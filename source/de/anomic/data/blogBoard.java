@@ -50,8 +50,8 @@ import org.xml.sax.SAXException;
 import de.anomic.kelondro.blob.BLOBTree;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
 

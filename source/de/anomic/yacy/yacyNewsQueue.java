@@ -52,9 +52,9 @@ import java.util.Iterator;
 
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.table.Stack;
+import de.anomic.kelondro.util.DateFormatter;
 
 public class yacyNewsQueue {
 

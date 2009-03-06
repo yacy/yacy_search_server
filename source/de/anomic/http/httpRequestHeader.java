@@ -31,7 +31,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.server.serverCore;
 
 public class httpRequestHeader extends httpHeader {

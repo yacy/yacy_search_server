@@ -29,10 +29,10 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.yacy.yacyCore;

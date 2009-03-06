@@ -51,7 +51,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;

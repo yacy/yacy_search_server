@@ -34,8 +34,8 @@ import java.util.List;
 import org.apache.commons.httpclient.methods.multipart.Part;
 
 import de.anomic.http.DefaultCharsetStringPart;
-import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.Digest;
+import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;

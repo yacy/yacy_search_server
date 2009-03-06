@@ -30,7 +30,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.order.DateFormatter;
+import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

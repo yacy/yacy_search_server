@@ -32,11 +32,11 @@ import java.util.Iterator;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.URLMetadata;
 import de.anomic.kelondro.text.MetadataRepository;
+import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

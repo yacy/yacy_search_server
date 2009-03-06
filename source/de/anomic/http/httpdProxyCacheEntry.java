@@ -29,8 +29,8 @@ package de.anomic.http;
 import java.util.Date;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.text.Document;
+import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.yacy.yacyURL;
 

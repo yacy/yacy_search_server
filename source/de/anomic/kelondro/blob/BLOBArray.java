@@ -38,9 +38,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.MergeIterator;
+import de.anomic.kelondro.util.DateFormatter;
 
 public class BLOBArray implements BLOB {
 

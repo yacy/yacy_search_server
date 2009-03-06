@@ -6,11 +6,11 @@ import java.util.TreeSet;
 
 import de.anomic.crawler.AbstractImporter;
 import de.anomic.crawler.Importer;
-import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceRow;
+import de.anomic.kelondro.util.DateFormatter;
 
 public class plasmaDbImporter extends AbstractImporter implements Importer {
 	

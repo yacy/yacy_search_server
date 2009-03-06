@@ -52,8 +52,8 @@ import java.util.Iterator;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.server.serverCodings;
 

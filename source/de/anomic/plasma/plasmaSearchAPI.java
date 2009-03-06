@@ -34,10 +34,10 @@ import java.util.List;
 
 import de.anomic.data.listManager;
 import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.Blacklist;
+import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.server.serverObjects;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;

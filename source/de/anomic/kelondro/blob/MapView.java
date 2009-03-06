@@ -37,9 +37,9 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.RotateIterator;
+import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.kelondroException;
 

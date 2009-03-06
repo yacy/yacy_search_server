@@ -52,8 +52,8 @@ import java.util.Properties;
 import java.util.Map.Entry;
 
 import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.server.serverCodings;
 
 public class yacyNewsRecord {

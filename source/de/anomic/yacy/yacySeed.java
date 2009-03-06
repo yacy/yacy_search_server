@@ -56,9 +56,9 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.text.Word;
+import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.net.natLib;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDomains;

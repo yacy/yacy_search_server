@@ -82,8 +82,8 @@ import java.util.zip.GZIPOutputStream;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterInputStream;
-import de.anomic.kelondro.order.DateFormatter;
 import de.anomic.kelondro.util.ByteBuffer;
+import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParser;
