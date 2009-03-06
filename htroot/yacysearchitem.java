@@ -98,8 +98,8 @@ public class yacysearchitem {
 
             
             final int port=result.url().getPort();
-            yacyURL faviconURL;
-            try {
+            yacyURL faviconURL = null;
+            if (!result.url().isLocal()) try {
                 faviconURL = new yacyURL(result.url().getProtocol() + "://" + result.url().getHost() + ((port != -1) ? (":" + String.valueOf(port)) : "") + "/favicon.ico", null);
             } catch (final MalformedURLException e1) {
                 faviconURL = null;

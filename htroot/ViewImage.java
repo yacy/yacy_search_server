@@ -43,6 +43,13 @@ public class ViewImage {
 
     private static HashMap<String, Image> iconcache = new HashMap<String, Image>();
     private static String defaulticon = "htroot/env/grafics/dfltfvcn.ico";
+    private static byte[] defaulticonb;
+    static {
+        try {
+            defaulticonb = FileUtils.read(new File(defaulticon));
+        } catch (final IOException e) {
+        }
+    }
     
     public static Image respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         
@@ -68,9 +75,6 @@ public class ViewImage {
             urlString = (url == null) ? null : url.toNormalform(true, true);
         }
         
-        if (url == null) return null;
-        System.out.println("loading image from " + url.toString());
-        
         int width = post.getInt("width", 0);
         int height = post.getInt("height", 0);
         int maxwidth = post.getInt("maxwidth", 0);
@@ -81,7 +85,7 @@ public class ViewImage {
         Image scaled = iconcache.get(urlString);
         if (scaled == null) {
             Object[] resource = null;
-            try {
+            if (url != null) try {
                 resource = plasmaSnippetCache.getResource(url, true, timeout, false, true);
             } catch (IOException e) {
                 Log.logWarning("ViewImage", "cannot load: " + e.getMessage());
@@ -90,10 +94,12 @@ public class ViewImage {
             if (resource == null) {
                 if (urlString.endsWith(".ico")) {
                     // load default favicon dfltfvcn.ico
-                    try {
+                    if (defaulticonb == null) try {
                         imgb = FileUtils.read(new File(sb.getRootPath(), defaulticon));
                     } catch (final IOException e) {
                         return null;
+                    } else {
+                        imgb = defaulticonb;
                     }
                 } else {
                     return null;

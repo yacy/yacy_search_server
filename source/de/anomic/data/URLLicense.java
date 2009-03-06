@@ -56,6 +56,7 @@ public class URLLicense {
     public String aquireLicense(final yacyURL url) {
         // generate license key
         String license = "";
+        if (url == null) return license;
         while (license.length() < keylen) license += Integer.toHexString(random.nextInt());
         license = license.substring(0, keylen);
         // store reference to url with license key
