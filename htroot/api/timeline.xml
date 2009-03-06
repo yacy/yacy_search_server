@@ -1,0 +1,11 @@
+<data>
+#{event}#
+    <event
+      start="#[start]#"
+      end="#[end]#"
+      isDuration=#(isDuration)#"false"::"true"#(/isDuration)#
+      title="#[title]#">
+        #[description]#
+    </event>
+#{/event}#
+</data>

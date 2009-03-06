@@ -73,6 +73,7 @@ public final class DateFormatter {
     private static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);
     
     private static final SimpleDateFormat FORMAT_RFC1036      = new SimpleDateFormat(PATTERN_RFC1036, Locale.US); 
+    private static final SimpleDateFormat FORMAT_ANSIC        = new SimpleDateFormat(PATTERN_ANSIC, Locale.US); 
 
     /**
      * RFC 2616 requires that HTTP clients are able to parse all 3 different
@@ -140,6 +141,10 @@ public final class DateFormatter {
     public static final String formatISO8601(final Date date) {
         if (date == null) return "";
         return format(FORMAT_ISO8601, date);
+    }
+    public static final String formatANSIC(final Date date) {
+        if (date == null) return "";
+        return format(FORMAT_ANSIC, date);
     }
 
     private static long lastRFC1123long = 0;
