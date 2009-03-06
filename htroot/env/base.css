@@ -169,8 +169,6 @@ tt, *.tt {
   margin-bottom:10px;
 }
 
-
-
 .PostSubject {
   padding:5px;
   margin:0;
@@ -293,14 +291,6 @@ div.bookmark {
   padding-bottom:1em;
 }
 
-div.searchresults {
-  padding-top:1em;
-  width:85%;
-}
-
-div.searchresults.hidden {
-  display:none;
-}
 
 div.SubMenugroup{
   float:left;
@@ -319,6 +309,15 @@ div.content {
 div.yacysearch {
   margin-top: .8em;
   display:block;
+}
+
+div.searchresults {
+  padding-top:1em;
+  width:100%;
+}
+
+div.searchresults.hidden {
+  display:none;
 }
 
 div.urlactions {

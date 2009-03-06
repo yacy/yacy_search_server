@@ -74,6 +74,7 @@ function statistics(offset, itemscount, totalcount, localResourceSize, remoteRes
   document.getElementById("resultsOffset").firstChild.nodeValue = offset;
   document.getElementById("itemscount").firstChild.nodeValue = itemscount;
   document.getElementById("totalcount").firstChild.nodeValue = totalcount;
+  if (document.getElementById("localResourceSize") == null) return;
   document.getElementById("localResourceSize").firstChild.nodeValue = localResourceSize;
   document.getElementById("remoteResourceSize").firstChild.nodeValue = remoteResourceSize;
   document.getElementById("remoteIndexCount").firstChild.nodeValue = remoteIndexCount;

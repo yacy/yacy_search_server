@@ -61,23 +61,22 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
       <h2>#[promoteSearchPageGreeting]#</h2>
       <div class="yacylogo"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch" /></a></div>
       <fieldset class="yacys">
-              <input id="search" name="query" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
-              <input id="Enter" type="submit" name="Enter" value="Search" />
-              
-          <div class="yacysearch">
-              <input type="radio" id="text" name="contentdom" value="text"#(contentdomCheckText)#:: checked="checked"#(/contentdomCheckText)# />
-              <label for="text">Text</label>&nbsp;&nbsp;
-              <input type="radio" id="images" name="contentdom" value="image"#(contentdomCheckImage)#:: checked="checked"#(/contentdomCheckImage)# />
-              <label for="images">Images</label>&nbsp;&nbsp;
-              <input type="radio" id="audio" name="contentdom" value="audio"#(contentdomCheckAudio)#:: checked="checked"#(/contentdomCheckAudio)# />
-              <label for="audio">Audio</label>&nbsp;&nbsp;
-              <input type="radio" id="video" name="contentdom" value="video"#(contentdomCheckVideo)#:: checked="checked"#(/contentdomCheckVideo)# />
-              <label for="video">Video</label>&nbsp;&nbsp;
-              <input type="radio" id="appl" name="contentdom" value="app"#(contentdomCheckApp)#:: checked="checked"#(/contentdomCheckApp)# />
-              <label for="appl">Applications</label>
-               &nbsp;
-              <a href="index.html?display=#[display]#&amp;input=#[input]#&amp;searchoptions=1&amp;count=#[count]#&amp;resource=#[resource]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#">more options</a>
-           </div>
+        <input id="search" name="query" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
+        <input id="Enter" type="submit" name="Enter" value="Search" />
+        <div class="yacysearch">
+          <input type="radio" id="text" name="contentdom" value="text"#(contentdomCheckText)#:: checked="checked"#(/contentdomCheckText)# />
+          <label for="text">Text</label>&nbsp;&nbsp;
+          <input type="radio" id="images" name="contentdom" value="image"#(contentdomCheckImage)#:: checked="checked"#(/contentdomCheckImage)# />
+          <label for="images">Images</label>&nbsp;&nbsp;
+          <input type="radio" id="audio" name="contentdom" value="audio"#(contentdomCheckAudio)#:: checked="checked"#(/contentdomCheckAudio)# />
+          <label for="audio">Audio</label>&nbsp;&nbsp;
+          <input type="radio" id="video" name="contentdom" value="video"#(contentdomCheckVideo)#:: checked="checked"#(/contentdomCheckVideo)# />
+          <label for="video">Video</label>&nbsp;&nbsp;
+          <input type="radio" id="appl" name="contentdom" value="app"#(contentdomCheckApp)#:: checked="checked"#(/contentdomCheckApp)# />
+          <label for="appl">Applications</label>
+           &nbsp;
+          <a href="index.html?display=#[display]#&amp;input=#[input]#&amp;searchoptions=1&amp;count=#[count]#&amp;resource=#[resource]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#">more options</a>
+        </div>
         <input type="hidden" name="former" value="#[former]#" />
         <input type="hidden" name="maximumRecords" value="#[count]#" />
         <input type="hidden" name="startRecord" value="#[offset]#" />
@@ -115,7 +114,7 @@ document.getElementById("Enter").value = "search again";
 	<p>No Results. (length of search words must be at least 3 characters)</p>
 	::
 	<div id="results"></div>
-	<span id="resCounter" style="display: inline;"><strong id="resultsOffset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> results from a total number of <strong id="totalcount">#[totalcount]#</strong> known#(globalresults)#.:: (<strong id="localResourceSize">#[localResourceSize]#</strong> local, <strong id="remoteResourceSize">#[remoteResourceSize]#</strong> remote), <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> links from <strong id="remotePeerCount">#[remotePeerCount]#</strong> other YaCy peers.#(/globalresults)#</span>
+	<span id="resCounter" style="display: inline;"><strong id="resultsOffset">#[offset]#</strong>-<strong id="itemscount">#[itemscount]#</strong> of <strong id="totalcount">#[totalcount]#</strong> #(globalresults)#::; (<strong id="localResourceSize">#[localResourceSize]#</strong> local, <strong id="remoteResourceSize">#[remoteResourceSize]#</strong> remote), <strong id="remoteIndexCount">#[remoteIndexCount]#</strong> from <strong id="remotePeerCount">#[remotePeerCount]#</strong> remote YaCy peers.#(/globalresults)#</span>
 	<span id="resNav" style="display: inline;">#[resnav]#</span>
 	::
 	<p>Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function</p>
@@ -136,5 +135,6 @@ var progressbar = new Progressbar(#[results]#, document.getElementById("results"
 <!-- attach the bottomline -->
 <!--#include virtual="yacysearchtrailer.html?eventID=#[eventID]#&display=#[display]#" -->
 </div>
+
 </body>
 </html>
