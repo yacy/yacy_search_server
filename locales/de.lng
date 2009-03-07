@@ -356,6 +356,7 @@ please open your firewall for this port and/or set a virtual server option in yo
 Your peer can be reached by other peers==Ihr Peer kann von anderen Peers erreicht werden
 Peer Port:==Peer-Port:
 Configure your router for YaCy:==Ihren Router f&uuml;r YaCy konfigurieren:
+Configuration was not successful. This may take a moment.==Die Konfiguration war nicht erfolgreich. Dies kann einen Moment dauern.
 Set Configuration==Konfiguration speichern
 What you should do next:==Was Sie als n&auml;chstes tun k&ouml;nnen:
 Your basic configuration is complete! You can now \(for example\)==Ihre Grundeinstellungen sind vollst&auml;ndig! Sie k&ouml;nnen jetzt (beispielsweise)
