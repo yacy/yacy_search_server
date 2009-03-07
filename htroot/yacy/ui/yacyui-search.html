@@ -49,6 +49,7 @@
 		   		var page = (data.channels[0].startIndex / data.channels[0].itemsPerPage) + 1;
 			   	var search = data.channels[0].searchTerms;
 			   	var rows = {};
+			   	var counter = 0;
 			   	$.each (
 					data.channels[0].items,
 					function(i,item) {
@@ -56,9 +57,11 @@
 							var html = "<h3 class='linktitle'>"+item.title+"</h3><p class='desc'>"+item.description+"</p><p class='url'><a href='"+item.link+"'>"+item.link+"</a>"
 							var fav = "<a class='favicon' href='"+item.link+"'></a>";
 							rows[i] = {id: item.guid, cell: [item.guid, fav, html, "Tags", "Folders", item.pubDate]};
+							counter++;
 						}								
 					}
-				);				
+				);
+				if (total < counter) total = counter;		
 				var bhtml = "<li id='"+search+"'><span class='folder'>"+search+"</span><ul>";
 				$.each (
 					data.channels[0].topwords,
@@ -109,20 +112,15 @@
 				if (p.params) {
 					for (var pi = 0; pi < p.params.length; pi++) param[param.length] = p.params[pi];
 				}
-				$.ajax({
-				   type: p.method,
-				   url: p.url,
-				   data: param,
-				   dataType: p.dataType,
-				   success: function(data){
-				   		/* yacy limits itemsPerPage for unauthenticated users */
+
+				$.getJSON(url, param,
+			        function(json, status){
+						if (json[0]) data = json[0];
+						else data = json;						
 						p.rp = parseInt(data.channels[0].itemsPerPage);
 						g.flexAddData(data);
-				   },
-				   error: function(data) { 
-				   		try { if (p.onError) p.onError(data); } catch (e) {} 
-				   }
-				});				
+			        }
+			    );				
 	 		}								    				
  		});
 	});

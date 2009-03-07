@@ -197,20 +197,19 @@ h3.linktitle {
   	line-height: 1.2em;
   	margin-bottom:-1em; 	
 }
-.bm_input {
-  width: 340px;  
+.bm_input, .bm_select { 
   padding: 2px 0px 2px 0px /* top right bottom left */
   border: 1px solid #CCCCCC;
-  margin-bottom: 2px;
-  font-family: "Trebuchet MS", Trebuchet, Verdana, Helvetica, Arial, sans-serif;
-  font-size: 1.0em;
+  margin: 0px 0px 2px 10px;
 }
+.bm_input { width: 240px; }
+.bm_select { width: 100px; }
+.bm_dialog label { margin: 6px 0px 2px 10px;}
 .bm_dialog {
-	margin: 10px 10px 10px 10px;
-	font-size: .9em;
+	margin: 5px 5px 5px 5px;
+	font-size: 1.1em;	
 }
-#yfolder {	
-	margin: 5px 5px 10px 20px; /* top right bottom left */
+#yfolder {
 	max-height: 250px;
 	overflow-x: hidden;
 	overflow-y: auto;
@@ -270,5 +269,7 @@ h3.linktitle {
 	padding: 1px 0px 0px 18px; 
 	display: block;
 }
-
+.filetree ul, .filetree li {
+	background-color: transparent;
+}
 

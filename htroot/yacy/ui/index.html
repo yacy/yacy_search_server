@@ -60,6 +60,12 @@
 		flex = {};
 		bmk_tab = 2;
 		tabid = "#Welcome";
+		
+		$.ajaxSetup({
+			timeout: 3000,
+			cache: false
+		})		
+		
 		/* Initialize Tabs and set up close function */
 		$tabs = $('#tabs-container').tabs({
 			// tabs options
@@ -134,8 +140,8 @@
 		/* Initialize Bookmark Dialog */		
 		$("#bmadd").dialog({			
 			autoOpen: false,
-			height: 365,
-			width: 400,
+			height: 400,
+			width: 300,
 			position: ['top',100],
 			modal: true,			
 			resizable: false,
@@ -306,6 +312,10 @@
 	<div id="dialog-container">
 		<!-- Bookmarks Edit Dialog -->	
 		<div id="bmadd" class="bm_dialog" title="YaCy Bookmarks">
+			<p style="margin-top: -8px;">			
+			<img src="img-1/Star.png" style="padding-right: 6px; vertical-align: middle;"/>
+			Add or edit bookmark
+			</p>			
 			<form id="bmaddform" method="post" accept-charset="UTF-8" action="jQuery"><div>
 				<label for="bm_url">URL:</label>
 				<br />					
@@ -331,7 +341,7 @@
 				<br />
 				<label for="bm_public">Public:</label>
 				<br />
-				<select name="bm_public" id="bm_public" class="selector">
+				<select name="bm_public" id="bm_public" class="bm_select">
 					<option value="public">yes</option>
 					<option value="private">no</option>
 				</select>
@@ -382,5 +392,4 @@
 	</div>		
 </body>
 </html>
-
 
