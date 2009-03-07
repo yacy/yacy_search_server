@@ -212,8 +212,11 @@ public class ConfigBasic {
             prop.put("nextStep", NEXTSTEP_FINISHED);
         }
                 
+        final boolean upnp_enabled = env.getConfigBool(plasmaSwitchboardConstants.UPNP_ENABLED, false);
         prop.put("upnp", "1");
-        prop.put("upnp_enabled", (env.getConfigBool(plasmaSwitchboardConstants.UPNP_ENABLED, false)) ? "1" : "0");
+        prop.put("upnp_enabled", upnp_enabled ? "1" : "0");
+        if (upnp_enabled) prop.put("upnp_success", (UPnP.getMappedPort() > 0) ? "2" : "1");
+        else prop.put("upnp_success", "0");
         
         // set default values       
         prop.putHTML("defaultName", env.getConfig("peerName", ""));

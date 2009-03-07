@@ -111,12 +111,14 @@ public class UPnP {
 		if (port < 1) return;
 		if (mappedPort > 0) deletePortMapping(); // delete old mapping first
 		if (mappedPort == 0 && ((IGDs != null && localHostIP != null) || init())) {
-			mappedPort = port;
 			for (InternetGatewayDevice IGD : IGDs) {
 				try {
-					boolean mapped = IGD.addPortMapping(mappedName, null, mappedPort, mappedPort, localHostIP, 0, mappedProtocol);
-					String msg = "port " + mappedPort + " on device "+ IGD.getIGDRootDevice().getFriendlyName();
-					if (mapped) log.logInfo("mapped " + msg);
+					boolean mapped = IGD.addPortMapping(mappedName, null, port, port, localHostIP, 0, mappedProtocol);
+					String msg = "port " + port + " on device "+ IGD.getIGDRootDevice().getFriendlyName();
+					if (mapped) {
+						log.logInfo("mapped " + msg);
+						mappedPort = port;
+					}
 					else log.logWarning("could not map " + msg);
 				} catch (IOException e) {} catch (UPNPResponseException e) { log.logSevere("mapping error: " + e.getMessage()); }
 			}
