@@ -126,7 +126,17 @@ public class yacysearch {
             
             return prop;
         }
-
+        
+        // check for JSONP
+        if (post.containsKey("callback")) {
+        	final String jsonp = post.get("callback")+ "([";
+        	prop.put("jsonp-start", jsonp);
+        	prop.put("jsonp-end", "])");
+        } else {
+        	prop.put("jsonp-start", "");
+        	prop.put("jsonp-end", "");
+        }
+        
         // collect search attributes
         boolean newsearch = post.hasValue("query") && post.hasValue("former") && !post.get("query","").equalsIgnoreCase(post.get("former","")); //new search term
         

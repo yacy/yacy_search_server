@@ -1,3 +1,4 @@
+#[jsonp-start]#
 {
   "xmlns$yacy": "http://www.yacy.net/",
   "xmlns$os":   "http://a9.com/-/spec/opensearch/1.1/",
@@ -23,3 +24,4 @@
 <!--#include virtual="yacysearchtrailer.json?eventID=#[eventID]#" -->
   }]
 }
+#[jsonp-end]#
