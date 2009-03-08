@@ -61,6 +61,14 @@
 		bmk_tab = 2;
 		tabid = "#Welcome";
 		
+		$(window).resize(function(){
+  			var width = document.documentElement.clientWidth;
+			if (width > 800) width = width - 290;
+            else width = width - 20;
+			$("#tabs-container").width(width);
+		});
+		$(window).trigger("resize");
+		
 		$.ajaxSetup({
 			timeout: 10000,
 			cache: false

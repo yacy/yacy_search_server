@@ -5,13 +5,12 @@ body {
 /* Main */
 div.main { 
   float:left;
-  margin-top:1.5em;
-  width:75%;
-  height:100%;
+  margin-top:25px;
+  min-width: 470px;
 }
 /* Sidebar */ 
 div.sidebar {     
-  margin-right: 1em;
+  margin-right: 10px;
   float:left;
   width:250px;
 }
