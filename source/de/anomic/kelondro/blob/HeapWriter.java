@@ -87,13 +87,13 @@ public final class HeapWriter  {
         assert blob.length > 0;
         assert key.length == this.keylength;
         assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
-        assert index.getl(key) < 0; // must not occur before
+        assert index.get(key) < 0; // must not occur before
         if ((blob == null) || (blob.length == 0)) return;
         int chunkl = key.length + blob.length;
         os.writeInt(chunkl);
         os.write(key);
         os.write(blob);
-        index.addl(key, seek);
+        index.putUnique(key, seek);
         this.seek += chunkl + 4;
     }
     

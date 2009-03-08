@@ -164,7 +164,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
             }
             assert (key != null) : "DEBUG: empty key in initializeRamIndex"; // should not happen; if it does, it is an error of the condentNodes iterator
             //System.out.println("ENTRY: " + serverLog.arrayList(indexentry.bytes(), 0, indexentry.objectsize()));
-            try { ri.addi(key, i); } catch (final IOException e) {} // no IOException can happen here
+            try { ri.putUnique(key, i); } catch (final IOException e) {} // no IOException can happen here
             if ((i % 10000) == 0) {
                 System.out.print('.');
                 System.out.flush();
@@ -177,7 +177,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
 
     public synchronized Row.Entry get(final byte[] key) throws IOException {
         if (index == null) return null; // case may happen during shutdown
-		final int pos = index.geti(key);
+		final int pos = index.get(key);
 		assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
 		if (pos < 0) return null;
 		// pos may be greater than this.size(), because this table may have deleted entries
@@ -211,7 +211,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
         while (i.hasNext()) {
             row = i.next();
             key = row.getColBytes(0);
-            pos = index.geti(key);
+            pos = index.get(key);
             if (pos < 0) {
                 new_rows_sequential.add(row);
             } else {
@@ -237,10 +237,10 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
         assert row.objectsize() <= this.rowdef.objectsize;
         final byte[] key = row.getColBytes(0);
         if (index == null) return null; // case may appear during shutdown
-        int pos = index.geti(key);
+        int pos = index.get(key);
         if (pos < 0) {
         	pos = super.add(row);
-            index.puti(key, pos);
+            index.put(key, pos);
             assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
             return null;
         }
@@ -250,11 +250,11 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
         if (oldentry == null) {
         	Log.logSevere("kelondroFlexTable", "put(): index failure; the index pointed to a cell which is empty. content.size() = " + this.size() + ", index.size() = " + index.size());
         	// patch bug ***** FIND CAUSE! (see also: remove)
-        	final int oldindex = index.removei(key);
+        	final int oldindex = index.remove(key);
         	assert oldindex >= 0;
-        	assert index.geti(key) == -1;
+        	assert index.get(key) == -1;
         	// here is this.size() > index.size() because of remove operation above
-        	index.puti(key, super.add(row));
+        	index.put(key, super.add(row));
         	assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
             return null;
         }
@@ -268,7 +268,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     public synchronized void addUnique(final Row.Entry row) throws IOException {
         assert row.objectsize() == this.rowdef.objectsize;
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
-		index.addi(row.getColBytes(0), super.add(row));
+		index.putUnique(row.getColBytes(0), super.add(row));
     }
     
     public synchronized void addUniqueMultiple(final List<Row.Entry> rows) throws IOException {
@@ -281,7 +281,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
         Map.Entry<Integer, byte[]> entry;
         while (i.hasNext()) {
             entry = i.next();
-            index.puti(entry.getValue(), entry.getKey().intValue());
+            index.put(entry.getValue(), entry.getKey().intValue());
         }
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
     }
@@ -310,8 +310,8 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     
     public synchronized Row.Entry remove(final byte[] key) throws IOException {
         // the underlying data structure is a file, where the order cannot be maintained. Gaps are filled with new values.
-        final int i = index.removei(key);
-        assert (index.geti(key) < 0); // must be deleted
+        final int i = index.remove(key);
+        assert (index.get(key) < 0); // must be deleted
         if (i < 0) {
         	assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
     		return null;
@@ -332,7 +332,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     }
 
     public synchronized Row.Entry removeOne() throws IOException {
-        final int i = index.removeonei();
+        final int i = index.removeone();
         if (i < 0) return null;
         Row.Entry r;
         r = super.get(i);

@@ -24,8 +24,16 @@
 
 package de.anomic.kelondro.index;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -46,6 +54,51 @@ public class IntegerHandleIndex {
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("int c-4 {b256}")}, objectOrder, 0);
         this.index = new ObjectIndexCache(rowdef, space);
     }
+
+    /**
+     * initialize a BytesLongMap with the content of a dumped index
+     * @param keylength
+     * @param objectOrder
+     * @param file
+     * @throws IOException 
+     */
+    public IntegerHandleIndex(final int keylength, final ByteOrder objectOrder, final File file) throws IOException {
+        this(keylength, objectOrder, (int) (file.length() / (keylength + 8)));
+        // read the index dump and fill the index
+        InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
+        byte[] a = new byte[keylength + 8];
+        int c;
+        while (true) {
+            c = is.read(a);
+            if (c <= 0) break;
+            this.index.addUnique(this.rowdef.newEntry(a));
+        }
+        is.close();
+        assert this.index.size() == file.length() / (keylength + 8);
+    }
+
+    /**
+     * write a dump of the index to a file. All entries are written in order
+     * which makes it possible to read them again in a fast way
+     * @param file
+     * @return the number of written entries
+     * @throws IOException
+     */
+    public int dump(File file) throws IOException {
+        // we must use an iterator from the combined index, because we need the entries sorted
+        // otherwise we could just write the byte[] from the in kelondroRowSet which would make
+        // everything much faster, but this is not an option here.
+        Iterator<Row.Entry> i = this.index.rows(true, null);
+        OutputStream os = new BufferedOutputStream(new FileOutputStream(file), 1024 * 1024);
+        int c = 0;
+        while (i.hasNext()) {
+            os.write(i.next().bytes());
+            c++;
+        }
+        os.flush();
+        os.close();
+        return c;
+    }
     
     public Row row() {
         return index.row();
@@ -60,14 +113,14 @@ public class IntegerHandleIndex {
         return index.has(key);
     }
     
-    public synchronized int geti(final byte[] key) throws IOException {
+    public synchronized int get(final byte[] key) throws IOException {
         assert (key != null);
         final Row.Entry indexentry = index.get(key);
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
     }
     
-    public synchronized int puti(final byte[] key, final int i) throws IOException {
+    public synchronized int put(final byte[] key, final int i) throws IOException {
         assert i >= 0 : "i = " + i;
         assert (key != null);
         final Row.Entry newentry = index.row().newEntry();
@@ -78,7 +131,34 @@ public class IntegerHandleIndex {
         return (int) oldentry.getColLong(1);
     }
     
-    public synchronized void addi(final byte[] key, final int i) throws IOException {
+    public synchronized int add(final byte[] key, int a) throws IOException {
+        assert key != null;
+        assert a > 0; // it does not make sense to add 0. If this occurres, it is a performance issue
+
+        final Row.Entry indexentry = index.get(key);
+        if (indexentry == null) {
+            final Row.Entry newentry = this.rowdef.newEntry();
+            newentry.setCol(0, key);
+            newentry.setCol(1, a);
+            index.addUnique(newentry);
+            return 1;
+        } else {
+            int i = (int) indexentry.getColLong(1) + a;
+            indexentry.setCol(1, i);
+            index.put(indexentry);
+            return i;
+        }
+    }
+    
+    public synchronized int inc(final byte[] key) throws IOException {
+        return add(key, 1);
+    }
+    
+    public synchronized int dec(final byte[] key) throws IOException {
+        return add(key, -1);
+    }
+    
+    public synchronized void putUnique(final byte[] key, final int i) throws IOException {
         assert i >= 0 : "i = " + i;
         assert (key != null);
         final Row.Entry newentry = this.rowdef.newEntry();
@@ -105,14 +185,14 @@ public class IntegerHandleIndex {
         return report;
     }
     
-    public synchronized int removei(final byte[] key) throws IOException {
+    public synchronized int remove(final byte[] key) throws IOException {
         assert (key != null);
         final Row.Entry indexentry = index.remove(key);
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
     }
 
-    public synchronized int removeonei() throws IOException {
+    public synchronized int removeone() throws IOException {
         final Row.Entry indexentry = index.removeOne();
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
@@ -222,7 +302,7 @@ public class IntegerHandleIndex {
             try {
                 entry c;
                 while ((c = cache.take()) != poisonEntry) {
-                    map.addi(c.key, c.l);
+                    map.putUnique(c.key, c.l);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();

@@ -116,14 +116,14 @@ public class LongHandleIndex {
         index.clear();
     }
     
-    public synchronized long getl(final byte[] key) throws IOException {
+    public synchronized long get(final byte[] key) throws IOException {
         assert (key != null);
         final Row.Entry indexentry = index.get(key);
         if (indexentry == null) return -1;
         return indexentry.getColLong(1);
     }
     
-    public synchronized long putl(final byte[] key, final long l) throws IOException {
+    public synchronized long put(final byte[] key, final long l) throws IOException {
         assert l >= 0 : "l = " + l;
         assert (key != null);
         final Row.Entry newentry = index.row().newEntry();
@@ -134,13 +134,40 @@ public class LongHandleIndex {
         return oldentry.getColLong(1);
     }
     
-    public synchronized void addl(final byte[] key, final long l) throws IOException {
+    public synchronized void putUnique(final byte[] key, final long l) throws IOException {
         assert l >= 0 : "l = " + l;
         assert (key != null);
         final Row.Entry newentry = this.rowdef.newEntry();
         newentry.setCol(0, key);
         newentry.setCol(1, l);
         index.addUnique(newentry);
+    }
+    
+    public synchronized long add(final byte[] key, long a) throws IOException {
+        assert key != null;
+        assert a > 0; // it does not make sense to add 0. If this occurres, it is a performance issue
+
+        final Row.Entry indexentry = index.get(key);
+        if (indexentry == null) {
+            final Row.Entry newentry = this.rowdef.newEntry();
+            newentry.setCol(0, key);
+            newentry.setCol(1, a);
+            index.addUnique(newentry);
+            return 1;
+        } else {
+            long i = indexentry.getColLong(1) + a;
+            indexentry.setCol(1, i);
+            index.put(indexentry);
+            return i;
+        }
+    }
+    
+    public synchronized long inc(final byte[] key) throws IOException {
+        return add(key, 1);
+    }
+    
+    public synchronized long dec(final byte[] key) throws IOException {
+        return add(key, -1);
     }
     
     public synchronized ArrayList<Long[]> removeDoubles() throws IOException {
@@ -159,14 +186,14 @@ public class LongHandleIndex {
         return report;
     }
     
-    public synchronized long removel(final byte[] key) throws IOException {
+    public synchronized long remove(final byte[] key) throws IOException {
         assert (key != null);
         final Row.Entry indexentry = index.remove(key);
         if (indexentry == null) return -1;
         return indexentry.getColLong(1);
     }
 
-    public synchronized long removeonel() throws IOException {
+    public synchronized long removeone() throws IOException {
         final Row.Entry indexentry = index.removeOne();
         if (indexentry == null) return -1;
         return indexentry.getColLong(1);
@@ -273,7 +300,7 @@ public class LongHandleIndex {
             try {
                 entry c;
                 while ((c = cache.take()) != poisonEntry) {
-                    map.addl(c.key, c.l);
+                    map.putUnique(c.key, c.l);
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();

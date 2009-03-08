@@ -146,7 +146,7 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
         assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
         
         // check if the index contains the key
-        final long seek = index.getl(key);
+        final long seek = index.get(key);
         if (seek < 0) return;
         
         // access the file and read the container
@@ -168,7 +168,7 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
         this.file.write(fill, 0, size);
         
         // remove entry from index
-        this.index.removel(key);
+        this.index.remove(key);
         
         // recursively merge gaps
         tryMergeNextGaps(seek, size);
@@ -281,7 +281,7 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
 	    assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
         
 	    // check if the index contains the key
-        final long pos = index.getl(key);
+        final long pos = index.get(key);
         if (pos < 0) return 0;
         
         // access the file and read the container

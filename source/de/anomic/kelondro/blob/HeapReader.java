@@ -73,7 +73,7 @@ public class HeapReader {
             boolean ok = true;
             while (i.hasNext() && c-- > 0) {
                 b = i.next();
-                pos = this.index.getl(b);
+                pos = this.index.get(b);
                 file.seek(pos + 4);
                 file.readFully(b1, 0, b1.length);
                 if (this.ordering.compare(b, b1) != 0) {
@@ -210,7 +210,7 @@ public class HeapReader {
         
         // check if the file index contains the key
         try {
-            return index.getl(key) >= 0;
+            return index.get(key) >= 0;
         } catch (final IOException e) {
             e.printStackTrace();
             return false;
@@ -231,7 +231,7 @@ public class HeapReader {
         assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
        
         // check if the index contains the key
-        final long pos = index.getl(key);
+        final long pos = index.get(key);
         if (pos < 0) return null;
         
         // access the file and read the container
@@ -270,7 +270,7 @@ public class HeapReader {
         assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
         
         // check if the index contains the key
-        final long pos = index.getl(key);
+        final long pos = index.get(key);
         if (pos < 0) return -1;
         
         // access the file and read the size of the container

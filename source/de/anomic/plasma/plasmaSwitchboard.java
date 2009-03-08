@@ -1915,7 +1915,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         boolean hasDoneSomething = false;
         if (this.dhtDispatcher.cloudSize() > this.webIndex.seedDB.scheme.verticalPartitions() * 4) {
         	log.logInfo("dhtTransferJob: no selection, too many entries in transmission cloud: " + this.dhtDispatcher.cloudSize());
-        } else if (MemoryControl.available() < 1024*1024*20) {
+        } else if (MemoryControl.available() < 1024*1024*25) {
         	log.logInfo("dhtTransferJob: no selection, too less memory available : " + (MemoryControl.available() / 1024 / 1024) + " MB");
         } else {
 	        String startHash = PeerSelection.selectTransferStart();

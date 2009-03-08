@@ -280,6 +280,7 @@ public final class FileUtils {
             while ((c = fis.read(buffer, p, buffer.length - p)) > 0) p += c;
         } finally {
             if (fis != null) try { fis.close(); } catch (final Exception e) {}
+            fis = null;
         }
         return buffer;
     }

@@ -139,7 +139,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
         file.writeInt(key.length + blob.length);
         file.write(key);
         file.write(blob, 0, blob.length);
-        index.putl(key, pos);
+        index.put(key, pos);
     }
     
     /**
@@ -167,7 +167,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
             entry = i.next();
             key = entry.getKey().getBytes();
             blob = entry.getValue();
-            index.putl(key, posFile);
+            index.put(key, posFile);
             b = AbstractRandomAccess.int2array(key.length + blob.length);
             assert b.length == 4;
             assert posBuffer + 4 < ba.length : "posBuffer = " + posBuffer + ", ba.length = " + ba.length;
@@ -307,7 +307,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
                 file.write(b);
                 
                 // add the entry to the index
-                this.index.putl(key, entry.getKey());
+                this.index.put(key, entry.getKey());
                 
                 // remove the entry from the free list
                 i.remove();
@@ -338,7 +338,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
             file.write(b);
             
             // add the index to the new entry
-            index.putl(key, lseek);
+            index.put(key, lseek);
             
             // define the new empty entry
             final int newfreereclen = lsize - reclen - 4;

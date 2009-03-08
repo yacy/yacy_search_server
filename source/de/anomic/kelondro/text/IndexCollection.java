@@ -39,6 +39,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
 
+import de.anomic.kelondro.index.IntegerHandleIndex;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowCollection;
@@ -68,15 +69,15 @@ public class IndexCollection implements Index {
     private static final int EcoFSBufferSize = 1000;
     private static final int errorLimit = 500; // if the index exceeds this number of errors, it is re-built next time the application starts
     
-    private ObjectIndex index;
-    private final int           keylength;
-    private final File          path;
-    private final String        filenameStub;
-    private final File          commonsPath;
+    private ObjectIndex     index;
+    private final int       keylength;
+    private final File      path;
+    private final String    filenameStub;
+    private final File      commonsPath;
+    private final Row       payloadrow;    // definition of the payload (chunks inside the collections)
+    private final int       maxPartitions; // this is the maxmimum number of array files
+    private int             indexErrors;   // counter for exceptions when index returned wrong value
     private Map<String, FixedWidthArray> arrays; // Map of (partitionNumber"-"chunksize)/kelondroFixedWidthArray - Objects
-    private final Row   payloadrow; // definition of the payload (chunks inside the collections)
-    private final int           maxPartitions;  // this is the maxmimum number of array files
-    private int                 indexErrors; // counter for exceptions when index returned wrong value
     
     private static final int idx_col_key        = 0;  // the index
     private static final int idx_col_chunksize  = 1;  // chunksize (number of bytes in a single chunk, needed for migration option)
@@ -93,16 +94,16 @@ public class IndexCollection implements Index {
     		final int keyLength, 
     		final ByteOrder indexOrder,
             final int maxpartitions, 
-            final Row rowdef, 
+            final Row payloadrow, 
             boolean useCommons) throws IOException {
         // the buffersize is number of bytes that are only used if the kelondroFlexTable is backed up with a kelondroTree
         indexErrors = 0;
         this.path = path;
         this.filenameStub = filenameStub;
         this.keylength = keyLength;
-        this.payloadrow = rowdef;
+        this.payloadrow = payloadrow;
         this.maxPartitions = maxpartitions;
-        File cop = new File(path, filenameStub + "." + fillZ(Integer.toHexString(rowdef.objectsize).toUpperCase(), 4) + ".commons");
+        File cop = new File(path, filenameStub + "." + fillZ(Integer.toHexString(payloadrow.objectsize).toUpperCase(), 4) + ".commons");
         this.commonsPath = (useCommons) ? cop : null;
         if (this.commonsPath == null) {
             FileUtils.deleteDirectory(cop);
@@ -118,7 +119,7 @@ public class IndexCollection implements Index {
             
             // open index and array files
             this.arrays = new HashMap<String, FixedWidthArray>(); // all entries will be dynamically created with getArray()
-            index = openIndexFile(path, filenameStub, indexOrder, loadfactor, rowdef, 0);
+            index = openIndexFile(path, this.keylength, filenameStub, indexOrder, loadfactor, payloadrow, 0);
             openAllArrayFiles(false, indexOrder);
         } else {
             // calculate initialSpace
@@ -132,7 +133,7 @@ public class IndexCollection implements Index {
                 final int partitionNumber = Integer.parseInt(list[i].substring(pos +  9, pos + 11), 16);
                 final int serialNumber    = Integer.parseInt(list[i].substring(pos + 12, pos + 14), 16);
                 try {
-                    array = openArrayFile(partitionNumber, serialNumber, indexOrder, true);
+                    array = openArrayFile(this.path, this.filenameStub, this.keylength, partitionNumber, serialNumber, indexOrder, this.payloadrow.objectsize, true);
                     initialSpace += array.size();
                     array.close();
                 } catch (final IOException e) {
@@ -317,7 +318,7 @@ public class IndexCollection implements Index {
             final int partitionNumber = Integer.parseInt(list[i].substring(pos +  9, pos + 11), 16);
             final int serialNumber    = Integer.parseInt(list[i].substring(pos + 12, pos + 14), 16);
             try {
-                array = openArrayFile(partitionNumber, serialNumber, indexOrder, true);
+                array = openArrayFile(this.path, this.filenameStub, this.keylength, partitionNumber, serialNumber, indexOrder, this.payloadrow.objectsize, true);
             } catch (final IOException e) {
                 e.printStackTrace();
                 continue;
@@ -390,7 +391,67 @@ public class IndexCollection implements Index {
         if (doublecount > 0) Log.logWarning("STARTUP", "found " + doublecount + " RWI entries with references to several collections. All have been fixed (zombies still exists).");
     }
     
-    private ObjectIndex openIndexFile(final File path, final String filenameStub, final ByteOrder indexOrder,
+    /**
+     * enumerate all index files and return a set of reference hashes
+     * @param path
+     * @param filenameStub
+     * @param keylength
+     * @param indexOrder
+     * @param payloadrow
+     * @return
+     * @throws IOException
+     */
+    public static IntegerHandleIndex referenceHashes(
+            final File path, 
+            final String filenameStub, 
+            final int keylength, 
+            final ByteOrder indexOrder,
+            final Row payloadrow) throws IOException {
+       
+        final String[] list = path.list();
+        FixedWidthArray array;
+        IntegerHandleIndex references = new IntegerHandleIndex(keylength, indexOrder, 100000);
+        for (int i = 0; i < list.length; i++) if (list[i].endsWith(".kca")) {
+            // open array
+            final int pos = list[i].indexOf('.');
+            if (pos < 0) continue;
+            final int partitionNumber = Integer.parseInt(list[i].substring(pos +  9, pos + 11), 16);
+            final int serialNumber    = Integer.parseInt(list[i].substring(pos + 12, pos + 14), 16);
+            try {
+                array = openArrayFile(path, filenameStub, keylength, partitionNumber, serialNumber, indexOrder, payloadrow.objectsize, true);
+            } catch (final IOException e) {
+                e.printStackTrace();
+                continue;
+            }
+            
+            // loop over all elements in array and collect reference hashes
+            Row.EntryIndex arrayrow;
+            final Iterator<EntryIndex> ei = array.contentRows(-1);
+            final long start = System.currentTimeMillis();
+            long lastlog = start;
+            int count = 0;
+            while (ei.hasNext()) {
+                arrayrow = ei.next();
+                if (arrayrow == null) continue;
+                final RowSet collection = new RowSet(payloadrow, arrayrow);
+                final int chunkcountInArray = collection.size();
+                for (int j = 0; j < chunkcountInArray; j++) {
+                    references.inc(collection.get(j, false).getColBytes(0));
+                }
+                count++;
+                // write a log
+                if (System.currentTimeMillis() - lastlog > 30000) {
+                    Log.logFine("COLLECTION INDEX STARTUP", "scanned " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() + array.free() - count) / count) / 60000) + " minutes remaining for this array");
+                    lastlog = System.currentTimeMillis();
+                }
+            }
+                
+        }
+        return references;
+    }
+    
+    private static ObjectIndex openIndexFile(
+            final File path, int keylength, final String filenameStub, final ByteOrder indexOrder,
             final int loadfactor, final Row rowdef, final int initialSpace) throws IOException {
         // open/create index table
         final File f = new File(path, filenameStub + ".index");
@@ -413,12 +474,14 @@ public class IndexCollection implements Index {
         return theindex;
     }
     
-    private FixedWidthArray openArrayFile(final int partitionNumber, final int serialNumber, final ByteOrder indexOrder, final boolean create) throws IOException {
-        final File f = arrayFile(path, filenameStub, loadfactor, payloadrow.objectsize, partitionNumber, serialNumber);
+    private static FixedWidthArray openArrayFile(
+            File path, String filenameStub, int keylength,
+            final int partitionNumber, final int serialNumber, final ByteOrder indexOrder, int objectsize, final boolean create) throws IOException {
+        final File f = arrayFile(path, filenameStub, loadfactor, objectsize, partitionNumber, serialNumber);
         final int load = arrayCapacity(partitionNumber);
         final Row rowdef = new Row(
                 "byte[] key-" + keylength + "," +
-                "byte[] collection-" + (RowCollection.exportOverheadSize + load * this.payloadrow.objectsize),
+                "byte[] collection-" + (RowCollection.exportOverheadSize + load * objectsize),
                 indexOrder,
                 0
                 );
@@ -433,7 +496,7 @@ public class IndexCollection implements Index {
         FixedWidthArray array = arrays.get(accessKey);
         if (array != null) return array;
         try {
-            array = openArrayFile(partitionNumber, serialNumber, indexOrder, true);
+            array = openArrayFile(this.path, this.filenameStub, this.keylength, partitionNumber, serialNumber, indexOrder, this.payloadrow.objectsize, true);
         } catch (final IOException e) {
         	e.printStackTrace();
             return null;
@@ -442,14 +505,14 @@ public class IndexCollection implements Index {
         return array;
     }
     
-    private int arrayCapacity(final int arrayCounter) {
+    private static int arrayCapacity(final int arrayCounter) {
         if (arrayCounter < 0) return 0;
         int load = loadfactor;
         for (int i = 0; i < arrayCounter; i++) load = load * loadfactor;
         return load;
     }
     
-    private int arrayIndex(final int requestedCapacity) throws kelondroOutOfLimitsException{
+    private static int arrayIndex(final int requestedCapacity) throws kelondroOutOfLimitsException{
         // the requestedCapacity is the number of wanted chunks
         int load = 1, i = 0;
         while (true) {

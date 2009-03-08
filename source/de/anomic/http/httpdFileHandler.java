@@ -86,6 +86,7 @@ import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
@@ -812,45 +813,43 @@ public final class httpdFileHandler {
                     
                     // read the file/template
                     TemplateCacheEntry templateCacheEntry = null;
-                    if (useTemplateCache) {
-                        final long fileSize = targetFile.length();
-                        if (fileSize <= 512 * 1024) {
-                            // read from cache
-                            SoftReference<TemplateCacheEntry> ref = templateCache.get(targetFile);
-                            if (ref != null) {
-                                templateCacheEntry = ref.get();
-                                if (templateCacheEntry == null) templateCache.remove(targetFile);
-                            }
-
-                            Date targetFileDate = new Date(targetFile.lastModified());
-                            if (templateCacheEntry == null || targetFileDate.after(templateCacheEntry.lastModified)) {
-                                // loading the content of the template file into
-                                // a byte array
-                        	templateCacheEntry = new TemplateCacheEntry();
-                                templateCacheEntry.lastModified = targetFileDate;
-                                templateCacheEntry.content = FileUtils.read(targetFile);
-
-                                // storing the content into the cache
-                                ref = new SoftReference<TemplateCacheEntry>(templateCacheEntry);
-                                templateCache.put(targetFile, ref);
-                                if (theLogger.isFinest()) theLogger.logFinest("Cache MISS for file " + targetFile);
-                            } else {
-                                if (theLogger.isFinest()) theLogger.logFinest("Cache HIT for file " + targetFile);
-                            }
-
-                            // creating an inputstream needed by the template
-                            // rewrite function
-                            fis = new ByteArrayInputStream(templateCacheEntry.content);
-                            templateCacheEntry = null;
-                        } else {
-                            // read from file directly
-                            fis = new BufferedInputStream(new FileInputStream(targetFile));
+                    long fileSize = targetFile.length();
+                    if (useTemplateCache && fileSize <= 512 * 1024) {
+                        // read from cache
+                        SoftReference<TemplateCacheEntry> ref = templateCache.get(targetFile);
+                        if (ref != null) {
+                            templateCacheEntry = ref.get();
+                            if (templateCacheEntry == null) templateCache.remove(targetFile);
                         }
+
+                        Date targetFileDate = new Date(targetFile.lastModified());
+                        if (templateCacheEntry == null || targetFileDate.after(templateCacheEntry.lastModified)) {
+                            // loading the content of the template file into
+                            // a byte array
+                    	templateCacheEntry = new TemplateCacheEntry();
+                            templateCacheEntry.lastModified = targetFileDate;
+                            templateCacheEntry.content = FileUtils.read(targetFile);
+
+                            // storing the content into the cache
+                            ref = new SoftReference<TemplateCacheEntry>(templateCacheEntry);
+                            templateCache.put(targetFile, ref);
+                            if (theLogger.isFinest()) theLogger.logFinest("Cache MISS for file " + targetFile);
+                        } else {
+                            if (theLogger.isFinest()) theLogger.logFinest("Cache HIT for file " + targetFile);
+                        }
+
+                        // creating an inputstream needed by the template
+                        // rewrite function
+                        fis = new ByteArrayInputStream(templateCacheEntry.content);
+                        templateCacheEntry = null;
+                    } else if (fileSize <= Math.min(4 * 1024 * 1204, MemoryControl.available() / 100)) {
+                        // read file completely into ram, avoid that too many files are open at the same time
+                        fis = new ByteArrayInputStream(FileUtils.read(targetFile));
                     } else {
                         fis = new BufferedInputStream(new FileInputStream(targetFile));
                     }
                     
-                    if(mimeType.startsWith("text")) {
+                    if (mimeType.startsWith("text")) {
                     	// every text-file distributed by yacy is UTF-8
                     	if(!path.startsWith("/repository")) {
                     		mimeType = mimeType + "; charset=UTF-8";
@@ -880,6 +879,7 @@ public final class httpdFileHandler {
                         final ByteBuffer o = new ByteBuffer();
                         // apply templates
                         httpTemplate.writeTemplate(fis, o, templatePatterns, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
+                        fis.close();
                         httpd.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, -1, targetDate, null, (templatePatterns == null) ? new httpResponseHeader() : templatePatterns.getOutgoingHeader(), null, "chunked", nocache);
                         // send the content in chunked parts, see RFC 2616 section 3.6.1
                         final httpChunkedOutputStream chos = new httpChunkedOutputStream(out);
@@ -892,7 +892,7 @@ public final class httpdFileHandler {
                         // apply templates
                         final ByteBuffer o1 = new ByteBuffer();
                         httpTemplate.writeTemplate(fis, o1, templatePatterns, "-UNRESOLVED_PATTERN-".getBytes("UTF-8"));
-                        
+                        fis.close();
                         final ByteBuffer o = new ByteBuffer();
                         
                         if (zipContent) {
