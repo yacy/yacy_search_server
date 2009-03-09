@@ -393,7 +393,9 @@ public class URLAnalysis {
                 12,
                 Base64Order.enhancedCoder,
                 ReferenceRow.urlEntryRow);
+            System.out.println("COLLECTION INDEX REFERENCE COLLECTION starting dump of statistics");
             idx.dump(new File(statisticPath));
+            System.out.println("COLLECTION INDEX REFERENCE COLLECTION finished dump");
         } catch (IOException e) {
             e.printStackTrace();
         }

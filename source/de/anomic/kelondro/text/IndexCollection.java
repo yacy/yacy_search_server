@@ -331,7 +331,7 @@ public class IndexCollection implements Index {
                 // loop over all elements in array and create index entry for each row
                 Row.EntryIndex aentry;
                 Row.Entry      ientry;
-                final Iterator<EntryIndex> ei = array.contentRows(-1);
+                final Iterator<EntryIndex> ei = array.contentRows(10000);
                 byte[] key;
                 final long start = System.currentTimeMillis();
                 long lastlog = start;
@@ -359,7 +359,7 @@ public class IndexCollection implements Index {
                     
                     // write a log
                     if (System.currentTimeMillis() - lastlog > 30000) {
-                        Log.logFine("COLLECTION INDEX STARTUP", "created " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() + array.free() - count) / count) / 60000) + " minutes remaining for this array");
+                        Log.logInfo("COLLECTION INDEX STARTUP", "created " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() + array.free() - count) / count) / 60000) + " minutes remaining for this array");
                         lastlog = System.currentTimeMillis();
                     }
                 }
@@ -410,6 +410,7 @@ public class IndexCollection implements Index {
        
         final String[] list = path.list();
         FixedWidthArray array;
+        System.out.println("COLLECTION INDEX REFERENCE COLLECTION startup");
         IntegerHandleIndex references = new IntegerHandleIndex(keylength, indexOrder, 100000);
         for (int i = 0; i < list.length; i++) if (list[i].endsWith(".kca")) {
             // open array
@@ -417,18 +418,20 @@ public class IndexCollection implements Index {
             if (pos < 0) continue;
             final int partitionNumber = Integer.parseInt(list[i].substring(pos +  9, pos + 11), 16);
             final int serialNumber    = Integer.parseInt(list[i].substring(pos + 12, pos + 14), 16);
+            System.out.println("COLLECTION INDEX REFERENCE COLLECTION opening partition " + partitionNumber + ", " + i + " of " + list.length);
             try {
                 array = openArrayFile(path, filenameStub, keylength, partitionNumber, serialNumber, indexOrder, payloadrow.objectsize, true);
             } catch (final IOException e) {
                 e.printStackTrace();
                 continue;
             }
-            
+            System.out.println("COLLECTION INDEX REFERENCE COLLECTION opened partition " + partitionNumber + ", initializing iterator");            
             // loop over all elements in array and collect reference hashes
             Row.EntryIndex arrayrow;
-            final Iterator<EntryIndex> ei = array.contentRows(-1);
+            final Iterator<EntryIndex> ei = array.contentRows(10000);
+            System.out.println("COLLECTION INDEX REFERENCE COLLECTION opened partition " + partitionNumber + ", starting reference scanning");
             final long start = System.currentTimeMillis();
-            long lastlog = start;
+            long lastlog = start - 27000;
             int count = 0;
             while (ei.hasNext()) {
                 arrayrow = ei.next();
@@ -441,12 +444,13 @@ public class IndexCollection implements Index {
                 count++;
                 // write a log
                 if (System.currentTimeMillis() - lastlog > 30000) {
-                    Log.logFine("COLLECTION INDEX REFERENCE COLLECTION", "scanned " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() + array.free() - count) / count) / 60000) + " minutes remaining for this array");
+                    System.out.println("COLLECTION INDEX REFERENCE COLLECTION scanned " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() + array.free() - count) / count) / 60000) + " minutes remaining for this array");
+                    //Log.logInfo("COLLECTION INDEX REFERENCE COLLECTION", "scanned " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() + array.free() - count) / count) / 60000) + " minutes remaining for this array");
                     lastlog = System.currentTimeMillis();
                 }
             }
-                
         }
+        System.out.println("COLLECTION INDEX REFERENCE COLLECTION finished with reference collection");
         return references;
     }
     

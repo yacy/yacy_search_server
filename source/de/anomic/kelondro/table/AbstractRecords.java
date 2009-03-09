@@ -723,10 +723,10 @@ public abstract class AbstractRecords implements RandomAccessRecords {
         return USAGE.FREEC;
     }
     
-    protected final Set<RecordHandle> deletedHandles(final long maxTime) throws kelondroException, IOException {
+    protected final Set<RecordHandle> deletedHandles(final long maxTime) throws IOException {
         // initialize set with deleted nodes; the set contains Handle-Objects
         // this may last only the given maxInitTime
-        // if the initTime is exceeded, the method throws an kelondroException
+        // if the initTime is exceeded, the method returns what it found so far
         final TreeSet<RecordHandle> markedDeleted = new TreeSet<RecordHandle>();
         final long timeLimit = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         long seekp;
@@ -761,7 +761,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
                     }
                     
                     // this appears to be correct. go on.
-                    if (System.currentTimeMillis() > timeLimit) throw new kelondroException(filename, "time limit of " + maxTime + " exceeded; > " + markedDeleted.size() + " deleted entries");
+                    if (System.currentTimeMillis() > timeLimit) return markedDeleted;
                 }
                 System.out.println("\nDEBUG: " + markedDeleted.size() + " deleted entries in " + entryFile.name());
             }
@@ -956,7 +956,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
         private final boolean fullyMarked;
         private Node next;
         
-        public contentNodeIterator(final long maxInitTime) throws IOException, kelondroException {
+        public contentNodeIterator(final long maxInitTime) throws IOException {
             // initialize markedDeleted set of deleted Handles
             markedDeleted = deletedHandles(maxInitTime);
             fullyMarked = (maxInitTime < 0);
