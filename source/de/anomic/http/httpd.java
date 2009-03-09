@@ -520,17 +520,17 @@ public final class httpd implements serverHandler, Cloneable {
             final String errorMsg = e.getMessage();
             if (errorMsg != null) {
                 if (errorMsg.startsWith("Socket closed")) {
-                    log.logInfo("httpd shutdown detected ...");
+                    log.logInfo("httpd shutdown detected ... (" + e.getMessage() + "), client = " + userAddress.getHostAddress());
                 } else if ((errorMsg.startsWith("Broken pipe") || errorMsg.startsWith("Connection reset"))) {
                     // client closed the connection, so we just end silently
-                    log.logInfo("Client unexpectedly closed connection");
+                    log.logInfo("Client unexpectedly closed connection... (" + e.getMessage() + "), client = " + userAddress.getHostAddress());
                 } else if (errorMsg.equals("400 Bad request")) {
-                	log.logInfo("Bad client request.");
+                	log.logInfo("Bad client request ... (" + e.getMessage() + "), client = " + userAddress.getHostAddress());
                 } else {
-                    log.logSevere("Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(),e);
+                    log.logSevere("Unexpected Error ... (" + e.getMessage() + "), client = " + userAddress.getHostAddress(),e);
                 }
             } else {
-                log.logSevere("Unexpected Error. " + e.getClass().getName(),e);
+                log.logSevere("Unexpected Error ... (" + e.getMessage() + "), client = " + userAddress.getHostAddress(),e);
             }
         }        
     }
