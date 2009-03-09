@@ -305,6 +305,7 @@ public final class IndexCache implements Index, IndexReader, Iterable<ReferenceC
     }
 
     public synchronized void addEntry(final String wordHash, final ReferenceRow newEntry, final long updateTime, final boolean dhtCase) {
+        if (heap == null) return; // there was already a shutdown
         heap.addEntry(wordHash, newEntry);
         hashScore.incScore(wordHash);
         hashDate.setScore(wordHash, intTime(updateTime));
