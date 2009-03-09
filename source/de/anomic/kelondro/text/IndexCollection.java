@@ -441,7 +441,7 @@ public class IndexCollection implements Index {
                 count++;
                 // write a log
                 if (System.currentTimeMillis() - lastlog > 30000) {
-                    Log.logFine("COLLECTION INDEX STARTUP", "scanned " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() + array.free() - count) / count) / 60000) + " minutes remaining for this array");
+                    Log.logFine("COLLECTION INDEX REFERENCE COLLECTION", "scanned " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() + array.free() - count) / count) / 60000) + " minutes remaining for this array");
                     lastlog = System.currentTimeMillis();
                 }
             }

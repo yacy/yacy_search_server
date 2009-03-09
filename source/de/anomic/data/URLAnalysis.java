@@ -50,6 +50,10 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import de.anomic.kelondro.index.IntegerHandleIndex;
+import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.text.IndexCollection;
+import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.yacy.yacyURL;
 
@@ -380,13 +384,21 @@ public class URLAnalysis {
 
         System.out.println("finished");
     }
-    /*
-    public static void used(String collectionPath, String statisticPath) {
-        File collections = new File(collectionPath);
-        File out = new File(statisticPath);
-        IntegerHandleIndex idx = IndexCollection.referenceHashes(collctions, filenameStub, keylength, indexOrder, payloadrow)
+    
+    public static void incollection(String collectionPath, String statisticPath) {
+        try {
+            IntegerHandleIndex idx = IndexCollection.referenceHashes(
+                new File(collectionPath),
+                "collection",
+                12,
+                Base64Order.enhancedCoder,
+                ReferenceRow.urlEntryRow);
+            idx.dump(new File(statisticPath));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
-*/
+
     public static void main(String[] args) {
         // example: java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -stat DATA/EXPORT/urls1.txt.gz 
     	if (args[0].equals("-stat") && args.length >= 2) {
@@ -395,8 +407,10 @@ public class URLAnalysis {
     		for (int i = 1; i < args.length; i++) genhost(args[i]);
         } else if (args[0].equals("-sort") && args.length >= 2) {
             for (int i = 1; i < args.length; i++) sortsplit(args[i]);
-        //} else if (args[0].equals("-incollection") && args.length >= 2) {
-        //    used(args[1], args[2]);
+        } else if (args[0].equals("-incollection") && args.length >= 2) {
+            // example:
+            // java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -incollection DATA/INDEX/freeworld/TEXT/RICOLLECTION used.dump
+            incollection(args[1], args[2]);
         } else {
     		System.out.println("usage:");
     		System.out.println("-stat <file>    generate a statistics about common words in file, store to <file>.stat");
