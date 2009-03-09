@@ -43,10 +43,7 @@ public class FlatWordPartitionScheme implements PartitionScheme {
     public long dhtPosition(String wordHash, String urlHash) {
         // the urlHash has no relevance here
         // normalized to Long.MAX_VALUE
-        long c = Base64Order.enhancedCoder.cardinal(wordHash.getBytes());
-        assert c != Long.MAX_VALUE;
-        if (c == Long.MAX_VALUE) return Long.MAX_VALUE - 1;
-        return c;
+        return Base64Order.enhancedCoder.cardinal(wordHash);
     }
 
     public final long dhtDistance(final String word, final String urlHash, final yacySeed peer) {
@@ -78,8 +75,9 @@ public class FlatWordPartitionScheme implements PartitionScheme {
     }
 
     public final static long dhtDistance(final long fromPos, final long toPos) {
-        final long d = toPos - fromPos;
-        return (d >= 0) ? d : (d + Long.MAX_VALUE) + 1;
+        return (toPos >= fromPos) ?
+                toPos - fromPos :
+                (Long.MAX_VALUE - fromPos) + toPos + 1;
     }
     
     public static String positionToHash(final long l) {

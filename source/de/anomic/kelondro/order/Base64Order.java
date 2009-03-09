@@ -262,6 +262,16 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         c = c << 3;
         return c;
     }
+    
+    private final long cardinalI(final String key) {
+        // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
+        long c = 0;
+        int p = 0;
+        while ((p < 10) && (p < key.length())) c = (c << 6) | ahpla[key.charAt(p++)];
+        while (p++ < 10) c = (c << 6);
+        c = c << 3;
+        return c;
+    }
 
     public final byte[] uncardinal(long c) {
         c = c >> 3;
@@ -274,6 +284,14 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
     }
     
     public final long cardinal(final byte[] key) {
+        if (this.zero == null) return cardinalI(key);
+        final long zeroCardinal = cardinalI(this.zero);
+        final long keyCardinal = cardinalI(key);
+        if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
+        return Long.MAX_VALUE - keyCardinal + zeroCardinal;
+    }
+    
+    public final long cardinal(final String key) {
         if (this.zero == null) return cardinalI(key);
         final long zeroCardinal = cardinalI(this.zero);
         final long keyCardinal = cardinalI(key);
