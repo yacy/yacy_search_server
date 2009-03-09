@@ -917,12 +917,15 @@ public final class plasmaWordIndex implements Index {
         if (ram) {
             return indexCache.referenceIterator(startWordHash, false, true);
         }
+        return collections.referenceIterator(startWordHash, false, false);
+        /*
         return new MergeIterator<ReferenceContainer>(
                 indexCache.referenceIterator(startWordHash, false, true),
                 collections.referenceIterator(startWordHash, false, false),
                 containerOrder,
                 ReferenceContainer.containerMergeMethod,
                 true);
+        */
     }
     
 
