@@ -75,13 +75,15 @@
           <input type="submit" name="addBlacklistEntry" value="Add URL pattern" />
         </div>
         <ul>
-          <li>domain/fullpath</li>
-          <li>domain/.* or <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
-          <li>*.domain/.* or <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
-          <li>domain.*/.* or <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
-          <li>*.sub.domain/.* or <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
-          <li>sub.domain.*/.* or <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regexpr</a></li>
-        </ul>
+          <li>domain.net/fullpath</li>
+          <li>domain.net/*</li>
+          <li>*.domain.net/*</li>
+          <li>*.sub.domain.net/*</li>
+          <li>sub.domain.*/*</li>
+          <li>domain.*/*</li>          
+          <li>a complete <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regex</a> (slow)</li>
+       </ul>
+
       </form>
 
       <form name="editBlacklistPatterns" action="Blacklist_p.html" method="post" enctype="multipart/form-data">
