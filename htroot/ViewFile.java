@@ -160,7 +160,7 @@ public class ViewFile {
         if (resource == null) {
             Document entry = null;
             try {
-                entry = sb.crawlQueues.loadResourceFromWeb(url, 5000, false, true, false);
+                entry = sb.crawlQueues.loadResourceFromWeb(url, 10000, false, true, false);
             } catch (final Exception e) {
                 prop.put("error", "4");
                 prop.putHTML("error_errorText", e.getMessage());
