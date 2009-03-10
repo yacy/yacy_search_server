@@ -397,7 +397,7 @@ public final class plasmaWordIndex implements Index {
     }
     
     public Export exportURL(final File f, final String filter, final int format, final boolean dom) {
-        return this.referenceURL.export(f, filter, format, dom);
+        return this.referenceURL.export(f, filter, null, format, dom);
     }
     
     public Export exportURL() {

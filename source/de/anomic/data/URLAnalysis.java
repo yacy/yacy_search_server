@@ -57,6 +57,7 @@ import de.anomic.kelondro.text.IndexCollection;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.ReferenceRow;
+import de.anomic.kelondro.text.MetadataRepository.Export;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.yacy.yacyURL;
 
@@ -410,13 +411,10 @@ public class URLAnalysis {
         MetadataRepository mr = new MetadataRepository(new File(metadataPath));
         HandleSet hs = new HandleSet(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, 100);
         System.out.println("COLLECTION INDEX DIFF URL-COL loaded dump, starting diff");
-        byte[] refhash;
-        Iterator<byte[]> i = mr.iterator();
         long start = System.currentTimeMillis();
         long update = start - 7000;
         int c = 0;
-        while (i.hasNext()) {
-            refhash = i.next();
+        for (byte[] refhash: mr) {
             if (idx.get(refhash) == -1) {
                 // the key exists as urlhash in the URL database, but not in the collection as referenced urlhash
                 hs.put(refhash);
@@ -432,6 +430,33 @@ public class URLAnalysis {
         c = hs.dump(new File(diffFile));
         System.out.println("COLLECTION INDEX DIFF URL-COL finished dump, wrote " + c + " references that occur in the URL-DB, but not in the collection-dump");
         return c;
+    }
+    
+    public static void export(String metadataPath, int format, String export, String diffFile) throws IOException {
+        // format: 0=text, 1=html, 2=rss/xml
+        System.out.println("URL EXPORT startup");
+        MetadataRepository mr = new MetadataRepository(new File(metadataPath));
+        HandleSet hs = (diffFile == null) ? null : new HandleSet(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, new File(diffFile));
+        System.out.println("URL EXPORT loaded dump, starting export");
+        Export e = mr.export(new File(export), ".*", hs, format, false);
+        try {
+            e.join();
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();
+        }
+        System.out.println("URL EXPORT finished export, wrote " + ((hs == null) ? mr.size() : hs.size()) + " entries");
+    }
+    
+    public static void delete(String metadataPath, String diffFile) throws IOException {
+        System.out.println("URL DELETE startup");
+        MetadataRepository mr = new MetadataRepository(new File(metadataPath));
+        int mrSize = mr.size();
+        HandleSet hs = new HandleSet(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, new File(diffFile));
+        System.out.println("URL DELETE loaded dump, starting deletion of " + hs.size() + " entries from " + mrSize);
+        for (byte[] refhash: hs) {
+            mr.remove(new String(refhash));
+        }
+        System.out.println("URL DELETE finished deletions, " + mr.size() + " entries left in URL database");
     }
     
     public static void main(String[] args) {
@@ -460,13 +485,58 @@ public class URLAnalysis {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        } else if (args[0].equals("-export") && args.length >= 4) {
+            // export a url-list file
+            // example:
+            // java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -export DATA/INDEX/freeworld/TEXT xml urls.xml diffurlcol.dump
+            // instead of 'xml' (which is in fact a rss), the format can also be 'text' and 'html'
+            int format = (args[2].equals("xml")) ? 2 : (args[2].equals("html")) ? 1 : 0;
+            try {
+                export(args[1], format, args[3], (args.length >= 5) ? args[4] : null);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else if (args[0].equals("-delete") && args.length >= 3) {
+            // delete from URLs as given by urlreference diff dump
+            // example:
+            // java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -delete DATA/INDEX/freeworld/TEXT diffurlcol.dump
+            // instead of 'xml' (which is in fact a rss), the format can also be 'text' and 'html'
+            try {
+                delete(args[1], args[2]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } else {
     		System.out.println("usage:");
-    		System.out.println("-stat         <file>    generate a statistics about common words in file, store to <file>.stat");
-    		System.out.println("-host         <file>    generate a file <file>.host containing only the hosts of the urls");
-    		System.out.println("-sort         <file>    generate file <file>.x.sort with sorted lists and split the file in smaller pieces");
-    		System.out.println("-incollection <path-to-RICOLLECTION> <file>  generate a dump of all referenced URL hashes");
-    		System.out.println("-diffurlcol   <path-to-URL-DB> <dump-from-incollection> <diff-dump>  find URLs that occur ");
+    		System.out.println();
+    		System.out.println("-stat <file> ");
+    		System.out.println(" generate a statistics about common words in file, store to <file>.stat");
+            System.out.println();
+            System.out.println("-host <file>");
+            System.out.println(" generate a file <file>.host containing only the hosts of the urls");
+            System.out.println();
+            System.out.println("-sort <file>");
+            System.out.println(" generate file <file>.x.sort with sorted lists and split the file in smaller pieces");
+            System.out.println();
+            System.out.println("-incollection <path-to-RICOLLECTION> <file>");
+            System.out.println(" generate a dump of all referenced URL hashes");
+            System.out.println();
+            System.out.println("-diffurlcol <path-to-URL-DB> <dump-from-incollection> <diff-dump>");
+            System.out.println(" find URLs that occur in url-db but not in collections");
+            System.out.println();
+            System.out.println("-export <path-to-URL-DB> <format text|html|xml> <export-file> <diff-dump>");
+            System.out.println(" export urls to file. the last argument can be omitted, then all urls are exported");
+            System.out.println();
+            System.out.println("-delete <path-to-URL-DB> <diff-dump>");
+            System.out.println(" delete all urls that are listed in the diff-dump from the url-db");
+            System.out.println();
+            System.out.println("to do a complete clean-up of the url database, start the following:");
+            System.out.println();
+            System.out.println("java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -incollection DATA/INDEX/freeworld/TEXT/RICOLLECTION used.dump");
+            System.out.println("java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -diffurlcol DATA/INDEX/freeworld/TEXT used.dump diffurlcol.dump");
+            System.out.println("java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -export DATA/INDEX/freeworld/TEXT xml urls.xml diffurlcol.dump");
+            System.out.println("java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -delete DATA/INDEX/freeworld/TEXT diffurlcol.dump");
+            System.out.println();
     	}
     }
     

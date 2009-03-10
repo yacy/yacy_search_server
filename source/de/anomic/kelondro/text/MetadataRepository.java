@@ -44,6 +44,7 @@ import de.anomic.http.httpClient;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.kelondro.blob.Cache;
+import de.anomic.kelondro.index.HandleSet;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.CloneableIterator;
@@ -406,12 +407,12 @@ public final class MetadataRepository implements Iterable<byte[]> {
     }
     
     // export methods
-    public Export export(final File f, final String filter, final int format, final boolean dom) {
+    public Export export(final File f, final String filter, HandleSet set, final int format, final boolean dom) {
         if ((exportthread != null) && (exportthread.isAlive())) {
             Log.logWarning("LURL-EXPORT", "cannot start another export thread, already one running");
             return exportthread;
         }
-        this.exportthread = new Export(f, filter, format, dom);
+        this.exportthread = new Export(f, filter, set, format, dom);
         this.exportthread.start();
         return exportthread;
     }
@@ -427,8 +428,9 @@ public final class MetadataRepository implements Iterable<byte[]> {
         private String failure;
         private final int format;
         private final boolean dom;
+        private HandleSet set;
         
-        public Export(final File f, final String filter, final int format, boolean dom) {
+        public Export(final File f, final String filter, HandleSet set, final int format, boolean dom) {
             // format: 0=text, 1=html, 2=rss/xml
             this.f = f;
             this.filter = filter;
@@ -436,12 +438,14 @@ public final class MetadataRepository implements Iterable<byte[]> {
             this.failure = null;
             this.format = format;
             this.dom = dom;
+            this.set = set;
             if ((dom) && (format == 2)) dom = false;
         }
         
         public void run() {
             try {
-                f.getParentFile().mkdirs();
+                File parentf = f.getParentFile();
+                if (parentf != null) parentf.mkdirs();
                 final PrintWriter pw = new PrintWriter(new BufferedOutputStream(new FileOutputStream(f)));
                 if (format == 1) {
                     pw.println("<html><head></head><body>");
@@ -471,6 +475,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
                     String url;
                     while (i.hasNext()) {
                         entry = i.next();
+                        if (this.set != null && !set.has(entry.hash().getBytes())) continue;
                         metadata = entry.metadata();
                         url = metadata.url().toNormalform(true, false);
                         if (!url.matches(filter)) continue;
