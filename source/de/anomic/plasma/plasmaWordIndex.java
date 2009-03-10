@@ -45,7 +45,6 @@ import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.MergeIterator;
 import de.anomic.kelondro.order.Order;
 import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.text.Index;
@@ -96,19 +95,19 @@ public final class plasmaWordIndex implements Index {
     public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
     
     
-    private final IndexCache               indexCache;
-    private final IndexCollection        collections;          // new database structure to replace AssortmentCluster and FileCluster
-    private final Log                      log;
-    public MetadataRepository        referenceURL;
-    public  final yacySeedDB               seedDB;
-    private final File                     primaryRoot, secondaryRoot;
-    public        IndexingStack            queuePreStack;
-    public        CrawlProfile             profilesActiveCrawls, profilesPassiveCrawls;
-    public  CrawlProfile.entry             defaultProxyProfile;
-    public  CrawlProfile.entry             defaultRemoteProfile;
-    public  CrawlProfile.entry             defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
-    public  CrawlProfile.entry             defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
-    private final File                     queuesRoot;
+    private final IndexCache      indexCache;
+    private final IndexCollection collections;          // new database structure to replace AssortmentCluster and FileCluster
+    private final Log             log;
+    public MetadataRepository     referenceURL;
+    public  final yacySeedDB      seedDB;
+    private final File            primaryRoot, secondaryRoot;
+    public        IndexingStack   queuePreStack;
+    public        CrawlProfile    profilesActiveCrawls, profilesPassiveCrawls;
+    public  CrawlProfile.entry    defaultProxyProfile;
+    public  CrawlProfile.entry    defaultRemoteProfile;
+    public  CrawlProfile.entry    defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
+    public  CrawlProfile.entry    defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
+    private final File            queuesRoot;
 
     public plasmaWordIndex(
             final String networkName,
@@ -171,7 +170,7 @@ public final class plasmaWordIndex implements Index {
 					useCommons);
 
         // create LURL-db
-        referenceURL = new MetadataRepository(this.secondaryRoot);
+        referenceURL = new MetadataRepository(new File(this.secondaryRoot, "TEXT"));
         
         // make crawl profiles database and default profiles
         this.queuesRoot = new File(this.primaryRoot, "QUEUES");

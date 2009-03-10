@@ -52,18 +52,20 @@ import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
 
-public final class MetadataRepository {
+public final class MetadataRepository implements Iterable<byte[]> {
 
     // class objects
-    ObjectIndex urlIndexFile;
-    private Export      exportthread    = null; // will have a export thread assigned if exporter is running
-    private File        location        = null;
-    ArrayList<hostStat> statsDump       = null;
+    private ObjectIndex         urlIndexFile;
+    private Export              exportthread; // will have a export thread assigned if exporter is running
+    private File                location;
+    private ArrayList<hostStat> statsDump;
     
-    public MetadataRepository(final File indexSecondaryPath) {
-        super();
-        this.location = new File(indexSecondaryPath, "TEXT");        
-        urlIndexFile = new Cache(new SplitTable(this.location, "urls", MetadataRowContainer.rowdef, false));
+    public MetadataRepository(final File path) {
+        this.location = path;        
+        this.urlIndexFile = new Cache(new SplitTable(this.location, "urls", MetadataRowContainer.rowdef, false));
+        this.exportthread = null; // will have a export thread assigned if exporter is running
+        this.statsDump = null;
+       
     }
 
     public void clearCache() {
@@ -151,6 +153,19 @@ public final class MetadataRepository {
         return urlIndexFile.has(urlHash.getBytes());
     }
 
+    public CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) {
+        try {
+            return this.urlIndexFile.keys(up, firstKey);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Iterator<byte[]> iterator() {
+        return keys(true, null);
+    }
+    
     public CloneableIterator<MetadataRowContainer> entries() throws IOException {
         // enumerates entry elements
         return new kiter();

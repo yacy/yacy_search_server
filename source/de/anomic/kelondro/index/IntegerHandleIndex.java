@@ -66,7 +66,7 @@ public class IntegerHandleIndex {
         this(keylength, objectOrder, (int) (file.length() / (keylength + 8)));
         // read the index dump and fill the index
         InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
-        byte[] a = new byte[keylength + 8];
+        byte[] a = new byte[keylength + 4];
         int c;
         while (true) {
             c = is.read(a);
@@ -74,7 +74,7 @@ public class IntegerHandleIndex {
             this.index.addUnique(this.rowdef.newEntry(a));
         }
         is.close();
-        assert this.index.size() == file.length() / (keylength + 8);
+        assert this.index.size() == file.length() / (keylength + 4);
     }
 
     /**

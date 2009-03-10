@@ -50,9 +50,12 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import de.anomic.kelondro.index.HandleSet;
 import de.anomic.kelondro.index.IntegerHandleIndex;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.IndexCollection;
+import de.anomic.kelondro.text.MetadataRepository;
+import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.yacy.yacyURL;
@@ -395,29 +398,75 @@ public class URLAnalysis {
                 ReferenceRow.urlEntryRow);
             System.out.println("COLLECTION INDEX REFERENCE COLLECTION starting dump of statistics");
             idx.dump(new File(statisticPath));
-            System.out.println("COLLECTION INDEX REFERENCE COLLECTION finished dump");
+            System.out.println("COLLECTION INDEX REFERENCE COLLECTION finished dump, wrote " + idx.size() + " entries to " + statisticPath);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    public static int diffurlcol(String metadataPath, String statisticFile, String diffFile) throws IOException {
+        System.out.println("COLLECTION INDEX DIFF URL-COL startup");
+        IntegerHandleIndex idx = new IntegerHandleIndex(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, new File(statisticFile));
+        MetadataRepository mr = new MetadataRepository(new File(metadataPath));
+        HandleSet hs = new HandleSet(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, 100);
+        System.out.println("COLLECTION INDEX DIFF URL-COL loaded dump, starting diff");
+        byte[] refhash;
+        Iterator<byte[]> i = mr.iterator();
+        long start = System.currentTimeMillis();
+        long update = start - 7000;
+        int c = 0;
+        while (i.hasNext()) {
+            refhash = i.next();
+            if (idx.get(refhash) == -1) {
+                // the key exists as urlhash in the URL database, but not in the collection as referenced urlhash
+                hs.put(refhash);
+            }
+            c++;
+            if (System.currentTimeMillis() - update > 10000) {
+                System.out.println("COLLECTION INDEX DIFF URL-COL running, checked " + c + ", found " + hs.size() + " missing references so far, " + (((System.currentTimeMillis() - start) * (mr.size() - c) / c) / 60000) + " minutes remaining");
+                update = System.currentTimeMillis();
+            }
+        }
+        mr.close();
+        System.out.println("COLLECTION INDEX DIFF URL-COL finished diff, starting dump to " + diffFile);
+        c = hs.dump(new File(diffFile));
+        System.out.println("COLLECTION INDEX DIFF URL-COL finished dump, wrote " + c + " references that occur in the URL-DB, but not in the collection-dump");
+        return c;
+    }
+    
     public static void main(String[] args) {
-        // example: java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -stat DATA/EXPORT/urls1.txt.gz 
-    	if (args[0].equals("-stat") && args.length >= 2) {
-    		for (int i = 1; i < args.length; i++) genstat(args[i]);
+        if (args[0].equals("-stat") && args.length >= 2) {
+            // generate a statistics about common words in file, store to <file>.stat
+            // example:
+            // java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -stat DATA/EXPORT/urls1.txt.gz 
+            for (int i = 1; i < args.length; i++) genstat(args[i]);
     	} else if (args[0].equals("-host") && args.length >= 2) {
+    	    // generate a file <file>.host containing only the hosts of the urls
     		for (int i = 1; i < args.length; i++) genhost(args[i]);
         } else if (args[0].equals("-sort") && args.length >= 2) {
+            // generate file <file>.x.sort with sorted lists and split the file in smaller pieces
             for (int i = 1; i < args.length; i++) sortsplit(args[i]);
         } else if (args[0].equals("-incollection") && args.length >= 2) {
+            // generate a dump of all referenced URL hashes from a given RICOLLECTION
             // example:
             // java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -incollection DATA/INDEX/freeworld/TEXT/RICOLLECTION used.dump
             incollection(args[1], args[2]);
+        } else if (args[0].equals("-diffurlcol") && args.length >= 3) {
+            // make a diff-file that contains hashes from the url database that do not occur in the collection reference dump
+            // example:
+            // java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -diffurlcol DATA/INDEX/freeworld/TEXT used.dump diffurlcol.dump
+            try {
+                diffurlcol(args[1], args[2], args[3]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } else {
     		System.out.println("usage:");
-    		System.out.println("-stat <file>    generate a statistics about common words in file, store to <file>.stat");
-    		System.out.println("-host <file>    generate a file <file>.host containing only the hosts of the urls");
-    		System.out.println("-sort <file>    generate file <file>.x.sort with sorted lists and split the file in smaller pieces");
+    		System.out.println("-stat         <file>    generate a statistics about common words in file, store to <file>.stat");
+    		System.out.println("-host         <file>    generate a file <file>.host containing only the hosts of the urls");
+    		System.out.println("-sort         <file>    generate file <file>.x.sort with sorted lists and split the file in smaller pieces");
+    		System.out.println("-incollection <path-to-RICOLLECTION> <file>  generate a dump of all referenced URL hashes");
+    		System.out.println("-diffurlcol   <path-to-URL-DB> <dump-from-incollection> <diff-dump>  find URLs that occur ");
     	}
     }
     
