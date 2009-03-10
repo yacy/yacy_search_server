@@ -28,6 +28,7 @@ package de.anomic.yacy.dht;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -188,7 +189,17 @@ public class Dispatcher {
             containers.add(container);
         }
         // then remove the container from the backend
-        for (ReferenceContainer c: containers) this.backend.deleteAllReferences(c.getWordHash());
+        HashSet<String> urlHashes = new HashSet<String>();
+        Iterator<ReferenceRow> it;
+        for (ReferenceContainer c: containers) {
+            urlHashes.clear();
+            it = c.entries();
+            while (it.hasNext()) {
+                urlHashes.add(it.next().urlHash());
+            }
+            if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + c.getWordHash() + "'");
+            if (urlHashes.size() > 0) this.backend.removeReferences(c.getWordHash(), urlHashes);
+        }
         
         // finished. The caller must take care of the containers and must put them back if not needed
         return containers;
