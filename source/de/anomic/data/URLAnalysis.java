@@ -538,6 +538,7 @@ public class URLAnalysis {
             System.out.println("java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -delete DATA/INDEX/freeworld/TEXT diffurlcol.dump");
             System.out.println();
     	}
+        System.exit(0); // kill remaining threads
     }
     
     private static final String num(int i) {
