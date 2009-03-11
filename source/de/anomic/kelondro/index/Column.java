@@ -43,8 +43,11 @@ public class Column {
     public static final int encoder_b256   = 2;
     public static final int encoder_bytes  = 3;
     
-    public int celltype, cellwidth, encoder;
-    public String nickname, description;
+    public          int    cellwidth;
+    public    final String nickname;
+    protected final int    celltype;
+    protected final int    encoder;
+    protected final String description;
 
     public Column(final String nickname, final int celltype, final int encoder, final int cellwidth, final String description) {
         this.celltype = celltype;
@@ -169,7 +172,7 @@ public class Column {
                 else if (this.celltype == celltype_boolean)   this.encoder = encoder_bytes;
                 else if (this.celltype == celltype_binary)    this.encoder = encoder_bytes;
                 else if (this.celltype == celltype_string)    this.encoder = encoder_bytes;
-                else if (this.celltype == celltype_cardinal)  throw new kelondroException("kelondroColumn - encoder missing for cell " + this.nickname);
+                else throw new kelondroException("kelondroColumn - encoder missing for cell " + this.nickname);
             }
         } else {
             if (this.celltype == celltype_cardinal) throw new kelondroException("kelondroColumn - encoder missing for cell " + this.nickname);
@@ -188,12 +191,6 @@ public class Column {
         }
     }
 
-    public void setAttributes(final String nickname, final int celltype, final int encoder) {
-        this.celltype = celltype;
-        this.encoder = encoder;
-        this.nickname = nickname;
-    }
-    
     public String toString() {
         final StringBuilder s = new StringBuilder();
         switch (celltype) {

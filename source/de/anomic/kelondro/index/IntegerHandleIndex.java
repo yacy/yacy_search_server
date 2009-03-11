@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -42,8 +43,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.yacy.dht.FlatWordPartitionScheme;
 
 public class IntegerHandleIndex {
     
@@ -313,5 +316,20 @@ public class IntegerHandleIndex {
             return map;
         }
         
+    }
+    
+    public static void main(String[] args) {
+        int count = (args.length == 0) ? 100000 : Integer.parseInt(args[0]);
+        IntegerHandleIndex idx = new IntegerHandleIndex(12, Base64Order.enhancedCoder, 100000);
+        Random r = new Random(0);
+        long start = System.currentTimeMillis();
+        try {
+            for (int i = 0; i < count; i++) {
+                idx.inc(FlatWordPartitionScheme.positionToHash(r.nextInt(count / 32)).getBytes());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Result: " + (((long) count) * 1000L / (System.currentTimeMillis() - start)) + " inc per second; " + count + " loops.");
     }
 }

@@ -73,7 +73,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
         }
         minimumSpace = Math.max(minimumSpace, super.size());
         try {
-    	final long neededRAM = 10 * 1024 * 104 + (long) ((super.row().column(0).cellwidth + 4) * minimumSpace * RowCollection.growfactor);
+    	final long neededRAM = 10 * 1024 * 104 + (long) ((super.row().primaryKeyLength + 4) * minimumSpace * RowCollection.growfactor);
     	
     	final File newpath = new File(path, tablename);
         final File indexfile = new File(newpath, "col.000.index");
@@ -112,7 +112,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     	} catch (final IOException e) {
     		if (resetOnFail) {
     			RAMIndex = true;
-    	        index = new IntegerHandleIndex(super.row().column(0).cellwidth, super.rowdef.objectOrder, 0);
+    	        index = new IntegerHandleIndex(super.row().primaryKeyLength, super.rowdef.objectOrder, 0);
     		} else {
     			throw new kelondroException(e.getMessage());
     		}
@@ -122,7 +122,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     public void clear() throws IOException {
     	super.reset();
     	RAMIndex = true;
-        index = new IntegerHandleIndex(super.row().column(0).cellwidth, super.rowdef.objectOrder, 0);
+        index = new IntegerHandleIndex(super.row().primaryKeyLength, super.rowdef.objectOrder, 0);
     }
     
     public static int staticSize(final File path, final String tablename) {
@@ -130,7 +130,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     }
     
     public static int staticRAMIndexNeed(final File path, final String tablename, final Row rowdef) {
-        return (int) ((rowdef.column(0).cellwidth + 4) * staticSize(path, tablename) * RowCollection.growfactor);
+        return (int) ((rowdef.primaryKeyLength + 4) * staticSize(path, tablename) * RowCollection.growfactor);
     }
     
     public boolean hasRAMIndex() {
@@ -148,7 +148,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     private IntegerHandleIndex initializeRamIndex(final int initialSpace) {
     	final int space = Math.max(super.col[0].size(), initialSpace) + 1;
     	if (space < 0) throw new kelondroException("wrong space: " + space);
-        final IntegerHandleIndex ri = new IntegerHandleIndex(super.row().column(0).cellwidth, super.rowdef.objectOrder, space);
+        final IntegerHandleIndex ri = new IntegerHandleIndex(super.row().primaryKeyLength, super.rowdef.objectOrder, space);
         final Iterator<Node> content = super.col[0].contentNodes(-1);
         Node node;
         int i;

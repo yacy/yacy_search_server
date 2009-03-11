@@ -63,7 +63,7 @@ public final class Row {
         this.colstart = new int[row.length];
         int os = 0;
         for (int i = 0; i < row.length; i++) {
-            this.colstart[i] = this.objectsize;
+            this.colstart[i] = os;
             os+= this.row[i].cellwidth;
         }
         this.objectsize = os;
@@ -97,7 +97,7 @@ public final class Row {
         this.colstart = new int[row.length];
         int os = 0;
         for (int i = 0; i < l.size(); i++) {
-            this.colstart[i] = this.objectsize;
+            this.colstart[i] = os;
             this.row[i] = l.get(i);
             os += this.row[i].cellwidth;
         }
