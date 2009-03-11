@@ -175,25 +175,18 @@ public class SQLTable implements ObjectIndex {
         }
     }
 
-    public synchronized void putMultiple(final List<Row.Entry> rows) throws IOException {
+    public synchronized void put(final List<Row.Entry> rows) throws IOException {
         final Iterator<Row.Entry> i = rows.iterator();
         while (i.hasNext()) put(i.next());
     }
     
-    public Row.Entry put(final Row.Entry row, final Date entryDate) throws IOException {
-        return put(row);
-    }
-    
-    public Row.Entry put(final Row.Entry row) throws IOException {
+    public Row.Entry replace(final Row.Entry row) throws IOException {
         try {
-            
-            final Row.Entry oldEntry = remove(row.getColBytes(0));            
-            
+            final Row.Entry oldEntry = remove(row.getColBytes(0));
             final String sqlQuery = "INSERT INTO test (" +
                     "hash, " +
                     "value) " +
-                    "VALUES (?,?)";                
-            
+                    "VALUES (?,?)";
             
             final PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);     
             
@@ -208,6 +201,27 @@ public class SQLTable implements ObjectIndex {
             throw new IOException(e.getMessage());
         }
     }
+    
+    public void put(final Row.Entry row) throws IOException {
+        try {
+            final String sqlQuery = "INSERT INTO test (" +
+                    "hash, " +
+                    "value) " +
+                    "VALUES (?,?)";                
+            
+            final PreparedStatement sqlStatement = this.theDBConnection.prepareStatement(sqlQuery);     
+            
+            sqlStatement.setString(1, row.getColString(0, null));
+            sqlStatement.setBytes(2, row.bytes());
+            sqlStatement.execute();
+            
+            sqlStatement.close();
+            
+            return;
+        } catch (final Exception e) {
+            throw new IOException(e.getMessage());
+        }
+    }
 
     public synchronized void addUnique(final Row.Entry row) throws IOException {
         throw new UnsupportedOperationException();
@@ -217,7 +231,7 @@ public class SQLTable implements ObjectIndex {
         throw new UnsupportedOperationException();
     }
     
-    public synchronized void addUniqueMultiple(final List<Row.Entry> rows) throws IOException {
+    public synchronized void addUnique(final List<Row.Entry> rows) throws IOException {
         throw new UnsupportedOperationException();
     }
     

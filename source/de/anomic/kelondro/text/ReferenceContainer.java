@@ -111,7 +111,7 @@ public class ReferenceContainer extends RowSet {
     
     public Reference put(final ReferenceRow entry) {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
-        final Row.Entry r = super.put(entry.toKelondroEntry());
+        final Row.Entry r = super.replace(entry.toKelondroEntry());
         if (r == null) return null;
         return new ReferenceRow(r);
     }
@@ -119,13 +119,13 @@ public class ReferenceContainer extends RowSet {
     public boolean putRecent(final ReferenceRow entry) {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         // returns true if the new entry was added, false if it already existed
-        final Row.Entry oldEntryRow = this.put(entry.toKelondroEntry());
+        final Row.Entry oldEntryRow = this.replace(entry.toKelondroEntry());
         if (oldEntryRow == null) {
             return true;
         }
         final ReferenceRow oldEntry = new ReferenceRow(oldEntryRow);
         if (entry.isOlder(oldEntry)) { // A more recent Entry is already in this container
-            this.put(oldEntry.toKelondroEntry()); // put it back
+            this.replace(oldEntry.toKelondroEntry()); // put it back
             return false;
         }
         return true;

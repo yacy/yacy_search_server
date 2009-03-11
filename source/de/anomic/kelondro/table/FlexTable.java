@@ -198,7 +198,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
 		//}
 	}
     
-    public synchronized void putMultiple(final List<Row.Entry> rows) throws IOException {
+    public synchronized void put(final List<Row.Entry> rows) throws IOException {
         // put a list of entries in a ordered way.
         // this should save R/W head positioning time
         final Iterator<Row.Entry> i = rows.iterator();
@@ -222,16 +222,16 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
         super.setMultiple(old_rows_ordered);
         
         // write new entries to index
-        addUniqueMultiple(new_rows_sequential);
+        addUnique(new_rows_sequential);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
     }
 
     public synchronized Row.Entry put(final Row.Entry row, final Date entryDate) throws IOException {
     	assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
-		return put(row);
+		return replace(row);
     }
     
-    public synchronized Row.Entry put(final Row.Entry row) throws IOException {
+    public synchronized Row.Entry replace(final Row.Entry row) throws IOException {
         assert (row != null);
         assert (!(Log.allZero(row.getColBytes(0))));
         assert row.objectsize() <= this.rowdef.objectsize;
@@ -265,13 +265,32 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
         return oldentry;
     }
     
+    public synchronized void put(final Row.Entry row) throws IOException {
+        assert (row != null);
+        assert (!(Log.allZero(row.getColBytes(0))));
+        assert row.objectsize() <= this.rowdef.objectsize;
+        final byte[] key = row.getColBytes(0);
+        if (index == null) return; // case may appear during shutdown
+        int pos = index.get(key);
+        if (pos < 0) {
+            pos = super.add(row);
+            index.put(key, pos);
+            assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
+            return;
+        }
+        //System.out.println("row.key=" + serverLog.arrayList(row.bytes(), 0, row.objectsize()));
+        assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
+        super.set(pos, row);
+        assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
+    }
+    
     public synchronized void addUnique(final Row.Entry row) throws IOException {
         assert row.objectsize() == this.rowdef.objectsize;
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
 		index.putUnique(row.getColBytes(0), super.add(row));
     }
     
-    public synchronized void addUniqueMultiple(final List<Row.Entry> rows) throws IOException {
+    public synchronized void addUnique(final List<Row.Entry> rows) throws IOException {
         // add a list of entries in a ordered way.
         // this should save R/W head positioning time
         final TreeMap<Integer, byte[]> indexed_result = super.addMultiple(rows);

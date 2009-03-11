@@ -93,10 +93,10 @@ public class yacyNewsDB {
 
     public synchronized yacyNewsRecord put(final yacyNewsRecord record) throws IOException {
         try {
-            return b2r(news.put(r2b(record)));
+            return b2r(news.replace(r2b(record)));
         } catch (final kelondroException e) {
             resetDB();
-            return b2r(news.put(r2b(record)));
+            return b2r(news.replace(r2b(record)));
         }
     }
 

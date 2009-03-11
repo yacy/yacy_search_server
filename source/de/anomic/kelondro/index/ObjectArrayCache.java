@@ -108,7 +108,7 @@ public class ObjectArrayCache {
         final Row.Entry newentry = rowdef.newEntry();
         newentry.setCol(0, ii);
         newentry.setCol(1, value);
-        final Row.Entry oldentry = index1.put(newentry);
+        final Row.Entry oldentry = index1.replace(newentry);
         if (oldentry == null) return null;
         return oldentry.getColBytes(1);
     }

@@ -26,7 +26,6 @@ package de.anomic.kelondro.index;
 
 import java.io.DataInput;
 import java.io.IOException;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
@@ -105,16 +104,29 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return entry;
     }
     
-    public synchronized void putMultiple(final List<Row.Entry> rows) {
+    public synchronized void put(final List<Row.Entry> rows) {
         final Iterator<Row.Entry> i = rows.iterator();
         while (i.hasNext()) put(i.next());
     }
     
-    public Row.Entry put(final Row.Entry row, final Date entryDate) {
-        return put(row);
+    public synchronized void put(final Row.Entry entry) {
+        assert (entry != null);
+        assert (entry.getPrimaryKeyBytes() != null);
+        // when reaching a specific amount of un-sorted entries, re-sort all
+        if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
+            sort();
+        }
+        int index = find(entry.bytes(), (rowdef.primaryKeyIndex < 0) ? 0 :super.rowdef.colstart[rowdef.primaryKeyIndex], super.rowdef.primaryKeyLength);
+        if (index < 0) {
+            super.addUnique(entry);
+        } else {
+            int sb = this.sortBound; // save the sortBound, because it is not altered (we replace at the same place)
+            set(index, entry);       // this may alter the sortBound, which we will revert in the next step
+            this.sortBound = sb;     // revert a sortBound altering
+        }
     }
-    
-    public synchronized Row.Entry put(final Row.Entry entry) {
+
+    public synchronized Row.Entry replace(final Row.Entry entry) {
         assert (entry != null);
         assert (entry.getPrimaryKeyBytes() != null);
         int index = -1;

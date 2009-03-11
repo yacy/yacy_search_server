@@ -75,8 +75,8 @@ public class ObjectIndexDaemon implements ObjectIndex {
         index.addUnique(row);
     }
 
-    public void addUniqueMultiple(List<Entry> rows) throws IOException {
-        index.addUniqueMultiple(rows);
+    public void addUnique(List<Entry> rows) throws IOException {
+        index.addUnique(rows);
     }
 
     public void clear() throws IOException {
@@ -112,7 +112,7 @@ public class ObjectIndexDaemon implements ObjectIndex {
         return this.index.has(key);
     }
 
-    public Entry put(Entry row) throws IOException {
+    public Entry replace(Entry row) throws IOException {
         Entry entry = get(row.getPrimaryKeyBytes());
         try {
             this.queue.put(row);
@@ -122,7 +122,15 @@ public class ObjectIndexDaemon implements ObjectIndex {
         return entry;
     }
 
-    public void putMultiple(List<Entry> rows) throws IOException {
+    public void put(Entry row) throws IOException {
+        try {
+            this.queue.put(row);
+        } catch (InterruptedException e) {
+            this.index.put(row);
+        }
+    }
+
+    public void put(List<Entry> rows) throws IOException {
         for (Entry entry: rows) try {
             this.queue.put(entry);
         } catch (InterruptedException e) {

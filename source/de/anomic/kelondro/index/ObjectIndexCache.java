@@ -26,7 +26,6 @@ package de.anomic.kelondro.index;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
@@ -102,7 +101,7 @@ public class ObjectIndexCache implements ObjectIndex {
         return index1.put(entry);
     }
     */
-    public synchronized Row.Entry put(final Row.Entry entry) {
+	public synchronized Row.Entry replace(final Row.Entry entry) {
         assert (entry != null);
         finishInitialization();
         // if the new entry is within the initialization part, just overwrite it
@@ -110,21 +109,29 @@ public class ObjectIndexCache implements ObjectIndex {
         byte[] key = entry.getPrimaryKeyBytes();
         if (index0.has(key)) {
             // replace the entry
-            return index0.put(entry);
+            return index0.replace(entry);
         }
         // else place it in the index1
-        return index1.put(entry);
+        return index1.replace(entry);
     }
-    
-    public Entry put(final Entry row, final Date entryDate) {
-		return put(row);
-	}
-	
-	public void putMultiple(final List<Entry> rows) {
+   
+	public synchronized void put(final Row.Entry entry) {
+        assert (entry != null);
+        finishInitialization();
+        // if the new entry is within the initialization part, just overwrite it
+        assert index0.isSorted();
+        byte[] key = entry.getPrimaryKeyBytes();
+        if (index0.has(key)) {
+            // replace the entry
+            index0.put(entry);
+        }
+        // else place it in the index1
+        index1.put(entry);
+    }
+   
+    public void put(final List<Entry> rows) {
 		final Iterator<Entry> i = rows.iterator();
-		while (i.hasNext()) {
-			put(i.next());
-		}
+		while (i.hasNext()) put(i.next());
 	}
 
 	public synchronized void addUnique(final Row.Entry entry) {    	
@@ -138,7 +145,7 @@ public class ObjectIndexCache implements ObjectIndex {
         index1.addUnique(entry);
     }
 
-	public void addUniqueMultiple(final List<Entry> rows) {
+	public void addUnique(final List<Entry> rows) {
 		final Iterator<Entry> i = rows.iterator();
 		while (i.hasNext()) addUnique(i.next());
 	}

@@ -288,7 +288,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         addUnique(r, 0, r.length);
     }
 
-    public synchronized void addUniqueMultiple(final List<Row.Entry> rows) {
+    public synchronized void addUnique(final List<Row.Entry> rows) {
         assert this.sortBound == 0 : "sortBound = " + this.sortBound + ", chunkcount = " + this.chunkcount;
         final Iterator<Row.Entry> i = rows.iterator();
         while (i.hasNext()) addUnique(i.next());

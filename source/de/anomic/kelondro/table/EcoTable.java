@@ -274,7 +274,7 @@ public class EcoTable implements ObjectIndex {
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
     }
 
-    public synchronized void addUniqueMultiple(final List<Entry> rows) throws IOException {
+    public synchronized void addUnique(final List<Entry> rows) throws IOException {
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
         final Iterator<Entry> i = rows.iterator();
         while (i.hasNext()) {
@@ -382,7 +382,7 @@ public class EcoTable implements ObjectIndex {
         return index.keys(up, firstKey);
     }
 
-    public synchronized Entry put(final Entry row) throws IOException {
+    public synchronized Entry replace(final Entry row) throws IOException {
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert ((table == null) || (table.size() == index.size()));
         assert row != null;
@@ -415,17 +415,39 @@ public class EcoTable implements ObjectIndex {
         // return old value
         return rowdef.newEntry(b);
     }
-
-    public synchronized Entry put(final Entry row, final Date entryDate) throws IOException {
-        return put(row);
+    
+    public synchronized void put(final Entry row) throws IOException {
+        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert ((table == null) || (table.size() == index.size()));
+        assert row != null;
+        assert row.bytes() != null;
+        if ((row == null) || (row.bytes() == null)) return;
+        final int i = index.get(row.getPrimaryKeyBytes());
+        if (i == -1) {
+            addUnique(row);
+            return;
+        }
+        
+        if (table == null) {
+            // write new value
+            file.put(i, row.bytes(), 0);
+        } else {
+            // write new value
+            table.set(i, taildef.newEntry(row.bytes(), rowdef.primaryKeyLength, true));
+            file.put(i, row.bytes(), 0);
+        }
+        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert ((table == null) || (table.size() == index.size()));
     }
 
-    public synchronized void putMultiple(final List<Entry> rows) throws IOException {
+    public synchronized Entry put(final Entry row, final Date entryDate) throws IOException {
+        return replace(row);
+    }
+
+    public synchronized void put(final List<Entry> rows) throws IOException {
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
         final Iterator<Entry> i = rows.iterator();
-        while (i.hasNext()) {
-            put(i.next());
-        }
+        while (i.hasNext()) put(i.next());
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
     }
 

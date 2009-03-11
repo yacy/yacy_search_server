@@ -124,7 +124,7 @@ public class Relations {
         entry.setCol(1, System.currentTimeMillis());
         entry.setCol(2, 1000000);
         entry.setCol(3, value);
-        final Row.Entry oldentry = table.put(entry);
+        final Row.Entry oldentry = table.replace(entry);
         if (oldentry == null) return null;
         return oldentry.getColBytes(3);
     }

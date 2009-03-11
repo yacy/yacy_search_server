@@ -129,7 +129,7 @@ public class IntegerHandleIndex {
         final Row.Entry newentry = index.row().newEntry();
         newentry.setCol(0, key);
         newentry.setCol(1, i);
-        final Row.Entry oldentry = index.put(newentry);
+        final Row.Entry oldentry = index.replace(newentry);
         if (oldentry == null) return -1;
         return (int) oldentry.getColLong(1);
     }

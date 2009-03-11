@@ -255,25 +255,25 @@ public class Cache implements ObjectIndex {
         // learn from result
         if (entry == null) {
             if ((checkMissSpace()) && (readMissCache != null)) {
-                final Row.Entry dummy = readMissCache.put(readMissCache.row().newEntry(key));
+                final Row.Entry dummy = readMissCache.replace(readMissCache.row().newEntry(key));
                 if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
             }
             return null;
         }
         
         if ((checkHitSpace()) && (readHitCache != null)) {
-            final Row.Entry dummy = readHitCache.put(entry);
+            final Row.Entry dummy = readHitCache.replace(entry);
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
         return entry;
     }
 
-    public synchronized void putMultiple(final List<Entry> rows) throws IOException {
+    public synchronized void put(final List<Entry> rows) throws IOException {
         final Iterator<Entry> i = rows.iterator();
         while (i.hasNext()) put(i.next());
     }
-    
-    public synchronized Entry put(final Entry row) throws IOException {
+
+    public synchronized void put(final Entry row) throws IOException {
         assert (row != null);
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
@@ -288,7 +288,37 @@ public class Cache implements ObjectIndex {
                 // the entry does not exist before
                 index.put(row); // write to backend
                 if (readHitCache != null) {
-                    final Row.Entry dummy = readHitCache.put(row); // learn that entry
+                    final Row.Entry dummy = readHitCache.replace(row); // learn that entry
+                    if (dummy == null) this.writeUnique++; else this.writeDouble++;
+                }
+                return;
+            }
+        }
+        
+        index.put(row);
+        if (readHitCache != null) {
+            // learn from situation
+            final Row.Entry dummy = readHitCache.replace(row); // overwrite old entry
+            if (dummy == null) this.writeUnique++; else this.writeDouble++;
+        }
+    }
+    
+    public synchronized Entry replace(final Entry row) throws IOException {
+        assert (row != null);
+        assert (row.columns() == row().columns());
+        //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
+        
+        final byte[] key = row.getPrimaryKeyBytes();
+        checkHitSpace();
+        
+        // remove entry from miss- and hit-cache
+        if (readMissCache != null) {
+            if (readMissCache.remove(key) != null) {
+                this.hasnotHit++;
+                // the entry does not exist before
+                index.put(row); // write to backend
+                if (readHitCache != null) {
+                    final Row.Entry dummy = readHitCache.replace(row); // learn that entry
                     if (dummy == null) this.writeUnique++; else this.writeDouble++;
                 }
                 return null;
@@ -304,16 +334,16 @@ public class Cache implements ObjectIndex {
                     // write directly to backend index
                     index.put(row);
                     // learn from situation
-                    final Row.Entry dummy = readHitCache.put(row); // overwrite old entry
+                    final Row.Entry dummy = readHitCache.replace(row); // overwrite old entry
                     if (dummy == null) this.writeUnique++; else this.writeDouble++;
                     return entry;
             }
         }
 
         // the worst case: we must write to the back-end directly
-        entry = index.put(row);
+        entry = index.replace(row);
         if (readHitCache != null) {
-            final Row.Entry dummy = readHitCache.put(row); // learn that entry
+            final Row.Entry dummy = readHitCache.replace(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
         return entry;
@@ -334,7 +364,7 @@ public class Cache implements ObjectIndex {
             // the entry does not exist before
             index.addUnique(row); // write to backend
             if (readHitCache != null) {
-                final Row.Entry dummy = readHitCache.put(row); // learn that entry
+                final Row.Entry dummy = readHitCache.replace(row); // learn that entry
                 if (dummy == null) this.writeUnique++; else this.writeDouble++;
             }
             return;
@@ -343,7 +373,7 @@ public class Cache implements ObjectIndex {
         // the worst case: we must write to the back-end directly
         index.addUnique(row);
         if (readHitCache != null) {
-            final Row.Entry dummy = readHitCache.put(row); // learn that entry
+            final Row.Entry dummy = readHitCache.replace(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
     }
@@ -369,12 +399,12 @@ public class Cache implements ObjectIndex {
         // the worst case: we must write to the backend directly
         index.addUnique(row);
         if (readHitCache != null) {
-            final Row.Entry dummy = readHitCache.put(row); // learn that entry
+            final Row.Entry dummy = readHitCache.replace(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
     }
     
-    public synchronized void addUniqueMultiple(final List<Entry> rows) throws IOException {
+    public synchronized void addUnique(final List<Entry> rows) throws IOException {
         final Iterator<Entry> i = rows.iterator();
         while (i.hasNext()) addUnique(i.next());
     }
@@ -390,7 +420,7 @@ public class Cache implements ObjectIndex {
         // add entry to miss-cache
         if (readMissCache != null) {
             // set the miss cache; if there was already an entry we know that the return value must be null
-            final Row.Entry dummy = readMissCache.put(readMissCache.row().newEntry(key));
+            final Row.Entry dummy = readMissCache.replace(readMissCache.row().newEntry(key));
             if (dummy == null) {
                 this.hasnotUnique++;
             } else {
@@ -421,7 +451,7 @@ public class Cache implements ObjectIndex {
         if (entry == null) return null;
         final byte[] key = entry.getPrimaryKeyBytes();
         if (readMissCache != null) {
-            final Row.Entry dummy = readMissCache.put(readMissCache.row().newEntry(key));
+            final Row.Entry dummy = readMissCache.replace(readMissCache.row().newEntry(key));
             if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
         }
         if (readHitCache != null) {

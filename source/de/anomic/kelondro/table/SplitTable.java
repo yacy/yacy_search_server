@@ -222,19 +222,15 @@ public class SplitTable implements ObjectIndex {
         return keeper.get(key);
     }
     
-    public synchronized void putMultiple(final List<Row.Entry> rows) throws IOException {
+    public synchronized void put(final List<Row.Entry> rows) throws IOException {
         throw new UnsupportedOperationException("not yet implemented");
     }
     
-    public synchronized Row.Entry put(final Row.Entry row) throws IOException {
-        return put(row, null); // entry for current date
-    }
-    
-    public synchronized Row.Entry put(final Row.Entry row, Date entryDate) throws IOException {
+    public synchronized Row.Entry replace(final Row.Entry row) throws IOException {
         assert row.objectsize() <= this.rowdef.objectsize;
         final ObjectIndex keeper = keeperOf(row.getColBytes(0));
-        if (keeper != null) return keeper.put(row);
-        if ((entryDate == null) || (entryDate.after(new Date()))) entryDate = new Date(); // fix date
+        if (keeper != null) return keeper.replace(row);
+        Date entryDate = new Date();
         final String suffix = dateSuffix(entryDate);
         if (suffix == null) return null;
         ObjectIndex table = tables.get(suffix);
@@ -255,6 +251,32 @@ public class SplitTable implements ObjectIndex {
         }
         table.put(row);
         return null;
+    }
+    
+    public synchronized void put(final Row.Entry row) throws IOException {
+        assert row.objectsize() <= this.rowdef.objectsize;
+        final ObjectIndex keeper = keeperOf(row.getColBytes(0));
+        if (keeper != null) {keeper.put(row); return;}
+        Date entryDate = new Date();
+        final String suffix = dateSuffix(entryDate);
+        if (suffix == null) return;
+        ObjectIndex table = tables.get(suffix);
+        if (table == null) {
+            // open table
+            final File f = new File(path, tablename + "." + suffix);
+            if (f.exists()) {
+                if (f.isDirectory()) {
+                    FlexTable.delete(path, tablename + "." + suffix);
+                }
+                // open a eco table
+                table = new EcoTable(f, rowdef, EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
+            } else {
+                // make new table
+                table = new EcoTable(f, rowdef, EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
+            }
+            tables.put(suffix, table);
+        }
+        table.put(row);
     }
     
     public synchronized ObjectIndex keeperOf(final byte[] key) {
@@ -322,7 +344,7 @@ public class SplitTable implements ObjectIndex {
         table.addUnique(row);
     }
     
-    public synchronized void addUniqueMultiple(final List<Row.Entry> rows) throws IOException {
+    public synchronized void addUnique(final List<Row.Entry> rows) throws IOException {
         final Iterator<Row.Entry> i = rows.iterator();
         while (i.hasNext()) addUnique(i.next());
     }

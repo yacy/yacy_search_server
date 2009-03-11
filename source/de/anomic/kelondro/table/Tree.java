@@ -33,7 +33,6 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -313,16 +312,16 @@ public class Tree extends CachedRecords implements ObjectIndex {
         return (lc.equals(childn.handle()));
     }
     
-    public synchronized void putMultiple(final List<Entry> rows) throws IOException {
+    public synchronized void put(final List<Entry> rows) throws IOException {
         final Iterator<Entry> i = rows.iterator();
         while (i.hasNext()) put(i.next());
     }
     
-    public Row.Entry put(final Row.Entry row, final Date entryDate) throws IOException {
-        return put(row);
+    public void put(final Row.Entry newrow) throws IOException {
+        replace(newrow);
     }
     
-    public Row.Entry put(final Row.Entry newrow) throws IOException {
+    public Row.Entry replace(final Row.Entry newrow) throws IOException {
         assert (newrow != null);
         assert (newrow.columns() == row().columns());
         assert (!(Log.allZero(newrow.getPrimaryKeyBytes())));
@@ -468,11 +467,7 @@ public class Tree extends CachedRecords implements ObjectIndex {
         this.put(row);
     }
     
-    public synchronized void addUnique(final Row.Entry row, final Date entryDate) throws IOException {
-        this.put(row, entryDate);
-    }
-    
-    public synchronized void addUniqueMultiple(final List<Row.Entry> rows) throws IOException {
+    public synchronized void addUnique(final List<Row.Entry> rows) throws IOException {
         final Iterator<Row.Entry> i = rows.iterator();
         while (i.hasNext()) addUnique(i.next());
     }
@@ -596,7 +591,7 @@ public class Tree extends CachedRecords implements ObjectIndex {
     // Associates the specified value with the specified key in this map
     public byte[] put(final byte[] key, final byte[] value) throws IOException {
         final Row.Entry row = row().newEntry(new byte[][]{key, value});
-        final Row.Entry ret = put(row);
+        final Row.Entry ret = replace(row);
         if (ret == null) return null;
         return ret.getColBytes(0);
     }
