@@ -273,11 +273,6 @@ public class Cache implements ObjectIndex {
         while (i.hasNext()) put(i.next());
     }
     
-    public synchronized void putMultiple(final List<Entry> rows, final Date entryDate) throws IOException {
-        final Iterator<Entry> i = rows.iterator();
-        while (i.hasNext()) put(i.next(), entryDate);
-    }
-    
     public synchronized Entry put(final Entry row) throws IOException {
         assert (row != null);
         assert (row.columns() == row().columns());
@@ -322,12 +317,6 @@ public class Cache implements ObjectIndex {
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
         return entry;
-    }
-
-    public synchronized Entry put(final Entry row, final Date entryDate) throws IOException {
-        // a put with a date is bad for the cache: the date cannot be handled
-        // we omit the date here and use the current Date everywhere
-        return this.put(row);
     }
 
     public synchronized void addUnique(final Entry row) throws IOException {

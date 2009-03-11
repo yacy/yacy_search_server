@@ -33,7 +33,6 @@ package de.anomic.kelondro.index;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import de.anomic.kelondro.order.CloneableIterator;
@@ -46,7 +45,6 @@ public interface ObjectIndex {
     public boolean has(byte[] key); // use this only if there is no get in case that has returns true
     public Row.Entry get(byte[] key) throws IOException;
     public Row.Entry put(Row.Entry row) throws IOException;
-    public Row.Entry put(Row.Entry row, Date entryDate) throws IOException;
     public void putMultiple(List<Row.Entry> rows) throws IOException; // for R/W head path optimization
     public void addUnique(Row.Entry row) throws IOException; // no double-check
     public void addUniqueMultiple(List<Row.Entry> rows) throws IOException; // no double-check

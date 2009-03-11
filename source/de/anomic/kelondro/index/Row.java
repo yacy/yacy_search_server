@@ -636,6 +636,10 @@ public final class Row {
         }
     }
     
+    public Queue newQueue(int maxsize) {
+        return new Queue(maxsize);
+    }
+    
     public final class Queue {
         
         private final ArrayBlockingQueue<Entry> queue;
