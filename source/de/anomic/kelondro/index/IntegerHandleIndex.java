@@ -51,7 +51,7 @@ import de.anomic.yacy.dht.FlatWordPartitionScheme;
 public class IntegerHandleIndex {
     
     private final Row rowdef;
-    private ObjectIndex index;
+    private ObjectIndexCache index;
     
     public IntegerHandleIndex(final int keylength, final ByteOrder objectOrder, final int space) {
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("int c-4 {b256}")}, objectOrder, 0);
@@ -133,8 +133,19 @@ public class IntegerHandleIndex {
         if (oldentry == null) return -1;
         return (int) oldentry.getColLong(1);
     }
-    
-    public synchronized int add(final byte[] key, int a) throws IOException {
+
+    public synchronized int inc(final byte[] key, int a) throws IOException {
+        assert key != null;
+        assert a > 0; // it does not make sense to add 0. If this occurres, it is a performance issue
+
+        final Row.Entry newentry = this.rowdef.newEntry();
+        newentry.setCol(0, key);
+        newentry.setCol(1, a);
+        long l = index.inc(key, 1, a, newentry);
+        return (int) l;
+    }
+    /*
+    public synchronized int inc(final byte[] key, int a) throws IOException {
         assert key != null;
         assert a > 0; // it does not make sense to add 0. If this occurres, it is a performance issue
 
@@ -146,20 +157,12 @@ public class IntegerHandleIndex {
             index.addUnique(newentry);
             return 1;
         } else {
-            int i = (int) indexentry.getColLong(1) + a;
-            indexentry.setCol(1, i);
+            long l = indexentry.incCol(1, a);
             index.put(indexentry);
-            return i;
+            return (int) l;
         }
     }
-    
-    public synchronized int inc(final byte[] key) throws IOException {
-        return add(key, 1);
-    }
-    
-    public synchronized int dec(final byte[] key) throws IOException {
-        return add(key, -1);
-    }
+    */
     
     public synchronized void putUnique(final byte[] key, final int i) throws IOException {
         assert i >= 0 : "i = " + i;
@@ -325,7 +328,7 @@ public class IntegerHandleIndex {
         long start = System.currentTimeMillis();
         try {
             for (int i = 0; i < count; i++) {
-                idx.inc(FlatWordPartitionScheme.positionToHash(r.nextInt(count / 32)).getBytes());
+                idx.inc(FlatWordPartitionScheme.positionToHash(r.nextInt(count / 32)).getBytes(), 1);
             }
         } catch (IOException e) {
             e.printStackTrace();

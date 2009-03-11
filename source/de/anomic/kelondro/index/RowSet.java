@@ -135,6 +135,25 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return oldentry;
     }
 
+    public synchronized long inc(byte[] key, int col, long add, Row.Entry initrow) {
+        final int index = find(key, 0, key.length);
+        if (index >= 0) {
+            // the entry existed before
+            final Row.Entry entry = get(index, false); // no clone necessary
+            long l = entry.incCol(col, add);
+            set(index, entry);
+            return l;
+        } else if (initrow != null) {
+            // create new entry
+            super.addUnique(initrow);
+            return initrow.getColLong(col);
+        } else {
+            // if initrow == null just do nothing
+            // but return a Long.MIN_VALUE
+            return Long.MIN_VALUE;
+        }
+    }
+    
     private synchronized Row.Entry remove(final byte[] a, final int start, final int length) {
         final int index = find(a, start, length);
         if (index < 0) return null;

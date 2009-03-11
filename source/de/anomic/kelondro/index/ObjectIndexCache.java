@@ -87,6 +87,7 @@ public class ObjectIndexCache implements ObjectIndex {
         return index1.has(key);
 	}
     
+	/*
     public synchronized Row.Entry put(final Row.Entry entry) {
     	assert (entry != null);
     	finishInitialization();
@@ -100,8 +101,22 @@ public class ObjectIndexCache implements ObjectIndex {
         // else place it in the index1
         return index1.put(entry);
     }
+    */
+    public synchronized Row.Entry put(final Row.Entry entry) {
+        assert (entry != null);
+        finishInitialization();
+        // if the new entry is within the initialization part, just overwrite it
+        assert index0.isSorted();
+        byte[] key = entry.getPrimaryKeyBytes();
+        if (index0.has(key)) {
+            // replace the entry
+            return index0.put(entry);
+        }
+        // else place it in the index1
+        return index1.put(entry);
+    }
     
-	public Entry put(final Entry row, final Date entryDate) {
+    public Entry put(final Entry row, final Date entryDate) {
 		return put(row);
 	}
 	
@@ -128,7 +143,16 @@ public class ObjectIndexCache implements ObjectIndex {
 		while (i.hasNext()) addUnique(i.next());
 	}
 	
-	public synchronized ArrayList<RowCollection> removeDoubles() {
+	public synchronized long inc(final byte[] key, int col, long add, Row.Entry initrow) {
+        assert (key != null);
+        finishInitialization();
+        assert index0.isSorted();
+        long l = index0.inc(key, col, add, null);
+        if (l != Long.MIN_VALUE) return l;
+        return index1.inc(key, col, add, initrow);
+    }    
+    
+    public synchronized ArrayList<RowCollection> removeDoubles() {
 	    // finish initialization phase explicitely
         index0.sort();
 	    if (index1 == null) {

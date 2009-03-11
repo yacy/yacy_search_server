@@ -464,20 +464,20 @@ public final class Row {
             }
         }
         
-        public final void addCol(final int column, long c) {
+        public final long incCol(final int column, long c) {
             int encoder = row[column].encoder;
             int colstrt = colstart[column];
             int cellwidth = row[column].cellwidth;
             long l;
             switch (encoder) {
             case Column.encoder_b64e:
-                l = Base64Order.enhancedCoder.decodeLong(rowinstance, offset + colstrt, cellwidth);
-                Base64Order.enhancedCoder.encodeLong(l + c, rowinstance, offset, cellwidth);
-                return;
+                l = c + Base64Order.enhancedCoder.decodeLong(rowinstance, offset + colstrt, cellwidth);
+                Base64Order.enhancedCoder.encodeLong(l, rowinstance, offset + colstrt, cellwidth);
+                return l;
             case Column.encoder_b256:
-                l = NaturalOrder.decodeLong(rowinstance, offset + colstrt, cellwidth);
-                NaturalOrder.encodeLong(l + c, rowinstance, offset, cellwidth);
-                return;
+                l = c + NaturalOrder.decodeLong(rowinstance, offset + colstrt, cellwidth);
+                NaturalOrder.encodeLong(l, rowinstance, offset + colstrt, cellwidth);
+                return l;
             }
             throw new kelondroException("ROW", "addCol did not find appropriate encoding");
         }

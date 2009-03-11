@@ -50,6 +50,7 @@ public interface ObjectIndex {
     public void putMultiple(List<Row.Entry> rows) throws IOException; // for R/W head path optimization
     public void addUnique(Row.Entry row) throws IOException; // no double-check
     public void addUniqueMultiple(List<Row.Entry> rows) throws IOException; // no double-check
+    //public long inc(final byte[] key, int col, long add, Row.Entry initrow); // replace a column with a recomputed value
     public ArrayList<RowCollection> removeDoubles() throws IOException; // removes all elements that are double (to be used after all addUnique)
     public Row.Entry remove(byte[] key) throws IOException;
     public Row.Entry removeOne() throws IOException;

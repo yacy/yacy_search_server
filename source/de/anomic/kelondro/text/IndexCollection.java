@@ -439,7 +439,7 @@ public class IndexCollection implements Index {
                 final RowSet collection = new RowSet(payloadrow, arrayrow);
                 final int chunkcountInArray = collection.size();
                 for (int j = 0; j < chunkcountInArray; j++) {
-                    references.inc(collection.get(j, false).getColBytes(0));
+                    references.inc(collection.get(j, false).getColBytes(0), 1);
                 }
                 count++;
                 // write a log
