@@ -31,8 +31,10 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.concurrent.ArrayBlockingQueue;
 
 import de.anomic.kelondro.order.AbstractOrder;
 import de.anomic.kelondro.order.Base64Order;
@@ -46,11 +48,11 @@ import de.anomic.kelondro.util.Log;
 
 public final class Row {
    
-    protected Column[]      row;
-    public int[]                 colstart;
-    public ByteOrder     objectOrder;
-    public    int                   objectsize;
-    public    int                   primaryKeyIndex, primaryKeyLength;
+    protected final Column[]        row;
+    public final int[]              colstart;
+    public final ByteOrder          objectOrder;
+    public final int                objectsize;
+    public final int                primaryKeyIndex, primaryKeyLength;
     protected Map<String, Object[]> nickref = null; // a mapping from nicknames to Object[2]{kelondroColumn, Integer(colstart)}
     
     public Row(final Column[] row, final ByteOrder objectOrder, final int primaryKey) {
@@ -59,11 +61,12 @@ public final class Row {
         this.row = row;
         assert (objectOrder != null);
         this.colstart = new int[row.length];
-        this.objectsize = 0;
+        int os = 0;
         for (int i = 0; i < row.length; i++) {
             this.colstart[i] = this.objectsize;
-            this.objectsize += this.row[i].cellwidth;
+            os+= this.row[i].cellwidth;
         }
+        this.objectsize = os;
         this.primaryKeyIndex = primaryKey;
         this.primaryKeyLength = (primaryKey < 0) ? this.objectsize : row[primaryKeyIndex].cellwidth;
     }
@@ -92,19 +95,13 @@ public final class Row {
         // define columns
         this.row = new Column[l.size()];
         this.colstart = new int[row.length];
-        this.objectsize = 0;
+        int os = 0;
         for (int i = 0; i < l.size(); i++) {
             this.colstart[i] = this.objectsize;
             this.row[i] = l.get(i);
-            this.objectsize += this.row[i].cellwidth;
+            os += this.row[i].cellwidth;
         }
-        this.primaryKeyIndex = primaryKey;
-        this.primaryKeyLength = (primaryKey < 0) ? this.objectsize : row[primaryKeyIndex].cellwidth;
-    }
-    
-    public final void setOrdering(final ByteOrder objectOrder, final int primaryKey) {
-        assert (objectOrder != null);
-        this.objectOrder = objectOrder;
+        this.objectsize = os;
         this.primaryKeyIndex = primaryKey;
         this.primaryKeyLength = (primaryKey < 0) ? this.objectsize : row[primaryKeyIndex].cellwidth;
     }
@@ -467,6 +464,24 @@ public final class Row {
             }
         }
         
+        public final void addCol(final int column, long c) {
+            int encoder = row[column].encoder;
+            int colstrt = colstart[column];
+            int cellwidth = row[column].cellwidth;
+            long l;
+            switch (encoder) {
+            case Column.encoder_b64e:
+                l = Base64Order.enhancedCoder.decodeLong(rowinstance, offset + colstrt, cellwidth);
+                Base64Order.enhancedCoder.encodeLong(l + c, rowinstance, offset, cellwidth);
+                return;
+            case Column.encoder_b256:
+                l = NaturalOrder.decodeLong(rowinstance, offset + colstrt, cellwidth);
+                NaturalOrder.encodeLong(l + c, rowinstance, offset, cellwidth);
+                return;
+            }
+            throw new kelondroException("ROW", "addCol did not find appropriate encoding");
+        }
+        
         public final byte[] getCol(final String nickname, final byte[] dflt) {
             if (nickref == null) genNickRef();
             final Object[] ref = nickref.get(nickname);
@@ -618,6 +633,45 @@ public final class Row {
         }
         public int index() {
             return index;
+        }
+    }
+    
+    public final class Queue {
+        
+        private final ArrayBlockingQueue<Entry> queue;
+        
+        public Queue(int maxsize) {
+            this.queue = new ArrayBlockingQueue<Entry>(maxsize);
+        }
+        
+        public void put(Entry e) throws InterruptedException {
+            this.queue.put(e);
+        }
+        
+        public Entry take() throws InterruptedException {
+            return this.queue.take();
+        }
+        
+        public Entry get(byte[] key) {
+            for (Entry e: this.queue) {
+                if (objectOrder.compare(key, e.getPrimaryKeyBytes()) == 0) {
+                    return e;
+                }
+            }
+            return null;
+        }
+        
+        public Entry delete(byte[] key) {
+            Iterator<Entry> i = this.queue.iterator();
+            Entry e;
+            while (i.hasNext()) {
+                e = i.next();
+                if (objectOrder.compare(key, e.getPrimaryKeyBytes()) == 0) {
+                    i.remove();
+                    return e;
+                }
+            }
+            return null;
         }
     }
     

@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.Random;
 
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 
@@ -63,16 +62,6 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
     public RowSet(final Row rowdef, final Row.Entry exportedCollectionRowEnvironment) {
         super(rowdef, exportedCollectionRowEnvironment);
         assert rowdef.objectOrder != null;
-    }
-
-    public void setOrdering(final ByteOrder newOrder, final int newColumn) {
-        assert newOrder != null;
-        if ((rowdef.objectOrder == null) ||
-            (!(rowdef.objectOrder.signature().equals(newOrder.signature()))) ||
-            (newColumn != rowdef.primaryKeyIndex)) {
-            rowdef.setOrdering(newOrder, newColumn);
-            this.sortBound = 0;
-        }
     }
     
     public static RowSet importRowSet(final DataInput is, final Row rowdef) throws IOException {
@@ -486,7 +475,6 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         
         final String[] test = { "eins", "zwei", "drei", "vier", "fuenf", "sechs", "sieben", "acht", "neun", "zehn" };
         final RowSet d = new RowSet(new Row("byte[] key-10, Cardinal x-4 {b256}", NaturalOrder.naturalOrder, 0), 0);
-        d.setOrdering(NaturalOrder.naturalOrder, 0);
         for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());
         for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());
         d.sort();
