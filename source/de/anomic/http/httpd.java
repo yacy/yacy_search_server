@@ -96,6 +96,7 @@ public final class httpd implements serverHandler, Cloneable {
     
     public static final int ERRORCASE_MESSAGE = 4;
     public static final int ERRORCASE_FILE = 5;
+    private static File TMPDIR = new File(System.getProperty("java.io.tmpdir"));
     private static httpdAlternativeDomainNames alternativeResolver = null;
     
     /**
@@ -899,7 +900,7 @@ public final class httpd implements serverHandler, Cloneable {
         }
 
         // parse data in memory
-        FileItemFactory factory = new DiskFileItemFactory(1024 * 1024, new File(System.getProperty("java.io.tmpdir")));
+        FileItemFactory factory = new DiskFileItemFactory(1024 * 1024, TMPDIR);
         FileUpload upload = new FileUpload(factory);
         List<FileItem> items;
         try {
