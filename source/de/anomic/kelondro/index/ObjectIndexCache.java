@@ -37,7 +37,8 @@ import de.anomic.kelondro.order.StackIterator;
 public class ObjectIndexCache implements ObjectIndex {
     
     private final Row rowdef;
-    private RowSet index0, index1;
+    private RowSet index0;
+    private RowSet index1;
     private final Row.EntryComparator entryComparator;
     
     public ObjectIndexCache(final Row rowdef, final int initialspace) {

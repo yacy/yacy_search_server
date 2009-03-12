@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -46,6 +47,7 @@ import java.util.concurrent.Future;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
 
 public class IntegerHandleIndex {
@@ -107,7 +109,7 @@ public class IntegerHandleIndex {
         return index.row();
     }
     
-    public void clear() throws IOException {
+    public void clear() {
         this.index.clear();
     }
     
@@ -116,14 +118,14 @@ public class IntegerHandleIndex {
         return index.has(key);
     }
     
-    public synchronized int get(final byte[] key) throws IOException {
+    public synchronized int get(final byte[] key) {
         assert (key != null);
         final Row.Entry indexentry = index.get(key);
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
     }
     
-    public synchronized int put(final byte[] key, final int i) throws IOException {
+    public synchronized int put(final byte[] key, final int i) {
         assert i >= 0 : "i = " + i;
         assert (key != null);
         final Row.Entry newentry = index.row().newEntry();
@@ -134,7 +136,7 @@ public class IntegerHandleIndex {
         return (int) oldentry.getColLong(1);
     }
 
-    public synchronized int inc(final byte[] key, int a) throws IOException {
+    public synchronized int inc(final byte[] key, int a) {
         assert key != null;
         assert a > 0; // it does not make sense to add 0. If this occurres, it is a performance issue
 
@@ -164,7 +166,7 @@ public class IntegerHandleIndex {
     }
     */
     
-    public synchronized void putUnique(final byte[] key, final int i) throws IOException {
+    public synchronized void putUnique(final byte[] key, final int i) {
         assert i >= 0 : "i = " + i;
         assert (key != null);
         final Row.Entry newentry = this.rowdef.newEntry();
@@ -173,7 +175,7 @@ public class IntegerHandleIndex {
         index.addUnique(newentry);
     }
     
-    public synchronized ArrayList<Integer[]> removeDoubles() throws IOException {
+    public synchronized ArrayList<Integer[]> removeDoubles() {
         final ArrayList<Integer[]> report = new ArrayList<Integer[]>();
         Integer[] is;
         int c, i;
@@ -191,14 +193,14 @@ public class IntegerHandleIndex {
         return report;
     }
     
-    public synchronized int remove(final byte[] key) throws IOException {
+    public synchronized int remove(final byte[] key) {
         assert (key != null);
         final Row.Entry indexentry = index.remove(key);
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
     }
 
-    public synchronized int removeone() throws IOException {
+    public synchronized int removeone() {
         final Row.Entry indexentry = index.removeOne();
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
@@ -208,11 +210,11 @@ public class IntegerHandleIndex {
         return index.size();
     }
     
-    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
+    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
         return index.keys(up, firstKey);
     }
 
-    public synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
+    public synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) {
         return index.rows(up, firstKey);
     }
     
@@ -322,17 +324,48 @@ public class IntegerHandleIndex {
     }
     
     public static void main(String[] args) {
-        int count = (args.length == 0) ? 100000 : Integer.parseInt(args[0]);
-        IntegerHandleIndex idx = new IntegerHandleIndex(12, Base64Order.enhancedCoder, 100000);
+        int count = (args.length == 0) ? 1000000 : Integer.parseInt(args[0]);
+        System.out.println("Starting test with " + count + " objects, minimum memory: " + (count * 16) + " bytes; " + MemoryControl.available(
+) + " available");
+        
         Random r = new Random(0);
         long start = System.currentTimeMillis();
-        try {
-            for (int i = 0; i < count; i++) {
-                idx.inc(FlatWordPartitionScheme.positionToHash(r.nextInt(count / 32)).getBytes(), 1);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        System.gc(); // for resource measurement
+        long a = MemoryControl.available();
+        IntegerHandleIndex idx = new IntegerHandleIndex(12, Base64Order.enhancedCoder, 0);
+        for (int i = 0; i < count; i++) {
+            idx.inc(FlatWordPartitionScheme.positionToHash(r.nextInt(count)).getBytes(), 1);
         }
-        System.out.println("Result: " + (((long) count) * 1000L / (System.currentTimeMillis() - start)) + " inc per second; " + count + " loops.");
+        long timek = ((long) count) * 1000L / (System.currentTimeMillis() - start);
+        System.out.println("Result IntegerHandleIndex: " + timek + " inc per second " + count + " loops.");
+        System.gc();
+        long memk = a - MemoryControl.available();
+        System.out.println("Used Memory: " + memk + " bytes");
+        System.out.println("x " + idx.get(FlatWordPartitionScheme.positionToHash(0).getBytes()));
+        idx = null;
+        
+        r = new Random(0);
+        start = System.currentTimeMillis();
+        String hash;
+        Integer d;
+        System.gc(); // for resource measurement
+        a = MemoryControl.available();
+        HashMap<String, Integer> hm = new HashMap<String, Integer>(0);
+        for (int i = 0; i < count; i++) {
+            hash = FlatWordPartitionScheme.positionToHash(r.nextInt(count));
+            d = hm.get(hash);
+            if (d == null) hm.put(hash, 1); else hm.put(hash, d + 1);
+        }
+        long timej =  ((long) count) * 1000L / (System.currentTimeMillis() - start);
+        System.out.println("Result HashMap: " +timej + " inc per second; " + count 
++ " loops.");
+        System.gc();
+        long memj = a - MemoryControl.available();
+        System.out.println("Used Memory: " + memj + " bytes");
+        System.out.println("x " + hm.get(FlatWordPartitionScheme.positionToHash(0)));
+        System.out.println("Geschwindigkeitsfaktor j/k: " + (timej / timek));
+        System.out.println("Speicherfaktor j/k: " + (memj / memk));
+        System.exit(0);
     }
+
 }

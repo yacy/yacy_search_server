@@ -209,12 +209,7 @@ public class HeapReader {
         assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
         
         // check if the file index contains the key
-        try {
-            return index.get(key) >= 0;
-        } catch (final IOException e) {
-            e.printStackTrace();
-            return false;
-        }
+        return index.get(key) >= 0;
     }
 
     public ByteOrder ordering() {

@@ -666,12 +666,7 @@ public class EcoTable implements ObjectIndex {
             final byte[] k = i.next();
             assert k != null;
             if (k == null) return null;
-            try {
-                this.c = index.get(k);
-            } catch (final IOException e) {
-                e.printStackTrace();
-                return null;
-            }
+            this.c = index.get(k);
             if (this.c < 0) throw new ConcurrentModificationException(); // this should only happen if the table was modified during the iteration
             final byte[] b = new byte[rowdef.objectsize];
             if (table == null) {

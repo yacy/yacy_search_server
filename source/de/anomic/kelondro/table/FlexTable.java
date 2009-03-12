@@ -164,7 +164,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
             }
             assert (key != null) : "DEBUG: empty key in initializeRamIndex"; // should not happen; if it does, it is an error of the condentNodes iterator
             //System.out.println("ENTRY: " + serverLog.arrayList(indexentry.bytes(), 0, indexentry.objectsize()));
-            try { ri.putUnique(key, i); } catch (final IOException e) {} // no IOException can happen here
+            ri.putUnique(key, i);
             if ((i % 10000) == 0) {
                 System.out.print('.');
                 System.out.flush();
