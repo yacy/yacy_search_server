@@ -382,7 +382,7 @@ public final class httpdFileHandler {
                 String val;
                 while (e.hasNext()) {
                     val = e.next();
-                    if ((val != null) && (val.indexOf("<script") >= 0)) {
+                    if ((val != null) && (val.indexOf("<script") >= 0) && !path.equals("/WatchCrawler_p.html")) {
                         // deny request
                         httpd.sendRespondError(conProp,out,4,403,null,"bad post values",null);
                         return;
