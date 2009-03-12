@@ -85,7 +85,7 @@ public class Balancer {
             try {
                 final Iterator<byte[]> i = urlFileIndex.keys(true, null);
                 byte[] hash;
-                while (i.hasNext()) {
+                while (i != null && i.hasNext()) {
                     hash = i.next();
                     pushHashToDomainStacks(new String(hash), true);
                 }

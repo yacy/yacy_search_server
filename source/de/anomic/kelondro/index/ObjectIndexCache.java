@@ -24,7 +24,6 @@
 
 package de.anomic.kelondro.index;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -36,9 +35,10 @@ import de.anomic.kelondro.order.StackIterator;
 
 public class ObjectIndexCache implements ObjectIndex {
     
+    private static final int spread = 1000;
     private final Row rowdef;
     private RowSet index0;
-    private RowSet index1;
+    private RowSetArray index1;
     private final Row.EntryComparator entryComparator;
     
     public ObjectIndexCache(final Row rowdef, final int initialspace) {
@@ -66,7 +66,7 @@ public class ObjectIndexCache implements ObjectIndex {
             // finish initialization phase
             index0.sort();
             index0.uniq();
-            index1 = new RowSet(rowdef, 0);
+            index1 = new RowSetArray(rowdef, 0, spread);
         }
     }
     
@@ -166,7 +166,6 @@ public class ObjectIndexCache implements ObjectIndex {
 	    if (index1 == null) {
 	        return index0.removeDoubles();
 	    }
-        index1.sort();
         ArrayList<RowCollection> d0 = index0.removeDoubles();
         ArrayList<RowCollection> d1 = index1.removeDoubles();
         d0.addAll(d1);
@@ -214,7 +213,7 @@ public class ObjectIndexCache implements ObjectIndex {
             // finish initialization phase
             index0.sort();
             index0.uniq();
-            index1 = new RowSet(rowdef, 0);
+            index1 = new RowSetArray(rowdef, 0, spread);
             return index0.keys(up, firstKey);
         }
         assert (index1 != null);
@@ -224,11 +223,14 @@ public class ObjectIndexCache implements ObjectIndex {
         }
         // index0 should be sorted
         // sort index1 to enable working of the merge iterator
-        index1.sort();
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
+        CloneableIterator<byte[]> k0 = index0.keys(up, firstKey);
+        CloneableIterator<byte[]> k1 = index1.keys(up, firstKey);
+        if (k0 == null) return k1;
+        if (k1 == null) return k0;
         return new MergeIterator<byte[]>(
-                index0.keys(up, firstKey),
-                index1.keys(up, firstKey),
+                k0,
+                k1,
                 rowdef.objectOrder,
                 MergeIterator.simpleMerge,
                 true);
@@ -240,7 +242,7 @@ public class ObjectIndexCache implements ObjectIndex {
             // finish initialization phase
             index0.sort();
             index0.uniq();
-            index1 = new RowSet(rowdef, 0);
+            index1 = new RowSetArray(rowdef, 0, spread);
             return index0.rows(up, firstKey);
         }
         assert (index1 != null);
@@ -250,23 +252,27 @@ public class ObjectIndexCache implements ObjectIndex {
         }
         // index0 should be sorted
         // sort index1 to enable working of the merge iterator
-        index1.sort();
+        //index1.sort();
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
+        CloneableIterator<Row.Entry> k0 = index0.rows(up, firstKey);
+        CloneableIterator<Row.Entry> k1 = index1.rows(up, firstKey);
+        if (k0 == null) return k1;
+        if (k1 == null) return k0;
         return new MergeIterator<Row.Entry>(
-                index0.rows(up, firstKey),
-                index1.rows(up, firstKey),
+                k0,
+                k1,
                 entryComparator,
                 MergeIterator.simpleMerge,
                 true);
     }
     
-    public synchronized CloneableIterator<Row.Entry> rows() throws IOException {
+    public synchronized CloneableIterator<Row.Entry> rows() {
         // returns the row-iterator of the underlying kelondroIndex
         if (index1 == null) {
             // finish initialization phase
             index0.sort();
             index0.uniq();
-            index1 = new RowSet(rowdef, 0);
+            index1 = new RowSetArray(rowdef, 0, spread);
             return index0.rows();
         }
         assert (index1 != null);
@@ -276,7 +282,7 @@ public class ObjectIndexCache implements ObjectIndex {
         }
         // index0 should be sorted
         // sort index1 to enable working of the merge iterator
-        index1.sort();
+        //index1.sort();
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
         return new StackIterator<Row.Entry>(index0.rows(), index1.rows());
     }

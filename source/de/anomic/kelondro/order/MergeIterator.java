@@ -45,6 +45,8 @@ public class MergeIterator<E> implements CloneableIterator<E> {
             final Method m,
             final boolean up) {
         // this works currently only for String-type key iterations
+        assert a != null;
+        assert b != null;
         this.a = a;
         this.b = b;
         this.up = up;
@@ -55,6 +57,8 @@ public class MergeIterator<E> implements CloneableIterator<E> {
     }
 
     public MergeIterator<E> clone(final Object modifier) {
+        assert a != null;
+        assert b != null;
         return new MergeIterator<E>(a.clone(modifier), b.clone(modifier), comp, merger, up);
     }
     

@@ -389,8 +389,10 @@ public class SplitTable implements ObjectIndex {
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         final List<CloneableIterator<byte[]>> c = new ArrayList<CloneableIterator<byte[]>>(tables.size());
         final Iterator<ObjectIndex> i = tables.values().iterator();
+        CloneableIterator<byte[]> k;
         while (i.hasNext()) {
-            c.add(i.next().keys(up, firstKey));
+            k = i.next().keys(up, firstKey);
+            if (k != null) c.add(k);
         }
         return MergeIterator.cascade(c, rowdef.objectOrder, MergeIterator.simpleMerge, up);
     }

@@ -33,9 +33,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Random;
+import java.util.TreeMap;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -350,7 +350,7 @@ public class IntegerHandleIndex {
         Integer d;
         System.gc(); // for resource measurement
         a = MemoryControl.available();
-        HashMap<String, Integer> hm = new HashMap<String, Integer>(0);
+        TreeMap<String, Integer> hm = new TreeMap<String, Integer>();
         for (int i = 0; i < count; i++) {
             hash = FlatWordPartitionScheme.positionToHash(r.nextInt(count));
             d = hm.get(hash);
@@ -364,7 +364,7 @@ public class IntegerHandleIndex {
         System.out.println("Used Memory: " + memj + " bytes");
         System.out.println("x " + hm.get(FlatWordPartitionScheme.positionToHash(0)));
         System.out.println("Geschwindigkeitsfaktor j/k: " + (timej / timek));
-        System.out.println("Speicherfaktor j/k: " + (memj / memk));
+        System.out.println("Speicherplatzfaktor    j/k: " + (memj / memk));
         System.exit(0);
     }
 

@@ -640,7 +640,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         ArrayList<String> l = new ArrayList<String>();
         CloneableIterator<byte[]> i = this.urlIndexFile.keys(true, null);
         String hash;
-        while (i.hasNext()) {
+        while (i != null && i.hasNext()) {
             hash = new String(i.next());
             if (hosthash.equals(hash.substring(6))) l.add(hash);
         }
