@@ -264,7 +264,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (applyPro) this.log.logInfo("This is the pro-version of YaCy");
         
         // UPnP port mapping
-        UPnP.setSb(sb);
         if (getConfigBool(plasmaSwitchboardConstants.UPNP_ENABLED, false))
         	serverInstantBusyThread.oneTimeJob(UPnP.class, "addPortMapping", UPnP.log, 0);
         

@@ -43,7 +43,7 @@ import de.anomic.plasma.plasmaSwitchboardConstants;
 public class UPnP {
 	
 	public final static Log log = new Log("UPNP");
-	private static plasmaSwitchboard sb;
+	private static plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
 	
 	private final static int discoveryTimeout = 5000; // seconds to receive a response from devices
 	private static InternetGatewayDevice[] IGDs = null;
@@ -59,10 +59,6 @@ public class UPnP {
 	static {
 		System.setProperty("net.sbbi.upnp.ddos.matchip", "false");
 	} */
-	
-	public static void setSb(plasmaSwitchboard switchboard) {
-		sb = switchboard;
-	}
 	
 	public static boolean setIGDs(InternetGatewayDevice[] igds) {
 		if(IGDs == null) {
@@ -203,7 +199,7 @@ public class UPnP {
 				log.logInfo("discovered device: " + newIGD[0].getIGDRootDevice().getFriendlyName());
 				if (UPnP.setIGDs(newIGD) &&
 					plasmaSwitchboard.getSwitchboard().getConfigBool(plasmaSwitchboardConstants.UPNP_ENABLED, false))
-					UPnP.addPortMapping();
+						UPnP.addPortMapping();
 				Listener.unregister();
 			}
 		
