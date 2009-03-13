@@ -55,9 +55,9 @@ public class IntegerHandleIndex {
     private final Row rowdef;
     private ObjectIndexCache index;
     
-    public IntegerHandleIndex(final int keylength, final ByteOrder objectOrder, final int space) {
+    public IntegerHandleIndex(final int keylength, final ByteOrder objectOrder, final int initialspace, final int expectedspace) {
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("int c-4 {b256}")}, objectOrder, 0);
-        this.index = new ObjectIndexCache(rowdef, space);
+        this.index = new ObjectIndexCache(rowdef, initialspace, expectedspace);
     }
 
     /**
@@ -67,8 +67,8 @@ public class IntegerHandleIndex {
      * @param file
      * @throws IOException 
      */
-    public IntegerHandleIndex(final int keylength, final ByteOrder objectOrder, final File file) throws IOException {
-        this(keylength, objectOrder, (int) (file.length() / (keylength + 8)));
+    public IntegerHandleIndex(final int keylength, final ByteOrder objectOrder, final File file, final int expectedspace) throws IOException {
+        this(keylength, objectOrder, (int) (file.length() / (keylength + 8)), expectedspace);
         // read the index dump and fill the index
         InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
         byte[] a = new byte[keylength + 4];
@@ -243,8 +243,8 @@ public class IntegerHandleIndex {
      * @param bufferSize
      * @return
      */
-    public static initDataConsumer asynchronusInitializer(final int keylength, final ByteOrder objectOrder, final int space, int bufferSize) {
-        initDataConsumer initializer = new initDataConsumer(new IntegerHandleIndex(keylength, objectOrder, space), bufferSize);
+    public static initDataConsumer asynchronusInitializer(final int keylength, final ByteOrder objectOrder, final int space, final int expectedspace, int bufferSize) {
+        initDataConsumer initializer = new initDataConsumer(new IntegerHandleIndex(keylength, objectOrder, space, expectedspace), bufferSize);
         ExecutorService service = Executors.newSingleThreadExecutor();
         initializer.setResult(service.submit(initializer));
         service.shutdown();
@@ -331,7 +331,7 @@ public class IntegerHandleIndex {
 
         System.gc(); // for resource measurement
         long a = MemoryControl.available();
-        IntegerHandleIndex idx = new IntegerHandleIndex(12, Base64Order.enhancedCoder, 0);
+        IntegerHandleIndex idx = new IntegerHandleIndex(12, Base64Order.enhancedCoder, 0, 150000);
         for (int i = 0; i < count; i++) {
             idx.inc(FlatWordPartitionScheme.positionToHash(r.nextInt(count)).getBytes(), 1);
         }

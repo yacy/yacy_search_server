@@ -36,7 +36,7 @@ import de.anomic.kelondro.order.NaturalOrder;
 
 public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.Entry> {
 
-    private static final int collectionReSortLimit = 400;
+    private static final int collectionReSortLimit = 300;
 
     public RowSet(final RowSet rs) {
         super(rs);
@@ -190,7 +190,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         
         if (rowdef.objectOrder == null) return iterativeSearch(a, astart, alength, 0, this.chunkcount);
         
-        if ((this.chunkcount - this.sortBound) > (collectionReSortLimit << 1)) {
+        if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
             sort();
         }
         

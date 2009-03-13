@@ -112,7 +112,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     	} catch (final IOException e) {
     		if (resetOnFail) {
     			RAMIndex = true;
-    	        index = new IntegerHandleIndex(super.row().primaryKeyLength, super.rowdef.objectOrder, 0);
+    	        index = new IntegerHandleIndex(super.row().primaryKeyLength, super.rowdef.objectOrder, 0, 0);
     		} else {
     			throw new kelondroException(e.getMessage());
     		}
@@ -122,7 +122,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     public void clear() throws IOException {
     	super.reset();
     	RAMIndex = true;
-        index = new IntegerHandleIndex(super.row().primaryKeyLength, super.rowdef.objectOrder, 0);
+        index = new IntegerHandleIndex(super.row().primaryKeyLength, super.rowdef.objectOrder, 0, 0);
     }
     
     public static int staticSize(final File path, final String tablename) {
@@ -148,7 +148,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     private IntegerHandleIndex initializeRamIndex(final int initialSpace) {
     	final int space = Math.max(super.col[0].size(), initialSpace) + 1;
     	if (space < 0) throw new kelondroException("wrong space: " + space);
-        final IntegerHandleIndex ri = new IntegerHandleIndex(super.row().primaryKeyLength, super.rowdef.objectOrder, space);
+        final IntegerHandleIndex ri = new IntegerHandleIndex(super.row().primaryKeyLength, super.rowdef.objectOrder, space, 0);
         final Iterator<Node> content = super.col[0].contentNodes(-1);
         Node node;
         int i;

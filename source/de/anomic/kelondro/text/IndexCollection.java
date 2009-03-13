@@ -411,7 +411,7 @@ public class IndexCollection implements Index {
         final String[] list = path.list();
         FixedWidthArray array;
         System.out.println("COLLECTION INDEX REFERENCE COLLECTION startup");
-        IntegerHandleIndex references = new IntegerHandleIndex(keylength, indexOrder, 100000);
+        IntegerHandleIndex references = new IntegerHandleIndex(keylength, indexOrder, 0, 1000000);
         for (int i = 0; i < list.length; i++) if (list[i].endsWith(".kca")) {
             // open array
             final int pos = list[i].indexOf('.');

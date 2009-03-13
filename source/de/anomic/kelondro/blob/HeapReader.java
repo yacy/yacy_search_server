@@ -106,7 +106,7 @@ public class HeapReader {
         // there is an index and a gap file:
         // read the index file:
         try {
-            this.index = new LongHandleIndex(this.keylength, this.ordering, fif);
+            this.index = new LongHandleIndex(this.keylength, this.ordering, fif, 1000000);
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -132,7 +132,7 @@ public class HeapReader {
         // this initializes the this.index object by reading positions from the heap file
 
         this.free = new Gap();
-        LongHandleIndex.initDataConsumer indexready = LongHandleIndex.asynchronusInitializer(keylength, this.ordering, 0, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))));
+        LongHandleIndex.initDataConsumer indexready = LongHandleIndex.asynchronusInitializer(keylength, this.ordering, 0, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))), 100000);
         byte[] key = new byte[keylength];
         int reclen;
         long seek = 0;

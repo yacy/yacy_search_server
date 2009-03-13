@@ -35,16 +35,17 @@ import de.anomic.kelondro.order.StackIterator;
 
 public class ObjectIndexCache implements ObjectIndex {
     
-    private static final int spread = 1000;
     private final Row rowdef;
     private RowSet index0;
     private RowSetArray index1;
     private final Row.EntryComparator entryComparator;
+    private final int spread;
     
-    public ObjectIndexCache(final Row rowdef, final int initialspace) {
+    public ObjectIndexCache(final Row rowdef, final int initialspace, final int expectedspace) {
     	this.rowdef = rowdef;
     	this.entryComparator = new Row.EntryComparator(rowdef.objectOrder);
-        reset(initialspace);
+    	this.spread = Math.max(10, expectedspace / 3000);
+    	reset(initialspace);
     }
     
     public void clear() {
@@ -66,6 +67,7 @@ public class ObjectIndexCache implements ObjectIndex {
             // finish initialization phase
             index0.sort();
             index0.uniq();
+            index0.trim(false);
             index1 = new RowSetArray(rowdef, 0, spread);
         }
     }
@@ -87,21 +89,6 @@ public class ObjectIndexCache implements ObjectIndex {
         return index1.has(key);
 	}
     
-	/*
-    public synchronized Row.Entry put(final Row.Entry entry) {
-    	assert (entry != null);
-    	finishInitialization();
-        // if the new entry is within the initialization part, just overwrite it
-    	assert index0.isSorted();
-        final Row.Entry indexentry = index0.remove(entry.getPrimaryKeyBytes()); // keeps ordering
-        if (indexentry != null) {
-            index1.put(entry);
-            return indexentry;
-        }
-        // else place it in the index1
-        return index1.put(entry);
-    }
-    */
 	public synchronized Row.Entry replace(final Row.Entry entry) {
         assert (entry != null);
         finishInitialization();

@@ -58,9 +58,9 @@ public class LongHandleIndex {
      * @param objectOrder
      * @param space
      */
-    public LongHandleIndex(final int keylength, final ByteOrder objectOrder, final int space) {
+    public LongHandleIndex(final int keylength, final ByteOrder objectOrder, final int initialspace, final int expectedspace) {
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("long c-8 {b256}")}, objectOrder, 0);
-        this.index = new ObjectIndexCache(rowdef, space);
+        this.index = new ObjectIndexCache(rowdef, initialspace, expectedspace);
     }
 
     /**
@@ -70,8 +70,8 @@ public class LongHandleIndex {
      * @param file
      * @throws IOException 
      */
-    public LongHandleIndex(final int keylength, final ByteOrder objectOrder, final File file) throws IOException {
-        this(keylength, objectOrder, (int) (file.length() / (keylength + 8)));
+    public LongHandleIndex(final int keylength, final ByteOrder objectOrder, final File file, final int expectedspace) throws IOException {
+        this(keylength, objectOrder, (int) (file.length() / (keylength + 8)), expectedspace);
         // read the index dump and fill the index
         InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
         byte[] a = new byte[keylength + 8];
@@ -226,8 +226,8 @@ public class LongHandleIndex {
      * @param bufferSize
      * @return
      */
-    public static initDataConsumer asynchronusInitializer(final int keylength, final ByteOrder objectOrder, final int space, int bufferSize) {
-        initDataConsumer initializer = new initDataConsumer(new LongHandleIndex(keylength, objectOrder, space), bufferSize);
+    public static initDataConsumer asynchronusInitializer(final int keylength, final ByteOrder objectOrder, final int space, final int expectedspace, int bufferSize) {
+        initDataConsumer initializer = new initDataConsumer(new LongHandleIndex(keylength, objectOrder, space, expectedspace), bufferSize);
         ExecutorService service = Executors.newSingleThreadExecutor();
         initializer.setResult(service.submit(initializer));
         service.shutdown();

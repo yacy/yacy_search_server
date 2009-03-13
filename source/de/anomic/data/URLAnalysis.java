@@ -407,9 +407,9 @@ public class URLAnalysis {
 
     public static int diffurlcol(String metadataPath, String statisticFile, String diffFile) throws IOException {
         System.out.println("COLLECTION INDEX DIFF URL-COL startup");
-        IntegerHandleIndex idx = new IntegerHandleIndex(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, new File(statisticFile));
+        IntegerHandleIndex idx = new IntegerHandleIndex(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, new File(statisticFile), 0);
         MetadataRepository mr = new MetadataRepository(new File(metadataPath));
-        HandleSet hs = new HandleSet(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, 100);
+        HandleSet hs = new HandleSet(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, 0, 1000000);
         System.out.println("COLLECTION INDEX DIFF URL-COL loaded dump, starting diff");
         long start = System.currentTimeMillis();
         long update = start - 7000;
@@ -436,7 +436,7 @@ public class URLAnalysis {
         // format: 0=text, 1=html, 2=rss/xml
         System.out.println("URL EXPORT startup");
         MetadataRepository mr = new MetadataRepository(new File(metadataPath));
-        HandleSet hs = (diffFile == null) ? null : new HandleSet(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, new File(diffFile));
+        HandleSet hs = (diffFile == null) ? null : new HandleSet(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, new File(diffFile), 0);
         System.out.println("URL EXPORT loaded dump, starting export");
         Export e = mr.export(new File(export), ".*", hs, format, false);
         try {
@@ -451,7 +451,7 @@ public class URLAnalysis {
         System.out.println("URL DELETE startup");
         MetadataRepository mr = new MetadataRepository(new File(metadataPath));
         int mrSize = mr.size();
-        HandleSet hs = new HandleSet(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, new File(diffFile));
+        HandleSet hs = new HandleSet(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, new File(diffFile), 0);
         System.out.println("URL DELETE loaded dump, starting deletion of " + hs.size() + " entries from " + mrSize);
         for (byte[] refhash: hs) {
             mr.remove(new String(refhash));

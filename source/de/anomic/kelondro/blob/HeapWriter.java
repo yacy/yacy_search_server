@@ -71,7 +71,7 @@ public final class HeapWriter  {
     public HeapWriter(final File heapFile, final int keylength, final ByteOrder ordering) throws IOException {
         this.heapFile = heapFile;
         this.keylength = keylength;
-        this.index = new LongHandleIndex(keylength, ordering, 10);
+        this.index = new LongHandleIndex(keylength, ordering, 10, 100000);
         this.os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(heapFile), 1024 * 1024));
         this.seek = 0;
     }

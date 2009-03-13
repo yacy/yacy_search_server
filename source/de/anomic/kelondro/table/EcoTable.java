@@ -132,7 +132,7 @@ public class EcoTable implements ObjectIndex {
                 table = null; System.gc();
                 Log.logSevere("ECOTABLE", tablefile + ": RAM after releasing the table: " + (MemoryControl.available() / 1024 / 1024) + "MB");
             }
-            index = new IntegerHandleIndex(rowdef.primaryKeyLength, rowdef.objectOrder, records);
+            index = new IntegerHandleIndex(rowdef.primaryKeyLength, rowdef.objectOrder, records, 100000);
             Log.logInfo("ECOTABLE", tablefile + ": EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
 
             // read all elements from the file into the copy table
@@ -586,7 +586,7 @@ public class EcoTable implements ObjectIndex {
         
         // initialize index and copy table
         table = (table == null) ? null : new RowSet(taildef, 1);
-        index = new IntegerHandleIndex(rowdef.primaryKeyLength, rowdef.objectOrder, 1);        
+        index = new IntegerHandleIndex(rowdef.primaryKeyLength, rowdef.objectOrder, 1, 100000);        
     }
 
     public Row row() {

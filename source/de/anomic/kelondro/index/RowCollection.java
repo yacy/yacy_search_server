@@ -781,7 +781,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         try {
             while (i >= 0) {
                 if (match(i, i + 1)) {
-                    removeRow(i + 1, false);
+                    removeRow(i + 1, true);
                     d++;
                     if (i + 1 < chunkcount - 1) u = false;
                 }
