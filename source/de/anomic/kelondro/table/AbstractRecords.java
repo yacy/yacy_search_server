@@ -588,7 +588,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
             TXTPROPS[i] = new byte[TXTPROPW];
             entryFile.readFully(POS_TXTPROPS + TXTPROPW * i, TXTPROPS[i], 0, TXTPROPS[i].length);
         }
-        this.ROW = new Row(COLDEFS, readOrderType(), 0);
+        this.ROW = new Row(COLDEFS, readOrderType());
         
         // assign remaining values that are only present at run-time
         this.overhead = OHBYTEC + 4 * OHHANDLEC;

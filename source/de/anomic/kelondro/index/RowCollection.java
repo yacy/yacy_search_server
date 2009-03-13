@@ -155,7 +155,7 @@ public class RowCollection implements Iterable<Row.Entry> {
                 "byte[] orderkey-2," +
                 "int orderbound-4 {b256}," +
                 "byte[] collection-" + chunkcachelength,
-                NaturalOrder.naturalOrder, 0
+                NaturalOrder.naturalOrder
                 );
     }
     
@@ -866,16 +866,14 @@ public class RowCollection implements Iterable<Row.Entry> {
         assert (j >= 0) && (j < chunkcount) : "j = " + j + ", chunkcount = " + chunkcount;
         assert (this.rowdef.objectOrder != null);
         if (i == j) return 0;
-        assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
-        final int colstart = (this.rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
         //assert (!bugappearance(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
         //assert (!bugappearance(chunkcache, j * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
         final int c = this.rowdef.objectOrder.compare(
                 chunkcache,
-                i * this.rowdef.objectsize + colstart,
+                i * this.rowdef.objectsize,
                 this.rowdef.primaryKeyLength,
                 chunkcache,
-                j * this.rowdef.objectsize + colstart,
+                j * this.rowdef.objectsize,
                 this.rowdef.primaryKeyLength);
         return c;
     }
@@ -884,16 +882,13 @@ public class RowCollection implements Iterable<Row.Entry> {
         assert (i >= 0) && (i < chunkcount) : "i = " + i + ", chunkcount = " + chunkcount;
         assert (this.rowdef.objectOrder != null);
         assert (this.rowdef.objectOrder instanceof Base64Order);
-        assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
-        final int colstart = (this.rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
         //assert (!bugappearance(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
-        return ((Base64Order) this.rowdef.objectOrder).compilePivot(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength);
+        return ((Base64Order) this.rowdef.objectOrder).compilePivot(chunkcache, i * this.rowdef.objectsize, this.rowdef.primaryKeyLength);
     }
     
     protected final byte[] compilePivot(final byte[] a, final int astart, final int alength) {
         assert (this.rowdef.objectOrder != null);
         assert (this.rowdef.objectOrder instanceof Base64Order);
-        assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
         return ((Base64Order) this.rowdef.objectOrder).compilePivot(a, astart, alength);
     }
     
@@ -902,13 +897,11 @@ public class RowCollection implements Iterable<Row.Entry> {
         assert (j >= 0) && (j < chunkcount) : "j = " + j + ", chunkcount = " + chunkcount;
         assert (this.rowdef.objectOrder != null);
         assert (this.rowdef.objectOrder instanceof Base64Order);
-        assert (this.rowdef.primaryKeyIndex == 0) : "this.sortColumn = " + this.rowdef.primaryKeyIndex;
-        final int colstart = (this.rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
         //assert (!bugappearance(chunkcache, j * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
         final int c = ((Base64Order) this.rowdef.objectOrder).comparePivot(
         		compiledPivot,
                 chunkcache,
-                j * this.rowdef.objectsize + colstart,
+                j * this.rowdef.objectsize,
                 this.rowdef.primaryKeyLength);
         return c;
     }
@@ -916,7 +909,7 @@ public class RowCollection implements Iterable<Row.Entry> {
     protected synchronized int compare(final byte[] a, final int astart, final int alength, final int chunknumber) {
         assert (chunknumber < chunkcount);
         final int l = Math.min(this.rowdef.primaryKeyLength, Math.min(a.length - astart, alength));
-        return rowdef.objectOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize + ((rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[rowdef.primaryKeyIndex]), this.rowdef.primaryKeyLength);
+        return rowdef.objectOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize, this.rowdef.primaryKeyLength);
     }
     
     protected final boolean match(final int i, final int j) {
@@ -927,9 +920,8 @@ public class RowCollection implements Iterable<Row.Entry> {
         if (j >= chunkcount) return false;
         assert (this.rowdef.objectOrder != null);
         if (i == j) return true;
-        final int colstart = (this.rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
-        int astart = i * this.rowdef.objectsize + colstart;
-        int bstart = j * this.rowdef.objectsize + colstart;
+        int astart = i * this.rowdef.objectsize;
+        int bstart = j * this.rowdef.objectsize;
         int k = this.rowdef.primaryKeyLength;
         while (k-- != 0) {
             if (chunkcache[astart++] != chunkcache[bstart++]) return false;
@@ -939,7 +931,7 @@ public class RowCollection implements Iterable<Row.Entry> {
     
     protected synchronized boolean match(final byte[] a, int astart, final int alength, final int chunknumber) {
         if (chunknumber >= chunkcount) return false;
-        int p = chunknumber * this.rowdef.objectsize + ((rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[rowdef.primaryKeyIndex]);
+        int p = chunknumber * this.rowdef.objectsize;
         int len = Math.min(this.rowdef.primaryKeyLength, Math.min(alength, a.length - astart));
         while (len-- != 0) {
             if (a[astart++] != chunkcache[p++]) return false;
@@ -967,7 +959,7 @@ public class RowCollection implements Iterable<Row.Entry> {
     public static void test(final int testsize) {
     	final Row r = new Row(new Column[]{
     			new Column("hash", Column.celltype_string, Column.encoder_bytes, 12, "hash")},
-    			Base64Order.enhancedCoder, 0);
+    			Base64Order.enhancedCoder);
     	
     	RowCollection a = new RowCollection(r, testsize);
     	a.add("AAAAAAAAAAAA".getBytes());

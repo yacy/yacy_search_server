@@ -52,10 +52,10 @@ public final class Row {
     public final int[]              colstart;
     public final ByteOrder          objectOrder;
     public final int                objectsize;
-    public final int                primaryKeyIndex, primaryKeyLength;
+    public final int                primaryKeyLength;
     protected Map<String, Object[]> nickref = null; // a mapping from nicknames to Object[2]{kelondroColumn, Integer(colstart)}
     
-    public Row(final Column[] row, final ByteOrder objectOrder, final int primaryKey) {
+    public Row(final Column[] row, final ByteOrder objectOrder) {
         assert objectOrder != null;
         this.objectOrder = objectOrder;
         this.row = row;
@@ -67,11 +67,10 @@ public final class Row {
             os+= this.row[i].cellwidth;
         }
         this.objectsize = os;
-        this.primaryKeyIndex = primaryKey;
-        this.primaryKeyLength = (primaryKey < 0) ? this.objectsize : row[primaryKeyIndex].cellwidth;
+        this.primaryKeyLength = row[0].cellwidth;
     }
 
-    public Row(String structure, final ByteOrder objectOrder, final int primaryKey) {
+    public Row(String structure, final ByteOrder objectOrder) {
         assert (objectOrder != null);
         this.objectOrder = objectOrder;
         // define row with row syntax
@@ -102,8 +101,7 @@ public final class Row {
             os += this.row[i].cellwidth;
         }
         this.objectsize = os;
-        this.primaryKeyIndex = primaryKey;
-        this.primaryKeyLength = (primaryKey < 0) ? this.objectsize : row[primaryKeyIndex].cellwidth;
+        this.primaryKeyLength = row[0].cellwidth;
     }
     
     public final ByteOrder getOrdering() {
@@ -119,11 +117,7 @@ public final class Row {
     public final int columns() {
         return this.row.length;
     }
-    /*
-    public final int objectsize() {
-        return this.objectsize;
-    }
-    */
+    
     public final Column column(final int col) {
         return row[col];
     }
@@ -567,7 +561,7 @@ public final class Row {
         
         public final byte[] getPrimaryKeyBytes() {
             final byte[] c = new byte[primaryKeyLength];
-            System.arraycopy(rowinstance, offset + ((primaryKeyIndex < 0) ? 0 : colstart[primaryKeyIndex]), c, 0, primaryKeyLength);
+            System.arraycopy(rowinstance, offset, c, 0, primaryKeyLength);
             return c;
         }
         

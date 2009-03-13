@@ -104,7 +104,7 @@ public class Supporter {
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);
             //accumulateVotes(negativeHashes, positiveHashes, yacyNewsPool.PUBLISHED_DB);
             final ScoreCluster<String> ranking = new ScoreCluster<String>(); // score cluster for url hashes
-            final Row rowdef = new Row("String url-255, String title-120, String description-120, String refid-" + (DateFormatter.PATTERN_SHORT_SECOND.length() + 12), NaturalOrder.naturalOrder, 0);
+            final Row rowdef = new Row("String url-255, String title-120, String description-120, String refid-" + (DateFormatter.PATTERN_SHORT_SECOND.length() + 12), NaturalOrder.naturalOrder);
             final HashMap<String, Entry> Supporter = new HashMap<String, Entry>(); // a mapping from an url hash to a kelondroRow.Entry with display properties
             accumulateSupporter(sb, Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.INCOMING_DB);
             //accumulateSupporter(Supporter, ranking, rowdef, negativeHashes, positiveHashes, yacyNewsPool.OUTGOING_DB);

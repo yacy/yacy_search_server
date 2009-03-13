@@ -269,7 +269,7 @@ public class IndexCollection implements Index {
             "int indexpos-4 {b256}," +
             "short lastread-2 {b256}, " +
             "short lastwrote-2 {b256}",
-            payloadOrder, 0
+            payloadOrder
             );
     }
     
@@ -486,9 +486,7 @@ public class IndexCollection implements Index {
         final Row rowdef = new Row(
                 "byte[] key-" + keylength + "," +
                 "byte[] collection-" + (RowCollection.exportOverheadSize + load * objectsize),
-                indexOrder,
-                0
-                );
+                indexOrder                );
         if ((!(f.exists())) && (!create)) return null;
         final FixedWidthArray a = new FixedWidthArray(f, rowdef, 0);
         Log.logFine("STARTUP", "opened array file " + f + " with " + a.size() + " RWIs");
@@ -1033,7 +1031,7 @@ public class IndexCollection implements Index {
     public static void main(final String[] args) {
 
         // define payload structure
-        final Row rowdef = new Row("byte[] a-10, byte[] b-80", NaturalOrder.naturalOrder, 0);
+        final Row rowdef = new Row("byte[] a-10, byte[] b-80", NaturalOrder.naturalOrder);
         
         final File path = new File(args[0]);
         final String filenameStub = args[1];

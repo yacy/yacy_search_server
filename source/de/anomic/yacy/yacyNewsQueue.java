@@ -66,7 +66,7 @@ public class yacyNewsQueue {
             new Column("newsid", Column.celltype_string, Column.encoder_bytes, yacyNewsRecord.idLength, "id = created + originator"),
             new Column("last touched", Column.celltype_string, Column.encoder_bytes, DateFormatter.PATTERN_SHORT_SECOND.length(), "")
         },
-        NaturalOrder.naturalOrder, 0
+        NaturalOrder.naturalOrder
     );
 
     public yacyNewsQueue(final File path, final yacyNewsDB newsDB) {

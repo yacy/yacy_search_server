@@ -61,11 +61,11 @@ public class plasmaRankingCRProcess {
             "Cardinal WACount-3 {b64e}, Cardinal WUCount-3 {b64e}, Cardinal Flags-1 {b64e}, " +
             "Cardinal FUDate-3 {b64e}, Cardinal FDDate-3 {b64e}, Cardinal LUDate-3 {b64e}, " + 
             "Cardinal UCount-2 {b64e}, Cardinal PCount-2 {b64e}, Cardinal ACount-2 {b64e}, Cardinal VCount-2 {b64e}, Cardinal Vita-2 {b64e}",
-            Base64Order.enhancedCoder, 0);
-    public static final Row CRG_colrow = new Row("byte[] Anchor-12", Base64Order.enhancedCoder, 0);
+            Base64Order.enhancedCoder);
+    public static final Row CRG_colrow = new Row("byte[] Anchor-12", Base64Order.enhancedCoder);
     public static final String CRG_accname = "CRG-a-attr";
     public static final String CRG_seqname = "CRG-a-coli";
-    public static final Row RCI_coli = new Row("byte[] RefereeDom-6", Base64Order.enhancedCoder, 0);
+    public static final Row RCI_coli = new Row("byte[] RefereeDom-6", Base64Order.enhancedCoder);
     public static final String RCI_colname = "RCI-a-coli";
 
     private static boolean accumulate_upd(final File f, final AttrSeq acc) {

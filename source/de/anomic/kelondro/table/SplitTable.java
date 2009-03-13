@@ -67,7 +67,7 @@ public class SplitTable implements ObjectIndex {
     // the table type can be either kelondroFlex or kelondroEco
 
     private static final int EcoFSBufferSize = 20;
-    static final ObjectIndex dummyIndex = new ObjectIndexCache(new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, 2, "key")}, NaturalOrder.naturalOrder, 0), 0, 0);
+    static final ObjectIndex dummyIndex = new ObjectIndexCache(new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, 2, "key")}, NaturalOrder.naturalOrder), 0, 0);
 
     // the thread pool for the keeperOf executor service
     private ExecutorService executor;

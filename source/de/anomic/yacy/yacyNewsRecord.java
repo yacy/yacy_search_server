@@ -81,7 +81,7 @@ public class yacyNewsRecord {
             "String rec-" + DateFormatter.PATTERN_SHORT_SECOND.length() + "," +
             "short  dis-2 {b64e}," +
             "String att-" + attributesMaxLength,
-            NaturalOrder.naturalOrder, 0
+            NaturalOrder.naturalOrder
     );
     
     public static yacyNewsRecord newRecord(final String newsString) {

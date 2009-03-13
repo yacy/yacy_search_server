@@ -62,7 +62,7 @@ public class Relations {
                 "long time-8" + keysize + ", " +
                 "int ttl-4" + keysize + ", " +
                 "byte[] node-" + payloadsize,
-                NaturalOrder.naturalOrder, 0);
+                NaturalOrder.naturalOrder);
     }
     
     private static String filename(final String tablename, final int keysize, final int payloadsize) {

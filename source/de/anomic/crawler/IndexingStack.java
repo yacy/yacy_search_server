@@ -72,8 +72,8 @@ public class IndexingStack {
             "Cardinal depth-2 {b64e}, " +                              // the prefetch depth so far, starts at 0
             "String profile-" + yacySeedDB.commonHashLength + ", " +   // the name of the prefetch profile handle
             "String urldescr-80",
-            NaturalOrder.naturalOrder,
-            0);
+            NaturalOrder.naturalOrder
+    );
 
     public int size() {
         return (sbQueueStack == null) ? 0 : sbQueueStack.size();

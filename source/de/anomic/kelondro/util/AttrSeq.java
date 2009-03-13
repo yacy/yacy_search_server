@@ -316,7 +316,7 @@ public class AttrSeq {
                 rowdef.append('-');
                 rowdef.append(seq_len[i]);
             }
-            seqrow = new Row(new String(rowdef), null, 0);
+            seqrow = new Row(new String(rowdef), null);
         }
         
         public String toString() {

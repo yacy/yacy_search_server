@@ -350,8 +350,7 @@ public class ReferenceContainer extends RowSet {
         final int keylength = i1.rowdef.width(0);
         assert (keylength == i2.rowdef.width(0));
         final ReferenceContainer conj = new ReferenceContainer(null, i1.rowdef, 0); // start with empty search result
-        if (!((i1.rowdef.getOrdering().signature().equals(i2.rowdef.getOrdering().signature())) &&
-              (i1.rowdef.primaryKeyIndex == i2.rowdef.primaryKeyIndex))) return conj; // ordering must be equal
+        if (!((i1.rowdef.getOrdering().signature().equals(i2.rowdef.getOrdering().signature())))) return conj; // ordering must be equal
         final Iterator<ReferenceRow> e1 = i1.entries();
         final Iterator<ReferenceRow> e2 = i2.entries();
         int c;
@@ -424,8 +423,7 @@ public class ReferenceContainer extends RowSet {
         assert pivot.rowdef.equals(excl.rowdef) : "i1 = " + pivot.rowdef.toString() + "; i2 = " + excl.rowdef.toString();
         final int keylength = pivot.rowdef.width(0);
         assert (keylength == excl.rowdef.width(0));
-        if (!((pivot.rowdef.getOrdering().signature().equals(excl.rowdef.getOrdering().signature())) &&
-              (pivot.rowdef.primaryKeyIndex == excl.rowdef.primaryKeyIndex))) return pivot; // ordering must be equal
+        if (!((pivot.rowdef.getOrdering().signature().equals(excl.rowdef.getOrdering().signature())))) return pivot; // ordering must be equal
         final Iterator<ReferenceRow> e1 = pivot.entries();
         final Iterator<ReferenceRow> e2 = excl.entries();
         int c;

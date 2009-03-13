@@ -53,8 +53,8 @@ public class ZURL {
             "Cardinal workcount-4 {b256}, " +                          // number of load retries
             "String anycause-132, " +                                   // string describing load failure
             "byte[] entry-" + CrawlEntry.rowdef.objectsize,                                          // extra space
-            Base64Order.enhancedCoder,
-            0);
+            Base64Order.enhancedCoder
+    );
 
     // the class object
     private final ObjectIndex urlIndex;

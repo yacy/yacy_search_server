@@ -116,7 +116,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
             sort();
         }
-        int index = find(entry.bytes(), (rowdef.primaryKeyIndex < 0) ? 0 :super.rowdef.colstart[rowdef.primaryKeyIndex], super.rowdef.primaryKeyLength);
+        int index = find(entry.bytes(), 0, super.rowdef.primaryKeyLength);
         if (index < 0) {
             super.addUnique(entry);
         } else {
@@ -135,7 +135,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
             sort();
         }
-        index = find(entry.bytes(), (rowdef.primaryKeyIndex < 0) ? 0 :super.rowdef.colstart[rowdef.primaryKeyIndex], super.rowdef.primaryKeyLength);
+        index = find(entry.bytes(), 0, super.rowdef.primaryKeyLength);
         if (index < 0) {
             super.addUnique(entry);
         } else {
@@ -488,7 +488,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         */
         
         final String[] test = { "eins", "zwei", "drei", "vier", "fuenf", "sechs", "sieben", "acht", "neun", "zehn" };
-        final RowSet d = new RowSet(new Row("byte[] key-10, Cardinal x-4 {b256}", NaturalOrder.naturalOrder, 0), 0);
+        final RowSet d = new RowSet(new Row("byte[] key-10, Cardinal x-4 {b256}", NaturalOrder.naturalOrder), 0);
         for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());
         for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());
         d.sort();
@@ -575,7 +575,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         
         // remove test
         final long start = System.currentTimeMillis();
-        final RowSet c = new RowSet(new Row("byte[] a-12, byte[] b-12", Base64Order.enhancedCoder, 0), 0);
+        final RowSet c = new RowSet(new Row("byte[] a-12, byte[] b-12", Base64Order.enhancedCoder), 0);
         byte[] key;
         final int testsize = 5000;
         final byte[][] delkeys = new byte[testsize / 5][];

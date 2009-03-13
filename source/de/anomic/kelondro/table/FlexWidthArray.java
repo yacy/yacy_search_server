@@ -128,7 +128,7 @@ public class FlexWidthArray implements ObjectArray {
                 
                 final Column columns[] = new Column[colend - colstart + 1];
                 for (int j = colstart; j <= colend; j++) columns[j-colstart] = rowdef.column(j);
-                col[colstart] = new FixedWidthArray(new File(tabledir, files[i]), new Row(columns, (colstart == 0) ? rowdef.objectOrder : NaturalOrder.naturalOrder, 0), 16);
+                col[colstart] = new FixedWidthArray(new File(tabledir, files[i]), new Row(columns, (colstart == 0) ? rowdef.objectOrder : NaturalOrder.naturalOrder), 16);
                 for (int j = colstart; j <= colend; j++) check = check.substring(0, j) + "X" + check.substring(j + 1);
             }
         }
@@ -147,7 +147,7 @@ public class FlexWidthArray implements ObjectArray {
                 columns[j - p] = rowdef.column(j);
                 check = check.substring(0, j) + "X" + check.substring(j + 1);
             }
-            col[p] = new FixedWidthArray(new File(tabledir, colfilename(p, q)), new Row(columns, (p == 0) ? rowdef.objectOrder : NaturalOrder.naturalOrder, 0), 16);
+            col[p] = new FixedWidthArray(new File(tabledir, colfilename(p, q)), new Row(columns, (p == 0) ? rowdef.objectOrder : NaturalOrder.naturalOrder), 16);
         }
     }
     
@@ -374,7 +374,7 @@ public class FlexWidthArray implements ObjectArray {
     public static void main(final String[] args) {
         //File f = new File("d:\\\\mc\\privat\\fixtest.db");
         final File f = new File("/Users/admin/");
-        final Row rowdef = new Row("byte[] a-12, byte[] b-4", NaturalOrder.naturalOrder, 0);
+        final Row rowdef = new Row("byte[] a-12, byte[] b-4", NaturalOrder.naturalOrder);
         final String testname = "flextest";
         try {
             System.out.println("erster Test");

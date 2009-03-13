@@ -59,9 +59,9 @@ public final class ReferenceRow implements Reference, Cloneable {
             new Column("o", Column.celltype_cardinal,  Column.encoder_b256,  1, "posofphrase"),
             new Column("i", Column.celltype_cardinal,  Column.encoder_b256,  1, "worddistance"),
             new Column("k", Column.celltype_cardinal,  Column.encoder_b256,  1, "reserve")
-    },
-    Base64Order.enhancedCoder,
-    0);
+        },
+        Base64Order.enhancedCoder
+    );
     // available chars: b,e,j,q
     
     // static properties

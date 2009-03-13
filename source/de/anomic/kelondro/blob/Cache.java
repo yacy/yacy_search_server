@@ -76,7 +76,7 @@ public class Cache implements ObjectIndex {
     }
     
     private void init() {
-        this.keyrow = new Row(new Column[]{index.row().column(index.row().primaryKeyIndex)}, index.row().objectOrder, 0);
+        this.keyrow = new Row(new Column[]{index.row().column(0)}, index.row().objectOrder);
         this.readHitCache = new RowSet(index.row(), 0);
         this.readMissCache = new RowSet(this.keyrow, 0);
         this.readHit = 0;

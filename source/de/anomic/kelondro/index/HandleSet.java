@@ -43,7 +43,7 @@ public class HandleSet implements Iterable<byte[]> {
     private ObjectIndex index;
     
     public HandleSet(final int keylength, final ByteOrder objectOrder, final int initialspace, final int expectedspace) {
-        this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key")}, objectOrder, 0);
+        this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key")}, objectOrder);
         this.index = new ObjectIndexCache(rowdef, initialspace, expectedspace);
     }
 

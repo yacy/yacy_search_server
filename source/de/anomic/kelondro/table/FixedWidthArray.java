@@ -168,7 +168,7 @@ public class FixedWidthArray extends FullRecords implements ObjectArray {
     public static void main(final String[] args) {
         //File f = new File("d:\\\\mc\\privat\\fixtest.db");
         final File f = new File("/Users/admin/fixtest.db");
-        final Row rowdef = new Row("byte[] a-12, byte[] b-4", NaturalOrder.naturalOrder, 0);
+        final Row rowdef = new Row("byte[] a-12, byte[] b-4", NaturalOrder.naturalOrder);
         try {
             System.out.println("erster Test");
             f.delete();

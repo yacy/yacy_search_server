@@ -42,9 +42,7 @@ public class URLFetcherStack {
     
     private static final Row rowdef = new Row(
             "String urlstring-256",
-            Base64Order.enhancedCoder,
-            0
-    );
+            Base64Order.enhancedCoder    );
     private final Stack db;
     private final Log log;
     

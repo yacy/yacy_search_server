@@ -71,8 +71,8 @@ public class MetadataRowContainer {
         "Cardinal laudio-2 {b256}, " +  // # of embedded audio links; for audio: track number; for video: number of audio tracks
         "Cardinal lvideo-2 {b256}, " +  // # of embedded video links
         "Cardinal lapp-2 {b256}",       // # of embedded links to applications
-        Base64Order.enhancedCoder,
-        0);      
+        Base64Order.enhancedCoder
+    );      
     
     /* ===========================================================================
      * Constants to access the various columns of an URL entry

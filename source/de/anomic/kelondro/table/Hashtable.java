@@ -162,7 +162,7 @@ public class Hashtable {
         final Column[] newCol = new Column[rowdef.columns() + 1];
         newCol[0] = new Column("Cardinal key-4 {b256}");
         for (int i = 0; i < rowdef.columns(); i++) newCol[i + 1] = rowdef.column(i);
-        return new Row(newCol, rowdef.objectOrder, rowdef.primaryKeyIndex);
+        return new Row(newCol, rowdef.objectOrder);
     } 
     
     public static int power2(int x) {

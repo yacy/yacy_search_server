@@ -47,7 +47,7 @@ public class Balancer {
     private static final int EcoFSBufferSize = 200;
 
     // definition of payload for fileStack
-    private static final Row stackrow = new Row("byte[] urlhash-" + yacySeedDB.commonHashLength, Base64Order.enhancedCoder, 0);
+    private static final Row stackrow = new Row("byte[] urlhash-" + yacySeedDB.commonHashLength, Base64Order.enhancedCoder);
     
     // class variables
     private final ConcurrentHashMap<String, LinkedList<String>>

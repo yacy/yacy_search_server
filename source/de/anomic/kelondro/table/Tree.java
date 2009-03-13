@@ -1280,7 +1280,7 @@ public class Tree extends CachedRecords implements ObjectIndex {
                     // test script
                     final File testFile = new File("test.db");
                     while (testFile.exists()) testFile.delete();
-                    final Tree fm = new Tree(testFile, true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder, 0));
+                    final Tree fm = new Tree(testFile, true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder));
                     final byte[] dummy = "".getBytes();
                     fm.put("abc0".getBytes(), dummy); fm.put("bcd0".getBytes(), dummy);
                     fm.put("def0".getBytes(), dummy); fm.put("bab0".getBytes(), dummy);
@@ -1302,7 +1302,7 @@ public class Tree extends CachedRecords implements ObjectIndex {
 		    ret = null;
 		}
 	    } else if (args.length == 2) {
-		final Tree fm = new Tree(new File(args[1]), true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder, 0));
+		final Tree fm = new Tree(new File(args[1]), true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder));
 		if (args[0].equals("-v")) {
 		    fm.print();
 		    ret = null;
@@ -1310,11 +1310,11 @@ public class Tree extends CachedRecords implements ObjectIndex {
 		fm.close();
 	    } else if (args.length == 3) {
 		if (args[0].equals("-d")) {
-		    final Tree fm = new Tree(new File(args[1]), true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder, 0));
+		    final Tree fm = new Tree(new File(args[1]), true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder));
 		    fm.remove(args[2].getBytes());
 		    fm.close();
 		} else if (args[0].equals("-i")) {
-		    final Tree fm = new Tree(new File(args[1]), true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder, 0));
+		    final Tree fm = new Tree(new File(args[1]), true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder));
 		    final int i = fm.imp(new File(args[1]),";");
 		    fm.close();
 		    ret = (i + " records imported").getBytes();
@@ -1337,12 +1337,12 @@ public class Tree extends CachedRecords implements ObjectIndex {
                 if (f != null) try {f.close();}catch(final Exception e){}
             }
 		} else if (args[0].equals("-g")) {
-		    final Tree fm = new Tree(new File(args[1]), true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder, 0));
+		    final Tree fm = new Tree(new File(args[1]), true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder));
 		    final Row.Entry ret2 = fm.get(args[2].getBytes());
 		    ret = ((ret2 == null) ? null : ret2.getColBytes(1)); 
 		    fm.close();
 		} else if (args[0].equals("-n")) {
-		    final Tree fm = new Tree(new File(args[1]), true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder, 0));
+		    final Tree fm = new Tree(new File(args[1]), true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder));
 		    //byte[][] keys = fm.getSequentialKeys(args[2].getBytes(), 500, true);
                     final Iterator<Row.Entry> rowIt = fm.rows(true, (args[2].length() == 0) ? null : args[2].getBytes());
                     final Vector<String> v = new Vector<String>();
@@ -1355,11 +1355,11 @@ public class Tree extends CachedRecords implements ObjectIndex {
 		    // create <keylen> <valuelen> <filename>
 		    final File f = new File(args[3]);
 		    if (f.exists()) f.delete();
-            final Row lens = new Row("byte[] key-" + Integer.parseInt(args[1]) + ", byte[] value-" + Integer.parseInt(args[2]), NaturalOrder.naturalOrder, 0);
+            final Row lens = new Row("byte[] key-" + Integer.parseInt(args[1]) + ", byte[] value-" + Integer.parseInt(args[2]), NaturalOrder.naturalOrder);
 		    final Tree fm = new Tree(f, true, 10, lens);
 		    fm.close();
 		} else if (args[0].equals("-u")) {
-		    final Tree fm = new Tree(new File(args[1]), true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder, 0));
+		    final Tree fm = new Tree(new File(args[1]), true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder));
 		    ret = fm.put(args[1].getBytes(), args[2].getBytes());
 		    fm.close();
 		}
@@ -1418,7 +1418,7 @@ public class Tree extends CachedRecords implements ObjectIndex {
             int steps = 0;
             while (true) {
                 if (testFile.exists()) testFile.delete();
-                tt = new Tree(testFile, true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder, 0));
+                tt = new Tree(testFile, true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder));
                 steps = 10 + ((int) System.currentTimeMillis() % 7) * (((int) System.currentTimeMillis() + 17) % 11);
                 t = s;
                 d = "";
@@ -1484,7 +1484,7 @@ public class Tree extends CachedRecords implements ObjectIndex {
         final File f = new File("test.db");
         if (f.exists()) f.delete();
         try {
-            final Tree tt = new Tree(f, true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder, 0));
+            final Tree tt = new Tree(f, true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder));
             byte[] b;
             b = testWord('B'); tt.put(b, b); //tt.print();
             b = testWord('C'); tt.put(b, b); //tt.print();
@@ -1549,7 +1549,7 @@ public class Tree extends CachedRecords implements ObjectIndex {
     
     public static Tree testTree(final File f, final String testentities) throws IOException {
         if (f.exists()) f.delete();
-        final Tree tt = new Tree(f, false, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder, 0));
+        final Tree tt = new Tree(f, false, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder));
         byte[] b;
         for (int i = 0; i < testentities.length(); i++) {
             b = testWord(testentities.charAt(i));

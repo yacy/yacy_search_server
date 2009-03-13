@@ -458,7 +458,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
         // open a file, add one entry and exit
         final File f = new File(args[0]);
         final String name = args[1];
-        final Row row = new Row("Cardinal key-4 {b256}, byte[] x-64", NaturalOrder.naturalOrder, 0);
+        final Row row = new Row("Cardinal key-4 {b256}, byte[] x-64", NaturalOrder.naturalOrder);
         try {
             final FlexTable t = new FlexTable(f, name, row, 0, true);
             final Row.Entry entry = row.newEntry();

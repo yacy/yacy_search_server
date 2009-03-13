@@ -59,9 +59,8 @@ public class CrawlEntry extends serverProcessorJob {
         "Cardinal loaddate-8 {b256}," +                             // time when the file was loaded
         "Cardinal serverdate-8 {b256}," +                           // time when that the server returned as document date
         "Cardinal modifiedSince-8 {b256}",                          // time that was given to server as ifModifiedSince
-        Base64Order.enhancedCoder,
-        0
-        );
+        Base64Order.enhancedCoder
+    );
     
     // a shared domainAccess map for all balancers. the key is a domain-hash (6 bytes)
     public static final ConcurrentHashMap<String, domaccess> domainAccess = new ConcurrentHashMap<String, domaccess>();

@@ -88,13 +88,12 @@ public class EcoTable implements ObjectIndex {
         this.rowdef = rowdef;
         this.buffersize = buffersize;
         //this.fail = 0;
-        assert rowdef.primaryKeyIndex == 0;
         // define the taildef, a row like the rowdef but without the first column
         final Column[] cols = new Column[rowdef.columns() - 1];
         for (int i = 0; i < cols.length; i++) {
             cols[i] = rowdef.column(i + 1);
         }
-        this.taildef = new Row(cols, NaturalOrder.naturalOrder, -1);
+        this.taildef = new Row(cols, NaturalOrder.naturalOrder);
         
         // initialize table file
         boolean freshFile = false;
@@ -696,7 +695,7 @@ public class EcoTable implements ObjectIndex {
     
     public static ObjectIndex testTable(final File f, final String testentities, final int testcase) throws IOException {
         if (f.exists()) f.delete();
-        final Row rowdef = new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder, 0);
+        final Row rowdef = new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder);
         final ObjectIndex tt = new EcoTable(f, rowdef, testcase, 100, 0);
         byte[] b;
         final Row.Entry row = rowdef.newEntry();

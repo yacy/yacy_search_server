@@ -284,7 +284,7 @@ public class dbtest {
             profiler.start();
             
             // create the database access
-            final Row testRow = new Row("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength, Base64Order.enhancedCoder, 0);
+            final Row testRow = new Row("byte[] key-" + keylength + ", byte[] dummy-" + keylength + ", value-" + valuelength, Base64Order.enhancedCoder);
             final ObjectIndex table_test = selectTableType(dbe_test, tablename_test, testRow);
             final ObjectIndex table_reference = (dbe_reference == null) ? null : selectTableType(dbe_reference, tablename_reference, testRow);
             

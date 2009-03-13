@@ -77,7 +77,7 @@ public class BLOBTree implements BLOB {
     public BLOBTree(final File file, final boolean useNodeCache, final boolean useObjectCache, final int key,
             final int nodesize, final char fillChar, final ByteOrder objectOrder, final boolean usetree, final boolean writebuffer, final boolean resetOnFail) {
         // creates or opens a dynamic tree
-        rowdef = new Row("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize, objectOrder, 0);
+        rowdef = new Row("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize, objectOrder);
         this.file = file;
         ObjectIndex fbi;
         if (usetree) {

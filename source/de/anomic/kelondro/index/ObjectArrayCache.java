@@ -46,7 +46,7 @@ public class ObjectArrayCache {
     //private final kelondroOrder<kelondroRow.Entry> entryOrder;
     
     public ObjectArrayCache(final int payloadSize, final int initSize) {
-    	this.rowdef = new Row("Cardinal key-4 {b256}, byte[] payload-" + payloadSize, NaturalOrder.naturalOrder, 0);
+    	this.rowdef = new Row("Cardinal key-4 {b256}, byte[] payload-" + payloadSize, NaturalOrder.naturalOrder);
     	this.index0 = new RowSet(rowdef, initSize);
     	this.index1 = null;
         //this.entryOrder = new kelondroRow.EntryComparator(rowdef.objectOrder);
