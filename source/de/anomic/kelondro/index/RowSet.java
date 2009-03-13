@@ -202,7 +202,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
             if (p >= 0) return p;
             
             // then find in unsorted area
-            return iterativeSearchCompiledPivot(compiledPivot, this.sortBound, this.chunkcount);
+            return iterativeSearch(a, astart, alength, this.sortBound, this.chunkcount);
         } else {
             // first try to find in sorted area
             final int p = binarySearch(a, astart, alength);
@@ -215,25 +215,8 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
     
     private int iterativeSearch(final byte[] key, final int astart, final int alength, final int leftBorder, final int rightBound) {
         // returns the chunknumber        
-        if (rowdef.objectOrder == null) {
-            for (int i = leftBorder; i < rightBound; i++) {
-                if (match(key, astart, alength, i)) return i;
-            }
-            return -1;
-        }
-        // we dont do a special handling of kelondroBase64Order here, because tests showed that this produces too much overhead
         for (int i = leftBorder; i < rightBound; i++) {
-            if (compare(key, astart, alength, i) == 0) return i;
-        }
-        return -1;
-    }
-    
-    private int iterativeSearchCompiledPivot(final byte[] compiledPivot, final int leftBorder, final int rightBound) {
-        // returns the chunknumber
-        assert (rowdef.objectOrder != null);
-        assert (rowdef.objectOrder instanceof Base64Order);
-        for (int i = leftBorder; i < rightBound; i++) {
-            if (comparePivot(compiledPivot, i) == 0) return i;
+            if (match(key, astart, alength, i)) return i;
         }
         return -1;
     }

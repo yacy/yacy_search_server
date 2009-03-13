@@ -780,13 +780,13 @@ public class RowCollection implements Iterable<Row.Entry> {
         boolean u = true;
         try {
             while (i >= 0) {
-                if (compare(i, i + 1) == 0) {
+                if (match(i, i + 1)) {
                     removeRow(i + 1, false);
                     d++;
                     if (i + 1 < chunkcount - 1) u = false;
                 }
                 i--;
-                if (System.currentTimeMillis() - t > 10000) {
+                if (System.currentTimeMillis() - t > 60000) {
                     throw new RuntimeException("uniq() time-out at " + i + " (backwards) from " + chunkcount + " elements after " + (System.currentTimeMillis() - t) + " milliseconds; " + d + " deletions so far");
                 }
             }
@@ -811,7 +811,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         RowCollection collection = new RowCollection(this.rowdef, 2);
         try {
             while (i >= 0) {
-                if (compare(i, i + 1) == 0) {
+                if (match(i, i + 1)) {
                     collection.addUnique(get(i + 1, false));
                     removeRow(i + 1, false);
                     d++;
@@ -919,13 +919,32 @@ public class RowCollection implements Iterable<Row.Entry> {
         return rowdef.objectOrder.compare(a, astart, l, chunkcache, chunknumber * this.rowdef.objectsize + ((rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[rowdef.primaryKeyIndex]), this.rowdef.primaryKeyLength);
     }
     
-    protected synchronized boolean match(final byte[] a, final int astart, final int alength, final int chunknumber) {
+    protected final boolean match(final int i, final int j) {
+        assert (chunkcount * this.rowdef.objectsize <= chunkcache.length) : "chunkcount = " + chunkcount + ", objsize = " + this.rowdef.objectsize + ", chunkcache.length = " + chunkcache.length;
+        assert (i >= 0) && (i < chunkcount) : "i = " + i + ", chunkcount = " + chunkcount;
+        assert (j >= 0) && (j < chunkcount) : "j = " + j + ", chunkcount = " + chunkcount;
+        if (i >= chunkcount) return false;
+        if (j >= chunkcount) return false;
+        assert (this.rowdef.objectOrder != null);
+        if (i == j) return true;
+        final int colstart = (this.rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[this.rowdef.primaryKeyIndex];
+        int astart = i * this.rowdef.objectsize + colstart;
+        int bstart = j * this.rowdef.objectsize + colstart;
+        int k = this.rowdef.primaryKeyLength;
+        while (k-- != 0) {
+            if (chunkcache[astart++] != chunkcache[bstart++]) return false;
+        }
+        return true;
+    }
+    
+    protected synchronized boolean match(final byte[] a, int astart, final int alength, final int chunknumber) {
         if (chunknumber >= chunkcount) return false;
-        int i = 0;
         int p = chunknumber * this.rowdef.objectsize + ((rowdef.primaryKeyIndex <= 0) ? 0 : this.rowdef.colstart[rowdef.primaryKeyIndex]);
-        final int len = Math.min(this.rowdef.primaryKeyLength, Math.min(alength, a.length - astart));
-        while (i < len) if (a[astart + i++] != chunkcache[p++]) return false;
-        return ((len == this.rowdef.primaryKeyLength) || (chunkcache[len] == 0)) ;
+        int len = Math.min(this.rowdef.primaryKeyLength, Math.min(alength, a.length - astart));
+        while (len-- != 0) {
+            if (a[astart++] != chunkcache[p++]) return false;
+        }
+        return true;
     }
 
     public synchronized void close() {
