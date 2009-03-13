@@ -124,7 +124,7 @@ public class IndexControlRWIs_p {
                 if (delurl || delurlref) {
                     // generate an urlx array
                     ReferenceContainer index = null;
-                    index = sb.webIndex.getReferences(keyhash, null);
+                    index = sb.webIndex.index().getReferences(keyhash, null);
                     final Iterator<ReferenceRow> en = index.entries();
                     int i = 0;
                     urlx = new String[index.size()];
@@ -141,7 +141,7 @@ public class IndexControlRWIs_p {
                         sb.urlRemove(urlx[i]);
                     }
                 }
-                sb.webIndex.deleteAllReferences(keyhash);
+                sb.webIndex.index().deleteAllReferences(keyhash);
                 post.remove("keyhashdeleteall");
                 post.put("urllist", "generated");
             }
@@ -158,7 +158,7 @@ public class IndexControlRWIs_p {
                 }
                 final Set<String> urlHashes = new HashSet<String>();
                 for (int i = 0; i < urlx.length; i++) urlHashes.add(urlx[i]);
-                sb.webIndex.removeReferences(keyhash, urlHashes);
+                sb.webIndex.index().removeReferences(keyhash, urlHashes);
                 // this shall lead to a presentation of the list; so handle that the remaining program
                 // thinks that it was called for a list presentation
                 post.remove("keyhashdelete");
@@ -200,7 +200,7 @@ public class IndexControlRWIs_p {
                 // prepare index
                 ReferenceContainer index;
                 final long starttime = System.currentTimeMillis();
-                index = sb.webIndex.getReferences(keyhash, null);
+                index = sb.webIndex.index().getReferences(keyhash, null);
                 // built urlCache
                 final Iterator<ReferenceRow> urlIter = index.entries();
                 final HashMap<String, MetadataRowContainer> knownURLs = new HashMap<String, MetadataRowContainer>();
@@ -237,7 +237,7 @@ public class IndexControlRWIs_p {
     
             // generate list
             if (post.containsKey("keyhashsimilar")) {
-                final Iterator<ReferenceContainer> containerIt = sb.webIndex.indexContainerSet(keyhash, false, true, 256).iterator();
+                final Iterator<ReferenceContainer> containerIt = sb.webIndex.index().indexContainerSet(keyhash, false, true, 256).iterator();
                     ReferenceContainer container;
                     int i = 0;
                     int rows = 0, cols = 0;
@@ -315,7 +315,7 @@ public class IndexControlRWIs_p {
                     } catch (final IOException e) {
                     }
                 }
-                sb.webIndex.removeReferences(keyhash, urlHashes);
+                sb.webIndex.index().removeReferences(keyhash, urlHashes);
             }
         
             if (prop.getInt("searchresult", 0) == 3) plasmaSearchAPI.listHosts(prop, keyhash, sb);
@@ -323,7 +323,7 @@ public class IndexControlRWIs_p {
         
 
         // insert constants
-        prop.putNum("wcount", sb.webIndex.size());
+        prop.putNum("wcount", sb.webIndex.index().size());
         // return rewrite properties
         return prop;
     }

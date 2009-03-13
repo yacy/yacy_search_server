@@ -106,7 +106,7 @@ public final class IndexImport_p {
             }
         }
         
-        prop.putNum("wcount", switchboard.webIndex.size());
+        prop.putNum("wcount", switchboard.webIndex.index().size());
         prop.putNum("ucount", switchboard.webIndex.metadata().size());
         
         /*

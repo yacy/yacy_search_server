@@ -36,7 +36,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
     	super("PLASMADB");
         this.homeWordIndex = homeWI;
         this.importWordIndex = importWI;
-        this.importStartSize = this.importWordIndex.size();
+        this.importStartSize = this.importWordIndex.index().size();
     }
 
     /**
@@ -93,15 +93,15 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
         
         try {
             this.log.logInfo("Importing DB from '" + this.importWordIndex.getLocation(true).getAbsolutePath() + "'");
-            this.log.logInfo("Home word index contains " + homeWordIndex.size() + " words and " + homeWordIndex.metadata().size() + " URLs.");
-            this.log.logInfo("Import word index contains " + this.importWordIndex.size() + " words and " + this.importWordIndex.metadata().size() + " URLs.");                        
+            this.log.logInfo("Home word index contains " + homeWordIndex.index().size() + " words and " + homeWordIndex.metadata().size() + " URLs.");
+            this.log.logInfo("Import word index contains " + this.importWordIndex.index().size() + " words and " + this.importWordIndex.metadata().size() + " URLs.");                        
             
             final HashSet<String> unknownUrlBuffer = new HashSet<String>();
             final HashSet<String> importedUrlBuffer = new HashSet<String>();
 			
             // iterate over all words from import db
             //Iterator importWordHashIterator = this.importWordIndex.wordHashes(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
-            Iterator<ReferenceContainer> indexContainerIterator = this.importWordIndex.indexContainerSet(this.wordChunkStartHash, false, false, 100).iterator();
+            Iterator<ReferenceContainer> indexContainerIterator = this.importWordIndex.index().indexContainerSet(this.wordChunkStartHash, false, false, 100).iterator();
             while (!isAborted() && indexContainerIterator.hasNext()) {
                 
                 final TreeSet<String> entityUrls = new TreeSet<String>();
@@ -169,10 +169,10 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                     if (isAborted()) break;
                     
                     // importing entity container to home db
-                    if (newContainer.size() > 0) { homeWordIndex.addReferences(newContainer); }
+                    if (newContainer.size() > 0) { homeWordIndex.index().addReferences(newContainer); }
                     
                     // delete complete index entity file
-                    this.importWordIndex.deleteAllReferences(this.wordHash);                 
+                    this.importWordIndex.index().deleteAllReferences(this.wordHash);                 
                     
                     // print out some statistical information
                     if (this.entryCounter % 500 == 0) {
@@ -189,8 +189,8 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                                 "Speed: "+ 500*1000/duration + " word entities/s" +
                                 " | Elapsed time: " + DateFormatter.formatInterval(getElapsedTime()) +
                                 " | Estimated time: " + DateFormatter.formatInterval(getEstimatedTime()) + "\n" + 
-                                "Home Words = " + homeWordIndex.size() + 
-                                " | Import Words = " + this.importWordIndex.size());
+                                "Home Words = " + homeWordIndex.index().size() + 
+                                " | Import Words = " + this.importWordIndex.index().size());
                         this.wordChunkStart = this.wordChunkEnd;
                         this.wordChunkStartHash = this.wordChunkEndHash;
                     }                    
@@ -203,7 +203,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
 
                 if (!indexContainerIterator.hasNext()) {
                     // We may not be finished yet, try to get the next chunk of wordHashes
-                    final TreeSet<ReferenceContainer> containers = this.importWordIndex.indexContainerSet(this.wordHash, false, false, 100);
+                    final TreeSet<ReferenceContainer> containers = this.importWordIndex.index().indexContainerSet(this.wordHash, false, false, 100);
                     indexContainerIterator = containers.iterator();
                     // Make sure we don't get the same wordhash twice, but don't skip a word
                     if ((indexContainerIterator.hasNext())&&(!this.wordHash.equals((indexContainerIterator.next()).getWordHash()))) {
@@ -212,8 +212,8 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                 }
             }
             
-            this.log.logInfo("Home word index contains " + homeWordIndex.size() + " words and " + homeWordIndex.metadata().size() + " URLs.");
-            this.log.logInfo("Import word index contains " + this.importWordIndex.size() + " words and " + this.importWordIndex.metadata().size() + " URLs.");
+            this.log.logInfo("Home word index contains " + homeWordIndex.index().size() + " words and " + homeWordIndex.metadata().size() + " URLs.");
+            this.log.logInfo("Import word index contains " + this.importWordIndex.index().size() + " words and " + this.importWordIndex.metadata().size() + " URLs.");
         } catch (final Exception e) {
             this.log.logSevere("Database import failed.",e);
             e.printStackTrace();

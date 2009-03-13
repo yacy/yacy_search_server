@@ -38,7 +38,6 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.ByteBuffer;
-import de.anomic.plasma.plasmaWordIndex;
 
 public class ReferenceContainer extends RowSet {
 
@@ -229,11 +228,11 @@ public class ReferenceContainer extends RowSet {
         // join a search result and return the joincount (number of pages after join)
 
         // since this is a conjunction we return an empty entity if any word is not known
-        if (includeContainers == null) return plasmaWordIndex.emptyContainer(null, 0);
+        if (includeContainers == null) return CachedIndexCollection.emptyContainer(null, 0);
 
         // join the result
         final ReferenceContainer rcLocal = ReferenceContainer.joinContainers(includeContainers, maxDistance);
-        if (rcLocal == null) return plasmaWordIndex.emptyContainer(null, 0);
+        if (rcLocal == null) return CachedIndexCollection.emptyContainer(null, 0);
         excludeContainers(rcLocal, excludeContainers);
         
         return rcLocal;

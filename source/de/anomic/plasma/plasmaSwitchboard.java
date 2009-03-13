@@ -329,7 +329,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // init a DHT transmission dispatcher
         this.dhtDispatcher = new Dispatcher(
-                webIndex,
+                webIndex.index(),
                 webIndex.metadata(),
                 webIndex.peers(),
                 true, 
@@ -1119,12 +1119,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     }
     
     public int rwiCacheSize() {
-    	return webIndex.cacheSize();
+    	return webIndex.index().cacheSize();
     }
     
     public boolean rwiCacheFlush() {
     	if (rwiCacheSize() == 0) return false;
-    	webIndex.flushCacheFor((int) ((this.getConfigLong(plasmaSwitchboardConstants.CACHEFLUSH_BUSYSLEEP, 10000) * this.getConfigLong("performanceIO", 10)) / 100));
+    	webIndex.index().flushCacheFor((int) ((this.getConfigLong(plasmaSwitchboardConstants.CACHEFLUSH_BUSYSLEEP, 10000) * this.getConfigLong("performanceIO", 10)) / 100));
     	return true;
     }
     
@@ -1143,7 +1143,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public void deQueueFreeMem() {
         // flush some entries from the RAM cache
-        webIndex.flushCacheFor(5000);
+        webIndex.index().flushCacheFor(5000);
         // empty some caches
         webIndex.metadata().clearCache();
         plasmaSearchEvent.cleanupEvents(true);
@@ -1772,7 +1772,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 
                 // delete all word references
                 int count = 0;
-                if (words != null) count = webIndex.removeWordReferences(words, urlhash);
+                if (words != null) count = webIndex.index().removeWordReferences(words, urlhash);
                 
                 // finally delete the url entry itself
                 webIndex.metadata().remove(urlhash);
@@ -1889,8 +1889,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (webIndex.metadata().size() < 10) {
             return "no DHT distribution: loadedURL.size() = " + webIndex.metadata().size();
         }
-        if (webIndex.size() < 100) {
-            return "no DHT distribution: not enough words - wordIndex.size() = " + webIndex.size();
+        if (webIndex.index().size() < 100) {
+            return "no DHT distribution: not enough words - wordIndex.size() = " + webIndex.index().size();
         }
         if ((getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) && (crawlQueues.noticeURL.notEmpty())) {
             return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + webIndex.queuePreStack.size();
@@ -1992,7 +1992,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         webIndex.peers().mySeed().put(yacySeed.LCOUNT, Integer.toString(webIndex.metadata().size())); // the number of links that the peer has stored (LURL's)
         webIndex.peers().mySeed().put(yacySeed.NCOUNT, Integer.toString(crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
         webIndex.peers().mySeed().put(yacySeed.RCOUNT, Integer.toString(crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
-        webIndex.peers().mySeed().put(yacySeed.ICOUNT, Integer.toString(webIndex.size())); // the minimum number of words that the peer has indexed (as it says)
+        webIndex.peers().mySeed().put(yacySeed.ICOUNT, Integer.toString(webIndex.index().size())); // the minimum number of words that the peer has indexed (as it says)
         webIndex.peers().mySeed().put(yacySeed.SCOUNT, Integer.toString(webIndex.peers().sizeConnected())); // the number of seeds that the peer has stored
         webIndex.peers().mySeed().put(yacySeed.CCOUNT, Double.toString(((int) ((webIndex.peers().sizeConnected() + webIndex.peers().sizeDisconnected() + webIndex.peers().sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
         webIndex.peers().mySeed().put(yacySeed.VERSION, getConfig("version", ""));

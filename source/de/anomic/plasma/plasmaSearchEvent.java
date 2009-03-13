@@ -248,7 +248,7 @@ public final class plasmaSearchEvent {
                 if (rw > 0) {
                     final Set<String> removeWords = cleanEvent.query.queryHashes;
                     removeWords.addAll(cleanEvent.query.excludeHashes);
-                    cleanEvent.wordIndex.removeEntriesMultiple(removeWords, cleanEvent.failedURLs.keySet());
+                    cleanEvent.wordIndex.index().removeEntriesMultiple(removeWords, cleanEvent.failedURLs.keySet());
                     Log.logInfo("SearchEvents", "cleaning up event " + cleanEvent.query.id(true) + ", removed " + rw + " URL references on " + removeWords.size() + " words");
                 }                
                 
@@ -301,7 +301,7 @@ public final class plasmaSearchEvent {
             (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
             (!(metadata.dc_title().startsWith("Index of")))) {
             final Iterator<String> wi = query.queryHashes.iterator();
-            while (wi.hasNext()) wordIndex.removeReference(wi.next(), page.hash());
+            while (wi.hasNext()) wordIndex.index().removeReference(wi.next(), page.hash());
             registerFailure(page.hash(), "index-of constraint not fullfilled");
             return null;
         }
@@ -824,7 +824,7 @@ public final class plasmaSearchEvent {
                 String address = null;
                 if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
                     // seed is not known from here
-                    wordIndex.removeWordReferences(
+                    wordIndex.index().removeWordReferences(
                         plasmaCondenser.getWords(
                             ("yacyshare " +
                              filename.replace('?', ' ') +

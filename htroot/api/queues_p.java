@@ -42,7 +42,7 @@ public class queues_p {
         prop.putNum("indexingSize", sb.getThread(plasmaSwitchboardConstants.INDEXER).getJobCount() + sb.webIndex.queuePreStack.getActiveQueueSize());
         prop.putNum("indexingMax", (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30));
         prop.putNum("urlpublictextSize", sb.webIndex.metadata().size());
-        prop.putNum("rwipublictextSize", sb.webIndex.size());
+        prop.putNum("rwipublictextSize", sb.webIndex.index().size());
         if ((sb.webIndex.queuePreStack.size() == 0) && (sb.webIndex.queuePreStack.getActiveQueueSize() == 0)) {
             prop.put("list", "0"); //is empty
         } else {

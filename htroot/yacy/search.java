@@ -185,7 +185,7 @@ public final class search {
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
             final long timer = System.currentTimeMillis();
-            final Map<String, ReferenceContainer>[] containers = sb.webIndex.localSearchContainers(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2Set(urls));
+            final Map<String, ReferenceContainer>[] containers = sb.webIndex.index().localSearchContainers(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2Set(urls));
 
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.COLLECTION, containers[0].size(), System.currentTimeMillis() - timer), false);
             if (containers != null) {

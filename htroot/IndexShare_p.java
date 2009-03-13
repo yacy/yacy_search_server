@@ -55,7 +55,7 @@ public class IndexShare_p {
             prop.put("wordfreq", switchboard.getConfigLong("defaultWordReceiveFrequency",10));
             prop.put("dtable", "");
             prop.put("rtable", "");
-            prop.putNum("wcount", switchboard.webIndex.size());
+            prop.putNum("wcount", switchboard.webIndex.index().size());
             prop.putNum("ucount", switchboard.webIndex.metadata().size());
             return prop; // be save
         }
@@ -68,7 +68,7 @@ public class IndexShare_p {
         }
 
         // insert constants
-        prop.putNum("wcount", switchboard.webIndex.size());
+        prop.putNum("wcount", switchboard.webIndex.index().size());
         prop.putNum("ucount", switchboard.webIndex.metadata().size());
         
         // return rewrite properties

@@ -81,7 +81,7 @@ public class Balancer {
         if (urlFileStack.size() != urlFileIndex.size() || (urlFileIndex.size() < 10000 && urlFileIndex.size() > 0)) {
             // fix the file stack
             Log.logInfo("Balancer", "re-creating the " + stackname + " balancer stack, size = " + urlFileIndex.size() + ((urlFileStack.size() == urlFileIndex.size()) ? "" : " (the old stack size was wrong)" ));
-            urlFileStack = Stack.reset(urlFileStack);
+            urlFileStack.clear();
             try {
                 final Iterator<byte[]> i = urlFileIndex.keys(true, null);
                 byte[] hash;
@@ -130,7 +130,7 @@ public class Balancer {
     }
     
     public synchronized void clear() {
-        urlFileStack = Stack.reset(urlFileStack);
+        urlFileStack.clear();
         domainStacks.clear();
         urlRAMStack.clear();
         resetFileIndex();
@@ -544,7 +544,7 @@ public class Balancer {
             if (nextentry == null) {
                 // emergency case: this means that something with the stack organization is wrong
                 // the file appears to be broken. We kill the file.
-                Stack.reset(urlFileStack);
+                urlFileStack.clear();
                 Log.logSevere("BALANCER", "get() failed to fetch entry from file stack. reset stack file.");
             } else {
                 final String nexthash = new String(nextentry.getColBytes(0));

@@ -51,19 +51,16 @@ import de.anomic.yacy.yacyURL;
 
 public class IndexingStack {
 
-    Stack sbQueueStack;
-    CrawlProfile profiles;
-    plasmaWordIndex wordIndex;
-    private final File sbQueueStackPath;
-    ConcurrentHashMap<String, QueueEntry> queueInProcess;
+    private final Stack sbQueueStack;
+    private final CrawlProfile profiles;
+    private final plasmaWordIndex wordIndex;
+    private final ConcurrentHashMap<String, QueueEntry> queueInProcess;
     
     public IndexingStack(final plasmaWordIndex wordIndex, final File sbQueueStackPath, final CrawlProfile profiles) {
-        this.sbQueueStackPath = sbQueueStackPath;
         this.profiles = profiles;
         this.wordIndex = wordIndex;
         this.queueInProcess = new ConcurrentHashMap<String, QueueEntry>();
-
-        initQueueStack();
+        this.sbQueueStack = Stack.open(sbQueueStackPath, rowdef);
     }
     
     public static final Row rowdef = new Row(
@@ -77,18 +74,7 @@ public class IndexingStack {
             "String urldescr-80",
             NaturalOrder.naturalOrder,
             0);
-    
-    private void initQueueStack() {
-        sbQueueStack = Stack.open(sbQueueStackPath, rowdef);
-    }
-    
-    /*
-    private void resetQueueStack() {
-        try {sbQueueStack.close();} catch (Exception e) {}
-        if (sbQueueStackPath.exists()) sbQueueStackPath.delete();
-        initQueueStack();
-    }
-    */
+
     public int size() {
         return (sbQueueStack == null) ? 0 : sbQueueStack.size();
     }
@@ -131,14 +117,13 @@ public class IndexingStack {
     }
 
     public void clear() {
-        sbQueueStack = Stack.reset(sbQueueStack);
+        sbQueueStack.clear();
     }
 
     public void close() {
         if (sbQueueStack != null) {
             sbQueueStack.close();
         }
-        sbQueueStack = null;
     }
 
     protected void finalize() throws Throwable {

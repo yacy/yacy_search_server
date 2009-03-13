@@ -100,9 +100,9 @@ public final class transferRWI {
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
             result = "not_granted";
             pause = 0;
-        } else if (sb.webIndex.indexCacheSize() > cachelimit) {
+        } else if (sb.webIndex.index().indexCacheSize() > cachelimit) {
             // we are too busy to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.webIndex.indexCacheSize() + ").");
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.webIndex.index().indexCacheSize() + ").");
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 60000;
@@ -157,7 +157,7 @@ public final class transferRWI {
                 }
                 
                 // learn entry
-                sb.webIndex.addEntry(wordHash, iEntry, System.currentTimeMillis());
+                sb.webIndex.index().addEntry(wordHash, iEntry, System.currentTimeMillis());
                 serverCore.checkInterruption();
 
                 // check if we need to ask for the corresponding URL
@@ -193,7 +193,7 @@ public final class transferRWI {
             }
             result = "ok";
             
-            pause = (int) (sb.webIndex.indexCacheSize() * 20000 / sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 100000)); // estimation of necessary pause time
+            pause = (int) (sb.webIndex.index().indexCacheSize() * 20000 / sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 100000)); // estimation of necessary pause time
         }
 
         prop.put("unknownURL", unknownURLs.toString());

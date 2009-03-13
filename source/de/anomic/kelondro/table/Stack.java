@@ -78,17 +78,14 @@ public final class Stack extends FullRecords {
         }
     }
     
-    public static Stack reset(final Stack stack) {
-        // memorize settings to this file
-        final File f = new File(stack.filename);
-        final Row row = stack.row();
-        
-        // close and delete the file
-        try {stack.close();} catch (final Exception e) {}
-        if (f.exists()) f.delete();
-
-        // re-open a database with same settings as before
-        return open(f, row);
+    public void clear() {
+        try {
+            super.clear();
+            setHandle(root, null);
+            setHandle(toor, null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public Iterator<Row.Entry> stackIterator(final boolean up) {
