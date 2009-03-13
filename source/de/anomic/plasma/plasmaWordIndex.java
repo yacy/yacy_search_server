@@ -467,7 +467,7 @@ public final class plasmaWordIndex implements Index {
             // flush elements that are too big. This flushing depends on the fact that the flush rule
             // selects the biggest elements first for flushing. If it does not for any reason, the following
             // loop would not terminate.
-            serverProfiling.update("wordcache", Long.valueOf(cs));
+            serverProfiling.update("wordcache", Long.valueOf(cs), true);
             // To ensure termination an additional counter is used
             int l = 0;
             while (theCache.size() > 0 && (l++ < 100) && (theCache.maxURLinCache() > wCacheMaxChunk)) {
@@ -479,7 +479,7 @@ public final class plasmaWordIndex implements Index {
                     (MemoryControl.available() < collections.minMem()))) {
                 flushCacheOne(theCache);
             }
-            if (cacheSize() != cs) serverProfiling.update("wordcache", Long.valueOf(cacheSize()));
+            if (cacheSize() != cs) serverProfiling.update("wordcache", Long.valueOf(cacheSize()), true);
         }
     }
     

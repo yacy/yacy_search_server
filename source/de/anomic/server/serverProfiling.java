@@ -40,7 +40,7 @@ public class serverProfiling extends Thread {
     private static serverProfiling systemProfiler = null;
     
     public static void startSystemProfiling() {
-    	systemProfiler = new serverProfiling(1000);
+    	systemProfiler = new serverProfiling(1500);
     	systemProfiler.start();
     }
     
@@ -58,7 +58,7 @@ public class serverProfiling extends Thread {
     
     public void run() {
     	while (running) {
-    		update("memory", Long.valueOf(MemoryControl.used()));
+    		update("memory", Long.valueOf(MemoryControl.used()), true);
     		try {
 				Thread.sleep(this.delaytime);
 			} catch (final InterruptedException e) {
@@ -67,13 +67,13 @@ public class serverProfiling extends Thread {
     	}
     }
     
-    public static void update(final String eventName, final Object eventPayload) {
+    public static void update(final String eventName, final Object eventPayload, boolean useProtection) {
     	// get event history container
         Long lastAcc = eventAccess.get(eventName);
         if (lastAcc == null) {
             eventAccess.put(eventName, Long.valueOf(System.currentTimeMillis()));
         } else {
-            if (System.currentTimeMillis() - lastAcc.longValue() > 1000) {
+            if (!useProtection || System.currentTimeMillis() - lastAcc.longValue() > 1000) {
                 eventAccess.put(eventName, Long.valueOf(System.currentTimeMillis()));
             } else {
                 return; // protect against too heavy load
@@ -108,6 +108,16 @@ public class serverProfiling extends Thread {
     	return (historyMaps.containsKey(eventName) ? (historyMaps.get(eventName)) : new ConcurrentLinkedQueue<Event>()).iterator();
     }
 
+    public static int countEvents(final String eventName, long time) {
+        Iterator<Event> i = history(eventName);
+        long now = System.currentTimeMillis();
+        int count = 0;
+        while (i.hasNext()) {
+            if (now - i.next().time < time) count++;
+        }
+        return count;
+    }
+    
     public static class Event {
         public Object payload;
         public long time;

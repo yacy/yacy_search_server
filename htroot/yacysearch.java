@@ -380,7 +380,7 @@ public class yacysearch {
                     yacyURL.TLD_any_zone_filter,
                     client,
                     authenticated);
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.INITIALIZATION, 0, 0));
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.INITIALIZATION, 0, 0), false);
             
             // tell all threads to do nothing for a specific time
             sb.intermissionAllThreads(10000);

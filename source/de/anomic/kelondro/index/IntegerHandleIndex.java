@@ -325,11 +325,10 @@ public class IntegerHandleIndex {
     
     public static void main(String[] args) {
         int count = (args.length == 0) ? 1000000 : Integer.parseInt(args[0]);
-        System.out.println("Starting test with " + count + " objects, minimum memory: " + (count * 16) + " bytes; " + MemoryControl.available(
-) + " available");
-        
+        System.out.println("Starting test with " + count + " objects, minimum memory: " + (count * 16) + " bytes; " + MemoryControl.available() + " available");
         Random r = new Random(0);
         long start = System.currentTimeMillis();
+
         System.gc(); // for resource measurement
         long a = MemoryControl.available();
         IntegerHandleIndex idx = new IntegerHandleIndex(12, Base64Order.enhancedCoder, 0);
@@ -357,8 +356,7 @@ public class IntegerHandleIndex {
             if (d == null) hm.put(hash, 1); else hm.put(hash, d + 1);
         }
         long timej =  ((long) count) * 1000L / (System.currentTimeMillis() - start);
-        System.out.println("Result HashMap: " +timej + " inc per second; " + count 
-+ " loops.");
+        System.out.println("Result HashMap: " +timej + " inc per second; " + count + " loops.");
         System.gc();
         long memj = a - MemoryControl.available();
         System.out.println("Used Memory: " + memj + " bytes");
@@ -366,6 +364,7 @@ public class IntegerHandleIndex {
         System.out.println("Geschwindigkeitsfaktor j/k: " + (timej / timek));
         System.out.println("Speicherplatzfaktor    j/k: " + (memj / memk));
         System.exit(0);
+
     }
 
 }

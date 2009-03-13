@@ -32,7 +32,7 @@ import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.index.Row.Queue;
 import de.anomic.kelondro.order.CloneableIterator;
 
-public class ObjectIndexDaemon implements ObjectIndex {
+public class ObjectIndexDaemon {
 
     private Row.Entry poison;    
     private PutScheduler putScheduler;
@@ -71,11 +71,11 @@ public class ObjectIndexDaemon implements ObjectIndex {
         }
     }
 
-    public void addUnique(Entry row) throws IOException {
+    public void addUnique(Entry row) {
         index.addUnique(row);
     }
 
-    public void addUnique(List<Entry> rows) throws IOException {
+    public void addUnique(List<Entry> rows) {
         index.addUnique(rows);
     }
 
@@ -100,7 +100,7 @@ public class ObjectIndexDaemon implements ObjectIndex {
         return this.index.filename();
     }
 
-    public Entry get(byte[] key) throws IOException {
+    public Entry get(byte[] key) {
         Entry entry = this.queue.get(key);
         if (entry != null) return entry;
         return this.index.get(key);
@@ -112,7 +112,7 @@ public class ObjectIndexDaemon implements ObjectIndex {
         return this.index.has(key);
     }
 
-    public Entry replace(Entry row) throws IOException {
+    public Entry replace(Entry row) {
         Entry entry = get(row.getPrimaryKeyBytes());
         try {
             this.queue.put(row);
@@ -122,7 +122,7 @@ public class ObjectIndexDaemon implements ObjectIndex {
         return entry;
     }
 
-    public void put(Entry row) throws IOException {
+    public void put(Entry row) {
         try {
             this.queue.put(row);
         } catch (InterruptedException e) {
@@ -130,7 +130,7 @@ public class ObjectIndexDaemon implements ObjectIndex {
         }
     }
 
-    public void put(List<Entry> rows) throws IOException {
+    public void put(List<Entry> rows) {
         for (Entry entry: rows) try {
             this.queue.put(entry);
         } catch (InterruptedException e) {
@@ -138,14 +138,14 @@ public class ObjectIndexDaemon implements ObjectIndex {
         }
     }
 
-    public Entry remove(byte[] key) throws IOException {
+    public Entry remove(byte[] key) {
         Entry entry = this.queue.delete(key);
         if (entry == null) return this.index.remove(key);
         this.index.remove(key);
         return entry;
     }
 
-    public synchronized ArrayList<RowCollection> removeDoubles() throws IOException {
+    public synchronized ArrayList<RowCollection> removeDoubles() {
         try {
             this.queue.put(poison);
             this.putScheduler.join();
@@ -159,7 +159,7 @@ public class ObjectIndexDaemon implements ObjectIndex {
         return d;
     }
 
-    public synchronized Entry removeOne() throws IOException {
+    public synchronized Entry removeOne() {
         try {
             this.queue.put(poison);
             this.putScheduler.join();
@@ -177,7 +177,7 @@ public class ObjectIndexDaemon implements ObjectIndex {
         return this.index.row();
     }
 
-    public synchronized CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
+    public synchronized CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) {
         try {
             this.queue.put(poison);
             this.putScheduler.join();
@@ -191,7 +191,7 @@ public class ObjectIndexDaemon implements ObjectIndex {
         return keys;
     }
 
-    public synchronized CloneableIterator<Entry> rows(boolean up, byte[] firstKey) throws IOException {
+    public synchronized CloneableIterator<Entry> rows(boolean up, byte[] firstKey) {
         try {
             this.queue.put(poison);
             this.putScheduler.join();
@@ -205,7 +205,7 @@ public class ObjectIndexDaemon implements ObjectIndex {
         return rows;
     }
 
-    public CloneableIterator<Entry> rows() throws IOException {
+    public CloneableIterator<Entry> rows() {
         return rows(true, null);
     }
 

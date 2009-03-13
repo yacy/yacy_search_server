@@ -143,7 +143,7 @@ public class yacysearchitem {
             final plasmaSnippetCache.TextSnippet snippet = result.textSnippet();
             prop.put("content_description", (snippet == null) ? "" : snippet.getLineMarked(theQuery.fullqueryHashes));
             prop.putXML("content_description-xml", (snippet == null) ? "" : snippet.getLineMarked(theQuery.fullqueryHashes));
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.FINALIZATION + "-" + item, 0, 0));
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.FINALIZATION + "-" + item, 0, 0), false);
             
             return prop;
         }

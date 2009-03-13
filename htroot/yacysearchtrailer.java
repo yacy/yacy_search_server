@@ -109,7 +109,7 @@ public class yacysearchtrailer {
             }
             prop.put("words", hintcount);
         }
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.FINALIZATION + "-" + "bottomline", 0, 0));
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.FINALIZATION + "-" + "bottomline", 0, 0), false);
         
         return prop;
     }

@@ -138,7 +138,7 @@ public class Network {
                 prop.putNum("table_my-rU", Long.parseLong(seed.get(yacySeed.URL_IN, "0")));
                 prop.putNum("table_my-ppm", myppm);
                 prop.putNum("table_my-qph", Math.round(100d * myqph) / 100d);
-                prop.putNum("table_my-totalppm", sb.totalPPM);
+                prop.putNum("table_my-totalppm", sb.currentPPM());
                 prop.putNum("table_my-totalqph", Math.round(6000d * sb.totalQPM) / 100d);
                 prop.putNum("table_my-seeds", Long.parseLong(seed.get(yacySeed.SCOUNT, "0")));
                 prop.putNum("table_my-connects", Double.parseDouble(seed.get(yacySeed.CCOUNT, "0")));

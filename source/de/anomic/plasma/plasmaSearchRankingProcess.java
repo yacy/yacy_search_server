@@ -111,7 +111,7 @@ public final class plasmaSearchRankingProcess {
         
         long timer = System.currentTimeMillis();
         this.localSearchContainerMaps = wordIndex.localSearchContainers(query.queryHashes, query.excludeHashes, null);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.COLLECTION, this.localSearchContainerMaps[0].size(), System.currentTimeMillis() - timer));
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.COLLECTION, this.localSearchContainerMaps[0].size(), System.currentTimeMillis() - timer), false);
         
         // join and exclude the local result
         timer = System.currentTimeMillis();
@@ -120,7 +120,7 @@ public final class plasmaSearchRankingProcess {
                 this.localSearchContainerMaps[0].values(),
                 this.localSearchContainerMaps[1].values(),
                 query.maxDistance);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer));
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
         if (index.size() == 0) {
             return;
         }
@@ -145,7 +145,7 @@ public final class plasmaSearchRankingProcess {
         
         // normalize entries
         final ArrayList<ReferenceVars> decodedEntries = this.order.normalizeWith(index);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer));
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
         
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
@@ -211,7 +211,7 @@ public final class plasmaSearchRankingProcess {
         }
         
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer));
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
     }
 
     private boolean testFlags(final Reference ientry) {

@@ -187,7 +187,7 @@ public final class search {
             final long timer = System.currentTimeMillis();
             final Map<String, ReferenceContainer>[] containers = sb.webIndex.localSearchContainers(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2Set(urls));
 
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.COLLECTION, containers[0].size(), System.currentTimeMillis() - timer));
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.COLLECTION, containers[0].size(), System.currentTimeMillis() - timer), false);
             if (containers != null) {
                 final Iterator<Map.Entry<String, ReferenceContainer>> ci = containers[0].entrySet().iterator();
                 Map.Entry<String, ReferenceContainer> entry;
@@ -279,7 +279,7 @@ public final class search {
                 refstr.append(",").append(j.next());
             }
             prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), "reference collection", ws.size(), System.currentTimeMillis() - timer));
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), "reference collection", ws.size(), System.currentTimeMillis() - timer), false);
         }
         prop.put("indexabstract", indexabstract.toString());
         
@@ -306,7 +306,7 @@ public final class search {
             }
             prop.put("links", links.toString());
             prop.put("linkcount", accu.size());
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), "result list preparation", accu.size(), System.currentTimeMillis() - timer));
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), "result list preparation", accu.size(), System.currentTimeMillis() - timer), false);
         }
         
         // add information about forward peers

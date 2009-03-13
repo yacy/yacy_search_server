@@ -223,12 +223,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  ArrayList<plasmaSearchQuery>   localSearches; // array of search result properties as HashMaps
     public  ArrayList<plasmaSearchQuery>   remoteSearches; // array of search result properties as HashMaps
     public  HashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
-    public  long                           lastseedcheckuptime = -1;
     public  long                           indexedPages = 0;
-    public  long                           lastindexedPages = 0;
     public  double                         requestedQueries = 0d;
-    public  double                         lastrequestedQueries = 0d;
-    public  int                            totalPPM = 0;
     public  double                         totalQPM = 0d;
     public  TreeMap<String, String>        clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
     public  URLLicense                     licensedURLs;
@@ -1677,10 +1673,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (System.currentTimeMillis() - lastPPMUpdate > 30000) {
             // we don't want to do this too often
             updateMySeed();
-            serverProfiling.update("ppm", Long.valueOf(currentPPM()));
+            serverProfiling.update("ppm", Long.valueOf(currentPPM()), true);
             lastPPMUpdate = System.currentTimeMillis();
         }
-        serverProfiling.update("indexed", queueEntry.url().toNormalform(true, false));
+        serverProfiling.update("indexed", queueEntry.url().toNormalform(true, false), false);
         
         // if this was performed for a remote crawl request, notify requester
         final yacySeed initiatorPeer = queueEntry.initiatorPeer();
@@ -1975,11 +1971,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     }
     
     public int currentPPM() {
-        final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
-        final long uptimediff = uptime - lastseedcheckuptime;
-        final long indexedcdiff = indexedPages - lastindexedPages;
-        totalPPM = (int) (indexedPages * 60 / Math.max(uptime, 1));
-        return Math.round(Math.max(indexedcdiff, 0f) * 60f / Math.max(uptimediff, 1f));
+        return serverProfiling.countEvents("indexed", 30000) * 2;
     }
     
     public void updateMySeed() {
@@ -1990,19 +1982,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         webIndex.seedDB.mySeed().put(yacySeed.NAME, getConfig("peerName", "nameless"));
         webIndex.seedDB.mySeed().put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(getConfig("port", "8080"))));
         
-        final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
-        final long uptimediff = uptime - lastseedcheckuptime;
-        final long indexedcdiff = indexedPages - lastindexedPages;
-        //double requestcdiff = requestedQueries - lastrequestedQueries;
-        if (uptimediff > 300 || uptimediff <= 0 || lastseedcheckuptime == -1 ) {
-            lastseedcheckuptime = uptime;
-            lastindexedPages = indexedPages;
-            lastrequestedQueries = requestedQueries;
-        }
-        
         //the speed of indexing (pages/minute) of the peer
-        totalPPM = (int) (indexedPages * 60 / Math.max(uptime, 1));
-        webIndex.seedDB.mySeed().put(yacySeed.ISPEED, Long.toString(Math.round(Math.max(indexedcdiff, 0f) * 60f / Math.max(uptimediff, 1f))));
+        final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
+        webIndex.seedDB.mySeed().put(yacySeed.ISPEED, Integer.toString(currentPPM()));
         totalQPM = requestedQueries * 60d / Math.max(uptime, 1d);
         webIndex.seedDB.mySeed().put(yacySeed.RSPEED, Double.toString(totalQPM /*Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f)*/ ));
         

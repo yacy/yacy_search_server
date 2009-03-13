@@ -155,7 +155,7 @@ public final class plasmaSearchEvent {
                     query.ranking,
                     query.constraint,
                     (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes);
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "remote search thread start", this.primarySearchThreads.length, System.currentTimeMillis() - timer));
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "remote search thread start", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
             
             // meanwhile do a local search
             localSearchThread = new localSearchProcess();
@@ -192,7 +192,7 @@ public final class plasmaSearchEvent {
                     IACount.put(wordhash, Integer.valueOf(container.size()));
                     IAResults.put(wordhash, ReferenceContainer.compressIndex(container, null, 1000).toString());
                 }
-                serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "abstract generation", this.rankedCache.searchContainerMaps()[0].size(), System.currentTimeMillis() - timer));
+                serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "abstract generation", this.rankedCache.searchContainerMaps()[0].size(), System.currentTimeMillis() - timer), false);
             }
         }
         
@@ -203,18 +203,18 @@ public final class plasmaSearchEvent {
                 this.workerThreads[i] = new resultWorker(i, 10000, 2);
                 this.workerThreads[i].start();
             }
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "online snippet fetch threads started", 0, 0));
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "online snippet fetch threads started", 0, 0), false);
         } else {
             final long timer = System.currentTimeMillis();
             // use only a single worker thread, thats enough
             resultWorker worker = new resultWorker(0, 3000, 0);
             worker.run();
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "offline snippet fetch", result.size(), System.currentTimeMillis() - timer));
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "offline snippet fetch", result.size(), System.currentTimeMillis() - timer), false);
         }
         
         // clean up events
         cleanupEvents(false);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "event-cleanup", 0, 0));
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "event-cleanup", 0, 0), false);
         
         // store this search to a cache so it can be re-used
         if (MemoryControl.available() < 1024 * 1024 * 10) cleanupEvents(true);
@@ -599,7 +599,7 @@ public final class plasmaSearchEvent {
     public ResultEntry oneResult(final int item) {
         // check if we already retrieved this item (happens if a search
         // pages is accessed a second time)
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "obtain one result entry - start", 0, 0));
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "obtain one result entry - start", 0, 0), false);
         if (this.result.sizeStore() > item) {
             // we have the wanted result already in the result array .. return that
             return this.result.element(item).element;
