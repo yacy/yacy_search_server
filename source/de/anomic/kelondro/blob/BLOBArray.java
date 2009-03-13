@@ -208,7 +208,7 @@ public class BLOBArray implements BLOB {
             // too old
             blobItem oldestBLOB = blobs.remove(0);
             oldestBLOB.blob.close();
-            oldestBLOB.location.delete();
+            if (!oldestBLOB.location.delete()) oldestBLOB.location.deleteOnExit();
         }
         
         // size limit
@@ -216,7 +216,7 @@ public class BLOBArray implements BLOB {
             // too large
             blobItem oldestBLOB = blobs.remove(0);
             oldestBLOB.blob.close();
-            oldestBLOB.location.delete();
+            if (!oldestBLOB.location.delete()) oldestBLOB.location.deleteOnExit();
         }
     }
     
