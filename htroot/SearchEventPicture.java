@@ -41,7 +41,7 @@ public class SearchEventPicture {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final String eventID = (String) header.get("event", plasmaSearchEvent.lastEventID);
         if (eventID == null) return null;
-        final ymageMatrix yp = plasmaGrafics.getSearchEventPicture(sb.webIndex.seedDB, eventID);
+        final ymageMatrix yp = plasmaGrafics.getSearchEventPicture(sb.webIndex.peers(), eventID);
         if (yp == null) return new ymageMatrix(1, 1, ymageMatrix.MODE_SUB, "000000"); // empty image
         
         return yp;

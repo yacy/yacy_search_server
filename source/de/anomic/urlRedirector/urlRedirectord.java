@@ -191,13 +191,13 @@ public class urlRedirectord implements serverHandler, Cloneable {
                         ) {
                             // first delete old entry, if exists
                             final String urlhash = reqURL.hash();
-                            sb.webIndex.removeURL(urlhash);
+                            sb.webIndex.metadata().remove(urlhash);
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             sb.crawlQueues.errorURL.remove(urlhash);                            
                             
                             // enqueuing URL for crawling
                             sb.crawlStacker.enqueueEntry(new CrawlEntry(
-                                    sb.webIndex.seedDB.mySeed().hash, 
+                                    sb.webIndex.peers().mySeed().hash, 
                                     reqURL, 
                                     null, 
                                     "URL Redirector", 

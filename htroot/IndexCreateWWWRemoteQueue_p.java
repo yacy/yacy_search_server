@@ -96,7 +96,7 @@ public class IndexCreateWWWRemoteQueue_p {
             for (i = 0; (i < crawlerList.size()) && (showNum < showLimit); i++) {
                 urle = crawlerList.get(i);
                 if (urle != null && urle.url() != null) {
-                    initiator = sb.webIndex.seedDB.getConnected(urle.initiator());
+                    initiator = sb.webIndex.peers().getConnected(urle.initiator());
                     profileHandle = urle.profileHandle();
                     profileEntry = (profileHandle == null) ? null : sb.webIndex.profilesActiveCrawls.getEntry(profileHandle);
                     prop.put("crawler-queue_list_" + showNum + "_dark", dark ? "1" : "0");

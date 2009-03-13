@@ -66,7 +66,7 @@ public final class transfer {
         	return prop;
         }
 
-        final yacySeed otherseed = sb.webIndex.seedDB.get(otherpeer);
+        final yacySeed otherseed = sb.webIndex.peers().get(otherpeer);
         if ((otherseed == null) || (filename.indexOf("..") >= 0)) {
             // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
             // reject paths that contain '..' because they are dangerous
@@ -88,7 +88,7 @@ public final class transfer {
                 final String access = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(otherpeer + ":" + filename)) + ":" + Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw("" + System.currentTimeMillis()));
                 prop.put("response", "ok");
                 prop.put("process_access", access);
-                prop.put("process_address", sb.webIndex.seedDB.mySeed().getPublicAddress());
+                prop.put("process_address", sb.webIndex.peers().mySeed().getPublicAddress());
                 prop.put("process_protocol", "http");
                 prop.put("process_path", "");  // currently empty; the store process will find a path
                 prop.put("process_maxsize", "-1"); // if response is too big we return the size of the file

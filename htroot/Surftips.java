@@ -86,7 +86,7 @@ public class Surftips {
                 map.put("urlhash", hash);
                 map.put("vote", "negative");
                 map.put("refid", post.get("refid", ""));
-                sb.webIndex.seedDB.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
+                sb.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             }
             if ((post != null) && ((hash = post.get("votePositive", null)) != null)) {
                 if (!sb.verifyAuthentication(header, false)) {
@@ -102,7 +102,7 @@ public class Surftips {
                 map.put("vote", "positive");
                 map.put("refid", post.get("refid", ""));
                 map.put("comment", post.get("comment", ""));
-                sb.webIndex.seedDB.newsPool.publishMyNews(new yacyNewsRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
+                sb.webIndex.peers().newsPool.publishMyNews(new yacyNewsRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             }
         
             // create surftips
@@ -140,8 +140,8 @@ public class Surftips {
                 description = row.getColString(2,"UTF-8");
                 if ((url == null) || (title == null) || (description == null)) continue;
                 refid = row.getColString(3, null);
-                voted = (sb.webIndex.seedDB.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || 
-                		(sb.webIndex.seedDB.newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
+                voted = (sb.webIndex.peers().newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null) || 
+                		(sb.webIndex.peers().newsPool.getSpecific(yacyNewsPool.PUBLISHED_DB, yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, "refid", refid) != null);
                 prop.put("surftips_results_" + i + "_authorized", (authenticated) ? "1" : "0");
                 prop.put("surftips_results_" + i + "_authorized_recommend", (voted) ? "0" : "1");
 
@@ -177,9 +177,9 @@ public class Surftips {
     }
     
     private static void accumulateVotes(final plasmaSwitchboard sb, final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
-        final int maxCount = Math.min(1000, sb.webIndex.seedDB.newsPool.size(dbtype));
+        final int maxCount = Math.min(1000, sb.webIndex.peers().newsPool.size(dbtype));
         yacyNewsRecord record;
-        final Iterator<yacyNewsRecord> recordIterator = sb.webIndex.seedDB.newsPool.recordIterator(dbtype, true);
+        final Iterator<yacyNewsRecord> recordIterator = sb.webIndex.peers().newsPool.recordIterator(dbtype, true);
         int j = 0;
         while ((recordIterator.hasNext()) && (j++ < maxCount)) {
             record = recordIterator.next();
@@ -207,9 +207,9 @@ public class Surftips {
             final plasmaSwitchboard sb,
             final HashMap<String, Entry> surftips, final ScoreCluster<String> ranking, final Row rowdef,
             final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
-        final int maxCount = Math.min(1000, sb.webIndex.seedDB.newsPool.size(dbtype));
+        final int maxCount = Math.min(1000, sb.webIndex.peers().newsPool.size(dbtype));
         yacyNewsRecord record;
-        final Iterator<yacyNewsRecord> recordIterator = sb.webIndex.seedDB.newsPool.recordIterator(dbtype, true);
+        final Iterator<yacyNewsRecord> recordIterator = sb.webIndex.peers().newsPool.recordIterator(dbtype, true);
         int j = 0;
         String url = "", urlhash;
         Row.Entry entry;
@@ -271,8 +271,8 @@ public class Surftips {
             } catch (final IOException e) {}
             
             if (record.category().equals(yacyNewsPool.CATEGORY_WIKI_UPDATE)) try {
-                yacySeed seed = sb.webIndex.seedDB.getConnected(record.originator());
-                if (seed == null) seed = sb.webIndex.seedDB.getDisconnected(record.originator());
+                yacySeed seed = sb.webIndex.peers().getConnected(record.originator());
+                if (seed == null) seed = sb.webIndex.peers().getDisconnected(record.originator());
                 if (seed != null) {
                     url = "http://" + seed.getPublicAddress() + "/Wiki.html?page=" + record.attribute("page", "");
                     entry = rowdef.newEntry(new byte[][]{
@@ -286,8 +286,8 @@ public class Surftips {
             } catch (final IOException e) {}
             
             if (record.category().equals(yacyNewsPool.CATEGORY_BLOG_ADD)) try {
-                yacySeed seed = sb.webIndex.seedDB.getConnected(record.originator());
-                if (seed == null) seed = sb.webIndex.seedDB.getDisconnected(record.originator());
+                yacySeed seed = sb.webIndex.peers().getConnected(record.originator());
+                if (seed == null) seed = sb.webIndex.peers().getDisconnected(record.originator());
                 if (seed != null) {
                     url = "http://" + seed.getPublicAddress() + "/Blog.html?page=" + record.attribute("page", "");
                     entry = rowdef.newEntry(new byte[][]{

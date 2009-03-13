@@ -92,10 +92,10 @@ public final class crawlReceipt {
 
         */
         
-        final yacySeed otherPeer = sb.webIndex.seedDB.get(iam);
+        final yacySeed otherPeer = sb.webIndex.peers().get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));        
 
-        if ((sb.webIndex.seedDB.mySeed() == null) || (!(sb.webIndex.seedDB.mySeed().hash.equals(youare)))) {
+        if ((sb.webIndex.peers().mySeed() == null) || (!(sb.webIndex.peers().mySeed().hash.equals(youare)))) {
             // no yacy connection / unknown peers
             prop.put("delay", "3600");
             return prop;
@@ -137,7 +137,7 @@ public final class crawlReceipt {
         
         if (result.equals("fill")) try {
             // put new entry into database
-            sb.webIndex.putURL(entry);
+            sb.webIndex.metadata().store(entry);
             sb.crawlResults.stack(entry, youare, iam, 1);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
             log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + entry.hash() + ":" + metadata.url().toNormalform(false, true));

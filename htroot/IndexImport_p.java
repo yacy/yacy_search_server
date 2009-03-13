@@ -107,7 +107,7 @@ public final class IndexImport_p {
         }
         
         prop.putNum("wcount", switchboard.webIndex.size());
-        prop.putNum("ucount", switchboard.webIndex.countURL());
+        prop.putNum("ucount", switchboard.webIndex.metadata().size());
         
         /*
          * Loop over all currently running jobs

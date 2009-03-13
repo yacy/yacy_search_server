@@ -177,7 +177,7 @@ public class ConfigAppearance_p {
             prop.put("popupStatus", 1);
         }
         
-        String myaddress = sb.webIndex.seedDB.mySeed().getPublicAddress();
+        String myaddress = sb.webIndex.peers().mySeed().getPublicAddress();
         if (myaddress == null) myaddress = "localhost:" + sb.getConfig("port", "8080");
         prop.put("myaddress", myaddress);
         return prop;

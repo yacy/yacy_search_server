@@ -260,7 +260,7 @@ public class SitemapParser extends DefaultHandler {
                 final String dbocc = this.sb.urlExists(nexturlhash);
                 if ((dbocc != null) && (dbocc.equalsIgnoreCase("loaded"))) {
                     // the url was already loaded. we need to check the date
-                    final MetadataRowContainer oldEntry = this.sb.webIndex.getURL(nexturlhash, null, 0);
+                    final MetadataRowContainer oldEntry = this.sb.webIndex.metadata().load(nexturlhash, null, 0);
                     if (oldEntry != null) {
                         final Date modDate = oldEntry.moddate();
                         // check if modDate is null
@@ -272,7 +272,7 @@ public class SitemapParser extends DefaultHandler {
 
             // URL needs to crawled
             this.sb.crawlStacker.enqueueEntry(new CrawlEntry(
-                    this.sb.webIndex.seedDB.mySeed().hash,
+                    this.sb.webIndex.peers().mySeed().hash,
                     url,
                     null, // this.siteMapURL.toString(),
                     this.nextURL,

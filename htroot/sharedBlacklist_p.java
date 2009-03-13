@@ -109,8 +109,8 @@ public class sharedBlacklist_p {
                 
                 // generate the download URL
                 String downloadURLOld = null;
-                if( sb.webIndex.seedDB != null ){ //no nullpointer error..
-                    final yacySeed seed = sb.webIndex.seedDB.getConnected(Hash); 
+                if( sb.webIndex.peers() != null ){ //no nullpointer error..
+                    final yacySeed seed = sb.webIndex.peers().getConnected(Hash); 
                     if (seed != null) {
                         final String IP = seed.getIP(); 
                         final String Port = seed.get(yacySeed.PORT, "8080");

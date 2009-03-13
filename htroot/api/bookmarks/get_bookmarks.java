@@ -50,8 +50,8 @@ public class get_bookmarks {
     	prop.putHTML("display_user", username);
     	
     	// set peer address    	
-    	prop.put("display_address", sb.webIndex.seedDB.mySeed().getPublicAddress());
-    	prop.put("display_peer", sb.webIndex.seedDB.mySeed().getName());
+    	prop.put("display_address", sb.webIndex.peers().mySeed().getPublicAddress());
+    	prop.put("display_peer", sb.webIndex.peers().mySeed().getName());
     	    	
 		int rp = MAXRESULTS;			// items per page 
     	int page = 1;					// page    	

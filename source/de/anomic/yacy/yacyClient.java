@@ -569,7 +569,7 @@ public final class yacyClient {
 
 			// passed all checks, store url
 			try {
-				wordIndex.putURL(urlEntry);
+				wordIndex.metadata().store(urlEntry);
 				crawlResults.stack(urlEntry, mySeed.hash, target.hash, 2);
 			} catch (final IOException e) {
 				yacyCore.log.logSevere("could not store search result", e);
@@ -1074,7 +1074,7 @@ public final class yacyClient {
             final plasmaSwitchboard sb = new plasmaSwitchboard(new File(args[0]), "httpProxy.init", "DATA/SETTINGS/yacy.conf", false);
             /*final yacyCore core =*/ new yacyCore(sb);
             sb.loadSeedLists();
-            final yacySeed target = sb.webIndex.seedDB.getConnected(args[1]);
+            final yacySeed target = sb.webIndex.peers().getConnected(args[1]);
             final String wordhashe = Word.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));
             
@@ -1082,9 +1082,9 @@ public final class yacyClient {
             reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
             final byte[] content = httpClient.wget(
                                               "http://" + target.getPublicAddress() + "/yacy/search.html" +
-                                                      "?myseed=" + sb.webIndex.seedDB.mySeed().genSeedStr(null) +
+                                                      "?myseed=" + sb.webIndex.peers().mySeed().genSeedStr(null) +
                                                       "&youare=" + target.hash + "&key=" +
-                                                      "&myseed=" + sb.webIndex.seedDB.mySeed() .genSeedStr(null) +
+                                                      "&myseed=" + sb.webIndex.peers().mySeed() .genSeedStr(null) +
                                                       "&count=10" +
                                                       "&resource=global" +
                                                       "&query=" + wordhashe +

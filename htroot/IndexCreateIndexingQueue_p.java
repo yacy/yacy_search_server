@@ -116,7 +116,7 @@ public class IndexCreateIndexingQueue_p {
                 if ((pcentry != null)&&(pcentry.url() != null)) {
                     final long entrySize = pcentry.size();
                     totalSize += entrySize;
-                    initiator = sb.webIndex.seedDB.getConnected(pcentry.initiator());
+                    initiator = sb.webIndex.peers().getConnected(pcentry.initiator());
                     prop.put("indexing-queue_list_"+entryCount+"_dark", inProcess ? "2" : (dark ? "1" : "0"));
                     prop.putHTML("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("indexing-queue_list_"+entryCount+"_depth", pcentry.depth());
@@ -163,8 +163,8 @@ public class IndexCreateIndexingQueue_p {
                     
                     initiatorHash = entry.initiator();
                     executorHash = entry.executor();
-                    initiatorSeed = sb.webIndex.seedDB.getConnected(initiatorHash);
-                    executorSeed = sb.webIndex.seedDB.getConnected(executorHash);
+                    initiatorSeed = sb.webIndex.peers().getConnected(initiatorHash);
+                    executorSeed = sb.webIndex.peers().getConnected(executorHash);
                     prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
                     prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
                     prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false, true));

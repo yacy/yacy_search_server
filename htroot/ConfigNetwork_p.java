@@ -124,10 +124,10 @@ public class ConfigNetwork_p {
     
                 if (indexReceive) {
                     sb.setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
-                    sb.webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(true);
+                    sb.webIndex.peers().mySeed().setFlagAcceptRemoteIndex(true);
                 } else {
                     sb.setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
-                    sb.webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(false);
+                    sb.webIndex.peers().mySeed().setFlagAcceptRemoteIndex(false);
                 }
     
                 if (post.get("indexReceiveBlockBlacklist", "").equals("on")) {
@@ -137,7 +137,7 @@ public class ConfigNetwork_p {
                 }
                     
                 if (post.containsKey("peertags")) {
-                    sb.webIndex.seedDB.mySeed().setPeerTags(serverCodings.string2set(normalizedList(post.get("peertags")), ","));
+                    sb.webIndex.peers().mySeed().setPeerTags(serverCodings.string2set(normalizedList(post.get("peertags")), ","));
                 }
                 
                 sb.setConfig("cluster.mode", post.get("cluster.mode", "publicpeer"));
@@ -170,7 +170,7 @@ public class ConfigNetwork_p {
                 sb.setConfig("cluster.peers.yacydomain", checkYaCyDomainList(post.get("cluster.peers.yacydomain", "")));
                 
                 // update the cluster hash set
-                sb.clusterhashes = sb.webIndex.seedDB.clusterHashes(sb.getConfig("cluster.peers.yacydomain", ""));
+                sb.clusterhashes = sb.webIndex.peers().clusterHashes(sb.getConfig("cluster.peers.yacydomain", ""));
             }            
         }
         
@@ -196,11 +196,11 @@ public class ConfigNetwork_p {
         prop.put("indexReceiveChecked", (indexReceive) ? "1" : "0");
         prop.put("indexReceiveBlockBlacklistChecked.on", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "1" : "0");
         prop.put("indexReceiveBlockBlacklistChecked.off", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "0" : "1");
-        prop.putHTML("peertags", serverCodings.set2string(sb.webIndex.seedDB.mySeed().getPeerTags(), ",", false));
+        prop.putHTML("peertags", serverCodings.set2string(sb.webIndex.peers().mySeed().getPeerTags(), ",", false));
 
         // set seed information directly
-        sb.webIndex.seedDB.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
-        sb.webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(indexReceive);
+        sb.webIndex.peers().mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));
+        sb.webIndex.peers().mySeed().setFlagAcceptRemoteIndex(indexReceive);
         
         // set p2p/robinson mode flags and values
         prop.put("p2p.checked", (indexDistribute || indexReceive) ? "1" : "0");

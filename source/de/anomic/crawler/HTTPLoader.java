@@ -105,7 +105,7 @@ public final class HTTPLoader {
     private Document load(final CrawlEntry entry, final String parserMode, final int retryCount) throws IOException {
 
         if (retryCount < 0) {
-            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "redirection counter exceeded").store();
+            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.peers().mySeed().hash, new Date(), 1, "redirection counter exceeded").store();
             throw new IOException("Redirection counter exceeded for URL " + entry.url().toString() + ". Processing aborted.");
         }
         
@@ -119,7 +119,7 @@ public final class HTTPLoader {
         // check if url is in blacklist
         final String hostlow = host.toLowerCase();
         if (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, hostlow, path)) {
-            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "url in blacklist").store();
+            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.peers().mySeed().hash, new Date(), 1, "url in blacklist").store();
             throw new IOException("CRAWLER Rejecting URL '" + entry.url().toString() + "'. URL is in blacklist.");
         }
         
@@ -158,7 +158,7 @@ public final class HTTPLoader {
                         // get the content length and check if the length is allowed
                         long contentLength = res.getResponseHeader().getContentLength();
                         if (maxFileSize >= 0 && contentLength > maxFileSize) {
-                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "file size limit exceeded");                    
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.peers().mySeed().hash, new Date(), 1, "file size limit exceeded");                    
                             throw new IOException("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes.");
                         }
 
@@ -169,14 +169,14 @@ public final class HTTPLoader {
                         
                         // check length again in case it was not possible to get the length before loading
                         if (maxFileSize >= 0 && contentLength > maxFileSize) {
-                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "file size limit exceeded");                    
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.peers().mySeed().hash, new Date(), 1, "file size limit exceeded");                    
                             throw new IOException("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes.");
                         }
                         
                         htCache.setCacheArray(responseBody);
                     } else {
                         // if the response has not the right file type then reject file
-                        sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "wrong mime type or wrong extension");
+                        sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.peers().mySeed().hash, new Date(), 1, "wrong mime type or wrong extension");
                         throw new IOException("REJECTED WRONG MIME/EXT TYPE " + res.getResponseHeader().mime() + " for URL " + entry.url().toString());
                     }
                     return htCache;
@@ -198,7 +198,7 @@ public final class HTTPLoader {
                         redirectionUrlString = redirectionUrlString.trim();
 
                         if (redirectionUrlString.length() == 0) {
-                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "redirection header empy");
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.peers().mySeed().hash, new Date(), 1, "redirection header empy");
                             throw new IOException("CRAWLER Redirection of URL=" + entry.url().toString() + " aborted. Location header is empty.");
                         }
                         
@@ -211,7 +211,7 @@ public final class HTTPLoader {
 
                         // if we are already doing a shutdown we don't need to retry crawling
                         if (Thread.currentThread().isInterrupted()) {
-                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "server shutdown");
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.peers().mySeed().hash, new Date(), 1, "server shutdown");
                             throw new IOException("CRAWLER Retry of URL=" + entry.url().toString() + " aborted because of server shutdown.");
                         }
 
@@ -221,7 +221,7 @@ public final class HTTPLoader {
                         // check if the url was already indexed
                         final String dbname = sb.urlExists(urlhash);
                         if (dbname != null) {
-                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "redirection to double content");
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.peers().mySeed().hash, new Date(), 1, "redirection to double content");
                             throw new IOException("CRAWLER Redirection of URL=" + entry.url().toString() + " ignored. The url appears already in db " + dbname);
                         }
                         
@@ -231,7 +231,7 @@ public final class HTTPLoader {
                     }
             } else {
                 // if the response has not the right response type then reject file
-                sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, "wrong http status code " + res.getStatusCode() +  ")");
+                sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.peers().mySeed().hash, new Date(), 1, "wrong http status code " + res.getStatusCode() +  ")");
                 throw new IOException("REJECTED WRONG STATUS TYPE '" + res.getStatusLine() + "' for URL " + entry.url().toString());
             }
             /*

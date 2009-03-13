@@ -123,7 +123,7 @@ public final class CrawlStacker {
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null) {
-                final ZURL.Entry ee = nextQueue.errorURL.newEntry(entry, wordIndex.seedDB.mySeed().hash, new Date(), 1, rejectReason);
+                final ZURL.Entry ee = nextQueue.errorURL.newEntry(entry, wordIndex.peers().mySeed().hash, new Date(), 1, rejectReason);
                 ee.store();
                 nextQueue.errorURL.push(ee);
             }
@@ -255,8 +255,8 @@ public final class CrawlStacker {
 
         // check if the url is double registered
         final String dbocc = nextQueue.urlExists(entry.url().hash());
-        if (dbocc != null || wordIndex.existsURL(entry.url().hash())) {
-            final MetadataRowContainer oldEntry = wordIndex.getURL(entry.url().hash(), null, 0);
+        if (dbocc != null || wordIndex.metadata().exists(entry.url().hash())) {
+            final MetadataRowContainer oldEntry = wordIndex.metadata().load(entry.url().hash(), null, 0);
             final boolean recrawl = (oldEntry != null) && (profile.recrawlIfOlder() > oldEntry.loaddate().getTime());
             // do double-check
             if ((dbocc != null) && (!recrawl)) {
@@ -278,7 +278,7 @@ public final class CrawlStacker {
         }
         
         // store information
-        final boolean local = entry.initiator().equals(wordIndex.seedDB.mySeed().hash);
+        final boolean local = entry.initiator().equals(wordIndex.peers().mySeed().hash);
         final boolean proxy = (entry.initiator() == null || entry.initiator().equals("------------")) && profile.handle().equals(wordIndex.defaultProxyProfile.handle());
         final boolean remote = profile.handle().equals(wordIndex.defaultRemoteProfile.handle());
         final boolean global = 
@@ -286,8 +286,8 @@ public final class CrawlStacker {
             (entry.depth() == profile.depth()) /* leaf node */ && 
             //(initiatorHash.equals(yacyCore.seedDB.mySeed.hash)) /* not proxy */ &&
             (
-                    (wordIndex.seedDB.mySeed().isSenior()) ||
-                    (wordIndex.seedDB.mySeed().isPrincipal())
+                    (wordIndex.peers().mySeed().isSenior()) ||
+                    (wordIndex.peers().mySeed().isPrincipal())
             ) /* qualified */;
         
         if (!local && !global && !remote && !proxy) {

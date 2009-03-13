@@ -94,7 +94,7 @@ public class ConfigProfile_p {
                 // generate a news message
                 final Properties news = profile;
                 news.remove("comment");
-                sb.webIndex.seedDB.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_PROFILE_UPDATE, news));
+                sb.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_PROFILE_UPDATE, news));
                 //yacyCore.newsPool.publishMyNews(new yacyNewsRecord(yacyNewsRecord.CATEGORY_PROFILE_UPDATE, profile));
             } catch(final IOException e) {
             } finally {

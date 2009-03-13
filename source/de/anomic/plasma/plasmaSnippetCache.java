@@ -946,7 +946,7 @@ public class plasmaSnippetCache {
             (snippet.getErrorCode() == ERROR_PARSER_FAILED) ||
             (snippet.getErrorCode() == ERROR_PARSER_NO_LINES)) {
             log.logInfo("error: '" + snippet.getError() + "', remove url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
-            plasmaSwitchboard.getSwitchboard().webIndex.removeURL(urlHash);
+            plasmaSwitchboard.getSwitchboard().webIndex.metadata().remove(urlHash);
             final plasmaSearchEvent event = plasmaSearchEvent.getEvent(eventID);
             assert plasmaSwitchboard.getSwitchboard() != null;
             assert plasmaSwitchboard.getSwitchboard().webIndex != null;

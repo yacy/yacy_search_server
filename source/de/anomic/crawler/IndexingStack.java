@@ -319,12 +319,12 @@ public class IndexingStack {
         
         public yacySeed initiatorPeer() {
             if ((initiator == null) || (initiator.length() == 0)) return null;
-            if (initiator.equals(wordIndex.seedDB.mySeed().hash)) {
+            if (initiator.equals(wordIndex.peers().mySeed().hash)) {
                 // normal crawling
                 return null;
             }
             // this was done for remote peer (a global crawl)
-            return wordIndex.seedDB.getConnected(initiator);
+            return wordIndex.peers().getConnected(initiator);
         }
 
         public int depth() {
@@ -367,7 +367,7 @@ public class IndexingStack {
             if (referrerURL == null) {
                 // FIXME the equals seems to be incorrect: String.equals(boolean)
                 if ((referrerHash == null) || ((initiator != null) && (referrerHash.equals(initiator.length() == 0)))) return null;
-                final MetadataRowContainer entry = wordIndex.getURL(referrerHash, null, 0);
+                final MetadataRowContainer entry = wordIndex.metadata().load(referrerHash, null, 0);
                 if (entry == null) referrerURL = null; else referrerURL = entry.metadata().url();
             }
             return referrerURL;
@@ -394,7 +394,7 @@ public class IndexingStack {
             if ((initiator == null) || initiator.length() == 0 || initiator.equals("------------")) {
                 // proxy-load
                 processCase = plasmaSwitchboardConstants.PROCESSCASE_4_PROXY_LOAD;
-            } else if (initiator.equals(wordIndex.seedDB.mySeed().hash)) {
+            } else if (initiator.equals(wordIndex.peers().mySeed().hash)) {
                 // normal crawling
                 processCase = plasmaSwitchboardConstants.PROCESSCASE_5_LOCAL_CRAWLING;
             } else {

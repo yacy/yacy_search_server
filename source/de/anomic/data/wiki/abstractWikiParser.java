@@ -28,7 +28,7 @@ public abstract class abstractWikiParser implements wikiParser {
             return transform(
                     new BufferedReader(new StringReader(content)),
                     content.length(),
-                    sb.webIndex.seedDB.mySeed().getPublicAddress(),
+                    sb.webIndex.peers().mySeed().getPublicAddress(),
                     sb);
         } catch (final IOException e) {
             return "internal error: " + e.getMessage();
@@ -74,7 +74,7 @@ public abstract class abstractWikiParser implements wikiParser {
             return transform(
                     new BufferedReader(new InputStreamReader(bais, encoding)),
                     content.length,
-                    sb.webIndex.seedDB.mySeed().getPublicAddress(),
+                    sb.webIndex.peers().mySeed().getPublicAddress(),
                     switchboard);
         } catch (final IOException e) {
             return "internal error: " + e.getMessage();

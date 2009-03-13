@@ -31,8 +31,8 @@ public class get_folders {
     	prop.putHTML("display_user", username);
     	
     	// set peer address    	
-    	prop.put("display_address", sb.webIndex.seedDB.mySeed().getPublicAddress());
-    	prop.put("display_peer", sb.webIndex.seedDB.mySeed().getName());
+    	prop.put("display_address", sb.webIndex.peers().mySeed().getPublicAddress());
+    	prop.put("display_peer", sb.webIndex.peers().mySeed().getName());
     	    	
     	String root = "/";  	
     	String[] foldername = null;

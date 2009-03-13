@@ -73,7 +73,7 @@ public class plasmaSearchAPI {
         yacySeed seed;
         int hc = 0;
         prop.put("searchresult_keyhash", startHash);
-        final Iterator<yacySeed> e = PeerSelection.getAcceptRemoteIndexSeeds(sb.webIndex.seedDB, startHash, sb.webIndex.seedDB.sizeConnected(), true);
+        final Iterator<yacySeed> e = PeerSelection.getAcceptRemoteIndexSeeds(sb.webIndex.peers(), startHash, sb.webIndex.peers().sizeConnected(), true);
         while (e.hasNext()) {
             seed = e.next();
             if (seed != null) {

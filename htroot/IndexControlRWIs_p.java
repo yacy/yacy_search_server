@@ -187,14 +187,14 @@ public class IndexControlRWIs_p {
                 if (host.length() != 0) {
                     if (host.length() == 12) {
                         // the host string is a peer hash
-                        seed = sb.webIndex.seedDB.getConnected(host);
+                        seed = sb.webIndex.peers().getConnected(host);
                     } else {
                         // the host string can be a host name
-                        seed = sb.webIndex.seedDB.lookupByName(host);
+                        seed = sb.webIndex.peers().lookupByName(host);
                     }
                 } else {
                     host = post.get("hostHash", ""); // if input field is empty, get from select box
-                    seed = sb.webIndex.seedDB.getConnected(host);
+                    seed = sb.webIndex.peers().getConnected(host);
                 }
                 
                 // prepare index
@@ -209,7 +209,7 @@ public class IndexControlRWIs_p {
                 MetadataRowContainer lurl;
                 while (urlIter.hasNext()) {
                     iEntry = urlIter.next();
-                    lurl = sb.webIndex.getURL(iEntry.urlHash(), null, 0);
+                    lurl = sb.webIndex.metadata().load(iEntry.urlHash(), null, 0);
                     if (lurl == null) {
                         unknownURLEntries.add(iEntry.urlHash());
                         urlIter.remove();
@@ -269,8 +269,8 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final MetadataRowContainer e = sb.webIndex.getURL(urlx[i], null, 0);
-                            sb.webIndex.removeURL(urlx[i]);
+                            final MetadataRowContainer e = sb.webIndex.metadata().load(urlx[i], null, 0);
+                            sb.webIndex.metadata().remove(urlx[i]);
                             if (e != null) {
                                 url = e.metadata().url();
                                 pw.println(url.getHost() + "/" + url.getFile());
@@ -297,8 +297,8 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final MetadataRowContainer e = sb.webIndex.getURL(urlx[i], null, 0);
-                            sb.webIndex.removeURL(urlx[i]);
+                            final MetadataRowContainer e = sb.webIndex.metadata().load(urlx[i], null, 0);
+                            sb.webIndex.metadata().remove(urlx[i]);
                             if (e != null) {
                                 url = e.metadata().url();
                                 pw.println(url.getHost() + "/.*");

@@ -43,7 +43,7 @@ public class IndexCleaner_p {
             //prop.putHTML("bla", "post!=null");
             if (post.get("action").equals("ustart")) {
                 if (urldbCleanerThread==null || !urldbCleanerThread.isAlive()) {
-                    urldbCleanerThread = sb.webIndex.getURLCleaner(plasmaSwitchboard.urlBlacklist);
+                    urldbCleanerThread = sb.webIndex.metadata().getBlacklistCleaner(plasmaSwitchboard.urlBlacklist);
                     urldbCleanerThread.start();
                 }
                 else {
@@ -77,7 +77,7 @@ public class IndexCleaner_p {
         //prop.put("bla", "post==null");
         if (urldbCleanerThread!=null) {
             prop.put("urldb", "1");
-            prop.putNum("urldb_percentUrls", ((double)urldbCleanerThread.totalSearchedUrls/sb.webIndex.countURL())*100);
+            prop.putNum("urldb_percentUrls", ((double)urldbCleanerThread.totalSearchedUrls/sb.webIndex.metadata().size())*100);
             prop.putNum("urldb_blacklisted", urldbCleanerThread.blacklistedUrls);
             prop.putNum("urldb_total", urldbCleanerThread.totalSearchedUrls);
             prop.putHTML("urldb_lastBlacklistedUrl", urldbCleanerThread.lastBlacklistedUrl);

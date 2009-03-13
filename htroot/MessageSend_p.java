@@ -67,14 +67,14 @@ public class MessageSend_p {
 
             // open an editor page for the message
             // first ask if the other peer is online, and also what kind of document it accepts
-            final HashMap<String, String> result = yacyClient.permissionMessage(sb.webIndex.seedDB, hash);
+            final HashMap<String, String> result = yacyClient.permissionMessage(sb.webIndex.peers(), hash);
             //System.out.println("DEBUG: permission request result = " + result.toString());
             String peerName;
             yacySeed targetPeer = null;
-            if (hash.equals(sb.webIndex.seedDB.mySeed().hash)) {
-                peerName = sb.webIndex.seedDB.mySeed().get(yacySeed.NAME,"nameless");
+            if (hash.equals(sb.webIndex.peers().mySeed().hash)) {
+                peerName = sb.webIndex.peers().mySeed().get(yacySeed.NAME,"nameless");
             } else {
-                targetPeer = sb.webIndex.seedDB.getConnected(hash);
+                targetPeer = sb.webIndex.peers().getConnected(hash);
                 if (targetPeer == null)
                     peerName = "nameless";
                 else
@@ -88,7 +88,7 @@ public class MessageSend_p {
                 prop.put("mode_permission", "0");
 
                 if (targetPeer != null) {
-                    sb.webIndex.seedDB.peerActions.peerDeparture(targetPeer, "peer responded upon message send request: " + response);
+                    sb.webIndex.peers().peerActions.peerDeparture(targetPeer, "peer responded upon message send request: " + response);
                 }
             } else {
                 prop.put("mode_permission", "1");
@@ -131,7 +131,7 @@ public class MessageSend_p {
                 } catch (final UnsupportedEncodingException e) {
                     mb = message.getBytes();
                 }
-                final HashMap<String, String> result = yacyClient.postMessage(sb.webIndex.seedDB, hash, subject, mb);
+                final HashMap<String, String> result = yacyClient.postMessage(sb.webIndex.peers(), hash, subject, mb);
 
                 //message has been sent
                 prop.put("mode_status_response", result.get("response"));

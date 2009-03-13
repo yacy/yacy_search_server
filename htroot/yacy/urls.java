@@ -46,7 +46,7 @@ public class urls {
         
         // insert default values
         final serverObjects prop = new serverObjects();
-        prop.put("iam", sb.webIndex.seedDB.mySeed().hash);
+        prop.put("iam", sb.webIndex.peers().mySeed().hash);
         prop.put("response", "rejected - insufficient call parameters");
         prop.put("channel_title", "");
         prop.put("channel_description", "");
@@ -82,7 +82,7 @@ public class urls {
                 sb.crawlQueues.delegatedURL.push(
                         sb.crawlQueues.delegatedURL.newEntry(
                                 entry,
-                                sb.webIndex.seedDB.mySeed().hash,
+                                sb.webIndex.peers().mySeed().hash,
                                 new Date(),
                                 0,
                                 "client=____________")
@@ -113,7 +113,7 @@ public class urls {
         	URLMetadata metadata;
             yacyURL referrer;
             for (int i = 0; i < count; i++) {
-                entry = sb.webIndex.getURL(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);
+                entry = sb.webIndex.metadata().load(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);
                 if (entry == null) continue;
                 // find referrer, if there is one
                 referrer = sb.getURL(entry.referrerHash());

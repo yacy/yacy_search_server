@@ -243,7 +243,7 @@ public class bookmarksDB {
 	    			Pattern.compile(newcrawlingMustMatch);	    			
                     
                     String urlhash = crawlingStartURL.hash();
-                    sb.webIndex.removeURL(urlhash);
+                    sb.webIndex.metadata().remove(urlhash);
                     sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                     sb.crawlQueues.errorURL.remove(urlhash);
 	               
@@ -259,7 +259,7 @@ public class bookmarksDB {
 	                        indexText, indexMedia,
 	                        storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
 	                sb.crawlStacker.enqueueEntry(new CrawlEntry(
-	                        sb.webIndex.seedDB.mySeed().hash,
+	                        sb.webIndex.peers().mySeed().hash,
                             crawlingStartURL,
 	                        null,
 	                        "CRAWLING-ROOT",
@@ -287,7 +287,7 @@ public class bookmarksDB {
                         m.remove("generalFilter");
                         m.remove("specificFilter");
                         m.put("intention", "Automatic ReCrawl!");
-                        sb.webIndex.seedDB.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));	                      
+                        sb.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));	                      
                     }
 	    		} catch (MalformedURLException e1) {}
 			} // if

@@ -83,7 +83,7 @@ public final class transferRWI {
         boolean granted       = sb.getConfig("allowReceiveIndex", "false").equals("true");
         final boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
         final long cachelimit = sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 100000);
-        final yacySeed otherPeer = sb.webIndex.seedDB.get(iam);
+        final yacySeed otherPeer = sb.webIndex.peers().get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));                
         
         // response values
@@ -91,8 +91,8 @@ public final class transferRWI {
         String result = "ok";
         final StringBuilder unknownURLs = new StringBuilder();
         
-        if ((youare == null) || (!youare.equals(sb.webIndex.seedDB.mySeed().hash))) {
-        	sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.webIndex.seedDB.mySeed().hash);
+        if ((youare == null) || (!youare.equals(sb.webIndex.peers().mySeed().hash))) {
+        	sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.webIndex.peers().mySeed().hash);
             result = "wrong_target";
             pause = 0;
         } else if ((!granted) || (sb.isRobinsonMode())) {
@@ -162,7 +162,7 @@ public final class transferRWI {
 
                 // check if we need to ask for the corresponding URL
                 if (!(knownURL.contains(urlHash)||unknownURL.contains(urlHash)))  try {
-                    if (sb.webIndex.existsURL(urlHash)) {
+                    if (sb.webIndex.metadata().exists(urlHash)) {
                         knownURL.add(urlHash);
                     } else {
                         unknownURL.add(urlHash);
@@ -175,7 +175,7 @@ public final class transferRWI {
                 }
                 received++;
             }
-            sb.webIndex.seedDB.mySeed().incRI(received);
+            sb.webIndex.peers().mySeed().incRI(received);
 
             // finally compose the unknownURL hash list
             final Iterator<String> it = unknownURL.iterator();  
@@ -187,7 +187,7 @@ public final class transferRWI {
             if ((wordhashes.length == 0) || (received == 0)) {
                 sb.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs");
             } else {
-                final long avdist = (FlatWordPartitionScheme.std.dhtDistance(wordhashes[0], null, sb.webIndex.seedDB.mySeed()) + FlatWordPartitionScheme.std.dhtDistance(wordhashes[received - 1], null, sb.webIndex.seedDB.mySeed())) / 2;
+                final long avdist = (FlatWordPartitionScheme.std.dhtDistance(wordhashes[0], null, sb.webIndex.peers().mySeed()) + FlatWordPartitionScheme.std.dhtDistance(wordhashes[received - 1], null, sb.webIndex.peers().mySeed())) / 2;
                 sb.getLog().logInfo("Received " + received + " Entries " + wordc + " Words [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + "/" + receivedURL + " URLs, blocked " + blocked + " RWIs");
                 RSSFeed.channels(RSSFeed.INDEXRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", requesting " + unknownURL.size() + " URLs, blocked " + blocked, "", ""));
             }

@@ -287,7 +287,7 @@ public class PerformanceQueues_p {
         prop.put("minimumGlobalDelta", switchboard.crawlQueues.noticeURL.getMinimumGlobalDelta());
         
         // table cache settings
-        prop.putNum("urlCacheSize", switchboard.webIndex.getURLwriteCacheSize());  
+        prop.putNum("urlCacheSize", switchboard.webIndex.metadata().writeCacheSize());  
         prop.putNum("wordCacheSize", switchboard.webIndex.indexCacheSize());
         prop.putNum("wordCacheSizeKBytes", switchboard.webIndex.indexCacheSizeBytes()/1024);
         prop.putNum("maxURLinCache", switchboard.webIndex.maxURLinCache());

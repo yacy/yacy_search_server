@@ -224,7 +224,7 @@ public class yacysearch {
             
             // check available memory and clean up if necessary
             if (!MemoryControl.request(8000000L, false)) {
-                sb.webIndex.clearCache();
+                sb.webIndex.metadata().clearCache();
                 plasmaSearchEvent.cleanupEvents(true);
             }
             
@@ -322,7 +322,7 @@ public class yacysearch {
                 map.put("urlhash", delHash);
                 map.put("vote", "negative");
                 map.put("refid", "");
-                sb.webIndex.seedDB.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
+                sb.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             }
 
             // if a plus-button was hit, create new voting message
@@ -332,7 +332,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                final MetadataRowContainer urlentry = sb.webIndex.getURL(recommendHash, null, 0);
+                final MetadataRowContainer urlentry = sb.webIndex.metadata().load(recommendHash, null, 0);
                 if (urlentry != null) {
                     final URLMetadata metadata = urlentry.metadata();
                     plasmaParserDocument document;
@@ -345,7 +345,7 @@ public class yacysearch {
                         map.put("description", document.dc_title().replace(',', ' '));
                         map.put("author", document.dc_creator());
                         map.put("tags", document.dc_subject(' '));
-                        sb.webIndex.seedDB.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
+                        sb.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
                         document.close();
                     }
                 }

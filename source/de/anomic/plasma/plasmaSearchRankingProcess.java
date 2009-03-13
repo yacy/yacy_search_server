@@ -295,7 +295,7 @@ public final class plasmaSearchRankingProcess {
                 if (((stack.size() == 0) && (size() == 0))) break;
                 final SortStack<ReferenceVars>.stackElement obrwi = bestRWI(skipDoubleDom);
                 if (obrwi == null) continue; // *** ? this happened and the thread was suspended silently. cause?
-                final MetadataRowContainer u = wordIndex.getURL(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
+                final MetadataRowContainer u = wordIndex.metadata().load(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
                 if (u != null) {
                     final URLMetadata metadata = u.metadata();
                     if (metadata.url() != null) this.handover.put(u.hash(), metadata.url().toNormalform(true, false)); // remember that we handed over this url

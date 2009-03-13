@@ -51,14 +51,12 @@ import de.anomic.kelondro.text.Index;
 import de.anomic.kelondro.text.IndexCache;
 import de.anomic.kelondro.text.IndexCollection;
 import de.anomic.kelondro.text.MetadataRowContainer;
-import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerOrder;
 import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.Word;
 import de.anomic.kelondro.text.Blacklist;
-import de.anomic.kelondro.text.MetadataRepository.Export;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
@@ -98,8 +96,8 @@ public final class plasmaWordIndex implements Index {
     private final IndexCache      indexCache;
     private final IndexCollection collections;          // new database structure to replace AssortmentCluster and FileCluster
     private final Log             log;
-    public MetadataRepository     referenceURL;
-    public  final yacySeedDB      seedDB;
+    private MetadataRepository    metadata;
+    private final yacySeedDB      peers;
     private final File            primaryRoot, secondaryRoot;
     public        IndexingStack   queuePreStack;
     public        CrawlProfile    profilesActiveCrawls, profilesPassiveCrawls;
@@ -170,7 +168,7 @@ public final class plasmaWordIndex implements Index {
 					useCommons);
 
         // create LURL-db
-        referenceURL = new MetadataRepository(new File(this.secondaryRoot, "TEXT"));
+        metadata = new MetadataRepository(new File(this.secondaryRoot, "TEXT"));
         
         // make crawl profiles database and default profiles
         this.queuesRoot = new File(this.primaryRoot, "QUEUES");
@@ -233,7 +231,7 @@ public final class plasmaWordIndex implements Index {
         final File mySeedFile = new File(networkRoot, yacySeedDB.DBFILE_OWN_SEED);
         final File oldSeedFile = new File(new File(indexPrimaryRoot.getParentFile(), "YACYDB"), "mySeed.txt");
         if (oldSeedFile.exists()) oldSeedFile.renameTo(mySeedFile);
-        seedDB = new yacySeedDB(
+        peers = new yacySeedDB(
                 networkRoot,
                 "seed.new.heap",
                 "seed.old.heap",
@@ -243,8 +241,12 @@ public final class plasmaWordIndex implements Index {
                 partitionExponent);
     }
     
-    public void clearCache() {
-        referenceURL.clearCache();
+    public MetadataRepository metadata() {
+        return this.metadata;
+    }
+
+    public yacySeedDB peers() {
+        return this.peers;
     }
 
     public void clear() {
@@ -255,7 +257,7 @@ public final class plasmaWordIndex implements Index {
 			e.printStackTrace();
 		}
         try {
-            referenceURL.clear();
+            metadata.clear();
         } catch (final IOException e) {
             e.printStackTrace();
         }
@@ -374,54 +376,6 @@ public final class plasmaWordIndex implements Index {
     
     public File getLocation(final boolean primary) {
         return (primary) ? this.primaryRoot : this.secondaryRoot;
-    }
-
-    public void putURL(final MetadataRowContainer entry) throws IOException {
-        this.referenceURL.store(entry);
-    }
-    
-    public MetadataRowContainer getURL(final String urlHash, final Reference searchedWord, final long ranking) {
-        return this.referenceURL.load(urlHash, searchedWord, ranking);
-    }
-    
-    public boolean removeURL(final String urlHash) {
-        return this.referenceURL.remove(urlHash);
-    }
-        
-    public boolean existsURL(final String urlHash) {
-        return this.referenceURL.exists(urlHash);
-    }
-    
-    public int countURL() {
-        return this.referenceURL.size();
-    }
-    
-    public Export exportURL(final File f, final String filter, final int format, final boolean dom) {
-        return this.referenceURL.export(f, filter, null, format, dom);
-    }
-    
-    public Export exportURL() {
-        return this.referenceURL.export();
-    }
-    
-    public CloneableIterator<MetadataRowContainer> entriesURL(final boolean up, final String firstHash) throws IOException {
-        return this.referenceURL.entries(up, firstHash);
-    }
-    
-    public Iterator<MetadataRepository.hostStat> statistics(int count) throws IOException {
-        return this.referenceURL.statistics(count);
-    }
-    
-    public int deleteDomain(String urlfragment) throws IOException {
-        return this.referenceURL.deleteDomain(urlfragment);
-    }
-    
-    public MetadataRepository.BlacklistCleaner getURLCleaner(final Blacklist blacklist) {
-        return this.referenceURL.getBlacklistCleaner(blacklist); // thread is not already started after this is called!
-    }
-    
-    public int getURLwriteCacheSize() {
-        return this.referenceURL.writeCacheSize();
     }
     
     public int minMem() {
@@ -696,8 +650,8 @@ public final class plasmaWordIndex implements Index {
     public void close() {
         indexCache.close();
         collections.close();
-        referenceURL.close();
-        seedDB.close();
+        metadata.close();
+        peers.close();
         profilesActiveCrawls.close();
         queuePreStack.close();
     }
@@ -866,7 +820,7 @@ public final class plasmaWordIndex implements Index {
         );
         
         // STORE URL TO LOADED-URL-DB
-        putURL(newEntry);
+        metadata.store(newEntry);
         
         final long storageEndTime = System.currentTimeMillis();
         
@@ -895,7 +849,7 @@ public final class plasmaWordIndex implements Index {
                     "Anchors: " + ((document.getAnchors() == null) ? 0 : document.getAnchors().size()) +
                     "\n\tLinkStorageTime: " + (storageEndTime - startTime) + " ms | " +
                     "indexStorageTime: " + (indexingEndTime - storageEndTime) + " ms");
-            RSSFeed.channels((entry.initiator().equals(seedDB.mySeed().hash)) ? RSSFeed.LOCALINDEXING : RSSFeed.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, entry.url().toNormalform(true, false)));
+            RSSFeed.channels((entry.initiator().equals(peers.mySeed().hash)) ? RSSFeed.LOCALINDEXING : RSSFeed.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, entry.url().toNormalform(true, false)));
         }
         
         // finished
@@ -965,7 +919,7 @@ public final class plasmaWordIndex implements Index {
                     entry = containerIterator.next();
                     // System.out.println("Wordhash: "+wordHash+" UrlHash:
                     // "+entry.getUrlHash());
-                    final MetadataRowContainer ue = referenceURL.load(entry.urlHash(), entry, 0);
+                    final MetadataRowContainer ue = metadata.load(entry.urlHash(), entry, 0);
                     if (ue == null) {
                         urlHashs.add(entry.urlHash());
                     } else {

@@ -183,7 +183,7 @@ public final class plasmaSearchEvent {
                         IAmaxcounthash = wordhash;
                         maxcount = container.size();
                     }
-                    l = FlatWordPartitionScheme.std.dhtDistance(wordhash, null, wordIndex.seedDB.mySeed());
+                    l = FlatWordPartitionScheme.std.dhtDistance(wordhash, null, wordIndex.peers().mySeed());
                     if (l < mindhtdistance) {
                         // calculate the word hash that is closest to our dht position
                         mindhtdistance = l;
@@ -345,7 +345,7 @@ public final class plasmaSearchEvent {
             } else {
                 // problems with snippet fetch
                 registerFailure(page.hash(), "no text snippet for URL " + metadata.url());
-                if (!wordIndex.seedDB.mySeed().isVirgin()) plasmaSnippetCache.failConsequences(snippet, query.id(false));
+                if (!wordIndex.peers().mySeed().isVirgin()) plasmaSnippetCache.failConsequences(snippet, query.id(false));
                 return null;
             }
         } else {
@@ -708,7 +708,7 @@ public final class plasmaSearchEvent {
             Iterator<Map.Entry<String, String>> i1 = abstractJoin.entrySet().iterator();
             Map.Entry<String, String> entry1;
             String url, urls, peer, peers;
-            final String mypeerhash = wordIndex.seedDB.mySeed().hash;
+            final String mypeerhash = wordIndex.peers().mySeed().hash;
             boolean mypeerinvolved = false;
             int mypeercount;
             while (i1.hasNext()) {
@@ -819,7 +819,7 @@ public final class plasmaSearchEvent {
                 // translate host into current IP
                 int p = host.indexOf(".");
                 final String hash = yacySeed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));
-                final yacySeed seed = wordIndex.seedDB.getConnected(hash);
+                final yacySeed seed = wordIndex.peers().getConnected(hash);
                 final String filename = urlcomps.url().getFile();
                 String address = null;
                 if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
@@ -831,7 +831,7 @@ public final class plasmaSearchEvent {
                              " " +
                              urlcomps.dc_title())).keySet(),
                              urlentry.hash());
-                    wordIndex.removeURL(urlentry.hash()); // clean up
+                    wordIndex.metadata().remove(urlentry.hash()); // clean up
                     throw new RuntimeException("index void");
                 }
                 alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + filename;

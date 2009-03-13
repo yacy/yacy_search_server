@@ -114,7 +114,7 @@ public class yacySearch extends Thread {
 
     public void run() {
         this.urls = yacyClient.search(
-                    wordIndex.seedDB.mySeed(),
+                    wordIndex.peers().mySeed(),
                     wordhashes, excludehashes, urlhashes, prefer, filter, language, count, maxDistance, global, partitions,
                     targetPeer, wordIndex, crawlResults, containerCache, abstractCache,
                     blacklist, rankingProfile, constraint);
@@ -123,8 +123,8 @@ public class yacySearch extends Thread {
             final StringBuilder urllist = new StringBuilder(this.urls.length * 13);
             for (int i = 0; i < this.urls.length; i++) urllist.append(this.urls[i]).append(' ');
             yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + urls.length + " links for word hash " + wordhashes + ": " + new String(urllist));
-            wordIndex.seedDB.mySeed().incRI(urls.length);
-            wordIndex.seedDB.mySeed().incRU(urls.length);
+            wordIndex.peers().mySeed().incRI(urls.length);
+            wordIndex.peers().mySeed().incRU(urls.length);
         } else {
             yacyCore.log.logInfo("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
         }
@@ -266,11 +266,11 @@ public class yacySearch extends Thread {
         final yacySeed[] targetPeers =
             (clusterselection == null) ?
                     selectSearchTargets(
-                            wordIndex.seedDB,
+                            wordIndex.peers(),
                             plasmaSearchQuery.hashes2Set(wordhashes),
                             targets,
-                            wordIndex.seedDB.redundancy())
-                  : selectClusterPeers(wordIndex.seedDB, clusterselection);
+                            wordIndex.peers().redundancy())
+                  : selectClusterPeers(wordIndex.peers(), clusterselection);
         if (targetPeers == null) return new yacySearch[0];
         targets = targetPeers.length;
         if (targets == 0) return new yacySearch[0];
@@ -294,10 +294,10 @@ public class yacySearch extends Thread {
             final plasmaSearchRankingProfile rankingProfile,
             final Bitfield constraint, final TreeMap<String, String> clusterselection) {
         // check own peer status
-        if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
+        if (wordIndex.peers().mySeed() == null || wordIndex.peers().mySeed().getPublicAddress() == null) { return null; }
 
         // prepare seed targets and threads
-        final yacySeed targetPeer = wordIndex.seedDB.getConnected(targethash);
+        final yacySeed targetPeer = wordIndex.peers().getConnected(targethash);
         if (targetPeer == null || targetPeer.hash == null) return null;
         if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(targetPeer.hash));
         final yacySearch searchThread = new yacySearch(wordhashes, excludehashes, urlhashes, "", "", "en", 0, 9999, true, 0, targetPeer,

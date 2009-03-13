@@ -72,7 +72,7 @@ public final class query {
         prop.put("mytime", DateFormatter.formatShortSecond());
 
         // check if we are the right target and requester has correct information about this peer
-        if (sb.webIndex.seedDB.mySeed() == null || !sb.webIndex.seedDB.mySeed().hash.equals(youare)) {
+        if (sb.webIndex.peers().mySeed() == null || !sb.webIndex.peers().mySeed().hash.equals(youare)) {
             // this request has a wrong target
             prop.put("response", "-1"); // request rejected
             return prop;
@@ -94,7 +94,7 @@ public final class query {
 
         if (obj.equals("lurlcount")) {
             // return the number of all available l-url's
-            prop.put("response", sb.webIndex.countURL());
+            prop.put("response", sb.webIndex.metadata().size());
             return prop;
         }
 

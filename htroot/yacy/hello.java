@@ -158,17 +158,17 @@ public final class hello {
                 remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_SENIOR);
             }
             // connect the seed
-            sb.webIndex.seedDB.peerActions.peerArrival(remoteSeed, true);
+            sb.webIndex.peers().peerActions.peerArrival(remoteSeed, true);
         } else {
             prop.put(yacySeed.YOURTYPE, yacySeed.PEERTYPE_JUNIOR);
             remoteSeed.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
             yacyCore.log.logInfo("hello: responded remote junior peer '" + remoteSeed.getName() + "' from " + reportedip);
             // no connection here, instead store junior in connection cache
             if ((remoteSeed.hash != null) && (remoteSeed.isProper(false) == null)) {
-                sb.webIndex.seedDB.peerActions.peerPing(remoteSeed);
+                sb.webIndex.peers().peerActions.peerPing(remoteSeed);
             }
         }
-        sb.webIndex.seedDB.peerActions.setUserAgent(clientip, userAgent);
+        sb.webIndex.peers().peerActions.setUserAgent(clientip, userAgent);
         if (!(prop.get(yacySeed.YOURTYPE)).equals(reportedPeerType)) {
             yacyCore.log.logInfo("hello: changing remote peer '" + remoteSeed.getName() +
                                                            "' [" + reportedip +
@@ -179,15 +179,15 @@ public final class hello {
         serverCore.checkInterruption();
         final StringBuilder seeds = new StringBuilder(768);
         // attach some more seeds, as requested
-        if (sb.webIndex.seedDB.sizeConnected() > 0) {
-            if (count > sb.webIndex.seedDB.sizeConnected()) { count = sb.webIndex.seedDB.sizeConnected(); }
+        if (sb.webIndex.peers().sizeConnected() > 0) {
+            if (count > sb.webIndex.peers().sizeConnected()) { count = sb.webIndex.peers().sizeConnected(); }
             if (count > 100) { count = 100; }
             
             // latest seeds
-            final Map<String, yacySeed> ySeeds = PeerSelection.seedsByAge(sb.webIndex.seedDB, true, count); // peerhash/yacySeed relation
+            final Map<String, yacySeed> ySeeds = PeerSelection.seedsByAge(sb.webIndex.peers(), true, count); // peerhash/yacySeed relation
             
             // attach also my own seed
-            seeds.append("seed0=").append(sb.webIndex.seedDB.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
+            seeds.append("seed0=").append(sb.webIndex.peers().mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
             count = 1;            
             
             // attach other seeds
@@ -211,7 +211,7 @@ public final class hello {
             }
         } else {
             // attach also my own seed
-            seeds.append("seed0=").append(sb.webIndex.seedDB.mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
+            seeds.append("seed0=").append(sb.webIndex.peers().mySeed().genSeedStr(key)).append(serverCore.CRLF_STRING);
         }
 
         prop.put("seedlist", seeds.toString());

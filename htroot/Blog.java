@@ -68,7 +68,7 @@ public class Blog {
 
         
         final boolean xml = (header.get(httpRequestHeader.CONNECTION_PROP_PATH)).endsWith(".xml");
-        final String address = sb.webIndex.seedDB.mySeed().getPublicAddress();
+        final String address = sb.webIndex.peers().mySeed().getPublicAddress();
 
         if(hasRights) {
             prop.put("mode_admin", "1");
@@ -77,7 +77,7 @@ public class Blog {
         }
 
         if (post == null) {
-            prop.putHTML("peername", sb.webIndex.seedDB.mySeed().getName());
+            prop.putHTML("peername", sb.webIndex.peers().mySeed().getName());
             prop.put("address", address);
             return putBlogDefault(prop, sb, address, 0, 10, hasRights, xml);
         }
@@ -104,10 +104,10 @@ public class Blog {
             StrAuthor = sb.blogDB.guessAuthor(ip);
 
             if (StrAuthor == null || StrAuthor.length() == 0) {
-                if (sb.webIndex.seedDB.mySeed() == null) {
+                if (sb.webIndex.peers().mySeed() == null) {
                     StrAuthor = "anonymous";
                 } else {
-                    StrAuthor = sb.webIndex.seedDB.mySeed().get("Name", "anonymous");
+                    StrAuthor = sb.webIndex.peers().mySeed().get("Name", "anonymous");
                 }
             }
         }
@@ -169,7 +169,7 @@ public class Blog {
             map.put("page", pagename);
             map.put("subject", StrSubject.replace(',', ' '));
             map.put("author", StrAuthor.replace(',', ' '));
-            sb.webIndex.seedDB.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_BLOG_ADD, map));
+            sb.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_BLOG_ADD, map));
         }
 
         page = sb.blogDB.readBlogEntry(pagename); //maybe "if(page == null)"
@@ -246,7 +246,7 @@ public class Blog {
             if(pagename.equals(DEFAULT_PAGE)) {
                 // XXX: where are "peername" and "address" used in the template?
                 // XXX: "clientname" is already set to the peername, no need for a new setting
-                prop.putHTML("peername", sb.webIndex.seedDB.mySeed().getName());
+                prop.putHTML("peername", sb.webIndex.peers().mySeed().getName());
                 prop.put("address", address);
                 //index all entries
                 putBlogDefault(prop, sb, address, start, num, hasRights, xml);

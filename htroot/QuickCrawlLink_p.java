@@ -122,7 +122,7 @@ public class QuickCrawlLink_p {
             }
                     
             final String urlhash = crawlingStartURL.hash();
-            sb.webIndex.removeURL(urlhash);
+            sb.webIndex.metadata().remove(urlhash);
             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
             sb.crawlQueues.errorURL.remove(urlhash);
             
@@ -160,7 +160,7 @@ public class QuickCrawlLink_p {
             // stack URL
             String reasonString = null;
             reasonString = sb.crawlStacker.stackCrawl(new CrawlEntry(
-                    sb.webIndex.seedDB.mySeed().hash, 
+                    sb.webIndex.peers().mySeed().hash, 
                     crawlingStartURL,
                     null, 
                     (title==null)?"CRAWLING-ROOT":title, 

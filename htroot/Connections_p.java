@@ -160,14 +160,14 @@ public final class Connections_p {
                     commandLine = urlRedir.getURL();
                 }                
                 
-                if ((dest != null) && (dest.equals(virtualHost))) dest = sb.webIndex.seedDB.mySeed().getName() + ".yacy";
+                if ((dest != null) && (dest.equals(virtualHost))) dest = sb.webIndex.peers().mySeed().getName() + ".yacy";
                 
                 // determining if the source is a yacy host
                 yacySeed seed = null;
                 if (doNameLookup) {
-                    seed = sb.webIndex.seedDB.lookupByIP(userAddress,true,false,false);
+                    seed = sb.webIndex.peers().lookupByIP(userAddress,true,false,false);
                     if (seed != null) {
-                        if ((seed.hash.equals(sb.webIndex.seedDB.mySeed().hash)) && 
+                        if ((seed.hash.equals(sb.webIndex.peers().mySeed().hash)) && 
                                 (!seed.get(yacySeed.PORT,"").equals(Integer.toString(userPort)))) {
                             seed = null;
                         }

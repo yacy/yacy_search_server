@@ -244,7 +244,7 @@ public class CrawlQueues {
                             + ", crawlDepth=" + profile.depth()
                             + ", must-match=" + profile.mustMatchPattern().toString()
                             + ", must-not-match=" + profile.mustNotMatchPattern().toString()
-                            + ", permission=" + ((sb.webIndex.seedDB == null) ? "undefined" : (((sb.webIndex.seedDB.mySeed().isSenior()) || (sb.webIndex.seedDB.mySeed().isPrincipal())) ? "true" : "false")));
+                            + ", permission=" + ((sb.webIndex.peers() == null) ? "undefined" : (((sb.webIndex.peers().mySeed().isSenior()) || (sb.webIndex.peers().mySeed().isPrincipal())) ? "true" : "false")));
 
                 processLocalCrawling(urlEntry, stats);
             } else {
@@ -310,13 +310,13 @@ public class CrawlQueues {
     
     public boolean remoteCrawlLoaderJob() {
         // check if we are allowed to crawl urls provided by other peers
-        if (!sb.webIndex.seedDB.mySeed().getFlagAcceptRemoteCrawl()) {
+        if (!sb.webIndex.peers().mySeed().getFlagAcceptRemoteCrawl()) {
             //this.log.logInfo("remoteCrawlLoaderJob: not done, we are not allowed to do that");
             return false;
         }
         
         // check if we are a senior peer
-        if (!sb.webIndex.seedDB.mySeed().isActive()) {
+        if (!sb.webIndex.peers().mySeed().isActive()) {
             //this.log.logInfo("remoteCrawlLoaderJob: not done, this should be a senior or principal peer");
             return false;
         }
@@ -354,8 +354,8 @@ public class CrawlQueues {
         // check if we have an entry in the provider list, otherwise fill the list
         yacySeed seed;
         if (remoteCrawlProviderHashes.size() == 0) {
-            if (sb.webIndex.seedDB != null && sb.webIndex.seedDB.sizeConnected() > 0) {
-                final Iterator<yacySeed> e = PeerSelection.getProvidesRemoteCrawlURLs(sb.webIndex.seedDB);
+            if (sb.webIndex.peers() != null && sb.webIndex.peers().sizeConnected() > 0) {
+                final Iterator<yacySeed> e = PeerSelection.getProvidesRemoteCrawlURLs(sb.webIndex.peers());
                 while (e.hasNext()) {
                     seed = e.next();
                     if (seed != null) {
@@ -372,7 +372,7 @@ public class CrawlQueues {
         while ((seed == null) && (remoteCrawlProviderHashes.size() > 0)) {
             hash = remoteCrawlProviderHashes.remove(remoteCrawlProviderHashes.size() - 1);
             if (hash == null) continue;
-            seed = sb.webIndex.seedDB.get(hash);
+            seed = sb.webIndex.peers().get(hash);
             if (seed == null) continue;
             // check if the peer is inside our cluster
             if ((sb.isRobinsonMode()) && (!sb.isInMyCluster(seed))) {
@@ -383,11 +383,11 @@ public class CrawlQueues {
         if (seed == null) return false;
         
         // we know a peer which should provide remote crawl entries. load them now.
-        final RSSFeed feed = yacyClient.queryRemoteCrawlURLs(sb.webIndex.seedDB, seed, 30, 60000);
+        final RSSFeed feed = yacyClient.queryRemoteCrawlURLs(sb.webIndex.peers(), seed, 30, 60000);
         if (feed == null || feed.size() == 0) {
             // something is wrong with this provider. To prevent that we get not stuck with this peer
             // we remove it from the peer list
-            sb.webIndex.seedDB.peerActions.peerDeparture(seed, "no results from provided remote crawls");
+            sb.webIndex.peers().peerActions.peerDeparture(seed, "no results from provided remote crawls");
             // ask another peer
             return remoteCrawlLoaderJob();
         }
@@ -501,7 +501,7 @@ public class CrawlQueues {
     ) throws IOException {
         
         final CrawlEntry centry = new CrawlEntry(
-                sb.webIndex.seedDB.mySeed().hash, 
+                sb.webIndex.peers().mySeed().hash, 
                 url, 
                 "", 
                 "", 
@@ -555,7 +555,7 @@ public class CrawlQueues {
                     if (log.isFine()) log.logFine("Crawling of URL '" + entry.url().toString() + "' disallowed by robots.txt.");
                     final ZURL.Entry eentry = errorURL.newEntry(
                             this.entry,
-                            sb.webIndex.seedDB.mySeed().hash,
+                            sb.webIndex.peers().mySeed().hash,
                             new Date(),
                             1,
                             "denied by robots.txt");
@@ -568,7 +568,7 @@ public class CrawlQueues {
                     if (result != null) {
                         final ZURL.Entry eentry = errorURL.newEntry(
                                 this.entry,
-                                sb.webIndex.seedDB.mySeed().hash,
+                                sb.webIndex.peers().mySeed().hash,
                                 new Date(),
                                 1,
                                 "cannot load: " + result);
@@ -581,7 +581,7 @@ public class CrawlQueues {
             } catch (final Exception e) {
                 final ZURL.Entry eentry = errorURL.newEntry(
                         this.entry,
-                        sb.webIndex.seedDB.mySeed().hash,
+                        sb.webIndex.peers().mySeed().hash,
                         new Date(),
                         1,
                         e.getMessage() + " - in worker");

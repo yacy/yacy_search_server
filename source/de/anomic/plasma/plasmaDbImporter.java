@@ -93,8 +93,8 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
         
         try {
             this.log.logInfo("Importing DB from '" + this.importWordIndex.getLocation(true).getAbsolutePath() + "'");
-            this.log.logInfo("Home word index contains " + homeWordIndex.size() + " words and " + homeWordIndex.countURL() + " URLs.");
-            this.log.logInfo("Import word index contains " + this.importWordIndex.size() + " words and " + this.importWordIndex.countURL() + " URLs.");                        
+            this.log.logInfo("Home word index contains " + homeWordIndex.size() + " words and " + homeWordIndex.metadata().size() + " URLs.");
+            this.log.logInfo("Import word index contains " + this.importWordIndex.size() + " words and " + this.importWordIndex.metadata().size() + " URLs.");                        
             
             final HashSet<String> unknownUrlBuffer = new HashSet<String>();
             final HashSet<String> importedUrlBuffer = new HashSet<String>();
@@ -141,11 +141,11 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                             // we need to import the url
 
                             // getting the url entry
-                            final MetadataRowContainer urlEntry = this.importWordIndex.getURL(urlHash, null, 0);
+                            final MetadataRowContainer urlEntry = this.importWordIndex.metadata().load(urlHash, null, 0);
                             if (urlEntry != null) {
 
                                 /* write it into the home url db */
-                                homeWordIndex.putURL(urlEntry);
+                                homeWordIndex.metadata().store(urlEntry);
                                 importedUrlBuffer.add(urlHash);
                                 this.urlCounter++;
 
@@ -212,8 +212,8 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                 }
             }
             
-            this.log.logInfo("Home word index contains " + homeWordIndex.size() + " words and " + homeWordIndex.countURL() + " URLs.");
-            this.log.logInfo("Import word index contains " + this.importWordIndex.size() + " words and " + this.importWordIndex.countURL() + " URLs.");
+            this.log.logInfo("Home word index contains " + homeWordIndex.size() + " words and " + homeWordIndex.metadata().size() + " URLs.");
+            this.log.logInfo("Import word index contains " + this.importWordIndex.size() + " words and " + this.importWordIndex.metadata().size() + " URLs.");
         } catch (final Exception e) {
             this.log.logSevere("Database import failed.",e);
             e.printStackTrace();

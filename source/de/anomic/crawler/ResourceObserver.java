@@ -123,7 +123,7 @@ public final class ResourceObserver {
             if (tmpDisksFree == LOW && sb.getConfigBool(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false)) {
             	log.logInfo("disabling index receive");
                 sb.setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
-                sb.webIndex.seedDB.mySeed().setFlagAcceptRemoteIndex(false);
+                sb.webIndex.peers().mySeed().setFlagAcceptRemoteIndex(false);
             }
         }
         else {

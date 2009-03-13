@@ -157,10 +157,10 @@ public final class search {
         
         // store accessing peer
         final yacySeed remoteSeed = yacySeed.genRemoteSeed(oseed, key, false);
-        if (sb.webIndex.seedDB == null) {
+        if (sb.webIndex.peers() == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {
-            sb.webIndex.seedDB.peerActions.peerArrival(remoteSeed, true);
+            sb.webIndex.peers().peerActions.peerArrival(remoteSeed, true);
         }
 
         // prepare search
@@ -315,7 +315,7 @@ public final class search {
         prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
 
         // prepare search statistics
-        theQuery.remotepeer = sb.webIndex.seedDB.lookupByIP(natLib.getInetAddress(client), true, false, false);
+        theQuery.remotepeer = sb.webIndex.peers().lookupByIP(natLib.getInetAddress(client), true, false, false);
         theQuery.resultcount = (theSearch == null) ? 0 : theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
         theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.getURLRetrievalTime();
@@ -337,8 +337,8 @@ public final class search {
         prop.put("searchtime", System.currentTimeMillis() - timestamp);
 
         final int links = Integer.parseInt(prop.get("linkcount","0"));
-        sb.webIndex.seedDB.mySeed().incSI(links);
-        sb.webIndex.seedDB.mySeed().incSU(links);
+        sb.webIndex.peers().mySeed().incSI(links);
+        sb.webIndex.peers().mySeed().incSU(links);
         return prop;
     }
 

@@ -119,7 +119,7 @@ public class WatchCrawler_p {
             
             if (post.containsKey("crawlingstart")) {
                 // init crawl
-                if (sb.webIndex.seedDB == null) {
+                if (sb.webIndex.peers() == null) {
                     prop.put("info", "3");
                 } else {
                     // set new properties
@@ -209,7 +209,7 @@ public class WatchCrawler_p {
                             // first delete old entry, if exists
                             final yacyURL url = new yacyURL(crawlingStart, null);
                             final String urlhash = url.hash();
-                            sb.webIndex.removeURL(urlhash);
+                            sb.webIndex.metadata().remove(urlhash);
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             sb.crawlQueues.errorURL.remove(urlhash);
                             
@@ -227,7 +227,7 @@ public class WatchCrawler_p {
                                     indexText, indexMedia,
                                     storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
                             final String reasonString = sb.crawlStacker.stackCrawl(new CrawlEntry(
-                                    sb.webIndex.seedDB.mySeed().hash,
+                                    sb.webIndex.peers().mySeed().hash,
                                     url,
                                     null,
                                     "CRAWLING-ROOT",
@@ -272,7 +272,7 @@ public class WatchCrawler_p {
                                     m.remove("generalFilter");
                                     m.remove("specificFilter");
                                     m.put("intention", post.get("intention", "").replace(',', '/'));
-                                    sb.webIndex.seedDB.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.seedDB.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));
+                                    sb.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));
                                 }                                
                             } else {
                                 prop.put("info", "5"); //Crawling failed
@@ -281,7 +281,7 @@ public class WatchCrawler_p {
                                 
                                 final ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
                                         new CrawlEntry(
-                                                sb.webIndex.seedDB.mySeed().hash, 
+                                                sb.webIndex.peers().mySeed().hash, 
                                                 crawlingStartURL, 
                                                 "", 
                                                 "", 
@@ -291,7 +291,7 @@ public class WatchCrawler_p {
                                                 0, 
                                                 0, 
                                                 0),
-                                        sb.webIndex.seedDB.mySeed().hash,
+                                        sb.webIndex.peers().mySeed().hash,
                                         new Date(),
                                         1,
                                         reasonString);
@@ -366,7 +366,7 @@ public class WatchCrawler_p {
                                     
                                     // enqueuing the url for crawling
                                     sb.crawlStacker.enqueueEntry(new CrawlEntry(
-                                            sb.webIndex.seedDB.mySeed().hash, 
+                                            sb.webIndex.peers().mySeed().hash, 
                                             nexturl, 
                                             "", 
                                             e.getValue(), 
