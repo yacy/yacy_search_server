@@ -202,6 +202,10 @@ public final class Row {
         public int compare(final Entry a, final Entry b) {
             return a.compareTo(b);
         }
+        
+        public boolean equal(Entry a, Entry b) {
+            return a.equals(b);
+        }
 
         public Order<Entry> clone() {
             return new EntryComparator(base);
@@ -324,15 +328,14 @@ public final class Row {
         public final int compareTo(final Entry o) {
             // compares only the content of the primary key
             if (objectOrder == null) throw new kelondroException("objects cannot be compared, no order given");
-            return objectOrder.compare(this.getPrimaryKeyBytes(), (o).getPrimaryKeyBytes());
+            return objectOrder.compare(this.bytes(), 0, this.getPrimaryKeyLength(), o.bytes(), 0, o.getPrimaryKeyLength());
         }
         
         public final boolean equals(final Entry otherEntry) {
             // compares the content of the complete entry
             final byte[] t = this.bytes();
             final byte[] o = otherEntry.bytes();
-            if (o.length != t.length) return false;
-            for (int i = 0; i < t.length; i++) {
+            for (int i = 0; i < primaryKeyLength; i++) {
                 if (t[i] != o[i]) return false;
             }
             return true;
@@ -656,7 +659,7 @@ public final class Row {
         
         public Entry get(byte[] key) {
             for (Entry e: this.queue) {
-                if (objectOrder.compare(key, e.getPrimaryKeyBytes()) == 0) {
+                if (objectOrder.compare(key, 0, key.length, e.bytes(), 0, e.getPrimaryKeyLength()) == 0) {
                     return e;
                 }
             }
@@ -668,7 +671,7 @@ public final class Row {
             Entry e;
             while (i.hasNext()) {
                 e = i.next();
-                if (objectOrder.compare(key, e.getPrimaryKeyBytes()) == 0) {
+                if (objectOrder.compare(key, 0, key.length, e.bytes(), 0, e.getPrimaryKeyLength()) == 0) {
                     i.remove();
                     return e;
                 }

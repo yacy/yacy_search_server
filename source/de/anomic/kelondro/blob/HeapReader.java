@@ -76,7 +76,7 @@ public class HeapReader {
                 pos = this.index.get(b);
                 file.seek(pos + 4);
                 file.readFully(b1, 0, b1.length);
-                if (this.ordering.compare(b, b1) != 0) {
+                if (!this.ordering.equal(b, b1)) {
                     ok = false;
                     break;
                 }
@@ -239,7 +239,7 @@ public class HeapReader {
         // read the key
         final byte[] keyf = new byte[index.row().primaryKeyLength];
         file.readFully(keyf, 0, keyf.length);
-        if (this.ordering.compare(key, keyf) != 0) {
+        if (!this.ordering.equal(key, keyf)) {
             // verification of the indexed access failed. we must re-read the index
             Log.logWarning("kelondroBLOBHeap", "verification indexed access for " + heapFile.toString() + " failed, re-building index");
             // this is a severe operation, it should never happen.

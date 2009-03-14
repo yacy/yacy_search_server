@@ -294,7 +294,7 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
         // read the key
         final byte[] keyf = new byte[index.row().primaryKeyLength];
         file.readFully(keyf, 0, keyf.length);
-        assert this.ordering.compare(key, keyf) == 0;
+        assert this.ordering.equal(key, keyf);
         
         // read the blob
         byte[] blob = new byte[len];

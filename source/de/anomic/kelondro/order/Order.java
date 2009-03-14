@@ -44,6 +44,8 @@ public interface Order<A> extends Comparator<A> {
 
     public int compare(A a, A b);
     
+    public boolean equal(A a, A b);
+    
     public A zero(); // returns the zero point of the Ordering; null if not defined
 
     public void rotate(A zero); // defines that the ordering rotates, and sets the zero point for the rotation

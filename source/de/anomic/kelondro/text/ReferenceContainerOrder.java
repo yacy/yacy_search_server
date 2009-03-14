@@ -52,7 +52,11 @@ public class ReferenceContainerOrder extends AbstractOrder<ReferenceContainer> i
     public int compare(final ReferenceContainer a, final ReferenceContainer b) {
         return this.embeddedOrder.compare(a.getWordHash().getBytes(), b.getWordHash().getBytes());
     }
-
+    
+    public boolean equal(ReferenceContainer a, ReferenceContainer b) {
+        return this.embeddedOrder.equal(a.getWordHash().getBytes(), b.getWordHash().getBytes());
+    }
+    
     public void rotate(final ReferenceContainer zero) {
         this.embeddedOrder.rotate(zero.getWordHash().getBytes());
         this.zero = new ReferenceContainer(new String(this.embeddedOrder.zero()), zero);

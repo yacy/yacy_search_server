@@ -949,7 +949,7 @@ public class IndexCollection implements Index {
         }
         
         final RowSet collection = new RowSet(this.payloadrow, arrayrow); // FIXME: this does not yet work with different rowdef in case of several rowdef.objectsize()
-        if ((!(index.row().objectOrder.wellformed(indexkey))) || (index.row().objectOrder.compare(arraykey, indexkey) != 0)) {
+        if ((!(index.row().objectOrder.wellformed(indexkey))) || (!index.row().objectOrder.equal(arraykey, indexkey))) {
             // check if we got the right row; this row is wrong. Fix it:
             index.remove(indexkey); // the wrong row cannot be fixed
             // store the row number in the index; this may be a double-entry, but better than nothing

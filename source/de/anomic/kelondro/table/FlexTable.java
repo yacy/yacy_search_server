@@ -259,7 +259,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
             return null;
         }
         assert oldentry != null : "overwrite of empty position " + pos + ", index management must have failed before";
-        assert rowdef.objectOrder.compare(oldentry.getPrimaryKeyBytes(), key) == 0 : "key and row does not match; key = " + NaturalOrder.arrayList(key, 0, key.length) + " row.key = " + NaturalOrder.arrayList(oldentry.getPrimaryKeyBytes(), 0, rowdef.primaryKeyLength);
+        assert rowdef.objectOrder.equal(oldentry.getPrimaryKeyBytes(), key) : "key and row does not match; key = " + NaturalOrder.arrayList(key, 0, key.length) + " row.key = " + NaturalOrder.arrayList(oldentry.getPrimaryKeyBytes(), 0, rowdef.primaryKeyLength);
         super.set(pos, row);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
         return oldentry;
@@ -343,7 +343,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
     		return null;
         }
         assert r != null : "r == null"; // should be avoided with path above
-        assert rowdef.objectOrder.compare(r.getPrimaryKeyBytes(), key) == 0 : "key and row does not match; key = " + NaturalOrder.arrayList(key, 0, key.length) + " row.key = " + NaturalOrder.arrayList(r.getPrimaryKeyBytes(), 0, rowdef.primaryKeyLength);
+        assert rowdef.objectOrder.equal(r.getPrimaryKeyBytes(), key) : "key and row does not match; key = " + NaturalOrder.arrayList(key, 0, key.length) + " row.key = " + NaturalOrder.arrayList(r.getPrimaryKeyBytes(), 0, rowdef.primaryKeyLength);
         super.remove(i);
         assert super.get(i) == null : "i = " + i + ", get(i) = " + NaturalOrder.arrayList(super.get(i).bytes(), 0, 12);
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
