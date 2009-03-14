@@ -253,6 +253,19 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         }
     }
 
+    private final long cardinalI(final byte[] key, int off, int len) {
+        // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
+        long c = 0;
+        int lim = off + Math.min(10, len);
+        int lim10 = off + 10;
+        while (off < lim) c = (c << 6) | ahpla[key[off++]];
+        while (off++ < lim10) c = (c << 6);
+        c = c << 3;
+        assert c >= 0;
+        return c;
+    }
+    
+    /*
     private final long cardinalI(final byte[] key) {
         // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
         long c = 0;
@@ -260,9 +273,10 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         while ((p < 10) && (p < key.length)) c = (c << 6) | ahpla[key[p++]];
         while (p++ < 10) c = (c << 6);
         c = c << 3;
+        assert c >= 0;
         return c;
     }
-    
+    */
     private final long cardinalI(final String key) {
         // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
         long c = 0;
@@ -270,6 +284,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         while ((p < 10) && (p < key.length())) c = (c << 6) | ahpla[key.charAt(p++)];
         while (p++ < 10) c = (c << 6);
         c = c << 3;
+        assert c >= 0;
         return c;
     }
 
@@ -284,16 +299,24 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
     }
     
     public final long cardinal(final byte[] key) {
-        if (this.zero == null) return cardinalI(key);
-        final long zeroCardinal = cardinalI(this.zero);
-        final long keyCardinal = cardinalI(key);
+        if (this.zero == null) return cardinalI(key, 0, key.length);
+        final long zeroCardinal = cardinalI(this.zero, 0, zero.length);
+        final long keyCardinal = cardinalI(key, 0, key.length);
+        if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
+        return Long.MAX_VALUE - keyCardinal + zeroCardinal;
+    }
+    
+    public final long cardinal(final byte[] key, int off, int len) {
+        if (this.zero == null) return cardinalI(key, off, len);
+        final long zeroCardinal = cardinalI(this.zero, 0, zero.length);
+        final long keyCardinal = cardinalI(key, off, len);
         if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
         return Long.MAX_VALUE - keyCardinal + zeroCardinal;
     }
     
     public final long cardinal(final String key) {
         if (this.zero == null) return cardinalI(key);
-        final long zeroCardinal = cardinalI(this.zero);
+        final long zeroCardinal = cardinalI(this.zero, 0, zero.length);
         final long keyCardinal = cardinalI(key);
         if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
         return Long.MAX_VALUE - keyCardinal + zeroCardinal;
@@ -303,6 +326,28 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         return (x > 0) ? 1 : (x < 0) ? -1 : 0;
     }
     
+    public final boolean equal(final byte[] a, final byte[] b) {
+        if ((a == null) && (b == null)) return true;
+        if ((a == null) || (b == null)) return false;
+        if (a.length != b.length) return false;
+        int astart = 0;
+        int bstart = 0;
+        int length = a.length;
+        while (length-- != 0) {
+            if (a[astart++] != b[bstart++]) return false;
+        }
+        return true;
+    }
+    
+    public final boolean equal(final byte[] a, int astart, final byte[] b, int bstart, int length) {
+        if ((a == null) && (b == null)) return true;
+        if ((a == null) || (b == null)) return false;
+        while (length-- != 0) {
+            if (a[astart++] != b[bstart++]) return false;
+        }
+        return true;
+    }
+   
     public final int compare(final byte[] a, final byte[] b) {
         return (asc) ? compare0(a, 0, a.length, b, 0, b.length) : compare0(b, 0, b.length, a, 0, a.length);
     }

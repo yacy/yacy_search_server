@@ -36,6 +36,12 @@ public interface ByteOrder extends Order<byte[]> {
     
     public int compare(byte[] a, int astart, int alen, byte[] b, int bstart, int blen);
 
+    public boolean equal(final byte[] a, final byte[] b);
+    
+    public boolean equal(final byte[] a, int astart, final byte[] b, int bstart, int length);
+   
+    public long cardinal(final byte[] a, int off, int len);
+        
     public final static class StringOrder implements Comparator<String> {
 
     	public ByteOrder baseOrder;

@@ -208,7 +208,7 @@ public final class Row {
         }
 
         public long cardinal(final Entry key) {
-            return base.cardinal(key.getPrimaryKeyBytes());
+            return base.cardinal(key.bytes(), 0, key.getPrimaryKeyLength());
         }
 
         public String signature() {
@@ -563,6 +563,10 @@ public final class Row {
             final byte[] c = new byte[primaryKeyLength];
             System.arraycopy(rowinstance, offset, c, 0, primaryKeyLength);
             return c;
+        }
+        
+        public final int getPrimaryKeyLength() {
+            return primaryKeyLength;
         }
         
         public final byte[] getColBytes(final int column) {

@@ -70,7 +70,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         if ( asc) return "nu";
         return null;
     }
-    
+    /*
     private final static long cardinalI(final byte[] key) {
         // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
         long c = 0;
@@ -80,15 +80,34 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         c = c >>> 1;
         return c;
     }
+    */
+    private final static long cardinalI(final byte[] key, int off, int len) {
+        // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
+        long c = 0;
+        int lim = off + Math.min(8, len);
+        int lim8 = off + 8;
+        while (off < lim) c = (c << 8) | ((long) key[off++] & 0xFF);
+        while (off++ < lim8) c = (c << 8);
+        c = c >>> 1;
+        return c;
+    }
     
     public final long cardinal(final byte[] key) {
-        if (this.zero == null) return cardinalI(key);
-        final long zeroCardinal = cardinalI(this.zero);
-        final long keyCardinal = cardinalI(key);
+        if (this.zero == null) return cardinalI(key, 0, key.length);
+        final long zeroCardinal = cardinalI(this.zero, 0, this.zero.length);
+        final long keyCardinal = cardinalI(key, 0, key.length);
         if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
         return Long.MAX_VALUE - keyCardinal + zeroCardinal;
     }
-
+    
+    public long cardinal(final byte[] key, int off, int len) {
+        if (this.zero == null) return cardinalI(key, off, len);
+        final long zeroCardinal = cardinalI(this.zero, 0, this.zero.length);
+        final long keyCardinal = cardinalI(key, off, len);
+        if (keyCardinal > zeroCardinal) return keyCardinal - zeroCardinal;
+        return Long.MAX_VALUE - keyCardinal + zeroCardinal;
+    }
+    
     public final static byte[] encodeLong(long c, int length) {
         final byte[] b = new byte[length];
         while (length > 0) {
@@ -148,10 +167,26 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         return sig(az - bz);
     }
 
-    public static final boolean equal(final byte[] a, final byte[] b) {
+    public final boolean equal(final byte[] a, final byte[] b) {
         if ((a == null) && (b == null)) return true;
         if ((a == null) || (b == null)) return false;
-        return compares(a, 0, a.length, b, 0, b.length) == 0;
+        if (a.length != b.length) return false;
+        int astart = 0;
+        int bstart = 0;
+        int length = a.length;
+        while (length-- != 0) {
+            if (a[astart++] != b[bstart++]) return false;
+        }
+        return true;
+    }
+    
+    public final boolean equal(final byte[] a, int astart, final byte[] b, int bstart, int length) {
+        if ((a == null) && (b == null)) return true;
+        if ((a == null) || (b == null)) return false;
+        while (length-- != 0) {
+            if (a[astart++] != b[bstart++]) return false;
+        }
+        return true;
     }
    
     public static final int compares(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {

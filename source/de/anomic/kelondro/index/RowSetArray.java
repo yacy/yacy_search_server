@@ -51,7 +51,7 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
     }
     
     private int indexFor(Entry row) {
-        return indexFor(row.getPrimaryKeyBytes());
+        return (int) (this.rowdef.objectOrder.cardinal(row.bytes(), 0, row.getPrimaryKeyLength()) % ((long) array.length));
     }
     
     private RowSet accessArray(int i) {
@@ -64,7 +64,9 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
     }
     
     public void addUnique(Entry row) {
-        accessArray(indexFor(row)).addUnique(row);
+        int i = indexFor(row);
+        if (i < 0) return;
+        accessArray(i).addUnique(row);
     }
 
     public void addUnique(List<Entry> rows) {
@@ -95,6 +97,7 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
 
     public Entry get(byte[] key) {
         int i = indexFor(key);
+        if (i < 0) return null;
         RowSet r = this.array[i];
         if (r == null) return null;
         return r.get(key);
@@ -102,6 +105,7 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
 
     public boolean has(byte[] key) {
         int i = indexFor(key);
+        if (i < 0) return false;
         RowSet r = this.array[i];
         if (r == null) return false;
         return r.has(key);
@@ -121,7 +125,9 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
     }
 
     public void put(Entry row) {
-        accessArray(indexFor(row)).put(row);
+        int i = indexFor(row);
+        if (i < 0) return;
+        accessArray(i).put(row);
     }
 
     public void put(List<Entry> rows) {
@@ -129,7 +135,9 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
     }
 
     public Entry remove(byte[] key) {
-        return accessArray(indexFor(key)).remove(key);
+        int i = indexFor(key);
+        if (i < 0) return null;
+        return accessArray(i).remove(key);
     }
 
     public ArrayList<RowCollection> removeDoubles() {
@@ -159,7 +167,9 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
     }
 
     public Entry replace(Entry row) {
-        return accessArray(indexFor(row)).replace(row);
+        int i = indexFor(row);
+        if (i < 0) return null;
+        return accessArray(i).replace(row);
     }
 
     public Row row() {
@@ -200,6 +210,8 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
     }
 
     public long inc(byte[] key, int col, long add, Entry initrow) {
-        return accessArray(indexFor(key)).inc(key, col, add, initrow);
+        int i = indexFor(key);
+        if (i < 0) return -1;
+        return accessArray(i).inc(key, col, add, initrow);
     }
 }
