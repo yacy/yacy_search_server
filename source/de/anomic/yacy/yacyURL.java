@@ -658,18 +658,23 @@ public class yacyURL implements Serializable {
 
     public final boolean isCGI() {
         final String ls = path.toLowerCase();
+        int pos;
         return ls.indexOf(".cgi") >= 0 ||
                ls.indexOf(".exe") >= 0 ||
 
-               (ls.indexOf("sid") >= 0 &&
-                (ls.indexOf("?sid") >= 0 || ls.indexOf("&sid") >= 0) &&
-                (ls.indexOf("sid=") >= 0 || ls.indexOf("sid%") >= 0)) ||
+               ((pos = ls.indexOf("sid")) > 0 &&
+                (ls.charAt(--pos) == '?' || ls.charAt(pos) == '&') &&
+                (pos += 4) < ls.length() &&
+                (ls.charAt(pos) == '=' || ls.charAt(pos) == '%')
+                ) ||
 
-               (ls.indexOf("sessionid") >= 0 &&
-                (ls.indexOf("sessionid=") >= 0 || ls.indexOf("sessionid%") >= 0 || ls.indexOf("sessionid/") >= 0 )) ||
+               ((pos = ls.indexOf("sessionid")) >= 0 && (pos += 10) < ls.length() &&
+                (ls.charAt(--pos) == '=' || ls.charAt(pos) == '%' || ls.charAt(pos) == '/')
+                ) ||
 
-               (ls.indexOf("phpsessid") >= 0 &&
-                (ls.indexOf("phpsessid=") >= 0 || ls.indexOf("phpsessid%") >= 0));
+               ((pos = ls.indexOf("phpsessid")) >= 0 && (pos += 10) < ls.length() &&
+                (ls.charAt(--pos) == '=' || ls.charAt(pos) == '%')
+                );
     }
 
 
