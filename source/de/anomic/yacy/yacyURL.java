@@ -656,17 +656,23 @@ public class yacyURL implements Serializable {
     	return (this.quest != null) && (this.quest.length() > 0);
     }
 
-    public boolean isCGI() {
+    public final boolean isCGI() {
         final String ls = path.toLowerCase();
-        return ((ls.indexOf(".cgi") >= 0) ||
-                (ls.indexOf(".exe") >= 0) ||
-                (ls.indexOf(";jsessionid=") >= 0) ||
-                (ls.indexOf("sessionid/") >= 0) ||
-                (ls.indexOf("phpsessid=") >= 0) ||
-                (ls.indexOf("search.php?sid=") >= 0) ||
-                (ls.indexOf("memberlist.php?sid=") >= 0));
+        return ls.indexOf(".cgi") >= 0 ||
+               ls.indexOf(".exe") >= 0 ||
+
+               (ls.indexOf("sid") >= 0 &&
+                (ls.indexOf("?sid") >= 0 || ls.indexOf("&sid") >= 0) &&
+                (ls.indexOf("sid=") >= 0 || ls.indexOf("sid%") >= 0)) ||
+
+               (ls.indexOf("sessionid") >= 0 &&
+                (ls.indexOf("sessionid=") >= 0 || ls.indexOf("sessionid%") >= 0 || ls.indexOf("sessionid/") >= 0 )) ||
+
+               (ls.indexOf("phpsessid") >= 0 &&
+                (ls.indexOf("phpsessid=") >= 0 || ls.indexOf("phpsessid%") >= 0));
     }
-    
+
+
     // static methods from plasmaURL
 
     public static final int flagTypeID(final String hash) {
