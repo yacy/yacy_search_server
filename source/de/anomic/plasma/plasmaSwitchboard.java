@@ -1120,12 +1120,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     }
     
     public int rwiCacheSize() {
-    	return webIndex.index().cacheSize();
+    	return webIndex.index().getBufferSize();
     }
     
     public boolean rwiCacheFlush() {
     	if (rwiCacheSize() == 0) return false;
-    	webIndex.index().flushCacheFor((int) ((this.getConfigLong(plasmaSwitchboardConstants.CACHEFLUSH_BUSYSLEEP, 10000) * this.getConfigLong("performanceIO", 10)) / 100));
+    	webIndex.index().cleanupBuffer((int) ((this.getConfigLong(plasmaSwitchboardConstants.CACHEFLUSH_BUSYSLEEP, 10000) * this.getConfigLong("performanceIO", 10)) / 100));
     	return true;
     }
     
@@ -1144,7 +1144,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public void deQueueFreeMem() {
         // flush some entries from the RAM cache
-        webIndex.index().flushCacheFor(5000);
+        webIndex.index().cleanupBuffer(5000);
         // empty some caches
         webIndex.metadata().clearCache();
         plasmaSearchEvent.cleanupEvents(true);
@@ -1773,7 +1773,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 
                 // delete all word references
                 int count = 0;
-                if (words != null) count = webIndex.index().removeEntryMultiple(Word.words2hashes(words), urlhash);
+                if (words != null) count = webIndex.index().remove(Word.words2hashes(words), urlhash);
                 
                 // finally delete the url entry itself
                 webIndex.metadata().remove(urlhash);

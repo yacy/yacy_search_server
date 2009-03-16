@@ -381,7 +381,7 @@ public class plasmaRankingCRProcess {
         final int size = seq.size();
         final long start = System.currentTimeMillis();
         long l;
-        final CloneableIterator<ReferenceContainer> i = seq.referenceIterator(null, false, false);
+        final CloneableIterator<ReferenceContainer> i = seq.references(null, false);
         ReferenceContainer keycollection;
         String referee, refereeDom, anchor, anchorDom;
         RowSet rci_entry;
@@ -400,7 +400,7 @@ public class plasmaRankingCRProcess {
                 if (anchor.length() == 6) anchorDom = anchor; else anchorDom = anchor.substring(6);
 
                 // update domain-specific entry
-                rci_entry = rci.getReferences(anchorDom, null);
+                rci_entry = rci.get(anchorDom, null);
                 if (rci_entry == null) rci_entry = new RowSet(RCI_coli, 0);
                 rci_entry.add(refereeDom.getBytes());
                 

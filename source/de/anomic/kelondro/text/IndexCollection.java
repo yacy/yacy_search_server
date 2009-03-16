@@ -90,9 +90,9 @@ public class IndexCollection extends AbstractIndex implements Index {
     
     public IndexCollection(
     		final File path, 
-    		final String filenameStub, 
-    		final int keyLength, 
-    		final ByteOrder indexOrder,
+    		final String filenameStub,
+    		final int keyLength,
+    		final ByteOrder wordOrder,
             final int maxpartitions, 
             final Row payloadrow, 
             boolean useCommons) throws IOException {
@@ -119,8 +119,8 @@ public class IndexCollection extends AbstractIndex implements Index {
             
             // open index and array files
             this.arrays = new HashMap<String, FixedWidthArray>(); // all entries will be dynamically created with getArray()
-            index = openIndexFile(path, this.keylength, filenameStub, indexOrder, loadfactor, payloadrow, 0);
-            openAllArrayFiles(false, indexOrder);
+            index = openIndexFile(path, this.keylength, filenameStub, wordOrder, loadfactor, payloadrow, 0);
+            openAllArrayFiles(false, wordOrder);
         } else {
             // calculate initialSpace
             final String[] list = this.path.list();
@@ -133,7 +133,7 @@ public class IndexCollection extends AbstractIndex implements Index {
                 final int partitionNumber = Integer.parseInt(list[i].substring(pos +  9, pos + 11), 16);
                 final int serialNumber    = Integer.parseInt(list[i].substring(pos + 12, pos + 14), 16);
                 try {
-                    array = openArrayFile(this.path, this.filenameStub, this.keylength, partitionNumber, serialNumber, indexOrder, this.payloadrow.objectsize, true);
+                    array = openArrayFile(this.path, this.filenameStub, this.keylength, partitionNumber, serialNumber, wordOrder, this.payloadrow.objectsize, true);
                     initialSpace += array.size();
                     array.close();
                 } catch (final IOException e) {
@@ -142,7 +142,7 @@ public class IndexCollection extends AbstractIndex implements Index {
                 }
             }
             Log.logFine("COLLECTION INDEX STARTUP", "STARTED INITIALIZATION OF NEW COLLECTION INDEX WITH " + initialSpace + " ENTRIES.  THIS WILL TAKE SOME TIME. " + (MemoryControl.available() / 1024 / 1024) + "MB AVAILABLE.");
-            final Row indexRowdef = indexRow(keyLength, indexOrder);
+            final Row indexRowdef = indexRow(keyLength, wordOrder);
             final long necessaryRAM4fullTable = minimumRAM4Eco + (indexRowdef.objectsize + 4) * initialSpace * 3 / 2;
             
             // initialize (new generation) index table from file
@@ -150,12 +150,16 @@ public class IndexCollection extends AbstractIndex implements Index {
             
             // open array files
             this.arrays = new HashMap<String, FixedWidthArray>(); // all entries will be dynamically created with getArray()
-            openAllArrayFiles(true, indexOrder);
+            openAllArrayFiles(true, wordOrder);
             Log.logFine("COLLECTION INDEX STARTUP", "FINISHED INITIALIZATION OF NEW COLLECTION INDEX.");            
         }
     }
 
-    public synchronized CloneableIterator<ReferenceContainer> referenceIterator(final String startWordHash, final boolean rot, final boolean ram) {
+    public ByteOrder ordering() {
+        return index.row().objectOrder;
+    }
+    
+    public synchronized CloneableIterator<ReferenceContainer> references(final String startWordHash, final boolean rot) {
         return new wordContainersIterator(startWordHash, rot);
     }
 
@@ -192,11 +196,11 @@ public class IndexCollection extends AbstractIndex implements Index {
 
     }
 
-    public boolean hasReferences(final String wordHash) {
+    public boolean has(final String wordHash) {
         return this.has(wordHash.getBytes());
     }
     
-    public ReferenceContainer getReferences(final String wordHash, final Set<String> urlselection) {
+    public ReferenceContainer get(final String wordHash, final Set<String> urlselection) {
         try {
             final RowSet collection = this.get(wordHash.getBytes());
             if (collection != null) collection.select(urlselection);
@@ -207,7 +211,7 @@ public class IndexCollection extends AbstractIndex implements Index {
         }
     }
 
-    public ReferenceContainer deleteAllReferences(final String wordHash) {
+    public ReferenceContainer delete(final String wordHash) {
         try {
             final RowSet collection = this.delete(wordHash.getBytes());
             if (collection == null) return null;
@@ -217,13 +221,13 @@ public class IndexCollection extends AbstractIndex implements Index {
         }
     }
 
-    public boolean removeReference(final String wordHash, final String urlHash) {
+    public boolean remove(final String wordHash, final String urlHash) {
         final HashSet<String> hs = new HashSet<String>();
         hs.add(urlHash);
-        return removeReferences(wordHash, hs) == 1;
+        return remove(wordHash, hs) == 1;
     }
     
-    public int removeReferences(final String wordHash, final Set<String> urlHashes) {
+    public int remove(final String wordHash, final Set<String> urlHashes) {
         try {
             return this.remove(wordHash.getBytes(), urlHashes);
         } catch (final kelondroOutOfLimitsException e) {
@@ -235,7 +239,7 @@ public class IndexCollection extends AbstractIndex implements Index {
         }
     }
 
-    public void addReferences(final ReferenceContainer newEntries) {
+    public void add(final ReferenceContainer newEntries) {
     	if (newEntries == null) return;
         try {
             this.merge(newEntries);
@@ -246,7 +250,7 @@ public class IndexCollection extends AbstractIndex implements Index {
         }
     }
 
-    public void addReference(String wordhash, ReferenceRow entry) {
+    public void add(String wordhash, ReferenceRow entry) {
         if (entry == null) return;
         try {
             this.merge(new ReferenceContainer(wordhash, entry));
@@ -257,7 +261,7 @@ public class IndexCollection extends AbstractIndex implements Index {
         }
     }
 
-    public int countReferences(String key) {
+    public int count(String key) {
         try {
             final RowSet collection = this.get(key.getBytes());
             if (collection == null) return 0;
@@ -313,12 +317,12 @@ public class IndexCollection extends AbstractIndex implements Index {
     	this.index.deleteOnExit();
     }
     
-    private void openAllArrayFiles(final boolean indexGeneration, final ByteOrder indexOrder) throws IOException {
+    private void openAllArrayFiles(final boolean indexGeneration, final ByteOrder wordOrder) throws IOException {
         
         final String[] list = this.path.list();
         FixedWidthArray array;
         
-        final Row irow = indexRow(keylength, indexOrder);
+        final Row irow = indexRow(keylength, wordOrder);
         final int t = RowCollection.daysSince2000(System.currentTimeMillis());
         for (int i = 0; i < list.length; i++) if (list[i].endsWith(".kca")) {
 
@@ -329,7 +333,7 @@ public class IndexCollection extends AbstractIndex implements Index {
             final int partitionNumber = Integer.parseInt(list[i].substring(pos +  9, pos + 11), 16);
             final int serialNumber    = Integer.parseInt(list[i].substring(pos + 12, pos + 14), 16);
             try {
-                array = openArrayFile(this.path, this.filenameStub, this.keylength, partitionNumber, serialNumber, indexOrder, this.payloadrow.objectsize, true);
+                array = openArrayFile(this.path, this.filenameStub, this.keylength, partitionNumber, serialNumber, wordOrder, this.payloadrow.objectsize, true);
             } catch (final IOException e) {
                 e.printStackTrace();
                 continue;
@@ -407,7 +411,7 @@ public class IndexCollection extends AbstractIndex implements Index {
      * @param path
      * @param filenameStub
      * @param keylength
-     * @param indexOrder
+     * @param wordOrder
      * @param payloadrow
      * @return
      * @throws IOException
@@ -416,13 +420,13 @@ public class IndexCollection extends AbstractIndex implements Index {
             final File path, 
             final String filenameStub, 
             final int keylength, 
-            final ByteOrder indexOrder,
+            final ByteOrder wordOrder,
             final Row payloadrow) throws IOException {
        
         final String[] list = path.list();
         FixedWidthArray array;
         System.out.println("COLLECTION INDEX REFERENCE COLLECTION startup");
-        IntegerHandleIndex references = new IntegerHandleIndex(keylength, indexOrder, 0, 1000000);
+        IntegerHandleIndex references = new IntegerHandleIndex(keylength, wordOrder, 0, 1000000);
         for (int i = 0; i < list.length; i++) if (list[i].endsWith(".kca")) {
             // open array
             final int pos = list[i].indexOf('.');
@@ -431,7 +435,7 @@ public class IndexCollection extends AbstractIndex implements Index {
             final int serialNumber    = Integer.parseInt(list[i].substring(pos + 12, pos + 14), 16);
             System.out.println("COLLECTION INDEX REFERENCE COLLECTION opening partition " + partitionNumber + ", " + i + " of " + list.length);
             try {
-                array = openArrayFile(path, filenameStub, keylength, partitionNumber, serialNumber, indexOrder, payloadrow.objectsize, true);
+                array = openArrayFile(path, filenameStub, keylength, partitionNumber, serialNumber, wordOrder, payloadrow.objectsize, true);
             } catch (final IOException e) {
                 e.printStackTrace();
                 continue;
@@ -491,25 +495,27 @@ public class IndexCollection extends AbstractIndex implements Index {
     
     private static FixedWidthArray openArrayFile(
             File path, String filenameStub, int keylength,
-            final int partitionNumber, final int serialNumber, final ByteOrder indexOrder, int objectsize, final boolean create) throws IOException {
+            final int partitionNumber, final int serialNumber,
+            final ByteOrder wordOrder, int objectsize,
+            final boolean create) throws IOException {
         final File f = arrayFile(path, filenameStub, loadfactor, objectsize, partitionNumber, serialNumber);
         final int load = arrayCapacity(partitionNumber);
         final Row rowdef = new Row(
                 "byte[] key-" + keylength + "," +
                 "byte[] collection-" + (RowCollection.exportOverheadSize + load * objectsize),
-                indexOrder                );
+                wordOrder                );
         if ((!(f.exists())) && (!create)) return null;
         final FixedWidthArray a = new FixedWidthArray(f, rowdef, 0);
         Log.logFine("STARTUP", "opened array file " + f + " with " + a.size() + " RWIs");
         return a;
     }
     
-    private FixedWidthArray getArray(final int partitionNumber, final int serialNumber, final ByteOrder indexOrder, final int chunksize) {
+    private FixedWidthArray getArray(final int partitionNumber, final int serialNumber, final ByteOrder wordOrder, final int chunksize) {
         final String accessKey = partitionNumber + "-" + chunksize;
         FixedWidthArray array = arrays.get(accessKey);
         if (array != null) return array;
         try {
-            array = openArrayFile(this.path, this.filenameStub, this.keylength, partitionNumber, serialNumber, indexOrder, this.payloadrow.objectsize, true);
+            array = openArrayFile(this.path, this.filenameStub, this.keylength, partitionNumber, serialNumber, wordOrder, this.payloadrow.objectsize, true);
         } catch (final IOException e) {
         	e.printStackTrace();
             return null;

@@ -51,6 +51,7 @@ import de.anomic.kelondro.index.RowSet;
 public final class ReferenceContainerCache extends AbstractIndex implements Index, IndexReader, Iterable<ReferenceContainer> {
 
     private final Row payloadrow;
+    private final ByteOrder wordOrder;
     private SortedMap<String, ReferenceContainer> cache;
     
     /**
@@ -60,8 +61,9 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * @param payloadrow
      * @param log
      */
-    public ReferenceContainerCache(final Row payloadrow) {
+    public ReferenceContainerCache(final Row payloadrow, ByteOrder wordOrder) {
         this.payloadrow = payloadrow;
+        this.wordOrder = wordOrder;
         this.cache = null;
     }
     
@@ -83,7 +85,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * another dump reading afterwards is not possible
      */
     public void initWriteMode() {
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(payloadrow.getOrdering())));
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(this.wordOrder)));
     }
     
     /**
@@ -96,7 +98,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
     public void initWriteModeFromHeap(final File heapFile) throws IOException {
         Log.logInfo("indexContainerRAMHeap", "restoring dump for rwi heap '" + heapFile.getName() + "'");
         final long start = System.currentTimeMillis();
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(payloadrow.getOrdering())));
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(this.wordOrder)));
         int urlCount = 0;
         synchronized (cache) {
             for (final ReferenceContainer container : new heapFileEntries(heapFile, this.payloadrow)) {
@@ -117,7 +119,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
     public void initWriteModeFromBLOB(final File blobFile) throws IOException {
         Log.logInfo("indexContainerRAMHeap", "restoring rwi blob dump '" + blobFile.getName() + "'");
         final long start = System.currentTimeMillis();
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(payloadrow.getOrdering())));
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(this.wordOrder)));
         int urlCount = 0;
         synchronized (cache) {
             for (final ReferenceContainer container : new blobFileEntries(blobFile, this.payloadrow)) {
@@ -332,13 +334,13 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * in the cache, so that manipulations of the iterated objects do not change
      * objects in the cache.
      */
-    public synchronized CloneableIterator<ReferenceContainer> referenceIterator(final String startWordHash, final boolean rot, final boolean ram) {
+    public synchronized CloneableIterator<ReferenceContainer> references(final String startWordHash, final boolean rot) {
         return new heapCacheIterator(startWordHash, rot);
     }
 
 
     public Iterator<ReferenceContainer> iterator() {
-        return referenceIterator(null, false, true);
+        return references(null, false);
     }
     
     
@@ -399,7 +401,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * @param key
      * @return true, if the key is used in the heap; false othervise
      */
-    public boolean hasReferences(final String key) {
+    public boolean has(final String key) {
         return this.cache.containsKey(key);
     }
     
@@ -408,7 +410,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * @param key
      * @return the indexContainer if one exist, null otherwise
      */
-    public ReferenceContainer getReferences(final String key, Set<String> urlselection) {
+    public ReferenceContainer get(final String key, Set<String> urlselection) {
         if (urlselection == null) return this.cache.get(key);
         ReferenceContainer c = this.cache.get(key);
         if (c == null) return null;
@@ -428,7 +430,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * @param key
      * @return
      */
-    public int countReferences(final String key) {
+    public int count(final String key) {
         ReferenceContainer c = this.cache.get(key);
         if (c == null) return 0;
         return c.size();
@@ -439,19 +441,19 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * @param wordHash
      * @return the indexContainer if the cache contained the container, null othervise
      */
-    public synchronized ReferenceContainer deleteAllReferences(final String wordHash) {
+    public synchronized ReferenceContainer delete(final String wordHash) {
         // returns the index that had been deleted
         assert this.cache != null;
         return cache.remove(wordHash);
     }
 
-    public synchronized boolean removeReference(final String wordHash, final String urlHash) {
+    public synchronized boolean remove(final String wordHash, final String urlHash) {
         assert this.cache != null;
         final ReferenceContainer c = cache.get(wordHash);
         if ((c != null) && (c.remove(urlHash) != null)) {
             // removal successful
             if (c.size() == 0) {
-                deleteAllReferences(wordHash);
+                delete(wordHash);
             } else {
                 cache.put(wordHash, c);
             }
@@ -460,7 +462,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         return false;
     }
     
-    public synchronized int removeReferences(final String wordHash, final Set<String> urlHashes) {
+    public synchronized int remove(final String wordHash, final Set<String> urlHashes) {
         assert this.cache != null;
         if (urlHashes.size() == 0) return 0;
         final ReferenceContainer c = cache.get(wordHash);
@@ -468,7 +470,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
             // removal successful
             if (c.size() == 0) {
-                deleteAllReferences(wordHash);
+                delete(wordHash);
             } else {
                 cache.put(wordHash, c);
             }
@@ -477,7 +479,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         return 0;
     }
  
-    public synchronized void addReferences(final ReferenceContainer container) {
+    public synchronized void add(final ReferenceContainer container) {
         // this puts the entries into the cache
         int added = 0;
         if ((container == null) || (container.size() == 0)) return;
@@ -499,7 +501,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         return;
     }
 
-    public synchronized void addReference(final String wordHash, final ReferenceRow newEntry) {
+    public synchronized void add(final String wordHash, final ReferenceRow newEntry) {
         assert this.cache != null;
         ReferenceContainer container = cache.get(wordHash);
         if (container == null) container = new ReferenceContainer(wordHash, this.payloadrow, 1);
@@ -509,6 +511,10 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
 
     public int minMem() {
         return 0;
+    }
+
+    public ByteOrder ordering() {
+        return this.wordOrder;
     }
 
 }

@@ -38,6 +38,7 @@ import de.anomic.kelondro.text.ReferenceContainerCache;
 import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.util.Log;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
@@ -106,7 +107,7 @@ public class Transmission  {
                 final Row payloadrow) {
             super();
             this.primaryTarget = primaryTarget;
-            this.containers = new ReferenceContainerCache(payloadrow);
+            this.containers = new ReferenceContainerCache(payloadrow, plasmaWordIndex.wordOrder);
             this.containers.initWriteMode();
             this.references = new HashMap<String, MetadataRowContainer>();
             this.badReferences = new HashSet<String>();
@@ -138,7 +139,7 @@ public class Transmission  {
             // now delete all references that were not found
             for (String s : notFound) container.remove(s);
             // finally add the remaining container to the cache
-            containers.addReferences(container);
+            containers.add(container);
         }
         
         /**
@@ -235,7 +236,7 @@ public class Transmission  {
         }
 
         public void restore() {
-            for (ReferenceContainer ic : this) try { backend.addReferences(ic); } catch (IOException e) {}
+            for (ReferenceContainer ic : this) try { backend.add(ic); } catch (IOException e) {}
         }
     }
 }

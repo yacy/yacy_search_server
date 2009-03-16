@@ -30,28 +30,52 @@ package de.anomic.kelondro.text;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
+
+import de.anomic.kelondro.order.Order;
 
 public abstract class AbstractIndex implements Index {
     
-    public int removeEntryMultiple(final Set<String> wordHashes, final String urlHash) throws IOException {
+    public int remove(final Set<String> wordHashes, final String urlHash) throws IOException {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search
         final Iterator<String> i = wordHashes.iterator();
         int c = 0;
         while (i.hasNext()) {
-            if (removeReference(i.next(), urlHash)) c++;
+            if (remove(i.next(), urlHash)) c++;
         }
         return c;
     }
     
-    public void removeEntriesMultiple(final Set<String> wordHashes, final Set<String> urlHashes) throws IOException {
+    public void remove(final Set<String> wordHashes, final Set<String> urlHashes) throws IOException {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search
         final Iterator<String> i = wordHashes.iterator();
         while (i.hasNext()) {
-            removeReferences(i.next(), urlHashes);
+            remove(i.next(), urlHashes);
         }
     }
     
-
+    public synchronized TreeSet<ReferenceContainer> references(final String startHash, final boolean rot, int count) throws IOException {
+        // creates a set of indexContainers
+        // this does not use the cache
+        final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(this.ordering().clone());
+        containerOrder.rotate(ReferenceContainer.emptyContainer(startHash, 0));
+        final TreeSet<ReferenceContainer> containers = new TreeSet<ReferenceContainer>(containerOrder);
+        final Iterator<ReferenceContainer> i = references(startHash, rot);
+        //if (ram) count = Math.min(size(), count);
+        ReferenceContainer container;
+        // this loop does not terminate using the i.hasNex() predicate when rot == true
+        // because then the underlying iterator is a rotating iterator without termination
+        // in this case a termination must be ensured with a counter
+        // It must also be ensured that the counter is in/decreased every loop
+        while ((count > 0) && (i.hasNext())) {
+            container = i.next();
+            if ((container != null) && (container.size() > 0)) {
+                containers.add(container);
+            }
+            count--; // decrease counter even if the container was null or empty to ensure termination
+        }
+        return containers; // this may return less containers as demanded
+    }
 }

@@ -74,13 +74,13 @@ public class EcoTable implements ObjectIndex {
     
     public static final long maxarraylength = 134217727L; // that may be the maxmimum size of array length in some JVMs
     private static final long minmemremaining = 20 * 1024 * 1024; // if less than this memory is remaininig, the memory copy of a table is abandoned
-    RowSet table;
-    IntegerHandleIndex index;
-    BufferedEcoFS file;
-    Row rowdef;
-    int fail;
-    File tablefile;
-    Row taildef;
+    private RowSet table;
+    private IntegerHandleIndex index;
+    private BufferedEcoFS file;
+    private Row rowdef;
+    private int fail;
+    private File tablefile;
+    private Row taildef;
     private final int buffersize;
     
     public EcoTable(final File tablefile, final Row rowdef, final int useTailCache, final int buffersize, final int initialSpace) {

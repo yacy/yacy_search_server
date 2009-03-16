@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.MergeIterator;
 import de.anomic.kelondro.order.Order;
@@ -56,11 +57,12 @@ public final class IndexCell extends AbstractIndex implements Index {
     
     public IndexCell(
             final File cellPath,
+            final ByteOrder wordOrder,
             final Row payloadrow,
             final int maxRamEntries
             ) throws IOException {
-        this.array = new ReferenceContainerArray(cellPath, payloadrow);
-        this.ram = new ReferenceContainerCache(payloadrow);
+        this.array = new ReferenceContainerArray(cellPath, wordOrder, payloadrow);
+        this.ram = new ReferenceContainerCache(payloadrow, wordOrder);
         this.maxRamEntries = maxRamEntries;
     }
     
@@ -69,23 +71,27 @@ public final class IndexCell extends AbstractIndex implements Index {
         File dumpFile = this.array.newContainerBLOBFile();
         this.ram.dump(dumpFile);
         // get a fresh ram cache
-        this.ram = new ReferenceContainerCache(this.array.rowdef());
+        this.ram = new ReferenceContainerCache(this.array.rowdef(), this.array.ordering());
         // add the dumped indexContainerBLOB to the array
         this.array.mountBLOBContainer(dumpFile);
     }
 
+    public ByteOrder ordering() {
+        return this.array.ordering();
+    }
+    
     /**
      * add entries to the cell: this adds the new entries always to the RAM part, never to BLOBs
      * @throws IOException 
      * @throws IOException 
      */
-    public synchronized void addReferences(ReferenceContainer newEntries) throws IOException {
-        this.ram.addReferences(newEntries);
+    public synchronized void add(ReferenceContainer newEntries) throws IOException {
+        this.ram.add(newEntries);
         if (this.ram.size() > this.maxRamEntries) cacheDump();
     }
 
-    public synchronized void addReference(String hash, ReferenceRow entry) throws IOException {
-        this.ram.addReference(hash, entry);
+    public synchronized void add(String hash, ReferenceRow entry) throws IOException {
+        this.ram.add(hash, entry);
         if (this.ram.size() > this.maxRamEntries) cacheDump();
     }
 
@@ -120,8 +126,8 @@ public final class IndexCell extends AbstractIndex implements Index {
      * the deleted containers are merged and returned as result of the method
      * @throws IOException 
      */
-    public ReferenceContainer deleteAllReferences(String wordHash) throws IOException {
-        ReferenceContainer c0 = this.ram.deleteAllReferences(wordHash);
+    public ReferenceContainer delete(String wordHash) throws IOException {
+        ReferenceContainer c0 = this.ram.delete(wordHash);
         ReferenceContainer c1 = this.array.get(wordHash);
         if (c1 == null) {
             if (c0 == null) return null;
@@ -136,8 +142,8 @@ public final class IndexCell extends AbstractIndex implements Index {
      * all containers in the BLOBs and the RAM are merged and returned
      * @throws IOException 
      */
-    public ReferenceContainer getReferences(String wordHash, Set<String> urlselection) throws IOException {
-        ReferenceContainer c0 = this.ram.getReferences(wordHash, null);
+    public ReferenceContainer get(String wordHash, Set<String> urlselection) throws IOException {
+        ReferenceContainer c0 = this.ram.get(wordHash, null);
         ReferenceContainer c1 = this.array.get(wordHash);
         if (c1 == null) {
             if (c0 == null) return null;
@@ -147,8 +153,8 @@ public final class IndexCell extends AbstractIndex implements Index {
         return c1.merge(c0);
     }
 
-    public int countReferences(String wordHash) {
-        ReferenceContainer c0 = this.ram.getReferences(wordHash, null);
+    public int count(String wordHash) {
+        ReferenceContainer c0 = this.ram.get(wordHash, null);
         ReferenceContainer c1;
         try {
             c1 = this.array.get(wordHash);
@@ -166,8 +172,8 @@ public final class IndexCell extends AbstractIndex implements Index {
     /**
      * checks if there is any container for this wordHash, either in RAM or any BLOB
      */
-    public boolean hasReferences(String wordHash) {
-        if (this.ram.hasReferences(wordHash)) return true;
+    public boolean has(String wordHash) {
+        if (this.ram.has(wordHash)) return true;
         return this.array.has(wordHash);
     }
 
@@ -184,12 +190,12 @@ public final class IndexCell extends AbstractIndex implements Index {
      * @throws IOException 
      * @throws IOException 
      */
-    public int removeReferences(String wordHash, Set<String> urlHashes) throws IOException {
+    public int remove(String wordHash, Set<String> urlHashes) throws IOException {
         int reduced = this.array.replace(wordHash, new RemoveRewriter(urlHashes));
         return reduced / this.array.rowdef().objectsize;
     }
 
-    public boolean removeReference(String wordHash, String urlHash) throws IOException {
+    public boolean remove(String wordHash, String urlHash) throws IOException {
         int reduced = this.array.replace(wordHash, new RemoveRewriter(urlHash));
         return reduced > 0;
     }
@@ -198,14 +204,30 @@ public final class IndexCell extends AbstractIndex implements Index {
         return this.ram.size() + this.array.size();
     }
 
-    public CloneableIterator<ReferenceContainer> referenceIterator(String startWordHash, boolean rot, boolean ram) {
+    public CloneableIterator<ReferenceContainer> references(String startWordHash, boolean rot) {
+        final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(this.ram.rowdef().getOrdering().clone());
+        containerOrder.rotate(new ReferenceContainer(startWordHash, this.ram.rowdef(), 0));
+        return new MergeIterator<ReferenceContainer>(
+            this.ram.references(startWordHash, rot),
+            new MergeIterator<ReferenceContainer>(
+                this.ram.references(startWordHash, false),
+                this.array.wordContainerIterator(startWordHash, false, false),
+                containerOrder,
+                ReferenceContainer.containerMergeMethod,
+                true),
+            containerOrder,
+            ReferenceContainer.containerMergeMethod,
+            true);
+    }
+
+    public CloneableIterator<ReferenceContainer> references(String startWordHash, boolean rot, boolean ram) {
         final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(this.ram.rowdef().getOrdering().clone());
         containerOrder.rotate(new ReferenceContainer(startWordHash, this.ram.rowdef(), 0));
         if (ram) {
-            return this.ram.referenceIterator(startWordHash, rot, true);
+            return this.ram.references(startWordHash, rot);
         }
         return new MergeIterator<ReferenceContainer>(
-                this.ram.referenceIterator(startWordHash, false, true),
+                this.ram.references(startWordHash, false),
                 this.array.wordContainerIterator(startWordHash, false, false),
                 containerOrder,
                 ReferenceContainer.containerMergeMethod,

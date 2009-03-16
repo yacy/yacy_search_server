@@ -33,9 +33,9 @@ import de.anomic.kelondro.order.CloneableIterator;
 public interface IndexReader {
 
     public int size();
-    public boolean hasReferences(String wordHash); // should only be used if in case that true is returned the getContainer is NOT called
-    public ReferenceContainer getReferences(String wordHash, Set<String> urlselection); 
-    public CloneableIterator<ReferenceContainer> referenceIterator(String startWordHash, boolean rot, boolean ram);
+    public boolean has(String wordHash); // should only be used if in case that true is returned the getContainer is NOT called
+    public ReferenceContainer get(String wordHash, Set<String> urlselection); 
+    public CloneableIterator<ReferenceContainer> references(String startWordHash, boolean rot);
     public void close();
     
 }

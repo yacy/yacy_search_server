@@ -229,7 +229,7 @@ public class PerformanceQueues_p {
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
             final int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);
             switchboard.setConfig(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
-            switchboard.webIndex.index().setMaxWordCount(wordCacheMaxCount);
+            switchboard.webIndex.index().setBufferMaxWordCount(wordCacheMaxCount);
             
             final int wordCacheInitCount = post.getInt(plasmaSwitchboardConstants.WORDCACHE_INIT_COUNT, 30000);
             switchboard.setConfig(plasmaSwitchboardConstants.WORDCACHE_INIT_COUNT, Integer.toString(wordCacheInitCount));
@@ -288,11 +288,11 @@ public class PerformanceQueues_p {
         
         // table cache settings
         prop.putNum("urlCacheSize", switchboard.webIndex.metadata().writeCacheSize());  
-        prop.putNum("wordCacheSize", switchboard.webIndex.index().indexCacheSize());
-        prop.putNum("wordCacheSizeKBytes", switchboard.webIndex.index().indexCacheSizeBytes()/1024);
-        prop.putNum("maxURLinCache", switchboard.webIndex.index().maxURLinCache());
-        prop.putNum("maxAgeOfCache", switchboard.webIndex.index().maxAgeOfCache() / 1000 / 60); // minutes
-        prop.putNum("minAgeOfCache", switchboard.webIndex.index().minAgeOfCache() / 1000 / 60); // minutes
+        prop.putNum("wordCacheSize", switchboard.webIndex.index().getBufferSize());
+        prop.putNum("wordCacheSizeKBytes", switchboard.webIndex.index().getBufferSizeBytes()/1024);
+        prop.putNum("maxURLinCache", switchboard.webIndex.index().getBufferMaxReferences());
+        prop.putNum("maxAgeOfCache", switchboard.webIndex.index().getBufferMaxAge() / 1000 / 60); // minutes
+        prop.putNum("minAgeOfCache", switchboard.webIndex.index().getBufferMinAge() / 1000 / 60); // minutes
         prop.putNum("maxWaitingWordFlush", switchboard.getConfigLong("maxWaitingWordFlush", 180));
         prop.put("wordCacheMaxCount", switchboard.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 20000));
         prop.put("wordCacheInitCount", switchboard.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_INIT_COUNT, 30000));

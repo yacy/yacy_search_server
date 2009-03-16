@@ -638,7 +638,7 @@ public final class yacyClient {
 
 		// insert the containers to the index
         for (int m = 0; m < words; m++) try {
-                wordIndex.index().addReferences(container[m]);
+                wordIndex.index().add(container[m]);
             } catch (IOException e) {
                 e.printStackTrace();
             }

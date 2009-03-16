@@ -33,7 +33,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.text.Index;
+import de.anomic.kelondro.text.BufferedIndex;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.text.MetadataRepository;
@@ -81,7 +81,7 @@ public class Dispatcher {
     private HashMap<String, Transmission.Chunk> transmissionCloud;
     
     // the backend is used to store the remaining indexContainers in case that the object is closed
-    private Index backend;
+    private BufferedIndex backend;
     
     // the seed database
     private yacySeedDB seeds;
@@ -96,7 +96,7 @@ public class Dispatcher {
     private Transmission transmission;
     
     public Dispatcher(
-            final Index backend,
+            final BufferedIndex backend,
             final MetadataRepository repository,
             final yacySeedDB seeds,
             final boolean gzipBody, 
@@ -168,7 +168,7 @@ public class Dispatcher {
         
         final ArrayList<ReferenceContainer> containers = new ArrayList<ReferenceContainer>(maxContainerCount);
         
-        final Iterator<ReferenceContainer> indexContainerIterator = this.backend.referenceIterator(hash, true, ram);
+        final Iterator<ReferenceContainer> indexContainerIterator = this.backend.references(hash, true, ram);
         ReferenceContainer container;
         int refcount = 0;
 
@@ -198,7 +198,7 @@ public class Dispatcher {
                 urlHashes.add(it.next().urlHash());
             }
             if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + c.getWordHash() + "'");
-            if (urlHashes.size() > 0) this.backend.removeReferences(c.getWordHash(), urlHashes);
+            if (urlHashes.size() > 0) this.backend.remove(c.getWordHash(), urlHashes);
         }
         
         // finished. The caller must take care of the containers and must put them back if not needed
@@ -375,7 +375,7 @@ public class Dispatcher {
         if (indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.announceShutdown();
         if (this.transmissionCloud != null) {
         	for (Map.Entry<String, Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
-        		for (ReferenceContainer i : e.getValue()) try {this.backend.addReferences(i);} catch (IOException e1) {}
+        		for (ReferenceContainer i : e.getValue()) try {this.backend.add(i);} catch (IOException e1) {}
         	}
         	this.transmissionCloud.clear();
         }

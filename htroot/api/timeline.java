@@ -78,7 +78,7 @@ public final class timeline {
         yacyCore.log.logInfo("INIT TIMELINE SEARCH: " + plasmaSearchQuery.anonymizedQueryHashes(query[0]) + " - " + count + " links");
         
         // get the index container with the result vector
-        HashMap<String, ReferenceContainer>[] localSearchContainerMaps = sb.webIndex.index().localSearchContainers(query[0], query[1], null);
+        HashMap<String, ReferenceContainer>[] localSearchContainerMaps = sb.webIndex.localSearchContainers(query[0], query[1], null);
         final ReferenceContainer index =
             ReferenceContainer.joinExcludeContainers(
                 localSearchContainerMaps[0].values(),

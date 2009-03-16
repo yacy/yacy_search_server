@@ -36,6 +36,7 @@ import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.BLOBArray;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
+import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 
 public final class ReferenceContainerArray {
@@ -55,13 +56,14 @@ public final class ReferenceContainerArray {
      */
     public ReferenceContainerArray(
     		final File heapLocation,
+    		final ByteOrder wordOrder,
     		final Row payloadrow) throws IOException {
         this.payloadrow = payloadrow;
         this.array = new BLOBArray(
             heapLocation,
             "index",
             payloadrow.primaryKeyLength,
-            payloadrow.getOrdering(),
+            wordOrder,
             0);
     }
     
@@ -75,6 +77,10 @@ public final class ReferenceContainerArray {
     
     public synchronized int size() {
         return (this.array == null) ? 0 : this.array.size();
+    }
+    
+    public ByteOrder ordering() {
+        return this.array.ordering();
     }
     
     public File newContainerBLOBFile() {

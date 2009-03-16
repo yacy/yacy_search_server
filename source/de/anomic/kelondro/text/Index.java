@@ -30,7 +30,9 @@ package de.anomic.kelondro.text;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.TreeSet;
 
+import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 
 public interface Index {
@@ -43,7 +45,7 @@ public interface Index {
 	 * @param newEntries the References to be merged with existing references
 	 * @throws IOException
 	 */
-	public void addReferences(ReferenceContainer newEntries) throws IOException;
+	public void add(ReferenceContainer newEntries) throws IOException;
 
 	/**
 	 * add a single reference to the reverse index
@@ -54,14 +56,14 @@ public interface Index {
 	 * @param entry
 	 * @throws IOException
 	 */
-    public void addReference(final String wordHash, final ReferenceRow entry) throws IOException;
+    public void add(final String wordHash, final ReferenceRow entry) throws IOException;
     
 	/**
 	 * check if there are references stored to the given word hash
 	 * @param wordHash
 	 * @return true if references exist, false if not
 	 */
-	public boolean hasReferences(String wordHash); // should only be used if in case that true is returned the getContainer is NOT called
+	public boolean has(String wordHash); // should only be used if in case that true is returned the getContainer is NOT called
     
 	/**
 	 * count the number of references for the given word
@@ -70,7 +72,7 @@ public interface Index {
 	 * @param wordHash
 	 * @return the number of references to the given word
 	 */
-	public int countReferences(final String wordHash);
+	public int count(final String wordHash);
     
 	/**
 	 * get the references to a given word.
@@ -81,7 +83,7 @@ public interface Index {
 	 * @return the references
 	 * @throws IOException
 	 */
-	public ReferenceContainer getReferences(String wordHash, Set<String> referenceselection) throws IOException;
+	public ReferenceContainer get(String wordHash, Set<String> referenceselection) throws IOException;
     
     /**
      * delete all references for a word
@@ -89,7 +91,7 @@ public interface Index {
      * @return the deleted references
      * @throws IOException
      */
-	public ReferenceContainer deleteAllReferences(String wordHash) throws IOException;
+	public ReferenceContainer delete(String wordHash) throws IOException;
     
 	/**
 	 * remove a specific reference entry
@@ -98,7 +100,7 @@ public interface Index {
 	 * @return
 	 * @throws IOException
 	 */
-    public boolean removeReference(String wordHash, String referenceHash) throws IOException;
+    public boolean remove(String wordHash, String referenceHash) throws IOException;
     
     /**
      * remove a set of reference entries for a given word
@@ -107,11 +109,11 @@ public interface Index {
      * @return
      * @throws IOException
      */
-    public int removeReferences(String wordHash, Set<String> referenceHashes) throws IOException;
+    public int remove(String wordHash, Set<String> referenceHashes) throws IOException;
     
-    public int removeEntryMultiple(final Set<String> wordHashes, final String urlHash) throws IOException;
+    public int remove(final Set<String> wordHashes, final String urlHash) throws IOException;
     
-    public void removeEntriesMultiple(final Set<String> wordHashes, final Set<String> urlHashes) throws IOException;
+    public void remove(final Set<String> wordHashes, final Set<String> urlHashes) throws IOException;
 
     /**
      * iterate all references from the beginning of a specific word hash
@@ -121,7 +123,17 @@ public interface Index {
      * @return
      * @throws IOException
      */
-	public CloneableIterator<ReferenceContainer> referenceIterator(String startWordHash, boolean rot, boolean ram) throws IOException; // method to replace wordHashes
+	public CloneableIterator<ReferenceContainer> references(
+	                        String startHash,
+	                        boolean rot
+	                        ) throws IOException;
+    
+
+    public TreeSet<ReferenceContainer> references(
+                            String startHash,
+                            boolean rot,
+                            int count
+                            ) throws IOException;
     
     /**
      * delete all references entries
@@ -146,4 +158,9 @@ public interface Index {
      */
     public int minMem();
     
+    /**
+     * return the order that is used for the storage of the word hashes
+     * @return
+     */
+    public ByteOrder ordering();
 }

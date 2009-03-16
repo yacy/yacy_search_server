@@ -251,7 +251,7 @@ public final class plasmaSearchEvent {
                     final Set<String> removeWords = cleanEvent.query.queryHashes;
                     removeWords.addAll(cleanEvent.query.excludeHashes);
                     try {
-                        cleanEvent.wordIndex.index().removeEntriesMultiple(removeWords, cleanEvent.failedURLs.keySet());
+                        cleanEvent.wordIndex.index().remove(removeWords, cleanEvent.failedURLs.keySet());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -307,7 +307,7 @@ public final class plasmaSearchEvent {
             (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
             (!(metadata.dc_title().startsWith("Index of")))) {
             final Iterator<String> wi = query.queryHashes.iterator();
-            while (wi.hasNext()) try { wordIndex.index().removeReference(wi.next(), page.hash()); } catch (IOException e) {}
+            while (wi.hasNext()) try { wordIndex.index().remove(wi.next(), page.hash()); } catch (IOException e) {}
             registerFailure(page.hash(), "index-of constraint not fullfilled");
             return null;
         }
@@ -836,7 +836,7 @@ public final class plasmaSearchEvent {
                 if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
                     // seed is not known from here
                     try {
-                        wordIndex.index().removeEntryMultiple(
+                        wordIndex.index().remove(
                             Word.words2hashes(plasmaCondenser.getWords(
                                 ("yacyshare " +
                                  filename.replace('?', ' ') +

@@ -48,6 +48,7 @@ import de.anomic.plasma.plasmaSearchAPI;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -124,7 +125,7 @@ public class IndexControlRWIs_p {
                 if (delurl || delurlref) {
                     // generate an urlx array
                     ReferenceContainer index = null;
-                    index = sb.webIndex.index().getReferences(keyhash, null);
+                    index = sb.webIndex.index().get(keyhash, null);
                     final Iterator<ReferenceRow> en = index.entries();
                     int i = 0;
                     urlx = new String[index.size()];
@@ -141,7 +142,7 @@ public class IndexControlRWIs_p {
                         sb.urlRemove(urlx[i]);
                     }
                 }
-                sb.webIndex.index().deleteAllReferences(keyhash);
+                sb.webIndex.index().delete(keyhash);
                 post.remove("keyhashdeleteall");
                 post.put("urllist", "generated");
             } catch (IOException e) {
@@ -160,7 +161,7 @@ public class IndexControlRWIs_p {
                 }
                 final Set<String> urlHashes = new HashSet<String>();
                 for (int i = 0; i < urlx.length; i++) urlHashes.add(urlx[i]);
-                sb.webIndex.index().removeReferences(keyhash, urlHashes);
+                sb.webIndex.index().remove(keyhash, urlHashes);
                 // this shall lead to a presentation of the list; so handle that the remaining program
                 // thinks that it was called for a list presentation
                 post.remove("keyhashdelete");
@@ -204,7 +205,7 @@ public class IndexControlRWIs_p {
                 // prepare index
                 ReferenceContainer index;
                 final long starttime = System.currentTimeMillis();
-                index = sb.webIndex.index().getReferences(keyhash, null);
+                index = sb.webIndex.index().get(keyhash, null);
                 // built urlCache
                 final Iterator<ReferenceRow> urlIter = index.entries();
                 final HashMap<String, MetadataRowContainer> knownURLs = new HashMap<String, MetadataRowContainer>();
@@ -223,8 +224,8 @@ public class IndexControlRWIs_p {
                 }
                 
                 // make an indexContainerCache
-                ReferenceContainerCache icc = new ReferenceContainerCache(index.rowdef);
-                icc.addReferences(index);
+                ReferenceContainerCache icc = new ReferenceContainerCache(index.rowdef, plasmaWordIndex.wordOrder);
+                icc.add(index);
                 
                 // transport to other peer
                 final String gzipBody = sb.getConfig("indexControl.gzipBody","false");
@@ -242,8 +243,8 @@ public class IndexControlRWIs_p {
             }
     
             // generate list
-            if (post.containsKey("keyhashsimilar")) {
-                final Iterator<ReferenceContainer> containerIt = sb.webIndex.index().indexContainerSet(keyhash, false, true, 256).iterator();
+            if (post.containsKey("keyhashsimilar")) try {
+                final Iterator<ReferenceContainer> containerIt = sb.webIndex.index().references(keyhash, true, 256, false).iterator();
                     ReferenceContainer container;
                     int i = 0;
                     int rows = 0, cols = 0;
@@ -262,6 +263,8 @@ public class IndexControlRWIs_p {
                     prop.put("keyhashsimilar_rows_"+rows+"_cols", cols);
                     prop.put("keyhashsimilar_rows", rows + 1);
                     prop.put("result", "");
+            } catch (IOException e) {
+                e.printStackTrace();
             }
             
             if (post.containsKey("blacklist")) {
@@ -322,7 +325,7 @@ public class IndexControlRWIs_p {
                     }
                 }
                 try {
-                    sb.webIndex.index().removeReferences(keyhash, urlHashes);
+                    sb.webIndex.index().remove(keyhash, urlHashes);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

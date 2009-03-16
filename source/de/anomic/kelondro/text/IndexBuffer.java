@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.ScoreCluster;
@@ -42,7 +43,7 @@ import de.anomic.kelondro.util.Log;
  * A IndexCache is a ReferenceContainerCache with an attached cache flush logic
  *
  */
-public final class IndexCache extends AbstractIndex implements Index, IndexReader, Iterable<ReferenceContainer> {
+public final class IndexBuffer extends AbstractIndex implements Index, IndexReader, Iterable<ReferenceContainer> {
 
     // class variables
     private final ScoreCluster<String> hashScore;
@@ -56,8 +57,9 @@ public final class IndexCache extends AbstractIndex implements Index, IndexReade
     private ReferenceContainerCache heap;
     
     @SuppressWarnings("unchecked")
-    public IndexCache(
+    public IndexBuffer(
             final File databaseRoot,
+            final ByteOrder wordOrdering,
             final Row payloadrow,
             final int entityCacheMaxSize,
             final int wCacheReferenceCountLimitInit,
@@ -75,7 +77,7 @@ public final class IndexCache extends AbstractIndex implements Index, IndexReade
         this.cacheReferenceAgeLimit = wCacheReferenceAgeLimitInit;
         this.log = log;
         this.dumpFile = new File(databaseRoot, newHeapName);
-        this.heap = new ReferenceContainerCache(payloadrow);
+        this.heap = new ReferenceContainerCache(payloadrow, wordOrdering);
         
         // read in dump of last session
         boolean initFailed = false;
@@ -91,7 +93,7 @@ public final class IndexCache extends AbstractIndex implements Index, IndexReade
             heap.initWriteMode();
         } else if (dumpFile.exists()) {
             // initialize scores for cache organization
-            for (final ReferenceContainer ic : (Iterable<ReferenceContainer>) heap.referenceIterator(null, false, true)) {
+            for (final ReferenceContainer ic : (Iterable<ReferenceContainer>) heap.references(null, false)) {
                 this.hashDate.setScore(ic.getWordHash(), intTime(ic.lastWrote()));
                 this.hashScore.setScore(ic.getWordHash(), ic.size());
             }
@@ -118,17 +120,17 @@ public final class IndexCache extends AbstractIndex implements Index, IndexReade
     }
     
     // cache settings
-    public int maxURLinCache() {
+    public int getBufferMaxReferences() {
         if (hashScore.size() == 0) return 0;
         return hashScore.getMaxScore();
     }
 
-    public long minAgeOfCache() {
+    public long getBufferMinAge() {
         if (hashDate.size() == 0) return 0;
         return System.currentTimeMillis() - longEmit(hashDate.getMaxScore());
     }
 
-    public long maxAgeOfCache() {
+    public long getBufferMaxAge() {
         if (hashDate.size() == 0) return 0;
         return System.currentTimeMillis() - longEmit(hashDate.getMinScore());
     }
@@ -146,12 +148,11 @@ public final class IndexCache extends AbstractIndex implements Index, IndexReade
         return heap.size();
     }
 
-    public synchronized CloneableIterator<ReferenceContainer> referenceIterator(final String startWordHash, final boolean rot, final boolean ram) {
+    public synchronized CloneableIterator<ReferenceContainer> references(final String startWordHash, final boolean rot) {
         // we return an iterator object that creates top-level-clones of the indexContainers
         // in the cache, so that manipulations of the iterated objects do not change
         // objects in the cache.
-    	assert ram == true;
-        return heap.referenceIterator(startWordHash, rot, ram);
+        return heap.references(startWordHash, rot);
     }
 
     public synchronized String maxScoreWordHash() {
@@ -195,7 +196,7 @@ public final class IndexCache extends AbstractIndex implements Index, IndexReade
                 hash = hashDate.getMinObject(); // flush oldest entries
             }
             if (hash == null) {
-                final ReferenceContainer ic = heap.referenceIterator(null, false, true).next();
+                final ReferenceContainer ic = heap.references(null, false).next();
                 if (ic != null) hash = ic.getWordHash();
             }
             return hash;
@@ -213,7 +214,7 @@ public final class IndexCache extends AbstractIndex implements Index, IndexReade
         for (int i = 0; i < count; i++) {
             hash = bestFlushWordHash();
             if (hash == null) return containerList;
-            container = heap.deleteAllReferences(hash);
+            container = heap.delete(hash);
             assert (container != null);
             if (container == null) return containerList;
             hashScore.deleteScore(hash);
@@ -231,19 +232,19 @@ public final class IndexCache extends AbstractIndex implements Index, IndexReade
         return (((long) intTime) * (long) 1000) + initTime;
     }
     
-    public boolean hasReferences(final String wordHash) {
-        return heap.hasReferences(wordHash);
+    public boolean has(final String wordHash) {
+        return heap.has(wordHash);
     }
     
-    public int countReferences(String key) {
-        return this.heap.countReferences(key);
+    public int count(String key) {
+        return this.heap.count(key);
     }
     
-    public synchronized ReferenceContainer getReferences(final String wordHash, final Set<String> urlselection) {
+    public synchronized ReferenceContainer get(final String wordHash, final Set<String> urlselection) {
         if (wordHash == null) return null;
         
         // retrieve container
-        ReferenceContainer container = heap.getReferences(wordHash, null);
+        ReferenceContainer container = heap.get(wordHash, null);
         
         // We must not use the container from cache to store everything we find,
         // as that container remains linked to in the cache and might be changed later
@@ -257,19 +258,19 @@ public final class IndexCache extends AbstractIndex implements Index, IndexReade
         return container;
     }
 
-    public synchronized ReferenceContainer deleteAllReferences(final String wordHash) {
+    public synchronized ReferenceContainer delete(final String wordHash) {
         // returns the index that had been deleted
     	if (wordHash == null || heap == null) return null;
-        final ReferenceContainer container = heap.deleteAllReferences(wordHash);
+        final ReferenceContainer container = heap.delete(wordHash);
         hashScore.deleteScore(wordHash);
         hashDate.deleteScore(wordHash);
         return container;
     }
 
-    public synchronized boolean removeReference(final String wordHash, final String urlHash) {
-        final boolean removed = heap.removeReference(wordHash, urlHash);
+    public synchronized boolean remove(final String wordHash, final String urlHash) {
+        final boolean removed = heap.remove(wordHash, urlHash);
         if (removed) {
-            if (heap.hasReferences(wordHash)) {
+            if (heap.has(wordHash)) {
                 hashScore.decScore(wordHash);
                 hashDate.setScore(wordHash, intTime(System.currentTimeMillis()));
             } else {
@@ -281,12 +282,12 @@ public final class IndexCache extends AbstractIndex implements Index, IndexReade
         return false;
     }
     
-    public synchronized int removeReferences(final String wordHash, final Set<String> urlHashes) {
+    public synchronized int remove(final String wordHash, final Set<String> urlHashes) {
         if (urlHashes.size() == 0) return 0;
-        final int c = heap.removeReferences(wordHash, urlHashes);
+        final int c = heap.remove(wordHash, urlHashes);
         if (c > 0) {
             // removal successful
-            if (heap.hasReferences(wordHash)) {
+            if (heap.has(wordHash)) {
                 hashScore.addScore(wordHash, -c);
                 hashDate.setScore(wordHash, intTime(System.currentTimeMillis()));
             } else {
@@ -298,20 +299,20 @@ public final class IndexCache extends AbstractIndex implements Index, IndexReade
         return 0;
     }
     
-    public synchronized void addReferences(final ReferenceContainer container) {
+    public synchronized void add(final ReferenceContainer container) {
         if (container == null || container.size() == 0 || heap == null) return;
 
         // put new words into cache
-        heap.addReferences(container);
-        hashScore.setScore(container.getWordHash(), heap.countReferences(container.getWordHash()));
+        heap.add(container);
+        hashScore.setScore(container.getWordHash(), heap.count(container.getWordHash()));
         hashDate.setScore(container.getWordHash(), intTime(System.currentTimeMillis()));
     }
 
-    public void addReference(final String wordHash, final ReferenceRow entry) throws IOException {
+    public void add(final String wordHash, final ReferenceRow entry) throws IOException {
         if (entry == null || heap == null) return;
 
         // put new words into cache
-        heap.addReference(wordHash, entry);
+        heap.add(wordHash, entry);
         hashScore.incScore(wordHash);
         hashDate.setScore(wordHash, intTime(System.currentTimeMillis()));
     }
@@ -330,6 +331,20 @@ public final class IndexCache extends AbstractIndex implements Index, IndexReade
     }
 
     public Iterator<ReferenceContainer> iterator() {
-        return referenceIterator(null, false, true);
+        return references(null, false);
     }
+    
+    public ByteOrder ordering() {
+        return heap.ordering();
+    }
+
+    public synchronized long getBufferSizeBytes() {
+        // calculate the real size in bytes of the index cache
+        long cacheBytes = 0;
+        final long entryBytes = ReferenceRow.urlEntryRow.objectsize;
+        final Iterator<ReferenceContainer> it = references(null, false);
+        while (it.hasNext()) cacheBytes += it.next().size() * entryBytes;
+        return cacheBytes;
+    }
+
 }
