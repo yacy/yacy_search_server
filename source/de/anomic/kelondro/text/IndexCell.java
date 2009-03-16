@@ -47,7 +47,7 @@ import de.anomic.kelondro.order.Order;
  * another BLOB file in the index array.
  */
 
-public final class IndexCell implements Index {
+public final class IndexCell extends AbstractIndex implements Index {
 
     // class variables
     private ReferenceContainerArray array;
@@ -77,6 +77,7 @@ public final class IndexCell implements Index {
     /**
      * add entries to the cell: this adds the new entries always to the RAM part, never to BLOBs
      * @throws IOException 
+     * @throws IOException 
      */
     public synchronized void addReferences(ReferenceContainer newEntries) throws IOException {
         this.ram.addReferences(newEntries);
@@ -85,6 +86,7 @@ public final class IndexCell implements Index {
 
     /**
      * clear the RAM and BLOB part, deletes everything in the cell
+     * @throws IOException 
      */
     public synchronized void clear() throws IOException {
         this.ram.clear();
@@ -111,6 +113,7 @@ public final class IndexCell implements Index {
     /**
      * deleting a container affects the containers in RAM and all the BLOB files
      * the deleted containers are merged and returned as result of the method
+     * @throws IOException 
      */
     public ReferenceContainer deleteAllReferences(String wordHash) throws IOException {
         ReferenceContainer c0 = this.ram.deleteAllReferences(wordHash);
@@ -126,6 +129,7 @@ public final class IndexCell implements Index {
 
     /**
      * all containers in the BLOBs and the RAM are merged and returned
+     * @throws IOException 
      */
     public ReferenceContainer getReferences(String wordHash, Set<String> urlselection) throws IOException {
         ReferenceContainer c0 = this.ram.getReferences(wordHash, null);
@@ -173,6 +177,7 @@ public final class IndexCell implements Index {
      * new BLOBs. This returns the sum of all url references that have been removed
      * @throws IOException 
      * @throws IOException 
+     * @throws IOException 
      */
     public int removeReferences(String wordHash, Set<String> urlHashes) throws IOException {
         int reduced = this.array.replace(wordHash, new RemoveRewriter(urlHashes));
@@ -188,7 +193,7 @@ public final class IndexCell implements Index {
         return this.ram.size() + this.array.size();
     }
 
-    public CloneableIterator<ReferenceContainer> referenceIterator(String startWordHash, boolean rot, boolean ram) throws IOException {
+    public CloneableIterator<ReferenceContainer> referenceIterator(String startWordHash, boolean rot, boolean ram) {
         final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(this.ram.rowdef().getOrdering().clone());
         containerOrder.rotate(new ReferenceContainer(startWordHash, this.ram.rowdef(), 0));
         if (ram) {

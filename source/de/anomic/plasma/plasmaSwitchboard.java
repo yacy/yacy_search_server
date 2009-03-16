@@ -143,6 +143,7 @@ import de.anomic.kelondro.text.Document;
 import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.URLMetadata;
 import de.anomic.kelondro.text.Blacklist;
+import de.anomic.kelondro.text.Word;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
@@ -1772,13 +1773,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 
                 // delete all word references
                 int count = 0;
-                if (words != null) count = webIndex.index().removeWordReferences(words, urlhash);
+                if (words != null) count = webIndex.index().removeEntryMultiple(Word.words2hashes(words), urlhash);
                 
                 // finally delete the url entry itself
                 webIndex.metadata().remove(urlhash);
                 return count;
             }
         } catch (final ParserException e) {
+            return 0;
+        } catch (IOException e) {
+            e.printStackTrace();
             return 0;
         } finally {
             if (resourceContent != null) try { resourceContent.close(); } catch (final Exception e) {/* ignore this */}

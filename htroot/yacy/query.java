@@ -27,6 +27,8 @@
 // javac -classpath .:../../classes query.java
 // if the shell's current path is HTROOT
 
+import java.io.IOException;
+
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -79,11 +81,13 @@ public final class query {
         }
 
         // requests about environment
-        if (obj.equals("rwiurlcount")) {
+        if (obj.equals("rwiurlcount")) try {
             // the total number of different urls in the rwi is returned
             // <env> shall contain a word hash, the number of assigned lurls to this hash is returned
             prop.put("response", sb.webIndex.index().getReferences(env, null).size());
             return prop;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         if (obj.equals("rwicount")) {

@@ -39,6 +39,7 @@ import de.anomic.crawler.IndexingStack;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.kelondro.text.CachedIndexCollection;
+import de.anomic.kelondro.text.IndexPackage;
 import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceRow;
@@ -77,7 +78,7 @@ public final class plasmaWordIndex {
     public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
     
     
-    private final CachedIndexCollection index;
+    private final IndexPackage    index;
     private final Log             log;
     private MetadataRepository    metadata;
     private final yacySeedDB      peers;
@@ -211,13 +212,13 @@ public final class plasmaWordIndex {
         return this.peers;
     }
 
-    public CachedIndexCollection index() {
+    public IndexPackage index() {
         return this.index;
     }
     
     public void clear() {
-        index.clear();
         try {
+            index.clear();
             metadata.clear();
         } catch (final IOException e) {
             e.printStackTrace();
@@ -559,13 +560,16 @@ public final class plasmaWordIndex {
                         }
                     }
                 }
-                if (urlHashs.size() > 0) {
+                if (urlHashs.size() > 0) try {
                     final int removed = index.removeReferences(container.getWordHash(), urlHashs);
                     Log.logFine("INDEXCLEANER", container.getWordHash() + ": " + removed + " of " + container.size() + " URL-entries deleted");
                     lastWordHash = container.getWordHash();
                     lastDeletionCounter = urlHashs.size();
                     urlHashs.clear();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+                
                 if (!containerIterator.hasNext()) {
                     // We may not be finished yet, try to get the next chunk of wordHashes
                     final TreeSet<ReferenceContainer> containers = index.indexContainerSet(container.getWordHash(), false, false, 100);

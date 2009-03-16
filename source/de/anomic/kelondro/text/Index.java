@@ -98,6 +98,10 @@ public interface Index {
      */
     public int removeReferences(String wordHash, Set<String> referenceHashes) throws IOException;
     
+    public int removeEntryMultiple(final Set<String> wordHashes, final String urlHash) throws IOException;
+    
+    public void removeEntriesMultiple(final Set<String> wordHashes, final Set<String> urlHashes) throws IOException;
+
     /**
      * iterate all references from the beginning of a specific word hash
      * @param startWordHash

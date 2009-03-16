@@ -46,12 +46,11 @@ import de.anomic.kelondro.text.IndexCollection;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerOrder;
 import de.anomic.kelondro.text.ReferenceRow;
-import de.anomic.kelondro.text.Word;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverProfiling;
 
-public final class CachedIndexCollection implements Index {
+public final class CachedIndexCollection extends AbstractIndex implements Index, IndexPackage {
 
     // environment constants
     public  static final long wCacheMaxAge    = 1000 * 60 * 30; // milliseconds; 30 minutes
@@ -65,7 +64,7 @@ public final class CachedIndexCollection implements Index {
     private final IndexCache      indexCache;
     private final IndexCollection collections;          // new database structure to replace AssortmentCluster and FileCluster
     
-    public CachedIndexCollection(
+    public CachedIndexCollection (
             File indexPrimaryTextLocation,
             final int entityCacheMaxSize,
             final boolean useCommons, 
@@ -100,122 +99,24 @@ public final class CachedIndexCollection implements Index {
                     useCommons);
     }
 
-    public void clear() {
-        indexCache.clear();
-        try {
-            collections.clear();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    public int minMem() {
-        return 1024*1024 /* indexing overhead */ + indexCache.minMem() + collections.minMem();
-    }
-
-    public int maxURLinCache() {
-        return indexCache.maxURLinCache();
-    }
-
-    public long minAgeOfCache() {
-        return indexCache.minAgeOfCache();
-    }
-
-    public long maxAgeOfCache() {
-        return indexCache.maxAgeOfCache();
-    }
-
-    public int indexCacheSize() {
-        return indexCache.size();
-    }
-    
-    public long indexCacheSizeBytes() {
-        // calculate the real size in bytes of the index cache
-        long cacheBytes = 0;
-        final long entryBytes = ReferenceRow.urlEntryRow.objectsize;
-        final IndexCache cache = (indexCache);
-        synchronized (cache) {
-            final Iterator<ReferenceContainer> it = cache.referenceIterator(null, false, true);
-            while (it.hasNext()) cacheBytes += it.next().size() * entryBytes;
-        }
-        return cacheBytes;
-    }
-
-    public void setMaxWordCount(final int maxWords) {
-        indexCache.setMaxWordCount(maxWords);
-    }
-
-    public void cacheFlushControl(final IndexCache theCache) {
-        // check for forced flush
-        int cs = cacheSize();
-        if (cs > 0) {
-            // flush elements that are too big. This flushing depends on the fact that the flush rule
-            // selects the biggest elements first for flushing. If it does not for any reason, the following
-            // loop would not terminate.
-            serverProfiling.update("wordcache", Long.valueOf(cs), true);
-            // To ensure termination an additional counter is used
-            int l = 0;
-            while (theCache.size() > 0 && (l++ < 100) && (theCache.maxURLinCache() > wCacheMaxChunk)) {
-                flushCacheOne(theCache);
-            }
-            // next flush more entries if the size exceeds the maximum size of the cache
-            while (theCache.size() > 0 &&
-                    ((theCache.size() > theCache.getMaxWordCount()) ||
-                    (MemoryControl.available() < collections.minMem()))) {
-                flushCacheOne(theCache);
-            }
-            if (cacheSize() != cs) serverProfiling.update("wordcache", Long.valueOf(cacheSize()), true);
-        }
-    }
-    
-    public static ReferenceContainer emptyContainer(final String wordHash, final int elementCount) {
-        return new ReferenceContainer(wordHash, ReferenceRow.urlEntryRow, elementCount);
-    }
-
-    public void addEntry(final String wordHash, final ReferenceRow entry, final long updateTime) {
-        // add the entry
-        indexCache.addEntry(wordHash, entry, updateTime, true);
-        cacheFlushControl(this.indexCache);
-    }
+    /* methods for interface Index */
     
     public void addReferences(final ReferenceContainer entries) {
         assert (entries.row().objectsize == ReferenceRow.urlEntryRow.objectsize);
  
         // add the entry
         indexCache.addReferences(entries);
-        cacheFlushControl(this.indexCache);
+        cacheFlushControl();
     }
     
-    public void flushCacheFor(int time) {
-        flushCacheUntil(System.currentTimeMillis() + time);
-    }
-    
-    private synchronized void flushCacheUntil(long timeout) {
-        while (System.currentTimeMillis() < timeout && indexCache.size() > 0) {
-            flushCacheOne(indexCache);
-        }
-    }
-    
-    private synchronized void flushCacheOne(final IndexCache ram) {
-        if (ram.size() > 0) collections.addReferences(flushContainer(ram));
-    }
-    
-    private ReferenceContainer flushContainer(final IndexCache ram) {
-        String wordHash;
-        ReferenceContainer c;
-        wordHash = ram.maxScoreWordHash();
-        c = ram.getReferences(wordHash, null);
-        if ((c != null) && (c.size() > wCacheMaxChunk)) {
-            return ram.deleteAllReferences(wordHash);
-        } else {
-            return ram.deleteAllReferences(ram.bestFlushWordHash());
-        }
-    }
-
     public boolean hasReferences(final String wordHash) {
         if (indexCache.hasReferences(wordHash)) return true;
         if (collections.hasReferences(wordHash)) return true;
         return false;
+    }
+    
+    public int countReferences(String key) {
+        return indexCache.countReferences(key) + collections.countReferences(key);
     }
     
     public ReferenceContainer getReferences(final String wordHash, final Set<String> urlselection) {
@@ -263,74 +164,6 @@ public final class CachedIndexCollection implements Index {
         return container;
     }
 
-    /**
-     * return map of wordhash:indexContainer
-     * 
-     * @param wordHashes
-     * @param urlselection
-     * @param deleteIfEmpty
-     * @param interruptIfEmpty
-     * @return
-     */
-    public HashMap<String, ReferenceContainer> getContainers(final Set<String> wordHashes, final Set<String> urlselection, final boolean interruptIfEmpty) {
-        // retrieve entities that belong to the hashes
-        final HashMap<String, ReferenceContainer> containers = new HashMap<String, ReferenceContainer>(wordHashes.size());
-        String singleHash;
-        ReferenceContainer singleContainer;
-            final Iterator<String> i = wordHashes.iterator();
-            while (i.hasNext()) {
-            
-                // get next word hash:
-                singleHash = i.next();
-            
-                // retrieve index
-                singleContainer = getReferences(singleHash, urlselection);
-            
-                // check result
-                if (((singleContainer == null) || (singleContainer.size() == 0)) && (interruptIfEmpty)) return new HashMap<String, ReferenceContainer>(0);
-            
-                containers.put(singleHash, singleContainer);
-            }
-        return containers;
-    }
-
-    @SuppressWarnings("unchecked")
-    public HashMap<String, ReferenceContainer>[] localSearchContainers(
-                            final TreeSet<String> queryHashes, 
-                            final TreeSet<String> excludeHashes, 
-                            final Set<String> urlselection) {
-        // search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
-
-        // retrieve entities that belong to the hashes
-        HashMap<String, ReferenceContainer> inclusionContainers = (queryHashes.size() == 0) ? new HashMap<String, ReferenceContainer>(0) : getContainers(
-                        queryHashes,
-                        urlselection,
-                        true);
-        if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < queryHashes.size())) inclusionContainers = new HashMap<String, ReferenceContainer>(0); // prevent that only a subset is returned
-        final HashMap<String, ReferenceContainer> exclusionContainers = (inclusionContainers.size() == 0) ? new HashMap<String, ReferenceContainer>(0) : getContainers(
-                excludeHashes,
-                urlselection,
-                true);
-        return new HashMap[]{inclusionContainers, exclusionContainers};
-    }
-    
-    public int size() {
-        return java.lang.Math.max(collections.size(), indexCache.size());
-    }
-
-    public int collectionsSize() {
-        return collections.size();
-    }
-    
-    public int cacheSize() {
-        return indexCache.size();
-    }
-
-    public void close() {
-        indexCache.close();
-        collections.close();
-    }
-    
     public ReferenceContainer deleteAllReferences(final String wordHash) {
         final ReferenceContainer c = new ReferenceContainer(
                 wordHash,
@@ -348,17 +181,6 @@ public final class CachedIndexCollection implements Index {
         return removed;
     }
     
-    public int removeEntryMultiple(final Set<String> wordHashes, final String urlHash) {
-        // remove the same url hashes for multiple words
-        // this is mainly used when correcting a index after a search
-        final Iterator<String> i = wordHashes.iterator();
-        int count = 0;
-        while (i.hasNext()) {
-            if (removeReference(i.next(), urlHash)) count++;
-        }
-        return count;
-    }
-    
     public int removeReferences(final String wordHash, final Set<String> urlHashes) {
         int removed = 0;
         removed += indexCache.removeReferences(wordHash, urlHashes);
@@ -366,39 +188,215 @@ public final class CachedIndexCollection implements Index {
         return removed;
     }
     
-    public String removeEntriesExpl(final String wordHash, final Set<String> urlHashes) {
-        String removed = "";
-        removed += indexCache.removeReferences(wordHash, urlHashes) + ", ";
-        removed += collections.removeReferences(wordHash, urlHashes);
-        return removed;
+    public synchronized CloneableIterator<ReferenceContainer> referenceIterator(final String startHash, final boolean rot, final boolean ram) {
+        final CloneableIterator<ReferenceContainer> i = wordContainers(startHash, ram);
+        if (rot) {
+            return new RotateIterator<ReferenceContainer>(i, new String(Base64Order.zero(startHash.length())), indexCache.size() + ((ram) ? 0 : collections.size()));
+        }
+        return i;
     }
     
-    public void removeEntriesMultiple(final Set<String> wordHashes, final Set<String> urlHashes) {
-        // remove the same url hashes for multiple words
-        // this is mainly used when correcting a index after a search
-        final Iterator<String> i = wordHashes.iterator();
-        while (i.hasNext()) {
-            removeReferences(i.next(), urlHashes);
+    private synchronized CloneableIterator<ReferenceContainer> wordContainers(final String startWordHash, final boolean ram) {
+        final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(indexOrder.clone());
+        containerOrder.rotate(ReferenceContainer.emptyContainer(startWordHash, 0));
+        if (ram) {
+            return indexCache.referenceIterator(startWordHash, false, true);
+        }
+        return collections.referenceIterator(startWordHash, false, false);
+        /*
+        return new MergeIterator<ReferenceContainer>(
+                indexCache.referenceIterator(startWordHash, false, true),
+                collections.referenceIterator(startWordHash, false, false),
+                containerOrder,
+                ReferenceContainer.containerMergeMethod,
+                true);
+        */
+    }
+    
+    public void clear() {
+        indexCache.clear();
+        try {
+            collections.clear();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
     
-    public int removeWordReferences(final Set<String> words, final String urlhash) {
-        // sequentially delete all word references
-        // returns number of deletions
-        final Iterator<String> iter = words.iterator();
-        int count = 0;
-        while (iter.hasNext()) {
-            // delete the URL reference in this word index
-            if (removeReference(Word.word2hash(iter.next()), urlhash)) count++;
-        }
-        return count;
+    public void close() {
+        indexCache.close();
+        collections.close();
     }
     
+    public int size() {
+        return java.lang.Math.max(collections.size(), indexCache.size());
+    }
+    
+    public int minMem() {
+        return 1024*1024 /* indexing overhead */ + indexCache.minMem() + collections.minMem();
+    }
+
+    
+    /* 
+     * methods for cache management
+     */
+    
+    public int maxURLinCache() {
+        return indexCache.maxURLinCache();
+    }
+
+    public long minAgeOfCache() {
+        return indexCache.minAgeOfCache();
+    }
+
+    public long maxAgeOfCache() {
+        return indexCache.maxAgeOfCache();
+    }
+
+    public int indexCacheSize() {
+        return indexCache.size();
+    }
+    
+    public long indexCacheSizeBytes() {
+        // calculate the real size in bytes of the index cache
+        long cacheBytes = 0;
+        final long entryBytes = ReferenceRow.urlEntryRow.objectsize;
+        final IndexCache cache = (indexCache);
+        synchronized (cache) {
+            final Iterator<ReferenceContainer> it = cache.referenceIterator(null, false, true);
+            while (it.hasNext()) cacheBytes += it.next().size() * entryBytes;
+        }
+        return cacheBytes;
+    }
+
+    public void setMaxWordCount(final int maxWords) {
+        indexCache.setMaxWordCount(maxWords);
+    }
+
+    public void cacheFlushControl() {
+        // check for forced flush
+        int cs = cacheSize();
+        if (cs > 0) {
+            // flush elements that are too big. This flushing depends on the fact that the flush rule
+            // selects the biggest elements first for flushing. If it does not for any reason, the following
+            // loop would not terminate.
+            serverProfiling.update("wordcache", Long.valueOf(cs), true);
+            // To ensure termination an additional counter is used
+            int l = 0;
+            while (this.indexCache.size() > 0 && (l++ < 100) && (this.indexCache.maxURLinCache() > wCacheMaxChunk)) {
+                flushCacheOne(this.indexCache);
+            }
+            // next flush more entries if the size exceeds the maximum size of the cache
+            while (this.indexCache.size() > 0 &&
+                    ((this.indexCache.size() > this.indexCache.getMaxWordCount()) ||
+                    (MemoryControl.available() < collections.minMem()))) {
+                flushCacheOne(this.indexCache);
+            }
+            if (cacheSize() != cs) serverProfiling.update("wordcache", Long.valueOf(cacheSize()), true);
+        }
+    }
+    
+    public void flushCacheFor(int time) {
+        flushCacheUntil(System.currentTimeMillis() + time);
+    }
+    
+    private synchronized void flushCacheUntil(long timeout) {
+        while (System.currentTimeMillis() < timeout && indexCache.size() > 0) {
+            flushCacheOne(indexCache);
+        }
+    }
+    
+    private synchronized void flushCacheOne(final IndexCache ram) {
+        if (ram.size() > 0) collections.addReferences(flushContainer(ram));
+    }
+    
+    private ReferenceContainer flushContainer(final IndexCache ram) {
+        String wordHash;
+        ReferenceContainer c;
+        wordHash = ram.maxScoreWordHash();
+        c = ram.getReferences(wordHash, null);
+        if ((c != null) && (c.size() > wCacheMaxChunk)) {
+            return ram.deleteAllReferences(wordHash);
+        } else {
+            return ram.deleteAllReferences(ram.bestFlushWordHash());
+        }
+    }
+
+    public int backendSize() {
+        return collections.size();
+    }
+    
+    public int cacheSize() {
+        return indexCache.size();
+    }
+
+    
+    /*
+     * methods to update the index
+     */
+    
+    public void addEntry(final String wordHash, final ReferenceRow entry, final long updateTime) {
+        // add the entry
+        indexCache.addEntry(wordHash, entry, updateTime, true);
+        cacheFlushControl();
+    }
+
+
+    /*
+     * methods to search the index
+     */
+
+    @SuppressWarnings("unchecked")
+    public HashMap<String, ReferenceContainer>[] localSearchContainers(
+                            final TreeSet<String> queryHashes, 
+                            final TreeSet<String> excludeHashes, 
+                            final Set<String> urlselection) {
+        // search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
+
+        // retrieve entities that belong to the hashes
+        HashMap<String, ReferenceContainer> inclusionContainers = (queryHashes.size() == 0) ? new HashMap<String, ReferenceContainer>(0) : getContainers(
+                        queryHashes,
+                        urlselection);
+        if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < queryHashes.size())) inclusionContainers = new HashMap<String, ReferenceContainer>(0); // prevent that only a subset is returned
+        final HashMap<String, ReferenceContainer> exclusionContainers = (inclusionContainers.size() == 0) ? new HashMap<String, ReferenceContainer>(0) : getContainers(
+                excludeHashes,
+                urlselection);
+        return new HashMap[]{inclusionContainers, exclusionContainers};
+    }
+    
+    /**
+     * collect containers for given word hashes. This collection stops if a single container does not contain any references.
+     * In that case only a empty result is returned.
+     * @param wordHashes
+     * @param urlselection
+     * @return map of wordhash:indexContainer
+     */
+    private HashMap<String, ReferenceContainer> getContainers(final Set<String> wordHashes, final Set<String> urlselection) {
+        // retrieve entities that belong to the hashes
+        final HashMap<String, ReferenceContainer> containers = new HashMap<String, ReferenceContainer>(wordHashes.size());
+        String singleHash;
+        ReferenceContainer singleContainer;
+            final Iterator<String> i = wordHashes.iterator();
+            while (i.hasNext()) {
+            
+                // get next word hash:
+                singleHash = i.next();
+            
+                // retrieve index
+                singleContainer = getReferences(singleHash, urlselection);
+            
+                // check result
+                if ((singleContainer == null || singleContainer.size() == 0)) return new HashMap<String, ReferenceContainer>(0);
+            
+                containers.put(singleHash, singleContainer);
+            }
+        return containers;
+    }
+
     public synchronized TreeSet<ReferenceContainer> indexContainerSet(final String startHash, final boolean ram, final boolean rot, int count) {
         // creates a set of indexContainers
         // this does not use the cache
         final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(indexOrder.clone());
-        containerOrder.rotate(emptyContainer(startHash, 0));
+        containerOrder.rotate(ReferenceContainer.emptyContainer(startHash, 0));
         final TreeSet<ReferenceContainer> containers = new TreeSet<ReferenceContainer>(containerOrder);
         final Iterator<ReferenceContainer> i = referenceIterator(startHash, rot, ram);
         if (ram) count = Math.min(indexCache.size(), count);
@@ -416,34 +414,5 @@ public final class CachedIndexCollection implements Index {
         }
         return containers; // this may return less containers as demanded
     }
-    
-    public synchronized CloneableIterator<ReferenceContainer> referenceIterator(final String startHash, final boolean rot, final boolean ram) {
-        final CloneableIterator<ReferenceContainer> i = wordContainers(startHash, ram);
-        if (rot) {
-            return new RotateIterator<ReferenceContainer>(i, new String(Base64Order.zero(startHash.length())), indexCache.size() + ((ram) ? 0 : collections.size()));
-        }
-        return i;
-    }
 
-    private synchronized CloneableIterator<ReferenceContainer> wordContainers(final String startWordHash, final boolean ram) {
-        final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(indexOrder.clone());
-        containerOrder.rotate(emptyContainer(startWordHash, 0));
-        if (ram) {
-            return indexCache.referenceIterator(startWordHash, false, true);
-        }
-        return collections.referenceIterator(startWordHash, false, false);
-        /*
-        return new MergeIterator<ReferenceContainer>(
-                indexCache.referenceIterator(startWordHash, false, true),
-                collections.referenceIterator(startWordHash, false, false),
-                containerOrder,
-                ReferenceContainer.containerMergeMethod,
-                true);
-        */
-    }
-
-    public int countReferences(String key) {
-        return indexCache.countReferences(key) + collections.countReferences(key);
-    }
-    
 }

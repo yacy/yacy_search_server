@@ -48,7 +48,7 @@ import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 
-public final class ReferenceContainerCache implements Iterable<ReferenceContainer>, Index {
+public final class ReferenceContainerCache extends AbstractIndex implements Index, IndexReader, Iterable<ReferenceContainer> {
 
     private final Row payloadrow;
     private SortedMap<String, ReferenceContainer> cache;

@@ -27,6 +27,7 @@
 // javac -classpath .:../classes yacysearch.java
 // if the shell's current path is HTROOT
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.TreeSet;
 
@@ -307,7 +308,7 @@ public class yacysearch {
             }
 
             // if a minus-button was hit, remove a special reference first
-            if (post != null && post.containsKey("deleteref")) {
+            if (post != null && post.containsKey("deleteref")) try {
                 if (!sb.verifyAuthentication(header, true)) {
                     prop.put("AUTHENTICATE", "admin log-in"); // force log-in
                     return prop;
@@ -315,7 +316,7 @@ public class yacysearch {
                 
                 // delete the index entry locally
                 final String delHash = post.get("deleteref", ""); // urlhash
-                sb.webIndex.index().removeWordReferences(query[0], delHash);
+                sb.webIndex.index().removeEntryMultiple(Word.words2hashes(query[0]), delHash);
 
                 // make new news message with negative voting
                 final HashMap<String, String> map = new HashMap<String, String>();
@@ -323,6 +324,8 @@ public class yacysearch {
                 map.put("vote", "negative");
                 map.put("refid", "");
                 sb.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
 
             // if a plus-button was hit, create new voting message

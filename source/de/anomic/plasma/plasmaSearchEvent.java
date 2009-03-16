@@ -26,6 +26,7 @@
 
 package de.anomic.plasma;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceVars;
 import de.anomic.kelondro.text.URLMetadata;
+import de.anomic.kelondro.text.Word;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.SortStack;
@@ -248,7 +250,11 @@ public final class plasmaSearchEvent {
                 if (rw > 0) {
                     final Set<String> removeWords = cleanEvent.query.queryHashes;
                     removeWords.addAll(cleanEvent.query.excludeHashes);
-                    cleanEvent.wordIndex.index().removeEntriesMultiple(removeWords, cleanEvent.failedURLs.keySet());
+                    try {
+                        cleanEvent.wordIndex.index().removeEntriesMultiple(removeWords, cleanEvent.failedURLs.keySet());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     Log.logInfo("SearchEvents", "cleaning up event " + cleanEvent.query.id(true) + ", removed " + rw + " URL references on " + removeWords.size() + " words");
                 }                
                 
@@ -301,7 +307,7 @@ public final class plasmaSearchEvent {
             (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
             (!(metadata.dc_title().startsWith("Index of")))) {
             final Iterator<String> wi = query.queryHashes.iterator();
-            while (wi.hasNext()) wordIndex.index().removeReference(wi.next(), page.hash());
+            while (wi.hasNext()) try { wordIndex.index().removeReference(wi.next(), page.hash()); } catch (IOException e) {}
             registerFailure(page.hash(), "index-of constraint not fullfilled");
             return null;
         }
@@ -345,7 +351,12 @@ public final class plasmaSearchEvent {
             } else {
                 // problems with snippet fetch
                 registerFailure(page.hash(), "no text snippet for URL " + metadata.url());
-                if (!wordIndex.peers().mySeed().isVirgin()) plasmaSnippetCache.failConsequences(snippet, query.id(false));
+                if (!wordIndex.peers().mySeed().isVirgin())
+                    try {
+                        plasmaSnippetCache.failConsequences(snippet, query.id(false));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 return null;
             }
         } else {
@@ -824,13 +835,17 @@ public final class plasmaSearchEvent {
                 String address = null;
                 if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
                     // seed is not known from here
-                    wordIndex.index().removeWordReferences(
-                        plasmaCondenser.getWords(
-                            ("yacyshare " +
-                             filename.replace('?', ' ') +
-                             " " +
-                             urlcomps.dc_title())).keySet(),
-                             urlentry.hash());
+                    try {
+                        wordIndex.index().removeEntryMultiple(
+                            Word.words2hashes(plasmaCondenser.getWords(
+                                ("yacyshare " +
+                                 filename.replace('?', ' ') +
+                                 " " +
+                                 urlcomps.dc_title())).keySet()),
+                                 urlentry.hash());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     wordIndex.metadata().remove(urlentry.hash()); // clean up
                     throw new RuntimeException("index void");
                 }

@@ -235,11 +235,7 @@ public class Transmission  {
         }
 
         public void restore() {
-            for (ReferenceContainer ic : this) try {
-                backend.addReferences(ic);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
+            for (ReferenceContainer ic : this) try { backend.addReferences(ic); } catch (IOException e) {}
         }
     }
 }

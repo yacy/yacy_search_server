@@ -120,7 +120,7 @@ public class IndexControlRWIs_p {
             }
     
             // delete word
-            if (post.containsKey("keyhashdeleteall")) {
+            if (post.containsKey("keyhashdeleteall")) try {
                 if (delurl || delurlref) {
                     // generate an urlx array
                     ReferenceContainer index = null;
@@ -144,10 +144,12 @@ public class IndexControlRWIs_p {
                 sb.webIndex.index().deleteAllReferences(keyhash);
                 post.remove("keyhashdeleteall");
                 post.put("urllist", "generated");
+            } catch (IOException e) {
+                e.printStackTrace();
             }
     
             // delete selected URLs
-            if (post.containsKey("keyhashdelete")) {
+            if (post.containsKey("keyhashdelete")) try {
                 if (delurlref) {
                     for (int i = 0; i < urlx.length; i++) sb.removeAllUrlReferences(urlx[i], true);
                 }
@@ -163,6 +165,8 @@ public class IndexControlRWIs_p {
                 // thinks that it was called for a list presentation
                 post.remove("keyhashdelete");
                 post.put("urllist", "generated");
+            } catch (IOException e) {
+                e.printStackTrace();
             }
             
             if (post.containsKey("urllist")) {
@@ -176,7 +180,7 @@ public class IndexControlRWIs_p {
             }
 
             // transfer to other peer
-            if (post.containsKey("keyhashtransfer")) {
+            if (post.containsKey("keyhashtransfer")) try {
                 if (keystring.length() == 0 || !Word.word2hash(keystring).equals(keyhash)) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
@@ -233,6 +237,8 @@ public class IndexControlRWIs_p {
                              timeout);
                 prop.put("result", (error == null) ? ("Successfully transferred " + knownURLs.size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds, " + unknownURLEntries + " URL not found") : "error: " + error);
                 index = null;
+            } catch (IOException e) {
+                e.printStackTrace();
             }
     
             // generate list
@@ -315,7 +321,11 @@ public class IndexControlRWIs_p {
                     } catch (final IOException e) {
                     }
                 }
-                sb.webIndex.index().removeReferences(keyhash, urlHashes);
+                try {
+                    sb.webIndex.index().removeReferences(keyhash, urlHashes);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         
             if (prop.getInt("searchresult", 0) == 3) plasmaSearchAPI.listHosts(prop, keyhash, sb);

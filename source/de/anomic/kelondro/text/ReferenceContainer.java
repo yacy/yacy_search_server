@@ -39,6 +39,11 @@ import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.ByteBuffer;
 
+/**
+ * A ReferenceContainer is a set of ReferenceRows entries. Since ReferenceRow entries are special
+ * Row entries, a collection of ReferenceRows can be contained in a RowSet. This class extends
+ * the RowSet with methods for the handling of special ReferenceRow Row entry objects.
+ */
 public class ReferenceContainer extends RowSet {
 
     private String wordHash;
@@ -60,6 +65,10 @@ public class ReferenceContainer extends RowSet {
         return newContainer;
     }
     
+    public static ReferenceContainer emptyContainer(final String wordHash, final int elementCount) {
+        return new ReferenceContainer(wordHash, ReferenceRow.urlEntryRow, elementCount);
+    }
+
     public void setWordHash(final String newWordHash) {
         this.wordHash = newWordHash;
     }
@@ -228,11 +237,11 @@ public class ReferenceContainer extends RowSet {
         // join a search result and return the joincount (number of pages after join)
 
         // since this is a conjunction we return an empty entity if any word is not known
-        if (includeContainers == null) return CachedIndexCollection.emptyContainer(null, 0);
+        if (includeContainers == null) return ReferenceContainer.emptyContainer(null, 0);
 
         // join the result
         final ReferenceContainer rcLocal = ReferenceContainer.joinContainers(includeContainers, maxDistance);
-        if (rcLocal == null) return CachedIndexCollection.emptyContainer(null, 0);
+        if (rcLocal == null) return ReferenceContainer.emptyContainer(null, 0);
         excludeContainers(rcLocal, excludeContainers);
         
         return rcLocal;

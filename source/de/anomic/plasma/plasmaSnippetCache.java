@@ -937,7 +937,7 @@ public class plasmaSnippetCache {
             return new Object[]{resource, Long.valueOf(contentLength)};
     }
     
-    public static String failConsequences(final TextSnippet snippet, final String eventID) {
+    public static String failConsequences(final TextSnippet snippet, final String eventID) throws IOException {
         // problems with snippet fetch
         final String urlHash = snippet.getUrl().hash();
         final String querystring = SetTools.setToString(snippet.getRemainingHashes(), ' ');

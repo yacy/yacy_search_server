@@ -1,4 +1,4 @@
-// ReverseIndexReader.java
+// IndexReader.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 2.4.2008 on http://yacy.net
 //

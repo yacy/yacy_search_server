@@ -95,8 +95,13 @@ public final class ReferenceContainerArray {
      * objects in the cache.
      * @throws IOException 
      */
-    public synchronized CloneableIterator<ReferenceContainer> wordContainerIterator(final String startWordHash, final boolean rot, final boolean ram) throws IOException {
-        return new heapCacheIterator(startWordHash, rot);
+    public synchronized CloneableIterator<ReferenceContainer> wordContainerIterator(final String startWordHash, final boolean rot, final boolean ram) {
+        try {
+            return new heapCacheIterator(startWordHash, rot);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**

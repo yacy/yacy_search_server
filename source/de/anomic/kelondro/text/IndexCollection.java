@@ -61,7 +61,7 @@ import de.anomic.kelondro.util.kelondroOutOfLimitsException;
 import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
 
-public class IndexCollection implements Index {
+public class IndexCollection extends AbstractIndex implements Index {
 
 	private static final int loadfactor = 4;
     private static final int serialNumber = 0;

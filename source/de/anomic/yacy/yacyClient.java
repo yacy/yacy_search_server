@@ -69,7 +69,6 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.Digest;
-import de.anomic.kelondro.text.CachedIndexCollection;
 import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
@@ -530,7 +529,7 @@ public final class yacyClient {
 		final int words = wordhashes.length() / yacySeedDB.commonHashLength;
 		final ReferenceContainer[] container = new ReferenceContainer[words];
 		for (int i = 0; i < words; i++) {
-			container[i] = CachedIndexCollection.emptyContainer(wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength), count);
+			container[i] = ReferenceContainer.emptyContainer(wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength), count);
 		}
 
 		// insert results to containers
@@ -638,9 +637,11 @@ public final class yacyClient {
 		}
 
 		// insert the containers to the index
-        for (int m = 0; m < words; m++) {
-            wordIndex.index().addReferences(container[m]);
-        }
+        for (int m = 0; m < words; m++) try {
+                wordIndex.index().addReferences(container[m]);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         
         // generate statistics
 		long searchtime;

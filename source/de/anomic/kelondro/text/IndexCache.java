@@ -1,4 +1,4 @@
-// ReverseIndexCache.java
+// IndexCache.java
 // (C) 2005, 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 2005 on http://yacy.net
 //
@@ -38,7 +38,11 @@ import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.Log;
 
-public final class IndexCache implements Index, IndexReader, Iterable<ReferenceContainer> {
+/**
+ * A IndexCache is a ReferenceContainerCache with an attached cache flush logic
+ *
+ */
+public final class IndexCache extends AbstractIndex implements Index, IndexReader, Iterable<ReferenceContainer> {
 
     // class variables
     private final ScoreCluster<String> hashScore;
