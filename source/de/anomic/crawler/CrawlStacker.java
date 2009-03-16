@@ -260,12 +260,12 @@ public final class CrawlStacker {
             final boolean recrawl = (oldEntry != null) && (profile.recrawlIfOlder() > oldEntry.loaddate().getTime());
             // do double-check
             if ((dbocc != null) && (!recrawl)) {
-                reason = "double " + dbocc + ")";
+                reason = "double " + dbocc;
                 if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
                 return reason;
             }
             if ((oldEntry != null) && (!recrawl)) {
-                reason = "double " + "LURL)";
+                reason = "double LURL";
                 if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in 'LURL'. " + "Stack processing time: " + (System.currentTimeMillis()-startTime) + "ms");
                 return reason;
             }
