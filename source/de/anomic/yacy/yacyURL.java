@@ -399,22 +399,26 @@ public class yacyURL implements Serializable {
         }
         return sbuf;
     }
-    
+
     // from: http://www.w3.org/International/unescape.java
     public static String unescape(final String s) {
-        final StringBuilder sbuf = new StringBuilder();
         final int l  = s.length();
+        final StringBuilder sbuf = new StringBuilder(l);
         int ch = -1;
         int b, sumb = 0;
         for (int i = 0, more = -1; i < l; i++) {
             /* Get next byte b from URL segment s */
             switch (ch = s.charAt(i)) {
                 case '%':
-                    ch = s.charAt(++i) ;
-                    final int hb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase((char) ch) - 'a') & 0xF;
-                    ch = s.charAt(++i) ;
-                    final int lb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase ((char) ch) - 'a') & 0xF;
-                    b = (hb << 4) | lb;
+                    if (i + 2 < l) {
+                        ch = s.charAt(++i);
+                        int hb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase((char) ch) - 'a') & 0xF;
+                        ch = s.charAt(++i);
+                        int lb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase ((char) ch) - 'a') & 0xF;
+                        b = (hb << 4) | lb;
+                    } else {
+                        b = ch;
+                    }
                     break;
                 case '+':
                     b = ' ';
@@ -424,10 +428,10 @@ public class yacyURL implements Serializable {
             }
             /* Decode byte b as UTF-8, sumb collects incomplete chars */
             if ((b & 0xc0) == 0x80) {               // 10xxxxxx (continuation byte)
-                sumb = (sumb << 6) | (b & 0x3f) ;   // Add 6 bits to sumb
-                if (--more == 0) sbuf.append((char) sumb) ; // Add char to sbuf
+                sumb = (sumb << 6) | (b & 0x3f);    // Add 6 bits to sumb
+                if (--more == 0) sbuf.append((char) sumb); // Add char to sbuf
             } else if ((b & 0x80) == 0x00) {        // 0xxxxxxx (yields 7 bits)
-                sbuf.append((char) b) ;             // Store in sbuf
+                sbuf.append((char) b);              // Store in sbuf
             } else if ((b & 0xe0) == 0xc0) {        // 110xxxxx (yields 5 bits)
                 sumb = b & 0x1f;
                 more = 1;                           // Expect 1 more byte
@@ -448,7 +452,7 @@ public class yacyURL implements Serializable {
         }
         return sbuf.toString();
     }
-    
+
     private void identPort(final String inputURL, final int dflt) throws MalformedURLException {
         // identify ref in file
         final int r = this.host.indexOf(':');
@@ -657,24 +661,27 @@ public class yacyURL implements Serializable {
     }
 
     public final boolean isCGI() {
-        final String ls = path.toLowerCase();
+        final String ls = unescape(path.toLowerCase());
         int pos;
         return ls.indexOf(".cgi") >= 0 ||
                ls.indexOf(".exe") >= 0 ||
 
                ((pos = ls.indexOf("sid")) > 0 &&
-                (ls.charAt(--pos) == '?' || ls.charAt(pos) == '&') &&
-                (pos += 4) < ls.length() &&
-                (ls.charAt(pos) == '=' || ls.charAt(pos) == '%')
+                (ls.charAt(--pos) == '?' || ls.charAt(pos) == '&' || ls.charAt(pos) == ';') &&
+                (pos += 5) < ls.length() &&
+                (ls.charAt(pos) != '&' && ls.charAt(--pos) == '=')
                 ) ||
 
-               ((pos = ls.indexOf("sessionid")) >= 0 && (pos += 10) < ls.length() &&
-                (ls.charAt(--pos) == '=' || ls.charAt(pos) == '%' || ls.charAt(pos) == '/')
+               ((pos = ls.indexOf("sessionid")) > 0 &&
+                (pos += 10) < ls.length() &&
+                (ls.charAt(pos) != '&' &&
+                 (ls.charAt(--pos) == '=' || ls.charAt(pos) == '/'))
                 ) ||
 
-               ((pos = ls.indexOf("phpsessid")) >= 0 && (pos += 10) < ls.length() &&
-                (ls.charAt(--pos) == '=' || ls.charAt(pos) == '%')
-                );
+               ((pos = ls.indexOf("phpsessid")) > 0 &&
+                (pos += 10) < ls.length() &&
+                (ls.charAt(pos) != '&' &&
+                 (ls.charAt(--pos) == '=' || ls.charAt(pos) == '/')));
     }
 
 
