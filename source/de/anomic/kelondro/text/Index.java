@@ -37,13 +37,24 @@ public interface Index {
     
 	/**
 	 * add references to the reverse index
-	 * when no references are stored, the new Entries are simply added,
-	 * if there are already references to the word that is denoted
-	 * with the reference stored, then merge the old and the new reference
+	 * if no references to the word are stored, the new Entries are added,
+	 * if there are already references to the word that is denoted with the
+	 * reference to be stored, then the old and the new references are merged
 	 * @param newEntries the References to be merged with existing references
 	 * @throws IOException
 	 */
 	public void addReferences(ReferenceContainer newEntries) throws IOException;
+
+	/**
+	 * add a single reference to the reverse index
+	 * if no references to the word are stored, the a new entry is added,
+     * if there are already references to the word hash stored,
+     * then the old and the new references are merged
+	 * @param wordHash
+	 * @param entry
+	 * @throws IOException
+	 */
+    public void addReference(final String wordHash, final ReferenceRow entry) throws IOException;
     
 	/**
 	 * check if there are references stored to the given word hash

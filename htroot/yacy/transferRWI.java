@@ -27,6 +27,7 @@
 // javac -classpath .:../classes transferRWI.java
 
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -157,7 +158,11 @@ public final class transferRWI {
                 }
                 
                 // learn entry
-                sb.webIndex.index().addEntry(wordHash, iEntry, System.currentTimeMillis());
+                try {
+                    sb.webIndex.index().addReference(wordHash, iEntry);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 serverCore.checkInterruption();
 
                 // check if we need to ask for the corresponding URL

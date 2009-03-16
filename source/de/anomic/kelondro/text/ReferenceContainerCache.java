@@ -499,7 +499,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         return;
     }
 
-    public synchronized void addEntry(final String wordHash, final ReferenceRow newEntry) {
+    public synchronized void addReference(final String wordHash, final ReferenceRow newEntry) {
         assert this.cache != null;
         ReferenceContainer container = cache.get(wordHash);
         if (container == null) container = new ReferenceContainer(wordHash, this.payloadrow, 1);

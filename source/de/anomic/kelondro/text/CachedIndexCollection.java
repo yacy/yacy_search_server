@@ -109,6 +109,12 @@ public final class CachedIndexCollection extends AbstractIndex implements Index,
         cacheFlushControl();
     }
     
+    public void addReference(final String wordHash, final ReferenceRow entry) throws IOException {
+        // add the entry
+        indexCache.addReference(wordHash, entry);
+        cacheFlushControl();
+    }
+
     public boolean hasReferences(final String wordHash) {
         if (indexCache.hasReferences(wordHash)) return true;
         if (collections.hasReferences(wordHash)) return true;
@@ -330,17 +336,7 @@ public final class CachedIndexCollection extends AbstractIndex implements Index,
     }
 
     
-    /*
-     * methods to update the index
-     */
     
-    public void addEntry(final String wordHash, final ReferenceRow entry, final long updateTime) {
-        // add the entry
-        indexCache.addEntry(wordHash, entry, updateTime, true);
-        cacheFlushControl();
-    }
-
-
     /*
      * methods to search the index
      */

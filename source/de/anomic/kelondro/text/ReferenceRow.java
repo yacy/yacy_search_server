@@ -102,7 +102,7 @@ public final class ReferenceRow implements Reference, Cloneable {
             final int      posofphrase,   // number of the phrase where word appears
             final long     lastmodified,  // last-modified time of the document where word appears
             final long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
-            String   language,      // (guessed) language of document
+            final String   language,      // (guessed) language of document
             final char     doctype,       // type of document
             final int      outlinksSame,  // outlinks to same domain
             final int      outlinksOther, // outlinks to other domain
@@ -110,7 +110,6 @@ public final class ReferenceRow implements Reference, Cloneable {
     ) {
 
         assert (urlHash.length() == 12) : "urlhash = " + urlHash;
-        if ((language == null) || (language.length() != urlEntryRow.width(col_language))) language = "uk";
         this.entry = urlEntryRow.newEntry();
         final int mddlm = MicroDate.microDateDays(lastmodified);
         final int mddct = MicroDate.microDateDays(updatetime);
@@ -121,7 +120,7 @@ public final class ReferenceRow implements Reference, Cloneable {
         this.entry.setCol(col_wordsInText, wordcount);
         this.entry.setCol(col_phrasesInText, phrasecount);
         this.entry.setCol(col_doctype, new byte[]{(byte) doctype});
-        this.entry.setCol(col_language, language, null);
+        this.entry.setCol(col_language, ((language == null) || (language.length() != urlEntryRow.width(col_language))) ? "uk" : language, null);
         this.entry.setCol(col_llocal, outlinksSame);
         this.entry.setCol(col_lother, outlinksOther);
         this.entry.setCol(col_urlLength, urlLength);

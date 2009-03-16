@@ -84,6 +84,11 @@ public final class IndexCell extends AbstractIndex implements Index {
         if (this.ram.size() > this.maxRamEntries) cacheDump();
     }
 
+    public synchronized void addReference(String hash, ReferenceRow entry) throws IOException {
+        this.ram.addReference(hash, entry);
+        if (this.ram.size() > this.maxRamEntries) cacheDump();
+    }
+
     /**
      * clear the RAM and BLOB part, deletes everything in the cell
      * @throws IOException 

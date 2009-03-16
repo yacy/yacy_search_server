@@ -53,6 +53,12 @@ public class ReferenceContainer extends RowSet {
         this.wordHash = wordHash;
     }
     
+    public ReferenceContainer(String wordHash, ReferenceRow entry) {
+        super(ReferenceRow.urlEntryRow, 1);
+        this.add(entry);
+        this.wordHash = wordHash;
+    }
+    
     public ReferenceContainer(final String wordHash, final Row rowdef, final int objectCount) {
         super(rowdef, objectCount);
         this.wordHash = wordHash;

@@ -384,7 +384,11 @@ public final class plasmaWordIndex {
                         doctype,
                         outlinksSame, outlinksOther,
                         wprop.flags);
-            this.index.addEntry(Word.word2hash(word), ientry, System.currentTimeMillis());
+            try {
+                this.index.addReference(Word.word2hash(word), ientry);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             wordCount++;
         }
         

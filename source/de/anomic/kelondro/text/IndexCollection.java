@@ -246,6 +246,17 @@ public class IndexCollection extends AbstractIndex implements Index {
         }
     }
 
+    public void addReference(String wordhash, ReferenceRow entry) {
+        if (entry == null) return;
+        try {
+            this.merge(new ReferenceContainer(wordhash, entry));
+        } catch (final kelondroOutOfLimitsException e) {
+            e.printStackTrace();
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public int countReferences(String key) {
         try {
             final RowSet collection = this.get(key.getBytes());

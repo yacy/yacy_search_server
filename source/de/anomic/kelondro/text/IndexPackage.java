@@ -70,11 +70,6 @@ public interface IndexPackage extends Index {
     public int cacheSize();
 
     
-    /*
-     * methods to update the index
-     */
-    
-    public void addEntry(final String wordHash, final ReferenceRow entry, final long updateTime);
     
     /*
      * methods to search the index

@@ -299,8 +299,7 @@ public final class IndexCache extends AbstractIndex implements Index, IndexReade
     }
     
     public synchronized void addReferences(final ReferenceContainer container) {
-        // this puts the entries into the cache, not into the assortment directly
-        if ((container == null) || (container.size() == 0) || heap == null) return;
+        if (container == null || container.size() == 0 || heap == null) return;
 
         // put new words into cache
         heap.addReferences(container);
@@ -308,11 +307,13 @@ public final class IndexCache extends AbstractIndex implements Index, IndexReade
         hashDate.setScore(container.getWordHash(), intTime(System.currentTimeMillis()));
     }
 
-    public synchronized void addEntry(final String wordHash, final ReferenceRow newEntry, final long updateTime, final boolean dhtCase) {
-        if (heap == null) return; // there was already a shutdown
-        heap.addEntry(wordHash, newEntry);
+    public void addReference(final String wordHash, final ReferenceRow entry) throws IOException {
+        if (entry == null || heap == null) return;
+
+        // put new words into cache
+        heap.addReference(wordHash, entry);
         hashScore.incScore(wordHash);
-        hashDate.setScore(wordHash, intTime(updateTime));
+        hashDate.setScore(wordHash, intTime(System.currentTimeMillis()));
     }
 
     public synchronized void close() {
