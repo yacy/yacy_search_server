@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -277,37 +277,46 @@ public class CrawlQueues {
 
     /**
      * Checks if crawl queue has elements and new crawl will not exceed thread-limit
-     * @param stackType 
+     * @param stackType
      * @param type
      * @return
      */
     private boolean crawlIsPossible(int stackType, final String type) {
+        int value;
         if (noticeURL.stackSize(stackType) == 0) {
             //log.logDebug("GlobalCrawl: queue is empty");
             return false;
         }
-        
-        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30)) {
-            if (this.log.isFine()) log.logFine(type + "Crawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.webIndex.queuePreStack.size() + ")");
+
+        value = (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30);
+        if (sb.webIndex.queuePreStack.size() >= value) {
+            if (this.log.isFine()) {
+                log.logFine(type + "Crawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.webIndex.queuePreStack.size() + ")");
+            }
             return false;
         }
-        if (this.size() >= sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
+        value = (int) sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10);
+        if (this.size() >= value) {
             // try a cleanup
             this.cleanup();
         }
         // check again
-        if (this.size() >= sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
-            if (this.log.isFine()) log.logFine(type + "Crawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
+        if (this.size() >= value) {
+            if (this.log.isFine()) {
+                log.logFine(type + "Crawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
+            }
             return false;
         }
-        
+
         if (sb.onlineCaution()) {
-            if (this.log.isFine()) log.logFine(type + "Crawl: online caution, omitting processing");
+            if (this.log.isFine()) {
+                log.logFine(type + "Crawl: online caution, omitting processing");
+            }
             return false;
         }
         return true;
     }
-    
+
     public boolean remoteCrawlLoaderJob() {
         // check if we are allowed to crawl urls provided by other peers
         if (!sb.webIndex.peers().mySeed().getFlagAcceptRemoteCrawl()) {
