@@ -900,3 +900,6 @@ cgi.suffixes = cgi,pl
 
 # whether this is a version for a web browser
 browserintegration = false
+
+# next index data structure
+useCell = false

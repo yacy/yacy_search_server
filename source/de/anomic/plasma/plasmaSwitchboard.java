@@ -306,6 +306,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         final boolean useCommons = getConfigBool("index.storeCommons", false);
         final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);        
         final int paritionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
+        final boolean useCell = sb.getConfigBool("useCell", false);
         try {
 			webIndex = new plasmaWordIndex(
 			        networkName,
@@ -315,7 +316,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 			        wordCacheMaxCount,
 			        useCommons,
 			        redundancy,
-			        paritionExponent);
+			        paritionExponent,
+			        useCell);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 			webIndex = null;
@@ -760,6 +762,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             final boolean useCommons = getConfigBool("index.storeCommons", false);
             final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
             final int paritionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
+            final boolean useCell = sb.getConfigBool("useCell", false);
             try {
 				this.webIndex = new plasmaWordIndex(
 				        getConfig(plasmaSwitchboardConstants.NETWORK_NAME, ""),
@@ -769,7 +772,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 				        wordCacheMaxCount,
 				        useCommons,
 				        redundancy,
-				        paritionExponent);
+				        paritionExponent,
+				        useCell);
 			} catch (IOException e) {
 				e.printStackTrace();
 				this.webIndex = null;

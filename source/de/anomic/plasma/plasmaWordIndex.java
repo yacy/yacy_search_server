@@ -42,8 +42,9 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
-import de.anomic.kelondro.text.BufferedIndexCollection;
 import de.anomic.kelondro.text.BufferedIndex;
+import de.anomic.kelondro.text.BufferedIndexCollection;
+import de.anomic.kelondro.text.IndexCell;
 import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceRow;
@@ -83,7 +84,7 @@ public final class plasmaWordIndex {
     
     public static final ByteOrder wordOrder = Base64Order.enhancedCoder;
     
-    private final BufferedIndex    index;
+    private final BufferedIndex   index;
     private final Log             log;
     private MetadataRepository    metadata;
     private final yacySeedDB      peers;
@@ -104,7 +105,8 @@ public final class plasmaWordIndex {
             final int entityCacheMaxSize,
             final boolean useCommons, 
             final int redundancy,
-            final int partitionExponent) throws IOException {
+            final int partitionExponent,
+            final boolean useCell) throws IOException {
         if (networkName == null || networkName.length() == 0) {
             log.logSevere("no network name given - shutting down");
             System.exit(0);
@@ -128,7 +130,13 @@ public final class plasmaWordIndex {
                 }
             }
         }
-        this.index = new BufferedIndexCollection(
+        this.index = (useCell) ? 
+                new IndexCell(
+                new File(indexPrimaryTextLocation, "RICELL"),
+                wordOrder,
+                ReferenceRow.urlEntryRow,
+                entityCacheMaxSize) :
+                new BufferedIndexCollection(
                         indexPrimaryTextLocation,
                         wordOrder,
                         ReferenceRow.urlEntryRow,
@@ -136,7 +144,7 @@ public final class plasmaWordIndex {
                         useCommons, 
                         redundancy,
                         log);
-        
+            
         // create LURL-db
         metadata = new MetadataRepository(new File(this.secondaryRoot, "TEXT"));
         

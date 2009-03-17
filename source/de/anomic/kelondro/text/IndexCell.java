@@ -36,6 +36,7 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.MergeIterator;
 import de.anomic.kelondro.order.Order;
+import de.anomic.server.serverProfiling;
 
 /*
  * an index cell is a part of the horizontal index in the new segment-oriented index
@@ -48,7 +49,7 @@ import de.anomic.kelondro.order.Order;
  * another BLOB file in the index array.
  */
 
-public final class IndexCell extends AbstractIndex implements Index {
+public final class IndexCell extends AbstractBufferedIndex implements BufferedIndex {
 
     // class variables
     private ReferenceContainerArray array;
@@ -63,22 +64,14 @@ public final class IndexCell extends AbstractIndex implements Index {
             ) throws IOException {
         this.array = new ReferenceContainerArray(cellPath, wordOrder, payloadrow);
         this.ram = new ReferenceContainerCache(payloadrow, wordOrder);
+        this.ram.initWriteMode();
         this.maxRamEntries = maxRamEntries;
     }
-    
-    private void cacheDump() throws IOException {
-        // dump the ram
-        File dumpFile = this.array.newContainerBLOBFile();
-        this.ram.dump(dumpFile);
-        // get a fresh ram cache
-        this.ram = new ReferenceContainerCache(this.array.rowdef(), this.array.ordering());
-        // add the dumped indexContainerBLOB to the array
-        this.array.mountBLOBContainer(dumpFile);
-    }
 
-    public ByteOrder ordering() {
-        return this.array.ordering();
-    }
+    
+    /*
+     * methods to implement Index
+     */
     
     /**
      * add entries to the cell: this adds the new entries always to the RAM part, never to BLOBs
@@ -87,38 +80,53 @@ public final class IndexCell extends AbstractIndex implements Index {
      */
     public synchronized void add(ReferenceContainer newEntries) throws IOException {
         this.ram.add(newEntries);
+        serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
         if (this.ram.size() > this.maxRamEntries) cacheDump();
     }
 
     public synchronized void add(String hash, ReferenceRow entry) throws IOException {
         this.ram.add(hash, entry);
+        serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
         if (this.ram.size() > this.maxRamEntries) cacheDump();
     }
 
     /**
-     * clear the RAM and BLOB part, deletes everything in the cell
-     * @throws IOException 
+     * checks if there is any container for this wordHash, either in RAM or any BLOB
      */
-    public synchronized void clear() throws IOException {
-        this.ram.clear();
-        this.array.clear();
+    public boolean has(String wordHash) {
+        if (this.ram.has(wordHash)) return true;
+        return this.array.has(wordHash);
     }
 
-    /**
-     * when a cell is closed, the current RAM is dumped to a file which will be opened as
-     * BLOB file the next time a cell is opened. A name for the dump is automatically generated
-     * and is composed of the current date and the cell salt
-     */
-    public synchronized void close() {
-        // dump the ram
+    public int count(String wordHash) {
+        ReferenceContainer c0 = this.ram.get(wordHash, null);
+        ReferenceContainer c1;
         try {
-            this.ram.dump(this.array.newContainerBLOBFile());
+            c1 = this.array.get(wordHash);
         } catch (IOException e) {
-            e.printStackTrace();
+            c1 = null;
         }
-        // close all
-        this.ram.close();
-        this.array.close();
+        if (c1 == null) {
+            if (c0 == null) return 0;
+            return c0.size();
+        }
+        if (c0 == null) return c1.size();
+        return c1.size() + c0.size();
+    }
+    
+    /**
+     * all containers in the BLOBs and the RAM are merged and returned
+     * @throws IOException 
+     */
+    public ReferenceContainer get(String wordHash, Set<String> urlselection) throws IOException {
+        ReferenceContainer c0 = this.ram.get(wordHash, null);
+        ReferenceContainer c1 = this.array.get(wordHash);
+        if (c1 == null) {
+            if (c0 == null) return null;
+            return c0;
+        }
+        if (c0 == null) return c1;
+        return c1.merge(c0);
     }
 
     /**
@@ -139,55 +147,10 @@ public final class IndexCell extends AbstractIndex implements Index {
     }
 
     /**
-     * all containers in the BLOBs and the RAM are merged and returned
-     * @throws IOException 
-     */
-    public ReferenceContainer get(String wordHash, Set<String> urlselection) throws IOException {
-        ReferenceContainer c0 = this.ram.get(wordHash, null);
-        ReferenceContainer c1 = this.array.get(wordHash);
-        if (c1 == null) {
-            if (c0 == null) return null;
-            return c0;
-        }
-        if (c0 == null) return c1;
-        return c1.merge(c0);
-    }
-
-    public int count(String wordHash) {
-        ReferenceContainer c0 = this.ram.get(wordHash, null);
-        ReferenceContainer c1;
-        try {
-            c1 = this.array.get(wordHash);
-        } catch (IOException e) {
-            c1 = null;
-        }
-        if (c1 == null) {
-            if (c0 == null) return 0;
-            return c0.size();
-        }
-        if (c0 == null) return c1.size();
-        return c1.size() + c0.size();
-    }
-    
-    /**
-     * checks if there is any container for this wordHash, either in RAM or any BLOB
-     */
-    public boolean has(String wordHash) {
-        if (this.ram.has(wordHash)) return true;
-        return this.array.has(wordHash);
-    }
-
-    public int minMem() {
-        return 10 * 1024 * 1024;
-    }
-
-    /**
      * remove url references from a selected word hash. this deletes also in the BLOB
      * files, which means that there exists new gap entries after the deletion
      * The gaps are never merged in place, but can be eliminated when BLOBs are merged into
      * new BLOBs. This returns the sum of all url references that have been removed
-     * @throws IOException 
-     * @throws IOException 
      * @throws IOException 
      */
     public int remove(String wordHash, Set<String> urlHashes) throws IOException {
@@ -200,8 +163,24 @@ public final class IndexCell extends AbstractIndex implements Index {
         return reduced > 0;
     }
 
-    public int size() {
-        return this.ram.size() + this.array.size();
+    private static class RemoveRewriter implements ReferenceContainerArray.ContainerRewriter {
+        
+        Set<String> urlHashes;
+        
+        public RemoveRewriter(Set<String> urlHashes) {
+            this.urlHashes = urlHashes;
+        }
+        
+        public RemoveRewriter(String urlHash) {
+            this.urlHashes = new HashSet<String>();
+            this.urlHashes.add(urlHash);
+        }
+        
+        public ReferenceContainer rewrite(ReferenceContainer container) {
+            container.removeEntries(urlHashes);
+            return container;
+        }
+        
     }
 
     public CloneableIterator<ReferenceContainer> references(String startWordHash, boolean rot) {
@@ -234,24 +213,97 @@ public final class IndexCell extends AbstractIndex implements Index {
                 true);
     }
 
-    private static class RemoveRewriter implements ReferenceContainerArray.ContainerRewriter {
-        
-        Set<String> urlHashes;
-        
-        public RemoveRewriter(Set<String> urlHashes) {
-            this.urlHashes = urlHashes;
-        }
-        
-        public RemoveRewriter(String urlHash) {
-            this.urlHashes = new HashSet<String>();
-            this.urlHashes.add(urlHash);
-        }
-        
-        public ReferenceContainer rewrite(ReferenceContainer container) {
-            container.removeEntries(urlHashes);
-            return container;
-        }
-        
+    /**
+     * clear the RAM and BLOB part, deletes everything in the cell
+     * @throws IOException 
+     */
+    public synchronized void clear() throws IOException {
+        this.ram.clear();
+        this.array.clear();
     }
+    
+    /**
+     * when a cell is closed, the current RAM is dumped to a file which will be opened as
+     * BLOB file the next time a cell is opened. A name for the dump is automatically generated
+     * and is composed of the current date and the cell salt
+     */
+    public synchronized void close() {
+        // dump the ram
+        try {
+            this.ram.dump(this.array.newContainerBLOBFile());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // close all
+        this.ram.close();
+        this.array.close();
+    }
+
+    public int size() {
+        return this.ram.size() + this.array.size();
+    }
+
+    public int minMem() {
+        return 10 * 1024 * 1024;
+    }
+
+    public ByteOrder ordering() {
+        return this.array.ordering();
+    }
+    
+    
+    /*
+     * cache control methods
+     */
+    
+    private void cacheDump() throws IOException {
+        // dump the ram
+        File dumpFile = this.array.newContainerBLOBFile();
+        this.ram.dump(dumpFile);
+        // get a fresh ram cache
+        this.ram = new ReferenceContainerCache(this.array.rowdef(), this.array.ordering());
+        this.ram.initWriteMode();
+        // add the dumped indexContainerBLOB to the array
+        this.array.mountBLOBContainer(dumpFile);
+    }
+
+    public void cleanupBuffer(int time) {
+        // do nothing
+    }
+
+
+    public int getBackendSize() {
+        return this.array.size();
+    }
+
+
+    public long getBufferMaxAge() {
+        return System.currentTimeMillis();
+    }
+
+
+    public int getBufferMaxReferences() {
+        return this.ram.maxReferences();
+    }
+
+
+    public long getBufferMinAge() {
+        return System.currentTimeMillis();
+    }
+
+
+    public int getBufferSize() {
+        return this.ram.size();
+    }
+
+
+    public long getBufferSizeBytes() {
+        return 10000 * this.ram.size(); // guessed; we don't know that exactly because there is no statistics here (expensive, not necessary)
+    }
+
+
+    public void setBufferMaxWordCount(int maxWords) {
+        this.maxRamEntries = maxWords;
+    }    
     
 }

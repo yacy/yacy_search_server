@@ -120,7 +120,7 @@ public class ReferenceContainer extends RowSet {
     }
     
     public ReferenceContainer merge(final ReferenceContainer c) {
-    	return new ReferenceContainer(this.wordHash, this.merge(c));
+        return new ReferenceContainer(this.wordHash, super.merge(c));
     }
     
     public Reference put(final ReferenceRow entry) {

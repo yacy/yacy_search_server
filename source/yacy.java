@@ -675,7 +675,7 @@ public final class yacy {
             final int cacheMem = (int)(MemoryControl.max() - MemoryControl.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
-            final plasmaWordIndex wordIndex = new plasmaWordIndex(networkName, log, indexPrimaryRoot, indexSecondaryRoot, 10000, false, 1, 0);
+            final plasmaWordIndex wordIndex = new plasmaWordIndex(networkName, log, indexPrimaryRoot, indexSecondaryRoot, 10000, false, 1, 0, false);
             final Iterator<ReferenceContainer> indexContainerIterator = wordIndex.index().references("AAAAAAAAAAAA", false, false);
             
             long urlCounter = 0, wordCounter = 0;
@@ -866,7 +866,7 @@ public final class yacy {
         try {
             Iterator<ReferenceContainer> indexContainerIterator = null;
             if (resource.equals("all")) {
-                WordIndex = new plasmaWordIndex("freeworld", log, indexPrimaryRoot, indexSecondaryRoot, 10000, false, 1, 0);
+                WordIndex = new plasmaWordIndex("freeworld", log, indexPrimaryRoot, indexSecondaryRoot, 10000, false, 1, 0, false);
                 indexContainerIterator = WordIndex.index().references(wordChunkStartHash, false, false);
             }
             int counter = 0;

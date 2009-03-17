@@ -107,6 +107,17 @@ public interface BufferedIndex extends Index {
      */
     public int getBufferSize();
     
+    /**
+     * iterate over entries in index. this method differs from the iterator in an Index
+     * object in such a way that it has the additional 'buffer' flag. When using this method,
+     * the iteration goes only over the buffer content, or over the backend-content, but
+     * not over a merged content.
+     * @param startHash
+     * @param rot
+     * @param buffer
+     * @return
+     * @throws IOException
+     */
     public CloneableIterator<ReferenceContainer> references(
                             String startHash,
                             boolean rot,
@@ -114,6 +125,18 @@ public interface BufferedIndex extends Index {
                             ) throws IOException;
     
 
+    /**
+     * collect reference container in index. this method differs from the collector in an Index
+     * object in such a way that it has the additional 'buffer' flag. When using this method,
+     * the collection goes only over the buffer content, or over the backend-content, but
+     * not over a merged content.
+     * @param startHash
+     * @param rot
+     * @param count
+     * @param buffer
+     * @return
+     * @throws IOException
+     */
     public TreeSet<ReferenceContainer> references(
                             String startHash,
                             boolean rot,
