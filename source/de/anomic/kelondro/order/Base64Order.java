@@ -258,7 +258,14 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         long c = 0;
         int lim = off + Math.min(10, len);
         int lim10 = off + 10;
-        while (off < lim) c = (c << 6) | ahpla[key[off++]];
+        byte b;
+        while (off < lim) {
+            b = key[off++];
+            if (b < 0) return -1;
+            b = ahpla[b];
+            if (b < 0) return -1;
+            c = (c << 6) | b;
+        }
         while (off++ < lim10) c = (c << 6);
         c = c << 3;
         assert c >= 0;
@@ -281,7 +288,12 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
         long c = 0;
         int p = 0;
-        while ((p < 10) && (p < key.length())) c = (c << 6) | ahpla[key.charAt(p++)];
+        byte b;
+        while ((p < 10) && (p < key.length())) {
+            b = ahpla[key.charAt(p++)];
+            if (b < 0) return -1;
+            c = (c << 6) |b;
+        }
         while (p++ < 10) c = (c << 6);
         c = c << 3;
         assert c >= 0;
