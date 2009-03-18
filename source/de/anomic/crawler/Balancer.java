@@ -58,7 +58,6 @@ public class Balancer {
     private final File               cacheStacksPath;
     private final String             stackname;
     private boolean                  top;             // to alternate between top and bottom of the file stack
-    private final boolean            fullram;
     private long                     minimumLocalDelta;
     private long                     minimumGlobalDelta;
     
@@ -71,13 +70,13 @@ public class Balancer {
         this.domainStacks   = new ConcurrentHashMap<String, LinkedList<String>>();
         this.urlRAMStack    = new ArrayList<String>();
         this.top            = true;
-        this.fullram        = fullram;
         this.minimumLocalDelta = minimumLocalDelta;
         this.minimumGlobalDelta = minimumGlobalDelta;
         
         // create a stack for newly entered entries
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
-        openFileIndex();
+        cacheStacksPath.mkdirs();
+        urlFileIndex = new EcoTable(new File(cacheStacksPath, stackname + indexSuffix), CrawlEntry.rowdef, (fullram) ? EcoTable.tailCacheUsageAuto : EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
         if (urlFileStack.size() != urlFileIndex.size() || (urlFileIndex.size() < 10000 && urlFileIndex.size() > 0)) {
             // fix the file stack
             Log.logInfo("Balancer", "re-creating the " + stackname + " balancer stack, size = " + urlFileIndex.size() + ((urlFileStack.size() == urlFileIndex.size()) ? "" : " (the old stack size was wrong)" ));
@@ -130,24 +129,14 @@ public class Balancer {
     }
     
     public synchronized void clear() {
+        try {
+            urlFileIndex.clear();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         urlFileStack.clear();
         domainStacks.clear();
         urlRAMStack.clear();
-        resetFileIndex();
-    }
-    
-    private void openFileIndex() {
-        cacheStacksPath.mkdirs();
-        urlFileIndex = new EcoTable(new File(cacheStacksPath, stackname + indexSuffix), CrawlEntry.rowdef, (fullram) ? EcoTable.tailCacheUsageAuto : EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
-    }
-    
-    private void resetFileIndex() {
-        if (urlFileIndex != null) {
-            urlFileIndex.close();
-            urlFileIndex = null;
-            new File(cacheStacksPath, stackname + indexSuffix).delete();
-        }
-        openFileIndex();
     }
     
     public synchronized CrawlEntry get(final String urlhash) throws IOException {

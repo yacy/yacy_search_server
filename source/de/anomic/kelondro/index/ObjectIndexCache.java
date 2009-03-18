@@ -105,6 +105,7 @@ public class ObjectIndexCache implements ObjectIndex {
    
 	public synchronized void put(final Row.Entry entry) {
         assert (entry != null);
+        if (entry == null) return;
         finishInitialization();
         // if the new entry is within the initialization part, just overwrite it
         assert index0.isSorted();
@@ -122,8 +123,9 @@ public class ObjectIndexCache implements ObjectIndex {
 		while (i.hasNext()) put(i.next());
 	}
 
-	public synchronized void addUnique(final Row.Entry entry) {    	
+	public synchronized void addUnique(final Row.Entry entry) {
     	assert (entry != null);
+    	if (entry == null) return;
         if (index1 == null) {
             // we are in the initialization phase
         	index0.addUnique(entry);

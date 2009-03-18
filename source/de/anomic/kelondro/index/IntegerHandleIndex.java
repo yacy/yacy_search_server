@@ -73,10 +73,12 @@ public class IntegerHandleIndex {
         InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
         byte[] a = new byte[keylength + 4];
         int c;
+        Row.Entry entry;
         while (true) {
             c = is.read(a);
             if (c <= 0) break;
-            this.index.addUnique(this.rowdef.newEntry(a));
+            entry = this.rowdef.newEntry(a); // may be null if a is not well-formed
+            if (entry != null) this.index.addUnique(entry);
         }
         is.close();
         assert this.index.size() == file.length() / (keylength + 4);
