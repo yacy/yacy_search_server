@@ -58,7 +58,7 @@ public class RowCollection implements Iterable<Row.Entry> {
     
     protected byte[] chunkcache;
     protected int    chunkcount;
-    protected long   lastTimeRead, lastTimeWrote;    
+    protected long   lastTimeWrote;    
     public Row       rowdef;
     protected int    sortBound;
 
@@ -74,7 +74,6 @@ public class RowCollection implements Iterable<Row.Entry> {
         this.chunkcache = rc.chunkcache;
         this.chunkcount = rc.chunkcount;
         this.sortBound = rc.sortBound;
-        this.lastTimeRead = rc.lastTimeRead;
         this.lastTimeWrote = rc.lastTimeWrote;
     }
     
@@ -83,7 +82,6 @@ public class RowCollection implements Iterable<Row.Entry> {
         this.chunkcache = new byte[objectCount * rowdef.objectsize];
         this.chunkcount = 0;
         this.sortBound = 0;
-        this.lastTimeRead = System.currentTimeMillis();
         this.lastTimeWrote = System.currentTimeMillis();
     }
      
@@ -92,7 +90,6 @@ public class RowCollection implements Iterable<Row.Entry> {
         this.chunkcache = cache;
         this.chunkcount = objectCount;
         this.sortBound = sortBound;
-        this.lastTimeRead = System.currentTimeMillis();
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
@@ -106,7 +103,6 @@ public class RowCollection implements Iterable<Row.Entry> {
             Log.logWarning("RowCollection", "corrected wrong chunkcount; chunkcount = " + this.chunkcount + ", chunkcachelength = " + chunkcachelength + ", rowdef.objectsize = " + rowdef.objectsize);
             this.chunkcount = chunkcachelength / rowdef.objectsize; // patch problem
         }
-        this.lastTimeRead = (exportedCollection.getColLong(exp_last_read) + 10957) * day;
         this.lastTimeWrote = (exportedCollection.getColLong(exp_last_wrote) + 10957) * day;
         final String sortOrderKey = exportedCollection.getColString(exp_order_type, null);
         ByteOrder oldOrder = null;
@@ -170,7 +166,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         assert (sortBound <= chunkcount) : "sortBound = " + sortBound + ", chunkcount = " + chunkcount;
         assert (this.chunkcount <= chunkcache.length / rowdef.objectsize) : "chunkcount = " + this.chunkcount + ", chunkcache.length = " + chunkcache.length + ", rowdef.objectsize = " + rowdef.objectsize;
         entry.setCol(exp_chunkcount, this.chunkcount);
-        entry.setCol(exp_last_read, daysSince2000(this.lastTimeRead));
+        entry.setCol(exp_last_read, daysSince2000(System.currentTimeMillis()));
         entry.setCol(exp_last_wrote, daysSince2000(this.lastTimeWrote));
         entry.setCol(exp_order_type, (this.rowdef.objectOrder == null) ? "__".getBytes() :this.rowdef.objectOrder.signature().getBytes());
         entry.setCol(exp_order_bound, this.sortBound);
@@ -220,10 +216,6 @@ public class RowCollection implements Iterable<Row.Entry> {
                 chunkcache.length, newChunkcache.length));
         chunkcache = newChunkcache;
     }
-
-    public final long lastRead() {
-        return lastTimeRead;
-    }
     
     public final long lastWrote() {
         return lastTimeWrote;
@@ -236,7 +228,6 @@ public class RowCollection implements Iterable<Row.Entry> {
         if ((chunkcache == null) || (rowdef == null)) return null; // case may appear during shutdown
         if (index >= chunkcount) return null;
         if ((index + 1) * rowdef.objectsize > chunkcache.length) return null; // the whole chunk does not fit into the chunkcache
-        this.lastTimeRead = System.currentTimeMillis();
         final byte[] b = new byte[this.rowdef.width(0)];
         System.arraycopy(chunkcache, index * rowdef.objectsize, b, 0, b.length);
         return b;
@@ -255,7 +246,6 @@ public class RowCollection implements Iterable<Row.Entry> {
             if (addr + rowdef.objectsize > chunkcache.length) return null; // the whole chunk does not fit into the chunkcache
             entry = rowdef.newEntry(chunkcache, addr, clone);
         }
-        this.lastTimeRead = System.currentTimeMillis();
         return entry;
     }
     

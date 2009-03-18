@@ -98,7 +98,7 @@ public class LongHandleIndex {
         // otherwise we could just write the byte[] from the in kelondroRowSet which would make
         // everything much faster, but this is not an option here.
         Iterator<Row.Entry> i = this.index.rows(true, null);
-        OutputStream os = new BufferedOutputStream(new FileOutputStream(file), 1024 * 1024);
+        OutputStream os = new BufferedOutputStream(new FileOutputStream(file), 4 * 1024 * 1024);
         int c = 0;
         while (i.hasNext()) {
             os.write(i.next().bytes());
