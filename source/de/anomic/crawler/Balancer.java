@@ -580,10 +580,12 @@ public class Balancer {
             // behave in a DoS-manner
             Log.logInfo("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ((sleeptime > Math.max(minimumLocalDelta, minimumGlobalDelta)) ? " (caused by robots.txt)" : ""));
             if (System.currentTimeMillis() - this.lastPrepare > 10000) {
-                prepare(100);
+                long t = System.currentTimeMillis();
+                prepare(400);
                 this.lastPrepare = System.currentTimeMillis();
+                sleeptime -= this.lastPrepare - t;
             }
-            try {synchronized(this) { this.wait(sleeptime); }} catch (final InterruptedException e) {}
+            if (sleeptime > 0) try {synchronized(this) { this.wait(sleeptime); }} catch (final InterruptedException e) {}
         }
         
         // update statistical data

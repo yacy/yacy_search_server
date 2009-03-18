@@ -21,16 +21,11 @@ public class status_p {
             prop.setLocalized(false);
         prop.put("rejected", "0");
         sb.updateMySeed();
-        final int  cacheSize = sb.webIndex.index().getBufferSize();
-        final long cacheMaxSize = sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 10000);
+        final int cacheMaxSize = (int) sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 10000);
         prop.putNum("ppm", sb.currentPPM());
         prop.putNum("qpm", sb.webIndex.peers().mySeed().getQPM());
-        prop.putNum("wordCacheSize", sb.webIndex.index().getBufferSize());
-        prop.putNum("wordCacheSize", cacheSize);
-        prop.putNum("wordCacheMaxSize", cacheMaxSize);
-        prop.put("wordCacheCount", cacheSize);
-        prop.put("wordCacheMaxCount", cacheMaxSize);
-
+        prop.put("wordCacheSize", Integer.toString(sb.webIndex.index().getBufferSize()));
+        prop.put("wordCacheMaxSize", Integer.toString(cacheMaxSize));
 		//
 		// memory usage and system attributes
         prop.putNum("freeMemory", MemoryControl.free());

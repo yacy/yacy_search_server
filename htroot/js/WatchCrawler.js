@@ -91,9 +91,7 @@ function handleStatus(){
     removeAllChildren(trafCrawlerSpan);
 	trafCrawlerSpan.appendChild(document.createTextNode(Math.round((trafficCrawler) / 1024 / 10.24) / 100));
     
-	var wordCache=getValue(getFirstChild(statusTag, "wordCacheCount"));
 	var wordCacheSize=getValue(getFirstChild(statusTag, "wordCacheSize"));
-	var wordCacheMax=getValue(getFirstChild(statusTag, "wordCacheMaxCount"));
 	var wordCacheMaxSize=getValue(getFirstChild(statusTag, "wordCacheMaxSize"));
 
 	wordCacheNum=document.getElementById("wordcacheNum");
@@ -103,7 +101,7 @@ function handleStatus(){
 	wordCacheSpan=document.getElementById("wordcacheSpan");
 	removeAllChildren(wordCacheSpan);
 	var img;
-	var percent=Math.round(wordCache/wordCacheMax*100);
+	var percent=Math.round(wordCacheSize/wordCacheMaxSize*100);
 	for(i=0;i<percent*WORDCACHEBAR_LENGTH;i++){
 		img=document.createElement("img");
 		img.setAttribute("src", BAR_IMG2);
