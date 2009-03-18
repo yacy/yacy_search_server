@@ -30,7 +30,6 @@
 		<maxAgeOfCache>#[maxAgeOfCache]#</maxAgeOfCache>
 		<minAgeOfCache>#[minAgeOfCache]#</minAgeOfCache>
 		<wordCacheMaxCount>#[wordOutCacheMaxCount]#</wordCacheMaxCount>
-		<wordCacheInitCount>#[wordCacheInitCount]#</wordCacheInitCount>
 		<wordFlushSize>#[wordFlushSize]#</wordFlushSize>
 	</Cache>
 	<ThreadPools>

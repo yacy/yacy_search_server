@@ -248,6 +248,9 @@ public final class ReferenceContainerArray {
         if (this.array.entries() < 2) return false;
         File f1 = this.array.unmountOldestBLOB();
         File f2 = this.array.unmountOldestBLOB();
+        System.out.println("*** DEBUG mergeOldest: vvvvvvvvv array has " + this.array.entries() + " entries vvvvvvvvv");
+        System.out.println("*** DEBUG mergeOldest: unmounted " + f1.getName());
+        System.out.println("*** DEBUG mergeOldest: unmounted " + f2.getName());
         // iterate both files and write a new one
         
         CloneableIterator<ReferenceContainer> i1 = new blobFileEntries(f1, this.payloadrow);
@@ -340,6 +343,8 @@ public final class ReferenceContainerArray {
         if (!f1.delete()) f1.deleteOnExit();
         if (!f2.delete()) f2.deleteOnExit();
         this.array.mountBLOB(newFile);
+        System.out.println("*** DEBUG mergeOldest:   mounted " + newFile.getName());
+        System.out.println("*** DEBUG mergeOldest: ^^^^^^^^^^^ array has " + this.array.entries() + " entries ^^^^^^^^^^^");
         return true;
     }
 

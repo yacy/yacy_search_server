@@ -230,9 +230,6 @@ public class PerformanceQueues_p {
             final int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);
             switchboard.setConfig(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
             switchboard.webIndex.index().setBufferMaxWordCount(wordCacheMaxCount);
-            
-            final int wordCacheInitCount = post.getInt(plasmaSwitchboardConstants.WORDCACHE_INIT_COUNT, 30000);
-            switchboard.setConfig(plasmaSwitchboardConstants.WORDCACHE_INIT_COUNT, Integer.toString(wordCacheInitCount));
         }
         
         if ((post != null) && (post.containsKey("poolConfig"))) {
@@ -295,7 +292,6 @@ public class PerformanceQueues_p {
         prop.putNum("minAgeOfCache", switchboard.webIndex.index().getBufferMinAge() / 1000 / 60); // minutes
         prop.putNum("maxWaitingWordFlush", switchboard.getConfigLong("maxWaitingWordFlush", 180));
         prop.put("wordCacheMaxCount", switchboard.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 20000));
-        prop.put("wordCacheInitCount", switchboard.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_INIT_COUNT, 30000));
         prop.put("crawlPauseProxy", switchboard.getConfigLong(plasmaSwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, 30000));
         prop.put("crawlPauseLocalsearch", switchboard.getConfigLong(plasmaSwitchboardConstants.LOCALSEACH_ONLINE_CAUTION_DELAY, 30000));
         prop.put("crawlPauseRemotesearch", switchboard.getConfigLong(plasmaSwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, 30000));

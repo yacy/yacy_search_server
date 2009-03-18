@@ -53,13 +53,14 @@ public class Balancer {
     private final ConcurrentHashMap<String, LinkedList<String>>
                                      domainStacks;    // a map from domain name part to Lists with url hashs
     private final ArrayList<String>  urlRAMStack;     // a list that is flushed first
-    private Stack            urlFileStack;    // a file with url hashes
-    private ObjectIndex            urlFileIndex;
+    private Stack                    urlFileStack;    // a file with url hashes
+    private ObjectIndex              urlFileIndex;
     private final File               cacheStacksPath;
     private final String             stackname;
     private boolean                  top;             // to alternate between top and bottom of the file stack
     private long                     minimumLocalDelta;
     private long                     minimumGlobalDelta;
+    private long                     lastPrepare;
     
     public Balancer(final File cachePath, final String stackname, final boolean fullram,
                     final long minimumLocalDelta, final long minimumGlobalDelta) {
@@ -72,6 +73,7 @@ public class Balancer {
         this.top            = true;
         this.minimumLocalDelta = minimumLocalDelta;
         this.minimumGlobalDelta = minimumGlobalDelta;
+        this.lastPrepare = System.currentTimeMillis();
         
         // create a stack for newly entered entries
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
@@ -577,6 +579,10 @@ public class Balancer {
             // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
             Log.logInfo("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ((sleeptime > Math.max(minimumLocalDelta, minimumGlobalDelta)) ? " (caused by robots.txt)" : ""));
+            if (System.currentTimeMillis() - this.lastPrepare > 10000) {
+                prepare(100);
+                this.lastPrepare = System.currentTimeMillis();
+            }
             try {synchronized(this) { this.wait(sleeptime); }} catch (final InterruptedException e) {}
         }
         
@@ -595,9 +601,22 @@ public class Balancer {
      * @throws IOException
      */
     public synchronized ArrayList<CrawlEntry> top(int count) throws IOException {
+        // construct a list using the urlRAMStack which was filled with this procedure
+        count = prepare(count);
+        final ArrayList<CrawlEntry> list = new ArrayList<CrawlEntry>();
+        for (int i = 0; i < count; i++) {
+            final String urlhash = urlRAMStack.get(i);
+            final Row.Entry entry = urlFileIndex.get(urlhash.getBytes());
+            if (entry == null) break;
+            list.add(new CrawlEntry(entry));
+        }
+        return list;
+    }
+    
+    private int prepare(int count) throws IOException {
         // if we need to flush anything, then flush the domain stack first,
         // to avoid that new urls get hidden by old entries from the file stack
-        if (urlRAMStack == null) return null;
+        if (urlRAMStack == null) return 0;
 
         // ensure that the domain stacks are filled enough
         shiftFileToDomStacks(count);
@@ -614,16 +633,7 @@ public class Balancer {
         // if the ram is still not full enough, use the file stack
         shiftFileToRAM(count);
         
-        // finally, construct a list using the urlRAMStack which was filled with this procedure
-        count = Math.min(count, urlRAMStack.size());
-        final ArrayList<CrawlEntry> list = new ArrayList<CrawlEntry>();
-        for (int i = 0; i < count; i++) {
-            final String urlhash = urlRAMStack.get(i);
-            final Row.Entry entry = urlFileIndex.get(urlhash.getBytes());
-            if (entry == null) break;
-            list.add(new CrawlEntry(entry));
-        }
-        return list;
+        return Math.min(count, urlRAMStack.size());
     }
     
     public synchronized Iterator<CrawlEntry> iterator() throws IOException {

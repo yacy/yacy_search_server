@@ -317,7 +317,6 @@ public final class plasmaSwitchboardConstants {
      */
     public static final String CRAWLER_THREADS_ACTIVE_MAX       = "crawler.MaxActiveThreads";
     public static final String YACY_MODE_DEBUG                  = "yacyDebugMode";
-    public static final String WORDCACHE_INIT_COUNT             = "wordCacheInitCount";
     /**
      * <p><code>public static final String <strong>WORDCACHE_MAX_COUNT</strong> = "wordCacheMaxCount"</code></p>
      * <p>Name of the setting how many words the word-cache (or DHT-Out cache) shall contain maximal. Indexing pages if the

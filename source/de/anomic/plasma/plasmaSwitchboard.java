@@ -288,8 +288,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         this.log.logConfig("Work Path:    " + this.workPath.toString());
         
         // set a high maximum cache size to current size; this is adopted later automatically
-        final int wordCacheMaxCount = Math.max((int) getConfigLong(plasmaSwitchboardConstants.WORDCACHE_INIT_COUNT, 30000),
-                                         (int) getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 20000));
+        final int wordCacheMaxCount = (int) getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
         setConfig(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
         
         // set network-specific performance attributes

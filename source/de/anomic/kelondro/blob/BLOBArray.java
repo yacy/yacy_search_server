@@ -136,7 +136,7 @@ public class BLOBArray implements BLOB {
      * @param location
      * @throws IOException
      */
-    public void mountBLOB(File location) throws IOException {
+    public synchronized void mountBLOB(File location) throws IOException {
         Date d;
         try {
             d = DateFormatter.parseShortSecond(location.getName().substring(0, 14));
@@ -147,7 +147,7 @@ public class BLOBArray implements BLOB {
         blobs.add(new blobItem(d, location, oneBlob));
     }
     
-    public void unmountBLOB(File location, boolean writeIDX) {
+    public synchronized void unmountBLOB(File location, boolean writeIDX) {
         Iterator<blobItem> i = this.blobs.iterator();
         blobItem b;
         while (i.hasNext()) {
@@ -160,7 +160,7 @@ public class BLOBArray implements BLOB {
         }
     }
     
-    public File unmountOldestBLOB() {
+    public synchronized File unmountOldestBLOB() {
         if (this.blobs.size() == 0) return null;
         blobItem b = this.blobs.remove(0);
         b.blob.close(false);
@@ -171,7 +171,7 @@ public class BLOBArray implements BLOB {
      * return the number of BLOB files in this array
      * @return
      */
-    public int entries() {
+    public synchronized int entries() {
         return this.blobs.size();
     }
     
@@ -181,7 +181,7 @@ public class BLOBArray implements BLOB {
      * @param creation
      * @return
      */
-    public File newBLOB(Date creation) {
+    public synchronized File newBLOB(Date creation) {
         return new File(heapLocation, DateFormatter.formatShortSecond(creation) + "." + blobSalt + ".blob");
     }
     
@@ -221,9 +221,9 @@ public class BLOBArray implements BLOB {
     }
     
     /*
-     * return the size of the repository
+     * return the size of the repository (in bytes)
      */
-    public long length() {
+    public synchronized long length() {
         long s = 0;
         for (int i = 0; i < blobs.size(); i++) s += blobs.get(i).location.length();
         return s;
@@ -262,16 +262,16 @@ public class BLOBArray implements BLOB {
      * clears the content of the database
      * @throws IOException
      */
-    public void clear() throws IOException {
+    public synchronized void clear() throws IOException {
         for (blobItem bi: blobs) bi.blob.clear();
         blobs.clear();
     }
     
     /**
-     * ask for the number of entries
+     * ask for the number of blob entries
      * @return the number of entries in the table
      */
-    public int size() {
+    public synchronized int size() {
         int s = 0;
         for (blobItem bi: blobs) s += bi.blob.size();
         return s;
@@ -284,7 +284,7 @@ public class BLOBArray implements BLOB {
      * @return
      * @throws IOException
      */
-    public CloneableIterator<byte[]> keys(boolean up, boolean rotating) throws IOException {
+    public synchronized CloneableIterator<byte[]> keys(boolean up, boolean rotating) throws IOException {
         assert rotating = false;
         final List<CloneableIterator<byte[]>> c = new ArrayList<CloneableIterator<byte[]>>(blobs.size());
         final Iterator<blobItem> i = blobs.iterator();
@@ -301,7 +301,7 @@ public class BLOBArray implements BLOB {
      * @return
      * @throws IOException
      */
-    public CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
+    public synchronized CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException {
         final List<CloneableIterator<byte[]>> c = new ArrayList<CloneableIterator<byte[]>>(blobs.size());
         final Iterator<blobItem> i = blobs.iterator();
         while (i.hasNext()) {
@@ -316,7 +316,7 @@ public class BLOBArray implements BLOB {
      * @return
      * @throws IOException
      */
-    public boolean has(byte[] key) {
+    public synchronized boolean has(byte[] key) {
         for (blobItem bi: blobs) if (bi.blob.has(key)) return true;
         return false;
     }
@@ -327,7 +327,7 @@ public class BLOBArray implements BLOB {
      * @return
      * @throws IOException
      */
-    public byte[] get(byte[] key) throws IOException {
+    public synchronized byte[] get(byte[] key) throws IOException {
         byte[] b;
         for (blobItem bi: blobs) {
             b = bi.blob.get(key);
@@ -343,7 +343,7 @@ public class BLOBArray implements BLOB {
      * @return
      * @throws IOException
      */
-    public List<byte[]> getAll(byte[] key) throws IOException {
+    public synchronized List<byte[]> getAll(byte[] key) throws IOException {
         byte[] b;
         ArrayList<byte[]> l = new ArrayList<byte[]>(blobs.size());
         for (blobItem bi: blobs) {
@@ -359,7 +359,7 @@ public class BLOBArray implements BLOB {
      * @return the size of the BLOB or -1 if the BLOB does not exist
      * @throws IOException
      */
-    public long length(byte[] key) throws IOException {
+    public synchronized long length(byte[] key) throws IOException {
         long l;
         for (blobItem bi: blobs) {
             l = bi.blob.length(key);
@@ -374,7 +374,7 @@ public class BLOBArray implements BLOB {
      * @param b
      * @throws IOException
      */
-    public void put(byte[] key, byte[] b) throws IOException {
+    public synchronized void put(byte[] key, byte[] b) throws IOException {
         blobItem bi = (blobs.size() == 0) ? null : blobs.get(blobs.size() - 1);
         if (bi == null)
             System.out.println("bi == null");
@@ -397,7 +397,7 @@ public class BLOBArray implements BLOB {
      * @param key  the primary key
      * @throws IOException
      */
-    public int replace(byte[] key, Rewriter rewriter) throws IOException {
+    public synchronized int replace(byte[] key, Rewriter rewriter) throws IOException {
         int d = 0;
         for (blobItem bi: blobs) {
             d += bi.blob.replace(key, rewriter);
@@ -410,14 +410,14 @@ public class BLOBArray implements BLOB {
      * @param key  the primary key
      * @throws IOException
      */
-    public void remove(byte[] key) throws IOException {
+    public synchronized void remove(byte[] key) throws IOException {
         for (blobItem bi: blobs) bi.blob.remove(key);
     }
     
     /**
      * close the BLOB
      */
-    public void close(boolean writeIDX) {
+    public synchronized void close(boolean writeIDX) {
         for (blobItem bi: blobs) bi.blob.close(writeIDX);
         blobs.clear();
         blobs = null;

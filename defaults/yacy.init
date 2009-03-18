@@ -626,9 +626,7 @@ javastart_priority=10
 # ram cache during indexing. When YaCy is shut down, this cache must be
 # flushed to disc; this may last some minutes.
 wordCacheMaxCount = 30000
-wordCacheInitCount = 30000
 wordCacheMaxCount__pro = 100000
-wordCacheInitCount__pro = 100000
 
 # Specifies if yacy can be used as transparent http proxy.
 # 
