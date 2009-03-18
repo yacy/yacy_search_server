@@ -26,10 +26,7 @@
 
 package de.anomic.kelondro.text;
 
-import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -89,29 +86,6 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
     }
     
     /**
-     * restore a heap dump: this is a heap in write mode. There should no heap file
-     * be assigned in initialization; the file name is given here in this method
-     * when the heap is once dumped again, the heap file name may be different
-     * @param heapFile
-     * @throws IOException
-     */
-    public void initWriteModeFromHeap(final File heapFile) throws IOException {
-        Log.logInfo("indexContainerRAMHeap", "restoring dump for rwi heap '" + heapFile.getName() + "'");
-        final long start = System.currentTimeMillis();
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(this.wordOrder)));
-        int urlCount = 0;
-        synchronized (cache) {
-            for (final ReferenceContainer container : new heapFileEntries(heapFile, this.payloadrow)) {
-                // TODO: in this loop a lot of memory may be allocated. A check if the memory gets low is necessary. But what do when the memory is low?
-                if (container == null) break;
-                cache.put(container.getWordHash(), container);
-                urlCount += container.size();
-            }
-        }
-        Log.logInfo("indexContainerRAMHeap", "finished rwi heap restore: " + cache.size() + " words, " + urlCount + " word/URL relations in " + (System.currentTimeMillis() - start) + " milliseconds");
-    }
-    
-    /**
      * this is the new cache file format initialization
      * @param heapFile
      * @throws IOException
@@ -135,32 +109,38 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         Log.logInfo("indexContainerRAMHeap", "finished rwi blob restore: " + cache.size() + " words, " + urlCount + " word/URL relations in " + (System.currentTimeMillis() - start) + " milliseconds");
     }
     
-    public void dump(final File heapFile) throws IOException {
+    public void dump(final File heapFile, boolean writeIDX) throws IOException {
         assert this.cache != null;
         Log.logInfo("indexContainerRAMHeap", "creating rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
         if (heapFile.exists()) heapFile.delete();
-        final HeapWriter dump = new HeapWriter(heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder);
+        HeapWriter dump = new HeapWriter(heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder);
         final long startTime = System.currentTimeMillis();
         long wordcount = 0, urlcount = 0;
-        String wordHash;
+        String wordHash = null, lwh;
         ReferenceContainer container;
         
         // write wCache
         synchronized (cache) {
             for (final Map.Entry<String, ReferenceContainer> entry: cache.entrySet()) {
                 // get entries
+                lwh = wordHash;
                 wordHash = entry.getKey();
                 container = entry.getValue();
                 
+                // check consistency: entries must be ordered
+                assert (lwh == null || this.ordering().compare(wordHash.getBytes(), lwh.getBytes()) > 0);
+                
                 // put entries on heap
                 if (container != null && wordHash.length() == payloadrow.primaryKeyLength) {
+                    //System.out.println("Dump: " + wordHash);
                     dump.add(wordHash.getBytes(), container.exportCollection());
                     urlcount += container.size();
                 }
                 wordcount++;
             }
         }
-        dump.close();
+        dump.close(writeIDX);
+        dump = null;
         Log.logInfo("indexContainerRAMHeap", "finished alternative rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
     }
     
@@ -169,73 +149,17 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
     }
     
     /**
-     * static iterator of heap files: is used to import heap dumps into a write-enabled index heap
-     */
-    public static class heapFileEntries implements Iterator<ReferenceContainer>, Iterable<ReferenceContainer> {
-        DataInputStream is;
-        byte[] word;
-        Row payloadrow;
-        ReferenceContainer nextContainer;
-        
-        public heapFileEntries(final File heapFile, final Row payloadrow) throws IOException {
-            if (!(heapFile.exists())) throw new IOException("file " + heapFile + " does not exist");
-            is = new DataInputStream(new BufferedInputStream(new FileInputStream(heapFile), 1024*1024));
-            word = new byte[payloadrow.primaryKeyLength];
-            this.payloadrow = payloadrow;
-            this.nextContainer = next0();
-        }
-        
-        public boolean hasNext() {
-            return this.nextContainer != null;
-        }
-
-        private ReferenceContainer next0() {
-            try {
-                is.readFully(word);
-                return new ReferenceContainer(new String(word), RowSet.importRowSet(is, payloadrow));
-            } catch (final IOException e) {
-                return null;
-            }
-        }
-        
-        /**
-         * return an index container
-         * because they may get very large, it is wise to deallocate some memory before calling next()
-         */
-        public ReferenceContainer next() {
-            final ReferenceContainer n = this.nextContainer;
-            this.nextContainer = next0();
-            return n;
-        }
-
-        public void remove() {
-            throw new UnsupportedOperationException("heap dumps are read-only");
-        }
-
-        public Iterator<ReferenceContainer> iterator() {
-            return this;
-        }
-        
-        public void close() {
-            if (is != null) try { is.close(); } catch (final IOException e) {}
-            is = null;
-        }
-        
-        protected void finalize() {
-            this.close();
-        }
-    }
-
-    /**
      * static iterator of BLOBHeap files: is used to import heap dumps into a write-enabled index heap
      */
-    public static class blobFileEntries implements Iterator<ReferenceContainer>, Iterable<ReferenceContainer> {
+    public static class blobFileEntries implements CloneableIterator<ReferenceContainer>, Iterable<ReferenceContainer> {
         Iterator<Map.Entry<String, byte[]>> blobs;
         Row payloadrow;
+        File blobFile;
         
         public blobFileEntries(final File blobFile, final Row payloadrow) throws IOException {
             this.blobs = new HeapReader.entries(blobFile, payloadrow.primaryKeyLength);
             this.payloadrow = payloadrow;
+            this.blobFile = blobFile;
         }
         
         public boolean hasNext() {
@@ -266,6 +190,15 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         
         protected void finalize() {
             this.close();
+        }
+
+        public CloneableIterator<ReferenceContainer> clone(Object modifier) {
+            try {
+                return new blobFileEntries(this.blobFile, this.payloadrow);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
         }
     }
 

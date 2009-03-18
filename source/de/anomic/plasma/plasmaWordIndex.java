@@ -135,7 +135,7 @@ public final class plasmaWordIndex {
                 new File(indexPrimaryTextLocation, "RICELL"),
                 wordOrder,
                 ReferenceRow.urlEntryRow,
-                entityCacheMaxSize) :
+                entityCacheMaxSize, 10) :
                 new BufferedIndexCollection(
                         indexPrimaryTextLocation,
                         wordOrder,

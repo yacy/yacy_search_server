@@ -37,11 +37,12 @@ import de.anomic.kelondro.util.Log;
 
 public final class HeapWriter  {
 
-    private int                     keylength;  // the length of the primary key
+    private int                keylength;  // the length of the primary key
     private LongHandleIndex    index;      // key/seek relation for used records
-    private final File              heapFile;   // the file of the heap
-    private DataOutputStream        os;         // the output stream where the BLOB is written
-    private long                    seek;       // the current write position
+    private final File         heapFile;   // the file of the heap
+    private DataOutputStream   os;         // the output stream where the BLOB is written
+    private long               seek;       // the current write position
+    //private HashSet<String>    doublecheck;// only for testing
     
     /*
      * This class implements a BLOB management based on a sequence of records
@@ -73,6 +74,7 @@ public final class HeapWriter  {
         this.keylength = keylength;
         this.index = new LongHandleIndex(keylength, ordering, 10, 100000);
         this.os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(heapFile), 1024 * 1024));
+        //this.doublecheck = new HashSet<String>();
         this.seek = 0;
     }
 
@@ -83,17 +85,19 @@ public final class HeapWriter  {
      * @param blob
      * @throws IOException
      */
-    public void add(final byte[] key, final byte[] blob) throws IOException {
+    public synchronized void add(final byte[] key, final byte[] blob) throws IOException {
+        //System.out.println("HeapWriter.add: " + new String(key));
         assert blob.length > 0;
         assert key.length == this.keylength;
         assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
-        assert index.get(key) < 0; // must not occur before
+        assert index.get(key) < 0 : "index.get(key) = " + index.get(key) + ", index.size() = " + index.size() + ", file.length() = " + this.heapFile.length() +  ", key = " + new String(key); // must not occur before
         if ((blob == null) || (blob.length == 0)) return;
         int chunkl = key.length + blob.length;
         os.writeInt(chunkl);
         os.write(key);
         os.write(blob);
         index.putUnique(key, seek);
+        //assert (this.doublecheck.add(new String(key))) : "doublecheck failed for " + new String(key);
         this.seek += chunkl + 4;
     }
     
@@ -122,7 +126,7 @@ public final class HeapWriter  {
      * close the BLOB table
      * @throws  
      */
-    public synchronized void close() {
+    public synchronized void close(boolean writeIDX) {
         try {
             os.flush();
             os.close();
@@ -131,7 +135,7 @@ public final class HeapWriter  {
         }
         os = null;
         
-        if (index.size() > 3) {
+        if (writeIDX && index.size() > 3) {
             // now we can create a dump of the index and the gap information
             // to speed up the next start
             try {

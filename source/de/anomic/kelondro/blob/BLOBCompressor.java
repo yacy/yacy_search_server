@@ -77,14 +77,14 @@ public class BLOBCompressor extends Thread implements BLOB {
         return this.backend.ordering();
     }
     
-    public synchronized void close() {
+    public synchronized void close(boolean writeIDX) {
         // no more thread is running, flush all queues
         try {
             flushAll();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.backend.close();
+        this.backend.close(writeIDX);
     }
     
     private byte[] compress(byte[] b) {

@@ -82,10 +82,10 @@ public class HeapReader {
                 }
             }
             if (!ok) {
-                Log.logWarning("kelondroBLOBHeap", "verification of idx file for " + heapFile.toString() + " failed, re-building index");
+                Log.logWarning("HeapReader", "verification of idx file for " + heapFile.toString() + " failed, re-building index");
                 initIndexReadFromHeap();
             } else {
-                Log.logInfo("kelondroBLOBHeap", "using a dump of the index of " + heapFile.toString() + ".");
+                Log.logInfo("HeapReader", "using a dump of the index of " + heapFile.toString() + ".");
             }
         } else {
             // if we did not have a dump, create a new index

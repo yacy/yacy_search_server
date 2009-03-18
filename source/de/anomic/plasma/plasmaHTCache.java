@@ -172,7 +172,7 @@ public final class plasmaHTCache {
     
     public static void close() {
         responseHeaderDB.close();
-        fileDB.close();
+        fileDB.close(true);
     }
 
     public static boolean isPicture(final String mimeType) {

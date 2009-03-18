@@ -99,9 +99,9 @@ public class httpClient {
         conManager.getParams().setConnectionTimeout(60000); // set a default timeout
         conManager.getParams().setDefaultMaxConnectionsPerHost(3); // prevent DoS by mistake
         localHostConfiguration.setHost("localhost");
-        conManager.getParams().setMaxConnectionsPerHost(localHostConfiguration, 10);
+        conManager.getParams().setMaxConnectionsPerHost(localHostConfiguration, 100);
         localHostConfiguration.setHost("127.0.0.1");
-        conManager.getParams().setMaxConnectionsPerHost(localHostConfiguration, 10);
+        conManager.getParams().setMaxConnectionsPerHost(localHostConfiguration, 100);
         // TODO should this be configurable?
 
         // accept self-signed or untrusted certificates

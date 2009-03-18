@@ -146,7 +146,7 @@ public interface BLOB {
     /**
      * close the BLOB table
      */
-    public void close();
+    public void close(boolean writeIDX);
     
     public interface Rewriter {
         

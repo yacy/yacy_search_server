@@ -42,6 +42,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 
@@ -309,5 +310,19 @@ public class LongHandleIndex {
             return map;
         }
         
+    }
+    
+    public static void main(String[] args) {
+       LongHandleIndex idx = new LongHandleIndex(12, Base64Order.enhancedCoder, 10000, 10000000);
+       byte[] s;
+       //long l;
+       for (int i = 0; i < 10000000; i = i + 8) {
+           s = Base64Order.enhancedCoder.uncardinal(Long.MAX_VALUE - i);
+           //l = Base64Order.enhancedCoder.cardinal(s);
+           //if (i != l) System.out.println("encoding bug for " + new String(s) + ", v = " + (Long.MAX_VALUE - i) + ", l = " + l);
+           //System.out.println(s);
+           if (idx.get(s) >= 0) System.out.println("search bug for " + new String(s) + ": " + idx.get(s));
+           idx.putUnique(s, 1);
+       }
     }
 }

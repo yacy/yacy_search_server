@@ -54,18 +54,20 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
     // class variables
     private ReferenceContainerArray array;
     private ReferenceContainerCache ram;
-    private int maxRamEntries;
+    private int maxRamEntries, maxArrayFiles;
     
     public IndexCell(
             final File cellPath,
             final ByteOrder wordOrder,
             final Row payloadrow,
-            final int maxRamEntries
+            final int maxRamEntries,
+            final int maxArrayFiles
             ) throws IOException {
         this.array = new ReferenceContainerArray(cellPath, wordOrder, payloadrow);
         this.ram = new ReferenceContainerCache(payloadrow, wordOrder);
         this.ram.initWriteMode();
         this.maxRamEntries = maxRamEntries;
+        this.maxArrayFiles = maxArrayFiles;
     }
 
     
@@ -230,7 +232,7 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
     public synchronized void close() {
         // dump the ram
         try {
-            this.ram.dump(this.array.newContainerBLOBFile());
+            this.ram.dump(this.array.newContainerBLOBFile(), true);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -256,15 +258,19 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
      * cache control methods
      */
     
-    private void cacheDump() throws IOException {
+    private synchronized void cacheDump() throws IOException {
         // dump the ram
         File dumpFile = this.array.newContainerBLOBFile();
-        this.ram.dump(dumpFile);
+        this.ram.dump(dumpFile, true);
         // get a fresh ram cache
         this.ram = new ReferenceContainerCache(this.array.rowdef(), this.array.ordering());
         this.ram.initWriteMode();
         // add the dumped indexContainerBLOB to the array
         this.array.mountBLOBContainer(dumpFile);
+        int c = 0;
+        while (this.array.entries() > this.maxArrayFiles && c++ < 3) {
+            if (!this.array.mergeOldest()) break;
+        }
     }
 
     public void cleanupBuffer(int time) {

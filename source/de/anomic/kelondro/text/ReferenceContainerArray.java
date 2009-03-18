@@ -34,10 +34,12 @@ import java.util.List;
 
 import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.BLOBArray;
+import de.anomic.kelondro.blob.HeapWriter;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.text.ReferenceContainerCache.blobFileEntries;
 
 public final class ReferenceContainerArray {
 
@@ -68,7 +70,7 @@ public final class ReferenceContainerArray {
     }
     
     public synchronized void close() {
-    	this.array.close();
+    	this.array.close(true);
     }
     
     public synchronized void clear() throws IOException {
@@ -231,41 +233,114 @@ public final class ReferenceContainerArray {
             return c.exportCollection();
         }
     }
-/*
-    public int mergeOldest() {
-        if (this.array.entries() < 2) return 0;
-        File f1 = this.array.unmountOldestBLOB();
-        File f2 = this.array.unmountOldestBLOB();
-        // iterate both files and write a new one
-        new kelondroMergeIterator<indexContainer>(
-                (kelondroCloneableIterator<Map.Entry<String, byte[]>>) new kelondroBLOBHeapReader.entries(f1, this.payloadrow.objectsize),
-                null,
-                null,
-                null,
-                true);
-        return 0;
-    }
-    */
-    /*
-     *         new kelondroMergeIterator<indexContainer>(
-                new kelondroBLOBHeapReader.entries(f1, this.payloadrow.objectsize),
-                new kelondroBLOBHeapReader.entries(f2, this.payloadrow.objectsize),
-                this.payloadrow.getOrdering(),
-                indexContainer.containerMergeMethod,
-                true);
-     */
-    /*
-      public kelondroMergeIterator(
-      final kelondroCloneableIterator<E> a,
-      final kelondroCloneableIterator<E> b,
-      final Comparator<E> c,
-      final Method m, final boolean up) {
-     */
-    
+
     public interface ContainerRewriter {
         
         public ReferenceContainer rewrite(ReferenceContainer container);
         
+    }
+    
+    public int entries() {
+        return this.array.entries();
+    }
+    
+    public synchronized boolean mergeOldest() throws IOException {
+        if (this.array.entries() < 2) return false;
+        File f1 = this.array.unmountOldestBLOB();
+        File f2 = this.array.unmountOldestBLOB();
+        // iterate both files and write a new one
+        
+        CloneableIterator<ReferenceContainer> i1 = new blobFileEntries(f1, this.payloadrow);
+        CloneableIterator<ReferenceContainer> i2 = new blobFileEntries(f2, this.payloadrow);
+        ReferenceContainer c1, c2, c1o, c2o;
+        c1 = (i1.hasNext()) ? i1.next() : null;
+        c2 = (i2.hasNext()) ? i2.next() : null;
+        if (c1 == null && c2 == null) {
+            if (!f1.delete()) f1.deleteOnExit();
+            if (!f2.delete()) f2.deleteOnExit();
+            return true;
+        }
+        if (c1 == null) {
+            if (!f1.delete()) f1.deleteOnExit();
+            this.array.mountBLOB(f2);
+            return true;
+        }
+        if (c2 == null) {
+            if (!f2.delete()) f2.deleteOnExit();
+            this.array.mountBLOB(f1);
+            return true;
+        }
+        File newFile = newContainerBLOBFile();
+        HeapWriter writer = new HeapWriter(newFile, this.array.keylength(), this.array.ordering());
+        int e;
+        while (true) {
+            assert c1 != null;
+            assert c2 != null;
+            e = this.array.ordering().compare(c1.getWordHash().getBytes(), c2.getWordHash().getBytes());
+            if (e < 0) {
+                writer.add(c1.getWordHash().getBytes(), c1.exportCollection());
+                if (i1.hasNext()) {
+                    c1o = c1;
+                    c1 = i1.next();
+                    assert this.array.ordering().compare(c1.getWordHash().getBytes(), c1o.getWordHash().getBytes()) > 0;
+                    continue;
+                }
+                break;
+            }
+            if (e > 0) {
+                writer.add(c2.getWordHash().getBytes(), c2.exportCollection());
+                if (i2.hasNext()) {
+                    c2o = c2;
+                    c2 = i2.next();
+                    assert this.array.ordering().compare(c2.getWordHash().getBytes(), c2o.getWordHash().getBytes()) > 0;
+                    continue;
+                }
+                break;
+            }
+            assert e == 0;
+            // merge the entries
+            writer.add(c1.getWordHash().getBytes(), (c1.merge(c2)).exportCollection());
+            if (i1.hasNext() && i2.hasNext()) {
+                c1 = i1.next();
+                c2 = i2.next();
+                continue;
+            }
+            if (i1.hasNext()) c1 = i1.next();
+            if (i2.hasNext()) c2 = i2.next();
+            break;
+           
+        }
+        // catch up remaining entries
+        assert !(i1.hasNext() && i2.hasNext());
+        while (i1.hasNext()) {
+            //System.out.println("FLUSH REMAINING 1: " + c1.getWordHash());
+            writer.add(c1.getWordHash().getBytes(), c1.exportCollection());
+            if (i1.hasNext()) {
+                c1o = c1;
+                c1 = i1.next();
+                assert this.array.ordering().compare(c1.getWordHash().getBytes(), c1o.getWordHash().getBytes()) > 0;
+                continue;
+            }
+            break;
+        }
+        while (i2.hasNext()) {
+            //System.out.println("FLUSH REMAINING 2: " + c2.getWordHash());
+            writer.add(c2.getWordHash().getBytes(), c2.exportCollection());
+            if (i2.hasNext()) {
+                c2o = c2;
+                c2 = i2.next();
+                assert this.array.ordering().compare(c2.getWordHash().getBytes(), c2o.getWordHash().getBytes()) > 0;
+                continue;
+            }
+            break;
+        }
+        // finished with writing
+        writer.close(true);
+        // we don't need the old files any more
+        if (!f1.delete()) f1.deleteOnExit();
+        if (!f2.delete()) f2.deleteOnExit();
+        this.array.mountBLOB(newFile);
+        return true;
     }
 
 }

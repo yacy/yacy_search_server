@@ -296,7 +296,7 @@ public class MapView {
         cacheScore = null;
 
         // close file
-        blob.close();
+        blob.close(true);
     }
 
     public class objectIterator implements Iterator<Map<String, String>> {

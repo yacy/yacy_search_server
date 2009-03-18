@@ -147,14 +147,14 @@ public class BLOBArray implements BLOB {
         blobs.add(new blobItem(d, location, oneBlob));
     }
     
-    public void unmountBLOB(File location) {
+    public void unmountBLOB(File location, boolean writeIDX) {
         Iterator<blobItem> i = this.blobs.iterator();
         blobItem b;
         while (i.hasNext()) {
             b = i.next();
             if (b.location.equals(location)) {
                 i.remove();
-                b.blob.close();
+                b.blob.close(writeIDX);
                 return;
             }
         }
@@ -163,7 +163,7 @@ public class BLOBArray implements BLOB {
     public File unmountOldestBLOB() {
         if (this.blobs.size() == 0) return null;
         blobItem b = this.blobs.remove(0);
-        b.blob.close();
+        b.blob.close(false);
         return b.location;
     }
     
@@ -207,7 +207,7 @@ public class BLOBArray implements BLOB {
         while (blobs.size() > 0 && System.currentTimeMillis() - blobs.get(0).creation.getTime() - this.fileAgeLimit > this.repositoryAgeMax) {
             // too old
             blobItem oldestBLOB = blobs.remove(0);
-            oldestBLOB.blob.close();
+            oldestBLOB.blob.close(false);
             if (!oldestBLOB.location.delete()) oldestBLOB.location.deleteOnExit();
         }
         
@@ -215,7 +215,7 @@ public class BLOBArray implements BLOB {
         while (blobs.size() > 0 && length() > this.repositorySizeMax) {
             // too large
             blobItem oldestBLOB = blobs.remove(0);
-            oldestBLOB.blob.close();
+            oldestBLOB.blob.close(false);
             if (!oldestBLOB.location.delete()) oldestBLOB.location.deleteOnExit();
         }
     }
@@ -417,8 +417,8 @@ public class BLOBArray implements BLOB {
     /**
      * close the BLOB
      */
-    public void close() {
-        for (blobItem bi: blobs) bi.blob.close();
+    public void close(boolean writeIDX) {
+        for (blobItem bi: blobs) bi.blob.close(writeIDX);
         blobs.clear();
         blobs = null;
     }
@@ -441,7 +441,7 @@ public class BLOBArray implements BLOB {
             heap.remove("aaaaaaaaaaab".getBytes());
             heap.remove("aaaaaaaaaaac".getBytes());
             heap.put("aaaaaaaaaaaX".getBytes(), "WXYZ".getBytes());
-            heap.close();
+            heap.close(true);
         } catch (final IOException e) {
             e.printStackTrace();
         }

@@ -500,7 +500,7 @@ public class BLOBTree implements BLOB {
 
     }
     
-    public synchronized void close() {
+    public synchronized void close(boolean writeIDX) {
         index.close();
     }
 
@@ -518,7 +518,7 @@ public class BLOBTree implements BLOB {
                 final Iterator<byte[]> i = kd.keys(true, false);
                 while (i.hasNext())
                     System.out.println(new String(i.next()));
-                kd.close();
+                kd.close(true);
             } catch (final IOException e) {
                 e.printStackTrace();
             }

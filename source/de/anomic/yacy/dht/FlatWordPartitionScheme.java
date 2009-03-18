@@ -82,7 +82,9 @@ public class FlatWordPartitionScheme implements PartitionScheme {
     
     public static String positionToHash(final long l) {
         // transform the position of a peer position into a close peer hash
-        return new String(Base64Order.enhancedCoder.uncardinal(l)) + "AA";
+        String s = new String(Base64Order.enhancedCoder.uncardinal(l));
+        while (s.length() < 12) s += "A";
+        return s;
     }
 
 }

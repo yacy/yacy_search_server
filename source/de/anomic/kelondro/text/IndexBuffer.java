@@ -321,7 +321,7 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
         // dump cache
         try {
             //heap.dumpold(this.oldDumpFile);
-            heap.dump(this.dumpFile);
+            heap.dump(this.dumpFile, true);
         } catch (final IOException e){
             log.logSevere("unable to dump cache: " + e.getMessage(), e);
         }

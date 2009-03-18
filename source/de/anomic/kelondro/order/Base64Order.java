@@ -253,24 +253,6 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         }
     }
 
-    private final long cardinalI(final byte[] key, int off, int len) {
-        // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
-        long c = 0;
-        int lim = off + Math.min(10, len);
-        int lim10 = off + 10;
-        byte b;
-        while (off < lim) {
-            b = key[off++];
-            if (b < 0) return -1;
-            b = ahpla[b];
-            if (b < 0) return -1;
-            c = (c << 6) | b;
-        }
-        while (off++ < lim10) c = (c << 6);
-        c = c << 3;
-        assert c >= 0;
-        return c;
-    }
     
     /*
     private final long cardinalI(final byte[] key) {
@@ -292,21 +274,42 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         while ((p < 10) && (p < key.length())) {
             b = ahpla[key.charAt(p++)];
             if (b < 0) return -1;
-            c = (c << 6) |b;
+            c = (c << 6) | b;
         }
         while (p++ < 10) c = (c << 6);
-        c = c << 3;
+        c = (c << 3) | 7;
         assert c >= 0;
         return c;
     }
 
+    private final long cardinalI(final byte[] key, int off, int len) {
+        // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
+        long c = 0;
+        int lim = off + Math.min(10, len);
+        int lim10 = off + 10;
+        byte b;
+        while (off < lim) {
+            b = key[off++];
+            if (b < 0) return -1;
+            b = ahpla[b];
+            if (b < 0) return -1;
+            c = (c << 6) | b;
+        }
+        while (off++ < lim10) c = (c << 6);
+        c = (c << 3) | 7;
+        assert c >= 0;
+        return c;
+    }
+    
     public final byte[] uncardinal(long c) {
         c = c >> 3;
-        byte[] b = new byte[10];
+        byte[] b = new byte[12];
         for (int p = 9; p >= 0; p--) {
             b[p] = (byte) alpha[(int) (c & 0x3fL)];
             c = c >> 6;
         }
+        b[10] = (byte) alpha[0x3f];
+        b[11] = (byte) alpha[0x3f];
         return b;
     }
     
