@@ -232,7 +232,7 @@ public final class Row {
         
         public Entry() {
             rowinstance = new byte[objectsize];
-            for (int i = 0; i < objectsize; i++) this.rowinstance[i] = 0;
+            //for (int i = 0; i < objectsize; i++) this.rowinstance[i] = 0;
             offset = 0;
         }
         
