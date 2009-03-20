@@ -78,6 +78,8 @@ public class FTPLoader {
      * @return
      */
     public Document load(final CrawlEntry entry) throws IOException {
+        
+        long start = System.currentTimeMillis();
         final yacyURL entryUrl = entry.url();
         final String fullPath = getPath(entryUrl);
 
@@ -146,7 +148,8 @@ public class FTPLoader {
             sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.peers().mySeed().hash, new Date(), 1, "server download" + detail);
             throw new IOException("FTPLoader: Unable to download URL " + entry.url().toString() + detail);
         }
-
+        
+        Latency.update(entry.url().hash().substring(6), entry.url().getHost(), System.currentTimeMillis() - start);
         return htCache;
     }
 

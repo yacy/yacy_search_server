@@ -288,7 +288,7 @@ public class Balancer {
             while (i.hasNext() && c < max) {
                 entry = i.next();
                 list = entry.getValue();
-                if (onlyReadyForAccess && CrawlEntry.waitingRemainingGuessed(list.getFirst(), minimumLocalDelta, minimumGlobalDelta) > 0) continue;
+                if (onlyReadyForAccess && Latency.waitingRemainingGuessed(list.getFirst(), minimumLocalDelta, minimumGlobalDelta) > 0) continue;
                 if (ram) {
                     urlRAMStack.add(list.removeFirst());
                 } else try {
@@ -415,7 +415,7 @@ public class Balancer {
             String besthash = null;
             while (i.hasNext()) {
                 urlhash = i.next();
-                waitingtime = CrawlEntry.waitingRemainingGuessed(urlhash, minimumLocalDelta, minimumGlobalDelta);
+                waitingtime = Latency.waitingRemainingGuessed(urlhash, minimumLocalDelta, minimumGlobalDelta);
                 if (waitingtime == 0) {
                     // zero waiting is a good one
                     result = urlhash;
@@ -474,7 +474,7 @@ public class Balancer {
             while (hitlist.size() > 0) {
                 domhash = hitlist.remove(hitlist.lastKey());
                 if (maxhash == null) maxhash = domhash; // remember first entry
-                waitingtime = CrawlEntry.waitingRemainingGuessed(domhash, minimumLocalDelta, minimumGlobalDelta);
+                waitingtime = Latency.waitingRemainingGuessed(domhash, minimumLocalDelta, minimumGlobalDelta);
                 if (waitingtime < 100) {
                     domlist = domainStacks.get(domhash);
                     result = domlist.removeFirst();
@@ -498,7 +498,7 @@ public class Balancer {
             while (i.hasNext()) {
                 entry = i.next();
                 domhash = entry.getKey();
-                waitingtime = CrawlEntry.waitingRemainingGuessed(domhash, minimumLocalDelta, minimumGlobalDelta);
+                waitingtime = Latency.waitingRemainingGuessed(domhash, minimumLocalDelta, minimumGlobalDelta);
                 if (waitingtime == 0) {
                     // zero waiting is a good one
                     domlist = entry.getValue();
@@ -542,7 +542,7 @@ public class Balancer {
 
                 // check if the time after retrieval of last hash from same
                 // domain is not shorter than the minimumDelta
-                long waitingtime = CrawlEntry.waitingRemainingGuessed(nexthash, minimumLocalDelta, minimumGlobalDelta);
+                long waitingtime = Latency.waitingRemainingGuessed(nexthash, minimumLocalDelta, minimumGlobalDelta);
                 if (waitingtime == 0) {
                     // the entry is fine
                     result = new String((top) ? urlFileStack.pop().getColBytes(0) : urlFileStack.pot().getColBytes(0));
@@ -571,7 +571,7 @@ public class Balancer {
         // at this point we must check if the crawlEntry has relevancy because the crawl profile still exists
         // if not: return null. A calling method must handle the null value and try again
         if (profile != null && !profile.hasEntry(crawlEntry.profileHandle())) return null;
-        long sleeptime = crawlEntry.waitingRemaining(minimumLocalDelta, minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
+        long sleeptime = Latency.waitingRemaining(crawlEntry.url(), minimumLocalDelta, minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
         
         if (delay && sleeptime > 0) {
             // force a busy waiting here
@@ -586,11 +586,7 @@ public class Balancer {
                 sleeptime -= this.lastPrepare - t;
             }
             if (sleeptime > 0) try {synchronized(this) { this.wait(sleeptime); }} catch (final InterruptedException e) {}
-        }
-        
-        // update statistical data
-        crawlEntry.updateAccess();
-        
+        }        
         return crawlEntry;
     }
 

@@ -99,7 +99,10 @@ public final class HTTPLoader {
     }    
    
     public Document load(final CrawlEntry entry, final String parserMode) throws IOException {
-        return load(entry, parserMode, DEFAULT_CRAWLING_RETRY_COUNT);
+        long start = System.currentTimeMillis();
+        Document doc = load(entry, parserMode, DEFAULT_CRAWLING_RETRY_COUNT);
+        Latency.update(entry.url().hash().substring(6), entry.url().getHost(), System.currentTimeMillis() - start);
+        return doc;
     }
     
     private Document load(final CrawlEntry entry, final String parserMode, final int retryCount) throws IOException {
@@ -242,90 +245,6 @@ public final class HTTPLoader {
                 }
             }*/
             return htCache;
-        /*
-        } catch (final Exception e) {
-            final String errorMsg = e.getMessage();
-            String failreason = null;
-
-            if ((e instanceof IOException) && 
-                (errorMsg != null) && 
-                (errorMsg.indexOf("socket closed") >= 0) &&
-                (Thread.currentThread().isInterrupted())
-            ) {
-                this.log.logInfo("CRAWLER Interruption detected because of server shutdown.");
-                failreason = ErrorURL.DENIED_SERVER_SHUTDOWN;
-            } else if (e instanceof httpdLimitExceededException) {
-                this.log.logWarning("CRAWLER Max file size limit '" + maxFileSize + "' exceeded while downloading URL " + entry.url());
-                failreason = ErrorURL.DENIED_FILESIZE_LIMIT_EXCEEDED;                    
-            } else if (e instanceof MalformedURLException) {
-                this.log.logWarning("CRAWLER Malformed URL '" + entry.url().toString() + "' detected. ");
-                failreason = ErrorURL.DENIED_MALFORMED_URL;
-            } else if (e instanceof NoRouteToHostException) {
-                this.log.logWarning("CRAWLER No route to host found while trying to crawl URL  '" + entry.url().toString() + "'.");
-                failreason = ErrorURL.DENIED_NO_ROUTE_TO_HOST;
-            } else if ((e instanceof UnknownHostException) ||
-                       ((errorMsg != null) && (errorMsg.indexOf("unknown host") >= 0))) {
-                final yacyURL u = (entry.referrerhash() == null) ? null : sb.getURL(entry.referrerhash());
-                this.log.logWarning("CRAWLER Unknown host in URL '" + entry.url() + "'. " +
-                        "Referer URL: " + ((u == null) ? "Unknown" : u.toNormalform(true, true)));
-                failreason = ErrorURL.DENIED_UNKNOWN_HOST;
-            } else if (e instanceof java.net.BindException) {
-                this.log.logWarning("CRAWLER BindException detected while trying to download content from '" + entry.url().toString() +
-                "'. Retrying request.");
-                failreason = ErrorURL.DENIED_CONNECTION_BIND_EXCEPTION;
-            } else if ((errorMsg != null) && (
-            		(errorMsg.indexOf("Corrupt GZIP trailer") >= 0) ||
-            		(errorMsg.indexOf("Not in GZIP format") >= 0) ||
-            		(errorMsg.indexOf("Unexpected end of ZLIB") >= 0)
-            )) {
-                this.log.logWarning("CRAWLER Problems detected while receiving gzip encoded content from '" + entry.url().toString() +
-                "'. Retrying request without using gzip content encoding.");
-                failreason = ErrorURL.DENIED_CONTENT_DECODING_ERROR;
-            } else if ((errorMsg != null) && (errorMsg.indexOf("The host did not accept the connection within timeout of") >= 0)) {
-                this.log.logWarning("CRAWLER Timeout while trying to connect to '" + entry.url().toString() +
-                "'. Retrying request.");
-                failreason = ErrorURL.DENIED_CONNECTION_TIMEOUT;
-            } else if ((errorMsg != null) && (errorMsg.indexOf("Read timed out") >= 0)) {
-                this.log.logWarning("CRAWLER Read timeout while receiving content from '" + entry.url().toString() +
-                "'. Retrying request.");
-                failreason = ErrorURL.DENIED_CONNECTION_TIMEOUT;
-            } else if ((errorMsg != null) && (errorMsg.indexOf("connect timed out") >= 0)) {
-                this.log.logWarning("CRAWLER Timeout while trying to connect to '" + entry.url().toString() +
-                "'. Retrying request.");
-                failreason = ErrorURL.DENIED_CONNECTION_TIMEOUT;
-            } else if ((errorMsg != null) && (errorMsg.indexOf("Connection timed out") >= 0)) {
-                this.log.logWarning("CRAWLER Connection timeout while receiving content from '" + entry.url().toString() +
-                "'. Retrying request.");
-                failreason = ErrorURL.DENIED_CONNECTION_TIMEOUT;
-            } else if ((errorMsg != null) && (errorMsg.indexOf("Connection refused") >= 0)) {
-                this.log.logWarning("CRAWLER Connection refused while trying to connect to '" + entry.url().toString() + "'.");
-                failreason = ErrorURL.DENIED_CONNECTION_REFUSED;
-            } else if ((errorMsg != null) && (errorMsg.indexOf("Circular redirect to '")>= 0)) {
-                this.log.logWarning("CRAWLER Redirect Error with URL '" + entry.url().toString() + "': "+ e.toString());  
-                failreason = ErrorURL.DENIED_REDIRECTION_COUNTER_EXCEEDED;
-            } else if ((errorMsg != null) && (errorMsg.indexOf("There is not enough space on the disk") >= 0)) {
-                this.log.logSevere("CRAWLER Not enough space on the disk detected while crawling '" + entry.url().toString() + "'. " +
-                "Pausing crawlers. ");
-                sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-                sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-                failreason = ErrorURL.DENIED_OUT_OF_DISK_SPACE;
-            } else if ((errorMsg != null) && (errorMsg.indexOf("Network is unreachable") >=0)) {
-                this.log.logSevere("CRAWLER Network is unreachable while trying to crawl URL '" + entry.url().toString() + "'. ");
-                failreason = ErrorURL.DENIED_NETWORK_IS_UNREACHABLE;
-            } else if ((errorMsg != null) && (errorMsg.indexOf("No trusted certificate found")>= 0)) {
-                this.log.logSevere("CRAWLER No trusted certificate found for URL '" + entry.url().toString() + "'. ");  
-                failreason = ErrorURL.DENIED_SSL_UNTRUSTED_CERT;
-            } else {
-                this.log.logSevere("CRAWLER Unexpected Error with URL '" + entry.url().toString() + "': " + e.toString(), e);
-                failreason = ErrorURL.DENIED_CONNECTION_ERROR;
-            }
-
-            if (failreason != null) {
-                // add url into error db
-                sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.seedDB.mySeed().hash, new Date(), 1, failreason);
-            }
-            return null;
-        }*/
     }
     
 }

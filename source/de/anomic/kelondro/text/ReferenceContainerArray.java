@@ -251,30 +251,50 @@ public final class ReferenceContainerArray {
         System.out.println("*** DEBUG mergeOldest: vvvvvvvvv array has " + this.array.entries() + " entries vvvvvvvvv");
         System.out.println("*** DEBUG mergeOldest: unmounted " + f1.getName());
         System.out.println("*** DEBUG mergeOldest: unmounted " + f2.getName());
+        File newFile = merge(f1, f2);
+        if (newFile == null) return true;
+        this.array.mountBLOB(newFile);
+        System.out.println("*** DEBUG mergeOldest:   mounted " + newFile.getName());
+        System.out.println("*** DEBUG mergeOldest: ^^^^^^^^^^^ array has " + this.array.entries() + " entries ^^^^^^^^^^^");
+        return true;
+    }
+    
+    private synchronized File merge(File f1, File f2) throws IOException {
         // iterate both files and write a new one
         
         CloneableIterator<ReferenceContainer> i1 = new blobFileEntries(f1, this.payloadrow);
         CloneableIterator<ReferenceContainer> i2 = new blobFileEntries(f2, this.payloadrow);
-        ReferenceContainer c1, c2, c1o, c2o;
-        c1 = (i1.hasNext()) ? i1.next() : null;
-        c2 = (i2.hasNext()) ? i2.next() : null;
-        if (c1 == null && c2 == null) {
-            if (!f1.delete()) f1.deleteOnExit();
+        if (!i1.hasNext()) {
+            if (i2.hasNext()) {
+                if (!f1.delete()) f1.deleteOnExit();
+                return f2;
+            } else {
+                if (!f1.delete()) f1.deleteOnExit();
+                if (!f2.delete()) f2.deleteOnExit();
+                return null;
+            }
+        } else if (!i2.hasNext()) {
             if (!f2.delete()) f2.deleteOnExit();
-            return true;
+            return f1;
         }
-        if (c1 == null) {
-            if (!f1.delete()) f1.deleteOnExit();
-            this.array.mountBLOB(f2);
-            return true;
-        }
-        if (c2 == null) {
-            if (!f2.delete()) f2.deleteOnExit();
-            this.array.mountBLOB(f1);
-            return true;
-        }
+        assert i1.hasNext();
+        assert i2.hasNext();
         File newFile = newContainerBLOBFile();
         HeapWriter writer = new HeapWriter(newFile, this.array.keylength(), this.array.ordering());
+        merge(i1, i2, writer);
+        writer.close(true);
+        // we don't need the old files any more
+        if (!f1.delete()) f1.deleteOnExit();
+        if (!f2.delete()) f2.deleteOnExit();
+        return newFile;
+    }
+    
+    private synchronized void merge(CloneableIterator<ReferenceContainer> i1, CloneableIterator<ReferenceContainer> i2, HeapWriter writer) throws IOException {
+        assert i1.hasNext();
+        assert i2.hasNext();
+        ReferenceContainer c1, c2, c1o, c2o;
+        c1 = i1.next();
+        c2 = i2.next();
         int e;
         while (true) {
             assert c1 != null;
@@ -338,14 +358,6 @@ public final class ReferenceContainerArray {
             break;
         }
         // finished with writing
-        writer.close(true);
-        // we don't need the old files any more
-        if (!f1.delete()) f1.deleteOnExit();
-        if (!f2.delete()) f2.deleteOnExit();
-        this.array.mountBLOB(newFile);
-        System.out.println("*** DEBUG mergeOldest:   mounted " + newFile.getName());
-        System.out.println("*** DEBUG mergeOldest: ^^^^^^^^^^^ array has " + this.array.entries() + " entries ^^^^^^^^^^^");
-        return true;
     }
 
 }
