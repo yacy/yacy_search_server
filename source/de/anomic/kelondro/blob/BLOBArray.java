@@ -160,9 +160,46 @@ public class BLOBArray implements BLOB {
         }
     }
     
-    public synchronized File unmountOldestBLOB() {
+    public synchronized File unmountSmallestBLOB() {
         if (this.blobs.size() == 0) return null;
-        blobItem b = this.blobs.remove(0);
+        int bestIndex = -1;
+        long smallest = Long.MAX_VALUE;
+        for (int i = 0; i < this.blobs.size(); i++) {
+            if (this.blobs.get(i).location.length() < smallest) {
+                smallest = this.blobs.get(i).location.length();
+                bestIndex = i;
+            }
+        }
+        blobItem b = this.blobs.remove(bestIndex);
+        b.blob.close(false);
+        return b.location;
+    }
+    
+    public synchronized File unmountOldestBLOB(boolean smallestFromFirst2) {
+        if (this.blobs.size() == 0) return null;
+        int idx = 0;
+        if (smallestFromFirst2 && this.blobs.get(1).location.length() < this.blobs.get(0).location.length()) idx = 1;
+        blobItem b = this.blobs.remove(idx);
+        b.blob.close(false);
+        return b.location;
+    }
+    
+    public synchronized File unmountSimilarSizeBLOB(long otherSize) {
+        if (this.blobs.size() == 0 || otherSize == 0) return null;
+        blobItem b;
+        double delta, bestDelta = Double.MAX_VALUE;
+        int bestIndex = -1;
+        for (int i = 0; i < this.blobs.size(); i++) {
+            b = this.blobs.get(i);
+            if (b.location.length() == 0) continue;
+            delta = ((double) b.location.length()) / ((double) otherSize);
+            if (delta < 1.0) delta = 1.0 / delta;
+            if (delta < bestDelta) {
+                bestDelta = delta;
+                bestIndex = i;
+            }
+        }
+        b = this.blobs.remove(bestIndex);
         b.blob.close(false);
         return b.location;
     }

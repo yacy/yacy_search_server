@@ -47,6 +47,7 @@ import de.anomic.kelondro.text.BufferedIndexCollection;
 import de.anomic.kelondro.text.IndexCell;
 import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.ReferenceContainerMerger;
 import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.Word;
@@ -96,7 +97,8 @@ public final class plasmaWordIndex {
     public  CrawlProfile.entry    defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
     public  CrawlProfile.entry    defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
     private final File            queuesRoot;
-
+    private ReferenceContainerMerger merger;
+    
     public plasmaWordIndex(
             final String networkName,
             final Log log,
@@ -130,12 +132,14 @@ public final class plasmaWordIndex {
                 }
             }
         }
+        this.merger = (useCell) ? new ReferenceContainerMerger(1) : null;
+        if (this.merger != null) this.merger.start();
         this.index = (useCell) ? 
                 new IndexCell(
                 new File(indexPrimaryTextLocation, "RICELL"),
                 wordOrder,
                 ReferenceRow.urlEntryRow,
-                entityCacheMaxSize, 10) :
+                entityCacheMaxSize, 10, this.merger) :
                 new BufferedIndexCollection(
                         indexPrimaryTextLocation,
                         wordOrder,
@@ -411,6 +415,7 @@ public final class plasmaWordIndex {
     }
 
     public void close() {
+        if (this.merger != null) this.merger.terminate();
         index.close();
         metadata.close();
         peers.close();

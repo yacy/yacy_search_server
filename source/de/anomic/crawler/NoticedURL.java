@@ -43,7 +43,7 @@ public class NoticedURL {
     public static final int STACK_TYPE_MOVIE    = 12; // put on movie stack
     public static final int STACK_TYPE_MUSIC    = 13; // put on music stack
 
-    public static final long minimumLocalDeltaInit  =   0; // the minimum time difference between access of the same local domain
+    public static final long minimumLocalDeltaInit  =  10; // the minimum time difference between access of the same local domain
     public static final long minimumGlobalDeltaInit = 500; // the minimum time difference between access of the same global domain
     
     private Balancer coreStack;      // links found by crawling to depth-1

@@ -150,7 +150,7 @@ public class Latency {
         waiting = Math.min(60000, waiting);
         
         // return time that is remaining
-        System.out.println("Latency: " + (waiting - timeSinceLastAccess));
+        //System.out.println("Latency: " + (waiting - timeSinceLastAccess));
         return Math.max(0, waiting - timeSinceLastAccess);
     }
     

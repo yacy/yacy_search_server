@@ -61,9 +61,10 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
             final ByteOrder wordOrder,
             final Row payloadrow,
             final int maxRamEntries,
-            final int maxArrayFiles
+            final int maxArrayFiles,
+            ReferenceContainerMerger merger
             ) throws IOException {
-        this.array = new ReferenceContainerArray(cellPath, wordOrder, payloadrow);
+        this.array = new ReferenceContainerArray(cellPath, wordOrder, payloadrow, merger);
         this.ram = new ReferenceContainerCache(payloadrow, wordOrder);
         this.ram.initWriteMode();
         this.maxRamEntries = maxRamEntries;
@@ -269,7 +270,7 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
         this.array.mountBLOBContainer(dumpFile);
         int c = 0;
         while (this.array.entries() > this.maxArrayFiles && c++ < 3) {
-            if (!this.array.mergeOldest()) break;
+            if (!this.array.merge(true)) break;
         }
     }
 

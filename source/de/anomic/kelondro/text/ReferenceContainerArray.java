@@ -1,8 +1,6 @@
-// indexContainerBLOBHeap.java
+// ReferenceContainerArray.java
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 04.01.2009 on http://yacy.net
-//
-// This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate: 2008-03-14 01:16:04 +0100 (Fr, 14 Mrz 2008) $
 // $LastChangedRevision: 4558 $
@@ -34,17 +32,16 @@ import java.util.List;
 
 import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.BLOBArray;
-import de.anomic.kelondro.blob.HeapWriter;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.text.ReferenceContainerCache.blobFileEntries;
 
 public final class ReferenceContainerArray {
 
     private final Row payloadrow;
     private final BLOBArray array;
+    private final ReferenceContainerMerger merger;
     
     /**
      * open a index container based on a BLOB dump. The content of the BLOB will not be read
@@ -59,7 +56,8 @@ public final class ReferenceContainerArray {
     public ReferenceContainerArray(
     		final File heapLocation,
     		final ByteOrder wordOrder,
-    		final Row payloadrow) throws IOException {
+    		final Row payloadrow,
+    		ReferenceContainerMerger merger) throws IOException {
         this.payloadrow = payloadrow;
         this.array = new BLOBArray(
             heapLocation,
@@ -67,6 +65,7 @@ public final class ReferenceContainerArray {
             payloadrow.primaryKeyLength,
             wordOrder,
             0);
+        this.merger = merger;
     }
     
     public synchronized void close() {
@@ -244,120 +243,13 @@ public final class ReferenceContainerArray {
         return this.array.entries();
     }
     
-    public synchronized boolean mergeOldest() throws IOException {
+    public synchronized boolean merge(boolean similar) throws IOException {
         if (this.array.entries() < 2) return false;
-        File f1 = this.array.unmountOldestBLOB();
-        File f2 = this.array.unmountOldestBLOB();
-        System.out.println("*** DEBUG mergeOldest: vvvvvvvvv array has " + this.array.entries() + " entries vvvvvvvvv");
-        System.out.println("*** DEBUG mergeOldest: unmounted " + f1.getName());
-        System.out.println("*** DEBUG mergeOldest: unmounted " + f2.getName());
-        File newFile = merge(f1, f2);
-        if (newFile == null) return true;
-        this.array.mountBLOB(newFile);
-        System.out.println("*** DEBUG mergeOldest:   mounted " + newFile.getName());
-        System.out.println("*** DEBUG mergeOldest: ^^^^^^^^^^^ array has " + this.array.entries() + " entries ^^^^^^^^^^^");
+        File f1 = this.array.unmountOldestBLOB(similar);
+        File f2 = (similar) ? this.array.unmountSimilarSizeBLOB(f1.length()) : this.array.unmountOldestBLOB(false);
+        merger.merge(f1, f2, this.array, this.payloadrow, newContainerBLOBFile());
         return true;
     }
     
-    private synchronized File merge(File f1, File f2) throws IOException {
-        // iterate both files and write a new one
-        
-        CloneableIterator<ReferenceContainer> i1 = new blobFileEntries(f1, this.payloadrow);
-        CloneableIterator<ReferenceContainer> i2 = new blobFileEntries(f2, this.payloadrow);
-        if (!i1.hasNext()) {
-            if (i2.hasNext()) {
-                if (!f1.delete()) f1.deleteOnExit();
-                return f2;
-            } else {
-                if (!f1.delete()) f1.deleteOnExit();
-                if (!f2.delete()) f2.deleteOnExit();
-                return null;
-            }
-        } else if (!i2.hasNext()) {
-            if (!f2.delete()) f2.deleteOnExit();
-            return f1;
-        }
-        assert i1.hasNext();
-        assert i2.hasNext();
-        File newFile = newContainerBLOBFile();
-        HeapWriter writer = new HeapWriter(newFile, this.array.keylength(), this.array.ordering());
-        merge(i1, i2, writer);
-        writer.close(true);
-        // we don't need the old files any more
-        if (!f1.delete()) f1.deleteOnExit();
-        if (!f2.delete()) f2.deleteOnExit();
-        return newFile;
-    }
     
-    private synchronized void merge(CloneableIterator<ReferenceContainer> i1, CloneableIterator<ReferenceContainer> i2, HeapWriter writer) throws IOException {
-        assert i1.hasNext();
-        assert i2.hasNext();
-        ReferenceContainer c1, c2, c1o, c2o;
-        c1 = i1.next();
-        c2 = i2.next();
-        int e;
-        while (true) {
-            assert c1 != null;
-            assert c2 != null;
-            e = this.array.ordering().compare(c1.getWordHash().getBytes(), c2.getWordHash().getBytes());
-            if (e < 0) {
-                writer.add(c1.getWordHash().getBytes(), c1.exportCollection());
-                if (i1.hasNext()) {
-                    c1o = c1;
-                    c1 = i1.next();
-                    assert this.array.ordering().compare(c1.getWordHash().getBytes(), c1o.getWordHash().getBytes()) > 0;
-                    continue;
-                }
-                break;
-            }
-            if (e > 0) {
-                writer.add(c2.getWordHash().getBytes(), c2.exportCollection());
-                if (i2.hasNext()) {
-                    c2o = c2;
-                    c2 = i2.next();
-                    assert this.array.ordering().compare(c2.getWordHash().getBytes(), c2o.getWordHash().getBytes()) > 0;
-                    continue;
-                }
-                break;
-            }
-            assert e == 0;
-            // merge the entries
-            writer.add(c1.getWordHash().getBytes(), (c1.merge(c2)).exportCollection());
-            if (i1.hasNext() && i2.hasNext()) {
-                c1 = i1.next();
-                c2 = i2.next();
-                continue;
-            }
-            if (i1.hasNext()) c1 = i1.next();
-            if (i2.hasNext()) c2 = i2.next();
-            break;
-           
-        }
-        // catch up remaining entries
-        assert !(i1.hasNext() && i2.hasNext());
-        while (i1.hasNext()) {
-            //System.out.println("FLUSH REMAINING 1: " + c1.getWordHash());
-            writer.add(c1.getWordHash().getBytes(), c1.exportCollection());
-            if (i1.hasNext()) {
-                c1o = c1;
-                c1 = i1.next();
-                assert this.array.ordering().compare(c1.getWordHash().getBytes(), c1o.getWordHash().getBytes()) > 0;
-                continue;
-            }
-            break;
-        }
-        while (i2.hasNext()) {
-            //System.out.println("FLUSH REMAINING 2: " + c2.getWordHash());
-            writer.add(c2.getWordHash().getBytes(), c2.exportCollection());
-            if (i2.hasNext()) {
-                c2o = c2;
-                c2 = i2.next();
-                assert this.array.ordering().compare(c2.getWordHash().getBytes(), c2o.getWordHash().getBytes()) > 0;
-                continue;
-            }
-            break;
-        }
-        // finished with writing
-    }
-
 }
