@@ -3,9 +3,9 @@
 // (C) 2009 by Michael Peter Christen; mc@yacy.net
 // first published 19.03.2009 on http://yacy.net
 //
-// $LastChangedDate: 2009-03-16 19:08:43 +0100 (Mo, 16 Mrz 2009) $
-// $LastChangedRevision: 5723 $
-// $LastChangedBy: borg-0300 $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
