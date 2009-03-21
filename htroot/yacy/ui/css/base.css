@@ -185,7 +185,11 @@ h3.linktitle {
     line-height: 1.2em;
 	color:#239AFF;
 }
-.url a {
+h3.linktitle a {
+	color:#239AFF;
+	text-decoration:none;
+}
+p.url a {
   	color:#20A020;
   	text-decoration:none;
 }

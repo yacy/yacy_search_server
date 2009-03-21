@@ -17,8 +17,7 @@
 				var height = document.documentElement.clientHeight - 240;
 				var query = $.query.get('search');
 				if (query == '') query = $.query.get('query');
-				$.query.REMOVE('search');
-										    			
+														    			
 		 		$(".yresult").flexigrid({
 			 		url: '/yacysearch.json',
 					dataType: 'json',
@@ -61,9 +60,12 @@
 							data.channels[0].items,
 							function(i,item) {
 								if (item) {
-									var html = "<h3 class='linktitle'>"+item.title+"</h3><p class='desc'>"+item.description+"</p><p class='url'><a href='"+item.link+"'>"+item.link+"</a>"
+									var title = "<h3 class='linktitle'><a href='"+item.link+"' target='_blank'>"+item.title+"</a></h3>";
+									var url = "<p class='url'><a href='"+item.link+"' target='_blank'>"+item.link+"</a></p>"
+									var desc = "<p class='desc'>"+item.description+"</p>";
 									var fav = "<a class='favicon' href='"+item.link+"'></a>";
-									rows[i] = {id: item.guid, cell: [item.guid, fav, html, item.pubDate]};
+									var date = item.pubDate.substring(0,16);
+									rows[i] = {id: item.guid, cell: [item.guid, fav, title+desc+url, "Tags", "Folders", date]};
 								}								
 							}
 						);
@@ -82,7 +84,7 @@
 						$('.pReload',this.pDiv).addClass('loading');
 						if (g.bDiv) $(g.block).css({top:g.bDiv.offsetTop});
 						if (p.hideOnSubmit) $(this.gDiv).prepend(g.block); //$(t).hide();
-						if ($.browser.opera) $(t).css('visibility','hidden');				
+						// if ($.browser.opera) $(t).css('visibility','hidden');				
 						if (!p.newp) p.newp = 1;				
 						if (p.page>p.pages) p.page = p.pages;
 		
