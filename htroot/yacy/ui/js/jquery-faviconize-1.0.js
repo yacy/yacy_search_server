@@ -27,7 +27,7 @@
 		
 		$(this).each(function() {
 			var a = $(this);
-			var r = a.attr("href").match(/http:\/\/[a-z0-9.-]*(\/)?/i);
+			var r = a.attr("href").match(/http[s]*:\/\/[a-z0-9.-]*(\/)?/i);
 			var r = r[0] + ((r[1] == null) ? "/" : "");
 			if(r) {
 				if($.grep(e.exceptions, function(x) {x = (x.match(/\/$/) == null) ? x+"/" : x; return (x == r);}).length == 0) {
