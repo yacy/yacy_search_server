@@ -44,14 +44,15 @@
   margin-left: -20px;
 }
 .classic {
-	font-size: 75%;
+	font-size: 12px;	
+	text-align: left;
 }
 .classic .linktitle, .classic .url, .classic .date, .classic .desc {
 	margin-left: 20px;
 }
 div .ybpane {
 	float: left;
-	font-size: 0.8em;
+	font-size: 13px;
     line-height: 1.2em;
 	color:#239AFF;
 	margin-top: 10px;
