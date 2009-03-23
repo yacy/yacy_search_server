@@ -193,6 +193,11 @@ p.url a {
   	color:#20A020;
   	text-decoration:none;
 }
+.tag {
+	font-size: 1.1em;
+  	line-height: 1.3em;
+  	color:#20A020;
+}
 .desc {
   	font-style:italic;
 	font-size: 0.9em;

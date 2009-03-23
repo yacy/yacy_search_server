@@ -31,6 +31,7 @@
 			],												
 			useRp: true,
 			rp: 10,
+			hideOnSubmit: false,
 			usepager: true,					
 			striped: true,
 			nowrap: false,			 									    				
@@ -59,7 +60,9 @@
 							var desc = "<p class='desc'>"+item.description+"</p>";
 							var fav = "<a class='favicon' href='"+item.link+"'></a>";
 							var date = item.pubDate.substring(0,16);
-							rows[i] = {id: item.guid, cell: [item.guid, fav, title+desc+url, "Tags", "Folders", date]};
+							var tags = "<p id='tags-"+i+"' class='tag'></p>";
+							getTags(item.link, i);							
+							rows[i] = {id: item.guid, cell: [item.guid, fav, title+desc+url, tags, "Folders", date]};
 						}								
 					}
 				);
@@ -154,6 +157,21 @@
 		} else {
 			alert("Test!");
 		}
+	}
+	function getTags(url, i) {
+		$.ajax({
+			type: "GET",
+			url: "/api/util/getpageinfo_p.xml?url="+url,			
+			dataType: "xml",
+			success: function(xml) {					
+				tags = "";
+				$(xml).find('tag').each(function(){
+					tags = tags + $(this).attr('name') + "<img src='img/tags/tag_blue.png' />";
+				});				
+				var id = "#tags-"+i;
+				$(id).append(tags);									
+			}					
+		});	
 	}		
   //]]>
 </script>		

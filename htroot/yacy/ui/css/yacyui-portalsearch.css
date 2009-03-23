@@ -1,0 +1,72 @@
+.ui-dialog .ui-dialog-title {
+	font-size: 14px;
+}
+.ui-dialog .ui-dialog-buttonpane button {
+	font-size: 14px;
+}
+#ypopup .url {
+	padding-top: 1px;
+	font-size: 0.9em;
+  	line-height: 1.2em;
+  	margin-bottom:0.6em;
+}
+#ypopup .date {
+	font-size: 0.9em;
+  	line-height: 1.2em;
+  	margin-top:-0.6em;
+}
+#ypopup .url a {
+  	color:#20A020;
+  	text-decoration:none;
+}
+#ypopup h3.linktitle {
+	margin-top: 2px;	
+	margin-bottom: -0.5em;
+    font-size: 1.0em;
+    line-height: 1.2em;
+	color:#239AFF;
+}
+#ypopup h3.linktitle a {
+	text-decoration:none;
+	color:#239AFF;
+}
+#ypopup .desc {
+  	font-style:italic;
+	font-size: 0.9em;
+  	color: #808080;
+  	line-height: 1.2em;
+  	margin-bottom:-1em; 	
+}
+#ypopup .favicon {  
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;  
+  margin-left: -20px;
+}
+.classic {
+	font-size: 75%;
+}
+.classic .linktitle, .classic .url, .classic .date, .classic .desc {
+	margin-left: 20px;
+}
+div .ybpane {
+	float: left;
+	font-size: 0.8em;
+    line-height: 1.2em;
+	color:#239AFF;
+	margin-top: 10px;
+	margin-left: 10px;
+}
+.ybpane img {
+	width: 50px;
+	height: 32px;
+	vertical-align: middle;
+	padding-right: 15px;
+	padding-top: 3px;
+	border: 0;
+}
+#ypopup .yloading {
+	margin-top: 150px;
+	margin-left: -10px;
+	text-align: center;
+}

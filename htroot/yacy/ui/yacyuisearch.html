@@ -40,7 +40,8 @@
 					],												
 					useRp: true,
 					rp: 10,
-					usepager: true,					
+					usepager: true,
+					hideOnSubmit: false,					
 					striped: true,
 					nowrap: false,			 									    				
 			 		height: height,
@@ -65,7 +66,7 @@
 									var desc = "<p class='desc'>"+item.description+"</p>";
 									var fav = "<a class='favicon' href='"+item.link+"'></a>";
 									var date = item.pubDate.substring(0,16);
-									rows[i] = {id: item.guid, cell: [item.guid, fav, title+desc+url, "Tags", "Folders", date]};
+									rows[i] = {id: item.guid, cell: [item.guid, fav, title+desc+url, date]};
 								}								
 							}
 						);
