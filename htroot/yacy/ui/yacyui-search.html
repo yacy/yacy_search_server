@@ -60,8 +60,9 @@
 							var desc = "<p class='desc'>"+item.description+"</p>";
 							var fav = "<a class='favicon' href='"+item.link+"'></a>";
 							var date = item.pubDate.substring(0,16);
-							var tags = "<p id='tags-"+i+"' class='tag'></p>";
-							getTags(item.link, i);							
+							// var tags = "<p id='tags-"+i+"' class='tag'></p>";
+							// getTags(item.link, i);
+							var tags = "Tags";							
 							rows[i] = {id: item.guid, cell: [item.guid, fav, title+desc+url, tags, "Folders", date]};
 						}								
 					}
