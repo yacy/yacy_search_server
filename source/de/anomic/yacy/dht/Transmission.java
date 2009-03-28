@@ -210,7 +210,8 @@ public class Transmission  {
                                  " in " + (transferTime / 1000) + 
                                  " seconds successful ("  + (1000 * this.containers.size() / (transferTime + 1)) + 
                                  " words/s)");
-                
+                seeds.mySeed().incSI(this.containers.size());
+                seeds.mySeed().incSU(this.references.size());
                 // if the peer has set a pause time and we are in flush mode (index transfer)
                 // then we pause for a while now
                 log.logInfo("Transfer finished of chunk to target " + target.hash + "/" + target.getName());
