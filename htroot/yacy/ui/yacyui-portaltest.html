@@ -8,11 +8,9 @@
 		<script>			
 			$(document).ready(function() {
 				yconf = {
-					url : 'http://localhost:8081/',
+					url : 'http://localhost:8081',
 					theme : 'start',
-					title : 'YaCy P2P Web Search',
-					width : 420,
-					height : 500
+					title : 'YaCy Portal Search'
 				};
 				$.getScript(yconf.url+'/yacy/ui/js/yacyui-portalsearch.js', function(){});
 			});
@@ -20,8 +18,8 @@
 		<h3>YaCy Portal Search:</h3>
 		<div id="yacy">
 			<form id="ysearch" method="get" accept-charset="UTF-8" action="http://localhost:8081/yacysearch.html">
-				<input name="query" id="yquery" type="text" size="15" maxlength="80" value=""/>
-				<input type="hidden" name="verify" value="false" />
+				<input name="search" id="yquery" type="text" size="15" maxlength="80" value=""/>
+				<input type="hidden" name="verify" value="true" />
 				<input type="hidden" name="maximumRecords" value="10" />
 				<input type="hidden" name="resource" value="local" />
 				<input type="hidden" name="urlmaskfilter" value=".*" />
@@ -37,11 +35,9 @@
 &lt;script&gt;			
 	$(document).ready(function() {
 		yconf = {
-			url : 'http://localhost:8081/',
+			url : 'http://localhost:8081',
 			theme : 'start',
-			title : 'YaCy P2P Web Search',
-			width : 420,
-			height : 500
+			title : 'YaCy Portal Search'
 		};
 		$.getScript(yconf.url+'/yacy/ui/js/yacyui-portalsearch.js', function(){});
 	});
@@ -49,7 +45,7 @@
 &lt;div id="yacy"&gt;
 	&lt;form id="ysearch" method="get" accept-charset="UTF-8" action="http://localhost:8081/yacysearch.html"&gt;
 		&lt;input name="query" id="yquery" type="text" size="15" maxlength="80" value=""/&gt;
-		&lt;input type="hidden" name="verify" value="false" /&gt;
+		&lt;input type="hidden" name="verify" value="true" /&gt;
 		&lt;input type="hidden" name="maximumRecords" value="10" /&gt;
 		&lt;input type="hidden" name="resource" value="local" /&gt;
 		&lt;input type="hidden" name="urlmaskfilter" value=".*" /&gt;
@@ -59,7 +55,24 @@
 		&lt;input type="submit" name="Enter" value="Suchen" /&gt;
 	&lt;/form&gt;
 &lt;/div&gt;
-</pre>			
+</pre>
+<h4>Configuration options and defaults:</h4>
+<pre>
+url : 'is a mandatory property - no default',
+theme : 'start',
+title : 'YaCy P2P Web Search',
+width : 420,
+height : 500,
+position: ['top',50],
+modal: false,			
+resizable: true,
+show: '',
+hide: ''
+</pre>
+<h4>Themes:</h4>
+<p>You can <a href="http://jquery-ui.googlecode.com/files/jquery-ui-themes-1.7.zip" target="_blank">
+download</a> ready made themes or <a href="http://jqueryui.com/themeroller/" target="_blank">create</a> 
+your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/</p>			
 	</body>	
 </html>
 

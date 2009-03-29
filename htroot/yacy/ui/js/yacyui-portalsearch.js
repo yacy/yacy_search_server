@@ -1,8 +1,8 @@
 $(document).ready(function() {
 	
 	$.ajaxSetup({
-		timeout: 10000,
-		cache: false
+		timeout: 5000,
+		cache: true
 	})
 	
 	// apply default properties
@@ -14,7 +14,9 @@ $(document).ready(function() {
 		height : 500,
 		position: ['top',50],
 		modal: false,			
-		resizable: true	
+		resizable: true,
+		show: '',
+		hide: ''	
 	}, yconf);
 	
 	$('<div id="ypopup" class="classic"></div>').appendTo("#yacy");	
@@ -55,6 +57,8 @@ $(document).ready(function() {
 			modal: yconf.modal,			
 			resizable: yconf.resizable,
 		  	title: yconf.title,
+		  	show: yconf.show,
+		  	hide: yconf.hide,
 		  	buttons: {
         		Next: function() {
         			startRecord = startRecord + maximumRecords;
@@ -91,8 +95,9 @@ $(document).ready(function() {
 		$("#ysearch input").each(function(i){
 			var item = { name : $(this).attr('name'), value : $(this).attr('value') };		
 			param[i] = item;
-		});	
-	
+		});
+		param[param.length] = { name : 'startRecord', value : startRecord };
+		
 		$.getJSON(url, param,
 	        function(json, status){
 				if (json[0]) data = json[0];
