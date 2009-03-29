@@ -1,11 +1,13 @@
 $(document).ready(function() {
 	
 	$.ajaxSetup({
-		timeout: 5000,
+		timeout: 10000,
 		cache: true
 	})
 	
 	// apply default properties
+	startRecord = 0;
+	maximumRecords = 10;
 	yconf = $.extend({
 		url : 'is a mandatory property - no default',
 		theme : 'start',
@@ -45,7 +47,7 @@ $(document).ready(function() {
 	$.getScript(script4, function(){});
 	
 	$.getScript(script5, function(){
-		startRecord = 0;
+
 		maximumRecords = parseInt($("#ysearch input[name='maximumRecords']").getValue());
 		
 		$("#ypopup").dialog({			
