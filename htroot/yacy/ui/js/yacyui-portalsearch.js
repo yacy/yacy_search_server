@@ -4,7 +4,19 @@ $(document).ready(function() {
 		timeout: 10000,
 		cache: false
 	})
-
+	
+	// apply default properties
+	yconf = $.extend({
+		url : 'is a mandatory property - no default',
+		theme : 'start',
+		title : 'YaCy P2P Web Search',
+		width : 420,
+		height : 500,
+		position: ['top',50],
+		modal: false,			
+		resizable: true	
+	}, yconf);
+	
 	$('<div id="ypopup" class="classic"></div>').appendTo("#yacy");	
 	
 	var style1 = yconf.url + '/yacy/ui/css/yacyui-portalsearch.css';
@@ -39,9 +51,9 @@ $(document).ready(function() {
 			height: yconf.height,
 			width: yconf.width,
 			minWidth: yconf.width,			
-			position: ['top',50],
-			modal: false,			
-			resizable: true,
+			position: yconf.position,
+			modal: yconf.modal,			
+			resizable: yconf.resizable,
 		  	title: yconf.title,
 		  	buttons: {
         		Next: function() {
@@ -63,9 +75,8 @@ $(document).ready(function() {
 		return false;		
 	});
 
-	$('#ysearch').submit(function() {			
+	$('#ysearch').submit(function() {				
 	
-		var query = $('#yquery').getValue();			
 		var url = yconf.url + '/yacysearch.json?callback=?'
 		
 		$('#ypopup').empty();
