@@ -300,7 +300,11 @@ public class BLOBArray implements BLOB {
      * @throws IOException
      */
     public synchronized void clear() throws IOException {
-        for (blobItem bi: blobs) bi.blob.clear();
+        for (blobItem bi: blobs) {
+            bi.blob.clear();
+            bi.blob.close(false);
+            bi.location.delete();
+        }
         blobs.clear();
     }
     
