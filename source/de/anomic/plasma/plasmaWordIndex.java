@@ -149,8 +149,16 @@ public final class plasmaWordIndex {
                         redundancy,
                         log);
             
+        // migrate LURL-db files into new subdirectory METADATA
+        File textdir = new File(this.secondaryRoot, "TEXT");
+        File metadatadir = new File(textdir, "METADATA");
+        if (!metadatadir.exists()) metadatadir.mkdirs();
+        String[] l = textdir.list();
+        for (int i = 0; i < l.length; i++) {
+            if (l[i].startsWith("urls.")) (new File(textdir, l[i])).renameTo(new File(metadatadir, l[i]));
+        }
         // create LURL-db
-        metadata = new MetadataRepository(new File(this.secondaryRoot, "TEXT"));
+        metadata = new MetadataRepository(metadatadir);
         
         // make crawl profiles database and default profiles
         this.queuesRoot = new File(this.primaryRoot, "QUEUES");
