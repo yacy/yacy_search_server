@@ -103,13 +103,14 @@ public class yacysearch {
             prop.put("input_count", "10");
             prop.put("input_offset", "0");
             prop.put("input_resource", "global");
-            prop.put("input_urlmaskfilter", ".*");
-            prop.put("input_prefermaskfilter", "");
+            prop.put("input_urlmaskfilter", (post == null) ? ".*" : post.get("urlmaskfilter", ".*"));
+            prop.put("input_prefermaskfilter", (post == null) ? "" : post.get("prefermaskfilter", ""));
+            prop.put("input_tenant", (post == null) ? "" : post.get("tenant", ""));
             prop.put("input_indexof", "off");
             prop.put("input_constraint", "");
             prop.put("input_cat", "href");
             prop.put("input_depth", "0");
-            prop.put("input_verify", "true");
+            prop.put("input_verify", (post == null) ? "true" : post.get("verify", "true"));
             prop.put("input_contentdom", "text");
             prop.put("input_contentdomCheckText", "1");
             prop.put("input_contentdomCheckAudio", "0");
@@ -284,6 +285,10 @@ public class yacysearch {
                         urlmask = "[a-zA-Z]*://[^/]*" + domain + "/.*" + urlmask;
                     }
                 }
+            }
+            if (post.containsKey("tenant")) {
+                final String tenant = post.get("tenant");
+                if (urlmask == null) urlmask = ".*" + tenant + ".*"; else urlmask = ".*" + tenant + urlmask;
             }
             if (urlmask == null || urlmask.length() == 0) urlmask = originalUrlMask; //if no urlmask was given
            

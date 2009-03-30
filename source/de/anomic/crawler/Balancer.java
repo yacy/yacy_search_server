@@ -564,7 +564,9 @@ public class Balancer {
         final int s = urlFileIndex.size();
         Row.Entry rowEntry = urlFileIndex.remove(result.getBytes());
         if (rowEntry == null) {
-            throw new IOException("get() found a valid urlhash, but failed to fetch the corresponding url entry - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size());
+            String error = "get() found a valid urlhash, but failed to fetch the corresponding url entry - total size = " + size() + ", fileStack.size() = " + urlFileStack.size() + ", ramStack.size() = " + urlRAMStack.size() + ", domainStacks.size() = " + domainStacks.size();
+            //this.clear();
+            throw new IOException(error + " - cleared the balancer");
         }
         assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
         final CrawlEntry crawlEntry = new CrawlEntry(rowEntry);

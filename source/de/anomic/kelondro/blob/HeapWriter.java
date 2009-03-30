@@ -103,14 +103,17 @@ public final class HeapWriter  {
     }
     
     protected static File fingerprintIndexFile(File f) {
+        assert f != null;
         return new File(f.getParentFile(), f.getName() + "." + fingerprintFileHash(f) + ".idx");
     }
     
     protected static File fingerprintGapFile(File f) {
+        assert f != null;
         return new File(f.getParentFile(), f.getName() + "." + fingerprintFileHash(f) + ".gap");
     }
     
     protected static String fingerprintFileHash(File f) {
+        assert f != null;
         return Digest.fastFingerprintB64(f, false).substring(0, 12);
     }
     

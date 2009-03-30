@@ -256,6 +256,7 @@ public class Dispatcher {
      * then no additional IO is necessary.
      */
     private void enqueueContainersToCloud(final ArrayList<ReferenceContainer>[] containers) {
+        if (transmissionCloud == null) return;
         ReferenceContainer lastContainer;
         String primaryTarget;
         Transmission.Chunk entry;
