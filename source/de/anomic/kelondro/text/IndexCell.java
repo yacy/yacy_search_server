@@ -51,10 +51,15 @@ import de.anomic.server.serverProfiling;
 
 public final class IndexCell extends AbstractBufferedIndex implements BufferedIndex {
 
+    private static final long cleanupCycle = 10000;
+    
     // class variables
-    private ReferenceContainerArray array;
-    private ReferenceContainerCache ram;
-    private int maxRamEntries, maxArrayFiles;
+    private final ReferenceContainerArray array;
+    private       ReferenceContainerCache ram;
+    private       int                     maxRamEntries, maxArrayFiles;
+    private final IODispatcher            merger;
+    private final long                    lastCleanup;
+    
     
     public IndexCell(
             final File cellPath,
@@ -62,13 +67,15 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
             final Row payloadrow,
             final int maxRamEntries,
             final int maxArrayFiles,
-            ReferenceContainerMerger merger
+            IODispatcher merger
             ) throws IOException {
         this.array = new ReferenceContainerArray(cellPath, wordOrder, payloadrow, merger);
         this.ram = new ReferenceContainerCache(payloadrow, wordOrder);
         this.ram.initWriteMode();
         this.maxRamEntries = maxRamEntries;
         this.maxArrayFiles = maxArrayFiles;
+        this.merger = merger;
+        this.lastCleanup = System.currentTimeMillis();
     }
 
     
@@ -85,12 +92,14 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
         this.ram.add(newEntries);
         serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
         if (this.ram.size() > this.maxRamEntries) cacheDump();
+        cacheCleanup();
     }
 
     public synchronized void add(String hash, ReferenceRow entry) throws IOException {
         this.ram.add(hash, entry);
         serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
         if (this.ram.size() > this.maxRamEntries) cacheDump();
+        cacheCleanup();
     }
 
     /**
@@ -262,15 +271,19 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
     private synchronized void cacheDump() throws IOException {
         // dump the ram
         File dumpFile = this.array.newContainerBLOBFile();
-        this.ram.dump(dumpFile, true);
+        //this.ram.dump(dumpFile, true);
+        //this.array.mountBLOBContainer(dumpFile);
+        merger.dump(this.ram, dumpFile, array);
         // get a fresh ram cache
         this.ram = new ReferenceContainerCache(this.array.rowdef(), this.array.ordering());
         this.ram.initWriteMode();
-        // add the dumped indexContainerBLOB to the array
-        this.array.mountBLOBContainer(dumpFile);
+    }
+    
+    private synchronized void cacheCleanup() throws IOException {
+        if (this.lastCleanup + cleanupCycle > System.currentTimeMillis()) return;
         int c = 0;
-        while (this.array.entries() > this.maxArrayFiles && c++ < 3) {
-            if (!this.array.merge(true)) break;
+        if (this.array.entries() > this.maxArrayFiles && c++ < 3) {
+            this.array.shrink(true);
         }
     }
 

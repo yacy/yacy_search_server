@@ -41,7 +41,7 @@ public final class ReferenceContainerArray {
 
     private final Row payloadrow;
     private final BLOBArray array;
-    private final ReferenceContainerMerger merger;
+    private final IODispatcher merger;
     
     /**
      * open a index container based on a BLOB dump. The content of the BLOB will not be read
@@ -57,7 +57,7 @@ public final class ReferenceContainerArray {
     		final File heapLocation,
     		final ByteOrder wordOrder,
     		final Row payloadrow,
-    		ReferenceContainerMerger merger) throws IOException {
+    		IODispatcher merger) throws IOException {
         this.payloadrow = payloadrow;
         this.array = new BLOBArray(
             heapLocation,
@@ -243,8 +243,9 @@ public final class ReferenceContainerArray {
         return this.array.entries();
     }
     
-    public synchronized boolean merge(boolean similar) throws IOException {
+    public synchronized boolean shrink(boolean similar) throws IOException {
         if (this.array.entries() < 2) return false;
+        if (this.merger.queueLength() > 0) return false;
         File f1 = this.array.unmountOldestBLOB(similar);
         File f2 = (similar) ? this.array.unmountSimilarSizeBLOB(f1.length()) : this.array.unmountOldestBLOB(false);
         merger.merge(f1, f2, this.array, this.payloadrow, newContainerBLOBFile());

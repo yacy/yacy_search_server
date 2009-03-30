@@ -48,44 +48,78 @@ import de.anomic.kelondro.text.ReferenceContainerCache.blobFileEntries;
  * of merging with a call to the start() - method. To shut down all mergings, call terminate()
  * only once.
  */
-public class ReferenceContainerMerger extends Thread {
+public class IODispatcher extends Thread {
 
-    private Job poison;
-    private ArrayBlockingQueue<Job> queue;
-    private ArrayBlockingQueue<Job> termi;
+    private final Boolean poison, vita;
+    private ArrayBlockingQueue<Boolean>  controlQueue;
+    private ArrayBlockingQueue<MergeJob> mergeQueue;
+    private ArrayBlockingQueue<DumpJob>  dumpQueue;
+    private ArrayBlockingQueue<Boolean>  termQueue;
     
-    public ReferenceContainerMerger(int queueLength) {
-        this.poison = new Job();
-        this.queue = new ArrayBlockingQueue<Job>(queueLength);
-        this.termi = new ArrayBlockingQueue<Job>(1);
+    public IODispatcher(int dumpQueueLength, int mergeQueueLength) {
+        this.poison = new Boolean(false);
+        this.vita = new Boolean(true);
+        this.controlQueue = new ArrayBlockingQueue<Boolean>(dumpQueueLength + mergeQueueLength + 1);
+        this.dumpQueue = new ArrayBlockingQueue<DumpJob>(dumpQueueLength);
+        this.mergeQueue = new ArrayBlockingQueue<MergeJob>(mergeQueueLength);
+        this.termQueue = new ArrayBlockingQueue<Boolean>(1);
     }
     
     public synchronized void terminate() {
-        if (queue == null || !this.isAlive()) return;
-        try {
-            queue.put(poison);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        // await termination
-        try {
-            termi.take();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (termQueue != null && this.isAlive()) {
+            try {
+                controlQueue.put(poison);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            // await termination
+            try {
+                termQueue.take();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
     
+    public synchronized void dump(ReferenceContainerCache cache, File file, ReferenceContainerArray array) {
+        if (dumpQueue == null || !this.isAlive()) {
+            try {
+                cache.dump(file, true);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            DumpJob job = new DumpJob(cache, file, array);
+            try {
+                dumpQueue.put(job);
+                controlQueue.put(vita);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+                try {
+                    cache.dump(file, true);
+                } catch (IOException ee) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+    
+    public synchronized int queueLength() {
+        return controlQueue.size();
+    }
+    
     public synchronized void merge(File f1, File f2, BLOBArray array, Row payloadrow, File newFile) {
-        if (queue == null || !this.isAlive()) {
+        if (mergeQueue == null || !this.isAlive()) {
             try {
                 mergeMount(f1, f2, array, payloadrow, newFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else {
-            Job job = new Job(f1, f2, array, payloadrow, newFile);
+            MergeJob job = new MergeJob(f1, f2, array, payloadrow, newFile);
             try {
-                queue.put(job);
+                mergeQueue.put(job);
+                controlQueue.put(vita);
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 try {
@@ -98,37 +132,61 @@ public class ReferenceContainerMerger extends Thread {
     }
     
     public void run() {
-        Job job;
+        MergeJob mergeJob;
+        DumpJob dumpJob;
         try {
-            while ((job = queue.take()) != poison) {
-                job.merge();
+            loop: while (controlQueue.take() != poison) {
+                // prefer dump actions to flush memory to disc
+                if (dumpQueue.size() > 0) {
+                    dumpJob = dumpQueue.take();
+                    dumpJob.dump();
+                    continue loop;
+                }
+                // otherwise do a merge operation
+                if (mergeQueue.size() > 0) {
+                    mergeJob = mergeQueue.take();
+                    mergeJob.merge();
+                    continue loop;
+                }
+                assert false; // this should never happen
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
             try {
-                termi.put(poison);
+                termQueue.put(poison);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
     }
     
-    public class Job {
+    public class DumpJob {
+        ReferenceContainerCache cache;
+        File file;
+        ReferenceContainerArray array;
+        public DumpJob(ReferenceContainerCache cache, File file, ReferenceContainerArray array) {
+            this.cache = cache;
+            this.file = file;
+            this.array = array;
+        }
+        public void dump() {
+            try {
+                cache.dump(file, true);
+                array.mountBLOBContainer(file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    
+    public class MergeJob {
 
         File f1, f2, newFile;
         BLOBArray array;
         Row payloadrow;
         
-        public Job() {
-            this.f1 = null;
-            this.f2 = null;
-            this.newFile = null;
-            this.array = null;
-            this.payloadrow = null;
-        }
-        
-        public Job(File f1, File f2, BLOBArray array, Row payloadrow, File newFile) {
+        public MergeJob(File f1, File f2, BLOBArray array, Row payloadrow, File newFile) {
             this.f1 = f1;
             this.f2 = f2;
             this.newFile = newFile;
