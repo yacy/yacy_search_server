@@ -131,6 +131,7 @@ public final class CachedRandomAccess extends AbstractRandomAccess implements Ra
         } catch (IOException e) {
             e.printStackTrace();
         }
+        this.file = null;
         this.cache = null;
         this.RAFile = null;
     }

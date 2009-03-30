@@ -156,9 +156,42 @@ public class BLOBArray implements BLOB {
             if (b.location.equals(location)) {
                 i.remove();
                 b.blob.close(writeIDX);
+                b.blob = null;
+                b.location = null;
                 return;
             }
         }
+    }
+    
+    private File unmount(int idx) {
+        blobItem b = this.blobs.remove(idx);
+        b.blob.close(false);
+        b.blob = null;
+        File f = b.location;
+        b.location = null;
+        return f;
+    }
+    
+    public synchronized File[] unmountBestMatch(double maxq) {
+        double l, r, min = Double.MAX_VALUE;
+        int[] idx = new int[2];
+        for (int i = 0; i < this.blobs.size() - 1; i++) {
+            for (int j = i + 1; j < this.blobs.size(); j++) {
+                l = this.blobs.get(i).location.length();
+                r = this.blobs.get(j).location.length();
+                double q = Math.max(l/r, r/l);
+                if (q < min) {
+                    min = q;
+                    idx[0] = i;
+                    idx[1] = j;
+                }
+            }
+        }
+        if (min > maxq) return null;
+        File[] bestmatch = new File[]{this.blobs.get(idx[0]).location, this.blobs.get(idx[1]).location};
+        unmount(idx[1]);
+        unmount(idx[0]);
+        return bestmatch;
     }
     
     public synchronized File unmountSmallestBLOB() {
@@ -171,20 +204,14 @@ public class BLOBArray implements BLOB {
                 bestIndex = i;
             }
         }
-        blobItem b = this.blobs.remove(bestIndex);
-        b.blob.close(false);
-        b.blob = null;
-        return b.location;
+        return unmount(bestIndex);
     }
     
     public synchronized File unmountOldestBLOB(boolean smallestFromFirst2) {
         if (this.blobs.size() == 0) return null;
         int idx = 0;
         if (smallestFromFirst2 && this.blobs.get(1).location.length() < this.blobs.get(0).location.length()) idx = 1;
-        blobItem b = this.blobs.remove(idx);
-        b.blob.close(false);
-        b.blob = null;
-        return b.location;
+        return unmount(idx);
     }
     
     public synchronized File unmountSimilarSizeBLOB(long otherSize) {
@@ -202,10 +229,7 @@ public class BLOBArray implements BLOB {
                 bestIndex = i;
             }
         }
-        b = this.blobs.remove(bestIndex);
-        b.blob.close(false);
-        b.blob = null;
-        return b.location;
+        return unmount(bestIndex);
     }
     
     /**

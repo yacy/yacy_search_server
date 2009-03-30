@@ -48,7 +48,7 @@ public class HeapReader {
     protected int                keylength;  // the length of the primary key
     protected LongHandleIndex    index;      // key/seek relation for used records
     protected Gap                free;       // set of {seek, size} pairs denoting space and position of free records
-    protected final File         heapFile;   // the file of the heap
+    protected File               heapFile;   // the file of the heap
     protected final ByteOrder    ordering;   // the ordering on keys
     protected CachedRandomAccess file;       // a random access to the file
     
@@ -280,6 +280,7 @@ public class HeapReader {
     public synchronized void close() {
         if (file != null) file.close();
         file = null;
+        heapFile = null;
         free.clear();
         free = null;
         index.close();

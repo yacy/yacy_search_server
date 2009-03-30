@@ -281,8 +281,7 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
     
     private synchronized void cacheCleanup() throws IOException {
         if (this.lastCleanup + cleanupCycle > System.currentTimeMillis()) return;
-        int c = 0;
-        if (this.array.entries() > this.maxArrayFiles && c++ < 3) {
+        if (this.array.entries() > this.maxArrayFiles) {
             this.array.shrink(true);
         }
     }
