@@ -131,7 +131,7 @@ public class psParser extends AbstractParser implements Parser {
             if (e instanceof ParserException) throw (ParserException) e;
             
             // delete temp file
-            if (outputFile != null) outputFile.delete();
+            if (outputFile != null) FileUtils.deletedelete(outputFile);
             
             // throw exception
             throw new ParserException("Unexpected error while parsing ps file. " + e.getMessage(),location); 
@@ -285,7 +285,7 @@ public class psParser extends AbstractParser implements Parser {
         	
             throw new ParserException("Unable to parse the ps file. " + e.getMessage(),location, e);
         } finally {
-            if (tempFile != null) try{ tempFile.delete(); }catch(final Exception e) {/* */}
+            if (tempFile != null) FileUtils.deletedelete(tempFile);
         }
     }
 

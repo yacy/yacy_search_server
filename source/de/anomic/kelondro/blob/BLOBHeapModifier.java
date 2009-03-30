@@ -32,6 +32,7 @@ import java.util.SortedMap;
 
 import de.anomic.kelondro.io.CachedRandomAccess;
 import de.anomic.kelondro.order.ByteOrder;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.Log;
 
@@ -90,12 +91,9 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
     public synchronized void clear() throws IOException {
         this.index.clear();
         this.free.clear();
-        try {
-            this.file.close();
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-        this.heapFile.delete();
+        this.file.close();
+        this.file = null;
+        FileUtils.deletedelete(this.heapFile);
         this.file = new CachedRandomAccess(heapFile);
     }
 
@@ -105,11 +103,7 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
     public synchronized void close(boolean writeIDX) {
         shrinkWithGapsAtEnd();
         if (file != null) {
-            try {
-                file.close();
-            } catch (final IOException e) {
-                e.printStackTrace();
-            }
+            file.close();
         }
         file = null;
         

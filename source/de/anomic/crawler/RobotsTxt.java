@@ -84,7 +84,7 @@ public class RobotsTxt {
     private void resetDatabase() {
         // deletes the robots.txt database and creates a new one
         if (robotsTable != null) robotsTable.close();
-        if (!(robotsTableFile.delete())) throw new RuntimeException("cannot delete robots.txt database");
+        FileUtils.deletedelete(robotsTableFile);
         robotsTableFile.getParentFile().mkdirs();
         BLOB blob = null;
         try {

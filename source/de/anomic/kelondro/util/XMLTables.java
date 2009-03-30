@@ -88,7 +88,7 @@ public class XMLTables {
             xmlenc.close();
             
             // delete old file and rename tmp-file to old file's name
-            this.propFile.delete();
+            FileUtils.deletedelete(this.propFile);
             tmpFile.renameTo(this.propFile);
 
             // set the new time stamp

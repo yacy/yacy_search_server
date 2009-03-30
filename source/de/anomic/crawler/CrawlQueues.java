@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import de.anomic.kelondro.table.FlexWidthArray;
 import de.anomic.kelondro.text.Document;
 import de.anomic.kelondro.util.DateFormatter;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -77,7 +78,7 @@ public class CrawlQueues {
         if (errorDBFile.exists()) {
             // delete the error db to get a fresh each time on startup
             // this is useful because there is currently no re-use of the data in this table.
-            if (errorDBFile.isDirectory()) FlexWidthArray.delete(plasmaPath, "urlError2.db"); else errorDBFile.delete();
+            if (errorDBFile.isDirectory()) FlexWidthArray.delete(plasmaPath, "urlError2.db"); else FileUtils.deletedelete(errorDBFile);
         }
         errorURL = new ZURL(plasmaPath, "urlError3.db", false);
         delegatedURL = new ZURL(plasmaPath, "urlDelegated3.db", true);

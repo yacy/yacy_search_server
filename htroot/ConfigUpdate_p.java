@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -77,7 +78,7 @@ public class ConfigUpdate_p {
                 final String release = post.get("releaseinstall", "");
                 if(release.length() > 0) {
                     try {
-                        new File(sb.releasePath, release).delete();
+                        FileUtils.deletedelete(new File(sb.releasePath, release));
                     } catch (final NullPointerException e) {
                         sb.getLog().logSevere("AUTO-UPDATE: could not delete release " + release + ": " + e.getMessage());
                     }

@@ -49,6 +49,7 @@ import de.anomic.kelondro.io.RandomAccessIOChunks;
 import de.anomic.kelondro.io.RandomAccessRecords;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
 
@@ -440,7 +441,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
         final File f = ra.file();
         assert f != null;
         this.entryFile.close();
-        f.delete();
+        FileUtils.deletedelete(f);
         ra = (useChannel) ? new ChannelRandomAccess(f) : new FileRandomAccess(f);
         initNewFile(ra, this.HANDLES.length, this.TXTPROPS.length);
     }

@@ -36,6 +36,7 @@ import java.util.StringTokenizer;
 
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 
 public final class Stack extends FullRecords {
@@ -66,7 +67,7 @@ public final class Stack extends FullRecords {
         try {
             return new Stack(file, rowdef);
         } catch (final IOException e) {
-            file.delete();
+            FileUtils.deletedelete(file);
             try {
                 return new Stack(file, rowdef);
             } catch (final IOException ee) {
@@ -358,7 +359,7 @@ public final class Stack extends FullRecords {
 		if (args[0].equals("-c")) {
 		    // create <keylen> <valuelen> <filename>
 		    final File f = new File(args[3]);
-		    if (f.exists()) f.delete();
+		    if (f.exists()) FileUtils.deletedelete(f);
 		    final Stack fm = new Stack(f, lens);
 		    fm.close();
 		} else if (args[0].equals("-p")) {

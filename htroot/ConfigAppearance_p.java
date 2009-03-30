@@ -81,7 +81,7 @@ public class ConfigAppearance_p {
             if (post.containsKey("delete_button")) {
                 // delete skin
                 final File skinfile = new File(skinPath, post.get("skin"));
-                skinfile.delete();
+                FileUtils.deletedelete(skinfile);
 
             }
             if (post.containsKey("install_button")) {

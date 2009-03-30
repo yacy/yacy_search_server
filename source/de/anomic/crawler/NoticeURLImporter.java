@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaWordIndex;
 
 public class NoticeURLImporter extends AbstractImporter implements Importer {
@@ -76,7 +77,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
         try {
             this.importProfileDB = new CrawlProfile(profileDbFile);
         } catch (IOException e) {
-            profileDbFile.delete();
+            FileUtils.deletedelete(profileDbFile);
             try {
                 this.importProfileDB = new CrawlProfile(profileDbFile);
             } catch (IOException e1) {

@@ -45,6 +45,7 @@ import de.anomic.kelondro.text.IndexCollection;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerOrder;
 import de.anomic.kelondro.text.ReferenceRow;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverProfiling;
@@ -78,7 +79,7 @@ public final class BufferedIndexCollection extends AbstractBufferedIndex impleme
             for (ReferenceContainer c: dhtInCache) {
                 this.buffer.add(c);
             }
-            new File(textindexcache, "index.dhtin.blob").delete();
+            FileUtils.deletedelete(new File(textindexcache, "index.dhtin.blob"));
         } else {
             // read in new BLOB
             this.buffer = new IndexBuffer(textindexcache, wordOrdering, payloadrow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.blob", log);            
@@ -328,16 +329,11 @@ public final class BufferedIndexCollection extends AbstractBufferedIndex impleme
     public CloneableIterator<ReferenceContainer> references(String startWordHash, boolean rot) {
         final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(this.buffer.ordering().clone());
         return new MergeIterator<ReferenceContainer>(
-            this.buffer.references(startWordHash, rot),
-            new MergeIterator<ReferenceContainer>(
                 this.buffer.references(startWordHash, false),
                 this.collections.references(startWordHash, false),
                 containerOrder,
                 ReferenceContainer.containerMergeMethod,
-                true),
-            containerOrder,
-            ReferenceContainer.containerMergeMethod,
-            true);
+                true);
     }
 
 }

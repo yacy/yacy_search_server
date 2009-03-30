@@ -39,13 +39,14 @@ import de.anomic.kelondro.io.CachedRandomAccess;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.RotateIterator;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.Log;
 
 public class HeapReader {
 
     protected int                keylength;  // the length of the primary key
-    protected LongHandleIndex       index;      // key/seek relation for used records
+    protected LongHandleIndex    index;      // key/seek relation for used records
     protected Gap                free;       // set of {seek, size} pairs denoting space and position of free records
     protected final File         heapFile;   // the file of the heap
     protected final ByteOrder    ordering;   // the ordering on keys
@@ -112,7 +113,7 @@ public class HeapReader {
             return false;
         }
         // an index file is a one-time throw-away object, so just delete it now
-        fif.delete();
+        FileUtils.deletedelete(fif);
         
         // read the gap file:
         try {
@@ -122,7 +123,7 @@ public class HeapReader {
             return false;
         }
         // same with gap file
-        fgf.delete();
+        FileUtils.deletedelete(fgf);
         
         // everything is fine now
         return this.index.size() > 0;
@@ -277,13 +278,8 @@ public class HeapReader {
      * close the BLOB table
      */
     public synchronized void close() {
-        if (file != null) try {
-            file.close();
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
+        if (file != null) file.close();
         file = null;
-        
         free.clear();
         free = null;
         index.close();

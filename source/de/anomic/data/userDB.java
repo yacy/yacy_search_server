@@ -42,6 +42,7 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 
 public final class userDB {
@@ -63,7 +64,7 @@ public final class userDB {
     void resetDatabase() {
         // deletes the database and creates a new one
         if (userTable != null) userTable.close();
-        if (!(userTableFile.delete())) throw new RuntimeException("cannot delete user database");
+        FileUtils.deletedelete(userTableFile);
         userTableFile.getParentFile().mkdirs();
         userTable = new MapView(new BLOBTree(userTableFile, true, true, 256, 512, '_', NaturalOrder.naturalOrder, true, false, false), 10);
     }

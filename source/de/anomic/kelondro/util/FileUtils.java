@@ -584,8 +584,7 @@ public final class FileUtils {
         if(!(to.delete() && from.renameTo(to))) {
             // do it manually
             copy(from, to);
-            if(!from.delete())
-                from.deleteOnExit();
+            FileUtils.deletedelete(from);
         }
     }
     
@@ -718,23 +717,41 @@ public final class FileUtils {
     }
     
     /**
-     * delete a directory
-     * if the directory is not empty, delete also everything inside
-     * @param directory
+     * delete files and directories
+     * if a directory is not empty, delete also everything inside
+     * because deletion sometimes fails on windows, there is also a windows exec included
+     * @param path
      */
-    public static void deleteDirectory(final File directory) {
-        final String[] list = directory.list();
-        if (list != null) {
-            File object;
-            for (int i = list.length - 1; i >= 0; i--) {
-                object = new File(directory, list[i]);
-                if (object.isFile()) {
-                    object.delete();
-                } else {
-                    deleteDirectory(object);
-                }
+    public static void deletedelete(final File path) {
+        if (!path.exists()) return;
+
+        // empty the directory first
+        if (path.isDirectory()) {
+            final String[] list = path.list();
+            if (list != null) {
+                for (String s: list) deletedelete(new File(path, s));
             }
         }
-        directory.delete();
+        
+        if (!path.delete()) path.deleteOnExit();
+        if (path.exists()) {
+            if (System.getProperties().getProperty("os.name","").toLowerCase().startsWith("windows")) {
+                // deleting files on windows sometimes does not work with java
+                try {
+                    String p = path.getCanonicalPath();
+                    String command = "cmd /C del /F /Q " + p;
+                    Process r = Runtime.getRuntime().exec(command);
+                    if (r == null) {
+                        Log.logSevere("FileUtils", "cannot execute command: " + command);
+                    } else {
+                        byte[] response = read(r.getInputStream());
+                        Log.logInfo("FileUtils", "deletedelete: " + new String(response));
+                    }
+                    if (path.exists()) Log.logSevere("FileUtils", "cannot delete file " + p);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }                
+            }
+        }
     }
 }

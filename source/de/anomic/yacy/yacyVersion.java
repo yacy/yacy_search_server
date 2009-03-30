@@ -369,9 +369,11 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
             if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + release.url + " failed");
         } catch (final IOException e) {
             Log.logSevere("yacyVersion", "download of " + release.name + " failed: " + e.getMessage());
-            if (download != null && download.exists())
-            	if(!download.delete())
+            if (download != null && download.exists()) {
+                FileUtils.deletedelete(download);
+            	if (download.exists())
             		Log.logWarning("yacyVersion", "could not delete file "+ download);
+            }
             download = null;
         } finally {
             if (res != null) {
@@ -650,7 +652,8 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
                 final File downloadedFile = new File(filesPath + File.separator + filename);
                 if (now - downloadedFile.lastModified() > deleteAfterMillis) {
                     // delete file
-                    if (!downloadedFile.delete()) {
+                    FileUtils.deletedelete(downloadedFile);
+                    if (downloadedFile.exists()) {
                         Log.logWarning("STARTUP", "cannot delete old release " + downloadedFile.getAbsolutePath());
                     }
                 }

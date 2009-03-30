@@ -267,7 +267,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             return new MapDataMining(new BLOBHeap(seedDBFile, commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         } catch (final Exception e) {
             // try again
-            seedDBFile.delete();
+            FileUtils.deletedelete(seedDBFile);
             try {
                 return new MapDataMining(new BLOBHeap(seedDBFile, commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
             } catch (IOException e1) {
@@ -283,7 +283,8 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         // seed.db is detected
         yacyCore.log.logWarning("seed-db " + seedDBFile.toString() + " reset (on-the-fly)");
         seedDB.close();
-        if(!seedDBFile.delete())
+        FileUtils.deletedelete(seedDBFile);
+        if (seedDBFile.exists())
         	Log.logWarning("yacySeedDB", "could not delete file "+ seedDBFile);
         // create new seed database
         seedDB = openSeedTable(seedDBFile);
@@ -810,7 +811,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         } finally {
             if (seedFile != null)
 				try {
-					seedFile.delete();
+				    FileUtils.deletedelete(seedFile);
 				} catch (final Exception e) {
 					/* ignore this */
 				}

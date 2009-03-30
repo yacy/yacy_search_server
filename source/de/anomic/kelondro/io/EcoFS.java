@@ -30,6 +30,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 
 /**
@@ -573,7 +574,7 @@ public class EcoFS {
     public static void main(final String[] args) {
         // open a file, add one entry and exit
         final File f = new File(args[0]);
-        if (f.exists()) f.delete();
+        if (f.exists()) FileUtils.deletedelete(f);
         try {
             final EcoFS t = new EcoFS(f, 8);
             final byte[] b = new byte[8];

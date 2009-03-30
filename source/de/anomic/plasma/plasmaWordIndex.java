@@ -45,6 +45,7 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.text.BufferedIndex;
 import de.anomic.kelondro.text.BufferedIndexCollection;
 import de.anomic.kelondro.text.IndexCell;
+import de.anomic.kelondro.text.IndexCollectionMigration;
 import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.IODispatcher;
@@ -52,6 +53,7 @@ import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.Word;
 import de.anomic.kelondro.text.Blacklist;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
 import de.anomic.tools.iso639;
@@ -63,10 +65,11 @@ import de.anomic.yacy.yacyURL;
 public final class plasmaWordIndex {
 
     // environment constants
-    public  static final long wCacheMaxAge    = 1000 * 60 * 30; // milliseconds; 30 minutes
-    public  static final int  wCacheMaxChunk  =  800;           // maximum number of references for each urlhash
-    public  static final int  lowcachedivisor =  900;
-    public  static final int  maxCollectionPartition = 7;       // should be 7
+    public static final long wCacheMaxAge    = 1000 * 60 * 30; // milliseconds; 30 minutes
+    public static final int  wCacheMaxChunk  =  800;           // maximum number of references for each urlhash
+    public static final int  lowcachedivisor =  900;
+    public static final int  maxCollectionPartition = 7;       // should be 7
+    public static final int  maxCellArrayFiles = 10;
     
     public static final String CRAWL_PROFILE_PROXY                 = "proxy";
     public static final String CRAWL_PROFILE_REMOTE                = "remote";
@@ -126,7 +129,7 @@ public final class plasmaWordIndex {
                 assert !indexPrimaryTextLocation.exists();
                 indexPrimaryTextLocation.mkdirs();
                 if (oldPrimaryTextLocation.renameTo(indexPrimaryTextLocation)) {
-                    if (!oldPrimaryPath.delete()) oldPrimaryPath.deleteOnExit();
+                    FileUtils.deletedelete(oldPrimaryPath);
                 } else {
                     indexPrimaryTextLocation = oldPrimaryTextLocation; // emergency case: stay with old directory
                 }
@@ -134,20 +137,38 @@ public final class plasmaWordIndex {
         }
         this.merger = (useCell) ? new IODispatcher(1, 1) : null;
         if (this.merger != null) this.merger.start();
-        this.index = (useCell) ? 
-                new IndexCell(
-                new File(indexPrimaryTextLocation, "RICELL"),
-                wordOrder,
-                ReferenceRow.urlEntryRow,
-                entityCacheMaxSize, 10, this.merger) :
-                new BufferedIndexCollection(
-                        indexPrimaryTextLocation,
-                        wordOrder,
-                        ReferenceRow.urlEntryRow,
-                        entityCacheMaxSize,
-                        useCommons, 
-                        redundancy,
-                        log);
+        
+        // check if the peer has migrated the index
+        if (new File(indexPrimaryTextLocation, "RICOLLECTION").exists()) {
+            this.index = (useCell) ? 
+                                    new IndexCollectionMigration(
+                                    indexPrimaryTextLocation,
+                                    wordOrder,
+                                    ReferenceRow.urlEntryRow,
+                                    entityCacheMaxSize,
+                                    maxCellArrayFiles,
+                                    this.merger,
+                                    log)
+                                   :
+                                    new BufferedIndexCollection(
+                                            indexPrimaryTextLocation,
+                                            wordOrder,
+                                            ReferenceRow.urlEntryRow,
+                                            entityCacheMaxSize,
+                                            useCommons, 
+                                            redundancy,
+                                            log);
+        } else {
+            this.index = new IndexCell(
+                                    new File(indexPrimaryTextLocation, "RICELL"),
+                                    wordOrder,
+                                    ReferenceRow.urlEntryRow,
+                                    entityCacheMaxSize,
+                                    maxCellArrayFiles,
+                                    this.merger);
+        }
+        
+        
             
         // migrate LURL-db files into new subdirectory METADATA
         File textdir = new File(this.secondaryRoot, "TEXT");
@@ -173,7 +194,7 @@ public final class plasmaWordIndex {
         try {
             this.profilesActiveCrawls = new CrawlProfile(profilesActiveFile);
         } catch (IOException e) {
-            profilesActiveFile.delete();
+            FileUtils.deletedelete(profilesActiveFile);
             try {
                 this.profilesActiveCrawls = new CrawlProfile(profilesActiveFile);
             } catch (IOException e1) {
@@ -194,7 +215,7 @@ public final class plasmaWordIndex {
         try {
             this.profilesPassiveCrawls = new CrawlProfile(profilesPassiveFile);
         } catch (IOException e) {
-            profilesPassiveFile.delete();
+            FileUtils.deletedelete(profilesPassiveFile);
             try {
                 this.profilesPassiveCrawls = new CrawlProfile(profilesPassiveFile);
             } catch (IOException e1) {
@@ -323,7 +344,7 @@ public final class plasmaWordIndex {
     
     private void resetProfiles() {
         final File pdb = new File(this.queuesRoot, DBFILE_ACTIVE_CRAWL_PROFILES);
-        if (pdb.exists()) pdb.delete();
+        if (pdb.exists()) FileUtils.deletedelete(pdb);
         try {
             profilesActiveCrawls = new CrawlProfile(pdb);
         } catch (IOException e) {

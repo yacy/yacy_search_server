@@ -179,7 +179,7 @@ public final class plasmaRankingDistribution {
             result = yacyClient.transfer(address, crfile.getName(), b);
             if (result == null) {
                 log.logInfo("RankingDistribution - transmitted file " + crfile + " to " + address + " successfully in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds");
-                crfile.delete(); // the file is not needed any more locally
+                FileUtils.deletedelete(crfile); // the file is not needed any more locally
             } else {
                 log.logInfo("RankingDistribution - error transmitting file " + crfile + " to " + address + ": " + result);
             }

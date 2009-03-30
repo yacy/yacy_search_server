@@ -49,6 +49,7 @@ import de.anomic.kelondro.io.BufferedEcoFS;
 import de.anomic.kelondro.io.EcoFS;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
@@ -416,11 +417,11 @@ public class EcoTable implements ObjectIndex {
     }
     
     public synchronized void put(final Entry row) throws IOException {
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert ((table == null) || (table.size() == index.size()));
+        assert file == null || file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert table == null || table.size() == index.size();
         assert row != null;
         assert row.bytes() != null;
-        if ((row == null) || (row.bytes() == null)) return;
+        if (file == null || table == null || row == null || row.bytes() == null) return;
         final int i = index.get(row.getPrimaryKeyBytes());
         if (i == -1) {
             addUnique(row);
@@ -562,7 +563,7 @@ public class EcoTable implements ObjectIndex {
     public void clear() throws IOException {
         final File f = file.filename();
         file.close();
-        f.delete();
+        FileUtils.deletedelete(f);
         
         // make new file
         FileOutputStream fos = null;
@@ -694,7 +695,7 @@ public class EcoTable implements ObjectIndex {
     }
     
     public static ObjectIndex testTable(final File f, final String testentities, final int testcase) throws IOException {
-        if (f.exists()) f.delete();
+        if (f.exists()) FileUtils.deletedelete(f);
         final Row rowdef = new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder);
         final ObjectIndex tt = new EcoTable(f, rowdef, testcase, 100, 0);
         byte[] b;

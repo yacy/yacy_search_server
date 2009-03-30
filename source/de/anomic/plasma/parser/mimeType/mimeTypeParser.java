@@ -178,7 +178,7 @@ public class mimeTypeParser extends AbstractParser implements Parser {
         } catch (final IOException e) {
             throw new ParserException("Unexpected error while detect mimetype of resource. " + e.getMessage(),location);
         } finally {
-            if (dstFile != null) {dstFile.delete();}            
+            if (dstFile != null) FileUtils.deletedelete(dstFile);
         }
         
     }

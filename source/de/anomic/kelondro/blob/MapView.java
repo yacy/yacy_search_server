@@ -40,6 +40,7 @@ import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.util.DateFormatter;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.kelondroException;
 
@@ -339,7 +340,7 @@ public class MapView {
     public static void main(String[] args) {
         // test the class
         File f = new File("maptest");
-        if (f.exists()) f.delete();
+        if (f.exists()) FileUtils.deletedelete(f);
         try {
             // make a blob
             BLOB blob = new BLOBHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 1024);

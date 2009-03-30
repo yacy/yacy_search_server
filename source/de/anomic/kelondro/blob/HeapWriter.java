@@ -33,6 +33,7 @@ import java.io.IOException;
 import de.anomic.kelondro.index.LongHandleIndex;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.Digest;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
 
 public final class HeapWriter  {
@@ -118,7 +119,7 @@ public final class HeapWriter  {
         String n = f.getName();
         String[] l = d.list();
         for (int i = 0; i < l.length; i++) {
-            if (l[i].startsWith(n) && (l[i].endsWith(".idx") || l[i].endsWith(".gap"))) new File(d, l[i]).delete();
+            if (l[i].startsWith(n) && (l[i].endsWith(".idx") || l[i].endsWith(".gap"))) FileUtils.deletedelete(new File(d, l[i]));
         }
     }
     

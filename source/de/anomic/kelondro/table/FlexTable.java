@@ -42,6 +42,7 @@ import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
@@ -88,7 +89,7 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
 		if (indexfile.exists()) {
 			// delete existing index file
 			System.out.println("*** Delete File index " + indexfile);
-			indexfile.delete();
+			FileUtils.deletedelete(indexfile);
 		}
 
 		// fill the index

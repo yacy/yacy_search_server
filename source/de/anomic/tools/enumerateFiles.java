@@ -26,6 +26,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.TreeSet;
 
+import de.anomic.kelondro.util.FileUtils;
+
 public class enumerateFiles implements Enumeration<File> {
     
     // implements iterative search through recursively defined subdirectories
@@ -83,7 +85,7 @@ public class enumerateFiles implements Enumeration<File> {
                 } else {
                     if (l.length == 0) {
                         if (delete_emptyFolders) {
-                            f.delete();
+                            FileUtils.deletedelete(f);
                             f = null;
                         } else {
                             if (!(return_folders)) f = null;

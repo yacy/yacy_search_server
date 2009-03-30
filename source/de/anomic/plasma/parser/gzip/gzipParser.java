@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.util.Hashtable;
 import java.util.zip.GZIPInputStream;
 
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
@@ -98,7 +99,7 @@ public class gzipParser extends AbstractParser implements Parser {
             
             throw new ParserException("Unexpected error while parsing gzip file. " + e.getMessage(),location); 
         } finally {
-            if (tempFile != null) tempFile.delete();
+            if (tempFile != null) FileUtils.deletedelete(tempFile);
         }
     }
     

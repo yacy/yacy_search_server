@@ -57,6 +57,7 @@ import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.MergeIterator;
 import de.anomic.kelondro.order.Order;
 import de.anomic.kelondro.order.StackIterator;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.NamePrefixThreadFactory;
 
@@ -166,7 +167,7 @@ public class SplitTable implements ObjectIndex {
     	for (int i = 0; i < l.length; i++) {
     		if (l[i].startsWith(tablename)) {
     		    final File f = new File(path, l[i]);
-    		    if (f.isDirectory()) FlexWidthArray.delete(path, l[i]); else f.delete();
+    		    if (f.isDirectory()) FlexWidthArray.delete(path, l[i]); else FileUtils.deletedelete(f);
     		}
     	}
     	init(true);

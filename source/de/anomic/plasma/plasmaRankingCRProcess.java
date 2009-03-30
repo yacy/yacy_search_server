@@ -298,7 +298,7 @@ public class plasmaRankingCRProcess {
                 // store the file
                 acc.toFile(tmp_file);
                 // since this was successful, we remove the old file and move the new file to it
-                to_file.delete();
+                FileUtils.deletedelete(to_file);
                 tmp_file.renameTo(to_file);
             }
             FileUtils.moveAll(tmp_dir, bkp_dir);
@@ -313,7 +313,7 @@ public class plasmaRankingCRProcess {
     public static int genrci(File cr_in, final File rci_out) throws IOException {
         if (!(cr_in.exists())) return 0;
         AttrSeq cr = new AttrSeq(cr_in, false);
-        //if (rci_out.exists()) rci_out.delete(); // we want only fresh rci here (during testing) 
+        //if (rci_out.exists()) FileUtils.deletedelete(rci_out); // we want only fresh rci here (during testing) 
         if (!(rci_out.exists())) {
             final AttrSeq rcix = new AttrSeq("Global Ranking Reverse Citation Index",
                     "<AnchorDom-6>,'='," +
@@ -478,7 +478,7 @@ public class plasmaRankingCRProcess {
                     } catch (final IOException e) {
                         // there is something wrong with this file; delete it
                         System.out.println("file " + f.getName() + " is corrupted and deleted");
-                        f.delete();
+                        FileUtils.deletedelete(f);
                     }
                 }
                 final long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);

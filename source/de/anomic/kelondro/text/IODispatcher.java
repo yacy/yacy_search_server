@@ -34,6 +34,7 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.text.ReferenceContainerCache.blobFileEntries;
+import de.anomic.kelondro.util.FileUtils;
 
 /**
  * merger class for files from ReferenceContainerArray.
@@ -173,7 +174,7 @@ public class IODispatcher extends Thread {
         public void dump() {
             try {
                 cache.dump(file, true);
-                array.mountBLOBContainer(file);
+                array.mountBLOBFile(file);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -223,16 +224,16 @@ public class IODispatcher extends Thread {
         CloneableIterator<ReferenceContainer> i2 = new blobFileEntries(f2, payloadrow);
         if (!i1.hasNext()) {
             if (i2.hasNext()) {
-                if (!f1.delete()) f1.deleteOnExit();
+                FileUtils.deletedelete(f1);
                 if (f2.renameTo(newFile)) return newFile;
                 return f2;
             } else {
-                if (!f1.delete()) f1.deleteOnExit();
-                if (!f2.delete()) f2.deleteOnExit();
+                FileUtils.deletedelete(f1);
+                FileUtils.deletedelete(f2);
                 return null;
             }
         } else if (!i2.hasNext()) {
-            if (!f2.delete()) f2.deleteOnExit();
+            FileUtils.deletedelete(f2);
             if (f1.renameTo(newFile)) return newFile;
             return f1;
         }
@@ -242,8 +243,8 @@ public class IODispatcher extends Thread {
         merge(i1, i2, array.ordering(), writer);
         writer.close(true);
         // we don't need the old files any more
-        if (!f1.delete()) f1.deleteOnExit();
-        if (!f2.delete()) f2.deleteOnExit();
+        FileUtils.deletedelete(f1);
+        FileUtils.deletedelete(f2);
         return newFile;
     }
     

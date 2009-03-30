@@ -66,7 +66,7 @@ public class odtDetector implements MagicDetector {
         } catch (final IOException e) {
             return null;
         } finally {
-            if (dstFile != null) {dstFile.delete();}            
+            if (dstFile != null) FileUtils.deletedelete(dstFile);
         }
     }
 

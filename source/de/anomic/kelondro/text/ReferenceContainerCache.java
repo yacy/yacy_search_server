@@ -41,6 +41,7 @@ import de.anomic.kelondro.blob.HeapWriter;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
@@ -112,7 +113,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
     public void dump(final File heapFile, boolean writeIDX) throws IOException {
         assert this.cache != null;
         Log.logInfo("indexContainerRAMHeap", "creating rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
-        if (heapFile.exists()) heapFile.delete();
+        if (heapFile.exists()) FileUtils.deletedelete(heapFile);
         HeapWriter dump = new HeapWriter(heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder);
         final long startTime = System.currentTimeMillis();
         long wordcount = 0, urlcount = 0;

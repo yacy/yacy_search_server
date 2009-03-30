@@ -197,7 +197,7 @@ public class odtParser extends AbstractParser implements Parser {
             if (writer != null) try { writer.close(); } catch (final Exception ex) {/* ignore this */}
             
             // delete the file
-            if (writerFile != null) try { writerFile.delete(); } catch (final Exception ex)  {/* ignore this */}            
+            if (writerFile != null) FileUtils.deletedelete(writerFile);
             
             throw new ParserException("Unexpected error while parsing odt file. " + e.getMessage(),location); 
         }
@@ -221,7 +221,7 @@ public class odtParser extends AbstractParser implements Parser {
             
             throw new ParserException("Unexpected error while parsing odt file. " + e.getMessage(),location); 
         } finally {
-            if (dest != null) try { dest.delete(); } catch (final Exception e){/* ignore this */}
+            if (dest != null) FileUtils.deletedelete(dest);
         }
     }
     

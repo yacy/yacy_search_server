@@ -38,6 +38,7 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
@@ -73,7 +74,7 @@ public class CrawlProfile {
     public void clear() {
         // deletes the profile database and creates a new one
         if (profileTable != null) profileTable.close();
-        if (!(profileTableFile.delete())) throw new RuntimeException("cannot delete crawl profile database");
+        FileUtils.deletedelete(profileTableFile);
         profileTableFile.getParentFile().mkdirs();
         BLOB dyn = null;
         try {

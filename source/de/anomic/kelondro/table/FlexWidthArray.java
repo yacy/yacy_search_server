@@ -36,6 +36,7 @@ import de.anomic.kelondro.index.ObjectArray;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
 
@@ -174,16 +175,16 @@ public class FlexWidthArray implements ObjectArray {
         final File tabledir = new File(path, tablename);
         if (!(tabledir.exists())) return;
         if ((!(tabledir.isDirectory()))) {
-            tabledir.delete();
+            FileUtils.deletedelete(tabledir);
             return;
         }
 
         final String[] files = tabledir.list();
         for (int i = 0; i < files.length; i++) {
-            new File(tabledir, files[i]).delete();
+            FileUtils.deletedelete(new File(tabledir, files[i]));
         }
         
-        tabledir.delete();
+        FileUtils.deletedelete(tabledir);
     }
     
     public void reset() throws IOException {

@@ -36,6 +36,7 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.util.FileUtils;
 
 public final class ReferenceContainerArray {
 
@@ -88,7 +89,7 @@ public final class ReferenceContainerArray {
     	return this.array.newBLOB(new Date());
     }
     
-    public void mountBLOBContainer(File location) throws IOException {
+    public void mountBLOBFile(File location) throws IOException {
         this.array.mountBLOB(location);
     }
     
@@ -247,6 +248,10 @@ public final class ReferenceContainerArray {
         if (this.array.entries() < 2) return false;
         if (this.merger.queueLength() > 0) return false;
         File f1 = this.array.unmountOldestBLOB(similar);
+        if (f1.length() == 0) {
+            FileUtils.deletedelete(f1);
+            return true;
+        }
         File f2 = (similar) ? this.array.unmountSimilarSizeBLOB(f1.length()) : this.array.unmountOldestBLOB(false);
         merger.merge(f1, f2, this.array, this.payloadrow, newContainerBLOBFile());
         return true;

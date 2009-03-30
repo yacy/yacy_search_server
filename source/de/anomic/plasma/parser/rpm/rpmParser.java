@@ -85,7 +85,7 @@ public class rpmParser extends AbstractParser implements Parser {
         } catch (final Exception e) {            
             return null;
         } finally {
-            if (dstFile != null) {dstFile.delete();}            
+            if (dstFile != null) FileUtils.deletedelete(dstFile);
         }        
     }    
     

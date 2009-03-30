@@ -241,6 +241,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
         }
     	this.buffer = null;
     	super.close();
+    	assert file == null;
     }
 
     /**

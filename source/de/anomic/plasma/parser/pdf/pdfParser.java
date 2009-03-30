@@ -177,7 +177,7 @@ public class pdfParser extends AbstractParser implements Parser {
             if (writer != null) try { writer.close(); } catch (final Exception ex) {/* ignore this */}
             
             // delete the file
-            if (writerFile != null) try { writerFile.delete(); } catch (final Exception ex)  {/* ignore this */}
+            if (writerFile != null) FileUtils.deletedelete(writerFile);
             
             e.printStackTrace();
             throw new ParserException("Unexpected error while parsing pdf file. " + e.getMessage(),location); 

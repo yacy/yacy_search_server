@@ -54,6 +54,7 @@ import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.table.FlexTable;
 import de.anomic.kelondro.table.FlexWidthArray;
 import de.anomic.kelondro.table.Tree;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 
 public class BLOBTree implements BLOB {
@@ -86,7 +87,7 @@ public class BLOBTree implements BLOB {
 			} catch (final IOException e) {
 				e.printStackTrace();
 				if (resetOnFail) {
-					file.delete();
+				    FileUtils.deletedelete(file);
 					try {
 						fbi = new Tree(file, useNodeCache, -1, rowdef, 1, 8);
 					} catch (final IOException e1) {
@@ -145,8 +146,7 @@ public class BLOBTree implements BLOB {
     
     public static final void delete(final File file) {
         if (file.isFile()) {
-            file.delete();
-            if (file.exists()) file.deleteOnExit();
+            FileUtils.deletedelete(file);
         } else {
             FlexWidthArray.delete(file.getParentFile(), file.getName());
         }

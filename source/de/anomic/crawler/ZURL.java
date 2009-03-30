@@ -38,6 +38,7 @@ import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.table.FlexWidthArray;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
@@ -66,7 +67,7 @@ public class ZURL {
         final File f = new File(cachePath, tablename);
         if (startWithEmptyFile) {
             if (f.exists()) {
-                if (f.isDirectory()) FlexWidthArray.delete(cachePath, tablename); else f.delete();
+                if (f.isDirectory()) FlexWidthArray.delete(cachePath, tablename); else FileUtils.deletedelete(f);
             }
         }
         this.urlIndex = new EcoTable(f, rowdef, EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);

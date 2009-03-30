@@ -41,6 +41,7 @@ import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.MergeIterator;
 import de.anomic.kelondro.util.DateFormatter;
+import de.anomic.kelondro.util.FileUtils;
 
 public class BLOBArray implements BLOB {
 
@@ -172,6 +173,7 @@ public class BLOBArray implements BLOB {
         }
         blobItem b = this.blobs.remove(bestIndex);
         b.blob.close(false);
+        b.blob = null;
         return b.location;
     }
     
@@ -181,6 +183,7 @@ public class BLOBArray implements BLOB {
         if (smallestFromFirst2 && this.blobs.get(1).location.length() < this.blobs.get(0).location.length()) idx = 1;
         blobItem b = this.blobs.remove(idx);
         b.blob.close(false);
+        b.blob = null;
         return b.location;
     }
     
@@ -201,6 +204,7 @@ public class BLOBArray implements BLOB {
         }
         b = this.blobs.remove(bestIndex);
         b.blob.close(false);
+        b.blob = null;
         return b.location;
     }
     
@@ -245,7 +249,8 @@ public class BLOBArray implements BLOB {
             // too old
             blobItem oldestBLOB = blobs.remove(0);
             oldestBLOB.blob.close(false);
-            if (!oldestBLOB.location.delete()) oldestBLOB.location.deleteOnExit();
+            oldestBLOB.blob = null;
+            FileUtils.deletedelete(oldestBLOB.location);
         }
         
         // size limit
@@ -253,7 +258,7 @@ public class BLOBArray implements BLOB {
             // too large
             blobItem oldestBLOB = blobs.remove(0);
             oldestBLOB.blob.close(false);
-            if (!oldestBLOB.location.delete()) oldestBLOB.location.deleteOnExit();
+            FileUtils.deletedelete(oldestBLOB.location);
         }
     }
     
@@ -303,7 +308,7 @@ public class BLOBArray implements BLOB {
         for (blobItem bi: blobs) {
             bi.blob.clear();
             bi.blob.close(false);
-            bi.location.delete();
+            FileUtils.deletedelete(bi.location);
         }
         blobs.clear();
     }

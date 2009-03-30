@@ -71,7 +71,7 @@ public class ConfigLanguage_p {
                 //delete language file
             }else if(post.containsKey("delete")){
                 final File langfile= new File(langPath, post.get("language"));
-                langfile.delete();
+                FileUtils.deletedelete(langfile);
 
                 //load language file from URL
             } else if (post.containsKey("url")){

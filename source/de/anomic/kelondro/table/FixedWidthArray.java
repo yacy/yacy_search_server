@@ -37,6 +37,7 @@ import de.anomic.kelondro.index.ObjectArray;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.io.RandomAccessInterface;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.FileUtils;
 
 public class FixedWidthArray extends FullRecords implements ObjectArray {
 
@@ -76,7 +77,7 @@ public class FixedWidthArray extends FullRecords implements ObjectArray {
         try {
             return new FixedWidthArray(file, rowdef, intprops);
         } catch (final IOException e) {
-            file.delete();
+            FileUtils.deletedelete(file);
             try {
                 return new FixedWidthArray(file, rowdef, intprops);
             } catch (final IOException ee) {

@@ -98,7 +98,7 @@ public final class plasmaHTCache {
                     object.getName().equals("yacy") ||
                     object.getName().equals("https") ||
                     object.getName().equals("ftp")) {
-                    FileUtils.deleteDirectory(cachePath);
+                    FileUtils.deletedelete(cachePath);
                 }
             }
         }
@@ -121,7 +121,7 @@ public final class plasmaHTCache {
         log.logFine("reset responseHeader DB with "+ responseHeaderDB.size() +" entries");
         if (responseHeaderDB != null) responseHeaderDB.close();
         final File dbfile = new File(cachePath, RESPONSE_HEADER_DB_NAME);
-        if (dbfile.exists()) dbfile.delete();
+        if (dbfile.exists()) FileUtils.deletedelete(dbfile);
         openDB();
     }
     

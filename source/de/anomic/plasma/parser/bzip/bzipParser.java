@@ -31,6 +31,7 @@ import java.util.Hashtable;
 
 import org.apache.tools.bzip2.CBZip2InputStream;
 
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
@@ -115,7 +116,7 @@ public class bzipParser extends AbstractParser implements Parser {
             
             throw new ParserException("Unexpected error while parsing bzip file. " + e.getMessage(),location);
         } finally {
-            if (tempFile != null) tempFile.delete();
+            if (tempFile != null) FileUtils.deletedelete(tempFile);
         }
     }
     

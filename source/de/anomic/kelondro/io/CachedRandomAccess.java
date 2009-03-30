@@ -125,8 +125,12 @@ public final class CachedRandomAccess extends AbstractRandomAccess implements Ra
         RAFile.seek(pos);
     }
 
-    public synchronized void close() throws IOException {
-        if (RAFile != null) RAFile.close();
+    public synchronized void close() {
+        if (RAFile != null) try {
+            RAFile.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         this.cache = null;
         this.RAFile = null;
     }

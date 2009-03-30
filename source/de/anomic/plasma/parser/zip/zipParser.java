@@ -135,7 +135,7 @@ public class zipParser extends AbstractParser implements Parser {
                 } catch (final ParserException e) {
                     this.theLogger.logInfo("Unable to parse zip file entry '" + entryName + "'. " + e.getMessage());
                 } finally {
-                    if (subDocTempFile != null) try {subDocTempFile.delete(); } catch(final Exception ex){/* ignore this */}
+                    if (subDocTempFile != null) FileUtils.deletedelete(subDocTempFile);
                 }
                 if (subDoc == null) continue;
                 
@@ -208,7 +208,7 @@ public class zipParser extends AbstractParser implements Parser {
             if (docText != null) try { docText.close(); } catch (final Exception ex) {/* ignore this */}
             
             // delete the file
-            if (outputFile != null) try { outputFile.delete(); } catch (final Exception ex)  {/* ignore this */}            
+            if (outputFile != null) FileUtils.deletedelete(outputFile);
             
             throw new ParserException("Unexpected error while parsing zip resource. " + e.getClass().getName() + ": "+ e.getMessage(),location);
         }

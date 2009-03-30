@@ -287,6 +287,16 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
         }
     }
 
+    public File newContainerBLOBFile() {
+        // for migration of cache files
+        return this.array.newContainerBLOBFile();
+    }
+    
+    public void mountBLOBFile(File blobFile) throws IOException {
+        // for migration of cache files
+        this.array.mountBLOBFile(blobFile);
+    }
+    
     public void cleanupBuffer(int time) {
         // do nothing
     }

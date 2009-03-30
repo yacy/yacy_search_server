@@ -106,7 +106,7 @@ public class IndexCollection extends AbstractIndex implements Index {
         File cop = new File(path, filenameStub + "." + fillZ(Integer.toHexString(payloadrow.objectsize).toUpperCase(), 4) + ".commons");
         this.commonsPath = (useCommons) ? cop : null;
         if (this.commonsPath == null) {
-            FileUtils.deleteDirectory(cop);
+            FileUtils.deletedelete(cop);
         } else {
             this.commonsPath.mkdirs();
         }
@@ -220,7 +220,7 @@ public class IndexCollection extends AbstractIndex implements Index {
             return null;
         }
     }
-
+    
     public boolean remove(final String wordHash, final String urlHash) {
         final HashSet<String> hs = new HashSet<String>();
         hs.add(urlHash);
@@ -1041,8 +1041,10 @@ public class IndexCollection extends AbstractIndex implements Index {
     
     public synchronized void close() {
         this.index.close();
+        this.index = null;
         final Iterator<FixedWidthArray> i = arrays.values().iterator();
         while (i.hasNext()) i.next().close();
+        this.arrays = null;
     }
     
     public static void main(final String[] args) {

@@ -387,7 +387,7 @@ public final class serverSystem {
 		} catch (final InterruptedException e) {
 			throw new IOException(e.getMessage());
 		}
-		starterFile.delete();
+		FileUtils.deletedelete(starterFile);
 	}
 
 	public static Vector<String> execSynchronous(final String command) throws IOException {

@@ -54,6 +54,7 @@ import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.util.DateFormatter;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.server.serverCodings;
 
@@ -70,7 +71,7 @@ public class yacyNewsDB {
 
     private void resetDB() {
         try {close();} catch (final Exception e) {}
-        if (path.exists()) path.delete();
+        if (path.exists()) FileUtils.deletedelete(path);
         this.news = new EcoTable(path, yacyNewsRecord.rowdef, EcoTable.tailCacheUsageAuto, 10, 0);
     }
     

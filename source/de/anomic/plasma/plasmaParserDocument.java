@@ -470,7 +470,7 @@ dc_rights
         // delete the temp file
         if ((this.text != null) && (this.text instanceof File)) {
             try { 
-                ((File)this.text).delete(); 
+                FileUtils.deletedelete((File) this.text); 
             } catch (final Exception e) {
                 /* ignore this */
             } finally {

@@ -55,6 +55,7 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.table.Stack;
 import de.anomic.kelondro.util.DateFormatter;
+import de.anomic.kelondro.util.FileUtils;
 
 public class yacyNewsQueue {
 
@@ -77,7 +78,7 @@ public class yacyNewsQueue {
 
     private void resetDB() {
         try {close();} catch (final Exception e) {}
-        if (path.exists()) path.delete();
+        if (path.exists()) FileUtils.deletedelete(path);
         queueStack = Stack.open(path, rowdef);
     }
 

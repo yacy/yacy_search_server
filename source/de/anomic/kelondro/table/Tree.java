@@ -51,6 +51,7 @@ import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
 
@@ -109,7 +110,7 @@ public class Tree extends CachedRecords implements ObjectIndex {
         try {
             return new Tree(file, useNodeCache, preloadTime, rowdef, txtProps, txtPropsWidth);
         } catch (final IOException e) {
-            file.delete();
+            FileUtils.deletedelete(file);
             try {
                 return new Tree(file, useNodeCache, preloadTime, rowdef, txtProps, txtPropsWidth);
             } catch (final IOException ee) {
@@ -1354,7 +1355,7 @@ public class Tree extends CachedRecords implements ObjectIndex {
 		if (args[0].equals("-c")) {
 		    // create <keylen> <valuelen> <filename>
 		    final File f = new File(args[3]);
-		    if (f.exists()) f.delete();
+		    if (f.exists()) FileUtils.deletedelete(f);
             final Row lens = new Row("byte[] key-" + Integer.parseInt(args[1]) + ", byte[] value-" + Integer.parseInt(args[2]), NaturalOrder.naturalOrder);
 		    final Tree fm = new Tree(f, true, 10, lens);
 		    fm.close();
@@ -1417,7 +1418,7 @@ public class Tree extends CachedRecords implements ObjectIndex {
         try {
             int steps = 0;
             while (true) {
-                if (testFile.exists()) testFile.delete();
+                if (testFile.exists()) FileUtils.deletedelete(testFile);
                 tt = new Tree(testFile, true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder));
                 steps = 10 + ((int) System.currentTimeMillis() % 7) * (((int) System.currentTimeMillis() + 17) % 11);
                 t = s;
@@ -1482,7 +1483,7 @@ public class Tree extends CachedRecords implements ObjectIndex {
     
     public static void smalltest() {
         final File f = new File("test.db");
-        if (f.exists()) f.delete();
+        if (f.exists()) FileUtils.deletedelete(f);
         try {
             final Tree tt = new Tree(f, true, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder));
             byte[] b;
@@ -1548,7 +1549,7 @@ public class Tree extends CachedRecords implements ObjectIndex {
     */
     
     public static Tree testTree(final File f, final String testentities) throws IOException {
-        if (f.exists()) f.delete();
+        if (f.exists()) FileUtils.deletedelete(f);
         final Tree tt = new Tree(f, false, 10, new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder));
         byte[] b;
         for (int i = 0; i < testentities.length(); i++) {
