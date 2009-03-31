@@ -421,13 +421,12 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
  
     public synchronized void add(final ReferenceContainer container) {
         // this puts the entries into the cache
-        int added = 0;
-        if ((container == null) || (container.size() == 0)) return;
-        assert this.cache != null;
+        if (this.cache == null || container == null || container.size() == 0) return;
         
         // put new words into cache
         final String wordHash = container.getWordHash();
         ReferenceContainer entries = cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
+        int added = 0;
         if (entries == null) {
             entries = container.topLevelClone();
             added = entries.size();

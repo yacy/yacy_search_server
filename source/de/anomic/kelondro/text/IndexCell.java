@@ -36,6 +36,7 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.MergeIterator;
 import de.anomic.kelondro.order.Order;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.server.serverProfiling;
 
 /*
@@ -79,6 +80,7 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
         this.lastCleanup = System.currentTimeMillis();
         this.targetFileSize = targetFileSize;
         this.maxFileSize = maxFileSize;
+        cacheCleanup();
     }
 
     
@@ -94,14 +96,14 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
     public synchronized void add(ReferenceContainer newEntries) throws IOException {
         this.ram.add(newEntries);
         serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
-        if (this.ram.size() > this.maxRamEntries) cacheDump();
+        cacheDumpIfNecessary();
         cacheCleanup();
     }
 
     public synchronized void add(String hash, ReferenceRow entry) throws IOException {
         this.ram.add(hash, entry);
         serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
-        if (this.ram.size() > this.maxRamEntries) cacheDump();
+        cacheDumpIfNecessary();
         cacheCleanup();
     }
 
@@ -157,6 +159,7 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
             return c0;
         }
         this.array.delete(wordHash);
+        cacheCleanup();
         if (c0 == null) return c1;
         return c1.merge(c0);
     }
@@ -270,6 +273,16 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
     /*
      * cache control methods
      */
+    
+    private synchronized void cacheDumpIfNecessary() {
+        if (this.ram.size() > this.maxRamEntries || MemoryControl.available() < 20 * 1024 * 1024) {
+            try {
+                cacheDump();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
     
     private synchronized void cacheDump() throws IOException {
         // dump the ram

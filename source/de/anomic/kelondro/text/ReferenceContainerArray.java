@@ -36,6 +36,7 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.util.Log;
 
 public final class ReferenceContainerArray {
 
@@ -250,18 +251,21 @@ public final class ReferenceContainerArray {
         
         File[] ff = this.array.unmountBestMatch(2.0, targetFileSize);
         if (ff != null) {
+            Log.logInfo("RICELL-shrink", "doing unmountBestMatch(2.0, " + targetFileSize + ")");
             merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
             return true;
         }
         
         ff = this.array.unmountSmallest(targetFileSize);
         if (ff != null) {
+            Log.logInfo("RICELL-shrink", "doing unmountSmallest(" + targetFileSize + ")");
             merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
             return true;
         }
         
         ff = this.array.unmountBestMatch(2.0, maxFileSize);
         if (ff != null) {
+            Log.logInfo("RICELL-shrink", "doing unmountBestMatch(2.0, " + maxFileSize + ")");
             merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
             return true;
         }

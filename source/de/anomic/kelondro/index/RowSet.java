@@ -398,6 +398,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
      * @return
      */
     public RowSet merge(RowSet c) {
+        assert c != null;
         /*
         if (this.isSorted() && this.size() >= c.size()) {
             return mergeInsert(this, c);
@@ -425,7 +426,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
      * @return
      */
     protected static RowSet mergeEnum(RowCollection c0, RowCollection c1) {
-        assert c0.rowdef == c1.rowdef;
+        assert c0.rowdef == c1.rowdef : c0.rowdef.toString() + " != " + c1.rowdef.toString();
         RowSet r = new RowSet(c0.rowdef, c0.size() + c1.size());
         c0.sort();
         c1.sort();

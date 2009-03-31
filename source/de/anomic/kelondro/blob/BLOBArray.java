@@ -197,9 +197,9 @@ public class BLOBArray implements BLOB {
     }
     
     public synchronized File[] unmountSmallest(long maxResultSize) {
-        File f0 = smallestBLOB(null);
+        File f0 = smallestBLOB(null, maxResultSize);
         if (f0 == null) return null;
-        File f1 = smallestBLOB(f0);
+        File f1 = smallestBLOB(f0, maxResultSize - f0.length());
         if (f1 == null) return null;
         
         unmountBLOB(f0, false);
@@ -207,22 +207,23 @@ public class BLOBArray implements BLOB {
         return new File[]{f0, f1};
     }
     
-    public synchronized File unmountSmallestBLOB() {
-        return smallestBLOB(null);
+    public synchronized File unmountSmallestBLOB(long maxResultSize) {
+        return smallestBLOB(null, maxResultSize);
     }
     
-    public synchronized File smallestBLOB(File excluding) {
+    public synchronized File smallestBLOB(File excluding, long maxsize) {
         if (this.blobs.size() == 0) return null;
         int bestIndex = -1;
         long smallest = Long.MAX_VALUE;
         for (int i = 0; i < this.blobs.size(); i++) {
-            if (excluding != null && this.blobs.get(i).location.getAbsolutePath().equals(excluding.getAbsoluteFile())) continue;
+            if (this.blobs.get(i).location == excluding) continue;
             if (this.blobs.get(i).location.length() < smallest) {
                 smallest = this.blobs.get(i).location.length();
                 bestIndex = i;
             }
         }
         if (bestIndex == -1) return null;
+        if (smallest > maxsize) return null;
         return this.blobs.get(bestIndex).location;
     }
     
@@ -256,7 +257,7 @@ public class BLOBArray implements BLOB {
      * @return
      */
     public synchronized int entries() {
-        return this.blobs.size();
+        return (this.blobs == null) ? 0 : this.blobs.size();
     }
     
     /**

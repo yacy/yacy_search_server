@@ -206,13 +206,16 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
     }
 
     public ReferenceContainer delete(final String wordHash) throws IOException {
-        final ReferenceContainer c = new ReferenceContainer(
-                wordHash,
-                ReferenceRow.urlEntryRow,
-                cell.count(wordHash));
-        c.addAllUnique(cell.delete(wordHash));
-        if (this.collections != null) c.merge(collections.delete(wordHash));
-        return c;
+        ReferenceContainer cc = cell.delete(wordHash);
+        if (cc == null) {
+            if (collections == null) return null;
+            return collections.delete(wordHash);
+        } else {
+            if (collections == null) return cc;
+            ReferenceContainer cd = collections.delete(wordHash);
+            if (cd == null) return cc;
+            return cc.merge(cd);
+        }
     }
     
     public boolean remove(final String wordHash, final String urlHash) throws IOException {
