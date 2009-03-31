@@ -135,11 +135,11 @@ public final class plasmaWordIndex {
                 }
             }
         }
-        this.merger = (useCell) ? new IODispatcher(1, 1) : null;
-        if (this.merger != null) this.merger.start();
         
         // check if the peer has migrated the index
         if (new File(indexPrimaryTextLocation, "RICOLLECTION").exists()) {
+            this.merger = (useCell) ? new IODispatcher(1, 1) : null;
+            if (this.merger != null) this.merger.start();
             this.index = (useCell) ? 
                                     new IndexCollectionMigration(
                                     indexPrimaryTextLocation,
@@ -159,6 +159,8 @@ public final class plasmaWordIndex {
                                             redundancy,
                                             log);
         } else {
+            this.merger = new IODispatcher(1, 1);
+            this.merger.start();
             this.index = new IndexCell(
                                     new File(indexPrimaryTextLocation, "RICELL"),
                                     wordOrder,

@@ -66,6 +66,7 @@ public final class ReferenceContainerArray {
             payloadrow.primaryKeyLength,
             wordOrder,
             0);
+        assert merger != null;
         this.merger = merger;
     }
     

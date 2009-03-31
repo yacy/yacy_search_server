@@ -284,6 +284,7 @@ public class CrawlQueues {
      */
     private boolean crawlIsPossible(int stackType, final String type) {
         int value;
+        //System.out.println("stacksize = " + noticeURL.stackSize(stackType));
         if (noticeURL.stackSize(stackType) == 0) {
             //log.logDebug("GlobalCrawl: queue is empty");
             return false;

@@ -356,12 +356,14 @@ public class Balancer {
     public synchronized void push(final CrawlEntry entry) throws IOException {
         assert entry != null;
         if (urlFileIndex.has(entry.url().hash().getBytes())) {
-            //serverLog.logWarning("BALANCER", "double-check has failed for urlhash " + entry.url().hash()  + " in " + stackname + " - fixed");
+            Log.logWarning("BALANCER", "double-check has failed for urlhash " + entry.url().hash()  + " in " + stackname + " - fixed");
             return;
         }
         
         // add to index
+        int s = urlFileIndex.size();
         urlFileIndex.put(entry.toRow());
+        assert s < urlFileIndex.size();
         
         // add the hash to a queue
         pushHashToDomainStacks(entry.url().hash(), true);
@@ -617,7 +619,7 @@ public class Balancer {
         // if we need to flush anything, then flush the domain stack first,
         // to avoid that new urls get hidden by old entries from the file stack
         if (urlRAMStack == null) return 0;
-
+        
         // ensure that the domain stacks are filled enough
         shiftFileToDomStacks(count);
         

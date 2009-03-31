@@ -277,23 +277,37 @@ public final class CrawlStacker {
             ) /* qualified */;
 
         if (!local && !global && !remote && !proxy) {
-            this.log.logSevere("URL '" + entry.url().toString() + "' cannot be crawled. initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
-        } else {
-            if (global) {
-                // it may be possible that global == true and local == true, so do not check an error case against it
-                if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
-                if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
-                nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_LIMIT, entry);
-            } else if (local) {
-                if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
-                if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
-                nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_CORE, entry);
-            } else if (proxy) {
-                if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
-                nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_CORE, entry);
-            } else if (remote) {
-                nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_REMOTE, entry);
-            }
+            String error = "URL '" + entry.url().toString() + "' cannot be crawled. initiator = " + entry.initiator() + ", profile.handle = " + profile.handle();
+            this.log.logSevere(error);
+            return error;
+        }
+        
+        if (global) {
+            // it may be possible that global == true and local == true, so do not check an error case against it
+            if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
+            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
+            int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
+            nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_LIMIT, entry);
+            assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
+            this.log.logInfo("stacked/global: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT));
+        } else if (local) {
+            if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
+            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
+            int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
+            nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_CORE, entry);
+            assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
+            this.log.logInfo("stacked/local: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE));
+        } else if (proxy) {
+            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
+            int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
+            nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_CORE, entry);
+            assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
+            this.log.logInfo("stacked/proxy: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE));
+        } else if (remote) {
+            int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE);
+            nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_REMOTE, entry);
+            assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE);
+            this.log.logInfo("stacked/remote: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE));
         }
 
         return null;

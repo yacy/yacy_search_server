@@ -421,7 +421,7 @@ public class EcoTable implements ObjectIndex {
         assert table == null || table.size() == index.size();
         assert row != null;
         assert row.bytes() != null;
-        if (file == null || table == null || row == null || row.bytes() == null) return;
+        if (file == null || row == null || row.bytes() == null) return;
         final int i = index.get(row.getPrimaryKeyBytes());
         if (i == -1) {
             addUnique(row);
