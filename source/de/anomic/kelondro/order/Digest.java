@@ -233,8 +233,12 @@ public class Digest {
 
     public static String fastFingerprintB64(final File file, boolean includeDate) {
         try {
-            return Base64Order.enhancedCoder.encode(fastFingerprintRaw(file, includeDate));
+            byte[] b = fastFingerprintRaw(file, includeDate);
+            assert b != null : "file = " + file.toString();
+            assert b.length != 0 : "file = " + file.toString();
+            return Base64Order.enhancedCoder.encode(b);
         } catch (IOException e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -280,7 +284,7 @@ public class Digest {
             if (includeDate) digest.update(NaturalOrder.encodeLong(file.lastModified(), 8), 0, 8);
         } finally {
             raf.close();
-            raf.getChannel().close();
+            try {raf.getChannel().close();} catch (IOException e) {}
         }
         return digest.digest();
     }

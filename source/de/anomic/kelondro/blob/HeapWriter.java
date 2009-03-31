@@ -114,7 +114,9 @@ public final class HeapWriter  {
     
     protected static String fingerprintFileHash(File f) {
         assert f != null;
-        return Digest.fastFingerprintB64(f, false).substring(0, 12);
+        String fp = Digest.fastFingerprintB64(f, false);
+        assert fp != null : "file = " + f.toString();
+        return fp.substring(0, 12);
     }
     
     public static void deleteAllFingerprints(File f) {

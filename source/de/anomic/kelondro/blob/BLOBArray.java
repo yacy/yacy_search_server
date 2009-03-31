@@ -172,14 +172,17 @@ public class BLOBArray implements BLOB {
         return f;
     }
     
-    public synchronized File[] unmountBestMatch(double maxq) {
-        double l, r, min = Double.MAX_VALUE;
+    public synchronized File[] unmountBestMatch(double maxq, long maxResultSize) {
+        long l, r;
+        double min = Double.MAX_VALUE;
         int[] idx = new int[2];
+        maxResultSize = maxResultSize >> 1;
         for (int i = 0; i < this.blobs.size() - 1; i++) {
             for (int j = i + 1; j < this.blobs.size(); j++) {
-                l = this.blobs.get(i).location.length();
-                r = this.blobs.get(j).location.length();
-                double q = Math.max(l/r, r/l);
+                l = 1 + (this.blobs.get(i).location.length() >> 1);
+                r = 1 + (this.blobs.get(j).location.length() >> 1);
+                if (l + r > maxResultSize) continue;
+                double q = Math.max(((double) l)/((double) r), ((double) r)/((double) l));
                 if (q < min) {
                     min = q;
                     idx[0] = i;
@@ -194,17 +197,34 @@ public class BLOBArray implements BLOB {
         return bestmatch;
     }
     
+    public synchronized File[] unmountSmallest(long maxResultSize) {
+        File f0 = smallestBLOB(null);
+        if (f0 == null) return null;
+        File f1 = smallestBLOB(f0);
+        if (f1 == null) return null;
+        
+        unmountBLOB(f0, false);
+        unmountBLOB(f1, false);
+        return new File[]{f0, f1};
+    }
+    
     public synchronized File unmountSmallestBLOB() {
+        return smallestBLOB(null);
+    }
+    
+    public synchronized File smallestBLOB(File excluding) {
         if (this.blobs.size() == 0) return null;
         int bestIndex = -1;
         long smallest = Long.MAX_VALUE;
         for (int i = 0; i < this.blobs.size(); i++) {
+            if (excluding != null && this.blobs.get(i).location.getAbsolutePath().equals(excluding.getAbsoluteFile())) continue;
             if (this.blobs.get(i).location.length() < smallest) {
                 smallest = this.blobs.get(i).location.length();
                 bestIndex = i;
             }
         }
-        return unmount(bestIndex);
+        if (bestIndex == -1) return null;
+        return this.blobs.get(bestIndex).location;
     }
     
     public synchronized File unmountOldestBLOB(boolean smallestFromFirst2) {

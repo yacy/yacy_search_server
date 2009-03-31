@@ -56,9 +56,10 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
     // class variables
     private final ReferenceContainerArray array;
     private       ReferenceContainerCache ram;
-    private       int                     maxRamEntries, maxArrayFiles;
+    private       int                     maxRamEntries;
     private final IODispatcher            merger;
-    private final long                    lastCleanup;
+    private       long                    lastCleanup;
+    private final long                    targetFileSize, maxFileSize;
     
     
     public IndexCell(
@@ -66,16 +67,18 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
             final ByteOrder wordOrder,
             final Row payloadrow,
             final int maxRamEntries,
-            final int maxArrayFiles,
+            final long targetFileSize,
+            final long maxFileSize,
             IODispatcher merger
             ) throws IOException {
         this.array = new ReferenceContainerArray(cellPath, wordOrder, payloadrow, merger);
         this.ram = new ReferenceContainerCache(payloadrow, wordOrder);
         this.ram.initWriteMode();
         this.maxRamEntries = maxRamEntries;
-        this.maxArrayFiles = maxArrayFiles;
         this.merger = merger;
         this.lastCleanup = System.currentTimeMillis();
+        this.targetFileSize = targetFileSize;
+        this.maxFileSize = maxFileSize;
     }
 
     
@@ -281,9 +284,8 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
     
     private synchronized void cacheCleanup() throws IOException {
         if (this.lastCleanup + cleanupCycle > System.currentTimeMillis()) return;
-        if (this.array.entries() > this.maxArrayFiles) {
-            this.array.shrink(true);
-        }
+        this.array.shrink(this.targetFileSize, this.maxFileSize);
+        this.lastCleanup = System.currentTimeMillis();
     }
 
     public File newContainerBLOBFile() {

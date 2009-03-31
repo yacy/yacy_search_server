@@ -56,7 +56,8 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
             final ByteOrder wordOrdering,
             final Row payloadrow,
             final int entityCacheMaxSize,
-            final int maxCellArrayFiles,
+            final long targetFileSize,
+            final long maxFileSize,
             final IODispatcher merger,
             final Log log) throws IOException {
 
@@ -66,7 +67,10 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
                                 celldir,
                                 wordOrdering,
                                 ReferenceRow.urlEntryRow,
-                                entityCacheMaxSize, maxCellArrayFiles, this.merger);
+                                entityCacheMaxSize,
+                                targetFileSize,
+                                maxFileSize,
+                                this.merger);
         final File textindexcache = new File(indexPrimaryTextLocation, "RICACHE");
         if (textindexcache.exists()) {
             // migrate the "index.dhtout.blob" into RICELL directory

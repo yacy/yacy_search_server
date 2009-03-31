@@ -69,7 +69,8 @@ public final class plasmaWordIndex {
     public static final int  wCacheMaxChunk  =  800;           // maximum number of references for each urlhash
     public static final int  lowcachedivisor =  900;
     public static final int  maxCollectionPartition = 7;       // should be 7
-    public static final int  maxCellArrayFiles = 10;
+    public static final long targetFileSize  = 100 * 1024 * 1024;
+    public static final long maxFileSize     = Long.MAX_VALUE >> 1;
     
     public static final String CRAWL_PROFILE_PROXY                 = "proxy";
     public static final String CRAWL_PROFILE_REMOTE                = "remote";
@@ -146,7 +147,8 @@ public final class plasmaWordIndex {
                                     wordOrder,
                                     ReferenceRow.urlEntryRow,
                                     entityCacheMaxSize,
-                                    maxCellArrayFiles,
+                                    targetFileSize,
+                                    maxFileSize,
                                     this.merger,
                                     log)
                                    :
@@ -166,7 +168,8 @@ public final class plasmaWordIndex {
                                     wordOrder,
                                     ReferenceRow.urlEntryRow,
                                     entityCacheMaxSize,
-                                    maxCellArrayFiles,
+                                    targetFileSize,
+                                    maxFileSize,
                                     this.merger);
         }
         

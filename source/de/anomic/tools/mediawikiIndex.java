@@ -321,7 +321,7 @@ public class mediawikiIndex {
         } finally {
             if (raf != null) try {
                 raf.close();
-                raf.getChannel().close();
+                try{raf.getChannel().close();} catch (IOException e) {}
             } catch (IOException e) { }
         }
         return b;

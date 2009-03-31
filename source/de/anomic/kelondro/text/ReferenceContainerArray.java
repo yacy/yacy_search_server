@@ -36,7 +36,6 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.util.FileUtils;
 
 public final class ReferenceContainerArray {
 
@@ -245,34 +244,29 @@ public final class ReferenceContainerArray {
         return this.array.entries();
     }
     
-    public synchronized boolean shrink(boolean similar) throws IOException {
+    public synchronized boolean shrink(long targetFileSize, long maxFileSize) throws IOException {
         if (this.array.entries() < 2) return false;
         if (this.merger.queueLength() > 0) return false;
-        File[] ff = this.array.unmountBestMatch(2.0);
-        if (ff == null) {
-            ff = new File[2];
-            ff[0] = this.array.unmountSmallestBLOB();
-            if (ff[0].length() == 0) {
-                FileUtils.deletedelete(ff[0]);
-                return true;
-            }
-            ff[1] = this.array.unmountSmallestBLOB();
-            if (ff[1].length() == 0) {
-                this.array.mountBLOB(ff[0]);
-                FileUtils.deletedelete(ff[1]);
-                return true;
-            }
-            /*
-            ff[0] = this.array.unmountOldestBLOB(similar);
-            if (ff[0].length() == 0) {
-                FileUtils.deletedelete(ff[0]);
-                return true;
-            }
-            ff[1] = (similar) ? this.array.unmountSimilarSizeBLOB(ff[0].length()) : this.array.unmountOldestBLOB(false);
-            */
+        
+        File[] ff = this.array.unmountBestMatch(2.0, targetFileSize);
+        if (ff != null) {
+            merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
+            return true;
         }
-        merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
-        return true;
+        
+        ff = this.array.unmountSmallest(targetFileSize);
+        if (ff != null) {
+            merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
+            return true;
+        }
+        
+        ff = this.array.unmountBestMatch(2.0, maxFileSize);
+        if (ff != null) {
+            merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
+            return true;
+        }
+
+        return false;
     }
     
     
