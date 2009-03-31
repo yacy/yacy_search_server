@@ -149,12 +149,11 @@ public class BLOBArray implements BLOB {
     }
     
     public synchronized void unmountBLOB(File location, boolean writeIDX) {
-        Iterator<blobItem> i = this.blobs.iterator();
         blobItem b;
-        while (i.hasNext()) {
-            b = i.next();
+        for (int i = 0; i < this.blobs.size(); i++) {
+            b = this.blobs.get(i);
             if (b.location.equals(location)) {
-                i.remove();
+                this.blobs.remove(i);
                 b.blob.close(writeIDX);
                 b.blob = null;
                 b.location = null;
