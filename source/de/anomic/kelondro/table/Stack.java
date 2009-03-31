@@ -277,7 +277,7 @@ public final class Stack extends FullRecords {
             }
             return recs; 
         } finally {
-            if (f!=null) try{f.close();}catch(final Exception e){}
+            if (f!=null) try{f.close(); f.getChannel().close();}catch(final Exception e){}
         }
     }
 

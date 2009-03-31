@@ -127,7 +127,10 @@ public final class CachedRandomAccess extends AbstractRandomAccess implements Ra
 
     public synchronized void close() {
         if (RAFile != null) try {
+            RAFile.getChannel().close();
+            //System.out.println("***DEBUG*** closed file " + this.file + ", FD is " + ((RAFile.getFD().valid()) ? "VALID" : "VOID") + ", channel is " + ((RAFile.getChannel().isOpen()) ? "OPEN" : "CLOSE"));
             RAFile.close();
+            //System.out.println("***DEBUG*** closed file " + this.file + ", FD is " + ((RAFile.getFD().valid()) ? "VALID" : "VOID") + ", channel is " + ((RAFile.getChannel().isOpen()) ? "OPEN" : "CLOSE"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -137,9 +140,7 @@ public final class CachedRandomAccess extends AbstractRandomAccess implements Ra
     }
 
     protected void finalize() throws Throwable {
-        if (RAFile != null) {
-            this.close();
-        }
+        this.close();
         super.finalize();
     }
 

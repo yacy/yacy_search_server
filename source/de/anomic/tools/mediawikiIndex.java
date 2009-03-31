@@ -309,17 +309,22 @@ public class mediawikiIndex {
     }
 
     public static byte[] read(File f, long start, int len) {
+        byte[] b = new byte[len];
+        RandomAccessFile raf = null;
         try {
-            RandomAccessFile raf = new RandomAccessFile(f, "r");
-            byte[] b = new byte[len];
+            raf = new RandomAccessFile(f, "r");
             raf.seek(start);
             raf.read(b);
-            raf.close();
-            return b;
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
+        } finally {
+            if (raf != null) try {
+                raf.close();
+                raf.getChannel().close();
+            } catch (IOException e) { }
         }
-        return null;
+        return b;
     }
     
     public static wikirecord find(String title, File f) throws IOException {

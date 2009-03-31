@@ -344,6 +344,9 @@ public class HeapReader {
         }
 
         public CloneableIterator<Entry<String, byte[]>> clone(Object modifier) {
+            // if the entries iterator is cloned, close the file!
+            if (is != null) try { is.close(); } catch (final IOException e) {}
+            is = null;
             try {
                 return new entries(blobFile, keylen);
             } catch (IOException e) {
@@ -353,7 +356,10 @@ public class HeapReader {
         }
         
         public boolean hasNext() {
-            return this.nextEntry != null;
+            if (is == null) return false;
+            if  (this.nextEntry != null) return true;
+            close();
+            return false;
         }
 
         private Map.Entry<String, byte[]> next0() {

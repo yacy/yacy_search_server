@@ -260,7 +260,6 @@ public class Digest {
         final int mb = 16 * 1024;
         final long fl = file.length();
         if (fl <= 2 * mb) return encodeMD5Raw(file);
-        RandomAccessFile raf = new RandomAccessFile(file, "r");
         MessageDigest digest;
         try {
             digest = MessageDigest.getInstance("MD5");
@@ -268,15 +267,21 @@ public class Digest {
             e.printStackTrace();
             return null;
         }
-        raf.seek(0);
+        RandomAccessFile raf = new RandomAccessFile(file, "r");
         byte[] a = new byte[mb];
-        raf.readFully(a, 0, mb - 1);
-        digest.update(a, 0, mb);
-        raf.seek(fl - mb);
-        raf.readFully(a, 0, mb - 1);
-        digest.update(a, 0, mb);
-        digest.update(NaturalOrder.encodeLong(fl, 8), 0, 8);
-        if (includeDate) digest.update(NaturalOrder.encodeLong(file.lastModified(), 8), 0, 8);
+        try {
+            raf.seek(0);
+            raf.readFully(a, 0, mb - 1);
+            digest.update(a, 0, mb);
+            raf.seek(fl - mb);
+            raf.readFully(a, 0, mb - 1);
+            digest.update(a, 0, mb);
+            digest.update(NaturalOrder.encodeLong(fl, 8), 0, 8);
+            if (includeDate) digest.update(NaturalOrder.encodeLong(file.lastModified(), 8), 0, 8);
+        } finally {
+            raf.close();
+            raf.getChannel().close();
+        }
         return digest.digest();
     }
 

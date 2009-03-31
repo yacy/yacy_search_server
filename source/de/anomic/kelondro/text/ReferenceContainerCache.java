@@ -153,7 +153,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * static iterator of BLOBHeap files: is used to import heap dumps into a write-enabled index heap
      */
     public static class blobFileEntries implements CloneableIterator<ReferenceContainer>, Iterable<ReferenceContainer> {
-        Iterator<Map.Entry<String, byte[]>> blobs;
+        HeapReader.entries blobs;
         Row payloadrow;
         File blobFile;
         
@@ -164,7 +164,10 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         }
         
         public boolean hasNext() {
-            return blobs.hasNext();
+            if (blobs == null) return false;
+            if (blobs.hasNext()) return true;
+            close();
+            return false;
         }
 
         /**
@@ -186,6 +189,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         }
         
         public void close() {
+            if (blobs != null) this.blobs.close();
             blobs = null;
         }
         
@@ -194,6 +198,8 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         }
 
         public CloneableIterator<ReferenceContainer> clone(Object modifier) {
+            if (blobs != null) this.blobs.close();
+            blobs = null;
             try {
                 return new blobFileEntries(this.blobFile, this.payloadrow);
             } catch (IOException e) {

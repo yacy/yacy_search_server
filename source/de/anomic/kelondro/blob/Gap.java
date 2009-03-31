@@ -74,6 +74,7 @@ public class Gap extends TreeMap<Long, Integer> {
             }
         }
         is.close();
+        is = null;
     }
     
     /**

@@ -83,6 +83,7 @@ public class LongHandleIndex {
             this.index.addUnique(this.rowdef.newEntry(a));
         }
         is.close();
+        is = null;
         assert this.index.size() == file.length() / (keylength + 8);
     }
 

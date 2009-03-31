@@ -733,12 +733,26 @@ public final class FileUtils {
             }
         }
         
-        if (!path.delete()) path.deleteOnExit();
+        int c = 0;
+        while (c++ < 20) {
+            if (!path.exists()) break;
+            if (path.delete()) break;
+            // some OS may be slow when giving up file pointer
+            //System.runFinalization();
+            //System.gc();
+            try { Thread.sleep(200); } catch (InterruptedException e) { break; }
+        }
         if (path.exists()) {
+            path.deleteOnExit();
+            String p = "";
+            try {
+                p = path.getCanonicalPath();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
             if (System.getProperties().getProperty("os.name","").toLowerCase().startsWith("windows")) {
                 // deleting files on windows sometimes does not work with java
                 try {
-                    String p = path.getCanonicalPath();
                     String command = "cmd /C del /F /Q " + p;
                     Process r = Runtime.getRuntime().exec(command);
                     if (r == null) {
@@ -747,11 +761,11 @@ public final class FileUtils {
                         byte[] response = read(r.getInputStream());
                         Log.logInfo("FileUtils", "deletedelete: " + new String(response));
                     }
-                    if (path.exists()) Log.logSevere("FileUtils", "cannot delete file " + p);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }                
             }
+            if (path.exists()) Log.logSevere("FileUtils", "cannot delete file " + p);
         }
     }
 }
