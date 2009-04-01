@@ -110,18 +110,6 @@ public final class plasmaSwitchboardConstants {
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM   = null;
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP        = "62_remotetriggeredcrawl_idlesleep";
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP        = "62_remotetriggeredcrawl_busysleep";
-    // 74_parsing
-    /**
-     * <p><code>public static final String <strong>INDEXER</strong> = "80_indexing"</code></p>
-     * <p>Name of the indexer thread, performing the actual indexing of a website</p>
-     */
-    public static final String PARSER                      = "74_indexing";
-    public static final String PARSER_MEMPREREQ            = "74_indexing_memprereq";
-    public static final String PARSER_IDLESLEEP            = "74_indexing_idlesleep";
-    public static final String PARSER_BUSYSLEEP            = "74_indexing_busysleep";
-    public static final String PARSER_METHOD_START         = "deQueueProcess";
-    public static final String PARSER_METHOD_JOBCOUNT      = "queueSize";
-    public static final String PARSER_METHOD_FREEMEM       = "deQueueFreeMem";
     // 80_indexing
     /**
      * <p><code>public static final String <strong>INDEXER</strong> = "80_indexing"</code></p>
@@ -135,18 +123,6 @@ public final class plasmaSwitchboardConstants {
     public static final String INDEXER_METHOD_JOBCOUNT      = "queueSize";
     public static final String INDEXER_METHOD_FREEMEM       = "deQueueFreeMem";
     public static final String INDEXER_SLOTS                = "indexer.slots";
-    // 85_cacheflush
-    /**
-     * the cache flush thread starts a flush of the RAM cache.
-     * This periodic flushing replaces the permanent flushing
-     */
-    public static final String CACHEFLUSH                   = "85_cacheflush";
-    public static final String CACHEFLUSH_MEMPREREQ         = "85_cacheflush_memprereq";
-    public static final String CACHEFLUSH_IDLESLEEP         = "85_cacheflush_idlesleep";
-    public static final String CACHEFLUSH_BUSYSLEEP         = "85_cacheflush_busysleep";
-    public static final String CACHEFLUSH_METHOD_START      = "rwiCacheFlush";
-    public static final String CACHEFLUSH_METHOD_JOBCOUNT   = "rwiCacheSize";
-    public static final String CACHEFLUSH_METHOD_FREEMEM    = "deQueueFreeMem";
     // 90_cleanup
     /**
      * <p><code>public static final String <strong>CLEANUP</strong> = "90_cleanup"</code></p>

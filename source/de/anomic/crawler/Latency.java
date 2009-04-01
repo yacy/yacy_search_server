@@ -185,7 +185,7 @@ public class Latency {
         }
         public void slowdown() {
             this.lastacc = System.currentTimeMillis();
-            this.timeacc = Math.min(60000, average() * 5);
+            this.timeacc = Math.min(60000, average() * 2);
             this.count = 1;
         }
         public int count() {

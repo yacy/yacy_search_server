@@ -289,25 +289,25 @@ public final class CrawlStacker {
             //int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
             nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_LIMIT, entry);
             //assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
-            this.log.logInfo("stacked/global: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT));
+            //this.log.logInfo("stacked/global: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT));
         } else if (local) {
             if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
             if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
             //int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
             nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_CORE, entry);
             //assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
-            this.log.logInfo("stacked/local: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE));
+            //this.log.logInfo("stacked/local: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE));
         } else if (proxy) {
             if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
             //int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
             nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_CORE, entry);
             //assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
-            this.log.logInfo("stacked/proxy: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE));
+            //this.log.logInfo("stacked/proxy: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE));
         } else if (remote) {
             //int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE);
             nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_REMOTE, entry);
             //assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE);
-            this.log.logInfo("stacked/remote: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE));
+            //this.log.logInfo("stacked/remote: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE));
         }
 
         return null;

@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.anomic.http.httpClient;
 import de.anomic.kelondro.table.FlexWidthArray;
 import de.anomic.kelondro.text.Document;
 import de.anomic.kelondro.util.DateFormatter;
@@ -571,7 +572,8 @@ public class CrawlQueues {
                             1,
                             "denied by robots.txt");
                     eentry.store();
-                    errorURL.push(eentry);         
+                    errorURL.push(eentry);
+                    this.entry.setStatus("worker-disallowed", serverProcessorJob.STATUS_FINISHED);
                 } else {
                     // starting a load from the internet
                     this.entry.setStatus("worker-loading", serverProcessorJob.STATUS_RUNNING);
@@ -585,6 +587,7 @@ public class CrawlQueues {
                                 "cannot load: " + result);
                         eentry.store();
                         errorURL.push(eentry);
+                        this.entry.setStatus("worker-error", serverProcessorJob.STATUS_FINISHED);
                     } else {
                         this.entry.setStatus("worker-processed", serverProcessorJob.STATUS_FINISHED);
                     }
@@ -599,9 +602,10 @@ public class CrawlQueues {
                 eentry.store();
                 errorURL.push(eentry);
                 e.printStackTrace();
+                httpClient.initConnectionManager();
+                this.entry.setStatus("worker-exception", serverProcessorJob.STATUS_FINISHED);
             } finally {
                 workers.remove(code);
-                this.entry.setStatus("worker-finalized", serverProcessorJob.STATUS_FINISHED);
             }
         }
         

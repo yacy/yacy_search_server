@@ -76,8 +76,8 @@ public class httpClient {
      * "the HttpClient instance and connection manager should be shared among all threads for maximum efficiency."
      * (Concurrent execution of HTTP methods, http://hc.apache.org/httpclient-3.x/performance.html)
      */
-    private final static MultiThreadedHttpConnectionManager conManager = new MultiThreadedHttpConnectionManager();
-    private final static HttpClient apacheHttpClient = new HttpClient(conManager);
+    private static MultiThreadedHttpConnectionManager conManager = null;
+    private static HttpClient apacheHttpClient = null;
 
     // last ; must be before location (this is parsed)
     private final static String jakartaUserAgent = " " +
@@ -87,25 +87,8 @@ public class httpClient {
         /**
          * set options for client
          */
-        // simple user agent
-        setUserAgent("yacy (www.yacy.net; " + getSystemOST() + ")");
-        // only one retry
-        apacheHttpClient.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
-                                                  new DefaultHttpMethodRetryHandler(1, false));
-        /**
-         * set options for connection manager
-         */
-        // conManager.getParams().setDefaultMaxConnectionsPerHost(4); // default 2
-        HostConfiguration localHostConfiguration = new HostConfiguration();
-        conManager.getParams().setMaxTotalConnections(200); // Proxy may need many connections
-        conManager.getParams().setConnectionTimeout(60000); // set a default timeout
-        conManager.getParams().setDefaultMaxConnectionsPerHost(3); // prevent DoS by mistake
-        localHostConfiguration.setHost("localhost");
-        conManager.getParams().setMaxConnectionsPerHost(localHostConfiguration, 100);
-        localHostConfiguration.setHost("127.0.0.1");
-        conManager.getParams().setMaxConnectionsPerHost(localHostConfiguration, 100);
-        // TODO should this be configurable?
-
+        initConnectionManager();
+        
         // accept self-signed or untrusted certificates
         Protocol.registerProtocol("https", new Protocol("https",
                 (ProtocolSocketFactory) new AcceptEverythingSSLProtcolSocketFactory(), 443));
@@ -125,6 +108,32 @@ public class httpClient {
         System.setProperty("sun.net.client.defaultReadTimeout", "60000");
     }
 
+    public static void initConnectionManager() {
+        MultiThreadedHttpConnectionManager.shutdownAll();
+        conManager = new MultiThreadedHttpConnectionManager();
+        apacheHttpClient = new HttpClient(conManager);
+        
+        /**
+         * set options for connection manager
+         */
+        // conManager.getParams().setDefaultMaxConnectionsPerHost(4); // default 2
+        HostConfiguration localHostConfiguration = new HostConfiguration();
+        conManager.getParams().setMaxTotalConnections(200); // Proxy may need many connections
+        conManager.getParams().setConnectionTimeout(60000); // set a default timeout
+        conManager.getParams().setDefaultMaxConnectionsPerHost(10);
+        localHostConfiguration.setHost("localhost");
+        conManager.getParams().setMaxConnectionsPerHost(localHostConfiguration, 100);
+        localHostConfiguration.setHost("127.0.0.1");
+        conManager.getParams().setMaxConnectionsPerHost(localHostConfiguration, 100);
+        
+        // only one retry
+        apacheHttpClient.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,
+                                                  new DefaultHttpMethodRetryHandler(1, false));
+        // simple user agent
+        setUserAgent("yacy (www.yacy.net; " + getSystemOST() + ")");
+        
+    }
+    
     /**
      * every x milliseconds do a cleanup (close old connections)
      * 
