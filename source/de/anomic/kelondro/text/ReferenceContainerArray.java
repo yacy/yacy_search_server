@@ -245,32 +245,38 @@ public final class ReferenceContainerArray {
         return this.array.entries();
     }
     
-    public synchronized boolean shrink(long targetFileSize, long maxFileSize) throws IOException {
+    public synchronized boolean shrink(long targetFileSize, long maxFileSize) {
         if (this.array.entries() < 2) return false;
-        if (this.merger.queueLength() > 0) return false;
+        boolean donesomething = false;
         
-        File[] ff = this.array.unmountBestMatch(2.0, targetFileSize);
-        if (ff != null) {
-            Log.logInfo("RICELL-shrink", "doing unmountBestMatch(2.0, " + targetFileSize + ")");
+        // first try to merge small files that match
+        while (this.merger.queueLength() < 3) {
+            File[] ff = this.array.unmountBestMatch(2.0, targetFileSize);
+            if (ff == null) break;
+            Log.logInfo("RICELL-shrink", "unmountBestMatch(2.0, " + targetFileSize + ")");
             merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
-            return true;
+            donesomething = true;
         }
         
-        ff = this.array.unmountSmallest(targetFileSize);
-        if (ff != null) {
-            Log.logInfo("RICELL-shrink", "doing unmountSmallest(" + targetFileSize + ")");
+        // then try to merge simply any small file
+        while (this.merger.queueLength() < 2) {
+            File[] ff = this.array.unmountSmallest(targetFileSize);
+            if (ff == null) break;
+            Log.logInfo("RICELL-shrink", "unmountSmallest(" + targetFileSize + ")");
             merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
-            return true;
+            donesomething = true;
         }
         
-        ff = this.array.unmountBestMatch(2.0, maxFileSize);
-        if (ff != null) {
-            Log.logInfo("RICELL-shrink", "doing unmountBestMatch(2.0, " + maxFileSize + ")");
+        // if there is no small file, then merge matching files up to limit
+        while (this.merger.queueLength() < 1) {
+            File[] ff = this.array.unmountBestMatch(2.0, maxFileSize);
+            if (ff == null) break;
+            Log.logInfo("RICELL-shrink", "unmountBestMatch(2.0, " + maxFileSize + ")");
             merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
-            return true;
+            donesomething = true;
         }
 
-        return false;
+        return donesomething;
     }
     
     

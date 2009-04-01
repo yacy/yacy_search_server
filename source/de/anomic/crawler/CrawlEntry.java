@@ -159,6 +159,7 @@ public class CrawlEntry extends serverProcessorJob {
     }
     
     public void setStatus(final String s, int code) {
+        //System.out.println("***DEBUG*** crawler status " + s + ", " + code + " for " + this.url.toNormalform(true, false));
         this.statusMessage = s;
         this.status = code;
     }

@@ -64,7 +64,7 @@ public class HeapReader {
         this.file = new CachedRandomAccess(heapFile);
         
         // read or initialize the index
-        if (initIndexReadDump(heapFile)) {
+        if (initIndexReadDump()) {
             // verify that everything worked just fine
             // pick some elements of the index
             Iterator<byte[]> i = this.index.keys(true, null);
@@ -94,13 +94,14 @@ public class HeapReader {
         }
     }
     
-    private boolean initIndexReadDump(File f) {
+    private boolean initIndexReadDump() {
         // look for an index dump and read it if it exist
         // if this is successfull, return true; otherwise false
-        File fif = HeapWriter.fingerprintIndexFile(f);
-        File fgf = HeapWriter.fingerprintGapFile(f);
+        String fingerprint = HeapWriter.fingerprintFileHash(this.heapFile);
+        File fif = HeapWriter.fingerprintIndexFile(this.heapFile, fingerprint);
+        File fgf = HeapWriter.fingerprintGapFile(this.heapFile, fingerprint);
         if (!fif.exists() || !fgf.exists()) {
-            HeapWriter.deleteAllFingerprints(f);
+            HeapWriter.deleteAllFingerprints(this.heapFile);
             return false;
         }
         

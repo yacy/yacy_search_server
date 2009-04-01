@@ -84,8 +84,9 @@ public class Gap extends TreeMap<Long, Integer> {
      * @throws IOException
      */
     public int dump(File file) throws IOException {
+        File tmp = new File(file.getParentFile(), file.getName() + ".tmp");
         Iterator<Map.Entry<Long, Integer>> i = this.entrySet().iterator();
-        DataOutputStream os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(file), 4 * 1024 * 1024));
+        DataOutputStream os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(tmp), 4 * 1024 * 1024));
         int c = 0;
         Map.Entry<Long, Integer> e;
         while (i.hasNext()) {
@@ -96,6 +97,10 @@ public class Gap extends TreeMap<Long, Integer> {
         }
         os.flush();
         os.close();
+        tmp.renameTo(file);
+        assert file.exists() : file.toString();
+        assert !tmp.exists() : tmp.toString();
+        
         return c;
     }
 

@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
@@ -97,12 +98,31 @@ public class BLOBArray implements BLOB {
 
         // register all blob files inside this directory
         String[] files = heapLocation.list();
+        HashSet<String> fh = new HashSet<String>();
+        for (int i = 0; i < files.length; i++) fh.add(files[i]);
+        // delete unused temporary files
+        boolean deletions = false;
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].endsWith(".tmp")) {
+                FileUtils.deletedelete(new File(heapLocation, files[i]));
+                deletions = true;
+            }
+            if (files[i].endsWith(".idx") || files[i].endsWith(".gap")) {
+                String s = files[i].substring(0, files[i].length() - 17);
+                if (!fh.contains(s)) {
+                    FileUtils.deletedelete(new File(heapLocation, files[i]));
+                    deletions = true;
+                }
+            }
+        }
+        if (deletions) files = heapLocation.list(); // make a fresh list
+        
+        // find maximum time: the file with this time will be given a write buffer
         Date d;
         TreeMap<Long, blobItem> sortedItems = new TreeMap<Long, blobItem>();
         BLOB oneBlob;
         File f;
         long time, maxtime = 0;
-        // first find maximum time: the file with this time will be given a write buffer
         for (int i = 0; i < files.length; i++) {
             if (files[i].length() >= 19 && files[i].endsWith(".blob")) {
                try {

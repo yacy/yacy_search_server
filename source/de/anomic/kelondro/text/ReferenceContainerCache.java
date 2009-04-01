@@ -114,7 +114,8 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         assert this.cache != null;
         Log.logInfo("indexContainerRAMHeap", "creating rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
         if (heapFile.exists()) FileUtils.deletedelete(heapFile);
-        HeapWriter dump = new HeapWriter(heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder);
+        File tmpFile = new File(heapFile.getParentFile(), heapFile.getName() + ".tmp");
+        HeapWriter dump = new HeapWriter(tmpFile, heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder);
         final long startTime = System.currentTimeMillis();
         long wordcount = 0, urlcount = 0;
         String wordHash = null, lwh;

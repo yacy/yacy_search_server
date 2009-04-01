@@ -80,7 +80,7 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
         this.lastCleanup = System.currentTimeMillis();
         this.targetFileSize = targetFileSize;
         this.maxFileSize = maxFileSize;
-        cacheCleanup();
+        cleanCache();
     }
 
     
@@ -96,15 +96,13 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
     public synchronized void add(ReferenceContainer newEntries) throws IOException {
         this.ram.add(newEntries);
         serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
-        cacheDumpIfNecessary();
-        cacheCleanup();
+        cleanCache();
     }
 
     public synchronized void add(String hash, ReferenceRow entry) throws IOException {
         this.ram.add(hash, entry);
         serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
-        cacheDumpIfNecessary();
-        cacheCleanup();
+        cleanCache();
     }
 
     /**
@@ -159,7 +157,7 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
             return c0;
         }
         this.array.delete(wordHash);
-        cacheCleanup();
+        cleanCache();
         if (c0 == null) return c1;
         return c1.merge(c0);
     }
@@ -274,16 +272,22 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
      * cache control methods
      */
     
-    private synchronized void cacheDumpIfNecessary() {
-        if (this.ram.size() > this.maxRamEntries || MemoryControl.available() < 20 * 1024 * 1024) {
+    private synchronized void cleanCache() {
+        // dump the cache if necessary
+        if (this.ram.size() > this.maxRamEntries || (this.ram.size() > 3000 && MemoryControl.available() < 50 * 1024 * 1024)) {
             try {
                 cacheDump();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+        
+        // clean-up the cache
+        if (this.lastCleanup + cleanupCycle > System.currentTimeMillis()) return;
+        this.array.shrink(this.targetFileSize, this.maxFileSize);
+        this.lastCleanup = System.currentTimeMillis();
     }
-    
+
     private synchronized void cacheDump() throws IOException {
         // dump the ram
         File dumpFile = this.array.newContainerBLOBFile();
@@ -295,12 +299,6 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
         this.ram.initWriteMode();
     }
     
-    private synchronized void cacheCleanup() throws IOException {
-        if (this.lastCleanup + cleanupCycle > System.currentTimeMillis()) return;
-        this.array.shrink(this.targetFileSize, this.maxFileSize);
-        this.lastCleanup = System.currentTimeMillis();
-    }
-
     public File newContainerBLOBFile() {
         // for migration of cache files
         return this.array.newContainerBLOBFile();
@@ -315,11 +313,9 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
         // do nothing
     }
 
-
     public int getBackendSize() {
         return this.array.size();
     }
-
 
     public long getBufferMaxAge() {
         return System.currentTimeMillis();

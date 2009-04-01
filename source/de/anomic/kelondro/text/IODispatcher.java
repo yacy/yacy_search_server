@@ -239,7 +239,8 @@ public class IODispatcher extends Thread {
         }
         assert i1.hasNext();
         assert i2.hasNext();
-        HeapWriter writer = new HeapWriter(newFile, array.keylength(), array.ordering());
+        File tmpFile = new File(newFile.getParentFile(), newFile.getName() + ".tmp");
+        HeapWriter writer = new HeapWriter(tmpFile, newFile, array.keylength(), array.ordering());
         merge(i1, i2, array.ordering(), writer);
         writer.close(true);
         // we don't need the old files any more

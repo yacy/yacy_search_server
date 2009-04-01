@@ -98,8 +98,9 @@ public class LongHandleIndex {
         // we must use an iterator from the combined index, because we need the entries sorted
         // otherwise we could just write the byte[] from the in kelondroRowSet which would make
         // everything much faster, but this is not an option here.
+        File tmp = new File(file.getParentFile(), file.getName() + ".tmp");
         Iterator<Row.Entry> i = this.index.rows(true, null);
-        OutputStream os = new BufferedOutputStream(new FileOutputStream(file), 4 * 1024 * 1024);
+        OutputStream os = new BufferedOutputStream(new FileOutputStream(tmp), 4 * 1024 * 1024);
         int c = 0;
         while (i.hasNext()) {
             os.write(i.next().bytes());
@@ -107,6 +108,9 @@ public class LongHandleIndex {
         }
         os.flush();
         os.close();
+        tmp.renameTo(file);
+        assert file.exists() : file.toString();
+        assert !tmp.exists() : tmp.toString();
         return c;
     }
 

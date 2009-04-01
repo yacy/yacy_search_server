@@ -112,10 +112,11 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
             // to speed up the next start
             try {
                 long start = System.currentTimeMillis();
-                free.dump(HeapWriter.fingerprintGapFile(this.heapFile));
+                String fingerprint = HeapWriter.fingerprintFileHash(this.heapFile);
+                free.dump(HeapWriter.fingerprintGapFile(this.heapFile, fingerprint));
                 free.clear();
                 free = null;
-                index.dump(HeapWriter.fingerprintIndexFile(this.heapFile));
+                index.dump(HeapWriter.fingerprintIndexFile(this.heapFile, fingerprint));
                 Log.logInfo("kelondroBLOBHeap", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
                 index.close();
                 index = null;

@@ -38,11 +38,12 @@ import de.anomic.kelondro.util.Log;
 
 public final class HeapWriter  {
 
-    private int                keylength;  // the length of the primary key
-    private LongHandleIndex    index;      // key/seek relation for used records
-    private final File         heapFile;   // the file of the heap
-    private DataOutputStream   os;         // the output stream where the BLOB is written
-    private long               seek;       // the current write position
+    private int                keylength;     // the length of the primary key
+    private LongHandleIndex    index;         // key/seek relation for used records
+    private final File         heapFileTMP;   // the temporary file of the heap during writing
+    private final File         heapFileREADY; // the final file of the heap when the file is closed
+    private DataOutputStream   os;            // the output stream where the BLOB is written
+    private long               seek;          // the current write position
     //private HashSet<String>    doublecheck;// only for testing
     
     /*
@@ -65,16 +66,18 @@ public final class HeapWriter  {
     /**
      * create a heap file: a arbitrary number of BLOBs, indexed by an access key
      * The heap file will be indexed upon initialization.
-     * @param heapFile
+     * @param temporaryHeapFile
+     * @param readyHeapFile
      * @param keylength
      * @param ordering
      * @throws IOException
      */
-    public HeapWriter(final File heapFile, final int keylength, final ByteOrder ordering) throws IOException {
-        this.heapFile = heapFile;
+    public HeapWriter(final File temporaryHeapFile, final File readyHeapFile, final int keylength, final ByteOrder ordering) throws IOException {
+        this.heapFileTMP = temporaryHeapFile;
+        this.heapFileREADY = readyHeapFile;
         this.keylength = keylength;
         this.index = new LongHandleIndex(keylength, ordering, 10, 100000);
-        this.os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(heapFile), 8 * 1024 * 1024));
+        this.os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(temporaryHeapFile), 8 * 1024 * 1024));
         //this.doublecheck = new HashSet<String>();
         this.seek = 0;
     }
@@ -91,7 +94,7 @@ public final class HeapWriter  {
         assert blob.length > 0;
         assert key.length == this.keylength;
         assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
-        assert index.get(key) < 0 : "index.get(key) = " + index.get(key) + ", index.size() = " + index.size() + ", file.length() = " + this.heapFile.length() +  ", key = " + new String(key); // must not occur before
+        assert index.get(key) < 0 : "index.get(key) = " + index.get(key) + ", index.size() = " + index.size() + ", file.length() = " + this.heapFileTMP.length() +  ", key = " + new String(key); // must not occur before
         if ((blob == null) || (blob.length == 0)) return;
         int chunkl = key.length + blob.length;
         os.writeInt(chunkl);
@@ -102,18 +105,19 @@ public final class HeapWriter  {
         this.seek += chunkl + 4;
     }
     
-    protected static File fingerprintIndexFile(File f) {
+    protected static File fingerprintIndexFile(File f, String fingerprint) {
         assert f != null;
-        return new File(f.getParentFile(), f.getName() + "." + fingerprintFileHash(f) + ".idx");
+        return new File(f.getParentFile(), f.getName() + "." + fingerprint + ".idx");
     }
     
-    protected static File fingerprintGapFile(File f) {
+    protected static File fingerprintGapFile(File f, String fingerprint) {
         assert f != null;
-        return new File(f.getParentFile(), f.getName() + "." + fingerprintFileHash(f) + ".gap");
+        return new File(f.getParentFile(), f.getName() + "." + fingerprint + ".gap");
     }
     
     protected static String fingerprintFileHash(File f) {
         assert f != null;
+        assert f.exists() : "file = " + f.toString();
         String fp = Digest.fastFingerprintB64(f, false);
         assert fp != null : "file = " + f.toString();
         return fp.substring(0, 12);
@@ -133,6 +137,7 @@ public final class HeapWriter  {
      * @throws  
      */
     public synchronized void close(boolean writeIDX) {
+        // close the file
         try {
             os.flush();
             os.close();
@@ -141,14 +146,21 @@ public final class HeapWriter  {
         }
         os = null;
         
+        // rename the file into final name
+        this.heapFileTMP.renameTo(this.heapFileREADY);
+        assert this.heapFileREADY.exists() : this.heapFileREADY.toString();
+        assert !this.heapFileTMP.exists() : this.heapFileTMP.toString();
+        
+        // generate index and gap files
         if (writeIDX && index.size() > 3) {
             // now we can create a dump of the index and the gap information
             // to speed up the next start
             try {
                 long start = System.currentTimeMillis();
-                new Gap().dump(fingerprintGapFile(this.heapFile));
-                index.dump(fingerprintIndexFile(this.heapFile));
-                Log.logInfo("kelondroBLOBHeapWriter", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                String fingerprint = HeapWriter.fingerprintFileHash(this.heapFileREADY);
+                new Gap().dump(fingerprintGapFile(this.heapFileREADY, fingerprint));
+                index.dump(fingerprintIndexFile(this.heapFileREADY, fingerprint));
+                Log.logInfo("kelondroBLOBHeapWriter", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFileREADY.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
                 index.close();
                 index = null;
             } catch (IOException e) {
@@ -160,5 +172,5 @@ public final class HeapWriter  {
             index = null;
         }
     }
-    
+
 }

@@ -582,7 +582,7 @@ public class Balancer {
             // in best case, this should never happen if the balancer works propertly
             // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
-            Log.logInfo("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ((sleeptime > Math.max(minimumLocalDelta, minimumGlobalDelta)) ? " (caused by robots.txt)" : ""));
+            Log.logInfo("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ((sleeptime > Math.max(minimumLocalDelta, minimumGlobalDelta)) ? " (forced latency)" : ""));
             if (System.currentTimeMillis() - this.lastPrepare > 10000) {
                 long t = System.currentTimeMillis();
                 prepare(400);
