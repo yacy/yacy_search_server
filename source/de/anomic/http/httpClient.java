@@ -59,8 +59,10 @@ import org.apache.commons.httpclient.params.HttpMethodParams;
 import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 
+import de.anomic.crawler.Latency;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.Log;
+import de.anomic.yacy.yacyURL;
 
 /**
  * HttpClient implementation which uses Jakarta Commons HttpClient 3.x {@link http://hc.apache.org/httpclient-3.x/}
@@ -448,14 +450,20 @@ public class httpClient {
             }
         } catch (final IllegalThreadStateException e) {
         	// cleanUp statistics
+            yacyURL url = new yacyURL(method.getURI().toString(), null);
+            Latency.slowdown(url.hash().substring(6), url.getHost());
             HttpConnectionInfo.removeConnection(generateConInfo(method));
             throw e;
         } catch (final IOException e) {
             // cleanUp statistics
+            yacyURL url = new yacyURL(method.getURI().toString(), null);
+            Latency.slowdown(url.hash().substring(6), url.getHost());
             HttpConnectionInfo.removeConnection(generateConInfo(method));
             throw e;
         } catch (final IllegalStateException e) {
             // cleanUp statistics
+            yacyURL url = new yacyURL(method.getURI().toString(), null);
+            Latency.slowdown(url.hash().substring(6), url.getHost());
             HttpConnectionInfo.removeConnection(generateConInfo(method));
             throw new IOException(e.getMessage());
         }

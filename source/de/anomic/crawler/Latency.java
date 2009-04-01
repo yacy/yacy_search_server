@@ -45,6 +45,17 @@ public class Latency {
         }
     }
     
+    public static void slowdown(String hosthash, String host) {
+        assert hosthash.length() == 6;
+        Host h = map.get(hosthash);
+        if (h == null) {
+            h = new Host(host, 3000);
+            map.put(hosthash, h);
+        } else {
+            h.slowdown();
+        }
+    }
+    
     public static Host host(String hosthash) {
         assert hosthash.length() == 6;
         return map.get(hosthash);
@@ -171,6 +182,11 @@ public class Latency {
             this.lastacc = System.currentTimeMillis();
             this.timeacc += time;
             this.count++;
+        }
+        public void slowdown() {
+            this.lastacc = System.currentTimeMillis();
+            this.timeacc = Math.min(60000, average() * 5);
+            this.count = 1;
         }
         public int count() {
             return this.count;

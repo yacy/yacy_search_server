@@ -184,9 +184,15 @@ public class plasmaWebStructure {
         final Map<String, Integer> map = new HashMap<String, Integer>();
         String c;
         final int refsc = refstr2count(refs);
+        int d;
         for (int i = 0; i < refsc; i++) {
             c = refs.substring(8 + i * 10, 8 + (i + 1) * 10);
-            map.put(c.substring(0, 6), Integer.valueOf(c.substring(6), 16));
+            try {
+                d = Integer.valueOf(c.substring(6), 16);
+            } catch (NumberFormatException e) {
+                d = 1;
+            }
+            map.put(c.substring(0, 6), d);
         }
         return map;
     }
