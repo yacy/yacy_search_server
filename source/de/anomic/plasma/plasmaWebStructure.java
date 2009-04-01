@@ -221,17 +221,23 @@ public class plasmaWebStructure {
         return s.toString();
     }
     
-    public Map<String, Integer> references(final String domhash) {
+    public structureEntry references(final String domhash) {
         // returns a map with a domhash(String):refcount(Integer) relation
         assert domhash.length() == 6;
         SortedMap<String, String> tailMap;
         Map<String, Integer> h = new HashMap<String, Integer>();
+        String domain = "";
+        String date = "";
+        String ref;
         synchronized (structure_old) {
             tailMap = structure_old.tailMap(domhash);
             if (!tailMap.isEmpty()) {
                 final String key = tailMap.firstKey();
                 if (key.startsWith(domhash)) {
-                    h = refstr2map(tailMap.get(key));
+                    domain = key.substring(7);
+                    ref = tailMap.get(key);
+                    date = ref.substring(0, 8);
+                    h = refstr2map(ref);
                 }
             }
         }
@@ -240,11 +246,16 @@ public class plasmaWebStructure {
             if (!tailMap.isEmpty()) {
                 final String key = tailMap.firstKey();
                 if (key.startsWith(domhash)) {
-                    h.putAll(refstr2map(tailMap.get(key)));
+                    ref = tailMap.get(key);
+                    if (domain.length() == 0) domain = key.substring(7);
+                    if (date.length() == 0) date = ref.substring(0, 8);
+                    assert domain == key.substring(7) : "domain = " + domain + ", key = " + key;
+                    h.putAll(refstr2map(ref));
                 }
             }
         }
-        return h;
+        if (h.size() == 0) return null;
+        return new structureEntry(domhash, domain, date, h);
     }
     
     public int referencesCount(final String domhash) {
@@ -302,7 +313,8 @@ public class plasmaWebStructure {
         final String domhash = url.hash().substring(6);
 
         // parse the new reference string and join it with the stored references
-        final Map<String, Integer> refs = references(domhash);
+        structureEntry structure = references(domhash);
+        final Map<String, Integer> refs = (structure == null) ? new HashMap<String, Integer>() : structure.references;
         assert reference.length() % 12 == 0;
         String dom;
         int c;

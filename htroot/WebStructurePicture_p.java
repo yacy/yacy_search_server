@@ -27,6 +27,7 @@
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -124,7 +125,8 @@ public class WebStructurePicture_p {
         if (nextlayer == maxlayer) return mynodes;
         nextlayer++;
         final double radius = 1.0 / (1 << nextlayer);
-        final Map<String, Integer> next = structure.references(centerhash);
+        plasmaWebStructure.structureEntry sr = structure.references(centerhash);
+        final Map<String, Integer> next = (sr == null) ? new HashMap<String, Integer>() : sr.references;
         Map.Entry<String, Integer> entry;
         String targethash, targethost;
         // first set points to next hosts

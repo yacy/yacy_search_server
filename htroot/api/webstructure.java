@@ -22,6 +22,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
+import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -30,6 +31,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWebStructure;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyURL;
 
 public class webstructure {
 
@@ -37,39 +39,67 @@ public class webstructure {
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final boolean latest = ((post == null) ? false : post.containsKey("latest"));
-        final Iterator<plasmaWebStructure.structureEntry> i = sb.webStructure.structureEntryIterator(latest);
-        int c = 0, d;
-        plasmaWebStructure.structureEntry sentry;
-        Map.Entry<String, Integer> refentry;
-        String refdom, refhash;
-        Integer refcount;
-        Iterator<Map.Entry<String, Integer>> k;
-        while (i.hasNext()) {
-            sentry = i.next();
-            prop.put("domains_" + c + "_hash", sentry.domhash);
-            prop.put("domains_" + c + "_domain", sentry.domain);
-            prop.put("domains_" + c + "_date", sentry.date);
-            k = sentry.references.entrySet().iterator();
-            d = 0;
-            refloop: while (k.hasNext()) {
-                refentry = k.next();
-                refhash = refentry.getKey();
-                refdom = sb.webStructure.resolveDomHash2DomString(refhash);
-                if (refdom == null) continue refloop;
-                prop.put("domains_" + c + "_citations_" + d + "_refhash", refhash);
-                prop.put("domains_" + c + "_citations_" + d + "_refdom", refdom);
-                refcount = refentry.getValue();
-                prop.put("domains_" + c + "_citations_" + d + "_refcount", refcount.intValue());
-                d++;
+        String about = ((post == null) ? null : post.get("about", null));
+
+        if (about != null) {
+            yacyURL url = null;
+            if (about.length() > 6) {
+                try {
+                    url = new yacyURL(about, null);
+                    about = url.hash().substring(6);
+                } catch (MalformedURLException e) {
+                    about = null;
+                }
             }
-            prop.put("domains_" + c + "_citations", d);
-            c++;
+            if (about != null) {
+                plasmaWebStructure.structureEntry sentry = sb.webStructure.references(about);
+                if (sentry != null) {
+                    reference(prop, 0, sentry, sb.webStructure);
+                    prop.put("domains", 1);
+                } else {
+                    prop.put("domains", 0);
+                }
+            } else {
+                prop.put("domains", 0);
+            }
+        } else {
+            final Iterator<plasmaWebStructure.structureEntry> i = sb.webStructure.structureEntryIterator(latest);
+            int c = 0;
+            plasmaWebStructure.structureEntry sentry;
+            while (i.hasNext()) {
+                sentry = i.next();
+                reference(prop, c, sentry, sb.webStructure);
+                c++;
+            }
+            prop.put("domains", c);
+            if (latest) sb.webStructure.joinOldNew();
         }
-        prop.put("domains", c);
         prop.put("maxref", plasmaWebStructure.maxref);
-        if (latest) sb.webStructure.joinOldNew();
         
         // return rewrite properties
         return prop;
+    }
+    
+    public static void reference(serverObjects prop, int c, plasmaWebStructure.structureEntry sentry, plasmaWebStructure ws) {
+        prop.put("domains_" + c + "_hash", sentry.domhash);
+        prop.put("domains_" + c + "_domain", sentry.domain);
+        prop.put("domains_" + c + "_date", sentry.date);
+        Iterator<Map.Entry<String, Integer>> k = sentry.references.entrySet().iterator();
+        Map.Entry<String, Integer> refentry;
+        String refdom, refhash;
+        Integer refcount;
+        int d = 0;
+        refloop: while (k.hasNext()) {
+            refentry = k.next();
+            refhash = refentry.getKey();
+            refdom = ws.resolveDomHash2DomString(refhash);
+            if (refdom == null) continue refloop;
+            prop.put("domains_" + c + "_citations_" + d + "_refhash", refhash);
+            prop.put("domains_" + c + "_citations_" + d + "_refdom", refdom);
+            refcount = refentry.getValue();
+            prop.put("domains_" + c + "_citations_" + d + "_refcount", refcount.intValue());
+            d++;
+        }
+        prop.put("domains_" + c + "_citations", d);
     }
 }
