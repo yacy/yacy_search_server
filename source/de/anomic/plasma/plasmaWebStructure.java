@@ -249,7 +249,7 @@ public class plasmaWebStructure {
                     ref = tailMap.get(key);
                     if (domain.length() == 0) domain = key.substring(7);
                     if (date.length() == 0) date = ref.substring(0, 8);
-                    assert domain == key.substring(7) : "domain = " + domain + ", key = " + key;
+                    assert domain.equals(key.substring(7)) : "domain = " + domain + ", key = " + key;
                     h.putAll(refstr2map(ref));
                 }
             }
