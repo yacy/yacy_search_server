@@ -40,6 +40,7 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.IndexingStack;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpdProxyCacheEntry;
+import de.anomic.kelondro.blob.BLOBArray;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.text.BufferedIndex;
@@ -69,8 +70,8 @@ public final class plasmaWordIndex {
     public static final int  wCacheMaxChunk  =  800;           // maximum number of references for each urlhash
     public static final int  lowcachedivisor =  900;
     public static final int  maxCollectionPartition = 7;       // should be 7
-    public static final long targetFileSize  = 100 * 1024 * 1024;
-    public static final long maxFileSize     = Long.MAX_VALUE >> 1;
+    public static final long targetFileSize  = 100 * 1024 * 1024; // 100 MB
+    public static final long maxFileSize     = BLOBArray.oneGigabyte; // 1GB
     
     public static final String CRAWL_PROFILE_PROXY                 = "proxy";
     public static final String CRAWL_PROFILE_REMOTE                = "remote";
