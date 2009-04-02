@@ -244,12 +244,7 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
      * and is composed of the current date and the cell salt
      */
     public synchronized void close() {
-        // dump the ram
-        try {
-            this.ram.dump(this.array.newContainerBLOBFile(), true);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        this.ram.dump(this.array.newContainerBLOBFile(), true);
         // close all
         this.ram.close();
         this.array.close();

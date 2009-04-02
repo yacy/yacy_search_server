@@ -318,13 +318,7 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
     }
 
     public synchronized void close() {
-        // dump cache
-        try {
-            //heap.dumpold(this.oldDumpFile);
-            heap.dump(this.dumpFile, true);
-        } catch (final IOException e){
-            log.logSevere("unable to dump cache: " + e.getMessage(), e);
-        }
+        heap.dump(this.dumpFile, true);
         heap = null;
         hashScore.clear();
         hashDate.clear();

@@ -84,11 +84,7 @@ public class IODispatcher extends Thread {
     
     public synchronized void dump(ReferenceContainerCache cache, File file, ReferenceContainerArray array) {
         if (dumpQueue == null || !this.isAlive()) {
-            try {
-                cache.dump(file, true);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            cache.dump(file, true);
         } else {
             DumpJob job = new DumpJob(cache, file, array);
             try {
@@ -96,11 +92,7 @@ public class IODispatcher extends Thread {
                 controlQueue.put(vita);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                try {
-                    cache.dump(file, true);
-                } catch (IOException ee) {
-                    e.printStackTrace();
-                }
+                cache.dump(file, true);
             }
         }
     }
@@ -242,11 +234,18 @@ public class IODispatcher extends Thread {
         File tmpFile = new File(newFile.getParentFile(), newFile.getName() + ".tmp");
         HeapWriter writer = new HeapWriter(tmpFile, newFile, array.keylength(), array.ordering());
         merge(i1, i2, array.ordering(), writer);
-        writer.close(true);
-        // we don't need the old files any more
-        FileUtils.deletedelete(f1);
-        FileUtils.deletedelete(f2);
-        return newFile;
+        try {
+            writer.close(true);
+            // we don't need the old files any more
+            FileUtils.deletedelete(f1);
+            FileUtils.deletedelete(f2);
+            return newFile;
+        } catch (IOException e) {
+            FileUtils.deletedelete(tmpFile);
+            FileUtils.deletedelete(newFile);
+            e.printStackTrace();
+            return null;
+        }
     }
     
     private static void merge(CloneableIterator<ReferenceContainer> i1, CloneableIterator<ReferenceContainer> i2, ByteOrder ordering, HeapWriter writer) throws IOException {

@@ -106,11 +106,11 @@ public class plasmaWebStructure {
             nexturlhash = it.next().hash();
             if (nexturlhash != null) {
                 if (nexturlhash.substring(6).equals(lhp)) {
-                    // this is a inbound link
+                    // this is a local link
                     cpl.append(nexturlhash.substring(0, 6)); // store only local part
                     LCount++;
                 } else {
-                    // this is a outbound link
+                    // this is a global link
                     cpg.append(nexturlhash); // store complete hash
                     GCount++;
                 }

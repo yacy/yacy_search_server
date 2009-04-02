@@ -136,20 +136,18 @@ public final class HeapWriter  {
      * close the BLOB table
      * @throws  
      */
-    public synchronized void close(boolean writeIDX) {
+    public synchronized void close(boolean writeIDX) throws IOException {
         // close the file
-        try {
-            os.flush();
-            os.close();
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
+        os.flush();
+        os.close();
         os = null;
         
         // rename the file into final name
-        this.heapFileTMP.renameTo(this.heapFileREADY);
-        assert this.heapFileREADY.exists() : this.heapFileREADY.toString();
-        assert !this.heapFileTMP.exists() : this.heapFileTMP.toString();
+        if (this.heapFileREADY.exists()) FileUtils.deletedelete(this.heapFileREADY);
+        boolean renameok = this.heapFileTMP.renameTo(this.heapFileREADY);
+        if (!renameok) throw new IOException("cannot rename " + this.heapFileTMP + " to " + this.heapFileREADY);
+        if (!this.heapFileREADY.exists()) throw new IOException("renaming of " + this.heapFileREADY.toString() + " failed: files still exists");
+        if (this.heapFileTMP.exists()) throw new IOException("renaming to " + this.heapFileTMP.toString() + " failed: file does not exist");
         
         // generate index and gap files
         if (writeIDX && index.size() > 3) {

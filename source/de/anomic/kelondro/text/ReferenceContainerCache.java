@@ -110,12 +110,18 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         Log.logInfo("indexContainerRAMHeap", "finished rwi blob restore: " + cache.size() + " words, " + urlCount + " word/URL relations in " + (System.currentTimeMillis() - start) + " milliseconds");
     }
     
-    public void dump(final File heapFile, boolean writeIDX) throws IOException {
+    public void dump(final File heapFile, boolean writeIDX) {
         assert this.cache != null;
         Log.logInfo("indexContainerRAMHeap", "creating rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
         if (heapFile.exists()) FileUtils.deletedelete(heapFile);
         File tmpFile = new File(heapFile.getParentFile(), heapFile.getName() + ".tmp");
-        HeapWriter dump = new HeapWriter(tmpFile, heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder);
+        HeapWriter dump;
+        try {
+            dump = new HeapWriter(tmpFile, heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            return;
+        }
         final long startTime = System.currentTimeMillis();
         long wordcount = 0, urlcount = 0;
         String wordHash = null, lwh;
@@ -135,15 +141,25 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
                 // put entries on heap
                 if (container != null && wordHash.length() == payloadrow.primaryKeyLength) {
                     //System.out.println("Dump: " + wordHash);
-                    dump.add(wordHash.getBytes(), container.exportCollection());
+                    try {
+                        dump.add(wordHash.getBytes(), container.exportCollection());
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     urlcount += container.size();
                 }
                 wordcount++;
             }
         }
-        dump.close(writeIDX);
-        dump = null;
-        Log.logInfo("indexContainerRAMHeap", "finished alternative rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
+        try {
+            dump.close(writeIDX);
+            Log.logInfo("indexContainerRAMHeap", "finished rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.logInfo("indexContainerRAMHeap", "failed rwi heap dump: " + e.getMessage());
+        } finally {
+            dump = null;
+        }
     }
     
     public int size() {
