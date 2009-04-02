@@ -328,12 +328,8 @@ public class SplitTable implements ObjectIndex {
     }
     
     public synchronized void addUnique(final Row.Entry row) throws IOException {
-        addUnique(row, null);
-    }
-    
-    public synchronized void addUnique(final Row.Entry row, Date entryDate) throws IOException {
         assert row.objectsize() <= this.rowdef.objectsize;
-        if ((entryDate == null) || (entryDate.after(new Date()))) entryDate = new Date(); // fix date
+        Date entryDate = new Date();
         final String suffix = dateSuffix(entryDate);
         if (suffix == null) return;
         ObjectIndex table = tables.get(suffix);
@@ -343,16 +339,6 @@ public class SplitTable implements ObjectIndex {
             tables.put(suffix, table);
         }
         table.addUnique(row);
-    }
-    
-    public synchronized void addUnique(final List<Row.Entry> rows) throws IOException {
-        final Iterator<Row.Entry> i = rows.iterator();
-        while (i.hasNext()) addUnique(i.next());
-    }
-    
-    public synchronized void addUniqueMultiple(final List<Row.Entry> rows, final Date entryDate) throws IOException {
-        final Iterator<Row.Entry> i = rows.iterator();
-        while (i.hasNext()) addUnique(i.next(), entryDate);
     }
     
     public ArrayList<RowCollection> removeDoubles() throws IOException {

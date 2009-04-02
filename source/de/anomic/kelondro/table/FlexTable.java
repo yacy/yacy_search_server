@@ -223,7 +223,18 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
         super.setMultiple(old_rows_ordered);
         
         // write new entries to index
-        addUnique(new_rows_sequential);
+        
+        // add a list of entries in a ordered way.
+        // this should save R/W head positioning time
+        final TreeMap<Integer, byte[]> indexed_result = super.addMultiple(new_rows_sequential);
+        // indexed_result is a Integer/byte[] relation
+        // that is used here to store the index
+        final Iterator<Map.Entry<Integer, byte[]>> j = indexed_result.entrySet().iterator();
+        Map.Entry<Integer, byte[]> entry;
+        while (j.hasNext()) {
+            entry = j.next();
+            index.put(entry.getValue(), entry.getKey().intValue());
+        }
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
     }
 
@@ -289,21 +300,6 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
         assert row.objectsize() == this.rowdef.objectsize;
         assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
 		index.putUnique(row.getColBytes(0), super.add(row));
-    }
-    
-    public synchronized void addUnique(final List<Row.Entry> rows) throws IOException {
-        // add a list of entries in a ordered way.
-        // this should save R/W head positioning time
-        final TreeMap<Integer, byte[]> indexed_result = super.addMultiple(rows);
-        // indexed_result is a Integer/byte[] relation
-        // that is used here to store the index
-        final Iterator<Map.Entry<Integer, byte[]>> i = indexed_result.entrySet().iterator();
-        Map.Entry<Integer, byte[]> entry;
-        while (i.hasNext()) {
-            entry = i.next();
-            index.put(entry.getValue(), entry.getKey().intValue());
-        }
-        assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
     }
     
     public synchronized ArrayList<RowCollection> removeDoubles() throws IOException {

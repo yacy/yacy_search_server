@@ -349,6 +349,9 @@ public final class DateFormatter {
     public static Date parseShortSecond(final String timeString) throws ParseException {
             return parse(FORMAT_SHORT_SECOND, timeString);
     }
+    public static Date parseShortMilliSecond(final String timeString) throws ParseException {
+        return parse(FORMAT_SHORT_MILSEC, timeString);
+}
 
     /**
      * Like {@link #parseShortSecond(String)} using additional timezone information provided in an

@@ -109,7 +109,7 @@ public final class plasmaWordIndex {
             final File indexPrimaryRoot,
             final File indexSecondaryRoot,
             final int entityCacheMaxSize,
-            final boolean useCommons, 
+            final boolean useCommons,
             final int redundancy,
             final int partitionExponent,
             final boolean useCell) throws IOException {

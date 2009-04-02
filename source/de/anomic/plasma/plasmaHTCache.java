@@ -67,7 +67,7 @@ public final class plasmaHTCache {
     
     public static long maxCacheSize = 0l;
     public static File cachePath = null;
-    public static String salt;
+    public static String prefix;
     public static final Log log = new Log("HTCACHE");
     
 
@@ -85,7 +85,7 @@ public final class plasmaHTCache {
         
         cachePath = htCachePath;
         maxCacheSize = CacheSizeMax;
-        salt = peerSalt;
+        prefix = peerSalt;
         
         // reset old HTCache ?
         String[] list = cachePath.list();
@@ -136,7 +136,7 @@ public final class plasmaHTCache {
         }
         responseHeaderDB = new MapView(blob, 500);
         try {
-            fileDBunbuffered = new BLOBArray(new File(cachePath, FILE_DB_NAME), salt, 12, Base64Order.enhancedCoder, 1024 * 1024 * 2);
+            fileDBunbuffered = new BLOBArray(new File(cachePath, FILE_DB_NAME), prefix, 12, Base64Order.enhancedCoder, 1024 * 1024 * 2);
             fileDBunbuffered.setMaxSize(maxCacheSize);
             fileDB = new BLOBCompressor(fileDBunbuffered, 2 * 1024 * 1024);
         } catch (IOException e) {

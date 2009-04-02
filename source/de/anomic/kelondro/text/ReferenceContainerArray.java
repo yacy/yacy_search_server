@@ -143,6 +143,7 @@ public final class ReferenceContainerArray {
         }
         
         public boolean hasNext() {
+            if (this.iterator == null) return false;
             if (rot) return true;
             return iterator.hasNext();
         }

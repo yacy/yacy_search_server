@@ -74,17 +74,17 @@ public class BLOBArray implements BLOB {
     private long repositoryAgeMax;
     private long repositorySizeMax;
     private List<blobItem> blobs;
-    private String blobSalt;
+    private String prefix;
     private int buffersize;
     
     public BLOBArray(
             final File heapLocation,
-            final String blobSalt,
+            final String prefix,
             final int keylength,
             final ByteOrder ordering,
             final int buffersize) throws IOException {
         this.keylength = keylength;
-        this.blobSalt = blobSalt;
+        this.prefix = prefix;
         this.ordering = ordering;
         this.buffersize = buffersize;
         this.heapLocation = heapLocation;
@@ -120,26 +120,39 @@ public class BLOBArray implements BLOB {
             }
         }
         if (deletions) files = heapLocation.list(); // make a fresh list
-        
-        // find maximum time: the file with this time will be given a write buffer
+        // migrate old file names
         Date d;
-        TreeMap<Long, blobItem> sortedItems = new TreeMap<Long, blobItem>();
-        BLOB oneBlob;
-        File f;
-        long time, maxtime = 0;
+        long time;
+        deletions = false;
         for (int i = 0; i < files.length; i++) {
             if (files[i].length() >= 19 && files[i].endsWith(".blob")) {
                try {
                    d = DateFormatter.parseShortSecond(files[i].substring(0, 14));
+                   new File(heapLocation, files[i]).renameTo(newBLOB(d));
+                   deletions = true;
+               } catch (ParseException e) {continue;}
+            }
+        }
+        if (deletions) files = heapLocation.list(); // make a fresh list
+        
+        // find maximum time: the file with this time will be given a write buffer
+        TreeMap<Long, blobItem> sortedItems = new TreeMap<Long, blobItem>();
+        BLOB oneBlob;
+        File f;
+        long maxtime = 0;
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].length() >= 22 && files[i].startsWith(prefix) && files[i].endsWith(".blob")) {
+               try {
+                   d = DateFormatter.parseShortMilliSecond(files[i].substring(prefix.length() + 1, prefix.length() + 18));
                    time = d.getTime();
                    if (time > maxtime) maxtime = time;
                } catch (ParseException e) {continue;}
             }
         }
         for (int i = 0; i < files.length; i++) {
-            if (files[i].length() >= 19 && files[i].endsWith(".blob")) {
-               try {
-                   d = DateFormatter.parseShortSecond(files[i].substring(0, 14));
+            if (files[i].length() >= 22 && files[i].startsWith(prefix) && files[i].endsWith(".blob")) {
+                try {
+                   d = DateFormatter.parseShortMilliSecond(files[i].substring(prefix.length() + 1, prefix.length() + 18));
                    f = new File(heapLocation, files[i]);
                    time = d.getTime();
                    oneBlob = (time == maxtime && buffersize > 0) ? new BLOBHeap(f, keylength, ordering, buffersize) : new BLOBHeapModifier(f, keylength, ordering);
@@ -164,7 +177,7 @@ public class BLOBArray implements BLOB {
     public synchronized void mountBLOB(File location) throws IOException {
         Date d;
         try {
-            d = DateFormatter.parseShortSecond(location.getName().substring(0, 14));
+            d = DateFormatter.parseShortMilliSecond(location.getName().substring(prefix.length() + 1, prefix.length() + 18));
         } catch (ParseException e) {
             throw new IOException("date parse problem with file " + location.toString() + ": " + e.getMessage());
         }
@@ -291,7 +304,8 @@ public class BLOBArray implements BLOB {
      * @return
      */
     public synchronized File newBLOB(Date creation) {
-        return new File(heapLocation, DateFormatter.formatShortSecond(creation) + "." + blobSalt + ".blob");
+        //return new File(heapLocation, DateFormatter.formatShortSecond(creation) + "." + blobSalt + ".blob");
+        return new File(heapLocation, prefix + "." + DateFormatter.formatShortMilliSecond(creation) + ".blob");
     }
     
     public String name() {
