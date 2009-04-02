@@ -579,13 +579,15 @@ public final class plasmaWordIndex {
         // search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
 
         // retrieve entities that belong to the hashes
-        HashMap<String, ReferenceContainer> inclusionContainers = (queryHashes.size() == 0) ? new HashMap<String, ReferenceContainer>(0) : getContainers(
-                        queryHashes,
-                        urlselection);
+        HashMap<String, ReferenceContainer> inclusionContainers =
+            (queryHashes.size() == 0) ?
+                    new HashMap<String, ReferenceContainer>(0) :
+                    getContainers(queryHashes, urlselection);
         if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < queryHashes.size())) inclusionContainers = new HashMap<String, ReferenceContainer>(0); // prevent that only a subset is returned
-        final HashMap<String, ReferenceContainer> exclusionContainers = (inclusionContainers.size() == 0) ? new HashMap<String, ReferenceContainer>(0) : getContainers(
-                excludeHashes,
-                urlselection);
+        final HashMap<String, ReferenceContainer> exclusionContainers =
+            (inclusionContainers.size() == 0) ?
+                    new HashMap<String, ReferenceContainer>(0) :
+                    getContainers(excludeHashes, urlselection);
         return new HashMap[]{inclusionContainers, exclusionContainers};
     }
 

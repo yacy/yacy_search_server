@@ -74,7 +74,11 @@ public final class plasmaSearchRankingProcess {
     private HashMap<String, ReferenceContainer>[] localSearchContainerMaps;
     private final int[] domZones;
     
-    public plasmaSearchRankingProcess(final plasmaWordIndex wordIndex, final plasmaSearchQuery query, final int maxentries, final int concurrency) {
+    public plasmaSearchRankingProcess(
+            final plasmaWordIndex wordIndex,
+            final plasmaSearchQuery query,
+            final int maxentries,
+            final int concurrency) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
@@ -181,6 +185,11 @@ public final class plasmaSearchRankingProcess {
             if (!yacyURL.matchesAnyDomDomain(iEntry.urlHash(), this.query.zonecode)) {
                 // filter out all tld that do not match with wanted tld domain
                 continue;
+            }
+            
+            // check site constraints
+            if (query.sitehash != null && !iEntry.urlHash().substring(6).equals(query.sitehash)) {
+                // filter out all domains that do not match with the site constraint
             }
             
             // count domZones

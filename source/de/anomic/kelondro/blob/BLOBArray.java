@@ -37,12 +37,16 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.MergeIterator;
+import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.ReferenceContainerCache.blobFileEntries;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
+import de.anomic.kelondro.util.Log;
 
 public class BLOBArray implements BLOB {
 
@@ -533,6 +537,125 @@ public class BLOBArray implements BLOB {
         blobs = null;
     }
     
+    public File mergeMount(File f1, File f2, Row payloadrow, File newFile) throws IOException {
+        Log.logInfo("BLOBArray", "merging " + f1.getName() + " with " + f2.getName());
+        File resultFile = mergeWorker(f1, f2, payloadrow, newFile);
+        if (resultFile == null) return null;
+        mountBLOB(resultFile);
+        Log.logInfo("BLOBArray", "merged " + f1.getName() + " with " + f2.getName() + " into " + resultFile);
+        return resultFile;
+    }
+    
+    private File mergeWorker(File f1, File f2, Row payloadrow, File newFile) throws IOException {
+        // iterate both files and write a new one
+        
+        CloneableIterator<ReferenceContainer> i1 = new blobFileEntries(f1, payloadrow);
+        CloneableIterator<ReferenceContainer> i2 = new blobFileEntries(f2, payloadrow);
+        if (!i1.hasNext()) {
+            if (i2.hasNext()) {
+                FileUtils.deletedelete(f1);
+                if (f2.renameTo(newFile)) return newFile;
+                return f2;
+            } else {
+                FileUtils.deletedelete(f1);
+                FileUtils.deletedelete(f2);
+                return null;
+            }
+        } else if (!i2.hasNext()) {
+            FileUtils.deletedelete(f2);
+            if (f1.renameTo(newFile)) return newFile;
+            return f1;
+        }
+        assert i1.hasNext();
+        assert i2.hasNext();
+        File tmpFile = new File(newFile.getParentFile(), newFile.getName() + ".tmp");
+        HeapWriter writer = new HeapWriter(tmpFile, newFile, this.keylength(), this.ordering());
+        merge(i1, i2, this.ordering(), writer);
+        try {
+            writer.close(true);
+            // we don't need the old files any more
+            FileUtils.deletedelete(f1);
+            FileUtils.deletedelete(f2);
+            return newFile;
+        } catch (IOException e) {
+            FileUtils.deletedelete(tmpFile);
+            FileUtils.deletedelete(newFile);
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    private static void merge(CloneableIterator<ReferenceContainer> i1, CloneableIterator<ReferenceContainer> i2, ByteOrder ordering, HeapWriter writer) throws IOException {
+        assert i1.hasNext();
+        assert i2.hasNext();
+        ReferenceContainer c1, c2, c1o, c2o;
+        c1 = i1.next();
+        c2 = i2.next();
+        int e;
+        while (true) {
+            assert c1 != null;
+            assert c2 != null;
+            e = ordering.compare(c1.getWordHash().getBytes(), c2.getWordHash().getBytes());
+            if (e < 0) {
+                writer.add(c1.getWordHash().getBytes(), c1.exportCollection());
+                if (i1.hasNext()) {
+                    c1o = c1;
+                    c1 = i1.next();
+                    assert ordering.compare(c1.getWordHash().getBytes(), c1o.getWordHash().getBytes()) > 0;
+                    continue;
+                }
+                break;
+            }
+            if (e > 0) {
+                writer.add(c2.getWordHash().getBytes(), c2.exportCollection());
+                if (i2.hasNext()) {
+                    c2o = c2;
+                    c2 = i2.next();
+                    assert ordering.compare(c2.getWordHash().getBytes(), c2o.getWordHash().getBytes()) > 0;
+                    continue;
+                }
+                break;
+            }
+            assert e == 0;
+            // merge the entries
+            writer.add(c1.getWordHash().getBytes(), (c1.merge(c2)).exportCollection());
+            if (i1.hasNext() && i2.hasNext()) {
+                c1 = i1.next();
+                c2 = i2.next();
+                continue;
+            }
+            if (i1.hasNext()) c1 = i1.next();
+            if (i2.hasNext()) c2 = i2.next();
+            break;
+           
+        }
+        // catch up remaining entries
+        assert !(i1.hasNext() && i2.hasNext());
+        while (i1.hasNext()) {
+            //System.out.println("FLUSH REMAINING 1: " + c1.getWordHash());
+            writer.add(c1.getWordHash().getBytes(), c1.exportCollection());
+            if (i1.hasNext()) {
+                c1o = c1;
+                c1 = i1.next();
+                assert ordering.compare(c1.getWordHash().getBytes(), c1o.getWordHash().getBytes()) > 0;
+                continue;
+            }
+            break;
+        }
+        while (i2.hasNext()) {
+            //System.out.println("FLUSH REMAINING 2: " + c2.getWordHash());
+            writer.add(c2.getWordHash().getBytes(), c2.exportCollection());
+            if (i2.hasNext()) {
+                c2o = c2;
+                c2 = i2.next();
+                assert ordering.compare(c2.getWordHash().getBytes(), c2o.getWordHash().getBytes()) > 0;
+                continue;
+            }
+            break;
+        }
+        // finished with writing
+    }
+
 
     public static void main(final String[] args) {
         final File f = new File("/Users/admin/blobarraytest");

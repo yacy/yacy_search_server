@@ -87,6 +87,7 @@ public final class search {
         final String  prefer = post.get("prefer", "");
         final String  contentdom = post.get("contentdom", "text");
         final String  filter = post.get("filter", ".*");
+        String  sitehash = post.get("sitehash", ""); if (sitehash.length() == 0) sitehash = null;
         String  language = post.get("language", "");
         if (!iso639.exists(language)) {
             // take language from the user agent
@@ -180,7 +181,29 @@ public final class search {
         plasmaSearchEvent theSearch = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
-            theQuery = new plasmaSearchQuery(null, abstractSet, new TreeSet<String>(Base64Order.enhancedComparator), null, rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), language, false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, null, false, yacyURL.TLD_any_zone_filter, client, false);
+            theQuery = new plasmaSearchQuery(
+                    null,
+                    abstractSet,
+                    new TreeSet<String>(Base64Order.enhancedComparator),
+                    null,
+                    rankingProfile,
+                    maxdist,
+                    prefer,
+                    plasmaSearchQuery.contentdomParser(contentdom),
+                    language,
+                    false,
+                    count,
+                    0,
+                    filter,
+                    plasmaSearchQuery.SEARCHDOM_LOCAL,
+                    null,
+                    -1,
+                    null,
+                    false,
+                    sitehash, 
+                    yacyURL.TLD_any_zone_filter,
+                    client,
+                    false);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
@@ -207,7 +230,30 @@ public final class search {
             
         } else {
             // retrieve index containers from search request
-            theQuery = new plasmaSearchQuery(null, queryhashes, excludehashes, null, rankingProfile, maxdist, prefer, plasmaSearchQuery.contentdomParser(contentdom), language, false, count, 0, filter, plasmaSearchQuery.SEARCHDOM_LOCAL, null, -1, constraint, false, yacyURL.TLD_any_zone_filter, client, false);
+            theQuery = new plasmaSearchQuery(
+                    null, 
+                    queryhashes, 
+                    excludehashes, 
+                    null, 
+                    rankingProfile, 
+                    maxdist, 
+                    prefer, 
+                    plasmaSearchQuery.
+                    contentdomParser(contentdom), 
+                    language, 
+                    false, 
+                    count, 
+                    0, 
+                    filter, 
+                    plasmaSearchQuery.SEARCHDOM_LOCAL, 
+                    null, 
+                    -1, 
+                    constraint, 
+                    false,
+                    sitehash, 
+                    yacyURL.TLD_any_zone_filter,
+                    client, 
+                    false);
             theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
             RSSFeed.channels(RSSFeed.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes), ""));

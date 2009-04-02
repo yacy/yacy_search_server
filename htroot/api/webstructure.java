@@ -51,7 +51,8 @@ public class webstructure {
                     about = null;
                 }
             }
-            if (about != null) {
+            if (url != null && about != null) {
+                
                 plasmaWebStructure.structureEntry sentry = sb.webStructure.references(about);
                 if (sentry != null) {
                     reference(prop, 0, sentry, sb.webStructure);

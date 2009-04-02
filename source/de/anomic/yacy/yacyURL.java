@@ -42,9 +42,7 @@ import de.anomic.tools.Punycode;
 import de.anomic.tools.Punycode.PunycodeException;
 
 public class yacyURL implements Serializable {
-    /**
-     * generated with svn4751 on 2008-05-01
-     */
+    
     private static final long serialVersionUID = -1173233022912141884L;
     public  static final int TLD_any_zone_filter = 255; // from TLD zones can be filtered during search; this is the catch-all filter
     private static final Pattern backPathPattern = Pattern.compile("(/[^/]+(?<!/\\.{1,2})/)[.]{2}(?=/|$)|/\\.(?=/)|/(?=/)");
@@ -55,6 +53,18 @@ public class yacyURL implements Serializable {
     // class variables
     private String protocol, host, userInfo, path, quest, ref, hash;
     private int port;
+    
+    public static String domhash(String host) {
+        if (!host.startsWith("http://")) host = "http://" + host;
+        yacyURL url = null;
+        try {
+            url = new yacyURL(host, null);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return (url == null) ? null : url.hash().substring(6);
+    }
     
     public yacyURL(final String url, final String hash) throws MalformedURLException {
         if (url == null) throw new MalformedURLException("url string is null");

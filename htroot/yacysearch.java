@@ -270,13 +270,19 @@ public class yacysearch {
                     }
                 }
             }
+            if (post.containsKey("tenant")) {
+                final String tenant = post.get("tenant");
+                if (urlmask == null) urlmask = ".*" + tenant + ".*"; else urlmask = ".*" + tenant + urlmask;
+            }
             int site = querystring.indexOf("site:");
+            String sitehash = null;
             if (site >= 0) {
                 int ftb = querystring.indexOf(' ', site);
                 if (ftb == -1) ftb = querystring.length();
                 String domain = querystring.substring(site + 5, ftb);
                 query[0].remove("site:" + domain.toLowerCase());
                 while(domain.startsWith(".")) domain = domain.substring(1);
+                sitehash = yacyURL.domhash(domain);
                 if (domain.indexOf(".") < 0) domain = "\\." + domain; // is tld
                 if (domain.length() > 0) {
                     if (urlmask == null) {
@@ -285,10 +291,6 @@ public class yacysearch {
                         urlmask = "[a-zA-Z]*://[^/]*" + domain + "/.*" + urlmask;
                     }
                 }
-            }
-            if (post.containsKey("tenant")) {
-                final String tenant = post.get("tenant");
-                if (urlmask == null) urlmask = ".*" + tenant + ".*"; else urlmask = ".*" + tenant + urlmask;
             }
             if (urlmask == null || urlmask.length() == 0) urlmask = originalUrlMask; //if no urlmask was given
            
@@ -385,6 +387,7 @@ public class yacysearch {
                     20,
                     constraint,
                     true,
+                    sitehash,
                     yacyURL.TLD_any_zone_filter,
                     client,
                     authenticated);
