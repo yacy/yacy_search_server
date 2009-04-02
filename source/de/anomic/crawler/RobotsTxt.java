@@ -150,7 +150,7 @@ public class RobotsTxt {
                 }
                 if (robotsTxt4Host != null &&
                     robotsTxt4Host.getLoadedDate() != null &&
-                    System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() <= 7*24*60*60*1000) {
+                    System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() <= 1*24*60*60*1000) {
                     return robotsTxt4Host;
                 }
                 
