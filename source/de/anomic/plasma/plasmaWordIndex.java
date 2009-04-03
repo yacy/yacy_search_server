@@ -38,6 +38,7 @@ import java.util.TreeSet;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.IndexingStack;
+import de.anomic.data.Blacklist;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.kelondro.blob.BLOBArray;
@@ -47,16 +48,16 @@ import de.anomic.kelondro.text.BufferedIndex;
 import de.anomic.kelondro.text.BufferedIndexCollection;
 import de.anomic.kelondro.text.IndexCell;
 import de.anomic.kelondro.text.IndexCollectionMigration;
-import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.IODispatcher;
-import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.text.MetadataRepository;
-import de.anomic.kelondro.text.Word;
-import de.anomic.kelondro.text.Blacklist;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
+import de.anomic.plasma.parser.Word;
+import de.anomic.plasma.parser.Condenser;
 import de.anomic.tools.iso639;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;
@@ -146,7 +147,7 @@ public final class plasmaWordIndex {
                                     new IndexCollectionMigration(
                                     indexPrimaryTextLocation,
                                     wordOrder,
-                                    ReferenceRow.urlEntryRow,
+                                    WordReferenceRow.urlEntryRow,
                                     entityCacheMaxSize,
                                     targetFileSize,
                                     maxFileSize,
@@ -156,7 +157,7 @@ public final class plasmaWordIndex {
                                     new BufferedIndexCollection(
                                             indexPrimaryTextLocation,
                                             wordOrder,
-                                            ReferenceRow.urlEntryRow,
+                                            WordReferenceRow.urlEntryRow,
                                             entityCacheMaxSize,
                                             useCommons, 
                                             redundancy,
@@ -167,7 +168,7 @@ public final class plasmaWordIndex {
             this.index = new IndexCell(
                                     new File(indexPrimaryTextLocation, "RICELL"),
                                     wordOrder,
-                                    ReferenceRow.urlEntryRow,
+                                    WordReferenceRow.urlEntryRow,
                                     entityCacheMaxSize,
                                     targetFileSize,
                                     maxFileSize,
@@ -408,7 +409,7 @@ public final class plasmaWordIndex {
      * @param outlinksOther
      * @return
      */
-    public int addPageIndex(final yacyURL url, final Date urlModified, final plasmaParserDocument document, final plasmaCondenser condenser, final String language, final char doctype, final int outlinksSame, final int outlinksOther) {
+    public int addPageIndex(final yacyURL url, final Date urlModified, final plasmaParserDocument document, final Condenser condenser, final String language, final char doctype, final int outlinksSame, final int outlinksOther) {
         int wordCount = 0;
         final int urlLength = url.toNormalform(true, true).length();
         final int urlComps = htmlFilterContentScraper.urlComps(url.toString()).length;
@@ -417,14 +418,14 @@ public final class plasmaWordIndex {
         final Iterator<Map.Entry<String, Word>> i = condenser.words().entrySet().iterator();
         Map.Entry<String, Word> wentry;
         String word;
-        ReferenceRow ientry;
+        WordReferenceRow ientry;
         Word wprop;
         while (i.hasNext()) {
             wentry = i.next();
             word = wentry.getKey();
             wprop = wentry.getValue();
             assert (wprop.flags != null);
-            ientry = new ReferenceRow(url.hash(),
+            ientry = new WordReferenceRow(url.hash(),
                         urlLength, urlComps, (document == null) ? urlLength : document.dc_title().length(),
                         wprop.count,
                         condenser.RESULT_NUMB_WORDS,
@@ -458,7 +459,7 @@ public final class plasmaWordIndex {
         queuePreStack.close();
     }
 
-    public MetadataRowContainer storeDocument(final IndexingStack.QueueEntry entry, final plasmaParserDocument document, final plasmaCondenser condenser) throws IOException {
+    public URLMetadataRow storeDocument(final IndexingStack.QueueEntry entry, final plasmaParserDocument document, final Condenser condenser) throws IOException {
         final long startTime = System.currentTimeMillis();
 
         // CREATE INDEX
@@ -511,7 +512,7 @@ public final class plasmaWordIndex {
         
         // create a new loaded URL db entry
         final long ldate = System.currentTimeMillis();
-        final MetadataRowContainer newEntry = new MetadataRowContainer(
+        final URLMetadataRow newEntry = new URLMetadataRow(
                 entry.url(),                               // URL
                 dc_title,                                  // document description
                 document.dc_creator(),                     // author
@@ -649,7 +650,7 @@ public final class plasmaWordIndex {
         public void run() {
             Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
             ReferenceContainer container = null;
-            ReferenceRow entry = null;
+            WordReferenceRow entry = null;
             yacyURL url = null;
             final HashSet<String> urlHashs = new HashSet<String>();
             try {
@@ -657,14 +658,14 @@ public final class plasmaWordIndex {
                 while (indexContainerIterator.hasNext() && run) {
                     waiter();
                     container = indexContainerIterator.next();
-                    final Iterator<ReferenceRow> containerIterator = container.entries();
-                    wordHashNow = container.getWordHash();
+                    final Iterator<WordReferenceRow> containerIterator = container.entries();
+                    wordHashNow = container.getTermHash();
                     while (containerIterator.hasNext() && run) {
                         waiter();
                         entry = containerIterator.next();
                         // System.out.println("Wordhash: "+wordHash+" UrlHash:
                         // "+entry.getUrlHash());
-                        final MetadataRowContainer ue = metadata.load(entry.urlHash(), entry, 0);
+                        final URLMetadataRow ue = metadata.load(entry.urlHash(), entry, 0);
                         if (ue == null) {
                             urlHashs.add(entry.urlHash());
                         } else {
@@ -675,9 +676,9 @@ public final class plasmaWordIndex {
                         }
                     }
                     if (urlHashs.size() > 0) try {
-                        final int removed = index.remove(container.getWordHash(), urlHashs);
-                        Log.logFine("INDEXCLEANER", container.getWordHash() + ": " + removed + " of " + container.size() + " URL-entries deleted");
-                        lastWordHash = container.getWordHash();
+                        final int removed = index.remove(container.getTermHash(), urlHashs);
+                        Log.logFine("INDEXCLEANER", container.getTermHash() + ": " + removed + " of " + container.size() + " URL-entries deleted");
+                        lastWordHash = container.getTermHash();
                         lastDeletionCounter = urlHashs.size();
                         urlHashs.clear();
                     } catch (IOException e) {
@@ -686,10 +687,10 @@ public final class plasmaWordIndex {
                     
                     if (!containerIterator.hasNext()) {
                         // We may not be finished yet, try to get the next chunk of wordHashes
-                        final TreeSet<ReferenceContainer> containers = index.references(container.getWordHash(), false, 100, false);
+                        final TreeSet<ReferenceContainer> containers = index.references(container.getTermHash(), false, 100, false);
                         indexContainerIterator = containers.iterator();
                         // Make sure we don't get the same wordhash twice, but don't skip a word
-                        if ((indexContainerIterator.hasNext()) && (!container.getWordHash().equals(indexContainerIterator.next().getWordHash()))) {
+                        if ((indexContainerIterator.hasNext()) && (!container.getTermHash().equals(indexContainerIterator.next().getTermHash()))) {
                             indexContainerIterator = containers.iterator();
                         }
                     }

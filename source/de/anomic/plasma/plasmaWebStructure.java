@@ -42,6 +42,7 @@ import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
+import de.anomic.plasma.parser.Condenser;
 import de.anomic.yacy.yacyURL;
 
 public class plasmaWebStructure {
@@ -90,7 +91,7 @@ public class plasmaWebStructure {
         }
     }
     
-    public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(final plasmaParserDocument document, final plasmaCondenser condenser, final Date docDate) {
+    public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(final plasmaParserDocument document, final Condenser condenser, final Date docDate) {
         final yacyURL url = document.dc_source();
         
         // generate citation reference

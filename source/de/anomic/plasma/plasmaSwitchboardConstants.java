@@ -317,7 +317,7 @@ public final class plasmaSwitchboardConstants {
      * 
      * @see DefaultBlacklist for a detailed overview about the syntax of the default implementation
      */
-    public static final String BLACKLIST_CLASS_DEFAULT  = "de.anomic.kelondro.text.DefaultBlacklist";
+    public static final String BLACKLIST_CLASS_DEFAULT  = "de.anomic.data.DefaultBlacklist";
     public static final String LIST_BLUE                = "plasmaBlueList";
     public static final String LIST_BLUE_DEFAULT        = null;
     public static final String LIST_BADWORDS_DEFAULT    = "yacy.badwords";

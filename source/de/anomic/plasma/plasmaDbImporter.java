@@ -6,10 +6,10 @@ import java.util.TreeSet;
 
 import de.anomic.crawler.AbstractImporter;
 import de.anomic.crawler.Importer;
-import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
-import de.anomic.kelondro.text.ReferenceRow;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.DateFormatter;
 
 public class plasmaDbImporter extends AbstractImporter implements Importer {
@@ -109,11 +109,11 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                 try {
                     this.wordCounter++;
                     newContainer = indexContainerIterator.next();
-                    this.wordHash = newContainer.getWordHash();
+                    this.wordHash = newContainer.getTermHash();
                     
                     // loop throug the entities of the container and get the
                     // urlhash
-                    final Iterator<ReferenceRow> importWordIdxEntries = newContainer.entries();
+                    final Iterator<WordReferenceRow> importWordIdxEntries = newContainer.entries();
                     Reference importWordIdxEntry;
                     while (importWordIdxEntries.hasNext()) {
                         // testing if import process was aborted
@@ -141,7 +141,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                             // we need to import the url
 
                             // getting the url entry
-                            final MetadataRowContainer urlEntry = this.importWordIndex.metadata().load(urlHash, null, 0);
+                            final URLMetadataRow urlEntry = this.importWordIndex.metadata().load(urlHash, null, 0);
                             if (urlEntry != null) {
 
                                 /* write it into the home url db */
@@ -206,7 +206,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                     final TreeSet<ReferenceContainer> containers = this.importWordIndex.index().references(this.wordHash, false, 100, false);
                     indexContainerIterator = containers.iterator();
                     // Make sure we don't get the same wordhash twice, but don't skip a word
-                    if ((indexContainerIterator.hasNext())&&(!this.wordHash.equals((indexContainerIterator.next()).getWordHash()))) {
+                    if ((indexContainerIterator.hasNext())&&(!this.wordHash.equals((indexContainerIterator.next()).getTermHash()))) {
                         indexContainerIterator = containers.iterator();
                     }
                 }

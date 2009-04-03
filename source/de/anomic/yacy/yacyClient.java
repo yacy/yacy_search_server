@@ -60,6 +60,7 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.crawler.ResultURLs;
+import de.anomic.data.Blacklist;
 import de.anomic.http.DefaultCharsetFilePart;
 import de.anomic.http.DefaultCharsetStringPart;
 import de.anomic.http.httpClient;
@@ -69,14 +70,11 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.Digest;
-import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerCache;
-import de.anomic.kelondro.text.ReferenceRow;
-import de.anomic.kelondro.text.URLMetadata;
-import de.anomic.kelondro.text.Word;
-import de.anomic.kelondro.text.Blacklist;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSearchRankingProcess;
@@ -85,6 +83,7 @@ import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaWordIndex;
+import de.anomic.plasma.parser.Word;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.tools.crypt;
@@ -533,15 +532,15 @@ public final class yacyClient {
 		}
 
 		// insert results to containers
-		MetadataRowContainer urlEntry;
+		URLMetadataRow urlEntry;
 		final String[] urls = new String[results];
 		for (int n = 0; n < results; n++) {
 			// get one single search result
-			urlEntry = MetadataRowContainer.importEntry(result.get("resource" + n));
+			urlEntry = URLMetadataRow.importEntry(result.get("resource" + n));
 			if (urlEntry == null) continue;
 			assert (urlEntry.hash().length() == 12) : "urlEntry.hash() = " + urlEntry.hash();
 			if (urlEntry.hash().length() != 12) continue; // bad url hash
-			final URLMetadata metadata = urlEntry.metadata();
+			final URLMetadataRow.Components metadata = urlEntry.metadata();
 			if (blacklist.isListed(Blacklist.BLACKLIST_SEARCH, metadata.url())) {
 				yacyCore.log.logInfo("remote search (client): filtered blacklisted url " + metadata.url() + " from peer " + target.getName());
 				continue; // block with backlist
@@ -796,7 +795,7 @@ public final class yacyClient {
         return "wrong protocol: " + protocol;
     }
 
-    public static HashMap<String, String> crawlReceipt(final yacySeed mySeed, final yacySeed target, final String process, final String result, final String reason, final MetadataRowContainer entry, final String wordhashes) {
+    public static HashMap<String, String> crawlReceipt(final yacySeed mySeed, final yacySeed target, final String process, final String result, final String reason, final URLMetadataRow entry, final String wordhashes) {
         assert (target != null);
         assert (mySeed != null);
         assert (mySeed != target);
@@ -859,7 +858,7 @@ public final class yacyClient {
     public static String transferIndex(
             final yacySeed targetSeed,
             final ReferenceContainerCache indexes,
-            final HashMap<String, MetadataRowContainer> urlCache,
+            final HashMap<String, URLMetadataRow> urlCache,
             final boolean gzipBody,
             final int timeout) {
         
@@ -868,7 +867,7 @@ public final class yacyClient {
         try {
             
             // check if we got all necessary urls in the urlCache (only for debugging)
-            Iterator<ReferenceRow> eenum;
+            Iterator<WordReferenceRow> eenum;
             Reference entry;
             for (ReferenceContainer ic: indexes) {
                 eenum = ic.entries();
@@ -911,7 +910,7 @@ public final class yacyClient {
             if (uhs.length == 0) { return null; } // all url's known
             
             // extract the urlCache from the result
-            final MetadataRowContainer[] urls = new MetadataRowContainer[uhs.length];
+            final URLMetadataRow[] urls = new URLMetadataRow[uhs.length];
             for (int i = 0; i < uhs.length; i++) {
                 urls[i] = urlCache.get(uhs[i]);
                 if (urls[i] == null) {
@@ -963,13 +962,13 @@ public final class yacyClient {
         
         int indexcount = 0;
         final StringBuilder entrypost = new StringBuilder(indexes.size() * 73);
-        Iterator<ReferenceRow> eenum;
+        Iterator<WordReferenceRow> eenum;
         Reference entry;
         for (ReferenceContainer ic: indexes) {
             eenum = ic.entries();
             while (eenum.hasNext()) {
                 entry = eenum.next();
-                entrypost.append(ic.getWordHash()) 
+                entrypost.append(ic.getTermHash()) 
                          .append(entry.toPropertyForm()) 
                          .append(serverCore.CRLF_STRING);
                 indexcount++;
@@ -1001,7 +1000,7 @@ public final class yacyClient {
         }
     }
 
-    private static HashMap<String, String> transferURL(final yacySeed targetSeed, final MetadataRowContainer[] urls, boolean gzipBody, final int timeout) {
+    private static HashMap<String, String> transferURL(final yacySeed targetSeed, final URLMetadataRow[] urls, boolean gzipBody, final int timeout) {
         // this post a message to the remote message board
         final String address = targetSeed.getPublicAddress();
         if (address == null) { return null; }

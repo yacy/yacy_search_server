@@ -37,57 +37,55 @@ import java.util.TreeMap;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.ByteBuffer;
 
 /**
- * A ReferenceContainer is a set of ReferenceRows entries. Since ReferenceRow entries are special
- * Row entries, a collection of ReferenceRows can be contained in a RowSet. This class extends
- * the RowSet with methods for the handling of special ReferenceRow Row entry objects.
+ * A ReferenceContainer is a set of ReferenceRows entries for a specific term.
+ * Since ReferenceRow entries are special Row entries, a collection of ReferenceRows
+ * can be contained in a RowSet.
+ * This class extends the RowSet with methods for the handling of
+ * special ReferenceRow Row entry objects.
  */
 public class ReferenceContainer extends RowSet {
 
-    private String wordHash;
+    private String termHash;
 
-    public ReferenceContainer(final String wordHash, final RowSet collection) {
+    public ReferenceContainer(final String termHash, final RowSet collection) {
         super(collection);
-        this.wordHash = wordHash;
+        this.termHash = termHash;
     }
     
-    public ReferenceContainer(String wordHash, ReferenceRow entry) {
-        super(ReferenceRow.urlEntryRow, 1);
-        this.add(entry);
-        this.wordHash = wordHash;
-    }
-    
-    public ReferenceContainer(final String wordHash, final Row rowdef, final int objectCount) {
+    public ReferenceContainer(final String termHash, final Row rowdef, final int objectCount) {
         super(rowdef, objectCount);
-        this.wordHash = wordHash;
+        this.termHash = termHash;
         this.lastTimeWrote = 0;
     }
     
     public ReferenceContainer topLevelClone() {
-        final ReferenceContainer newContainer = new ReferenceContainer(this.wordHash, this.rowdef, this.size());
+        final ReferenceContainer newContainer = new ReferenceContainer(this.termHash, this.rowdef, this.size());
         newContainer.addAllUnique(this);
         return newContainer;
     }
     
     public static ReferenceContainer emptyContainer(final String wordHash, final int elementCount) {
-        return new ReferenceContainer(wordHash, ReferenceRow.urlEntryRow, elementCount);
+        return new ReferenceContainer(wordHash, WordReferenceRow.urlEntryRow, elementCount);
     }
 
     public void setWordHash(final String newWordHash) {
-        this.wordHash = newWordHash;
+        this.termHash = newWordHash;
     }
 
     public long updated() {
         return super.lastWrote();
     }
 
-    public String getWordHash() {
-        return wordHash;
+    public String getTermHash() {
+        return termHash;
     }
     
-    public void add(final ReferenceRow entry) {
+    public void add(final WordReferenceRow entry) {
         // add without double-occurrence test
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         this.addUnique(entry.toKelondroEntry());
@@ -95,11 +93,11 @@ public class ReferenceContainer extends RowSet {
     
     public void add(final Reference entry, final long updateTime) {
         // add without double-occurrence test
-        if (entry instanceof ReferenceRow) {
-            assert ((ReferenceRow) entry).toKelondroEntry().objectsize() == super.rowdef.objectsize;
-            this.add((ReferenceRow) entry);
+        if (entry instanceof WordReferenceRow) {
+            assert ((WordReferenceRow) entry).toKelondroEntry().objectsize() == super.rowdef.objectsize;
+            this.add((WordReferenceRow) entry);
         } else {
-            this.add(((ReferenceVars) entry).toRowEntry()); 
+            this.add(((WordReferenceVars) entry).toRowEntry()); 
         }
         this.lastTimeWrote = updateTime;
     }
@@ -120,24 +118,24 @@ public class ReferenceContainer extends RowSet {
     }
     
     public ReferenceContainer merge(final ReferenceContainer c) {
-        return new ReferenceContainer(this.wordHash, super.merge(c));
+        return new ReferenceContainer(this.termHash, super.merge(c));
     }
     
-    public Reference put(final ReferenceRow entry) {
+    public Reference put(final WordReferenceRow entry) {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         final Row.Entry r = super.replace(entry.toKelondroEntry());
         if (r == null) return null;
-        return new ReferenceRow(r);
+        return new WordReferenceRow(r);
     }
     
-    public boolean putRecent(final ReferenceRow entry) {
+    public boolean putRecent(final WordReferenceRow entry) {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         // returns true if the new entry was added, false if it already existed
         final Row.Entry oldEntryRow = this.replace(entry.toKelondroEntry());
         if (oldEntryRow == null) {
             return true;
         }
-        final ReferenceRow oldEntry = new ReferenceRow(oldEntryRow);
+        final WordReferenceRow oldEntry = new WordReferenceRow(oldEntryRow);
         if (entry.isOlder(oldEntry)) { // A more recent Entry is already in this container
             this.replace(oldEntry.toKelondroEntry()); // put it back
             return false;
@@ -151,7 +149,7 @@ public class ReferenceContainer extends RowSet {
         if (c == null) return 0;
         int x = 0;
         synchronized (c) {
-            final Iterator<ReferenceRow> i = c.entries();
+            final Iterator<WordReferenceRow> i = c.entries();
             while (i.hasNext()) {
                 try {
                     if (putRecent(i.next())) x++;
@@ -167,7 +165,7 @@ public class ReferenceContainer extends RowSet {
     public Reference get(final String urlHash) {
         final Row.Entry entry = this.get(urlHash.getBytes());
         if (entry == null) return null;
-        return new ReferenceRow(entry);
+        return new WordReferenceRow(entry);
     }
 
     /**
@@ -178,7 +176,7 @@ public class ReferenceContainer extends RowSet {
     public Reference remove(final String urlHash) {
         final Row.Entry entry = remove(urlHash.getBytes());
         if (entry == null) return null;
-        return new ReferenceRow(entry);
+        return new WordReferenceRow(entry);
     }
 
     public int removeEntries(final Set<String> urlHashes) {
@@ -188,12 +186,12 @@ public class ReferenceContainer extends RowSet {
         return count;
     }
 
-    public Iterator<ReferenceRow> entries() {
+    public Iterator<WordReferenceRow> entries() {
         // returns an iterator of indexRWIEntry objects
         return new entryIterator();
     }
 
-    public class entryIterator implements Iterator<ReferenceRow> {
+    public class entryIterator implements Iterator<WordReferenceRow> {
 
         Iterator<Row.Entry> rowEntryIterator;
         
@@ -205,10 +203,10 @@ public class ReferenceContainer extends RowSet {
             return rowEntryIterator.hasNext();
         }
 
-        public ReferenceRow next() {
+        public WordReferenceRow next() {
             final Row.Entry rentry = rowEntryIterator.next();
             if (rentry == null) return null;
-            return new ReferenceRow(rentry);
+            return new WordReferenceRow(rentry);
         }
 
         public void remove() {
@@ -342,11 +340,11 @@ public class ReferenceContainer extends RowSet {
         final int keylength = small.rowdef.width(0);
         assert (keylength == large.rowdef.width(0));
         final ReferenceContainer conj = new ReferenceContainer(null, small.rowdef, 0); // start with empty search result
-        final Iterator<ReferenceRow> se = small.entries();
-        ReferenceVars ie0;
+        final Iterator<WordReferenceRow> se = small.entries();
+        WordReferenceVars ie0;
         Reference ie1;
         while (se.hasNext()) {
-            ie0 = new ReferenceVars(se.next());
+            ie0 = new WordReferenceVars(se.next());
             ie1 = large.get(ie0.urlHash());
             if ((ie0 != null) && (ie1 != null)) {
                 assert (ie0.urlHash().length() == keylength) : "ie0.urlHash() = " + ie0.urlHash();
@@ -366,13 +364,13 @@ public class ReferenceContainer extends RowSet {
         assert (keylength == i2.rowdef.width(0));
         final ReferenceContainer conj = new ReferenceContainer(null, i1.rowdef, 0); // start with empty search result
         if (!((i1.rowdef.getOrdering().signature().equals(i2.rowdef.getOrdering().signature())))) return conj; // ordering must be equal
-        final Iterator<ReferenceRow> e1 = i1.entries();
-        final Iterator<ReferenceRow> e2 = i2.entries();
+        final Iterator<WordReferenceRow> e1 = i1.entries();
+        final Iterator<WordReferenceRow> e2 = i2.entries();
         int c;
         if ((e1.hasNext()) && (e2.hasNext())) {
-            ReferenceVars ie1;
+            WordReferenceVars ie1;
             Reference ie2;
-            ie1 = new ReferenceVars(e1.next());
+            ie1 = new WordReferenceVars(e1.next());
             ie2 = e2.next();
 
             while (true) {
@@ -381,14 +379,14 @@ public class ReferenceContainer extends RowSet {
                 c = i1.rowdef.getOrdering().compare(ie1.urlHash().getBytes(), ie2.urlHash().getBytes());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
-                    if (e1.hasNext()) ie1 = new ReferenceVars(e1.next()); else break;
+                    if (e1.hasNext()) ie1 = new WordReferenceVars(e1.next()); else break;
                 } else if (c > 0) {
                     if (e2.hasNext()) ie2 = e2.next(); else break;
                 } else {
                     // we have found the same urls in different searches!
                     ie1.join(ie2);
                     if (ie1.worddistance() <= maxDistance) conj.add(ie1.toRowEntry());
-                    if (e1.hasNext()) ie1 = new ReferenceVars(e1.next()); else break;
+                    if (e1.hasNext()) ie1 = new WordReferenceVars(e1.next()); else break;
                     if (e2.hasNext()) ie2 = e2.next(); else break;
                 }
             }
@@ -420,7 +418,7 @@ public class ReferenceContainer extends RowSet {
         final int keylength = pivot.rowdef.width(0);
         assert (keylength == excl.rowdef.width(0));
         final boolean iterate_pivot = pivot.size() < excl.size();
-        final Iterator<ReferenceRow> se = (iterate_pivot) ? pivot.entries() : excl.entries();
+        final Iterator<WordReferenceRow> se = (iterate_pivot) ? pivot.entries() : excl.entries();
         Reference ie0, ie1;
             while (se.hasNext()) {
                 ie0 = se.next();
@@ -439,13 +437,13 @@ public class ReferenceContainer extends RowSet {
         final int keylength = pivot.rowdef.width(0);
         assert (keylength == excl.rowdef.width(0));
         if (!((pivot.rowdef.getOrdering().signature().equals(excl.rowdef.getOrdering().signature())))) return pivot; // ordering must be equal
-        final Iterator<ReferenceRow> e1 = pivot.entries();
-        final Iterator<ReferenceRow> e2 = excl.entries();
+        final Iterator<WordReferenceRow> e1 = pivot.entries();
+        final Iterator<WordReferenceRow> e2 = excl.entries();
         int c;
         if ((e1.hasNext()) && (e2.hasNext())) {
-            ReferenceVars ie1;
+            WordReferenceVars ie1;
             Reference ie2;
-            ie1 = new ReferenceVars(e1.next());
+            ie1 = new WordReferenceVars(e1.next());
             ie2 = e2.next();
 
             while (true) {
@@ -454,14 +452,14 @@ public class ReferenceContainer extends RowSet {
                 c = pivot.rowdef.getOrdering().compare(ie1.urlHash().getBytes(), ie2.urlHash().getBytes());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
-                    if (e1.hasNext()) ie1 = new ReferenceVars(e1.next()); else break;
+                    if (e1.hasNext()) ie1 = new WordReferenceVars(e1.next()); else break;
                 } else if (c > 0) {
                     if (e2.hasNext()) ie2 = e2.next(); else break;
                 } else {
                     // we have found the same urls in different searches!
                     ie1.join(ie2);
                     e1.remove();
-                    if (e1.hasNext()) ie1 = new ReferenceVars(e1.next()); else break;
+                    if (e1.hasNext()) ie1 = new WordReferenceVars(e1.next()); else break;
                     if (e2.hasNext()) ie2 = e2.next(); else break;
                 }
             }
@@ -470,11 +468,11 @@ public class ReferenceContainer extends RowSet {
     }
 
     public String toString() {
-        return "C[" + wordHash + "] has " + this.size() + " entries";
+        return "C[" + termHash + "] has " + this.size() + " entries";
     }
     
     public int hashCode() {
-        return (int) Base64Order.enhancedCoder.decodeLong(this.wordHash.substring(0, 4));
+        return (int) Base64Order.enhancedCoder.decodeLong(this.termHash.substring(0, 4));
     }
     
 
@@ -483,7 +481,7 @@ public class ReferenceContainer extends RowSet {
         final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
         final TreeMap<String, String> doms = new TreeMap<String, String>();
         synchronized (inputContainer) {
-            final Iterator<ReferenceRow> i = inputContainer.entries();
+            final Iterator<WordReferenceRow> i = inputContainer.entries();
             Reference iEntry;
             String dom, paths;
             while (i.hasNext()) {

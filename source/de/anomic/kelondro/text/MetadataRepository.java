@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import de.anomic.data.Blacklist;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpResponse;
@@ -48,6 +49,7 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.table.SplitTable;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
@@ -62,7 +64,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
     
     public MetadataRepository(final File path) {
         this.location = path;        
-        this.urlIndexFile = new Cache(new SplitTable(this.location, "urls", MetadataRowContainer.rowdef, false));
+        this.urlIndexFile = new Cache(new SplitTable(this.location, "urls", URLMetadataRow.rowdef, false));
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
        
@@ -97,7 +99,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         return 0;
     }
 
-    public synchronized MetadataRowContainer load(final String urlHash, final Reference searchedWord, final long ranking) {
+    public synchronized URLMetadataRow load(final String urlHash, final Reference searchedWord, final long ranking) {
         // generates an plasmaLURLEntry using the url hash
         // if the url cannot be found, this returns null
         if (urlHash == null) return null;
@@ -105,15 +107,15 @@ public final class MetadataRepository implements Iterable<byte[]> {
         try {
             final Row.Entry entry = urlIndexFile.get(urlHash.getBytes());
             if (entry == null) return null;
-            return new MetadataRowContainer(entry, searchedWord, ranking);
+            return new URLMetadataRow(entry, searchedWord, ranking);
         } catch (final IOException e) {
             return null;
         }
     }
 
-    public synchronized void store(final MetadataRowContainer entry) throws IOException {
+    public synchronized void store(final URLMetadataRow entry) throws IOException {
         // Check if there is a more recent Entry already in the DB
-        MetadataRowContainer oldEntry;
+        URLMetadataRow oldEntry;
         try {
             if (exists(entry.hash())) {
                 oldEntry = load(entry.hash(), null, 0);
@@ -166,17 +168,17 @@ public final class MetadataRepository implements Iterable<byte[]> {
         return keys(true, null);
     }
     
-    public CloneableIterator<MetadataRowContainer> entries() throws IOException {
+    public CloneableIterator<URLMetadataRow> entries() throws IOException {
         // enumerates entry elements
         return new kiter();
     }
 
-    public CloneableIterator<MetadataRowContainer> entries(final boolean up, final String firstHash) throws IOException {
+    public CloneableIterator<URLMetadataRow> entries(final boolean up, final String firstHash) throws IOException {
         // enumerates entry elements
         return new kiter(up, firstHash);
     }
 
-    public class kiter implements CloneableIterator<MetadataRowContainer> {
+    public class kiter implements CloneableIterator<URLMetadataRow> {
         // enumerates entry elements
         private final Iterator<Row.Entry> iter;
         private final boolean error;
@@ -208,12 +210,12 @@ public final class MetadataRepository implements Iterable<byte[]> {
             return this.iter.hasNext();
         }
 
-        public final MetadataRowContainer next() {
+        public final URLMetadataRow next() {
             Row.Entry e = null;
             if (this.iter == null) { return null; }
             if (this.iter.hasNext()) { e = this.iter.next(); }
             if (e == null) { return null; }
-            return new MetadataRowContainer(e, null, 0);
+            return new URLMetadataRow(e, null, 0);
         }
 
         public final void remove() {
@@ -232,7 +234,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         final Log log = new Log("URLDBCLEANUP");
         final HashSet<String> damagedURLS = new HashSet<String>();
         try {
-            final Iterator<MetadataRowContainer> eiter = entries(true, null);
+            final Iterator<URLMetadataRow> eiter = entries(true, null);
             int iteratorCount = 0;
             while (eiter.hasNext()) try {
                 eiter.next();
@@ -325,7 +327,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         public void run() {
             try {
                 Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread startet");
-                final Iterator<MetadataRowContainer> eiter = entries(true, null);
+                final Iterator<URLMetadataRow> eiter = entries(true, null);
                 while (eiter.hasNext() && run) {
                     synchronized (this) {
                         if (this.pause) {
@@ -338,13 +340,13 @@ public final class MetadataRepository implements Iterable<byte[]> {
                             }
                         }
                     }
-                    final MetadataRowContainer entry = eiter.next();
+                    final URLMetadataRow entry = eiter.next();
                     if (entry == null) {
                         if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", "entry == null");
                     } else if (entry.hash() == null) {
                         if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + "hash == null");
                     } else {
-                        final URLMetadata metadata = entry.metadata();
+                        final URLMetadataRow.Components metadata = entry.metadata();
                         totalSearchedUrls++;
                         if (metadata.url() == null) {
                             if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + "URL == null");
@@ -468,9 +470,9 @@ public final class MetadataRepository implements Iterable<byte[]> {
                         count++;
                     }
                 } else {
-                    final Iterator<MetadataRowContainer> i = entries(); // iterates indexURLEntry objects
-                    MetadataRowContainer entry;
-                    URLMetadata metadata;
+                    final Iterator<URLMetadataRow> i = entries(); // iterates indexURLEntry objects
+                    URLMetadataRow entry;
+                    URLMetadataRow.Components metadata;
                     String url;
                     while (i.hasNext()) {
                         entry = i.next();
@@ -552,7 +554,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         HashMap<String, hashStat> map = domainSampleCollector();
         
         // fetch urls from the database to determine the host in clear text
-        MetadataRowContainer urlref;
+        URLMetadataRow urlref;
         if (count < 0 || count > map.size()) count = map.size();
         statsDump = new ArrayList<hostStat>();
         TreeSet<String> set = new TreeSet<String>();
@@ -582,12 +584,12 @@ public final class MetadataRepository implements Iterable<byte[]> {
     
         // fetch urls from the database to determine the host in clear text
         Iterator<String> j = s.scores(false); // iterate urlhash-examples in reverse order (biggest first)
-        MetadataRowContainer urlref;
+        URLMetadataRow urlref;
         String urlhash;
         count += 10; // make some more to prevent that we have to do this again after deletions too soon.
         if (count < 0 || count > s.size()) count = s.size();
         statsDump = new ArrayList<hostStat>();
-        URLMetadata comps;
+        URLMetadataRow.Components comps;
         yacyURL url;
         while (j.hasNext()) {
             urlhash = j.next();

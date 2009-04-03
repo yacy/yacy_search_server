@@ -31,11 +31,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import de.anomic.data.Blacklist;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.text.Blacklist;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.plasma.plasmaSwitchboard;

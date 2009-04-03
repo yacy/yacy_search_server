@@ -39,16 +39,16 @@ import java.util.concurrent.ConcurrentHashMap;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.kelondro.index.BinSearch;
 import de.anomic.kelondro.order.Digest;
-import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceOrder;
-import de.anomic.kelondro.text.ReferenceVars;
-import de.anomic.kelondro.text.URLMetadata;
-import de.anomic.kelondro.text.Word;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SortStack;
 import de.anomic.kelondro.util.FileUtils;
+import de.anomic.plasma.parser.Word;
+import de.anomic.plasma.parser.Condenser;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;
 
@@ -59,8 +59,8 @@ public final class plasmaSearchRankingProcess {
     private static boolean useYBR = true;
     private static final int maxDoubleDomAll = 20, maxDoubleDomSpecial = 10000;
     
-    private final SortStack<ReferenceVars> stack;
-    private final HashMap<String, SortStack<ReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
+    private final SortStack<WordReferenceVars> stack;
+    private final HashMap<String, SortStack<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     private final HashMap<String, String> handover; // key = urlhash, value = urlstring; used for double-check of urls that had been handed over to search process
     private final plasmaSearchQuery query;
     private final int maxentries;
@@ -83,8 +83,8 @@ public final class plasmaSearchRankingProcess {
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
         this.localSearchContainerMaps = null;
-        this.stack = new SortStack<ReferenceVars>(maxentries);
-        this.doubleDomCache = new HashMap<String, SortStack<ReferenceVars>>();
+        this.stack = new SortStack<WordReferenceVars>(maxentries);
+        this.doubleDomCache = new HashMap<String, SortStack<WordReferenceVars>>();
         this.handover = new HashMap<String, String>();
         this.order = (query == null) ? null : new ReferenceOrder(query.ranking, query.targetlang);
         this.query = query;
@@ -103,7 +103,7 @@ public final class plasmaSearchRankingProcess {
         for (int i = 0; i < 8; i++) {this.domZones[i] = 0;}
     }
     
-    public long ranking(final ReferenceVars word) {
+    public long ranking(final WordReferenceVars word) {
         return order.cardinal(word);
     }
     
@@ -148,13 +148,13 @@ public final class plasmaSearchRankingProcess {
         long timer = System.currentTimeMillis();
         
         // normalize entries
-        final ArrayList<ReferenceVars> decodedEntries = this.order.normalizeWith(index);
+        final ArrayList<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
         
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
-        final Iterator<ReferenceVars> i = decodedEntries.iterator();
-        ReferenceVars iEntry;
+        final Iterator<WordReferenceVars> i = decodedEntries.iterator();
+        WordReferenceVars iEntry;
         Long r;
         while (i.hasNext()) {
             iEntry = i.next();
@@ -175,10 +175,10 @@ public final class plasmaSearchRankingProcess {
             
             // check document domain
             if (query.contentdom != plasmaSearchQuery.CONTENTDOM_TEXT) {
-                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasaudio)))) continue;
-                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasvideo)))) continue;
-                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasimage)))) continue;
-                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_APP  ) && (!(iEntry.flags().get(plasmaCondenser.flag_cat_hasapp  )))) continue;
+                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) continue;
+                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) continue;
+                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) continue;
+                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) continue;
             }
 
             // check tld domain
@@ -252,10 +252,10 @@ public final class plasmaSearchRankingProcess {
     // - root-domain guessing to prefer the root domain over other urls if search word appears in domain name
     
     
-    private SortStack<ReferenceVars>.stackElement bestRWI(final boolean skipDoubleDom) {
+    private SortStack<WordReferenceVars>.stackElement bestRWI(final boolean skipDoubleDom) {
         // returns from the current RWI list the best entry and removes this entry from the list
-        SortStack<ReferenceVars> m;
-        SortStack<ReferenceVars>.stackElement rwi;
+        SortStack<WordReferenceVars> m;
+        SortStack<WordReferenceVars>.stackElement rwi;
         while (stack.size() > 0) {
             rwi = stack.pop();
             if (rwi == null) continue; // in case that a synchronization problem occurred just go lazy over it
@@ -265,7 +265,7 @@ public final class plasmaSearchRankingProcess {
             m = this.doubleDomCache.get(domhash);
             if (m == null) {
                 // first appearance of dom
-                m = new SortStack<ReferenceVars>((query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll);
+                m = new SortStack<WordReferenceVars>((query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll);
                 this.doubleDomCache.put(domhash, m);
                 return rwi;
             }
@@ -274,9 +274,9 @@ public final class plasmaSearchRankingProcess {
         }
         // no more entries in sorted RWI entries. Now take Elements from the doubleDomCache
         // find best entry from all caches
-        final Iterator<SortStack<ReferenceVars>> i = this.doubleDomCache.values().iterator();
-        SortStack<ReferenceVars>.stackElement bestEntry = null;
-        SortStack<ReferenceVars>.stackElement o;
+        final Iterator<SortStack<WordReferenceVars>> i = this.doubleDomCache.values().iterator();
+        SortStack<WordReferenceVars>.stackElement bestEntry = null;
+        SortStack<WordReferenceVars>.stackElement o;
         while (i.hasNext()) {
             m = i.next();
             if (m == null) continue;
@@ -298,15 +298,15 @@ public final class plasmaSearchRankingProcess {
         return bestEntry;
     }
     
-    public MetadataRowContainer bestURL(final boolean skipDoubleDom) {
+    public URLMetadataRow bestURL(final boolean skipDoubleDom) {
         // returns from the current RWI list the best URL entry and removed this entry from the list
         while ((stack.size() > 0) || (size() > 0)) {
                 if (((stack.size() == 0) && (size() == 0))) break;
-                final SortStack<ReferenceVars>.stackElement obrwi = bestRWI(skipDoubleDom);
+                final SortStack<WordReferenceVars>.stackElement obrwi = bestRWI(skipDoubleDom);
                 if (obrwi == null) continue; // *** ? this happened and the thread was suspended silently. cause?
-                final MetadataRowContainer u = wordIndex.metadata().load(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
+                final URLMetadataRow u = wordIndex.metadata().load(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
                 if (u != null) {
-                    final URLMetadata metadata = u.metadata();
+                    final URLMetadataRow.Components metadata = u.metadata();
                     if (metadata.url() != null) this.handover.put(u.hash(), metadata.url().toNormalform(true, false)); // remember that we handed over this url
                     return u;
                 }
@@ -318,7 +318,7 @@ public final class plasmaSearchRankingProcess {
     public int size() {
         //assert sortedRWIEntries.size() == urlhashes.size() : "sortedRWIEntries.size() = " + sortedRWIEntries.size() + ", urlhashes.size() = " + urlhashes.size();
         int c = stack.size();
-        final Iterator<SortStack<ReferenceVars>> i = this.doubleDomCache.values().iterator();
+        final Iterator<SortStack<WordReferenceVars>> i = this.doubleDomCache.values().iterator();
         while (i.hasNext()) c += i.next().size();
         return c;
     }
@@ -355,7 +355,7 @@ public final class plasmaSearchRankingProcess {
     }
     
     public Reference remove(final String urlHash) {
-        final SortStack<ReferenceVars>.stackElement se = stack.remove(urlHash.hashCode());
+        final SortStack<WordReferenceVars>.stackElement se = stack.remove(urlHash.hashCode());
         if (se == null) return null;
         urlhashes.remove(urlHash);
         return se.element;

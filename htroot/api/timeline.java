@@ -31,7 +31,7 @@ import java.util.TreeSet;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.text.ReferenceContainer;
-import de.anomic.kelondro.text.ReferenceRow;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -85,8 +85,8 @@ public final class timeline {
                 localSearchContainerMaps[1].values(),
                 maxdist);
         
-        Iterator<ReferenceRow> i = index.entries();
-        ReferenceRow entry;
+        Iterator<WordReferenceRow> i = index.entries();
+        WordReferenceRow entry;
         int c = 0;
         Date lm;
         String lms;

@@ -56,12 +56,11 @@ import de.anomic.kelondro.blob.BLOBHeap;
 import de.anomic.kelondro.blob.MapDataMining;
 import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
-import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.text.MetadataRepository;
-import de.anomic.kelondro.text.Word;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.ScoreCluster;
@@ -70,6 +69,7 @@ import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.plasmaWordIndex;
+import de.anomic.plasma.parser.Word;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSystem;
@@ -689,13 +689,13 @@ public final class yacy {
                     wordIdxContainer = indexContainerIterator.next();
                     
                     // the combined container will fit, read the container
-                    final Iterator<ReferenceRow> wordIdxEntries = wordIdxContainer.entries();
+                    final Iterator<WordReferenceRow> wordIdxEntries = wordIdxContainer.entries();
                     Reference iEntry;
                     while (wordIdxEntries.hasNext()) {
                         iEntry = wordIdxEntries.next();
                         final String urlHash = iEntry.urlHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
-                            final MetadataRowContainer urlEntry = currentUrlDB.load(urlHash, null, 0);                       
+                            final URLMetadataRow urlEntry = currentUrlDB.load(urlHash, null, 0);                       
                             urlCounter++;
                             minimizedUrlDB.store(urlEntry);
                             if (urlCounter % 500 == 0) {
@@ -705,7 +705,7 @@ public final class yacy {
                     }
                     
                     if (wordCounter%500 == 0) {
-                        wordChunkEndHash = wordIdxContainer.getWordHash();
+                        wordChunkEndHash = wordIdxContainer.getTermHash();
                         wordChunkEnd = System.currentTimeMillis();
                         final long duration = wordChunkEnd - wordChunkStart;
                         log.logInfo(wordCounter + " words scanned " +
@@ -881,10 +881,10 @@ public final class yacy {
                     while (indexContainerIterator.hasNext()) {
                         counter++;
                         container = indexContainerIterator.next();
-                        bos.write((container.getWordHash()).getBytes());
+                        bos.write((container.getTermHash()).getBytes());
                         bos.write(serverCore.CRLF);
                         if (counter % 500 == 0) {
-                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getWordHash());
+                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getTermHash());
                         }
                     }
                 }
@@ -898,17 +898,17 @@ public final class yacy {
                     while (indexContainerIterator.hasNext()) {
                         counter++;
                         container = indexContainerIterator.next();
-                        bos.write((container.getWordHash()).getBytes());
+                        bos.write((container.getTermHash()).getBytes());
                         bos.write(serverCore.CRLF);
                         if (counter % 500 == 0) {
-                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getWordHash());
+                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getTermHash());
                         }
                     }
                 }
                 bos.flush();
                 bos.close();
             }
-            log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + (container == null ? "null" : container.getWordHash()));
+            log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + (container == null ? "null" : container.getTermHash()));
         } catch (final IOException e) {
             log.logSevere("IOException", e);
         }

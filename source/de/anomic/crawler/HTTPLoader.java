@@ -28,17 +28,17 @@ package de.anomic.crawler;
 import java.io.IOException;
 import java.util.Date;
 
+import de.anomic.data.Blacklist;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpdProxyCacheEntry;
-import de.anomic.kelondro.text.Blacklist;
-import de.anomic.kelondro.text.Document;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.parser.Document;
 import de.anomic.yacy.yacyURL;
 
 public final class HTTPLoader {

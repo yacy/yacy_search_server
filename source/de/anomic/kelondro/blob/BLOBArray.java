@@ -609,30 +609,30 @@ public class BLOBArray implements BLOB {
         while (true) {
             assert c1 != null;
             assert c2 != null;
-            e = ordering.compare(c1.getWordHash().getBytes(), c2.getWordHash().getBytes());
+            e = ordering.compare(c1.getTermHash().getBytes(), c2.getTermHash().getBytes());
             if (e < 0) {
-                writer.add(c1.getWordHash().getBytes(), c1.exportCollection());
+                writer.add(c1.getTermHash().getBytes(), c1.exportCollection());
                 if (i1.hasNext()) {
                     c1o = c1;
                     c1 = i1.next();
-                    assert ordering.compare(c1.getWordHash().getBytes(), c1o.getWordHash().getBytes()) > 0;
+                    assert ordering.compare(c1.getTermHash().getBytes(), c1o.getTermHash().getBytes()) > 0;
                     continue;
                 }
                 break;
             }
             if (e > 0) {
-                writer.add(c2.getWordHash().getBytes(), c2.exportCollection());
+                writer.add(c2.getTermHash().getBytes(), c2.exportCollection());
                 if (i2.hasNext()) {
                     c2o = c2;
                     c2 = i2.next();
-                    assert ordering.compare(c2.getWordHash().getBytes(), c2o.getWordHash().getBytes()) > 0;
+                    assert ordering.compare(c2.getTermHash().getBytes(), c2o.getTermHash().getBytes()) > 0;
                     continue;
                 }
                 break;
             }
             assert e == 0;
             // merge the entries
-            writer.add(c1.getWordHash().getBytes(), (c1.merge(c2)).exportCollection());
+            writer.add(c1.getTermHash().getBytes(), (c1.merge(c2)).exportCollection());
             if (i1.hasNext() && i2.hasNext()) {
                 c1 = i1.next();
                 c2 = i2.next();
@@ -647,22 +647,22 @@ public class BLOBArray implements BLOB {
         assert !(i1.hasNext() && i2.hasNext());
         while (i1.hasNext()) {
             //System.out.println("FLUSH REMAINING 1: " + c1.getWordHash());
-            writer.add(c1.getWordHash().getBytes(), c1.exportCollection());
+            writer.add(c1.getTermHash().getBytes(), c1.exportCollection());
             if (i1.hasNext()) {
                 c1o = c1;
                 c1 = i1.next();
-                assert ordering.compare(c1.getWordHash().getBytes(), c1o.getWordHash().getBytes()) > 0;
+                assert ordering.compare(c1.getTermHash().getBytes(), c1o.getTermHash().getBytes()) > 0;
                 continue;
             }
             break;
         }
         while (i2.hasNext()) {
             //System.out.println("FLUSH REMAINING 2: " + c2.getWordHash());
-            writer.add(c2.getWordHash().getBytes(), c2.exportCollection());
+            writer.add(c2.getTermHash().getBytes(), c2.exportCollection());
             if (i2.hasNext()) {
                 c2o = c2;
                 c2 = i2.next();
-                assert ordering.compare(c2.getWordHash().getBytes(), c2o.getWordHash().getBytes()) > 0;
+                assert ordering.compare(c2.getTermHash().getBytes(), c2o.getTermHash().getBytes()) > 0;
                 continue;
             }
             break;

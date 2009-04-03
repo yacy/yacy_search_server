@@ -29,10 +29,9 @@
 import java.io.IOException;
 import java.text.ParseException;
 
+import de.anomic.data.Blacklist;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.text.MetadataRowContainer;
-import de.anomic.kelondro.text.URLMetadata;
-import de.anomic.kelondro.text.Blacklist;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -85,7 +84,7 @@ public final class transferURL {
             final int sizeBefore = sb.webIndex.metadata().size();
             // read the urls from the other properties and store
             String urls;
-            MetadataRowContainer lEntry;
+            URLMetadataRow lEntry;
             for (int i = 0; i < urlc; i++) {
                 serverCore.checkInterruption();
                 
@@ -98,7 +97,7 @@ public final class transferURL {
                 }
 
                 // parse new lurl-entry
-                lEntry = MetadataRowContainer.importEntry(urls);
+                lEntry = URLMetadataRow.importEntry(urls);
                 if (lEntry == null) {
                     yacyCore.log.logWarning("transferURL: received invalid URL (entry null) from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;
@@ -106,7 +105,7 @@ public final class transferURL {
                 }
                 
                 // check if entry is well-formed
-                final URLMetadata metadata = lEntry.metadata();
+                final URLMetadataRow.Components metadata = lEntry.metadata();
                 if (metadata.url() == null) {
                     yacyCore.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;

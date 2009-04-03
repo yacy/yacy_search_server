@@ -39,16 +39,15 @@ import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
-import de.anomic.kelondro.text.Document;
-import de.anomic.kelondro.text.MetadataRowContainer;
-import de.anomic.kelondro.text.URLMetadata;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.parser.Document;
 import de.anomic.plasma.parser.ParserException;
+import de.anomic.plasma.parser.Condenser;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
@@ -95,7 +94,7 @@ public class ViewFile {
         final String urlHash = post.get("urlHash","");
         if (urlHash.length() > 0) {
             // getting the urlEntry that belongs to the url hash
-            MetadataRowContainer urlEntry = null;
+            URLMetadataRow urlEntry = null;
             urlEntry = sb.webIndex.metadata().load(urlHash, null, 0);
             if (urlEntry == null) {
                 prop.put("error", "2");
@@ -104,7 +103,7 @@ public class ViewFile {
             }            
             
                 // getting the url that belongs to the entry
-            final URLMetadata metadata = urlEntry.metadata();
+            final URLMetadataRow.Components metadata = urlEntry.metadata();
             if ((metadata == null) || (metadata.url() == null)) {
                 prop.put("error", "3");
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
@@ -114,7 +113,7 @@ public class ViewFile {
             descr = metadata.dc_title();
             urlEntry.wordCount();
             size = urlEntry.size();
-            pre = urlEntry.flags().get(plasmaCondenser.flag_cat_indexof);
+            pre = urlEntry.flags().get(Condenser.flag_cat_indexof);
         }
 
         // alternatively, get the url simply from a url String
@@ -312,7 +311,7 @@ public class ViewFile {
                     // Search word highlighting
                     while (sentences.hasNext()) {
                         sentence = sentences.next().toString();
-                        Enumeration<StringBuilder> tokens = plasmaCondenser.wordTokenizer(sentence, "UTF-8");
+                        Enumeration<StringBuilder> tokens = Condenser.wordTokenizer(sentence, "UTF-8");
                         while (tokens.hasMoreElements()) {
                             token = tokens.nextElement().toString();
                             if (token.length() > 0) {

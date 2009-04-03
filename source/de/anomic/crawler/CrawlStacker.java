@@ -31,8 +31,8 @@ package de.anomic.crawler;
 import java.net.UnknownHostException;
 import java.util.Date;
 
-import de.anomic.kelondro.text.MetadataRowContainer;
-import de.anomic.kelondro.text.Blacklist;
+import de.anomic.data.Blacklist;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
@@ -244,7 +244,7 @@ public final class CrawlStacker {
         // check if the url is double registered
         final String dbocc = nextQueue.urlExists(entry.url().hash());
         if (dbocc != null || wordIndex.metadata().exists(entry.url().hash())) {
-            final MetadataRowContainer oldEntry = wordIndex.metadata().load(entry.url().hash(), null, 0);
+            final URLMetadataRow oldEntry = wordIndex.metadata().load(entry.url().hash(), null, 0);
             final boolean recrawl = (oldEntry != null) && (profile.recrawlIfOlder() > oldEntry.loaddate().getTime());
             // do double-check
             if ((dbocc != null) && (!recrawl)) {

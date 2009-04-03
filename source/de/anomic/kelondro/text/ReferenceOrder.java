@@ -32,15 +32,17 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.ScoreCluster;
-import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
+import de.anomic.plasma.parser.Condenser;
 import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacyURL;
 
 public class ReferenceOrder {
-    private ReferenceVars min, max;
+    private WordReferenceVars min, max;
     private final plasmaSearchRankingProfile ranking;
     private final ScoreCluster<String> doms; // collected for "authority" heuristic 
     private int maxdomcount;
@@ -55,10 +57,10 @@ public class ReferenceOrder {
         this.language = language;
     }
     
-    public ArrayList<ReferenceVars> normalizeWith(final ReferenceContainer container) {
+    public ArrayList<WordReferenceVars> normalizeWith(final ReferenceContainer container) {
         // normalize ranking: find minimum and maxiumum of separate ranking criteria
         assert (container != null);
-        ArrayList<ReferenceVars> result = null;
+        ArrayList<WordReferenceVars> result = null;
         
         //long s0 = System.currentTimeMillis();
         if ((serverProcessor.useCPU > 1) && (container.size() > 600)) {
@@ -112,7 +114,7 @@ public class ReferenceOrder {
     	return (doms.getScore(urlHash.substring(6)) << 8) / (1 + this.maxdomcount);
     }
 
-    public long cardinal(final ReferenceVars t) {
+    public long cardinal(final WordReferenceVars t) {
         //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry
         final Bitfield flags = t.flags();
@@ -136,17 +138,17 @@ public class ReferenceOrder {
            + ((max.hitcount()      == min.hitcount())      ? 0 : (((t.hitcount()     - min.hitcount()      ) << 8) / (max.hitcount()     - min.hitcount())      ) << ranking.coeff_hitcount)
            + tf
            + ((ranking.coeff_authority > 12) ? (authority(t.urlHash()) << ranking.coeff_authority) : 0)
-           + ((flags.get(Reference.flag_app_dc_identifier))  ? 255 << ranking.coeff_appurl             : 0)
-           + ((flags.get(Reference.flag_app_dc_title))       ? 255 << ranking.coeff_app_dc_title       : 0)
-           + ((flags.get(Reference.flag_app_dc_creator))     ? 255 << ranking.coeff_app_dc_creator     : 0)
-           + ((flags.get(Reference.flag_app_dc_subject))     ? 255 << ranking.coeff_app_dc_subject     : 0)
-           + ((flags.get(Reference.flag_app_dc_description)) ? 255 << ranking.coeff_app_dc_description : 0)
-           + ((flags.get(Reference.flag_app_emphasized))     ? 255 << ranking.coeff_appemph            : 0)
-           + ((flags.get(plasmaCondenser.flag_cat_indexof))      ? 255 << ranking.coeff_catindexof         : 0)
-           + ((flags.get(plasmaCondenser.flag_cat_hasimage))     ? 255 << ranking.coeff_cathasimage        : 0)
-           + ((flags.get(plasmaCondenser.flag_cat_hasaudio))     ? 255 << ranking.coeff_cathasaudio        : 0)
-           + ((flags.get(plasmaCondenser.flag_cat_hasvideo))     ? 255 << ranking.coeff_cathasvideo        : 0)
-           + ((flags.get(plasmaCondenser.flag_cat_hasapp))       ? 255 << ranking.coeff_cathasapp          : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_identifier))  ? 255 << ranking.coeff_appurl             : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_title))       ? 255 << ranking.coeff_app_dc_title       : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_creator))     ? 255 << ranking.coeff_app_dc_creator     : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_subject))     ? 255 << ranking.coeff_app_dc_subject     : 0)
+           + ((flags.get(WordReferenceRow.flag_app_dc_description)) ? 255 << ranking.coeff_app_dc_description : 0)
+           + ((flags.get(WordReferenceRow.flag_app_emphasized))     ? 255 << ranking.coeff_appemph            : 0)
+           + ((flags.get(Condenser.flag_cat_indexof))      ? 255 << ranking.coeff_catindexof         : 0)
+           + ((flags.get(Condenser.flag_cat_hasimage))     ? 255 << ranking.coeff_cathasimage        : 0)
+           + ((flags.get(Condenser.flag_cat_hasaudio))     ? 255 << ranking.coeff_cathasaudio        : 0)
+           + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << ranking.coeff_cathasvideo        : 0)
+           + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << ranking.coeff_cathasapp          : 0)
            + ((patchUK(t.language).equals(this.language))        ? 255 << ranking.coeff_language           : 0)
            + ((yacyURL.probablyRootURL(t.urlHash()))             ?  15 << ranking.coeff_urllength          : 0);
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
@@ -161,13 +163,13 @@ public class ReferenceOrder {
     
     public static class minmaxfinder extends Thread {
 
-        ReferenceVars entryMin;
-        ReferenceVars entryMax;
+        WordReferenceVars entryMin;
+        WordReferenceVars entryMax;
         private final ReferenceContainer container;
         private final int start, end;
         private final HashMap<String, Integer> doms;
         private final Integer int1;
-        ArrayList<ReferenceVars> decodedEntries;
+        ArrayList<WordReferenceVars> decodedEntries;
         
         public minmaxfinder(final ReferenceContainer container, final int start /*including*/, final int end /*excluding*/) {
             this.container = container;
@@ -175,19 +177,19 @@ public class ReferenceOrder {
             this.end = end;
             this.doms = new HashMap<String, Integer>();
             this.int1 = 1;
-            this.decodedEntries = new ArrayList<ReferenceVars>();
+            this.decodedEntries = new ArrayList<WordReferenceVars>();
         }
         
         public void run() {
             // find min/max to obtain limits for normalization
             this.entryMin = null;
             this.entryMax = null;
-            ReferenceVars iEntry;
+            WordReferenceVars iEntry;
             int p = this.start;
             String dom;
             Integer count;
             while (p < this.end) {
-                iEntry = new ReferenceVars(new ReferenceRow(container.get(p++, false)));
+                iEntry = new WordReferenceVars(new WordReferenceRow(container.get(p++, false)));
                 this.decodedEntries.add(iEntry);
                 // find min/max
                 if (this.entryMin == null) this.entryMin = iEntry.clone(); else this.entryMin.min(iEntry);
@@ -203,7 +205,7 @@ public class ReferenceOrder {
             }
         }
         
-        public ArrayList<ReferenceVars> decodedContainer() {
+        public ArrayList<WordReferenceVars> decodedContainer() {
             return this.decodedEntries;
         }
         

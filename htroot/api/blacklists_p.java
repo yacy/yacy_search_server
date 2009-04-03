@@ -2,9 +2,9 @@
 import java.io.File;
 import java.util.List;
 
+import de.anomic.data.AbstractBlacklist;
 import de.anomic.data.listManager;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.text.AbstractBlacklist;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

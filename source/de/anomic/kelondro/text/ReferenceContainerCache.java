@@ -41,6 +41,7 @@ import de.anomic.kelondro.blob.HeapWriter;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.index.Row;
@@ -49,7 +50,7 @@ import de.anomic.kelondro.index.RowSet;
 public final class ReferenceContainerCache extends AbstractIndex implements Index, IndexReader, Iterable<ReferenceContainer> {
 
     private final Row payloadrow;
-    private final ByteOrder wordOrder;
+    private final ByteOrder termOrder;
     private SortedMap<String, ReferenceContainer> cache;
     
     /**
@@ -59,9 +60,9 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * @param payloadrow
      * @param log
      */
-    public ReferenceContainerCache(final Row payloadrow, ByteOrder wordOrder) {
+    public ReferenceContainerCache(final Row payloadrow, ByteOrder termOrder) {
         this.payloadrow = payloadrow;
-        this.wordOrder = wordOrder;
+        this.termOrder = termOrder;
         this.cache = null;
     }
     
@@ -83,7 +84,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * another dump reading afterwards is not possible
      */
     public void initWriteMode() {
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(this.wordOrder)));
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(this.termOrder)));
     }
     
     /**
@@ -94,14 +95,14 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
     public void initWriteModeFromBLOB(final File blobFile) throws IOException {
         Log.logInfo("indexContainerRAMHeap", "restoring rwi blob dump '" + blobFile.getName() + "'");
         final long start = System.currentTimeMillis();
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(this.wordOrder)));
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(this.termOrder)));
         int urlCount = 0;
         synchronized (cache) {
             for (final ReferenceContainer container : new blobFileEntries(blobFile, this.payloadrow)) {
                 // TODO: in this loop a lot of memory may be allocated. A check if the memory gets low is necessary. But what do when the memory is low?
                 if (container == null) break;
                 //System.out.println("***DEBUG indexContainerHeap.initwriteModeFromBLOB*** container.size = " + container.size() + ", container.sorted = " + container.sorted());
-                cache.put(container.getWordHash(), container);
+                cache.put(container.getTermHash(), container);
                 urlCount += container.size();
             }
         }
@@ -242,7 +243,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         for (ReferenceContainer container : cache.values()) {
             if (container.size() > max) {
                 max = container.size();
-                hash = container.getWordHash();
+                hash = container.getTermHash();
             }
         }
         return hash;
@@ -253,7 +254,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         ArrayList<String> hashes = new ArrayList<String>();
         for (ReferenceContainer container : cache.values()) {
             if (container.size() >= bound) {
-                hashes.add(container.getWordHash());
+                hashes.add(container.getTermHash());
             }
         }
         return hashes;
@@ -281,7 +282,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         ArrayList<String> hashes = new ArrayList<String>();
         long limit = System.currentTimeMillis() - maxage;
         for (ReferenceContainer container : cache.values()) {
-            if (container.lastWrote() < limit) hashes.add(container.getWordHash());
+            if (container.lastWrote() < limit) hashes.add(container.getTermHash());
         }
         return hashes;
     }
@@ -372,9 +373,9 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         ReferenceContainer c = this.cache.get(key);
         if (c == null) return null;
         // because this is all in RAM, we must clone the entries (flat)
-        ReferenceContainer c1 = new ReferenceContainer(c.getWordHash(), c.row(), c.size());
-        Iterator<ReferenceRow> e = c.entries();
-        ReferenceRow ee;
+        ReferenceContainer c1 = new ReferenceContainer(c.getTermHash(), c.row(), c.size());
+        Iterator<WordReferenceRow> e = c.entries();
+        WordReferenceRow ee;
         while (e.hasNext()) {
             ee = e.next();
             if (urlselection.contains(ee.urlHash())) c1.add(ee);
@@ -441,7 +442,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         if (this.cache == null || container == null || container.size() == 0) return;
         
         // put new words into cache
-        final String wordHash = container.getWordHash();
+        final String wordHash = container.getTermHash();
         ReferenceContainer entries = cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
         int added = 0;
         if (entries == null) {
@@ -457,7 +458,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         return;
     }
 
-    public synchronized void add(final String wordHash, final ReferenceRow newEntry) {
+    public synchronized void add(final String wordHash, final WordReferenceRow newEntry) {
         assert this.cache != null;
         ReferenceContainer container = cache.get(wordHash);
         if (container == null) container = new ReferenceContainer(wordHash, this.payloadrow, 1);
@@ -470,7 +471,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
     }
 
     public ByteOrder ordering() {
-        return this.wordOrder;
+        return this.termOrder;
     }
 
 }

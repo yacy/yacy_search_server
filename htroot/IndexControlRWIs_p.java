@@ -34,21 +34,21 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import de.anomic.data.AbstractBlacklist;
 import de.anomic.data.listManager;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerCache;
-import de.anomic.kelondro.text.ReferenceRow;
-import de.anomic.kelondro.text.Word;
-import de.anomic.kelondro.text.AbstractBlacklist;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.plasma.plasmaSearchAPI;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
+import de.anomic.plasma.parser.Word;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -126,7 +126,7 @@ public class IndexControlRWIs_p {
                     // generate an urlx array
                     ReferenceContainer index = null;
                     index = sb.webIndex.index().get(keyhash, null);
-                    final Iterator<ReferenceRow> en = index.entries();
+                    final Iterator<WordReferenceRow> en = index.entries();
                     int i = 0;
                     urlx = new String[index.size()];
                     while (en.hasNext()) {
@@ -207,11 +207,11 @@ public class IndexControlRWIs_p {
                 final long starttime = System.currentTimeMillis();
                 index = sb.webIndex.index().get(keyhash, null);
                 // built urlCache
-                final Iterator<ReferenceRow> urlIter = index.entries();
-                final HashMap<String, MetadataRowContainer> knownURLs = new HashMap<String, MetadataRowContainer>();
+                final Iterator<WordReferenceRow> urlIter = index.entries();
+                final HashMap<String, URLMetadataRow> knownURLs = new HashMap<String, URLMetadataRow>();
                 final HashSet<String> unknownURLEntries = new HashSet<String>();
                 Reference iEntry;
-                MetadataRowContainer lurl;
+                URLMetadataRow lurl;
                 while (urlIter.hasNext()) {
                     iEntry = urlIter.next();
                     lurl = sb.webIndex.metadata().load(iEntry.urlHash(), null, 0);
@@ -251,7 +251,7 @@ public class IndexControlRWIs_p {
                     prop.put("keyhashsimilar", "1");
                     while (containerIt.hasNext() && i < 256) {
                         container = containerIt.next();
-                        prop.put("keyhashsimilar_rows_"+rows+"_cols_"+cols+"_wordHash", container.getWordHash());
+                        prop.put("keyhashsimilar_rows_"+rows+"_cols_"+cols+"_wordHash", container.getTermHash());
                         cols++;
                         if (cols==8) {
                             prop.put("keyhashsimilar_rows_"+rows+"_cols", cols);
@@ -278,7 +278,7 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final MetadataRowContainer e = sb.webIndex.metadata().load(urlx[i], null, 0);
+                            final URLMetadataRow e = sb.webIndex.metadata().load(urlx[i], null, 0);
                             sb.webIndex.metadata().remove(urlx[i]);
                             if (e != null) {
                                 url = e.metadata().url();
@@ -306,7 +306,7 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final MetadataRowContainer e = sb.webIndex.metadata().load(urlx[i], null, 0);
+                            final URLMetadataRow e = sb.webIndex.metadata().load(urlx[i], null, 0);
                             sb.webIndex.metadata().remove(urlx[i]);
                             if (e != null) {
                                 url = e.metadata().url();

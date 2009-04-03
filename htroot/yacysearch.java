@@ -33,13 +33,10 @@ import java.util.TreeSet;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.text.MetadataRowContainer;
-import de.anomic.kelondro.text.URLMetadata;
-import de.anomic.kelondro.text.Word;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.Log;
-import de.anomic.plasma.plasmaCondenser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
@@ -48,6 +45,8 @@ import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.plasma.parser.Word;
+import de.anomic.plasma.parser.Condenser;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
@@ -164,7 +163,7 @@ public class yacysearch {
         Bitfield constraint = (post != null && post.containsKey("constraint") && post.get("constraint", "").length() > 0) ? new Bitfield(4, post.get("constraint", "______")) : null;
         if (indexof) {
             constraint = new Bitfield(4);
-            constraint.set(plasmaCondenser.flag_cat_indexof, true);
+            constraint.set(Condenser.flag_cat_indexof, true);
         }
         
         // SEARCH
@@ -342,9 +341,9 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                final MetadataRowContainer urlentry = sb.webIndex.metadata().load(recommendHash, null, 0);
+                final URLMetadataRow urlentry = sb.webIndex.metadata().load(recommendHash, null, 0);
                 if (urlentry != null) {
-                    final URLMetadata metadata = urlentry.metadata();
+                    final URLMetadataRow.Components metadata = urlentry.metadata();
                     plasmaParserDocument document;
                     document = plasmaSnippetCache.retrieveDocument(metadata.url(), true, 5000, true, false);
                     if (document != null) {

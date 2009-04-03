@@ -50,7 +50,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.kelondro.text.Blacklist;
+import de.anomic.data.Blacklist;
 import de.anomic.plasma.plasmaSwitchboard;
 
 public class yacyNewsPool {

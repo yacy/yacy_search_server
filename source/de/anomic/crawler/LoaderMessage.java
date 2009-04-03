@@ -23,7 +23,7 @@
 
 package de.anomic.crawler;
 
-import de.anomic.kelondro.text.Document;
+import de.anomic.plasma.parser.Document;
 import de.anomic.server.serverSemaphore;
 import de.anomic.yacy.yacyURL;
 

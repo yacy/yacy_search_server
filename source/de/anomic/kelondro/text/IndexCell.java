@@ -36,6 +36,7 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.MergeIterator;
 import de.anomic.kelondro.order.Order;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.server.serverProfiling;
 
@@ -65,15 +66,15 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
     
     public IndexCell(
             final File cellPath,
-            final ByteOrder wordOrder,
+            final ByteOrder termOrder,
             final Row payloadrow,
             final int maxRamEntries,
             final long targetFileSize,
             final long maxFileSize,
             IODispatcher merger
             ) throws IOException {
-        this.array = new ReferenceContainerArray(cellPath, wordOrder, payloadrow, merger);
-        this.ram = new ReferenceContainerCache(payloadrow, wordOrder);
+        this.array = new ReferenceContainerArray(cellPath, termOrder, payloadrow, merger);
+        this.ram = new ReferenceContainerCache(payloadrow, termOrder);
         this.ram.initWriteMode();
         this.maxRamEntries = maxRamEntries;
         this.merger = merger;
@@ -99,25 +100,25 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
         cleanCache();
     }
 
-    public synchronized void add(String hash, ReferenceRow entry) throws IOException {
+    public synchronized void add(String hash, WordReferenceRow entry) throws IOException {
         this.ram.add(hash, entry);
         serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
         cleanCache();
     }
 
     /**
-     * checks if there is any container for this wordHash, either in RAM or any BLOB
+     * checks if there is any container for this termHash, either in RAM or any BLOB
      */
-    public boolean has(String wordHash) {
-        if (this.ram.has(wordHash)) return true;
-        return this.array.has(wordHash);
+    public boolean has(String termHash) {
+        if (this.ram.has(termHash)) return true;
+        return this.array.has(termHash);
     }
 
-    public int count(String wordHash) {
-        ReferenceContainer c0 = this.ram.get(wordHash, null);
+    public int count(String termHash) {
+        ReferenceContainer c0 = this.ram.get(termHash, null);
         ReferenceContainer c1;
         try {
-            c1 = this.array.get(wordHash);
+            c1 = this.array.get(termHash);
         } catch (IOException e) {
             c1 = null;
         }
@@ -133,9 +134,9 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
      * all containers in the BLOBs and the RAM are merged and returned
      * @throws IOException 
      */
-    public ReferenceContainer get(String wordHash, Set<String> urlselection) throws IOException {
-        ReferenceContainer c0 = this.ram.get(wordHash, null);
-        ReferenceContainer c1 = this.array.get(wordHash);
+    public ReferenceContainer get(String termHash, Set<String> urlselection) throws IOException {
+        ReferenceContainer c0 = this.ram.get(termHash, null);
+        ReferenceContainer c1 = this.array.get(termHash);
         if (c1 == null) {
             if (c0 == null) return null;
             return c0;
@@ -149,14 +150,14 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
      * the deleted containers are merged and returned as result of the method
      * @throws IOException 
      */
-    public ReferenceContainer delete(String wordHash) throws IOException {
-        ReferenceContainer c0 = this.ram.delete(wordHash);
-        ReferenceContainer c1 = this.array.get(wordHash);
+    public ReferenceContainer delete(String termHash) throws IOException {
+        ReferenceContainer c0 = this.ram.delete(termHash);
+        ReferenceContainer c1 = this.array.get(termHash);
         if (c1 == null) {
             if (c0 == null) return null;
             return c0;
         }
-        this.array.delete(wordHash);
+        this.array.delete(termHash);
         cleanCache();
         if (c0 == null) return c1;
         return c1.merge(c0);
@@ -169,13 +170,13 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
      * new BLOBs. This returns the sum of all url references that have been removed
      * @throws IOException 
      */
-    public int remove(String wordHash, Set<String> urlHashes) throws IOException {
-        int reduced = this.array.replace(wordHash, new RemoveRewriter(urlHashes));
+    public int remove(String termHash, Set<String> urlHashes) throws IOException {
+        int reduced = this.array.replace(termHash, new RemoveRewriter(urlHashes));
         return reduced / this.array.rowdef().objectsize;
     }
 
-    public boolean remove(String wordHash, String urlHash) throws IOException {
-        int reduced = this.array.replace(wordHash, new RemoveRewriter(urlHash));
+    public boolean remove(String termHash, String urlHash) throws IOException {
+        int reduced = this.array.replace(termHash, new RemoveRewriter(urlHash));
         return reduced > 0;
     }
 
@@ -199,14 +200,14 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
         
     }
 
-    public CloneableIterator<ReferenceContainer> references(String startWordHash, boolean rot) {
+    public CloneableIterator<ReferenceContainer> references(String starttermHash, boolean rot) {
         final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(this.ram.rowdef().getOrdering().clone());
-        containerOrder.rotate(new ReferenceContainer(startWordHash, this.ram.rowdef(), 0));
+        containerOrder.rotate(new ReferenceContainer(starttermHash, this.ram.rowdef(), 0));
         return new MergeIterator<ReferenceContainer>(
-            this.ram.references(startWordHash, rot),
+            this.ram.references(starttermHash, rot),
             new MergeIterator<ReferenceContainer>(
-                this.ram.references(startWordHash, false),
-                this.array.wordContainerIterator(startWordHash, false, false),
+                this.ram.references(starttermHash, false),
+                this.array.wordContainerIterator(starttermHash, false, false),
                 containerOrder,
                 ReferenceContainer.containerMergeMethod,
                 true),
@@ -215,15 +216,15 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
             true);
     }
 
-    public CloneableIterator<ReferenceContainer> references(String startWordHash, boolean rot, boolean ram) {
+    public CloneableIterator<ReferenceContainer> references(String startTermHash, boolean rot, boolean ram) {
         final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(this.ram.rowdef().getOrdering().clone());
-        containerOrder.rotate(new ReferenceContainer(startWordHash, this.ram.rowdef(), 0));
+        containerOrder.rotate(new ReferenceContainer(startTermHash, this.ram.rowdef(), 0));
         if (ram) {
-            return this.ram.references(startWordHash, rot);
+            return this.ram.references(startTermHash, rot);
         }
         return new MergeIterator<ReferenceContainer>(
-                this.ram.references(startWordHash, false),
-                this.array.wordContainerIterator(startWordHash, false, false),
+                this.ram.references(startTermHash, false),
+                this.array.wordContainerIterator(startTermHash, false, false),
                 containerOrder,
                 ReferenceContainer.containerMergeMethod,
                 true);
@@ -317,26 +318,21 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
         return System.currentTimeMillis();
     }
 
-
     public int getBufferMaxReferences() {
         return this.ram.maxReferences();
     }
-
 
     public long getBufferMinAge() {
         return System.currentTimeMillis();
     }
 
-
     public int getBufferSize() {
         return this.ram.size();
     }
 
-
     public long getBufferSizeBytes() {
         return 10000 * this.ram.size(); // guessed; we don't know that exactly because there is no statistics here (expensive, not necessary)
     }
-
 
     public void setBufferMaxWordCount(int maxWords) {
         this.maxRamEntries = maxWords;

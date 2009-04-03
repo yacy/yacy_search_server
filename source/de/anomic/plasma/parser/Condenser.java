@@ -23,7 +23,7 @@
 // compile with javac -sourcepath source source/de/anomic/plasma/plasmaCondenser.java
 // execute with java -cp source de.anomic.plasma.plasmaCondenser
 
-package de.anomic.plasma;
+package de.anomic.plasma.parser;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -49,14 +49,13 @@ import java.util.TreeSet;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.text.Phrase;
-import de.anomic.kelondro.text.Reference;
-import de.anomic.kelondro.text.Word;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.language.identification.Identificator;
+import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.yacy.yacyURL;
 
-public final class plasmaCondenser {
+public final class Condenser {
 
     // this is the page analysis class
     
@@ -101,7 +100,7 @@ public final class plasmaCondenser {
     public Bitfield RESULT_FLAGS = new Bitfield(4);
     Identificator languageIdentificator;
     
-    public plasmaCondenser(final plasmaParserDocument document, final boolean indexText, final boolean indexMedia) throws UnsupportedEncodingException {
+    public Condenser(final plasmaParserDocument document, final boolean indexText, final boolean indexMedia) throws UnsupportedEncodingException {
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
         this.wordminsize = 3;
@@ -133,13 +132,13 @@ public final class plasmaCondenser {
             // phrase  99 is taken from the media Link url and anchor description
             // phrase 100 and above are lines from the text
       
-            insertTextToWords(document.dc_title(),    1, Reference.flag_app_dc_title, RESULT_FLAGS, true);
-            insertTextToWords(document.dc_description(), 3, Reference.flag_app_dc_description, RESULT_FLAGS, true);
-            insertTextToWords(document.dc_creator(),   4, Reference.flag_app_dc_creator, RESULT_FLAGS, true);
+            insertTextToWords(document.dc_title(),    1, WordReferenceRow.flag_app_dc_title, RESULT_FLAGS, true);
+            insertTextToWords(document.dc_description(), 3, WordReferenceRow.flag_app_dc_description, RESULT_FLAGS, true);
+            insertTextToWords(document.dc_creator(),   4, WordReferenceRow.flag_app_dc_creator, RESULT_FLAGS, true);
             // missing: tags!
             final String[] titles = document.getSectionTitles();
             for (int i = 0; i < titles.length; i++) {
-                insertTextToWords(titles[i], i + 10, Reference.flag_app_emphasized, RESULT_FLAGS, true);
+                insertTextToWords(titles[i], i + 10, WordReferenceRow.flag_app_emphasized, RESULT_FLAGS, true);
             }
             
             // anchors: for text indexing we add only the anchor description
@@ -164,7 +163,7 @@ public final class plasmaCondenser {
         }
         
         // add the URL components to the word list
-        insertTextToWords(document.dc_source().toNormalform(false, true), 0, Reference.flag_app_dc_identifier, RESULT_FLAGS, false);
+        insertTextToWords(document.dc_source().toNormalform(false, true), 0, WordReferenceRow.flag_app_dc_identifier, RESULT_FLAGS, false);
 
         if (indexMedia) {
             // add anchor descriptions: here, we also add the url components
@@ -241,11 +240,11 @@ public final class plasmaCondenser {
         }
     }
 
-    public plasmaCondenser(final InputStream text, final String charset) throws UnsupportedEncodingException {
+    public Condenser(final InputStream text, final String charset) throws UnsupportedEncodingException {
         this(text, charset, 3, 2);
     }
 
-    public plasmaCondenser(final InputStream text, final String charset, final int wordminsize, final int wordcut) throws UnsupportedEncodingException {
+    public Condenser(final InputStream text, final String charset, final int wordminsize, final int wordcut) throws UnsupportedEncodingException {
         this.wordminsize = wordminsize;
         this.wordcut = wordcut;
         this.languageIdentificator = null; // we don't need that here
@@ -715,7 +714,7 @@ public final class plasmaCondenser {
 			buffer = new ByteArrayInputStream(text.getBytes());
 		}
         try {
-            return new plasmaCondenser(buffer, "UTF-8", 2, 1).words();
+            return new Condenser(buffer, "UTF-8", 2, 1).words();
         } catch (final UnsupportedEncodingException e) {
             return null;
         }

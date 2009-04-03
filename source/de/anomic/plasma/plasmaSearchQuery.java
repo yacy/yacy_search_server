@@ -31,8 +31,9 @@ import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.text.Word;
 import de.anomic.kelondro.util.SetTools;
+import de.anomic.plasma.parser.Word;
+import de.anomic.plasma.parser.Condenser;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
@@ -234,7 +235,7 @@ public final class plasmaSearchQuery {
     public static final boolean matches(final String text, final TreeSet<String> keyhashes) {
     	// returns true if any of the word hashes in keyhashes appear in the String text
     	// to do this, all words in the string must be recognized and transcoded to word hashes
-    	final TreeSet<String> wordhashes = Word.words2hashes(plasmaCondenser.getWords(text).keySet());
+    	final TreeSet<String> wordhashes = Word.words2hashes(Condenser.getWords(text).keySet());
     	return SetTools.anymatch(wordhashes, keyhashes);
     }
     

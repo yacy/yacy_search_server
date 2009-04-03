@@ -28,8 +28,7 @@
 import java.net.MalformedURLException;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.text.MetadataRowContainer;
-import de.anomic.kelondro.text.URLMetadata;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -69,14 +68,14 @@ public class yacydoc {
         }
         if (urlhash == null || urlhash.length() == 0) return prop;
         
-        final MetadataRowContainer entry = sb.webIndex.metadata().load(urlhash, null, 0);
+        final URLMetadataRow entry = sb.webIndex.metadata().load(urlhash, null, 0);
         if (entry == null) return prop;
 
-        final URLMetadata metadata = entry.metadata();
+        final URLMetadataRow.Components metadata = entry.metadata();
         if (metadata.url() == null) {
             return prop;
         }
-        final MetadataRowContainer le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : sb.webIndex.metadata().load(entry.referrerHash(), null, 0);
+        final URLMetadataRow le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : sb.webIndex.metadata().load(entry.referrerHash(), null, 0);
         
         prop.putXML("dc_title", metadata.dc_title());
         prop.putXML("dc_creator", metadata.dc_creator());

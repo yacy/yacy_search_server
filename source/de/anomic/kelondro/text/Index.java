@@ -34,6 +34,7 @@ import java.util.TreeSet;
 
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 
 public interface Index {
     
@@ -52,72 +53,72 @@ public interface Index {
 	 * if no references to the word are stored, the a new entry is added,
      * if there are already references to the word hash stored,
      * then the old and the new references are merged
-	 * @param wordHash
+	 * @param termHash
 	 * @param entry
 	 * @throws IOException
 	 */
-    public void add(final String wordHash, final ReferenceRow entry) throws IOException;
+    public void add(final String termHash, final WordReferenceRow entry) throws IOException;
     
 	/**
 	 * check if there are references stored to the given word hash
-	 * @param wordHash
+	 * @param termHash
 	 * @return true if references exist, false if not
 	 */
-	public boolean has(String wordHash); // should only be used if in case that true is returned the getContainer is NOT called
+	public boolean has(String termHash); // should only be used if in case that true is returned the getContainer is NOT called
     
 	/**
 	 * count the number of references for the given word
 	 * do not use this method to check the existence of a reference by comparing
 	 * the result with zero, use hasReferences instead.
-	 * @param wordHash
+	 * @param termHash
 	 * @return the number of references to the given word
 	 */
-	public int count(final String wordHash);
+	public int count(final String termHash);
     
 	/**
 	 * get the references to a given word.
 	 *  if referenceselection is not null, then all url references which are not
 	 *  in referenceselection are removed from the container
-	 * @param wordHash
+	 * @param termHash
 	 * @param referenceselection
 	 * @return the references
 	 * @throws IOException
 	 */
-	public ReferenceContainer get(String wordHash, Set<String> referenceselection) throws IOException;
+	public ReferenceContainer get(String termHash, Set<String> referenceselection) throws IOException;
     
     /**
      * delete all references for a word
-     * @param wordHash
+     * @param termHash
      * @return the deleted references
      * @throws IOException
      */
-	public ReferenceContainer delete(String wordHash) throws IOException;
+	public ReferenceContainer delete(String termHash) throws IOException;
     
 	/**
 	 * remove a specific reference entry
-	 * @param wordHash
+	 * @param termHash
 	 * @param referenceHash the key for the reference entry to be removed
 	 * @return
 	 * @throws IOException
 	 */
-    public boolean remove(String wordHash, String referenceHash) throws IOException;
+    public boolean remove(String termHash, String referenceHash) throws IOException;
     
     /**
      * remove a set of reference entries for a given word
-     * @param wordHash the key for the references
+     * @param termHash the key for the references
      * @param referenceHash the reference entry keys
      * @return
      * @throws IOException
      */
-    public int remove(String wordHash, Set<String> referenceHashes) throws IOException;
+    public int remove(String termHash, Set<String> referenceHashes) throws IOException;
     
-    public int remove(final Set<String> wordHashes, final String urlHash) throws IOException;
+    public int remove(final Set<String> termHashes, final String urlHash) throws IOException;
     
-    public void remove(final Set<String> wordHashes, final Set<String> urlHashes) throws IOException;
+    public void remove(final Set<String> termHashes, final Set<String> urlHashes) throws IOException;
 
     /**
      * iterate all references from the beginning of a specific word hash
-     * @param startWordHash
+     * @param startHash
      * @param rot if true, then rotate at the end to the beginning
      * @param ram
      * @return

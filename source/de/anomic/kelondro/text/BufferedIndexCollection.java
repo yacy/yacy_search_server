@@ -44,7 +44,7 @@ import de.anomic.kelondro.text.IndexBuffer;
 import de.anomic.kelondro.text.IndexCollection;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerOrder;
-import de.anomic.kelondro.text.ReferenceRow;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.Log;
@@ -94,21 +94,21 @@ public final class BufferedIndexCollection extends AbstractBufferedIndex impleme
                     12,
                     Base64Order.enhancedCoder,
                     maxCollectionPartition, 
-                    ReferenceRow.urlEntryRow, 
+                    WordReferenceRow.urlEntryRow, 
                     useCommons);
     }
 
     /* methods for interface Index */
     
     public void add(final ReferenceContainer entries) {
-        assert (entries.row().objectsize == ReferenceRow.urlEntryRow.objectsize);
+        assert (entries.row().objectsize == WordReferenceRow.urlEntryRow.objectsize);
  
         // add the entry
         buffer.add(entries);
         cacheFlushControl();
     }
     
-    public void add(final String wordHash, final ReferenceRow entry) throws IOException {
+    public void add(final String wordHash, final WordReferenceRow entry) throws IOException {
         // add the entry
         buffer.add(wordHash, entry);
         cacheFlushControl();
@@ -151,10 +151,10 @@ public final class BufferedIndexCollection extends AbstractBufferedIndex impleme
         for (int i = 0; i < d.size(); i++) {
             // for each element in the double-set, take that one that is the most recent one
             set = d.get(i);
-            ReferenceRow e, elm = null;
+            WordReferenceRow e, elm = null;
             long lm = 0;
             for (int j = 0; j < set.size(); j++) {
-                e = new ReferenceRow(set.get(j, true));
+                e = new WordReferenceRow(set.get(j, true));
                 if ((elm == null) || (e.lastModified() > lm)) {
                     elm = e;
                     lm = e.lastModified();
@@ -164,7 +164,7 @@ public final class BufferedIndexCollection extends AbstractBufferedIndex impleme
                 container.addUnique(elm.toKelondroEntry());
             }
         }
-        if (container.size() < beforeDouble) System.out.println("*** DEBUG DOUBLECHECK - removed " + (beforeDouble - container.size()) + " index entries from word container " + container.getWordHash());
+        if (container.size() < beforeDouble) System.out.println("*** DEBUG DOUBLECHECK - removed " + (beforeDouble - container.size()) + " index entries from word container " + container.getTermHash());
 
         return container;
     }
@@ -172,7 +172,7 @@ public final class BufferedIndexCollection extends AbstractBufferedIndex impleme
     public ReferenceContainer delete(final String wordHash) {
         final ReferenceContainer c = new ReferenceContainer(
                 wordHash,
-                ReferenceRow.urlEntryRow,
+                WordReferenceRow.urlEntryRow,
                 buffer.count(wordHash));
         c.addAllUnique(buffer.delete(wordHash));
         c.addAllUnique(collections.delete(wordHash));

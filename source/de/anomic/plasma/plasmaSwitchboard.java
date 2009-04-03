@@ -122,6 +122,7 @@ import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.RobotsTxt;
 import de.anomic.crawler.ZURL;
 import de.anomic.crawler.CrawlProfile.entry;
+import de.anomic.data.Blacklist;
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
@@ -139,18 +140,17 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.text.Document;
-import de.anomic.kelondro.text.MetadataRowContainer;
-import de.anomic.kelondro.text.URLMetadata;
-import de.anomic.kelondro.text.Blacklist;
-import de.anomic.kelondro.text.Word;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.net.UPnP;
+import de.anomic.plasma.parser.Document;
 import de.anomic.plasma.parser.ParserException;
+import de.anomic.plasma.parser.Word;
+import de.anomic.plasma.parser.Condenser;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCore;
@@ -930,7 +930,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (urlhash.length() == 0) return null;
         final yacyURL ne = crawlQueues.getURL(urlhash);
         if (ne != null) return ne;
-        final MetadataRowContainer le = webIndex.metadata().load(urlhash, null, 0);
+        final URLMetadataRow le = webIndex.metadata().load(urlhash, null, 0);
         if (le != null) return le.metadata().url();
         return null;
     }
@@ -1242,11 +1242,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public static class indexingQueueEntry extends serverProcessorJob {
         public IndexingStack.QueueEntry queueEntry;
         public plasmaParserDocument document;
-        public plasmaCondenser condenser;
+        public Condenser condenser;
         public indexingQueueEntry(
                 final IndexingStack.QueueEntry queueEntry,
                 final plasmaParserDocument document,
-                final plasmaCondenser condenser) {
+                final Condenser condenser) {
             super();
             this.queueEntry = queueEntry;
             this.document = document;
@@ -1595,7 +1595,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // strip out words and generate statistics
         if (this.log.isFine()) log.logFine("Condensing for '" + in.queueEntry.url().toNormalform(false, true) + "'");
         try {
-            plasmaCondenser condenser = new plasmaCondenser(in.document, in.queueEntry.profile().indexText(), in.queueEntry.profile().indexMedia());
+            Condenser condenser = new Condenser(in.document, in.queueEntry.profile().indexText(), in.queueEntry.profile().indexMedia());
 
             // update image result list statistics
             // its good to do this concurrently here, because it needs a DNS lookup
@@ -1623,7 +1623,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         in.queueEntry.close();
     }
     
-    private void storeDocumentIndex(final IndexingStack.QueueEntry queueEntry, final plasmaParserDocument document, final plasmaCondenser condenser) {
+    private void storeDocumentIndex(final IndexingStack.QueueEntry queueEntry, final plasmaParserDocument document, final Condenser condenser) {
         
         // CREATE INDEX
         final String dc_title = document.dc_title();
@@ -1634,7 +1634,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + queueEntry.url());
 
         // STORE URL TO LOADED-URL-DB
-        MetadataRowContainer newEntry = null;
+        URLMetadataRow newEntry = null;
         try {
             newEntry = webIndex.storeDocument(queueEntry, document, condenser);
         } catch (final IOException e) {
@@ -1682,9 +1682,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public class receiptSending implements Runnable {
         yacySeed initiatorPeer;
-        MetadataRowContainer reference;
+        URLMetadataRow reference;
         
-        public receiptSending(final yacySeed initiatorPeer, final MetadataRowContainer reference) {
+        public receiptSending(final yacySeed initiatorPeer, final URLMetadataRow reference) {
             this.initiatorPeer = initiatorPeer;
             this.reference = reference;
         }
@@ -1729,9 +1729,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         if (urlhash == null) return 0;
         // determine the url string
-        final MetadataRowContainer entry = webIndex.metadata().load(urlhash, null, 0);
+        final URLMetadataRow entry = webIndex.metadata().load(urlhash, null, 0);
         if (entry == null) return 0;
-        final URLMetadata metadata = entry.metadata();
+        final URLMetadataRow.Components metadata = entry.metadata();
         if (metadata.url() == null) return 0;
         
         InputStream resourceContent = null;
@@ -1757,7 +1757,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 // get the word set
                 Set<String> words = null;
                 try {
-                    words = new plasmaCondenser(document, true, true).words().keySet();
+                    words = new Condenser(document, true, true).words().keySet();
                 } catch (final UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }

@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2009-03-20 16:44:59 +0100 (Fr, 20 Mrz 2009) $
+// $LastChangedRevision: 5736 $
+// $LastChangedBy: borg-0300 $
 //
 // LICENSE
 // 
@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.text;
+package de.anomic.kelondro.text.referencePrototype;
 
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
@@ -32,9 +32,10 @@ import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.MicroDate;
+import de.anomic.kelondro.text.Reference;
 import de.anomic.yacy.yacySeedDB;
 
-public final class ReferenceRow implements Reference, Cloneable {
+public final class WordReferenceRow implements Reference, Cloneable {
 
     // this object stores attributes to URL references inside RWI collections
 
@@ -88,9 +89,19 @@ public final class ReferenceRow implements Reference, Cloneable {
     private static final int col_reserve1      = 18; // i  1 reserve1
     private static final int col_reserve2      = 19; // k  1 reserve2
 
+    // appearance flags, used in RWI entry
+    // some names are derived from the Dublin Core Metadata tag set
+    // the flags 0..23 are identical to the category flags in plasmaCondenser
+    public  static final int flag_app_dc_description= 24; // word appears in anchor description text (the reference to an url), or any alternative text field of a link
+    public  static final int flag_app_dc_title      = 25; // word appears in title or headline or any description part
+    public  static final int flag_app_dc_creator    = 26; // word appears in author
+    public  static final int flag_app_dc_subject    = 27; // word appears in header tags or other descriptive part
+    public  static final int flag_app_dc_identifier = 28; // word appears in url or document identifier
+    public  static final int flag_app_emphasized    = 29; // word is emphasized in text (i.e. bold, italics, special size)
+
     private final Row.Entry entry;
     
-    public ReferenceRow(final String  urlHash,
+    public WordReferenceRow(final String  urlHash,
             final int      urlLength,     // byte-length of complete URL
             final int      urlComps,      // number of path components
             final int      titleLength,   // length of description/length (longer are better?)
@@ -135,32 +146,32 @@ public final class ReferenceRow implements Reference, Cloneable {
         this.entry.setCol(col_reserve2, 0);
     }
     
-    public ReferenceRow(final String urlHash, final String code) {
+    public WordReferenceRow(final String urlHash, final String code) {
         // the code is the external form of the row minus the leading urlHash entry
         this.entry = urlEntryRow.newEntry((urlHash + code).getBytes());
     }
     
-    public ReferenceRow(final String external) {
+    public WordReferenceRow(final String external) {
         this.entry = urlEntryRow.newEntry(external, true);
     }
     
-    public ReferenceRow(final byte[] row) {
+    public WordReferenceRow(final byte[] row) {
         this.entry = urlEntryRow.newEntry(row);
     }
     
-    public ReferenceRow(final byte[] row, final int offset, final boolean clone) {
+    public WordReferenceRow(final byte[] row, final int offset, final boolean clone) {
         this.entry = urlEntryRow.newEntry(row, offset, clone);
     }
     
-    public ReferenceRow(final Row.Entry rentry) {
+    public WordReferenceRow(final Row.Entry rentry) {
         // FIXME: see if cloning is necessary
         this.entry = rentry;
     }
     
-    public ReferenceRow clone() {
+    public WordReferenceRow clone() {
         final byte[] b = new byte[urlEntryRow.objectsize];
         System.arraycopy(entry.bytes(), 0, b, 0, urlEntryRow.objectsize);
-        return new ReferenceRow(b);
+        return new WordReferenceRow(b);
     }
 
     public String toPropertyForm() {

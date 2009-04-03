@@ -32,12 +32,13 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import de.anomic.data.Blacklist;
 import de.anomic.data.listManager;
 import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.text.MetadataRowContainer;
-import de.anomic.kelondro.text.Reference;
-import de.anomic.kelondro.text.Blacklist;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.DateFormatter;
+import de.anomic.plasma.parser.Condenser;
 import de.anomic.server.serverObjects;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
@@ -54,17 +55,17 @@ public class plasmaSearchAPI {
             if (post.get("flags","").length() == 0) return null;
             return new Bitfield(4, post.get("flags"));
         }
-        if (post.get("description", "").equals("on")) b.set(Reference.flag_app_dc_description, true);
-        if (post.get("title", "").equals("on")) b.set(Reference.flag_app_dc_title, true);
-        if (post.get("creator", "").equals("on")) b.set(Reference.flag_app_dc_creator, true);
-        if (post.get("subject", "").equals("on")) b.set(Reference.flag_app_dc_subject, true);
-        if (post.get("url", "").equals("on")) b.set(Reference.flag_app_dc_identifier, true);
-        if (post.get("emphasized", "").equals("on")) b.set(Reference.flag_app_emphasized, true);
-        if (post.get("image", "").equals("on")) b.set(plasmaCondenser.flag_cat_hasimage, true);
-        if (post.get("audio", "").equals("on")) b.set(plasmaCondenser.flag_cat_hasaudio, true);
-        if (post.get("video", "").equals("on")) b.set(plasmaCondenser.flag_cat_hasvideo, true);
-        if (post.get("app", "").equals("on")) b.set(plasmaCondenser.flag_cat_hasapp, true);
-        if (post.get("indexof", "").equals("on")) b.set(plasmaCondenser.flag_cat_indexof, true);
+        if (post.get("description", "").equals("on")) b.set(WordReferenceRow.flag_app_dc_description, true);
+        if (post.get("title", "").equals("on")) b.set(WordReferenceRow.flag_app_dc_title, true);
+        if (post.get("creator", "").equals("on")) b.set(WordReferenceRow.flag_app_dc_creator, true);
+        if (post.get("subject", "").equals("on")) b.set(WordReferenceRow.flag_app_dc_subject, true);
+        if (post.get("url", "").equals("on")) b.set(WordReferenceRow.flag_app_dc_identifier, true);
+        if (post.get("emphasized", "").equals("on")) b.set(WordReferenceRow.flag_app_emphasized, true);
+        if (post.get("image", "").equals("on")) b.set(Condenser.flag_cat_hasimage, true);
+        if (post.get("audio", "").equals("on")) b.set(Condenser.flag_cat_hasaudio, true);
+        if (post.get("video", "").equals("on")) b.set(Condenser.flag_cat_hasvideo, true);
+        if (post.get("app", "").equals("on")) b.set(Condenser.flag_cat_hasapp, true);
+        if (post.get("indexof", "").equals("on")) b.set(Condenser.flag_cat_indexof, true);
         return b;
     }
     
@@ -96,17 +97,17 @@ public class plasmaSearchAPI {
         } else {
             prop.put("searchresult", 3);
             prop.put("searchresult_allurl", ranked.filteredCount());
-            prop.put("searchresult_description", ranked.flagCount()[Reference.flag_app_dc_description]);
-            prop.put("searchresult_title", ranked.flagCount()[Reference.flag_app_dc_title]);
-            prop.put("searchresult_creator", ranked.flagCount()[Reference.flag_app_dc_creator]);
-            prop.put("searchresult_subject", ranked.flagCount()[Reference.flag_app_dc_subject]);
-            prop.put("searchresult_url", ranked.flagCount()[Reference.flag_app_dc_identifier]);
-            prop.put("searchresult_emphasized", ranked.flagCount()[Reference.flag_app_emphasized]);
-            prop.put("searchresult_image", ranked.flagCount()[plasmaCondenser.flag_cat_hasimage]);
-            prop.put("searchresult_audio", ranked.flagCount()[plasmaCondenser.flag_cat_hasaudio]);
-            prop.put("searchresult_video", ranked.flagCount()[plasmaCondenser.flag_cat_hasvideo]);
-            prop.put("searchresult_app", ranked.flagCount()[plasmaCondenser.flag_cat_hasapp]);
-            prop.put("searchresult_indexof", ranked.flagCount()[plasmaCondenser.flag_cat_indexof]);
+            prop.put("searchresult_description", ranked.flagCount()[WordReferenceRow.flag_app_dc_description]);
+            prop.put("searchresult_title", ranked.flagCount()[WordReferenceRow.flag_app_dc_title]);
+            prop.put("searchresult_creator", ranked.flagCount()[WordReferenceRow.flag_app_dc_creator]);
+            prop.put("searchresult_subject", ranked.flagCount()[WordReferenceRow.flag_app_dc_subject]);
+            prop.put("searchresult_url", ranked.flagCount()[WordReferenceRow.flag_app_dc_identifier]);
+            prop.put("searchresult_emphasized", ranked.flagCount()[WordReferenceRow.flag_app_emphasized]);
+            prop.put("searchresult_image", ranked.flagCount()[Condenser.flag_cat_hasimage]);
+            prop.put("searchresult_audio", ranked.flagCount()[Condenser.flag_cat_hasaudio]);
+            prop.put("searchresult_video", ranked.flagCount()[Condenser.flag_cat_hasvideo]);
+            prop.put("searchresult_app", ranked.flagCount()[Condenser.flag_cat_hasapp]);
+            prop.put("searchresult_indexof", ranked.flagCount()[Condenser.flag_cat_indexof]);
         }
         return ranked;
     }
@@ -126,7 +127,7 @@ public class plasmaSearchAPI {
             prop.put("genUrlList_lines", maxlines);
             int i = 0;
             yacyURL url;
-            MetadataRowContainer entry;
+            URLMetadataRow entry;
             String us;
             long rn = -1;
             while ((ranked.size() > 0) && ((entry = ranked.bestURL(false)) != null)) {
@@ -161,17 +162,17 @@ public class plasmaSearchAPI {
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_urlcomps", entry.word().urlcomps());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_urllength", entry.word().urllength());
                 prop.put("genUrlList_urlList_"+i+"_urlExists_props",
-                        ((entry.word().flags().get(plasmaCondenser.flag_cat_indexof)) ? "appears on index page, " : "") +
-                        ((entry.word().flags().get(plasmaCondenser.flag_cat_hasimage)) ? "contains images, " : "") +
-                        ((entry.word().flags().get(plasmaCondenser.flag_cat_hasaudio)) ? "contains audio, " : "") +
-                        ((entry.word().flags().get(plasmaCondenser.flag_cat_hasvideo)) ? "contains video, " : "") +
-                        ((entry.word().flags().get(plasmaCondenser.flag_cat_hasapp)) ? "contains applications, " : "") +
-                        ((entry.word().flags().get(Reference.flag_app_dc_identifier)) ? "appears in url, " : "") +
-                        ((entry.word().flags().get(Reference.flag_app_dc_title)) ? "appears in title, " : "") +
-                        ((entry.word().flags().get(Reference.flag_app_dc_creator)) ? "appears in author, " : "") +
-                        ((entry.word().flags().get(Reference.flag_app_dc_subject)) ? "appears in subject, " : "") +
-                        ((entry.word().flags().get(Reference.flag_app_dc_description)) ? "appears in description, " : "") +
-                        ((entry.word().flags().get(Reference.flag_app_emphasized)) ? "appears emphasized, " : "") +
+                        ((entry.word().flags().get(Condenser.flag_cat_indexof)) ? "appears on index page, " : "") +
+                        ((entry.word().flags().get(Condenser.flag_cat_hasimage)) ? "contains images, " : "") +
+                        ((entry.word().flags().get(Condenser.flag_cat_hasaudio)) ? "contains audio, " : "") +
+                        ((entry.word().flags().get(Condenser.flag_cat_hasvideo)) ? "contains video, " : "") +
+                        ((entry.word().flags().get(Condenser.flag_cat_hasapp)) ? "contains applications, " : "") +
+                        ((entry.word().flags().get(WordReferenceRow.flag_app_dc_identifier)) ? "appears in url, " : "") +
+                        ((entry.word().flags().get(WordReferenceRow.flag_app_dc_title)) ? "appears in title, " : "") +
+                        ((entry.word().flags().get(WordReferenceRow.flag_app_dc_creator)) ? "appears in author, " : "") +
+                        ((entry.word().flags().get(WordReferenceRow.flag_app_dc_subject)) ? "appears in subject, " : "") +
+                        ((entry.word().flags().get(WordReferenceRow.flag_app_dc_description)) ? "appears in description, " : "") +
+                        ((entry.word().flags().get(WordReferenceRow.flag_app_emphasized)) ? "appears emphasized, " : "") +
                         ((yacyURL.probablyRootURL(entry.word().urlHash())) ? "probably root url" : "")
                 );
                 if (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, url)) {

@@ -41,7 +41,7 @@ import de.anomic.kelondro.text.Index;
 import de.anomic.kelondro.text.IndexCollection;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerOrder;
-import de.anomic.kelondro.text.ReferenceRow;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
 
@@ -66,7 +66,7 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
         this.cell = new IndexCell(
                                 celldir,
                                 wordOrdering,
-                                ReferenceRow.urlEntryRow,
+                                WordReferenceRow.urlEntryRow,
                                 entityCacheMaxSize,
                                 targetFileSize,
                                 maxFileSize,
@@ -104,7 +104,7 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
                         12,
                         Base64Order.enhancedCoder,
                         BufferedIndexCollection.maxCollectionPartition, 
-                        ReferenceRow.urlEntryRow, 
+                        WordReferenceRow.urlEntryRow, 
                         false);
             if (this.collections.size() == 0) {
                 // delete everything here
@@ -126,10 +126,10 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
     /* methods for interface Index */
     
     public void add(final ReferenceContainer entries) throws IOException {
-        assert (entries.row().objectsize == ReferenceRow.urlEntryRow.objectsize);
+        assert (entries.row().objectsize == WordReferenceRow.urlEntryRow.objectsize);
  
         if (this.collections != null) {
-            ReferenceContainer e = this.collections.delete(entries.getWordHash());
+            ReferenceContainer e = this.collections.delete(entries.getTermHash());
             if (e != null) {
                 e.merge(entries);
                 cell.add(e);
@@ -141,7 +141,7 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
         }
     }
     
-    public void add(final String wordHash, final ReferenceRow entry) throws IOException {
+    public void add(final String wordHash, final WordReferenceRow entry) throws IOException {
         if (this.collections != null) {
             ReferenceContainer e = this.collections.delete(wordHash);
             if (e != null) {

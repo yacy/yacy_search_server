@@ -38,11 +38,11 @@ import java.util.HashSet;
 import java.util.List;
 
 import de.anomic.crawler.HTTPLoader;
+import de.anomic.data.AbstractBlacklist;
 import de.anomic.data.listManager;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.text.AbstractBlacklist;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;

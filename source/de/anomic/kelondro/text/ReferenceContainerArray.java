@@ -56,7 +56,7 @@ public final class ReferenceContainerArray {
      */
     public ReferenceContainerArray(
     		final File heapLocation,
-    		final ByteOrder wordOrder,
+    		final ByteOrder termOrder,
     		final Row payloadrow,
     		IODispatcher merger) throws IOException {
         this.payloadrow = payloadrow;
@@ -64,7 +64,7 @@ public final class ReferenceContainerArray {
             heapLocation,
             "index",
             payloadrow.primaryKeyLength,
-            wordOrder,
+            termOrder,
             0);
         assert merger != null;
         this.merger = merger;
@@ -182,8 +182,8 @@ public final class ReferenceContainerArray {
      * @return true, if the key is used in the heap; false othervise
      * @throws IOException 
      */
-    public synchronized boolean has(final String key) {
-        return this.array.has(key.getBytes());
+    public synchronized boolean has(final String termHash) {
+        return this.array.has(termHash.getBytes());
     }
     
     /**
@@ -192,13 +192,13 @@ public final class ReferenceContainerArray {
      * @return the indexContainer if one exist, null otherwise
      * @throws IOException 
      */
-    public synchronized ReferenceContainer get(final String key) throws IOException {
-    	List<byte[]> entries = this.array.getAll(key.getBytes());
+    public synchronized ReferenceContainer get(final String termHash) throws IOException {
+    	List<byte[]> entries = this.array.getAll(termHash.getBytes());
     	if (entries == null || entries.size() == 0) return null;
     	byte[] a = entries.remove(0);
-    	ReferenceContainer c = new ReferenceContainer(key, RowSet.importRowSet(a, payloadrow));
+    	ReferenceContainer c = new ReferenceContainer(termHash, RowSet.importRowSet(a, payloadrow));
     	while (entries.size() > 0) {
-    		c = c.merge(new ReferenceContainer(key, RowSet.importRowSet(entries.remove(0), payloadrow)));
+    		c = c.merge(new ReferenceContainer(termHash, RowSet.importRowSet(entries.remove(0), payloadrow)));
     	}
     	return c;
     }
@@ -209,13 +209,13 @@ public final class ReferenceContainerArray {
      * @return the indexContainer if the cache contained the container, null othervise
      * @throws IOException 
      */
-    public synchronized void delete(final String wordHash) throws IOException {
+    public synchronized void delete(final String termHash) throws IOException {
         // returns the index that had been deleted
-    	array.remove(wordHash.getBytes());
+    	array.remove(termHash.getBytes());
     }
     
-    public synchronized int replace(final String wordHash, ContainerRewriter rewriter) throws IOException {
-        return array.replace(wordHash.getBytes(), new BLOBRewriter(wordHash, rewriter));
+    public synchronized int replace(final String termHash, ContainerRewriter rewriter) throws IOException {
+        return array.replace(termHash.getBytes(), new BLOBRewriter(termHash, rewriter));
     }
     
     public class BLOBRewriter implements BLOB.Rewriter {

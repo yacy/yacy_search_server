@@ -38,13 +38,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.http.httpClient;
 import de.anomic.kelondro.table.FlexWidthArray;
-import de.anomic.kelondro.text.Document;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.plasma.parser.Document;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.xml.RSSFeed;
 import de.anomic.xml.RSSMessage;

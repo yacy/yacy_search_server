@@ -30,8 +30,7 @@ import java.util.Date;
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.text.MetadataRowContainer;
-import de.anomic.kelondro.text.URLMetadata;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -109,8 +108,8 @@ public class urls {
             if (urlhashes.length() % 12 != 0) return prop;
             final int count = urlhashes.length() / 12;
         	int c = 0;
-        	MetadataRowContainer entry;
-        	URLMetadata metadata;
+        	URLMetadataRow entry;
+        	URLMetadataRow.Components metadata;
             yacyURL referrer;
             for (int i = 0; i < count; i++) {
                 entry = sb.webIndex.metadata().load(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);

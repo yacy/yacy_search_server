@@ -40,7 +40,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.text.MetadataRowContainer;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacySeedDB;
@@ -82,7 +82,7 @@ public final class ResultURLs {
         gcrawlResultDomains = new ScoreCluster<String>();
     }
 
-    public synchronized void stack(final MetadataRowContainer e, final String initiatorHash, final String executorHash, final int stackType) {
+    public synchronized void stack(final URLMetadataRow e, final String initiatorHash, final String executorHash, final int stackType) {
         assert initiatorHash != null;
         assert executorHash != null;
         if (e == null) { return; }
@@ -305,7 +305,7 @@ public final class ResultURLs {
         final ResultURLs results = new ResultURLs();
         try {
             final yacyURL url = new yacyURL("http", "www.yacy.net", 80, "/");
-            final MetadataRowContainer urlRef = new MetadataRowContainer(url, "YaCy Homepage", "", "", "", new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), "de", 0, 0, 0, 0, 0, 0);
+            final URLMetadataRow urlRef = new URLMetadataRow(url, "YaCy Homepage", "", "", "", new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), "de", 0, 0, 0, 0, 0, 0);
             int stackNo = 1;
             System.out.println("valid test:\n=======");
             // add

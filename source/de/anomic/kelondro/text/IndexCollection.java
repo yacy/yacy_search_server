@@ -54,6 +54,7 @@ import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.table.FixedWidthArray;
 import de.anomic.kelondro.table.FlexTable;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
@@ -250,10 +251,12 @@ public class IndexCollection extends AbstractIndex implements Index {
         }
     }
 
-    public void add(String wordhash, ReferenceRow entry) {
+    public void add(String wordhash, WordReferenceRow entry) {
         if (entry == null) return;
         try {
-            this.merge(new ReferenceContainer(wordhash, entry));
+            ReferenceContainer container = new ReferenceContainer(wordhash, this.payloadrow, 1);
+            container.add(entry);
+            this.merge(container);
         } catch (final kelondroOutOfLimitsException e) {
             e.printStackTrace();
         } catch (final IOException e) {
@@ -704,7 +707,7 @@ public class IndexCollection extends AbstractIndex implements Index {
     
     private synchronized void merge(final ReferenceContainer container) throws IOException, kelondroOutOfLimitsException {
         if ((container == null) || (container.size() == 0)) return;
-        final byte[] key = container.getWordHash().getBytes();
+        final byte[] key = container.getTermHash().getBytes();
         
         // first find an old entry, if one exists
         Row.Entry indexrow = index.get(key);

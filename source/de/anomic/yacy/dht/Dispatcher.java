@@ -35,8 +35,8 @@ import java.util.Map;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.BufferedIndex;
 import de.anomic.kelondro.text.ReferenceContainer;
-import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.text.MetadataRepository;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacySeed;
@@ -181,7 +181,7 @@ public class Dispatcher {
                 (System.currentTimeMillis() < timeout) &&
                 ((container = indexContainerIterator.next()) != null) &&
                 ((containers.size() == 0) ||
-                 (Base64Order.enhancedComparator.compare(container.getWordHash(), limitHash) < 0))
+                 (Base64Order.enhancedComparator.compare(container.getTermHash(), limitHash) < 0))
                 
         ) {
             if (container.size() == 0) continue;
@@ -190,15 +190,15 @@ public class Dispatcher {
         }
         // then remove the container from the backend
         HashSet<String> urlHashes = new HashSet<String>();
-        Iterator<ReferenceRow> it;
+        Iterator<WordReferenceRow> it;
         for (ReferenceContainer c: containers) {
             urlHashes.clear();
             it = c.entries();
             while (it.hasNext()) {
                 urlHashes.add(it.next().urlHash());
             }
-            if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + c.getWordHash() + "'");
-            if (urlHashes.size() > 0) this.backend.remove(c.getWordHash(), urlHashes);
+            if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + c.getTermHash() + "'");
+            if (urlHashes.size() > 0) this.backend.remove(c.getTermHash(), urlHashes);
         }
         
         // finished. The caller must take care of the containers and must put them back if not needed
@@ -222,15 +222,15 @@ public class Dispatcher {
         
         // check all entries and split them to the partitions
         ReferenceContainer[] partitionBuffer = new ReferenceContainer[partitionCount];
-        ReferenceRow re;
+        WordReferenceRow re;
         for (ReferenceContainer container: containers) {
             // init the new partitions
             for (int j = 0; j < partitionBuffer.length; j++) {
-                partitionBuffer[j] = new ReferenceContainer(container.getWordHash(), container.row(), container.size() / partitionCount);
+                partitionBuffer[j] = new ReferenceContainer(container.getTermHash(), container.row(), container.size() / partitionCount);
             }
 
             // split the container
-            Iterator<ReferenceRow> i = container.entries();
+            Iterator<WordReferenceRow> i = container.entries();
             while (i.hasNext()) {
                 re = i.next();
                 if (re == null) continue;
@@ -263,7 +263,7 @@ public class Dispatcher {
         for (int vertical = 0; vertical < containers.length; vertical++) {
             // the 'new' primary target is the word hash of the last container
             lastContainer = containers[vertical].get(containers[vertical].size() - 1);
-            primaryTarget = FlatWordPartitionScheme.positionToHash(this.seeds.scheme.dhtPosition(lastContainer.getWordHash(), vertical));
+            primaryTarget = FlatWordPartitionScheme.positionToHash(this.seeds.scheme.dhtPosition(lastContainer.getTermHash(), vertical));
 
             // get or make a entry object
             entry = this.transmissionCloud.get(primaryTarget); // if this is not null, the entry is extended here

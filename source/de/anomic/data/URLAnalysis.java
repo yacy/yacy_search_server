@@ -55,9 +55,9 @@ import de.anomic.kelondro.index.IntegerHandleIndex;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.IndexCollection;
 import de.anomic.kelondro.text.MetadataRepository;
-import de.anomic.kelondro.text.MetadataRowContainer;
-import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.text.MetadataRepository.Export;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.yacy.yacyURL;
 
@@ -396,7 +396,7 @@ public class URLAnalysis {
                 "collection",
                 12,
                 Base64Order.enhancedCoder,
-                ReferenceRow.urlEntryRow);
+                WordReferenceRow.urlEntryRow);
             System.out.println("COLLECTION INDEX REFERENCE COLLECTION starting dump of statistics");
             idx.dump(new File(statisticPath));
             System.out.println("COLLECTION INDEX REFERENCE COLLECTION finished dump, wrote " + idx.size() + " entries to " + statisticPath);
@@ -407,9 +407,9 @@ public class URLAnalysis {
 
     public static int diffurlcol(String metadataPath, String statisticFile, String diffFile) throws IOException {
         System.out.println("COLLECTION INDEX DIFF URL-COL startup");
-        IntegerHandleIndex idx = new IntegerHandleIndex(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, new File(statisticFile), 0);
+        IntegerHandleIndex idx = new IntegerHandleIndex(URLMetadataRow.rowdef.primaryKeyLength, URLMetadataRow.rowdef.objectOrder, new File(statisticFile), 0);
         MetadataRepository mr = new MetadataRepository(new File(metadataPath));
-        HandleSet hs = new HandleSet(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, 0, 1000000);
+        HandleSet hs = new HandleSet(URLMetadataRow.rowdef.primaryKeyLength, URLMetadataRow.rowdef.objectOrder, 0, 1000000);
         System.out.println("COLLECTION INDEX DIFF URL-COL loaded dump, starting diff");
         long start = System.currentTimeMillis();
         long update = start - 7000;
@@ -436,7 +436,7 @@ public class URLAnalysis {
         // format: 0=text, 1=html, 2=rss/xml
         System.out.println("URL EXPORT startup");
         MetadataRepository mr = new MetadataRepository(new File(metadataPath));
-        HandleSet hs = (diffFile == null) ? null : new HandleSet(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, new File(diffFile), 0);
+        HandleSet hs = (diffFile == null) ? null : new HandleSet(URLMetadataRow.rowdef.primaryKeyLength, URLMetadataRow.rowdef.objectOrder, new File(diffFile), 0);
         System.out.println("URL EXPORT loaded dump, starting export");
         Export e = mr.export(new File(export), ".*", hs, format, false);
         try {
@@ -451,7 +451,7 @@ public class URLAnalysis {
         System.out.println("URL DELETE startup");
         MetadataRepository mr = new MetadataRepository(new File(metadataPath));
         int mrSize = mr.size();
-        HandleSet hs = new HandleSet(MetadataRowContainer.rowdef.primaryKeyLength, MetadataRowContainer.rowdef.objectOrder, new File(diffFile), 0);
+        HandleSet hs = new HandleSet(URLMetadataRow.rowdef.primaryKeyLength, URLMetadataRow.rowdef.objectOrder, new File(diffFile), 0);
         System.out.println("URL DELETE loaded dump, starting deletion of " + hs.size() + " entries from " + mrSize);
         for (byte[] refhash: hs) {
             mr.remove(new String(refhash));

@@ -42,8 +42,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import de.anomic.kelondro.text.AbstractBlacklist;
-import de.anomic.kelondro.text.Blacklist.blacklistFile;
+import de.anomic.data.Blacklist.blacklistFile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 

@@ -35,6 +35,7 @@ import java.util.Set;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.Log;
@@ -94,8 +95,8 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
         } else if (dumpFile.exists()) {
             // initialize scores for cache organization
             for (final ReferenceContainer ic : (Iterable<ReferenceContainer>) heap.references(null, false)) {
-                this.hashDate.setScore(ic.getWordHash(), intTime(ic.lastWrote()));
-                this.hashScore.setScore(ic.getWordHash(), ic.size());
+                this.hashDate.setScore(ic.getTermHash(), intTime(ic.lastWrote()));
+                this.hashScore.setScore(ic.getTermHash(), ic.size());
             }
         } else {
             heap.initWriteMode();
@@ -197,7 +198,7 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
             }
             if (hash == null) {
                 final ReferenceContainer ic = heap.references(null, false).next();
-                if (ic != null) hash = ic.getWordHash();
+                if (ic != null) hash = ic.getTermHash();
             }
             return hash;
             
@@ -304,11 +305,11 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
 
         // put new words into cache
         heap.add(container);
-        hashScore.setScore(container.getWordHash(), heap.count(container.getWordHash()));
-        hashDate.setScore(container.getWordHash(), intTime(System.currentTimeMillis()));
+        hashScore.setScore(container.getTermHash(), heap.count(container.getTermHash()));
+        hashDate.setScore(container.getTermHash(), intTime(System.currentTimeMillis()));
     }
 
-    public void add(final String wordHash, final ReferenceRow entry) throws IOException {
+    public void add(final String wordHash, final WordReferenceRow entry) throws IOException {
         if (entry == null || heap == null) return;
 
         // put new words into cache
@@ -335,7 +336,7 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
     public synchronized long getBufferSizeBytes() {
         // calculate the real size in bytes of the index cache
         long cacheBytes = 0;
-        final long entryBytes = ReferenceRow.urlEntryRow.objectsize;
+        final long entryBytes = WordReferenceRow.urlEntryRow.objectsize;
         final Iterator<ReferenceContainer> it = references(null, false);
         while (it.hasNext()) cacheBytes += it.next().size() * entryBytes;
         return cacheBytes;

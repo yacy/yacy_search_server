@@ -31,8 +31,7 @@ import java.util.Iterator;
 import java.util.Locale;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.text.MetadataRowContainer;
-import de.anomic.kelondro.text.URLMetadata;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -170,8 +169,8 @@ public class CrawlResults {
             String urlHash, initiatorHash, executorHash;
             String urlstr, urltxt;
             yacySeed initiatorSeed, executorSeed;
-            MetadataRowContainer urle;
-            URLMetadata metadata;
+            URLMetadataRow urle;
+            URLMetadataRow.Components metadata;
 
             int i, cnt = 0;
             for (i = sb.crawlResults.getStackSize(tabletype) - 1; i >= (sb.crawlResults.getStackSize(tabletype) - lines); i--) {

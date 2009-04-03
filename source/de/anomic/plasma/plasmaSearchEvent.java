@@ -39,17 +39,17 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
-import de.anomic.kelondro.text.ReferenceVars;
-import de.anomic.kelondro.text.URLMetadata;
-import de.anomic.kelondro.text.Word;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.SortStack;
 import de.anomic.kelondro.util.SortStore;
 import de.anomic.kelondro.util.Log;
+import de.anomic.plasma.parser.Word;
+import de.anomic.plasma.parser.Condenser;
 import de.anomic.plasma.plasmaSnippetCache.MediaSnippet;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacySearch;
@@ -180,7 +180,7 @@ public final class plasmaSearchEvent {
                 for (Map.Entry<String, ReferenceContainer> entry : this.rankedCache.searchContainerMaps()[0].entrySet()) {
                     wordhash = entry.getKey();
                     final ReferenceContainer container = entry.getValue();
-                    assert (container.getWordHash().equals(wordhash));
+                    assert (container.getTermHash().equals(wordhash));
                     if (container.size() > maxcount) {
                         IAmaxcounthash = wordhash;
                         maxcount = container.size();
@@ -264,7 +264,7 @@ public final class plasmaSearchEvent {
         }
     }
     
-    ResultEntry obtainResultEntry(final MetadataRowContainer page, final int snippetFetchMode) {
+    ResultEntry obtainResultEntry(final URLMetadataRow page, final int snippetFetchMode) {
 
         // a search result entry needs some work to produce a result Entry:
         // - check if url entry exists in LURL-db
@@ -280,7 +280,7 @@ public final class plasmaSearchEvent {
         // find the url entry
 
         long startTime = System.currentTimeMillis();
-        final URLMetadata metadata = page.metadata();
+        final URLMetadataRow.Components metadata = page.metadata();
         final String pagetitle = metadata.dc_title().toLowerCase();
         if (metadata.url() == null) {
             registerFailure(page.hash(), "url corrupted (null)");
@@ -304,7 +304,7 @@ public final class plasmaSearchEvent {
             
         // check constraints
         if ((query.constraint != null) &&
-            (query.constraint.get(plasmaCondenser.flag_cat_indexof)) &&
+            (query.constraint.get(Condenser.flag_cat_indexof)) &&
             (!(metadata.dc_title().startsWith("Index of")))) {
             final Iterator<String> wi = query.queryHashes.iterator();
             while (wi.hasNext()) try { wordIndex.index().remove(wi.next(), page.hash()); } catch (IOException e) {}
@@ -337,7 +337,7 @@ public final class plasmaSearchEvent {
         if (query.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) {
             // attach text snippet
             startTime = System.currentTimeMillis();
-            final plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(metadata, snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(plasmaCondenser.flag_cat_indexof))), 180, 3000, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 30000, query.isGlobal());
+            final plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(metadata, snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(Condenser.flag_cat_indexof))), 180, 3000, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 30000, query.isGlobal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
             Log.logInfo("SEARCH_EVENT", "text snippet load time for " + metadata.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
             
@@ -512,7 +512,7 @@ public final class plasmaSearchEvent {
         public void run() {
 
             // start fetching urls and snippets
-            MetadataRowContainer page;
+            URLMetadataRow page;
             final int fetchAhead = snippetMode == 0 ? 0 : 10;
             while (System.currentTimeMillis() < this.timeout) {
                 this.lastLifeSign = System.currentTimeMillis();
@@ -803,8 +803,8 @@ public final class plasmaSearchEvent {
     
     public static class ResultEntry {
         // payload objects
-        private final MetadataRowContainer urlentry;
-        private final URLMetadata urlcomps; // buffer for components
+        private final URLMetadataRow urlentry;
+        private final URLMetadataRow.Components urlcomps; // buffer for components
         private String alternative_urlstring;
         private String alternative_urlname;
         private final plasmaSnippetCache.TextSnippet textSnippet;
@@ -813,7 +813,7 @@ public final class plasmaSearchEvent {
         // statistic objects
         public long dbRetrievalTime, snippetComputationTime;
         
-        public ResultEntry(final MetadataRowContainer urlentry, final plasmaWordIndex wordIndex,
+        public ResultEntry(final URLMetadataRow urlentry, final plasmaWordIndex wordIndex,
                            final plasmaSnippetCache.TextSnippet textSnippet,
                            final ArrayList<plasmaSnippetCache.MediaSnippet> mediaSnippets,
                            final long dbRetrievalTime, final long snippetComputationTime) {
@@ -837,7 +837,7 @@ public final class plasmaSearchEvent {
                     // seed is not known from here
                     try {
                         wordIndex.index().remove(
-                            Word.words2hashes(plasmaCondenser.getWords(
+                            Word.words2hashes(Condenser.getWords(
                                 ("yacyshare " +
                                  filename.replace('?', ' ') +
                                  " " +
@@ -899,10 +899,10 @@ public final class plasmaSearchEvent {
         public int lapp() {
             return urlentry.lapp();
         }
-        public ReferenceVars word() {
+        public WordReferenceVars word() {
             final Reference word = urlentry.word();
-            assert word instanceof ReferenceVars;
-            return (ReferenceVars) word;
+            assert word instanceof WordReferenceVars;
+            return (WordReferenceVars) word;
         }
         public boolean hasTextSnippet() {
             return (this.textSnippet != null) && (this.textSnippet.getErrorCode() < 11);

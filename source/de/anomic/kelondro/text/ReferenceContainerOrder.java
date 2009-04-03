@@ -38,7 +38,7 @@ public class ReferenceContainerOrder extends AbstractOrder<ReferenceContainer> i
     }
 
     public boolean wellformed(final ReferenceContainer a) {
-        return embeddedOrder.wellformed(a.getWordHash().getBytes());
+        return embeddedOrder.wellformed(a.getTermHash().getBytes());
     }
     
     public void direction(final boolean ascending) {
@@ -50,15 +50,15 @@ public class ReferenceContainerOrder extends AbstractOrder<ReferenceContainer> i
     }
 
     public int compare(final ReferenceContainer a, final ReferenceContainer b) {
-        return this.embeddedOrder.compare(a.getWordHash().getBytes(), b.getWordHash().getBytes());
+        return this.embeddedOrder.compare(a.getTermHash().getBytes(), b.getTermHash().getBytes());
     }
     
     public boolean equal(ReferenceContainer a, ReferenceContainer b) {
-        return this.embeddedOrder.equal(a.getWordHash().getBytes(), b.getWordHash().getBytes());
+        return this.embeddedOrder.equal(a.getTermHash().getBytes(), b.getTermHash().getBytes());
     }
     
     public void rotate(final ReferenceContainer zero) {
-        this.embeddedOrder.rotate(zero.getWordHash().getBytes());
+        this.embeddedOrder.rotate(zero.getTermHash().getBytes());
         this.zero = new ReferenceContainer(new String(this.embeddedOrder.zero()), zero);
     }
 
@@ -80,7 +80,7 @@ public class ReferenceContainerOrder extends AbstractOrder<ReferenceContainer> i
     }
 
 	public long cardinal(final ReferenceContainer key) {
-		return this.embeddedOrder.cardinal(key.getWordHash().getBytes());
+		return this.embeddedOrder.cardinal(key.getTermHash().getBytes());
 	}
 
 }

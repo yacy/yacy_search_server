@@ -45,11 +45,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import de.anomic.data.AbstractBlacklist;
+import de.anomic.data.Blacklist;
+import de.anomic.data.DefaultBlacklist;
 import de.anomic.data.listManager;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.text.Blacklist;
-import de.anomic.kelondro.text.AbstractBlacklist;
-import de.anomic.kelondro.text.DefaultBlacklist;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;

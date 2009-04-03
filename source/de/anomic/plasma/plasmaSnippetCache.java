@@ -43,13 +43,14 @@ import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpResponseHeader;
-import de.anomic.kelondro.text.Document;
-import de.anomic.kelondro.text.URLMetadata;
-import de.anomic.kelondro.text.Word;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.Log;
+import de.anomic.plasma.parser.Document;
 import de.anomic.plasma.parser.ParserException;
+import de.anomic.plasma.parser.Word;
+import de.anomic.plasma.parser.Condenser;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacyURL;
 
@@ -302,7 +303,7 @@ public class plasmaSnippetCache {
     }
     
     @SuppressWarnings("unchecked")
-    public static TextSnippet retrieveTextSnippet(final URLMetadata comp, final Set<String> queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int timeout, final int maxDocLen, final boolean reindexing) {
+    public static TextSnippet retrieveTextSnippet(final URLMetadataRow.Components comp, final Set<String> queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int timeout, final int maxDocLen, final boolean reindexing) {
         // heise = "0OQUNU3JSs05"
         final yacyURL url = comp.url();
         if (queryhashes.size() == 0) {
@@ -796,7 +797,7 @@ public class plasmaSnippetCache {
     private static HashMap<String, Integer> hashSentence(final String sentence) {
         // generates a word-wordPos mapping
         final HashMap<String, Integer> map = new HashMap<String, Integer>();
-        final Enumeration<StringBuilder> words = plasmaCondenser.wordTokenizer(sentence, "UTF-8");
+        final Enumeration<StringBuilder> words = Condenser.wordTokenizer(sentence, "UTF-8");
         int pos = 0;
         StringBuilder word;
         String hash;

@@ -48,9 +48,9 @@ import de.anomic.kelondro.blob.BLOBCompressor;
 import de.anomic.kelondro.blob.BLOBHeap;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.text.Document;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
+import de.anomic.plasma.parser.Document;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 

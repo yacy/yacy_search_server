@@ -51,8 +51,8 @@ import java.util.Set;
 import java.util.TreeMap;
 
 import de.anomic.crawler.ResultURLs;
+import de.anomic.data.Blacklist;
 import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.text.Blacklist;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSearchQuery;

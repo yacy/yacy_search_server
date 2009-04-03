@@ -33,9 +33,8 @@ import java.util.Iterator;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.RotateIterator;
-import de.anomic.kelondro.text.MetadataRowContainer;
-import de.anomic.kelondro.text.URLMetadata;
 import de.anomic.kelondro.text.MetadataRepository;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -116,7 +115,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            final MetadataRowContainer entry = sb.webIndex.metadata().load(urlhash, null, 0);
+            final URLMetadataRow entry = sb.webIndex.metadata().load(urlhash, null, 0);
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
@@ -150,7 +149,7 @@ public class IndexControlURLs_p {
                 final yacyURL url = new yacyURL(urlstring, null);
                 urlhash = url.hash();
                 prop.put("urlhash", urlhash);
-                final MetadataRowContainer entry = sb.webIndex.metadata().load(urlhash, null, 0);
+                final URLMetadataRow entry = sb.webIndex.metadata().load(urlhash, null, 0);
                 if (entry == null) {
                     prop.putHTML("urlstring", "unknown url: " + urlstring);
                     prop.put("urlhash", "");
@@ -167,7 +166,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashsearch")) {
-            final MetadataRowContainer entry = sb.webIndex.metadata().load(urlhash, null, 0);
+            final URLMetadataRow entry = sb.webIndex.metadata().load(urlhash, null, 0);
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash);
             } else {
@@ -182,9 +181,9 @@ public class IndexControlURLs_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator<MetadataRowContainer> entryIt = new RotateIterator<MetadataRowContainer>(sb.webIndex.metadata().entries(true, urlhash), new String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), sb.webIndex.index().size()); 
+                final Iterator<URLMetadataRow> entryIt = new RotateIterator<URLMetadataRow>(sb.webIndex.metadata().entries(true, urlhash), new String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), sb.webIndex.index().size()); 
                 final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
-                MetadataRowContainer entry;
+                URLMetadataRow entry;
                 int i = 0;
                 int rows = 0, cols = 0;
                 prop.put("urlhashsimilar", "1");
@@ -286,15 +285,15 @@ public class IndexControlURLs_p {
         return prop;
     }
     
-    private static serverObjects genUrlProfile(final plasmaSwitchboard switchboard, final MetadataRowContainer entry, final String urlhash) {
+    private static serverObjects genUrlProfile(final plasmaSwitchboard switchboard, final URLMetadataRow entry, final String urlhash) {
         final serverObjects prop = new serverObjects();
         if (entry == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
-        final URLMetadata metadata = entry.metadata();
-        final MetadataRowContainer le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : switchboard.webIndex.metadata().load(entry.referrerHash(), null, 0);
+        final URLMetadataRow.Components metadata = entry.metadata();
+        final URLMetadataRow le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : switchboard.webIndex.metadata().load(entry.referrerHash(), null, 0);
         if (metadata.url() == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);

@@ -43,6 +43,7 @@ import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.parser.Parser;
+import de.anomic.plasma.parser.Condenser;
 import de.anomic.server.serverCachedFileOutputStream;
 import de.anomic.yacy.yacyURL;
 
@@ -282,7 +283,7 @@ dc_rights
     
     public Iterator<StringBuilder> getSentences(final boolean pre) {
         if (this.text == null) return null;
-        final plasmaCondenser.sentencesFromInputStreamEnum e = plasmaCondenser.sentencesFromInputStream(getText());
+        final Condenser.sentencesFromInputStreamEnum e = Condenser.sentencesFromInputStream(getText());
         e.pre(pre);
         return e;
     }
@@ -439,7 +440,7 @@ dc_rights
     	this.favicon = faviconURL;
     }
     
-    public void notifyWebStructure(final plasmaWebStructure webStructure, final plasmaCondenser condenser, final Date docDate) {
+    public void notifyWebStructure(final plasmaWebStructure webStructure, final Condenser condenser, final Date docDate) {
         final Integer[] ioLinks = webStructure.generateCitationReference(this, condenser, docDate); // [outlinksSame, outlinksOther]
         this.inboundLinks = ioLinks[0].intValue();
         this.outboundLinks = ioLinks[1].intValue();

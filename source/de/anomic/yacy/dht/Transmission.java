@@ -32,11 +32,11 @@ import java.util.Iterator;
 
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.text.Index;
-import de.anomic.kelondro.text.MetadataRowContainer;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerCache;
-import de.anomic.kelondro.text.ReferenceRow;
 import de.anomic.kelondro.text.MetadataRepository;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverProcessorJob;
@@ -88,7 +88,7 @@ public class Transmission  {
          */
         private String                             primaryTarget;
         private ReferenceContainerCache                containers;
-        private HashMap<String, MetadataRowContainer> references;
+        private HashMap<String, URLMetadataRow> references;
         private HashSet<String>                    badReferences;
         private ArrayList<yacySeed>                targets;
         private int                                hit, miss;
@@ -109,7 +109,7 @@ public class Transmission  {
             this.primaryTarget = primaryTarget;
             this.containers = new ReferenceContainerCache(payloadrow, plasmaWordIndex.wordOrder);
             this.containers.initWriteMode();
-            this.references = new HashMap<String, MetadataRowContainer>();
+            this.references = new HashMap<String, URLMetadataRow>();
             this.badReferences = new HashSet<String>();
             this.targets    = targets;
             this.hit = 0;
@@ -123,12 +123,12 @@ public class Transmission  {
          */
         public void add(ReferenceContainer container) {
             // iterate through the entries in the container and check if the reference is in the repository
-            Iterator<ReferenceRow>  i = container.entries();
+            Iterator<WordReferenceRow>  i = container.entries();
             ArrayList<String> notFound = new ArrayList<String>();
             while (i.hasNext()) {
-                ReferenceRow e = i.next();
+                WordReferenceRow e = i.next();
                 if (references.containsKey(e.urlHash()) || badReferences.contains(e.urlHash())) continue;
-                MetadataRowContainer r = repository.load(e.urlHash(), null, 0);
+                URLMetadataRow r = repository.load(e.urlHash(), null, 0);
                 if (r == null) {
                     notFound.add(e.urlHash());
                     badReferences.add(e.urlHash());
@@ -204,7 +204,7 @@ public class Transmission  {
                 Iterator<ReferenceContainer> i = this.containers.iterator();
                 ReferenceContainer firstContainer = (i == null) ? null : i.next();
                 log.logInfo("Index transfer of " + this.containers.size() + 
-                                 " words [" + ((firstContainer == null) ? null : firstContainer.getWordHash()) + " .. " + this.primaryTarget + "]" + 
+                                 " words [" + ((firstContainer == null) ? null : firstContainer.getTermHash()) + " .. " + this.primaryTarget + "]" + 
                                  " and " + this.references.size() + " URLs" +
                                  " to peer " + target.getName() + ":" + target.hash + 
                                  " in " + (transferTime / 1000) + 

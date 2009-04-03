@@ -39,7 +39,7 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.table.Stack;
-import de.anomic.kelondro.text.MetadataRowContainer;
+import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaHTCache;
@@ -352,7 +352,7 @@ public class IndexingStack {
             if (referrerURL == null) {
                 // FIXME the equals seems to be incorrect: String.equals(boolean)
                 if ((referrerHash == null) || ((initiator != null) && (referrerHash.equals(initiator.length() == 0)))) return null;
-                final MetadataRowContainer entry = wordIndex.metadata().load(referrerHash, null, 0);
+                final URLMetadataRow entry = wordIndex.metadata().load(referrerHash, null, 0);
                 if (entry == null) referrerURL = null; else referrerURL = entry.metadata().url();
             }
             return referrerURL;

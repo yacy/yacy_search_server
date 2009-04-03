@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2009-03-20 16:44:59 +0100 (Fr, 20 Mrz 2009) $
+// $LastChangedRevision: 5736 $
+// $LastChangedBy: borg-0300 $
 //
 // LICENSE
 // 
@@ -24,12 +24,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.text;
+package de.anomic.kelondro.text.referencePrototype;
 
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.MicroDate;
+import de.anomic.kelondro.text.Reference;
 
-public class ReferenceVars implements Reference, Cloneable {
+public class WordReferenceVars implements Reference, Cloneable {
 
     public Bitfield flags;
     public long freshUntil, lastModified;
@@ -41,7 +42,7 @@ public class ReferenceVars implements Reference, Cloneable {
                worddistance, wordsintext, wordsintitle;
     public double termFrequency;
     
-    public ReferenceVars(final String  urlHash,
+    public WordReferenceVars(final String  urlHash,
             final int      urlLength,     // byte-length of complete URL
             final int      urlComps,      // number of path components
             final int      titleLength,   // length of description/length (longer are better?)
@@ -86,7 +87,7 @@ public class ReferenceVars implements Reference, Cloneable {
         this.termFrequency = termfrequency;
     }
     
-    public ReferenceVars(final ReferenceRow e) {
+    public WordReferenceVars(final WordReferenceRow e) {
         this.flags = e.flags();
         this.freshUntil = e.freshUntil();
         this.lastModified = e.lastModified();
@@ -109,8 +110,8 @@ public class ReferenceVars implements Reference, Cloneable {
         this.termFrequency = e.termFrequency();
     }
     
-    public ReferenceVars clone() {
-        final ReferenceVars c = new ReferenceVars(
+    public WordReferenceVars clone() {
+        final WordReferenceVars c = new WordReferenceVars(
                 this.urlHash,
                 this.urllength,
                 this.urlcomps,
@@ -133,7 +134,7 @@ public class ReferenceVars implements Reference, Cloneable {
         return c;
     }
     
-    public void join(final ReferenceVars oe) {
+    public void join(final WordReferenceVars oe) {
         // combine the distance
         this.worddistance = this.worddistance + oe.worddistance + Math.abs(this.posintext - oe.posintext);
         this.posintext = Math.min(this.posintext, oe.posintext);
@@ -203,8 +204,8 @@ public class ReferenceVars implements Reference, Cloneable {
         return posofphrase;
     }
     
-    public ReferenceRow toRowEntry() {
-        return new ReferenceRow(
+    public WordReferenceRow toRowEntry() {
+        return new WordReferenceRow(
                 urlHash,
                 urllength,     // byte-length of complete URL
                 urlcomps,      // number of path components
@@ -262,7 +263,7 @@ public class ReferenceVars implements Reference, Cloneable {
         return this.termFrequency;
     }
     
-    public final void min(final ReferenceVars other) {
+    public final void min(final WordReferenceVars other) {
         int v;
         long w;
         double d;
@@ -284,7 +285,7 @@ public class ReferenceVars implements Reference, Cloneable {
         if (this.termFrequency > (d = other.termFrequency)) this.termFrequency = d;
     }
     
-    public final void max(final ReferenceVars other) {
+    public final void max(final WordReferenceVars other) {
         int v;
         long w;
         double d;
