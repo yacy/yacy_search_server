@@ -91,7 +91,7 @@ public final class ReferenceContainerArray {
     }
     
     public void mountBLOBFile(File location) throws IOException {
-        this.array.mountBLOB(location);
+        this.array.mountBLOB(location, false);
     }
     
     public Row rowdef() {

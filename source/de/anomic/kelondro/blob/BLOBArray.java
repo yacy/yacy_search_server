@@ -155,7 +155,7 @@ public class BLOBArray implements BLOB {
                    d = DateFormatter.parseShortMilliSecond(files[i].substring(prefix.length() + 1, prefix.length() + 18));
                    f = new File(heapLocation, files[i]);
                    time = d.getTime();
-                   oneBlob = (time == maxtime && buffersize > 0) ? new BLOBHeap(f, keylength, ordering, buffersize) : new BLOBHeapModifier(f, keylength, ordering);
+                   oneBlob = (time == maxtime) ? new BLOBHeap(f, keylength, ordering, buffersize) : new BLOBHeapModifier(f, keylength, ordering);
                    sortedItems.put(Long.valueOf(time), new blobItem(d, f, oneBlob));
                } catch (ParseException e) {continue;}
             }
@@ -174,14 +174,14 @@ public class BLOBArray implements BLOB {
      * @param location
      * @throws IOException
      */
-    public synchronized void mountBLOB(File location) throws IOException {
+    public synchronized void mountBLOB(File location, boolean full) throws IOException {
         Date d;
         try {
             d = DateFormatter.parseShortMilliSecond(location.getName().substring(prefix.length() + 1, prefix.length() + 18));
         } catch (ParseException e) {
             throw new IOException("date parse problem with file " + location.toString() + ": " + e.getMessage());
         }
-        BLOB oneBlob = (buffersize > 0) ? new BLOBHeap(location, keylength, ordering, buffersize) : new BLOBHeapModifier(location, keylength, ordering);
+        BLOB oneBlob = (full && buffersize > 0) ? new BLOBHeap(location, keylength, ordering, buffersize) : new BLOBHeapModifier(location, keylength, ordering);
         blobs.add(new blobItem(d, location, oneBlob));
     }
     
@@ -555,7 +555,7 @@ public class BLOBArray implements BLOB {
         Log.logInfo("BLOBArray", "merging " + f1.getName() + " with " + f2.getName());
         File resultFile = mergeWorker(f1, f2, payloadrow, newFile);
         if (resultFile == null) return null;
-        mountBLOB(resultFile);
+        mountBLOB(resultFile, false);
         Log.logInfo("BLOBArray", "merged " + f1.getName() + " with " + f2.getName() + " into " + resultFile);
         return resultFile;
     }
