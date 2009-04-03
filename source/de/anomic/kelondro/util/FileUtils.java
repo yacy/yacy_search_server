@@ -753,7 +753,7 @@ public final class FileUtils {
             if (System.getProperties().getProperty("os.name","").toLowerCase().startsWith("windows")) {
                 // deleting files on windows sometimes does not work with java
                 try {
-                    String command = "cmd /C del /F /Q " + p;
+                    String command = "cmd /C del /F /Q \"" + p + "\"";
                     Process r = Runtime.getRuntime().exec(command);
                     if (r == null) {
                         Log.logSevere("FileUtils", "cannot execute command: " + command);
