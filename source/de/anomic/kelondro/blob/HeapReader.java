@@ -45,6 +45,8 @@ import de.anomic.kelondro.util.Log;
 
 public class HeapReader {
 
+    public final static long keepFreeMem = 20 * 1024 * 1024;
+    
     protected int                keylength;  // the length of the primary key
     protected LongHandleIndex    index;      // key/seek relation for used records
     protected Gap                free;       // set of {seek, size} pairs denoting space and position of free records
@@ -234,8 +236,8 @@ public class HeapReader {
         // access the file and read the container
         file.seek(pos);
         final int len = file.readInt() - index.row().primaryKeyLength;
-        if (MemoryControl.available() < len) {
-            if (!MemoryControl.request(len, true)) return null; // not enough memory available for this blob
+        if (MemoryControl.available() < len * 2 + keepFreeMem) {
+            if (!MemoryControl.request(len * 2 + keepFreeMem, true)) return null; // not enough memory available for this blob
         }
         
         // read the key

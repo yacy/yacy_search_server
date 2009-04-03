@@ -64,7 +64,7 @@ public class BLOBArray implements BLOB {
      */
     
     public static final long oneMonth    = 1000L * 60L * 60L * 24L * 365L / 12L;
-    public static final long oneGigabyte = 1024 * 1024 * 1024;
+    public static final long oneGigabyte = 1024L * 1024L * 1024L;
     
     private int keylength;
     private ByteOrder ordering;
