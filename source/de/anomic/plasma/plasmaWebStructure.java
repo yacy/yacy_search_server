@@ -259,34 +259,42 @@ public class plasmaWebStructure {
     }
     
     public structureEntry incomingReferences(final String domhash) {
+        String host = resolveDomHash2DomString(domhash);
+        if (host == null) return null;
         // collect the references
-        final Iterator<plasmaWebStructure.structureEntry> i = structureEntryIterator(false);
         plasmaWebStructure.structureEntry sentry;
         HashMap<String, Integer> domhashes = new HashMap<String, Integer>();
+        Iterator<plasmaWebStructure.structureEntry> i = structureEntryIterator(false);
         while (i.hasNext()) {
             sentry = i.next();
-            if (sentry.references.containsKey(domhash)) {
-                domhashes.put(sentry.domhash, sentry.references.get(domhash));
-            }
+            if (sentry.references.containsKey(domhash)) domhashes.put(sentry.domhash, sentry.references.get(domhash));
+        }
+        i = structureEntryIterator(true);
+        while (i.hasNext()) {
+            sentry = i.next();
+            if (sentry.references.containsKey(domhash)) domhashes.put(sentry.domhash, sentry.references.get(domhash));
         }
         // construct a new structureEntry Object
         return new structureEntry(
                 domhash,
-                resolveDomHash2DomString(domhash), 
+                host,
                 DateFormatter.formatShortDay(new Date()),
                 domhashes);
     }
     
     public HashMap<String, Integer> incomingDomains(final String domhash) {
         // collect the references
-        final Iterator<plasmaWebStructure.structureEntry> i = structureEntryIterator(false);
         plasmaWebStructure.structureEntry sentry;
         HashMap<String, Integer> domains = new HashMap<String, Integer>();
+        Iterator<plasmaWebStructure.structureEntry> i = structureEntryIterator(false);
         while (i.hasNext()) {
             sentry = i.next();
-            if (sentry.references.containsKey(domhash)) {
-                domains.put(sentry.domain, sentry.references.get(domhash));
-            }
+            if (sentry.references.containsKey(domhash)) domains.put(sentry.domain, sentry.references.get(domhash));
+        }
+        i = structureEntryIterator(true);
+        while (i.hasNext()) {
+            sentry = i.next();
+            if (sentry.references.containsKey(domhash)) domains.put(sentry.domain, sentry.references.get(domhash));
         }
         return domains;
     }

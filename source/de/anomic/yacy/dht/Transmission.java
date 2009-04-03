@@ -227,12 +227,12 @@ public class Transmission  {
         }
         
         public boolean isFinished() {
-        	System.out.println("canFinish: hit = " + this.hit + ", redundancy = " + seeds.redundancy() + ", targets.size() = " + targets.size());
+        	//System.out.println("canFinish: hit = " + this.hit + ", redundancy = " + seeds.redundancy() + ", targets.size() = " + targets.size());
             return this.hit >= seeds.redundancy();
         }
         
         public boolean canFinish() {
-        	System.out.println("canFinish: hit = " + this.hit + ", redundancy = " + seeds.redundancy() + ", targets.size() = " + targets.size());
+        	//System.out.println("canFinish: hit = " + this.hit + ", redundancy = " + seeds.redundancy() + ", targets.size() = " + targets.size());
             return this.targets.size() >= seeds.redundancy() - this.hit;
         }
 
