@@ -49,7 +49,7 @@ public class plasmaWebStructure {
     public static int maxCRLDump = 500000;
     public static int maxCRGDump = 200000;
     public static int maxref = 300; // maximum number of references, to avoid overflow when a large link farm occurs (i.e. wikipedia)
-    public static int maxhosts = 8000; // maximum number of hosts in web structure map
+    public static int maxhosts = 20000; // maximum number of hosts in web structure map
     
     private StringBuilder crg;     // global citation references
     private final Log    log;
@@ -221,7 +221,7 @@ public class plasmaWebStructure {
         return s.toString();
     }
     
-    public structureEntry references(final String domhash) {
+    public structureEntry outgoingReferences(final String domhash) {
         // returns a map with a domhash(String):refcount(Integer) relation
         assert domhash.length() == 6;
         SortedMap<String, String> tailMap;
@@ -256,6 +256,39 @@ public class plasmaWebStructure {
         }
         if (h.size() == 0) return null;
         return new structureEntry(domhash, domain, date, h);
+    }
+    
+    public structureEntry incomingReferences(final String domhash) {
+        // collect the references
+        final Iterator<plasmaWebStructure.structureEntry> i = structureEntryIterator(false);
+        plasmaWebStructure.structureEntry sentry;
+        HashMap<String, Integer> domhashes = new HashMap<String, Integer>();
+        while (i.hasNext()) {
+            sentry = i.next();
+            if (sentry.references.containsKey(domhash)) {
+                domhashes.put(sentry.domhash, sentry.references.get(domhash));
+            }
+        }
+        // construct a new structureEntry Object
+        return new structureEntry(
+                domhash,
+                resolveDomHash2DomString(domhash), 
+                DateFormatter.formatShortDay(new Date()),
+                domhashes);
+    }
+    
+    public HashMap<String, Integer> incomingDomains(final String domhash) {
+        // collect the references
+        final Iterator<plasmaWebStructure.structureEntry> i = structureEntryIterator(false);
+        plasmaWebStructure.structureEntry sentry;
+        HashMap<String, Integer> domains = new HashMap<String, Integer>();
+        while (i.hasNext()) {
+            sentry = i.next();
+            if (sentry.references.containsKey(domhash)) {
+                domains.put(sentry.domain, sentry.references.get(domhash));
+            }
+        }
+        return domains;
     }
     
     public int referencesCount(final String domhash) {
@@ -313,7 +346,7 @@ public class plasmaWebStructure {
         final String domhash = url.hash().substring(6);
 
         // parse the new reference string and join it with the stored references
-        structureEntry structure = references(domhash);
+        structureEntry structure = outgoingReferences(domhash);
         final Map<String, Integer> refs = (structure == null) ? new HashMap<String, Integer>() : structure.references;
         assert reference.length() % 12 == 0;
         String dom;
@@ -462,7 +495,11 @@ public class plasmaWebStructure {
     public static class structureEntry {
         public String domhash, domain, date;
         public Map<String, Integer> references;
-        public structureEntry(final String domhash, final String domain, final String date, final Map<String, Integer> references) {
+        public structureEntry(
+                final String domhash,
+                final String domain, 
+                final String date,
+                final Map<String, Integer> references) {
             this.domhash = domhash;
             this.domain = domain;
             this.date = date;

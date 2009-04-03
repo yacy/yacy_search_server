@@ -1,12 +1,25 @@
 <?xml version="1.0"?>
-<webstructure>
-<domains reference="reverse" count="#[domains]#" maxref="#[maxref]#">
+<webstructure maxhosts="#[maxhosts]#">
+#(out)#::
+<references direction="out" count="#[domains]#" maxref="#[maxref]#">
 #{domains}#
 <domain host="#[domain]#" id="#[hash]#" date="#[date]#">
 #{citations}#
-  <citation host="#[refdom]#" id="#[refhash]#" count="#[refcount]#" />
+  <reference id="#[refhash]#" count="#[refcount]#">#[refdom]#</reference>
 #{/citations}#
 </domain>
 #{/domains}#
-</domains>
+</references>
+#(/out)#
+#(in)#::
+<references direction="in" count="#[domains]#">
+#{domains}#
+<domain host="#[domain]#" id="#[hash]#" date="#[date]#">
+#{citations}#
+  <reference id="#[refhash]#" count="#[refcount]#">#[refdom]#</reference>
+#{/citations}#
+</domain>
+#{/domains}#
+</references>
+#(/in)#
 </webstructure>

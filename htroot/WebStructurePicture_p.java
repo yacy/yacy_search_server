@@ -93,7 +93,7 @@ public class WebStructurePicture_p {
             try {
                 hash = (new yacyURL("http://" + host, null)).hash().substring(6);
             } catch (final MalformedURLException e) {e.printStackTrace();}
-            assert (sb.webStructure.references(hash) != null);
+            assert (sb.webStructure.outgoingReferences(hash) != null);
             
             // recursively find domains, up to a specific depth
             final ymageGraph graph = new ymageGraph();
@@ -125,7 +125,7 @@ public class WebStructurePicture_p {
         if (nextlayer == maxlayer) return mynodes;
         nextlayer++;
         final double radius = 1.0 / (1 << nextlayer);
-        plasmaWebStructure.structureEntry sr = structure.references(centerhash);
+        plasmaWebStructure.structureEntry sr = structure.outgoingReferences(centerhash);
         final Map<String, Integer> next = (sr == null) ? new HashMap<String, Integer>() : sr.references;
         Map.Entry<String, Integer> entry;
         String targethash, targethost;
