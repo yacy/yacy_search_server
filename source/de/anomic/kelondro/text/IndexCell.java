@@ -270,7 +270,7 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
     
     private synchronized void cleanCache() {
         // dump the cache if necessary
-        if (this.ram.size() > this.maxRamEntries || (this.ram.size() > 3000 && MemoryControl.available() < 50 * 1024 * 1024)) {
+        if (this.ram.size() > this.maxRamEntries || (this.ram.size() > 2000 && MemoryControl.available() < 100L * 1024L * 1024L)) {
             try {
                 cacheDump();
             } catch (IOException e) {
