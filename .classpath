@@ -25,7 +25,7 @@
 	<classpathentry exported="true" kind="lib" path="libx/odf_utils_05_11_29.jar"/>
 	<classpathentry exported="true" kind="lib" path="libx/tm-extractors-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="libx/wsdl4j.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/xerces.jar"/>
+	<classpathentry kind="lib" path="D:/meinedaten/workspace/yacy/lib/xerces.jar"/>
 	<classpathentry exported="true" kind="lib" path="libx/poi-3.0-alpha2-20060616.jar"/>
 	<classpathentry exported="true" kind="lib" path="libx/poi-scratchpad-3.0-alpha2-20060616.jar"/>
 	<classpathentry exported="true" kind="lib" path="libx/inetlib.jar"/>
