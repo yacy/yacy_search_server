@@ -40,7 +40,7 @@ import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.text.Metadata;
-import de.anomic.kelondro.text.Reference;
+import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
@@ -119,7 +119,7 @@ public class URLMetadataRow implements Metadata {
     
     private final Row.Entry entry;
     private final String snippet;
-    private Reference word; // this is only used if the url is transported via remote search requests
+    private WordReference word; // this is only used if the url is transported via remote search requests
     private final long ranking; // during generation of a search result this value is set
     
     public URLMetadataRow(
@@ -201,7 +201,7 @@ public class URLMetadataRow implements Metadata {
 		}
     }
     
-    public URLMetadataRow(final Row.Entry entry, final Reference searchedWord, final long ranking) {
+    public URLMetadataRow(final Row.Entry entry, final WordReference searchedWord, final long ranking) {
         this.entry = entry;
         this.snippet = null;
         this.word = searchedWord;
@@ -427,7 +427,7 @@ public class URLMetadataRow implements Metadata {
         return snippet;
     }
 
-    public Reference word() {
+    public WordReference word() {
         return word;
     }
 

@@ -26,14 +26,15 @@
 
 package de.anomic.kelondro.text.referencePrototype;
 
+import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.text.Reference;
 
-public class WordReferenceVars implements Reference, Cloneable {
+public class WordReferenceVars implements WordReference, Cloneable {
 
     public Bitfield flags;
-    public long freshUntil, lastModified;
+    public long lastModified;
     public String language, urlHash;
     public char type;
     public int hitcount, llocal, lother, phrasesintext, posintext,
@@ -54,7 +55,7 @@ public class WordReferenceVars implements Reference, Cloneable {
             final int      posofphrase,   // number of the phrase where word appears
             final long     lastmodified,  // last-modified time of the document where word appears
             final long     updatetime,    // update time; this is needed to compute a TTL for the word, so it can be removed easily if the TTL is short
-            String   language,      // (guessed) language of document
+                  String   language,      // (guessed) language of document
             final char     doctype,       // type of document
             final int      outlinksSame,  // outlinks to same domain
             final int      outlinksOther, // outlinks to other domain
@@ -64,9 +65,9 @@ public class WordReferenceVars implements Reference, Cloneable {
     ) {
         if ((language == null) || (language.length() != 2)) language = "uk";
         final int mddlm = MicroDate.microDateDays(lastmodified);
-        final int mddct = MicroDate.microDateDays(updatetime);
+        //final int mddct = MicroDate.microDateDays(updatetime);
         this.flags = flags;
-        this.freshUntil = Math.max(0, mddlm + (mddct - mddlm) * 2);
+        //this.freshUntil = Math.max(0, mddlm + (mddct - mddlm) * 2);
         this.lastModified = lastmodified;
         this.language = language;
         this.urlHash = urlHash;
@@ -89,10 +90,10 @@ public class WordReferenceVars implements Reference, Cloneable {
     
     public WordReferenceVars(final WordReferenceRow e) {
         this.flags = e.flags();
-        this.freshUntil = e.freshUntil();
+        //this.freshUntil = e.freshUntil();
         this.lastModified = e.lastModified();
         this.language = e.getLanguage();
-        this.urlHash = e.urlHash();
+        this.urlHash = e.metadataHash();
         this.type = e.getType();
         this.hitcount = e.hitcount();
         this.llocal = e.llocal();
@@ -134,26 +135,26 @@ public class WordReferenceVars implements Reference, Cloneable {
         return c;
     }
     
-    public void join(final WordReferenceVars oe) {
+    public void join(final WordReferenceVars v) {
         // combine the distance
-        this.worddistance = this.worddistance + oe.worddistance + Math.abs(this.posintext - oe.posintext);
-        this.posintext = Math.min(this.posintext, oe.posintext);
-        this.posinphrase = (this.posofphrase == oe.posofphrase) ? Math.min(this.posinphrase, oe.posinphrase) : 0;
-        this.posofphrase = Math.min(this.posofphrase, oe.posofphrase);
+        this.worddistance = this.worddistance + v.worddistance() + Math.abs(this.posintext - v.posintext);
+        this.posintext = Math.min(this.posintext, v.posintext);
+        this.posinphrase = (this.posofphrase == v.posofphrase) ? Math.min(this.posinphrase, v.posinphrase) : 0;
+        this.posofphrase = Math.min(this.posofphrase, v.posofphrase);
 
         // combine term frequency
-        this.wordsintext = this.wordsintext + oe.wordsintext;
-        this.termFrequency = this.termFrequency + oe.termFrequency;
+        this.wordsintext = this.wordsintext + v.wordsintext;
+        this.termFrequency = this.termFrequency + v.termFrequency;
     }
 
     public Bitfield flags() {
         return flags;
     }
-
+/*
     public long freshUntil() {
         return freshUntil;
     }
-
+*/
     public String getLanguage() {
         return language;
     }
@@ -225,12 +226,16 @@ public class WordReferenceVars implements Reference, Cloneable {
                 flags          // attributes to the url and to the word according the url
         );
     }
+    
+    public Entry toKelondroEntry() {
+        return toRowEntry().toKelondroEntry();
+    }
 
     public String toPropertyForm() {
         return toRowEntry().toPropertyForm();
     }
 
-    public String urlHash() {
+    public String metadataHash() {
         return urlHash;
     }
 
@@ -278,7 +283,7 @@ public class WordReferenceVars implements Reference, Cloneable {
         if (this.posofphrase > (v = other.posofphrase)) this.posofphrase = v;
         if (this.worddistance > (v = other.worddistance)) this.worddistance = v;
         if (this.lastModified > (w = other.lastModified)) this.lastModified = w;
-        if (this.freshUntil > (w = other.freshUntil)) this.freshUntil = w;
+        //if (this.freshUntil > (w = other.freshUntil)) this.freshUntil = w;
         if (this.urllength > (v = other.urllength)) this.urllength = v;
         if (this.urlcomps > (v = other.urlcomps)) this.urlcomps = v;
         if (this.wordsintitle > (v = other.wordsintitle)) this.wordsintitle = v;
@@ -300,14 +305,14 @@ public class WordReferenceVars implements Reference, Cloneable {
         if (this.posofphrase < (v = other.posofphrase)) this.posofphrase = v;
         if (this.worddistance < (v = other.worddistance)) this.worddistance = v;
         if (this.lastModified < (w = other.lastModified)) this.lastModified = w;
-        if (this.freshUntil < (w = other.freshUntil)) this.freshUntil = w;
+        //if (this.freshUntil < (w = other.freshUntil)) this.freshUntil = w;
         if (this.urllength < (v = other.urllength)) this.urllength = v;
         if (this.urlcomps < (v = other.urlcomps)) this.urlcomps = v;
         if (this.wordsintitle < (v = other.wordsintitle)) this.wordsintitle = v;
         if (this.termFrequency < (d = other.termFrequency)) this.termFrequency = d;
     }
 
-    public void join(final Reference oe) {
+    public void join(final WordReference oe) {
         // joins two entries into one entry
         
         // combine the distance
@@ -324,4 +329,6 @@ public class WordReferenceVars implements Reference, Cloneable {
     public int hashCode() {
         return this.urlHash.hashCode();
     }
+
+    
 }

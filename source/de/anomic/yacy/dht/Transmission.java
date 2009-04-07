@@ -127,13 +127,13 @@ public class Transmission  {
             ArrayList<String> notFound = new ArrayList<String>();
             while (i.hasNext()) {
                 WordReferenceRow e = i.next();
-                if (references.containsKey(e.urlHash()) || badReferences.contains(e.urlHash())) continue;
-                URLMetadataRow r = repository.load(e.urlHash(), null, 0);
+                if (references.containsKey(e.metadataHash()) || badReferences.contains(e.metadataHash())) continue;
+                URLMetadataRow r = repository.load(e.metadataHash(), null, 0);
                 if (r == null) {
-                    notFound.add(e.urlHash());
-                    badReferences.add(e.urlHash());
+                    notFound.add(e.metadataHash());
+                    badReferences.add(e.metadataHash());
                 } else {
-                    references.put(e.urlHash(), r);
+                    references.put(e.metadataHash(), r);
                 }
             }
             // now delete all references that were not found

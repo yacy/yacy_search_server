@@ -148,7 +148,7 @@ public final class transferRWI {
                 wordHash = estring.substring(0, p);
                 wordhashes[received] = wordHash;
                 iEntry = new WordReferenceRow(estring.substring(p));
-                urlHash = iEntry.urlHash();
+                urlHash = iEntry.metadataHash();
                 
                 // block blacklisted entries
                 if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(Blacklist.BLACKLIST_DHT, urlHash))) {

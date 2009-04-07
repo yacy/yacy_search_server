@@ -561,8 +561,8 @@ public final class yacyClient {
 
 			// the search-result-url transports all the attributes of word indexes
 			entry = urlEntry.word();
-			if (!(entry.urlHash().equals(urlEntry.hash()))) {
-				yacyCore.log.logInfo("remote search (client): url-hash " + urlEntry.hash() + " does not belong to word-attached-hash " + entry.urlHash() + "; url = " + metadata.url() + " from peer " + target.getName());
+			if (!(entry.metadataHash().equals(urlEntry.hash()))) {
+				yacyCore.log.logInfo("remote search (client): url-hash " + urlEntry.hash() + " does not belong to word-attached-hash " + entry.metadataHash() + "; url = " + metadata.url() + " from peer " + target.getName());
 				continue; // spammed
 			}
 
@@ -873,8 +873,8 @@ public final class yacyClient {
                 eenum = ic.entries();
                 while (eenum.hasNext()) {
                     entry = eenum.next();
-                    if (urlCache.get(entry.urlHash()) == null) {
-                        if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + entry.urlHash() + "' is not contained in urlCache");
+                    if (urlCache.get(entry.metadataHash()) == null) {
+                        if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + entry.metadataHash() + "' is not contained in urlCache");
                     }
                 }
             }        

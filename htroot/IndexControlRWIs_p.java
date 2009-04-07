@@ -130,7 +130,7 @@ public class IndexControlRWIs_p {
                     int i = 0;
                     urlx = new String[index.size()];
                     while (en.hasNext()) {
-                        urlx[i++] = en.next().urlHash();
+                        urlx[i++] = en.next().metadataHash();
                     }
                     index = null;
                 }
@@ -214,12 +214,12 @@ public class IndexControlRWIs_p {
                 URLMetadataRow lurl;
                 while (urlIter.hasNext()) {
                     iEntry = urlIter.next();
-                    lurl = sb.webIndex.metadata().load(iEntry.urlHash(), null, 0);
+                    lurl = sb.webIndex.metadata().load(iEntry.metadataHash(), null, 0);
                     if (lurl == null) {
-                        unknownURLEntries.add(iEntry.urlHash());
+                        unknownURLEntries.add(iEntry.metadataHash());
                         urlIter.remove();
                     } else {
-                        knownURLs.put(iEntry.urlHash(), lurl);
+                        knownURLs.put(iEntry.metadataHash(), lurl);
                     }
                 }
                 

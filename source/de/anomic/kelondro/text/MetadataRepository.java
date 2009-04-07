@@ -50,6 +50,7 @@ import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.table.SplitTable;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
@@ -99,7 +100,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         return 0;
     }
 
-    public synchronized URLMetadataRow load(final String urlHash, final Reference searchedWord, final long ranking) {
+    public synchronized URLMetadataRow load(final String urlHash, final WordReference searchedWord, final long ranking) {
         // generates an plasmaLURLEntry using the url hash
         // if the url cannot be found, this returns null
         if (urlHash == null) return null;

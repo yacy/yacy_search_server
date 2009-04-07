@@ -693,7 +693,7 @@ public final class yacy {
                     Reference iEntry;
                     while (wordIdxEntries.hasNext()) {
                         iEntry = wordIdxEntries.next();
-                        final String urlHash = iEntry.urlHash();                    
+                        final String urlHash = iEntry.metadataHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
                             final URLMetadataRow urlEntry = currentUrlDB.load(urlHash, null, 0);                       
                             urlCounter++;

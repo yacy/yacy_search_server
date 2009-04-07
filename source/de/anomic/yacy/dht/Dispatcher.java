@@ -195,7 +195,7 @@ public class Dispatcher {
             urlHashes.clear();
             it = c.entries();
             while (it.hasNext()) {
-                urlHashes.add(it.next().urlHash());
+                urlHashes.add(it.next().metadataHash());
             }
             if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + c.getTermHash() + "'");
             if (urlHashes.size() > 0) this.backend.remove(c.getTermHash(), urlHashes);
@@ -234,7 +234,7 @@ public class Dispatcher {
             while (i.hasNext()) {
                 re = i.next();
                 if (re == null) continue;
-                partitionBuffer[this.seeds.scheme.verticalPosition(re.urlHash())].add(re);
+                partitionBuffer[this.seeds.scheme.verticalPosition(re.metadataHash())].add(re);
             }
             
             // add the containers to the result vector

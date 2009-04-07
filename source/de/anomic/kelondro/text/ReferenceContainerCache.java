@@ -378,7 +378,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         WordReferenceRow ee;
         while (e.hasNext()) {
             ee = e.next();
-            if (urlselection.contains(ee.urlHash())) c1.add(ee);
+            if (urlselection.contains(ee.metadataHash())) c1.add(ee);
         }
         return c1;
     }

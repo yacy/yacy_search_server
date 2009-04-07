@@ -138,7 +138,7 @@ public class plasmaSearchAPI {
                 if (rn == -1) rn = entry.ranking();
                 prop.put("genUrlList_urlList_"+i+"_urlExists", "1");
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxCount", i);
-                prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", entry.word().urlHash());
+                prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", entry.word().metadataHash());
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_keyString", keystring);
                 prop.put("genUrlList_urlList_"+i+"_urlExists_keyHash", keyhash);
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlString", us);
@@ -173,7 +173,7 @@ public class plasmaSearchAPI {
                         ((entry.word().flags().get(WordReferenceRow.flag_app_dc_subject)) ? "appears in subject, " : "") +
                         ((entry.word().flags().get(WordReferenceRow.flag_app_dc_description)) ? "appears in description, " : "") +
                         ((entry.word().flags().get(WordReferenceRow.flag_app_emphasized)) ? "appears emphasized, " : "") +
-                        ((yacyURL.probablyRootURL(entry.word().urlHash())) ? "probably root url" : "")
+                        ((yacyURL.probablyRootURL(entry.word().metadataHash())) ? "probably root url" : "")
                 );
                 if (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, url)) {
                     prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxChecked", "1");

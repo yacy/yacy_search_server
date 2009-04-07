@@ -43,6 +43,7 @@ import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceOrder;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SortStack;
@@ -158,7 +159,7 @@ public final class plasmaSearchRankingProcess {
         Long r;
         while (i.hasNext()) {
             iEntry = i.next();
-            assert (iEntry.urlHash().length() == index.row().primaryKeyLength);
+            assert (iEntry.metadataHash().length() == index.row().primaryKeyLength);
             //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
 
             // increase flag counts
@@ -182,13 +183,13 @@ public final class plasmaSearchRankingProcess {
             }
 
             // check tld domain
-            if (!yacyURL.matchesAnyDomDomain(iEntry.urlHash(), this.query.zonecode)) {
+            if (!yacyURL.matchesAnyDomDomain(iEntry.metadataHash(), this.query.zonecode)) {
                 // filter out all tld that do not match with wanted tld domain
                 continue;
             }
             
             // check site constraints
-            if (query.sitehash != null && !iEntry.urlHash().substring(6).equals(query.sitehash)) {
+            if (query.sitehash != null && !iEntry.metadataHash().substring(6).equals(query.sitehash)) {
                 // filter out all domains that do not match with the site constraint
             }
             
@@ -198,12 +199,12 @@ public final class plasmaSearchRankingProcess {
             yacyURL uurl = (uentry == null) ? null : uentry.comp().url();
             System.out.println("DEBUG domDomain dom=" + ((uurl == null) ? "null" : uurl.getHost()) + ", zone=" + yacyURL.domDomain(iEntry.urlHash()));
             */
-            this.domZones[yacyURL.domDomain(iEntry.urlHash())]++;
+            this.domZones[yacyURL.domDomain(iEntry.metadataHash())]++;
             
             // insert
             if ((maxentries < 0) || (stack.size() < maxentries)) {
                 // in case that we don't have enough yet, accept any new entry
-                if (urlhashes.containsKey(iEntry.urlHash())) continue;
+                if (urlhashes.containsKey(iEntry.metadataHash())) continue;
                 stack.push(iEntry, r);
             } else {
                 // if we already have enough entries, insert only such that are necessary to get a better result
@@ -211,7 +212,7 @@ public final class plasmaSearchRankingProcess {
                     continue;
                 }
                 // double-check
-                if (urlhashes.containsKey(iEntry.urlHash())) continue;
+                if (urlhashes.containsKey(iEntry.metadataHash())) continue;
                 stack.push(iEntry, r);
             }
             
@@ -223,7 +224,7 @@ public final class plasmaSearchRankingProcess {
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
     }
 
-    private boolean testFlags(final Reference ientry) {
+    private boolean testFlags(final WordReference ientry) {
         if (query.constraint == null) return true;
         // test if ientry matches with filter
         // if all = true: let only entries pass that has all matching bits
@@ -261,7 +262,7 @@ public final class plasmaSearchRankingProcess {
             if (rwi == null) continue; // in case that a synchronization problem occurred just go lazy over it
             if (!skipDoubleDom) return rwi;
             // check doubledom
-            final String domhash = rwi.element.urlHash().substring(6);
+            final String domhash = rwi.element.metadataHash().substring(6);
             m = this.doubleDomCache.get(domhash);
             if (m == null) {
                 // first appearance of dom
@@ -292,9 +293,9 @@ public final class plasmaSearchRankingProcess {
         }
         if (bestEntry == null) return null;
         // finally remove the best entry from the doubledom cache
-        m = this.doubleDomCache.get(bestEntry.element.urlHash().substring(6));
+        m = this.doubleDomCache.get(bestEntry.element.metadataHash().substring(6));
         o = m.pop();
-        assert o == null || o.element.urlHash().equals(bestEntry.element.urlHash());
+        assert o == null || o.element.metadataHash().equals(bestEntry.element.metadataHash());
         return bestEntry;
     }
     
@@ -304,13 +305,13 @@ public final class plasmaSearchRankingProcess {
                 if (((stack.size() == 0) && (size() == 0))) break;
                 final SortStack<WordReferenceVars>.stackElement obrwi = bestRWI(skipDoubleDom);
                 if (obrwi == null) continue; // *** ? this happened and the thread was suspended silently. cause?
-                final URLMetadataRow u = wordIndex.metadata().load(obrwi.element.urlHash(), obrwi.element, obrwi.weight.longValue());
+                final URLMetadataRow u = wordIndex.metadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
                 if (u != null) {
                     final URLMetadataRow.Components metadata = u.metadata();
                     if (metadata.url() != null) this.handover.put(u.hash(), metadata.url().toNormalform(true, false)); // remember that we handed over this url
                     return u;
                 }
-                misses.add(obrwi.element.urlHash());
+                misses.add(obrwi.element.metadataHash());
         }
         return null;
     }

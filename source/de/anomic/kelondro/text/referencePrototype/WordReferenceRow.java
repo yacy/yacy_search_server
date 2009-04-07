@@ -35,7 +35,7 @@ import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.yacy.yacySeedDB;
 
-public final class WordReferenceRow implements Reference, Cloneable {
+public final class WordReferenceRow implements WordReference, Cloneable {
 
     // this object stores attributes to URL references inside RWI collections
 
@@ -182,7 +182,7 @@ public final class WordReferenceRow implements Reference, Cloneable {
         return this.entry;
     }
 
-    public String urlHash() {
+    public String metadataHash() {
         return this.entry.getColString(col_urlhash, null);
     }
 
@@ -275,6 +275,6 @@ public final class WordReferenceRow implements Reference, Cloneable {
     }
     
     public int hashCode() {
-        return this.urlHash().hashCode();
+        return this.metadataHash().hashCode();
     }
 }

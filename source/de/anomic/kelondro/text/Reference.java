@@ -1,6 +1,6 @@
 // Reference.java
-// (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 07.11.2007 on http://www.anomic.de
+// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 03.04.2009 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
@@ -26,49 +26,19 @@
 
 package de.anomic.kelondro.text;
 
-import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.index.Row.Entry;
 
 public interface Reference {
 
     public String toPropertyForm();
+    
+    public Entry toKelondroEntry();
 
-    public String urlHash();
-
-    public int virtualAge();
+    public String metadataHash();
 
     public long lastModified();
     
-    public long freshUntil();
-
-    public int hitcount();
-
-    public int posintext();
-
-    public int posinphrase();
-
-    public int posofphrase();
-
-    public int wordsintext();
-
-    public int phrasesintext();
-
-    public String getLanguage();
-
-    public char getType();
-
-    public int wordsintitle();
-    
-    public int llocal();
-    
-    public int lother();
-    
-    public int urllength();
-    
-    public int urlcomps();
-    
-    public Bitfield flags();
-    
-    public double termFrequency();
+    //public long freshUntil();
     
     public String toString();
     

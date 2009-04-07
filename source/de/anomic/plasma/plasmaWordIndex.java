@@ -210,7 +210,7 @@ public final class plasmaWordIndex {
             }
         }
         initActiveCrawlProfiles();
-        log.logConfig("Loaded active crawl profiles from file " + profilesActiveFile.getName() +
+        log.logInfo("Loaded active crawl profiles from file " + profilesActiveFile.getName() +
                 ", " + this.profilesActiveCrawls.size() + " entries" +
                 ", " + profilesActiveFile.length()/1024);
         final File profilesPassiveFile = new File(queuesRoot, DBFILE_PASSIVE_CRAWL_PROFILES);
@@ -230,7 +230,7 @@ public final class plasmaWordIndex {
                 this.profilesPassiveCrawls = null;
             }
         }
-        log.logConfig("Loaded passive crawl profiles from file " + profilesPassiveFile.getName() +
+        log.logInfo("Loaded passive crawl profiles from file " + profilesPassiveFile.getName() +
                 ", " + this.profilesPassiveCrawls.size() + " entries" +
                 ", " + profilesPassiveFile.length()/1024);
         
@@ -665,13 +665,13 @@ public final class plasmaWordIndex {
                         entry = containerIterator.next();
                         // System.out.println("Wordhash: "+wordHash+" UrlHash:
                         // "+entry.getUrlHash());
-                        final URLMetadataRow ue = metadata.load(entry.urlHash(), entry, 0);
+                        final URLMetadataRow ue = metadata.load(entry.metadataHash(), entry, 0);
                         if (ue == null) {
-                            urlHashs.add(entry.urlHash());
+                            urlHashs.add(entry.metadataHash());
                         } else {
                             url = ue.metadata().url();
                             if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, url) == true)) {
-                                urlHashs.add(entry.urlHash());
+                                urlHashs.add(entry.metadataHash());
                             }
                         }
                     }

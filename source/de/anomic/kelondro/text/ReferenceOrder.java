@@ -121,8 +121,8 @@ public class ReferenceOrder {
         final long tf = ((max.termFrequency() == min.termFrequency()) ? 0 : (((int)(((t.termFrequency()-min.termFrequency())*256.0)/(max.termFrequency() - min.termFrequency())))) << ranking.coeff_termfrequency);
         //System.out.println("tf(" + t.urlHash + ") = " + Math.floor(1000 * t.termFrequency()) + ", min = " + Math.floor(1000 * min.termFrequency()) + ", max = " + Math.floor(1000 * max.termFrequency()) + ", tf-normed = " + tf);
         final long r =
-             ((256 - yacyURL.domLengthNormalized(t.urlHash())) << ranking.coeff_domlength)
-           + ((ranking.coeff_ybr > 12) ? ((256 - (plasmaSearchRankingProcess.ybr(t.urlHash()) << 4)) << ranking.coeff_ybr) : 0)
+             ((256 - yacyURL.domLengthNormalized(t.metadataHash())) << ranking.coeff_domlength)
+           + ((ranking.coeff_ybr > 12) ? ((256 - (plasmaSearchRankingProcess.ybr(t.metadataHash()) << 4)) << ranking.coeff_ybr) : 0)
            + ((max.urlcomps()      == min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - min.urlcomps()     ) << 8) / (max.urlcomps()     - min.urlcomps())     )) << ranking.coeff_urlcomps)
            + ((max.urllength()     == min.urllength()  )   ? 0 : (256 - (((t.urllength()    - min.urllength()    ) << 8) / (max.urllength()    - min.urllength())    )) << ranking.coeff_urllength)
            + ((max.posintext()     == min.posintext()  )   ? 0 : (256 - (((t.posintext()    - min.posintext()    ) << 8) / (max.posintext()    - min.posintext())    )) << ranking.coeff_posintext)
@@ -137,7 +137,7 @@ public class ReferenceOrder {
            + ((max.lother()        == min.lother())        ? 0 : (((t.lother()       - min.lother()        ) << 8) / (max.lother()       - min.lother())        ) << ranking.coeff_lother)
            + ((max.hitcount()      == min.hitcount())      ? 0 : (((t.hitcount()     - min.hitcount()      ) << 8) / (max.hitcount()     - min.hitcount())      ) << ranking.coeff_hitcount)
            + tf
-           + ((ranking.coeff_authority > 12) ? (authority(t.urlHash()) << ranking.coeff_authority) : 0)
+           + ((ranking.coeff_authority > 12) ? (authority(t.metadataHash()) << ranking.coeff_authority) : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_identifier))  ? 255 << ranking.coeff_appurl             : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_title))       ? 255 << ranking.coeff_app_dc_title       : 0)
            + ((flags.get(WordReferenceRow.flag_app_dc_creator))     ? 255 << ranking.coeff_app_dc_creator     : 0)
@@ -150,7 +150,7 @@ public class ReferenceOrder {
            + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << ranking.coeff_cathasvideo        : 0)
            + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << ranking.coeff_cathasapp          : 0)
            + ((patchUK(t.language).equals(this.language))        ? 255 << ranking.coeff_language           : 0)
-           + ((yacyURL.probablyRootURL(t.urlHash()))             ?  15 << ranking.coeff_urllength          : 0);
+           + ((yacyURL.probablyRootURL(t.metadataHash()))             ?  15 << ranking.coeff_urllength          : 0);
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
 
         return Long.MAX_VALUE - r; // returns a reversed number: the lower the number the better the ranking. This is used for simple sorting with a TreeMap
@@ -195,7 +195,7 @@ public class ReferenceOrder {
                 if (this.entryMin == null) this.entryMin = iEntry.clone(); else this.entryMin.min(iEntry);
                 if (this.entryMax == null) this.entryMax = iEntry.clone(); else this.entryMax.max(iEntry);
                 // update domcount
-                dom = iEntry.urlHash().substring(6);
+                dom = iEntry.metadataHash().substring(6);
                 count = doms.get(dom);
                 if (count == null) {
                 	doms.put(dom, int1);
