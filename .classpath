@@ -13,7 +13,6 @@
 	<classpathentry kind="src" path="htroot/api/bookmarks/tags"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="lib/tar.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/bzip2.jar"/>
 	<classpathentry exported="true" kind="lib" path="libx/commons-discovery.jar"/>
 	<classpathentry exported="true" kind="lib" path="libx/jakarta-oro-2.0.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="libx/jaxrpc.jar"/>
@@ -25,7 +24,6 @@
 	<classpathentry exported="true" kind="lib" path="libx/odf_utils_05_11_29.jar"/>
 	<classpathentry exported="true" kind="lib" path="libx/tm-extractors-1.0.jar"/>
 	<classpathentry exported="true" kind="lib" path="libx/wsdl4j.jar"/>
-	<classpathentry kind="lib" path="D:/meinedaten/workspace/yacy/lib/xerces.jar"/>
 	<classpathentry exported="true" kind="lib" path="libx/poi-3.0-alpha2-20060616.jar"/>
 	<classpathentry exported="true" kind="lib" path="libx/poi-scratchpad-3.0-alpha2-20060616.jar"/>
 	<classpathentry exported="true" kind="lib" path="libx/inetlib.jar"/>
@@ -45,5 +43,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/servlet-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-jxpath-1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/sbbi-upnplib-1.0.4.jar"/>
+	<classpathentry kind="lib" path="lib/xerces.jar"/>
+	<classpathentry kind="lib" path="lib/bzip2.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

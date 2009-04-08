@@ -130,7 +130,8 @@ import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.messageBoard;
 import de.anomic.data.userDB;
-import de.anomic.data.wikiBoard;
+import de.anomic.data.wiki.wikiBoard;
+import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpRemoteProxyConfig;
@@ -546,15 +547,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         log.logConfig("Initializing Snippet Cache");
         plasmaSnippetCache.init(parser, log, this);
         
-        final String wikiParserClassName = getConfig(plasmaSwitchboardConstants.WIKIPARSER_CLASS, plasmaSwitchboardConstants.WIKIPARSER_CLASS_DEFAULT);
-        this.log.logConfig("Loading wiki parser " + wikiParserClassName + " ...");
-        try {
-            final Class<?> wikiParserClass = Class.forName(wikiParserClassName);
-            final Constructor<?> wikiParserClassConstr = wikiParserClass.getConstructor(new Class[] { plasmaSwitchboard.class });
-            wikiParser = (wikiParser)wikiParserClassConstr.newInstance(new Object[] { this });
-        } catch (final Exception e) {
-            this.log.logSevere("Unable to load wiki parser, the wiki won't work", e);
-        }
+        // init the wiki
+        wikiParser = new wikiCode(this.webIndex.peers().mySeed().getClusterAddress());
         
         // initializing the resourceObserver
         this.observer = new ResourceObserver(this);

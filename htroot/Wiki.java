@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.data.diff;
-import de.anomic.data.wikiBoard;
+import de.anomic.data.wiki.wikiBoard;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;

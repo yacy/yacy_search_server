@@ -57,9 +57,7 @@ public class bzipParser extends AbstractParser implements Parser {
      * a list of library names that are needed by this parser
      * @see Parser#getLibxDependences()
      */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {
-        "bzip2.jar"
-    };
+    private static final String[] LIBX_DEPENDENCIES = new String[] {};
     
     public bzipParser() {        
         super(LIBX_DEPENDENCIES);

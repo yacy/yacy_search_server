@@ -7,29 +7,21 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
-import de.anomic.plasma.plasmaSwitchboard;
-
 public abstract class abstractWikiParser implements wikiParser {
     
-    private final plasmaSwitchboard sb;
+    String address;
     
-    public abstractWikiParser(final plasmaSwitchboard sb) {
-        this.sb = sb;
+    public abstractWikiParser(String address) {
+        this.address = address;
     }
     
-    protected abstract String transform(BufferedReader reader, int length, String publicAddress, plasmaSwitchboard sb) throws IOException;
+    protected abstract String transform(BufferedReader reader, int length) throws IOException;
 
     public String transform(final String content) {
-        return transform(content, this.sb);
-    }
-    
-    public String transform(final String content, final plasmaSwitchboard sb) {
         try {
             return transform(
                     new BufferedReader(new StringReader(content)),
-                    content.length(),
-                    sb.webIndex.peers().mySeed().getPublicAddress(),
-                    sb);
+                    content.length());
         } catch (final IOException e) {
             return "internal error: " + e.getMessage();
         }
@@ -39,43 +31,33 @@ public abstract class abstractWikiParser implements wikiParser {
         try {
             return transform(
                     new BufferedReader(new StringReader(content)),
-                    content.length(),
-                    publicAddress,
-                    null);
+                    content.length());
         } catch (final IOException e) {
             return "internal error: " + e.getMessage();
         }
     }
     
     public String transform(final byte[] content) throws UnsupportedEncodingException {
-        return transform(content, "UTF-8", this.sb);
+        return transform(content, "UTF-8");
     }
     
-    public String transform(final byte[] content, final String encoding) throws UnsupportedEncodingException {
-        return transform(content, encoding, this.sb);
-    }
-
     public String transform(final byte[] content, final String encoding, final String publicAddress) throws UnsupportedEncodingException {
         final ByteArrayInputStream bais = new ByteArrayInputStream(content);
         try {
             return transform(
                     new BufferedReader(new InputStreamReader(bais, encoding)),
-                    content.length,
-                    publicAddress,
-                    null);
+                    content.length);
         } catch (final IOException e) {
             return "internal error: " + e.getMessage();
         }
     }
     
-    public String transform(final byte[] content, final String encoding, final plasmaSwitchboard switchboard) throws UnsupportedEncodingException {
+    public String transform(final byte[] content, final String encoding) throws UnsupportedEncodingException {
         final ByteArrayInputStream bais = new ByteArrayInputStream(content);
         try {
             return transform(
                     new BufferedReader(new InputStreamReader(bais, encoding)),
-                    content.length,
-                    sb.webIndex.peers().mySeed().getPublicAddress(),
-                    switchboard);
+                    content.length);
         } catch (final IOException e) {
             return "internal error: " + e.getMessage();
         }

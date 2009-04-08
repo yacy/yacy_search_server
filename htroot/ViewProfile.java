@@ -67,7 +67,6 @@ public class ViewProfile {
         
         // get the profile
         HashMap profile = null;
-        String address = null;
         if (hash.equals("localhash")) {
             // read the profile from local peer
             final Properties p = new Properties();
@@ -84,7 +83,6 @@ public class ViewProfile {
             prop.put("localremotepeer", "0");
             prop.putHTML("success_peername", sb.webIndex.peers().mySeed().getName());
             prop.put("success_peerhash", sb.webIndex.peers().mySeed().hash);
-            address = sb.webIndex.peers().mySeed().getPublicAddress();
         } else {
             // read the profile from remote peer
             yacySeed seed = sb.webIndex.peers().getConnected(hash);
@@ -111,7 +109,6 @@ public class ViewProfile {
                 }
                 prop.putHTML("success_peername", seed.getName());
                 prop.put("success_peerhash", seed.hash);
-                address = seed.getPublicAddress();
             }
             prop.put("localremotepeer", "1");
         }
@@ -159,9 +156,7 @@ public class ViewProfile {
                     if(key.equals("comment")){
                         prop.putWiki(
                                 "success_" + key + "_value",
-                                ((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n"),
-                                address
-                        );
+                                ((String) entry.getValue()).replaceAll("\r", "").replaceAll("\\\\n", "\n"));
                         prop.put("success_" + key + "_b64value",Base64Order.standardCoder.encodeString((String) entry.getValue()));
                     }else{
                         prop.putHTML("success_" + key + "_value", value); //put replaces HTML Chars by entities.

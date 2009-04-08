@@ -302,8 +302,6 @@ public final class plasmaSwitchboardConstants {
     public static final String HTTPC_NAME_CACHE_CACHING_PATTERNS_NO = "httpc.nameCacheNoCachingPatterns";
     public static final String ROBOTS_TXT                       = "httpd.robots.txt";
     public static final String ROBOTS_TXT_DEFAULT               = httpdRobotsTxtConfig.LOCKED + "," + httpdRobotsTxtConfig.DIRS;
-    public static final String WIKIPARSER_CLASS                 = "wikiParser.class";
-    public static final String WIKIPARSER_CLASS_DEFAULT         = "de.anomic.data.wikiCode";
     /**
      * <p><code>public static final String <strong>BLACKLIST_CLASS</strong> = "Blacklist.class"</code></p>
      * <p>Name of the setting which Blacklist backend shall be used. Due to different requirements of users, the

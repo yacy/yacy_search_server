@@ -26,7 +26,10 @@
 
 package de.anomic.tools;
 
+import org.apache.tools.bzip2.CBZip2InputStream;
+
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
@@ -56,8 +59,10 @@ import de.anomic.kelondro.util.ByteBuffer;
 
 public class mediawikiIndex {
 
-    private static final byte[] pagestart = "<page>".getBytes();
-    private static final byte[] pageend = "</page>".getBytes();
+    private static final String pagestart = "<page>";
+    private static final String pageend = "</page>";
+    private static final byte[] pagestartb = pagestart.getBytes();
+    private static final byte[] pageendb = pageend.getBytes();
     
     public static void checkIndex(File wikimediaxml) {
         File idx = idxFromWikimediaXML(wikimediaxml);
@@ -99,10 +104,10 @@ public class mediawikiIndex {
         
         // read the wiki dump
         long start, stop;
-        while (in.seek(pagestart)) {
+        while (in.seek(pagestartb)) {
             start = in.pos() - 6;
             in.resetBuffer();
-            if (!in.seek(pageend)) break;
+            if (!in.seek(pageendb)) break;
             stop = in.pos();
             consumer.consume(new wikiraw(in.bytes(), start, stop));
             in.resetBuffer();
@@ -335,7 +340,7 @@ public class mediawikiIndex {
         while (in.seek("<page ".getBytes())) {
             start = in.pos() - 6;
             in.resetBuffer();
-            if (!in.seek(pageend)) break;
+            if (!in.seek(pageendb)) break;
             s = new String(in.bytes(), "UTF-8");
             in.resetBuffer();
             if (s.indexOf(m) >= 0) {
@@ -363,12 +368,58 @@ public class mediawikiIndex {
     public static void main(String[] s) {
         if (s.length == 0) {
             System.out.println("usage:");
+            System.out.println(" -more <wikipedia-dump>");
             System.out.println(" -index <wikipedia-dump>");
             System.out.println(" -read  <start> <len> <idx-file>");
             System.out.println(" -find  <title> <wikipedia-dump>");
             System.exit(0);
         }
 
+        if (s[0].equals("-more")) {   
+            try {
+                InputStream is = new FileInputStream(new File(s[1]));
+                if (s[1].endsWith(".bz2")) {
+                    int b = is.read();
+                    if (b != 'B') throw new IOException("Invalid bz2 content.");
+                    b = is.read();
+                    if (b != 'Z') throw new IOException("Invalid bz2 content.");
+                    is = new CBZip2InputStream(is);
+                }
+                BufferedReader r = new BufferedReader(new java.io.InputStreamReader(is));
+                String t;
+                StringBuffer sb = new StringBuffer();
+                boolean read = false;
+                String title = null;
+                while ((t = r.readLine()) != null) {
+                    if (t.indexOf(pagestart) >= 0) {
+                        read = true;
+                        continue;
+                    }
+                    if (t.indexOf(pageend) >= 0) {
+                        read = false;
+                        System.out.println("Title: " + title);
+                        System.out.println(sb);
+                        System.out.println();
+                        sb.setLength(0);
+                        continue;
+                    }
+                    if (t.indexOf("<title>") >= 0) {
+                        title = t.substring(t.indexOf("<title>") + 7);
+                        int p = title.indexOf("</title>");
+                        if (p >= 0) title = title.substring(0, p);
+                        continue;
+                    }
+                    if (read) {
+                        sb.append(t);
+                        sb.append('\n');
+                    }
+                }
+                r.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
         if (s[0].equals("-index")) {   
             try {
                 createIndex(new File(s[1]));

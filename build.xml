@@ -192,6 +192,7 @@
       <pathelement location="${lib}/commons-io-1.4.jar" />
       <pathelement location="${lib}/servlet-api.jar" />
       <pathelement location="${lib}/xerces.jar" />
+      <pathelement location="${lib}/bzip2.jar" />
       <!-- upnp (+ commons-logging) -->
       <pathelement location="${lib}/sbbi-upnplib-1.0.4.jar" />
       <pathelement location="${lib}/commons-jxpath-1.1.jar" />

@@ -69,8 +69,7 @@ public class mimeTypeParser extends AbstractParser implements Parser {
         "commons-logging-1.1.1.jar",
         "jmimemagic-0.1.0.jar",
         "jakarta-oro-2.0.7.jar",
-        "log4j-1.2.9.jar",
-        "xerces.jar"
+        "log4j-1.2.9.jar"
     };
     
     /**

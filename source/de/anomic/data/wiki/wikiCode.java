@@ -25,7 +25,7 @@
 // Contains contributions from Alexander Schier [AS]
 // Franz Brausze [FB] and Marc Nause [MN]
 
-package de.anomic.data;
+package de.anomic.data.wiki;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -33,10 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 
-import de.anomic.data.wiki.abstractWikiParser;
-import de.anomic.data.wiki.wikiParser;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 
 /** This class provides methods to handle texts that have been posted in the yacyWiki or other
@@ -80,19 +77,17 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private final ArrayList<String> dirElements = new ArrayList<String>();    //list of headlines used to create diectory of page
 
     /** Constructor of the class wikiCode */
-    public wikiCode(final plasmaSwitchboard switchboard){
-        super(switchboard);
+    public wikiCode(String address){
+        super(address);
     }
     
     protected String transform(
             final BufferedReader reader,
-            final int length,
-            final String publicAddress,
-            final plasmaSwitchboard switchboard) throws IOException {
+            final int length) throws IOException {
         final StringBuilder out = new StringBuilder(length);
         String line;
         while ((line = reader.readLine()) != null)
-            out.append(transformLine(line, publicAddress, switchboard)).append(serverCore.CRLF_STRING);
+            out.append(transformLine(line)).append(serverCore.CRLF_STRING);
         return out.insert(0, directory()).toString();
     }
 
@@ -101,7 +96,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
       * @return a string with wiki code of parts of table replaced by HTML code for table
       */
       //[FB], changes by [MN]
-    private String processTable(String result, final plasmaSwitchboard switchboard){
+    private String processTable(String result){
         //some variables that make it easier to change codes for the table
         String line = "";
         final String tableStart = "&#123;&#124;";                 // {|
@@ -164,10 +159,10 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 propEnd = lenCellDivider;
             }
             table=false; cellprocessing=true;
-            line+=">"+processTable(result.substring(propEnd,cellEnd).trim(), switchboard)+"</td>";
+            line+=">"+processTable(result.substring(propEnd,cellEnd).trim())+"</td>";
             table=true; cellprocessing=false;
             if (cellEnd<result.length()) {
-                line+="\n"+processTable(result.substring(cellEnd), switchboard);
+                line+="\n"+processTable(result.substring(cellEnd));
             }
             result=line;
         }
@@ -376,7 +371,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     /** This method processes links and images.
       */
     //contributed by [AS] except where stated otherwise
-    private String linksAndImages(String result, final String publicAddress, final plasmaSwitchboard switchboard) {
+    private String linksAndImages(String result) {
 
         // create links
         String kl, kv, alt, align;
@@ -429,7 +424,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 // or an image DATA/HTDOCS/grafics/kaskelix.jpg with [[Image:grafics/kaskelix.jpg]]
                 // you are free to use other sub-paths of DATA/HTDOCS
                 if (kl.indexOf("://")<1) {
-                    kl = "http://" + publicAddress.trim() + "/" + kl;
+                    kl = "http://" + super.address + "/" + kl;
                 }
 
                 result = result.substring(0, p0) + "<img src=\"" + kl + "\"" + align + alt + ">" + result.substring(p1 + 2);
@@ -444,11 +439,11 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 } else {
                     kv = kl;
                 }
-                if (switchboard != null && switchboard.wikiDB.read(kl) != null) {
+                //if (switchboard != null && switchboard.wikiDB.read(kl) != null) {
                     result = result.substring(0, p0) + "<a class=\"known\" href=\"Wiki.html?page=" + kl + "\">" + kv + "</a>" + result.substring(p1 + 2);
-                } else {
-                    result = result.substring(0, p0) + "<a class=\"unknown\" href=\"Wiki.html?page=" + kl + "&edit=Edit\">" + kv + "</a>" + result.substring(p1 + 2);
-                }
+                //} else {
+                //    result = result.substring(0, p0) + "<a class=\"unknown\" href=\"Wiki.html?page=" + kl + "&edit=Edit\">" + kv + "</a>" + result.substring(p1 + 2);
+                //}
             }
         }
 
@@ -471,7 +466,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             // or a file DATA/HTDOCS/www/page.html with [www/page.html]
             // you are free to use other sub-paths of DATA/HTDOCS
             if (kl.indexOf("://") < 1) {
-                kl = "http://" + publicAddress.trim() + "/" + kl;
+                kl = "http://" + super.address + "/" + kl;
             }
         result = result.substring(0, p0) + "<a class=\"extern\" href=\"" + kl + "\">" + kv + "</a>" + result.substring(p1 + 1);
         }
@@ -480,7 +475,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
 
     /** This method handles the escape tags [= =] */
     //contributed by [MN]
-    private String escapeTag(String result, final String publicAddress, final plasmaSwitchboard switchboard){
+    private String escapeTag(String result){
         int p0 = 0;
         int p1 = 0;
         //both [= and =] in the same line
@@ -488,16 +483,16 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             if(p0<p1){
                 String escapeText = result.substring(p0+2,p1);
                 escapeText = escapeText.replaceAll("!esc!", "!esc!!");
-                result = transformLine(result.substring(0,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!"+result.substring(p1+2).replaceAll("!esc!", "!esc!!"), publicAddress, switchboard);
+                result = transformLine(result.substring(0,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!"+result.substring(p1+2).replaceAll("!esc!", "!esc!!"));
                 result = result.replaceAll("!esc!txt!", escapeText);
                 result = result.replaceAll("!esc!!", "!esc!");
             }
             //handles cases like [=[= =]=] [= =] that would cause an exception otherwise
             else{
                 escape = true;
-                final String temp1 = transformLine(result.substring(0,p0-1).replaceAll("!tmp!","!tmp!!")+"!tmp!txt!", publicAddress, switchboard);
+                final String temp1 = transformLine(result.substring(0,p0-1).replaceAll("!tmp!","!tmp!!")+"!tmp!txt!");
                 nolist = true;
-                final String temp2 = transformLine(result.substring(p0), publicAddress, switchboard);
+                final String temp2 = transformLine(result.substring(p0));
                 nolist = false;
                 result = temp1.replaceAll("!tmp!txt!",temp2);
                 result = result.replaceAll("!tmp!!", "!tmp!");
@@ -517,7 +512,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 escindented++;
                 bq = bq + "<blockquote>";
             }
-            result = transformLine(result.substring(escindented,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!", publicAddress, switchboard);
+            result = transformLine(result.substring(escindented,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!");
             result = bq + result.replaceAll("!esc!txt!", escapeText);
             result = result.replaceAll("!esc!!", "!esc!");
             escape = false;
@@ -535,7 +530,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 bq = bq + "</blockquote>";
                 escindented--;
             }
-            result = transformLine("!esc!txt!"+result.substring(p0+2).replaceAll("!esc!", "!esc!!"), publicAddress, switchboard);
+            result = transformLine("!esc!txt!"+result.substring(p0+2).replaceAll("!esc!", "!esc!!"));
             result = result.replaceAll("!esc!txt!", escapeText) + bq;
             result = result.replaceAll("!esc!!", "!esc!");
             escaped = false;
@@ -545,14 +540,14 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             while((p0 = result.indexOf("=]"))>=0){
                 result = result.substring(0,p0)+result.substring(p0+2);
             }
-            result = transformLine(result, publicAddress, switchboard);
+            result = transformLine(result);
         }
         return result;
     }
 
     /** This method handles the preformatted tags <pre> </pre> */
     //contributed by [MN]
-    private String preformattedTag(String result, final String publicAddress, final plasmaSwitchboard switchboard){
+    private String preformattedTag(String result){
         int p0 = 0;
         int p1 = 0;
         //implementation very similar to escape code (see above)
@@ -561,16 +556,16 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             if(p0<p1){
                 String preformattedText = "<pre style=\"border:dotted;border-width:thin\">"+result.substring(p0+11,p1)+"</pre>";
                 preformattedText = preformattedText.replaceAll("!pre!", "!pre!!");
-                result = transformLine(result.substring(0,p0).replaceAll("!pre!", "!pre!!")+"!pre!txt!"+result.substring(p1+12).replaceAll("!pre!", "!pre!!"), publicAddress, switchboard);
+                result = transformLine(result.substring(0,p0).replaceAll("!pre!", "!pre!!")+"!pre!txt!"+result.substring(p1+12).replaceAll("!pre!", "!pre!!"));
                 result = result.replaceAll("!pre!txt!", preformattedText);
                 result = result.replaceAll("!pre!!", "!pre!");
             }
             //handles cases like <pre><pre> </pre></pre> <pre> </pre> that would cause an exception otherwise
             else{
                 preformatted = true;
-                final String temp1 = transformLine(result.substring(0,p0-1).replaceAll("!tmp!","!tmp!!")+"!tmp!txt!", publicAddress, switchboard);
+                final String temp1 = transformLine(result.substring(0,p0-1).replaceAll("!tmp!","!tmp!!")+"!tmp!txt!");
                 nolist = true;
-                final String temp2 = transformLine(result.substring(p0), publicAddress, switchboard);
+                final String temp2 = transformLine(result.substring(p0));
                 nolist = false;
                 result = temp1.replaceAll("!tmp!txt!",temp2);
                 result = result.replaceAll("!tmp!!", "!tmp!");
@@ -589,7 +584,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 preindented++;
                 bq = bq + "<blockquote>";
             }
-            result = transformLine(result.substring(preindented,p0).replaceAll("!pre!", "!pre!!")+"!pre!txt!", publicAddress, switchboard);
+            result = transformLine(result.substring(preindented,p0).replaceAll("!pre!", "!pre!!")+"!pre!txt!");
             result = bq + result.replaceAll("!pre!txt!", preformattedText);
             result = result.replaceAll("!pre!!", "!pre!");
             preformattedSpan = true;
@@ -606,7 +601,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 bq = bq + "</blockquote>";
                 preindented--;
             }
-            result = transformLine("!pre!txt!"+result.substring(p0+12).replaceAll("!pre!", "!pre!!"), publicAddress, switchboard);
+            result = transformLine("!pre!txt!"+result.substring(p0+12).replaceAll("!pre!", "!pre!!"));
             result = result.replaceAll("!pre!txt!", preformattedText) + bq;
             result = result.replaceAll("!pre!!", "!pre!");
             preformatted = false;
@@ -616,7 +611,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             while((p0 = result.indexOf("&lt;/pre&gt;"))>=0){
                 result = result.substring(0,p0)+result.substring(p0+12);
             }
-            result = transformLine(result, publicAddress, switchboard);
+            result = transformLine(result);
         }
         return result;
     }
@@ -755,7 +750,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
       * @param switchboard
       * @return the line of text with HTML tags instead of wiki tags
       */
-    public String transformLine(String result, final String publicAddress, final plasmaSwitchboard switchboard) {
+    public String transformLine(String result) {
         //If HTML has not bee replaced yet (can happen if method gets called in recursion), replace now!
         if (!replacedHTML || preformattedSpan){
             result = htmlFilterCharacterCoding.unicode2html(result, true);
@@ -764,19 +759,19 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
 
         //check if line contains escape symbols([= =]) or if we are in an escape sequence already.
         if ((result.indexOf("[=")>=0)||(result.indexOf("=]")>=0)||(escapeSpan)){
-            result = escapeTag(result, publicAddress, switchboard);
+            result = escapeTag(result);
         }
 
         //check if line contains preformatted symbols or if we are in a preformatted sequence already.
         else if ((result.indexOf("&lt;pre&gt;")>=0)||(result.indexOf("&lt;/pre&gt;")>=0)||(preformattedSpan)){
-            result = preformattedTag(result, publicAddress, switchboard);
+            result = preformattedTag(result);
         }
 
         //transform page as usual
         else {
 
             //tables first -> wiki-tags in cells can be treated after that
-            result = processTable(result, switchboard);
+            result = processTable(result);
 
             // format lines
             if (result.startsWith(" ")) result = "<tt>" + result.substring(1) + "</tt>";
@@ -808,7 +803,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             result = orderedList(result);
             result = definitionList(result);
 
-            result = linksAndImages(result, publicAddress, switchboard);
+            result = linksAndImages(result);
 
         }
 
