@@ -226,8 +226,8 @@ public class Surftips {
                 if (url.length() < 12) continue;
                 entry = rowdef.newEntry(new byte[][]{
                                 url.getBytes(),
-                                (((intention.length() == 0) || (intention.equals("simple web crawl"))) ? record.attribute("startURL", "") : intention).getBytes(),
-                                ("Crawl Start Point").getBytes("UTF-8"),
+                                (((intention.length() == 0) || intention.equals("simple web crawl") || intention.equals("Automatic ReCrawl!")) ? record.attribute("startURL", "") : intention).getBytes(),
+                                intention.equals("Automatic ReCrawl!") ? ("Automatic ReCrawl").getBytes("UTF-8") : ("Crawl Start Point").getBytes("UTF-8"),
                                 record.id().getBytes()
                         });
                 score = 2 + Math.min(10, intention.length() / 4) + timeFactor(record.created());
