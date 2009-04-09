@@ -134,7 +134,8 @@ public class HeapReader {
     
     private void initIndexReadFromHeap() throws IOException {
         // this initializes the this.index object by reading positions from the heap file
-
+        Log.logInfo("HeapReader", "generating index for " + heapFile.toString() + ", " + (file.length() / 1024) + " kbytes. Please wait.");
+        
         this.free = new Gap();
         LongHandleIndex.initDataConsumer indexready = LongHandleIndex.asynchronusInitializer(keylength, this.ordering, 0, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))), 100000);
         byte[] key = new byte[keylength];
@@ -189,6 +190,8 @@ public class HeapReader {
         } catch (ExecutionException e) {
             e.printStackTrace();
         }
+        Log.logInfo("HeapReader", "finished index generation for " + heapFile.toString() + ", " + index.size() + " entries, " + free.size() + " gaps.");
+        
     }
     
     public String name() {
