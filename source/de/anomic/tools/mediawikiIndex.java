@@ -50,6 +50,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import de.anomic.data.wiki.wikiCode;
+import de.anomic.data.wiki.wikiParser;
 import de.anomic.kelondro.util.ByteBuffer;
 
 /*
@@ -59,6 +61,8 @@ import de.anomic.kelondro.util.ByteBuffer;
 
 public class mediawikiIndex {
 
+    private static final String textstart = "<text";
+    private static final String textend = "</text>";
     private static final String pagestart = "<page>";
     private static final String pageend = "</page>";
     private static final byte[] pagestartb = pagestart.getBytes();
@@ -388,19 +392,29 @@ public class mediawikiIndex {
                 BufferedReader r = new BufferedReader(new java.io.InputStreamReader(is));
                 String t;
                 StringBuffer sb = new StringBuffer();
-                boolean read = false;
+                boolean page = false, text = false;
                 String title = null;
+                wikiParser wparser = new wikiCode("de.wikipedia.org");
+                //plasmaParser hparser = new plasmaParser();
                 while ((t = r.readLine()) != null) {
                     if (t.indexOf(pagestart) >= 0) {
-                        read = true;
+                        page = true;
+                        continue;
+                    }
+                    if (t.indexOf(textstart) >= 0) {
+                        text = page;
+                        continue;
+                    }
+                    if (t.indexOf(textend) >= 0) {
+                        text = false;
+                        System.out.println("Title: " + title);
+                        System.out.println(wparser.transform(sb.toString()));
+                        System.out.println();
+                        sb.setLength(0);
                         continue;
                     }
                     if (t.indexOf(pageend) >= 0) {
-                        read = false;
-                        System.out.println("Title: " + title);
-                        System.out.println(sb);
-                        System.out.println();
-                        sb.setLength(0);
+                        page = false;
                         continue;
                     }
                     if (t.indexOf("<title>") >= 0) {
@@ -409,7 +423,7 @@ public class mediawikiIndex {
                         if (p >= 0) title = title.substring(0, p);
                         continue;
                     }
-                    if (read) {
+                    if (text) {
                         sb.append(t);
                         sb.append('\n');
                     }

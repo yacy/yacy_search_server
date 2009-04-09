@@ -64,7 +64,6 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private boolean defList = false;            //needed for definition lists
     private boolean escape = false;             //needed for escape
     private boolean escaped = false;            //needed for <pre> not getting in the way
-    private boolean escapeSpan = false;         //needed for escape symbols [= and =] spanning over several lines
     private boolean newrowstart=false;          //needed for the first row not to be empty
     private boolean nolist = false;             //needed for handling of [= and <pre> in lists
     private boolean preformatted = false;       //needed for preformatted text
@@ -72,7 +71,6 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private boolean replacedHTML = false;       //indicates if method replaceHTML has been used with line already
     private boolean table = false;              //needed for tables, because they reach over several lines
     private int preindented = 0;                //needed for indented <pre>s
-    private int escindented = 0;                //needed for indented [=s
     private int headlines = 0;                  //number of headlines in page
     private final ArrayList<String> dirElements = new ArrayList<String>();    //list of headlines used to create diectory of page
 
@@ -473,78 +471,6 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         return result;
     }
 
-    /** This method handles the escape tags [= =] */
-    //contributed by [MN]
-    private String escapeTag(String result){
-        int p0 = 0;
-        int p1 = 0;
-        //both [= and =] in the same line
-        if(((p0 = result.indexOf("[="))>=0)&&((p1 = result.indexOf("=]"))>0)&&(!(preformatted))){
-            if(p0<p1){
-                String escapeText = result.substring(p0+2,p1);
-                escapeText = escapeText.replaceAll("!esc!", "!esc!!");
-                result = transformLine(result.substring(0,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!"+result.substring(p1+2).replaceAll("!esc!", "!esc!!"));
-                result = result.replaceAll("!esc!txt!", escapeText);
-                result = result.replaceAll("!esc!!", "!esc!");
-            }
-            //handles cases like [=[= =]=] [= =] that would cause an exception otherwise
-            else{
-                escape = true;
-                final String temp1 = transformLine(result.substring(0,p0-1).replaceAll("!tmp!","!tmp!!")+"!tmp!txt!");
-                nolist = true;
-                final String temp2 = transformLine(result.substring(p0));
-                nolist = false;
-                result = temp1.replaceAll("!tmp!txt!",temp2);
-                result = result.replaceAll("!tmp!!", "!tmp!");
-                escape = false;
-            }
-        }
-
-        //start [=
-        else if(((p0 = result.indexOf("[="))>=0)&&(!escapeSpan)&&(!preformatted)){
-            escape = true;    //prevent surplus line breaks
-            escaped = true;   //prevents <pre> being parsed
-            String bq = "";   //gets filled with <blockquote>s as needed
-            String escapeText = result.substring(p0+2);
-            escapeText = escapeText.replaceAll("!esc!", "!esc!!");
-            //taking care of indented lines
-            while(result.substring(escindented,p0).startsWith(":")){
-                escindented++;
-                bq = bq + "<blockquote>";
-            }
-            result = transformLine(result.substring(escindented,p0).replaceAll("!esc!", "!esc!!")+"!esc!txt!");
-            result = bq + result.replaceAll("!esc!txt!", escapeText);
-            result = result.replaceAll("!esc!!", "!esc!");
-            escape = false;
-            escapeSpan = true;
-        }
-
-        //end =]
-        else if(((p0 = result.indexOf("=]"))>=0)&&(escapeSpan)&&(!preformatted)){
-            escapeSpan = false;
-            String bq = ""; //gets filled with </blockquote>s as needed
-            String escapeText = result.substring(0,p0);
-            escapeText = escapeText.replaceAll("!esc!", "!esc!!");
-            //taking care of indented lines
-            while(escindented > 0){
-                bq = bq + "</blockquote>";
-                escindented--;
-            }
-            result = transformLine("!esc!txt!"+result.substring(p0+2).replaceAll("!esc!", "!esc!!"));
-            result = result.replaceAll("!esc!txt!", escapeText) + bq;
-            result = result.replaceAll("!esc!!", "!esc!");
-            escaped = false;
-        }
-        //Getting rid of surplus =]
-        else if (((p0 = result.indexOf("=]"))>=0)&&(!escapeSpan)&&(!preformatted)){
-            while((p0 = result.indexOf("=]"))>=0){
-                result = result.substring(0,p0)+result.substring(p0+2);
-            }
-            result = transformLine(result);
-        }
-        return result;
-    }
-
     /** This method handles the preformatted tags <pre> </pre> */
     //contributed by [MN]
     private String preformattedTag(String result){
@@ -757,18 +683,10 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             replacedHTML = true;
         }
 
-        //check if line contains escape symbols([= =]) or if we are in an escape sequence already.
-        if ((result.indexOf("[=")>=0)||(result.indexOf("=]")>=0)||(escapeSpan)){
-            result = escapeTag(result);
-        }
-
         //check if line contains preformatted symbols or if we are in a preformatted sequence already.
-        else if ((result.indexOf("&lt;pre&gt;")>=0)||(result.indexOf("&lt;/pre&gt;")>=0)||(preformattedSpan)){
+        if ((result.indexOf("&lt;pre&gt;")>=0)||(result.indexOf("&lt;/pre&gt;")>=0)||(preformattedSpan)){
             result = preformattedTag(result);
-        }
-
-        //transform page as usual
-        else {
+        } else {
 
             //tables first -> wiki-tags in cells can be treated after that
             result = processTable(result);
