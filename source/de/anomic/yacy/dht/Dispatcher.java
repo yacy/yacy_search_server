@@ -291,6 +291,7 @@ public class Dispatcher {
             final int maxContainerCount,
             final int maxReferenceCount,
             final int maxtime) throws IOException {
+        if (this.transmissionCloud == null) return false;
 
     	ArrayList<ReferenceContainer> selectedContainerCache = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime);
         this.log.logInfo("selectContainersToCache: selectedContainerCache was filled with " + selectedContainerCache.size() + " entries");
