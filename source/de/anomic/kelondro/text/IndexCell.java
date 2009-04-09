@@ -279,7 +279,7 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
         }
         
         // clean-up the cache
-        if (this.lastCleanup + cleanupCycle > System.currentTimeMillis()) return;
+        if (this.array.size() < 50 && this.lastCleanup + cleanupCycle > System.currentTimeMillis()) return;
         //System.out.println("----cleanup check");
         this.array.shrink(this.targetFileSize, this.maxFileSize);
         this.lastCleanup = System.currentTimeMillis();
