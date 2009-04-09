@@ -1042,7 +1042,7 @@ public final class httpdFileHandler {
                 } else {
                     if ((errorMsg != null) && 
                         (
-                           errorMsg.contains("broken pipe") || 
+                           errorMsg.contains("Broken pipe") || 
                            errorMsg.contains("Connection reset") ||
                            errorMsg.contains("Software caused connection abort")                           
                        )) {
