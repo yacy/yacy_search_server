@@ -186,6 +186,7 @@ public class serverDomains {
          "HR=Croatia (Hrvatska)",
          "HU=Hungary",
          "IE=Ireland",
+         "IM=Isle of Man",
          "IS=Iceland",
          "IT=Italy",
          "JE=Jersey",
