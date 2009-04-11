@@ -46,6 +46,7 @@
   <property name="libbuild" location="libbuild"/>
   <property name="build" location="classes"/>
   <property name="htroot" location="htroot"/>
+  <property name="langstats" location="langstats"/>
   <property name="locales" location="locales"/>
   <property name="skins" location="skins"/>
   <property name="ranking" location="ranking"/>
@@ -434,6 +435,13 @@
       </fileset>
     </copy>
 
+    <!-- copy language statistics files -->
+    <copy todir="${release_main}/langstats">
+      <fileset dir="${langstats}">
+        <include name="*"/>
+      </fileset>
+    </copy>
+
     <!-- copy documentation -->
     <copy todir="${release_main}">
       <fileset dir=".">
@@ -606,6 +614,13 @@
     <!-- copy skins  -->
     <copy todir="${release_source}/skins">
       <fileset dir="${skins}">
+        <include name="*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy language statistics files -->
+    <copy todir="${release_source}/langstats">
+      <fileset dir="${langstats}">
         <include name="*"/>
       </fileset>
     </copy>
@@ -806,6 +821,13 @@
     <!-- copy skins  -->
     <copy todir="${DESTDIR}/usr/share/yacy/skins">
       <fileset dir="${skins}">
+        <include name="*"/>
+      </fileset>
+    </copy>
+
+    <!-- copy language statistics files -->
+    <copy todir="${DESTDIR}/usr/share/yacy/langstats">
+      <fileset dir="${langstats}">
         <include name="*"/>
       </fileset>
     </copy>
