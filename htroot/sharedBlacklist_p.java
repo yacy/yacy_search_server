@@ -33,6 +33,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -40,6 +41,8 @@ import java.util.List;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.AbstractBlacklist;
 import de.anomic.data.listManager;
+import de.anomic.data.list.ListAccumulator;
+import de.anomic.data.list.XMLBlacklistImporter;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
@@ -49,6 +52,8 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
+import java.util.Map;
+import org.xml.sax.SAXException;
 
 public class sharedBlacklist_p {
 
@@ -58,6 +63,7 @@ public class sharedBlacklist_p {
     public static final int STATUS_PEER_UNKNOWN = 3;
     public static final int STATUS_URL_PROBLEM = 4;
     public static final int STATUS_WRONG_INVOCATION = 5;
+    public static final int STATUS_PARSE_ERROR = 6;
 
     private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
     
@@ -99,6 +105,8 @@ public class sharedBlacklist_p {
             prop.put("page_blackLists", blacklistCount);
             
             List<String> otherBlacklist = null;
+            ListAccumulator otherBlacklists = null;
+            
             if (post.containsKey("hash")) {
                 /* ======================================================
                  * Import blacklist from other peer 
@@ -165,22 +173,42 @@ public class sharedBlacklist_p {
                     prop.put("page", "1");
                 }
             } else if (post.containsKey("file")) {
-                /* ======================================================
-                 * Import the blacklist from file
-                 * ====================================================== */
-                final String sourceFileName = post.get("file");
-                prop.putHTML("page_source", sourceFileName);
-                
-                final String fileString = post.get("file$file");
 
-                if (fileString != null) {
-                    try {
-                        otherBlacklist = FileUtils.strings(fileString.getBytes("UTF-8"), "UTF-8");
-                    } catch (IOException ex) {
-                        prop.put("status", STATUS_FILE_ERROR);
+                if (post.containsKey("type") && post.get("type").equalsIgnoreCase("xml")) {
+                    /* ======================================================
+                     * Import the blacklist from XML file
+                     * ====================================================== */
+                    final String sourceFileName = post.get("file");
+                    prop.putHTML("page_source", sourceFileName);
+
+                    final String fileString = post.get("file$file");
+
+                    if (fileString != null) {
+                        try {
+                            otherBlacklists = new XMLBlacklistImporter().parse(new StringReader(fileString));
+                        } catch (IOException ex) {
+                            prop.put("status", STATUS_FILE_ERROR);
+                        } catch (SAXException ex) {
+                            prop.put("status", STATUS_PARSE_ERROR);
+                        }
+                    }
+                } else {
+                    /* ======================================================
+                     * Import the blacklist from text file
+                     * ====================================================== */
+                    final String sourceFileName = post.get("file");
+                    prop.putHTML("page_source", sourceFileName);
+
+                    final String fileString = post.get("file$file");
+
+                    if (fileString != null) {
+                        try {
+                            otherBlacklist = FileUtils.strings(fileString.getBytes("UTF-8"), "UTF-8");
+                        } catch (IOException ex) {
+                            prop.put("status", STATUS_FILE_ERROR);
+                        }
                     }
                 }
-                
             } else if (post.containsKey("add")) {
                 /* ======================================================
                  * Add loaded items into blacklist file
@@ -268,12 +296,40 @@ public class sharedBlacklist_p {
                 prop.put("page_urllist", (count));
                 prop.put("num", count);
                 prop.put("page", "0");
+
+            } else if (otherBlacklists != null) {
+                List<List<String>> entries = otherBlacklists.getEntryLists();
+                //List<Map<String,String>> properties = otherBlacklists.getPropertyMaps();
+                int count = 0;
+
+                for(List<String> list : entries) {
+
+                    // sort the loaded blacklist
+                    final String[] sortedlist = list.toArray(new String[list.size()]);
+                    Arrays.sort(sortedlist);
+
+                    for(int i = 0; i < sortedlist.length; i++){
+                        final String tmp = sortedlist[i];
+                        if(!tmp.equals("")){
+                            //newBlacklist.add(tmp);
+                            prop.put("page_urllist_" + count + "_dark", count % 2 == 0 ? "0" : "1");
+                            prop.putHTML("page_urllist_" + count + "_url", tmp);
+                            prop.put("page_urllist_" + count + "_count", count);
+                            count++;
+                        }
+                    }
+
+                }
+
+                prop.put("page_urllist", (count));
+                prop.put("num", count);
+                prop.put("page", "0");
+
             }
-                
                 
         } else {
             prop.put("page", "1");
-            prop.put("status", "5");//Wrong Invokation
+            prop.put("status", "5");//Wrong Invocation
         }
         return prop;
     }
