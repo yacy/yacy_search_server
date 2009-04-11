@@ -83,11 +83,5 @@
     <ppm>#[gppm]#</ppm>
     <qph>#[gqph]#</qph>
   </cluster>
-  <status>#[comment]#</status>
-  <!--
-  0 - nothing
-  1 - online mode, but no Internet available
-  2 - not in online mode
-  -->
 #(/table)#
 </peers>
