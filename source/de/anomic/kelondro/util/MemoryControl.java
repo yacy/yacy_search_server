@@ -56,7 +56,7 @@ public class MemoryControl {
             //System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ if you see this many times please report to forum");
             lastGC = System.currentTimeMillis();
             final long after = free();
-            gcs[gcs_pos++] = before - after;
+            gcs[gcs_pos++] = after - before;
             if (gcs_pos >= gcs.length) gcs_pos = 0;
             
             if (log.isFine()) log.logInfo("[gc] before: " + Formatter.bytesToString(before) +
