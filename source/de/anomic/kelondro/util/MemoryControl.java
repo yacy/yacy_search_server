@@ -45,7 +45,7 @@ public class MemoryControl {
      * @param last time which must be passed since lased gc
      * @param info additional info for log
      */
-    public final synchronized static void gc(final int last, final String info) { // thq
+    public final synchronized static boolean gc(final int last, final String info) { // thq
     	assert last >= 10000; // too many forced GCs will cause bad execution performance
         final long elapsed = System.currentTimeMillis() - lastGC;
         if (elapsed > last) {
@@ -56,29 +56,18 @@ public class MemoryControl {
             //System.out.println("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ if you see this many times please report to forum");
             lastGC = System.currentTimeMillis();
             final long after = free();
+            gcs[gcs_pos++] = before - after;
+            if (gcs_pos >= gcs.length) gcs_pos = 0;
+            
             if (log.isFine()) log.logInfo("[gc] before: " + Formatter.bytesToString(before) +
                                               ", after: " + Formatter.bytesToString(after) +
                                               ", freed: " + Formatter.bytesToString(after - before) +
                                               ", rt: " + (lastGC - start) + " ms, call: " + info);
-        } else if (log.isFine()) {
-            if (log.isFinest()) log.logFinest("[gc] no execute, last run: " + (elapsed / 1000) + " seconds ago, call: " + info);
+            return true;
         }
-    }
-
-    /**
-     * Tries to free count bytes
-     * @param count bytes
-     * @return the amount of freed bytes by a forced GC this method performes
-     */
-    private static long runGC(final boolean count) {
-        final long memBefore = available();
-        gc(10000, "serverMemory.runGC(...)");
-        final long freed = available() - memBefore;
-        if (count) {
-            gcs[gcs_pos] = freed;
-            gcs_pos = (gcs_pos + 1) % gcs.length;
-        }
-        return freed;
+        
+        if (log.isFinest()) log.logFinest("[gc] no execute, last run: " + (elapsed / 1000) + " seconds ago, call: " + info);
+        return false;
     }
     
     /**
@@ -160,14 +149,19 @@ public class MemoryControl {
         final long avg = getAverageGCFree();
         if (force || avg == 0 || avg + avail >= size) {
             // this is only called if we expect that an allocation of <size> bytes would cause the jvm to call the GC anyway
-            final long freed = runGC(false);
+            
+            final long memBefore = avail;
+            boolean performedGC = gc(10000, "serverMemory.runGC(...)");
             avail = available();
-            log.logInfo("performed " + ((force) ? "explicit" : "necessary") + " GC, freed " + (freed >> 10)
+            if (performedGC) {
+                final long freed = avail - memBefore;
+                log.logInfo("performed " + ((force) ? "explicit" : "necessary") + " GC, freed " + (freed >> 10)
                     + " KB (requested/available/average: "
                     + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
+            }
             return avail >= size;
         } else {
-            log.logInfo("former GCs indicate to not be able to free enough memory (requested/available/average: "
+            if (log.isFine()) log.logFine("former GCs indicate to not be able to free enough memory (requested/available/average: "
                     + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
             return false;
         }
