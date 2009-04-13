@@ -371,7 +371,7 @@ public class Blacklist_p {
             boolean dark = true;
             int offset = 0;
             int size = 50;
-            int to = sortedlist.length;
+            int to = 50;
             if (post != null) {
                 offset = post.getInt("offset", 0);
                 size = post.getInt("size", 50);
