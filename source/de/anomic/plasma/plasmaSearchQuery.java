@@ -140,7 +140,7 @@ public final class plasmaSearchQuery {
 		this.maxDistance = maxDistance;
 		this.prefer = prefer;
 		this.contentdom = contentdom;
-		this.linesPerPage = Math.min((specialRights) ? 1000 : 10, lines);
+		this.linesPerPage = Math.min((specialRights) ? 1000 : 50, lines);
 		this.offset = Math.min((specialRights) ? 10000 : 100, offset);
 		this.urlMask = urlMask;
 		assert language != null;

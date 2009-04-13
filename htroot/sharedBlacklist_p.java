@@ -52,7 +52,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
-import java.util.Map;
 import org.xml.sax.SAXException;
 
 public class sharedBlacklist_p {
