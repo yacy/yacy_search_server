@@ -300,18 +300,6 @@ public class httpClient {
     }
 
     /**
-     * This method sends several data at once via a POST request (multipart-message)
-     * 
-     * @param uri
-     * @param multiparts
-     * @return
-     * @throws IOException
-     */
-    public httpResponse POST(final String uri, final List<Part> multiparts) throws IOException {
-        return POST(uri, multiparts, false);
-    }
-
-    /**
      * This method sends several data at once via a POST request (multipart-message), maybe compressed
      * 
      * @param uri The URI to the page which the post is sent to.
@@ -648,7 +636,7 @@ public class httpClient {
                         "this is not a binary file ;)".getBytes())));
                 System.out.println("POST " + files.size() + " elements to " + url);
                 final httpClient client = new httpClient(1000);
-                resp = client.POST(url, files);
+                resp = client.POST(url, files, false);
                 System.out.println("----- Header: -----");
                 System.out.println(resp.getResponseHeader().toString());
                 System.out.println("----- Body:   -----");
@@ -763,11 +751,17 @@ public class httpClient {
         final httpClient client = new httpClient(timeout, header);
 
         // do the request
+        httpResponse response = null;
         try {
-            final httpResponse response = client.GET(uri);
+            response = client.GET(uri);
             return response.getData();
         } catch (final IOException e) {
             Log.logWarning("HTTPC", "wget(" + uri + ") failed: " + e.getMessage());
+        } finally {
+            // release connection
+            if (response != null) {
+                response.closeStream();
+            }
         }
         return null;
     }
