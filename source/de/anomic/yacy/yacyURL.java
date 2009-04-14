@@ -2,9 +2,9 @@
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 13.07.2006 on http://yacy.net
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -862,6 +862,7 @@ public class yacyURL implements Serializable {
         return (Base64Order.enhancedCoder.decodeByte(urlHash.charAt((urlHash.length() == 12) ? 11 : 5)) & 28) >> 2;
     }
 
+
     public static boolean isDomDomain(final String urlHash, final int id) {
         return domDomain(urlHash) == id;
     }
@@ -870,30 +871,31 @@ public class yacyURL implements Serializable {
         // this is a boolean matching on a set of domDomains
         return (domDomain(urlHash) | idset) != 0;
     }
-    
+
     // checks for local/global IP range and local IP
-    public boolean isLocal() {
+    public final boolean isLocal() {
         if (this.hash == null) {
-            if (this.host.startsWith("0:0:0:0:0:0:0:1") || this.host.startsWith("127.") || this.host.equals("localhost")) return true;
+            if (this.host.startsWith("127.") || this.host.equals("localhost") || this.host.startsWith("0:0:0:0:0:0:0:1")) return true;
             synchronized (this) {
                 this.hash = urlHashComputation();
             }
         }
         return domDomain(this.hash) == 7;
     }
-    
+
     public static final boolean isLocal(String urlhash) {
         return domDomain(urlhash) == 7;
     }
-    
+
     // language calculation
-    public String language() {
+    public final String language() {
         String language = "en";
         final int pos = host.lastIndexOf(".");
-        if ((pos > 0) && (host.length() - pos == 3)) language = host.substring(pos + 1).toLowerCase();
+        if (pos > 0 && host.length() - pos == 3) language = host.substring(pos + 1).toLowerCase();
+        if (language.equals("uk")) language = "en";
         return language;
     }
-    
+
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
           new String[]{null, "http://www.anomic.de/test/"},
