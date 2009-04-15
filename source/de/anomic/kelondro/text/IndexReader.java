@@ -30,12 +30,12 @@ import java.util.Set;
 
 import de.anomic.kelondro.order.CloneableIterator;
 
-public interface IndexReader {
+public interface IndexReader<ReferenceType extends Reference> {
 
     public int size();
     public boolean has(String wordHash); // should only be used if in case that true is returned the getContainer is NOT called
-    public ReferenceContainer get(String wordHash, Set<String> urlselection); 
-    public CloneableIterator<ReferenceContainer> references(String startWordHash, boolean rot);
+    public ReferenceContainer<ReferenceType> get(String wordHash, Set<String> urlselection); 
+    public CloneableIterator<ReferenceContainer<ReferenceType>> references(String startWordHash, boolean rot);
     public void close();
     
 }

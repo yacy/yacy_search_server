@@ -74,7 +74,7 @@ import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerCache;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
+import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSearchRankingProcess;
@@ -417,6 +417,7 @@ public final class yacyClient {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public static String[] search(
             final yacySeed mySeed,
             final String wordhashes,
@@ -526,9 +527,9 @@ public final class yacyClient {
 
 		// create containers
 		final int words = wordhashes.length() / yacySeedDB.commonHashLength;
-		final ReferenceContainer[] container = new ReferenceContainer[words];
+		final ReferenceContainer<WordReference>[] container = new ReferenceContainer[words];
 		for (int i = 0; i < words; i++) {
-			container[i] = ReferenceContainer.emptyContainer(wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength), count);
+			container[i] = ReferenceContainer.emptyContainer(plasmaWordIndex.wordReferenceFactory, wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength), count);
 		}
 
 		// insert results to containers
@@ -585,7 +586,7 @@ public final class yacyClient {
             
 			// add the url entry to the word indexes
 			for (int m = 0; m < words; m++) {
-				container[m].add(entry, System.currentTimeMillis());
+				container[m].add(entry);
 			}
             
 			// store url hash for statistics
@@ -857,7 +858,7 @@ public final class yacyClient {
      */
     public static String transferIndex(
             final yacySeed targetSeed,
-            final ReferenceContainerCache indexes,
+            final ReferenceContainerCache<WordReference> indexes,
             final HashMap<String, URLMetadataRow> urlCache,
             final boolean gzipBody,
             final int timeout) {
@@ -867,9 +868,9 @@ public final class yacyClient {
         try {
             
             // check if we got all necessary urls in the urlCache (only for debugging)
-            Iterator<WordReferenceRow> eenum;
+            Iterator<WordReference> eenum;
             Reference entry;
-            for (ReferenceContainer ic: indexes) {
+            for (ReferenceContainer<WordReference> ic: indexes) {
                 eenum = ic.entries();
                 while (eenum.hasNext()) {
                     entry = eenum.next();
@@ -944,7 +945,7 @@ public final class yacyClient {
 
     private static HashMap<String, String> transferRWI(
             final yacySeed targetSeed,
-            final ReferenceContainerCache indexes,
+            final ReferenceContainerCache<WordReference> indexes,
             boolean gzipBody,
             final int timeout) {
         final String address = targetSeed.getPublicAddress();
@@ -962,9 +963,9 @@ public final class yacyClient {
         
         int indexcount = 0;
         final StringBuilder entrypost = new StringBuilder(indexes.size() * 73);
-        Iterator<WordReferenceRow> eenum;
+        Iterator<WordReference> eenum;
         Reference entry;
-        for (ReferenceContainer ic: indexes) {
+        for (ReferenceContainer<WordReference> ic: indexes) {
             eenum = ic.entries();
             while (eenum.hasNext()) {
                 entry = eenum.next();

@@ -41,17 +41,16 @@ import de.anomic.kelondro.blob.HeapWriter;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
-import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 
-public final class ReferenceContainerCache extends AbstractIndex implements Index, IndexReader, Iterable<ReferenceContainer> {
+public final class ReferenceContainerCache<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType>, IndexReader<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
 
     private final Row payloadrow;
     private final ByteOrder termOrder;
-    private SortedMap<String, ReferenceContainer> cache;
+    private SortedMap<String, ReferenceContainer<ReferenceType>> cache;
     
     /**
      * opens an existing heap file in undefined mode
@@ -60,7 +59,8 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * @param payloadrow
      * @param log
      */
-    public ReferenceContainerCache(final Row payloadrow, ByteOrder termOrder) {
+    public ReferenceContainerCache(final ReferenceFactory<ReferenceType> factory, final Row payloadrow, ByteOrder termOrder) {
+        super(factory);
         this.payloadrow = payloadrow;
         this.termOrder = termOrder;
         this.cache = null;
@@ -84,7 +84,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * another dump reading afterwards is not possible
      */
     public void initWriteMode() {
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(this.termOrder)));
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer<ReferenceType>>(new ByteOrder.StringOrder(this.termOrder)));
     }
     
     /**
@@ -95,10 +95,10 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
     public void initWriteModeFromBLOB(final File blobFile) throws IOException {
         Log.logInfo("indexContainerRAMHeap", "restoring rwi blob dump '" + blobFile.getName() + "'");
         final long start = System.currentTimeMillis();
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer>(new ByteOrder.StringOrder(this.termOrder)));
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer<ReferenceType>>(new ByteOrder.StringOrder(this.termOrder)));
         int urlCount = 0;
         synchronized (cache) {
-            for (final ReferenceContainer container : new blobFileEntries(blobFile, this.payloadrow)) {
+            for (final ReferenceContainer<ReferenceType> container : new blobFileEntries<ReferenceType>(blobFile, factory, this.payloadrow)) {
                 // TODO: in this loop a lot of memory may be allocated. A check if the memory gets low is necessary. But what do when the memory is low?
                 if (container == null) break;
                 //System.out.println("***DEBUG indexContainerHeap.initwriteModeFromBLOB*** container.size = " + container.size() + ", container.sorted = " + container.sorted());
@@ -126,11 +126,11 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         final long startTime = System.currentTimeMillis();
         long wordcount = 0, urlcount = 0;
         String wordHash = null, lwh;
-        ReferenceContainer container;
+        ReferenceContainer<ReferenceType> container;
         
         // write wCache
         synchronized (cache) {
-            for (final Map.Entry<String, ReferenceContainer> entry: cache.entrySet()) {
+            for (final Map.Entry<String, ReferenceContainer<ReferenceType>> entry: cache.entrySet()) {
                 // get entries
                 lwh = wordHash;
                 wordHash = entry.getKey();
@@ -170,15 +170,17 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
     /**
      * static iterator of BLOBHeap files: is used to import heap dumps into a write-enabled index heap
      */
-    public static class blobFileEntries implements CloneableIterator<ReferenceContainer>, Iterable<ReferenceContainer> {
+    public static class blobFileEntries <RT extends Reference> implements CloneableIterator<ReferenceContainer<RT>>, Iterable<ReferenceContainer<RT>> {
         HeapReader.entries blobs;
         Row payloadrow;
         File blobFile;
+        ReferenceFactory<RT> factory;
         
-        public blobFileEntries(final File blobFile, final Row payloadrow) throws IOException {
+        public blobFileEntries(final File blobFile, ReferenceFactory<RT> factory, final Row payloadrow) throws IOException {
             this.blobs = new HeapReader.entries(blobFile, payloadrow.primaryKeyLength);
             this.payloadrow = payloadrow;
             this.blobFile = blobFile;
+            this.factory = factory;
         }
         
         public boolean hasNext() {
@@ -192,17 +194,17 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
          * return an index container
          * because they may get very large, it is wise to deallocate some memory before calling next()
          */
-        public ReferenceContainer next() {
+        public ReferenceContainer<RT> next() {
             Map.Entry<String, byte[]> entry = blobs.next();
             byte[] payload = entry.getValue();
-            return new ReferenceContainer(entry.getKey(), RowSet.importRowSet(payload, payloadrow));
+            return new ReferenceContainer<RT>(factory, entry.getKey(), RowSet.importRowSet(payload, payloadrow));
         }
         
         public void remove() {
             throw new UnsupportedOperationException("heap dumps are read-only");
         }
 
-        public Iterator<ReferenceContainer> iterator() {
+        public Iterator<ReferenceContainer<RT>> iterator() {
             return this;
         }
         
@@ -215,11 +217,11 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
             this.close();
         }
 
-        public CloneableIterator<ReferenceContainer> clone(Object modifier) {
+        public CloneableIterator<ReferenceContainer<RT>> clone(Object modifier) {
             if (blobs != null) this.blobs.close();
             blobs = null;
             try {
-                return new blobFileEntries(this.blobFile, this.payloadrow);
+                return new blobFileEntries<RT>(this.blobFile, factory, this.payloadrow);
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -230,7 +232,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
     public synchronized int maxReferences() {
         // iterate to find the max score
         int max = 0;
-        for (ReferenceContainer container : cache.values()) {
+        for (ReferenceContainer<ReferenceType> container : cache.values()) {
             if (container.size() > max) max = container.size();
         }
         return max;
@@ -240,7 +242,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         // iterate to find the max score
         int max = 0;
         String hash = null;
-        for (ReferenceContainer container : cache.values()) {
+        for (ReferenceContainer<ReferenceType> container : cache.values()) {
             if (container.size() > max) {
                 max = container.size();
                 hash = container.getTermHash();
@@ -252,7 +254,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
     public synchronized ArrayList<String> maxReferencesHash(int bound) {
         // iterate to find the max score
         ArrayList<String> hashes = new ArrayList<String>();
-        for (ReferenceContainer container : cache.values()) {
+        for (ReferenceContainer<ReferenceType> container : cache.values()) {
             if (container.size() >= bound) {
                 hashes.add(container.getTermHash());
             }
@@ -260,18 +262,18 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         return hashes;
     }
     
-    public synchronized ReferenceContainer latest() {
-        ReferenceContainer c = null;
-        for (ReferenceContainer container : cache.values()) {
+    public synchronized ReferenceContainer<ReferenceType> latest() {
+        ReferenceContainer<ReferenceType> c = null;
+        for (ReferenceContainer<ReferenceType> container : cache.values()) {
             if (c == null) {c = container; continue;}
             if (container.lastWrote() > c.lastWrote()) {c = container; continue;}
         }
         return c;
     }
     
-    public synchronized ReferenceContainer first() {
-        ReferenceContainer c = null;
-        for (ReferenceContainer container : cache.values()) {
+    public synchronized ReferenceContainer<ReferenceType> first() {
+        ReferenceContainer<ReferenceType> c = null;
+        for (ReferenceContainer<ReferenceType> container : cache.values()) {
             if (c == null) {c = container; continue;}
             if (container.lastWrote() < c.lastWrote()) {c = container; continue;}
         }
@@ -281,7 +283,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
     public synchronized ArrayList<String> overAge(long maxage) {
         ArrayList<String> hashes = new ArrayList<String>();
         long limit = System.currentTimeMillis() - maxage;
-        for (ReferenceContainer container : cache.values()) {
+        for (ReferenceContainer<ReferenceType> container : cache.values()) {
             if (container.lastWrote() < limit) hashes.add(container.getTermHash());
         }
         return hashes;
@@ -292,12 +294,12 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * in the cache, so that manipulations of the iterated objects do not change
      * objects in the cache.
      */
-    public synchronized CloneableIterator<ReferenceContainer> references(final String startWordHash, final boolean rot) {
+    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final String startWordHash, final boolean rot) {
         return new heapCacheIterator(startWordHash, rot);
     }
 
 
-    public Iterator<ReferenceContainer> iterator() {
+    public Iterator<ReferenceContainer<ReferenceType>> iterator() {
         return references(null, false);
     }
     
@@ -306,7 +308,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * cache iterator: iterates objects within the heap cache. This can only be used
      * for write-enabled heaps, read-only heaps do not have a heap cache
      */
-    public class heapCacheIterator implements CloneableIterator<ReferenceContainer>, Iterable<ReferenceContainer> {
+    public class heapCacheIterator implements CloneableIterator<ReferenceContainer<ReferenceType>>, Iterable<ReferenceContainer<ReferenceType>> {
 
         // this class exists, because the wCache cannot be iterated with rotation
         // and because every indexContainer Object that is iterated must be returned as top-level-clone
@@ -314,7 +316,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         // plus the mentioned features
         
         private final boolean rot;
-        private Iterator<ReferenceContainer> iterator;
+        private Iterator<ReferenceContainer<ReferenceType>> iterator;
         
         public heapCacheIterator(final String startWordHash, final boolean rot) {
             this.rot = rot;
@@ -331,7 +333,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
             return iterator.hasNext();
         }
 
-        public ReferenceContainer next() {
+        public ReferenceContainer<ReferenceType> next() {
             if (iterator.hasNext()) {
                 return (iterator.next()).topLevelClone();
             }
@@ -347,7 +349,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
             iterator.remove();
         }
 
-        public Iterator<ReferenceContainer> iterator() {
+        public Iterator<ReferenceContainer<ReferenceType>> iterator() {
             return this;
         }
         
@@ -368,14 +370,14 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * @param key
      * @return the indexContainer if one exist, null otherwise
      */
-    public ReferenceContainer get(final String key, Set<String> urlselection) {
+    public ReferenceContainer<ReferenceType> get(final String key, Set<String> urlselection) {
         if (urlselection == null) return this.cache.get(key);
-        ReferenceContainer c = this.cache.get(key);
+        ReferenceContainer<ReferenceType> c = this.cache.get(key);
         if (c == null) return null;
         // because this is all in RAM, we must clone the entries (flat)
-        ReferenceContainer c1 = new ReferenceContainer(c.getTermHash(), c.row(), c.size());
-        Iterator<WordReferenceRow> e = c.entries();
-        WordReferenceRow ee;
+        ReferenceContainer<ReferenceType> c1 = new ReferenceContainer<ReferenceType>(factory, c.getTermHash(), c.row(), c.size());
+        Iterator<ReferenceType> e = c.entries();
+        ReferenceType ee;
         while (e.hasNext()) {
             ee = e.next();
             if (urlselection.contains(ee.metadataHash())) c1.add(ee);
@@ -389,7 +391,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * @return
      */
     public int count(final String key) {
-        ReferenceContainer c = this.cache.get(key);
+        ReferenceContainer<ReferenceType> c = this.cache.get(key);
         if (c == null) return 0;
         return c.size();
     }
@@ -399,7 +401,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
      * @param wordHash
      * @return the indexContainer if the cache contained the container, null othervise
      */
-    public synchronized ReferenceContainer delete(final String wordHash) {
+    public synchronized ReferenceContainer<ReferenceType> delete(final String wordHash) {
         // returns the index that had been deleted
         assert this.cache != null;
         return cache.remove(wordHash);
@@ -407,7 +409,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
 
     public synchronized boolean remove(final String wordHash, final String urlHash) {
         assert this.cache != null;
-        final ReferenceContainer c = cache.get(wordHash);
+        final ReferenceContainer<ReferenceType> c = cache.get(wordHash);
         if ((c != null) && (c.remove(urlHash) != null)) {
             // removal successful
             if (c.size() == 0) {
@@ -423,7 +425,7 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
     public synchronized int remove(final String wordHash, final Set<String> urlHashes) {
         assert this.cache != null;
         if (urlHashes.size() == 0) return 0;
-        final ReferenceContainer c = cache.get(wordHash);
+        final ReferenceContainer<ReferenceType> c = cache.get(wordHash);
         int count;
         if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
             // removal successful
@@ -437,13 +439,13 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         return 0;
     }
  
-    public synchronized void add(final ReferenceContainer container) {
+    public synchronized void add(final ReferenceContainer<ReferenceType> container) {
         // this puts the entries into the cache
         if (this.cache == null || container == null || container.size() == 0) return;
         
         // put new words into cache
         final String wordHash = container.getTermHash();
-        ReferenceContainer entries = cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
+        ReferenceContainer<ReferenceType> entries = cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
         int added = 0;
         if (entries == null) {
             entries = container.topLevelClone();
@@ -458,10 +460,10 @@ public final class ReferenceContainerCache extends AbstractIndex implements Inde
         return;
     }
 
-    public synchronized void add(final String wordHash, final WordReferenceRow newEntry) {
+    public synchronized void add(final String wordHash, final ReferenceType newEntry) {
         assert this.cache != null;
-        ReferenceContainer container = cache.get(wordHash);
-        if (container == null) container = new ReferenceContainer(wordHash, this.payloadrow, 1);
+        ReferenceContainer<ReferenceType> container = cache.get(wordHash);
+        if (container == null) container = new ReferenceContainer<ReferenceType>(factory, wordHash, this.payloadrow, 1);
         container.put(newEntry);
         cache.put(wordHash, container);
     }

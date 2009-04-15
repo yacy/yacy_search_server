@@ -33,17 +33,22 @@ import java.util.TreeSet;
 
 import de.anomic.kelondro.order.Order;
 
-public abstract class AbstractBufferedIndex extends AbstractIndex implements BufferedIndex {
+public abstract class AbstractBufferedIndex<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements BufferedIndex<ReferenceType> {
 
-    public synchronized TreeSet<ReferenceContainer> references(final String startHash, final boolean rot, int count, boolean ram) throws IOException {
+    public AbstractBufferedIndex(final ReferenceFactory<ReferenceType> factory) {
+        super(factory);
+    }
+    
+    public synchronized TreeSet<ReferenceContainer<ReferenceType>> references(final String startHash, final boolean rot, int count, boolean ram) throws IOException {
         // creates a set of indexContainers
         // this does not use the cache
-        final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(this.ordering().clone());
-        containerOrder.rotate(ReferenceContainer.emptyContainer(startHash, 0));
-        final TreeSet<ReferenceContainer> containers = new TreeSet<ReferenceContainer>(containerOrder);
-        final Iterator<ReferenceContainer> i = references(startHash, rot, ram);
+        final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.ordering().clone());
+        ReferenceContainer<ReferenceType> emptyContainer = ReferenceContainer.emptyContainer(factory, startHash, 0);
+        containerOrder.rotate(emptyContainer);
+        final TreeSet<ReferenceContainer<ReferenceType>> containers = new TreeSet<ReferenceContainer<ReferenceType>>(containerOrder);
+        final Iterator<ReferenceContainer<ReferenceType>> i = references(startHash, rot, ram);
         if (ram) count = Math.min(size(), count);
-        ReferenceContainer container;
+        ReferenceContainer<ReferenceType> container;
         // this loop does not terminate using the i.hasNex() predicate when rot == true
         // because then the underlying iterator is a rotating iterator without termination
         // in this case a termination must be ensured with a counter

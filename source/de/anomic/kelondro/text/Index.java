@@ -34,9 +34,8 @@ import java.util.TreeSet;
 
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 
-public interface Index {
+public interface Index <ReferenceType extends Reference> {
     
 	/**
 	 * add references to the reverse index
@@ -46,7 +45,7 @@ public interface Index {
 	 * @param newEntries the References to be merged with existing references
 	 * @throws IOException
 	 */
-	public void add(ReferenceContainer newEntries) throws IOException;
+	public void add(ReferenceContainer<ReferenceType> newEntries) throws IOException;
 
 	/**
 	 * add a single reference to the reverse index
@@ -57,7 +56,7 @@ public interface Index {
 	 * @param entry
 	 * @throws IOException
 	 */
-    public void add(final String termHash, final WordReferenceRow entry) throws IOException;
+    public void add(final String termHash, final ReferenceType entry) throws IOException;
     
 	/**
 	 * check if there are references stored to the given word hash
@@ -84,7 +83,7 @@ public interface Index {
 	 * @return the references
 	 * @throws IOException
 	 */
-	public ReferenceContainer get(String termHash, Set<String> referenceselection) throws IOException;
+	public ReferenceContainer<ReferenceType> get(String termHash, Set<String> referenceselection) throws IOException;
     
     /**
      * delete all references for a word
@@ -92,7 +91,7 @@ public interface Index {
      * @return the deleted references
      * @throws IOException
      */
-	public ReferenceContainer delete(String termHash) throws IOException;
+	public ReferenceContainer<ReferenceType> delete(String termHash) throws IOException;
     
 	/**
 	 * remove a specific reference entry
@@ -124,13 +123,13 @@ public interface Index {
      * @return
      * @throws IOException
      */
-	public CloneableIterator<ReferenceContainer> references(
+	public CloneableIterator<ReferenceContainer<ReferenceType>> references(
 	                        String startHash,
 	                        boolean rot
 	                        ) throws IOException;
     
 
-    public TreeSet<ReferenceContainer> references(
+    public TreeSet<ReferenceContainer<ReferenceType>> references(
                             String startHash,
                             boolean rot,
                             int count

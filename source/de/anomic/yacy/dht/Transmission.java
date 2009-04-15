@@ -36,7 +36,7 @@ import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerCache;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
+import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverProcessorJob;
@@ -44,12 +44,12 @@ import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 
-public class Transmission  {
+public class Transmission {
 
     private Log log;
     private MetadataRepository repository;
     private yacySeedDB seeds;
-    private Index backend;
+    private Index<WordReference> backend;
     private boolean gzipBody4Transfer;
     private int timeout4Transfer;
     
@@ -57,7 +57,7 @@ public class Transmission  {
             Log log,
             MetadataRepository repository, 
             yacySeedDB seeds,
-            Index backend,
+            Index<WordReference> backend,
             boolean gzipBody4Transfer,
             int timeout4Transfer) {
         this.log = log;
@@ -75,7 +75,7 @@ public class Transmission  {
         return new Chunk(primaryTarget, targets, payloadrow);
     }
     
-    public class Chunk extends serverProcessorJob implements Iterable<ReferenceContainer> {
+    public class Chunk extends serverProcessorJob implements Iterable<ReferenceContainer<WordReference>> {
         /**
          * a dispatcher entry contains
          * - the primary target, which is a word hash, as marker for the entry
@@ -86,12 +86,12 @@ public class Transmission  {
          * - a set of yacy seeds which will shrink as the containers are transmitted to them
          * - a counter that gives the number of sucessful and unsuccessful transmissions so far
          */
-        private String                             primaryTarget;
-        private ReferenceContainerCache                containers;
+        private String                          primaryTarget;
+        private ReferenceContainerCache<WordReference> containers;
         private HashMap<String, URLMetadataRow> references;
-        private HashSet<String>                    badReferences;
-        private ArrayList<yacySeed>                targets;
-        private int                                hit, miss;
+        private HashSet<String>                 badReferences;
+        private ArrayList<yacySeed>             targets;
+        private int                             hit, miss;
         
         /**
          * generate a new dispatcher target. such a target is defined with a primary target and 
@@ -107,7 +107,7 @@ public class Transmission  {
                 final Row payloadrow) {
             super();
             this.primaryTarget = primaryTarget;
-            this.containers = new ReferenceContainerCache(payloadrow, plasmaWordIndex.wordOrder);
+            this.containers = new ReferenceContainerCache<WordReference>(plasmaWordIndex.wordReferenceFactory, payloadrow, plasmaWordIndex.wordOrder);
             this.containers.initWriteMode();
             this.references = new HashMap<String, URLMetadataRow>();
             this.badReferences = new HashSet<String>();
@@ -121,12 +121,12 @@ public class Transmission  {
          * all entries in the container are checked and only such are stored which have a reference entry
          * @param container
          */
-        public void add(ReferenceContainer container) {
+        public void add(ReferenceContainer<WordReference> container) {
             // iterate through the entries in the container and check if the reference is in the repository
-            Iterator<WordReferenceRow>  i = container.entries();
+            Iterator<WordReference>  i = container.entries();
             ArrayList<String> notFound = new ArrayList<String>();
             while (i.hasNext()) {
-                WordReferenceRow e = i.next();
+                WordReference e = i.next();
                 if (references.containsKey(e.metadataHash()) || badReferences.contains(e.metadataHash())) continue;
                 URLMetadataRow r = repository.load(e.metadataHash(), null, 0);
                 if (r == null) {
@@ -146,7 +146,7 @@ public class Transmission  {
          * get all containers from the entry. This method may be used to flush remaining entries
          * if they had been finished transmission without success (not enough peers arrived)
          */
-        public Iterator<ReferenceContainer> iterator() {
+        public Iterator<ReferenceContainer<WordReference>> iterator() {
             return this.containers.iterator();
         }
         
@@ -201,8 +201,8 @@ public class Transmission  {
             if (error == null) {
                 // words successfully transfered
                 long transferTime = System.currentTimeMillis() - start;
-                Iterator<ReferenceContainer> i = this.containers.iterator();
-                ReferenceContainer firstContainer = (i == null) ? null : i.next();
+                Iterator<ReferenceContainer<WordReference>> i = this.containers.iterator();
+                ReferenceContainer<WordReference> firstContainer = (i == null) ? null : i.next();
                 log.logInfo("Index transfer of " + this.containers.size() + 
                                  " words [" + ((firstContainer == null) ? null : firstContainer.getTermHash()) + " .. " + this.primaryTarget + "]" + 
                                  " and " + this.references.size() + " URLs" +
@@ -237,7 +237,7 @@ public class Transmission  {
         }
 
         public void restore() {
-            for (ReferenceContainer ic : this) try { backend.add(ic); } catch (IOException e) {}
+            for (ReferenceContainer<WordReference> ic : this) try { backend.add(ic); } catch (IOException e) {}
         }
     }
 }

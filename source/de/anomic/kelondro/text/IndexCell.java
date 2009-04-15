@@ -36,7 +36,6 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.MergeIterator;
 import de.anomic.kelondro.order.Order;
-import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.server.serverProfiling;
 
@@ -51,30 +50,33 @@ import de.anomic.server.serverProfiling;
  * another BLOB file in the index array.
  */
 
-public final class IndexCell extends AbstractBufferedIndex implements BufferedIndex {
+public final class IndexCell<ReferenceType extends Reference> extends AbstractBufferedIndex<ReferenceType> implements BufferedIndex<ReferenceType> {
 
     private static final long cleanupCycle = 10000;
     
     // class variables
-    private final ReferenceContainerArray array;
-    private       ReferenceContainerCache ram;
-    private       int                     maxRamEntries;
-    private final IODispatcher            merger;
-    private       long                    lastCleanup;
-    private final long                    targetFileSize, maxFileSize;
+    private final ReferenceContainerArray<ReferenceType> array;
+    private       ReferenceContainerCache<ReferenceType> ram;
+    private       int                                    maxRamEntries;
+    private final IODispatcher<ReferenceType>            merger;
+    private       long                                   lastCleanup;
+    private final long                                   targetFileSize, maxFileSize;
     
     
     public IndexCell(
             final File cellPath,
+            final ReferenceFactory<ReferenceType> factory,
             final ByteOrder termOrder,
             final Row payloadrow,
             final int maxRamEntries,
             final long targetFileSize,
             final long maxFileSize,
-            IODispatcher merger
+            IODispatcher<ReferenceType> merger
             ) throws IOException {
-        this.array = new ReferenceContainerArray(cellPath, termOrder, payloadrow, merger);
-        this.ram = new ReferenceContainerCache(payloadrow, termOrder);
+        super(factory);
+        
+        this.array = new ReferenceContainerArray<ReferenceType>(cellPath, factory, termOrder, payloadrow, merger);
+        this.ram = new ReferenceContainerCache<ReferenceType>(factory, payloadrow, termOrder);
         this.ram.initWriteMode();
         this.maxRamEntries = maxRamEntries;
         this.merger = merger;
@@ -94,13 +96,13 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
      * @throws IOException 
      * @throws IOException 
      */
-    public synchronized void add(ReferenceContainer newEntries) throws IOException {
+    public synchronized void add(ReferenceContainer<ReferenceType> newEntries) throws IOException {
         this.ram.add(newEntries);
         serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
         cleanCache();
     }
 
-    public synchronized void add(String hash, WordReferenceRow entry) throws IOException {
+    public synchronized void add(String hash, ReferenceType entry) throws IOException {
         this.ram.add(hash, entry);
         serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
         cleanCache();
@@ -115,8 +117,8 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
     }
 
     public int count(String termHash) {
-        ReferenceContainer c0 = this.ram.get(termHash, null);
-        ReferenceContainer c1;
+        ReferenceContainer<ReferenceType> c0 = this.ram.get(termHash, null);
+        ReferenceContainer<ReferenceType> c1;
         try {
             c1 = this.array.get(termHash);
         } catch (IOException e) {
@@ -134,9 +136,9 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
      * all containers in the BLOBs and the RAM are merged and returned
      * @throws IOException 
      */
-    public ReferenceContainer get(String termHash, Set<String> urlselection) throws IOException {
-        ReferenceContainer c0 = this.ram.get(termHash, null);
-        ReferenceContainer c1 = this.array.get(termHash);
+    public ReferenceContainer<ReferenceType> get(String termHash, Set<String> urlselection) throws IOException {
+        ReferenceContainer<ReferenceType> c0 = this.ram.get(termHash, null);
+        ReferenceContainer<ReferenceType> c1 = this.array.get(termHash);
         if (c1 == null) {
             if (c0 == null) return null;
             return c0;
@@ -150,9 +152,9 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
      * the deleted containers are merged and returned as result of the method
      * @throws IOException 
      */
-    public ReferenceContainer delete(String termHash) throws IOException {
-        ReferenceContainer c0 = this.ram.delete(termHash);
-        ReferenceContainer c1 = this.array.get(termHash);
+    public ReferenceContainer<ReferenceType> delete(String termHash) throws IOException {
+        ReferenceContainer<ReferenceType>  c0 = this.ram.delete(termHash);
+        ReferenceContainer<ReferenceType>  c1 = this.array.get(termHash);
         if (c1 == null) {
             if (c0 == null) return null;
             return c0;
@@ -171,16 +173,16 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
      * @throws IOException 
      */
     public int remove(String termHash, Set<String> urlHashes) throws IOException {
-        int reduced = this.array.replace(termHash, new RemoveRewriter(urlHashes));
+        int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHashes));
         return reduced / this.array.rowdef().objectsize;
     }
 
     public boolean remove(String termHash, String urlHash) throws IOException {
-        int reduced = this.array.replace(termHash, new RemoveRewriter(urlHash));
+        int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHash));
         return reduced > 0;
     }
 
-    private static class RemoveRewriter implements ReferenceContainerArray.ContainerRewriter {
+    private static class RemoveRewriter<RT extends Reference> implements ReferenceContainerArray.ContainerRewriter<RT> {
         
         Set<String> urlHashes;
         
@@ -193,19 +195,19 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
             this.urlHashes.add(urlHash);
         }
         
-        public ReferenceContainer rewrite(ReferenceContainer container) {
+        public ReferenceContainer<RT> rewrite(ReferenceContainer<RT> container) {
             container.removeEntries(urlHashes);
             return container;
         }
         
     }
 
-    public CloneableIterator<ReferenceContainer> references(String starttermHash, boolean rot) {
-        final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(this.ram.rowdef().getOrdering().clone());
-        containerOrder.rotate(new ReferenceContainer(starttermHash, this.ram.rowdef(), 0));
-        return new MergeIterator<ReferenceContainer>(
+    public CloneableIterator<ReferenceContainer<ReferenceType>> references(String starttermHash, boolean rot) {
+        final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.ram.rowdef().getOrdering().clone());
+        containerOrder.rotate(new ReferenceContainer<ReferenceType>(factory, starttermHash, this.ram.rowdef(), 0));
+        return new MergeIterator<ReferenceContainer<ReferenceType>>(
             this.ram.references(starttermHash, rot),
-            new MergeIterator<ReferenceContainer>(
+            new MergeIterator<ReferenceContainer<ReferenceType>>(
                 this.ram.references(starttermHash, false),
                 this.array.wordContainerIterator(starttermHash, false, false),
                 containerOrder,
@@ -216,13 +218,13 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
             true);
     }
 
-    public CloneableIterator<ReferenceContainer> references(String startTermHash, boolean rot, boolean ram) {
-        final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(this.ram.rowdef().getOrdering().clone());
-        containerOrder.rotate(new ReferenceContainer(startTermHash, this.ram.rowdef(), 0));
+    public CloneableIterator<ReferenceContainer<ReferenceType>> references(String startTermHash, boolean rot, boolean ram) {
+        final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.ram.rowdef().getOrdering().clone());
+        containerOrder.rotate(new ReferenceContainer<ReferenceType>(factory, startTermHash, this.ram.rowdef(), 0));
         if (ram) {
             return this.ram.references(startTermHash, rot);
         }
-        return new MergeIterator<ReferenceContainer>(
+        return new MergeIterator<ReferenceContainer<ReferenceType>>(
                 this.ram.references(startTermHash, false),
                 this.array.wordContainerIterator(startTermHash, false, false),
                 containerOrder,
@@ -292,7 +294,7 @@ public final class IndexCell extends AbstractBufferedIndex implements BufferedIn
         //this.array.mountBLOBContainer(dumpFile);
         merger.dump(this.ram, dumpFile, array);
         // get a fresh ram cache
-        this.ram = new ReferenceContainerCache(this.array.rowdef(), this.array.ordering());
+        this.ram = new ReferenceContainerCache<ReferenceType>(factory, this.array.rowdef(), this.array.ordering());
         this.ram.initWriteMode();
     }
     

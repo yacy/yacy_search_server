@@ -45,26 +45,29 @@ import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
 
-public final class IndexCollectionMigration extends AbstractBufferedIndex implements Index, BufferedIndex {
+public final class IndexCollectionMigration<ReferenceType extends Reference> extends AbstractBufferedIndex<ReferenceType> implements Index<ReferenceType>, BufferedIndex<ReferenceType> {
 
-    private final IndexCell     cell;
-    private IndexCollection collections;
-    private final IODispatcher merger;
+    private final IndexCell<ReferenceType>    cell;
+    private IndexCollection<ReferenceType>    collections;
+    private final IODispatcher<ReferenceType> merger;
     
     public IndexCollectionMigration (
             final File indexPrimaryTextLocation,
+            final ReferenceFactory<ReferenceType> factory,
             final ByteOrder wordOrdering,
             final Row payloadrow,
             final int entityCacheMaxSize,
             final long targetFileSize,
             final long maxFileSize,
-            final IODispatcher merger,
+            final IODispatcher<ReferenceType> merger,
             final Log log) throws IOException {
-
+        super(factory);
+        
         this.merger = merger;
         final File celldir = new File(indexPrimaryTextLocation, "RICELL");
-        this.cell = new IndexCell(
+        this.cell = new IndexCell<ReferenceType>(
                                 celldir,
+                                factory,
                                 wordOrdering,
                                 WordReferenceRow.urlEntryRow,
                                 entityCacheMaxSize,
@@ -98,9 +101,10 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
         // open collections, this is for migration only.
         final File textindexcollections = new File(indexPrimaryTextLocation, "RICOLLECTION");
         if (textindexcollections.exists()) {
-            this.collections = new IndexCollection(
+            this.collections = new IndexCollection<ReferenceType>(
                         textindexcollections, 
                         "collection",
+                        factory,
                         12,
                         Base64Order.enhancedCoder,
                         BufferedIndexCollection.maxCollectionPartition, 
@@ -125,11 +129,11 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
 
     /* methods for interface Index */
     
-    public void add(final ReferenceContainer entries) throws IOException {
+    public void add(final ReferenceContainer<ReferenceType> entries) throws IOException {
         assert (entries.row().objectsize == WordReferenceRow.urlEntryRow.objectsize);
  
         if (this.collections != null) {
-            ReferenceContainer e = this.collections.delete(entries.getTermHash());
+            ReferenceContainer<ReferenceType> e = this.collections.delete(entries.getTermHash());
             if (e != null) {
                 e.merge(entries);
                 cell.add(e);
@@ -141,9 +145,9 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
         }
     }
     
-    public void add(final String wordHash, final WordReferenceRow entry) throws IOException {
+    public void add(final String wordHash, final ReferenceType entry) throws IOException {
         if (this.collections != null) {
-            ReferenceContainer e = this.collections.delete(wordHash);
+            ReferenceContainer<ReferenceType> e = this.collections.delete(wordHash);
             if (e != null) {
                 e.add(entry);
                 cell.add(e);
@@ -157,7 +161,7 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
 
     public boolean has(final String wordHash) {
         if (this.collections != null) {
-            ReferenceContainer e = this.collections.delete(wordHash);
+            ReferenceContainer<ReferenceType> e = this.collections.delete(wordHash);
             if (e != null) {
                 try {
                     cell.add(e);
@@ -175,7 +179,7 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
     
     public int count(String wordHash) {
         if (this.collections != null) {
-            ReferenceContainer e = this.collections.delete(wordHash);
+            ReferenceContainer<ReferenceType> e = this.collections.delete(wordHash);
             if (e != null) {
                 try {
                     cell.add(e);
@@ -191,28 +195,28 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
         }
     }
     
-    public ReferenceContainer get(final String wordHash, final Set<String> urlselection) throws IOException {
+    public ReferenceContainer<ReferenceType> get(final String wordHash, final Set<String> urlselection) throws IOException {
         if (wordHash == null) {
             // wrong input
             return null;
         }
         
         if (this.collections != null) {
-            ReferenceContainer e = this.collections.delete(wordHash);
+            ReferenceContainer<ReferenceType> e = this.collections.delete(wordHash);
             if (e != null) cell.add(e);
         }
         
         return this.cell.get(wordHash, urlselection);
     }
 
-    public ReferenceContainer delete(final String wordHash) throws IOException {
-        ReferenceContainer cc = cell.delete(wordHash);
+    public ReferenceContainer<ReferenceType> delete(final String wordHash) throws IOException {
+        ReferenceContainer<ReferenceType> cc = cell.delete(wordHash);
         if (cc == null) {
             if (collections == null) return null;
             return collections.delete(wordHash);
         } else {
             if (collections == null) return cc;
-            ReferenceContainer cd = collections.delete(wordHash);
+            ReferenceContainer<ReferenceType> cd = collections.delete(wordHash);
             if (cd == null) return cc;
             return cc.merge(cd);
         }
@@ -220,7 +224,7 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
     
     public boolean remove(final String wordHash, final String urlHash) throws IOException {
         if (this.collections != null) {
-            ReferenceContainer e = this.collections.delete(wordHash);
+            ReferenceContainer<ReferenceType> e = this.collections.delete(wordHash);
             if (e != null) cell.add(e);
         }
         return cell.remove(wordHash, urlHash);
@@ -228,28 +232,29 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
     
     public int remove(final String wordHash, final Set<String> urlHashes) throws IOException {
         if (this.collections != null) {
-            ReferenceContainer e = this.collections.delete(wordHash);
+            ReferenceContainer<ReferenceType> e = this.collections.delete(wordHash);
             if (e != null) cell.add(e);
         }
         return cell.remove(wordHash, urlHashes);
     }
     
-    public synchronized CloneableIterator<ReferenceContainer> references(final String startHash, final boolean rot, final boolean ram) throws IOException {
-        final CloneableIterator<ReferenceContainer> i = wordContainers(startHash, ram);
+    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final String startHash, final boolean rot, final boolean ram) throws IOException {
+        final CloneableIterator<ReferenceContainer<ReferenceType>> i = wordContainers(startHash, ram);
         if (rot) {
-            return new RotateIterator<ReferenceContainer>(i, new String(Base64Order.zero(startHash.length())), cell.size() + ((ram) ? 0 : collections.size()));
+            return new RotateIterator<ReferenceContainer<ReferenceType>>(i, new String(Base64Order.zero(startHash.length())), cell.size() + ((ram) ? 0 : collections.size()));
         }
         return i;
     }
     
-    private synchronized CloneableIterator<ReferenceContainer> wordContainers(final String startWordHash, final boolean ram) throws IOException {
-        final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(cell.ordering().clone());
-        containerOrder.rotate(ReferenceContainer.emptyContainer(startWordHash, 0));
+    private synchronized CloneableIterator<ReferenceContainer<ReferenceType>> wordContainers(final String startWordHash, final boolean ram) throws IOException {
+        final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, cell.ordering().clone());
+        ReferenceContainer<ReferenceType> emptyContainer = ReferenceContainer.emptyContainer(factory, startWordHash, 0);
+        containerOrder.rotate(emptyContainer);
         if (ram) {
             return cell.references(startWordHash, true);
         }
         if (collections == null) return cell.references(startWordHash, false);
-        return new MergeIterator<ReferenceContainer>(
+        return new MergeIterator<ReferenceContainer<ReferenceType>>(
                 cell.references(startWordHash, false),
                 collections.references(startWordHash, false),
                 containerOrder,
@@ -320,11 +325,11 @@ public final class IndexCollectionMigration extends AbstractBufferedIndex implem
         return cell.ordering();
     }
     
-    public CloneableIterator<ReferenceContainer> references(String startWordHash, boolean rot) {
-        final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(this.cell.ordering().clone());
+    public CloneableIterator<ReferenceContainer<ReferenceType>> references(String startWordHash, boolean rot) {
+        final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.cell.ordering().clone());
         if (this.collections == null) return this.cell.references(startWordHash, rot);
         //else
-        return new MergeIterator<ReferenceContainer>(
+        return new MergeIterator<ReferenceContainer<ReferenceType>>(
                 this.cell.references(startWordHash, false),
                 this.collections.references(startWordHash, false),
                 containerOrder,

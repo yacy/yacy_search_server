@@ -32,10 +32,11 @@ import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.MicroDate;
+import de.anomic.kelondro.text.AbstractReference;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.yacy.yacySeedDB;
 
-public final class WordReferenceRow implements WordReference, Cloneable {
+public final class WordReferenceRow extends AbstractReference implements WordReference, Cloneable {
 
     // this object stores attributes to URL references inside RWI collections
 
@@ -202,10 +203,20 @@ public final class WordReferenceRow implements WordReference, Cloneable {
         return (int) this.entry.getColLong(col_hitcount);
     }
 
-    public int posintext() {
+    public int positions() {
+        return 1;
+    }
+
+    public int position(int p) {
+        assert p == 0 : "p = " + p;
         return (int) this.entry.getColLong(col_posintext);
     }
 
+    public void addPosition(int position) {
+        throw new UnsupportedOperationException("");
+        
+    }
+    
     public int posinphrase() {
         return (int) this.entry.getColLong(col_posinphrase);
     }
@@ -276,5 +287,10 @@ public final class WordReferenceRow implements WordReference, Cloneable {
     
     public int hashCode() {
         return this.metadataHash().hashCode();
+    }
+
+    public void join(Reference oe) {
+        throw new UnsupportedOperationException("");
+        
     }
 }

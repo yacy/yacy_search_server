@@ -26,21 +26,25 @@
 
 package de.anomic.kelondro.text.referencePrototype;
 
+import java.util.ArrayList;
+
 import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.MicroDate;
+import de.anomic.kelondro.text.AbstractReference;
 import de.anomic.kelondro.text.Reference;
 
-public class WordReferenceVars implements WordReference, Cloneable {
+public class WordReferenceVars  extends AbstractReference implements WordReference, Reference, Cloneable {
 
     public Bitfield flags;
     public long lastModified;
     public String language, urlHash;
     public char type;
-    public int hitcount, llocal, lother, phrasesintext, posintext,
+    public int hitcount, llocal, lother, phrasesintext,
                posinphrase, posofphrase,
                urlcomps, urllength, virtualAge,
-               worddistance, wordsintext, wordsintitle;
+               wordsintext, wordsintitle;
+    ArrayList<Integer> positions;
     public double termFrequency;
     
     public WordReferenceVars(final String  urlHash,
@@ -50,7 +54,7 @@ public class WordReferenceVars implements WordReference, Cloneable {
             final int      hitcount,      // how often appears this word in the text
             final int      wordcount,     // total number of words
             final int      phrasecount,   // total number of phrases
-            final int      posintext,     // position of word in all words
+            final ArrayList<Integer> ps,  // positions of words that are joined into the reference
             final int      posinphrase,   // position of word in its phrase
             final int      posofphrase,   // number of the phrase where word appears
             final long     lastmodified,  // last-modified time of the document where word appears
@@ -60,7 +64,6 @@ public class WordReferenceVars implements WordReference, Cloneable {
             final int      outlinksSame,  // outlinks to same domain
             final int      outlinksOther, // outlinks to other domain
             final Bitfield flags,  // attributes to the url and to the word according the url
-            final int      worddistance,
             final double   termfrequency
     ) {
         if ((language == null) || (language.length() != 2)) language = "uk";
@@ -76,19 +79,19 @@ public class WordReferenceVars implements WordReference, Cloneable {
         this.llocal = outlinksSame;
         this.lother = outlinksOther;
         this.phrasesintext = outlinksOther;
-        this.posintext = posintext;
+        this.positions = new ArrayList<Integer>(ps.size());
+        for (int i = 0; i < ps.size(); i++) this.positions.add(ps.get(i));
         this.posinphrase = posinphrase;
         this.posofphrase = posofphrase;
         this.urlcomps = urlComps;
         this.urllength = urlLength;
         this.virtualAge = mddlm;
-        this.worddistance = worddistance;
         this.wordsintext = wordcount;
         this.wordsintitle = titleLength;
         this.termFrequency = termfrequency;
     }
     
-    public WordReferenceVars(final WordReferenceRow e) {
+    public WordReferenceVars(final WordReference e) {
         this.flags = e.flags();
         //this.freshUntil = e.freshUntil();
         this.lastModified = e.lastModified();
@@ -99,13 +102,13 @@ public class WordReferenceVars implements WordReference, Cloneable {
         this.llocal = e.llocal();
         this.lother = e.lother();
         this.phrasesintext = e.phrasesintext();
-        this.posintext = e.posintext();
+        this.positions = new ArrayList<Integer>(e.positions());
+        for (int i = 0; i < e.positions(); i++) this.positions.add(e.position(i));
         this.posinphrase = e.posinphrase();
         this.posofphrase = e.posofphrase();
         this.urlcomps = e.urlcomps();
         this.urllength = e.urllength();
         this.virtualAge = e.virtualAge();
-        this.worddistance = 0;
         this.wordsintext = e.wordsintext();
         this.wordsintitle = e.wordsintitle();
         this.termFrequency = e.termFrequency();
@@ -120,7 +123,7 @@ public class WordReferenceVars implements WordReference, Cloneable {
                 this.hitcount,
                 this.wordsintext,
                 this.phrasesintext,
-                this.posintext,
+                this.positions,
                 this.posinphrase,
                 this.posofphrase,
                 this.lastModified,
@@ -130,15 +133,13 @@ public class WordReferenceVars implements WordReference, Cloneable {
                 this.llocal,
                 this.lother,
                 this.flags,
-                this.worddistance,
                 this.termFrequency);
         return c;
     }
     
     public void join(final WordReferenceVars v) {
         // combine the distance
-        this.worddistance = this.worddistance + v.worddistance() + Math.abs(this.posintext - v.posintext);
-        this.posintext = Math.min(this.posintext, v.posintext);
+        this.positions.addAll(v.positions);
         this.posinphrase = (this.posofphrase == v.posofphrase) ? Math.min(this.posinphrase, v.posinphrase) : 0;
         this.posofphrase = Math.min(this.posofphrase, v.posofphrase);
 
@@ -197,8 +198,12 @@ public class WordReferenceVars implements WordReference, Cloneable {
         return posinphrase;
     }
 
-    public int posintext() {
-        return posintext;
+    public int positions() {
+        return this.positions.size();
+    }
+
+    public int position(int p) {
+        return this.positions.get(p);
     }
 
     public int posofphrase() {
@@ -214,7 +219,7 @@ public class WordReferenceVars implements WordReference, Cloneable {
                 hitcount,      // how often appears this word in the text
                 wordsintext,   // total number of words
                 phrasesintext, // total number of phrases
-                posintext,     // position of word in all words
+                positions.get(0), // position of word in all words
                 posinphrase,   // position of word in its phrase
                 posofphrase,   // number of the phrase where word appears
                 lastModified,  // last-modified time of the document where word appears
@@ -251,10 +256,6 @@ public class WordReferenceVars implements WordReference, Cloneable {
         return virtualAge;
     }
 
-    public int worddistance() {
-        return worddistance;
-    }
-
     public int wordsintext() {
         return wordsintext;
     }
@@ -278,10 +279,9 @@ public class WordReferenceVars implements WordReference, Cloneable {
         if (this.virtualAge > (v = other.virtualAge)) this.virtualAge = v;
         if (this.wordsintext > (v = other.wordsintext)) this.wordsintext = v;
         if (this.phrasesintext > (v = other.phrasesintext)) this.phrasesintext = v;
-        if (this.posintext > (v = other.posintext)) this.posintext = v;
+        this.positions = a(Math.min(min(this.positions), min(other.positions)));
         if (this.posinphrase > (v = other.posinphrase)) this.posinphrase = v;
         if (this.posofphrase > (v = other.posofphrase)) this.posofphrase = v;
-        if (this.worddistance > (v = other.worddistance)) this.worddistance = v;
         if (this.lastModified > (w = other.lastModified)) this.lastModified = w;
         //if (this.freshUntil > (w = other.freshUntil)) this.freshUntil = w;
         if (this.urllength > (v = other.urllength)) this.urllength = v;
@@ -300,10 +300,9 @@ public class WordReferenceVars implements WordReference, Cloneable {
         if (this.virtualAge < (v = other.virtualAge)) this.virtualAge = v;
         if (this.wordsintext < (v = other.wordsintext)) this.wordsintext = v;
         if (this.phrasesintext < (v = other.phrasesintext)) this.phrasesintext = v;
-        if (this.posintext < (v = other.posintext)) this.posintext = v;
+        this.positions = a(Math.max(max(this.positions), max(other.positions)));
         if (this.posinphrase < (v = other.posinphrase)) this.posinphrase = v;
         if (this.posofphrase < (v = other.posofphrase)) this.posofphrase = v;
-        if (this.worddistance < (v = other.worddistance)) this.worddistance = v;
         if (this.lastModified < (w = other.lastModified)) this.lastModified = w;
         //if (this.freshUntil < (w = other.freshUntil)) this.freshUntil = w;
         if (this.urllength < (v = other.urllength)) this.urllength = v;
@@ -312,12 +311,12 @@ public class WordReferenceVars implements WordReference, Cloneable {
         if (this.termFrequency < (d = other.termFrequency)) this.termFrequency = d;
     }
 
-    public void join(final WordReference oe) {
+    public void join(final Reference r) {
         // joins two entries into one entry
         
         // combine the distance
-        this.worddistance = Math.abs(this.posintext() - oe.posintext());
-        this.posintext = Math.min(this.posintext, oe.posintext());
+        WordReference oe = (WordReference) r; 
+        for (int i = 0; i < r.positions(); i++) this.positions.add(r.position(i));
         this.posinphrase = (this.posofphrase == oe.posofphrase()) ? Math.min(this.posinphrase, oe.posinphrase()) : 0;
         this.posofphrase = Math.min(this.posofphrase, oe.posofphrase());
 
@@ -328,6 +327,10 @@ public class WordReferenceVars implements WordReference, Cloneable {
 
     public int hashCode() {
         return this.urlHash.hashCode();
+    }
+
+    public void addPosition(int position) {
+        this.positions.add(position);
     }
 
     

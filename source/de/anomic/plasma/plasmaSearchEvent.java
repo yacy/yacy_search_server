@@ -42,6 +42,7 @@ import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
@@ -177,7 +178,7 @@ public final class plasmaSearchEvent {
                 int maxcount = -1;
                 long mindhtdistance = Long.MAX_VALUE, l;
                 String wordhash;
-                for (Map.Entry<String, ReferenceContainer> entry : this.rankedCache.searchContainerMaps()[0].entrySet()) {
+                for (Map.Entry<String, ReferenceContainer<WordReference>> entry : this.rankedCache.searchContainerMaps()[0].entrySet()) {
                     wordhash = entry.getKey();
                     final ReferenceContainer container = entry.getValue();
                     assert (container.getTermHash().equals(wordhash));

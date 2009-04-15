@@ -54,15 +54,16 @@ import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.table.FixedWidthArray;
 import de.anomic.kelondro.table.FlexTable;
-import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
+import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.kelondroOutOfLimitsException;
 import de.anomic.kelondro.util.Log;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.yacy.yacyURL;
 
-public class IndexCollection extends AbstractIndex implements Index {
+public class IndexCollection<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType> {
 
 	private static final int loadfactor = 4;
     private static final int serialNumber = 0;
@@ -92,11 +93,14 @@ public class IndexCollection extends AbstractIndex implements Index {
     public IndexCollection(
     		final File path, 
     		final String filenameStub,
+    		final ReferenceFactory<ReferenceType> factory,
     		final int keyLength,
     		final ByteOrder wordOrder,
             final int maxpartitions, 
             final Row payloadrow, 
             boolean useCommons) throws IOException {
+        super(factory);
+        
         // the buffersize is number of bytes that are only used if the kelondroFlexTable is backed up with a kelondroTree
         indexErrors = 0;
         this.path = path;
@@ -160,11 +164,11 @@ public class IndexCollection extends AbstractIndex implements Index {
         return index.row().objectOrder;
     }
     
-    public synchronized CloneableIterator<ReferenceContainer> references(final String startWordHash, final boolean rot) {
+    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final String startWordHash, final boolean rot) {
         return new wordContainersIterator(startWordHash, rot);
     }
 
-    public class wordContainersIterator implements CloneableIterator<ReferenceContainer> {
+    public class wordContainersIterator implements CloneableIterator<ReferenceContainer<ReferenceType>> {
 
         private final Iterator<Object[]> wci;
         private final boolean rot;
@@ -182,13 +186,13 @@ public class IndexCollection extends AbstractIndex implements Index {
             return wci.hasNext();
         }
 
-        public ReferenceContainer next() {
+        public ReferenceContainer<ReferenceType> next() {
             final Object[] oo = wci.next();
             if (oo == null) return null;
             final byte[] key = (byte[]) oo[0];
             final RowSet collection = (RowSet) oo[1];
             if (collection == null) return null;
-            return new ReferenceContainer(new String(key), collection);
+            return new ReferenceContainer<ReferenceType>(factory, new String(key), collection);
         }
         
         public void remove() {
@@ -201,22 +205,22 @@ public class IndexCollection extends AbstractIndex implements Index {
         return this.has(wordHash.getBytes());
     }
     
-    public ReferenceContainer get(final String wordHash, final Set<String> urlselection) {
+    public ReferenceContainer<ReferenceType> get(final String wordHash, final Set<String> urlselection) {
         try {
             final RowSet collection = this.get(wordHash.getBytes());
             if (collection != null) collection.select(urlselection);
             if ((collection == null) || (collection.size() == 0)) return null;
-            return new ReferenceContainer(wordHash, collection);
+            return new ReferenceContainer<ReferenceType>(factory, wordHash, collection);
         } catch (final IOException e) {
             return null;
         }
     }
 
-    public ReferenceContainer delete(final String wordHash) {
+    public ReferenceContainer<ReferenceType> delete(final String wordHash) {
         try {
             final RowSet collection = this.delete(wordHash.getBytes());
             if (collection == null) return null;
-            return new ReferenceContainer(wordHash, collection);
+            return new ReferenceContainer<ReferenceType>(factory, wordHash, collection);
         } catch (final IOException e) {
             return null;
         }
@@ -240,7 +244,7 @@ public class IndexCollection extends AbstractIndex implements Index {
         }
     }
 
-    public void add(final ReferenceContainer newEntries) {
+    public void add(final ReferenceContainer<ReferenceType> newEntries) {
     	if (newEntries == null) return;
         try {
             this.merge(newEntries);
@@ -251,10 +255,10 @@ public class IndexCollection extends AbstractIndex implements Index {
         }
     }
 
-    public void add(String wordhash, WordReferenceRow entry) {
+    public void add(String wordhash, ReferenceType entry) {
         if (entry == null) return;
         try {
-            ReferenceContainer container = new ReferenceContainer(wordhash, this.payloadrow, 1);
+            ReferenceContainer<ReferenceType> container = new ReferenceContainer<ReferenceType>(factory, wordhash, this.payloadrow, 1);
             container.add(entry);
             this.merge(container);
         } catch (final kelondroOutOfLimitsException e) {
@@ -705,7 +709,7 @@ public class IndexCollection extends AbstractIndex implements Index {
         index.put(indexrow); // write modified indexrow
     }
     
-    private synchronized void merge(final ReferenceContainer container) throws IOException, kelondroOutOfLimitsException {
+    private synchronized void merge(final ReferenceContainer<ReferenceType> container) throws IOException, kelondroOutOfLimitsException {
         if ((container == null) || (container.size() == 0)) return;
         final byte[] key = container.getTermHash().getBytes();
         
@@ -1059,8 +1063,10 @@ public class IndexCollection extends AbstractIndex implements Index {
         final String filenameStub = args[1];
         try {
             // initialize collection index
-            final IndexCollection collectionIndex  = new IndexCollection(
-                        path, filenameStub, 9 /*keyLength*/,
+            final IndexCollection<WordReference> collectionIndex  = new IndexCollection<WordReference>(
+                        path, filenameStub,
+                        plasmaWordIndex.wordReferenceFactory,
+                        9 /*keyLength*/,
                         NaturalOrder.naturalOrder,
                         7, rowdef, false);
             
@@ -1084,7 +1090,7 @@ public class IndexCollection extends AbstractIndex implements Index {
                 for (int j = 0; j < i; j++) {
                     collection.addUnique(rowdef.newEntry(new byte[][]{("def" + j).getBytes(), "xxx".getBytes()}));
                 }
-                collectionIndex.merge(new ReferenceContainer("key-" + i, collection));
+                collectionIndex.merge(new ReferenceContainer<WordReference>(plasmaWordIndex.wordReferenceFactory,"key-" + i, collection));
             }
             
             // printout of index

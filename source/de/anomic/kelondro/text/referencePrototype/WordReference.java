@@ -35,8 +35,6 @@ public interface WordReference extends Reference {
 
     public int hitcount();
 
-    public int posintext();
-
     public int posinphrase();
 
     public int posofphrase();

@@ -50,7 +50,7 @@ import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverProfiling;
 
-public final class BufferedIndexCollection extends AbstractBufferedIndex implements Index, BufferedIndex {
+public final class BufferedIndexCollection<ReferenceType extends Reference> extends AbstractBufferedIndex<ReferenceType> implements Index<ReferenceType>, BufferedIndex<ReferenceType> {
 
     // environment constants
     public  static final long wCacheMaxAge    = 1000 * 60 * 30; // milliseconds; 30 minutes
@@ -58,39 +58,42 @@ public final class BufferedIndexCollection extends AbstractBufferedIndex impleme
     public  static final int  lowcachedivisor =  900;
     public  static final int  maxCollectionPartition = 7;       // should be 7
     
-    private final IndexBuffer     buffer;
-    private final IndexCollection collections;
+    private final IndexBuffer<ReferenceType>     buffer;
+    private final IndexCollection<ReferenceType> collections;
     
     public BufferedIndexCollection (
             File indexPrimaryTextLocation,
+            final ReferenceFactory<ReferenceType> factory,
             final ByteOrder wordOrdering,
             final Row payloadrow,
             final int entityCacheMaxSize,
             final boolean useCommons, 
             final int redundancy,
             Log log) throws IOException {
-
+        super(factory);
+        
         final File textindexcache = new File(indexPrimaryTextLocation, "RICACHE");
         if (!(textindexcache.exists())) textindexcache.mkdirs();
         if (new File(textindexcache, "index.dhtin.blob").exists()) {
             // migration of the both caches into one
-            this.buffer = new IndexBuffer(textindexcache, wordOrdering, payloadrow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.blob", log);
-            IndexBuffer dhtInCache  = new IndexBuffer(textindexcache, wordOrdering, payloadrow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtin.blob", log);
-            for (ReferenceContainer c: dhtInCache) {
+            this.buffer = new IndexBuffer<ReferenceType>(textindexcache, factory, wordOrdering, payloadrow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.blob", log);
+            IndexBuffer<ReferenceType> dhtInCache  = new IndexBuffer<ReferenceType>(textindexcache, factory, wordOrdering, payloadrow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtin.blob", log);
+            for (ReferenceContainer<ReferenceType> c: dhtInCache) {
                 this.buffer.add(c);
             }
             FileUtils.deletedelete(new File(textindexcache, "index.dhtin.blob"));
         } else {
             // read in new BLOB
-            this.buffer = new IndexBuffer(textindexcache, wordOrdering, payloadrow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.blob", log);            
+            this.buffer = new IndexBuffer<ReferenceType>(textindexcache, factory, wordOrdering, payloadrow, entityCacheMaxSize, wCacheMaxChunk, wCacheMaxAge, "index.dhtout.blob", log);            
         }
         
         // create collections storage path
         final File textindexcollections = new File(indexPrimaryTextLocation, "RICOLLECTION");
         if (!(textindexcollections.exists())) textindexcollections.mkdirs();
-        this.collections = new IndexCollection(
+        this.collections = new IndexCollection<ReferenceType>(
                     textindexcollections, 
                     "collection",
+                    factory,
                     12,
                     Base64Order.enhancedCoder,
                     maxCollectionPartition, 
@@ -100,7 +103,7 @@ public final class BufferedIndexCollection extends AbstractBufferedIndex impleme
 
     /* methods for interface Index */
     
-    public void add(final ReferenceContainer entries) {
+    public void add(final ReferenceContainer<ReferenceType> entries) {
         assert (entries.row().objectsize == WordReferenceRow.urlEntryRow.objectsize);
  
         // add the entry
@@ -108,7 +111,7 @@ public final class BufferedIndexCollection extends AbstractBufferedIndex impleme
         cacheFlushControl();
     }
     
-    public void add(final String wordHash, final WordReferenceRow entry) throws IOException {
+    public void add(final String wordHash, final ReferenceType entry) throws IOException {
         // add the entry
         buffer.add(wordHash, entry);
         cacheFlushControl();
@@ -124,14 +127,14 @@ public final class BufferedIndexCollection extends AbstractBufferedIndex impleme
         return buffer.count(key) + collections.count(key);
     }
     
-    public ReferenceContainer get(final String wordHash, final Set<String> urlselection) {
+    public ReferenceContainer<ReferenceType> get(final String wordHash, final Set<String> urlselection) {
         if (wordHash == null) {
             // wrong input
             return null;
         }
         
         // get from cache
-        ReferenceContainer container;
+        ReferenceContainer<ReferenceType> container;
         container = buffer.get(wordHash, urlselection);
         
         // get from collection index
@@ -169,8 +172,9 @@ public final class BufferedIndexCollection extends AbstractBufferedIndex impleme
         return container;
     }
 
-    public ReferenceContainer delete(final String wordHash) {
-        final ReferenceContainer c = new ReferenceContainer(
+    public ReferenceContainer<ReferenceType> delete(final String wordHash) {
+        final ReferenceContainer<ReferenceType> c = new ReferenceContainer<ReferenceType>(
+                factory,
                 wordHash,
                 WordReferenceRow.urlEntryRow,
                 buffer.count(wordHash));
@@ -193,17 +197,18 @@ public final class BufferedIndexCollection extends AbstractBufferedIndex impleme
         return removed;
     }
     
-    public synchronized CloneableIterator<ReferenceContainer> references(final String startHash, final boolean rot, final boolean ram) throws IOException {
-        final CloneableIterator<ReferenceContainer> i = wordContainers(startHash, ram);
+    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final String startHash, final boolean rot, final boolean ram) throws IOException {
+        final CloneableIterator<ReferenceContainer<ReferenceType>> i = wordContainers(startHash, ram);
         if (rot) {
-            return new RotateIterator<ReferenceContainer>(i, new String(Base64Order.zero(startHash.length())), buffer.size() + ((ram) ? 0 : collections.size()));
+            return new RotateIterator<ReferenceContainer<ReferenceType>>(i, new String(Base64Order.zero(startHash.length())), buffer.size() + ((ram) ? 0 : collections.size()));
         }
         return i;
     }
     
-    private synchronized CloneableIterator<ReferenceContainer> wordContainers(final String startWordHash, final boolean ram) throws IOException {
-        final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(buffer.ordering().clone());
-        containerOrder.rotate(ReferenceContainer.emptyContainer(startWordHash, 0));
+    private synchronized CloneableIterator<ReferenceContainer<ReferenceType>> wordContainers(final String startWordHash, final boolean ram) throws IOException {
+        final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, buffer.ordering().clone());
+        ReferenceContainer<ReferenceType> emptyContainer = ReferenceContainer.emptyContainer(factory, startWordHash, 0);
+        containerOrder.rotate(emptyContainer);
         if (ram) {
             return buffer.references(startWordHash, false);
         }
@@ -298,13 +303,13 @@ public final class BufferedIndexCollection extends AbstractBufferedIndex impleme
         }
     }
     
-    private synchronized void flushCacheOne(final IndexBuffer ram) {
+    private synchronized void flushCacheOne(final IndexBuffer<ReferenceType> ram) {
         if (ram.size() > 0) collections.add(flushContainer(ram));
     }
     
-    private ReferenceContainer flushContainer(final IndexBuffer ram) {
+    private ReferenceContainer<ReferenceType> flushContainer(final IndexBuffer<ReferenceType> ram) {
         String wordHash;
-        ReferenceContainer c;
+        ReferenceContainer<ReferenceType> c;
         wordHash = ram.maxScoreWordHash();
         c = ram.get(wordHash, null);
         if ((c != null) && (c.size() > wCacheMaxChunk)) {
@@ -326,9 +331,9 @@ public final class BufferedIndexCollection extends AbstractBufferedIndex impleme
         return collections.ordering();
     }
     
-    public CloneableIterator<ReferenceContainer> references(String startWordHash, boolean rot) {
-        final Order<ReferenceContainer> containerOrder = new ReferenceContainerOrder(this.buffer.ordering().clone());
-        return new MergeIterator<ReferenceContainer>(
+    public CloneableIterator<ReferenceContainer<ReferenceType>> references(String startWordHash, boolean rot) {
+        final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.buffer.ordering().clone());
+        return new MergeIterator<ReferenceContainer<ReferenceType>>(
                 this.buffer.references(startWordHash, false),
                 this.collections.references(startWordHash, false),
                 containerOrder,

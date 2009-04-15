@@ -72,7 +72,7 @@ public final class plasmaSearchRankingProcess {
     private final int[] flagcount; // flag counter
     private final TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
     private final plasmaWordIndex wordIndex;
-    private HashMap<String, ReferenceContainer>[] localSearchContainerMaps;
+    private HashMap<String, ReferenceContainer<WordReference>>[] localSearchContainerMaps;
     private final int[] domZones;
     
     public plasmaSearchRankingProcess(
@@ -120,8 +120,9 @@ public final class plasmaSearchRankingProcess {
         
         // join and exclude the local result
         timer = System.currentTimeMillis();
-        final ReferenceContainer index =
+        final ReferenceContainer<WordReference> index =
             ReferenceContainer.joinExcludeContainers(
+                plasmaWordIndex.wordReferenceFactory,
                 this.localSearchContainerMaps[0].values(),
                 this.localSearchContainerMaps[1].values(),
                 query.maxDistance);
@@ -133,7 +134,7 @@ public final class plasmaSearchRankingProcess {
         insertRanked(index, true, index.size());
     }
     
-    public void insertRanked(final ReferenceContainer index, final boolean local, final int fullResource) {
+    public void insertRanked(final ReferenceContainer<WordReference> index, final boolean local, final int fullResource) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
@@ -241,7 +242,7 @@ public final class plasmaSearchRankingProcess {
         return false;
     }
     
-    public Map<String, ReferenceContainer>[] searchContainerMaps() {
+    public Map<String, ReferenceContainer<WordReference>>[] searchContainerMaps() {
         // direct access to the result maps is needed for abstract generation
         // this is only available if execQuery() was called before
         return localSearchContainerMaps;

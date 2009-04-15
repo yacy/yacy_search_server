@@ -42,7 +42,9 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.MergeIterator;
+import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.ReferenceFactory;
 import de.anomic.kelondro.text.ReferenceContainerCache.blobFileEntries;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
@@ -551,20 +553,20 @@ public class BLOBArray implements BLOB {
         blobs = null;
     }
     
-    public File mergeMount(File f1, File f2, Row payloadrow, File newFile) throws IOException {
+    public File mergeMount(File f1, File f2, ReferenceFactory<?> factory, Row payloadrow, File newFile) throws IOException {
         Log.logInfo("BLOBArray", "merging " + f1.getName() + " with " + f2.getName());
-        File resultFile = mergeWorker(f1, f2, payloadrow, newFile);
+        File resultFile = mergeWorker(factory, this.keylength, this.ordering, f1, f2, payloadrow, newFile);
         if (resultFile == null) return null;
         mountBLOB(resultFile, false);
         Log.logInfo("BLOBArray", "merged " + f1.getName() + " with " + f2.getName() + " into " + resultFile);
         return resultFile;
     }
     
-    private File mergeWorker(File f1, File f2, Row payloadrow, File newFile) throws IOException {
+    private static <ReferenceType extends Reference> File mergeWorker(ReferenceFactory<ReferenceType> factory, int keylength, ByteOrder order, File f1, File f2, Row payloadrow, File newFile) throws IOException {
         // iterate both files and write a new one
         
-        CloneableIterator<ReferenceContainer> i1 = new blobFileEntries(f1, payloadrow);
-        CloneableIterator<ReferenceContainer> i2 = new blobFileEntries(f2, payloadrow);
+        CloneableIterator<ReferenceContainer<ReferenceType>> i1 = new blobFileEntries<ReferenceType>(f1, factory, payloadrow);
+        CloneableIterator<ReferenceContainer<ReferenceType>> i2 = new blobFileEntries<ReferenceType>(f2, factory, payloadrow);
         if (!i1.hasNext()) {
             if (i2.hasNext()) {
                 FileUtils.deletedelete(f1);
@@ -583,8 +585,8 @@ public class BLOBArray implements BLOB {
         assert i1.hasNext();
         assert i2.hasNext();
         File tmpFile = new File(newFile.getParentFile(), newFile.getName() + ".tmp");
-        HeapWriter writer = new HeapWriter(tmpFile, newFile, this.keylength(), this.ordering());
-        merge(i1, i2, this.ordering(), writer);
+        HeapWriter writer = new HeapWriter(tmpFile, newFile, keylength, order);
+        merge(i1, i2, order, writer);
         try {
             writer.close(true);
             // we don't need the old files any more
@@ -599,10 +601,10 @@ public class BLOBArray implements BLOB {
         }
     }
     
-    private static void merge(CloneableIterator<ReferenceContainer> i1, CloneableIterator<ReferenceContainer> i2, ByteOrder ordering, HeapWriter writer) throws IOException {
+    private static <ReferenceType extends Reference> void merge(CloneableIterator<ReferenceContainer<ReferenceType>> i1, CloneableIterator<ReferenceContainer<ReferenceType>> i2, ByteOrder ordering, HeapWriter writer) throws IOException {
         assert i1.hasNext();
         assert i2.hasNext();
-        ReferenceContainer c1, c2, c1o, c2o;
+        ReferenceContainer<ReferenceType> c1, c2, c1o, c2o;
         c1 = i1.next();
         c2 = i2.next();
         int e;

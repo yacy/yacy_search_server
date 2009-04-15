@@ -43,15 +43,17 @@ import de.anomic.kelondro.index.Row;
  * of merging with a call to the start() - method. To shut down all mergings, call terminate()
  * only once.
  */
-public class IODispatcher extends Thread {
+public class IODispatcher <ReferenceType extends Reference> extends Thread {
 
     private final Boolean poison, vita;
     private ArrayBlockingQueue<Boolean>  controlQueue;
     private ArrayBlockingQueue<MergeJob> mergeQueue;
     private ArrayBlockingQueue<DumpJob>  dumpQueue;
     private ArrayBlockingQueue<Boolean>  termQueue;
+    ReferenceFactory<ReferenceType> factory;
     
-    public IODispatcher(int dumpQueueLength, int mergeQueueLength) {
+    public IODispatcher(ReferenceFactory<ReferenceType> factory, int dumpQueueLength, int mergeQueueLength) {
+        this.factory = factory;
         this.poison = new Boolean(false);
         this.vita = new Boolean(true);
         this.controlQueue = new ArrayBlockingQueue<Boolean>(dumpQueueLength + mergeQueueLength + 1);
@@ -76,7 +78,7 @@ public class IODispatcher extends Thread {
         }
     }
     
-    public synchronized void dump(ReferenceContainerCache cache, File file, ReferenceContainerArray array) {
+    public synchronized void dump(ReferenceContainerCache<ReferenceType> cache, File file, ReferenceContainerArray<ReferenceType> array) {
         if (dumpQueue == null || !this.isAlive()) {
             cache.dump(file, true);
         } else {
@@ -98,7 +100,7 @@ public class IODispatcher extends Thread {
     public synchronized void merge(File f1, File f2, BLOBArray array, Row payloadrow, File newFile) {
         if (mergeQueue == null || !this.isAlive()) {
             try {
-                array.mergeMount(f1, f2, payloadrow, newFile);
+                array.mergeMount(f1, f2, factory, payloadrow, newFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -110,7 +112,7 @@ public class IODispatcher extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 try {
-                    array.mergeMount(f1, f2, payloadrow, newFile);
+                    array.mergeMount(f1, f2, factory, payloadrow, newFile);
                 } catch (IOException ee) {
                     ee.printStackTrace();
                 }
@@ -149,10 +151,10 @@ public class IODispatcher extends Thread {
     }
     
     public class DumpJob {
-        ReferenceContainerCache cache;
+        ReferenceContainerCache<ReferenceType> cache;
         File file;
-        ReferenceContainerArray array;
-        public DumpJob(ReferenceContainerCache cache, File file, ReferenceContainerArray array) {
+        ReferenceContainerArray<ReferenceType> array;
+        public DumpJob(ReferenceContainerCache<ReferenceType> cache, File file, ReferenceContainerArray<ReferenceType> array) {
             this.cache = cache;
             this.file = file;
             this.array = array;
@@ -183,7 +185,7 @@ public class IODispatcher extends Thread {
 
         public File merge() {
             try {
-                return array.mergeMount(f1, f2, payloadrow, newFile);
+                return array.mergeMount(f1, f2, factory, payloadrow, newFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }

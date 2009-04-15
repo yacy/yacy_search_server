@@ -1,6 +1,6 @@
-// ReferenceFactory.java
+// WordReferenceFactory.java
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 06.04.2009 on http://yacy.net
+// first published 09.04.2009 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
@@ -24,12 +24,18 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.text;
+package de.anomic.kelondro.text.referencePrototype;
 
-import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.Row.Entry;
+import de.anomic.kelondro.text.ReferenceFactory;
 
-public interface ReferenceFactory<ReferenceType extends Reference> {
+public class WordReferenceFactory implements ReferenceFactory<WordReference> {
 
-    public ReferenceType produce(Row.Entry e, boolean fast);
-    
+    public WordReference produce(Entry e, boolean fast) {
+        if (fast)
+            return new WordReferenceVars(new WordReferenceRow(e));
+        else
+            return new WordReferenceRow(e);
+    }
+
 }

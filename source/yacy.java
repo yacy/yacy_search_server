@@ -60,7 +60,7 @@ import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
+import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.ScoreCluster;
@@ -676,20 +676,20 @@ public final class yacy {
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
             final plasmaWordIndex wordIndex = new plasmaWordIndex(networkName, log, indexPrimaryRoot, indexSecondaryRoot, 10000, false, 1, 0, false);
-            final Iterator<ReferenceContainer> indexContainerIterator = wordIndex.index().references("AAAAAAAAAAAA", false, false);
+            final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = wordIndex.index().references("AAAAAAAAAAAA", false, false);
             
             long urlCounter = 0, wordCounter = 0;
             long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = 0;
             String wordChunkStartHash = "AAAAAAAAAAAA", wordChunkEndHash;
             
             while (indexContainerIterator.hasNext()) {
-                ReferenceContainer wordIdxContainer = null;
+                ReferenceContainer<WordReference> wordIdxContainer = null;
                 try {
                     wordCounter++;
                     wordIdxContainer = indexContainerIterator.next();
                     
                     // the combined container will fit, read the container
-                    final Iterator<WordReferenceRow> wordIdxEntries = wordIdxContainer.entries();
+                    final Iterator<WordReference> wordIdxEntries = wordIdxContainer.entries();
                     Reference iEntry;
                     while (wordIdxEntries.hasNext()) {
                         iEntry = wordIdxEntries.next();
@@ -864,13 +864,13 @@ public final class yacy {
         log.logInfo("STARTING CREATION OF RWI-HASHLIST");
         final File root = homePath;
         try {
-            Iterator<ReferenceContainer> indexContainerIterator = null;
+            Iterator<ReferenceContainer<WordReference>> indexContainerIterator = null;
             if (resource.equals("all")) {
                 WordIndex = new plasmaWordIndex("freeworld", log, indexPrimaryRoot, indexSecondaryRoot, 10000, false, 1, 0, false);
                 indexContainerIterator = WordIndex.index().references(wordChunkStartHash, false, false);
             }
             int counter = 0;
-            ReferenceContainer container = null;
+            ReferenceContainer<WordReference> container = null;
             if (format.equals("zip")) {
                 log.logInfo("Writing Hashlist to ZIP-file: " + targetName + ".zip");
                 final ZipEntry zipEntry = new ZipEntry(targetName + ".txt");

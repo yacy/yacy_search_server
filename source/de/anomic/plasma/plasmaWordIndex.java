@@ -51,7 +51,10 @@ import de.anomic.kelondro.text.IndexCollectionMigration;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.IODispatcher;
 import de.anomic.kelondro.text.MetadataRepository;
+import de.anomic.kelondro.text.ReferenceFactory;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.text.referencePrototype.WordReference;
+import de.anomic.kelondro.text.referencePrototype.WordReferenceFactory;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
@@ -74,6 +77,9 @@ public final class plasmaWordIndex {
     public static final long targetFileSize  = 100 * 1024 * 1024; // 100 MB
     public static final long maxFileSize     = BLOBArray.oneGigabyte; // 1GB
     
+    // the reference factory
+    public static final ReferenceFactory<WordReference> wordReferenceFactory = new WordReferenceFactory();
+    
     public static final String CRAWL_PROFILE_PROXY                 = "proxy";
     public static final String CRAWL_PROFILE_REMOTE                = "remote";
     public static final String CRAWL_PROFILE_SNIPPET_LOCAL_TEXT    = "snippetLocalText";
@@ -91,7 +97,7 @@ public final class plasmaWordIndex {
     
     public static final ByteOrder wordOrder = Base64Order.enhancedCoder;
     
-    private final BufferedIndex   index;
+    private final BufferedIndex<WordReference> index;
     private final Log             log;
     private MetadataRepository    metadata;
     private final yacySeedDB      peers;
@@ -103,7 +109,7 @@ public final class plasmaWordIndex {
     public  CrawlProfile.entry    defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
     public  CrawlProfile.entry    defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
     private final File            queuesRoot;
-    private IODispatcher merger;
+    private IODispatcher<WordReference> merger;
     
     public plasmaWordIndex(
             final String networkName,
@@ -141,11 +147,12 @@ public final class plasmaWordIndex {
         
         // check if the peer has migrated the index
         if (new File(indexPrimaryTextLocation, "RICOLLECTION").exists()) {
-            this.merger = (useCell) ? new IODispatcher(1, 1) : null;
+            this.merger = (useCell) ? new IODispatcher<WordReference>(plasmaWordIndex.wordReferenceFactory, 1, 1) : null;
             if (this.merger != null) this.merger.start();
             this.index = (useCell) ? 
-                                    new IndexCollectionMigration(
+                                    new IndexCollectionMigration<WordReference>(
                                     indexPrimaryTextLocation,
+                                    wordReferenceFactory,
                                     wordOrder,
                                     WordReferenceRow.urlEntryRow,
                                     entityCacheMaxSize,
@@ -154,8 +161,9 @@ public final class plasmaWordIndex {
                                     this.merger,
                                     log)
                                    :
-                                    new BufferedIndexCollection(
+                                    new BufferedIndexCollection<WordReference>(
                                             indexPrimaryTextLocation,
+                                            wordReferenceFactory,
                                             wordOrder,
                                             WordReferenceRow.urlEntryRow,
                                             entityCacheMaxSize,
@@ -163,10 +171,11 @@ public final class plasmaWordIndex {
                                             redundancy,
                                             log);
         } else {
-            this.merger = new IODispatcher(1, 1);
+            this.merger = new IODispatcher<WordReference>(plasmaWordIndex.wordReferenceFactory, 1, 1);
             this.merger.start();
-            this.index = new IndexCell(
+            this.index = new IndexCell<WordReference>(
                                     new File(indexPrimaryTextLocation, "RICELL"),
+                                    wordReferenceFactory,
                                     wordOrder,
                                     WordReferenceRow.urlEntryRow,
                                     entityCacheMaxSize,
@@ -267,7 +276,7 @@ public final class plasmaWordIndex {
         return this.peers;
     }
 
-    public BufferedIndex index() {
+    public BufferedIndex<WordReference> index() {
         return this.index;
     }
     
@@ -574,21 +583,21 @@ public final class plasmaWordIndex {
     }
     
     @SuppressWarnings("unchecked")
-    public HashMap<String, ReferenceContainer>[] localSearchContainers(
+    public HashMap<String, ReferenceContainer<WordReference>>[] localSearchContainers(
                             final TreeSet<String> queryHashes, 
                             final TreeSet<String> excludeHashes, 
                             final Set<String> urlselection) {
         // search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
 
         // retrieve entities that belong to the hashes
-        HashMap<String, ReferenceContainer> inclusionContainers =
+        HashMap<String, ReferenceContainer<WordReference>> inclusionContainers =
             (queryHashes.size() == 0) ?
-                    new HashMap<String, ReferenceContainer>(0) :
+                    new HashMap<String, ReferenceContainer<WordReference>>(0) :
                     getContainers(queryHashes, urlselection);
-        if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < queryHashes.size())) inclusionContainers = new HashMap<String, ReferenceContainer>(0); // prevent that only a subset is returned
-        final HashMap<String, ReferenceContainer> exclusionContainers =
+        if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < queryHashes.size())) inclusionContainers = new HashMap<String, ReferenceContainer<WordReference>>(0); // prevent that only a subset is returned
+        final HashMap<String, ReferenceContainer<WordReference>> exclusionContainers =
             (inclusionContainers.size() == 0) ?
-                    new HashMap<String, ReferenceContainer>(0) :
+                    new HashMap<String, ReferenceContainer<WordReference>>(0) :
                     getContainers(excludeHashes, urlselection);
         return new HashMap[]{inclusionContainers, exclusionContainers};
     }
@@ -600,11 +609,11 @@ public final class plasmaWordIndex {
      * @param urlselection
      * @return map of wordhash:indexContainer
      */
-    private HashMap<String, ReferenceContainer> getContainers(final Set<String> wordHashes, final Set<String> urlselection) {
+    private HashMap<String, ReferenceContainer<WordReference>> getContainers(final Set<String> wordHashes, final Set<String> urlselection) {
         // retrieve entities that belong to the hashes
-        final HashMap<String, ReferenceContainer> containers = new HashMap<String, ReferenceContainer>(wordHashes.size());
+        final HashMap<String, ReferenceContainer<WordReference>> containers = new HashMap<String, ReferenceContainer<WordReference>>(wordHashes.size());
         String singleHash;
-        ReferenceContainer singleContainer;
+        ReferenceContainer<WordReference> singleContainer;
             final Iterator<String> i = wordHashes.iterator();
             while (i.hasNext()) {
             
@@ -620,7 +629,7 @@ public final class plasmaWordIndex {
                 }
             
                 // check result
-                if ((singleContainer == null || singleContainer.size() == 0)) return new HashMap<String, ReferenceContainer>(0);
+                if ((singleContainer == null || singleContainer.size() == 0)) return new HashMap<String, ReferenceContainer<WordReference>>(0);
             
                 containers.put(singleHash, singleContainer);
             }
@@ -649,16 +658,16 @@ public final class plasmaWordIndex {
         
         public void run() {
             Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
-            ReferenceContainer container = null;
-            WordReferenceRow entry = null;
+            ReferenceContainer<WordReference> container = null;
+            WordReference entry = null;
             yacyURL url = null;
             final HashSet<String> urlHashs = new HashSet<String>();
             try {
-                Iterator<ReferenceContainer> indexContainerIterator = index.references(startHash, false, 100, false).iterator();
+                Iterator<ReferenceContainer<WordReference>> indexContainerIterator = index.references(startHash, false, 100, false).iterator();
                 while (indexContainerIterator.hasNext() && run) {
                     waiter();
                     container = indexContainerIterator.next();
-                    final Iterator<WordReferenceRow> containerIterator = container.entries();
+                    final Iterator<WordReference> containerIterator = container.entries();
                     wordHashNow = container.getTermHash();
                     while (containerIterator.hasNext() && run) {
                         waiter();
@@ -687,7 +696,7 @@ public final class plasmaWordIndex {
                     
                     if (!containerIterator.hasNext()) {
                         // We may not be finished yet, try to get the next chunk of wordHashes
-                        final TreeSet<ReferenceContainer> containers = index.references(container.getTermHash(), false, 100, false);
+                        final TreeSet<ReferenceContainer<WordReference>> containers = index.references(container.getTermHash(), false, 100, false);
                         indexContainerIterator = containers.iterator();
                         // Make sure we don't get the same wordhash twice, but don't skip a word
                         if ((indexContainerIterator.hasNext()) && (!container.getTermHash().equals(indexContainerIterator.next().getTermHash()))) {

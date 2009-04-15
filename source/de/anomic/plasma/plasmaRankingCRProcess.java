@@ -40,6 +40,7 @@ import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.text.IndexCollection;
 import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.AttrSeq;
@@ -141,7 +142,7 @@ public class plasmaRankingCRProcess {
         return true;
     }
     
-    private static boolean accumulate_upd(final File f, final ObjectIndex acc, final IndexCollection seq) throws IOException {
+    private static boolean accumulate_upd(final File f, final ObjectIndex acc, final IndexCollection<WordReference> seq) throws IOException {
         // open file
         AttrSeq source_cr = null;
         try {
@@ -241,11 +242,11 @@ public class plasmaRankingCRProcess {
         // open target file
         AttrSeq acc = null;
         ObjectIndex newacc = null;
-        IndexCollection newseq = null;
+        IndexCollection<WordReference> newseq = null;
         if (newdb) {
             final File path = to_file.getParentFile(); // path to storage place
             newacc = new EcoTable(new File(path, CRG_accname), CRG_accrow, EcoTable.tailCacheUsageAuto, 0, 0);
-            newseq = new IndexCollection(path, CRG_seqname, 12, Base64Order.enhancedCoder, 9, CRG_colrow, false);
+            newseq = new IndexCollection<WordReference>(path, CRG_seqname, plasmaWordIndex.wordReferenceFactory, 12, Base64Order.enhancedCoder, 9, CRG_colrow, false);
         } else {
             if (!(to_file.exists())) {
                 acc = new AttrSeq("Global Ranking Accumulator File",
@@ -373,16 +374,16 @@ public class plasmaRankingCRProcess {
     
     public static int genrcix(final File cr_path_in, final File rci_path_out) throws IOException {
         //kelondroFlexTable       acc = new kelondroFlexTable(cr_path_in, CRG_accname, kelondroBase64Order.enhancedCoder, 128 * 1024 * 1024, -1, CRG_accrow, true);
-        final IndexCollection seq = new IndexCollection(cr_path_in, CRG_seqname, 12, Base64Order.enhancedCoder, 9, CRG_colrow, false);
-        final IndexCollection rci = new IndexCollection(rci_path_out, RCI_colname, 6, Base64Order.enhancedCoder, 9, RCI_coli, false);
+        final IndexCollection<WordReference> seq = new IndexCollection<WordReference>(cr_path_in, CRG_seqname, plasmaWordIndex.wordReferenceFactory, 12, Base64Order.enhancedCoder, 9, CRG_colrow, false);
+        final IndexCollection<WordReference> rci = new IndexCollection<WordReference>(rci_path_out, RCI_colname, plasmaWordIndex.wordReferenceFactory, 6, Base64Order.enhancedCoder, 9, RCI_coli, false);
         
         // loop over all referees
         int count = 0;
         final int size = seq.size();
         final long start = System.currentTimeMillis();
         long l;
-        final CloneableIterator<ReferenceContainer> i = seq.references(null, false);
-        ReferenceContainer keycollection;
+        final CloneableIterator<ReferenceContainer<WordReference>> i = seq.references(null, false);
+        ReferenceContainer<WordReference> keycollection;
         String referee, refereeDom, anchor, anchorDom;
         RowSet rci_entry;
         CloneableIterator<Row.Entry> cr_entry;

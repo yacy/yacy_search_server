@@ -44,7 +44,7 @@ import de.anomic.kelondro.util.Log;
  * A IndexCache is a ReferenceContainerCache with an attached cache flush logic
  *
  */
-public final class IndexBuffer extends AbstractIndex implements Index, IndexReader, Iterable<ReferenceContainer> {
+public final class IndexBuffer<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType>, IndexReader<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
 
     // class variables
     private final ScoreCluster<String> hashScore;
@@ -55,11 +55,12 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
     public  long  cacheReferenceAgeLimit;    // the maximum age (= time not changed) of a RWI entity
     private final Log log;
     private final File dumpFile;
-    private ReferenceContainerCache heap;
+    private ReferenceContainerCache<ReferenceType> heap;
     
     @SuppressWarnings("unchecked")
     public IndexBuffer(
             final File databaseRoot,
+            final ReferenceFactory<ReferenceType> factory,
             final ByteOrder wordOrdering,
             final Row payloadrow,
             final int entityCacheMaxSize,
@@ -67,7 +68,8 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
             final long wCacheReferenceAgeLimitInit,
             final String newHeapName,
             final Log log) {
-
+        super(factory);
+        
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
         this.hashScore = new ScoreCluster<String>();
@@ -78,7 +80,7 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
         this.cacheReferenceAgeLimit = wCacheReferenceAgeLimitInit;
         this.log = log;
         this.dumpFile = new File(databaseRoot, newHeapName);
-        this.heap = new ReferenceContainerCache(payloadrow, wordOrdering);
+        this.heap = new ReferenceContainerCache(factory, payloadrow, wordOrdering);
         
         // read in dump of last session
         boolean initFailed = false;
@@ -149,7 +151,7 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
         return heap.size();
     }
 
-    public synchronized CloneableIterator<ReferenceContainer> references(final String startWordHash, final boolean rot) {
+    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final String startWordHash, final boolean rot) {
         // we return an iterator object that creates top-level-clones of the indexContainers
         // in the cache, so that manipulations of the iterated objects do not change
         // objects in the cache.
@@ -197,7 +199,7 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
                 hash = hashDate.getMinObject(); // flush oldest entries
             }
             if (hash == null) {
-                final ReferenceContainer ic = heap.references(null, false).next();
+                final ReferenceContainer<ReferenceType> ic = heap.references(null, false).next();
                 if (ic != null) hash = ic.getTermHash();
             }
             return hash;
@@ -208,10 +210,10 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
         return null;
     }
 
-    public synchronized ArrayList<ReferenceContainer> bestFlushContainers(final int count) {
-        final ArrayList<ReferenceContainer> containerList = new ArrayList<ReferenceContainer>();
+    public synchronized ArrayList<ReferenceContainer<ReferenceType>> bestFlushContainers(final int count) {
+        final ArrayList<ReferenceContainer<ReferenceType>> containerList = new ArrayList<ReferenceContainer<ReferenceType>>();
         String hash;
-        ReferenceContainer container;
+        ReferenceContainer<ReferenceType> container;
         for (int i = 0; i < count; i++) {
             hash = bestFlushWordHash();
             if (hash == null) return containerList;
@@ -241,11 +243,11 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
         return this.heap.count(key);
     }
     
-    public synchronized ReferenceContainer get(final String wordHash, final Set<String> urlselection) {
+    public synchronized ReferenceContainer<ReferenceType> get(final String wordHash, final Set<String> urlselection) {
         if (wordHash == null) return null;
         
         // retrieve container
-        ReferenceContainer container = heap.get(wordHash, null);
+        ReferenceContainer<ReferenceType> container = heap.get(wordHash, null);
         
         // We must not use the container from cache to store everything we find,
         // as that container remains linked to in the cache and might be changed later
@@ -259,10 +261,10 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
         return container;
     }
 
-    public synchronized ReferenceContainer delete(final String wordHash) {
+    public synchronized ReferenceContainer<ReferenceType> delete(final String wordHash) {
         // returns the index that had been deleted
     	if (wordHash == null || heap == null) return null;
-        final ReferenceContainer container = heap.delete(wordHash);
+        final ReferenceContainer<ReferenceType> container = heap.delete(wordHash);
         hashScore.deleteScore(wordHash);
         hashDate.deleteScore(wordHash);
         return container;
@@ -300,7 +302,7 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
         return 0;
     }
     
-    public synchronized void add(final ReferenceContainer container) {
+    public synchronized void add(final ReferenceContainer<ReferenceType> container) {
         if (container == null || container.size() == 0 || heap == null) return;
 
         // put new words into cache
@@ -309,7 +311,7 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
         hashDate.setScore(container.getTermHash(), intTime(System.currentTimeMillis()));
     }
 
-    public void add(final String wordHash, final WordReferenceRow entry) throws IOException {
+    public void add(final String wordHash, final ReferenceType entry) throws IOException {
         if (entry == null || heap == null) return;
 
         // put new words into cache
@@ -325,7 +327,7 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
         hashDate.clear();
     }
 
-    public Iterator<ReferenceContainer> iterator() {
+    public Iterator<ReferenceContainer<ReferenceType>> iterator() {
         return references(null, false);
     }
     
@@ -337,7 +339,7 @@ public final class IndexBuffer extends AbstractIndex implements Index, IndexRead
         // calculate the real size in bytes of the index cache
         long cacheBytes = 0;
         final long entryBytes = WordReferenceRow.urlEntryRow.objectsize;
-        final Iterator<ReferenceContainer> it = references(null, false);
+        final Iterator<ReferenceContainer<ReferenceType>> it = references(null, false);
         while (it.hasNext()) cacheBytes += it.next().size() * entryBytes;
         return cacheBytes;
     }

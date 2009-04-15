@@ -29,15 +29,17 @@ package de.anomic.kelondro.text;
 import de.anomic.kelondro.order.AbstractOrder;
 import de.anomic.kelondro.order.Order;
 
-public class ReferenceContainerOrder extends AbstractOrder<ReferenceContainer> implements Order<ReferenceContainer>, Cloneable {
+public class ReferenceContainerOrder<ReferenceType extends Reference> extends AbstractOrder<ReferenceContainer<ReferenceType>> implements Order<ReferenceContainer<ReferenceType>>, Cloneable {
 
+    private final ReferenceFactory<ReferenceType> factory;
     private final Order<byte[]> embeddedOrder;
 
-    public ReferenceContainerOrder(final Order<byte[]> embedOrder) {
+    public ReferenceContainerOrder(ReferenceFactory<ReferenceType> factory, final Order<byte[]> embedOrder) {
         this.embeddedOrder = embedOrder;
+        this.factory = factory;
     }
 
-    public boolean wellformed(final ReferenceContainer a) {
+    public boolean wellformed(final ReferenceContainer<ReferenceType> a) {
         return embeddedOrder.wellformed(a.getTermHash().getBytes());
     }
     
@@ -49,21 +51,21 @@ public class ReferenceContainerOrder extends AbstractOrder<ReferenceContainer> i
         return this.embeddedOrder.partition(key, forks);
     }
 
-    public int compare(final ReferenceContainer a, final ReferenceContainer b) {
+    public int compare(final ReferenceContainer<ReferenceType> a, final ReferenceContainer<ReferenceType> b) {
         return this.embeddedOrder.compare(a.getTermHash().getBytes(), b.getTermHash().getBytes());
     }
     
-    public boolean equal(ReferenceContainer a, ReferenceContainer b) {
+    public boolean equal(ReferenceContainer<ReferenceType> a, ReferenceContainer<ReferenceType> b) {
         return this.embeddedOrder.equal(a.getTermHash().getBytes(), b.getTermHash().getBytes());
     }
     
-    public void rotate(final ReferenceContainer zero) {
+    public void rotate(final ReferenceContainer<ReferenceType> zero) {
         this.embeddedOrder.rotate(zero.getTermHash().getBytes());
-        this.zero = new ReferenceContainer(new String(this.embeddedOrder.zero()), zero);
+        this.zero = new ReferenceContainer<ReferenceType>(this.factory, new String(this.embeddedOrder.zero()), zero);
     }
 
-    public Order<ReferenceContainer> clone() {
-        return new ReferenceContainerOrder(this.embeddedOrder.clone());
+    public Order<ReferenceContainer<ReferenceType>> clone() {
+        return new ReferenceContainerOrder<ReferenceType>(this.factory, this.embeddedOrder.clone());
     }
 
     public String signature() {
@@ -74,12 +76,12 @@ public class ReferenceContainerOrder extends AbstractOrder<ReferenceContainer> i
         return this.embeddedOrder.cardinal(key);
     }
     
-    public boolean equals(final Order<ReferenceContainer> otherOrder) {
+    public boolean equals(final Order<ReferenceContainer<ReferenceType>> otherOrder) {
         if (!(otherOrder instanceof ReferenceContainerOrder)) return false;
-        return this.embeddedOrder.equals(((ReferenceContainerOrder) otherOrder).embeddedOrder);
+        return this.embeddedOrder.equals(((ReferenceContainerOrder<ReferenceType>) otherOrder).embeddedOrder);
     }
 
-	public long cardinal(final ReferenceContainer key) {
+	public long cardinal(final ReferenceContainer<ReferenceType> key) {
 		return this.embeddedOrder.cardinal(key.getTermHash().getBytes());
 	}
 

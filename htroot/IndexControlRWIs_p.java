@@ -42,7 +42,7 @@ import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerCache;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
+import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.plasma.plasmaSearchAPI;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchRankingProcess;
@@ -124,9 +124,9 @@ public class IndexControlRWIs_p {
             if (post.containsKey("keyhashdeleteall")) try {
                 if (delurl || delurlref) {
                     // generate an urlx array
-                    ReferenceContainer index = null;
+                    ReferenceContainer<WordReference> index = null;
                     index = sb.webIndex.index().get(keyhash, null);
-                    final Iterator<WordReferenceRow> en = index.entries();
+                    final Iterator<WordReference> en = index.entries();
                     int i = 0;
                     urlx = new String[index.size()];
                     while (en.hasNext()) {
@@ -203,11 +203,11 @@ public class IndexControlRWIs_p {
                 }
                 
                 // prepare index
-                ReferenceContainer index;
+                ReferenceContainer<WordReference> index;
                 final long starttime = System.currentTimeMillis();
                 index = sb.webIndex.index().get(keyhash, null);
                 // built urlCache
-                final Iterator<WordReferenceRow> urlIter = index.entries();
+                final Iterator<WordReference> urlIter = index.entries();
                 final HashMap<String, URLMetadataRow> knownURLs = new HashMap<String, URLMetadataRow>();
                 final HashSet<String> unknownURLEntries = new HashSet<String>();
                 Reference iEntry;
@@ -224,7 +224,7 @@ public class IndexControlRWIs_p {
                 }
                 
                 // make an indexContainerCache
-                ReferenceContainerCache icc = new ReferenceContainerCache(index.rowdef, plasmaWordIndex.wordOrder);
+                ReferenceContainerCache<WordReference> icc = new ReferenceContainerCache<WordReference>(plasmaWordIndex.wordReferenceFactory, index.rowdef, plasmaWordIndex.wordOrder);
                 icc.add(index);
                 
                 // transport to other peer
@@ -244,8 +244,8 @@ public class IndexControlRWIs_p {
     
             // generate list
             if (post.containsKey("keyhashsimilar")) try {
-                final Iterator<ReferenceContainer> containerIt = sb.webIndex.index().references(keyhash, true, 256, false).iterator();
-                    ReferenceContainer container;
+                final Iterator<ReferenceContainer<WordReference>> containerIt = sb.webIndex.index().references(keyhash, true, 256, false).iterator();
+                    ReferenceContainer<WordReference> container;
                     int i = 0;
                     int rows = 0, cols = 0;
                     prop.put("keyhashsimilar", "1");

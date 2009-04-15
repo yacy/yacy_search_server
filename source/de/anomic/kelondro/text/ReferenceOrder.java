@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.ScoreCluster;
@@ -57,7 +58,7 @@ public class ReferenceOrder {
         this.language = language;
     }
     
-    public ArrayList<WordReferenceVars> normalizeWith(final ReferenceContainer container) {
+    public ArrayList<WordReferenceVars> normalizeWith(final ReferenceContainer<WordReference> container) {
         // normalize ranking: find minimum and maxiumum of separate ranking criteria
         assert (container != null);
         ArrayList<WordReferenceVars> result = null;
@@ -120,16 +121,18 @@ public class ReferenceOrder {
         final Bitfield flags = t.flags();
         final long tf = ((max.termFrequency() == min.termFrequency()) ? 0 : (((int)(((t.termFrequency()-min.termFrequency())*256.0)/(max.termFrequency() - min.termFrequency())))) << ranking.coeff_termfrequency);
         //System.out.println("tf(" + t.urlHash + ") = " + Math.floor(1000 * t.termFrequency()) + ", min = " + Math.floor(1000 * min.termFrequency()) + ", max = " + Math.floor(1000 * max.termFrequency()) + ", tf-normed = " + tf);
+        int maxmaxpos = max.maxposition();
+        int minminpos = min.minposition();
         final long r =
              ((256 - yacyURL.domLengthNormalized(t.metadataHash())) << ranking.coeff_domlength)
            + ((ranking.coeff_ybr > 12) ? ((256 - (plasmaSearchRankingProcess.ybr(t.metadataHash()) << 4)) << ranking.coeff_ybr) : 0)
            + ((max.urlcomps()      == min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - min.urlcomps()     ) << 8) / (max.urlcomps()     - min.urlcomps())     )) << ranking.coeff_urlcomps)
            + ((max.urllength()     == min.urllength()  )   ? 0 : (256 - (((t.urllength()    - min.urllength()    ) << 8) / (max.urllength()    - min.urllength())    )) << ranking.coeff_urllength)
-           + ((max.posintext()     == min.posintext()  )   ? 0 : (256 - (((t.posintext()    - min.posintext()    ) << 8) / (max.posintext()    - min.posintext())    )) << ranking.coeff_posintext)
+           + ((maxmaxpos           == minminpos        )   ? 0 : (256 - (((t.minposition()  - minminpos          ) << 8) / (maxmaxpos          - minminpos)          )) << ranking.coeff_posintext)
            + ((max.posofphrase()   == min.posofphrase())   ? 0 : (256 - (((t.posofphrase()  - min.posofphrase()  ) << 8) / (max.posofphrase()  - min.posofphrase())  )) << ranking.coeff_posofphrase)
            + ((max.posinphrase()   == min.posinphrase())   ? 0 : (256 - (((t.posinphrase()  - min.posinphrase()  ) << 8) / (max.posinphrase()  - min.posinphrase())  )) << ranking.coeff_posinphrase)
-           + ((max.worddistance()  == min.worddistance())  ? 0 : (256 - (((t.worddistance() - min.worddistance() ) << 8) / (max.worddistance() - min.worddistance()) )) << ranking.coeff_worddistance)
-           + ((max.virtualAge()    == min.virtualAge())    ? 0 :        (((t.virtualAge()   - min.virtualAge()    ) << 8) / (max.virtualAge()   - min.virtualAge())    ) << ranking.coeff_date)
+           + ((max.distance()      == min.distance()   )   ? 0 : (256 - (((t.distance()     - min.distance()     ) << 8) / (max.distance()     - min.distance())     )) << ranking.coeff_worddistance)
+           + ((max.virtualAge()    == min.virtualAge())    ? 0 :        (((t.virtualAge()   - min.virtualAge()   ) << 8) / (max.virtualAge()   - min.virtualAge())    ) << ranking.coeff_date)
            + ((max.wordsintitle()  == min.wordsintitle())  ? 0 : (((t.wordsintitle() - min.wordsintitle()  ) << 8) / (max.wordsintitle() - min.wordsintitle())  ) << ranking.coeff_wordsintitle)
            + ((max.wordsintext()   == min.wordsintext())   ? 0 : (((t.wordsintext()  - min.wordsintext()   ) << 8) / (max.wordsintext()  - min.wordsintext())   ) << ranking.coeff_wordsintext)
            + ((max.phrasesintext() == min.phrasesintext()) ? 0 : (((t.phrasesintext()- min.phrasesintext() ) << 8) / (max.phrasesintext()- min.phrasesintext()) ) << ranking.coeff_phrasesintext)
@@ -165,13 +168,13 @@ public class ReferenceOrder {
 
         WordReferenceVars entryMin;
         WordReferenceVars entryMax;
-        private final ReferenceContainer container;
+        private final ReferenceContainer<WordReference> container;
         private final int start, end;
         private final HashMap<String, Integer> doms;
         private final Integer int1;
         ArrayList<WordReferenceVars> decodedEntries;
         
-        public minmaxfinder(final ReferenceContainer container, final int start /*including*/, final int end /*excluding*/) {
+        public minmaxfinder(final ReferenceContainer<WordReference> container, final int start /*including*/, final int end /*excluding*/) {
             this.container = container;
             this.start = start;
             this.end = end;

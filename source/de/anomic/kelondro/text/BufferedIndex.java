@@ -44,7 +44,7 @@ import de.anomic.kelondro.order.CloneableIterator;
  * (which integrates ReferenceContainerArray and ReferenceContainerCache)
  * to make it possible to switch between the old and new index data structure
  */
-public interface BufferedIndex extends Index {
+public interface BufferedIndex<ReferenceType extends Reference> extends Index<ReferenceType> {
 
     /*
      *  methods for monitoring of the buffer
@@ -118,7 +118,7 @@ public interface BufferedIndex extends Index {
      * @return
      * @throws IOException
      */
-    public CloneableIterator<ReferenceContainer> references(
+    public CloneableIterator<ReferenceContainer<ReferenceType>> references(
                             String startHash,
                             boolean rot,
                             boolean buffer
@@ -137,7 +137,7 @@ public interface BufferedIndex extends Index {
      * @return
      * @throws IOException
      */
-    public TreeSet<ReferenceContainer> references(
+    public TreeSet<ReferenceContainer<ReferenceType>> references(
                             String startHash,
                             boolean rot,
                             int count,

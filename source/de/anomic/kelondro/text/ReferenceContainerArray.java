@@ -38,11 +38,12 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.util.Log;
 
-public final class ReferenceContainerArray {
+public final class ReferenceContainerArray<ReferenceType extends Reference> {
 
+    private final ReferenceFactory<ReferenceType> factory;
     private final Row payloadrow;
     private final BLOBArray array;
-    private final IODispatcher merger;
+    private final IODispatcher<ReferenceType> merger;
     
     /**
      * open a index container based on a BLOB dump. The content of the BLOB will not be read
@@ -56,9 +57,11 @@ public final class ReferenceContainerArray {
      */
     public ReferenceContainerArray(
     		final File heapLocation,
+    		final ReferenceFactory<ReferenceType> factory,
     		final ByteOrder termOrder,
     		final Row payloadrow,
-    		IODispatcher merger) throws IOException {
+    		IODispatcher<ReferenceType> merger) throws IOException {
+        this.factory = factory;
         this.payloadrow = payloadrow;
         this.array = new BLOBArray(
             heapLocation,
@@ -104,7 +107,7 @@ public final class ReferenceContainerArray {
      * objects in the cache.
      * @throws IOException 
      */
-    public synchronized CloneableIterator<ReferenceContainer> wordContainerIterator(final String startWordHash, final boolean rot, final boolean ram) {
+    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> wordContainerIterator(final String startWordHash, final boolean rot, final boolean ram) {
         try {
             return new heapCacheIterator(startWordHash, rot);
         } catch (IOException e) {
@@ -117,7 +120,7 @@ public final class ReferenceContainerArray {
      * cache iterator: iterates objects within the heap cache. This can only be used
      * for write-enabled heaps, read-only heaps do not have a heap cache
      */
-    public class heapCacheIterator implements CloneableIterator<ReferenceContainer>, Iterable<ReferenceContainer> {
+    public class heapCacheIterator implements CloneableIterator<ReferenceContainer<ReferenceType>>, Iterable<ReferenceContainer<ReferenceType>> {
 
         // this class exists, because the wCache cannot be iterated with rotation
         // and because every indexContainer Object that is iterated must be returned as top-level-clone
@@ -148,7 +151,7 @@ public final class ReferenceContainerArray {
             return iterator.hasNext();
         }
 
-        public ReferenceContainer next() {
+        public ReferenceContainer<ReferenceType> next() {
         	try {
 				if (iterator.hasNext()) {
                 	return get(new String(iterator.next()));
@@ -169,7 +172,7 @@ public final class ReferenceContainerArray {
             iterator.remove();
         }
 
-        public Iterator<ReferenceContainer> iterator() {
+        public Iterator<ReferenceContainer<ReferenceType>> iterator() {
             return this;
         }
         
@@ -192,13 +195,13 @@ public final class ReferenceContainerArray {
      * @return the indexContainer if one exist, null otherwise
      * @throws IOException 
      */
-    public synchronized ReferenceContainer get(final String termHash) throws IOException {
+    public synchronized ReferenceContainer<ReferenceType> get(final String termHash) throws IOException {
     	List<byte[]> entries = this.array.getAll(termHash.getBytes());
     	if (entries == null || entries.size() == 0) return null;
     	byte[] a = entries.remove(0);
-    	ReferenceContainer c = new ReferenceContainer(termHash, RowSet.importRowSet(a, payloadrow));
+    	ReferenceContainer<ReferenceType> c = new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(a, payloadrow));
     	while (entries.size() > 0) {
-    		c = c.merge(new ReferenceContainer(termHash, RowSet.importRowSet(entries.remove(0), payloadrow)));
+    		c = c.merge(new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(entries.remove(0), payloadrow)));
     	}
     	return c;
     }
@@ -214,31 +217,31 @@ public final class ReferenceContainerArray {
     	array.remove(termHash.getBytes());
     }
     
-    public synchronized int replace(final String termHash, ContainerRewriter rewriter) throws IOException {
+    public synchronized int replace(final String termHash, ContainerRewriter<ReferenceType> rewriter) throws IOException {
         return array.replace(termHash.getBytes(), new BLOBRewriter(termHash, rewriter));
     }
     
     public class BLOBRewriter implements BLOB.Rewriter {
 
-        ContainerRewriter rewriter;
+        ContainerRewriter<ReferenceType> rewriter;
         String wordHash;
         
-        public BLOBRewriter(String wordHash, ContainerRewriter rewriter) {
+        public BLOBRewriter(String wordHash, ContainerRewriter<ReferenceType> rewriter) {
             this.rewriter = rewriter;
             this.wordHash = wordHash;
         }
         
         public byte[] rewrite(byte[] b) {
             if (b == null) return null;
-            ReferenceContainer c = rewriter.rewrite(new ReferenceContainer(this.wordHash, RowSet.importRowSet(b, payloadrow)));
+            ReferenceContainer<ReferenceType> c = rewriter.rewrite(new ReferenceContainer<ReferenceType>(factory, this.wordHash, RowSet.importRowSet(b, payloadrow)));
             if (c == null) return null;
             return c.exportCollection();
         }
     }
 
-    public interface ContainerRewriter {
+    public interface ContainerRewriter<RT extends Reference> {
         
-        public ReferenceContainer rewrite(ReferenceContainer container);
+        public ReferenceContainer<RT> rewrite(ReferenceContainer<RT> container);
         
     }
     

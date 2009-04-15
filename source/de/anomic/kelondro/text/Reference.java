@@ -38,8 +38,6 @@ public interface Reference {
 
     public long lastModified();
     
-    //public long freshUntil();
-    
     public String toString();
     
     public boolean isNewer(Reference other);
@@ -47,4 +45,19 @@ public interface Reference {
     public boolean isOlder(Reference other);
 
     public int hashCode();
+    
+    public void join(final Reference oe);
+    
+    public int positions();
+    
+    public int maxposition();
+    
+    public int minposition();
+    
+    public int position(int p);
+    
+    public void addPosition(int position);
+    
+    public int distance();
+        
 }
