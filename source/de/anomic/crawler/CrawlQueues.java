@@ -306,7 +306,7 @@ public class CrawlQueues {
         // check again
         if (this.size() >= value) {
             if (this.log.isFine()) {
-                log.logFine(type + "Crawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
+                log.logFine(type + "Crawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + "), httpClients = " + httpClient.connectionCount());
             }
             return false;
         }
@@ -344,7 +344,7 @@ public class CrawlQueues {
         }
         // check again
         if (this.size() >= sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
-            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + ")");
+            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + "), httpClients = " + httpClient.connectionCount());
             return false;
         }
         
@@ -605,7 +605,8 @@ public class CrawlQueues {
                 httpClient.initConnectionManager();
                 this.entry.setStatus("worker-exception", serverProcessorJob.STATUS_FINISHED);
             } finally {
-                workers.remove(code);
+                crawlWorker w = workers.remove(code);
+                assert w != null;
             }
         }
         
