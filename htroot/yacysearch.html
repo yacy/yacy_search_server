@@ -3,7 +3,7 @@
 <head>
   <title>YaCy '#[clientname]#': Search Page</title>
   #%env/templates/metas.template%#
-  <link rel="alternate" type="application/rss+xml" title="Search for #[input_former]#" href="yacysearch.rss?search=#[input_former]#" />
+  <link rel="alternate" type="application/rss+xml" title="Search for #[former]#" href="yacysearch.rss?search=#[former]#" />
   <link rel="search" type="application/opensearchdescription+xml" title="YaCy Search on '#[clientname]#'" href="opensearchdescription.xml" /> 
   <script type="text/javascript" src="/js/ajax.js"></script>
   <script type="text/javascript" src="/js/xml.js"></script>
@@ -54,30 +54,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 	#%env/templates/embeddedheader.template%#
 #(/display)#
 
-#(input)#
-	::
-    <form class="search small" action="yacysearch.html" method="get" accept-charset="UTF-8">
-      <fieldset class="yacys">
-        <input id="search" name="query" type="text" size="50" maxlength="80" value="#[former]#" onclick="document.getElementById('Enter').value = 'Search'" />
-        <input id="Enter" type="submit" name="Enter" value="Search" />
-        <input type="hidden" name="contentdom" value="#[contentdom]#" />
-        <input type="hidden" name="former" value="#[former]#" />
-        <input type="hidden" name="verify" value="#[verify]#" />
-        <input type="hidden" name="maximumRecords" value="#[count]#" />
-        <input type="hidden" name="startRecord" value="#[offset]#" />
-        <input type="hidden" name="resource" value="#[resource]#" />
-        <input type="hidden" name="urlmaskfilter" value="#[urlmaskfilter]#" />
-        <input type="hidden" name="prefermaskfilter" value="#[prefermaskfilter]#" />
-        <input type="hidden" name="depth" value="#[depth]#" />
-        <input type="hidden" name="cat" value="#[cat]#" />
-        <input type="hidden" name="type" value="#[type]#" />
-        <input type="hidden" name="display" value="#[display]#" />
-        <input type="hidden" name="input" value="#[input]#" />
-        <input type="hidden" name="constraint" value="#[constraint]#" />
-      </fieldset>
-    </form>
-    ::
-    <form class="search small" action="yacysearch.html" method="get" accept-charset="UTF-8">
+<form class="search small" action="yacysearch.html" method="get" accept-charset="UTF-8">
       <h2>#[promoteSearchPageGreeting]#</h2>
       <div class="yacylogo"><a href="#[promoteSearchPageGreeting.homepage]#" class="yacylogo"><img src="#[promoteSearchPageGreeting.smallImage]#" alt="yacysearch" /></a></div>
       <fieldset class="yacys">
@@ -95,7 +72,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
           <input type="radio" id="appl" name="contentdom" value="app"#(contentdomCheckApp)#:: checked="checked"#(/contentdomCheckApp)# />
           <label for="appl">Applications</label>
            &nbsp;
-          <a href="index.html?display=#[display]#&amp;input=#[input]#&amp;searchoptions=1&amp;count=#[count]#&amp;resource=#[resource]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#">more options</a>
+          <a href="index.html?display=#[display]#&amp;searchoptions=1&amp;count=#[count]#&amp;resource=#[resource]#&amp;urlmaskfilter=#[urlmaskfilter]#&amp;prefermaskfilter=#[prefermaskfilter]#&amp;cat=#[cat]#&amp;constraint=#[constraint]#&amp;contentdom=#[contentdom]#&amp;former=#[former]#">more options</a>
         </div>
         <input type="hidden" name="former" value="#[former]#" />
         <input type="hidden" name="maximumRecords" value="#[count]#" />
@@ -107,11 +84,9 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <input type="hidden" name="depth" value="#[depth]#" />
         <input type="hidden" name="cat" value="#[cat]#" />
         <input type="hidden" name="display" value="#[display]#" />
-        <input type="hidden" name="input" value="#[input]#" />
         <input type="hidden" name="constraint" value="#[constraint]#" />
       </fieldset>
     </form>
-#(/input)#
 
 #(searchagain)#
 ::

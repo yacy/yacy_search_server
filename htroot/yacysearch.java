@@ -76,7 +76,6 @@ public class yacysearch {
             final String  browserPopUpPage = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
             if (browserPopUpPage.startsWith("index") || browserPopUpPage.startsWith("yacysearch")) display = 2;
         }
-        final int input = (post == null) ? 2 : post.getInt("input", 2);
         String promoteSearchPageGreeting = env.getConfig(plasmaSwitchboardConstants.GREETING, "");
         if (env.getConfigBool(plasmaSwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
         final String client = header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
@@ -87,35 +86,32 @@ public class yacysearch {
         final serverObjects prop = new serverObjects();
         
         //final boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
-        prop.put("input_promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("input_promoteSearchPageGreeting.homepage", sb.getConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, ""));
-        prop.put("input_promoteSearchPageGreeting.smallImage", sb.getConfig(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, ""));
-        if ((post == null) || (env == null) || (querystring.length() == 0) || (!searchAllowed)) {
+        prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
+        prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, ""));
+        prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+        if ((post == null) || (env == null) || (!searchAllowed)) {
             // we create empty entries for template strings
             prop.put("searchagain", "0");
-            prop.put("input", input);
             prop.put("display", display);
-            prop.put("input_input", input);
-            prop.put("input_display", display);
-            prop.put("input_former", "");
+            prop.put("display", display);
             prop.put("former", "");
-            prop.put("input_count", "10");
-            prop.put("input_offset", "0");
-            prop.put("input_resource", "global");
-            prop.put("input_urlmaskfilter", (post == null) ? ".*" : post.get("urlmaskfilter", ".*"));
-            prop.put("input_prefermaskfilter", (post == null) ? "" : post.get("prefermaskfilter", ""));
-            prop.put("input_tenant", (post == null) ? "" : post.get("tenant", ""));
-            prop.put("input_indexof", "off");
-            prop.put("input_constraint", "");
-            prop.put("input_cat", "href");
-            prop.put("input_depth", "0");
-            prop.put("input_verify", (post == null) ? "true" : post.get("verify", "true"));
-            prop.put("input_contentdom", "text");
-            prop.put("input_contentdomCheckText", "1");
-            prop.put("input_contentdomCheckAudio", "0");
-            prop.put("input_contentdomCheckVideo", "0");
-            prop.put("input_contentdomCheckImage", "0");
-            prop.put("input_contentdomCheckApp", "0");
+            prop.put("count", "10");
+            prop.put("offset", "0");
+            prop.put("resource", "global");
+            prop.put("urlmaskfilter", (post == null) ? ".*" : post.get("urlmaskfilter", ".*"));
+            prop.put("prefermaskfilter", (post == null) ? "" : post.get("prefermaskfilter", ""));
+            prop.put("tenant", (post == null) ? "" : post.get("tenant", ""));
+            prop.put("indexof", "off");
+            prop.put("constraint", "");
+            prop.put("cat", "href");
+            prop.put("depth", "0");
+            prop.put("verify", (post == null) ? "true" : post.get("verify", "true"));
+            prop.put("contentdom", "text");
+            prop.put("contentdomCheckText", "1");
+            prop.put("contentdomCheckAudio", "0");
+            prop.put("contentdomCheckVideo", "0");
+            prop.put("contentdomCheckImage", "0");
+            prop.put("contentdomCheckApp", "0");
             prop.put("excluded", "0");
             prop.put("results", "");
             prop.put("resultTable", "0");
@@ -497,8 +493,8 @@ public class yacysearch {
                 prop.put("num-results", "3");
             }
 
-            prop.put("input_cat", "href");
-            prop.put("input_depth", "0");
+            prop.put("cat", "href");
+            prop.put("depth", "0");
 
             // adding some additional properties needed for the rss feed
             String hostName = (String) header.get("Host", "localhost");
@@ -508,25 +504,23 @@ public class yacysearch {
         }
         
         prop.put("searchagain", global ? "1" : "0");
-        prop.put("input", input);
         prop.put("display", display);
-        prop.put("input_input", input);
-        prop.put("input_display", display);
-        prop.putHTML("input_former", querystring);
-        prop.put("input_count", itemsPerPage);
-        prop.put("input_offset", offset);
-        prop.put("input_resource", global ? "global" : "local");
-        prop.putHTML("input_urlmaskfilter", originalUrlMask);
-        prop.putHTML("input_prefermaskfilter", prefermask);
-        prop.put("input_indexof", (indexof) ? "on" : "off");
-        prop.put("input_constraint", (constraint == null) ? "" : constraint.exportB64());
-        prop.put("input_verify", (fetchSnippets) ? "true" : "false");
-        prop.put("input_contentdom", (post == null ? "text" : post.get("contentdom", "text")));
-        prop.put("input_contentdomCheckText", (contentdomCode == plasmaSearchQuery.CONTENTDOM_TEXT) ? "1" : "0");
-        prop.put("input_contentdomCheckAudio", (contentdomCode == plasmaSearchQuery.CONTENTDOM_AUDIO) ? "1" : "0");
-        prop.put("input_contentdomCheckVideo", (contentdomCode == plasmaSearchQuery.CONTENTDOM_VIDEO) ? "1" : "0");
-        prop.put("input_contentdomCheckImage", (contentdomCode == plasmaSearchQuery.CONTENTDOM_IMAGE) ? "1" : "0");
-        prop.put("input_contentdomCheckApp", (contentdomCode == plasmaSearchQuery.CONTENTDOM_APP) ? "1" : "0");
+        prop.put("display", display);
+        prop.putHTML("former", querystring);
+        prop.put("count", itemsPerPage);
+        prop.put("offset", offset);
+        prop.put("resource", global ? "global" : "local");
+        prop.putHTML("urlmaskfilter", originalUrlMask);
+        prop.putHTML("prefermaskfilter", prefermask);
+        prop.put("indexof", (indexof) ? "on" : "off");
+        prop.put("constraint", (constraint == null) ? "" : constraint.exportB64());
+        prop.put("verify", (fetchSnippets) ? "true" : "false");
+        prop.put("contentdom", (post == null ? "text" : post.get("contentdom", "text")));
+        prop.put("contentdomCheckText", (contentdomCode == plasmaSearchQuery.CONTENTDOM_TEXT) ? "1" : "0");
+        prop.put("contentdomCheckAudio", (contentdomCode == plasmaSearchQuery.CONTENTDOM_AUDIO) ? "1" : "0");
+        prop.put("contentdomCheckVideo", (contentdomCode == plasmaSearchQuery.CONTENTDOM_VIDEO) ? "1" : "0");
+        prop.put("contentdomCheckImage", (contentdomCode == plasmaSearchQuery.CONTENTDOM_IMAGE) ? "1" : "0");
+        prop.put("contentdomCheckApp", (contentdomCode == plasmaSearchQuery.CONTENTDOM_APP) ? "1" : "0");
         
         // for RSS: don't HTML encode some elements
         prop.putXML("rss_query", querystring);

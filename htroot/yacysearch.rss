@@ -4,15 +4,15 @@
 	xmlns:yacy="http://www.yacy.net/"
 	xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/"
 	xmlns:atom="http://www.w3.org/2005/Atom">
-	<!-- YaCy P2P Web Search - Results; http://yacy.net -->
+	<!-- YaCy Search Engine; http://yacy.net -->
 	<channel>
-		<title>YaCy P2P-Search for #[rss_query]#</title>
+		<title>#[promoteSearchPageGreeting]#</title>
 		<description>Search for #[rss_query]#</description>
-		<link>#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[input_resource]#&amp;contentdom=#[input_contentdom]#&amp;verify=#[input_verify]#</link>
+		<link>#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;verify=#[verify]#</link>
 		<image>
 			<url>#[rssYacyImageURL]#</url>
 			<title>Search for #[rss_query]#</title>
-			<link>#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[input_resource]#&amp;contentdom=#[input_contentdom]#&amp;verify=#[input_verify]#</link>
+			<link>#[searchBaseURL]#?query=#[rss_queryenc]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;verify=#[verify]#</link>
 		</image>
 		<opensearch:totalResults>#[num-results_totalcount]#</opensearch:totalResults>
 		<opensearch:startIndex>#[num-results_offset]#</opensearch:startIndex>

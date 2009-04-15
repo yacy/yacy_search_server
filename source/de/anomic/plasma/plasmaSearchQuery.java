@@ -243,8 +243,12 @@ public final class plasmaSearchQuery {
     
     @SuppressWarnings("unchecked")
     public static TreeSet<String>[] cleanQuery(String querystring) {
-    	// returns three sets: a query set, a exclude set and a full query set
-    	if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{new TreeSet<String>(NaturalOrder.naturalComparator), new TreeSet<String>(NaturalOrder.naturalComparator)};
+        // returns three sets: a query set, a exclude set and a full query set
+        final TreeSet<String> query = new TreeSet<String>(NaturalOrder.naturalComparator);
+        final TreeSet<String> exclude = new TreeSet<String>(NaturalOrder.naturalComparator);
+        final TreeSet<String> fullquery = new TreeSet<String>(NaturalOrder.naturalComparator);
+        
+        if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{query, exclude, fullquery};
         
         // convert Umlaute
         querystring = htmlFilterAbstractScraper.stripAll(querystring).toLowerCase().trim();
@@ -256,9 +260,6 @@ public final class plasmaSearchQuery {
         String s;
         int l;
         // the string is clean now, but we must generate a set out of it
-        final TreeSet<String> query = new TreeSet<String>(NaturalOrder.naturalComparator);
-        final TreeSet<String> exclude = new TreeSet<String>(NaturalOrder.naturalComparator);
-        final TreeSet<String> fullquery = new TreeSet<String>(NaturalOrder.naturalComparator);
         final String[] a = querystring.split(" ");
         for (int i = 0; i < a.length; i++) {
         	if (a[i].startsWith("-")) {
