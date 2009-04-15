@@ -358,7 +358,7 @@ public class CrawlQueues {
             return false;
         }
         
-        if (coreCrawlJobSize() > 0) {
+        if (coreCrawlJobSize() > 0 && sb.indexingStorageProcessor.queueSize() > 0) {
             if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: a local crawl is running, omitting processing");
             return false;
         }
