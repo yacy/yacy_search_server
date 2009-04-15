@@ -632,7 +632,7 @@ public final class plasmaParser {
             
             // testing if parsing is supported for this resource
             if (!plasmaParser.supportedContent(location,mimeType)) {
-                final String errorMsg = "No parser available to parse mimetype '" + mimeType + "'";
+                final String errorMsg = "No parser available to parse mimetype '" + mimeType + "' (1)";
                 theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
                 throw new ParserException(errorMsg,location, "wrong mime type or wrong extension");
             }
@@ -654,7 +654,7 @@ public final class plasmaParser {
             } else if (HTMLParsableMimeTypesContains(mimeType)) {
                 doc = parseHtml(location, mimeType, documentCharset, sourceStream);
             } else {
-                final String errorMsg = "No parser available to parse mimetype '" + mimeType + "'";
+                final String errorMsg = "No parser available to parse mimetype '" + mimeType + "' (2)";
                 theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
                 throw new ParserException(errorMsg,location, "wrong mime type or wrong extension");                
             }

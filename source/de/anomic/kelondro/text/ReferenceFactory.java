@@ -30,6 +30,8 @@ import de.anomic.kelondro.index.Row;
 
 public interface ReferenceFactory<ReferenceType extends Reference> {
 
-    public ReferenceType produce(Row.Entry e, boolean fast);
+    public ReferenceType produceSlow(Row.Entry e);
+    
+    public ReferenceType produceFast(ReferenceType e);
     
 }

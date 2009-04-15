@@ -47,26 +47,26 @@ import de.anomic.kelondro.util.ByteBuffer;
  * This class extends the RowSet with methods for the handling of
  * special ReferenceRow Row entry objects.
  */
-public class ReferenceContainer<RT extends Reference> extends RowSet {
+public class ReferenceContainer<ReferenceType extends Reference> extends RowSet {
 
     private String termHash;
-    private ReferenceFactory<RT> factory;
+    private ReferenceFactory<ReferenceType> factory;
     
-    public ReferenceContainer(final ReferenceFactory<RT> factory, final String termHash, final RowSet collection) {
+    public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final String termHash, final RowSet collection) {
         super(collection);
         this.factory = factory;
         this.termHash = termHash;
     }
     
-    public ReferenceContainer(final ReferenceFactory<RT> factory, final String termHash, final Row rowdef, final int objectCount) {
+    public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final String termHash, final Row rowdef, final int objectCount) {
         super(rowdef, objectCount);
         this.termHash = termHash;
         this.factory = factory;
         this.lastTimeWrote = 0;
     }
     
-    public ReferenceContainer<RT> topLevelClone() {
-        final ReferenceContainer<RT> newContainer = new ReferenceContainer<RT>(this.factory, this.termHash, this.rowdef, this.size());
+    public ReferenceContainer<ReferenceType> topLevelClone() {
+        final ReferenceContainer<ReferenceType> newContainer = new ReferenceContainer<ReferenceType>(this.factory, this.termHash, this.rowdef, this.size());
         newContainer.addAllUnique(this);
         return newContainer;
     }
@@ -93,8 +93,8 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
         this.addUnique(entry.toKelondroEntry());
     }
     
-    public ReferenceContainer<RT> merge(final ReferenceContainer<RT> c) {
-        return new ReferenceContainer<RT>(this.factory, this.termHash, super.merge(c));
+    public ReferenceContainer<ReferenceType> merge(final ReferenceContainer<ReferenceType> c) {
+        return new ReferenceContainer<ReferenceType>(this.factory, this.termHash, super.merge(c));
     }
     
     public Reference put(final Reference entry) {
@@ -119,13 +119,13 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
         return true;
     }
 
-    public int putAllRecent(final ReferenceContainer<RT> c) {
+    public int putAllRecent(final ReferenceContainer<ReferenceType> c) {
         // adds all entries in c and checks every entry for double-occurrence
         // returns the number of new elements
         if (c == null) return 0;
         int x = 0;
         synchronized (c) {
-            final Iterator<RT> i = c.entries();
+            final Iterator<ReferenceType> i = c.entries();
             while (i.hasNext()) {
                 try {
                     if (putRecent(i.next())) x++;
@@ -138,10 +138,10 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
         return x;
     }
     
-    public RT get(final String urlHash) {
+    public ReferenceType get(final String urlHash) {
         final Row.Entry entry = this.get(urlHash.getBytes());
         if (entry == null) return null;
-        return this.factory.produce(entry, false);
+        return this.factory.produceSlow(entry);
     }
 
     /**
@@ -149,10 +149,10 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
      * if the url hash was found, return the entry, but delete the entry from the container
      * if the entry was not found, return null.
      */
-    public RT remove(final String urlHash) {
+    public ReferenceType remove(final String urlHash) {
         final Row.Entry entry = remove(urlHash.getBytes());
         if (entry == null) return null;
-        return this.factory.produce(entry, false);
+        return this.factory.produceSlow(entry);
     }
 
     public int removeEntries(final Set<String> urlHashes) {
@@ -162,12 +162,12 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
         return count;
     }
 
-    public Iterator<RT> entries() {
+    public Iterator<ReferenceType> entries() {
         // returns an iterator of indexRWIEntry objects
         return new entryIterator();
     }
 
-    public class entryIterator implements Iterator<RT> {
+    public class entryIterator implements Iterator<ReferenceType> {
 
         Iterator<Row.Entry> rowEntryIterator;
         
@@ -179,10 +179,10 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
             return rowEntryIterator.hasNext();
         }
 
-        public RT next() {
+        public ReferenceType next() {
             final Row.Entry rentry = rowEntryIterator.next();
             if (rentry == null) return null;
-            return factory.produce(rentry, false);
+            return factory.produceSlow(rentry);
         }
 
         public void remove() {
@@ -216,10 +216,10 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
         containerMergeMethod = meth;
     }
 
-    public static <RT extends Reference> ReferenceContainer<RT> joinExcludeContainers(
-            final ReferenceFactory<RT> factory,
-            final Collection<ReferenceContainer<RT>> includeContainers,
-            final Collection<ReferenceContainer<RT>> excludeContainers,
+    public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> joinExcludeContainers(
+            final ReferenceFactory<ReferenceType> factory,
+            final Collection<ReferenceContainer<ReferenceType>> includeContainers,
+            final Collection<ReferenceContainer<ReferenceType>> excludeContainers,
             final int maxDistance) {
         // join a search result and return the joincount (number of pages after join)
 
@@ -227,22 +227,22 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
         if (includeContainers == null) return ReferenceContainer.emptyContainer(factory, null, 0);
 
         // join the result
-        final ReferenceContainer<RT> rcLocal = ReferenceContainer.joinContainers(factory, includeContainers, maxDistance);
+        final ReferenceContainer<ReferenceType> rcLocal = ReferenceContainer.joinContainers(factory, includeContainers, maxDistance);
         if (rcLocal == null) return ReferenceContainer.emptyContainer(factory, null, 0);
-        excludeContainers(rcLocal, excludeContainers);
+        excludeContainers(factory, rcLocal, excludeContainers);
         
         return rcLocal;
     }
     
-    public static <RT extends Reference> ReferenceContainer<RT> joinContainers(
-            final ReferenceFactory<RT> factory,
-            final Collection<ReferenceContainer<RT>> containers,
+    public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> joinContainers(
+            final ReferenceFactory<ReferenceType> factory,
+            final Collection<ReferenceContainer<ReferenceType>> containers,
             final int maxDistance) {
         
         // order entities by their size
-        final TreeMap<Long, ReferenceContainer<RT>> map = new TreeMap<Long, ReferenceContainer<RT>>();
-        ReferenceContainer<RT> singleContainer;
-        final Iterator<ReferenceContainer<RT>> i = containers.iterator();
+        final TreeMap<Long, ReferenceContainer<ReferenceType>> map = new TreeMap<Long, ReferenceContainer<ReferenceType>>();
+        ReferenceContainer<ReferenceType> singleContainer;
+        final Iterator<ReferenceContainer<ReferenceType>> i = containers.iterator();
         int count = 0;
         while (i.hasNext()) {
             // get next entity:
@@ -262,7 +262,7 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
         // the map now holds the search results in order of number of hits per word
         // we now must pairwise build up a conjunction of these sets
         Long k = map.firstKey(); // the smallest, which means, the one with the least entries
-        ReferenceContainer<RT> searchA, searchB, searchResult = map.remove(k);
+        ReferenceContainer<ReferenceType> searchA, searchB, searchResult = map.remove(k);
         while ((map.size() > 0) && (searchResult.size() > 0)) {
             // take the first element of map which is a result and combine it with result
             k = map.firstKey(); // the next smallest...
@@ -279,14 +279,17 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
         return searchResult;
     }
     
-    public static <RT extends Reference> ReferenceContainer<RT> excludeContainers(ReferenceContainer<RT> pivot, final Collection<ReferenceContainer<RT>> containers) {
+    public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> excludeContainers(
+                            final ReferenceFactory<ReferenceType> factory,
+                            ReferenceContainer<ReferenceType> pivot,
+                            final Collection<ReferenceContainer<ReferenceType>> containers) {
         
         // check if there is any result
         if ((containers == null) || (containers.size() == 0)) return pivot; // no result, nothing found
         
-        final Iterator<ReferenceContainer<RT>> i = containers.iterator();
+        final Iterator<ReferenceContainer<ReferenceType>> i = containers.iterator();
         while (i.hasNext()) {
-        	pivot = excludeDestructive(pivot, i.next());
+        	pivot = excludeDestructive(factory, pivot, i.next());
         	if ((pivot == null) || (pivot.size() == 0)) return null;
         }
         
@@ -300,10 +303,10 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
         return l;
     }
     
-    public static <RT extends Reference> ReferenceContainer<RT> joinConstructive(
-            final ReferenceFactory<RT> factory,
-            final ReferenceContainer<RT> i1,
-            final ReferenceContainer<RT> i2,
+    public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> joinConstructive(
+            final ReferenceFactory<ReferenceType> factory,
+            final ReferenceContainer<ReferenceType> i1,
+            final ReferenceContainer<ReferenceType> i2,
             final int maxDistance) {
         if ((i1 == null) || (i2 == null)) return null;
         if ((i1.size() == 0) || (i2.size() == 0)) return null;
@@ -324,51 +327,52 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
         return joinConstructiveByEnumeration(factory, i1, i2, maxDistance);
     }
     
-    private static <RT extends Reference> ReferenceContainer<RT> joinConstructiveByTest(
-            final ReferenceFactory<RT> factory,
-            final ReferenceContainer<RT> small,
-            final ReferenceContainer<RT> large,
+    private static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> joinConstructiveByTest(
+            final ReferenceFactory<ReferenceType> factory,
+            final ReferenceContainer<ReferenceType> small,
+            final ReferenceContainer<ReferenceType> large,
             final int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY TEST, maxdistance = " + maxDistance);
         assert small.rowdef.equals(large.rowdef) : "small = " + small.rowdef.toString() + "; large = " + large.rowdef.toString();
         final int keylength = small.rowdef.width(0);
         assert (keylength == large.rowdef.width(0));
-        final ReferenceContainer<RT> conj = new ReferenceContainer<RT>(factory, null, small.rowdef, 0); // start with empty search result
-        final Iterator<RT> se = small.entries();
-        RT ie0;
-        RT ie1;
+        final ReferenceContainer<ReferenceType> conj = new ReferenceContainer<ReferenceType>(factory, null, small.rowdef, 0); // start with empty search result
+        final Iterator<ReferenceType> se = small.entries();
+        ReferenceType ie1;
+        ReferenceType ie2;
         while (se.hasNext()) {
-            ie0 = se.next();
-            ie1 = large.get(ie0.metadataHash());
-            if ((ie0 != null) && (ie1 != null)) {
-                assert (ie0.metadataHash().length() == keylength) : "ie0.urlHash() = " + ie0.metadataHash();
-                assert (ie1.metadataHash().length() == keylength) : "ie1.urlHash() = " + ie1.metadataHash();
+            ie1 = se.next();
+            ie2 = large.get(ie1.metadataHash());
+            if ((ie1 != null) && (ie2 != null)) {
+                assert (ie1.metadataHash().length() == keylength) : "ie0.urlHash() = " + ie1.metadataHash();
+                assert (ie2.metadataHash().length() == keylength) : "ie1.urlHash() = " + ie2.metadataHash();
                 // this is a hit. Calculate word distance:
                 
-                ie0.join(ie1);
-                if (ie0.distance() <= maxDistance) conj.add(ie0);
+                ie1 = factory.produceFast(ie2);
+                ie1.join(ie2);
+                if (ie1.distance() <= maxDistance) conj.add(ie1);
             }
         }
         return conj;
     }
     
-    private static <RT extends Reference> ReferenceContainer<RT> joinConstructiveByEnumeration(
-            final ReferenceFactory<RT> factory,
-            final ReferenceContainer<RT> i1,
-            final ReferenceContainer<RT> i2,
+    private static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> joinConstructiveByEnumeration(
+            final ReferenceFactory<ReferenceType> factory,
+            final ReferenceContainer<ReferenceType> i1,
+            final ReferenceContainer<ReferenceType> i2,
             final int maxDistance) {
         System.out.println("DEBUG: JOIN METHOD BY ENUMERATION, maxdistance = " + maxDistance);
         assert i1.rowdef.equals(i2.rowdef) : "i1 = " + i1.rowdef.toString() + "; i2 = " + i2.rowdef.toString();
         final int keylength = i1.rowdef.width(0);
         assert (keylength == i2.rowdef.width(0));
-        final ReferenceContainer<RT> conj = new ReferenceContainer<RT>(factory, null, i1.rowdef, 0); // start with empty search result
+        final ReferenceContainer<ReferenceType> conj = new ReferenceContainer<ReferenceType>(factory, null, i1.rowdef, 0); // start with empty search result
         if (!((i1.rowdef.getOrdering().signature().equals(i2.rowdef.getOrdering().signature())))) return conj; // ordering must be equal
-        final Iterator<RT> e1 = i1.entries();
-        final Iterator<RT> e2 = i2.entries();
+        final Iterator<ReferenceType> e1 = i1.entries();
+        final Iterator<ReferenceType> e2 = i2.entries();
         int c;
         if ((e1.hasNext()) && (e2.hasNext())) {
-            RT ie1;
-            RT ie2;
+            ReferenceType ie1;
+            ReferenceType ie2;
             ie1 = e1.next();
             ie2 = e2.next();
 
@@ -383,6 +387,7 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
                     if (e2.hasNext()) ie2 = e2.next(); else break;
                 } else {
                     // we have found the same urls in different searches!
+                    ie1 = factory.produceFast(ie1);
                     ie1.join(ie2);
                     if (ie1.distance() <= maxDistance) conj.add(ie1);
                     if (e1.hasNext()) ie1 = e1.next(); else break;
@@ -393,9 +398,10 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
         return conj;
     }
     
-    public static <RT extends Reference> ReferenceContainer<RT> excludeDestructive(
-            final ReferenceContainer<RT> pivot,
-            final ReferenceContainer<RT> excl) {
+    public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> excludeDestructive(
+            final ReferenceFactory<ReferenceType> factory,
+            final ReferenceContainer<ReferenceType> pivot,
+            final ReferenceContainer<ReferenceType> excl) {
         if (pivot == null) return null;
         if (excl == null) return pivot;
         if (pivot.size() == 0) return null;
@@ -411,17 +417,17 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
         if (stepsEnum > stepsTest) {
             return excludeDestructiveByTest(pivot, excl);
         }
-        return excludeDestructiveByEnumeration(pivot, excl);
+        return excludeDestructiveByEnumeration(factory, pivot, excl);
     }
     
-    private static <RT extends Reference> ReferenceContainer<RT> excludeDestructiveByTest(
-            final ReferenceContainer<RT> pivot,
-            final ReferenceContainer<RT> excl) {
+    private static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> excludeDestructiveByTest(
+            final ReferenceContainer<ReferenceType> pivot,
+            final ReferenceContainer<ReferenceType> excl) {
         assert pivot.rowdef.equals(excl.rowdef) : "small = " + pivot.rowdef.toString() + "; large = " + excl.rowdef.toString();
         final int keylength = pivot.rowdef.width(0);
         assert (keylength == excl.rowdef.width(0));
         final boolean iterate_pivot = pivot.size() < excl.size();
-        final Iterator<RT> se = (iterate_pivot) ? pivot.entries() : excl.entries();
+        final Iterator<ReferenceType> se = (iterate_pivot) ? pivot.entries() : excl.entries();
         Reference ie0, ie1;
             while (se.hasNext()) {
                 ie0 = se.next();
@@ -435,17 +441,20 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
         return pivot;
     }
     
-    private static <RT extends Reference> ReferenceContainer<RT> excludeDestructiveByEnumeration(final ReferenceContainer<RT> pivot, final ReferenceContainer<RT> excl) {
+    private static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> excludeDestructiveByEnumeration(
+                            final ReferenceFactory<ReferenceType> factory,
+                            final ReferenceContainer<ReferenceType> pivot,
+                            final ReferenceContainer<ReferenceType> excl) {
         assert pivot.rowdef.equals(excl.rowdef) : "i1 = " + pivot.rowdef.toString() + "; i2 = " + excl.rowdef.toString();
         final int keylength = pivot.rowdef.width(0);
         assert (keylength == excl.rowdef.width(0));
         if (!((pivot.rowdef.getOrdering().signature().equals(excl.rowdef.getOrdering().signature())))) return pivot; // ordering must be equal
-        final Iterator<RT> e1 = pivot.entries();
-        final Iterator<RT> e2 = excl.entries();
+        final Iterator<ReferenceType> e1 = pivot.entries();
+        final Iterator<ReferenceType> e2 = excl.entries();
         int c;
         if ((e1.hasNext()) && (e2.hasNext())) {
-            RT ie1;
-            RT ie2;
+            ReferenceType ie1;
+            ReferenceType ie2;
             ie1 = e1.next();
             ie2 = e2.next();
 
@@ -460,6 +469,7 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
                     if (e2.hasNext()) ie2 = e2.next(); else break;
                 } else {
                     // we have found the same urls in different searches!
+                    ie1 = factory.produceFast(ie1);
                     ie1.join(ie2);
                     e1.remove();
                     if (e1.hasNext()) ie1 = e1.next(); else break;
@@ -479,12 +489,12 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
     }
     
 
-    public static final <RT extends Reference> ByteBuffer compressIndex(final ReferenceContainer<RT> inputContainer, final ReferenceContainer<RT> excludeContainer, final long maxtime) {
+    public static final <ReferenceType extends Reference> ByteBuffer compressIndex(final ReferenceContainer<ReferenceType> inputContainer, final ReferenceContainer<ReferenceType> excludeContainer, final long maxtime) {
         // collect references according to domains
         final long timeout = (maxtime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxtime;
         final TreeMap<String, String> doms = new TreeMap<String, String>();
         synchronized (inputContainer) {
-            final Iterator<RT> i = inputContainer.entries();
+            final Iterator<ReferenceType> i = inputContainer.entries();
             Reference iEntry;
             String dom, paths;
             while (i.hasNext()) {
@@ -519,7 +529,7 @@ public class ReferenceContainer<RT extends Reference> extends RowSet {
         return bb;
     }
 
-    public static final <RT extends Reference> void decompressIndex(final TreeMap<String, String> target, ByteBuffer ci, final String peerhash) {
+    public static final <ReferenceType extends Reference> void decompressIndex(final TreeMap<String, String> target, ByteBuffer ci, final String peerhash) {
         // target is a mapping from url-hashes to a string of peer-hashes
         if ((ci.byteAt(0) == '{') && (ci.byteAt(ci.length() - 1) == '}')) {
             //System.out.println("DEBUG-DECOMPRESS: input is " + ci.toString());

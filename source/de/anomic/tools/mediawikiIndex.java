@@ -40,6 +40,7 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -53,6 +54,10 @@ import java.util.concurrent.TimeoutException;
 import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
 import de.anomic.kelondro.util.ByteBuffer;
+import de.anomic.plasma.plasmaParser;
+import de.anomic.plasma.plasmaParserDocument;
+import de.anomic.plasma.parser.ParserException;
+import de.anomic.yacy.yacyURL;
 
 /*
  * this class provides data structures to read a mediawiki dump file in xml format
@@ -67,6 +72,18 @@ public class mediawikiIndex {
     private static final String pageend = "</page>";
     private static final byte[] pagestartb = pagestart.getBytes();
     private static final byte[] pageendb = pageend.getBytes();
+    
+    private wikiParser wparser;
+    private plasmaParser hparser;
+    
+    public mediawikiIndex(String baseURL) throws MalformedURLException {
+        yacyURL u = new yacyURL(baseURL, null);
+        wparser = new wikiCode(u.getHost());
+        hparser = new plasmaParser();
+        // must be called before usage:
+        //plasmaParser.initHTMLParsableMimeTypes("text/html");
+        //plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER, "text/html");
+    }
     
     public static void checkIndex(File wikimediaxml) {
         File idx = idxFromWikimediaXML(wikimediaxml);
@@ -136,20 +153,20 @@ public class mediawikiIndex {
 
     private static class indexProducer implements Callable<Integer> {
 
-        private BlockingQueue<wikirecord> entries;
+        private BlockingQueue<wikisourcerecord> entries;
         PrintWriter out;
-        private static wikirecord poison = new wikirecord("", 0, 0);
+        private static wikisourcerecord poison = new wikisourcerecord("", 0, 0);
         int count;
         
         public indexProducer(int bufferCount, File indexFile) throws IOException {
-            entries = new ArrayBlockingQueue<wikirecord>(bufferCount);
+            entries = new ArrayBlockingQueue<wikisourcerecord>(bufferCount);
             out = new PrintWriter(new BufferedWriter(new FileWriter(indexFile)));
             count = 0;
             out.println("<index>");
             
         }
         
-        public void consume(wikirecord b) {
+        public void consume(wikisourcerecord b) {
             try {
                 entries.put(b);
             } catch (InterruptedException e) {
@@ -158,7 +175,7 @@ public class mediawikiIndex {
         }
         
         public Integer call() {
-            wikirecord r;
+            wikisourcerecord r;
             try {
                 while(true) {
                     r = entries.take();
@@ -205,7 +222,7 @@ public class mediawikiIndex {
         }
         
         public Integer call() {
-            wikirecord r;
+            wikisourcerecord r;
             wikiraw c;
             try {
                 while(true) {
@@ -215,7 +232,7 @@ public class mediawikiIndex {
                         break;
                     }
                     try {
-                        r = new wikirecord(c.b, c.start, c.end);
+                        r = new wikisourcerecord(c.b, c.start, c.end);
                         producer.consume(r);
                         System.out.println("consumer / record start: " + r.start + ", title : " + r.title);
                         count++;
@@ -240,15 +257,15 @@ public class mediawikiIndex {
         }
     }
     
-    public static class wikirecord {
+    public static class wikisourcerecord {
         public long start, end;
         public String title;
-        public wikirecord(String title, long start, long end) {
+        public wikisourcerecord(String title, long start, long end) {
             this.title = title;
             this.start = start;
             this.end = end;
         }
-        public wikirecord(byte[] chunk, long start, long end) {
+        public wikisourcerecord(byte[] chunk, long start, long end) {
             String s;
             try {
                 s = new String(chunk, "UTF-8");
@@ -269,6 +286,28 @@ public class mediawikiIndex {
             
             this.start = start;
             this.end = end;
+        }
+    }
+    public wikiparserrecord newRecord(String title, StringBuffer sb) {
+        return new wikiparserrecord(title, sb);
+    }
+    
+    public class wikiparserrecord {
+        public String title;
+        StringBuffer source;
+        String html;
+        yacyURL url;
+        plasmaParserDocument document;
+        public wikiparserrecord(String title, StringBuffer sb) {
+            this.title = title;
+            this.source = sb;
+        }
+        public void genHTML() throws MalformedURLException {
+            html = wparser.transform(source.toString());
+            url = new yacyURL("http://de.wikipedia.org/wiki/" + title, null);
+        }
+        public void genDocument() throws InterruptedException, ParserException {
+            document = hparser.parseSource(url, "text/html", "utf-8", html.getBytes());
         }
     }
     
@@ -336,7 +375,7 @@ public class mediawikiIndex {
         return b;
     }
     
-    public static wikirecord find(String title, File f) throws IOException {
+    public static wikisourcerecord find(String title, File f) throws IOException {
         PositionAwareReader in = new PositionAwareReader(f);
         long start;
         String m = "<title>" + title + "</title>";
@@ -363,7 +402,7 @@ public class mediawikiIndex {
                 if (q < 0) return null;
                 int length = Integer.parseInt(s.substring(p, q));
                 //System.out.println("start = " + start + ", length = " + length);
-                return new wikirecord(title, start, start + length);
+                return new wikisourcerecord(title, start, start + length);
             }
         }
         return null;
@@ -394,8 +433,10 @@ public class mediawikiIndex {
                 StringBuffer sb = new StringBuffer();
                 boolean page = false, text = false;
                 String title = null;
-                wikiParser wparser = new wikiCode("de.wikipedia.org");
-                //plasmaParser hparser = new plasmaParser();
+                plasmaParser.initHTMLParsableMimeTypes("text/html");
+                plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER, "text/html");
+                mediawikiIndex mi = new mediawikiIndex("http://de.wikipedia.org/wiki/");
+                wikiparserrecord record;
                 while ((t = r.readLine()) != null) {
                     if (t.indexOf(pagestart) >= 0) {
                         page = true;
@@ -408,8 +449,15 @@ public class mediawikiIndex {
                     if (t.indexOf(textend) >= 0) {
                         text = false;
                         System.out.println("Title: " + title);
-                        System.out.println(wparser.transform(sb.toString()));
-                        System.out.println();
+                        record = mi.newRecord(title, sb);
+                        record.genHTML();
+                        try {
+                            record.genDocument();
+                            System.out.println(new String(record.document.getTextBytes()));
+                            System.out.println();
+                        } catch (InterruptedException e) {
+                        } catch (ParserException e) {
+                        }
                         sb.setLength(0);
                         continue;
                     }
@@ -454,7 +502,7 @@ public class mediawikiIndex {
         
         if (s[0].equals("-find")) {
             try {
-                wikirecord w = find(s[1], new File(s[2] + ".idx.xml"));
+                wikisourcerecord w = find(s[1], new File(s[2] + ".idx.xml"));
                 if (w == null) {
                     System.out.println("not found");
                 } else {

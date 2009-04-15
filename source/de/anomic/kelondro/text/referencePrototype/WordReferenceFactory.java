@@ -31,11 +31,13 @@ import de.anomic.kelondro.text.ReferenceFactory;
 
 public class WordReferenceFactory implements ReferenceFactory<WordReference> {
 
-    public WordReference produce(Entry e, boolean fast) {
-        if (fast)
-            return new WordReferenceVars(new WordReferenceRow(e));
-        else
-            return new WordReferenceRow(e);
+    public WordReference produceSlow(Entry e) {
+        return new WordReferenceRow(e);
+    }
+    
+    public WordReference produceFast(WordReference r) {
+        if (r instanceof WordReferenceVars) return r;
+        return new WordReferenceVars(r);
     }
 
 }
