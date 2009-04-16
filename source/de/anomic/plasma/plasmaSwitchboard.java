@@ -1740,7 +1740,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         final yacySeed initiatorPeer = queueEntry.initiatorPeer();
         if ((processCase == plasmaSwitchboardConstants.PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
             log.logInfo("Sending crawl receipt for '" + queueEntry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
-            if (clusterhashes != null) initiatorPeer.setAlternativeAddress(clusterhashes.get(initiatorPeer.hash));
+            if (clusterhashes != null) initiatorPeer.setAlternativeAddress(clusterhashes.get(initiatorPeer.hash.getBytes()));
             // start a thread for receipt sending to avoid a blocking here
             new Thread(new receiptSending(initiatorPeer, newEntry), "sending receipt to " + initiatorPeer.hash).start();
         }
