@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- YaCy surrogate file generic element notion -->
+<!-- 
+  This is a generic surrogate file which is an alternative
+  intermediate document description file for index harvesting.
+  
+  For details please see surrogate_dublin_core.xml
+  
+  This file format has a generic content description, but YaCy
+  is currently not flexible enough to allow generic index content
+  descriptions. This file only shows a possible framework
+  for future developments.
+-->
+
+<surrogate>
+
+  <document>
+    <element name="title">
+      <value><![CDATA[Alan Smithee]]></value>
+    </element>
+    <element name="url">
+      <value>http://de.wikipedia.org/wiki/Alan_Smithee</value>
+    </element>
+    <element name="docdatetime">
+      <value>2009-04-14T00:00:00Z</value>
+    </element>
+    <element name="language">
+      <value>de</value>
+    </element>
+    <element name="body">
+      <value><![CDATA[Der als Filmregisseur oft genannte '''Alan Smithee''' ist ein Anagramm]]></value>
+    </element>
+    <element name="categories">
+      <value><![CDATA[Fiktive Person;Pseudonym]]></value>
+    </element>
+   </document>
+   
+</surrogate>
