@@ -29,6 +29,7 @@ package de.anomic.htmlFilter;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
@@ -503,13 +504,21 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
         // load page
         final httpRequestHeader reqHeader = new httpRequestHeader();
         reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-        final byte[] page = httpClient.wget(location.toString(), reqHeader, 10000);
-        if (page == null) throw new IOException("no response from url " + location.toString());
+        return parseResource(location, reqHeader);
+    }
+    
+    public static htmlFilterContentScraper parseResource(final yacyURL location, final httpRequestHeader reqHeader) throws IOException {
+        final Reader pageReader = httpClient.wgetReader(location.toString(), reqHeader, 10000);
+        if (pageReader == null) throw new IOException("no response from url " + location.toString());
         
         // scrape content
         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);
         final Writer writer = new htmlFilterWriter(null, null, scraper, null, false);
-        FileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName("UTF-8"));
+        try {
+            FileUtils.copy(pageReader, writer);
+        } finally {
+            pageReader.close();
+        }
         
         return scraper;
     }

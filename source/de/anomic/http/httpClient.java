@@ -29,6 +29,9 @@ package de.anomic.http;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -762,6 +765,28 @@ public class httpClient {
             if (response != null) {
                 response.closeStream();
             }
+        }
+        return null;
+    }
+    public static Reader wgetReader(final String uri) {
+        return wgetReader(uri, new httpRequestHeader(), 10000, null);
+    }
+    public static Reader wgetReader(final String uri, final httpRequestHeader header, final int timeout) {
+        return wgetReader(uri, header, timeout, null);
+    }
+    public static Reader wgetReader(final String uri, final httpRequestHeader header, final int timeout, final String vhost) {
+        assert uri != null : "precondition violated: uri != null";
+        addHostHeader(header, vhost);
+        final httpClient client = new httpClient(timeout, header);
+
+        // do the request
+        httpResponse response = null;
+        try {
+            response = client.GET(uri);
+            Charset charset = response.getResponseHeader().getCharSet();
+            return new InputStreamReader(response.getDataAsStream(), charset);
+        } catch (final IOException e) {
+            Log.logWarning("HTTPC", "wgetReader(" + uri + ") failed: " + e.getMessage());
         }
         return null;
     }

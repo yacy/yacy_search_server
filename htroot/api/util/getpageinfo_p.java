@@ -1,15 +1,11 @@
 
 import java.io.IOException;
-import java.io.Writer;
 import java.net.MalformedURLException;
 import java.util.Set;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.htmlFilter.htmlFilterWriter;
-import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -48,15 +44,7 @@ public class getpageinfo_p {
                     final yacyURL u = new yacyURL(url, null);
                     final httpRequestHeader reqHeader = new httpRequestHeader();
                     reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent); // do not set the crawler user agent, because this page was loaded by manual entering of the url
-                    final byte[] r = httpClient.wget(u.toString(), reqHeader, 5000);
-                    if (r == null) return prop;
-                    final String contentString=new String(r);
-                    
-                    final htmlFilterContentScraper scraper = new htmlFilterContentScraper(u);
-                    //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-                    final Writer writer = new htmlFilterWriter(null,null,scraper,null,false);
-                    FileUtils.copy(contentString,writer);
-                    writer.close();
+                    final htmlFilterContentScraper scraper = htmlFilterContentScraper.parseResource(u, reqHeader);
                     
                     // put the document title 
                     prop.putXML("title", scraper.getTitle());
