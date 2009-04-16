@@ -32,8 +32,11 @@ import de.anomic.tools.Formatter;
  */
 public class MemoryControl {
 
+	
     private static final Runtime runtime = Runtime.getRuntime();
-    private static final Log log = new Log("MEMORY");
+    public static long maxMemory = runtime.maxMemory(); // this value does never change during runtime
+    
+	private static final Log log = new Log("MEMORY");
     
     private static final long[] gcs = new long[5];
     private static int gcs_pos = 0;
@@ -99,17 +102,8 @@ public class MemoryControl {
      * @return bytes
      */
     public static final long available() {
-        return max() - total() + free();
+        return maxMemory - total() + free();
     }
-    
-    /**
-     * maximum memory which the vm can use
-	 * @return bytes
-	 */
-	public static final long max()
-	{
-		return runtime.maxMemory();
-	}
 
 	/**
 	 * currently allocated memory in the Java virtual machine; may vary over time
@@ -140,13 +134,14 @@ public class MemoryControl {
      * @return whether enough memory could be freed (or is free) or not
      */
     public static boolean request(final long size, final boolean force) {
+    	final long avg = getAverageGCFree();
+    	if (avg >= size) return true;
         long avail = available();
         if (avail >= size) return true;
         if (log.isFine()) {
             final String t = new Throwable("Stack trace").getStackTrace()[1].toString();
             log.logFine(t + " requested " + (size >> 10) + " KB, got " + (avail >> 10) + " KB");
         } 
-        final long avg = getAverageGCFree();
         if (force || avg == 0 || avg + avail >= size) {
             // this is only called if we expect that an allocation of <size> bytes would cause the jvm to call the GC anyway
             
@@ -183,7 +178,7 @@ public class MemoryControl {
         // try this with a jvm 1.4.2 and with a jvm 1.5 and compare results
         final int mb = 1024 * 1024;
         System.out.println("vm: " + System.getProperty("java.vm.version"));
-        System.out.println("computed max = " + (max() / mb) + " mb");
+        System.out.println("computed max = " + (maxMemory / mb) + " mb");
         final int alloc = 10000;
         final byte[][] x = new byte[100000][];
         for (int i = 0; i < 100000; i++) {
@@ -191,7 +186,7 @@ public class MemoryControl {
             if (i % 100 == 0) System.out.println("used = " + (i * alloc / mb) +
                     ", total = " + (total() / mb) +
                     ", free = " + (free() / mb) +
-                    ", max = " + (max() / mb) +
+                    ", max = " + (maxMemory / mb) +
                     ", avail = " + (available() / mb));
         }
 

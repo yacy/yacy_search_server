@@ -71,13 +71,12 @@ public class PerformanceMemory_p {
         final long memoryTotalAfterInitBGC = Long.parseLong(env.getConfig("memoryTotalAfterInitBGC", "0"));
         final long memoryTotalAfterInitAGC = Long.parseLong(env.getConfig("memoryTotalAfterInitAGC", "0"));
         final long memoryTotalAfterStartup = Long.parseLong(env.getConfig("memoryTotalAfterStartup", "0"));
-        final long memoryMax = MemoryControl.max();
         
-        prop.putNum("memoryMax", memoryMax / MB);
-        prop.putNum("memoryAvailAfterStartup", (memoryMax - memoryTotalAfterStartup + memoryFreeAfterStartup) / MB);
-        prop.putNum("memoryAvailAfterInitBGC", (memoryMax - memoryTotalAfterInitBGC + memoryFreeAfterInitBGC) / MB);
-        prop.putNum("memoryAvailAfterInitAGC", (memoryMax - memoryTotalAfterInitAGC + memoryFreeAfterInitAGC) / MB);
-        prop.putNum("memoryAvailNow", (memoryMax - memoryTotalNow + memoryFreeNow) / MB);
+        prop.putNum("memoryMax", MemoryControl.maxMemory / MB);
+        prop.putNum("memoryAvailAfterStartup", (MemoryControl.maxMemory - memoryTotalAfterStartup + memoryFreeAfterStartup) / MB);
+        prop.putNum("memoryAvailAfterInitBGC", (MemoryControl.maxMemory - memoryTotalAfterInitBGC + memoryFreeAfterInitBGC) / MB);
+        prop.putNum("memoryAvailAfterInitAGC", (MemoryControl.maxMemory - memoryTotalAfterInitAGC + memoryFreeAfterInitAGC) / MB);
+        prop.putNum("memoryAvailNow", (MemoryControl.maxMemory - memoryTotalNow + memoryFreeNow) / MB);
         prop.putNum("memoryTotalAfterStartup", memoryTotalAfterStartup / KB);
         prop.putNum("memoryTotalAfterInitBGC", memoryTotalAfterInitBGC / KB);
         prop.putNum("memoryTotalAfterInitAGC", memoryTotalAfterInitAGC / KB);

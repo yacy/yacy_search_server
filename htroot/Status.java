@@ -273,7 +273,7 @@ public class Status {
         // memory usage and system attributes
         prop.put("freeMemory", Formatter.bytesToString(MemoryControl.free()));
         prop.put("totalMemory", Formatter.bytesToString(MemoryControl.total()));
-        prop.put("maxMemory", Formatter.bytesToString(MemoryControl.max()));
+        prop.put("maxMemory", Formatter.bytesToString(MemoryControl.maxMemory));
         prop.put("processors", serverProcessor.availableCPU);
 
         // proxy traffic

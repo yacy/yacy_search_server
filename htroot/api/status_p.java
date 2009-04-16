@@ -30,7 +30,7 @@ public class status_p {
 		// memory usage and system attributes
         prop.putNum("freeMemory", MemoryControl.free());
         prop.putNum("totalMemory", MemoryControl.total());
-        prop.putNum("maxMemory", MemoryControl.max());
+        prop.putNum("maxMemory", MemoryControl.maxMemory);
         prop.putNum("processors", serverProcessor.availableCPU);
 
 		// proxy traffic

@@ -672,7 +672,7 @@ public final class yacy {
             // db used to hold all neede urls
             final MetadataRepository minimizedUrlDB = new MetadataRepository(new File(new File(indexRoot2, networkName), "TEXT"));
             
-            final int cacheMem = (int)(MemoryControl.max() - MemoryControl.total());
+            final int cacheMem = (int)(MemoryControl.maxMemory - MemoryControl.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
             final plasmaWordIndex wordIndex = new plasmaWordIndex(networkName, log, indexPrimaryRoot, indexSecondaryRoot, 10000, false, 1, 0, false);

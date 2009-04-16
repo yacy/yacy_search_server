@@ -377,12 +377,12 @@ public class dbtest {
                     System.out.println("Loop " + loop + ": Write = " + write + ", Remove = " + remove);
                     System.out.println(" bevore GC: " +
                               "free = " + MemoryControl.free() +
-                            ", max = " + MemoryControl.max() +
+                            ", max = " + MemoryControl.maxMemory +
                             ", total = " + MemoryControl.total());
                     System.gc();
                     System.out.println(" after  GC: " +
                             "free = " + MemoryControl.free() +
-                          ", max = " + MemoryControl.max() +
+                          ", max = " + MemoryControl.maxMemory +
                           ", total = " + MemoryControl.total());
                   loop++;
                 }
