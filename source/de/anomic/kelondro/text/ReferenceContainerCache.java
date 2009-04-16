@@ -50,7 +50,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
 
     private final Row payloadrow;
     private final ByteOrder termOrder;
-    private SortedMap<String, ReferenceContainer<ReferenceType>> cache;
+    private SortedMap<byte[], ReferenceContainer<ReferenceType>> cache;
     
     /**
      * opens an existing heap file in undefined mode
@@ -84,7 +84,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * another dump reading afterwards is not possible
      */
     public void initWriteMode() {
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer<ReferenceType>>(new ByteOrder.StringOrder(this.termOrder)));
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<byte[], ReferenceContainer<ReferenceType>>(this.termOrder));
     }
     
     /**
@@ -95,7 +95,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public void initWriteModeFromBLOB(final File blobFile) throws IOException {
         Log.logInfo("indexContainerRAMHeap", "restoring rwi blob dump '" + blobFile.getName() + "'");
         final long start = System.currentTimeMillis();
-        this.cache = Collections.synchronizedSortedMap(new TreeMap<String, ReferenceContainer<ReferenceType>>(new ByteOrder.StringOrder(this.termOrder)));
+        this.cache = Collections.synchronizedSortedMap(new TreeMap<byte[], ReferenceContainer<ReferenceType>>(this.termOrder));
         int urlCount = 0;
         synchronized (cache) {
             for (final ReferenceContainer<ReferenceType> container : new blobFileEntries<ReferenceType>(blobFile, factory, this.payloadrow)) {
@@ -125,25 +125,25 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
         final long startTime = System.currentTimeMillis();
         long wordcount = 0, urlcount = 0;
-        String wordHash = null, lwh;
+        byte[] wordHash = null, lwh;
         ReferenceContainer<ReferenceType> container;
         
         // write wCache
         synchronized (cache) {
-            for (final Map.Entry<String, ReferenceContainer<ReferenceType>> entry: cache.entrySet()) {
+            for (final Map.Entry<byte[], ReferenceContainer<ReferenceType>> entry: cache.entrySet()) {
                 // get entries
                 lwh = wordHash;
                 wordHash = entry.getKey();
                 container = entry.getValue();
                 
                 // check consistency: entries must be ordered
-                assert (lwh == null || this.ordering().compare(wordHash.getBytes(), lwh.getBytes()) > 0);
+                assert (lwh == null || this.ordering().compare(wordHash, lwh) > 0);
                 
                 // put entries on heap
-                if (container != null && wordHash.length() == payloadrow.primaryKeyLength) {
+                if (container != null && wordHash.length == payloadrow.primaryKeyLength) {
                     //System.out.println("Dump: " + wordHash);
                     try {
-                        dump.add(wordHash.getBytes(), container.exportCollection());
+                        dump.add(wordHash, container.exportCollection());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -170,13 +170,13 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     /**
      * static iterator of BLOBHeap files: is used to import heap dumps into a write-enabled index heap
      */
-    public static class blobFileEntries <RT extends Reference> implements CloneableIterator<ReferenceContainer<RT>>, Iterable<ReferenceContainer<RT>> {
+    public static class blobFileEntries <ReferenceType extends Reference> implements CloneableIterator<ReferenceContainer<ReferenceType>>, Iterable<ReferenceContainer<ReferenceType>> {
         HeapReader.entries blobs;
         Row payloadrow;
         File blobFile;
-        ReferenceFactory<RT> factory;
+        ReferenceFactory<ReferenceType> factory;
         
-        public blobFileEntries(final File blobFile, ReferenceFactory<RT> factory, final Row payloadrow) throws IOException {
+        public blobFileEntries(final File blobFile, ReferenceFactory<ReferenceType> factory, final Row payloadrow) throws IOException {
             this.blobs = new HeapReader.entries(blobFile, payloadrow.primaryKeyLength);
             this.payloadrow = payloadrow;
             this.blobFile = blobFile;
@@ -194,17 +194,17 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
          * return an index container
          * because they may get very large, it is wise to deallocate some memory before calling next()
          */
-        public ReferenceContainer<RT> next() {
+        public ReferenceContainer<ReferenceType> next() {
             Map.Entry<String, byte[]> entry = blobs.next();
             byte[] payload = entry.getValue();
-            return new ReferenceContainer<RT>(factory, entry.getKey(), RowSet.importRowSet(payload, payloadrow));
+            return new ReferenceContainer<ReferenceType>(factory, entry.getKey().getBytes(), RowSet.importRowSet(payload, payloadrow));
         }
         
         public void remove() {
             throw new UnsupportedOperationException("heap dumps are read-only");
         }
 
-        public Iterator<ReferenceContainer<RT>> iterator() {
+        public Iterator<ReferenceContainer<ReferenceType>> iterator() {
             return this;
         }
         
@@ -217,11 +217,11 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             this.close();
         }
 
-        public CloneableIterator<ReferenceContainer<RT>> clone(Object modifier) {
+        public CloneableIterator<ReferenceContainer<ReferenceType>> clone(Object modifier) {
             if (blobs != null) this.blobs.close();
             blobs = null;
             try {
-                return new blobFileEntries<RT>(this.blobFile, factory, this.payloadrow);
+                return new blobFileEntries<ReferenceType>(this.blobFile, factory, this.payloadrow);
             } catch (IOException e) {
                 e.printStackTrace();
                 return null;
@@ -238,10 +238,10 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return max;
     }
     
-    public synchronized String maxReferencesHash() {
+    public synchronized byte[] maxReferencesHash() {
         // iterate to find the max score
         int max = 0;
-        String hash = null;
+        byte[] hash = null;
         for (ReferenceContainer<ReferenceType> container : cache.values()) {
             if (container.size() > max) {
                 max = container.size();
@@ -251,9 +251,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return hash;
     }
     
-    public synchronized ArrayList<String> maxReferencesHash(int bound) {
+    public synchronized ArrayList<byte[]> maxReferencesHash(int bound) {
         // iterate to find the max score
-        ArrayList<String> hashes = new ArrayList<String>();
+        ArrayList<byte[]> hashes = new ArrayList<byte[]>();
         for (ReferenceContainer<ReferenceType> container : cache.values()) {
             if (container.size() >= bound) {
                 hashes.add(container.getTermHash());
@@ -280,8 +280,8 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return c;
     }
     
-    public synchronized ArrayList<String> overAge(long maxage) {
-        ArrayList<String> hashes = new ArrayList<String>();
+    public synchronized ArrayList<byte[]> overAge(long maxage) {
+        ArrayList<byte[]> hashes = new ArrayList<byte[]>();
         long limit = System.currentTimeMillis() - maxage;
         for (ReferenceContainer<ReferenceType> container : cache.values()) {
             if (container.lastWrote() < limit) hashes.add(container.getTermHash());
@@ -294,7 +294,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * in the cache, so that manipulations of the iterated objects do not change
      * objects in the cache.
      */
-    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final String startWordHash, final boolean rot) {
+    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final byte[] startWordHash, final boolean rot) {
         return new heapCacheIterator(startWordHash, rot);
     }
 
@@ -318,14 +318,14 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         private final boolean rot;
         private Iterator<ReferenceContainer<ReferenceType>> iterator;
         
-        public heapCacheIterator(final String startWordHash, final boolean rot) {
+        public heapCacheIterator(final byte[] startWordHash, final boolean rot) {
             this.rot = rot;
             this.iterator = (startWordHash == null) ? cache.values().iterator() : cache.tailMap(startWordHash).values().iterator();
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
         
         public heapCacheIterator clone(final Object secondWordHash) {
-            return new heapCacheIterator((String) secondWordHash, rot);
+            return new heapCacheIterator((byte[]) secondWordHash, rot);
         }
         
         public boolean hasNext() {
@@ -361,7 +361,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * @param key
      * @return true, if the key is used in the heap; false othervise
      */
-    public boolean has(final String key) {
+    public boolean has(final byte[] key) {
         return this.cache.containsKey(key);
     }
     
@@ -370,7 +370,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * @param key
      * @return the indexContainer if one exist, null otherwise
      */
-    public ReferenceContainer<ReferenceType> get(final String key, Set<String> urlselection) {
+    public ReferenceContainer<ReferenceType> get(final byte[] key, Set<String> urlselection) {
         if (urlselection == null) return this.cache.get(key);
         ReferenceContainer<ReferenceType> c = this.cache.get(key);
         if (c == null) return null;
@@ -390,7 +390,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * @param key
      * @return
      */
-    public int count(final String key) {
+    public int count(final byte[] key) {
         ReferenceContainer<ReferenceType> c = this.cache.get(key);
         if (c == null) return 0;
         return c.size();
@@ -401,38 +401,38 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * @param wordHash
      * @return the indexContainer if the cache contained the container, null othervise
      */
-    public synchronized ReferenceContainer<ReferenceType> delete(final String wordHash) {
+    public synchronized ReferenceContainer<ReferenceType> delete(final byte[] termHash) {
         // returns the index that had been deleted
         assert this.cache != null;
-        return cache.remove(wordHash);
+        return cache.remove(termHash);
     }
 
-    public synchronized boolean remove(final String wordHash, final String urlHash) {
+    public synchronized boolean remove(final byte[] termHash, final String urlHash) {
         assert this.cache != null;
-        final ReferenceContainer<ReferenceType> c = cache.get(wordHash);
+        final ReferenceContainer<ReferenceType> c = cache.get(termHash);
         if ((c != null) && (c.remove(urlHash) != null)) {
             // removal successful
             if (c.size() == 0) {
-                delete(wordHash);
+                delete(termHash);
             } else {
-                cache.put(wordHash, c);
+                cache.put(termHash, c);
             }
             return true;
         }
         return false;
     }
     
-    public synchronized int remove(final String wordHash, final Set<String> urlHashes) {
+    public synchronized int remove(final byte[] termHash, final Set<String> urlHashes) {
         assert this.cache != null;
         if (urlHashes.size() == 0) return 0;
-        final ReferenceContainer<ReferenceType> c = cache.get(wordHash);
+        final ReferenceContainer<ReferenceType> c = cache.get(termHash);
         int count;
         if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
             // removal successful
             if (c.size() == 0) {
-                delete(wordHash);
+                delete(termHash);
             } else {
-                cache.put(wordHash, c);
+                cache.put(termHash, c);
             }
             return count;
         }
@@ -444,8 +444,8 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         if (this.cache == null || container == null || container.size() == 0) return;
         
         // put new words into cache
-        final String wordHash = container.getTermHash();
-        ReferenceContainer<ReferenceType> entries = cache.get(wordHash); // null pointer exception? wordhash != null! must be cache==null
+        final byte[] termHash = container.getTermHash();
+        ReferenceContainer<ReferenceType> entries = cache.get(termHash); // null pointer exception? wordhash != null! must be cache==null
         int added = 0;
         if (entries == null) {
             entries = container.topLevelClone();
@@ -454,18 +454,18 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             added = entries.putAllRecent(container);
         }
         if (added > 0) {
-            cache.put(wordHash, entries);
+            cache.put(termHash, entries);
         }
         entries = null;
         return;
     }
 
-    public synchronized void add(final String wordHash, final ReferenceType newEntry) {
+    public synchronized void add(final byte[] termHash, final ReferenceType newEntry) {
         assert this.cache != null;
-        ReferenceContainer<ReferenceType> container = cache.get(wordHash);
-        if (container == null) container = new ReferenceContainer<ReferenceType>(factory, wordHash, this.payloadrow, 1);
+        ReferenceContainer<ReferenceType> container = cache.get(termHash);
+        if (container == null) container = new ReferenceContainer<ReferenceType>(factory, termHash, this.payloadrow, 1);
         container.put(newEntry);
-        cache.put(wordHash, container);
+        cache.put(termHash, container);
     }
 
     public int minMem() {

@@ -152,6 +152,9 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     public String putHTML(final String key, final String value) {
         return put(key, htmlFilterCharacterCoding.unicode2html(value, true));
     }
+    public String putHTML(final String key, final byte[] value) {
+        return putHTML(key, new String(value));
+    }
 
     /**
      * Like {@link #putHTML(String, String)} but takes an extra argument defining, if the returned

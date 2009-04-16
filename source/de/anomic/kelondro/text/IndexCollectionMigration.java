@@ -145,7 +145,7 @@ public final class IndexCollectionMigration<ReferenceType extends Reference> ext
         }
     }
     
-    public void add(final String wordHash, final ReferenceType entry) throws IOException {
+    public void add(final byte[] wordHash, final ReferenceType entry) throws IOException {
         if (this.collections != null) {
             ReferenceContainer<ReferenceType> e = this.collections.delete(wordHash);
             if (e != null) {
@@ -159,7 +159,7 @@ public final class IndexCollectionMigration<ReferenceType extends Reference> ext
         }
     }
 
-    public boolean has(final String wordHash) {
+    public boolean has(final byte[] wordHash) {
         if (this.collections != null) {
             ReferenceContainer<ReferenceType> e = this.collections.delete(wordHash);
             if (e != null) {
@@ -177,7 +177,7 @@ public final class IndexCollectionMigration<ReferenceType extends Reference> ext
         }
     }
     
-    public int count(String wordHash) {
+    public int count(byte[] wordHash) {
         if (this.collections != null) {
             ReferenceContainer<ReferenceType> e = this.collections.delete(wordHash);
             if (e != null) {
@@ -195,7 +195,7 @@ public final class IndexCollectionMigration<ReferenceType extends Reference> ext
         }
     }
     
-    public ReferenceContainer<ReferenceType> get(final String wordHash, final Set<String> urlselection) throws IOException {
+    public ReferenceContainer<ReferenceType> get(final byte[] wordHash, final Set<String> urlselection) throws IOException {
         if (wordHash == null) {
             // wrong input
             return null;
@@ -209,7 +209,7 @@ public final class IndexCollectionMigration<ReferenceType extends Reference> ext
         return this.cell.get(wordHash, urlselection);
     }
 
-    public ReferenceContainer<ReferenceType> delete(final String wordHash) throws IOException {
+    public ReferenceContainer<ReferenceType> delete(final byte[] wordHash) throws IOException {
         ReferenceContainer<ReferenceType> cc = cell.delete(wordHash);
         if (cc == null) {
             if (collections == null) return null;
@@ -222,7 +222,7 @@ public final class IndexCollectionMigration<ReferenceType extends Reference> ext
         }
     }
     
-    public boolean remove(final String wordHash, final String urlHash) throws IOException {
+    public boolean remove(final byte[] wordHash, final String urlHash) throws IOException {
         if (this.collections != null) {
             ReferenceContainer<ReferenceType> e = this.collections.delete(wordHash);
             if (e != null) cell.add(e);
@@ -230,7 +230,7 @@ public final class IndexCollectionMigration<ReferenceType extends Reference> ext
         return cell.remove(wordHash, urlHash);
     }
     
-    public int remove(final String wordHash, final Set<String> urlHashes) throws IOException {
+    public int remove(final byte[] wordHash, final Set<String> urlHashes) throws IOException {
         if (this.collections != null) {
             ReferenceContainer<ReferenceType> e = this.collections.delete(wordHash);
             if (e != null) cell.add(e);
@@ -238,15 +238,15 @@ public final class IndexCollectionMigration<ReferenceType extends Reference> ext
         return cell.remove(wordHash, urlHashes);
     }
     
-    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final String startHash, final boolean rot, final boolean ram) throws IOException {
+    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final byte[] startHash, final boolean rot, final boolean ram) throws IOException {
         final CloneableIterator<ReferenceContainer<ReferenceType>> i = wordContainers(startHash, ram);
         if (rot) {
-            return new RotateIterator<ReferenceContainer<ReferenceType>>(i, new String(Base64Order.zero(startHash.length())), cell.size() + ((ram) ? 0 : collections.size()));
+            return new RotateIterator<ReferenceContainer<ReferenceType>>(i, Base64Order.zero(startHash.length), cell.size() + ((ram) ? 0 : collections.size()));
         }
         return i;
     }
     
-    private synchronized CloneableIterator<ReferenceContainer<ReferenceType>> wordContainers(final String startWordHash, final boolean ram) throws IOException {
+    private synchronized CloneableIterator<ReferenceContainer<ReferenceType>> wordContainers(final byte[] startWordHash, final boolean ram) throws IOException {
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, cell.ordering().clone());
         ReferenceContainer<ReferenceType> emptyContainer = ReferenceContainer.emptyContainer(factory, startWordHash, 0);
         containerOrder.rotate(emptyContainer);
@@ -325,7 +325,7 @@ public final class IndexCollectionMigration<ReferenceType extends Reference> ext
         return cell.ordering();
     }
     
-    public CloneableIterator<ReferenceContainer<ReferenceType>> references(String startWordHash, boolean rot) {
+    public CloneableIterator<ReferenceContainer<ReferenceType>> references(byte[] startWordHash, boolean rot) {
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.cell.ordering().clone());
         if (this.collections == null) return this.cell.references(startWordHash, rot);
         //else

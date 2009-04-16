@@ -22,8 +22,8 @@
 
 package de.anomic.plasma;
 
+import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterAbstractScraper;
@@ -57,7 +57,7 @@ public final class plasmaSearchQuery {
     public static final Bitfield catchall_constraint = new Bitfield(4, "______");
     
     public String queryString;
-    public TreeSet<String> fullqueryHashes, queryHashes, excludeHashes;
+    public TreeSet<byte[]> fullqueryHashes, queryHashes, excludeHashes;
     public int linesPerPage, offset;
     public String prefer;
     public int contentdom;
@@ -86,9 +86,9 @@ public final class plasmaSearchQuery {
     		                 final Bitfield constraint) {
     	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(queryString.getBytes()))) {
     		this.queryString = null;
-            this.queryHashes = new TreeSet<String>();
-            this.excludeHashes = new TreeSet<String>();
-            this.queryHashes.add(queryString);
+            this.queryHashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
+            this.excludeHashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
+            this.queryHashes.add(queryString.getBytes());
     	} else {
     		this.queryString = queryString;
     		final TreeSet<String>[] cq = cleanQuery(queryString);
@@ -118,9 +118,9 @@ public final class plasmaSearchQuery {
     }
     
     public plasmaSearchQuery(
-		final String queryString, final TreeSet<String> queryHashes,
-		final TreeSet<String> excludeHashes, 
-        final TreeSet<String> fullqueryHashes,
+		final String queryString, final TreeSet<byte[]> queryHashes,
+		final TreeSet<byte[]> excludeHashes, 
+        final TreeSet<byte[]> fullqueryHashes,
         final plasmaSearchRankingProfile ranking,
         final int maxDistance, final String prefer, final int contentdom,
         final String language,
@@ -198,44 +198,53 @@ public final class plasmaSearchQuery {
         return this.domType == SEARCHDOM_LOCAL;
     }
     
-    public static TreeSet<String> hashes2Set(final String query) {
-        if (query == null) return new TreeSet<String>(Base64Order.enhancedComparator);
-        final TreeSet<String> keyhashes = new TreeSet<String>(Base64Order.enhancedComparator);
+    public static TreeSet<byte[]> hashes2Set(final String query) {
+        if (query == null) return new TreeSet<byte[]>(Base64Order.enhancedCoder);
+        final TreeSet<byte[]> keyhashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
+        for (int i = 0; i < (query.length() / yacySeedDB.commonHashLength); i++) {
+            keyhashes.add(query.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength).getBytes());
+        }
+        return keyhashes;
+    }
+    
+    public static HashSet<String> hashes2StringSet(final String query) {
+        if (query == null) return new HashSet<String>();
+        final HashSet<String> keyhashes = new HashSet<String>();
         for (int i = 0; i < (query.length() / yacySeedDB.commonHashLength); i++) {
             keyhashes.add(query.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength));
         }
         return keyhashes;
     }
     
-    public static String hashSet2hashString(final Set<String> hashes) {
-        final Iterator<String> i = hashes.iterator();
+    public static String hashSet2hashString(final TreeSet<byte[]> hashes) {
+        final Iterator<byte[]> i = hashes.iterator();
         final StringBuilder sb = new StringBuilder(hashes.size() * yacySeedDB.commonHashLength);
-        while (i.hasNext()) sb.append(i.next());
+        while (i.hasNext()) sb.append(new String(i.next()));
         return new String(sb);
     }
 
-    public static String anonymizedQueryHashes(final Set<String> hashes) {
+    public static String anonymizedQueryHashes(final TreeSet<byte[]> hashes) {
         // create a more anonymized representation of a query hashes for logging
-        final Iterator<String> i = hashes.iterator();
+        final Iterator<byte[]> i = hashes.iterator();
         final StringBuilder sb = new StringBuilder(hashes.size() * (yacySeedDB.commonHashLength + 2) + 2);
         sb.append("[");
-        String hash;
+        byte[] hash;
         if (i.hasNext()) {
             hash = i.next();
-            sb.append(hash.substring(0, 3)).append(".........");
+            sb.append(new String(hash).substring(0, 3)).append(".........");
         }
         while (i.hasNext()) {
             hash = i.next();
-            sb.append(", ").append(hash.substring(0, 3)).append(".........");
+            sb.append(", ").append(new String(hash).substring(0, 3)).append(".........");
         }
         sb.append("]");
         return new String(sb);
     }
     
-    public static final boolean matches(final String text, final TreeSet<String> keyhashes) {
+    public static final boolean matches(final String text, final TreeSet<byte[]> keyhashes) {
     	// returns true if any of the word hashes in keyhashes appear in the String text
     	// to do this, all words in the string must be recognized and transcoded to word hashes
-    	final TreeSet<String> wordhashes = Word.words2hashes(Condenser.getWords(text).keySet());
+    	final TreeSet<byte[]> wordhashes = Word.words2hashes(Condenser.getWords(text).keySet());
     	return SetTools.anymatch(wordhashes, keyhashes);
     }
     
@@ -291,10 +300,10 @@ public final class plasmaSearchQuery {
         return cleanQuery(this.queryString);
     }
     
-    public void filterOut(final Set<String> blueList) {
+    public void filterOut(final TreeSet<String> blueList) {
         // filter out words that appear in this set
     	// this is applied to the queryHashes
-    	final TreeSet<String> blues = Word.words2hashes(blueList);
+    	final TreeSet<byte[]> blues = Word.words2hashes(blueList);
     	SetTools.excludeDestructive(queryHashes, blues);
     }
 

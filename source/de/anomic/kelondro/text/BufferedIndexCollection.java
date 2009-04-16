@@ -111,23 +111,23 @@ public final class BufferedIndexCollection<ReferenceType extends Reference> exte
         cacheFlushControl();
     }
     
-    public void add(final String wordHash, final ReferenceType entry) throws IOException {
+    public void add(final byte[] wordHash, final ReferenceType entry) throws IOException {
         // add the entry
         buffer.add(wordHash, entry);
         cacheFlushControl();
     }
 
-    public boolean has(final String wordHash) {
+    public boolean has(final byte[] wordHash) {
         if (buffer.has(wordHash)) return true;
         if (collections.has(wordHash)) return true;
         return false;
     }
     
-    public int count(String key) {
+    public int count(byte[] key) {
         return buffer.count(key) + collections.count(key);
     }
     
-    public ReferenceContainer<ReferenceType> get(final String wordHash, final Set<String> urlselection) {
+    public ReferenceContainer<ReferenceType> get(final byte[] wordHash, final Set<String> urlselection) {
         if (wordHash == null) {
             // wrong input
             return null;
@@ -172,7 +172,7 @@ public final class BufferedIndexCollection<ReferenceType extends Reference> exte
         return container;
     }
 
-    public ReferenceContainer<ReferenceType> delete(final String wordHash) {
+    public ReferenceContainer<ReferenceType> delete(final byte[] wordHash) {
         final ReferenceContainer<ReferenceType> c = new ReferenceContainer<ReferenceType>(
                 factory,
                 wordHash,
@@ -183,29 +183,29 @@ public final class BufferedIndexCollection<ReferenceType extends Reference> exte
         return c;
     }
     
-    public boolean remove(final String wordHash, final String urlHash) {
+    public boolean remove(final byte[] wordHash, final String urlHash) {
         boolean removed = false;
         removed = removed | (buffer.remove(wordHash, urlHash));
         removed = removed | (collections.remove(wordHash, urlHash));
         return removed;
     }
     
-    public int remove(final String wordHash, final Set<String> urlHashes) {
+    public int remove(final byte[] wordHash, final Set<String> urlHashes) {
         int removed = 0;
         removed += buffer.remove(wordHash, urlHashes);
         removed += collections.remove(wordHash, urlHashes);
         return removed;
     }
     
-    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final String startHash, final boolean rot, final boolean ram) throws IOException {
+    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final byte[] startHash, final boolean rot, final boolean ram) throws IOException {
         final CloneableIterator<ReferenceContainer<ReferenceType>> i = wordContainers(startHash, ram);
         if (rot) {
-            return new RotateIterator<ReferenceContainer<ReferenceType>>(i, new String(Base64Order.zero(startHash.length())), buffer.size() + ((ram) ? 0 : collections.size()));
+            return new RotateIterator<ReferenceContainer<ReferenceType>>(i, Base64Order.zero(startHash.length), buffer.size() + ((ram) ? 0 : collections.size()));
         }
         return i;
     }
     
-    private synchronized CloneableIterator<ReferenceContainer<ReferenceType>> wordContainers(final String startWordHash, final boolean ram) throws IOException {
+    private synchronized CloneableIterator<ReferenceContainer<ReferenceType>> wordContainers(final byte[] startWordHash, final boolean ram) throws IOException {
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, buffer.ordering().clone());
         ReferenceContainer<ReferenceType> emptyContainer = ReferenceContainer.emptyContainer(factory, startWordHash, 0);
         containerOrder.rotate(emptyContainer);
@@ -308,7 +308,7 @@ public final class BufferedIndexCollection<ReferenceType extends Reference> exte
     }
     
     private ReferenceContainer<ReferenceType> flushContainer(final IndexBuffer<ReferenceType> ram) {
-        String wordHash;
+        byte[] wordHash;
         ReferenceContainer<ReferenceType> c;
         wordHash = ram.maxScoreWordHash();
         c = ram.get(wordHash, null);
@@ -331,7 +331,7 @@ public final class BufferedIndexCollection<ReferenceType extends Reference> exte
         return collections.ordering();
     }
     
-    public CloneableIterator<ReferenceContainer<ReferenceType>> references(String startWordHash, boolean rot) {
+    public CloneableIterator<ReferenceContainer<ReferenceType>> references(byte[] startWordHash, boolean rot) {
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.buffer.ordering().clone());
         return new MergeIterator<ReferenceContainer<ReferenceType>>(
                 this.buffer.references(startWordHash, false),

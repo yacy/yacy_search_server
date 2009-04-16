@@ -35,10 +35,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -622,25 +622,25 @@ public final class yacy {
 
         // load words
         Log.logInfo("GEN-WORDSTAT", "loading words...");
-        final HashMap<String, String> words = loadWordMap(new File(homePath, "yacy.words"));
+        final TreeMap<byte[], String> words = loadWordMap(new File(homePath, "yacy.words"));
 
         // find all hashes
         Log.logInfo("GEN-WORDSTAT", "searching all word-hash databases...");
         final File dbRoot = new File(homePath, config.getProperty("dbPath"));
         final enumerateFiles ef = new enumerateFiles(new File(dbRoot, "WORDS"), true, false, true, true);
         File f;
-        String h;
-        final ScoreCluster<String> hs = new ScoreCluster<String>();
+        byte[] h;
+        final ScoreCluster<byte[]> hs = new ScoreCluster<byte[]>();
         while (ef.hasMoreElements()) {
             f = ef.nextElement();
-            h = f.getName().substring(0, yacySeedDB.commonHashLength);
+            h = f.getName().substring(0, yacySeedDB.commonHashLength).getBytes();
             hs.addScore(h, (int) f.length());
         }
 
         // list the hashes in reverse order
         Log.logInfo("GEN-WORDSTAT", "listing words in reverse size order...");
         String w;
-        final Iterator<String> i = hs.scores(false);
+        final Iterator<byte[]> i = hs.scores(false);
         while (i.hasNext()) {
             h = i.next();
             w = words.get(h);
@@ -676,7 +676,7 @@ public final class yacy {
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
             final plasmaWordIndex wordIndex = new plasmaWordIndex(networkName, log, indexPrimaryRoot, indexSecondaryRoot, 10000, false, 1, 0, false);
-            final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = wordIndex.index().references("AAAAAAAAAAAA", false, false);
+            final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = wordIndex.index().references("AAAAAAAAAAAA".getBytes(), false, false);
             
             long urlCounter = 0, wordCounter = 0;
             long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = 0;
@@ -705,7 +705,7 @@ public final class yacy {
                     }
                     
                     if (wordCounter%500 == 0) {
-                        wordChunkEndHash = wordIdxContainer.getTermHash();
+                        wordChunkEndHash = new String(wordIdxContainer.getTermHash());
                         wordChunkEnd = System.currentTimeMillis();
                         final long duration = wordChunkEnd - wordChunkStart;
                         log.logInfo(wordCounter + " words scanned " +
@@ -747,15 +747,15 @@ public final class yacy {
     }
 
     /**
-    * Reads all words from the given file and creates a hashmap, where key is
+    * Reads all words from the given file and creates a treemap, where key is
     * the plasma word hash and value is the word itself.
     *
     * @param wordlist File where the words are stored.
     * @return HashMap with the hash-word - relation.
     */
-    private static HashMap<String, String> loadWordMap(final File wordlist) {
+    private static TreeMap<byte[], String> loadWordMap(final File wordlist) {
         // returns a hash-word - Relation
-        final HashMap<String, String> wordmap = new HashMap<String, String>();
+        final TreeMap<byte[], String> wordmap = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
         try {
             String word;
             final BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(wordlist)));
@@ -867,7 +867,7 @@ public final class yacy {
             Iterator<ReferenceContainer<WordReference>> indexContainerIterator = null;
             if (resource.equals("all")) {
                 WordIndex = new plasmaWordIndex("freeworld", log, indexPrimaryRoot, indexSecondaryRoot, 10000, false, 1, 0, false);
-                indexContainerIterator = WordIndex.index().references(wordChunkStartHash, false, false);
+                indexContainerIterator = WordIndex.index().references(wordChunkStartHash.getBytes(), false, false);
             }
             int counter = 0;
             ReferenceContainer<WordReference> container = null;
@@ -881,7 +881,7 @@ public final class yacy {
                     while (indexContainerIterator.hasNext()) {
                         counter++;
                         container = indexContainerIterator.next();
-                        bos.write((container.getTermHash()).getBytes());
+                        bos.write(container.getTermHash());
                         bos.write(serverCore.CRLF);
                         if (counter % 500 == 0) {
                             log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getTermHash());
@@ -898,7 +898,7 @@ public final class yacy {
                     while (indexContainerIterator.hasNext()) {
                         counter++;
                         container = indexContainerIterator.next();
-                        bos.write((container.getTermHash()).getBytes());
+                        bos.write(container.getTermHash());
                         bos.write(serverCore.CRLF);
                         if (counter % 500 == 0) {
                             log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getTermHash());

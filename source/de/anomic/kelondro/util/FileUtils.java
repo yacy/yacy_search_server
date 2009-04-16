@@ -434,7 +434,7 @@ public final class FileUtils {
         return set;
     }
 
-    public static void saveSet(final File file, final String format, final Set<String> set, final String sep) throws IOException {
+    public static void saveSet(final File file, final String format, final Set<byte[]> set, final String sep) throws IOException {
         final File tf = new File(file.toString() + ".tmp" + (System.currentTimeMillis() % 1000));
         OutputStream os = null;
         if ((format == null) || (format.equals("plain"))) {
@@ -449,8 +449,8 @@ public final class FileUtils {
             os = zos;
         }
         if(os != null) {
-            for (final Iterator<String> i = set.iterator(); i.hasNext(); ) {
-                os.write((i.next()).getBytes("UTF-8"));
+            for (final Iterator<byte[]> i = set.iterator(); i.hasNext(); ) {
+                os.write(i.next());
                 if (sep != null) os.write(sep.getBytes("UTF-8"));
             }
             os.close();

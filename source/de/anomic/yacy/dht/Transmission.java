@@ -69,7 +69,7 @@ public class Transmission {
     }
 
     public Chunk newChunk(
-                String primaryTarget,
+                byte[] primaryTarget,
                 final ArrayList<yacySeed> targets,
                 final Row payloadrow) {
         return new Chunk(primaryTarget, targets, payloadrow);
@@ -86,7 +86,7 @@ public class Transmission {
          * - a set of yacy seeds which will shrink as the containers are transmitted to them
          * - a counter that gives the number of sucessful and unsuccessful transmissions so far
          */
-        private String                          primaryTarget;
+        private byte[]                          primaryTarget;
         private ReferenceContainerCache<WordReference> containers;
         private HashMap<String, URLMetadataRow> references;
         private HashSet<String>                 badReferences;
@@ -102,7 +102,7 @@ public class Transmission {
          * @param payloadrow
          */
         public Chunk(
-                String primaryTarget,
+                byte[] primaryTarget,
                 final ArrayList<yacySeed> targets,
                 final Row payloadrow) {
             super();
@@ -154,7 +154,7 @@ public class Transmission {
             return this.containers.size();
         }
         
-        public String primaryTarget() {
+        public byte[] primaryTarget() {
             return this.primaryTarget;
         }
         
@@ -195,7 +195,7 @@ public class Transmission {
             	log.logInfo("Transfer of chunk to myself-target");
             	return true;
             }
-            log.logInfo("starting new index transmission request to " + this.primaryTarget);
+            log.logInfo("starting new index transmission request to " + new String(this.primaryTarget));
             long start = System.currentTimeMillis();
             final String error = yacyClient.transferIndex(target, this.containers, this.references, gzipBody4Transfer, timeout4Transfer);
             if (error == null) {
@@ -204,7 +204,7 @@ public class Transmission {
                 Iterator<ReferenceContainer<WordReference>> i = this.containers.iterator();
                 ReferenceContainer<WordReference> firstContainer = (i == null) ? null : i.next();
                 log.logInfo("Index transfer of " + this.containers.size() + 
-                                 " words [" + ((firstContainer == null) ? null : firstContainer.getTermHash()) + " .. " + this.primaryTarget + "]" + 
+                                 " words [" + ((firstContainer == null) ? null : firstContainer.getTermHash()) + " .. " + new String(this.primaryTarget) + "]" + 
                                  " and " + this.references.size() + " URLs" +
                                  " to peer " + target.getName() + ":" + target.hash + 
                                  " in " + (transferTime / 1000) + 

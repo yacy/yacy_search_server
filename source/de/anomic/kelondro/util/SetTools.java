@@ -421,6 +421,15 @@ public class SetTools {
         return list;
     }
     
+    public static String setToString(final TreeSet<byte[]> set, final char separator) {
+        final Iterator<byte[]> i = set.iterator();
+        final StringBuilder sb = new StringBuilder(set.size() * 7);
+        if (i.hasNext()) sb.append(new String(i.next()));
+        while (i.hasNext()) {
+            sb.append(separator).append(i.next());
+        }
+        return new String(sb);
+    }
     public static String setToString(final Set<String> set, final char separator) {
         final Iterator<String> i = set.iterator();
         final StringBuilder sb = new StringBuilder(set.size() * 7);

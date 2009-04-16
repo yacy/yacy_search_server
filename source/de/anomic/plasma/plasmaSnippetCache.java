@@ -30,7 +30,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -43,6 +42,7 @@ import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpResponseHeader;
+import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SetTools;
@@ -104,7 +104,7 @@ public class plasmaSnippetCache {
         private String line;
         private final String error;
         private final int errorCode;
-        Set<String> remaingHashes;
+        TreeSet<byte[]> remaingHashes;
         private final yacyURL favicon;
         
         /**
@@ -128,11 +128,11 @@ public class plasmaSnippetCache {
          */
 		private final static Pattern p01 = Pattern.compile("(.*?)(\\<b\\>.+?\\</b\\>)(.*)"); // marked words are in <b>-tags
         
-        public TextSnippet(final yacyURL url, final String line, final int errorCode, final Set<String> remaingHashes, final String errortext) {
+        public TextSnippet(final yacyURL url, final String line, final int errorCode, final TreeSet<byte[]> remaingHashes, final String errortext) {
         	this(url,line,errorCode,remaingHashes,errortext,null);
         }
         
-        public TextSnippet(final yacyURL url, final String line, final int errorCode, final Set<String> remaingHashes, final String errortext, final yacyURL favicon) {
+        public TextSnippet(final yacyURL url, final String line, final int errorCode, final TreeSet<byte[]> remaingHashes, final String errortext, final yacyURL favicon) {
             this.url = url;
             this.line = line;
             this.errorCode = errorCode;
@@ -161,15 +161,15 @@ public class plasmaSnippetCache {
         public int getErrorCode() {
             return errorCode;
         }
-        public Set<String> getRemainingHashes() {
+        public TreeSet<byte[]> getRemainingHashes() {
             return this.remaingHashes;
         }
-        public String getLineMarked(final Set<String> queryHashes) {
+        public String getLineMarked(final TreeSet<byte[]> queryHashes) {
             if (line == null) return "";
             if ((queryHashes == null) || (queryHashes.size() == 0)) return line.trim();
             if (line.endsWith(".")) line = line.substring(0, line.length() - 1);
-            final Iterator<String> i = queryHashes.iterator();
-            String h;
+            final Iterator<byte[]> i = queryHashes.iterator();
+            byte[] h;
             final String[] w = line.split(" ");
             while (i.hasNext()) {
                 h = i.next();
@@ -200,7 +200,7 @@ public class plasmaSnippetCache {
          * @return the marked word if hash matches, else the unmarked word
          * @see #getLineMarked(Set)
          */
-        private static String getWordMarked(String word, String h){
+        private static String getWordMarked(String word, byte[] h){
             //ignore punctuation marks (contrib [MN])
             //note to myself:
             //For details on regex see "Mastering regular expressions" by J.E.F. Friedl
@@ -297,13 +297,13 @@ public class plasmaSnippetCache {
         }
     }
     
-    public static boolean existsInCache(final yacyURL url, final Set<String> queryhashes) {
+    public static boolean existsInCache(final yacyURL url, final TreeSet<byte[]> queryhashes) {
         final String hashes = yacySearch.set2string(queryhashes);
         return retrieveFromCache(hashes, url.hash()) != null;
     }
     
     @SuppressWarnings("unchecked")
-    public static TextSnippet retrieveTextSnippet(final URLMetadataRow.Components comp, final Set<String> queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int timeout, final int maxDocLen, final boolean reindexing) {
+    public static TextSnippet retrieveTextSnippet(final URLMetadataRow.Components comp, final TreeSet<byte[]> queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int timeout, final int maxDocLen, final boolean reindexing) {
         // heise = "0OQUNU3JSs05"
         final yacyURL url = comp.url();
         if (queryhashes.size() == 0) {
@@ -406,7 +406,7 @@ public class plasmaSnippetCache {
         if (sentences == null) return new TextSnippet(url, null, ERROR_PARSER_NO_LINES, queryhashes, "parser returned no sentences",resFavicon);
         final Object[] tsr = computeTextSnippet(sentences, queryhashes, snippetMaxLength);
         final String textline = (tsr == null) ? null : (String) tsr[0];
-        final Set<String> remainingHashes = (tsr == null) ? queryhashes : (Set<String>) tsr[1];
+        final TreeSet<byte[]> remainingHashes = (tsr == null) ? queryhashes : (TreeSet<byte[]>) tsr[1];
         
         // compute snippet from media
         //String audioline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
@@ -567,12 +567,12 @@ public class plasmaSnippetCache {
     
     @SuppressWarnings("unchecked")
     private static Object[] /*{String - the snippet, Set - remaining hashes}*/
-            computeTextSnippet(final Iterator<StringBuilder> sentences, final Set<String> queryhashes, int maxLength) {
+            computeTextSnippet(final Iterator<StringBuilder> sentences, final TreeSet<byte[]> queryhashes, int maxLength) {
         try {
             if (sentences == null) return null;
             if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
-            Iterator<String> j;
-            HashMap<String, Integer> hs;
+            Iterator<byte[]> j;
+            TreeMap<byte[], Integer> hs;
             StringBuilder sentence;
             final TreeMap<Integer, StringBuilder> os = new TreeMap<Integer, StringBuilder>();
             int uniqCounter = 9999;
@@ -589,14 +589,14 @@ public class plasmaSnippetCache {
             }
             
             String result;
-            Set<String> remaininghashes;
+            TreeSet<byte[]> remaininghashes;
             while (os.size() > 0) {
                 sentence = os.remove(os.lastKey()); // sentence with the biggest score
                 Object[] tsr = computeTextSnippet(sentence.toString(), queryhashes, maxLength);
                 if (tsr == null) continue;
                 result = (String) tsr[0];
                 if ((result != null) && (result.length() > 0)) {
-                    remaininghashes = (Set<String>) tsr[1];
+                    remaininghashes = (TreeSet<byte[]>) tsr[1];
                     if (remaininghashes.size() == 0) {
                         // we have found the snippet
                         return new Object[]{result, remaininghashes};
@@ -626,18 +626,18 @@ public class plasmaSnippetCache {
     }
     
     private static Object[] /*{String - the snippet, Set - remaining hashes}*/
-            computeTextSnippet(String sentence, final Set<String> queryhashes, final int maxLength) {
+            computeTextSnippet(String sentence, final TreeSet<byte[]> queryhashes, final int maxLength) {
         try {
             if (sentence == null) return null;
             if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
-            String hash;
+            byte[] hash;
             
             // find all hashes that appear in the sentence
-            final HashMap<String, Integer> hs = hashSentence(sentence);
-            final Iterator<String> j = queryhashes.iterator();
+            final TreeMap<byte[], Integer> hs = hashSentence(sentence);
+            final Iterator<byte[]> j = queryhashes.iterator();
             Integer pos;
             int p, minpos = sentence.length(), maxpos = -1;
-            final HashSet<String> remainingHashes = new HashSet<String>();
+            final TreeSet<byte[]> remainingHashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
             while (j.hasNext()) {
                 hash = j.next();
                 pos = hs.get(hash);
@@ -694,7 +694,7 @@ public class plasmaSnippetCache {
         }
     }
     
-    public static ArrayList<MediaSnippet> retrieveMediaSnippets(final yacyURL url, final Set<String> queryhashes, final int mediatype, final boolean fetchOnline, final int timeout, final boolean reindexing) {
+    public static ArrayList<MediaSnippet> retrieveMediaSnippets(final yacyURL url, final TreeSet<byte[]> queryhashes, final int mediatype, final boolean fetchOnline, final int timeout, final boolean reindexing) {
         if (queryhashes.size() == 0) {
             Log.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();
@@ -711,7 +711,7 @@ public class plasmaSnippetCache {
         return a;
     }
     
-    public static ArrayList<MediaSnippet> computeMediaSnippets(final plasmaParserDocument document, final Set<String> queryhashes, final int mediatype) {
+    public static ArrayList<MediaSnippet> computeMediaSnippets(final plasmaParserDocument document, final TreeSet<byte[]> queryhashes, final int mediatype) {
         
         if (document == null) return new ArrayList<MediaSnippet>();
         Map<yacyURL, String> media = null;
@@ -724,7 +724,7 @@ public class plasmaSnippetCache {
         Map.Entry<yacyURL, String> entry;
         yacyURL url;
         String desc;
-        Set<String> s;
+        TreeSet<byte[]> s;
         final ArrayList<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             entry = i.next();
@@ -744,7 +744,7 @@ public class plasmaSnippetCache {
         return result;
     }
     
-    public static ArrayList<MediaSnippet> computeImageSnippets(final plasmaParserDocument document, final Set<String> queryhashes) {
+    public static ArrayList<MediaSnippet> computeImageSnippets(final plasmaParserDocument document, final TreeSet<byte[]> queryhashes) {
         
         final TreeSet<htmlFilterImageEntry> images = new TreeSet<htmlFilterImageEntry>();
         images.addAll(document.getImages().values()); // iterates images in descending size order!
@@ -754,7 +754,7 @@ public class plasmaSnippetCache {
         htmlFilterImageEntry ientry;
         yacyURL url;
         String desc;
-        Set<String> s;
+        TreeSet<byte[]> s;
         final ArrayList<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             ientry = i.next();
@@ -776,14 +776,14 @@ public class plasmaSnippetCache {
         return result;
     }
     
-    private static Set<String> removeAppearanceHashes(final String sentence, final Set<String> queryhashes) {
+    private static TreeSet<byte[]> removeAppearanceHashes(final String sentence, final TreeSet<byte[]> queryhashes) {
         // remove all hashes that appear in the sentence
         if (sentence == null) return queryhashes;
-        final HashMap<String, Integer> hs = hashSentence(sentence);
-        final Iterator<String> j = queryhashes.iterator();
-        String hash;
+        final TreeMap<byte[], Integer> hs = hashSentence(sentence);
+        final Iterator<byte[]> j = queryhashes.iterator();
+        byte[] hash;
         Integer pos;
-        final Set<String> remaininghashes = new HashSet<String>();
+        final TreeSet<byte[]> remaininghashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
         while (j.hasNext()) {
             hash = j.next();
             pos = hs.get(hash);
@@ -794,25 +794,25 @@ public class plasmaSnippetCache {
         return remaininghashes;
     }
     
-    private static HashMap<String, Integer> hashSentence(final String sentence) {
+    private static TreeMap<byte[], Integer> hashSentence(final String sentence) {
         // generates a word-wordPos mapping
-        final HashMap<String, Integer> map = new HashMap<String, Integer>();
+        final TreeMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
         final Enumeration<StringBuilder> words = Condenser.wordTokenizer(sentence, "UTF-8");
         int pos = 0;
         StringBuilder word;
-        String hash;
+        byte[] hash;
         while (words.hasMoreElements()) {
             word = words.nextElement();
             hash = Word.word2hash(new String(word));
-            if (!map.containsKey(hash)) map.put(hash, Integer.valueOf(pos)); // dont overwrite old values, that leads to too far word distances
+            if (!map.containsKey(hash)) map.put(hash, Integer.valueOf(pos)); // don't overwrite old values, that leads to too far word distances
             pos += word.length() + 1;
         }
         return map;
     }
     
-    private static boolean containsAllHashes(final String sentence, final Set<String> queryhashes) {
-        final HashMap<String, Integer> m = hashSentence(sentence);
-        final Iterator<String> i = queryhashes.iterator();
+    private static boolean containsAllHashes(final String sentence, final Set<byte[]> queryhashes) {
+        final TreeMap<byte[], Integer> m = hashSentence(sentence);
+        final Iterator<byte[]> i = queryhashes.iterator();
         while (i.hasNext()) {
             if (!(m.containsKey(i.next()))) return false;
         }

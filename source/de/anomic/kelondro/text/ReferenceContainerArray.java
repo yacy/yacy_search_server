@@ -107,7 +107,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * objects in the cache.
      * @throws IOException 
      */
-    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> wordContainerIterator(final String startWordHash, final boolean rot, final boolean ram) {
+    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> wordContainerIterator(final byte[] startWordHash, final boolean rot, final boolean ram) {
         try {
             return new heapCacheIterator(startWordHash, rot);
         } catch (IOException e) {
@@ -130,15 +130,15 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         private final boolean rot;
         private CloneableIterator<byte[]> iterator;
         
-        public heapCacheIterator(final String startWordHash, final boolean rot) throws IOException {
+        public heapCacheIterator(final byte[] startWordHash, final boolean rot) throws IOException {
             this.rot = rot;
-            this.iterator = array.keys(true, startWordHash.getBytes());
+            this.iterator = array.keys(true, startWordHash);
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
         
         public heapCacheIterator clone(final Object secondWordHash) {
             try {
-				return new heapCacheIterator((String) secondWordHash, rot);
+				return new heapCacheIterator((byte[]) secondWordHash, rot);
 			} catch (IOException e) {
 				e.printStackTrace();
 				return null;
@@ -154,14 +154,14 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         public ReferenceContainer<ReferenceType> next() {
         	try {
 				if (iterator.hasNext()) {
-                	return get(new String(iterator.next()));
+                	return get(iterator.next());
 				}
 	            // rotation iteration
 	            if (!rot) {
 	                return null;
 	            }
 	            iterator = array.keys(true, null);
-	            return get(new String(iterator.next()));
+	            return get(iterator.next());
             } catch (IOException e) {
 				e.printStackTrace();
 				return null;
@@ -185,8 +185,8 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * @return true, if the key is used in the heap; false othervise
      * @throws IOException 
      */
-    public synchronized boolean has(final String termHash) {
-        return this.array.has(termHash.getBytes());
+    public synchronized boolean has(final byte[] termHash) {
+        return this.array.has(termHash);
     }
     
     /**
@@ -195,8 +195,8 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * @return the indexContainer if one exist, null otherwise
      * @throws IOException 
      */
-    public synchronized ReferenceContainer<ReferenceType> get(final String termHash) throws IOException {
-    	List<byte[]> entries = this.array.getAll(termHash.getBytes());
+    public synchronized ReferenceContainer<ReferenceType> get(final byte[] termHash) throws IOException {
+    	List<byte[]> entries = this.array.getAll(termHash);
     	if (entries == null || entries.size() == 0) return null;
     	byte[] a = entries.remove(0);
     	ReferenceContainer<ReferenceType> c = new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(a, payloadrow));
@@ -212,21 +212,21 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * @return the indexContainer if the cache contained the container, null othervise
      * @throws IOException 
      */
-    public synchronized void delete(final String termHash) throws IOException {
+    public synchronized void delete(final byte[] termHash) throws IOException {
         // returns the index that had been deleted
-    	array.remove(termHash.getBytes());
+    	array.remove(termHash);
     }
     
-    public synchronized int replace(final String termHash, ContainerRewriter<ReferenceType> rewriter) throws IOException {
-        return array.replace(termHash.getBytes(), new BLOBRewriter(termHash, rewriter));
+    public synchronized int replace(final byte[] termHash, ContainerRewriter<ReferenceType> rewriter) throws IOException {
+        return array.replace(termHash, new BLOBRewriter(termHash, rewriter));
     }
     
     public class BLOBRewriter implements BLOB.Rewriter {
 
         ContainerRewriter<ReferenceType> rewriter;
-        String wordHash;
+        byte[] wordHash;
         
-        public BLOBRewriter(String wordHash, ContainerRewriter<ReferenceType> rewriter) {
+        public BLOBRewriter(byte[] wordHash, ContainerRewriter<ReferenceType> rewriter) {
             this.rewriter = rewriter;
             this.wordHash = wordHash;
         }
@@ -239,9 +239,9 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         }
     }
 
-    public interface ContainerRewriter<RT extends Reference> {
+    public interface ContainerRewriter<ReferenceType extends Reference> {
         
-        public ReferenceContainer<RT> rewrite(ReferenceContainer<RT> container);
+        public ReferenceContainer<ReferenceType> rewrite(ReferenceContainer<ReferenceType> container);
         
     }
     

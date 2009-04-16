@@ -47,8 +47,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.data.Blacklist;
@@ -130,10 +130,10 @@ public class yacySearch extends Thread {
         }
     }
 
-    public static String set2string(final Set<String> hashes) {
+    public static String set2string(final TreeSet<byte[]> hashes) {
         String wh = "";
-        final Iterator<String> iter = hashes.iterator();
-        while (iter.hasNext()) { wh = wh + iter.next(); }
+        final Iterator<byte[]> iter = hashes.iterator();
+        while (iter.hasNext()) { wh = wh + new String(iter.next()); }
         return wh;
     }
 
@@ -149,14 +149,14 @@ public class yacySearch extends Thread {
         return targetPeer;
     }
 
-    private static yacySeed[] selectClusterPeers(final yacySeedDB seedDB, final TreeMap<String, String> peerhashes) {
-    	final Iterator<Map.Entry<String, String>> i = peerhashes.entrySet().iterator();
+    private static yacySeed[] selectClusterPeers(final yacySeedDB seedDB, final TreeMap<byte[], String> peerhashes) {
+    	final Iterator<Map.Entry<byte[], String>> i = peerhashes.entrySet().iterator();
     	final ArrayList<yacySeed> l = new ArrayList<yacySeed>();
-    	Map.Entry<String, String> entry;
+    	Map.Entry<byte[], String> entry;
     	yacySeed s;
     	while (i.hasNext()) {
     		entry = i.next();
-    		s = seedDB.get(entry.getKey()); // should be getConnected; get only during testing time
+    		s = seedDB.get(new String(entry.getKey())); // should be getConnected; get only during testing time
     		if (s != null) {
     			s.setAlternativeAddress(entry.getValue());
     			l.add(s);
@@ -170,7 +170,7 @@ public class yacySearch extends Thread {
     	//return (yacySeed[]) l.toArray();
     }
     
-    private static yacySeed[] selectSearchTargets(final yacySeedDB seedDB, final Set<String> wordhashes, int seedcount, int redundancy) {
+    private static yacySeed[] selectSearchTargets(final yacySeedDB seedDB, final TreeSet<byte[]> wordhashes, int seedcount, int redundancy) {
         // find out a specific number of seeds, that would be relevant for the given word hash(es)
         // the result is ordered by relevance: [0] is most relevant
         // the seedcount is the maximum number of wanted results
@@ -185,7 +185,7 @@ public class yacySearch extends Thread {
         final HashMap<String, yacySeed> matchingSeeds = new HashMap<String, yacySeed>();
         yacySeed seed;
         Iterator<yacySeed> dhtEnum;         
-        Iterator<String> iter = wordhashes.iterator();
+        Iterator<byte[]> iter = wordhashes.iterator();
         while (iter.hasNext()) {
             PeerSelection.selectDHTPositions(seedDB, iter.next(), redundancy, regularSeeds, ranking);
         }
@@ -228,9 +228,9 @@ public class yacySearch extends Thread {
         seedcount = Math.min(ranking.size(), seedcount);
         final yacySeed[] result = new yacySeed[seedcount + matchingSeeds.size()];
         c = 0;
-        iter = ranking.scores(false); // higher are better
-        while (iter.hasNext() && c < seedcount) {
-            seed = regularSeeds.get(iter.next());
+        Iterator<String> iters = ranking.scores(false); // higher are better
+        while (iters.hasNext() && c < seedcount) {
+            seed = regularSeeds.get(iters.next());
             seed.selectscore = c;
             Log.logInfo("PLASMA", "selectPeers/_dht_: " + seed.hash + ":" + seed.getName() + " is choice " + c);
             result[c++] = seed;
@@ -257,7 +257,7 @@ public class yacySearch extends Thread {
             final Blacklist blacklist,
             final plasmaSearchRankingProfile rankingProfile,
             final Bitfield constraint,
-            final TreeMap<String, String> clusterselection) {
+            final TreeMap<byte[], String> clusterselection) {
         // check own peer status
         //if (wordIndex.seedDB.mySeed() == null || wordIndex.seedDB.mySeed().getPublicAddress() == null) { return null; }
 
@@ -292,14 +292,14 @@ public class yacySearch extends Thread {
             final plasmaSearchRankingProcess containerCache,
             final String targethash, final Blacklist blacklist,
             final plasmaSearchRankingProfile rankingProfile,
-            final Bitfield constraint, final TreeMap<String, String> clusterselection) {
+            final Bitfield constraint, final TreeMap<byte[], String> clusterselection) {
         // check own peer status
         if (wordIndex.peers().mySeed() == null || wordIndex.peers().mySeed().getPublicAddress() == null) { return null; }
 
         // prepare seed targets and threads
         final yacySeed targetPeer = wordIndex.peers().getConnected(targethash);
         if (targetPeer == null || targetPeer.hash == null) return null;
-        if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(targetPeer.hash));
+        if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(targetPeer.hash.getBytes()));
         final yacySearch searchThread = new yacySearch(wordhashes, excludehashes, urlhashes, "", "", "en", 0, 9999, true, 0, targetPeer,
                                              wordIndex, crawlResults, containerCache, new TreeMap<String, TreeMap<String, String>>(), blacklist, rankingProfile, constraint);
         searchThread.start();

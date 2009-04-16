@@ -72,7 +72,7 @@ public final class plasmaSearchRankingProcess {
     private final int[] flagcount; // flag counter
     private final TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
     private final plasmaWordIndex wordIndex;
-    private HashMap<String, ReferenceContainer<WordReference>>[] localSearchContainerMaps;
+    private HashMap<byte[], ReferenceContainer<WordReference>>[] localSearchContainerMaps;
     private final int[] domZones;
     
     public plasmaSearchRankingProcess(
@@ -242,7 +242,7 @@ public final class plasmaSearchRankingProcess {
         return false;
     }
     
-    public Map<String, ReferenceContainer<WordReference>>[] searchContainerMaps() {
+    public Map<byte[], ReferenceContainer<WordReference>>[] searchContainerMaps() {
         // direct access to the result maps is needed for abstract generation
         // this is only available if execQuery() was called before
         return localSearchContainerMaps;
@@ -485,10 +485,10 @@ public final class plasmaSearchRankingProcess {
         }
 
         // apply query-in-result matching
-        final Set<String> urlcomph = Word.words2hashSet(urlcomps);
-        final Set<String> descrcomph = Word.words2hashSet(descrcomps);
-        final Iterator<String> shi = query.queryHashes.iterator();
-        String queryhash;
+        final Set<byte[]> urlcomph = Word.words2hashSet(urlcomps);
+        final Set<byte[]> descrcomph = Word.words2hashSet(descrcomps);
+        final Iterator<byte[]> shi = query.queryHashes.iterator();
+        byte[] queryhash;
         while (shi.hasNext()) {
             queryhash = shi.next();
             if (urlcomph.contains(queryhash)) r += 256 << query.ranking.coeff_appurl;

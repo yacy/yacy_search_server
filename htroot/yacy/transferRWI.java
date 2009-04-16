@@ -159,7 +159,7 @@ public final class transferRWI {
                 
                 // learn entry
                 try {
-                    sb.webIndex.index().add(wordHash, iEntry);
+                    sb.webIndex.index().add(wordHash.getBytes(), iEntry);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -192,7 +192,7 @@ public final class transferRWI {
             if ((wordhashes.length == 0) || (received == 0)) {
                 sb.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs");
             } else {
-                final long avdist = (FlatWordPartitionScheme.std.dhtDistance(wordhashes[0], null, sb.webIndex.peers().mySeed()) + FlatWordPartitionScheme.std.dhtDistance(wordhashes[received - 1], null, sb.webIndex.peers().mySeed())) / 2;
+                final long avdist = (FlatWordPartitionScheme.std.dhtDistance(wordhashes[0].getBytes(), null, sb.webIndex.peers().mySeed()) + FlatWordPartitionScheme.std.dhtDistance(wordhashes[received - 1].getBytes(), null, sb.webIndex.peers().mySeed())) / 2;
                 sb.getLog().logInfo("Received " + received + " Entries " + wordc + " Words [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + "/" + receivedURL + " URLs, blocked " + blocked + " RWIs");
                 RSSFeed.channels(RSSFeed.INDEXRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", requesting " + unknownURL.size() + " URLs, blocked " + blocked, "", ""));
             }

@@ -155,7 +155,7 @@ public final class search {
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(3000);
 
-        final TreeSet<String> abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : plasmaSearchQuery.hashes2Set(abstracts);
+        final TreeSet<byte[]> abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : plasmaSearchQuery.hashes2Set(abstracts);
         
         // store accessing peer
         final yacySeed remoteSeed = yacySeed.genRemoteSeed(oseed, key, false);
@@ -166,8 +166,8 @@ public final class search {
         }
 
         // prepare search
-        final TreeSet<String> queryhashes = plasmaSearchQuery.hashes2Set(query);
-        final TreeSet<String> excludehashes = (exclude.length() == 0) ? new TreeSet<String>(Base64Order.enhancedComparator) : plasmaSearchQuery.hashes2Set(exclude);
+        final TreeSet<byte[]> queryhashes = plasmaSearchQuery.hashes2Set(query);
+        final TreeSet<byte[]> excludehashes = (exclude.length() == 0) ? new TreeSet<byte[]>(Base64Order.enhancedCoder) : plasmaSearchQuery.hashes2Set(exclude);
         final long timestamp = System.currentTimeMillis();
         
     	// prepare a search profile
@@ -185,7 +185,7 @@ public final class search {
             theQuery = new plasmaSearchQuery(
                     null,
                     abstractSet,
-                    new TreeSet<String>(Base64Order.enhancedComparator),
+                    new TreeSet<byte[]>(Base64Order.enhancedCoder),
                     null,
                     rankingProfile,
                     maxdist,
@@ -209,19 +209,19 @@ public final class search {
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
             final long timer = System.currentTimeMillis();
-            final Map<String, ReferenceContainer<WordReference>>[] containers = sb.webIndex.localSearchContainers(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2Set(urls));
+            final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.webIndex.localSearchContainers(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
 
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.COLLECTION, containers[0].size(), System.currentTimeMillis() - timer), false);
             if (containers != null) {
-                final Iterator<Map.Entry<String, ReferenceContainer<WordReference>>> ci = containers[0].entrySet().iterator();
-                Map.Entry<String, ReferenceContainer<WordReference>> entry;
-                String wordhash;
+                final Iterator<Map.Entry<byte[], ReferenceContainer<WordReference>>> ci = containers[0].entrySet().iterator();
+                Map.Entry<byte[], ReferenceContainer<WordReference>> entry;
+                byte[] wordhash;
                 while (ci.hasNext()) {
                     entry = ci.next();
                     wordhash = entry.getKey();
                     final ReferenceContainer<WordReference> container = entry.getValue();
                     indexabstractContainercount += container.size();
-                    indexabstract.append("indexabstract." + wordhash + "=").append(ReferenceContainer.compressIndex(container, null, 1000).toString()).append(serverCore.CRLF_STRING);                
+                    indexabstract.append("indexabstract." + new String(wordhash) + "=").append(ReferenceContainer.compressIndex(container, null, 1000).toString()).append(serverCore.CRLF_STRING);                
                 }
             }
             
@@ -269,16 +269,16 @@ public final class search {
             } else {
                 // attach information about index abstracts
                 final StringBuilder indexcount = new StringBuilder();
-                Map.Entry<String, Integer> entry;
-                final Iterator<Map.Entry<String, Integer>> i = theSearch.IACount.entrySet().iterator();
+                Map.Entry<byte[], Integer> entry;
+                final Iterator<Map.Entry<byte[], Integer>> i = theSearch.IACount.entrySet().iterator();
                 while (i.hasNext()) {
                     entry = i.next();
-                    indexcount.append("indexcount.").append(entry.getKey()).append('=').append((entry.getValue()).toString()).append(serverCore.CRLF_STRING);
+                    indexcount.append("indexcount.").append(new String(entry.getKey())).append('=').append((entry.getValue()).toString()).append(serverCore.CRLF_STRING);
                 }
                 if (abstractSet != null) {
                     // if a specific index-abstract is demanded, attach it here
-                    final Iterator<String> j = abstractSet.iterator();
-                    String wordhash;
+                    final Iterator<byte[]> j = abstractSet.iterator();
+                    byte[] wordhash;
                     while (j.hasNext()) {
                         wordhash = j.next();
                         indexabstractContainercount += (theSearch.IACount.get(wordhash)).intValue();

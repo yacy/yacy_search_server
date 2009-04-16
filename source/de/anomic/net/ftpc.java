@@ -2795,7 +2795,7 @@ public class ftpc {
 
     public static Thread putAsync(final String host, final File localFile, final String remotePath,
             final String remoteName, final String account, final String password) {
-        final Thread t = new Thread(new pt(host, localFile, remotePath, remoteName, account, password));
+        final Thread t = new Thread(new pt(host, localFile, remotePath, remoteName, account, password), "ftp to " + host);
         t.start();
         return t; // return value can be used to determine status of transfer
         // with isAlive() or join()

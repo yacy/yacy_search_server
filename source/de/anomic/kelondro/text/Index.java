@@ -56,14 +56,14 @@ public interface Index <ReferenceType extends Reference> {
 	 * @param entry
 	 * @throws IOException
 	 */
-    public void add(final String termHash, final ReferenceType entry) throws IOException;
+    public void add(final byte[] termHash, final ReferenceType entry) throws IOException;
     
 	/**
 	 * check if there are references stored to the given word hash
 	 * @param termHash
 	 * @return true if references exist, false if not
 	 */
-	public boolean has(String termHash); // should only be used if in case that true is returned the getContainer is NOT called
+	public boolean has(final byte[] termHash); // should only be used if in case that true is returned the getContainer is NOT called
     
 	/**
 	 * count the number of references for the given word
@@ -72,7 +72,7 @@ public interface Index <ReferenceType extends Reference> {
 	 * @param termHash
 	 * @return the number of references to the given word
 	 */
-	public int count(final String termHash);
+	public int count(final byte[] termHash);
     
 	/**
 	 * get the references to a given word.
@@ -83,7 +83,7 @@ public interface Index <ReferenceType extends Reference> {
 	 * @return the references
 	 * @throws IOException
 	 */
-	public ReferenceContainer<ReferenceType> get(String termHash, Set<String> referenceselection) throws IOException;
+	public ReferenceContainer<ReferenceType> get(byte[] termHash, Set<String> referenceselection) throws IOException;
     
     /**
      * delete all references for a word
@@ -91,7 +91,7 @@ public interface Index <ReferenceType extends Reference> {
      * @return the deleted references
      * @throws IOException
      */
-	public ReferenceContainer<ReferenceType> delete(String termHash) throws IOException;
+	public ReferenceContainer<ReferenceType> delete(byte[] termHash) throws IOException;
     
 	/**
 	 * remove a specific reference entry
@@ -100,7 +100,7 @@ public interface Index <ReferenceType extends Reference> {
 	 * @return
 	 * @throws IOException
 	 */
-    public boolean remove(String termHash, String referenceHash) throws IOException;
+    public boolean remove(byte[] termHash, String referenceHash) throws IOException;
     
     /**
      * remove a set of reference entries for a given word
@@ -109,11 +109,11 @@ public interface Index <ReferenceType extends Reference> {
      * @return
      * @throws IOException
      */
-    public int remove(String termHash, Set<String> referenceHashes) throws IOException;
+    public int remove(final byte[] termHash, Set<String> referenceHashes) throws IOException;
     
-    public int remove(final Set<String> termHashes, final String urlHash) throws IOException;
+    public int remove(final TreeSet<byte[]> termHashes, final String urlHash) throws IOException;
     
-    public void remove(final Set<String> termHashes, final Set<String> urlHashes) throws IOException;
+    public void remove(final TreeSet<byte[]> termHashes, final Set<String> urlHashes) throws IOException;
 
     /**
      * iterate all references from the beginning of a specific word hash
@@ -124,13 +124,13 @@ public interface Index <ReferenceType extends Reference> {
      * @throws IOException
      */
 	public CloneableIterator<ReferenceContainer<ReferenceType>> references(
-	                        String startHash,
+	                        byte[] startHash,
 	                        boolean rot
 	                        ) throws IOException;
     
 
     public TreeSet<ReferenceContainer<ReferenceType>> references(
-                            String startHash,
+                            byte[] startHash,
                             boolean rot,
                             int count
                             ) throws IOException;

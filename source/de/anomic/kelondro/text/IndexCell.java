@@ -102,8 +102,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         cleanCache();
     }
 
-    public synchronized void add(String hash, ReferenceType entry) throws IOException {
-        this.ram.add(hash, entry);
+    public synchronized void add(byte[] termHash, ReferenceType entry) throws IOException {
+        this.ram.add(termHash, entry);
         serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
         cleanCache();
     }
@@ -111,12 +111,12 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     /**
      * checks if there is any container for this termHash, either in RAM or any BLOB
      */
-    public boolean has(String termHash) {
+    public boolean has(byte[] termHash) {
         if (this.ram.has(termHash)) return true;
         return this.array.has(termHash);
     }
 
-    public int count(String termHash) {
+    public int count(byte[] termHash) {
         ReferenceContainer<ReferenceType> c0 = this.ram.get(termHash, null);
         ReferenceContainer<ReferenceType> c1;
         try {
@@ -136,7 +136,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * all containers in the BLOBs and the RAM are merged and returned
      * @throws IOException 
      */
-    public ReferenceContainer<ReferenceType> get(String termHash, Set<String> urlselection) throws IOException {
+    public ReferenceContainer<ReferenceType> get(byte[] termHash, Set<String> urlselection) throws IOException {
         ReferenceContainer<ReferenceType> c0 = this.ram.get(termHash, null);
         ReferenceContainer<ReferenceType> c1 = this.array.get(termHash);
         if (c1 == null) {
@@ -152,7 +152,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * the deleted containers are merged and returned as result of the method
      * @throws IOException 
      */
-    public ReferenceContainer<ReferenceType> delete(String termHash) throws IOException {
+    public ReferenceContainer<ReferenceType> delete(byte[] termHash) throws IOException {
         ReferenceContainer<ReferenceType>  c0 = this.ram.delete(termHash);
         ReferenceContainer<ReferenceType>  c1 = this.array.get(termHash);
         if (c1 == null) {
@@ -172,17 +172,17 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * new BLOBs. This returns the sum of all url references that have been removed
      * @throws IOException 
      */
-    public int remove(String termHash, Set<String> urlHashes) throws IOException {
+    public int remove(byte[] termHash, Set<String> urlHashes) throws IOException {
         int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHashes));
         return reduced / this.array.rowdef().objectsize;
     }
 
-    public boolean remove(String termHash, String urlHash) throws IOException {
+    public boolean remove(byte[] termHash, String urlHash) throws IOException {
         int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHash));
         return reduced > 0;
     }
 
-    private static class RemoveRewriter<RT extends Reference> implements ReferenceContainerArray.ContainerRewriter<RT> {
+    private static class RemoveRewriter<ReferenceType extends Reference> implements ReferenceContainerArray.ContainerRewriter<ReferenceType> {
         
         Set<String> urlHashes;
         
@@ -195,14 +195,14 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             this.urlHashes.add(urlHash);
         }
         
-        public ReferenceContainer<RT> rewrite(ReferenceContainer<RT> container) {
+        public ReferenceContainer<ReferenceType> rewrite(ReferenceContainer<ReferenceType> container) {
             container.removeEntries(urlHashes);
             return container;
         }
         
     }
 
-    public CloneableIterator<ReferenceContainer<ReferenceType>> references(String starttermHash, boolean rot) {
+    public CloneableIterator<ReferenceContainer<ReferenceType>> references(byte[] starttermHash, boolean rot) {
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.ram.rowdef().getOrdering().clone());
         containerOrder.rotate(new ReferenceContainer<ReferenceType>(factory, starttermHash, this.ram.rowdef(), 0));
         return new MergeIterator<ReferenceContainer<ReferenceType>>(
@@ -218,7 +218,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             true);
     }
 
-    public CloneableIterator<ReferenceContainer<ReferenceType>> references(String startTermHash, boolean rot, boolean ram) {
+    public CloneableIterator<ReferenceContainer<ReferenceType>> references(byte[] startTermHash, boolean rot, boolean ram) {
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.ram.rowdef().getOrdering().clone());
         containerOrder.rotate(new ReferenceContainer<ReferenceType>(factory, startTermHash, this.ram.rowdef(), 0));
         if (ram) {

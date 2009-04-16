@@ -69,7 +69,7 @@ public class plasmaSearchAPI {
         return b;
     }
     
-    public static void listHosts(final serverObjects prop, final String startHash, final plasmaSwitchboard sb) {
+    public static void listHosts(final serverObjects prop, final byte[] startHash, final plasmaSwitchboard sb) {
         // list known hosts
         yacySeed seed;
         int hc = 0;
@@ -86,8 +86,8 @@ public class plasmaSearchAPI {
         prop.put("searchresult_hosts", hc);
     }
 
-    public static plasmaSearchRankingProcess genSearchresult(final serverObjects prop, final plasmaSwitchboard sb, final String keyhash, final Bitfield filter) {
-        final plasmaSearchQuery query = new plasmaSearchQuery(keyhash, -1, sb.getRanking(), filter);
+    public static plasmaSearchRankingProcess genSearchresult(final serverObjects prop, final plasmaSwitchboard sb, final byte[] keyhash, final Bitfield filter) {
+        final plasmaSearchQuery query = new plasmaSearchQuery(new String(keyhash), -1, sb.getRanking(), filter);
         final plasmaSearchRankingProcess ranked = new plasmaSearchRankingProcess(sb.webIndex, query, Integer.MAX_VALUE, 1);
         ranked.execQuery();
         
@@ -112,9 +112,9 @@ public class plasmaSearchAPI {
         return ranked;
     }
     
-    public static void genURLList(final serverObjects prop, final String keyhash, final String keystring, final plasmaSearchRankingProcess ranked, final Bitfield flags, final int maxlines) {
+    public static void genURLList(final serverObjects prop, final byte[] keyhash, final String keystring, final plasmaSearchRankingProcess ranked, final Bitfield flags, final int maxlines) {
         // search for a word hash and generate a list of url links
-        prop.put("genUrlList_keyHash", keyhash);
+        prop.put("genUrlList_keyHash", new String(keyhash));
         
         if (ranked.filteredCount() == 0) {
             prop.put("genUrlList", 1);
@@ -140,7 +140,7 @@ public class plasmaSearchAPI {
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxCount", i);
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", entry.word().metadataHash());
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_keyString", keystring);
-                prop.put("genUrlList_urlList_"+i+"_urlExists_keyHash", keyhash);
+                prop.put("genUrlList_urlList_"+i+"_urlExists_keyHash", new String(keyhash));
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlString", us);
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlStringShort", (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20,  40) + "...") : ((us.length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ranking", (entry.ranking() - rn));

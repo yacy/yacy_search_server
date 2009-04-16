@@ -361,7 +361,7 @@ public class yacysearch {
             final boolean globalsearch = (global) /* && (yacyonline)*/ && (sb.getConfigBool(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false));
         
             // do the search
-            final TreeSet<String> queryHashes = Word.words2hashes(query[0]);
+            final TreeSet<byte[]> queryHashes = Word.words2hashes(query[0]);
             final plasmaSearchQuery theQuery = new plasmaSearchQuery(
         			querystring,
         			queryHashes,

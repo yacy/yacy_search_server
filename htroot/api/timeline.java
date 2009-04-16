@@ -36,6 +36,7 @@ import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaWordIndex;
+import de.anomic.plasma.parser.Word;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.iso639;
@@ -63,7 +64,7 @@ public final class timeline {
             if (language == null) language = "en";
         }
         final TreeSet<String>[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
-        
+        TreeSet<byte[]> q = Word.words2hashes(query[0]);
         
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(3000);
@@ -76,10 +77,10 @@ public final class timeline {
         int joincount = 0;
 
         // retrieve index containers
-        yacyCore.log.logInfo("INIT TIMELINE SEARCH: " + plasmaSearchQuery.anonymizedQueryHashes(query[0]) + " - " + count + " links");
+        //yacyCore.log.logInfo("INIT TIMELINE SEARCH: " + plasmaSearchQuery.anonymizedQueryHashes(query[0]) + " - " + count + " links");
         
         // get the index container with the result vector
-        HashMap<String, ReferenceContainer<WordReference>>[] localSearchContainerMaps = sb.webIndex.localSearchContainers(query[0], query[1], null);
+        HashMap<byte[], ReferenceContainer<WordReference>>[] localSearchContainerMaps = sb.webIndex.localSearchContainers(q, Word.words2hashes(query[1]), null);
         final ReferenceContainer<WordReference> index =
             ReferenceContainer.joinExcludeContainers(
                 plasmaWordIndex.wordReferenceFactory,
@@ -107,7 +108,7 @@ public final class timeline {
         
         // log
         yacyCore.log.logInfo("EXIT TIMELINE SEARCH: " +
-                plasmaSearchQuery.anonymizedQueryHashes(query[0]) + " - " + joincount + " links found, " +
+                plasmaSearchQuery.anonymizedQueryHashes(q) + " - " + joincount + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstracts, " +
                 (System.currentTimeMillis() - timestamp) + " milliseconds");

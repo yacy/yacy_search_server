@@ -305,24 +305,24 @@ public class yacyCore {
             // getting a list of peers to contact
             if (sb.webIndex.peers().mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN).equals(yacySeed.PEERTYPE_VIRGIN)) {
                 if (attempts > PING_INITIAL) { attempts = PING_INITIAL; }
-                final Map<String, String> ch = plasmaSwitchboard.getSwitchboard().clusterhashes;
+                final Map<byte[], String> ch = plasmaSwitchboard.getSwitchboard().clusterhashes;
                 seeds = PeerSelection.seedsByAge(sb.webIndex.peers(), true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
                 // add also all peers from cluster if this is a public robinson cluster
                 if (ch != null) {
-                    final Iterator<Map.Entry<String, String>> i = ch.entrySet().iterator();
-                    String hash;
-                    Map.Entry<String, String> entry;
+                    final Iterator<Map.Entry<byte[], String>> i = ch.entrySet().iterator();
+                    byte[] hash;
+                    Map.Entry<byte[], String> entry;
                     yacySeed seed;
                     while (i.hasNext()) {
                         entry = i.next();
                         hash = entry.getKey();
                         seed = seeds.get(hash);
                         if (seed == null) {
-                            seed = sb.webIndex.peers().get(hash);
+                            seed = sb.webIndex.peers().get(new String(hash));
                             if (seed == null) continue;
                         }
                         seed.setAlternativeAddress(entry.getValue());
-                        seeds.put(hash, seed);
+                        seeds.put(new String(hash), seed);
                 	}
                 }
             } else {

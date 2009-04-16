@@ -51,7 +51,7 @@ public class PeerSelection {
     
     public static void selectDHTPositions(
             final yacySeedDB seedDB, 
-            String wordhash,
+            byte[] wordhash,
             int redundancy, 
             HashMap<String, yacySeed> regularSeeds,
             ScoreCluster<String> ranking) {
@@ -80,7 +80,7 @@ public class PeerSelection {
     private static int verifiedOwn = 0;
     private static int verifiedNotOwn = 0;
     
-    public static boolean shallBeOwnWord(final yacySeedDB seedDB, final String wordhash, String urlhash, int redundancy, PartitionScheme scheme) {
+    public static boolean shallBeOwnWord(final yacySeedDB seedDB, final byte[] wordhash, String urlhash, int redundancy, PartitionScheme scheme) {
         // the guessIfOwnWord is a fast method that should only fail in case that a 'true' may be incorrect, but a 'false' shall always be correct
         if (guessIfOwnWord(seedDB, wordhash, urlhash)) {
             // this case must be verified, because it can be wrong.
@@ -117,19 +117,19 @@ public class PeerSelection {
         
     }
     
-    public static boolean guessIfOwnWord(final yacySeedDB seedDB, final String wordhash, final String urlhash) {
+    public static boolean guessIfOwnWord(final yacySeedDB seedDB, final byte[] wordhash, final String urlhash) {
         if (seedDB == null) return false;
         int connected = seedDB.sizeConnected();
         if (connected == 0) return true;
         final long target = seedDB.scheme.dhtPosition(wordhash, urlhash);
-        final long mypos = seedDB.scheme.dhtPosition(seedDB.mySeed().hash, urlhash);
+        final long mypos = seedDB.scheme.dhtPosition(seedDB.mySeed().hash.getBytes(), urlhash);
         long distance = FlatWordPartitionScheme.dhtDistance(target, mypos);
         if (distance <= 0) return false;
         if (distance <= Long.MAX_VALUE / connected * 2) return true;
         return false;
     }
     
-    public static boolean verifyIfOwnWord(final yacySeedDB seedDB, String wordhash, String urlhash, int redundancy) {
+    public static boolean verifyIfOwnWord(final yacySeedDB seedDB, byte[] wordhash, String urlhash, int redundancy) {
         String myHash = seedDB.mySeed().hash;
         wordhash = FlatWordPartitionScheme.positionToHash(seedDB.scheme.dhtPosition(wordhash, urlhash));
         Iterator<yacySeed> dhtEnum = getAcceptRemoteIndexSeeds(seedDB, wordhash, redundancy, true);
@@ -139,19 +139,19 @@ public class PeerSelection {
         return false;
     }
     
-    public static String selectTransferStart() {
-        return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength);
+    public static byte[] selectTransferStart() {
+        return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(2, 2 + yacySeedDB.commonHashLength).getBytes();
     }
     
-    public static String limitOver(final yacySeedDB seedDB, final String startHash) {
+    public static byte[] limitOver(final yacySeedDB seedDB, final byte[] startHash) {
         Iterator<yacySeed> seeds = getAcceptRemoteIndexSeeds(seedDB, startHash, 1, false);
-        if (seeds.hasNext()) return seeds.next().hash;
+        if (seeds.hasNext()) return seeds.next().hash.getBytes();
         return null;
     }
 
     public static ArrayList<yacySeed> getAcceptRemoteIndexSeedsList(
             yacySeedDB seedDB,
-            final String starthash,
+            final byte[] starthash,
             int max,
             boolean alsoMyOwn) {
         final Iterator<yacySeed> seedIter = PeerSelection.getAcceptRemoteIndexSeeds(seedDB, starthash, max, alsoMyOwn);
@@ -169,7 +169,7 @@ public class PeerSelection {
      * @param alsoMyOwn
      * @return
      */
-    public static Iterator<yacySeed> getAcceptRemoteIndexSeeds(yacySeedDB seedDB, final String starthash, int max, boolean alsoMyOwn) {
+    public static Iterator<yacySeed> getAcceptRemoteIndexSeeds(yacySeedDB seedDB, final byte[] starthash, int max, boolean alsoMyOwn) {
         return new acceptRemoteIndexSeedEnum(seedDB, starthash, Math.min(max, seedDB.sizeConnected()), alsoMyOwn);
     }
     
@@ -182,7 +182,7 @@ public class PeerSelection {
         private int remaining;
         private boolean alsoMyOwn;
         
-        public acceptRemoteIndexSeedEnum(yacySeedDB seedDB, final String starthash, int max, boolean alsoMyOwn) {
+        public acceptRemoteIndexSeedEnum(yacySeedDB seedDB, final byte[] starthash, int max, boolean alsoMyOwn) {
             this.seedDB = seedDB;
             this.se = getDHTSeeds(seedDB, starthash, yacyVersion.YACY_HANDLES_COLLECTION_INDEX);
             this.remaining = max;
@@ -243,7 +243,7 @@ public class PeerSelection {
      * @param minVersion
      * @return
      */
-    private static Iterator<yacySeed> getDHTSeeds(yacySeedDB seedDB, final String firstHash, final float minVersion) {
+    private static Iterator<yacySeed> getDHTSeeds(yacySeedDB seedDB, final byte[] firstHash, final float minVersion) {
         // enumerates seed-type objects: all seeds with starting point in the middle, rotating at the end/beginning
         return new seedDHTEnum(seedDB, firstHash, minVersion);
     }
@@ -255,7 +255,7 @@ public class PeerSelection {
         float minVersion;
         yacySeedDB seedDB;
         
-        public seedDHTEnum(yacySeedDB seedDB, final String firstHash, final float minVersion) {
+        public seedDHTEnum(yacySeedDB seedDB, final byte[] firstHash, final float minVersion) {
             this.seedDB = seedDB;
             this.steps = seedDB.sizeConnected();
             this.minVersion = minVersion;

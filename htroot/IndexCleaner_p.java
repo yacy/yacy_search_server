@@ -58,7 +58,7 @@ public class IndexCleaner_p {
             }
             else if (post.get("action").equals("rstart")) {
                 if (indexCleanerThread==null || !indexCleanerThread.isAlive()) {
-                    indexCleanerThread = sb.webIndex.getReferenceCleaner(post.get("wordHash","AAAAAAAAAAAA"));
+                    indexCleanerThread = sb.webIndex.getReferenceCleaner(post.get("wordHash","AAAAAAAAAAAA").getBytes());
                     indexCleanerThread.start();
                 }
                 else {

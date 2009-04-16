@@ -40,7 +40,7 @@ import de.anomic.yacy.yacySeedDB;
 
 public class Word {
 
-    private static final ConcurrentHashMap<String, String> hashCache = new ConcurrentHashMap<String, String>(1000);
+    private static final ConcurrentHashMap<String, byte[]> hashCache = new ConcurrentHashMap<String, byte[]>(1000);
     
     // object carries statistics for words and sentences
     public  int      count;       // number of occurrences
@@ -79,10 +79,10 @@ public class Word {
     // static methods
 
     // create a word hash
-    public static final String word2hash(final String word) {
-        String h = hashCache.get(word);
+    public static final byte[] word2hash(final String word) {
+        byte[] h = hashCache.get(word);
         if (h != null) return h;
-        h = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH))).substring(0, yacySeedDB.commonHashLength);
+        h = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH))).substring(0, yacySeedDB.commonHashLength).getBytes();
         hashCache.put(word, h); // prevent expensive MD5 computation and encoding
         if (hashCache.size() > 20000) {
             // prevent memory leak
@@ -91,8 +91,8 @@ public class Word {
         return h;
     }
     
-    public static final Set<String> words2hashSet(final String[] words) {
-        final TreeSet<String> hashes = new TreeSet<String>(Base64Order.enhancedComparator);
+    public static final TreeSet<byte[]> words2hashSet(final String[] words) {
+        final TreeSet<byte[]> hashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
         for (int i = 0; i < words.length; i++) hashes.add(word2hash(words[i]));
         return hashes;
     }
@@ -103,9 +103,9 @@ public class Word {
         return new String(sb);
     }
 
-    public static final TreeSet<String> words2hashes(final Set<String> words) {
+    public static final TreeSet<byte[]> words2hashes(final Set<String> words) {
         final Iterator<String> i = words.iterator();
-        final TreeSet<String> hashes = new TreeSet<String>(Base64Order.enhancedComparator);
+        final TreeSet<byte[]> hashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
         while (i.hasNext()) hashes.add(word2hash(i.next()));
         return hashes;
     }

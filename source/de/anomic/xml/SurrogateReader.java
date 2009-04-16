@@ -30,7 +30,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -49,7 +50,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable, Iterato
     private boolean parsingValue;
     private Surrogate surrogate;
     private String elementName;
-    private LinkedBlockingQueue<Surrogate> surrogates;
+    private BlockingQueue<Surrogate> surrogates;
     private SAXParser saxParser;
     private InputStream stream;
     private boolean isrunning;
@@ -59,7 +60,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable, Iterato
         this.parsingValue = false;
         this.surrogate = null;
         this.elementName = null;
-        this.surrogates = new LinkedBlockingQueue<Surrogate>();
+        this.surrogates = new ArrayBlockingQueue<Surrogate>(3);
         this.stream = stream;
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
@@ -102,15 +103,21 @@ public class SurrogateReader extends DefaultHandler implements Runnable, Iterato
         if (tag == null) return;
         if ("document".equals(tag)) {
             //System.out.println("A Title: " + this.surrogate.title());
-            this.surrogates.add(this.surrogate);
-            //System.out.println("B Title: " + this.surrogate.title());
-            this.surrogate = null;
-            this.buffer.setLength(0);
-            this.parsingValue = false;
+            try {
+                this.surrogates.put(this.surrogate);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } finally {
+                //System.out.println("B Title: " + this.surrogate.title());
+                this.surrogate = null;
+                this.buffer.setLength(0);
+                this.parsingValue = false;
+            }
         } else if ("element".equals(tag)) {
             this.buffer.setLength(0);
             this.parsingValue = false;
         } else if ("value".equals(tag)) {
+            //System.out.println("BUFFER-SIZE=" + buffer.length());
             final String value = buffer.toString().trim();
             if (this.elementName != null) {
                 this.surrogate.put(this.elementName, value);
@@ -149,7 +156,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable, Iterato
         try {
             sr = new SurrogateReader(new BufferedInputStream(new FileInputStream(f)));
 
-            Thread t = new Thread(sr);
+            Thread t = new Thread(sr, "Surrogate-Reader " + f.getAbsolutePath());
             t.start();
             Surrogate s;
             System.out.println("1");

@@ -77,9 +77,9 @@ public class IndexControlRWIs_p {
         if (post != null) {
             // default values
             final String keystring = post.get("keystring", "").trim();
-            String keyhash = post.get("keyhash", "").trim();
+            byte[] keyhash = post.get("keyhash", "").trim().getBytes();
             prop.putHTML("keystring", keystring);
-            prop.putHTML("keyhash", keyhash);
+            prop.putHTML("keyhash", new String(keyhash));
 
             // read values from checkboxes
             String[] urlx = post.getAll("urlhx.*");
@@ -103,7 +103,7 @@ public class IndexControlRWIs_p {
                 final plasmaSearchRankingProcess ranking = plasmaSearchAPI.genSearchresult(prop, sb, keyhash, null);
                 if (ranking.filteredCount() == 0) {
                     prop.put("searchresult", 2);
-                    prop.putHTML("searchresult_wordhash", keyhash);
+                    prop.putHTML("searchresult_wordhash", new String(keyhash));
                 }
             }
             

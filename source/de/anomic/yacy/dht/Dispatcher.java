@@ -27,10 +27,10 @@ package de.anomic.yacy.dht;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.BufferedIndex;
@@ -80,7 +80,7 @@ public class Dispatcher {
     
     // a cloud is a cache for the objects that wait to be transmitted
     // the String-key is the primary target as contained in the Entry
-    private HashMap<String, Transmission.Chunk> transmissionCloud;
+    private TreeMap<byte[], Transmission.Chunk> transmissionCloud;
     
     // the backend is used to store the remaining indexContainers in case that the object is closed
     private BufferedIndex<WordReference> backend;
@@ -104,7 +104,7 @@ public class Dispatcher {
             final boolean gzipBody, 
             final int timeout
             ) {
-        this.transmissionCloud = new HashMap<String, Transmission.Chunk>();
+        this.transmissionCloud = new TreeMap<byte[], Transmission.Chunk>(Base64Order.enhancedCoder);
         this.backend = backend;
         this.seeds = seeds;
         this.log = new Log("INDEX TRANSFER DISPATCHER");
@@ -146,8 +146,8 @@ public class Dispatcher {
      * @throws IOException
      */
     private ArrayList<ReferenceContainer<WordReference>> selectContainers(
-            final String hash,
-            final String limitHash,
+            final byte[] hash,
+            final byte[] limitHash,
             final int maxContainerCount,
             final int maxReferenceCount,
             final int maxtime) throws IOException {
@@ -161,8 +161,8 @@ public class Dispatcher {
     }
     
     private ArrayList<ReferenceContainer<WordReference>> selectContainers(
-            final String hash,
-            final String limitHash,
+            final byte[] hash,
+            final byte[] limitHash,
             final int maxContainerCount,
             final int maxReferenceCount,
             final int maxtime,
@@ -183,7 +183,7 @@ public class Dispatcher {
                 (System.currentTimeMillis() < timeout) &&
                 ((container = indexContainerIterator.next()) != null) &&
                 ((containers.size() == 0) ||
-                 (Base64Order.enhancedComparator.compare(container.getTermHash(), limitHash) < 0))
+                 (Base64Order.enhancedCoder.compare(container.getTermHash(), limitHash) < 0))
                 
         ) {
             if (container.size() == 0) continue;
@@ -260,7 +260,7 @@ public class Dispatcher {
     private void enqueueContainersToCloud(final ArrayList<ReferenceContainer<WordReference>>[] containers) {
         if (transmissionCloud == null) return;
         ReferenceContainer<WordReference> lastContainer;
-        String primaryTarget;
+        byte[] primaryTarget;
         Transmission.Chunk entry;
         for (int vertical = 0; vertical < containers.length; vertical++) {
             // the 'new' primary target is the word hash of the last container
@@ -288,8 +288,8 @@ public class Dispatcher {
     }
 
     public synchronized boolean selectContainersEnqueueToCloud(
-            final String hash,
-            final String limitHash,
+            final byte[] hash,
+            final byte[] limitHash,
             final int maxContainerCount,
             final int maxReferenceCount,
             final int maxtime) throws IOException {
@@ -328,9 +328,9 @@ public class Dispatcher {
      */
     public boolean dequeueContainer() {
         if (this.indexingTransmissionProcessor.queueSize() > indexingTransmissionProcessor.concurrency()) return false;
-        String maxtarget = "";
+        byte[] maxtarget = null;
         int maxsize = -1;
-        for (Map.Entry<String, Transmission.Chunk> chunk: this.transmissionCloud.entrySet()) {
+        for (Map.Entry<byte[], Transmission.Chunk> chunk: this.transmissionCloud.entrySet()) {
             if (chunk.getValue().containersSize() > maxsize) {
                 maxsize = chunk.getValue().containersSize();
                 maxtarget = chunk.getKey();
@@ -378,7 +378,7 @@ public class Dispatcher {
         // removes all entries from the dispatcher and puts them back to a RAMRI
         if (indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.announceShutdown();
         if (this.transmissionCloud != null) {
-        	for (Map.Entry<String, Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
+        	for (Map.Entry<byte[], Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
         		for (ReferenceContainer<WordReference> i : e.getValue()) try {this.backend.add(i);} catch (IOException e1) {}
         	}
         	this.transmissionCloud.clear();

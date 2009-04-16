@@ -335,23 +335,23 @@ public class IntegerHandleIndex {
         long a = MemoryControl.available();
         IntegerHandleIndex idx = new IntegerHandleIndex(12, Base64Order.enhancedCoder, 0, 150000);
         for (int i = 0; i < count; i++) {
-            idx.inc(FlatWordPartitionScheme.positionToHash(r.nextInt(count)).getBytes(), 1);
+            idx.inc(FlatWordPartitionScheme.positionToHash(r.nextInt(count)), 1);
         }
         long timek = ((long) count) * 1000L / (System.currentTimeMillis() - start);
         System.out.println("Result IntegerHandleIndex: " + timek + " inc per second " + count + " loops.");
         System.gc();
         long memk = a - MemoryControl.available();
         System.out.println("Used Memory: " + memk + " bytes");
-        System.out.println("x " + idx.get(FlatWordPartitionScheme.positionToHash(0).getBytes()));
+        System.out.println("x " + idx.get(FlatWordPartitionScheme.positionToHash(0)));
         idx = null;
         
         r = new Random(0);
         start = System.currentTimeMillis();
-        String hash;
+        byte[] hash;
         Integer d;
         System.gc(); // for resource measurement
         a = MemoryControl.available();
-        TreeMap<String, Integer> hm = new TreeMap<String, Integer>();
+        TreeMap<byte[], Integer> hm = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
         for (int i = 0; i < count; i++) {
             hash = FlatWordPartitionScheme.positionToHash(r.nextInt(count));
             d = hm.get(hash);

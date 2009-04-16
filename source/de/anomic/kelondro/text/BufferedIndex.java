@@ -119,7 +119,7 @@ public interface BufferedIndex<ReferenceType extends Reference> extends Index<Re
      * @throws IOException
      */
     public CloneableIterator<ReferenceContainer<ReferenceType>> references(
-                            String startHash,
+                            byte[] startHash,
                             boolean rot,
                             boolean buffer
                             ) throws IOException;
@@ -138,7 +138,7 @@ public interface BufferedIndex<ReferenceType extends Reference> extends Index<Re
      * @throws IOException
      */
     public TreeSet<ReferenceContainer<ReferenceType>> references(
-                            String startHash,
+                            byte[] startHash,
                             boolean rot,
                             int count,
                             boolean buffer

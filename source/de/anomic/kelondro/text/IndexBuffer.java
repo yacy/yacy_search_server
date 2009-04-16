@@ -47,8 +47,8 @@ import de.anomic.kelondro.util.Log;
 public final class IndexBuffer<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType>, IndexReader<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
 
     // class variables
-    private final ScoreCluster<String> hashScore;
-    private final ScoreCluster<String> hashDate;
+    private final ScoreCluster<byte[]> hashScore;
+    private final ScoreCluster<byte[]> hashDate;
     private long  initTime;
     private int   cacheEntityMaxCount;       // the maximum number of cache slots for RWI entries
     public  int   cacheReferenceCountLimit;  // the maximum number of references to a single RWI entity
@@ -72,8 +72,8 @@ public final class IndexBuffer<ReferenceType extends Reference> extends Abstract
         
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
-        this.hashScore = new ScoreCluster<String>();
-        this.hashDate  = new ScoreCluster<String>();
+        this.hashScore = new ScoreCluster<byte[]>();
+        this.hashDate  = new ScoreCluster<byte[]>();
         this.initTime = System.currentTimeMillis();
         this.cacheEntityMaxCount = entityCacheMaxSize;
         this.cacheReferenceCountLimit = wCacheReferenceCountLimitInit;
@@ -151,14 +151,14 @@ public final class IndexBuffer<ReferenceType extends Reference> extends Abstract
         return heap.size();
     }
 
-    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final String startWordHash, final boolean rot) {
+    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final byte[] startWordHash, final boolean rot) {
         // we return an iterator object that creates top-level-clones of the indexContainers
         // in the cache, so that manipulations of the iterated objects do not change
         // objects in the cache.
         return heap.references(startWordHash, rot);
     }
 
-    public synchronized String maxScoreWordHash() {
+    public synchronized byte[] maxScoreWordHash() {
         if (heap == null || heap.size() == 0) return null;
         try {
             return hashScore.getMaxObject();
@@ -168,7 +168,7 @@ public final class IndexBuffer<ReferenceType extends Reference> extends Abstract
         return null;
     }
     
-    public String bestFlushWordHash() {
+    public byte[] bestFlushWordHash() {
         // select appropriate hash
         // we have 2 different methods to find a good hash:
         // - the oldest entry in the cache
@@ -176,7 +176,7 @@ public final class IndexBuffer<ReferenceType extends Reference> extends Abstract
         if (heap == null || heap.size() == 0) return null;
         try {
             //return hashScore.getMaxObject();
-            String hash = null;
+            byte[] hash = null;
             final int count = hashScore.getMaxScore();
             if ((count >= cacheReferenceCountLimit) &&
                 ((hash = hashScore.getMaxObject()) != null)) {
@@ -212,7 +212,7 @@ public final class IndexBuffer<ReferenceType extends Reference> extends Abstract
 
     public synchronized ArrayList<ReferenceContainer<ReferenceType>> bestFlushContainers(final int count) {
         final ArrayList<ReferenceContainer<ReferenceType>> containerList = new ArrayList<ReferenceContainer<ReferenceType>>();
-        String hash;
+        byte[] hash;
         ReferenceContainer<ReferenceType> container;
         for (int i = 0; i < count; i++) {
             hash = bestFlushWordHash();
@@ -235,15 +235,15 @@ public final class IndexBuffer<ReferenceType extends Reference> extends Abstract
         return (((long) intTime) * (long) 1000) + initTime;
     }
     
-    public boolean has(final String wordHash) {
+    public boolean has(final byte[] wordHash) {
         return heap.has(wordHash);
     }
     
-    public int count(String key) {
+    public int count(byte[] key) {
         return this.heap.count(key);
     }
     
-    public synchronized ReferenceContainer<ReferenceType> get(final String wordHash, final Set<String> urlselection) {
+    public synchronized ReferenceContainer<ReferenceType> get(final byte[] wordHash, final Set<String> urlselection) {
         if (wordHash == null) return null;
         
         // retrieve container
@@ -261,7 +261,7 @@ public final class IndexBuffer<ReferenceType extends Reference> extends Abstract
         return container;
     }
 
-    public synchronized ReferenceContainer<ReferenceType> delete(final String wordHash) {
+    public synchronized ReferenceContainer<ReferenceType> delete(final byte[] wordHash) {
         // returns the index that had been deleted
     	if (wordHash == null || heap == null) return null;
         final ReferenceContainer<ReferenceType> container = heap.delete(wordHash);
@@ -270,7 +270,7 @@ public final class IndexBuffer<ReferenceType extends Reference> extends Abstract
         return container;
     }
 
-    public synchronized boolean remove(final String wordHash, final String urlHash) {
+    public synchronized boolean remove(final byte[] wordHash, final String urlHash) {
         final boolean removed = heap.remove(wordHash, urlHash);
         if (removed) {
             if (heap.has(wordHash)) {
@@ -285,7 +285,7 @@ public final class IndexBuffer<ReferenceType extends Reference> extends Abstract
         return false;
     }
     
-    public synchronized int remove(final String wordHash, final Set<String> urlHashes) {
+    public synchronized int remove(final byte[] wordHash, final Set<String> urlHashes) {
         if (urlHashes.size() == 0) return 0;
         final int c = heap.remove(wordHash, urlHashes);
         if (c > 0) {
@@ -311,7 +311,7 @@ public final class IndexBuffer<ReferenceType extends Reference> extends Abstract
         hashDate.setScore(container.getTermHash(), intTime(System.currentTimeMillis()));
     }
 
-    public void add(final String wordHash, final ReferenceType entry) throws IOException {
+    public void add(final byte[] wordHash, final ReferenceType entry) throws IOException {
         if (entry == null || heap == null) return;
 
         // put new words into cache

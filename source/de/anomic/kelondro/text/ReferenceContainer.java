@@ -49,16 +49,16 @@ import de.anomic.kelondro.util.ByteBuffer;
  */
 public class ReferenceContainer<ReferenceType extends Reference> extends RowSet {
 
-    private String termHash;
+    private byte[] termHash;
     private ReferenceFactory<ReferenceType> factory;
     
-    public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final String termHash, final RowSet collection) {
+    public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final RowSet collection) {
         super(collection);
         this.factory = factory;
         this.termHash = termHash;
     }
     
-    public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final String termHash, final Row rowdef, final int objectCount) {
+    public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final Row rowdef, final int objectCount) {
         super(rowdef, objectCount);
         this.termHash = termHash;
         this.factory = factory;
@@ -71,19 +71,19 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return newContainer;
     }
     
-    public static <RT extends Reference> ReferenceContainer<RT> emptyContainer(final ReferenceFactory<RT> factory, final String wordHash, final int elementCount) {
-        return new ReferenceContainer<RT>(factory, wordHash, WordReferenceRow.urlEntryRow, elementCount);
+    public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> emptyContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final int elementCount) {
+        return new ReferenceContainer<ReferenceType>(factory, termHash, WordReferenceRow.urlEntryRow, elementCount);
     }
 
-    public void setWordHash(final String newWordHash) {
-        this.termHash = newWordHash;
+    public void setWordHash(final byte[] newTermHash) {
+        this.termHash = newTermHash;
     }
 
     public long updated() {
         return super.lastWrote();
     }
 
-    public String getTermHash() {
+    public byte[] getTermHash() {
         return termHash;
     }
     
@@ -481,11 +481,11 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     }
 
     public String toString() {
-        return "C[" + termHash + "] has " + this.size() + " entries";
+        return "C[" + new String(termHash) + "] has " + this.size() + " entries";
     }
     
     public int hashCode() {
-        return (int) Base64Order.enhancedCoder.decodeLong(this.termHash.substring(0, 4));
+        return (int) Base64Order.enhancedCoder.decodeLong(new String(this.termHash).substring(0, 4));
     }
     
 

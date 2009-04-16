@@ -529,7 +529,7 @@ public final class yacyClient {
 		final int words = wordhashes.length() / yacySeedDB.commonHashLength;
 		final ReferenceContainer<WordReference>[] container = new ReferenceContainer[words];
 		for (int i = 0; i < words; i++) {
-			container[i] = ReferenceContainer.emptyContainer(plasmaWordIndex.wordReferenceFactory, wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength), count);
+			container[i] = ReferenceContainer.emptyContainer(plasmaWordIndex.wordReferenceFactory, wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength).getBytes(), count);
 		}
 
 		// insert results to containers
@@ -1077,7 +1077,7 @@ public final class yacyClient {
             /*final yacyCore core =*/ new yacyCore(sb);
             sb.loadSeedLists();
             final yacySeed target = sb.webIndex.peers().getConnected(args[1]);
-            final String wordhashe = Word.word2hash("test");
+            final byte[] wordhashe = Word.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));
             
             final httpRequestHeader reqHeader = new httpRequestHeader();
@@ -1089,7 +1089,7 @@ public final class yacyClient {
                                                       "&myseed=" + sb.webIndex.peers().mySeed() .genSeedStr(null) +
                                                       "&count=10" +
                                                       "&resource=global" +
-                                                      "&query=" + wordhashe +
+                                                      "&query=" + new String(wordhashe) +
                                                       "&network.unit.name=" + plasmaSwitchboard.getSwitchboard().getConfig(plasmaSwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT),
                                                       reqHeader, 10000, target.getHexHash() + ".yacyh");            
             final HashMap<String, String> result = FileUtils.table(content, "UTF-8");

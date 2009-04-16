@@ -189,9 +189,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  static long lastPPMUpdate        = System.currentTimeMillis()- 30000;
 
     // colored list management
-    public static TreeSet<String> badwords = null;
-    public static TreeSet<String> blueList = null;
-    public static TreeSet<String> stopwords = null;    
+    public static TreeSet<String> badwords       = null;
+    public static TreeSet<String> blueList       = null;
+    public static TreeSet<String> stopwords      = null;    
+    public static TreeSet<byte[]> badwordHashes  = null;
+    public static TreeSet<byte[]> blueListHashes = null;
+    public static TreeSet<byte[]> stopwordHashes = null;    
     public static Blacklist urlBlacklist = null;
     
     public static wikiParser wikiParser = null;
@@ -234,7 +237,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  long                           indexedPages = 0;
     public  double                         requestedQueries = 0d;
     public  double                         totalQPM = 0d;
-    public  TreeMap<String, String>        clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
+    public  TreeMap<byte[], String>        clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
     public  URLLicense                     licensedURLs;
     public  List<Pattern>                  networkWhitelist, networkBlacklist;
     public  Dispatcher                     dhtDispatcher;
@@ -362,6 +365,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             final String f = getConfig(plasmaSwitchboardConstants.LIST_BLUE, plasmaSwitchboardConstants.LIST_BLUE_DEFAULT);
             final File plasmaBlueListFile = new File(f);
             if (f != null) blueList = SetTools.loadList(plasmaBlueListFile, NaturalOrder.naturalComparator); else blueList= new TreeSet<String>();
+            blueListHashes = Word.words2hashes(blueList);
             this.log.logConfig("loaded blue-list from file " + plasmaBlueListFile.getName() + ", " +
             blueList.size() + " entries, " +
             ppRamString(plasmaBlueListFile.length()/1024));
@@ -404,6 +408,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (badwords == null) {
             final File badwordsFile = new File(rootPath, plasmaSwitchboardConstants.LIST_BADWORDS_DEFAULT);
             badwords = SetTools.loadList(badwordsFile, NaturalOrder.naturalComparator);
+            badwordHashes = Word.words2hashes(badwords);
             this.log.logConfig("loaded badwords from file " + badwordsFile.getName() +
                                ", " + badwords.size() + " entries, " +
                                ppRamString(badwordsFile.length()/1024));
@@ -413,6 +418,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (stopwords == null) {
             final File stopwordsFile = new File(rootPath, plasmaSwitchboardConstants.LIST_STOPWORDS_DEFAULT);
             stopwords = SetTools.loadList(stopwordsFile, NaturalOrder.naturalComparator);
+            stopwordHashes = Word.words2hashes(stopwords);
             this.log.logConfig("loaded stopwords from file " + stopwordsFile.getName() + ", " +
             stopwords.size() + " entries, " +
             ppRamString(stopwordsFile.length()/1024));
@@ -1180,12 +1186,15 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         }
     }
     
-    public void processSurrogate(String s) {
+    public boolean processSurrogate(String s) {
         File surrogateFile = new File(this.surrogatesInPath, s);
         File outfile = new File(this.surrogatesOutPath, s);
+        if (!surrogateFile.exists() || !surrogateFile.canWrite() || !surrogateFile.canRead()) return false;
+        if (outfile.exists()) return false;
+        boolean moved = false;
         try {
             SurrogateReader reader = new SurrogateReader(new BufferedInputStream(new FileInputStream(surrogateFile)));
-            Thread readerThread = new Thread(reader);
+            Thread readerThread = new Thread(reader, "Surrogate-Reader " + surrogateFile.getAbsolutePath());
             readerThread.start();
             Surrogate surrogate;
             QueueEntry queueentry;
@@ -1208,8 +1217,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            surrogateFile.renameTo(outfile);
+            moved = surrogateFile.renameTo(outfile);
         }
+        return moved;
     }
     
     public boolean deQueueProcess() {
@@ -1732,7 +1742,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             log.logInfo("Sending crawl receipt for '" + queueEntry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
             if (clusterhashes != null) initiatorPeer.setAlternativeAddress(clusterhashes.get(initiatorPeer.hash));
             // start a thread for receipt sending to avoid a blocking here
-            new Thread(new receiptSending(initiatorPeer, newEntry)).start();
+            new Thread(new receiptSending(initiatorPeer, newEntry), "sending receipt to " + initiatorPeer.hash).start();
         }
     }
     
@@ -1964,9 +1974,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         } else if (MemoryControl.available() < 1024*1024*25) {
         	log.logInfo("dhtTransferJob: no selection, too less memory available : " + (MemoryControl.available() / 1024 / 1024) + " MB");
         } else {
-	        String startHash = PeerSelection.selectTransferStart();
-	        log.logInfo("dhtTransferJob: selected " + startHash + " as start hash");
-	        String limitHash = PeerSelection.limitOver(this.webIndex.peers(), startHash);
+            byte[] startHash = PeerSelection.selectTransferStart();
+	        log.logInfo("dhtTransferJob: selected " + new String(startHash) + " as start hash");
+	        byte[] limitHash = PeerSelection.limitOver(this.webIndex.peers(), startHash);
 	        log.logInfo("dhtTransferJob: selected " + limitHash + " as limit hash");
 	        try {
 	            boolean enqueued = this.dhtDispatcher.selectContainersEnqueueToCloud(

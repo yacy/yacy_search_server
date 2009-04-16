@@ -54,8 +54,6 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
 
     public static final Base64Order standardCoder = new Base64Order(true, true);
     public static final Base64Order enhancedCoder = new Base64Order(true, false);
-    public static final Comparator<String> standardComparator = new ByteOrder.StringOrder(standardCoder);
-    public static final Comparator<String> enhancedComparator = new ByteOrder.StringOrder(enhancedCoder);
 
     private final boolean rfc1113compliant;
     private final char[] alpha;
@@ -185,7 +183,8 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
     // we will do that by grouping each three input bytes to four output bytes.
     public final String encode(final byte[] in) {
         if (in.length == 0) return "";
-        StringBuilder out = new StringBuilder(in.length / 3 * 4 + 3);
+        int lene = in.length / 3 * 4 + 3;
+        StringBuilder out = new StringBuilder(lene);
         int pos = 0;
         long l;
         while (in.length - pos >= 3) {
@@ -197,6 +196,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         if (in.length % 3 != 0) out = out.append((in.length % 3 == 2) ? encodeLong((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8, 4).substring(0, 3) : encodeLong((((0XffL & in[pos])) << 8) << 8, 4).substring(0, 2));
         if (rfc1113compliant) while (out.length() % 4 > 0) out.append("=");
         // return result
+        //assert lene == out.length() : "lene = " + lene + ", out.len = " + out.length();
         return new String(out);
     }
 

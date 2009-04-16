@@ -40,17 +40,17 @@ public class FlatWordPartitionScheme implements PartitionScheme {
         return 1;
     }
     
-    public long dhtPosition(String wordHash, String urlHash) {
+    public long dhtPosition(byte[] wordHash, String urlHash) {
         // the urlHash has no relevance here
         // normalized to Long.MAX_VALUE
         return Base64Order.enhancedCoder.cardinal(wordHash);
     }
 
-    public final long dhtDistance(final String word, final String urlHash, final yacySeed peer) {
-        return dhtDistance(word, urlHash, peer.hash);
+    public final long dhtDistance(final byte[] word, final String urlHash, final yacySeed peer) {
+        return dhtDistance(word, urlHash, peer.hash.getBytes());
     }
     
-    private final long dhtDistance(final String from, final String urlHash, final String to) {
+    private final long dhtDistance(final byte[] from, final String urlHash, final byte[] to) {
         // the dht distance is a positive value between 0 and 1
         // if the distance is small, the word more probably belongs to the peer
         assert to != null;
@@ -60,11 +60,11 @@ public class FlatWordPartitionScheme implements PartitionScheme {
         return dhtDistance(fromPos, toPos);
     }
 
-    public long dhtPosition(String wordHash, int verticalPosition) {
+    public long dhtPosition(byte[] wordHash, int verticalPosition) {
         return dhtPosition(wordHash, null);
     }
 
-    public long[] dhtPositions(String wordHash) {
+    public long[] dhtPositions(byte[] wordHash) {
         long[] l = new long[1];
         l[1] = dhtPosition(wordHash, null);
         return l;
@@ -80,11 +80,11 @@ public class FlatWordPartitionScheme implements PartitionScheme {
                 (Long.MAX_VALUE - fromPos) + toPos + 1;
     }
     
-    public static String positionToHash(final long l) {
+    public static byte[] positionToHash(final long l) {
         // transform the position of a peer position into a close peer hash
         String s = new String(Base64Order.enhancedCoder.uncardinal(l));
         while (s.length() < 12) s += "A";
-        return s;
+        return s.getBytes();
     }
 
 }

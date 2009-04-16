@@ -49,18 +49,15 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.Digest;
-import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.table.FixedWidthArray;
 import de.anomic.kelondro.table.FlexTable;
-import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.kelondroOutOfLimitsException;
 import de.anomic.kelondro.util.Log;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.yacy.yacyURL;
 
 public class IndexCollection<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType> {
@@ -164,7 +161,7 @@ public class IndexCollection<ReferenceType extends Reference> extends AbstractIn
         return index.row().objectOrder;
     }
     
-    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final String startWordHash, final boolean rot) {
+    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> references(final byte[] startWordHash, final boolean rot) {
         return new wordContainersIterator(startWordHash, rot);
     }
 
@@ -173,13 +170,13 @@ public class IndexCollection<ReferenceType extends Reference> extends AbstractIn
         private final Iterator<Object[]> wci;
         private final boolean rot;
         
-        public wordContainersIterator(final String startWordHash, final boolean rot) {
+        public wordContainersIterator(final byte[] startWordHash, final boolean rot) {
             this.rot = rot;
-            this.wci = keycollections(startWordHash.getBytes(), Base64Order.zero(startWordHash.length()), rot);
+            this.wci = keycollections(startWordHash, Base64Order.zero(startWordHash.length), rot);
         }
         
         public wordContainersIterator clone(final Object secondWordHash) {
-            return new wordContainersIterator((String) secondWordHash, rot);
+            return new wordContainersIterator((byte[]) secondWordHash, rot);
         }
         
         public boolean hasNext() {
@@ -192,7 +189,7 @@ public class IndexCollection<ReferenceType extends Reference> extends AbstractIn
             final byte[] key = (byte[]) oo[0];
             final RowSet collection = (RowSet) oo[1];
             if (collection == null) return null;
-            return new ReferenceContainer<ReferenceType>(factory, new String(key), collection);
+            return new ReferenceContainer<ReferenceType>(factory, key, collection);
         }
         
         public void remove() {
@@ -201,13 +198,9 @@ public class IndexCollection<ReferenceType extends Reference> extends AbstractIn
 
     }
 
-    public boolean has(final String wordHash) {
-        return this.has(wordHash.getBytes());
-    }
-    
-    public ReferenceContainer<ReferenceType> get(final String wordHash, final Set<String> urlselection) {
+    public ReferenceContainer<ReferenceType> get(final byte[] wordHash, final Set<String> urlselection) {
         try {
-            final RowSet collection = this.get(wordHash.getBytes());
+            final RowSet collection = this.get(wordHash);
             if (collection != null) collection.select(urlselection);
             if ((collection == null) || (collection.size() == 0)) return null;
             return new ReferenceContainer<ReferenceType>(factory, wordHash, collection);
@@ -216,31 +209,28 @@ public class IndexCollection<ReferenceType extends Reference> extends AbstractIn
         }
     }
 
-    public ReferenceContainer<ReferenceType> delete(final String wordHash) {
+    public ReferenceContainer<ReferenceType> delete(final byte[] wordHash) {
         try {
-            final RowSet collection = this.delete(wordHash.getBytes());
-            if (collection == null) return null;
-            return new ReferenceContainer<ReferenceType>(factory, wordHash, collection);
+            // find an entry, if one exists
+            final Row.Entry indexrow = index.remove(wordHash);
+            if (indexrow == null) return null;
+            final RowSet removedCollection = getdelete(indexrow, true);
+            assert (removedCollection != null);
+            if (removedCollection == null) return null;
+            return new ReferenceContainer<ReferenceType>(factory, wordHash, removedCollection);
         } catch (final IOException e) {
             return null;
         }
     }
     
-    public boolean remove(final String wordHash, final String urlHash) {
+    public boolean remove(final byte[] wordHash, final String urlHash) {
         final HashSet<String> hs = new HashSet<String>();
         hs.add(urlHash);
-        return remove(wordHash, hs) == 1;
-    }
-    
-    public int remove(final String wordHash, final Set<String> urlHashes) {
         try {
-            return this.remove(wordHash.getBytes(), urlHashes);
-        } catch (final kelondroOutOfLimitsException e) {
+            return remove(wordHash, hs) == 1;
+        } catch (kelondroOutOfLimitsException e) {
             e.printStackTrace();
-            return 0;
-        } catch (final IOException e) {
-            e.printStackTrace();
-            return 0;
+            return false;
         }
     }
 
@@ -255,7 +245,7 @@ public class IndexCollection<ReferenceType extends Reference> extends AbstractIn
         }
     }
 
-    public void add(String wordhash, ReferenceType entry) {
+    public void add(byte[] wordhash, ReferenceType entry) {
         if (entry == null) return;
         try {
             ReferenceContainer<ReferenceType> container = new ReferenceContainer<ReferenceType>(factory, wordhash, this.payloadrow, 1);
@@ -268,9 +258,9 @@ public class IndexCollection<ReferenceType extends Reference> extends AbstractIn
         }
     }
 
-    public int count(String key) {
+    public int count(byte[] key) {
         try {
-            final RowSet collection = this.get(key.getBytes());
+            final RowSet collection = this.get(key);
             if (collection == null) return 0;
             return collection.size();
         } catch (final IOException e) {
@@ -711,7 +701,7 @@ public class IndexCollection<ReferenceType extends Reference> extends AbstractIn
     
     private synchronized void merge(final ReferenceContainer<ReferenceType> container) throws IOException, kelondroOutOfLimitsException {
         if ((container == null) || (container.size() == 0)) return;
-        final byte[] key = container.getTermHash().getBytes();
+        final byte[] key = container.getTermHash();
         
         // first find an old entry, if one exists
         Row.Entry indexrow = index.get(key);
@@ -841,77 +831,84 @@ public class IndexCollection<ReferenceType extends Reference> extends AbstractIn
         }        
     }
     
-    private synchronized int remove(final byte[] key, final Set<String> removekeys) throws IOException, kelondroOutOfLimitsException {
+    public synchronized int remove(final byte[] key, final Set<String> removekeys) {
         
         if ((removekeys == null) || (removekeys.size() == 0)) return 0;
         
         // first find an old entry, if one exists
-        final Row.Entry indexrow = index.get(key);
-        
-        if (indexrow == null) return 0;
-            
-        // overwrite the old collection
-        // read old information
-        final int oldchunksize       = (int) indexrow.getColLong(idx_col_chunksize);  // needed only for migration
-        final int oldchunkcount      = (int) indexrow.getColLong(idx_col_chunkcount); // the number if rows in the collection
-        final int oldrownumber       = (int) indexrow.getColLong(idx_col_indexpos);   // index of the entry in array
-        final int oldPartitionNumber = indexrow.getColByte(idx_col_clusteridx); // points to array file
-        assert (oldPartitionNumber >= arrayIndex(oldchunkcount));
-
-        int removed = 0;
-        assert (removekeys != null);
-        // load the old collection and remove keys
-        RowSet oldcollection = null;
+        Row.Entry indexrow;
         try {
-            oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, serialNumber, false);
-        } catch (kelondroException e) {
-            // some internal problems occurred. however, go on like there was no old collection
-            e.printStackTrace();
-        }
-        // the oldcollection may be null here!
-        
-        if (oldcollection != null && oldcollection.size() > 0) {
-            // remove the keys from the set
-            final Iterator<String> i = removekeys.iterator();
-            while (i.hasNext()) {
-                if (oldcollection.remove(i.next().getBytes()) != null) removed++;
-            }
-            oldcollection.sort();
-            oldcollection.trim(false);
-        }
-        
-        // in case of an error or an empty collection, remove the collection:
-        if (oldcollection == null || oldcollection.size() == 0) {
-            // delete the index entry and the array
-            array_remove(
-                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize,
-                    oldrownumber);
-            index.remove(key);
-            return removed;
-        }
-        
-        // now write to a new partition (which may be the same partition as the old one)
-        final int newPartitionNumber = arrayIndex(oldcollection.size());
+            indexrow = index.get(key);
 
-        // see if we need new space or if we can overwrite the old space
-        if (oldPartitionNumber == newPartitionNumber) {
-            array_replace(
-                    key, oldcollection, indexrow,
-                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize,
-                    oldrownumber); // modifies indexrow
-        } else {
-            array_remove(
-                    oldPartitionNumber, serialNumber, this.payloadrow.objectsize,
-                    oldrownumber);
-            array_add(
-                    key, oldcollection, indexrow,
-                    newPartitionNumber, serialNumber, this.payloadrow.objectsize); // modifies indexrow
+            
+            if (indexrow == null) return 0;
+                
+            // overwrite the old collection
+            // read old information
+            final int oldchunksize       = (int) indexrow.getColLong(idx_col_chunksize);  // needed only for migration
+            final int oldchunkcount      = (int) indexrow.getColLong(idx_col_chunkcount); // the number if rows in the collection
+            final int oldrownumber       = (int) indexrow.getColLong(idx_col_indexpos);   // index of the entry in array
+            final int oldPartitionNumber = indexrow.getColByte(idx_col_clusteridx); // points to array file
+            assert (oldPartitionNumber >= arrayIndex(oldchunkcount));
+
+            int removed = 0;
+            assert (removekeys != null);
+            // load the old collection and remove keys
+            RowSet oldcollection = null;
+            try {
+                oldcollection = getwithparams(indexrow, oldchunksize, oldchunkcount, oldPartitionNumber, oldrownumber, serialNumber, false);
+            } catch (kelondroException e) {
+                // some internal problems occurred. however, go on like there was no old collection
+                e.printStackTrace();
+            }
+            // the oldcollection may be null here!
+            
+            if (oldcollection != null && oldcollection.size() > 0) {
+                // remove the keys from the set
+                final Iterator<String> i = removekeys.iterator();
+                while (i.hasNext()) {
+                    if (oldcollection.remove(i.next().getBytes()) != null) removed++;
+                }
+                oldcollection.sort();
+                oldcollection.trim(false);
+            }
+            
+            // in case of an error or an empty collection, remove the collection:
+            if (oldcollection == null || oldcollection.size() == 0) {
+                // delete the index entry and the array
+                array_remove(
+                        oldPartitionNumber, serialNumber, this.payloadrow.objectsize,
+                        oldrownumber);
+                index.remove(key);
+                return removed;
+            }
+            
+            // now write to a new partition (which may be the same partition as the old one)
+            final int newPartitionNumber = arrayIndex(oldcollection.size());
+
+            // see if we need new space or if we can overwrite the old space
+            if (oldPartitionNumber == newPartitionNumber) {
+                array_replace(
+                        key, oldcollection, indexrow,
+                        oldPartitionNumber, serialNumber, this.payloadrow.objectsize,
+                        oldrownumber); // modifies indexrow
+            } else {
+                array_remove(
+                        oldPartitionNumber, serialNumber, this.payloadrow.objectsize,
+                        oldrownumber);
+                array_add(
+                        key, oldcollection, indexrow,
+                        newPartitionNumber, serialNumber, this.payloadrow.objectsize); // modifies indexrow
+            }
+            index.put(indexrow); // write modified indexrow
+            return removed;
+        } catch (IOException e1) {
+            e1.printStackTrace();
         }
-        index.put(indexrow); // write modified indexrow
-        return removed;
+        return 0;
     }
     
-    private synchronized boolean has(final byte[] key) {
+    public synchronized boolean has(final byte[] key) {
         return index.has(key);
     }
     
@@ -924,14 +921,6 @@ public class IndexCollection<ReferenceType extends Reference> extends AbstractIn
         return col;
     }
     
-    private synchronized RowSet delete(final byte[] key) throws IOException {
-        // find an entry, if one exists
-        final Row.Entry indexrow = index.remove(key);
-        if (indexrow == null) return null;
-        final RowSet removedCollection = getdelete(indexrow, true);
-        assert (removedCollection != null);
-        return removedCollection;
-    }
 
     private RowSet getdelete(final Row.Entry indexrow, final boolean remove) throws IOException {
         // call this only within a synchronized(index) environment
@@ -1052,56 +1041,6 @@ public class IndexCollection<ReferenceType extends Reference> extends AbstractIn
         final Iterator<FixedWidthArray> i = arrays.values().iterator();
         while (i.hasNext()) i.next().close();
         this.arrays = null;
-    }
-    
-    public static void main(final String[] args) {
-
-        // define payload structure
-        final Row rowdef = new Row("byte[] a-10, byte[] b-80", NaturalOrder.naturalOrder);
-        
-        final File path = new File(args[0]);
-        final String filenameStub = args[1];
-        try {
-            // initialize collection index
-            final IndexCollection<WordReference> collectionIndex  = new IndexCollection<WordReference>(
-                        path, filenameStub,
-                        plasmaWordIndex.wordReferenceFactory,
-                        9 /*keyLength*/,
-                        NaturalOrder.naturalOrder,
-                        7, rowdef, false);
-            
-            // fill index with values
-            RowSet collection = new RowSet(rowdef, 0);
-            collection.addUnique(rowdef.newEntry(new byte[][]{"abc".getBytes(), "efg".getBytes()}));
-            collectionIndex.put("erstes".getBytes(), collection);
-            
-            for (int i = 1; i <= 170; i++) {
-                collection = new RowSet(rowdef, 0);
-                for (int j = 0; j < i; j++) {
-                    collection.addUnique(rowdef.newEntry(new byte[][]{("abc" + j).getBytes(), "xxx".getBytes()}));
-                }
-                System.out.println("put key-" + i + ": " + collection.toString());
-                collectionIndex.put(("key-" + i).getBytes(), collection);
-            }
-            
-            // extend collections with more values
-            for (int i = 0; i <= 170; i++) {
-                collection = new RowSet(rowdef, 0);
-                for (int j = 0; j < i; j++) {
-                    collection.addUnique(rowdef.newEntry(new byte[][]{("def" + j).getBytes(), "xxx".getBytes()}));
-                }
-                collectionIndex.merge(new ReferenceContainer<WordReference>(plasmaWordIndex.wordReferenceFactory,"key-" + i, collection));
-            }
-            
-            // printout of index
-            collectionIndex.close();
-            final EcoTable index = new EcoTable(new File(path, filenameStub + ".index"), IndexCollection.indexRow(9, NaturalOrder.naturalOrder), EcoTable.tailCacheUsageAuto, 0, 0);
-            index.print();
-            index.close();
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-
     }
     
 }

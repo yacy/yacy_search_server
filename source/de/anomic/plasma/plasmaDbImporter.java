@@ -25,10 +25,10 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
     protected plasmaWordIndex homeWordIndex;
     private final int importStartSize;   
 
-    private String wordHash = "------------";
+    private byte[] wordHash = "------------".getBytes();
     
     long wordChunkStart = System.currentTimeMillis(), wordChunkEnd = this.wordChunkStart;
-    String wordChunkStartHash = "------------", wordChunkEndHash;
+    byte[] wordChunkStartHash = "------------".getBytes(), wordChunkEndHash;
     private long urlCounter = 0, wordCounter = 0, entryCounter = 0, notBoundEntryCounter = 0;
     
 

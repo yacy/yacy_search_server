@@ -389,7 +389,7 @@ public class plasmaRankingCRProcess {
         CloneableIterator<Row.Entry> cr_entry;
         while (i.hasNext()) {
             keycollection = i.next();
-            referee = keycollection.getTermHash();
+            referee = new String(keycollection.getTermHash());
             if (referee.length() == 6) refereeDom = referee; else refereeDom = referee.substring(6);
             cr_entry = keycollection.rows();
             
@@ -401,7 +401,7 @@ public class plasmaRankingCRProcess {
                 if (anchor.length() == 6) anchorDom = anchor; else anchorDom = anchor.substring(6);
 
                 // update domain-specific entry
-                rci_entry = rci.get(anchorDom, null);
+                rci_entry = rci.get(anchorDom.getBytes(), null);
                 if (rci_entry == null) rci_entry = new RowSet(RCI_coli, 0);
                 rci_entry.add(refereeDom.getBytes());
                 

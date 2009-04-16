@@ -42,10 +42,10 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         this.factory = factory;
     }
     
-    public int remove(final Set<String> wordHashes, final String urlHash) throws IOException {
+    public int remove(final TreeSet<byte[]> termHashes, final String urlHash) throws IOException {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search
-        final Iterator<String> i = wordHashes.iterator();
+        final Iterator<byte[]> i = termHashes.iterator();
         int c = 0;
         while (i.hasNext()) {
             if (remove(i.next(), urlHash)) c++;
@@ -53,16 +53,16 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         return c;
     }
     
-    public void remove(final Set<String> wordHashes, final Set<String> urlHashes) throws IOException {
+    public void remove(final TreeSet<byte[]> termHashes, final Set<String> urlHashes) throws IOException {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search
-        final Iterator<String> i = wordHashes.iterator();
+        final Iterator<byte[]> i = termHashes.iterator();
         while (i.hasNext()) {
             remove(i.next(), urlHashes);
         }
     }
     
-    public synchronized TreeSet<ReferenceContainer<ReferenceType>> references(final String startHash, final boolean rot, int count) throws IOException {
+    public synchronized TreeSet<ReferenceContainer<ReferenceType>> references(final byte[] startHash, final boolean rot, int count) throws IOException {
         // creates a set of indexContainers
         // this does not use the cache
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.ordering().clone());

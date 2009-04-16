@@ -54,7 +54,7 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
      * @param urlHash, the hash of a reference
      * @return a double in the range 0 .. 1.0 (including 0, excluding 1.0), the DHT position
      */
-    public final long dhtPosition(final String wordHash, final String urlHash) {
+    public final long dhtPosition(final byte[] wordHash, final String urlHash) {
         // this creates 1^^e different positions for the same word hash (according to url hash)
         assert wordHash != null;
         assert urlHash != null;
@@ -68,10 +68,10 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
         // in case that the partitionExpoent is 1, only one bit is taken from the urlHash,
         // which means that the partition is in two parts.
         // With partitionExponent = 2 it is divided in four parts and so on.
-        return (FlatWordPartitionScheme.std.dhtPosition(wordHash, null) & partitionMask) | (FlatWordPartitionScheme.std.dhtPosition(urlHash, null) & ~partitionMask);
+        return (FlatWordPartitionScheme.std.dhtPosition(wordHash, null) & partitionMask) | (FlatWordPartitionScheme.std.dhtPosition(urlHash.getBytes(), null) & ~partitionMask);
     }
     
-    public final long dhtPosition(final String wordHash, final int verticalPosition) {
+    public final long dhtPosition(final byte[] wordHash, final int verticalPosition) {
         assert wordHash != null;
         if (partitionExponent == 0) return FlatWordPartitionScheme.std.dhtPosition(wordHash, null);
         long partitionMask = (1L << (Long.SIZE - 1 - partitionExponent)) - 1L;
@@ -83,7 +83,7 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
         assert urlHash != null;
         if (urlHash == null || partitionExponent < 1) return 0;
         assert partitionExponent > 0;
-        return (int) (FlatWordPartitionScheme.std.dhtPosition(urlHash, null) >> (Long.SIZE - 1 - partitionExponent)); // take only the top-<partitionExponent> bits
+        return (int) (FlatWordPartitionScheme.std.dhtPosition(urlHash.getBytes(), null) >> (Long.SIZE - 1 - partitionExponent)); // take only the top-<partitionExponent> bits
     }
     
     /**
@@ -93,7 +93,7 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
      * @param partitions, the number of partitions of the DHT
      * @return a vector of long values, the possible DHT positions
      */
-    public final long[] dhtPositions(final String wordHash) {
+    public final long[] dhtPositions(final byte[] wordHash) {
         assert wordHash != null;
         int partitions = 1 << partitionExponent;
         long[] l = new long[partitions];
@@ -105,11 +105,11 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
         return l;
     }
  
-    public final long dhtDistance(final String word, final String urlHash, final yacySeed peer) {
-        return dhtDistance(word, urlHash, peer.hash);
+    public final long dhtDistance(final byte[] word, final String urlHash, final yacySeed peer) {
+        return dhtDistance(word, urlHash, peer.hash.getBytes());
     }
     
-    private final long dhtDistance(final String from, final String urlHash, final String to) {
+    private final long dhtDistance(final byte[] from, final String urlHash, final byte[] to) {
         // the dht distance is a positive value between 0 and 1
         // if the distance is small, the word more probably belongs to the peer
         assert to != null;
@@ -132,10 +132,10 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
             // the horizontal and vertical position calculation
             String urlHash = args[1];
             partitionExponent = Integer.parseInt(args[2]);
-            dhtl = partition.dhtPosition(wordHash, urlHash);
+            dhtl = partition.dhtPosition(wordHash.getBytes(), urlHash);
         } else {
             // only a horizontal position calculation
-            dhtl = FlatWordPartitionScheme.std.dhtPosition(wordHash, null);
+            dhtl = FlatWordPartitionScheme.std.dhtPosition(wordHash.getBytes(), null);
         }
         //System.out.println("DHT Double              = " + dhtd);
         System.out.println("DHT Long                = " + dhtl);
@@ -155,7 +155,7 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
         System.out.println();
         */
         System.out.print("all " + (1 << partitionExponent) + " DHT positions from long   : ");
-        long[] l = partition.dhtPositions(wordHash);
+        long[] l = partition.dhtPositions(wordHash.getBytes());
         for (int i = 0; i < l.length; i++) {
             if (i > 0) System.out.print(", ");
             System.out.print(FlatWordPartitionScheme.positionToHash(l[i]));

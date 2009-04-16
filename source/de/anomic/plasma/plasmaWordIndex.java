@@ -462,7 +462,7 @@ public final class plasmaWordIndex {
                         outlinksSame, outlinksOther,
                         wprop.flags);
             try {
-                this.index.add(Word.word2hash(word), ientry);
+                this.index.add(Word.word2hash(word), ientry); // TODO: remove getBytes()
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -596,21 +596,21 @@ public final class plasmaWordIndex {
     }
     
     @SuppressWarnings("unchecked")
-    public HashMap<String, ReferenceContainer<WordReference>>[] localSearchContainers(
-                            final TreeSet<String> queryHashes, 
-                            final TreeSet<String> excludeHashes, 
+    public HashMap<byte[], ReferenceContainer<WordReference>>[] localSearchContainers(
+                            final TreeSet<byte[]> queryHashes, 
+                            final TreeSet<byte[]> excludeHashes, 
                             final Set<String> urlselection) {
         // search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
 
         // retrieve entities that belong to the hashes
-        HashMap<String, ReferenceContainer<WordReference>> inclusionContainers =
+        HashMap<byte[], ReferenceContainer<WordReference>> inclusionContainers =
             (queryHashes.size() == 0) ?
-                    new HashMap<String, ReferenceContainer<WordReference>>(0) :
+                    new HashMap<byte[], ReferenceContainer<WordReference>>(0) :
                     getContainers(queryHashes, urlselection);
-        if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < queryHashes.size())) inclusionContainers = new HashMap<String, ReferenceContainer<WordReference>>(0); // prevent that only a subset is returned
-        final HashMap<String, ReferenceContainer<WordReference>> exclusionContainers =
+        if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < queryHashes.size())) inclusionContainers = new HashMap<byte[], ReferenceContainer<WordReference>>(0); // prevent that only a subset is returned
+        final HashMap<byte[], ReferenceContainer<WordReference>> exclusionContainers =
             (inclusionContainers.size() == 0) ?
-                    new HashMap<String, ReferenceContainer<WordReference>>(0) :
+                    new HashMap<byte[], ReferenceContainer<WordReference>>(0) :
                     getContainers(excludeHashes, urlselection);
         return new HashMap[]{inclusionContainers, exclusionContainers};
     }
@@ -622,12 +622,12 @@ public final class plasmaWordIndex {
      * @param urlselection
      * @return map of wordhash:indexContainer
      */
-    private HashMap<String, ReferenceContainer<WordReference>> getContainers(final Set<String> wordHashes, final Set<String> urlselection) {
+    private HashMap<byte[], ReferenceContainer<WordReference>> getContainers(final TreeSet<byte[]> wordHashes, final Set<String> urlselection) {
         // retrieve entities that belong to the hashes
-        final HashMap<String, ReferenceContainer<WordReference>> containers = new HashMap<String, ReferenceContainer<WordReference>>(wordHashes.size());
-        String singleHash;
+        final HashMap<byte[], ReferenceContainer<WordReference>> containers = new HashMap<byte[], ReferenceContainer<WordReference>>(wordHashes.size());
+        byte[] singleHash;
         ReferenceContainer<WordReference> singleContainer;
-            final Iterator<String> i = wordHashes.iterator();
+            final Iterator<byte[]> i = wordHashes.iterator();
             while (i.hasNext()) {
             
                 // get next word hash:
@@ -642,7 +642,7 @@ public final class plasmaWordIndex {
                 }
             
                 // check result
-                if ((singleContainer == null || singleContainer.size() == 0)) return new HashMap<String, ReferenceContainer<WordReference>>(0);
+                if ((singleContainer == null || singleContainer.size() == 0)) return new HashMap<byte[], ReferenceContainer<WordReference>>(0);
             
                 containers.put(singleHash, singleContainer);
             }
@@ -650,21 +650,21 @@ public final class plasmaWordIndex {
     }
     
     //  The Cleaner class was provided as "UrldbCleaner" by Hydrox
-    public synchronized ReferenceCleaner getReferenceCleaner(final String startHash) {
+    public synchronized ReferenceCleaner getReferenceCleaner(final byte[] startHash) {
         return new ReferenceCleaner(startHash);
     }
     
     public class ReferenceCleaner extends Thread {
         
-        private final String startHash;
+        private final byte[] startHash;
         private boolean run = true;
         private boolean pause = false;
         public int rwiCountAtStart = 0;
-        public String wordHashNow = "";
-        public String lastWordHash = "";
+        public byte[] wordHashNow = null;
+        public byte[] lastWordHash = null;
         public int lastDeletionCounter = 0;
         
-        public ReferenceCleaner(final String startHash) {
+        public ReferenceCleaner(final byte[] startHash) {
             this.startHash = startHash;
             this.rwiCountAtStart = index().size();
         }

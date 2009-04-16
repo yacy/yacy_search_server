@@ -38,6 +38,7 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.crawler.ResultURLs;
+import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
@@ -81,16 +82,16 @@ public final class plasmaSearchEvent {
     private final Map<String, TreeMap<String, String>> rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
     private Thread localSearchThread;
-    private final TreeMap<String, String> preselectedPeerHashes;
+    private final TreeMap<byte[], String> preselectedPeerHashes;
     //private Object[] references;
-    public  TreeMap<String, String> IAResults;
-    public  TreeMap<String, Integer> IACount;
-    public  String IAmaxcounthash, IAneardhthash;
+    public  TreeMap<byte[], String> IAResults;
+    public  TreeMap<byte[], Integer> IACount;
+    public  byte[] IAmaxcounthash, IAneardhthash;
     private resultWorker[] workerThreads;
     SortStore<ResultEntry> result;
     SortStore<plasmaSnippetCache.MediaSnippet> images; // container to sort images by size
     HashMap<String, String> failedURLs; // a mapping from a urlhash to a fail reason string
-    TreeSet<String> snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
+    TreeSet<byte[]> snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     long urlRetrievalAllTime;
     long snippetComputationAllTime;
     ResultURLs crawlResults;
@@ -99,7 +100,7 @@ public final class plasmaSearchEvent {
     private plasmaSearchEvent(final plasmaSearchQuery query,
                              final plasmaWordIndex wordIndex,
                              final ResultURLs crawlResults,
-                             final TreeMap<String, String> preselectedPeerHashes,
+                             final TreeMap<byte[], String> preselectedPeerHashes,
                              final boolean generateAbstracts) {
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.wordIndex = wordIndex;
@@ -109,8 +110,8 @@ public final class plasmaSearchEvent {
         this.primarySearchThreads = null;
         this.secondarySearchThreads = null;
         this.preselectedPeerHashes = preselectedPeerHashes;
-        this.IAResults = new TreeMap<String, String>();
-        this.IACount = new TreeMap<String, Integer>();
+        this.IAResults = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
+        this.IACount = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
         this.IAmaxcounthash = null;
         this.IAneardhthash = null;
         this.urlRetrievalAllTime = 0;
@@ -123,10 +124,10 @@ public final class plasmaSearchEvent {
         
         // snippets do not need to match with the complete query hashes,
         // only with the query minus the stopwords which had not been used for the search
-        final TreeSet<String> filtered = SetTools.joinConstructive(query.queryHashes, plasmaSwitchboard.stopwords);
-        this.snippetFetchWordHashes = (TreeSet<String>) query.queryHashes.clone();
+        final TreeSet<byte[]> filtered = SetTools.joinConstructive(query.queryHashes, plasmaSwitchboard.stopwordHashes);
+        this.snippetFetchWordHashes = (TreeSet<byte[]>) query.queryHashes.clone();
         if ((filtered != null) && (filtered.size() > 0)) {
-            SetTools.excludeDestructive(this.snippetFetchWordHashes, plasmaSwitchboard.stopwords);
+            SetTools.excludeDestructive(this.snippetFetchWordHashes, plasmaSwitchboard.stopwordHashes);
         }
         
         final long start = System.currentTimeMillis();
@@ -177,8 +178,8 @@ public final class plasmaSearchEvent {
                 final long timer = System.currentTimeMillis();
                 int maxcount = -1;
                 long mindhtdistance = Long.MAX_VALUE, l;
-                String wordhash;
-                for (Map.Entry<String, ReferenceContainer<WordReference>> entry : this.rankedCache.searchContainerMaps()[0].entrySet()) {
+                byte[] wordhash;
+                for (Map.Entry<byte[], ReferenceContainer<WordReference>> entry : this.rankedCache.searchContainerMaps()[0].entrySet()) {
                     wordhash = entry.getKey();
                     final ReferenceContainer container = entry.getValue();
                     assert (container.getTermHash().equals(wordhash));
@@ -249,7 +250,7 @@ public final class plasmaSearchEvent {
                 // execute deletion of failed words
                 int rw = cleanEvent.failedURLs.size();
                 if (rw > 0) {
-                    final Set<String> removeWords = cleanEvent.query.queryHashes;
+                    final TreeSet<byte[]> removeWords = cleanEvent.query.queryHashes;
                     removeWords.addAll(cleanEvent.query.excludeHashes);
                     try {
                         cleanEvent.wordIndex.index().remove(removeWords, cleanEvent.failedURLs.keySet());
@@ -307,7 +308,7 @@ public final class plasmaSearchEvent {
         if ((query.constraint != null) &&
             (query.constraint.get(Condenser.flag_cat_indexof)) &&
             (!(metadata.dc_title().startsWith("Index of")))) {
-            final Iterator<String> wi = query.queryHashes.iterator();
+            final Iterator<byte[]> wi = query.queryHashes.iterator();
             while (wi.hasNext()) try { wordIndex.index().remove(wi.next(), page.hash()); } catch (IOException e) {}
             registerFailure(page.hash(), "index-of constraint not fullfilled");
             return null;
@@ -451,7 +452,7 @@ public final class plasmaSearchEvent {
             final plasmaSearchRankingProfile ranking,
             final plasmaWordIndex wordIndex,
             final ResultURLs crawlResults,
-            final TreeMap<String, String> preselectedPeerHashes,
+            final TreeMap<byte[], String> preselectedPeerHashes,
             final boolean generateAbstracts) {
         
         String id = query.id(false);

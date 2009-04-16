@@ -60,15 +60,15 @@ public interface PartitionScheme {
 
     public int verticalPartitions();
     
-    public long dhtPosition(final String wordHash, final String urlHash);
+    public long dhtPosition(final byte[] wordHash, final String urlHash);
     
-    public long dhtPosition(final String wordHash, final int verticalPosition);
+    public long dhtPosition(final byte[] wordHash, final int verticalPosition);
     
     public int verticalPosition(final String urlHash);
     
-    public long[] dhtPositions(final String wordHash);
+    public long[] dhtPositions(final byte[] wordHash);
  
-    public long dhtDistance(final String word, final String urlHash, final yacySeed peer);
+    public long dhtDistance(final byte[] word, final String urlHash, final yacySeed peer);
     
     
 }

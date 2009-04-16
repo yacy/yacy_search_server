@@ -46,6 +46,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
@@ -95,7 +96,7 @@ public class bookmarksDB {
     
     // tags
     MapView tagsTable;
-    HashMap<String, Tag> tagCache;					
+    TreeMap<String, Tag> tagCache;					
     
     // dates
     MapView datesTable;
@@ -109,7 +110,7 @@ public class bookmarksDB {
 
     public bookmarksDB(final File bookmarksFile, final File tagsFile, final File datesFile) {
         // bookmarks
-        tagCache=new HashMap<String, Tag>();
+        tagCache=new TreeMap<String, Tag>();
         bookmarksFile.getParentFile().mkdirs();
         //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
         this.bookmarksTable = new MapView(new BLOBTree(bookmarksFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, true, false, false), 1000);
@@ -305,10 +306,10 @@ public class bookmarksDB {
      *        tagName is converted to lower case before hash is generated!
      */
     public static String tagHash(final String tagName){
-        return Word.word2hash(tagName.toLowerCase());
+        return new String(Word.word2hash(tagName.toLowerCase()));
     }    
     public static String tagHash(final String tagName, final String user){
-        return Word.word2hash(user+":"+tagName.toLowerCase());
+        return new String(Word.word2hash(user+":"+tagName.toLowerCase()));
     }
     
     public Iterator<String> getFolderList(final boolean priv){    
@@ -548,7 +549,7 @@ public class bookmarksDB {
         while(it.hasNext()){
             storeTag(tagCache.get(it.next()));
         }
-        tagCache=new HashMap<String, Tag>();
+        tagCache=new TreeMap<String, Tag>();
     }
     
     public String addTag(final Tag tag) {		// TODO: is addTag() really needed - check storeTag() and saveTag()

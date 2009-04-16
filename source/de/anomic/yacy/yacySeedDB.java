@@ -324,7 +324,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         return new seedEnum(up, field, seedPotentialDB);
     }
     
-    public TreeMap<String, String> /* peer-b64-hashes/ipport */ clusterHashes(final String clusterdefinition) {
+    public TreeMap<byte[], String> /* peer-b64-hashes/ipport */ clusterHashes(final String clusterdefinition) {
     	// collects seeds according to cluster definition string, which consists of
     	// comma-separated .yacy or .yacyh-domains
     	// the domain may be extended by an alternative address specification of the form
@@ -334,7 +334,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     	// address    ::= (<peername>'.yacy'|<peerhexhash>'.yacyh'){'='<ip>{':'<port}}
     	// clusterdef ::= {address}{','address}*
     	final String[] addresses = (clusterdefinition.length() == 0) ? new String[0] : clusterdefinition.split(",");
-    	final TreeMap<String, String> clustermap = new TreeMap<String, String>(Base64Order.enhancedComparator);
+    	final TreeMap<byte[], String> clustermap = new TreeMap<byte[], String>(Base64Order.enhancedCoder);
     	yacySeed seed;
     	String hash, yacydom, ipport;
     	int p;
@@ -354,7 +354,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     			if (seed == null) {
     				yacyCore.log.logWarning("cluster peer '" + yacydom + "' was not found.");
     			} else {
-    				clustermap.put(hash, ipport);
+    				clustermap.put(hash.getBytes(), ipport);
     			}
     		} else if (yacydom.endsWith(".yacy")) {
     			// find a peer with its name
@@ -362,7 +362,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     			if (seed == null) {
     				yacyCore.log.logWarning("cluster peer '" + yacydom + "' was not found.");
     			} else {
-    				clustermap.put(seed.hash, ipport);
+    				clustermap.put(seed.hash.getBytes(), ipport);
     			}
     		} else {
     			yacyCore.log.logWarning("cluster peer '" + addresses[i] + "' has wrong syntax. the name must end with .yacy or .yacyh");
@@ -371,19 +371,19 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     	return clustermap;
     }
     
-    public Iterator<yacySeed> seedsConnected(final boolean up, final boolean rot, final String firstHash, final float minVersion) {
+    public Iterator<yacySeed> seedsConnected(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
-        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), null, seedActiveDB, minVersion);
+        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash, null, seedActiveDB, minVersion);
     }
     
-    public Iterator<yacySeed> seedsDisconnected(final boolean up, final boolean rot, final String firstHash, final float minVersion) {
+    public Iterator<yacySeed> seedsDisconnected(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
-        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), null, seedPassiveDB, minVersion);
+        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash, null, seedPassiveDB, minVersion);
     }
     
-    public Iterator<yacySeed> seedsPotential(final boolean up, final boolean rot, final String firstHash, final float minVersion) {
+    public Iterator<yacySeed> seedsPotential(final boolean up, final boolean rot, final byte[] firstHash, final float minVersion) {
         // enumerates seed-type objects: all seeds sequentially without order
-        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash.getBytes(), null, seedPotentialDB, minVersion);
+        return new seedEnum(up, rot, (firstHash == null) ? null : firstHash, null, seedPotentialDB, minVersion);
     }
     
     public yacySeed anySeedVersion(final float minVersion) {

@@ -135,16 +135,16 @@ public class plasmaRankingRCIEvaluation {
     }
     
     @SuppressWarnings("unchecked")
-    public static TreeSet<String>[] genRankingTable(final AttrSeq rci, final int[] partition) {
-        final TreeSet<String>[] ranked = new TreeSet[partition.length];
-        for (int i = 0; i < partition.length; i++) ranked[i] = new TreeSet<String>(Base64Order.enhancedComparator);
+    public static TreeSet<byte[]>[] genRankingTable(final AttrSeq rci, final int[] partition) {
+        final TreeSet<byte[]>[] ranked = new TreeSet[partition.length];
+        for (int i = 0; i < partition.length; i++) ranked[i] = new TreeSet<byte[]>(Base64Order.enhancedCoder);
         final Iterator<String> i = rci.keys();
         String key;
         AttrSeq.Entry entry;
         while (i.hasNext()) {
             key = i.next();
             entry = rci.getEntry(key);
-            ranked[orderIntoYBI(partition, entry.getSeqSet().size())].add(key);
+            ranked[orderIntoYBI(partition, entry.getSeqSet().size())].add(key.getBytes());
         }
         return ranked;
     }
@@ -165,7 +165,7 @@ public class plasmaRankingRCIEvaluation {
         return dommap;
     }
 
-    public static void storeRankingTable(final TreeSet<String>[] ranking, final File tablePath) throws IOException {
+    public static void storeRankingTable(final TreeSet<byte[]>[] ranking, final File tablePath) throws IOException {
         String filename;
         if (!(tablePath.exists())) tablePath.mkdirs();
         for (int i = 0; i < ranking.length - 1; i++) {
@@ -200,7 +200,7 @@ public class plasmaRankingRCIEvaluation {
                 System.out.println("sum of all references: " + sum);
                 
                 // create ranking
-                final TreeSet<String>[] ranked = genRankingTable(rci, partition);
+                final TreeSet<byte[]>[] ranked = genRankingTable(rci, partition);
                 storeRankingTable(ranked, new File(root_path, "ranking/YBR"));
                 final long seconds = java.lang.Math.max(1, (System.currentTimeMillis() - start) / 1000);
                 System.out.println("Finished YBR generation in " + seconds + " seconds.");

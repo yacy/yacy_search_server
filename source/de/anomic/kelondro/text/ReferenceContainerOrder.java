@@ -40,7 +40,7 @@ public class ReferenceContainerOrder<ReferenceType extends Reference> extends Ab
     }
 
     public boolean wellformed(final ReferenceContainer<ReferenceType> a) {
-        return embeddedOrder.wellformed(a.getTermHash().getBytes());
+        return embeddedOrder.wellformed(a.getTermHash());
     }
     
     public void direction(final boolean ascending) {
@@ -52,16 +52,16 @@ public class ReferenceContainerOrder<ReferenceType extends Reference> extends Ab
     }
 
     public int compare(final ReferenceContainer<ReferenceType> a, final ReferenceContainer<ReferenceType> b) {
-        return this.embeddedOrder.compare(a.getTermHash().getBytes(), b.getTermHash().getBytes());
+        return this.embeddedOrder.compare(a.getTermHash(), b.getTermHash());
     }
     
     public boolean equal(ReferenceContainer<ReferenceType> a, ReferenceContainer<ReferenceType> b) {
-        return this.embeddedOrder.equal(a.getTermHash().getBytes(), b.getTermHash().getBytes());
+        return this.embeddedOrder.equal(a.getTermHash(), b.getTermHash());
     }
     
     public void rotate(final ReferenceContainer<ReferenceType> zero) {
-        this.embeddedOrder.rotate(zero.getTermHash().getBytes());
-        this.zero = new ReferenceContainer<ReferenceType>(this.factory, new String(this.embeddedOrder.zero()), zero);
+        this.embeddedOrder.rotate(zero.getTermHash());
+        this.zero = new ReferenceContainer<ReferenceType>(this.factory, this.embeddedOrder.zero(), zero);
     }
 
     public Order<ReferenceContainer<ReferenceType>> clone() {
@@ -82,7 +82,7 @@ public class ReferenceContainerOrder<ReferenceType extends Reference> extends Ab
     }
 
 	public long cardinal(final ReferenceContainer<ReferenceType> key) {
-		return this.embeddedOrder.cardinal(key.getTermHash().getBytes());
+		return this.embeddedOrder.cardinal(key.getTermHash());
 	}
 
 }

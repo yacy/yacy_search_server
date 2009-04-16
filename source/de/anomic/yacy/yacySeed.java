@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
@@ -580,7 +581,7 @@ public class yacySeed implements Cloneable {
         return serverCodings.string2set(get(PEERTAGS, ""), "|");
     }
 
-    public boolean matchPeerTags(final Set<String> searchHashes) {
+    public boolean matchPeerTags(final TreeSet<byte[]> searchHashes) {
         final String peertags = get(PEERTAGS, "");
         if (peertags.equals("*")) return true;
         final Set<String> tags = serverCodings.string2set(peertags, "|");
@@ -676,7 +677,7 @@ public class yacySeed implements Cloneable {
         return type.equals(yacySeed.PEERTYPE_SENIOR) || type.equals(yacySeed.PEERTYPE_PRINCIPAL);
     }
 
-    private static String bestGap(final yacySeedDB seedDB) {
+    private static byte[] bestGap(final yacySeedDB seedDB) {
         if ((seedDB == null) || (seedDB.sizeConnected() <= 2)) {
             // use random hash
             return randomHash();
@@ -695,9 +696,9 @@ public class yacySeed implements Cloneable {
         
         // find dht position and size of gap
         final long gaphalf = FlatWordPartitionScheme.dhtDistance(
-                FlatWordPartitionScheme.std.dhtPosition(interval.substring(0, 12), null),
-                FlatWordPartitionScheme.std.dhtPosition(interval.substring(12), null)) >> 1;
-        long p = FlatWordPartitionScheme.std.dhtPosition(interval.substring(0, 12), null);
+                FlatWordPartitionScheme.std.dhtPosition(interval.substring(0, 12).getBytes(), null),
+                FlatWordPartitionScheme.std.dhtPosition(interval.substring(12).getBytes(), null)) >> 1;
+        long p = FlatWordPartitionScheme.std.dhtPosition(interval.substring(0, 12).getBytes(), null);
         long gappos = (Long.MAX_VALUE - p >= gaphalf) ? p + gaphalf : (p - Long.MAX_VALUE) + gaphalf;
         return FlatWordPartitionScheme.positionToHash(gappos);
     }
@@ -717,16 +718,16 @@ public class yacySeed implements Cloneable {
                 continue;
             }
             l = FlatWordPartitionScheme.dhtDistance(
-                    FlatWordPartitionScheme.std.dhtPosition(s0.hash, null),
-                    FlatWordPartitionScheme.std.dhtPosition(s1.hash, null));
+                    FlatWordPartitionScheme.std.dhtPosition(s0.hash.getBytes(), null),
+                    FlatWordPartitionScheme.std.dhtPosition(s1.hash.getBytes(), null));
             gaps.put(l, s0.hash + s1.hash);
             s0 = s1;
         }
         // compute also the last gap
         if ((first != null) && (s0 != null)) {
             l = FlatWordPartitionScheme.dhtDistance(
-                    FlatWordPartitionScheme.std.dhtPosition(s0.hash, null),
-                    FlatWordPartitionScheme.std.dhtPosition(first.hash, null));
+                    FlatWordPartitionScheme.std.dhtPosition(s0.hash.getBytes(), null),
+                    FlatWordPartitionScheme.std.dhtPosition(first.hash.getBytes(), null));
             gaps.put(l, s0.hash + first.hash);
         }
         return gaps;
@@ -740,10 +741,10 @@ public class yacySeed implements Cloneable {
         // generate a seed for the local peer
         // this is the birthplace of a seed, that then will start to travel to other peers
 
-        final String hash = bestGap(db);
+        final byte[] hash = bestGap(db);
         yacyCore.log.logInfo("init: OWN SEED = " + hash);
 
-        final yacySeed newSeed = new yacySeed(hash);
+        final yacySeed newSeed = new yacySeed(new String(hash));
 
         // now calculate other information about the host
         newSeed.dna.put(yacySeed.NAME, (name) == null ? "anonymous" : name);
@@ -758,11 +759,11 @@ public class yacySeed implements Cloneable {
 
     //public static String randomHash() { return "zLXFf5lTteUv"; } // only for debugging
 
-    public static String randomHash() {
+    public static byte[] randomHash() {
         final String hash =
             Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6) +
             Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(random.nextLong()))).substring(0, 6);
-        return hash;
+        return hash.getBytes();
     }
 
     public static yacySeed genRemoteSeed(final String seedStr, final String key, final boolean ownSeed) {
