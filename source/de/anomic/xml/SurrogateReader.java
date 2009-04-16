@@ -89,19 +89,23 @@ public class SurrogateReader extends DefaultHandler implements Runnable, Iterato
     }
     
     public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
-        if ("document".equals(tag)) {
+        if ("record".equals(tag) || "document".equals(tag)) {
             this.surrogate = new Surrogate();
         } else if ("element".equals(tag)) {
             this.elementName = atts.getValue("name");
         } else if ("value".equals(tag)) {
             this.buffer.setLength(0);
             this.parsingValue = true;
+        } else if (tag.startsWith("dc:")) {
+            // parse dublin core attribute
+            this.elementName = tag;
+            this.parsingValue = true;
         }
     }
 
     public void endElement(final String uri, final String name, final String tag) {
         if (tag == null) return;
-        if ("document".equals(tag)) {
+        if ("record".equals(tag) || "document".equals(tag)) {
             //System.out.println("A Title: " + this.surrogate.title());
             try {
                 this.surrogates.put(this.surrogate);
@@ -118,6 +122,13 @@ public class SurrogateReader extends DefaultHandler implements Runnable, Iterato
             this.parsingValue = false;
         } else if ("value".equals(tag)) {
             //System.out.println("BUFFER-SIZE=" + buffer.length());
+            final String value = buffer.toString().trim();
+            if (this.elementName != null) {
+                this.surrogate.put(this.elementName, value);
+            }
+            this.buffer.setLength(0);
+            this.parsingValue = false;
+        } else if (tag.startsWith("dc:")) {
             final String value = buffer.toString().trim();
             if (this.elementName != null) {
                 this.surrogate.put(this.elementName, value);
@@ -177,6 +188,24 @@ public class SurrogateReader extends DefaultHandler implements Runnable, Iterato
 }
     /*
 Example surrogate
+<?xml version="1.0" encoding="utf-8"?>
+<!-- YaCy surrogate file using dublin core notion -->
+<!-- see http://dublincore.org/documents/dc-xml-guidelines/ -->
+<surrogates
+  xmlns:dc="http://purl.org/dc/elements/1.1/">
+
+  <record>
+    <dc:title><![CDATA[Alan Smithee]]></dc:title>
+    <dc:identifier>http://de.wikipedia.org/wiki/Alan_Smithee</dc:identifier>
+    <dc:description><![CDATA[Der als Filmregisseur oft genannte '''Alan Smithee''' ist ein Anagramm von ãThe Alias MenÒ.]]></dc:description>
+    <dc:language>de</dc:language>
+    <dc:date>2009-03-02T11:12:36Z</dc:date> <!-- date is in ISO 8601 -->
+  </record>
+
+</surrogates>
+
+
+or
 
 <?xml version="1.0" encoding="utf-8"?>
 <documents>

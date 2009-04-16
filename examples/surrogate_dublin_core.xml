@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- YaCy surrogate file using dublin core notion -->
+<!-- 
+  This is a surrogate file which is an intermediate document description
+  file for index generation. Once you have YaCy started, you can copy a file
+  like this (or actual this file) into DATA/SURROGATE/in and then the indexing
+  process will read the file, store the content into the search index and moves
+  the file into DATA/SURROGATE/out
+  Using surrogate files and the surrogate file format you can easily create your
+  own data harvesting sources for the YaCy indexer. Just write a file generator
+  that generates files like this. The xml schema is very similar to that
+  described in
+    http://dublincore.org/documents/dc-xml-guidelines/
+  using the Dublin Core metadata element set.
+-->
+
+<surrogates
+  xmlns:dc="http://purl.org/dc/elements/1.1/">
+
+  <record>
+    <dc:title><![CDATA[Alan Smithee]]></dc:title>
+    <dc:identifier>http://de.wikipedia.org/wiki/Alan_Smithee</dc:identifier>
+    <dc:description><![CDATA[Der als Filmregisseur oft genannte '''Alan Smithee''' ist ein Anagramm von „The Alias Men“.]]></dc:description>
+    <dc:language>de</dc:language>
+    <dc:date>2009-03-02T11:12:36Z</dc:date> <!-- date is in ISO 8601 -->
+  </record>
+
+</surrogates>

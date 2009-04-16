@@ -41,9 +41,31 @@ public class Surrogate extends HashMap<String, String> {
     public Surrogate() {
         super();
     }
+    
+    /*
+    DC according to rfc 5013
+
+    * dc_title
+    * dc_creator
+    * dc_subject
+    * dc_description
+    * dc_publisher
+    dc_contributor
+    dc_date
+    dc_type
+    * dc_format
+    * dc_identifier
+    * dc_source
+    dc_language
+    dc_relation
+    dc_coverage
+    dc_rights
+         */
+    
     public Date date() {
-        String d = this.get("date");
+        String d = this.get("dateISO8601");
         if (d == null) d = this.get("docdatetime");
+        if (d == null) d = this.get("dc:date");
         if (d == null) return null;
         try {
             return DateFormatter.parseISO8601(d);
@@ -54,6 +76,7 @@ public class Surrogate extends HashMap<String, String> {
     }
     public yacyURL url() {
         String u = this.get("url");
+        if (u == null) u = this.get("dc:identifier");
         if (u == null) return null;
         try {
             return new yacyURL(u, null);
@@ -64,19 +87,28 @@ public class Surrogate extends HashMap<String, String> {
     }
     public String language() {
         String l = this.get("language");
+        if (l == null) l = this.get("dc:language");
         if (l == null) return "en"; else return l;
     }
     public String title() {
         String t = this.get("title");
-        return stripCDATA(t);
+        if (t == null) t = this.get("dc:title");
+        t = stripCDATA(t);
+        if (t == null) return "";
+        return t;
     }
     public String body() {
         String t = this.get("body");
-        return stripCDATA(t);
+        if (t == null) this.get("dc:description");
+        t = stripCDATA(t);
+        if (t == null) return "";
+        return t;
     }
     public String[] categories() {
         String t = this.get("categories");
+        if (t == null) this.get("dc:subject");
         t = stripCDATA(t);
+        if (t == null) return new String[]{};
         return t.split(";");
     }
     private String stripCDATA(String s) {
