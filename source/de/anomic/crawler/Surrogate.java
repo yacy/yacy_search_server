@@ -99,7 +99,7 @@ public class Surrogate extends HashMap<String, String> {
     }
     public String body() {
         String t = this.get("body");
-        if (t == null) this.get("dc:description");
+        if (t == null) t = this.get("dc:description");
         t = stripCDATA(t);
         if (t == null) return "";
         return t;

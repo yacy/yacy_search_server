@@ -1193,13 +1193,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (outfile.exists()) return false;
         boolean moved = false;
         try {
-            SurrogateReader reader = new SurrogateReader(new BufferedInputStream(new FileInputStream(surrogateFile)));
+            SurrogateReader reader = new SurrogateReader(new BufferedInputStream(new FileInputStream(surrogateFile)), 3);
             Thread readerThread = new Thread(reader, "Surrogate-Reader " + surrogateFile.getAbsolutePath());
             readerThread.start();
             Surrogate surrogate;
             QueueEntry queueentry;
-            while (reader.hasNext()) {
-                surrogate = reader.next();
+            while ((surrogate = reader.take()) != SurrogateReader.poison) {
                 plasmaParserDocument document = surrogate.document();
                 queueentry = this.webIndex.queuePreStack.newEntry(surrogate.url(), null, null, false, null, 0, this.webIndex.defaultSurrogateProfile.handle(), null);
                 /*

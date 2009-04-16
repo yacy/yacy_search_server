@@ -29,7 +29,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Iterator;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
@@ -43,8 +42,10 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import de.anomic.crawler.Surrogate;
 
-public class SurrogateReader extends DefaultHandler implements Runnable, Iterator<Surrogate> {
+public class SurrogateReader extends DefaultHandler implements Runnable {
 
+	public static final Surrogate poison = new Surrogate();
+	
     // class variables
     private final StringBuilder buffer;
     private boolean parsingValue;
@@ -53,14 +54,13 @@ public class SurrogateReader extends DefaultHandler implements Runnable, Iterato
     private BlockingQueue<Surrogate> surrogates;
     private SAXParser saxParser;
     private InputStream stream;
-    private boolean isrunning;
     
-    public SurrogateReader(final InputStream stream) throws IOException {
+    public SurrogateReader(final InputStream stream, int queueSize) throws IOException {
         this.buffer = new StringBuilder();
         this.parsingValue = false;
         this.surrogate = null;
         this.elementName = null;
-        this.surrogates = new ArrayBlockingQueue<Surrogate>(3);
+        this.surrogates = new ArrayBlockingQueue<Surrogate>(queueSize);
         this.stream = stream;
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
@@ -72,11 +72,9 @@ public class SurrogateReader extends DefaultHandler implements Runnable, Iterato
             e.printStackTrace();
             throw new IOException(e.getMessage());
         }
-        this.isrunning = false;
     }
     
     public void run() {
-        this.isrunning = true;
         try {
             this.saxParser.parse(this.stream, this);
         } catch (SAXException e) {
@@ -84,7 +82,16 @@ public class SurrogateReader extends DefaultHandler implements Runnable, Iterato
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            this.isrunning = false;
+        	try {
+				this.surrogates.put(poison);
+			} catch (InterruptedException e1) {
+				e1.printStackTrace();
+			}
+			try {
+        		this.stream.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
         }
     }
     
@@ -144,11 +151,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable, Iterato
         }
     }
 
-    public boolean hasNext() {
-        return this.isrunning || this.surrogates.size() > 0;
-    }
-
-    public Surrogate next() {
+    public Surrogate take() {
         try {
             return this.surrogates.take();
         } catch (InterruptedException e) {
@@ -165,14 +168,13 @@ public class SurrogateReader extends DefaultHandler implements Runnable, Iterato
         File f = new File(args[0]);
         SurrogateReader sr;
         try {
-            sr = new SurrogateReader(new BufferedInputStream(new FileInputStream(f)));
+            sr = new SurrogateReader(new BufferedInputStream(new FileInputStream(f)), 1);
 
             Thread t = new Thread(sr, "Surrogate-Reader " + f.getAbsolutePath());
             t.start();
             Surrogate s;
             System.out.println("1");
-            while (sr.hasNext()) {
-                s = sr.next();
+            while ((s = sr.take()) != SurrogateReader.poison) {
                 System.out.println("Title: " + s.title());
                 System.out.println("Date: " + s.date());
                 System.out.println("URL: " + s.url());
