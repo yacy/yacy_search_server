@@ -86,6 +86,8 @@ public final class plasmaWordIndex {
     public static final String CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT   = "snippetGlobalText";
     public static final String CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA   = "snippetLocalMedia";
     public static final String CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA  = "snippetGlobalMedia";
+    public static final String CRAWL_PROFILE_SURROGATE             = "surrogates";
+    
     public static final String DBFILE_ACTIVE_CRAWL_PROFILES        = "crawlProfilesActive.heap";
     public static final String DBFILE_PASSIVE_CRAWL_PROFILES       = "crawlProfilesPassive.heap";
     
@@ -94,6 +96,7 @@ public final class plasmaWordIndex {
     public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE = 60L * 24L * 30L;
     public static final long CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
     public static final long CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE = 60L * 24L * 30L;
+    public static final long CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE = 60L * 24L * 30L;
     
     public static final ByteOrder wordOrder = Base64Order.enhancedCoder;
     
@@ -108,6 +111,7 @@ public final class plasmaWordIndex {
     public  CrawlProfile.entry    defaultRemoteProfile;
     public  CrawlProfile.entry    defaultTextSnippetLocalProfile, defaultTextSnippetGlobalProfile;
     public  CrawlProfile.entry    defaultMediaSnippetLocalProfile, defaultMediaSnippetGlobalProfile;
+    public  CrawlProfile.entry    defaultSurrogateProfile;
     private final File            queuesRoot;
     private IODispatcher<WordReference> merger;
     
@@ -297,6 +301,7 @@ public final class plasmaWordIndex {
         this.defaultTextSnippetGlobalProfile = null;
         this.defaultMediaSnippetLocalProfile = null;
         this.defaultMediaSnippetGlobalProfile = null;
+        this.defaultSurrogateProfile = null;
         final Iterator<CrawlProfile.entry> i = this.profilesActiveCrawls.profiles(true);
         CrawlProfile.entry profile;
         String name;
@@ -310,6 +315,7 @@ public final class plasmaWordIndex {
                 if (name.equals(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT)) this.defaultTextSnippetGlobalProfile = profile;
                 if (name.equals(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA)) this.defaultMediaSnippetLocalProfile = profile;
                 if (name.equals(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA)) this.defaultMediaSnippetGlobalProfile = profile;
+                if (name.equals(CRAWL_PROFILE_SURROGATE)) this.defaultSurrogateProfile = profile;
             }
         } catch (final Exception e) {
             this.profilesActiveCrawls.clear();
@@ -319,6 +325,7 @@ public final class plasmaWordIndex {
             this.defaultTextSnippetGlobalProfile = null;
             this.defaultMediaSnippetLocalProfile = null;
             this.defaultMediaSnippetGlobalProfile = null;
+            this.defaultSurrogateProfile = null;
         }
         
         if (this.defaultProxyProfile == null) {
@@ -356,6 +363,11 @@ public final class plasmaWordIndex {
             defaultMediaSnippetGlobalProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA, null, CrawlProfile.KEYWORDS_SNIPPET, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
             		this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE), -1, -1, true, false, true, true, true, false, true, true, false);
         }
+        if (this.defaultSurrogateProfile == null) {
+            // generate new default entry for surrogate parsing
+            defaultSurrogateProfile = this.profilesActiveCrawls.newEntry(CRAWL_PROFILE_SURROGATE, null, CrawlProfile.KEYWORDS_SNIPPET, CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 0,
+                    this.profilesActiveCrawls.getRecrawlDate(CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE), -1, -1, true, true, false, false, false, false, true, true, false);
+        }
     }
     
     private void resetProfiles() {
@@ -387,7 +399,8 @@ public final class plasmaWordIndex {
                       (entry.name().equals(CRAWL_PROFILE_SNIPPET_LOCAL_TEXT))  ||
                       (entry.name().equals(CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT)) ||
                       (entry.name().equals(CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA)) ||
-                      (entry.name().equals(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA)))) {
+                      (entry.name().equals(CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA)) ||
+                      (entry.name().equals(CRAWL_PROFILE_SURROGATE)))) {
                     profilesPassiveCrawls.newEntry(entry.map());
                     iter.remove();
                     hasDoneSomething = true;

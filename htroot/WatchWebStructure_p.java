@@ -41,7 +41,8 @@ public class WatchWebStructure_p {
                     e.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)  ||
                     e.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT) ||
                     e.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ||
-                    e.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA))
+                    e.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA) ||
+                    e.name().equals(plasmaWordIndex.CRAWL_PROFILE_SURROGATE))
                    continue;
                 host = e.name();
                 break; // take the first one

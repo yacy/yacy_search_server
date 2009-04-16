@@ -114,7 +114,8 @@ public class CrawlProfileEditor_p {
         entry selentry;
         while (it.hasNext()) {
             selentry = it.next();
-            if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_PROXY) ||
+            if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_SURROGATE) ||
+                    selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_PROXY) ||
                     selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_REMOTE) /*||
                     selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_TEXT) ||
                     selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_MEDIA)*/)

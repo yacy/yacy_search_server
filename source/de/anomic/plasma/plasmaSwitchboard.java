@@ -85,6 +85,7 @@
 
 package de.anomic.plasma;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -120,8 +121,10 @@ import de.anomic.crawler.ResourceObserver;
 import de.anomic.crawler.ResultImages;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.RobotsTxt;
+import de.anomic.crawler.Surrogate;
 import de.anomic.crawler.ZURL;
 import de.anomic.crawler.CrawlProfile.entry;
+import de.anomic.crawler.IndexingStack.QueueEntry;
 import de.anomic.data.Blacklist;
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
@@ -165,6 +168,7 @@ import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
 import de.anomic.tools.crypt;
+import de.anomic.xml.SurrogateReader;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
@@ -200,6 +204,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  File                           rankingPath;
     public  File                           workPath;
     public  File                           releasePath;
+    public  File                           surrogatesInPath;
+    public  File                           surrogatesOutPath;
     public  Map<String, String>            rankingPermissions;
     public  plasmaWordIndex                webIndex;
     public  CrawlQueues                    crawlQueues;
@@ -434,6 +440,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         this.log.logInfo("HTCACHE Path = " + htCachePath.getAbsolutePath());
         final long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig(plasmaSwitchboardConstants.PROXY_CACHE_SIZE, "2")); // this is megabyte
         plasmaHTCache.init(htCachePath, webIndex.peers().mySeed().hash, maxCacheSize);
+        
+        // create the surrogates directories
+        surrogatesInPath = getConfigPath(plasmaSwitchboardConstants.SURROGATES_IN_PATH, plasmaSwitchboardConstants.SURROGATES_IN_PATH_DEFAULT);
+        this.log.logInfo("surrogates.in Path = " + surrogatesInPath.getAbsolutePath());
+        surrogatesInPath.mkdirs();
+        surrogatesOutPath = getConfigPath(plasmaSwitchboardConstants.SURROGATES_OUT_PATH, plasmaSwitchboardConstants.SURROGATES_OUT_PATH_DEFAULT);
+        this.log.logInfo("surrogates.out Path = " + surrogatesOutPath.getAbsolutePath());
+        surrogatesOutPath.mkdirs();
         
         // create the release download directory
         releasePath = getConfigPath(plasmaSwitchboardConstants.RELEASE_PATH, plasmaSwitchboardConstants.RELEASE_PATH_DEFAULT);
@@ -1166,6 +1180,38 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         }
     }
     
+    public void processSurrogate(String s) {
+        File surrogateFile = new File(this.surrogatesInPath, s);
+        File outfile = new File(this.surrogatesOutPath, s);
+        try {
+            SurrogateReader reader = new SurrogateReader(new BufferedInputStream(new FileInputStream(surrogateFile)));
+            Thread readerThread = new Thread(reader);
+            readerThread.start();
+            Surrogate surrogate;
+            QueueEntry queueentry;
+            while (reader.hasNext()) {
+                surrogate = reader.next();
+                plasmaParserDocument document = surrogate.document();
+                queueentry = this.webIndex.queuePreStack.newEntry(surrogate.url(), null, null, false, null, 0, this.webIndex.defaultSurrogateProfile.handle(), null);
+                /*
+                 * public QueueEntry newEntry(final yacyURL url, final String referrer, final Date ifModifiedSince, final boolean requestWithCookie,
+                     final String initiator, final int depth, final String profilehandle, final String anchorName) 
+                 */
+                indexingQueueEntry queueEntry = new indexingQueueEntry(queueentry, document, null);
+                try {
+                    indexingCondensementProcessor.enQueue(queueEntry);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            surrogateFile.renameTo(outfile);
+        }
+    }
+    
     public boolean deQueueProcess() {
         try {
             // work off fresh entries from the proxy or from the crawler
@@ -1178,6 +1224,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 
             // check for interruption
             checkInterruption();
+            
+            // check surrogates
+            String[] surrogatelist = this.surrogatesInPath.list();
+            if (surrogatelist.length > 0) {
+                // look if the is any xml inside
+                for (int i = 0; i < surrogatelist.length; i++) {
+                    if (surrogatelist[i].endsWith(".xml")) {
+                        // read the surrogate file and store entry in index
+                        processSurrogate(surrogatelist[i]);
+                        return true;
+                    }
+                }
+            }
 
             // getting the next entry from the indexing queue
             if (webIndex.queuePreStack.size() == 0) {
@@ -1297,6 +1356,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                     if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA))
                     	webIndex.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
                     			Long.toString(webIndex.profilesActiveCrawls.getRecrawlDate(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE)));
+                    if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_SURROGATE))
+                        webIndex.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
+                                Long.toString(webIndex.profilesActiveCrawls.getRecrawlDate(plasmaWordIndex.CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE)));
                 }
             } catch (final IOException e) {};
             

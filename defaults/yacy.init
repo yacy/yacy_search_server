@@ -221,6 +221,12 @@ proxyCache = DATA/HTCACHE
 proxyCacheSize = 100
 proxyCacheSize__pro = 1024
 
+# a path to the surrogate input directory
+surrogates.in = DATA/SURROGATES/in
+
+# a path to the surrogate output directory
+surrogates.out = DATA/SURROGATES/out
+
 # storage place for new releases
 releases = DATA/RELEASE
 

@@ -339,6 +339,12 @@ public final class plasmaSwitchboardConstants {
     public static final String HTCACHE_PATH_DEFAULT     = "DATA/HTCACHE";
     public static final String RELEASE_PATH             = "releases";
     public static final String RELEASE_PATH_DEFAULT     = "DATA/RELEASE";
+    
+    public static final String SURROGATES_IN_PATH          = "surrogates.in";
+    public static final String SURROGATES_IN_PATH_DEFAULT  = "DATA/SURROGATES/in";
+    public static final String SURROGATES_OUT_PATH         = "surrogates.out";
+    public static final String SURROGATES_OUT_PATH_DEFAULT = "DATA/SURROGATES/out";
+    
     /**
      * <p><code>public static final String <strong>HTDOCS_PATH</strong> = "htDocsPath"</code></p>
      * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all

@@ -100,7 +100,8 @@ public class IndexCreateWWWLocalQueue_p {
                                         name.equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)  ||
                                         name.equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT)  ||
                                         name.equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ||
-                                        name.equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA))
+                                        name.equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA) ||
+                                        name.equals(plasmaWordIndex.CRAWL_PROFILE_SURROGATE))
                                     continue;
                                 if (compiledPattern.matcher(name).find()) {
                                     sb.webIndex.profilesActiveCrawls.removeEntry(entry.handle());

@@ -101,7 +101,9 @@ public class SurrogateReader extends DefaultHandler implements Runnable, Iterato
     public void endElement(final String uri, final String name, final String tag) {
         if (tag == null) return;
         if ("document".equals(tag)) {
+            //System.out.println("A Title: " + this.surrogate.title());
             this.surrogates.add(this.surrogate);
+            //System.out.println("B Title: " + this.surrogate.title());
             this.surrogate = null;
             this.buffer.setLength(0);
             this.parsingValue = false;
@@ -150,6 +152,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable, Iterato
             Thread t = new Thread(sr);
             t.start();
             Surrogate s;
+            System.out.println("1");
             while (sr.hasNext()) {
                 s = sr.next();
                 System.out.println("Title: " + s.title());
@@ -159,6 +162,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable, Iterato
                 System.out.println("Body: " + s.body());
                 System.out.println("Categories: " + s.categories());
             }
+            System.out.println("2");
         } catch (IOException e) {
             e.printStackTrace();
         }
