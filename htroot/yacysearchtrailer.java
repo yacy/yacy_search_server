@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
@@ -65,7 +64,7 @@ public class yacysearchtrailer {
         final Set<String> references = theSearch.references(20);
         if (references.size() > 0) {
             // get the topwords
-            final TreeSet<String> topwords = new TreeSet<String>(NaturalOrder.naturalComparator);
+            final TreeSet<String> topwords = new TreeSet<String>();
             String tmp = "";
             final Iterator<String> i = references.iterator();
             while (i.hasNext()) {

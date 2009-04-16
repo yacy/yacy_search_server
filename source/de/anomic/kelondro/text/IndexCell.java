@@ -281,7 +281,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         }
         
         // clean-up the cache
-        if (this.array.size() < 50 && this.lastCleanup + cleanupCycle > System.currentTimeMillis()) return;
+        if (this.array.entries() < 50 && (this.lastCleanup + cleanupCycle > System.currentTimeMillis())) return;
         //System.out.println("----cleanup check");
         this.array.shrink(this.targetFileSize, this.maxFileSize);
         this.lastCleanup = System.currentTimeMillis();
