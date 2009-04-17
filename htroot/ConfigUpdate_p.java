@@ -63,21 +63,21 @@ public class ConfigUpdate_p {
                 if (release.length() > 0) {
                     try {
                 	yacyVersion versionToDownload = new yacyVersion(new yacyURL(release, null));
+                	
                 	// replace this version with version which contains public key
-                	yacyVersion.DevAndMainVersions releases = yacyVersion.allReleases(false);
-                	if(versionToDownload.mainRelease) {
-                	    yacyVersion repVersionToDownload = releases.main.ceiling(versionToDownload);
-                	    if(repVersionToDownload.equals(versionToDownload))
-                		versionToDownload = repVersionToDownload;
-                	} else {
-                	    yacyVersion repVersionToDownload = releases.dev.ceiling(versionToDownload);
-                	    if(repVersionToDownload.equals(versionToDownload))
-                		versionToDownload = repVersionToDownload;                	    
+                	yacyVersion.DevAndMainVersions allReleases = yacyVersion.allReleases(false);
+                	TreeSet<yacyVersion> mostReleases = versionToDownload.mainRelease
+                			? allReleases.main : allReleases.dev;
+                	for(yacyVersion rel : mostReleases) {
+                	    if(rel.equals(versionToDownload)) {
+                		versionToDownload = rel;
+                		break;
+                	    }
                 	}
-                        versionToDownload.downloadRelease();
+                	versionToDownload.downloadRelease();
                     } catch (final IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                	// TODO Auto-generated catch block
+                	e.printStackTrace();
                     }
                 }
             }
