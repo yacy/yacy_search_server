@@ -154,6 +154,15 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         return new String(s);
     }
 
+    public final byte[] encodeLongSubstr(long c, int length) {
+        final byte[] s = new byte[length];
+        while (length > 0) {
+            s[--length] = (byte) alpha[(byte) (c & 0x3F)];
+            c >>= 6;
+        }
+        return s;
+    }
+
     public final void encodeLong(long c, final byte[] b, final int offset, int length) {
         assert offset + length <= b.length;
         while (length > 0) {
@@ -212,6 +221,34 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         // return result
         //assert lene == out.length() : "lene = " + lene + ", out.len = " + out.length();
         return new String(out);
+    }
+    
+    public final byte[] encodeSubstring(final byte[] in, int sublen) {
+        if (in.length == 0) return null;
+        byte[] out = new byte[sublen];
+        int writepos = 0;
+        int pos = 0;
+        long l;
+        while (in.length - pos >= 3 && writepos < sublen) {
+            l = ((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8) + (0XffL & in[pos + 2]);
+            pos += 3;
+            System.arraycopy(encodeLongSubstr(l, 4), 0, out, writepos, 4);
+            writepos += 4;
+        }
+        // now there may be remaining bytes
+        if (in.length % 3 != 0 && writepos < sublen) {
+            if (in.length % 3 == 2) {
+                System.arraycopy(encodeLong((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8, 4), 0, out, writepos, 3);
+                writepos += 3;
+            } else {
+                System.arraycopy(encodeLong((((0XffL & in[pos])) << 8) << 8, 4).substring(0, 2), 0, out, writepos, 2);
+                writepos += 2;
+            }
+        }
+                                
+        if (rfc1113compliant) while (writepos % 4 > 0 && writepos < sublen) out[writepos] = '=';
+        //assert encode(in).substring(0, sublen).equals(new String(out));
+        return out;
     }
 
     public final String decodeString(final String in, final String info) {

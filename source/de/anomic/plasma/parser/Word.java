@@ -84,7 +84,7 @@ public class Word {
     public static final byte[] word2hash(final String word) {
         byte[] h = hashCache.get(word);
         if (h != null) return h;
-        h = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH))).substring(0, yacySeedDB.commonHashLength).getBytes();
+        h = Base64Order.enhancedCoder.encodeSubstring(Digest.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH)), yacySeedDB.commonHashLength);
         hashCache.put(word, h); // prevent expensive MD5 computation and encoding
         return h;
     }

@@ -554,9 +554,8 @@ public class httpClient {
                     Log.logWarning("HTTPC", "Proxy authentication contains invalid characters, trying anyway");
                 }
                 final String remoteProxyPwd = hostProxyConfig.getProxyPwd();
-                final String credentials = Base64Order.standardCoder.encodeString(remoteProxyUser.replace(":",
-                                                                                                                  "") +
-                        ":" + remoteProxyPwd);
+                final String credentials = Base64Order.standardCoder.encodeString(
+                                        remoteProxyUser.replace(":", "") + ":" + remoteProxyPwd);
                 method.setRequestHeader(httpRequestHeader.PROXY_AUTHORIZATION, "Basic " + credentials);
             }
         }
