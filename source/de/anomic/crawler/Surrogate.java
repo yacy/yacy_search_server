@@ -63,9 +63,8 @@ public class Surrogate extends HashMap<String, String> {
          */
     
     public Date date() {
-        String d = this.get("dateISO8601");
-        if (d == null) d = this.get("docdatetime");
-        if (d == null) d = this.get("dc:date");
+        String d = this.get("docdatetime");
+        if (d == null) d = this.get("dc:Date");
         if (d == null) return null;
         try {
             return DateFormatter.parseISO8601(d);
@@ -76,7 +75,7 @@ public class Surrogate extends HashMap<String, String> {
     }
     public yacyURL url() {
         String u = this.get("url");
-        if (u == null) u = this.get("dc:identifier");
+        if (u == null) u = this.get("dc:Identifier");
         if (u == null) return null;
         try {
             return new yacyURL(u, null);
@@ -87,26 +86,26 @@ public class Surrogate extends HashMap<String, String> {
     }
     public String language() {
         String l = this.get("language");
-        if (l == null) l = this.get("dc:language");
+        if (l == null) l = this.get("dc:Language");
         if (l == null) return "en"; else return l;
     }
     public String title() {
         String t = this.get("title");
-        if (t == null) t = this.get("dc:title");
+        if (t == null) t = this.get("dc:Title");
         t = stripCDATA(t);
         if (t == null) return "";
         return t;
     }
     public String body() {
         String t = this.get("body");
-        if (t == null) t = this.get("dc:description");
+        if (t == null) t = this.get("dc:Description");
         t = stripCDATA(t);
         if (t == null) return "";
         return t;
     }
     public String[] categories() {
         String t = this.get("categories");
-        if (t == null) this.get("dc:subject");
+        if (t == null) this.get("dc:Subject");
         t = stripCDATA(t);
         if (t == null) return new String[]{};
         return t.split(";");
