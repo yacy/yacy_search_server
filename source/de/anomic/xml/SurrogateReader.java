@@ -159,10 +159,6 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             return null;
         }
     }
-
-    public void remove() {
-        throw new UnsupportedOperationException("cannot remove here");
-    }
     
     public static void main(String[] args) {
         File f = new File(args[0]);

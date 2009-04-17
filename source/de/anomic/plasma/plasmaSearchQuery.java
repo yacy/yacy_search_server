@@ -30,6 +30,7 @@ import de.anomic.htmlFilter.htmlFilterAbstractScraper;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.plasma.parser.Word;
 import de.anomic.plasma.parser.Condenser;
@@ -252,9 +253,9 @@ public final class plasmaSearchQuery {
     @SuppressWarnings("unchecked")
     public static TreeSet<String>[] cleanQuery(String querystring) {
         // returns three sets: a query set, a exclude set and a full query set
-        final TreeSet<String> query = new TreeSet<String>();
-        final TreeSet<String> exclude = new TreeSet<String>();
-        final TreeSet<String> fullquery = new TreeSet<String>();
+        final TreeSet<String> query = new TreeSet<String>(NaturalOrder.naturalComparator);
+        final TreeSet<String> exclude = new TreeSet<String>(NaturalOrder.naturalComparator);
+        final TreeSet<String> fullquery = new TreeSet<String>(NaturalOrder.naturalComparator);
         
         if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{query, exclude, fullquery};
         
