@@ -730,7 +730,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 		try {
 		    String publicKeyString = getConfig("network.unit.update.location" + i + ".key", null);
 		    if(publicKeyString != null) {
-			byte[] publicKeyBytes = Base64Order.standardCoder.decode(publicKeyString, "decode public Key");
+			byte[] publicKeyBytes = Base64Order.standardCoder.decode(publicKeyString.trim(), "decode public Key");
 			publicKey = cryptoLib.getPublicKeyFromBytes(publicKeyBytes);
 		    }
 		} catch (InvalidKeySpecException e) {

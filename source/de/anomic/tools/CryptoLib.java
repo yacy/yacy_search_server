@@ -155,14 +155,14 @@ public class CryptoLib {
 		CryptoLib cl = new CryptoLib();
 		serverCharBuffer pubKeyBuffer = new serverCharBuffer(new File(args[1]));
 		byte[] pubKeyByteBuffer = Base64Order.standardCoder.decode(
-			pubKeyBuffer.toString(), "Private Key");
+			pubKeyBuffer.toString().trim(), "Private Key");
 		PublicKey pubKey = cl.getPublicKeyFromBytes(pubKeyByteBuffer);
 
 		FileInputStream dataStream = new FileInputStream(args[2]);
 
 		serverCharBuffer signBuffer = new serverCharBuffer(new File(args[2] + ".sig"));
 		byte[] signByteBuffer = Base64Order.standardCoder.decode(
-			signBuffer.toString(), "Signature");
+			signBuffer.toString().trim(), "Signature");
 		if(cl.verifySignature(pubKey, dataStream, signByteBuffer)) {
 		    System.out.println("Signature OK!");
 		} else {

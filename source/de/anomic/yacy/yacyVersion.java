@@ -394,7 +394,7 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
 		return null;
 	    }
 	    try {
-		signatureBytes = Base64Order.standardCoder.decode(new String(signatureData, "UTF8"), "decode signature");
+		signatureBytes = Base64Order.standardCoder.decode(new String(signatureData, "UTF8").trim(), "decode signature");
 	    } catch (UnsupportedEncodingException e) {
 		Log.logSevere("yacyVersion", "download of signature " + this.url.toString() + " failed: unsupported encoding");
 		return null;
