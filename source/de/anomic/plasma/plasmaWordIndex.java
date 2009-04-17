@@ -497,7 +497,7 @@ public final class plasmaWordIndex {
         
         // do a identification of the language
         String language = condenser.language(); // this is a statistical analysation of the content: will be compared with other attributes
-        String bymetadata = document.languageByMetadata(); // the languageByMetadata may return null if there was no declaration
+        String bymetadata = document.dc_language(); // the languageByMetadata may return null if there was no declaration
         if (language == null) {
             // no statistics available, we take either the metadata (if given) or the TLD
             language = (bymetadata == null) ? entry.url().language() : bymetadata;

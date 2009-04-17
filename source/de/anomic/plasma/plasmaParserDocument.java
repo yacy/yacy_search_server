@@ -29,6 +29,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,6 +42,7 @@ import java.util.TreeSet;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
+import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.Condenser;
@@ -137,7 +139,7 @@ public class plasmaParserDocument {
      * If there is no metadata at all, null is returned
      * @return a string with a language name using the alpha-2 code of ISO 639
      */
-    public String languageByMetadata() {
+    public String dc_language() {
         if (this.languages == null) return null;
         if (this.languages.size() == 0) return null;
         if (this.languages.size() == 1) return languages.iterator().next();
@@ -210,7 +212,7 @@ dc_rights
     }
     
     public String dc_identifier() {
-        return "yacy.net:" + this.source.hash();
+        return this.source.toNormalform(true, false);
     }
     
     public yacyURL dc_source() {
@@ -454,6 +456,22 @@ dc_rights
     public int outboundLinks() {
         assert this.outboundLinks >= 0;
         return (this.outboundLinks < 0) ? 0 : this.outboundLinks;
+    }
+    
+    public void writeXML(OutputStreamWriter os, Date date) throws IOException {
+        os.write("<record>\n");
+        os.write("<dc:Title><![CDATA[" + this.dc_title() + "]]></dc:Title>\n");
+        os.write("<dc:Identifier>" + this.dc_identifier() + "</dc:Identifier>\n");
+        os.write("<dc:Description><![CDATA[");
+        byte[] buffer = new byte[1000];
+        int c = 0;
+        InputStream is = this.getText();
+        while ((c = is.read(buffer)) > 0) os.write(new String(buffer, 0, c));
+        is.close();
+        os.write("]]></dc:Description>\n");
+        os.write("<dc:Language>" + this.dc_language() + "</dc:Language>\n");
+        os.write("<dc:Date>" + DateFormatter.formatISO8601(date) + "</dc:Date>\n");
+        os.write("</record>\n");
     }
     
     public void close() {

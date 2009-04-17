@@ -37,10 +37,12 @@ import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -308,6 +310,9 @@ public class mediawikiIndex {
         }
         public void genDocument() throws InterruptedException, ParserException {
             document = hparser.parseSource(url, "text/html", "utf-8", html.getBytes());
+        }
+        public void writeXML(OutputStreamWriter os) throws IOException {
+            document.writeXML(os, new Date());
         }
     }
     

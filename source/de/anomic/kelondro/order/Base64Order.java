@@ -238,16 +238,16 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         // now there may be remaining bytes
         if (in.length % 3 != 0 && writepos < sublen) {
             if (in.length % 3 == 2) {
-                System.arraycopy(encodeLong((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8, 4), 0, out, writepos, 3);
+                System.arraycopy(encodeLong((((0XffL & in[pos]) << 8) + (0XffL & in[pos + 1])) << 8, 4).getBytes(), 0, out, writepos, 3);
                 writepos += 3;
             } else {
-                System.arraycopy(encodeLong((((0XffL & in[pos])) << 8) << 8, 4).substring(0, 2), 0, out, writepos, 2);
+                System.arraycopy(encodeLong((((0XffL & in[pos])) << 8) << 8, 4).substring(0, 2).getBytes(), 0, out, writepos, 2);
                 writepos += 2;
             }
         }
                                 
         if (rfc1113compliant) while (writepos % 4 > 0 && writepos < sublen) out[writepos] = '=';
-        //assert encode(in).substring(0, sublen).equals(new String(out));
+        assert encode(in).substring(0, sublen).equals(new String(out));
         return out;
     }
 
