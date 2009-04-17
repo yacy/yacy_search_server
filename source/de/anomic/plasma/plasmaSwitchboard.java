@@ -93,6 +93,9 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.InvalidKeySpecException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -145,6 +148,7 @@ import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.Log;
@@ -168,6 +172,7 @@ import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
 import de.anomic.tools.crypt;
+import de.anomic.tools.CryptoLib;
 import de.anomic.xml.SurrogateReader;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
@@ -176,6 +181,7 @@ import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyTray;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.yacyUpdateLocation;
 import de.anomic.yacy.yacyVersion;
 import de.anomic.yacy.dht.Dispatcher;
 import de.anomic.yacy.dht.PeerSelection;
@@ -706,17 +712,38 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 
         // set release locations
         int i = 0;
-        String location;
-        while (true) {
-            location = getConfig("network.unit.update.location" + i, "");
-            if (location.length() == 0) break;
-            try {
-                yacyVersion.latestReleaseLocations.add(new yacyURL(location, null));
-            } catch (final MalformedURLException e) {
-                break;
-            }
-            i++;
-        }
+        CryptoLib cryptoLib;
+	try {
+	    cryptoLib = new CryptoLib();
+	    while (true) {
+		String location = getConfig("network.unit.update.location" + i, "");
+		if (location.length() == 0) break;
+		yacyURL locationURL;
+		try {
+		    // try to parse url
+		    locationURL = new yacyURL(location, null);
+		} catch (final MalformedURLException e) {
+		    break;
+		}
+		PublicKey publicKey = null;
+		// get public key if it's in config
+		try {
+		    String publicKeyString = getConfig("network.unit.update.location" + i + ".key", null);
+		    if(publicKeyString != null) {
+			byte[] publicKeyBytes = Base64Order.standardCoder.decode(publicKeyString, "decode public Key");
+			publicKey = cryptoLib.getPublicKeyFromBytes(publicKeyBytes);
+		    }
+		} catch (InvalidKeySpecException e) {
+		    e.printStackTrace();
+		}
+		yacyUpdateLocation updateLocation = new yacyUpdateLocation(locationURL, publicKey);
+		yacyVersion.latestReleaseLocations.add(updateLocation);
+		i++;
+	    }
+	} catch (NoSuchAlgorithmException e1) {
+	    // TODO Auto-generated catch block
+	    e1.printStackTrace();
+	}
         
         // initiate url license object
         licensedURLs = new URLLicense(8);
@@ -1469,12 +1496,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             if (updateVersion != null) {
                 // there is a version that is more recent. Load it and re-start with it
                 log.logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.url);
-                final File downloaded = yacyVersion.downloadRelease(updateVersion);
+                final File downloaded = updateVersion.downloadRelease();
                 final boolean devenvironment = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1")).startsWith("dev");
                 if (devenvironment) {
                     log.logInfo("AUTO-UPDATE: omiting update because this is a development environment");
                 } else if ((downloaded == null) || (!downloaded.exists()) || (downloaded.length() == 0)) {
-                    log.logInfo("AUTO-UPDATE: omiting update because download failed (file cannot be found or is too small)");
+                    log.logInfo("AUTO-UPDATE: omiting update because download failed (file cannot be found, is too small or signature is bad)");
                 } else {
                     yacyVersion.deployRelease(downloaded);
                     terminate(5000);

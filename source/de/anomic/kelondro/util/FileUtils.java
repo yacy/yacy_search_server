@@ -573,6 +573,21 @@ public final class FileUtils {
         }
         return v;
     }
+    public static ArrayList<String> strings(final Reader reader) {
+        if (reader == null) return new ArrayList<String>();
+        BufferedReader bufreader = new BufferedReader(reader);
+        final ArrayList<String> list = new ArrayList<String>();
+        String line = null;
+        try {
+	    while ((line = bufreader.readLine()) != null) {
+	        list.add(line);
+	    }
+	} catch (IOException e) {
+	    e.printStackTrace();
+	    return null;
+	}
+        return list;
+    }
    
     
     /**

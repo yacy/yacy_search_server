@@ -70,22 +70,23 @@ public class CryptoLib {
 	"         Verify signatur\n" +
 	" --gen-key privatekey publickey\n";
     
-    private static final String algorithm = "DSA";
-    private static final int bitkey       = 1024;
+    public static final String algorithm = "DSA";
+    public static final int bitkey       = 1024;
+    public static final String signAlgorithm = "SHA1with"+algorithm;
     
     private KeyFactory keyFact;
     private Signature sign;
     
     public CryptoLib() throws NoSuchAlgorithmException {
 	keyFact = KeyFactory.getInstance(algorithm);
-	sign = Signature.getInstance("SHA1with"+algorithm);
+	sign = Signature.getInstance(signAlgorithm);
     }
     
-    public PrivateKey getPrivateKeyFromBytes(byte[] keyBuffer) throws IOException, InvalidKeySpecException {
+    public PrivateKey getPrivateKeyFromBytes(byte[] keyBuffer) throws InvalidKeySpecException {
 	return keyFact.generatePrivate(new PKCS8EncodedKeySpec(keyBuffer));
     }
     
-    public PublicKey getPublicKeyFromBytes(byte[] keyBuffer) throws IOException, InvalidKeySpecException {
+    public PublicKey getPublicKeyFromBytes(byte[] keyBuffer) throws InvalidKeySpecException {
 	return keyFact.generatePublic(new X509EncodedKeySpec(keyBuffer));	
     }
     
@@ -104,8 +105,9 @@ public class CryptoLib {
     public byte[] getSignature(PrivateKey privKey, InputStream dataStream) throws InvalidKeyException, SignatureException, IOException {
 	sign.initSign(privKey);
 	byte[] buffer = new byte[1024];
-	while(dataStream.read(buffer) != -1) {
-	    sign.update(buffer);
+	int count = 0;
+	while((count = dataStream.read(buffer)) != -1) {
+	    sign.update(buffer, 0, count);
 	}
 	dataStream.close();
 	return sign.sign();
@@ -115,8 +117,9 @@ public class CryptoLib {
 	sign.initVerify(pubKey);
 	
 	byte[] buffer = new byte[1024];
-	while(dataStream.read(buffer) != -1) {
-	    sign.update(buffer);
+	int count = 0;
+	while((count = dataStream.read(buffer)) != -1) {
+	    sign.update(buffer, 0, count);
 	}
 	dataStream.close();
 	

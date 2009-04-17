@@ -32,10 +32,13 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -48,11 +51,14 @@ import de.anomic.http.httpClient;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSystem;
+import de.anomic.tools.CryptoLib;
+import de.anomic.tools.SignatureOutputStream;
 import de.anomic.tools.tarTools;
 
 public final class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVersion> {
@@ -71,8 +77,8 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
     // information about latest release, retrieved from download pages
     // this static information should be overwritten by network-specific locations
     // for details see defaults/yacy.network.freeworld.unit
-    private static HashMap<yacyURL, DevMain> latestReleases = new HashMap<yacyURL, DevMain>();
-    public  final static ArrayList<yacyURL> latestReleaseLocations = new ArrayList<yacyURL>(); // will be initialized with value in defaults/yacy.network.freeworld.unit
+    private static HashMap<yacyUpdateLocation, DevAndMainVersions> latestReleases = new HashMap<yacyUpdateLocation, DevAndMainVersions>();
+    public  final static ArrayList<yacyUpdateLocation> latestReleaseLocations = new ArrayList<yacyUpdateLocation>(); // will be initialized with value in defaults/yacy.network.freeworld.unit
     
     // private static release info about this release; is generated only once and can be retrieved by thisVersion()
     private static yacyVersion thisVersion = null;
@@ -84,10 +90,23 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
     public boolean mainRelease;
     public yacyURL url;
     public String name;
+    private File releaseFile;
+    private PublicKey publicKey;
     
     public yacyVersion(final yacyURL url) {
         this(url.getFileName());
         this.url = url;
+    }
+        
+    public yacyVersion(final yacyURL url, PublicKey publicKey) {
+        this(url.getFileName());
+        this.url = url;
+        this.publicKey = publicKey;
+    }
+    
+    public yacyVersion(final File releaseFile) {
+	this(releaseFile.getName());
+	this.releaseFile = releaseFile;
     }
         
     public yacyVersion(String release) {
@@ -137,9 +156,9 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         // finished! we parsed a relase string
     }
     
-    public static final class DevMain {
+    public static final class DevAndMainVersions {
         public TreeSet<yacyVersion> dev, main;
-        public DevMain(final TreeSet<yacyVersion> dev, final TreeSet<yacyVersion> main) {
+        public DevAndMainVersions(final TreeSet<yacyVersion> dev, final TreeSet<yacyVersion> main) {
             this.dev = dev;
             this.main = main;
         }
@@ -213,9 +232,9 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         }
         
         // check if we know that there is a release that is more recent than that which we are using
-        final DevMain releasess = yacyVersion.allReleases(true);
-        final yacyVersion latestmain = (releasess.main.size() == 0) ? null : releasess.main.last();
-        final yacyVersion latestdev  = (releasess.dev.size() == 0) ? null : releasess.dev.last();
+        final DevAndMainVersions releases = yacyVersion.allReleases(true);
+        final yacyVersion latestmain = (releases.main.size() == 0) ? null : releases.main.last();
+        final yacyVersion latestdev  = (releases.dev.size() == 0) ? null : releases.dev.last();
         final String concept = sb.getConfig("update.concept", "any");
         String blacklist = sb.getConfig("update.blacklist", "...[123]");
         if (blacklist.equals("....[123]")) {
@@ -275,9 +294,9 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         return null;
     }
     
-    public static DevMain allReleases(final boolean force) {
+    public static DevAndMainVersions allReleases(final boolean force) {
         // join the release infos
-        final DevMain[] a = new DevMain[latestReleaseLocations.size()];
+        final DevAndMainVersions[] a = new DevAndMainVersions[latestReleaseLocations.size()];
         for (int j = 0; j < latestReleaseLocations.size(); j++) {
             a[j] = getReleases(latestReleaseLocations.get(j), force);
         }
@@ -286,12 +305,18 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         for (int j = 0; j < a.length; j++) if ((a[j] != null) && (a[j].dev != null)) alldev.addAll(a[j].dev);
         for (int j = 0; j < a.length; j++) if ((a[j] != null) && (a[j].main != null)) allmain.addAll(a[j].main);
             
-        return new DevMain(alldev, allmain);
+        return new DevAndMainVersions(alldev, allmain);
     }
     
-    private static DevMain getReleases(final yacyURL location, final boolean force) {
-        // get release info from a internet resource
-        DevMain locLatestRelease = latestReleases.get(location);
+    /**
+     * get all Releases from update location using cache 
+     * @param location Update location
+     * @param force    when true, don't fetch from cache
+     * @return
+     */
+    private static DevAndMainVersions getReleases(final yacyUpdateLocation location, final boolean force) {
+        // get release info from a Internet resource
+	DevAndMainVersions locLatestRelease = latestReleases.get(location);
         if (force ||
             (locLatestRelease == null) /*||
             ((latestRelease[0].size() == 0) &&
@@ -304,88 +329,136 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         return locLatestRelease;
     }
     
-    private static DevMain allReleaseFrom(yacyURL url) {
+    /**
+     * get all releases from update location
+     * @param location
+     * @return
+     */
+    private static DevAndMainVersions allReleaseFrom(yacyUpdateLocation location) {
         // retrieves the latest info about releases
         // this is done by contacting a release location,
         // parsing the content and filtering+parsing links
         // returns the version info if successful, null otherwise
         htmlFilterContentScraper scraper;
         try {
-            scraper = htmlFilterContentScraper.parseResource(url);
+            scraper = htmlFilterContentScraper.parseResource(location.getLocationURL());
         } catch (final IOException e) {
             return null;
         }
         
         // analyse links in scraper resource, and find link to latest release in it
         final Map<yacyURL, String> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
-        final Iterator<yacyURL> i = anchors.keySet().iterator();
-        final TreeSet<yacyVersion> devreleases = new TreeSet<yacyVersion>();
-        final TreeSet<yacyVersion> mainreleases = new TreeSet<yacyVersion>();
-        yacyVersion release;
-        while (i.hasNext()) {
-            url = i.next();
+        final TreeSet<yacyVersion> mainReleases = new TreeSet<yacyVersion>();
+        final TreeSet<yacyVersion> devReleases = new TreeSet<yacyVersion>();
+        for(yacyURL url : anchors.keySet()) {
             try {
-                release = new yacyVersion(url);
+                yacyVersion release = new yacyVersion(url, location.getPublicKey());
                 //System.out.println("r " + release.toAnchor());
-                if ( release.mainRelease) mainreleases.add(release);
-                if (!release.mainRelease) devreleases.add(release);
+                if(release.mainRelease) {
+                    mainReleases.add(release);
+                } else {
+                    devReleases.add(release);
+                }
             } catch (final RuntimeException e) {
                 // the release string was not well-formed.
                 // that might have been another link
-                // just dont care
+                // just don't care
                 continue;
             }
         }
         plasmaSwitchboard.getSwitchboard().setConfig("update.time.lookup", System.currentTimeMillis());
-        return new DevMain(devreleases, mainreleases);
+        return new DevAndMainVersions(devReleases, mainReleases);
     }
     
-    public static File downloadRelease(final yacyVersion release) {
+    /**
+     * <p>download this release and if public key is know, download signature and check it.
+     * <p>The signature is named $releaseurl.sig and contains the base64 encoded signature
+     * (@see de.anomic.tools.CryptoLib)
+     * @return file object of release file, null in case of failure
+     */
+    public File downloadRelease() {
         final File storagePath = plasmaSwitchboard.getSwitchboard().releasePath;
-        // load file
         File download = null;
-        final httpRequestHeader header = new httpRequestHeader();
-        header.put(httpResponseHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
-        final httpClient client = new httpClient(120000, header);
+        // setup httpClient
+        final httpRequestHeader reqHeader = new httpRequestHeader();
+        reqHeader.put(httpResponseHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+        
         httpResponse res = null;
-        final String name = release.url.getFileName();
-        try {
-            res = client.GET(release.url.toString());
-            final boolean unzipped = res.getResponseHeader().gzip() && (res.getResponseHeader().mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
-            if ((unzipped) && (name.endsWith(".tar.gz"))) {
-                download = new File(storagePath, name.substring(0, name.length() - 3));
-            } else {
-                download = new File(storagePath, name);
-            }
-            try {
-                FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(new FileOutputStream(download)));
-            } catch(IOException ie) {
-        	// Saving file failed, abort download
-        	res.abort();
-        	throw ie;
-            } finally {
-                res.closeStream();
-            }
-            if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + release.url + " failed");
-        } catch (final IOException e) {
-            Log.logSevere("yacyVersion", "download of " + release.name + " failed: " + e.getMessage());
-            if (download != null && download.exists()) {
-                FileUtils.deletedelete(download);
-            	if (download.exists())
-            		Log.logWarning("yacyVersion", "could not delete file "+ download);
-            }
-            download = null;
-        } finally {
-            if (res != null) {
-                // release connection
-                res.closeStream();
-            }
-        }
+        final String name = this.url.getFileName();
+	byte[] signatureBytes = null;
+	// download signature first, if public key is available
+	if(this.publicKey != null) {
+	    final byte[] signatureData = httpClient.wget(this.url.toString() + ".sig", reqHeader, 6000);
+	    if(signatureData == null) {
+		Log.logSevere("yacyVersion", "download of signature " + this.url.toString() + " failed");
+		return null;
+	    }
+	    try {
+		signatureBytes = Base64Order.standardCoder.decode(new String(signatureData, "UTF8"), "decode signature");
+	    } catch (UnsupportedEncodingException e) {
+		Log.logSevere("yacyVersion", "download of signature " + this.url.toString() + " failed: unsupported encoding");
+		return null;
+	    }
+	}
+	try {
+	    final httpClient client = new httpClient(120000, reqHeader);
+	    res = client.GET(this.url.toString());
+
+	    final boolean unzipped = res.getResponseHeader().gzip() && (res.getResponseHeader().mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
+	    if ((unzipped) && (name.endsWith(".tar.gz"))) {
+		download = new File(storagePath, name.substring(0, name.length() - 3));
+	    } else {
+		download = new File(storagePath, name);
+	    }
+	    if(this.publicKey != null) {
+		// copy to file and check signature
+		SignatureOutputStream verifyOutput = null;
+		try {
+		    verifyOutput = new SignatureOutputStream(new FileOutputStream(download), CryptoLib.signAlgorithm, publicKey);
+		    FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(verifyOutput));
+
+		    if(!verifyOutput.verify(signatureBytes)) {
+			throw new IOException("Bad Signature!");
+		    }
+		} catch (NoSuchAlgorithmException e) {
+		    throw new IOException("No such algorithm");
+		} catch (SignatureException e) {
+		    throw new IOException("Signature exception");
+		} finally {
+		    if(verifyOutput != null)
+			verifyOutput.close();
+		}
+	    } else {
+		// just copy into file
+		FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(new FileOutputStream(download)));
+	    }
+	    if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + this.url + " failed");
+	} catch (final IOException e) {
+	    // Saving file failed, abort download
+	    res.abort();
+	    Log.logSevere("yacyVersion", "download of " + this.name + " failed: " + e.getMessage());
+	    if (download != null && download.exists()) {
+		FileUtils.deletedelete(download);
+		if (download.exists())
+		    Log.logWarning("yacyVersion", "could not delete file "+ download);
+	    }
+	    download = null;
+	} finally {
+	    if (res != null) {
+		// release connection
+		res.closeStream();
+	    }
+	}
+        this.releaseFile = ((download != null) && (download.exists())) ? download : null;
+        // check signature
         plasmaSwitchboard.getSwitchboard().setConfig("update.time.download", System.currentTimeMillis());
-        return ((download != null) && (download.exists())) ? download : null;
+        return this.releaseFile;
     }
     
-    
+    /**
+     * restart yacy by stopping yacy and previously running a batch
+     * script, which waits until yacy is terminated and starts it again
+     */
     public static void restart() {
         final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         final String apphome = sb.getRootPath().toString();
@@ -458,6 +531,10 @@ public final class yacyVersion implements Comparator<yacyVersion>, Comparable<ya
         }
     }
     
+    /**
+     * stop yacy and run a batch script, applies a new release and restarts yacy
+     * @param releaseFile
+     */
     public static void deployRelease(final File releaseFile) {
         //byte[] script = ("cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + ";while [ -e ../yacy.running ]; do sleep 1;done;tar xfz " + release + ";cp -Rf yacy/* ../../;rm -Rf yacy;cd ../../;startYACY.sh").getBytes();
         try {

@@ -1103,12 +1103,28 @@
                   replace="yacy (*auto-svn-version*) unstable; urgency=low" />
   </target>
 
-  <target name="sign" depends="readBuildProperties" description="sign all files in RELEASE/ with $privateKey">
+  <target name="sign" depends="readBuildProperties" description="sign current release file in RELEASE/ with $privateKey">
     <java classname="de.anomic.tools.CryptoLib" failonerror="true">
       <classpath>
         <pathelement location="${build}"/>
       </classpath>
       <arg line="--sign ${privateKeyFile} ${release}/${stdReleaseFile}"/>
     </java>
+  </target>
+
+  <target name="genkey" depends="readBuildProperties" description="generate a pair of keys and write it to $privateKey and $privateKey.pub">
+    <!-- TODO: check doesn't work! why?? -->
+    <fail message="There is already a private Key!!">
+      <condition>
+	<available file="$privateKey" type="file" />
+      </condition>
+    </fail>
+    <java classname="de.anomic.tools.CryptoLib" failonerror="true">
+      <classpath>
+        <pathelement location="${build}"/>
+      </classpath>
+      <arg line="--gen-key ${privateKeyFile} ${privateKeyFile}.pub"/>
+    </java>
+    <chmod file="${privateKeyFile}" perm="600"/>
   </target>
 </project>
