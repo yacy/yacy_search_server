@@ -31,8 +31,8 @@ import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
 
+import de.anomic.kelondro.index.SimpleARC;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.Digest;
@@ -40,7 +40,8 @@ import de.anomic.yacy.yacySeedDB;
 
 public class Word {
 
-    private static final ConcurrentHashMap<String, byte[]> hashCache = new ConcurrentHashMap<String, byte[]>(1000);
+    public static final int hashCacheSize = 20000;
+    private static final SimpleARC<String, byte[]> hashCache = new SimpleARC<String, byte[]>(hashCacheSize);
     
     // object carries statistics for words and sentences
     public  int      count;       // number of occurrences
@@ -84,10 +85,6 @@ public class Word {
         if (h != null) return h;
         h = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH))).substring(0, yacySeedDB.commonHashLength).getBytes();
         hashCache.put(word, h); // prevent expensive MD5 computation and encoding
-        if (hashCache.size() > 20000) {
-            // prevent memory leak
-            hashCache.clear();
-        }
         return h;
     }
     

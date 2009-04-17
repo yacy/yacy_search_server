@@ -442,13 +442,14 @@ public final class plasmaWordIndex {
         String word;
         WordReferenceRow ientry;
         Word wprop;
+        int len = (document == null) ? urlLength : document.dc_title().length();
         while (i.hasNext()) {
             wentry = i.next();
             word = wentry.getKey();
             wprop = wentry.getValue();
             assert (wprop.flags != null);
             ientry = new WordReferenceRow(url.hash(),
-                        urlLength, urlComps, (document == null) ? urlLength : document.dc_title().length(),
+                        urlLength, urlComps, len,
                         wprop.count,
                         condenser.RESULT_NUMB_WORDS,
                         condenser.RESULT_NUMB_SENTENCES,
