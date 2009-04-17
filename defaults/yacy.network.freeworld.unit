@@ -20,6 +20,7 @@ network.unit.bootstrap.seedlist0 = http://www.yacy.net/seed.txt
 network.unit.bootstrap.seedlist1 = http://home.arcor.de/hermens/yacy/seed.txt
 network.unit.bootstrap.seedlist2 = http://low.audioattack.de/yacy/seed.txt
 network.unit.bootstrap.seedlist3 = http://www.lulabad.de/seed.txt
+network.unit.update.location3.key = MIIBtTCCASwGByqGSM44BAEwggEfAoGBAP1/U4EddRIpUt9KnC7s5Of2EbdSPO9EAMMeP4C2USZpRV1AIlH7WT2NWPq/xfW6MPbLm1Vs14E7gB00b/JmYLdrmVClpJ+f6AR7ECLCT7up1/63xhv4O1fnxqimFQ8E+4P208UewwI1VBNaFpEy9nXzrith1yrv8iIDGZ3RSAHHAhUAl2BQjxUjC8yykrmCouuEC/BYHPUCgYEA9+GghdabPd7LvKtcNrhXuXmUr7v6OuqC+VdMCz0HgmdRWVeOutRZT+ZxBxCBgLRJFnEj6EwoFhO3zwkyjMim4TwWeotUfI0o4KOuHiuzpnWRbqN/C/ohNWLx+2J6ASQ7zKTxvqhRkImog9/hWuWfBpKLZl6Ae1UlZAFMO/7PSSoDgYIAAn8bzmhk8EWOj9h+7zng1o3OlgI+LsG7lI7kVsDxyzMB/WYTpO+NKWoibFjQDFN92TKBQVAA8DQciHfolqcFfVAot9/3ipamXVGz29OAxz8i0Wty6KI6w50YrL2xAkWjx7jSBghJKlnKx3V0PaDCWqz37ogQvuxLKBFORyAjbv3O
 
 # each network may use different yacy distributions.
 # the auto-updater can access network-specific update locations
