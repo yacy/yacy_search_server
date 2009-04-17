@@ -58,6 +58,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
     private final boolean rfc1113compliant;
     private final char[] alpha;
     private final byte[] ahpla;
+    private final short[] ab; // decision table for comparisments
 
     public Base64Order(final boolean up, final boolean rfc1113compliant) {
         // if we choose not to be rfc1113compliant,
@@ -66,7 +67,20 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         this.asc = up;
         alpha = (rfc1113compliant) ? alpha_standard : alpha_enhanced;
         ahpla = (rfc1113compliant) ? ahpla_standard : ahpla_enhanced;
-
+        ab = new short[1 << 14];
+        byte acc, bcc;
+        short c;
+        for (char ac: alpha) {
+            for (char bc: alpha) {
+                acc = ahpla[ac];
+                bcc = ahpla[bc];
+                c = 0;
+                if (acc > bcc) c = 1;
+                if (acc < bcc) c = -1;
+                
+                ab[(ac << 7) | bc] = c;
+            } 
+        }
         this.log = new Log("BASE64");
     }
 
@@ -387,9 +401,11 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         int i = 0;
         final int al = Math.min(alength, a.length - aoffset);
         final int bl = Math.min(blength, b.length - boffset);
+        final int ml = Math.min(al, bl);
         byte ac, bc;
-        byte acc, bcc;
-        while ((i < al) && (i < bl)) {
+        //byte acc, bcc;
+        //int c = 0;
+        while (i < ml) {
             assert (i + aoffset < a.length) : "i = " + i + ", aoffset = " + aoffset + ", a.length = " + a.length + ", a = " + NaturalOrder.arrayList(a, aoffset, al);
             assert (i + boffset < b.length) : "i = " + i + ", boffset = " + boffset + ", b.length = " + b.length + ", b = " + NaturalOrder.arrayList(b, boffset, al);
             ac = a[aoffset + i];
@@ -402,14 +418,16 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
             	i++;
             	continue;
             }
-            acc = ahpla[ac];
-            assert (acc >= 0) : "acc = " + acc + ", a = " + NaturalOrder.arrayList(a, aoffset, al) + "/" + new String(a, aoffset, al) + ", aoffset = 0x" + Integer.toHexString(aoffset) + ", i = " + i + "\n" + NaturalOrder.table(a, 16, aoffset);
-            bcc = ahpla[bc];
-            assert (bcc >= 0) : "bcc = " + bcc + ", b = " + NaturalOrder.arrayList(b, boffset, bl) + "/" + new String(b, boffset, bl) + ", boffset = 0x" + Integer.toHexString(boffset) + ", i = " + i + "\n" + NaturalOrder.table(b, 16, boffset);
-            if (acc > bcc) return 1;
-            if (acc < bcc) return -1;
-            // else the bytes are equal and it may go on yet undecided
-            i++;
+            //acc = ahpla[ac];
+            //assert (acc >= 0) : "acc = " + acc + ", a = " + NaturalOrder.arrayList(a, aoffset, al) + "/" + new String(a, aoffset, al) + ", aoffset = 0x" + Integer.toHexString(aoffset) + ", i = " + i + "\n" + NaturalOrder.table(a, 16, aoffset);
+            //bcc = ahpla[bc];
+            //assert (bcc >= 0) : "bcc = " + bcc + ", b = " + NaturalOrder.arrayList(b, boffset, bl) + "/" + new String(b, boffset, bl) + ", boffset = 0x" + Integer.toHexString(boffset) + ", i = " + i + "\n" + NaturalOrder.table(b, 16, boffset);
+            //if (acc > bcc) c = 1;
+            //if (acc < bcc) c = -1;
+            //assert c != 0;
+            //assert ab[(ac << 7) | bc] == c;
+            //return c;
+            return ab[(ac << 7) | bc];
         }
         // compare length
         if (al > bl) return 1;

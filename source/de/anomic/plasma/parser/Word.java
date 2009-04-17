@@ -36,11 +36,12 @@ import de.anomic.kelondro.index.SimpleARC;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.Digest;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.yacy.yacySeedDB;
 
 public class Word {
 
-    public static final int hashCacheSize = 20000;
+    public static final int hashCacheSize = (int) (MemoryControl.available() / 10000L);
     private static final SimpleARC<String, byte[]> hashCache = new SimpleARC<String, byte[]>(hashCacheSize);
     
     // object carries statistics for words and sentences

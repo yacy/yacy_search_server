@@ -125,6 +125,9 @@ public final class plasmaWordIndex {
             final int redundancy,
             final int partitionExponent,
             final boolean useCell) throws IOException {
+        
+        log.logInfo("Initializing Word Index for the network '" + networkName + "', word hash cache size is " + Word.hashCacheSize + ".");
+                        
         if (networkName == null || networkName.length() == 0) {
             log.logSevere("no network name given - shutting down");
             System.exit(0);

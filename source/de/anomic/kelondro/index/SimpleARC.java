@@ -30,6 +30,8 @@ import java.util.Map;
 /**
  * This is a simple cache using two generations of hashtables to store the content with a LFU strategy.
  * The Algorithm is described in a slightly more complex version as Adaptive Replacement Cache, "ARC".
+ * For details see http://www.almaden.ibm.com/cs/people/dmodha/ARC.pdf
+ * or http://en.wikipedia.org/wiki/Adaptive_Replacement_Cache
  * This version omits the ghost entry handling which is described in ARC, and keeps both cache levels
  * at the same size.
  */
