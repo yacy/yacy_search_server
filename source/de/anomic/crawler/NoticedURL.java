@@ -104,6 +104,10 @@ public class NoticedURL {
         return coreStack.notEmpty() || limitStack.notEmpty() || remoteStack.notEmpty();
     }
     
+    public boolean notEmptyLocal() {
+        return coreStack.notEmpty() || limitStack.notEmpty();
+    }
+    
     public int size() {
         // this does not count the overhang stack size
         return ((coreStack == null) ? 0 : coreStack.size()) + ((limitStack == null) ? 0 : limitStack.size()) + ((remoteStack == null) ? 0 : remoteStack.size());

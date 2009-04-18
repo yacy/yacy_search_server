@@ -1979,7 +1979,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (webIndex.index().size() < 100) {
             return "no DHT distribution: not enough words - wordIndex.size() = " + webIndex.index().size();
         }
-        if ((getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) && (crawlQueues.noticeURL.notEmpty())) {
+        if ((getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) && (crawlQueues.noticeURL.notEmptyLocal())) {
             return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + webIndex.queuePreStack.size();
         }
         if ((getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "false").equalsIgnoreCase("false")) && (webIndex.queuePreStack.size() > 1)) {
