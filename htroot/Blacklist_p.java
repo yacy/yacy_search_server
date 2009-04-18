@@ -249,7 +249,7 @@ public class Blacklist_p {
                  * =========================================================== */
 
                 blacklistToUse = post.get("currentBlacklist");
-                
+
                 final String temp = addBlacklistEntry(post.get("currentBlacklist"),
                         post.get("newEntry"), header, supportedBlacklistTypes);
                 if (temp != null) {
@@ -518,6 +518,8 @@ public class Blacklist_p {
 
         if (newEntry.startsWith("http://") ){
             newEntry = newEntry.substring(7);
+        } else if (newEntry.startsWith("https://")) {
+            newEntry = newEntry.substring(8);
         }
 
         int pos = newEntry.indexOf("/");
@@ -527,22 +529,32 @@ public class Blacklist_p {
             newEntry = newEntry + "/.*";
         }
 
-        // append the line to the file
-        PrintWriter pw = null;
-        try {
-            pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklistToUse), true));
-            pw.println(newEntry);
-            pw.close();
-        } catch (final IOException e) {
-            e.printStackTrace();
-        } finally {
-            if (pw != null) try { pw.close(); } catch (final Exception e){ Log.logWarning("Blacklist", "could not close stream to "+ blacklistToUse +"! "+ e.getMessage());}
-        }
+        if (supportedBlacklistTypes.length > 0 &&
+                !plasmaSwitchboard.urlBlacklist.contains(supportedBlacklistTypes[0], newEntry.substring(0, pos), newEntry.substring(pos + 1))) {
+            // append the line to the file
+            PrintWriter pw = null;
+            try {
+                pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklistToUse), true));
+                pw.println(newEntry);
+                pw.close();
+            } catch (final IOException e) {
+                e.printStackTrace();
+            } finally {
+                if (pw != null) {
+                    try {
+                        pw.close();
+                    } catch (final Exception e) {
+                        Log.logWarning("Blacklist", "could not close stream to " + blacklistToUse + "! " + e.getMessage());
+                    }
 
-        // add to blacklist
-        for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
-            if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
-                plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],newEntry.substring(0, pos), newEntry.substring(pos + 1));
+                }
+            }
+
+            // add to blacklist
+            for (int blTypes = 0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklistToUse)) {
+                    plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes], newEntry.substring(0, pos), newEntry.substring(pos + 1));
+                }
             }
         }
 

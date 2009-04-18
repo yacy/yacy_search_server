@@ -87,10 +87,12 @@ public interface Blacklist {
     public void loadList(blacklistFile[] blFiles, String sep);
 
 
+    public boolean contains(String blacklistType, String host, String path);
+
     public boolean hashInBlacklistedCache(String blacklistType, String urlHash);
     
     public boolean isListed(String blacklistType, yacyURL url);
     
-    public boolean isListed(String blacklistType, String hostlow, String path);    
+    public boolean isListed(String blacklistType, String hostlow, String path);  
     
 }

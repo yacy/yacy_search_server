@@ -244,6 +244,23 @@ public abstract class AbstractBlacklist implements Blacklist {
         return urlHashCache.contains(urlHash);
     }
 
+    public boolean contains(final String blacklistType, String host, String path) {
+        boolean ret = false;
+
+        if (blacklistType != null && host != null && path != null) {
+            HashMap<String, ArrayList<String>> blacklistMap;
+            blacklistMap = (isMatchable(host)) ? getBlacklistMap(blacklistType,true) : getBlacklistMap(blacklistType,false);
+
+            // avoid PatternSyntaxException e
+            if(!isMatchable(host) && host.startsWith("*"))
+                host = "." + host;
+
+            ArrayList<String> hostList = blacklistMap.get(host.toLowerCase());
+            if (hostList != null) ret = hostList.contains(path);
+        }
+        return ret;
+    }
+
     public boolean isListed(final String blacklistType, final yacyURL url) {
 
         final Set<String> urlHashCache = getCacheUrlHashsSet(blacklistType);        
