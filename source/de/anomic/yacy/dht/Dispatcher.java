@@ -199,7 +199,7 @@ public class Dispatcher {
             while (it.hasNext()) {
                 urlHashes.add(it.next().metadataHash());
             }
-            if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + c.getTermHash() + "'");
+            if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + c.getTermHashAsString() + "'");
             if (urlHashes.size() > 0) this.backend.remove(c.getTermHash(), urlHashes);
         }
         

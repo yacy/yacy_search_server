@@ -705,7 +705,7 @@ public final class yacy {
                     }
                     
                     if (wordCounter%500 == 0) {
-                        wordChunkEndHash = new String(wordIdxContainer.getTermHash());
+                        wordChunkEndHash = wordIdxContainer.getTermHashAsString();
                         wordChunkEnd = System.currentTimeMillis();
                         final long duration = wordChunkEnd - wordChunkStart;
                         log.logInfo(wordCounter + " words scanned " +
@@ -884,7 +884,7 @@ public final class yacy {
                         bos.write(container.getTermHash());
                         bos.write(serverCore.CRLF);
                         if (counter % 500 == 0) {
-                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getTermHash());
+                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getTermHashAsString());
                         }
                     }
                 }
@@ -901,14 +901,14 @@ public final class yacy {
                         bos.write(container.getTermHash());
                         bos.write(serverCore.CRLF);
                         if (counter % 500 == 0) {
-                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getTermHash());
+                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getTermHashAsString());
                         }
                     }
                 }
                 bos.flush();
                 bos.close();
             }
-            log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + (container == null ? "null" : container.getTermHash()));
+            log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + (container == null ? "null" : container.getTermHashAsString()));
         } catch (final IOException e) {
             log.logSevere("IOException", e);
         }

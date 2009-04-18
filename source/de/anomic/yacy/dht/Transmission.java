@@ -204,7 +204,7 @@ public class Transmission {
                 Iterator<ReferenceContainer<WordReference>> i = this.containers.iterator();
                 ReferenceContainer<WordReference> firstContainer = (i == null) ? null : i.next();
                 log.logInfo("Index transfer of " + this.containers.size() + 
-                                 " words [" + ((firstContainer == null) ? null : firstContainer.getTermHash()) + " .. " + new String(this.primaryTarget) + "]" + 
+                                 " words [" + ((firstContainer == null) ? null : firstContainer.getTermHashAsString()) + " .. " + new String(this.primaryTarget) + "]" + 
                                  " and " + this.references.size() + " URLs" +
                                  " to peer " + target.getName() + ":" + target.hash + 
                                  " in " + (transferTime / 1000) + 

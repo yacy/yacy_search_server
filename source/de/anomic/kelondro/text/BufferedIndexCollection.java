@@ -167,7 +167,7 @@ public final class BufferedIndexCollection<ReferenceType extends Reference> exte
                 container.addUnique(elm.toKelondroEntry());
             }
         }
-        if (container.size() < beforeDouble) System.out.println("*** DEBUG DOUBLECHECK - removed " + (beforeDouble - container.size()) + " index entries from word container " + container.getTermHash());
+        if (container.size() < beforeDouble) System.out.println("*** DEBUG DOUBLECHECK - removed " + (beforeDouble - container.size()) + " index entries from word container " + container.getTermHashAsString());
 
         return container;
     }

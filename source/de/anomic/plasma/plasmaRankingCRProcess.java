@@ -389,7 +389,7 @@ public class plasmaRankingCRProcess {
         CloneableIterator<Row.Entry> cr_entry;
         while (i.hasNext()) {
             keycollection = i.next();
-            referee = new String(keycollection.getTermHash());
+            referee = keycollection.getTermHashAsString();
             if (referee.length() == 6) refereeDom = referee; else refereeDom = referee.substring(6);
             cr_entry = keycollection.rows();
             

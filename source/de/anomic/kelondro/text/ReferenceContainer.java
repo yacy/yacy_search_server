@@ -87,6 +87,10 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return termHash;
     }
     
+    public String getTermHashAsString() {
+        return new String(termHash);
+    }
+    
     public void add(final Reference entry) {
         // add without double-occurrence test
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;

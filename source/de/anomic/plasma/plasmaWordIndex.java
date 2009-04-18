@@ -703,7 +703,7 @@ public final class plasmaWordIndex {
                     }
                     if (urlHashs.size() > 0) try {
                         final int removed = index.remove(container.getTermHash(), urlHashs);
-                        Log.logFine("INDEXCLEANER", container.getTermHash() + ": " + removed + " of " + container.size() + " URL-entries deleted");
+                        Log.logFine("INDEXCLEANER", container.getTermHashAsString() + ": " + removed + " of " + container.size() + " URL-entries deleted");
                         lastWordHash = container.getTermHash();
                         lastDeletionCounter = urlHashs.size();
                         urlHashs.clear();
