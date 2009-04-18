@@ -51,7 +51,7 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
     private boolean charsetChanged = false;
     private boolean endOfHead = false;
     
-    private final Reader reader;
+    private Reader reader;
     private Writer writer;
     
     public htmlFilterInputStream(
@@ -60,7 +60,7 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
             final yacyURL rooturl,
             final htmlFilterTransformer transformer,
             final boolean passbyIfBinarySuspect
-    ) throws UnsupportedEncodingException {
+    ) {
         // create a input stream for buffereing
         this.bufferedIn = new BufferedInputStream(inStream,(int) preBufferSize);
         this.bufferedIn.mark((int) preBufferSize);
@@ -68,7 +68,16 @@ public class htmlFilterInputStream extends InputStream implements htmlFilterEven
         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(rooturl);
         //scraper.registerHtmlFilterEventListener(this);
         
-        this.reader = new InputStreamReader(this,inputStreamCharset); 
+        try {
+	    this.reader = new InputStreamReader(this,inputStreamCharset);
+	} catch (UnsupportedEncodingException e) {
+	    try {
+		this.reader = new InputStreamReader(this, "UTF-8");
+	    } catch (UnsupportedEncodingException e1) {
+		// how is that possible?
+		this.reader = new InputStreamReader(this);
+	    }
+	} 
         this.writer = new htmlFilterWriter(null,null,scraper,transformer,passbyIfBinarySuspect);
     }
 
