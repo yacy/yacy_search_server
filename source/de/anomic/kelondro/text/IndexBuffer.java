@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
@@ -72,8 +73,8 @@ public final class IndexBuffer<ReferenceType extends Reference> extends Abstract
         
         // creates a new index cache
         // the cache has a back-end where indexes that do not fit in the cache are flushed
-        this.hashScore = new ScoreCluster<byte[]>();
-        this.hashDate  = new ScoreCluster<byte[]>();
+        this.hashScore = new ScoreCluster<byte[]>(Base64Order.enhancedCoder);
+        this.hashDate  = new ScoreCluster<byte[]>(Base64Order.enhancedCoder);
         this.initTime = System.currentTimeMillis();
         this.cacheEntityMaxCount = entityCacheMaxSize;
         this.cacheReferenceCountLimit = wCacheReferenceCountLimitInit;

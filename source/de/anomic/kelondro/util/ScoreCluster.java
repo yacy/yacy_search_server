@@ -23,6 +23,7 @@ package de.anomic.kelondro.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
@@ -38,7 +39,15 @@ public final class ScoreCluster<E> {
     private int encnt;
     
     public ScoreCluster()  {
-        refkeyDB = new TreeMap<E, Long>();
+        this(null);
+    }
+    
+    public ScoreCluster(Comparator<? super E> comparator)  {
+	if(comparator != null) {
+	    refkeyDB = new TreeMap<E, Long>(comparator);
+	} else {
+	    refkeyDB = new TreeMap<E, Long>();
+	}
         keyrefDB = new TreeMap<Long, E>();
         gcount = 0;
         encnt = 0;
