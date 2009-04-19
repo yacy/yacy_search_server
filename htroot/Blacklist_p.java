@@ -36,6 +36,7 @@ import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 import de.anomic.data.AbstractBlacklist;
@@ -529,8 +530,7 @@ public class Blacklist_p {
             newEntry = newEntry + "/.*";
         }
 
-        if (supportedBlacklistTypes.length > 0 &&
-                !plasmaSwitchboard.urlBlacklist.contains(supportedBlacklistTypes[0], newEntry.substring(0, pos), newEntry.substring(pos + 1))) {
+        if (!blacklistFileContains(blacklistToUse, newEntry)) {
             // append the line to the file
             PrintWriter pw = null;
             try {
@@ -608,6 +608,21 @@ public class Blacklist_p {
         }
         
         return null;
+    }
+
+    /**
+     * Checks if a blacklist file contains a certain entry.
+     * @param blacklistToUse The blacklist.
+     * @param newEntry The Entry.
+     * @return True if file contains entry, else false.
+     */
+    private static boolean blacklistFileContains(final String blacklistToUse, String newEntry) {
+        boolean ret = false;
+        final HashSet<String> Blacklist = new HashSet<String>(listManager.getListArray(new File(listManager.listsPath, blacklistToUse)));
+        if (Blacklist != null) {
+            ret = Blacklist.contains(newEntry);
+        }
+        return ret;
     }
 
 }
