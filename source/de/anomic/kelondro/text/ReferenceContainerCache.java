@@ -318,8 +318,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         private final boolean rot;
         private Iterator<ReferenceContainer<ReferenceType>> iterator;
         
-        public heapCacheIterator(final byte[] startWordHash, final boolean rot) {
+        public heapCacheIterator(byte[] startWordHash, final boolean rot) {
             this.rot = rot;
+            if (startWordHash.length == 0) startWordHash = null;
             this.iterator = (startWordHash == null) ? cache.values().iterator() : cache.tailMap(startWordHash).values().iterator();
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }

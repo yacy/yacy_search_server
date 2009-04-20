@@ -85,6 +85,8 @@ public class Word {
         byte[] h = hashCache.get(word);
         if (h != null) return h;
         h = Base64Order.enhancedCoder.encodeSubstring(Digest.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH)), yacySeedDB.commonHashLength);
+        assert h[2] != '@';
+        String s = new String(h);
         hashCache.put(word, h); // prevent expensive MD5 computation and encoding
         return h;
     }
