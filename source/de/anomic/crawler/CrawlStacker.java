@@ -207,7 +207,7 @@ public final class CrawlStacker {
         }
 
         // deny cgi
-        if (entry.url().isCGI())  {
+        if (entry.url().isIndividual())  {
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is CGI URL. " +
                              "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
             return "cgi url not allowed";

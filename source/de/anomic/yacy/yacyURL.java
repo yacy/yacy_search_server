@@ -668,10 +668,14 @@ public class yacyURL implements Serializable {
 
     public final boolean isCGI() {
         final String ls = unescape(path.toLowerCase());
-        int pos;
         return ls.indexOf(".cgi") >= 0 ||
-               ls.indexOf(".exe") >= 0 ||
-
+               ls.indexOf(".exe") >= 0;
+    }
+    
+    public final boolean isIndividual() {
+        final String ls = unescape(path.toLowerCase());
+        int pos;
+        return
                ((pos = ls.indexOf("sid")) > 0 &&
                 (ls.charAt(--pos) == '?' || ls.charAt(pos) == '&' || ls.charAt(pos) == ';') &&
                 (pos += 5) < ls.length() &&
