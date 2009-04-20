@@ -220,8 +220,11 @@ public class httpClient {
      * (non-Javadoc)
      * @see de.anomic.http.HttpClient#setTimeout(int)
      */
-    public void setTimeout(final int timeout) {
+    @SuppressWarnings("deprecation")
+	public void setTimeout(final int timeout) {
         apacheHttpClient.getParams().setIntParameter(HttpMethodParams.SO_TIMEOUT, timeout);
+        apacheHttpClient.getParams().setIntParameter(HttpMethodParams.HEAD_BODY_CHECK_TIMEOUT, timeout);
+        apacheHttpClient.setConnectionTimeout(timeout);
     }
 
     /**

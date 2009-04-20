@@ -46,7 +46,19 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 
 public class Digest {
-
+	
+	public static BlockingQueue<MessageDigest> digestPool = new ArrayBlockingQueue<MessageDigest>(10);
+	static {
+		for (int i = 0; i < 10; i++)
+			try {
+				MessageDigest digest = MessageDigest.getInstance("MD5");
+				digest.reset();
+				digestPool.add(digest);
+			} catch (NoSuchAlgorithmException e) {
+				e.printStackTrace();
+			}
+	}
+	
     public static String encodeHex(final long in, final int length) {
         String s = Long.toHexString(in);
         while (s.length() < length) s = "0" + s;
@@ -98,8 +110,7 @@ public class Digest {
 
     public static byte[] encodeMD5Raw(final String key) {
         try {
-            final MessageDigest digest = MessageDigest.getInstance("MD5");
-            digest.reset();
+            final MessageDigest digest = digestPool.take();
             byte[] keyBytes;
             try {
                 keyBytes = key.getBytes("UTF-8");
@@ -107,10 +118,13 @@ public class Digest {
                 keyBytes = key.getBytes();
             }
             digest.update(keyBytes);
-            return digest.digest();
-        } catch (final java.security.NoSuchAlgorithmException e) {
-            System.out.println("Internal Error at md5:" + e.getMessage());
-        }
+            byte[] result = digest.digest();
+            digest.reset();
+            digestPool.put(digest);
+            return result;
+        } catch (InterruptedException e) {
+        	System.out.println("Internal Error at md5:" + e.getMessage());
+		}
         return null;
     }
     

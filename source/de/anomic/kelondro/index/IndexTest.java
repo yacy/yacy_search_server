@@ -103,7 +103,7 @@ public class IndexTest {
         hm.clear(); hm = null;
         long t5 = System.currentTimeMillis();
         System.out.println("time   for HashMap<String> test: " + (t5 - t4) + ", " + bugs + " bugs");
-        System.out.println("memory for HashMap<byte[]>: " + (freeStartHash - freeEndHash) / mb + " MB\n");
+        System.out.println("memory for HashMap<String>: " + (freeStartHash - freeEndHash) / mb + " MB\n");
         
         // test kelondro index
         Runtime.getRuntime().gc();
