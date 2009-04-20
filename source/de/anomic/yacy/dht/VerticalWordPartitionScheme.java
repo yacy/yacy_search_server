@@ -73,6 +73,7 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
     
     public final long dhtPosition(final byte[] wordHash, final int verticalPosition) {
         assert wordHash != null;
+        assert wordHash[2] != '@';
         if (partitionExponent == 0) return FlatWordPartitionScheme.std.dhtPosition(wordHash, null);
         long partitionMask = (1L << (Long.SIZE - 1 - partitionExponent)) - 1L;
         long verticalMask = ((long) verticalPosition) << (Long.SIZE - 1 - partitionExponent); // don't remove the cast! it will become an integer result which is wrong.

@@ -125,7 +125,7 @@ public final class yacyClient {
             post.add(new DefaultCharsetStringPart("seed", mySeed.genSeedStr(salt)));
             // send request
             final long start = System.currentTimeMillis();
-            final byte[] content = wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 15000, false);
+            final byte[] content = wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 30000, false);
             yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacted peer at " + address + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + (System.currentTimeMillis() - start) + " milliseconds");
             result = FileUtils.table(content, "UTF-8");
             break;
@@ -134,7 +134,7 @@ public final class yacyClient {
                 yacyCore.log.logWarning("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' interrupted.");
                 return -1;
             }
-            yacyCore.log.logWarning("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' exception: " + e.getMessage() + "; retry = " + retry);
+            yacyCore.log.logWarning("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "', peer " +  address + "; exception: " + e.getMessage() + "; retry = " + retry);
             // try again (go into loop)
             result = null;
         }

@@ -266,7 +266,8 @@ public class Dispatcher {
             // the 'new' primary target is the word hash of the last container
             lastContainer = containers[vertical].get(containers[vertical].size() - 1);
             primaryTarget = FlatWordPartitionScheme.positionToHash(this.seeds.scheme.dhtPosition(lastContainer.getTermHash(), vertical));
-
+            assert primaryTarget[2] != '@';
+            
             // get or make a entry object
             entry = this.transmissionCloud.get(primaryTarget); // if this is not null, the entry is extended here
             ArrayList<yacySeed> targets = PeerSelection.getAcceptRemoteIndexSeedsList(
@@ -274,7 +275,7 @@ public class Dispatcher {
                     primaryTarget,
                     seeds.redundancy() * 3,
                     true);
-            this.log.logInfo("enqueueContainers: selected " + targets.size() + " targets for primary target key " + primaryTarget + "/" + vertical + " with " + containers[vertical].size() + " index containers.");
+            this.log.logInfo("enqueueContainers: selected " + targets.size() + " targets for primary target key " + new String(primaryTarget) + "/" + vertical + " with " + containers[vertical].size() + " index containers.");
             if (entry == null) entry = transmission.newChunk(primaryTarget, targets, lastContainer.row());
             
             // fill the entry with the containers
@@ -353,11 +354,11 @@ public class Dispatcher {
         
         if (success && chunk.isFinished()) {
                 // finished with this queue!
-                this.log.logInfo("STORE: Chunk " + chunk.primaryTarget() + " has FINISHED all transmissions!");
+                this.log.logInfo("STORE: Chunk " + new String(chunk.primaryTarget()) + " has FINISHED all transmissions!");
                 return chunk;
         }
         
-        this.log.logInfo("STORE: Chunk " + chunk.primaryTarget() + " has failed to transmit index; marked peer as busy");
+        this.log.logInfo("STORE: Chunk " + new String(chunk.primaryTarget()) + " has failed to transmit index; marked peer as busy");
         
         if (chunk.canFinish()) {
             try {
@@ -368,7 +369,7 @@ public class Dispatcher {
             }
             return chunk;
         } else {
-            this.log.logInfo("STORE: Chunk " + chunk.primaryTarget() + " has not enough targets left. This transmission has failed, putting back index to backend");
+            this.log.logInfo("STORE: Chunk " + new String(chunk.primaryTarget()) + " has not enough targets left. This transmission has failed, putting back index to backend");
             chunk.restore();
             return null;
         }

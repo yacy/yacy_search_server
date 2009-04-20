@@ -77,6 +77,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
     }
     
     public static RowSet importRowSet(byte[] b, final Row rowdef) {
+    	assert b.length >= 14 : "b.length = " + b.length;
         final int size = (int) NaturalOrder.decodeLong(b, 0, 4);
         final int orderbound = (int) NaturalOrder.decodeLong(b, 10, 4);
         final byte[] chunkcache = new byte[size * rowdef.objectsize];
