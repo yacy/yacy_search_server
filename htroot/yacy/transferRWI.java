@@ -157,6 +157,15 @@ public final class transferRWI {
                     continue;
                 }
                 
+                // check if the entry is in our network domain
+                final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomainHash(urlHash);
+                if (urlRejectReason != null) {
+                    yacyCore.log.logWarning("transferRWI: blocked URL hash '" + urlHash + "' (" + urlRejectReason + ") from peer " + otherPeerName + "; peer is suspected to be a spam-peer (or something is wrong)");
+                    //if (yacyCore.log.isFine()) yacyCore.log.logFine("transferRWI: blocked URL hash '" + urlHash + "' (" + urlRejectReason + ") from peer " + otherPeerName);
+                    blocked++;
+                    continue;
+                }
+                
                 // learn entry
                 try {
                     sb.webIndex.index().add(wordHash.getBytes(), iEntry);

@@ -1226,6 +1226,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             Surrogate surrogate;
             QueueEntry queueentry;
             while ((surrogate = reader.take()) != SurrogateReader.poison) {
+                // check if url is in accepted domain
+                final String urlRejectReason = crawlStacker.urlInAcceptedDomain(surrogate.url());
+                if (urlRejectReason != null) {
+                    if (this.log.isFine()) this.log.logInfo("Rejected URL '" + surrogate.url() + "': " + urlRejectReason);
+                    continue;
+                }
+                
+                // create a queue entry
                 plasmaParserDocument document = surrogate.document();
                 queueentry = this.webIndex.queuePreStack.newEntry(surrogate.url(), null, null, false, null, 0, this.webIndex.defaultSurrogateProfile.handle(), null);
                 /*
@@ -1233,6 +1241,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                      final String initiator, final int depth, final String profilehandle, final String anchorName) 
                  */
                 indexingQueueEntry queueEntry = new indexingQueueEntry(queueentry, document, null);
+                
+                // place the queue entry into the concurrent process of the condenser (document analysis)
                 try {
                     indexingCondensementProcessor.enQueue(queueEntry);
                 } catch (InterruptedException e) {

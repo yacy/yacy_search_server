@@ -325,15 +325,6 @@ public final class CrawlStacker {
         final String host = url.getHost();
         if (host == null) return "url.host is null";
         if (this.acceptGlobalURLs && this.acceptLocalURLs) return null; // fast shortcut to avoid dnsResolve
-        /*
-        InetAddress hostAddress = serverDomains.dnsResolve(host);
-        // if we don't know the host, we cannot load that resource anyway.
-        // But in case we use a proxy, it is possible that we dont have a DNS service.
-        final httpRemoteProxyConfig remoteProxyConfig = httpdProxyHandler.getRemoteProxyConfig();
-        if (hostAddress == null) {
-            if ((remoteProxyConfig != null) && (remoteProxyConfig.useProxy())) return null; else return "the dns of the host '" + host + "' cannot be resolved";
-        }
-        */
         // check if this is a local address and we are allowed to index local pages:
         //boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
         final boolean local = url.isLocal();
@@ -342,6 +333,20 @@ public final class CrawlStacker {
         return (local) ?
             ("the host '" + host + "' is local, but local addresses are not accepted") :
             ("the host '" + host + "' is global, but global addresses are not accepted");
+    }
+    
+    public String urlInAcceptedDomainHash(final String urlhash) {
+        // returns true if the url can be accepted accoring to network.unit.domain
+        if (urlhash == null) return "url is null";
+        if (this.acceptGlobalURLs && this.acceptLocalURLs) return null; // fast shortcut to avoid dnsResolve
+        // check if this is a local address and we are allowed to index local pages:
+        //boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
+        final boolean local = yacyURL.isLocal(urlhash);
+        //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
+        if ((this.acceptGlobalURLs && !local) || (this.acceptLocalURLs && local)) return null;
+        return (local) ?
+            ("the urlhash '" + urlhash + "' is local, but local addresses are not accepted") :
+            ("the urlhash '" + urlhash + "' is global, but global addresses are not accepted");
     }
 
     public boolean acceptLocalURLs() {
