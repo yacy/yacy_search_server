@@ -44,6 +44,7 @@ import de.anomic.data.Blacklist;
 import de.anomic.data.listManager;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.Log;
+import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -63,6 +64,9 @@ public class Blacklist_p {
         // initialize the list manager
         listManager.switchboard = (plasmaSwitchboard) env;
         listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
+        
+        // clean up all search events in case that a (new) blacklist entry denies previously returned results
+        plasmaSearchEvent.cleanupEvents(true);
         
         // getting the list of supported blacklist types
         final String supportedBlacklistTypesStr = AbstractBlacklist.BLACKLIST_TYPES_STRING;
