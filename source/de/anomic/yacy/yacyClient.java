@@ -969,7 +969,7 @@ public final class yacyClient {
             eenum = ic.entries();
             while (eenum.hasNext()) {
                 entry = eenum.next();
-                entrypost.append(ic.getTermHash()) 
+                entrypost.append(ic.getTermHashAsString()) 
                          .append(entry.toPropertyForm()) 
                          .append(serverCore.CRLF_STRING);
                 indexcount++;
