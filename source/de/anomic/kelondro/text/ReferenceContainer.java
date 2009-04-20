@@ -54,12 +54,14 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     
     public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final RowSet collection) {
         super(collection);
+        assert termHash[2] != '@';
         this.factory = factory;
         this.termHash = termHash;
     }
     
     public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final Row rowdef, final int objectCount) {
         super(rowdef, objectCount);
+        assert termHash[2] != '@';
         this.termHash = termHash;
         this.factory = factory;
         this.lastTimeWrote = 0;
@@ -72,10 +74,12 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     }
     
     public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> emptyContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final int elementCount) {
+        assert termHash[2] != '@';
         return new ReferenceContainer<ReferenceType>(factory, termHash, WordReferenceRow.urlEntryRow, elementCount);
     }
 
     public void setWordHash(final byte[] newTermHash) {
+        assert termHash[2] != '@';
         this.termHash = newTermHash;
     }
 
