@@ -29,11 +29,13 @@ package de.anomic.tools;
 import org.apache.tools.bzip2.CBZip2InputStream;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -416,16 +418,25 @@ public class mediawikiIndex {
     public static void main(String[] s) {
         if (s.length == 0) {
             System.out.println("usage:");
-            System.out.println(" -more <wikipedia-dump>");
             System.out.println(" -index <wikipedia-dump>");
             System.out.println(" -read  <start> <len> <idx-file>");
             System.out.println(" -find  <title> <wikipedia-dump>");
+            System.out.println(" -convert <wikipedia-dump-xml.bz2> <convert-target-dir> <url-stub>");
             System.exit(0);
         }
 
-        if (s[0].equals("-more")) {   
+        // example:
+        // java -Xmx1000m -cp classes:lib/bzip2.jar de.anomic.tools.mediawikiIndex -convert DATA\HTCACHE\dewiki-20090311-pages-articles.xml.bz2 DATA\SURROGATES\in\ http://de.wikipedia.org/wiki/
+        
+        if (s[0].equals("-convert") && s.length > 2 && s[1].endsWith(".xml.bz2") && s[3].startsWith("http://")) {
+            File sourcefile = new File(s[1]);
+            File targetdir = new File(s[2]);
+            String targetstub = sourcefile.getName();
+            targetstub = targetstub.substring(0, targetstub.length() - 8);
+            String urlStub = s[3]; // i.e. http://de.wikipedia.org/wiki/
+            //String language = urlStub.substring(7,9);
             try {
-                InputStream is = new FileInputStream(new File(s[1]));
+                InputStream is = new FileInputStream(sourcefile);
                 if (s[1].endsWith(".bz2")) {
                     int b = is.read();
                     if (b != 'B') throw new IOException("Invalid bz2 content.");
@@ -440,8 +451,13 @@ public class mediawikiIndex {
                 String title = null;
                 plasmaParser.initHTMLParsableMimeTypes("text/html");
                 plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER, "text/html");
-                mediawikiIndex mi = new mediawikiIndex("http://de.wikipedia.org/wiki/");
+                mediawikiIndex mi = new mediawikiIndex(urlStub);
                 wikiparserrecord record;
+                int fc = 0;
+                int rc = 0;
+                String outputfilename = targetstub + "." + fc + ".xml.tmp";
+                OutputStreamWriter osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(targetdir, outputfilename))));
+                osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<surrogates xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n");
                 while ((t = r.readLine()) != null) {
                     if (t.indexOf(pagestart) >= 0) {
                         page = true;
@@ -458,8 +474,19 @@ public class mediawikiIndex {
                         record.genHTML();
                         try {
                             record.genDocument();
-                            System.out.println(new String(record.document.getTextBytes()));
-                            System.out.println();
+                            record.document.writeXML(osw, new Date());
+                            rc++;
+                            if (rc >= 10000) {
+                                osw.write("</surrogates>\n");
+                                osw.close();
+                                String finalfilename = targetstub + "." + fc + ".xml";
+                                new File(targetdir, outputfilename).renameTo(new File(targetdir, finalfilename));
+                                rc = 0;
+                                fc++;
+                                outputfilename = targetstub + "." + fc + ".xml.tmp";
+                                osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(targetdir, outputfilename))));
+                                osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<surrogates xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n");
+                            }
                         } catch (InterruptedException e) {
                         } catch (ParserException e) {
                         }
@@ -481,6 +508,10 @@ public class mediawikiIndex {
                         sb.append('\n');
                     }
                 }
+                osw.write("</surrogates>\n");
+                osw.close();
+                String finalfilename = targetstub + "." + fc + ".xml";
+                new File(targetdir, outputfilename).renameTo(new File(targetdir, finalfilename));
                 r.close();
             } catch (IOException e) {
                 e.printStackTrace();
