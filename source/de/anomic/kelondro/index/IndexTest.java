@@ -33,6 +33,7 @@ import java.util.Random;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.util.ByteArray;
 import de.anomic.kelondro.util.MemoryControl;
 
 /**
@@ -56,7 +57,7 @@ public class IndexTest {
     public static final long mb = 1024 * 1024;
     
     public static void main(String[] args) {
-        System.out.println("Performance test: comparing HashMap, TreeMap and kelondroRow\n");
+        System.out.println("Performance test: comparing HashMap, TreeMap and kelondroRow");
         if (args.length == 0) {
             System.out.println("use one parameter: number of test entries");
             System.exit(0);
@@ -67,11 +68,14 @@ public class IndexTest {
         byte[][] tests = new byte[count][];
         Random r = new Random(0);
         for (int i = 0; i < count; i++) tests[i] = randomHash(r);
-
+        System.out.println("generated " + count + " test data entries \n");
+        
         // start
+        System.out.println("\nSTANDARD JAVA CLASS MAPS \n");
         long t1 = System.currentTimeMillis();
         
         // test tree map
+        System.out.println("sorted map");
         Runtime.getRuntime().gc();
         long freeStartTree = MemoryControl.free();
         TreeMap<byte[], Integer> tm = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
@@ -89,6 +93,7 @@ public class IndexTest {
         System.out.println("memory for TreeMap<byte[]>: " + (freeStartTree - freeEndTree) / mb + " MB\n");
 
         // test hash map
+        System.out.println("unsorted map");
         Runtime.getRuntime().gc();
         long freeStartHash = MemoryControl.available();
         HashMap<String, Integer> hm = new HashMap<String, Integer>();
@@ -105,7 +110,10 @@ public class IndexTest {
         System.out.println("time   for HashMap<String> test: " + (t5 - t4) + ", " + bugs + " bugs");
         System.out.println("memory for HashMap<String>: " + (freeStartHash - freeEndHash) / mb + " MB\n");
         
+        System.out.println("\nKELONDRO-ENHANCED MAPS \n");
+        
         // test kelondro index
+        System.out.println("sorted map");
         Runtime.getRuntime().gc();
         long freeStartKelondro = MemoryControl.available();
         IntegerHandleIndex ii = new IntegerHandleIndex(12, Base64Order.enhancedCoder, count, count);
@@ -122,6 +130,24 @@ public class IndexTest {
         long t7 = System.currentTimeMillis();
         System.out.println("time   for kelondroMap<byte[]> test: " + (t7 - t6) + ", " + bugs + " bugs");
         System.out.println("memory for kelondroMap<byte[]>: " + (freeStartKelondro - freeEndKelondro) / mb + " MB\n");
+
+        // test ByteArray
+        System.out.println("unsorted map");
+        Runtime.getRuntime().gc();
+        long freeStartBA = MemoryControl.available();
+        HashMap<ByteArray, Integer> bm = new HashMap<ByteArray, Integer>();
+        for (int i = 0; i < count; i++) bm.put(new ByteArray(tests[i]), 1);
+        long t8 = System.currentTimeMillis();
+        System.out.println("time   for HashMap<ByteArray> generation: " + (t8 - t7));
+        
+        bugs = 0;
+        for (int i = 0; i < count; i++) if (bm.get(new ByteArray(tests[i])) == null) bugs++;
+        Runtime.getRuntime().gc();
+        long freeEndBA = MemoryControl.available();
+        bm.clear(); bm = null;
+        long t9 = System.currentTimeMillis();
+        System.out.println("time   for HashMap<ByteArray> test: " + (t9 - t8) + ", " + bugs + " bugs");
+        System.out.println("memory for HashMap<ByteArray>: " + (freeStartBA - freeEndBA) / mb + " MB\n");
 
         System.exit(0);
     }
