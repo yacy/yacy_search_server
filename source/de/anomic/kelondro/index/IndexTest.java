@@ -155,9 +155,14 @@ public class IndexTest {
 
 /*
 
+sorted map
+time   for kelondroMap<byte[]> generation: 1781
+time   for kelondroMap<byte[]> test: 2452, 0 bugs
+memory for kelondroMap<byte[]>: 15 MB
 
-time   for TreeMap<byte[]> generation: 3117
-time   for TreeMap<byte[]> test: 3495, 0 bugs
-memory for TreeMap<byte[]>: 29 MB
+unsorted map
+time   for HashMap<ByteArray> generation: 828
+time   for HashMap<ByteArray> test: 953, 0 bugs
+memory for HashMap<ByteArray>: 9 MB
 
 */

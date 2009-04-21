@@ -322,7 +322,7 @@ public final class IndexBuffer<ReferenceType extends Reference> extends Abstract
     }
 
     public synchronized void close() {
-        heap.dump(this.dumpFile, true);
+        heap.dump(this.dumpFile);
         heap = null;
         hashScore.clear();
         hashDate.clear();

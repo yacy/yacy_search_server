@@ -443,30 +443,25 @@ public final class plasmaWordIndex {
         final Iterator<Map.Entry<String, Word>> i = condenser.words().entrySet().iterator();
         Map.Entry<String, Word> wentry;
         String word;
-        WordReferenceRow ientry;
-        Word wprop;
         int len = (document == null) ? urlLength : document.dc_title().length();
+        WordReferenceRow ientry = new WordReferenceRow(url.hash(),
+                                urlLength, urlComps, len,
+                                condenser.RESULT_NUMB_WORDS,
+                                condenser.RESULT_NUMB_SENTENCES,
+                                urlModified.getTime(),
+                                System.currentTimeMillis(),
+                                language,
+                                doctype,
+                                outlinksSame, outlinksOther);
+        Word wprop;
         while (i.hasNext()) {
             wentry = i.next();
             word = wentry.getKey();
             wprop = wentry.getValue();
             assert (wprop.flags != null);
-            ientry = new WordReferenceRow(url.hash(),
-                        urlLength, urlComps, len,
-                        wprop.count,
-                        condenser.RESULT_NUMB_WORDS,
-                        condenser.RESULT_NUMB_SENTENCES,
-                        wprop.posInText,
-                        wprop.posInPhrase,
-                        wprop.numOfPhrase,
-                        urlModified.getTime(),
-                        System.currentTimeMillis(),
-                        language,
-                        doctype,
-                        outlinksSame, outlinksOther,
-                        wprop.flags);
+            ientry.setWord(wprop);
             try {
-                this.index.add(Word.word2hash(word), ientry); // TODO: remove getBytes()
+                this.index.add(Word.word2hash(word), ientry);
             } catch (IOException e) {
                 e.printStackTrace();
             }

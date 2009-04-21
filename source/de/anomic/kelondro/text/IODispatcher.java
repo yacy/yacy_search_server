@@ -80,7 +80,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
     
     public synchronized void dump(ReferenceContainerCache<ReferenceType> cache, File file, ReferenceContainerArray<ReferenceType> array) {
         if (dumpQueue == null || !this.isAlive()) {
-            cache.dump(file, true);
+            cache.dump(file);
         } else {
             DumpJob job = new DumpJob(cache, file, array);
             try {
@@ -88,7 +88,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
                 controlQueue.put(vita);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                cache.dump(file, true);
+                cache.dump(file);
             }
         }
     }
@@ -161,7 +161,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
         }
         public void dump() {
             try {
-                cache.dump(file, true);
+                cache.dump(file);
                 array.mountBLOBFile(file);
             } catch (IOException e) {
                 e.printStackTrace();
