@@ -198,8 +198,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         if ((this.rowdef.objectOrder != null) && (this.rowdef.objectOrder instanceof Base64Order) && (this.sortBound > 4000)) {
             // first try to find in sorted area
             assert this.rowdef.objectOrder.wellformed(a, astart, alength) : "not wellformed: " + new String(a, astart, alength);
-            final byte[] compiledPivot = compilePivot(a, astart, alength);
-            final int p = binarySearchCompiledPivot(compiledPivot);
+            final int p = binarySearch(a, astart, alength);
             if (p >= 0) return p;
             
             // then find in unsorted area
@@ -233,24 +232,6 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         while (l < rbound) {
             p = l + ((rbound - l) >> 1);
             d = compare(key, astart, alength, p);
-            if (d == 0) return p;
-            if (d < 0) rbound = p; else l = p + 1;
-        }
-        return -1;
-    }
-    
-    private int binarySearchCompiledPivot(final byte[] compiledPivot) {
-        // returns the exact position of the key if the key exists,
-        // or -1 if the key does not exist
-        assert (rowdef.objectOrder != null);
-        assert (rowdef.objectOrder instanceof Base64Order);
-        int l = 0;
-        int rbound = this.sortBound;
-        int p = 0;
-        int d;
-        while (l < rbound) {
-            p = l + ((rbound - l) >> 1);
-            d = comparePivot(compiledPivot, p);
             if (d == 0) return p;
             if (d < 0) rbound = p; else l = p + 1;
         }
@@ -489,7 +470,17 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         System.out.println("after uniq, size = " + rs.size());
         */
         
-        final String[] test = { "eins", "zwei", "drei", "vier", "fuenf", "sechs", "sieben", "acht", "neun", "zehn" };
+        final String[] test = {
+        		"eins......xxxx", 
+        		"zwei......xxxx", 
+        		"drei......xxxx", 
+        		"vier......xxxx", 
+        		"fuenf.....xxxx", 
+        		"sechs.....xxxx", 
+        		"sieben....xxxx", 
+        		"acht......xxxx", 
+        		"neun......xxxx", 
+        		"zehn......xxxx" };
         final RowSet d = new RowSet(new Row("byte[] key-10, Cardinal x-4 {b256}", NaturalOrder.naturalOrder), 0);
         for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());
         for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());

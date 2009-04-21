@@ -292,17 +292,17 @@ public class mediawikiIndex {
             this.end = end;
         }
     }
-    public wikiparserrecord newRecord(String title, StringBuffer sb) {
+    public wikiparserrecord newRecord(String title, StringBuilder sb) {
         return new wikiparserrecord(title, sb);
     }
     
     public class wikiparserrecord {
         public String title;
-        StringBuffer source;
+        StringBuilder source;
         String html;
         yacyURL url;
         plasmaParserDocument document;
-        public wikiparserrecord(String title, StringBuffer sb) {
+        public wikiparserrecord(String title, StringBuilder sb) {
             this.title = title;
             this.source = sb;
         }
@@ -426,7 +426,7 @@ public class mediawikiIndex {
         }
 
         // example:
-        // java -Xmx1000m -cp classes:lib/bzip2.jar de.anomic.tools.mediawikiIndex -convert DATA\HTCACHE\dewiki-20090311-pages-articles.xml.bz2 DATA\SURROGATES\in\ http://de.wikipedia.org/wiki/
+        // java -Xmx2000m -cp classes:lib/bzip2.jar de.anomic.tools.mediawikiIndex -convert DATA/HTCACHE/dewiki-20090311-pages-articles.xml.bz2 DATA/SURROGATES/in/ http://de.wikipedia.org/wiki/
         
         if (s[0].equals("-convert") && s.length > 2 && s[1].endsWith(".xml.bz2") && s[3].startsWith("http://")) {
             File sourcefile = new File(s[1]);
@@ -444,9 +444,9 @@ public class mediawikiIndex {
                     if (b != 'Z') throw new IOException("Invalid bz2 content.");
                     is = new CBZip2InputStream(is);
                 }
-                BufferedReader r = new BufferedReader(new java.io.InputStreamReader(is));
+                BufferedReader r = new BufferedReader(new java.io.InputStreamReader(is, "UTF-8"));
                 String t;
-                StringBuffer sb = new StringBuffer();
+                StringBuilder sb = new StringBuilder();
                 boolean page = false, text = false;
                 String title = null;
                 plasmaParser.initHTMLParsableMimeTypes("text/html");
@@ -456,7 +456,7 @@ public class mediawikiIndex {
                 int fc = 0;
                 int rc = 0;
                 String outputfilename = targetstub + "." + fc + ".xml.tmp";
-                OutputStreamWriter osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(targetdir, outputfilename))));
+                OutputStreamWriter osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(targetdir, outputfilename))), "UTF-8");
                 osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<surrogates xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n");
                 while ((t = r.readLine()) != null) {
                     if (t.indexOf(pagestart) >= 0) {
@@ -484,7 +484,7 @@ public class mediawikiIndex {
                                 rc = 0;
                                 fc++;
                                 outputfilename = targetstub + "." + fc + ".xml.tmp";
-                                osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(targetdir, outputfilename))));
+                                osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(targetdir, outputfilename))), "UTF-8");
                                 osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<surrogates xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n");
                             }
                         } catch (InterruptedException e) {

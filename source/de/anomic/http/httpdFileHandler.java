@@ -646,7 +646,7 @@ public final class httpdFileHandler {
                     StringBuilder stringBuffer = new StringBuilder(1024);
 
                     while (is.available() > 0) {
-                        stringBuffer.append((char) is.read());
+                    	stringBuffer.append((char) is.read());
                     }
 
                     String cgiReturn = stringBuffer.toString();

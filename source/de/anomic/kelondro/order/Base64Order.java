@@ -206,7 +206,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
     // b64-Strings
     // we will do that by grouping each three input bytes to four output bytes.
     public final String encode(final byte[] in) {
-        if (in.length == 0) return "";
+        if (in == null || in.length == 0) return "";
         int lene = in.length / 3 * 4 + 3;
         StringBuilder out = new StringBuilder(lene);
         int pos = 0;
@@ -509,7 +509,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         // they are equal
         return 0;
     }
-    
+    /*
     public final int comparePivot(final byte[] compiledPivot, final byte[] b, final int boffset, final int blength) {
         assert zero == null;
         assert asc;
@@ -556,7 +556,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         }
         return cp;
     }
-
+*/
     public static void main(final String[] s) {
         // java -classpath classes de.anomic.kelondro.kelondroBase64Order
         final Base64Order b64 = new Base64Order(true, true);

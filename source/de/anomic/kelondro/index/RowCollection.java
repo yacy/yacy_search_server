@@ -285,7 +285,7 @@ public class RowCollection implements Iterable<Row.Entry> {
     }
     
     public synchronized void add(final byte[] a) {
-        assert a.length == this.rowdef.objectsize;
+        assert a.length == this.rowdef.objectsize : "a.length = " + a.length + ", objectsize = " + this.rowdef.objectsize;
         addUnique(a, 0, a.length);
     }
     
@@ -623,27 +623,22 @@ public class RowCollection implements Iterable<Row.Entry> {
         int p = L;
         int q = R - 1;
         int pivot = pivot(L, R, S, swapspace);
-        int oldpivot = -1;
-        byte[] compiledPivot = null;
         if (this.rowdef.objectOrder instanceof Base64Order) {
         	while (p <= q) {
         		// wenn pivot < S: pivot befindet sich in sortierter Sequenz von L bis S - 1
         		// d.h. alle Werte von L bis pivot sind kleiner als das pivot
-        		// zu finden ist ein minimales p <= q so dass chunk[p] >= pivot        		
-        		if (compiledPivot == null) compiledPivot = compilePivot(pivot);
+        		// zu finden ist ein minimales p <= q so dass chunk[p] >= pivot
         		if ((pivot < S) && (p < pivot)) {
         			//System.out.println("+++ saved " + (pivot - p) + " comparisments");
         			p = pivot;
         			S = 0;
         		} else {
-        			while ((p < R - 1) && (comparePivot(compiledPivot, p) >= 0)) p++; // chunkAt[p] < pivot
+        			while ((p < R - 1) && (compare(pivot, p) >= 0)) p++; // chunkAt[p] < pivot
         		}
         		// nun gilt chunkAt[p] >= pivot
-        		while ((q > L) && (comparePivot(compiledPivot, q) <= 0)) q--; // chunkAt[q] > pivot
+        		while ((q > L) && (compare(pivot, q) <= 0)) q--; // chunkAt[q] > pivot
         		if (p <= q) {
-        			oldpivot = pivot;
         			pivot = swap(p, q, pivot, swapspace);
-        			if (pivot != oldpivot && compiledPivot != null) compiledPivot = null; // must be computed again
         			p++;
         			q--;
         		}
@@ -862,34 +857,6 @@ public class RowCollection implements Iterable<Row.Entry> {
                 chunkcache,
                 i * this.rowdef.objectsize,
                 this.rowdef.primaryKeyLength,
-                chunkcache,
-                j * this.rowdef.objectsize,
-                this.rowdef.primaryKeyLength);
-        return c;
-    }
-    
-    protected final byte[] compilePivot(final int i) {
-        assert (i >= 0) && (i < chunkcount) : "i = " + i + ", chunkcount = " + chunkcount;
-        assert (this.rowdef.objectOrder != null);
-        assert (this.rowdef.objectOrder instanceof Base64Order);
-        //assert (!bugappearance(chunkcache, i * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
-        return ((Base64Order) this.rowdef.objectOrder).compilePivot(chunkcache, i * this.rowdef.objectsize, this.rowdef.primaryKeyLength);
-    }
-    
-    protected final byte[] compilePivot(final byte[] a, final int astart, final int alength) {
-        assert (this.rowdef.objectOrder != null);
-        assert (this.rowdef.objectOrder instanceof Base64Order);
-        return ((Base64Order) this.rowdef.objectOrder).compilePivot(a, astart, alength);
-    }
-    
-    protected final int comparePivot(final byte[] compiledPivot, final int j) {
-        assert (chunkcount * this.rowdef.objectsize <= chunkcache.length) : "chunkcount = " + chunkcount + ", objsize = " + this.rowdef.objectsize + ", chunkcache.length = " + chunkcache.length;
-        assert (j >= 0) && (j < chunkcount) : "j = " + j + ", chunkcount = " + chunkcount;
-        assert (this.rowdef.objectOrder != null);
-        assert (this.rowdef.objectOrder instanceof Base64Order);
-        //assert (!bugappearance(chunkcache, j * this.rowdef.objectsize + colstart, this.rowdef.primaryKeyLength));
-        final int c = ((Base64Order) this.rowdef.objectOrder).comparePivot(
-        		compiledPivot,
                 chunkcache,
                 j * this.rowdef.objectsize,
                 this.rowdef.primaryKeyLength);
