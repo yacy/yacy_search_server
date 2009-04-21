@@ -87,7 +87,7 @@ public class IndexTest {
         long t3 = System.currentTimeMillis();
         System.out.println("time   for TreeMap<byte[]> test: " + (t3 - t2) + ", " + bugs + " bugs");
         System.out.println("memory for TreeMap<byte[]>: " + (freeStartTree - freeEndTree) / mb + " MB\n");
-        
+
         // test hash map
         Runtime.getRuntime().gc();
         long freeStartHash = MemoryControl.available();
@@ -122,7 +122,16 @@ public class IndexTest {
         long t7 = System.currentTimeMillis();
         System.out.println("time   for kelondroMap<byte[]> test: " + (t7 - t6) + ", " + bugs + " bugs");
         System.out.println("memory for kelondroMap<byte[]>: " + (freeStartKelondro - freeEndKelondro) / mb + " MB\n");
-        
+
         System.exit(0);
     }
 }
+
+/*
+
+
+time   for TreeMap<byte[]> generation: 3117
+time   for TreeMap<byte[]> test: 3495, 0 bugs
+memory for TreeMap<byte[]>: 29 MB
+
+*/

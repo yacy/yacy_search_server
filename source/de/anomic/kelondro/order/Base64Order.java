@@ -58,7 +58,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
     private final boolean rfc1113compliant;
     private final char[] alpha;
     private final byte[] ahpla;
-    private final short[] ab; // decision table for comparisments
+    private final byte[] ab; // decision table for comparisments
 
     public Base64Order(final boolean up, final boolean rfc1113compliant) {
         // if we choose not to be rfc1113compliant,
@@ -67,9 +67,10 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         this.asc = up;
         alpha = (rfc1113compliant) ? alpha_standard : alpha_enhanced;
         ahpla = (rfc1113compliant) ? ahpla_standard : ahpla_enhanced;
-        ab = new short[1 << 14];
+        ab = new byte[1 << 14];
         byte acc, bcc;
-        short c;
+        byte c;
+        // pre-compute comparisment results: this omits one single ahpla lookup during comparisment
         for (char ac: alpha) {
             for (char bc: alpha) {
                 acc = ahpla[ac];
@@ -415,15 +416,22 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
     }
    
     public final int compare(final byte[] a, final byte[] b) {
-        return (asc) ? compare0(a, 0, a.length, b, 0, b.length) : compare0(b, 0, b.length, a, 0, a.length);
+        return (asc) ?
+                ((zero == null) ? compares(a, b) : compare0(a, 0, a.length, b, 0, b.length))
+                :
+                ((zero == null) ? compares(b, a) : compare0(b, 0, b.length, a, 0, a.length));
     }
 
     public final int compare(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
-        return (asc) ? compare0(a, aoffset, alength, b, boffset, blength) : compare0(b, boffset, blength, a, aoffset, alength);
+        return (asc) ?
+                compare0(a, aoffset, alength, b, boffset, blength)
+                :
+                compare0(b, boffset, blength, a, aoffset, alength);
     }
     
-    public final int compare0(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
+    private final int compare0(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
         if (zero == null) return compares(a, aoffset, alength, b, boffset, blength);
+
         // we have an artificial start point. check all combinations
         final int az = compares(a, aoffset, alength, zero, 0, Math.min(alength, zero.length)); // -1 if a < z; 0 if a == z; 1 if a > z
         final int bz = compares(b, boffset, blength, zero, 0, Math.min(blength, zero.length)); // -1 if b < z; 0 if b == z; 1 if b > z
@@ -431,14 +439,41 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         return sig(az - bz);
     }
     
-    public final int compares(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
+    private final int compares(final byte[] a, final byte[] b) {
+        assert (ahpla.length == 128);
+        short i = 0;
+        final int al = a.length;
+        final int bl = b.length;
+        final short ml = (short) Math.min(al, bl);
+        byte ac, bc;
+        while (i < ml) { // trace point
+            assert (i < a.length) : "i = " + i + ", aoffset = " + 0 + ", a.length = " + a.length + ", a = " + NaturalOrder.arrayList(a, 0, al);
+            assert (i < b.length) : "i = " + i + ", boffset = " + 0 + ", b.length = " + b.length + ", b = " + NaturalOrder.arrayList(b, 0, al);
+            ac = a[i];
+            assert (ac >= 0) && (ac < 128) : "ac = " + ac + ", a = " + NaturalOrder.arrayList(a, 0, al);
+            bc = b[i];
+            assert (bc >= 0) && (bc < 128) : "bc = " + bc + ", b = " + NaturalOrder.arrayList(b, 0, al);
+            assert ac != 0;
+            assert bc != 0;
+            //if ((ac == 0) && (bc == 0)) return 0; // zero-terminated length
+            if (ac != bc) return ab[(ac << 7) | bc];
+            i++;
+        }
+        // compare length
+        if (al > bl) return 1;
+        if (al < bl) return -1;
+        // they are equal
+        return 0;
+    }
+    
+    private final int compares(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
         assert (aoffset + alength <= a.length) : "a.length = " + a.length + ", aoffset = " + aoffset + ", alength = " + alength;
         assert (boffset + blength <= b.length) : "b.length = " + b.length + ", boffset = " + boffset + ", blength = " + blength;
         assert (ahpla.length == 128);
-        int i = 0;
+        short i = 0;
         final int al = Math.min(alength, a.length - aoffset);
         final int bl = Math.min(blength, b.length - boffset);
-        final int ml = Math.min(al, bl);
+        final short ml = (short) Math.min(al, bl);
         byte ac, bc;
         //byte acc, bcc;
         //int c = 0;
@@ -448,12 +483,14 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
             ac = a[aoffset + i];
             assert (ac >= 0) && (ac < 128) : "ac = " + ac + ", a = " + NaturalOrder.arrayList(a, aoffset, al);
             bc = b[boffset + i];
-            if ((ac == 0) && (bc == 0)) return 0; // zero-terminated length
             assert (bc >= 0) && (bc < 128) : "bc = " + bc + ", b = " + NaturalOrder.arrayList(b, boffset, al);
+            assert ac != 0;
+            assert bc != 0;
+            //if ((ac == 0) && (bc == 0)) return 0; // zero-terminated length
             if (ac == bc) {
-            	// shortcut in case of equality: we don't need to lookup the ahpla value
-            	i++;
-            	continue;
+                // shortcut in case of equality: we don't need to lookup the ahpla value
+                i++;
+                continue;
             }
             //acc = ahpla[ac];
             //assert (acc >= 0) : "acc = " + acc + ", a = " + NaturalOrder.arrayList(a, aoffset, al) + "/" + new String(a, aoffset, al) + ", aoffset = 0x" + Integer.toHexString(aoffset) + ", i = " + i + "\n" + NaturalOrder.table(a, 16, aoffset);
