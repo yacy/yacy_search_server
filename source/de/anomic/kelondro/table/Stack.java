@@ -37,6 +37,7 @@ import java.util.StringTokenizer;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.FileUtils;
+import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.kelondroException;
 
 public final class Stack extends FullRecords {
@@ -184,7 +185,10 @@ public final class Stack extends FullRecords {
     public synchronized Row.Entry pot() throws IOException {
         // return row on the bottom of the stack and remove record
         final Node n = botNode();
-        if (n == null) return null;
+        if (n == null) {
+        	Log.logInfo("Stack", "botNode() == null");
+        	return null;
+        }
         final Row.Entry ret = row().newEntry(n.getValueRow());
 
         // remove node
@@ -239,9 +243,15 @@ public final class Stack extends FullRecords {
     
     private Node botNode() throws IOException {
         // return node on bottom of the stack
-        if (size() == 0) return null;
+        if (size() == 0) {
+        	Log.logInfo("Stack", "size() == 0");
+        	return null;
+        }
         final RecordHandle h = getHandle(root);
-        if (h == null) return null;
+        if (h == null) {
+        	Log.logInfo("Stack", "getHandle(root) == null");
+        	return null;
+        }
         return new EcoNode(h);
     }
     

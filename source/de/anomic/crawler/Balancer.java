@@ -533,7 +533,8 @@ public class Balancer {
         
         // 3rd: take entry from file
         if ((result == null) && (urlFileStack.size() > 0)) {
-            final Row.Entry nextentry = (top) ? urlFileStack.top() : urlFileStack.bot();
+            Row.Entry nextentry = (top) ? urlFileStack.top() : urlFileStack.bot();
+            if (nextentry == null) nextentry = (top) ? urlFileStack.bot() : urlFileStack.top();
             if (nextentry == null) {
                 // emergency case: this means that something with the stack organization is wrong
                 // the file appears to be broken. We kill the file.

@@ -45,7 +45,6 @@ import de.anomic.kelondro.blob.BLOBArray;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.text.BufferedIndex;
-import de.anomic.kelondro.text.BufferedIndexCollection;
 import de.anomic.kelondro.text.IndexCell;
 import de.anomic.kelondro.text.IndexCollectionMigration;
 import de.anomic.kelondro.text.ReferenceContainer;
@@ -123,8 +122,7 @@ public final class plasmaWordIndex {
             final int entityCacheMaxSize,
             final boolean useCommons,
             final int redundancy,
-            final int partitionExponent,
-            final boolean useCell) throws IOException {
+            final int partitionExponent) throws IOException {
         
         log.logInfo("Initializing Word Index for the network '" + networkName + "', word hash cache size is " + Word.hashCacheSize + ".");
                         
@@ -154,10 +152,9 @@ public final class plasmaWordIndex {
         
         // check if the peer has migrated the index
         if (new File(indexPrimaryTextLocation, "RICOLLECTION").exists()) {
-            this.merger = (useCell) ? new IODispatcher<WordReference>(plasmaWordIndex.wordReferenceFactory, 1, 1) : null;
+            this.merger = new IODispatcher<WordReference>(plasmaWordIndex.wordReferenceFactory, 1, 1);
             if (this.merger != null) this.merger.start();
-            this.index = (useCell) ? 
-                                    new IndexCollectionMigration<WordReference>(
+            this.index = new IndexCollectionMigration<WordReference>(
                                     indexPrimaryTextLocation,
                                     wordReferenceFactory,
                                     wordOrder,
@@ -166,17 +163,7 @@ public final class plasmaWordIndex {
                                     targetFileSize,
                                     maxFileSize,
                                     this.merger,
-                                    log)
-                                   :
-                                    new BufferedIndexCollection<WordReference>(
-                                            indexPrimaryTextLocation,
-                                            wordReferenceFactory,
-                                            wordOrder,
-                                            WordReferenceRow.urlEntryRow,
-                                            entityCacheMaxSize,
-                                            useCommons, 
-                                            redundancy,
-                                            log);
+                                    log);
         } else {
             this.merger = new IODispatcher<WordReference>(plasmaWordIndex.wordReferenceFactory, 1, 1);
             this.merger.start();

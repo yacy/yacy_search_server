@@ -95,9 +95,15 @@ public class IndexingStack {
     }
 
     public synchronized QueueEntry pop() throws IOException {
-        if (sbQueueStack.size() == 0) return null;
+        if (sbQueueStack.size() == 0) {
+        	Log.logInfo("IndexingStack", "sbQueueStack.size() == 0");
+        	return null;
+        }
         final Row.Entry b = sbQueueStack.pot();
-        if (b == null) return null;
+        if (b == null) {
+        	Log.logInfo("IndexingStack", "sbQueueStack.pot() == null");
+        	return null;
+        }
         return new QueueEntry(b);
     }
 

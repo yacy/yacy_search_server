@@ -107,7 +107,7 @@ public final class IndexCollectionMigration<ReferenceType extends Reference> ext
                         factory,
                         12,
                         Base64Order.enhancedCoder,
-                        BufferedIndexCollection.maxCollectionPartition, 
+                        7, 
                         WordReferenceRow.urlEntryRow, 
                         false);
             if (this.collections.size() == 0) {

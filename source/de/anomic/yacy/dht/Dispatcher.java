@@ -328,6 +328,7 @@ public class Dispatcher {
      * This method returns true if a container was dequeued, false if not
      */
     public boolean dequeueContainer() {
+    	if (transmissionCloud == null) return false;
         if (this.indexingTransmissionProcessor.queueSize() > indexingTransmissionProcessor.concurrency()) return false;
         byte[] maxtarget = null;
         int maxsize = -1;

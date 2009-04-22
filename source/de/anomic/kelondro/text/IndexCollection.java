@@ -60,7 +60,7 @@ import de.anomic.kelondro.util.kelondroOutOfLimitsException;
 import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
 
-public class IndexCollection<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType> {
+public class IndexCollection<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> {
 
 	private static final int loadfactor = 4;
     private static final int serialNumber = 0;

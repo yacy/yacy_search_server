@@ -72,6 +72,7 @@ public class NoticedURL {
     }
     
     public void clear() {
+    	Log.logInfo("NoticedURL", "clearing all stacks");
         coreStack.clear();
         limitStack.clear();
         remoteStack.clear();
@@ -207,6 +208,7 @@ public class NoticedURL {
     }
 
     public void clear(final int stackType) {
+    	Log.logInfo("NoticedURL", "clearing stack " + stackType);
         switch (stackType) {
                 case STACK_TYPE_CORE:     coreStack.clear(); break;
                 case STACK_TYPE_LIMIT:    limitStack.clear(); break;
