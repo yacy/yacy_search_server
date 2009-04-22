@@ -2013,7 +2013,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             byte[] startHash = PeerSelection.selectTransferStart();
 	        log.logInfo("dhtTransferJob: selected " + new String(startHash) + " as start hash");
 	        byte[] limitHash = PeerSelection.limitOver(this.webIndex.peers(), startHash);
-	        log.logInfo("dhtTransferJob: selected " + limitHash + " as limit hash");
+	        log.logInfo("dhtTransferJob: selected " + new String(limitHash) + " as limit hash");
 	        try {
 	            boolean enqueued = this.dhtDispatcher.selectContainersEnqueueToCloud(
 	                    startHash,
