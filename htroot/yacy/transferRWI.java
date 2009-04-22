@@ -107,6 +107,11 @@ public final class transferRWI {
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 60000;
+        } else if (otherPeer.getVersion() < 0.75005845 && otherPeer.getVersion() >= 0.75005821) {
+        	// version that sends [B@... hashes
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Bad version.");
+            result = "not_granted";
+            pause = 1800000;
         } else {
             // we want and can receive indexes
             // log value status (currently added to find outOfMemory error
@@ -141,7 +146,7 @@ public final class transferRWI {
                 
                 // check if RWI entry is well-formed
                 p = estring.indexOf("{");
-                if ((p < 0) || (estring.indexOf("x=") < 0)) {
+                if ((p < 0) || (estring.indexOf("x=") < 0) || !(estring.indexOf("[B@") < 0)) {
                     blocked++;
                     continue;
                 }
