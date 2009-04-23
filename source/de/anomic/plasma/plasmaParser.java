@@ -671,6 +671,13 @@ public final class plasmaParser {
             final String errorMsg = "unsupported charset encoding: " + e.getMessage();
             theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg, e);
             throw new ParserException(errorMsg,location, errorMsg);                	
+        } catch (final IOException e) {
+            // IOExceptions may occur during html parsing when a server closes the connection during reading.
+        	// This may happen here, because the html parser is a streaming parser
+        	// that produces surrogates while the connection is active
+            final String errorMsg = "IOException - server may have closed the connection. " + e.getMessage();
+            theLogger.logWarning("Unable to parse '" + location + "'. " + errorMsg);
+            throw new ParserException(errorMsg, location, errorMsg);
         } catch (final Exception e) {
             // Interrupted- and Parser-Exceptions should pass through
             if (e instanceof InterruptedException) throw (InterruptedException) e;
