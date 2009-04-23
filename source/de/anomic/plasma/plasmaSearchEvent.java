@@ -203,7 +203,7 @@ public final class plasmaSearchEvent {
         // start worker threads to fetch urls and snippets
         this.workerThreads = new resultWorker[(query.onlineSnippetFetch) ? workerThreadCount : 1];
         for (int i = 0; i < this.workerThreads.length; i++) {
-            this.workerThreads[i] = new resultWorker(i, 10000, 2);
+            this.workerThreads[i] = new resultWorker(i, 10000, (query.onlineSnippetFetch) ? 2 : 0);
             this.workerThreads[i].start();
         }
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), this.workerThreads.length + " online snippet fetch threads started", 0, 0), false);
