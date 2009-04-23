@@ -69,7 +69,7 @@ public final class plasmaSearchEvent {
     public static final String NORMALIZING = "normalizing";
     public static final String FINALIZATION = "finalization";
     
-    public static int workerThreadCount = 10;
+    private final static int workerThreadCount = 10;
     public static String lastEventID = "";
     private static ConcurrentHashMap<String, plasmaSearchEvent> lastEvents = new ConcurrentHashMap<String, plasmaSearchEvent>(); // a cache for objects from this class: re-use old search requests
     public static final long eventLifetime = 60000; // the time an event will stay in the cache, 1 Minute
@@ -200,22 +200,14 @@ public final class plasmaSearchEvent {
             }
         }
         
-        if (query.onlineSnippetFetch) {
-            // start worker threads to fetch urls and snippets
-            this.workerThreads = new resultWorker[workerThreadCount];
-            for (int i = 0; i < workerThreadCount; i++) {
-                this.workerThreads[i] = new resultWorker(i, 10000, 2);
-                this.workerThreads[i].start();
-            }
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "online snippet fetch threads started", 0, 0), false);
-        } else {
-            final long timer = System.currentTimeMillis();
-            // use only a single worker thread, thats enough
-            resultWorker worker = new resultWorker(0, 3000, 0);
-            worker.run();
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "offline snippet fetch", result.size(), System.currentTimeMillis() - timer), false);
+        // start worker threads to fetch urls and snippets
+        this.workerThreads = new resultWorker[(query.onlineSnippetFetch) ? workerThreadCount : 1];
+        for (int i = 0; i < this.workerThreads.length; i++) {
+            this.workerThreads[i] = new resultWorker(i, 10000, 2);
+            this.workerThreads[i].start();
         }
-        
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), this.workerThreads.length + " online snippet fetch threads started", 0, 0), false);
+    
         // clean up events
         cleanupEvents(false);
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "event-cleanup", 0, 0), false);
@@ -384,7 +376,7 @@ public final class plasmaSearchEvent {
     
     private boolean anyWorkerAlive() {
         if (this.workerThreads == null) return false;
-        for (int i = 0; i < workerThreadCount; i++) {
+        for (int i = 0; i < this.workerThreads.length; i++) {
            if ((this.workerThreads[i] != null) &&
         	   (this.workerThreads[i].isAlive()) &&
         	   (this.workerThreads[i].busytime() < 3000)) return true;
@@ -479,14 +471,14 @@ public final class plasmaSearchEvent {
             if ((!event.anyWorkerAlive()) &&
                 (((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (event.images.size() + 30 < query.neededResults())) ||
                  (event.result.size() < query.neededResults() + 10)) &&
-                 (event.query.onlineSnippetFetch) &&
+                 //(event.query.onlineSnippetFetch) &&
                 (event.getRankingResult().getLocalResourceSize() + event.getRankingResult().getRemoteResourceSize() > event.result.size())) {
                 // set new timeout
                 event.eventTime = System.currentTimeMillis();
                 // start worker threads to fetch urls and snippets
                 event.workerThreads = new resultWorker[workerThreadCount];
                 resultWorker worker;
-                for (int i = 0; i < workerThreadCount; i++) {
+                for (int i = 0; i < event.workerThreads.length; i++) {
                     worker = event.new resultWorker(i, 6000, (query.onlineSnippetFetch) ? 2 : 0);
                     worker.start();
                     event.workerThreads[i] = worker;
