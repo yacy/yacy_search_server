@@ -354,12 +354,12 @@ public class Dispatcher {
         boolean success = chunk.transmit();
         
         if (success && chunk.isFinished()) {
-                // finished with this queue!
-                this.log.logInfo("STORE: Chunk " + new String(chunk.primaryTarget()) + " has FINISHED all transmissions!");
-                return chunk;
+            // finished with this queue!
+            this.log.logInfo("STORE: Chunk " + new String(chunk.primaryTarget()) + " has FINISHED all transmissions!");
+            return chunk;
         }
         
-        this.log.logInfo("STORE: Chunk " + new String(chunk.primaryTarget()) + " has failed to transmit index; marked peer as busy");
+        if (!success) this.log.logInfo("STORE: Chunk " + new String(chunk.primaryTarget()) + " has failed to transmit index; marked peer as busy");
         
         if (chunk.canFinish()) {
             try {
