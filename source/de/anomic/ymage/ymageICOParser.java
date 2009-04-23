@@ -88,6 +88,7 @@ public class ymageICOParser {
     }
     
     public BufferedImage getImage(final int index) {
+    	if (imagemaps == null || index >= imagemaps.length) return null;
         return imagemaps[index].image;
     }
     

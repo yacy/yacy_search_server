@@ -97,7 +97,7 @@ public class IndexControlRWIs_p {
             }
     
             if (post.containsKey("keyhashsearch")) {
-                if (keystring.length() == 0 || !Word.word2hash(keystring).equals(keyhash)) {
+                if (keystring.length() == 0 || !new String(Word.word2hash(keystring)).equals(new String(keyhash))) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
                 final plasmaSearchRankingProcess ranking = plasmaSearchAPI.genSearchresult(prop, sb, keyhash, null);
@@ -171,7 +171,7 @@ public class IndexControlRWIs_p {
             }
             
             if (post.containsKey("urllist")) {
-                if (keystring.length() == 0 || !Word.word2hash(keystring).equals(keyhash)) {
+                if (keystring.length() == 0 || !new String(Word.word2hash(keystring)).equals(new String(keyhash))) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
                 final Bitfield flags = plasmaSearchAPI.compileFlags(post);
@@ -182,7 +182,7 @@ public class IndexControlRWIs_p {
 
             // transfer to other peer
             if (post.containsKey("keyhashtransfer")) try {
-                if (keystring.length() == 0 || !Word.word2hash(keystring).equals(keyhash)) {
+                if (keystring.length() == 0 || !new String(Word.word2hash(keystring)).equals(new String(keyhash))) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
                 

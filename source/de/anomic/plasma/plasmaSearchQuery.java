@@ -313,7 +313,7 @@ public final class plasmaSearchQuery {
             "*" + this.domType + 
             "*" + this.contentdom +
             "*" + this.zonecode +
-            "*" + Word.word2hash(this.ranking.toExternalString()) +
+            "*" + new String(Word.word2hash(this.ranking.toExternalString())) +
             "*" + this.prefer +
             "*" + this.urlMask +
             "*" + this.targetlang +

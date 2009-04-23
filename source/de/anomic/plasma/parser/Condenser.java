@@ -733,7 +733,7 @@ public final class Condenser {
                 final String s = p.getProperty("keywords" + i);
                 final String[] l = s.split(",");
                 for (int j = 0; j < l.length; j++) {
-                    sb.append(Word.word2hash(l[j]));
+                    sb.append(new String(Word.word2hash(l[j])));
                 }
                 if (i < 15) sb.append(",\n");
             }

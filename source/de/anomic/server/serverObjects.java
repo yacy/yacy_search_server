@@ -102,7 +102,12 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @return      the previous value as String.
      */
     public String put(final String key, final byte[] value) {
-        return this.put(key, new String(value)); //TODO: do we need an encoding method for byte[]?
+        try {
+			return this.put(key, new String(value, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+			return null;
+		}
     }
 
     /**

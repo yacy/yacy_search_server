@@ -123,7 +123,7 @@ public class ViewImage {
             // read image
             final Image image = ymageImageParser.parse(urlString, imgb);
 
-            if ((auth) && ((width == 0) || (height == 0)) && (maxwidth == 0) && (maxheight == 0)) return image;
+            if (image == null || (auth && (width == 0 || height == 0) && maxwidth == 0 && maxheight == 0)) return image;
 
             // find original size
             final int h = image.getHeight(null);

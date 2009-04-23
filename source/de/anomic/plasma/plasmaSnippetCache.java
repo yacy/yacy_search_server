@@ -230,14 +230,14 @@ public class plasmaSnippetCache {
                 for(int k=0; k < word.length(); k++) {
                     //is character a special character?
                     if(p4.matcher(word.substring(k,k+1)).find()) {
-                        if (Word.word2hash(temp).equals(h)) temp = "<b>" + htmlFilterCharacterCoding.unicode2html(temp, false) + "</b>";
+                        if (new String(Word.word2hash(temp)).equals(new String(h))) temp = "<b>" + htmlFilterCharacterCoding.unicode2html(temp, false) + "</b>";
                         out = out + temp + htmlFilterCharacterCoding.unicode2html(word.substring(k,k+1), false);
                         temp = "";
                     }
                     //last character
                     else if(k == (word.length()-1)) {
                         temp = temp + word.substring(k,k+1);
-                        if (Word.word2hash(temp).equals(h)) temp = "<b>" + htmlFilterCharacterCoding.unicode2html(temp, false) + "</b>";
+                        if (new String(Word.word2hash(temp)).equals(new String(h))) temp = "<b>" + htmlFilterCharacterCoding.unicode2html(temp, false) + "</b>";
                         out = out + temp;
                         temp = "";
                     }
@@ -247,7 +247,7 @@ public class plasmaSnippetCache {
             }
 
             //end contrib [MN]
-            else if (Word.word2hash(word).equals(h)) word = "<b>" + htmlFilterCharacterCoding.unicode2html(word, false) + "</b>";
+            else if (new String(Word.word2hash(word)).equals(new String(h))) word = "<b>" + htmlFilterCharacterCoding.unicode2html(word, false) + "</b>";
 
             word = htmlFilterCharacterCoding.unicode2html(prefix, false)
             	+ word
