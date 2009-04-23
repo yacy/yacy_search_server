@@ -38,10 +38,11 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverSystem;
 
 
-public final class yacyTray {
+public final class Tray {
 	private static plasmaSwitchboard sb;
 	
 	private static nativeTrayIcon ti;
@@ -56,10 +57,10 @@ public final class yacyTray {
 	
 	public static void init(final plasmaSwitchboard par_sb) {
 		sb = par_sb;
-		isIntegrated = sb.getConfigBool("browserintegration", false);
-		trayLabel = sb.getConfig("tray.label", "YaCy");
+		isIntegrated = sb.getConfigBool(plasmaSwitchboardConstants.BROWSERINTEGRATION, false);
+		trayLabel = sb.getConfig(plasmaSwitchboardConstants.TRAY_LABEL, "YaCy");
 		try {
-			final boolean trayIcon = sb.getConfigBool("trayIcon", false);
+			final boolean trayIcon = sb.getConfigBool(plasmaSwitchboardConstants.TRAY_ICON_ENABLED, false);
 			if (trayIcon && serverSystem.isWindows) {
 				System.setProperty("java.awt.headless", "false");
 
@@ -205,7 +206,7 @@ class nativeTrayIcon {
 
 			Object arglist1[] = new Object[3];
 			arglist1[0] = i;
-			arglist1[1] = yacyTray.trayLabel;
+			arglist1[1] = Tray.trayLabel;
 			arglist1[2] = menu;
 			this.TrayIcon = TrayIconConstructor.newInstance(arglist1);
 

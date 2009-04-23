@@ -179,7 +179,7 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyTray;
+import de.anomic.yacy.Tray;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyUpdateLocation;
 import de.anomic.yacy.yacyVersion;
@@ -281,7 +281,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         	serverInstantBusyThread.oneTimeJob(UPnP.class, "addPortMapping", UPnP.log, 0);
         
         // init TrayIcon if possible
-        yacyTray.init(this);
+        Tray.init(this);
         
         // remote proxy configuration
         httpRemoteProxyConfig.init(this);
@@ -1153,7 +1153,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         webIndex.close();
         plasmaHTCache.close();
         UPnP.deletePortMapping();
-        yacyTray.removeTray();
+        Tray.removeTray();
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     

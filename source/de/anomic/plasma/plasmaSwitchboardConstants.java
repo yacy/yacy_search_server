@@ -515,4 +515,11 @@ public final class plasmaSwitchboardConstants {
     public static final String BROWSER_POP_UP_PAGE        = "browserPopUpPage";
     
     public static final String UPNP_ENABLED			= "upnp.enabled";
+    
+    /**
+     * system tray
+     */
+	public static final String TRAY_ICON_ENABLED	 = "trayIcon";
+	public static final String TRAY_LABEL			 = "tray.label";
+	public static final String BROWSERINTEGRATION	 = "browserintegration";
 }

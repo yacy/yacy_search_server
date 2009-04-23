@@ -77,7 +77,7 @@ import de.anomic.tools.enumerateFiles;
 import de.anomic.tools.Formatter;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.yacyTray;
+import de.anomic.yacy.Tray;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyVersion;
 
@@ -352,7 +352,7 @@ public final class yacy {
                     }
                     
                     // unlock yacyTray browser popup
-                    yacyTray.lockBrowserPopup = false;
+                    Tray.lockBrowserPopup = false;
 
                     // Copy the shipped locales into DATA, existing files are overwritten
                     final File locale_work   = sb.getConfigPath("locale.work", "DATA/LOCALE/locales");
