@@ -81,7 +81,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     	this.array.clear();
     }
     
-    public synchronized int size() {
+    public int size() {
         return (this.array == null) ? 0 : this.array.size();
     }
     

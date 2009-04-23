@@ -96,13 +96,13 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * @throws IOException 
      * @throws IOException 
      */
-    public synchronized void add(ReferenceContainer<ReferenceType> newEntries) throws IOException {
+    public void add(ReferenceContainer<ReferenceType> newEntries) throws IOException {
         this.ram.add(newEntries);
         serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
         cleanCache();
     }
 
-    public synchronized void add(byte[] termHash, ReferenceType entry) throws IOException {
+    public void add(byte[] termHash, ReferenceType entry) throws IOException {
         this.ram.add(termHash, entry);
         serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
         cleanCache();
@@ -153,8 +153,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * @throws IOException 
      */
     public ReferenceContainer<ReferenceType> delete(byte[] termHash) throws IOException {
-        ReferenceContainer<ReferenceType>  c0 = this.ram.delete(termHash);
-        ReferenceContainer<ReferenceType>  c1 = this.array.get(termHash);
+        ReferenceContainer<ReferenceType> c0 = this.ram.delete(termHash);
+        ReferenceContainer<ReferenceType> c1 = this.array.get(termHash);
         if (c1 == null) {
             if (c0 == null) return null;
             return c0;
