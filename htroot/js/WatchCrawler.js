@@ -12,9 +12,11 @@ var changing=false; //change the interval
 var statusLoaded=true;
 var queueLoaded=true;
 
-refresh();
-//loadInterval=window.setInterval("refresh()", refreshInterval*1000);
-countInterval=window.setInterval("countdown()", 1000);
+function initWatchCrawler(){
+    refresh();
+    //loadInterval=window.setInterval("refresh()", refreshInterval*1000);
+    countInterval=window.setInterval("countdown()", 1000);
+}
 
 function changeInterval(){
 	if(!changing){
