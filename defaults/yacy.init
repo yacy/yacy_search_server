@@ -633,8 +633,7 @@ javastart_priority=10
 # wordCacheMaxLow/High is the number of word indexes that shall be held in the
 # ram cache during indexing. When YaCy is shut down, this cache must be
 # flushed to disc; this may last some minutes.
-wordCacheMaxCount = 30000
-wordCacheMaxCount__pro = 100000
+wordCacheMaxCount = 100000
 
 # Specifies if yacy can be used as transparent http proxy.
 # 
@@ -684,26 +683,23 @@ crawler.http.acceptEncoding=gzip
 crawler.http.acceptLanguage=en-us,en;q=0.5
 crawler.http.acceptCharset=ISO-8859-1,utf-8;q=0.7,*;q=0.7
 crawler.http.maxFileSize=262144
-crawler.http.maxFileSize__pro=262144
 
 # ftp crawler specific settings; size in bytes
 crawler.ftp.maxFileSize=262144
-crawler.ftp.maxFileSize__pro=262144
 
 # maximum number of crawler threads
 crawler.MaxActiveThreads = 30
 
 # maximum size of indexing queue
 indexer.slots = 40
-indexer.slots__pro = 80
+indexer.threads = 1
 
 # maximum size of stacker queue
 stacker.slots = 2000
 
 # specifies if yacy should set it's own referer if no referer URL
 # was set by the client.
-useYacyReferer = true
-useYacyReferer__pro = false
+useYacyReferer = false
 
 # allow only 443(https-port) for https-proxy?
 # if you want to tunnel other protocols, set to false

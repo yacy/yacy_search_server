@@ -30,6 +30,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 
 import de.anomic.kelondro.blob.BLOBArray;
 import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.util.Log;
 
 /**
  * this is a concurrent merger that can merge single files that are queued for merging.
@@ -63,7 +64,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
     }
     
     public synchronized void terminate() {
-        if (termQueue != null && this.isAlive()) {
+        if (termQueue != null && controlQueue != null && this.isAlive()) {
             try {
                 controlQueue.put(poison);
             } catch (InterruptedException e) {
@@ -79,7 +80,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
     }
     
     public synchronized void dump(ReferenceContainerCache<ReferenceType> cache, File file, ReferenceContainerArray<ReferenceType> array) {
-        if (dumpQueue == null || !this.isAlive()) {
+        if (dumpQueue == null || controlQueue == null || !this.isAlive()) {
             cache.dump(file);
         } else {
             DumpJob job = new DumpJob(cache, file, array);
@@ -94,11 +95,11 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
     }
     
     public synchronized int queueLength() {
-        return controlQueue.size();
+        return (controlQueue == null) ? 0 : controlQueue.size();
     }
     
     public synchronized void merge(File f1, File f2, BLOBArray array, Row payloadrow, File newFile) {
-        if (mergeQueue == null || !this.isAlive()) {
+        if (mergeQueue == null || controlQueue == null || !this.isAlive()) {
             try {
                 array.mergeMount(f1, f2, factory, payloadrow, newFile);
             } catch (IOException e) {
@@ -127,21 +128,34 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
             loop: while (controlQueue.take() != poison) {
                 // prefer dump actions to flush memory to disc
                 if (dumpQueue.size() > 0) {
-                    dumpJob = dumpQueue.take();
-                    dumpJob.dump();
+                    try {
+                        dumpJob = dumpQueue.take();
+                        dumpJob.dump();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        Log.logSevere("IODispatcher", "main run job was interrupted (1)", e);
+                    }
                     continue loop;
                 }
                 // otherwise do a merge operation
                 if (mergeQueue.size() > 0) {
-                    mergeJob = mergeQueue.take();
-                    mergeJob.merge();
+                    try {
+                        mergeJob = mergeQueue.take();
+                        mergeJob.merge();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                        Log.logSevere("IODispatcher", "main run job was interrupted (2)", e);
+                    }
                     continue loop;
                 }
                 assert false; // this should never happen
             }
         } catch (InterruptedException e) {
             e.printStackTrace();
+            Log.logSevere("IODispatcher", "main run job was interrupted (3)", e);
         } finally {
+            Log.logInfo("IODispatcher", "terminating run job");
+            controlQueue = null;
             try {
                 termQueue.put(poison);
             } catch (InterruptedException e) {

@@ -596,11 +596,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         this.clusterhashes = this.webIndex.peers().clusterHashes(getConfig("cluster.peers.yacydomain", ""));
         
         // deploy blocking threads
+        int indexerThreads = (int) this.getConfigLong(plasmaSwitchboardConstants.INDEXER_THREADS, 1);
         indexingStorageProcessor      = new serverProcessor<indexingQueueEntry>(
                 "storeDocumentIndex",
                 "This is the sequencing step of the indexing queue: no concurrency is wanted here, because the access of the indexer works better if it is not concurrent. Files are written as streams, councurrency would destroy IO performance. In this process the words are written to the RWI cache, which flushes if it is full.",
                 new String[]{"RWI/Cache/Collections"},
-                this, "storeDocumentIndex", serverProcessor.useCPU + 40, null, 1);
+                this, "storeDocumentIndex", serverProcessor.useCPU + 40, null, indexerThreads);
         indexingAnalysisProcessor     = new serverProcessor<indexingQueueEntry>(
                 "webStructureAnalysis",
                 "This just stores the link structure of the document into a web structure database.",

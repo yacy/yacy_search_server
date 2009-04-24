@@ -466,34 +466,38 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return 0;
     }
  
-    public synchronized void add(final ReferenceContainer<ReferenceType> container) {
+    public void add(final ReferenceContainer<ReferenceType> container) {
         // this puts the entries into the cache
         if (this.cache == null || container == null || container.size() == 0) return;
         
         // put new words into cache
         ByteArray tha = new ByteArray(container.getTermHash());
-        ReferenceContainer<ReferenceType> entries = cache.get(tha); // null pointer exception? wordhash != null! must be cache==null
-        int added = 0;
-        if (entries == null) {
-            entries = container.topLevelClone();
-            added = entries.size();
-        } else {
-            added = entries.putAllRecent(container);
+        synchronized (this) {
+            ReferenceContainer<ReferenceType> entries = cache.get(tha); // null pointer exception? wordhash != null! must be cache==null
+            int added = 0;
+            if (entries == null) {
+                entries = container.topLevelClone();
+                added = entries.size();
+            } else {
+                added = entries.putAllRecent(container);
+            }
+            if (added > 0) {
+                cache.put(tha, entries);
+            }
+            entries = null;
+            return;
         }
-        if (added > 0) {
-            cache.put(tha, entries);
-        }
-        entries = null;
-        return;
     }
 
-    public synchronized void add(final byte[] termHash, final ReferenceType newEntry) {
+    public void add(final byte[] termHash, final ReferenceType newEntry) {
         assert this.cache != null;
         ByteArray tha = new ByteArray(termHash);
-        ReferenceContainer<ReferenceType> container = cache.get(tha);
-        if (container == null) container = new ReferenceContainer<ReferenceType>(factory, termHash, this.payloadrow, 1);
-        container.put(newEntry);
-        cache.put(tha, container);
+        synchronized (this) {
+            ReferenceContainer<ReferenceType> container = cache.get(tha);
+            if (container == null) container = new ReferenceContainer<ReferenceType>(factory, termHash, this.payloadrow, 1);
+            container.put(newEntry);
+            cache.put(tha, container);
+        }
     }
 
     public int minMem() {

@@ -123,6 +123,7 @@ public final class plasmaSwitchboardConstants {
     public static final String INDEXER_METHOD_JOBCOUNT      = "queueSize";
     public static final String INDEXER_METHOD_FREEMEM       = "deQueueFreeMem";
     public static final String INDEXER_SLOTS                = "indexer.slots";
+    public static final String INDEXER_THREADS              = "indexer.threads";
     // 90_cleanup
     /**
      * <p><code>public static final String <strong>CLEANUP</strong> = "90_cleanup"</code></p>
