@@ -1275,8 +1275,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 for (int i = 0; i < surrogatelist.length; i++) {
                     if (surrogatelist[i].endsWith(".xml")) {
                         // read the surrogate file and store entry in index
-                        processSurrogate(surrogatelist[i]);
-                        return true;
+                        if (processSurrogate(surrogatelist[i])) return true;
                     }
                 }
             }
