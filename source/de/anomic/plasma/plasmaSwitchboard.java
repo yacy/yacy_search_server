@@ -1761,7 +1761,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         indexedPages++;
         
         // update profiling info
-        if (System.currentTimeMillis() - lastPPMUpdate > 30000) {
+        if (System.currentTimeMillis() - lastPPMUpdate > 20000) {
             // we don't want to do this too often
             updateMySeed();
             serverProfiling.update("ppm", Long.valueOf(currentPPM()), true);
@@ -2065,7 +2065,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     }
     
     public int currentPPM() {
-        return serverProfiling.countEvents("indexed", 30000) * 2;
+        return serverProfiling.countEvents("indexed", 20000) * 3;
     }
     
     public void updateMySeed() {
