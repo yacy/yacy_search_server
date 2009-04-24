@@ -9,16 +9,18 @@ $(document).ready(function() {
 	startRecord = 0;
 	maximumRecords = 10;
 	yconf = $.extend({
-		url : 'is a mandatory property - no default',
-		theme : 'start',
-		title : 'YaCy P2P Web Search',
-		width : 420,
-		height : 500,
-		position: ['top',50],
-		modal: false,			
+		url      : 'is a mandatory property - no default',
+		theme    : 'start',
+		title    : 'YaCy P2P Web Search',
+		logo     : '/yacy/ui/img/yacy-logo.png',
+		link     : 'http://www.yacy.net',
+		width    : 420,
+		height   : 500,
+		position : ['top',50],
+		modal    : false,			
 		resizable: true,
-		show: '',
-		hide: ''	
+		show     : '',
+		hide     : ''	
 	}, yconf);
 	
 	$('<div id="ypopup" class="classic"></div>').appendTo("#yacy");	
@@ -101,19 +103,19 @@ $(document).ready(function() {
 		param[param.length] = { name : 'startRecord', value : startRecord };
 		
 		$.getJSON(url, param,
-	        function(json, status){
+	        function(json, status){				
 				if (json[0]) data = json[0];
 				else data = json;						
 				
-				$('#ypopup').empty();
-				
+				$('#ypopup').empty();				
+
 				var total = data.channels[0].totalResults.replace(/[,.]/,"");  		
 		   		var page = (data.channels[0].startIndex / data.channels[0].itemsPerPage) + 1;		
 				var start = startRecord + 1;				
 				var end = startRecord + maximumRecords;
 
 				$("div .ybpane").remove();
-				var ylogo = "<div class='ybpane'><a href='http://www.yacy.net' target='_blank'><img src='"+yconf.url+"/yacy/ui/img/yacy-logo.png' alt='www.yacy.net' title='www.yacy.net' /></a></div>";
+				var ylogo = "<div class='ybpane'><a href='"+yconf.link+"' target='_blank'><img src='"+yconf.logo+"' alt='"+yconf.logo+"' title='"+yconf.logo+"' /></a></div>";
 				var yresult = "<div class='ybpane'><em>Displaying result "+start+" to "+end+"<br/> of "+total+" total results.</em></div>";				
 				$("div .ui-dialog-buttonpane").prepend(ylogo+yresult);
 

@@ -18,6 +18,7 @@
 #ypopup .url a {
   	color:#20A020;
   	text-decoration:none;
+	margin-top: 10px;
 }
 #ypopup h3.linktitle {
 	margin-top: 2px;	
@@ -68,6 +69,6 @@ div .ybpane {
 }
 #ypopup .yloading {
 	margin-top: 150px;
-	margin-left: -10px;
+	margin-left: -12px;
 	text-align: center;
 }

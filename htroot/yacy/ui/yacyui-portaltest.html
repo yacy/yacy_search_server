@@ -56,23 +56,29 @@
 	&lt;/form&gt;
 &lt;/div&gt;
 </pre>
-<h4>Configuration options and defaults:</h4>
+<h4>Configuration options and defaults for 'yconf':</h4>
 <pre>
-url : 'is a mandatory property - no default',
-theme : 'start',
-title : 'YaCy P2P Web Search',
-width : 420,
-height : 500,
-position: ['top',50],
-modal: false,			
+url      : 'is a mandatory property - no default',
+theme    : 'start',
+title    : 'YaCy P2P Web Search',
+logo     : '/yacy/ui/img/yacy-logo.png',
+link     : 'http://www.yacy.net',
+width    : 420,
+height   : 500,
+position : ['top',50],
+modal    : false,			
 resizable: true,
-show: '',
-hide: ''
+show     : '',
+hide     : ''
 </pre>
 <h4>Themes:</h4>
 <p>You can <a href="http://jquery-ui.googlecode.com/files/jquery-ui-themes-1.7.zip" target="_blank">
 download</a> ready made themes or <a href="http://jqueryui.com/themeroller/" target="_blank">create</a> 
-your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/</p>			
+your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/</p>
+<h4>Bookmarklet:</h4>
+<p>
+<a href="javascript:q = "" + (window.getSelection ? window.getSelection() : document.getSelection ? document.getSelection() : document.selection.createRange().text); if (!q) q = prompt("You didn&#39;t select any text.  Enter a search phrase:", ""); if (q!=null) location="http://localhost:8080/yacysearch.html?display=2&verify=true&query=" + escape(q).replace(/ /g, "+"); void 0" name="yacy">YaCy</a>
+</p>			
 	</body>	
 </html>
 
