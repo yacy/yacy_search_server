@@ -98,14 +98,18 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      */
     public void add(ReferenceContainer<ReferenceType> newEntries) throws IOException {
         this.ram.add(newEntries);
-        serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
-        cleanCache();
+        if (this.ram.size() % 100 == 0) {
+            serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
+            cleanCache();
+        }
     }
 
     public void add(byte[] termHash, ReferenceType entry) throws IOException {
         this.ram.add(termHash, entry);
-        serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
-        cleanCache();
+        if (this.ram.size() % 100 == 0) {
+            serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
+            cleanCache();
+        }
     }
 
     /**
@@ -272,7 +276,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     
     private synchronized void cleanCache() {
         // dump the cache if necessary
-        if (this.ram.size() > this.maxRamEntries || (this.ram.size() > 2000 && !MemoryControl.request(100L * 1024L * 1024L, false))) {
+        if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 2000 && !MemoryControl.request(100L * 1024L * 1024L, false))) {
             try {
                 cacheDump();
             } catch (IOException e) {

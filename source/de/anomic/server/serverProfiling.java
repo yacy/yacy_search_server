@@ -35,7 +35,7 @@ import de.anomic.kelondro.util.MemoryControl;
 
 public class serverProfiling extends Thread {
     
-    private static final Map<String, ConcurrentLinkedQueue<Event>> historyMaps = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Event>>(); // value=TreeMap of Long/Event
+    private static final Map<String, ConcurrentLinkedQueue<Event>> historyMaps = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Event>>();
     private static final Map<String, Long> eventAccess = new ConcurrentHashMap<String, Long>(); // value: last time when this was accessed
     private static serverProfiling systemProfiler = null;
     
@@ -73,8 +73,9 @@ public class serverProfiling extends Thread {
         if (lastAcc == null) {
             eventAccess.put(eventName, Long.valueOf(System.currentTimeMillis()));
         } else {
-            if (!useProtection || System.currentTimeMillis() - lastAcc.longValue() > 1000) {
-                eventAccess.put(eventName, Long.valueOf(System.currentTimeMillis()));
+            long time = System.currentTimeMillis();
+            if (!useProtection || time - lastAcc.longValue() > 1000) {
+                eventAccess.put(eventName, Long.valueOf(time));
             } else {
                 return; // protect against too heavy load
             }
@@ -86,12 +87,15 @@ public class serverProfiling extends Thread {
             history.add(new Event(eventPayload));
             
             // clean up too old entries
-            Event e;
-            final long now = System.currentTimeMillis();
-            while (history.size() > 0) {
-                e = history.peek();
-                if (now - e.time < 600000) break;
-                history.poll();
+            while (history.size() > 1000) history.poll();
+            if (history.size() % 10 == 0) { // reduce number of System.currentTimeMillis() calls
+                Event e;
+                final long now = System.currentTimeMillis();
+                while (history.size() > 0) {
+                    e = history.peek();
+                    if (now - e.time < 600000) break;
+                    history.poll();
+                }
             }
     	} else {
     	    history = new ConcurrentLinkedQueue<Event>();

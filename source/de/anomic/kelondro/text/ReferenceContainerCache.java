@@ -507,5 +507,5 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public ByteOrder ordering() {
         return this.termOrder;
     }
-
+ 
 }
