@@ -1,0 +1,13 @@
+{
+	"clientname": "#[clientname]#",
+	"line": "#[lines]#",
+	"maxlines": "#[maxlines]#",
+	"reverse": "#(reverseChecked)#false::true#(/reverseChecked)#",
+	"filter": "#[filter]#",
+	"loglines": [ 
+		#{log}#{	
+		"loglevel": "#(level)#Debug::Info::System::Warning::Error#(/level)#",
+		"logline": "#[line]#"	
+		},#{/log}#{loglevel: "", logline: ""}
+	]
+}

@@ -45,6 +45,7 @@ public class ViewLog_p {
         final serverObjects prop = new serverObjects();
         String[] log = new String[0];
         boolean reversed = false;
+        boolean json = false;
         int maxlines = 400, lines = 200;
         String filter = ".*.*";
         
@@ -57,6 +58,9 @@ public class ViewLog_p {
             }
             if(post.containsKey("filter")){
                 filter = post.get("filter");
+            }
+            if(post.containsKey("json")){
+                json = true;
             }
         }
         
@@ -104,10 +108,10 @@ public class ViewLog_p {
             else if (nextLogLine.startsWith("W ")) level = 3;
             else if (nextLogLine.startsWith("S ")) level = 2;
             else if (nextLogLine.startsWith("I ")) level = 1;
-            else if (nextLogLine.startsWith("D ")) level = 0;
-            
+            else if (nextLogLine.startsWith("D ")) level = 0;            
             prop.put("log_" + lc + "_level", level);
-            prop.putHTML("log_" + lc + "_line", nextLogLine); 
+            if (json) prop.putJSON("log_" + lc + "_line", nextLogLine);
+            else prop.put("log_" + lc + "_line", nextLogLine);
             lc++;
         }
         prop.put("log", lc);
