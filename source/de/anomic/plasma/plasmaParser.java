@@ -544,7 +544,7 @@ public final class plasmaParser {
             
             // testing if the resource is not empty
             if (sourceArray == null || sourceArray.length == 0) {
-                final String errorMsg = "No resource content available (1) " + ((sourceArray == null) ? "source == null" : "source.length() == 0");
+                final String errorMsg = "No resource content available (1) " + (((sourceArray == null) ? "source == null" : "source.length() == 0") + ", url = " + location.toNormalform(true, false));
                 theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
                 throw new ParserException(errorMsg,location, errorMsg);
             }              
