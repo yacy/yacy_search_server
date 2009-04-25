@@ -1,14 +1,15 @@
 $(document).ready(function() {
-	
 	$.ajaxSetup({
-		timeout: 10000,
+		timeout: 15000,
 		cache: true
 	})	
 	// apply default properties
 	startRecord = 0;
 	maximumRecords = 10;	
+	submit = false;	
 	yconf = $.extend({
 		url      : 'is a mandatory property - no default',
+		global   : false,		
 		theme    : 'start',
 		title    : 'YaCy P2P Web Search',
 		logo     : yconf.url + '/yacy/ui/img/yacy-logo.png',
@@ -75,69 +76,72 @@ $(document).ready(function() {
     		}  
 		});	
 	});	
-	
 	$('#ysearch').keyup(function() {
 		startRecord = 0;
-		$('#ysearch').trigger('submit');
+		if(!submit) yacysearch(false);
+		else submit = false;		
 		return false;		
 	});
-
-	$('#ysearch').submit(function() {				
-	
-		var url = yconf.url + '/yacysearch.json?callback=?'
-		
-		$('#ypopup').empty();
-		$('#ypopup').append("<div class='yloading'><h3 class='linktitle'><em>Loading: "+yconf.url+"</em><br/><img src='"+yconf.url+"/yacy/ui/img/loading2.gif' align='absmiddle'/></h3></div>");
-		
-		if (!$("#ypopup").dialog('isOpen')) {			
-			$("#ypopup").dialog('open');
-		}					
-		$("#yquery").focus();
-				
-		var param = [];		
-		$("#ysearch input").each(function(i){
-			var item = { name : $(this).attr('name'), value : $(this).attr('value') };		
-			param[i] = item;
-		});
-		param[param.length] = { name : 'startRecord', value : startRecord };
-		
-		$.getJSON(url, param,
-	        function(json, status){				
-				if (json[0]) data = json[0];
-				else data = json;						
-				
-				$('#ypopup').empty();				
-
-				var total = data.channels[0].totalResults.replace(/[,.]/,"");  		
-		   		var page = (data.channels[0].startIndex / data.channels[0].itemsPerPage) + 1;		
-				var start = startRecord + 1;				
-				var end = startRecord + maximumRecords;
-
-				$("div .ybpane").remove();
-				var ylogo = "<div class='ybpane'><a href='"+yconf.link+"' target='_blank'><img src='"+yconf.logo+"' alt='"+yconf.logo+"' title='"+yconf.logo+"' /></a></div>";
-				var yresult = "<div class='ybpane'><em>Displaying result "+start+" to "+end+"<br/> of "+total+" total results.</em></div>";				
-				$("div .ui-dialog-buttonpane").prepend(ylogo+yresult);
-
-			   	$.each (
-					data.channels[0].items,
-					function(i,item) {
-						if (item) {
-							var title = "<h3 class='linktitle'><a href='"+item.link+"' target='_blank'>"+item.title+"</a></h3>";
-							var url = "<p class='url'><a href='"+item.link+"' target='_blank'>"+item.link+"</a></p>"
-							var desc = "<p class='desc'>"+item.description+"</p>";
-							var date = "<p class='date'>"+item.pubDate.substring(0,16);
-							var size = " | "+item.sizename+"</p>";
-							$(title+desc+url+date+size).appendTo("#ypopup");	
-						}								
-					}
-				);
-				$(".linktitle a").faviconize({
-					position: "before",
-					defaultImage: yconf.url + "/yacy/ui/img-2/article.png",
-					className: "favicon"
-				});
-	        }
-	    );
+	$('#ysearch').submit(function() {
+		submit = true;		
+		yacysearch(yconf.global);		
 		return false;
 	});
 });
+function yacysearch(global) {
+	var url = yconf.url + '/yacysearch.json?callback=?'		
+	$('#ypopup').empty();
+	$('#ypopup').append("<div class='yloading'><h3 class='linktitle'><em>Loading: "+yconf.url+"</em><br/><img src='"+yconf.url+"/yacy/ui/img/loading2.gif' align='absmiddle'/></h3></div>");
+	
+	if (!$("#ypopup").dialog('isOpen')) {			
+		$("#ypopup").dialog('open');
+	}					
+	$("#yquery").focus();			
+	var param = [];		
+	$("#ysearch input").each(function(i){
+		var item = { name : $(this).attr('name'), value : $(this).attr('value') };		
+		if(global && (item.name == 'resource')) item.value = 'global';
+		param[i] = item;
+	});
+	param[param.length] = { name : 'startRecord', value : startRecord };
+	$.getJSON(url, param,
+        function(json, status){				
+			if (json[0]) data = json[0];
+			else data = json;
+			$('#ypopup').empty();
+			var total = data.channels[0].totalResults.replace(/[,.]/,"");
+	   		if(global && (total == 0)) {
+	   			yacysearch(global);
+	   			return false;
+	   		}  		
+	   		var page = (data.channels[0].startIndex / data.channels[0].itemsPerPage) + 1;		
+			var start = startRecord + 1;				
+			var end = startRecord + maximumRecords;
+			$("div .ybpane").remove();
+			if(global) var result = 'global';
+			else var result = 'local';
+			var ylogo = "<div class='ybpane'><a href='"+yconf.link+"' target='_blank'><img src='"+yconf.logo+"' alt='"+yconf.logo+"' title='"+yconf.logo+"' /></a></div>";
+			var yresult = "<div class='ybpane'><em>Displaying result "+start+" to "+end+"<br/> of "+total+" "+result+" results.</em></div>";				
+			$("div .ui-dialog-buttonpane").prepend(ylogo+yresult);
+
+		   	$.each (
+				data.channels[0].items,
+				function(i,item) {
+					if (item) {
+						var title = "<h3 class='linktitle'><a href='"+item.link+"' target='_blank'>"+item.title+"</a></h3>";
+						var url = "<p class='url'><a href='"+item.link+"' target='_blank'>"+item.link+"</a></p>"
+						var desc = "<p class='desc'>"+item.description+"</p>";
+						var date = "<p class='date'>"+item.pubDate.substring(0,16);
+						var size = " | "+item.sizename+"</p>";
+						$(title+desc+url+date+size).appendTo("#ypopup");	
+					}								
+				}
+			);
+			$(".linktitle a").faviconize({
+				position: "before",
+				defaultImage: yconf.url + "/yacy/ui/img-2/article.png",
+				className: "favicon"
+			});
+        }
+    );
+}

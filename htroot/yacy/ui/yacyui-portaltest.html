@@ -8,7 +8,8 @@
 		<script>			
 			$(document).ready(function() {
 				yconf = {
-					url : 'http://localhost:8080',
+					url   : 'http://localhost:8080',
+					global: true,
 					theme : 'start',
 					title : 'YaCy Portal Search'
 				};
@@ -35,9 +36,10 @@
 &lt;script&gt;			
 	$(document).ready(function() {
 		yconf = {
-			url : 'http://localhost:8080',
-			theme : 'start',
-			title : 'YaCy Portal Search'
+			url    : 'http://localhost:8080',
+			global : true
+			theme  : 'start',
+			title  : 'YaCy Portal Search'
 		};
 		$.getScript(yconf.url+'/yacy/ui/js/yacyui-portalsearch.js', function(){});
 	});
@@ -59,6 +61,7 @@
 <h4>Configuration options and defaults for 'yconf':</h4>
 <pre>
 url      : 'is a mandatory property - no default',
+global   : false,
 theme    : 'start',
 title    : 'YaCy P2P Web Search',
 logo     : '/yacy/ui/img/yacy-logo.png',
