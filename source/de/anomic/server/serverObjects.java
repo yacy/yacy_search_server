@@ -146,6 +146,27 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     public String put(final String key, final InetAddress value) {
         return this.put(key, value.toString());
     }
+    /**
+     * Add a String to the map. The content of the String is escaped to be usable in JSON output.
+     * @param key   key name as String.
+     * @param value a String that will be reencoded for JSON output.
+     * @return      the modified String that was added to the map.
+     * @see htmlFilterCharacterCoding#encodeUnicode2json(String, boolean)
+     */
+    public String putJSON(final String key, String value) {      
+    	value = value.replaceAll("\"", "\\\"");
+    	value = value.replaceAll("/", "\\/");
+    	// value = value.replaceAll("\\", "\\\\");
+    	value = value.replaceAll("\b", "\\b");
+    	value = value.replaceAll("\f", "\\f");
+    	value = value.replaceAll("\n", "\\r");
+    	value = value.replaceAll("\r", "\\r");
+    	value = value.replaceAll("\t", "\\t");    	
+    	return put(key, value);
+    }
+    public String putJSON(final String key, final byte[] value) {
+        return putJSON(key, new String(value));
+    }
     
     /**
      * Add a String to the map. The content of the String is escaped to be usable in HTML output.
