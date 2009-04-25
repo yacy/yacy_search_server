@@ -151,7 +151,6 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @param key   key name as String.
      * @param value a String that will be reencoded for JSON output.
      * @return      the modified String that was added to the map.
-     * @see htmlFilterCharacterCoding#encodeUnicode2json(String, boolean)
      */
     public String putJSON(final String key, String value) {      
     	value = value.replaceAll("\"", "\\\"");
