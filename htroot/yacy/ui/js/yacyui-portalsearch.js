@@ -3,16 +3,15 @@ $(document).ready(function() {
 	$.ajaxSetup({
 		timeout: 10000,
 		cache: true
-	})
-	
+	})	
 	// apply default properties
 	startRecord = 0;
-	maximumRecords = 10;
+	maximumRecords = 10;	
 	yconf = $.extend({
 		url      : 'is a mandatory property - no default',
 		theme    : 'start',
 		title    : 'YaCy P2P Web Search',
-		logo     : '/yacy/ui/img/yacy-logo.png',
+		logo     : yconf.url + '/yacy/ui/img/yacy-logo.png',
 		link     : 'http://www.yacy.net',
 		width    : 420,
 		height   : 500,
