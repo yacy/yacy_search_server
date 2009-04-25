@@ -34,7 +34,7 @@ function updatepage(str) {
   if (raw != null) raw.innerHTML = str;
   var rsp = eval("("+str+")");
   var firstChannel = rsp.channels[0];
-  var totalResults = firstChannel.totalResults;
+  var totalResults = firstChannel.totalResults.replace(/[,.]/,"");
   var startIndex = firstChannel.startIndex;
   var itemsPerPage = firstChannel.itemsPerPage;
   
