@@ -109,11 +109,7 @@ function yacysearch(global) {
 			if (json[0]) data = json[0];
 			else data = json;
 			$('#ypopup').empty();
-			var total = data.channels[0].totalResults.replace(/[,.]/,"");
-	   		if(global && (total == 0)) {
-	   			yacysearch(global);
-	   			return false;
-	   		}  		
+			var total = data.channels[0].totalResults.replace(/[,.]/,"");	
 	   		var page = (data.channels[0].startIndex / data.channels[0].itemsPerPage) + 1;		
 			var start = startRecord + 1;				
 			var end = startRecord + maximumRecords;
