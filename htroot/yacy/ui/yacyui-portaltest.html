@@ -59,6 +59,7 @@
 &lt;/div&gt;
 </pre>
 <h4>Configuration options and defaults for 'yconf':</h4>
+<h5>Defaults</h5>
 <pre>
 url      : 'is a mandatory property - no default',
 global   : false,
@@ -74,7 +75,15 @@ resizable: true,
 show     : '',
 hide     : ''
 </pre>
-<h4>Themes:</h4>
+<h5>Size and position (width | height | position)</h5>
+Specifies where the dialog should be displayed. Possible values for position: 'center', 'left', 'right', 'top', 'bottom', or an array containing a coordinate pair (in pixel offset from top left of viewport) or the possible string values (e.g. ['right','top'] for top right corner).
+<h5>Animation effects (show | hide)</h5>
+The effect to be used. Possible values: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
+<h5>Interaction (modal | resizable)</h5>
+If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled (i.e. cannot be interacted with). Modal dialogs create an overlay below the dialog but above other page elements.
+<p/>
+If resizable is set to true, the dialog will be resizeable.
+<h5>Themes</h5>
 <p>You can <a href="http://jquery-ui.googlecode.com/files/jquery-ui-themes-1.7.zip" target="_blank">
 download</a> ready made themes or <a href="http://jqueryui.com/themeroller/" target="_blank">create</a> 
 your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/</p>
