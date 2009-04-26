@@ -15,11 +15,11 @@
 				};
 				$.getScript(yconf.url+'/yacy/ui/js/yacyui-portalsearch.js', function(){});
 			});
-		</script> 			
+		</script>			
 		<h3>YaCy Portal Search:</h3>
 		<div id="yacy">
 			<form id="ysearch" method="get" accept-charset="UTF-8" action="http://localhost:8080/yacysearch.html">
-				<input name="search" id="yquery" type="text" size="15" maxlength="80" value=""/>
+				<input name="search" id="yquery" class="fancy" type="text" size="15" maxlength="80" value=""/>
 				<input type="hidden" name="verify" value="true" />
 				<input type="hidden" name="maximumRecords" value="10" />
 				<input type="hidden" name="resource" value="local" />
@@ -46,7 +46,7 @@
 &lt;/script&gt;
 &lt;div id="yacy"&gt;
 	&lt;form id="ysearch" method="get" accept-charset="UTF-8" action="http://localhost:8080/yacysearch.html"&gt;
-		&lt;input name="query" id="yquery" type="text" size="15" maxlength="80" value=""/&gt;
+		&lt;input name="query" id="yquery" class="fancy" type="text" size="15" maxlength="80" value=""/&gt;
 		&lt;input type="hidden" name="verify" value="true" /&gt;
 		&lt;input type="hidden" name="maximumRecords" value="10" /&gt;
 		&lt;input type="hidden" name="resource" value="local" /&gt;
@@ -93,4 +93,3 @@ your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/t
 </p>			
 	</body>	
 </html>
-

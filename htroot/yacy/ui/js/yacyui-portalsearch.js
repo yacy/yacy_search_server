@@ -78,8 +78,12 @@ $(document).ready(function() {
 	});	
 	$('#ysearch').keyup(function() {
 		startRecord = 0;
-		if(!submit) yacysearch(false);
-		else submit = false;		
+		if ($("#yquery").getValue() == '') {
+			$("#ypopup").dialog('close');
+		} else {		 
+			if(!submit) yacysearch(false);
+			else submit = false;
+		}		
 		return false;		
 	});
 	$('#ysearch').submit(function() {

@@ -4,6 +4,17 @@
 .ui-dialog .ui-dialog-buttonpane button {
 	font-size: 14px;
 }
+#ysearch .fancy {
+	background-image: url(/yacy/ui/img-2/magnify.png);
+	background-repeat: no-repeat;
+	background-position: 2px 1px;
+	padding-left: 20px;
+	border-width: small;
+	border-color: #239AFF;
+	border-style: solid;
+	-moz-border-radius: 5px; 
+	-webkit-border-radius: 5px;
+}
 #ypopup * {
 	margin: 0;
     padding: 0;
