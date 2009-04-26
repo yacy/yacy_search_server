@@ -1,8 +1,8 @@
 #(content)#::#(nl)#::    ,#(/nl)#
     {
-      "title": "#[title]#",
+      "title": "#[title-json]#",
       "link": "#[link]#",
-      "description": "#[description]#",
+      "description": "#[description-json]#",
       "pubDate": "#[date822]#",
       "size": "#[size]#",
       "sizename": "#[sizename]#",
