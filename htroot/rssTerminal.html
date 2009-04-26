@@ -107,7 +107,9 @@ function scroll() {
 function showRSS(RSS) {
   //populate the items
   for (var i=0; i<RSS.items.length; i++) {
-    if (RSS.items[i].title != null) addLine(RSS.items[i].title + ":" + RSS.items[i].link);
+    if (RSS.items[i].title != null) {
+        if (RSS.items[i].link != null) addLine(RSS.items[i].title + ":" + RSS.items[i].link);
+        else addLine(RSS.items[i].title); }
     if (RSS.items[i].description != null) addLine(tab + RSS.items[i].description);
   }
   return true;
