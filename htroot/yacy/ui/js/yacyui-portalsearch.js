@@ -137,7 +137,7 @@ function yacysearch(global) {
 					}								
 				}
 			);
-			$(".linktitle a").faviconize({
+			$("#ypopup .linktitle a").faviconize({
 				position: "before",
 				defaultImage: yconf.url + "/yacy/ui/img-2/article.png",
 				className: "favicon"
