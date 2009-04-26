@@ -170,6 +170,28 @@ img.help {
 .flexigrid div.fbutton .deleteTag {
 	background: url(../img/tags/tag_blue_delete.png) no-repeat center left;
 }
+.flexigrid div.fbutton .log-debug {
+	background: url(../img-2/magnify.png) no-repeat center left;
+}
+.flexigrid div.fbutton .log-info {
+	background: url(../img-2/info.png) no-repeat center left;
+}
+.flexigrid div.fbutton .log-system {
+	background: url(../img-2/accept_green.png) no-repeat center left;
+}
+.flexigrid div.fbutton .log-warning {
+	background: url(../img/blacklist.png) no-repeat center left;
+}
+.flexigrid div.fbutton .log-error {
+	background: url(../img-2/stop.png) no-repeat center left;
+}
+.flexigrid div.fbutton .log-new {
+	background: url(../img-2/new.png) no-repeat center left;
+}
+.flexigrid div.fbutton .log-more {
+	/* background: url(../img/flexigrid/uup.png) no-repeat center left; */
+	margin-left: -20px;
+}
 
 /* YaCy Bookmarks ---------------------------*/
 .url {
