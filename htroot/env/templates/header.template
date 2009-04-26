@@ -4,6 +4,7 @@
 		yconf = {
 			url   : '',
 			global: true,
+			width : 500,			
 			theme : 'start',
 			title : 'YaCy P2P Search'
 		};
