@@ -13,9 +13,9 @@ $(document).ready(function() {
 		theme    : 'start',
 		title    : 'YaCy P2P Web Search',
 		logo     : yconf.url + '/yacy/ui/img/yacy-logo.png',
-		link     : 'http://www.yacy.net',
+		link     : 'http://yacy.net',
 		width    : 420,
-		height   : 500,
+		height   : 640,
 		position : ['top',50],
 		modal    : false,			
 		resizable: true,
@@ -23,7 +23,7 @@ $(document).ready(function() {
 		hide     : ''	
 	}, yconf);
 	
-	$('<div id="ypopup" class="classic"></div>').appendTo("#yacy");	
+	$('<div id="ypopup" class="classic"></div>').appendTo("#yacylivesearch");	
 	
 	var style1 = yconf.url + '/yacy/ui/css/yacyui-portalsearch.css';
 	var style2 = yconf.url + '/yacy/ui/css/themes/'+yconf.theme+'/ui.all.css';

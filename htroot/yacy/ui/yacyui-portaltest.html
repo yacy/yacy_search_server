@@ -17,7 +17,7 @@
 			});
 		</script>			
 		<h3>YaCy Portal Search:</h3>
-		<div id="yacy">
+		<div id="yacylivesearch">
 			<form id="ysearch" method="get" accept-charset="UTF-8" action="http://localhost:8080/yacysearch.html">
 				<input name="search" id="yquery" class="fancy" type="text" size="15" maxlength="80" value=""/>
 				<input type="hidden" name="verify" value="true" />
@@ -44,7 +44,7 @@
 		$.getScript(yconf.url+'/yacy/ui/js/yacyui-portalsearch.js', function(){});
 	});
 &lt;/script&gt;
-&lt;div id="yacy"&gt;
+&lt;div id="yacylivesearch"&gt;
 	&lt;form id="ysearch" method="get" accept-charset="UTF-8" action="http://localhost:8080/yacysearch.html"&gt;
 		&lt;input name="query" id="yquery" class="fancy" type="text" size="15" maxlength="80" value=""/&gt;
 		&lt;input type="hidden" name="verify" value="true" /&gt;
