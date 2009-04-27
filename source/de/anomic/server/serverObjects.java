@@ -153,7 +153,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @return      the modified String that was added to the map.
      */
     public String putJSON(final String key, String value) {      
-    	value = value.replaceAll("\"", "\\\"");
+    	value = value.replaceAll("\"", ""); // temporary fix until right quotation is known
     	value = value.replaceAll("/", "\\/");
     	// value = value.replaceAll("\\", "\\\\");
     	value = value.replaceAll("\b", "\\b");
