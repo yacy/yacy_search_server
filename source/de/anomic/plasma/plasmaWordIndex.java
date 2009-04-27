@@ -545,7 +545,7 @@ public final class plasmaWordIndex {
         );
         
         // STORE URL TO LOADED-URL-DB
-        metadata.store(newEntry);
+        metadata.store(newEntry); // TODO: should be serialized; integrated in IODispatcher
         
         final long storageEndTime = System.currentTimeMillis();
         

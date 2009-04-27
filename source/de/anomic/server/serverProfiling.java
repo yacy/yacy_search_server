@@ -87,7 +87,8 @@ public class serverProfiling extends Thread {
             history.add(new Event(eventPayload));
             
             // clean up too old entries
-            while (history.size() > 30000) history.poll();
+            int tp = history.size() - 30000;
+            while (tp-- > 0) history.poll();
             if (history.size() % 10 == 0) { // reduce number of System.currentTimeMillis() calls
                 Event e;
                 final long now = System.currentTimeMillis();

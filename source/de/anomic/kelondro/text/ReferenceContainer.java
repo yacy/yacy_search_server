@@ -340,7 +340,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             final ReferenceContainer<ReferenceType> small,
             final ReferenceContainer<ReferenceType> large,
             final int maxDistance) {
-        System.out.println("DEBUG: JOIN METHOD BY TEST, maxdistance = " + maxDistance);
+        //System.out.println("DEBUG: JOIN METHOD BY TEST, maxdistance = " + maxDistance);
         assert small.rowdef.equals(large.rowdef) : "small = " + small.rowdef.toString() + "; large = " + large.rowdef.toString();
         final int keylength = small.rowdef.width(0);
         assert (keylength == large.rowdef.width(0));
@@ -369,7 +369,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             final ReferenceContainer<ReferenceType> i1,
             final ReferenceContainer<ReferenceType> i2,
             final int maxDistance) {
-        System.out.println("DEBUG: JOIN METHOD BY ENUMERATION, maxdistance = " + maxDistance);
+        //System.out.println("DEBUG: JOIN METHOD BY ENUMERATION, maxdistance = " + maxDistance);
         assert i1.rowdef.equals(i2.rowdef) : "i1 = " + i1.rowdef.toString() + "; i2 = " + i2.rowdef.toString();
         final int keylength = i1.rowdef.width(0);
         assert (keylength == i2.rowdef.width(0));
