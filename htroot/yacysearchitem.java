@@ -142,10 +142,10 @@ public class yacysearchitem {
                     ((yacyURL.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
                     (((wordURL = yacyURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
             final plasmaSnippetCache.TextSnippet snippet = result.textSnippet();
-            final String desc = snippet.getLineMarked(theQuery.fullqueryHashes);
-            prop.put("content_description", (snippet == null) ? "" : desc);
-            prop.putXML("content_description-xml", (snippet == null) ? "" : desc);
-            prop.putJSON("content_description-json", (snippet == null) ? "" : desc);
+            final String desc = (snippet == null) ? "" : snippet.getLineMarked(theQuery.fullqueryHashes);
+            prop.put("content_description", desc);
+            prop.putXML("content_description-xml", desc);
+            prop.putJSON("content_description-json", desc);
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.FINALIZATION + "-" + item, 0, 0), false);
             
             return prop;
