@@ -85,8 +85,8 @@ public class mediawikiIndex {
         wparser = new wikiCode(u.getHost());
         hparser = new plasmaParser();
         // must be called before usage:
-        //plasmaParser.initHTMLParsableMimeTypes("text/html");
-        //plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER, "text/html");
+        plasmaParser.initHTMLParsableMimeTypes("text/html");
+        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER, "text/html");
     }
     
     public static void checkIndex(File wikimediaxml) {
@@ -309,9 +309,13 @@ public class mediawikiIndex {
             this.title = title;
             this.source = sb;
         }
-        public void genHTML() throws MalformedURLException {
-            html = wparser.transform(source.toString());
-            url = new yacyURL("http://de.wikipedia.org/wiki/" + title, null);
+        public void genHTML() throws IOException {
+            try {
+                html = wparser.transform(source.toString());
+                url = new yacyURL("http://de.wikipedia.org/wiki/" + title, null);
+            } catch (Exception e) {
+                throw new IOException(e.getMessage());
+            }
         }
         public void genDocument() throws InterruptedException, ParserException {
             document = hparser.parseSource(url, "text/html", "utf-8", html.getBytes());
@@ -444,7 +448,7 @@ public class mediawikiIndex {
                         out.put(record);
                     } catch (RuntimeException e) {
                         e.printStackTrace();
-                    } catch (MalformedURLException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     } catch (ParserException e) {
                         e.printStackTrace();
@@ -500,7 +504,6 @@ public class mediawikiIndex {
                         this.osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(targetdir, outputfilename))), "UTF-8");
                         osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<surrogates xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n");
                     }
-                    
                     System.out.println("[CONSUME] Title: " + record.title);
                     record.document.writeXML(osw, new Date());
                     rc++;
@@ -562,12 +565,12 @@ public class mediawikiIndex {
         plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER, "text/html");
         mediawikiIndex mi = new mediawikiIndex(urlStub);
         wikiparserrecord poison = mi.newRecord();
-        int threads = Math.max(1, Runtime.getRuntime().availableProcessors() - 1);
+        int threads = Math.max(2, Runtime.getRuntime().availableProcessors() - 1);
         BlockingQueue<wikiparserrecord> in = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
         BlockingQueue<wikiparserrecord> out = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
         ExecutorService service = Executors.newFixedThreadPool(threads + 1);
         convertConsumer[] consumers = new convertConsumer[threads];
-        Future<Integer>[] consumerResults = new Future[threads];
+        Future<?>[] consumerResults = new Future[threads];
         for (int i = 0; i < threads; i++) {
         	consumers[i] = new convertConsumer(in, out, poison);
             consumerResults[i] = service.submit(consumers[i]);

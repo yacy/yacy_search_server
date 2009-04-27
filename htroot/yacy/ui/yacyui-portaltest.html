@@ -5,31 +5,36 @@
 	</head>
 	<body>		
 		<script src="http://localhost:8080/yacy/ui/js/jquery-1.3.1.min.js" type="text/javascript"></script>
-		<script>			
-			$(document).ready(function() {
-				yconf = {
-					url   : 'http://localhost:8080',
-					global: true,
-					theme : 'start',
-					title : 'YaCy Portal Search'
-				};
-				$.getScript(yconf.url+'/yacy/ui/js/yacyui-portalsearch.js', function(){});
-			});
-		</script>			
-		<h3>YaCy Portal Search:</h3>
-		<div id="yacylivesearch">
-			<form id="ysearch" method="get" accept-charset="UTF-8" action="http://localhost:8080/yacysearch.html">
-				<input name="search" id="yquery" class="fancy" type="text" size="15" maxlength="80" value=""/>
-				<input type="hidden" name="verify" value="true" />
-				<input type="hidden" name="maximumRecords" value="10" />
-				<input type="hidden" name="resource" value="local" />
-				<input type="hidden" name="urlmaskfilter" value=".*" />
-				<input type="hidden" name="prefermaskfilter" value="" />
-				<input type="hidden" name="former" value="" />
-				<input type="hidden" name="display" value="2" />
-				<input type="submit" name="Enter" value="Suchen" />
-			</form>
-		</div>
+<script>			
+	$(document).ready(function() {
+		yconf = {
+			url    : 'http://localhost:8080',
+			logo   : '/yacy/ui/img/yacy-logo.png',
+			link   : 'http://www.yacy.net',
+			global : false,
+			width  : 500,
+			height : 620,
+			position : ['top',30],
+			theme  : 'start',
+			title  : 'YaCy Portal Search'
+		};
+		$.getScript(yconf.url+'/yacy/ui/js/yacyui-portalsearch.js', function(){});
+	});
+</script>
+<div id="yacylivesearch">
+    <h3>YaCy Portal Search:</h3>
+	<form id="ysearch" method="get" accept-charset="UTF-8" action="http://localhost:8080/yacysearch.html">
+		Live Search <input name="query" id="yquery" class="fancy" type="text" size="15" maxlength="80" value=""/>
+		<input type="hidden" name="verify" value="false" />
+		<input type="hidden" name="maximumRecords" value="10" />
+		<input type="hidden" name="resource" value="local" />
+		<input type="hidden" name="urlmaskfilter" value=".*" />
+		<input type="hidden" name="prefermaskfilter" value="" />
+		<input type="hidden" name="former" value="" />
+		<input type="hidden" name="display" value="2" />
+		<input type="submit" name="Enter" value="Search" />
+	</form>
+</div>
 <h4>Code Snippet:</h4>
 <pre>
 &lt;script src="http://localhost:8080/yacy/ui/js/jquery-1.3.1.min.js" type="text/javascript"&gt;&lt;/script&gt;
@@ -37,7 +42,12 @@
 	$(document).ready(function() {
 		yconf = {
 			url    : 'http://localhost:8080',
-			global : true,
+			logo   : '/yacy/ui/img/yacy-logo.png',
+			link   : 'http://www.yacy.net',
+			global : false,
+			width  : 500,
+			height : 620,
+			position : ['top',30],
 			theme  : 'start',
 			title  : 'YaCy Portal Search'
 		};
@@ -46,15 +56,15 @@
 &lt;/script&gt;
 &lt;div id="yacylivesearch"&gt;
 	&lt;form id="ysearch" method="get" accept-charset="UTF-8" action="http://localhost:8080/yacysearch.html"&gt;
-		&lt;input name="query" id="yquery" class="fancy" type="text" size="15" maxlength="80" value=""/&gt;
-		&lt;input type="hidden" name="verify" value="true" /&gt;
+		Live Search &lt;input name="query" id="yquery" class="fancy" type="text" size="15" maxlength="80" value=""/&gt;
+		&lt;input type="hidden" name="verify" value="false" /&gt;
 		&lt;input type="hidden" name="maximumRecords" value="10" /&gt;
 		&lt;input type="hidden" name="resource" value="local" /&gt;
 		&lt;input type="hidden" name="urlmaskfilter" value=".*" /&gt;
 		&lt;input type="hidden" name="prefermaskfilter" value="" /&gt;
 		&lt;input type="hidden" name="former" value="" /&gt;
 		&lt;input type="hidden" name="display" value="2" /&gt;
-		&lt;input type="submit" name="Enter" value="Suchen" /&gt;
+		&lt;input type="submit" name="Enter" value="Search" /&gt;
 	&lt;/form&gt;
 &lt;/div&gt;
 </pre>

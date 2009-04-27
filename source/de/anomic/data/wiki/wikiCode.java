@@ -437,11 +437,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 } else {
                     kv = kl;
                 }
-                //if (switchboard != null && switchboard.wikiDB.read(kl) != null) {
-                    result = result.substring(0, p0) + "<a class=\"known\" href=\"Wiki.html?page=" + kl + "\">" + kv + "</a>" + result.substring(p1 + 2);
-                //} else {
-                //    result = result.substring(0, p0) + "<a class=\"unknown\" href=\"Wiki.html?page=" + kl + "&edit=Edit\">" + kv + "</a>" + result.substring(p1 + 2);
-                //}
+                result = result.substring(0, p0) + "<a class=\"known\" href=\"Wiki.html?page=" + kl + "\">" + kv + "</a>" + result.substring(p1 + 2); // oob exception in append() !
             }
         }
 
