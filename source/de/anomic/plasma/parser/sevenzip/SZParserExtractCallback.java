@@ -25,9 +25,6 @@ package de.anomic.plasma.parser.sevenzip;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import SevenZip.ArchiveExtractCallback;
 import SevenZip.Archive.IInArchive;
@@ -105,6 +102,7 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
                     theDoc = this.parser.parseSource(url, mime, null, this.cfos.getContentBAOS());
                 }
                 
+                /*
                 // revert the above workaround
                 final Map<yacyURL, String> nanchors = new HashMap<yacyURL, String>(theDoc.getAnchors().size(), 1f);
                 final Iterator<Map.Entry<yacyURL, String>> it = theDoc.getAnchors().entrySet().iterator();
@@ -124,6 +122,7 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
                 }
                 theDoc.getAnchors().clear();
                 theDoc.getAnchors().putAll(nanchors);
+                */
                 this.doc.addSubDocument(theDoc);
             }
         } catch (final ParserException e) {

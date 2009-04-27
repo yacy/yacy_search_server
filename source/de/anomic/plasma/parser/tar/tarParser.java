@@ -173,7 +173,7 @@ public class tarParser extends AbstractParser implements Parser {
                     docTextLength += FileUtils.copy(subDoc.getText(), docText);
                 }               
                 
-                docAnchors.putAll(subDoc.getAnchors());
+                //docAnchors.putAll(subDoc.getAnchors());
                 htmlFilterContentScraper.addAllImages(docImages, subDoc.getImages());
                 
                 // release subdocument

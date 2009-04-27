@@ -121,7 +121,7 @@ public class rpmParser extends AbstractParser implements Parser {
                 else if (headerNames[i].equalsIgnoreCase("SUMMARY")) summary = tag.toString();
                 else if (headerNames[i].equalsIgnoreCase("DESCRIPTION")) description = tag.toString();
                 else if (headerNames[i].equalsIgnoreCase("PACKAGER")) packager = tag.toString();
-                else if (headerNames[i].equalsIgnoreCase("URL")) anchors.put(new yacyURL(tag.toString(), null), tag.toString());
+                //else if (headerNames[i].equalsIgnoreCase("URL")) anchors.put(new yacyURL(tag.toString(), null), tag.toString());
             }
 
             // closing the rpm file
