@@ -150,14 +150,23 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
 
     public void scrapeTag0(final String tagname, final Properties tagopts) {
         if (tagname.equalsIgnoreCase("img")) {
-            int width = -1, height = -1;
             try {
-                width = Integer.parseInt(tagopts.getProperty("width", "-1"));
-                height = Integer.parseInt(tagopts.getProperty("height", "-1"));
+                final int width = Integer.parseInt(tagopts.getProperty("width", "-1"));
+                final int height = Integer.parseInt(tagopts.getProperty("height", "-1"));
+                if (width > 15 && height > 15) {
+                    final float ratio = (float) Math.min(width, height) / Math.max(width, height);
+                    if (ratio > 0.4) {
+                        final yacyURL url = absolutePath(tagopts.getProperty("src", ""));
+                        final htmlFilterImageEntry ie = new htmlFilterImageEntry(url, tagopts.getProperty("alt", ""), width, height);
+                        addImage(images, ie);
+                    }
+// i think that real pictures have witdth & height tags - thq
+//                } else if (width < 0 && height < 0) { // add or to ignore !?
+//                    final yacyURL url = absolutePath(tagopts.getProperty("src", ""));
+//                    final htmlFilterImageEntry ie = new htmlFilterImageEntry(url, tagopts.getProperty("alt", ""), width, height);
+//                    addImage(images, ie);
+                }
             } catch (final NumberFormatException e) {}
-            final yacyURL url = absolutePath(tagopts.getProperty("src", ""));
-            final htmlFilterImageEntry ie = new htmlFilterImageEntry(url, tagopts.getProperty("alt",""), width, height);
-            addImage(images, ie);
         }
         if (tagname.equalsIgnoreCase("base")) try {
             root = new yacyURL(tagopts.getProperty("href", ""), null);
