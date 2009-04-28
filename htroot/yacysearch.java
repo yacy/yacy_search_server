@@ -81,7 +81,8 @@ public class yacysearch {
         final String client = header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
         
         // get query
-        String querystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
+        String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
+        String querystring = originalquerystring;
         boolean fetchSnippets = (post != null && post.get("verify", "false").equals("true"));
         final serverObjects prop = new serverObjects();
         
@@ -226,28 +227,29 @@ public class yacysearch {
             }
             
             final plasmaSearchRankingProfile ranking = sb.getRanking();
-            final TreeSet<String>[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
-            if ((query[0].contains("near")) && (querystring.indexOf("NEAR") >= 0)) {
-            	query[0].remove("near");
+
+            if (querystring.indexOf("NEAR") >= 0) {
+            	querystring = querystring.replace("NEAR", "");
             	ranking.coeff_worddistance = plasmaSearchRankingProfile.COEFF_MAX;
             }
-            if ((query[0].contains("recent")) && (querystring.indexOf("RECENT") >= 0)) {
-                query[0].remove("recent");
+            if (querystring.indexOf("RECENT") >= 0) {
+            	querystring = querystring.replace("RECENT", "");
                 ranking.coeff_date = plasmaSearchRankingProfile.COEFF_MAX;
             }
             int lrp = querystring.indexOf("LANGUAGE:");
             String lr = "";
             if (lrp >= 0) {
                 if (querystring.length() >= (lrp + 11))
-                	lr = querystring.substring(lrp + 9, lrp + 11).toLowerCase();
-                query[0].remove("language:" + lr);
+                	lr = querystring.substring(lrp + 9, lrp + 11);
+                querystring = querystring.replace("LANGUAGE:" + lr, "");
+                lr.toLowerCase();
             }
             int inurl = querystring.indexOf("inurl:");
             if (inurl >= 0) {
                 int ftb = querystring.indexOf(' ', inurl);
                 if (ftb == -1) ftb = querystring.length();
                 String urlstr = querystring.substring(inurl + 6, ftb);
-                query[0].remove("inurl:" + urlstr.toLowerCase());
+                querystring = querystring.replace("inurl:" + urlstr, "");
                 if(urlstr.length() > 0) urlmask = ".*" + urlstr + ".*";
             }
             int filetype = querystring.indexOf("filetype:");
@@ -255,7 +257,7 @@ public class yacysearch {
                 int ftb = querystring.indexOf(' ', filetype);
                 if (ftb == -1) ftb = querystring.length();
                 String ft = querystring.substring(filetype + 9, ftb);
-                query[0].remove("filetype:" + ft.toLowerCase());
+                querystring = querystring.replace("filetype:" + ft, "");
                 while(ft.startsWith(".")) ft = ft.substring(1);
                 if(ft.length() > 0) {
                     if (urlmask == null) {
@@ -275,9 +277,18 @@ public class yacysearch {
                 int ftb = querystring.indexOf(' ', site);
                 if (ftb == -1) ftb = querystring.length();
                 String domain = querystring.substring(site + 5, ftb);
-                query[0].remove("site:" + domain.toLowerCase());
+                querystring = querystring.replace("site:" + domain, "");
                 while(domain.startsWith(".")) domain = domain.substring(1);
+                while(domain.endsWith(".")) domain = domain.substring(0, domain.length() - 1);
                 sitehash = yacyURL.domhash(domain);
+            }
+            int tld = querystring.indexOf("tld:");
+            if (tld >= 0) {
+                int ftb = querystring.indexOf(' ', tld);
+                if (ftb == -1) ftb = querystring.length();
+                String domain = querystring.substring(tld + 4, ftb);
+                querystring = querystring.replace("tld:" + domain, "");
+                while(domain.startsWith(".")) domain = domain.substring(1);
                 if (domain.indexOf(".") < 0) domain = "\\." + domain; // is tld
                 if (domain.length() > 0) {
                     if (urlmask == null) {
@@ -300,6 +311,8 @@ public class yacysearch {
                 language = (agent == null) ? "en" : iso639.userAgentLanguageDetection(agent);
                 if (language == null) language = "en";
             }
+            
+            final TreeSet<String>[] query = plasmaSearchQuery.cleanQuery(querystring.trim()); // converts also umlaute
             
             int maxDistance = (querystring.indexOf('"') >= 0) ? maxDistance = query.length - 1 : Integer.MAX_VALUE;
 
@@ -363,7 +376,7 @@ public class yacysearch {
             // do the search
             final TreeSet<byte[]> queryHashes = Word.words2hashes(query[0]);
             final plasmaSearchQuery theQuery = new plasmaSearchQuery(
-        			querystring,
+        			originalquerystring,
         			queryHashes,
         			Word.words2hashes(query[1]),
         			Word.words2hashes(query[2]),
@@ -506,7 +519,7 @@ public class yacysearch {
         prop.put("searchagain", global ? "1" : "0");
         prop.put("display", display);
         prop.put("display", display);
-        prop.putHTML("former", querystring);
+        prop.putHTML("former", originalquerystring);
         prop.put("count", itemsPerPage);
         prop.put("offset", offset);
         prop.put("resource", global ? "global" : "local");
@@ -523,8 +536,8 @@ public class yacysearch {
         prop.put("contentdomCheckApp", (contentdomCode == plasmaSearchQuery.CONTENTDOM_APP) ? "1" : "0");
         
         // for RSS: don't HTML encode some elements
-        prop.putXML("rss_query", querystring);
-        prop.put("rss_queryenc", querystring.replace(' ', '+'));
+        prop.putXML("rss_query", originalquerystring);
+        prop.put("rss_queryenc", originalquerystring.replace(' ', '+'));
 
         sb.localSearchLastAccess = System.currentTimeMillis();
         
