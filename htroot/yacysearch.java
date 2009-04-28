@@ -242,7 +242,7 @@ public class yacysearch {
                 if (querystring.length() >= (lrp + 11))
                 	lr = querystring.substring(lrp + 9, lrp + 11);
                 querystring = querystring.replace("LANGUAGE:" + lr, "");
-                lr.toLowerCase();
+                lr = lr.toLowerCase();
             }
             int inurl = querystring.indexOf("inurl:");
             if (inurl >= 0) {
