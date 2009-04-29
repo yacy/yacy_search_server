@@ -92,7 +92,7 @@ $(document).ready(function() {
 		startRecord = 0;
 		if ($("#yquery").getValue() == '') {
 			$("#ypopup").dialog('close');
-		} else {		 
+		} else {
 			if(!submit) yacysearch(false);
 			else submit = false;
 		}		
@@ -116,7 +116,10 @@ function yacysearch(global) {
 	var param = [];		
 	$("#ysearch input").each(function(i){
 		var item = { name : $(this).attr('name'), value : $(this).attr('value') };		
-		if(global && (item.name == 'resource')) item.value = 'global';
+		if(item.name == 'resource') {
+			if(item.value == 'global') global = true;
+			if(global) item.value = 'global';
+		}
 		param[i] = item;
 	});
 	param[param.length] = { name : 'startRecord', value : startRecord };
