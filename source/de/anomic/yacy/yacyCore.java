@@ -310,19 +310,19 @@ public class yacyCore {
                 // add also all peers from cluster if this is a public robinson cluster
                 if (ch != null) {
                     final Iterator<Map.Entry<byte[], String>> i = ch.entrySet().iterator();
-                    byte[] hash;
+                    String hash;
                     Map.Entry<byte[], String> entry;
                     yacySeed seed;
                     while (i.hasNext()) {
                         entry = i.next();
-                        hash = entry.getKey();
+                        hash = new String(entry.getKey());
                         seed = seeds.get(hash);
                         if (seed == null) {
-                            seed = sb.webIndex.peers().get(new String(hash));
+                            seed = sb.webIndex.peers().get(hash);
                             if (seed == null) continue;
                         }
                         seed.setAlternativeAddress(entry.getValue());
-                        seeds.put(new String(hash), seed);
+                        seeds.put(hash, seed);
                 	}
                 }
             } else {

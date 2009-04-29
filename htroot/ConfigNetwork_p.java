@@ -207,7 +207,10 @@ public class ConfigNetwork_p {
         prop.put("robinson.checked", (indexDistribute || indexReceive) ? "0" : "1");
         prop.putHTML("cluster.peers.ipport", sb.getConfig("cluster.peers.ipport", ""));
         prop.putHTML("cluster.peers.yacydomain", sb.getConfig("cluster.peers.yacydomain", ""));
-        prop.put("cluster.peers.yacydomain.hashes", (sb.clusterhashes.size() == 0) ? "" : sb.clusterhashes.toString());
+        String hashes = "";
+        for (byte[] h:sb.clusterhashes.keySet()) hashes += ", " + new String(h);
+        if (hashes.length() > 2) hashes = hashes.substring(2);
+        prop.put("cluster.peers.yacydomain.hashes", hashes);
         
         // set p2p mode flags
         prop.put("privatepeerChecked", (sb.getConfig("cluster.mode", "").equals("privatepeer")) ? "1" : "0");

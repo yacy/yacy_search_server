@@ -924,7 +924,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             return network.indexOf(peer) >= 0;
     	} else if (clustermode.equals(plasmaSwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) {
     		// check if we got the request from a peer in the public cluster
-            return this.clusterhashes.containsKey(peer);
+            return this.clusterhashes.containsKey(peer.getBytes());
     	} else {
     		return false;
     	}
@@ -942,7 +942,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             return network.indexOf(seed.getPublicAddress()) >= 0;
     	} else if (clustermode.equals(plasmaSwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) {
     	    // check if we got the request from a peer in the public cluster
-            return this.clusterhashes.containsKey(seed.hash);
+            return this.clusterhashes.containsKey(seed.hash.getBytes());
     	} else {
     		return false;
     	}
