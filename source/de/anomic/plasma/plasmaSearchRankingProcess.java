@@ -301,7 +301,7 @@ public final class plasmaSearchRankingProcess {
     }
     
     public URLMetadataRow bestURL(final boolean skipDoubleDom) {
-        // returns from the current RWI list the best URL entry and removed this entry from the list
+        // returns from the current RWI list the best URL entry and removes this entry from the list
         while ((stack.size() > 0) || (size() > 0)) {
                 if (((stack.size() == 0) && (size() == 0))) break;
                 final SortStack<WordReferenceVars>.stackElement obrwi = bestRWI(skipDoubleDom);
@@ -309,8 +309,12 @@ public final class plasmaSearchRankingProcess {
                 final URLMetadataRow u = wordIndex.metadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
                 if (u != null) {
                     final URLMetadataRow.Components metadata = u.metadata();
-                    if (metadata.url() != null) this.handover.put(u.hash(), metadata.url().toNormalform(true, false)); // remember that we handed over this url
-                    return u;
+                    if (metadata.url() != null) {
+                    	String urlstring = metadata.url().toNormalform(true, true);
+                    	if (urlstring == null || !urlstring.matches(query.urlMask)) continue;                    
+                        this.handover.put(u.hash(), metadata.url().toNormalform(true, false)); // remember that we handed over this url
+                        return u;
+                    }
                 }
                 misses.add(obrwi.element.metadataHash());
         }
