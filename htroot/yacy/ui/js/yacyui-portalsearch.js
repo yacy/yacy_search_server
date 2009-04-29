@@ -26,8 +26,11 @@ $(document).ready(function() {
 	$('<div id="ypopup" class="classic"></div>').appendTo("#yacylivesearch");	
 	
 	var style1 = yconf.url + '/yacy/ui/css/yacyui-portalsearch.css';
-	var style2 = yconf.url + '/yacy/ui/css/themes/'+yconf.theme+'/ui.all.css';
-	
+	var style2 = yconf.url + '/yacy/ui/css/themes/'+yconf.theme+'/ui.core.css';
+	var style3 = yconf.url + '/yacy/ui/css/themes/'+yconf.theme+'/ui.dialog.css';
+	var style4 = yconf.url + '/yacy/ui/css/themes/'+yconf.theme+'/ui.theme.css';
+	var style5 = yconf.url + '/yacy/ui/css/themes/'+yconf.theme+'/ui.resizable.css';
+
 	var head = document.getElementsByTagName('head')[0];
 	
 	$(document.createElement('link'))
@@ -35,6 +38,15 @@ $(document).ready(function() {
     	.appendTo(head);
     $(document.createElement('link'))
     	.attr({type:'text/css', href: style2, rel:'stylesheet', media:'screen'})
+    	.appendTo(head);
+    $(document.createElement('link'))
+    	.attr({type:'text/css', href: style3, rel:'stylesheet', media:'screen'})
+    	.appendTo(head);
+    $(document.createElement('link'))
+    	.attr({type:'text/css', href: style4, rel:'stylesheet', media:'screen'})
+    	.appendTo(head);
+    $(document.createElement('link'))
+    	.attr({type:'text/css', href: style5, rel:'stylesheet', media:'screen'})
     	.appendTo(head);
     	
 	var script1 = yconf.url + '/yacy/ui/js/jquery.query.js';
