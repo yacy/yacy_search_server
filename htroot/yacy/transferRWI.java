@@ -96,11 +96,21 @@ public final class transferRWI {
         	sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.webIndex.peers().mySeed().hash);
             result = "wrong_target";
             pause = 0;
-        } else if ((!granted) || (sb.isRobinsonMode())) {
+        } else if (otherPeer == null) {
             // we dont want to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted.");
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted. Other Peer is unknown");
             result = "not_granted";
-            pause = 0;
+            pause = 60000;
+        } else if (!granted) {
+            // we dont want to receive indexes
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Granted is false");
+            result = "not_granted";
+            pause = 60000;
+        } else if (sb.isRobinsonMode()) {
+            // we dont want to receive indexes
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted. This peer is in robinson mode");
+            result = "not_granted";
+            pause = 60000;
         } else if (sb.webIndex.index().getBufferSize() > cachelimit) {
             // we are too busy to receive indexes
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.webIndex.index().getBufferSize() + ").");

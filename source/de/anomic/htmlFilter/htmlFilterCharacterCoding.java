@@ -262,7 +262,11 @@ public class htmlFilterCharacterCoding {
                     sb.append(new char[] {(char) Integer.parseInt(s.substring(3, s.length() - 1), 16)});
                     continue;
                 }
-                sb.append(new char[] {(char) Integer.parseInt(s.substring(2, s.length() - 1))});
+                String ucs = s.substring(2, s.length() - 1);
+                try {
+                	int uc = Integer.parseInt(ucs);
+                	sb.append(new char[] {(char) uc});
+                } catch (NumberFormatException e) {}
                 continue;
             }
             // the entity is unknown, skip it

@@ -754,7 +754,10 @@ public class yacyURL implements Serializable {
         // combine the attributes
         final StringBuilder hash = new StringBuilder(12);
         // form the 'local' part of the hash
-        hash.append(Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(toNormalform(true, true))).substring(0, 5)); // 5 chars
+        String normalform = toNormalform(true, true);
+        String b64l = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(normalform));
+        if (b64l.length() < 5) return null;
+        hash.append(b64l.substring(0, 5)); // 5 chars
         hash.append(subdomPortPath(subdom, port, rootpath)); // 1 char
         // form the 'global' part of the hash
         hash.append(hosthash5(this.protocol, host, port)); // 5 chars

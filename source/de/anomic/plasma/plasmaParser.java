@@ -36,6 +36,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -695,7 +696,11 @@ public final class plasmaParser {
         }        
     }
     
-    private plasmaParserDocument parseHtml(final yacyURL location, final String mimeType, final String documentCharset, final InputStream sourceStream) throws IOException, ParserException {
+    private plasmaParserDocument parseHtml(
+    		final yacyURL location, 
+    		final String mimeType, 
+    		final String documentCharset, 
+    		final InputStream sourceStream) throws IOException, ParserException {
         
         // make a scraper and transformer
         final htmlFilterInputStream htmlFilter = new htmlFilterInputStream(sourceStream,documentCharset,location,null,false);
@@ -710,10 +715,16 @@ public final class plasmaParser {
             theLogger.logInfo("Charset transformation needed from '" + documentCharset + "' to '" + charset + "' for URL = " + location.toNormalform(true, true));
         }
         
+        Charset c;
+        try {
+        	c = Charset.forName(charset);
+        } catch (IllegalCharsetNameException e) {
+        	c = Charset.defaultCharset();
+        }
         // parsing the content
         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);        
         final htmlFilterWriter writer = new htmlFilterWriter(null,null,scraper,null,false);
-        FileUtils.copy(htmlFilter, writer, Charset.forName(charset));
+        FileUtils.copy(htmlFilter, writer, c);
         writer.close();
         //OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
         //serverFileUtils.copy(sourceFile, hfos);
