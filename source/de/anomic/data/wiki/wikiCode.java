@@ -71,7 +71,6 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private boolean replacedHTML = false;       //indicates if method replaceHTML has been used with line already
     private boolean table = false;              //needed for tables, because they reach over several lines
     private int preindented = 0;                //needed for indented <pre>s
-    private int headlines = 0;                  //number of headlines in page
     private final ArrayList<String> dirElements = new ArrayList<String>();    //list of headlines used to create diectory of page
 
     /** Constructor of the class wikiCode */
@@ -608,7 +607,6 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         // [MN]
         if(!dirElements.isEmpty()){
             dirElements.clear();
-            headlines = 0;
         }
         return directory;
     }
@@ -636,7 +634,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 direlem = input.substring(p0 + l, p1);
                 //counting double headlines
                 int doubles = 0;
-                for(int i=0;i<headlines;i++){
+                for(int i=0;i<dirElements.size();i++){
                     if(dirElements.size() > i && dirElements.get(i).substring(1).equals(direlem)){
                         doubles++;
                     }
@@ -652,7 +650,6 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 if(pat.equals("===="))     dirElements.add("3"+direlem);
                 else if(pat.equals("===")) dirElements.add("2"+direlem);
                 else if(pat.equals("=="))  dirElements.add("1"+direlem);
-                headlines++;
             }
             else{
                 input = input.substring(0, p0) +  repl1 +
