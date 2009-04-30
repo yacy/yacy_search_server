@@ -44,6 +44,7 @@ import java.io.PrintWriter;
 import java.io.RandomAccessFile;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -79,10 +80,11 @@ public class mediawikiIndex {
     
     private wikiParser wparser;
     private plasmaParser hparser;
+    private String urlStub;
     
     public mediawikiIndex(String baseURL) throws MalformedURLException {
-        yacyURL u = new yacyURL(baseURL, null);
-        wparser = new wikiCode(u.getHost());
+    	urlStub = baseURL;
+        wparser = new wikiCode(new URL(baseURL).getHost());
         hparser = new plasmaParser();
         // must be called before usage:
         plasmaParser.initHTMLParsableMimeTypes("text/html");
@@ -301,24 +303,32 @@ public class mediawikiIndex {
     
     public class wikiparserrecord {
         public String title;
-        StringBuilder source;
+        String source;
         String html;
         yacyURL url;
         plasmaParserDocument document;
         public wikiparserrecord(String title, StringBuilder sb) {
             this.title = title;
-            this.source = sb;
+            this.source = (sb == null) ? null : sb.toString();
         }
         public void genHTML() throws IOException {
             try {
-                html = wparser.transform(source.toString());
-                url = new yacyURL("http://de.wikipedia.org/wiki/" + title, null);
+                html = wparser.transform(source);
             } catch (Exception e) {
+            	e.printStackTrace();
                 throw new IOException(e.getMessage());
             }
         }
         public void genDocument() throws InterruptedException, ParserException {
-            document = hparser.parseSource(url, "text/html", "utf-8", html.getBytes());
+            try {
+				url = new yacyURL(urlStub + title, null);
+				document = hparser.parseSource(url, "text/html", "utf-8", html.getBytes("UTF-8"));
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+			} catch (MalformedURLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
         }
         public void writeXML(OutputStreamWriter os) throws IOException {
             document.writeXML(os, new Date());
@@ -448,11 +458,12 @@ public class mediawikiIndex {
                         out.put(record);
                     } catch (RuntimeException e) {
                         e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
                     } catch (ParserException e) {
                         e.printStackTrace();
-                    }
+                    } catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -591,6 +602,10 @@ public class mediawikiIndex {
             if (t.indexOf(textend) >= 0) {
                 text = false;
                 System.out.println("[INJECT] Title: " + title);
+                if (sb.length() == 0) {
+                	System.out.println("ERROR: " + title + " has empty content");
+                	continue;
+                }
                 record = mi.newRecord(title, sb);
                 try {
                     in.put(record);

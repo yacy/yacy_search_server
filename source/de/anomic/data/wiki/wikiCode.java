@@ -283,15 +283,18 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 int i = ListLevel.length();
                 String tmp = "";
 
-                while(! result.startsWith(ListLevel.substring(0,i))){
+                while (ListLevel.length() >= i && !result.startsWith(ListLevel.substring(0,i))) {
                     tmp += "</ul>";
                     i--;
                 }
-                ListLevel = ListLevel.substring(0,i);
                 p0 = ListLevel.length();
+                if (i < p0) {
+                    ListLevel = ListLevel.substring(0,i);
+                    p0 = ListLevel.length();
+                }
                 p1 = result.length();
 
-                if(ListLevel.length() > 0){
+                if (ListLevel.length() > 0) {
                     result = tmp +
                         "<li>" +
                         result.substring(p0, p1) +
@@ -551,15 +554,19 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         int level3 = 0;
         int doubles = 0;
         String anchorext = "";
-        if((s=dirElements.size())>2){
-            for(int i=0;i<s;i++){
+        if ((s = dirElements.size()) > 2) {
+            for (int i = 0; i < s; i++) {
+            	if (i >= dirElements.size()) break;
                 element = dirElements.get(i);
                 //counting double headlines
                 doubles = 0;
-                for(int j=0;j<i;j++){
-                    if(dirElements.get(j).substring(1).replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]","").equals(element.substring(1).replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]",""))){
-                        doubles++;
-                    }
+                for (int j = 0; j < i; j++) {
+                	if (j >= dirElements.size()) break;
+                	String d = dirElements.get(j);
+                	if (d == null || d.length() < 1) continue;
+                	String a = d.substring(1).replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]","");
+                	String b = element.substring(1).replaceAll(" ","_").replaceAll("[^a-zA-Z0-9_]","");
+                    if (a.equals(b)) doubles++;
                 }
                 //if there are doubles, create anchorextension
                 if(doubles>0){
@@ -635,6 +642,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                 //counting double headlines
                 int doubles = 0;
                 for(int i=0;i<dirElements.size();i++){
+                	if (dirElements.get(i) == null) continue;
                     if(dirElements.size() > i && dirElements.get(i).substring(1).equals(direlem)){
                         doubles++;
                     }
