@@ -159,6 +159,9 @@ public class yacyURL implements Serializable {
 
     public static yacyURL newURL(final String baseURL, final String relPath) throws MalformedURLException {
         if ((baseURL == null) ||
+            (relPath.startsWith("mailto:")) ||
+            (relPath.startsWith("aim:")) ||
+            (relPath.startsWith("icq:")) ||
             (relPath.startsWith("http://")) ||
             (relPath.startsWith("https://")) ||
             (relPath.startsWith("ftp://")) ||
@@ -925,6 +928,8 @@ public class yacyURL implements Serializable {
 	      new String[]{"http://www.anomic.de/home/index.html", "mailto:abcdefg@nomailnomail.com"},
 	      new String[]{null, "news:de.test"},
 	      new String[]{"http://www.anomic.de/home", "news:de.test"},
+	      new String[]{null, "mailto:bob@web.com"},
+	      new String[]{"http://www.anomic.de/home", "mailto:bob@web.com"},
 	      new String[]{"http://www.anomic.de/home", "ftp://ftp.anomic.de/src"},
 	      new String[]{null, "ftp://ftp.delegate.org/"},
 	      new String[]{"http://www.anomic.de/home", "ftp://ftp.delegate.org/"},

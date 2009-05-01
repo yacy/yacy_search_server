@@ -1661,6 +1661,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 // fetching the next hyperlink
                 nextEntry = i.next();
                 nextUrl = nextEntry.getKey();
+                String u = nextUrl.toNormalform(true, true);
+                if (!(u.startsWith("http") || u.startsWith("ftp"))) continue;
                 // enqueue the hyperlink into the pre-notice-url db
                 crawlStacker.enqueueEntry(new CrawlEntry(
                         entry.initiator(),
