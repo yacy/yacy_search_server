@@ -49,6 +49,7 @@ public class yacyURL implements Serializable {
     private static final Pattern patternDot = Pattern.compile("\\.");
     private static final Pattern patternSlash = Pattern.compile("/");
     private static final Pattern patternAmp = Pattern.compile("&");
+    private static final Pattern patternMail = Pattern.compile("^[a-z]+:.*?");
     
     // class variables
     private String protocol, host, userInfo, path, quest, ref, hash;
@@ -159,14 +160,12 @@ public class yacyURL implements Serializable {
 
     public static yacyURL newURL(final String baseURL, final String relPath) throws MalformedURLException {
         if ((baseURL == null) ||
-            (relPath.startsWith("mailto:")) ||
-            (relPath.startsWith("aim:")) ||
-            (relPath.startsWith("icq:")) ||
             (relPath.startsWith("http://")) ||
             (relPath.startsWith("https://")) ||
             (relPath.startsWith("ftp://")) ||
             (relPath.startsWith("file://")) ||
-            (relPath.startsWith("smb://"))) {
+            (relPath.startsWith("smb://")) /*||
+            relPath.contains(":") && patternMail.matcher(relPath.toLowerCase()).find()*/) {
             return new yacyURL(relPath, null);
         }
         return new yacyURL(new yacyURL(baseURL, null), relPath);
@@ -178,7 +177,8 @@ public class yacyURL implements Serializable {
             (relPath.startsWith("https://")) ||
             (relPath.startsWith("ftp://")) ||
             (relPath.startsWith("file://")) ||
-            (relPath.startsWith("smb://"))) {
+            (relPath.startsWith("smb://")) /*||
+            relPath.contains(":") && patternMail.matcher(relPath.toLowerCase()).find()*/) {
             return new yacyURL(relPath, null);
         }
         return new yacyURL(baseURL, relPath);
@@ -207,7 +207,9 @@ public class yacyURL implements Serializable {
                 (relPath.startsWith("file://")) ||
                 (relPath.startsWith("smb://"))) {
             this.path = baseURL.path;
-        } else if (relPath.startsWith("/")) {
+        } else if (relPath.contains(":") && patternMail.matcher(relPath.toLowerCase()).find()) { // discards also any unknown protocol from previous if
+    		throw new MalformedURLException("relative path malformed: " + relPath);
+    	} else if (relPath.startsWith("/")) {
             this.path = relPath;
         } else if (baseURL.path.endsWith("/")) {
             if (relPath.startsWith("#") || relPath.startsWith("?")) {
