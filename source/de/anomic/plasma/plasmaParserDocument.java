@@ -397,12 +397,13 @@ dc_rights
         hyperlinks.putAll(plasmaParser.allReflinks(audiolinks.keySet()));
         hyperlinks.putAll(plasmaParser.allReflinks(videolinks.keySet()));
         hyperlinks.putAll(plasmaParser.allReflinks(applinks.keySet()));
+        /*
         hyperlinks.putAll(plasmaParser.allSubpaths(hyperlinks.keySet()));
         hyperlinks.putAll(plasmaParser.allSubpaths(images.values()));
         hyperlinks.putAll(plasmaParser.allSubpaths(audiolinks.keySet()));
         hyperlinks.putAll(plasmaParser.allSubpaths(videolinks.keySet()));
         hyperlinks.putAll(plasmaParser.allSubpaths(applinks.keySet()));
-        
+         */        
         // don't do this again
         this.resorted = true;
     }
