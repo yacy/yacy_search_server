@@ -75,6 +75,9 @@ $(document).ready(function() {
 		  	title: yconf.title,
 		  	show: yconf.show,
 		  	hide: yconf.hide,
+			close: function(event, ui) { 
+				$("#yquery").setValue('');		
+			},  
 		  	buttons: {
         		Next: function() {
         			startRecord = startRecord + maximumRecords;
