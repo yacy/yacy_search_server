@@ -91,8 +91,17 @@ $(document).ready(function() {
     		}  
 		});	
 	});	
-	$('#ysearch').keyup(function() {
-		startRecord = 0;
+	$('#ysearch').keyup(function(e) {
+		if(e.which == 27) {	// ESC
+			$("#ypopup").dialog('close');
+		} else if(e.which == 34) {	// PageDown
+			startRecord = startRecord + maximumRecords;
+		} else if(e.which == 33) {	// PageUp
+			startRecord = startRecord - maximumRecords;
+			if(startRecord < 0) startRecord = 0;			  
+		} else {
+			startRecord = 0;		
+		}
 		if ($("#yquery").getValue() == '') {
 			$("#ypopup").dialog('close');
 		} else {
