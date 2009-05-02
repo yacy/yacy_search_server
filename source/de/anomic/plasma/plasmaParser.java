@@ -37,6 +37,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -720,7 +721,10 @@ public final class plasmaParser {
         	c = Charset.forName(charset);
         } catch (IllegalCharsetNameException e) {
         	c = Charset.defaultCharset();
+        } catch (UnsupportedCharsetException e) {
+        	c = Charset.defaultCharset();
         }
+        
         // parsing the content
         final htmlFilterContentScraper scraper = new htmlFilterContentScraper(location);        
         final htmlFilterWriter writer = new htmlFilterWriter(null,null,scraper,null,false);

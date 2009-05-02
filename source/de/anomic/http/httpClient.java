@@ -459,19 +459,19 @@ public class httpClient {
         } catch (final IllegalThreadStateException e) {
         	// cleanUp statistics
             yacyURL url = new yacyURL(method.getURI().toString(), null);
-            Latency.slowdown(url.hash().substring(6), url.getHost());
+            if (url.hash() != null) Latency.slowdown(url.hash().substring(6), url.getHost());
             HttpConnectionInfo.removeConnection(generateConInfo(method));
             throw e;
         } catch (final IOException e) {
             // cleanUp statistics
             yacyURL url = new yacyURL(method.getURI().toString(), null);
-            Latency.slowdown(url.hash().substring(6), url.getHost());
+            if (url.hash() != null) Latency.slowdown(url.hash().substring(6), url.getHost());
             HttpConnectionInfo.removeConnection(generateConInfo(method));
             throw e;
         } catch (final IllegalStateException e) {
             // cleanUp statistics
             yacyURL url = new yacyURL(method.getURI().toString(), null);
-            Latency.slowdown(url.hash().substring(6), url.getHost());
+            if (url.hash() != null) Latency.slowdown(url.hash().substring(6), url.getHost());
             HttpConnectionInfo.removeConnection(generateConInfo(method));
             throw new IOException(e.getMessage());
         }
