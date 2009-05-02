@@ -209,6 +209,14 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
         }
 
         public File merge() {
+        	if (!f1.exists()) {
+        		Log.logWarning("IODispatcher", "merge of file (1) " + f1.getName() + " failed: file does not exists");
+        		return null;
+        	}
+        	if (!f2.exists()) {
+        		Log.logWarning("IODispatcher", "merge of file (2) " + f2.getName() + " failed: file does not exists");
+        		return null;
+        	}
             try {
                 return array.mergeMount(f1, f2, factory, payloadrow, newFile);
             } catch (IOException e) {

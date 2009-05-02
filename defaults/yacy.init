@@ -619,8 +619,8 @@ cleanup.deletionPublishedNews = true
 # -Xmx<size> and -Xms<size> maximum/init Java heap size
 # both values should be equal,
 # othervise the YaCy-internal memory supervision does not work
-javastart_Xmx=Xmx120m
-javastart_Xms=Xms120m
+javastart_Xmx=Xmx180m
+javastart_Xms=Xms180m
 
 # priority of the yacy-process
 # is valid in unix/shell and windows environments but

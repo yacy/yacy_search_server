@@ -95,16 +95,33 @@ public class IndexingStack {
     }
 
     public synchronized QueueEntry pop() throws IOException {
-        if (sbQueueStack.size() == 0) {
-        	Log.logInfo("IndexingStack", "sbQueueStack.size() == 0");
-        	return null;
-        }
-        final Row.Entry b = sbQueueStack.pot();
-        if (b == null) {
-        	Log.logInfo("IndexingStack", "sbQueueStack.pot() == null");
-        	return null;
-        }
-        return new QueueEntry(b);
+    	synchronized (sbQueueStack) {
+    		int sizeBefore;
+	    	while ((sizeBefore = sbQueueStack.size()) > 0) {
+		        Row.Entry b = sbQueueStack.pot();
+		        if (b == null) {
+		        	Log.logInfo("IndexingStack", "sbQueueStack.pot() == null");
+		        	if (sbQueueStack.size() < sizeBefore) continue;
+		        	Log.logSevere("IndexingStack", "sbQueueStack does not shrink after pot() == null; trying pop()");
+		        }
+		        if (sbQueueStack.size() < sizeBefore) {
+		        	return new QueueEntry(b);
+		        } else {
+		        	Log.logSevere("IndexingStack", "sbQueueStack does not shrink after pot() != null; trying pop()");
+		        }
+		        sizeBefore = sbQueueStack.size();
+		        b = sbQueueStack.pop();
+		        if (b == null) {
+		        	Log.logInfo("IndexingStack", "sbQueueStack.pop() == null");
+		        	if (sbQueueStack.size() < sizeBefore) continue;
+		        	Log.logSevere("IndexingStack", "sbQueueStack does not shrink after pop() == null; failed");
+		        	return null;
+		        }
+		        return new QueueEntry(b);
+	    	}
+	    	Log.logInfo("IndexingStack", "sbQueueStack.size() == 0");
+	        return null;
+    	}
     }
 
     public synchronized QueueEntry remove(final String urlHash) {

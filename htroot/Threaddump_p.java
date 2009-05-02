@@ -40,6 +40,7 @@ import java.util.HashMap;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.FileUtils;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -78,6 +79,7 @@ public class Threaddump_p {
             final ArrayList<Map<Thread,StackTraceElement[]>> traces = new ArrayList<Map<Thread,StackTraceElement[]>>();
             for (int i = 0; i < multipleCount; i++) {
                 traces.add(Thread.getAllStackTraces());
+                if (MemoryControl.available() < 20 * 1024 * 1024) break;
             }
             appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.BLOCKED);
             appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.RUNNABLE);

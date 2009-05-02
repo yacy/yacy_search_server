@@ -175,7 +175,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
             assert posBuffer + 4 + key.length <= ba.length : "posBuffer = " + posBuffer + ", key.length = " + key.length + ", ba.length = " + ba.length;
             System.arraycopy(key, 0, ba, posBuffer + 4, key.length);
             assert posBuffer + 4 + key.length + blob.length <= ba.length : "posBuffer = " + posBuffer + ", key.length = " + key.length + ", blob.length = " + blob.length + ", ba.length = " + ba.length;
-            System.arraycopy(blob, 0, ba, posBuffer + 4 + key.length, blob.length);
+            System.arraycopy(blob, 0, ba, posBuffer + 4 + key.length, blob.length); //java.lang.ArrayIndexOutOfBoundsException here
             posFile += 4 + key.length + blob.length;
             posBuffer += 4 + key.length + blob.length;
         }

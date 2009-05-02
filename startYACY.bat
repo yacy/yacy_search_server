@@ -15,7 +15,7 @@ For %%X in (libx/*.jar) Do Call %0 CPGEN libx\%%X
 REM Please change the "javastart" settings in the web-interface "Basic Configuration" -> "Advanced" 
 set jmx=
 set jms=
-set javacmd=-Xmx120m -Xms120m
+set javacmd=-Xmx180m -Xms180m
 set priolvl=10
 set priority=/BELOWNORMAL
 if exist DATA\SETTINGS\httpProxy.conf GoTo :RENAMEINDEX

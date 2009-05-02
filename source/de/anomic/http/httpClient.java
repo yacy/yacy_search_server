@@ -90,6 +90,7 @@ public class httpClient {
         /**
          * set options for client
          */
+        MultiThreadedHttpConnectionManager.shutdownAll();
         initConnectionManager();
         
         // accept self-signed or untrusted certificates
@@ -112,7 +113,11 @@ public class httpClient {
     }
 
     public static void initConnectionManager() {
-        MultiThreadedHttpConnectionManager.shutdownAll();
+        if (conManager != null) {
+        	conManager.closeIdleConnections(0);
+        	conManager.deleteClosedConnections();
+        	conManager.shutdown();
+        }
         conManager = new MultiThreadedHttpConnectionManager();
         apacheHttpClient = new HttpClient(conManager);
         

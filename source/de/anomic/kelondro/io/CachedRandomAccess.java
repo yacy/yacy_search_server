@@ -72,8 +72,8 @@ public final class CachedRandomAccess extends AbstractRandomAccess implements Ra
             return;
         }
         // we fill the cache here
-        int available = (int) (this.RAFile.length() - seek);
-        if (available < len) throw new IOException("EOF, available = " + available + ", requested = " + len);
+        long available = this.RAFile.length() - seek;
+        if (available < (long) len) throw new IOException("EOF, available = " + available + ", requested = " + len);
         if (cachestart + cachelen == seek && cache.length - cachelen >= len) {
             RAFile.readFully(cache, cachelen, len);
             //System.out.println("*** DEBUG FileRA " + this.file.getName() + ": append fill " + len + " bytes");
@@ -81,7 +81,7 @@ public final class CachedRandomAccess extends AbstractRandomAccess implements Ra
             cachelen += len;
         } else {
             // fill the cache as much as possible
-            int m = Math.min(available, cache.length);
+            int m = (int) Math.min(available, (long) cache.length);
             RAFile.readFully(cache, 0, m);
             cachestart = seek;
             cachelen = m;
