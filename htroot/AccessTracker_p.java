@@ -33,9 +33,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Map.Entry;
+import java.text.SimpleDateFormat;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -45,7 +45,9 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
 
 public class AccessTracker_p {
-    
+	
+	private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+	
 	private static final SortedMap<Long, String> treemapclone(final SortedMap<Long, String> m) {
 		final TreeMap<Long, String> accessClone = new TreeMap<Long, String>();
 		try {
@@ -109,7 +111,7 @@ public class AccessTracker_p {
 						while (ii.hasNext()) {
 							entry = ii.next();
 							prop.putHTML("page_list_" + entCount + "_host", host);
-							prop.put("page_list_" + entCount + "_date", DateFormatter.formatShortSecond(new Date((entry.getKey()).longValue())));
+							prop.put("page_list_" + entCount + "_date", SimpleFormatter.format(new Date((entry.getKey()).longValue())));
 							prop.putHTML("page_list_" + entCount + "_path", entry.getValue());
 							entCount++;
 						}
@@ -125,7 +127,7 @@ public class AccessTracker_p {
 						while (ii.hasNext()) {
 							entry = ii.next();
 							prop.putHTML("page_list_" + entCount + "_host", host);
-							prop.put("page_list_" + entCount + "_date", DateFormatter.formatShortSecond(new Date((entry.getKey()).longValue())));
+							prop.put("page_list_" + entCount + "_date", SimpleFormatter.format(new Date((entry.getKey()).longValue())));
 							prop.putHTML("page_list_" + entCount + "_path", entry.getValue());
 							entCount++;
 						}
@@ -156,7 +158,7 @@ public class AccessTracker_p {
                 prop.put("page_list_" + entCount + "_dark", ((dark) ? 1 : 0) );
                 dark =! dark;
                 prop.putHTML("page_list_" + entCount + "_host", searchProfile.host);
-                prop.put("page_list_" + entCount + "_date", DateFormatter.formatShortSecond(new Date(searchProfile.handle.longValue())));
+                prop.put("page_list_" + entCount + "_date", SimpleFormatter.format(new Date(searchProfile.handle.longValue())));
                 prop.put("page_list_" + entCount + "_timestamp", searchProfile.handle.longValue());
                 if (page == 2) {
                     // local search
@@ -219,7 +221,7 @@ public class AccessTracker_p {
                 final Iterator<Long> ii = handles.iterator();
                 while (ii.hasNext()) {
                 	final Long timestamp = ii.next();
-                	prop.put("page_list_" + entCount + "_dates_" + dateCount + "_date", DateFormatter.formatShortSecond(new Date(timestamp.longValue())));
+                	prop.put("page_list_" + entCount + "_dates_" + dateCount + "_date", SimpleFormatter.format(new Date(timestamp.longValue())));
                 	prop.put("page_list_" + entCount + "_dates_" + dateCount + "_timestamp", timestamp.toString());
                 	dateCount++;
                 }
