@@ -79,6 +79,7 @@ import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.Tray;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.yacyVersion;
 
 /**
@@ -251,7 +252,7 @@ public final class yacy {
                         final String svrReleaseNr = matcher.group(1);
                         try {
                             try {version = Double.parseDouble(vString);} catch (final NumberFormatException e) {version = (float) 0.1;}
-                            version = yacyVersion.versvn2combinedVersion(version, Integer.parseInt(svrReleaseNr));
+                            version = yacyRelease.versvn2combinedVersion(version, Integer.parseInt(svrReleaseNr));
                         } catch (final NumberFormatException e) {}
                         sb.setConfig("svnRevision", svrReleaseNr);
                     }
@@ -312,7 +313,7 @@ public final class yacy {
             
             // delete old release files
             final int deleteOldDownloadsAfterDays = (int) sb.getConfigLong("update.deleteOld", 30);
-            yacyVersion.deleteOldDownloads(sb.releasePath, deleteOldDownloadsAfterDays );
+            yacyRelease.deleteOldDownloads(sb.releasePath, deleteOldDownloadsAfterDays );
             
             // set user-agent
             final String userAgent = "yacy/" + Double.toString(version) + " (www.yacy.net; "

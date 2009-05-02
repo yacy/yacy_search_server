@@ -112,6 +112,8 @@ update.time.deploy = 0
 # delete old downloaded files after this amount of days to free disk space
 # the latest release is always kept
 update.deleteOld = 30
+# only install sign files
+update.onlySignedFiles = 1
 
 # restart-option
 # a peer can be re-started periodically

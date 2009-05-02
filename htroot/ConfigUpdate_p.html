@@ -25,7 +25,7 @@
       <dd><form action="ConfigUpdate_p.html" method="get">
         &nbsp;<select name="releasedownload">
         #{availreleases}#
-        <option #(selected)#::selected#(/selected)# value="#[url]#">#[name]#</option>
+        <option #(selected)#::selected#(/selected)# value="#[url]#">#[name]# #(signatures)#(unsigned)::(signed)#(/signatures)#</option>
         #{/availreleases}#
         </select>
     	&nbsp;&nbsp;<input type="submit" name="downloadRelease" value="Download Release" />
@@ -35,7 +35,7 @@
       <dd><form action="ConfigUpdate_p.html" method="get">
         &nbsp;<select name="releaseinstall">
         #{downloadedreleases}#
-        <option #(selected)#::selected#(/selected)# value="#[file]#">#[name]#</option>
+        <option #(selected)#::selected#(/selected)# value="#[file]#">#[name]# #(signature)#(no signature)::(signed)#(/signature)#</option>
         #{/downloadedreleases}#
         </select>
         #(deployenabled)#::no&nbsp;automated installation on development environments::
@@ -87,6 +87,13 @@
         </dd>
         </dl>
         </fieldset>
+      </dd>
+      <dt>
+        Signed autoupdate:&nbsp;
+      </dt>
+      <dd>
+        <input type="checkbox" name="onlySignedFiles" value="true" #(onlySignedFiles)#::checked="checked" #(/onlySignedFiles)#/>
+        only accept signed files
       </dd>
       <dt><input type="submit" name="configSubmit" value="Submit"></dt>
       <dd>#(configCommit)#::<div class="commit">Accepted Changes.</div>#(/configCommit)#</dd>

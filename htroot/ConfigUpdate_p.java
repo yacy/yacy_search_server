@@ -36,6 +36,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverSystem;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.yacyVersion;
 
 public class ConfigUpdate_p {
@@ -62,13 +63,13 @@ public class ConfigUpdate_p {
                 final String release = post.get("releasedownload", "");
                 if (release.length() > 0) {
                     try {
-                	yacyVersion versionToDownload = new yacyVersion(new yacyURL(release, null));
+                	yacyRelease versionToDownload = new yacyRelease(new yacyURL(release, null));
                 	
                 	// replace this version with version which contains public key
-                	yacyVersion.DevAndMainVersions allReleases = yacyVersion.allReleases(false);
-                	TreeSet<yacyVersion> mostReleases = versionToDownload.mainRelease
+                	yacyRelease.DevAndMainVersions allReleases = yacyRelease.allReleases(false, false);
+                	TreeSet<yacyRelease> mostReleases = versionToDownload.isMainRelease()
                 			? allReleases.main : allReleases.dev;
-                	for(yacyVersion rel : mostReleases) {
+                	for(yacyRelease rel : mostReleases) {
                 	    if(rel.equals(versionToDownload)) {
                 		versionToDownload = rel;
                 		break;
@@ -83,13 +84,14 @@ public class ConfigUpdate_p {
             }
          
             if (post.containsKey("checkRelease")) {
-                yacyVersion.allReleases(true);
+                yacyRelease.allReleases(true, false);
             }
             if (post.containsKey("deleteRelease")) {
                 final String release = post.get("releaseinstall", "");
                 if(release.length() > 0) {
                     try {
                         FileUtils.deletedelete(new File(sb.releasePath, release));
+                        FileUtils.deletedelete(new File(sb.releasePath, release + ".sig"));
                     } catch (final NullPointerException e) {
                         sb.getLog().logSevere("AUTO-UPDATE: could not delete release " + release + ": " + e.getMessage());
                     }
@@ -97,14 +99,14 @@ public class ConfigUpdate_p {
             }
          
             if (post.containsKey("autoUpdate")) {
-                final yacyVersion updateVersion = yacyVersion.rulebasedUpdateInfo(true);
+                final yacyRelease updateVersion = yacyRelease.rulebasedUpdateInfo(true);
                 if (updateVersion == null) {
                     prop.put("candeploy_autoUpdate", "2"); // no more recent release found
                 } else {
                     // there is a version that is more recent. Load it and re-start with it
-                    sb.getLog().logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.url);
+                    sb.getLog().logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.getUrl());
                     final File downloaded = updateVersion.downloadRelease();
-                    prop.putHTML("candeploy_autoUpdate_downloadedRelease", updateVersion.name);
+                    prop.putHTML("candeploy_autoUpdate_downloadedRelease", updateVersion.getName());
                     final boolean devenvironment = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1")).startsWith("dev");
                     if (devenvironment) {
                         sb.getLog().logInfo("AUTO-UPDATE: omiting update because this is a development environment");
@@ -113,7 +115,7 @@ public class ConfigUpdate_p {
                         sb.getLog().logInfo("AUTO-UPDATE: omiting update because download failed (file cannot be found, is too small or signature was bad)");
                         prop.put("candeploy_autoUpdate", "4");
                     } else {
-                        yacyVersion.deployRelease(downloaded);
+                        yacyRelease.deployRelease(downloaded);
                         sb.terminate(5000);
                         sb.getLog().logInfo("AUTO-UPDATE: deploy and restart initiated");
                         prop.put("candeploy_autoUpdate", "1");
@@ -127,6 +129,7 @@ public class ConfigUpdate_p {
                 sb.setConfig("update.cycle", Math.max(12, post.getLong("cycle", 168)));
                 sb.setConfig("update.blacklist", post.get("blacklist", ""));
                 sb.setConfig("update.concept", (post.get("releaseType", "any").equals("any")) ? "any" : "main");
+                sb.setConfig("update.onlySignedFiles", (post.get("onlySignedFiles", "false").equals("true")) ? "1" : "0");
             }
         }
         
@@ -153,10 +156,10 @@ public class ConfigUpdate_p {
             
         prop.put("candeploy_deployenabled", (downloadedFiles.length == 0) ? "0" : ((devenvironment) ? "1" : "2")); // prevent that a developer-version is over-deployed
           
-        final TreeSet<yacyVersion> downloadedReleases = new TreeSet<yacyVersion>();
+        final TreeSet<yacyRelease> downloadedReleases = new TreeSet<yacyRelease>();
         for(File downloaded : downloadedFiles) {
             try {
-                yacyVersion release = new yacyVersion(downloaded);
+                yacyRelease release = new yacyRelease(downloaded);
                 downloadedReleases.add(release);
             } catch (final RuntimeException e) {
                 // not a valid release
@@ -169,35 +172,38 @@ public class ConfigUpdate_p {
         // latest downloaded release
         yacyVersion dflt = (downloadedReleases.size() == 0) ? null : downloadedReleases.last();
         int relcount = 0;
-        for(yacyVersion release : downloadedReleases) {
-            prop.put("candeploy_downloadedreleases_" + relcount + "_name", ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
-            prop.putHTML("candeploy_downloadedreleases_" + relcount + "_file", release.name);
+        for(yacyRelease release : downloadedReleases) {
+            prop.put("candeploy_downloadedreleases_" + relcount + "_name", ((release.isMainRelease()) ? "main" : "dev") + " " + release.getReleaseNr() + "/" + release.getSvn());
+            prop.put("candeploy_downloadedreleases_" + relcount + "_signature", (release.getSignatureFile().exists() ? "1" : "0"));
+            prop.putHTML("candeploy_downloadedreleases_" + relcount + "_file", release.getName());
             prop.put("candeploy_downloadedreleases_" + relcount + "_selected", (release == dflt) ? "1" : "0");
             relcount++;
         }
         prop.put("candeploy_downloadedreleases", relcount);
 
         // list remotely available releases
-        final yacyVersion.DevAndMainVersions releasess = yacyVersion.allReleases(false);
+        final yacyRelease.DevAndMainVersions releasess = yacyRelease.allReleases(false, false);
         relcount = 0;
         
         // main
-        final TreeSet<yacyVersion> remoteMainReleases = releasess.main;
+        final TreeSet<yacyRelease> remoteMainReleases = releasess.main;
         remoteMainReleases.removeAll(downloadedReleases);
-        for (yacyVersion release : remoteMainReleases) {
-            prop.put("candeploy_availreleases_" + relcount + "_name", ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
-            prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
+        for (yacyRelease release : remoteMainReleases) {
+            prop.put("candeploy_availreleases_" + relcount + "_name", ((release.isMainRelease()) ? "main" : "dev") + " " + release.getReleaseNr() + "/" + release.getSvn());
+            prop.put("candeploy_availreleases_" + relcount + "_url", release.getUrl().toString());
+            prop.put("candeploy_availreleases_" + relcount + "_signatures", (release.getPublicKey()!=null?"1":"0"));
             prop.put("candeploy_availreleases_" + relcount + "_selected", "0");
             relcount++;
         }
         
         // dev
         dflt = (releasess.dev.size() == 0) ? null : releasess.dev.last();
-        final TreeSet<yacyVersion> remoteDevReleases = releasess.dev;
+        final TreeSet<yacyRelease> remoteDevReleases = releasess.dev;
         remoteDevReleases.removeAll(downloadedReleases);
-        for(yacyVersion release : remoteDevReleases) {
-            prop.put("candeploy_availreleases_" + relcount + "_name", ((release.mainRelease) ? "main" : "dev") + " " + release.releaseNr + "/" + release.svn);
-            prop.put("candeploy_availreleases_" + relcount + "_url", release.url.toString());
+        for(yacyRelease release : remoteDevReleases) {
+            prop.put("candeploy_availreleases_" + relcount + "_name", ((release.isMainRelease()) ? "main" : "dev") + " " + release.getReleaseNr() + "/" + release.getSvn());
+            prop.put("candeploy_availreleases_" + relcount + "_url", release.getUrl().toString());
+            prop.put("candeploy_availreleases_" + relcount + "_signatures", (release.getPublicKey()!=null?"1":"0"));
             prop.put("candeploy_availreleases_" + relcount + "_selected", (release == dflt) ? "1" : "0");
             relcount++;
         }
@@ -216,6 +222,7 @@ public class ConfigUpdate_p {
         prop.put("candeploy_lastdownload_time", new Date(sb.getConfigLong("update.time.download", 0)).toString());
         prop.put("candeploy_lastdeploy", (sb.getConfigLong("update.time.deploy", 0) == 0) ? "0" : "1");
         prop.put("candeploy_lastdeploy_time", new Date(sb.getConfigLong("update.time.deploy", 0)).toString());
+        prop.put("candeploy_onlySignedFiles", (sb.getConfig("update.onlySignedFiles", "1").equals("1")) ? "1" : "0");
         
         /*
         if ((adminaccess) && (yacyVersion.latestRelease >= (thisVersion+0.01))) { // only new Versions(not new SVN)

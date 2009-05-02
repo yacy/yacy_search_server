@@ -48,6 +48,7 @@ import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.yacyVersion;
 
 public class Network {
@@ -418,7 +419,7 @@ public class Network {
                                 final String peertags = serverCodings.set2string(seed.getPeerTags(), ",", false);
                                 prop.putHTML(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", ((peertags == null) || (peertags.length() == 0)) ? "no tags given" : ("tags = " + peertags));
                             }
-                            prop.putHTML(STR_TABLE_LIST + conCount + "_version", yacyVersion.combined2prettyVersion(seed.get(yacySeed.VERSION, "0.1"), shortname));
+                            prop.putHTML(STR_TABLE_LIST + conCount + "_version", yacyRelease.combined2prettyVersion(seed.get(yacySeed.VERSION, "0.1"), shortname));
                             prop.putNum(STR_TABLE_LIST + conCount + "_lastSeen", /*seed.getLastSeenString() + " " +*/ lastseen);
                             prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(yacySeed.UTC, "-"));
                             prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", DateFormatter.formatInterval(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));

@@ -67,6 +67,10 @@ public class yacyURL implements Serializable {
         return (url == null) ? null : url.hash().substring(6);
     }
     
+    public yacyURL(final String url) throws MalformedURLException {
+	this(url, null);
+    }
+    
     public yacyURL(final String url, final String hash) throws MalformedURLException {
         if (url == null) throw new MalformedURLException("url string is null");
         

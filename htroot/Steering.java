@@ -33,6 +33,7 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.yacyVersion;
 
 public class Steering {
@@ -59,7 +60,7 @@ public class Steering {
         }
 
         if (post.containsKey("restart")) {
-            yacyVersion.restart();
+            yacyRelease.restart();
             prop.put("info", "4");
             
             return prop;
@@ -70,7 +71,7 @@ public class Steering {
             final String releaseFileName = post.get("releaseinstall", "");
             final File releaseFile = new File(sb.getRootPath(), "DATA/RELEASE/".replace("/", File.separator) + releaseFileName);
             if ((!devenvironment) && (releaseFile.length() > 0) && (releaseFile.exists())) {
-                yacyVersion.deployRelease(releaseFile);
+                yacyRelease.deployRelease(releaseFile);
             }
             prop.put("info", "5");
             prop.putHTML("info_release", releaseFileName);

@@ -182,6 +182,7 @@ import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.Tray;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyUpdateLocation;
+import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.yacyVersion;
 import de.anomic.yacy.dht.Dispatcher;
 import de.anomic.yacy.dht.PeerSelection;
@@ -736,7 +737,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 		    e.printStackTrace();
 		}
 		yacyUpdateLocation updateLocation = new yacyUpdateLocation(locationURL, publicKey);
-		yacyVersion.latestReleaseLocations.add(updateLocation);
+		yacyRelease.latestReleaseLocations.add(updateLocation);
 		i++;
 	    }
 	} catch (NoSuchAlgorithmException e1) {
@@ -1498,10 +1499,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             
             // check if update is available and
             // if auto-update is activated perform an automatic installation and restart
-            final yacyVersion updateVersion = yacyVersion.rulebasedUpdateInfo(false);
+            final yacyRelease updateVersion = yacyRelease.rulebasedUpdateInfo(false);
             if (updateVersion != null) {
                 // there is a version that is more recent. Load it and re-start with it
-                log.logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.url);
+                log.logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.getUrl());
                 final File downloaded = updateVersion.downloadRelease();
                 final boolean devenvironment = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1")).startsWith("dev");
                 if (devenvironment) {
@@ -1509,7 +1510,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 } else if ((downloaded == null) || (!downloaded.exists()) || (downloaded.length() == 0)) {
                     log.logInfo("AUTO-UPDATE: omiting update because download failed (file cannot be found, is too small or signature is bad)");
                 } else {
-                    yacyVersion.deployRelease(downloaded);
+                    yacyRelease.deployRelease(downloaded);
                     terminate(5000);
                     log.logInfo("AUTO-UPDATE: deploy and restart initiated");
                 }
