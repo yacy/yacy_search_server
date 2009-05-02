@@ -12,9 +12,8 @@
 	});
 </script>
 <div class="head">
-	<h1>
-	YaCy - Distributed Search Engine
-	<div id="yacylivesearch" style="position:absolute; top:-3px; right:80px; z-index: 100;">
+	<h1>YaCy - Distributed Search Engine</h1>
+	<div id="yacylivesearch" style="float: right; margin-right: 90px; margin-top: -27px;">
 		<form id="ysearch" method="get" accept-charset="UTF-8" action="http://localhost:8080/yacysearch.html">
 			<input name="search" id="yquery" class="fancy" type="text" size="20" maxlength="80" value=""/>
 			<input type="hidden" name="verify" value="true" />
@@ -25,8 +24,7 @@
 			<input type="hidden" name="former" value="" />
 			<input type="hidden" name="display" value="2" />
 		</form>
-	</div>	
-	</h1>
+	</div>
 </div>
 
 <ul id="menu">

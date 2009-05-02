@@ -5,6 +5,7 @@
 	font-size: 14px;
 }
 #ysearch .fancy {
+	height:18px;
 	background-image: url(/yacy/ui/img-2/magnify.png);
 	background-repeat: no-repeat;
 	background-position: 2px 1px;
