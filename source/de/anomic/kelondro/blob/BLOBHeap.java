@@ -116,7 +116,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
      */
     public synchronized boolean has(final byte[] key) {
         assert index != null;
-        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
+        assert this.keylength == key.length : this.keylength + "!=" + key.length;
         
         // check the buffer
         if (this.buffer.containsKey(new String(key))) return true;
@@ -132,7 +132,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
     private void add(final byte[] key, final byte[] blob) throws IOException {
         assert blob.length > 0;
         assert key.length == this.keylength;
-        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
+        assert this.keylength == key.length : this.keylength + "!=" + key.length;
         if ((blob == null) || (blob.length == 0)) return;
         final int pos = (int) file.length();
         file.seek(pos);
@@ -148,6 +148,60 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
      * @throws IOException
      */
     private void flushBuffer() throws IOException {
+        // check size of buffer
+        Iterator<Map.Entry<String, byte[]>> i = this.buffer.entrySet().iterator();
+        int l = 0;
+        while (i.hasNext()) l += i.next().getValue().length;
+        assert l == this.buffersize;
+        
+        // simulate write: this whole code block is only here to test the assert at the end of the block; remove after testing
+        i = this.buffer.entrySet().iterator();
+        int posBuffer = 0;
+        Map.Entry<String, byte[]> entry;
+        byte[] key, blob;
+        while (i.hasNext()) {
+            entry = i.next();
+            key = entry.getKey().getBytes();
+            assert key.length == this.keylength : "key.length = " + key.length + ", this.keylength = " + this.keylength;
+            blob = entry.getValue();
+            posBuffer += 4 + key.length + blob.length;
+        }
+        assert l + (4 + this.keylength) * this.buffer.size() == posBuffer : "l = " + l + ", this.keylength = " + this.keylength + ", this.buffer.size() = " + this.buffer.size() + ", posBuffer = " + posBuffer;
+        
+        // append all contents of the buffer into one byte[]
+        i = this.buffer.entrySet().iterator();
+        final long pos = file.length();
+        long posFile = pos;
+        posBuffer = 0;
+        byte[] ba = new byte[l + (4 + this.keylength) * this.buffer.size()];
+        byte[] b;
+        while (i.hasNext()) {
+            entry = i.next();
+            key = entry.getKey().getBytes();
+            assert key.length == this.keylength : "key.length = " + key.length + ", this.keylength = " + this.keylength;
+            blob = entry.getValue();
+            index.put(key, posFile);
+            b = AbstractRandomAccess.int2array(key.length + blob.length);
+            assert b.length == 4;
+            assert posBuffer + 4 < ba.length : "posBuffer = " + posBuffer + ", ba.length = " + ba.length;
+            System.arraycopy(b, 0, ba, posBuffer, 4);
+            assert posBuffer + 4 + key.length <= ba.length : "posBuffer = " + posBuffer + ", key.length = " + key.length + ", ba.length = " + ba.length;
+            System.arraycopy(key, 0, ba, posBuffer + 4, key.length);
+            assert posBuffer + 4 + key.length + blob.length <= ba.length : "posBuffer = " + posBuffer + ", key.length = " + key.length + ", blob.length = " + blob.length + ", ba.length = " + ba.length;
+            System.out.println("*** DEBUG posFile=" + posFile + ",blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length);
+            System.err.println("*** DEBUG posFile=" + posFile + ",blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length);
+            System.arraycopy(blob, 0, ba, posBuffer + 4 + this.keylength, blob.length); //java.lang.ArrayIndexOutOfBoundsException here
+            posFile += 4 + key.length + blob.length;
+            posBuffer += 4 + key.length + blob.length;
+        }
+        assert ba.length == posBuffer; // must fit exactly
+        this.file.seek(pos);
+        this.file.write(ba);
+        this.buffer.clear();
+        this.buffersize = 0;
+    }
+    /*
+     private void flushBuffer() throws IOException {
         // check size of buffer
         Iterator<Map.Entry<String, byte[]>> i = this.buffer.entrySet().iterator();
         int l = 0;
@@ -175,8 +229,8 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
             assert posBuffer + 4 + key.length <= ba.length : "posBuffer = " + posBuffer + ", key.length = " + key.length + ", ba.length = " + ba.length;
             System.arraycopy(key, 0, ba, posBuffer + 4, key.length);
             assert posBuffer + 4 + key.length + blob.length <= ba.length : "posBuffer = " + posBuffer + ", key.length = " + key.length + ", blob.length = " + blob.length + ", ba.length = " + ba.length;
-            //System.out.println("*** DEBUG blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length + ",blob.length=" + blob.length);
-            //System.err.println("*** DEBUG blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length + ",blob.length=" + blob.length);
+            System.out.println("*** DEBUG posFile=" + posFile + ",blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length);
+            System.err.println("*** DEBUG posFile=" + posFile + ",blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length);
             System.arraycopy(blob, 0, ba, posBuffer + 4 + key.length, blob.length); //java.lang.ArrayIndexOutOfBoundsException here
             posFile += 4 + key.length + blob.length;
             posBuffer += 4 + key.length + blob.length;
@@ -187,6 +241,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
         this.buffer.clear();
         this.buffersize = 0;
     }
+     */
     
     /**
      * read a blob from the heap
@@ -195,7 +250,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
      * @throws IOException
      */
     public synchronized byte[] get(final byte[] key) throws IOException {
-        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
+        assert this.keylength == key.length : this.keylength + "!=" + key.length;
         
         // check the buffer
         byte[] blob = this.buffer.get(new String(key));
@@ -211,7 +266,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
      * @throws IOException
      */
     public synchronized long length(byte[] key) throws IOException {
-        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
+        assert this.keylength == key.length : this.keylength + "!=" + key.length;
         
         // check the buffer
         byte[] blob = this.buffer.get(new String(key));
@@ -253,7 +308,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
      * @throws IOException
      */
     public synchronized void put(final byte[] key, final byte[] b) throws IOException {
-        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
+        assert this.keylength == key.length : this.keylength + "!=" + key.length;
         
         // we do not write records of length 0 into the BLOB
         if (b.length == 0) return;
@@ -284,7 +339,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
     }
     
     private boolean putToGap(final byte[] key, final byte[] b) throws IOException {
-        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
+        assert this.keylength == key.length : this.keylength + "!=" + key.length;
         
         // we do not write records of length 0 into the BLOB
         if (b.length == 0) return true;
@@ -295,7 +350,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
         // find the largest entry
         long lseek = -1;
         int  lsize = 0;
-        final int reclen = b.length + index.row().primaryKeyLength;
+        final int reclen = b.length + this.keylength;
         Map.Entry<Long, Integer> entry;
         Iterator<Map.Entry<Long, Integer>> i = this.free.entrySet().iterator();
         while (i.hasNext()) {
@@ -369,7 +424,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
      * @throws IOException
      */
     public synchronized void remove(final byte[] key) throws IOException {
-        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
+        assert this.keylength == key.length : this.keylength + "!=" + key.length;
         
         // check the buffer
         byte[] blob = this.buffer.remove(new String(key));

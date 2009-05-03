@@ -144,7 +144,7 @@ public class MapView {
         assert (key.length() > 0);
         assert (newMap != null);
         if (cacheScore == null) return; // may appear during shutdown
-        while (key.length() < blob.keylength()) key += "_";
+        key = normalizeKey(key);
         
         // write entry
         blob.put(key.getBytes(), map2string(newMap, "W" + DateFormatter.formatShortSecond() + " ").getBytes());
@@ -165,7 +165,7 @@ public class MapView {
     public synchronized void remove(String key) throws IOException {
         // update elementCount
         if (key == null) return;
-        while (key.length() < blob.keylength()) key += "_";
+        key = normalizeKey(key);
         
         // remove from cache
         cacheScore.deleteScore(key);
@@ -184,7 +184,8 @@ public class MapView {
     public synchronized boolean has(String key) throws IOException {
         assert key != null;
         if (cache == null) return false; // case may appear during shutdown
-        while (key.length() < blob.keylength()) key += "_";
+        key = normalizeKey(key);
+        if (this.cache.containsKey(key)) return true;
         return this.blob.has(key.getBytes());
     }
 
@@ -198,12 +199,18 @@ public class MapView {
         if (key == null) return null;
         return get(key, true);
     }
+    
+    private String normalizeKey(String key) {
+    	if (key.length() > blob.keylength()) key = key.substring(0, blob.keylength());
+        while (key.length() < blob.keylength()) key += "_";
+        return key;
+    }
 
     protected synchronized Map<String, String> get(String key, final boolean storeCache) throws IOException {
         // load map from cache
         assert key != null;
         if (cache == null) return null; // case may appear during shutdown
-        while (key.length() < blob.keylength()) key += "_";
+        key = normalizeKey(key);
         
         Map<String, String> map = cache.get(key);
         if (map != null) return map;

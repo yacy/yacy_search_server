@@ -468,6 +468,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
  
     public void add(final ReferenceContainer<ReferenceType> container) {
         // this puts the entries into the cache
+    	assert this.cache != null;
         if (this.cache == null || container == null || container.size() == 0) return;
         
         // put new words into cache

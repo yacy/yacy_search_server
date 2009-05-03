@@ -893,7 +893,7 @@ public class yacyURL implements Serializable {
         if (this.hash == null) {
             if (this.host.startsWith("127.") || this.host.equals("localhost") || this.host.startsWith("0:0:0:0:0:0:0:1")) return true;
             synchronized (this) {
-                this.hash = urlHashComputation();
+            	if (this.hash == null) this.hash = urlHashComputation();
             }
         }
         return domDomain(this.hash) == 7;

@@ -82,7 +82,7 @@ public final class FileUtils {
      * @see #copy(File source, File dest)
      */
     public static long copy(final InputStream source, final OutputStream dest, final long count) throws IOException {
-        assert count == -1 || count > 0 : "precondition violated: count == -1 || count > 0 (nothing to copy)";
+        assert count == -1 || count > 0 : "precondition violated: count == " + count + " (nothing to copy)";
         if(count == 0) {
             // no bytes to copy
             return 0;
