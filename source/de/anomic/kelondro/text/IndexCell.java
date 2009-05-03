@@ -276,7 +276,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     
     private synchronized void cleanCache() {
         // dump the cache if necessary
-        if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 2000 && !MemoryControl.request(100L * 1024L * 1024L, false))) {
+        if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false))) {
             try {
                 cacheDump();
             } catch (IOException e) {

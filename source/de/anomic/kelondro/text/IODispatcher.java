@@ -94,7 +94,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
     }
     
     public synchronized int queueLength() {
-        return (controlQueue == null) ? 0 : controlQueue.availablePermits();
+        return (controlQueue == null || !this.isAlive()) ? 0 : controlQueue.availablePermits();
     }
     
     public synchronized void merge(File f1, File f2, BLOBArray array, Row payloadrow, File newFile) {
@@ -160,12 +160,15 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
                 }
 
                 Log.logSevere("IODispatcher", "main loop in bad state, dumpQueue.size() = " + dumpQueue.size() + ", mergeQueue.size() = " + mergeQueue.size() + ", controlQueue.availablePermits() = " + controlQueue.availablePermits());
-                assert false; // this should never happen
+                assert false : "this process statt should not be reached"; // this should never happen
             }
             Log.logInfo("IODispatcher", "loop terminated");
         } catch (InterruptedException e) {
             e.printStackTrace();
             Log.logSevere("IODispatcher", "main run job was interrupted (3)", e);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.logSevere("IODispatcher", "main run job failed (4)", e);
         } finally {
             Log.logInfo("IODispatcher", "terminating run job");
             controlQueue = null;

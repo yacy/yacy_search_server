@@ -191,7 +191,7 @@ public class BLOBArray implements BLOB {
         blobItem b;
         for (int i = 0; i < this.blobs.size(); i++) {
             b = this.blobs.get(i);
-            if (b.location.equals(location)) {
+            if (b.location.getAbsolutePath().equals(location.getAbsolutePath())) {
                 this.blobs.remove(i);
                 b.blob.close(writeIDX);
                 b.blob = null;
@@ -199,6 +199,7 @@ public class BLOBArray implements BLOB {
                 return;
             }
         }
+        Log.logSevere("BLOBArray", "file " + location + " cannot be unmounted. The file " + ((location.exists()) ? "exists." : "does not exist."));
     }
     
     private File unmount(int idx) {
@@ -211,32 +212,36 @@ public class BLOBArray implements BLOB {
     }
     
     public synchronized File[] unmountBestMatch(double maxq, long maxResultSize) {
+    	if (this.blobs.size() < 2) return null;
         long l, r;
+        File lf, rf;
         double min = Double.MAX_VALUE;
-        int[] idx = new int[2];
+        File[] bestMatch = new File[2];
         maxResultSize = maxResultSize >> 1;
         for (int i = 0; i < this.blobs.size() - 1; i++) {
             for (int j = i + 1; j < this.blobs.size(); j++) {
-                l = 1 + (this.blobs.get(i).location.length() >> 1);
-                r = 1 + (this.blobs.get(j).location.length() >> 1);
+            	lf = this.blobs.get(i).location;
+            	rf = this.blobs.get(j).location;
+                l = 1 + (lf.length() >> 1);
+                r = 1 + (rf.length() >> 1);
                 if (l + r > maxResultSize) continue;
-                double q = Math.max(((double) l)/((double) r), ((double) r)/((double) l));
+                double q = Math.max((double) l, (double) r) / Math.min((double) l, (double) r);
                 if (q < min) {
                     min = q;
-                    idx[0] = i;
-                    idx[1] = j;
+                    bestMatch[0] = lf;
+                    bestMatch[1] = rf;
                 }
             }
         }
         if (min > maxq) return null;
-        File[] bestmatch = new File[]{this.blobs.get(idx[0]).location, this.blobs.get(idx[1]).location};
-        unmount(idx[1]);
-        unmount(idx[0]);
-        return bestmatch;
+        unmountBLOB(bestMatch[1], false);
+        unmountBLOB(bestMatch[0], false);
+        return bestMatch;
     }
     
     public synchronized File[] unmountSmallest(long maxResultSize) {
-        File f0 = smallestBLOB(null, maxResultSize);
+    	if (this.blobs.size() < 2) return null;
+    	File f0 = smallestBLOB(null, maxResultSize);
         if (f0 == null) return null;
         File f1 = smallestBLOB(f0, maxResultSize - f0.length());
         if (f1 == null) return null;
@@ -252,18 +257,19 @@ public class BLOBArray implements BLOB {
     
     public synchronized File smallestBLOB(File excluding, long maxsize) {
         if (this.blobs.size() == 0) return null;
-        int bestIndex = -1;
+        File bestFile = null;
         long smallest = Long.MAX_VALUE;
+        File f = null;
         for (int i = 0; i < this.blobs.size(); i++) {
-            if (this.blobs.get(i).location == excluding) continue;
-            if (this.blobs.get(i).location.length() < smallest) {
-                smallest = this.blobs.get(i).location.length();
-                bestIndex = i;
+        	f = this.blobs.get(i).location;
+            if (excluding != null && f.getAbsolutePath().equals(excluding.getAbsolutePath())) continue;
+            if (f.length() < smallest) {
+                smallest = f.length();
+                bestFile = f;
             }
         }
-        if (bestIndex == -1) return null;
         if (smallest > maxsize) return null;
-        return this.blobs.get(bestIndex).location;
+        return bestFile;
     }
     
     public synchronized File unmountOldestBLOB(boolean smallestFromFirst2) {

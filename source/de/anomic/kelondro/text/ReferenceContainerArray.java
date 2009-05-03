@@ -254,10 +254,10 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         boolean donesomething = false;
         
         // first try to merge small files that match
-        while (this.merger.queueLength() < 3) {
+        while (this.merger.queueLength() < 3 || this.array.entries() >= 50) {
             File[] ff = this.array.unmountBestMatch(2.0, targetFileSize);
             if (ff == null) break;
-            Log.logInfo("RICELL-shrink", "unmountBestMatch(2.0, " + targetFileSize + ")");
+            Log.logInfo("RICELL-shrink1", "unmountBestMatch(2.0, " + targetFileSize + ")");
             merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
             donesomething = true;
         }
@@ -266,7 +266,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         while (this.merger.queueLength() < 2) {
             File[] ff = this.array.unmountSmallest(targetFileSize);
             if (ff == null) break;
-            Log.logInfo("RICELL-shrink", "unmountSmallest(" + targetFileSize + ")");
+            Log.logInfo("RICELL-shrink2", "unmountSmallest(" + targetFileSize + ")");
             merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
             donesomething = true;
         }
@@ -275,7 +275,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         while (this.merger.queueLength() < 1) {
             File[] ff = this.array.unmountBestMatch(2.0, maxFileSize);
             if (ff == null) break;
-            Log.logInfo("RICELL-shrink", "unmountBestMatch(2.0, " + maxFileSize + ")");
+            Log.logInfo("RICELL-shrink3", "unmountBestMatch(2.0, " + maxFileSize + ")");
             merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
             donesomething = true;
         }
