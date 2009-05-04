@@ -75,6 +75,7 @@ public final class plasmaWordIndex {
     public static final int  maxCollectionPartition = 7;       // should be 7
     public static final long targetFileSize  = 100 * 1024 * 1024; // 100 MB
     public static final long maxFileSize     = BLOBArray.oneGigabyte; // 1GB
+    public static final int  writeBufferSize = 4 * 1024 * 1024;
     
     // the reference factory
     public static final ReferenceFactory<WordReference> wordReferenceFactory = new WordReferenceFactory();
@@ -152,7 +153,7 @@ public final class plasmaWordIndex {
         
         // check if the peer has migrated the index
         if (new File(indexPrimaryTextLocation, "RICOLLECTION").exists()) {
-            this.merger = new IODispatcher<WordReference>(plasmaWordIndex.wordReferenceFactory, 1, 1);
+            this.merger = new IODispatcher<WordReference>(plasmaWordIndex.wordReferenceFactory, 1, 1, writeBufferSize);
             if (this.merger != null) this.merger.start();
             this.index = new IndexCollectionMigration<WordReference>(
                                     indexPrimaryTextLocation,
@@ -163,9 +164,10 @@ public final class plasmaWordIndex {
                                     targetFileSize,
                                     maxFileSize,
                                     this.merger,
+                                    writeBufferSize,
                                     log);
         } else {
-            this.merger = new IODispatcher<WordReference>(plasmaWordIndex.wordReferenceFactory, 1, 1);
+            this.merger = new IODispatcher<WordReference>(plasmaWordIndex.wordReferenceFactory, 1, 1, writeBufferSize);
             this.merger.start();
             this.index = new IndexCell<WordReference>(
                                     new File(indexPrimaryTextLocation, "RICELL"),
@@ -175,7 +177,8 @@ public final class plasmaWordIndex {
                                     entityCacheMaxSize,
                                     targetFileSize,
                                     maxFileSize,
-                                    this.merger);
+                                    this.merger,
+                                    writeBufferSize);
         }
         
         

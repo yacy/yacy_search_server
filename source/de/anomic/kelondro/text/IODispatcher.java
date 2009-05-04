@@ -32,6 +32,7 @@ import java.util.concurrent.Semaphore;
 import de.anomic.kelondro.blob.BLOBArray;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.util.Log;
+import de.anomic.kelondro.util.MemoryControl;
 
 /**
  * this is a concurrent merger that can merge single files that are queued for merging.
@@ -53,13 +54,15 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
     private ArrayBlockingQueue<DumpJob>  dumpQueue;
     private ReferenceFactory<ReferenceType> factory;
     private boolean                      terminate;
+    private int                          writeBufferSize;
     
-    public IODispatcher(ReferenceFactory<ReferenceType> factory, int dumpQueueLength, int mergeQueueLength) {
+    public IODispatcher(ReferenceFactory<ReferenceType> factory, int dumpQueueLength, int mergeQueueLength, int writeBufferSize) {
         this.factory = factory;
         this.termination = new Semaphore(0);
         this.controlQueue = new Semaphore(0);
         this.dumpQueue = new ArrayBlockingQueue<DumpJob>(dumpQueueLength);
         this.mergeQueue = new ArrayBlockingQueue<MergeJob>(mergeQueueLength);
+        this.writeBufferSize = writeBufferSize;
         this.terminate = false;
     }
     
@@ -79,7 +82,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
     public synchronized void dump(ReferenceContainerCache<ReferenceType> cache, File file, ReferenceContainerArray<ReferenceType> array) {
         if (dumpQueue == null || controlQueue == null || !this.isAlive()) {
             Log.logWarning("IODispatcher", "emergency dump of file " + file.getName());
-            cache.dump(file);
+            cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
         } else {
             DumpJob job = new DumpJob(cache, file, array);
             try {
@@ -88,7 +91,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
                 Log.logInfo("IODispatcher", "appended dump job for file " + file.getName());
             } catch (InterruptedException e) {
                 e.printStackTrace();
-                cache.dump(file);
+                cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
             }
         }
     }
@@ -101,7 +104,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
         if (mergeQueue == null || controlQueue == null || !this.isAlive()) {
             try {
                 Log.logWarning("IODispatcher", "emergency merge of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
-                array.mergeMount(f1, f2, factory, payloadrow, newFile);
+                array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -114,7 +117,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 try {
-                    array.mergeMount(f1, f2, factory, payloadrow, newFile);
+                    array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
                 } catch (IOException ee) {
                     ee.printStackTrace();
                 }
@@ -189,7 +192,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
         }
         public void dump() {
             try {
-                cache.dump(file);
+                cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
                 array.mountBLOBFile(file);
             } catch (IOException e) {
                 e.printStackTrace();
@@ -221,7 +224,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
         		return null;
         	}
             try {
-                return array.mergeMount(f1, f2, factory, payloadrow, newFile);
+                return array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
             } catch (IOException e) {
                 e.printStackTrace();
             }

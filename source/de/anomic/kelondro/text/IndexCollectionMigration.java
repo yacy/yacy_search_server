@@ -60,6 +60,7 @@ public final class IndexCollectionMigration<ReferenceType extends Reference> ext
             final long targetFileSize,
             final long maxFileSize,
             final IODispatcher<ReferenceType> merger,
+            final int writeBufferSize,
             final Log log) throws IOException {
         super(factory);
         
@@ -73,7 +74,8 @@ public final class IndexCollectionMigration<ReferenceType extends Reference> ext
                                 entityCacheMaxSize,
                                 targetFileSize,
                                 maxFileSize,
-                                this.merger);
+                                this.merger,
+                                writeBufferSize);
         final File textindexcache = new File(indexPrimaryTextLocation, "RICACHE");
         if (textindexcache.exists()) {
             // migrate the "index.dhtout.blob" into RICELL directory

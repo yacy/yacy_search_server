@@ -559,16 +559,16 @@ public class BLOBArray implements BLOB {
         blobs = null;
     }
     
-    public File mergeMount(File f1, File f2, ReferenceFactory<?> factory, Row payloadrow, File newFile) throws IOException {
+    public File mergeMount(File f1, File f2, ReferenceFactory<?> factory, Row payloadrow, File newFile, int writeBuffer) throws IOException {
         Log.logInfo("BLOBArray", "merging " + f1.getName() + " with " + f2.getName());
-        File resultFile = mergeWorker(factory, this.keylength, this.ordering, f1, f2, payloadrow, newFile);
+        File resultFile = mergeWorker(factory, this.keylength, this.ordering, f1, f2, payloadrow, newFile, writeBuffer);
         if (resultFile == null) return null;
         mountBLOB(resultFile, false);
         Log.logInfo("BLOBArray", "merged " + f1.getName() + " with " + f2.getName() + " into " + resultFile);
         return resultFile;
     }
     
-    private static <ReferenceType extends Reference> File mergeWorker(ReferenceFactory<ReferenceType> factory, int keylength, ByteOrder order, File f1, File f2, Row payloadrow, File newFile) throws IOException {
+    private static <ReferenceType extends Reference> File mergeWorker(ReferenceFactory<ReferenceType> factory, int keylength, ByteOrder order, File f1, File f2, Row payloadrow, File newFile, int writeBuffer) throws IOException {
         // iterate both files and write a new one
         
         CloneableIterator<ReferenceContainer<ReferenceType>> i1 = new blobFileEntries<ReferenceType>(f1, factory, payloadrow);
@@ -591,7 +591,7 @@ public class BLOBArray implements BLOB {
         assert i1.hasNext();
         assert i2.hasNext();
         File tmpFile = new File(newFile.getParentFile(), newFile.getName() + ".tmp");
-        HeapWriter writer = new HeapWriter(tmpFile, newFile, keylength, order);
+        HeapWriter writer = new HeapWriter(tmpFile, newFile, keylength, order, writeBuffer);
         merge(i1, i2, order, writer);
         try {
             writer.close(true);

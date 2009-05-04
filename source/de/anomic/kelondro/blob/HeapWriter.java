@@ -72,12 +72,12 @@ public final class HeapWriter  {
      * @param ordering
      * @throws IOException
      */
-    public HeapWriter(final File temporaryHeapFile, final File readyHeapFile, final int keylength, final ByteOrder ordering) throws IOException {
+    public HeapWriter(final File temporaryHeapFile, final File readyHeapFile, final int keylength, final ByteOrder ordering, int outBuffer) throws IOException {
         this.heapFileTMP = temporaryHeapFile;
         this.heapFileREADY = readyHeapFile;
         this.keylength = keylength;
         this.index = new LongHandleIndex(keylength, ordering, 10, 100000);
-        this.os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(temporaryHeapFile), 8 * 1024 * 1024));
+        this.os = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(temporaryHeapFile), outBuffer));
         //this.doublecheck = new HashSet<String>();
         this.seek = 0;
     }

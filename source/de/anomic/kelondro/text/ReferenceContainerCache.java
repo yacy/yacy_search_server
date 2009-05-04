@@ -115,14 +115,14 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         Log.logInfo("indexContainerRAMHeap", "finished rwi blob restore: " + cache.size() + " words, " + urlCount + " word/URL relations in " + (System.currentTimeMillis() - start) + " milliseconds");
     }
     
-    public void dump(final File heapFile) {
+    public void dump(final File heapFile, int writeBuffer) {
         assert this.cache != null;
         Log.logInfo("indexContainerRAMHeap", "creating rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
         if (heapFile.exists()) FileUtils.deletedelete(heapFile);
         File tmpFile = new File(heapFile.getParentFile(), heapFile.getName() + ".tmp");
         HeapWriter dump;
         try {
-            dump = new HeapWriter(tmpFile, heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder);
+            dump = new HeapWriter(tmpFile, heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder, writeBuffer);
         } catch (IOException e1) {
             e1.printStackTrace();
             return;

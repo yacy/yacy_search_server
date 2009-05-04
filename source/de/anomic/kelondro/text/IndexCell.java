@@ -61,6 +61,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     private final IODispatcher<ReferenceType>            merger;
     private       long                                   lastCleanup;
     private final long                                   targetFileSize, maxFileSize;
+    private final int                                    writeBufferSize;
     
     
     public IndexCell(
@@ -71,7 +72,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             final int maxRamEntries,
             final long targetFileSize,
             final long maxFileSize,
-            IODispatcher<ReferenceType> merger
+            IODispatcher<ReferenceType> merger,
+            int writeBufferSize
             ) throws IOException {
         super(factory);
         
@@ -83,6 +85,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         this.lastCleanup = System.currentTimeMillis();
         this.targetFileSize = targetFileSize;
         this.maxFileSize = maxFileSize;
+        this.writeBufferSize = writeBufferSize;
         cleanCache();
     }
 
@@ -251,7 +254,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * and is composed of the current date and the cell salt
      */
     public synchronized void close() {
-        this.ram.dump(this.array.newContainerBLOBFile());
+        this.ram.dump(this.array.newContainerBLOBFile(), (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
         // close all
         this.ram.close();
         this.array.close();
