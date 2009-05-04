@@ -429,12 +429,6 @@ public final class plasmaWordIndex {
         final int urlLength = url.toNormalform(true, true).length();
         final int urlComps = htmlFilterContentScraper.urlComps(url.toString()).length;
         
-        // check if merger is running
-        if (this.merger != null && !this.merger.isAlive()) {
-        	log.logSevere("re-starting IODispatcher");
-        	this.merger.start();
-        }
-        
         // iterate over all words of context text
         final Iterator<Map.Entry<String, Word>> i = condenser.words().entrySet().iterator();
         Map.Entry<String, Word> wentry;

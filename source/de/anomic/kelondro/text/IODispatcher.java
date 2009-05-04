@@ -134,24 +134,36 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
                 
                 // prefer dump actions to flush memory to disc
                 if (dumpQueue.size() > 0) {
+                	File f = null;
                     try {
                         dumpJob = dumpQueue.take();
+                        f = dumpJob.file;
                         dumpJob.dump();
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
                         Log.logSevere("IODispatcher", "main run job was interrupted (1)", e);
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        Log.logSevere("IODispatcher", "main run job had errors (1), dump to " + f + " failed.", e);
+                    	e.printStackTrace();
                     }
                     continue loop;
                 }
                 
                 // otherwise do a merge operation
                 if (mergeQueue.size() > 0) {
+                	File f = null, f1 = null, f2 = null;
                     try {
                         mergeJob = mergeQueue.take();
+                        f = mergeJob.newFile;
+                        f1 = mergeJob.f1;
+                        f2 = mergeJob.f2;
                         mergeJob.merge();
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
                         Log.logSevere("IODispatcher", "main run job was interrupted (2)", e);
+                        e.printStackTrace();
+                    } catch (Exception e) {
+                        Log.logSevere("IODispatcher", "main run job had errors (2), dump to " + f + " failed. Input files are " + f1 + " and " + f2, e);
+                    	e.printStackTrace();
                     }
                     continue loop;
                 }
@@ -167,11 +179,11 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
             }
             Log.logInfo("IODispatcher", "loop terminated");
         } catch (InterruptedException e) {
-            e.printStackTrace();
             Log.logSevere("IODispatcher", "main run job was interrupted (3)", e);
-        } catch (Exception e) {
             e.printStackTrace();
+        } catch (Exception e) {
             Log.logSevere("IODispatcher", "main run job failed (4)", e);
+            e.printStackTrace();
         } finally {
             Log.logInfo("IODispatcher", "terminating run job");
             controlQueue = null;

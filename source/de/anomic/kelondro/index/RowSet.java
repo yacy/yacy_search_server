@@ -33,6 +33,7 @@ import java.util.Random;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.util.Log;
 
 public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.Entry> {
 
@@ -410,8 +411,20 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
     protected static RowSet mergeEnum(RowCollection c0, RowCollection c1) {
         assert c0.rowdef == c1.rowdef : c0.rowdef.toString() + " != " + c1.rowdef.toString();
         RowSet r = new RowSet(c0.rowdef, c0.size() + c1.size());
-        c0.sort();
-        c1.sort();
+        try {
+        	c0.sort();
+        } catch (Exception e) {
+        	Log.logSevere("RowSet", "collection corrupted. cleaned. " + e.getMessage());
+        	e.printStackTrace();
+        	c0.clear();
+        }
+        try {
+        	c1.sort();
+        } catch (Exception e) {
+        	Log.logSevere("RowSet", "collection corrupted. cleaned. " + e.getMessage());
+        	e.printStackTrace();
+        	c1.clear();
+        }
         int c0i = 0, c1i = 0;
         int c0p, c1p;
         int o;
