@@ -24,6 +24,7 @@
 
 package de.anomic.kelondro.index;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -40,22 +41,22 @@ public class SimpleARC <K, V> {
 
     public final static boolean accessOrder = false; // if false, then a insertion-order is used
     private int cacheSize;
-    private LinkedHashMap<K, V> levelA, levelB;
+    private Map<K, V> levelA, levelB;
     
     public SimpleARC(int cacheSize) {
         this.cacheSize = cacheSize / 2;
-        this.levelA = new LinkedHashMap<K, V>(cacheSize, 0.1f, accessOrder) {
+        this.levelA = Collections.synchronizedMap(new LinkedHashMap<K, V>(cacheSize, 0.1f, accessOrder) {
             private static final long serialVersionUID = 1L;
             @Override protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
                 return size() > SimpleARC.this.cacheSize;
             }
-        };
-        this.levelB = new LinkedHashMap<K, V>(cacheSize, 0.1f, accessOrder) {
+        });
+        this.levelB = Collections.synchronizedMap(new LinkedHashMap<K, V>(cacheSize, 0.1f, accessOrder) {
             private static final long serialVersionUID = 1L;
             @Override protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
                 return size() > SimpleARC.this.cacheSize;
             }
-        };
+        });
     }
     
     /**
@@ -64,7 +65,7 @@ public class SimpleARC <K, V> {
      * @param s
      * @param v
      */
-    public synchronized void put(K s, V v) {
+    public void put(K s, V v) {
         assert this.levelA.get(s) == null;
         assert this.levelB.get(s) == null;
         this.levelA.put(s, v);
@@ -76,7 +77,7 @@ public class SimpleARC <K, V> {
      * @param s
      * @return the value
      */
-    public synchronized V get(K s) {
+    public V get(K s) {
         V v = this.levelB.get(s);
         if (v != null) return v;
         v = this.levelA.remove(s);
@@ -91,7 +92,7 @@ public class SimpleARC <K, V> {
     /**
      * clear the cache
      */
-    public synchronized void clear() {
+    public void clear() {
         this.levelA.clear();
         this.levelB.clear();
     }
