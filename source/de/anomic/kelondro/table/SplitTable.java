@@ -344,6 +344,7 @@ public class SplitTable implements ObjectIndex {
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (final ExecutionException e) {
+        	e.printStackTrace();
             throw new RuntimeException(e.getCause());
         }
         //System.out.println("*DEBUG SplitTable fail.time = " + (System.currentTimeMillis() - start) + " ms");
