@@ -105,11 +105,16 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return new ReferenceContainer<ReferenceType>(this.factory, this.termHash, super.merge(c));
     }
     
-    public Reference put(final Reference entry) {
+    public Reference replace(final Reference entry) {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         final Row.Entry r = super.replace(entry.toKelondroEntry());
         if (r == null) return null;
         return new WordReferenceRow(r);
+    }
+    
+    public void put(final Reference entry) {
+        assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
+        super.put(entry.toKelondroEntry());
     }
     
     public boolean putRecent(final Reference entry) {

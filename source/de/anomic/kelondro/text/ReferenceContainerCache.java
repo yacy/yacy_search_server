@@ -29,13 +29,12 @@ package de.anomic.kelondro.text;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.kelondro.blob.HeapReader;
 import de.anomic.kelondro.blob.HeapWriter;
@@ -87,7 +86,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * another dump reading afterwards is not possible
      */
     public void initWriteMode() {
-        this.cache = Collections.synchronizedMap(new HashMap<ByteArray, ReferenceContainer<ReferenceType>>());
+        this.cache = new ConcurrentHashMap<ByteArray, ReferenceContainer<ReferenceType>>();
     }
     
     /**
@@ -99,7 +98,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         Log.logInfo("indexContainerRAMHeap", "restoring rwi blob dump '" + blobFile.getName() + "'");
         final long start = System.currentTimeMillis();
         //this.cache = Collections.synchronizedSortedMap(new TreeMap<byte[], ReferenceContainer<ReferenceType>>(this.termOrder));
-        this.cache = new HashMap<ByteArray, ReferenceContainer<ReferenceType>>();
+        this.cache = new ConcurrentHashMap<ByteArray, ReferenceContainer<ReferenceType>>();
         int urlCount = 0;
         synchronized (cache) {
             for (final ReferenceContainer<ReferenceType> container : new blobFileEntries<ReferenceType>(blobFile, factory, this.payloadrow)) {
@@ -245,7 +244,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
     }
 
-    public synchronized int maxReferences() {
+    public int maxReferences() {
         // iterate to find the max score
         int max = 0;
         for (ReferenceContainer<ReferenceType> container : cache.values()) {
@@ -254,7 +253,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return max;
     }
     
-    public synchronized byte[] maxReferencesHash() {
+    public byte[] maxReferencesHash() {
         // iterate to find the max score
         int max = 0;
         byte[] hash = null;
@@ -267,7 +266,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return hash;
     }
     
-    public synchronized ArrayList<byte[]> maxReferencesHash(int bound) {
+    public ArrayList<byte[]> maxReferencesHash(int bound) {
         // iterate to find the max score
         ArrayList<byte[]> hashes = new ArrayList<byte[]>();
         for (ReferenceContainer<ReferenceType> container : cache.values()) {
@@ -278,7 +277,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return hashes;
     }
     
-    public synchronized ReferenceContainer<ReferenceType> latest() {
+    public ReferenceContainer<ReferenceType> latest() {
         ReferenceContainer<ReferenceType> c = null;
         for (ReferenceContainer<ReferenceType> container : cache.values()) {
             if (c == null) {c = container; continue;}
@@ -287,7 +286,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return c;
     }
     
-    public synchronized ReferenceContainer<ReferenceType> first() {
+    public ReferenceContainer<ReferenceType> first() {
         ReferenceContainer<ReferenceType> c = null;
         for (ReferenceContainer<ReferenceType> container : cache.values()) {
             if (c == null) {c = container; continue;}
@@ -296,7 +295,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return c;
     }
     
-    public synchronized ArrayList<byte[]> overAge(long maxage) {
+    public ArrayList<byte[]> overAge(long maxage) {
         ArrayList<byte[]> hashes = new ArrayList<byte[]>();
         long limit = System.currentTimeMillis() - maxage;
         for (ReferenceContainer<ReferenceType> container : cache.values()) {
@@ -426,42 +425,46 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * @param wordHash
      * @return the indexContainer if the cache contained the container, null othervise
      */
-    public synchronized ReferenceContainer<ReferenceType> delete(final byte[] termHash) {
+    public ReferenceContainer<ReferenceType> delete(final byte[] termHash) {
         // returns the index that had been deleted
         assert this.cache != null;
         return cache.remove(new ByteArray(termHash));
     }
 
-    public synchronized boolean remove(final byte[] termHash, final String urlHash) {
+    public boolean remove(final byte[] termHash, final String urlHash) {
         assert this.cache != null;
         ByteArray tha = new ByteArray(termHash);
-        final ReferenceContainer<ReferenceType> c = cache.get(tha);
-        if ((c != null) && (c.remove(urlHash) != null)) {
-            // removal successful
-            if (c.size() == 0) {
-                delete(termHash);
-            } else {
-                cache.put(tha, c);
-            }
-            return true;
+        synchronized (cache) {
+	        final ReferenceContainer<ReferenceType> c = cache.get(tha);
+	        if ((c != null) && (c.remove(urlHash) != null)) {
+	            // removal successful
+	            if (c.size() == 0) {
+	                delete(termHash);
+	            } else {
+	                cache.put(tha, c);
+	            }
+	            return true;
+	        }
         }
         return false;
     }
     
-    public synchronized int remove(final byte[] termHash, final Set<String> urlHashes) {
+    public int remove(final byte[] termHash, final Set<String> urlHashes) {
         assert this.cache != null;
         if (urlHashes.size() == 0) return 0;
         ByteArray tha = new ByteArray(termHash);
-        final ReferenceContainer<ReferenceType> c = cache.get(tha);
         int count;
-        if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
-            // removal successful
-            if (c.size() == 0) {
-                delete(termHash);
-            } else {
-                cache.put(tha, c);
-            }
-            return count;
+        synchronized (cache) {
+	        final ReferenceContainer<ReferenceType> c = cache.get(tha);
+	        if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
+	            // removal successful
+	            if (c.size() == 0) {
+	                delete(termHash);
+	            } else {
+	                cache.put(tha, c);
+	            }
+	            return count;
+	        }
         }
         return 0;
     }
@@ -473,9 +476,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         
         // put new words into cache
         ByteArray tha = new ByteArray(container.getTermHash());
-        synchronized (this) {
+        int added = 0;
+        synchronized (cache) {
             ReferenceContainer<ReferenceType> entries = cache.get(tha); // null pointer exception? wordhash != null! must be cache==null
-            int added = 0;
             if (entries == null) {
                 entries = container.topLevelClone();
                 added = entries.size();
@@ -493,11 +496,27 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public void add(final byte[] termHash, final ReferenceType newEntry) {
         assert this.cache != null;
         ByteArray tha = new ByteArray(termHash);
-        synchronized (this) {
-            ReferenceContainer<ReferenceType> container = cache.get(tha);
-            if (container == null) container = new ReferenceContainer<ReferenceType>(factory, termHash, this.payloadrow, 1);
-            container.put(newEntry);
-            cache.put(tha, container);
+        
+        // first synchronization: check if the entry is empty, and quickly set the entry
+        ReferenceContainer<ReferenceType> container = null;
+        synchronized (cache) {
+            container = cache.remove(tha);
+            if (container == null) {
+            	container = new ReferenceContainer<ReferenceType>(factory, termHash, this.payloadrow, 1);
+            	container.put(newEntry);
+            	cache.put(tha, container);
+            	return;
+            }
+        }
+        
+        // if the entry must be merged, first release the synchronization to do the merge concurrently
+        container.put(newEntry);
+        
+        // then get a new lock. If the entry was written in the meantime, merge again
+        synchronized (cache) {
+            ReferenceContainer<ReferenceType> containerNew = cache.get(tha);
+            if (container != null) container.putAllRecent(containerNew);
+        	cache.put(tha, container);
         }
     }
 
