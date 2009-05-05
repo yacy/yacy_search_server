@@ -28,7 +28,6 @@ package de.anomic.kelondro.text;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -87,31 +86,6 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      */
     public void initWriteMode() {
         this.cache = new ConcurrentHashMap<ByteArray, ReferenceContainer<ReferenceType>>();
-    }
-    
-    /**
-     * this is the new cache file format initialization
-     * @param heapFile
-     * @throws IOException
-     */
-    public void initWriteModeFromBLOB(final File blobFile) throws IOException {
-        Log.logInfo("indexContainerRAMHeap", "restoring rwi blob dump '" + blobFile.getName() + "'");
-        final long start = System.currentTimeMillis();
-        //this.cache = Collections.synchronizedSortedMap(new TreeMap<byte[], ReferenceContainer<ReferenceType>>(this.termOrder));
-        this.cache = new ConcurrentHashMap<ByteArray, ReferenceContainer<ReferenceType>>();
-        int urlCount = 0;
-        synchronized (cache) {
-            for (final ReferenceContainer<ReferenceType> container : new blobFileEntries<ReferenceType>(blobFile, factory, this.payloadrow)) {
-                // TODO: in this loop a lot of memory may be allocated. A check if the memory gets low is necessary. But what do when the memory is low?
-                if (container == null) break;
-                //System.out.println("***DEBUG indexContainerHeap.initwriteModeFromBLOB*** container.size = " + container.size() + ", container.sorted = " + container.sorted());
-                cache.put(new ByteArray(container.getTermHash()), container);
-                urlCount += container.size();
-            }
-        }
-        // remove idx and gap files if they exist here
-        HeapWriter.deleteAllFingerprints(blobFile);
-        Log.logInfo("indexContainerRAMHeap", "finished rwi blob restore: " + cache.size() + " words, " + urlCount + " word/URL relations in " + (System.currentTimeMillis() - start) + " milliseconds");
     }
     
     public void dump(final File heapFile, int writeBuffer) {
@@ -251,57 +225,6 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             if (container.size() > max) max = container.size();
         }
         return max;
-    }
-    
-    public byte[] maxReferencesHash() {
-        // iterate to find the max score
-        int max = 0;
-        byte[] hash = null;
-        for (ReferenceContainer<ReferenceType> container : cache.values()) {
-            if (container.size() > max) {
-                max = container.size();
-                hash = container.getTermHash();
-            }
-        }
-        return hash;
-    }
-    
-    public ArrayList<byte[]> maxReferencesHash(int bound) {
-        // iterate to find the max score
-        ArrayList<byte[]> hashes = new ArrayList<byte[]>();
-        for (ReferenceContainer<ReferenceType> container : cache.values()) {
-            if (container.size() >= bound) {
-                hashes.add(container.getTermHash());
-            }
-        }
-        return hashes;
-    }
-    
-    public ReferenceContainer<ReferenceType> latest() {
-        ReferenceContainer<ReferenceType> c = null;
-        for (ReferenceContainer<ReferenceType> container : cache.values()) {
-            if (c == null) {c = container; continue;}
-            if (container.lastWrote() > c.lastWrote()) {c = container; continue;}
-        }
-        return c;
-    }
-    
-    public ReferenceContainer<ReferenceType> first() {
-        ReferenceContainer<ReferenceType> c = null;
-        for (ReferenceContainer<ReferenceType> container : cache.values()) {
-            if (c == null) {c = container; continue;}
-            if (container.lastWrote() < c.lastWrote()) {c = container; continue;}
-        }
-        return c;
-    }
-    
-    public ArrayList<byte[]> overAge(long maxage) {
-        ArrayList<byte[]> hashes = new ArrayList<byte[]>();
-        long limit = System.currentTimeMillis() - maxage;
-        for (ReferenceContainer<ReferenceType> container : cache.values()) {
-            if (container.lastWrote() < limit) hashes.add(container.getTermHash());
-        }
-        return hashes;
     }
     
     /**
@@ -497,25 +420,16 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         assert this.cache != null;
         ByteArray tha = new ByteArray(termHash);
         
-        // first synchronization: check if the entry is empty, and quickly set the entry
-        ReferenceContainer<ReferenceType> container = null;
-        synchronized (cache) {
-            container = cache.remove(tha);
-            if (container == null) {
-            	container = new ReferenceContainer<ReferenceType>(factory, termHash, this.payloadrow, 1);
-            	container.put(newEntry);
-            	cache.put(tha, container);
-            	return;
-            }
-        }
-        
-        // if the entry must be merged, first release the synchronization to do the merge concurrently
+        // first access the cache without synchronization
+        ReferenceContainer<ReferenceType> container = cache.remove(tha);
+        if (container == null) container = new ReferenceContainer<ReferenceType>(factory, termHash, this.payloadrow, 1);
         container.put(newEntry);
         
-        // then get a new lock. If the entry was written in the meantime, merge again
+        // synchronization: check if the entry is still empty and set new value
         synchronized (cache) {
-            ReferenceContainer<ReferenceType> containerNew = cache.get(tha);
-            if (container != null) container.putAllRecent(containerNew);
+            ReferenceContainer<ReferenceType> containerNew = cache.put(tha, container);
+            if (containerNew == null) return;
+            container.putAllRecent(containerNew);
         	cache.put(tha, container);
         }
     }
