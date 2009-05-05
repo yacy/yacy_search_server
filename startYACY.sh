@@ -5,6 +5,10 @@ LOGFILE="yacy.log"
 PIDFILE="yacy.pid"
 OS="`uname`"
 
+#get javastart args
+JAVA_ARGS="-server -XX:+UseAdaptiveSizePolicy";
+#JAVA_ARGS="-verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails $JAVA_ARGS";
+
 #check if OS is Sun Solaris or one of the OpenSolaris distributions and use different version of id if necessary
 if [ $OS = "SunOS" ]
 then
@@ -67,6 +71,8 @@ for option in $options;do
 				;;
 			-l|--logging) 
 				LOGGING=1
+                # enable asserts
+                JAVA_ARGS="$JAVA_ARGS -ea"
 				if [ $DEBUG -eq 1 ];then
 					echo "can not combine -l and -d"
 					exit 1;
@@ -74,6 +80,8 @@ for option in $options;do
 				;;
 			-d|--debug)
 				DEBUG=1
+                # enable asserts
+                JAVA_ARGS="$JAVA_ARGS -ea"
 				if [ $LOGGING -eq 1 ];then
 					echo "can not combine -l and -d"
 					exit 1;
@@ -97,10 +105,6 @@ for option in $options;do
 done
 
 #echo $options;exit 0 #DEBUG for getopts
-
-#get javastart args
-JAVA_ARGS="-server -XX:+UseAdaptiveSizePolicy";
-#JAVA_ARGS="-verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails $JAVA_ARGS";
 
 #check if Linux system supports large memory pages or if OS is Solaris which 
 #supports large memory pages since version 9 
