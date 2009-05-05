@@ -107,7 +107,9 @@ public class mediawikiIndex {
         public void run() {
             try {
                 createIndex(this.wikimediaxml);
-            } catch (IOException e) {
+            } catch (final IOException e) {
+            } catch (final Exception e) {
+                e.printStackTrace();
             }
         }
     }

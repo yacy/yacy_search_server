@@ -87,17 +87,21 @@ public class URLAnalysis {
         }
         
         public void run() {
-            yacyURL url;
-            Pattern p = Pattern.compile("~|\\(|\\)|\\+|-|@|:|%|\\.|;|_");
-            while (true) {
-                try {
-                    url = in.take();
-                    if (url == poison) break;
-                    update(url.getHost().replaceAll("-", "\\.").split("\\."));
-                    update(p.matcher(url.getPath()).replaceAll("/").split("/"));
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+            try {
+                yacyURL url;
+                Pattern p = Pattern.compile("~|\\(|\\)|\\+|-|@|:|%|\\.|;|_");
+                while (true) {
+                    try {
+                        url = in.take();
+                        if (url == poison) break;
+                        update(url.getHost().replaceAll("-", "\\.").split("\\."));
+                        update(p.matcher(url.getPath()).replaceAll("/").split("/"));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
         

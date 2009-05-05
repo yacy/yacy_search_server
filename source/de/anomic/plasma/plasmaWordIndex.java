@@ -706,7 +706,9 @@ public final class plasmaWordIndex {
                         }
                     }
                 }
-            } catch (IOException e) {
+            } catch (final IOException e) {
+                e.printStackTrace();
+            } catch (final Exception e) {
                 e.printStackTrace();
             }
             Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread stopped");

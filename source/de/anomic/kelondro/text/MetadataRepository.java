@@ -377,6 +377,9 @@ public final class MetadataRepository implements Iterable<byte[]> {
             } catch (final IOException e) {
                 e.printStackTrace();
                 run = false;
+            } catch (final Exception e) {
+                e.printStackTrace();
+                run = false;
             }
             Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread stopped");
         }
@@ -510,6 +513,9 @@ public final class MetadataRepository implements Iterable<byte[]> {
                 }
                 pw.close();
             } catch (final IOException e) {
+                e.printStackTrace();
+                this.failure = e.getMessage();
+            } catch (final Exception e) {
                 e.printStackTrace();
                 this.failure = e.getMessage();
             }

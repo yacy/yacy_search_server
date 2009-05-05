@@ -533,20 +533,28 @@ final class memprofiler extends Thread {
     }
     
     public void run() {
-        int seconds0 = 0, kilobytes0 = 0;
-        int seconds1 = 0, kilobytes1 = 0;
-        while(run) {
-            memChart.setColor("FF0000");
-            seconds1 = (int) ((System.currentTimeMillis() - start) / 1000);
-            kilobytes1 = (int) (MemoryControl.used() / 1024);
-            memChart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, seconds0, kilobytes0, seconds1, kilobytes1);
-            seconds0 = seconds1;
-            kilobytes0 = kilobytes1;
-            try {Thread.sleep(100);} catch (final InterruptedException e) {}
+        try {
+            int seconds0 = 0, kilobytes0 = 0;
+            int seconds1 = 0, kilobytes1 = 0;
+            while (run) {
+                memChart.setColor("FF0000");
+                seconds1 = (int) ((System.currentTimeMillis() - start) / 1000);
+                kilobytes1 = (int) (MemoryControl.used() / 1024);
+                memChart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, seconds0, kilobytes0, seconds1, kilobytes1);
+                seconds0 = seconds1;
+                kilobytes0 = kilobytes1;
+                try {Thread.sleep(100);} catch (final InterruptedException e) {}
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
         }
         try {
             ImageIO.write(memChart.getImage(), "png", outputFile);
-        } catch (final IOException e) {}
+        } catch (final IOException e) {
+            // do noting
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
     }
     
     public void terminate() {

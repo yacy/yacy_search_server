@@ -41,7 +41,7 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.util.ByteArray;
 
-public class BLOBCompressor extends Thread implements BLOB {
+public class BLOBCompressor implements BLOB {
 
     static byte[] gzipMagic  = {(byte) 'z', (byte) '|'}; // magic for gzip-encoded content
     static byte[] plainMagic = {(byte) 'p', (byte) '|'}; // magic for plain content (no encoding)

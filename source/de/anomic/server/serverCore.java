@@ -620,6 +620,8 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 listen();
             } catch (final IOException e) {
                 System.err.println("ERROR: (internal) " + e);        
+            } catch (final Exception e) {
+                e.printStackTrace();
             } finally {
                 try {
                     if ((this.controlSocket != null) && (! this.controlSocket.isClosed())) {
@@ -925,7 +927,8 @@ public final class serverCore extends serverAbstractBusyThread implements server
             try {
                 Thread.sleep(delay);
             } catch (final InterruptedException e) {
-                // TODO Auto-generated catch block
+                e.printStackTrace();
+            } catch (final Exception e) {
                 e.printStackTrace();
             }
             

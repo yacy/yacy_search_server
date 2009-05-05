@@ -2238,6 +2238,8 @@ class delayedShutdown extends Thread {
             Thread.sleep(delay);
         } catch (final InterruptedException e) {
             sb.getLog().logInfo("interrupted delayed shutdown");
+        } catch (final Exception e) {
+            e.printStackTrace();
         }
         this.sb.terminate();
     }

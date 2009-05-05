@@ -191,20 +191,24 @@ public class ReferenceOrder {
             int p = this.start;
             String dom;
             Integer count;
-            while (p < this.end) {
-                iEntry = new WordReferenceVars(new WordReferenceRow(container.get(p++, false)));
-                this.decodedEntries.add(iEntry);
-                // find min/max
-                if (this.entryMin == null) this.entryMin = iEntry.clone(); else this.entryMin.min(iEntry);
-                if (this.entryMax == null) this.entryMax = iEntry.clone(); else this.entryMax.max(iEntry);
-                // update domcount
-                dom = iEntry.metadataHash().substring(6);
-                count = doms.get(dom);
-                if (count == null) {
-                	doms.put(dom, int1);
-                } else {
-                	doms.put(dom, Integer.valueOf(count.intValue() + 1));
+            try {
+                while (p < this.end) {
+                    iEntry = new WordReferenceVars(new WordReferenceRow(container.get(p++, false)));
+                    this.decodedEntries.add(iEntry);
+                    // find min/max
+                    if (this.entryMin == null) this.entryMin = iEntry.clone(); else this.entryMin.min(iEntry);
+                    if (this.entryMax == null) this.entryMax = iEntry.clone(); else this.entryMax.max(iEntry);
+                    // update domcount
+                    dom = iEntry.metadataHash().substring(6);
+                    count = doms.get(dom);
+                    if (count == null) {
+                    	doms.put(dom, int1);
+                    } else {
+                    	doms.put(dom, Integer.valueOf(count.intValue() + 1));
+                    }
                 }
+            } catch (final Exception e) {
+                e.printStackTrace();
             }
         }
         

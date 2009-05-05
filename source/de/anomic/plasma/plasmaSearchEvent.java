@@ -228,7 +228,11 @@ public final class plasmaSearchEvent {
             
             // sort the local containers and truncate it to a limited count,
             // so following sortings together with the global results will be fast
-            rankedCache.execQuery();
+            try {
+                rankedCache.execQuery();
+            } catch (final Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -508,39 +512,43 @@ public final class plasmaSearchEvent {
             // start fetching urls and snippets
             URLMetadataRow page;
             final int fetchAhead = snippetMode == 0 ? 0 : 10;
-            while (System.currentTimeMillis() < this.timeout) {
-                this.lastLifeSign = System.currentTimeMillis();
-
-                // check if we have enough
-                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (images.size() >= query.neededResults() + fetchAhead)) break;
-                if ((query.contentdom != plasmaSearchQuery.CONTENTDOM_IMAGE) && (result.size() >= query.neededResults() + fetchAhead)) break;
-
-                // get next entry
-                page = rankedCache.bestURL(true);
-                if (page == null) {
-                	if (!anyRemoteSearchAlive()) break; // we cannot expect more results
-                    // if we did not get another entry, sleep some time and try again
-                    try {Thread.sleep(100);} catch (final InterruptedException e1) {}
-                    continue;
+            try {
+                while (System.currentTimeMillis() < this.timeout) {
+                    this.lastLifeSign = System.currentTimeMillis();
+    
+                    // check if we have enough
+                    if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (images.size() >= query.neededResults() + fetchAhead)) break;
+                    if ((query.contentdom != plasmaSearchQuery.CONTENTDOM_IMAGE) && (result.size() >= query.neededResults() + fetchAhead)) break;
+    
+                    // get next entry
+                    page = rankedCache.bestURL(true);
+                    if (page == null) {
+                    	if (!anyRemoteSearchAlive()) break; // we cannot expect more results
+                        // if we did not get another entry, sleep some time and try again
+                        try {Thread.sleep(100);} catch (final InterruptedException e1) {}
+                        continue;
+                    }
+                    if (result.exists(page.hash().hashCode())) continue;
+                    if (failedURLs.get(page.hash()) != null) continue;
+                    
+                    // try secondary search
+                    prepareSecondarySearch(); // will be executed only once
+                    
+                    final ResultEntry resultEntry = obtainResultEntry(page, snippetMode);
+                    if (resultEntry == null) continue; // the entry had some problems, cannot be used
+                    urlRetrievalAllTime += resultEntry.dbRetrievalTime;
+                    snippetComputationAllTime += resultEntry.snippetComputationTime;
+                    //System.out.println("+++DEBUG-resultWorker+++ fetched " + resultEntry.urlstring());
+                    
+                    // place the result to the result vector
+                    if (!result.exists(resultEntry)) {
+                        result.push(resultEntry, Long.valueOf(rankedCache.getOrder().cardinal(resultEntry.word())));
+                        rankedCache.addReferences(resultEntry);
+                    }
+                    //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
                 }
-                if (result.exists(page.hash().hashCode())) continue;
-                if (failedURLs.get(page.hash()) != null) continue;
-                
-                // try secondary search
-                prepareSecondarySearch(); // will be executed only once
-                
-                final ResultEntry resultEntry = obtainResultEntry(page, snippetMode);
-                if (resultEntry == null) continue; // the entry had some problems, cannot be used
-                urlRetrievalAllTime += resultEntry.dbRetrievalTime;
-                snippetComputationAllTime += resultEntry.snippetComputationTime;
-                //System.out.println("+++DEBUG-resultWorker+++ fetched " + resultEntry.urlstring());
-                
-                // place the result to the result vector
-                if (!result.exists(resultEntry)) {
-                    result.push(resultEntry, Long.valueOf(rankedCache.getOrder().cardinal(resultEntry.word())));
-                    rankedCache.addReferences(resultEntry);
-                }
-                //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
+            } catch (final Exception e) {
+                e.printStackTrace();
             }
             Log.logInfo("SEARCH", "resultWorker thread " + id + " terminated");
         }

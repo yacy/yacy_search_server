@@ -73,7 +73,11 @@ public class consoleInterface extends Thread
                     output.add(line);
             }
             dataIsRead.release();
-        } catch(final IOException ix) { log.logWarning("logpoint 6 " +  ix.getMessage());}
+        } catch (final IOException ix) {
+            log.logWarning("logpoint 6 " +  ix.getMessage());
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
     }
     
     /**

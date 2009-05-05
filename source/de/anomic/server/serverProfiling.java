@@ -57,14 +57,18 @@ public class serverProfiling extends Thread {
     }
     
     public void run() {
-    	while (running) {
-    		update("memory", Long.valueOf(MemoryControl.used()), true);
-    		try {
-				Thread.sleep(this.delaytime);
-			} catch (final InterruptedException e) {
-				this.running = false;
-			}
-    	}
+        try {
+        	while (running) {
+        		update("memory", Long.valueOf(MemoryControl.used()), true);
+        		try {
+    				Thread.sleep(this.delaytime);
+    			} catch (final InterruptedException e) {
+    				this.running = false;
+    			}
+        	}
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
     }
     
     public static void update(final String eventName, final Object eventPayload, boolean useProtection) {

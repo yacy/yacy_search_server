@@ -1332,7 +1332,11 @@ public final class httpdProxyHandler {
                 ) {
                     out.write(buffer, 0, len); 
                 }
-            } catch (final IOException e) {}
+            } catch (final IOException e) {
+                // do nothing
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
         
         public void pleaseTerminate() {

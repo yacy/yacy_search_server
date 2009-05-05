@@ -113,20 +113,24 @@ public class yacySearch extends Thread {
     }
 
     public void run() {
-        this.urls = yacyClient.search(
-                    wordIndex.peers().mySeed(),
-                    wordhashes, excludehashes, urlhashes, prefer, filter, language, count, maxDistance, global, partitions,
-                    targetPeer, wordIndex, crawlResults, containerCache, abstractCache,
-                    blacklist, rankingProfile, constraint);
-        if (urls != null) {
-            // urls is an array of url hashes. this is only used for log output
-            final StringBuilder urllist = new StringBuilder(this.urls.length * 13);
-            for (int i = 0; i < this.urls.length; i++) urllist.append(this.urls[i]).append(' ');
-            yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + urls.length + " links for word hash " + wordhashes + ": " + new String(urllist));
-            wordIndex.peers().mySeed().incRI(urls.length);
-            wordIndex.peers().mySeed().incRU(urls.length);
-        } else {
-            yacyCore.log.logInfo("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
+        try {
+            this.urls = yacyClient.search(
+                        wordIndex.peers().mySeed(),
+                        wordhashes, excludehashes, urlhashes, prefer, filter, language, count, maxDistance, global, partitions,
+                        targetPeer, wordIndex, crawlResults, containerCache, abstractCache,
+                        blacklist, rankingProfile, constraint);
+            if (urls != null) {
+                // urls is an array of url hashes. this is only used for log output
+                final StringBuilder urllist = new StringBuilder(this.urls.length * 13);
+                for (int i = 0; i < this.urls.length; i++) urllist.append(this.urls[i]).append(' ');
+                yacyCore.log.logInfo("REMOTE SEARCH - remote peer " + targetPeer.hash + ":" + targetPeer.getName() + " contributed " + urls.length + " links for word hash " + wordhashes + ": " + new String(urllist));
+                wordIndex.peers().mySeed().incRI(urls.length);
+                wordIndex.peers().mySeed().incRU(urls.length);
+            } else {
+                yacyCore.log.logInfo("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
+            }
+        } catch (final Exception e) {
+            e.printStackTrace();
         }
     }
 
