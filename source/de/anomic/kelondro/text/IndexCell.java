@@ -180,13 +180,15 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * @throws IOException 
      */
     public int remove(byte[] termHash, Set<String> urlHashes) throws IOException {
+        int removed = this.ram.remove(termHash, urlHashes);
         int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHashes));
-        return reduced / this.array.rowdef().objectsize;
+        return removed + (reduced / this.array.rowdef().objectsize);
     }
 
     public boolean remove(byte[] termHash, String urlHash) throws IOException {
+        boolean removed = this.ram.remove(termHash, urlHash);
         int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHash));
-        return reduced > 0;
+        return removed || (reduced > 0);
     }
 
     private static class RemoveRewriter<ReferenceType extends Reference> implements ReferenceContainerArray.ContainerRewriter<ReferenceType> {
