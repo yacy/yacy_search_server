@@ -160,14 +160,11 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * @throws IOException 
      */
     public ReferenceContainer<ReferenceType> delete(byte[] termHash) throws IOException {
-        ReferenceContainer<ReferenceType> c0 = this.ram.delete(termHash);
         ReferenceContainer<ReferenceType> c1 = this.array.get(termHash);
-        if (c1 == null) {
-            if (c0 == null) return null;
-            return c0;
-        }
-        this.array.delete(termHash);
+        if (c1 != null) this.array.delete(termHash);
+        ReferenceContainer<ReferenceType> c0 = this.ram.delete(termHash);
         cleanCache();
+        if (c1 == null) return c0;
         if (c0 == null) return c1;
         return c1.merge(c0);
     }
