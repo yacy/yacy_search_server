@@ -82,30 +82,59 @@ public class mediawikiIndex extends Thread {
     private wikiParser wparser;
     private plasmaParser hparser;
     private String urlStub;
-    private File sourcefile;
-    private File targetdir;
+    public File sourcefile;
+    public File targetdir;
     public int count;
+    private long start;
+    private long docsize;
+    private int approxdocs;
+    
+    private static final int docspermbinxmlbz2 = 800;  // documents per megabyte in a xml.bz2 wikimedia dump
     
     public static mediawikiIndex job; // if started from a servlet, this object is used to store the thread
     
     public mediawikiIndex(File sourcefile, File targetdir, String baseURL) throws MalformedURLException {
     	this.sourcefile = sourcefile;
+    	this.docsize = sourcefile.length();
+    	this.approxdocs = (int) (this.docsize * (long) docspermbinxmlbz2 / 1024L / 1024L);
     	this.targetdir = targetdir;
         this.urlStub = baseURL;
         this.wparser = new wikiCode(new URL(baseURL).getHost());
         this.hparser = new plasmaParser();
         this.count = 0;
+        this.start = 0;
         // must be called before usage:
         plasmaParser.initHTMLParsableMimeTypes("text/html");
         plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER, "text/html");
     }
     
+    /**
+     * return the number of articles per second
+     * @return
+     */
+    public int speed() {
+        if (count == 0) return 0;
+        return (int) ((long) count / runningTime());
+    }
+    
+    /**
+     * return the remaining seconds for the completion of all records in milliseconds
+     * @return
+     */
+    public long remainingTime() {
+        return Math.max(0, this.approxdocs - count) / speed();
+    }
+    
+    public long runningTime() {
+        return (System.currentTimeMillis() - start) / 1024;
+    }
     
     public void run() {
+        this.start = System.currentTimeMillis();
         try {
             String targetstub = sourcefile.getName();
             targetstub = targetstub.substring(0, targetstub.length() - 8);
-            InputStream is = new FileInputStream(sourcefile);
+            InputStream is = new BufferedInputStream(new FileInputStream(sourcefile), 1 * 1024 * 1024);
             if (sourcefile.getName().endsWith(".bz2")) {
                 int b = is.read();
                 if (b != 'B') throw new IOException("Invalid bz2 content.");
@@ -113,7 +142,7 @@ public class mediawikiIndex extends Thread {
                 if (b != 'Z') throw new IOException("Invalid bz2 content.");
                 is = new CBZip2InputStream(is);
             }
-            BufferedReader r = new BufferedReader(new java.io.InputStreamReader(is, "UTF-8"), 10 * 1024 * 1024);
+            BufferedReader r = new BufferedReader(new java.io.InputStreamReader(is, "UTF-8"), 4 * 1024 * 1024);
             String t;
             StringBuilder sb = new StringBuilder();
             boolean page = false, text = false;

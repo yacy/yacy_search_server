@@ -548,6 +548,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                     break;
                 }
                 element = dirElements.get(i);
+                if (element == null) continue;
                 //counting double headlines
                 doubles = 0;
                 for (int j = 0; j < i; j++) {

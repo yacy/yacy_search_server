@@ -41,7 +41,13 @@ public class IndexImportWikimedia_p {
             // one import is running, no option to insert anything
             prop.put("import", 1);
             prop.put("import_thread", "running");
+            prop.put("import_dump", mediawikiIndex.job.sourcefile.getName());
             prop.put("import_count", mediawikiIndex.job.count);
+            prop.put("import_speed", mediawikiIndex.job.speed());
+            prop.put("import_runningHours", (mediawikiIndex.job.runningTime() / 60) / 60);
+            prop.put("import_runningMinutes", (mediawikiIndex.job.runningTime() / 60) % 60);
+            prop.put("import_remainingHours", (mediawikiIndex.job.remainingTime() / 60) / 60);
+            prop.put("import_remainingMinutes", (mediawikiIndex.job.remainingTime() / 60) % 60);
         } else {
             prop.put("import", 0);
             if (post == null) {
@@ -62,7 +68,13 @@ public class IndexImportWikimedia_p {
                         mediawikiIndex.job.start();
                         prop.put("import", 1);
                         prop.put("import_thread", "started");
+                        prop.put("import_dump", mediawikiIndex.job.sourcefile.getName());
                         prop.put("import_count", 0);
+                        prop.put("import_speed", 0);
+                        prop.put("import_runningHours", 0);
+                        prop.put("import_runningMinutes", 0);
+                        prop.put("import_remainingHours", 0);
+                        prop.put("import_remainingMinutes", 0);
                     } catch (MalformedURLException e) {
                         e.printStackTrace();
                         prop.put("import", 0);

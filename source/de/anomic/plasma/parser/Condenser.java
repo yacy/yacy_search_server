@@ -600,8 +600,12 @@ public final class Condenser {
     }
     
     static StringBuilder trim(StringBuilder sb) {
-        while ((sb.length() > 0) && (sb.charAt(0) <= ' ')) sb = sb.deleteCharAt(0);
-        while ((sb.length() > 0) && (sb.charAt(sb.length() - 1) <= ' ')) sb = sb.deleteCharAt(sb.length() - 1);
+        int i = 0;
+        while (i < sb.length() && sb.charAt(i) <= ' ') i++;
+        if (i > 0) sb.delete(0, i);
+        i = sb.length() - 1;
+        while (i >= 0 && i < sb.length() && sb.charAt(i) <= ' ') i--;
+        if (i > 0) sb.delete(i + 1, sb.length());
         return sb;
     }
     
