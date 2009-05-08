@@ -96,7 +96,7 @@ public class IndexCleaner_p {
             prop.putNum("rwidb_RWIcountstart", indexCleanerThread.rwiCountAtStart);
             prop.putNum("rwidb_RWIcountnow", sb.webIndex.index().size());
             prop.put("rwidb_wordHashNow", indexCleanerThread.wordHashNow);
-            prop.put("rwidb_lastWordHash", indexCleanerThread.lastWordHash);
+            prop.put("rwidb_lastWordHash", (indexCleanerThread.lastWordHash == null) ? "null" : new String(indexCleanerThread.lastWordHash));
             prop.putNum("rwidb_lastDeletionCounter", indexCleanerThread.lastDeletionCounter);
 
         }
