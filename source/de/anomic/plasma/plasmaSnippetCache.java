@@ -328,52 +328,56 @@ public class plasmaSnippetCache {
         InputStream resContent = null;
         httpResponseHeader responseHeader = null;
         try {
-            // trying to load the resource from the cache
-            resContent = plasmaHTCache.getResourceContentStream(url);
-            responseHeader = plasmaHTCache.loadResponseHeader(url);
-            if (resContent != null && ((resContentLength = plasmaHTCache.getResourceContentLength(url)) > maxDocLen) && (!fetchOnline)) {
-                // content may be too large to be parsed here. To be fast, we omit calculation of snippet here
-                return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "resource available, but too large: " + resContentLength + " bytes");
-            } else if (containsAllHashes(comp.dc_title(), queryhashes)) {
+            // first try to get the snippet from metadata
+            String loc;
+            if (containsAllHashes(loc = comp.dc_title(), queryhashes)) {
                 // try to create the snippet from information given in the url itself
-                return new TextSnippet(url, (comp.dc_subject().length() > 0) ? comp.dc_creator() : comp.dc_subject(), SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
-            } else if (containsAllHashes(comp.dc_creator(), queryhashes)) {
+                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
+            } else if (containsAllHashes(loc = comp.dc_creator(), queryhashes)) {
                 // try to create the snippet from information given in the creator metadata
-                return new TextSnippet(url, comp.dc_creator(), SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
-            } else if (containsAllHashes(comp.dc_subject(), queryhashes)) {
+                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
+            } else if (containsAllHashes(loc = comp.dc_subject(), queryhashes)) {
                 // try to create the snippet from information given in the subject metadata
-                return new TextSnippet(url, (comp.dc_creator().length() > 0) ? comp.dc_creator() : comp.dc_subject(), SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
-            } else if (containsAllHashes(comp.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
+                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
+            } else if (containsAllHashes(loc = comp.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
                 // try to create the snippet from information given in the subject metadata
-                return new TextSnippet(url, (comp.dc_creator().length() > 0) ? comp.dc_creator() : comp.dc_subject(), SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
-            } else if (fetchOnline) {
-                // if not found try to download it
-                
-                // download resource using the crawler and keep resource in memory if possible
-                final Document entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, true, reindexing);
-                
-                // getting resource metadata (e.g. the http headers for http resources)
-                if (entry != null) {
-                    // place entry on crawl queue
-                    sb.htEntryStoreProcess(entry);
-                    
-                    // read resource body (if it is there)
-                    final byte []resourceArray = entry.cacheArray();
-                    if (resourceArray != null) {
-                        resContent = new ByteArrayInputStream(resourceArray);
-                        resContentLength = resourceArray.length;
-                    } else {
-                        resContent = plasmaHTCache.getResourceContentStream(url); 
-                        resContentLength = plasmaHTCache.getResourceContentLength(url);
-                    }
-                }
-                
-                // if it is still not available, report an error
-                if (resContent == null) return new TextSnippet(url, null, ERROR_RESOURCE_LOADING, queryhashes, "error loading resource, plasmaHTCache.Entry cache is NULL");                
-                
-                source = SOURCE_WEB;
+                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
             } else {
-                return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "no resource available");
+                // trying to load the resource from the cache
+                resContent = plasmaHTCache.getResourceContentStream(url);
+                responseHeader = plasmaHTCache.loadResponseHeader(url);
+                if (resContent != null && ((resContentLength = plasmaHTCache.getResourceContentLength(url)) > maxDocLen) && (!fetchOnline)) {
+                    // content may be too large to be parsed here. To be fast, we omit calculation of snippet here
+                    return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "resource available, but too large: " + resContentLength + " bytes");
+                } else if (fetchOnline) {
+                    // if not found try to download it
+                    
+                    // download resource using the crawler and keep resource in memory if possible
+                    final Document entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, timeout, true, true, reindexing);
+                    
+                    // getting resource metadata (e.g. the http headers for http resources)
+                    if (entry != null) {
+                        // place entry on crawl queue
+                        sb.htEntryStoreProcess(entry);
+                        
+                        // read resource body (if it is there)
+                        final byte []resourceArray = entry.cacheArray();
+                        if (resourceArray != null) {
+                            resContent = new ByteArrayInputStream(resourceArray);
+                            resContentLength = resourceArray.length;
+                        } else {
+                            resContent = plasmaHTCache.getResourceContentStream(url); 
+                            resContentLength = plasmaHTCache.getResourceContentLength(url);
+                        }
+                    }
+                    
+                    // if it is still not available, report an error
+                    if (resContent == null) return new TextSnippet(url, null, ERROR_RESOURCE_LOADING, queryhashes, "error loading resource, plasmaHTCache.Entry cache is NULL");                
+                    
+                    source = SOURCE_WEB;
+                } else {
+                    return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "no resource available");
+                }
             }
         } catch (final Exception e) {
             //e.printStackTrace();
