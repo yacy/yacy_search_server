@@ -170,7 +170,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
                 
                 // check termination
                 if (this.terminate) {
-                    Log.logInfo("IODispatcher", "catched termination signal");
+                    Log.logInfo("IODispatcher", "caught termination signal");
                     break;
                 }
 

@@ -849,7 +849,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
                     // possible beginning of CRLF, check following byte
                     b = pbis.read();
                     if (b == LF) {
-                        // line end catched: break the loop
+                        // line end caught: break the loop
                         break;
                     } else if (b >= 0) {
                         // no line end: push back the byte, ignore the CR

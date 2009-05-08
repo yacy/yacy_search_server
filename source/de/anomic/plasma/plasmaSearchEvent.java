@@ -704,7 +704,7 @@ public final class plasmaSearchEvent {
         
         /*        
         // catch up index abstracts and join them; then call peers again to submit their urls
-        System.out.println("DEBUG-INDEXABSTRACT: " + rcAbstracts.size() + " word references catched, " + query.queryHashes.size() + " needed");
+        System.out.println("DEBUG-INDEXABSTRACT: " + rcAbstracts.size() + " word references caught, " + query.queryHashes.size() + " needed");
 
         Iterator i = rcAbstracts.entrySet().iterator();
         Map.Entry entry;
