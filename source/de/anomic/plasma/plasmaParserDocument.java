@@ -55,7 +55,7 @@ public class plasmaParserDocument {
     private final String mimeType;              // mimeType as taken from http header
     private final String charset;               // the charset of the document
     private final List<String> keywords;        // most resources provide a keyword field
-    private final StringBuilder title;          // a document title, taken from title or h1 tag; shall appear as headline of search result
+    private       StringBuilder title;          // a document title, taken from title or h1 tag; shall appear as headline of search result
     private final StringBuilder creator;        // author or copyright
     private final List<String>  sections;       // if present: more titles/headlines appearing in the document
     private final StringBuilder description;    // an abstract, if present: short content description
@@ -173,6 +173,10 @@ dc_rights
         return title.toString();
     }
 
+    public void setTitle(String title) {
+        this.title = new StringBuilder(title);
+    }
+    
     public String dc_creator() {
         if (creator == null)
             return "";

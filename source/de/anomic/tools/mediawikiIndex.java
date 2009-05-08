@@ -59,6 +59,7 @@ import java.util.concurrent.TimeoutException;
 import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
 import de.anomic.kelondro.util.ByteBuffer;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.ParserException;
@@ -69,7 +70,7 @@ import de.anomic.yacy.yacyURL;
  * as referenced with xmlns="http://www.mediawiki.org/xml/export-0.3/"
  */
 
-public class mediawikiIndex {
+public class mediawikiIndex extends Thread {
 
     private static final String textstart = "<text";
     private static final String textend = "</text>";
@@ -81,14 +82,149 @@ public class mediawikiIndex {
     private wikiParser wparser;
     private plasmaParser hparser;
     private String urlStub;
+    private File sourcefile;
+    private File targetdir;
+    public int count;
     
-    public mediawikiIndex(String baseURL) throws MalformedURLException {
-    	urlStub = baseURL;
-        wparser = new wikiCode(new URL(baseURL).getHost());
-        hparser = new plasmaParser();
+    public static mediawikiIndex job; // if started from a servlet, this object is used to store the thread
+    
+    public mediawikiIndex(File sourcefile, File targetdir, String baseURL) throws MalformedURLException {
+    	this.sourcefile = sourcefile;
+    	this.targetdir = targetdir;
+        this.urlStub = baseURL;
+        this.wparser = new wikiCode(new URL(baseURL).getHost());
+        this.hparser = new plasmaParser();
+        this.count = 0;
         // must be called before usage:
         plasmaParser.initHTMLParsableMimeTypes("text/html");
         plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER, "text/html");
+    }
+    
+    
+    public void run() {
+        try {
+            String targetstub = sourcefile.getName();
+            targetstub = targetstub.substring(0, targetstub.length() - 8);
+            InputStream is = new FileInputStream(sourcefile);
+            if (sourcefile.getName().endsWith(".bz2")) {
+                int b = is.read();
+                if (b != 'B') throw new IOException("Invalid bz2 content.");
+                b = is.read();
+                if (b != 'Z') throw new IOException("Invalid bz2 content.");
+                is = new CBZip2InputStream(is);
+            }
+            BufferedReader r = new BufferedReader(new java.io.InputStreamReader(is, "UTF-8"), 10 * 1024 * 1024);
+            String t;
+            StringBuilder sb = new StringBuilder();
+            boolean page = false, text = false;
+            String title = null;
+            plasmaParser.initHTMLParsableMimeTypes("text/html");
+            plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER, "text/html");
+            wikiparserrecord poison = newRecord();
+            int threads = Math.max(2, Runtime.getRuntime().availableProcessors() - 1);
+            BlockingQueue<wikiparserrecord> in = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
+            BlockingQueue<wikiparserrecord> out = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
+            ExecutorService service = Executors.newFixedThreadPool(threads + 1);
+            convertConsumer[] consumers = new convertConsumer[threads];
+            Future<?>[] consumerResults = new Future[threads];
+            for (int i = 0; i < threads; i++) {
+                consumers[i] = new convertConsumer(in, out, poison);
+                consumerResults[i] = service.submit(consumers[i]);
+            }
+            convertWriter   writer = new convertWriter(out, poison, targetdir, targetstub);
+            Future<Integer> writerResult = service.submit(writer);
+            
+            wikiparserrecord record;
+            int p;
+            while ((t = r.readLine()) != null) {
+                if (t.indexOf(pagestart) >= 0) {
+                    page = true;
+                    continue;
+                }
+                if ((p = t.indexOf(textstart)) >= 0) {
+                    text = page;
+                    int q = t.indexOf('>', p + textstart.length());
+                    if (q > 0) {
+                        int u = t.indexOf(textend, q + 1);
+                        if (u > q) {
+                            sb.append(t.substring(q + 1, u));
+                            Log.logInfo("WIKITRANSLATION", "[INJECT] Title: " + title);
+                            if (sb.length() == 0) {
+                                Log.logInfo("WIKITRANSLATION", "ERROR: " + title + " has empty content");
+                                continue;
+                            }
+                            record = newRecord(title, sb);
+                            try {
+                                in.put(record);
+                                this.count++;
+                            } catch (InterruptedException e1) {
+                                e1.printStackTrace();
+                            }
+                            sb = new StringBuilder(200);
+                            continue;
+                        } else {
+                            sb.append(t.substring(q + 1));
+                        }
+                    }
+                    continue;
+                }
+                if (t.indexOf(textend) >= 0) {
+                    text = false;
+                    Log.logInfo("WIKITRANSLATION", "[INJECT] Title: " + title);
+                    if (sb.length() == 0) {
+                        Log.logInfo("WIKITRANSLATION", "ERROR: " + title + " has empty content");
+                        continue;
+                    }
+                    record = newRecord(title, sb);
+                    try {
+                        in.put(record);
+                        this.count++;
+                    } catch (InterruptedException e1) {
+                        e1.printStackTrace();
+                    }
+                    sb = new StringBuilder(200);
+                    continue;
+                }
+                if (t.indexOf(pageend) >= 0) {
+                    page = false;
+                    continue;
+                }
+                if ((p = t.indexOf("<title>")) >= 0) {
+                    title = t.substring(p + 7);
+                    int q = title.indexOf("</title>");
+                    if (q >= 0) title = title.substring(0, q);
+                    continue;
+                }
+                if (text) {
+                    sb.append(t);
+                    sb.append('\n');
+                }
+            }
+            r.close();
+            
+            try {
+                for (int i = 0; i < threads; i++) {
+                    in.put(poison);
+                }
+                for (int i = 0; i < threads; i++) {
+                    consumerResults[i].get(10000, TimeUnit.MILLISECONDS);
+                }
+                out.put(poison);
+                writerResult.get(10000, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            } catch (ExecutionException e) {
+                e.printStackTrace();
+            } catch (TimeoutException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     
     public static void checkIndex(File wikimediaxml) {
@@ -188,13 +324,13 @@ public class mediawikiIndex {
                 while(true) {
                     r = entries.take();
                     if (r == poison) {
-                        System.out.println("producer / got poison");
+                        Log.logInfo("WIKITRANSLATION", "producer / got poison");
                         break;
                     }
                     out.println("  <page start=\"" + r.start + "\" length=\"" + (r.end - r.start) + "\">");
                     out.println("    <title>" + r.title + "</title>");
                     out.println("  </page>");
-                    System.out.println("producer / record start: " + r.start + ", title : " + r.title);
+                    Log.logInfo("WIKITRANSLATION", "producer / record start: " + r.start + ", title : " + r.title);
                     count++;
                 }
             } catch (InterruptedException e) {
@@ -236,13 +372,13 @@ public class mediawikiIndex {
                 while(true) {
                     c = entries.take();
                     if (c == poison) {
-                        System.out.println("consumer / got poison");
+                        Log.logInfo("WIKITRANSLATION", "consumer / got poison");
                         break;
                     }
                     try {
                         r = new wikisourcerecord(c.b, c.start, c.end);
                         producer.consume(r);
-                        System.out.println("consumer / record start: " + r.start + ", title : " + r.title);
+                        Log.logInfo("WIKITRANSLATION", "consumer / record start: " + r.start + ", title : " + r.title);
                         count++;
                     } catch (RuntimeException e) {}
                 }
@@ -325,6 +461,8 @@ public class mediawikiIndex {
             try {
 				url = new yacyURL(urlStub + title, null);
 				document = hparser.parseSource(url, "text/html", "utf-8", html.getBytes("UTF-8"));
+				// the wiki parser is not able to find the proper title in the source text, so it must be set here
+				document.setTitle(title);
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 			} catch (MalformedURLException e1) {
@@ -414,7 +552,7 @@ public class mediawikiIndex {
             in.resetBuffer();
             if (s.indexOf(m) >= 0) {
                 // we found the record
-                //System.out.println("s = " + s);
+                //Log.logInfo("WIKITRANSLATION", "s = " + s);
                 int p = s.indexOf("start=\"");
                 if (p < 0) return null;
                 p += 7;
@@ -427,7 +565,7 @@ public class mediawikiIndex {
                 q = s.indexOf('"', p + 1);
                 if (q < 0) return null;
                 int length = Integer.parseInt(s.substring(p, q));
-                //System.out.println("start = " + start + ", length = " + length);
+                //Log.logInfo("WIKITRANSLATION", "start = " + start + ", length = " + length);
                 return new wikisourcerecord(title, start, start + length);
             }
         }
@@ -451,7 +589,7 @@ public class mediawikiIndex {
                 while(true) {
                     record = in.take();
                     if (record == poison) {
-                        System.out.println("convertConsumer / got poison");
+                        Log.logInfo("WIKITRANSLATION", "convertConsumer / got poison");
                         break;
                     }
                     try {
@@ -470,7 +608,7 @@ public class mediawikiIndex {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            System.out.println("*** convertConsumer has terminated");
+            Log.logInfo("WIKITRANSLATION", "*** convertConsumer has terminated");
             return Integer.valueOf(0);
         }
         
@@ -507,7 +645,7 @@ public class mediawikiIndex {
                 while(true) {
                     record = in.take();
                     if (record == poison) {
-                        System.out.println("convertConsumer / got poison");
+                        Log.logInfo("WIKITRANSLATION", "convertConsumer / got poison");
                         break;
                     }
                     
@@ -517,7 +655,7 @@ public class mediawikiIndex {
                         this.osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(targetdir, outputfilename))), "UTF-8");
                         osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<surrogates xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n");
                     }
-                    System.out.println("[CONSUME] Title: " + record.title);
+                    Log.logInfo("WIKITRANSLATION", "[CONSUME] Title: " + record.title);
                     record.document.writeXML(osw, new Date());
                     rc++;
                     if (rc >= 10000) {
@@ -552,114 +690,19 @@ public class mediawikiIndex {
 					e.printStackTrace();
 				}
             }
-            System.out.println("*** convertWriter has terminated");
+            Log.logInfo("WIKITRANSLATION", "*** convertWriter has terminated");
             return Integer.valueOf(0);
-        }
-        
-    }
-    
-    public static void convert(File sourcefile, File targetdir, String urlStub) throws IOException {
-        String targetstub = sourcefile.getName();
-        targetstub = targetstub.substring(0, targetstub.length() - 8);
-        InputStream is = new FileInputStream(sourcefile);
-        if (sourcefile.getName().endsWith(".bz2")) {
-            int b = is.read();
-            if (b != 'B') throw new IOException("Invalid bz2 content.");
-            b = is.read();
-            if (b != 'Z') throw new IOException("Invalid bz2 content.");
-            is = new CBZip2InputStream(is);
-        }
-        BufferedReader r = new BufferedReader(new java.io.InputStreamReader(is, "UTF-8"), 10 * 1024 * 1024);
-        String t;
-        StringBuilder sb = new StringBuilder();
-        boolean page = false, text = false;
-        String title = null;
-        plasmaParser.initHTMLParsableMimeTypes("text/html");
-        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER, "text/html");
-        mediawikiIndex mi = new mediawikiIndex(urlStub);
-        wikiparserrecord poison = mi.newRecord();
-        int threads = Math.max(2, Runtime.getRuntime().availableProcessors() - 1);
-        BlockingQueue<wikiparserrecord> in = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
-        BlockingQueue<wikiparserrecord> out = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
-        ExecutorService service = Executors.newFixedThreadPool(threads + 1);
-        convertConsumer[] consumers = new convertConsumer[threads];
-        Future<?>[] consumerResults = new Future[threads];
-        for (int i = 0; i < threads; i++) {
-        	consumers[i] = new convertConsumer(in, out, poison);
-            consumerResults[i] = service.submit(consumers[i]);
-        }
-        convertWriter   writer = new convertWriter(out, poison, targetdir, targetstub);
-        Future<Integer> writerResult = service.submit(writer);
-        
-        wikiparserrecord record;
-        while ((t = r.readLine()) != null) {
-            if (t.indexOf(pagestart) >= 0) {
-                page = true;
-                continue;
-            }
-            if (t.indexOf(textstart) >= 0) {
-                text = page;
-                continue;
-            }
-            if (t.indexOf(textend) >= 0) {
-                text = false;
-                System.out.println("[INJECT] Title: " + title);
-                if (sb.length() == 0) {
-                	System.out.println("ERROR: " + title + " has empty content");
-                	continue;
-                }
-                record = mi.newRecord(title, sb);
-                try {
-                    in.put(record);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
-                }
-                sb.setLength(0);
-                continue;
-            }
-            if (t.indexOf(pageend) >= 0) {
-                page = false;
-                continue;
-            }
-            if (t.indexOf("<title>") >= 0) {
-                title = t.substring(t.indexOf("<title>") + 7);
-                int p = title.indexOf("</title>");
-                if (p >= 0) title = title.substring(0, p);
-                continue;
-            }
-            if (text) {
-                sb.append(t);
-                sb.append('\n');
-            }
-        }
-        r.close();
-        
-        try {
-        	for (int i = 0; i < threads; i++) {
-        		in.put(poison);
-            }
-        	for (int i = 0; i < threads; i++) {
-        		consumerResults[i].get(10000, TimeUnit.MILLISECONDS);
-            }
-            out.put(poison);
-            writerResult.get(10000, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e1) {
-            e1.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            e.printStackTrace();
         }
         
     }
     
     public static void main(String[] s) {
         if (s.length == 0) {
-            System.out.println("usage:");
-            System.out.println(" -index <wikipedia-dump>");
-            System.out.println(" -read  <start> <len> <idx-file>");
-            System.out.println(" -find  <title> <wikipedia-dump>");
-            System.out.println(" -convert <wikipedia-dump-xml.bz2> <convert-target-dir> <url-stub>");
+            Log.logInfo("WIKITRANSLATION", "usage:");
+            Log.logInfo("WIKITRANSLATION", " -index <wikipedia-dump>");
+            Log.logInfo("WIKITRANSLATION", " -read  <start> <len> <idx-file>");
+            Log.logInfo("WIKITRANSLATION", " -find  <title> <wikipedia-dump>");
+            Log.logInfo("WIKITRANSLATION", " -convert <wikipedia-dump-xml.bz2> <convert-target-dir> <url-stub>");
             System.exit(0);
         }
 
@@ -672,7 +715,11 @@ public class mediawikiIndex {
             String urlStub = s[3]; // i.e. http://de.wikipedia.org/wiki/
             //String language = urlStub.substring(7,9);
             try {
-                convert(sourcefile, targetdir, urlStub);
+                mediawikiIndex mi = new mediawikiIndex(sourcefile, targetdir, urlStub);
+                mi.start();
+                mi.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -700,7 +747,7 @@ public class mediawikiIndex {
             try {
                 wikisourcerecord w = find(s[1], new File(s[2] + ".idx.xml"));
                 if (w == null) {
-                    System.out.println("not found");
+                    Log.logInfo("WIKITRANSLATION", "not found");
                 } else {
                     System.out.println(new String(read(new File(s[2]), w.start, (int) (w.end - w.start)), "UTF-8"));
                 }
@@ -709,6 +756,7 @@ public class mediawikiIndex {
             }
             
         }
+        System.exit(0);
     }
     
 }

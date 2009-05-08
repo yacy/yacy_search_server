@@ -168,7 +168,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         if (c0 == null) return c1;
         return c1.merge(c0);
     }
-
+    
     /**
      * remove url references from a selected word hash. this deletes also in the BLOB
      * files, which means that there exists new gap entries after the deletion

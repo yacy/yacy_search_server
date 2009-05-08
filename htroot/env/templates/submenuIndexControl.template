@@ -6,5 +6,6 @@
     <li><a href="/IndexImport_p.html" class="MenuItemLink lock">Queue Import</a></li>
     <li><a href="/IndexTransfer_p.html" class="MenuItemLink lock">Index Transfer</a></li>
     <li><a href="/IndexCleaner_p.html" class="MenuItemLink lock">Index Cleaner</a></li>
+    <li><a href="/IndexImportWikimedia_p.html" class="MenuItemLink lock">Wikimedia Dump Import</a></li>
   </ul>
 </div>
