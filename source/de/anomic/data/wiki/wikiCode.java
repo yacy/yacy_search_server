@@ -2,11 +2,11 @@
 // -------------------------------------
 // part of YACY
 //
-// (C) 2005, 2006 by Alexander Schier 
-//                   Marc Nause, Franz Brausze
+// (C) 2005, 2006 by Alexander Schier, Marc Nause, Franz Brausze
 //
-//
-// last change: $LastChangedDate: $ by $LastChangedBy: $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,8 +22,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-// Contains contributions from Alexander Schier [AS]
-// Franz Brausze [FB] and Marc Nause [MN]
 package de.anomic.data.wiki;
 
 import java.io.BufferedReader;
@@ -31,21 +29,31 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.server.serverCore;
 
 /** This class provides methods to handle texts that have been posted in the yacyWiki or other
  * parts of YaCy that use this class, like the blog or the profile.
+ *
+ * @author Alexander Schier [AS], Franz Brausze [FB], Marc Nause [MN]
  */
 public class wikiCode extends abstractWikiParser implements wikiParser {
 
     /* Table properties */
     private static final String[] tps = {"rowspan", "colspan", "vspace", "hspace", "cellspacing", "cellpadding", "border"};
-    private static final HashMap<String, String[]> ps = new HashMap<String, String[]>();
+    private static final Map<String, String[]> ps = new HashMap<String, String[]>();
 
+    /* possible tags for headlines */
+    private static final String[] headlineTags = new String[]{"====", "===", "=="};
 
     static {
+        /* Arrays must be sorted since Array.searchBinary() is used later. For more info see:
+         * http://java.sun.com/javase/6/docs/api/java/util/Arrays.html#binarySearch(T[], T, java.util.Comparator)
+         */
+        Arrays.sort(headlineTags);
         Arrays.sort(tps);
         String[] array;
         Arrays.sort(array = new String[]{"void", "above", "below", "hsides", "lhs", "rhs", "vsides", "box", "border"});
@@ -57,6 +65,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         Arrays.sort(array = new String[]{"left", "right", "center"});
         ps.put("align", array);
     }
+
     private String numListLevel = "";
     private String ListLevel = "";
     private String defListLevel = "";
@@ -71,7 +80,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private boolean replacedHTML = false;       //indicates if method replaceHTML has been used with line already
     private boolean table = false;              //needed for tables, because they reach over several lines
     private int preindented = 0;                //needed for indented <pre>s
-    private final ArrayList<String> dirElements = new ArrayList<String>();    //list of headlines used to create diectory of page
+    private final List<String> dirElements = new ArrayList<String>();    //list of headlines used to create diectory of page
 
     /** Constructor of the class wikiCode */
     public wikiCode(String address) {
@@ -89,12 +98,13 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         return out.insert(0, directory()).toString();
     }
 
-    /** This method processes tables in the wiki code.
-     * @param a string that might contain parts of a table
-     * @return a string with wiki code of parts of table replaced by HTML code for table
+    /**
+     * Processes tables in the wiki code.
+     * @param input String which might or might not contain parts of a table.
+     * @return String with wiki code of parts of table replaced by HTML code for table.
      */
     //[FB], changes by [MN]
-    private String processTable(String result) {
+    private String processTable(final String input) {
         //some variables that make it easier to change codes for the table
         String line = "";
         final String tableStart = "&#123;&#124;";                 // {|
@@ -107,35 +117,33 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         final int lenTableEnd = tableEnd.length();
         final int lenAttribDivider = attribDivider.length();
 
-        if ((result.startsWith(tableStart)) && (!table)) {
+        if ((input.startsWith(tableStart)) && (!table)) {
             table = true;
             newrowstart = true;
             line = "<table";
-            if (result.trim().length() > lenTableStart) {
-                line += parseTableProperties(result.substring(lenTableStart).trim()).toString();
+            if (input.trim().length() > lenTableStart) {
+                line += parseTableProperties(input.substring(lenTableStart).trim()).toString();
             }
             line += ">";
-            result = line;
-        } else if (result.startsWith(newLine) && (table)) {          // new row
+        } else if (input.startsWith(newLine) && (table)) {          // new row
             if (!newrowstart) {
                 line += "\t</tr>\n";
             } else {
                 newrowstart = false;
             }
             line = line + "\t<tr>";
-            result = line;
-        } else if ((result.startsWith(cellDivider)) && (table)) {
+        } else if ((input.startsWith(cellDivider)) && (table)) {
             line += "\t\t<td";
-            final int cellEnd = (result.indexOf(cellDivider, lenCellDivider) > 0) ? (result.indexOf(cellDivider, lenCellDivider)) : (result.length());
-            int propEnd = result.indexOf(attribDivider, lenCellDivider);
-            final int occImage = result.indexOf("[[Image:", lenCellDivider);
-            final int occEscape = result.indexOf("[=", lenCellDivider);
+            final int cellEnd = (input.indexOf(cellDivider, lenCellDivider) > 0) ? (input.indexOf(cellDivider, lenCellDivider)) : (input.length());
+            int propEnd = input.indexOf(attribDivider, lenCellDivider);
+            final int occImage = input.indexOf("[[Image:", lenCellDivider);
+            final int occEscape = input.indexOf("[=", lenCellDivider);
             //If resultOf("[[Image:") is less than propEnd, that means that there is no
             //property for this cell, only an image. Without this, YaCy could get confused
             //by a | in [[Image:picture.png|alt-text]] or [[Image:picture.png|alt-text]]
             //Same for [= (part of [= =])
             if ((propEnd > lenCellDivider) && ((occImage > propEnd) || (occImage < 0)) && ((occEscape > propEnd) || (occEscape < 0))) {
-                propEnd = result.indexOf(attribDivider, lenCellDivider) + lenAttribDivider;
+                propEnd = input.indexOf(attribDivider, lenCellDivider) + lenAttribDivider;
             } else {
                 propEnd = cellEnd;
             }
@@ -143,7 +151,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             if (propEnd == cellEnd) {
                 propEnd = lenCellDivider;
             } else {
-                line += parseTableProperties(result.substring(lenCellDivider, propEnd - lenAttribDivider).trim()).toString();
+                line += parseTableProperties(input.substring(lenCellDivider, propEnd - lenAttribDivider).trim()).toString();
             }
             // quick&dirty fix [MN]
             if (propEnd > cellEnd) {
@@ -151,19 +159,19 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             }
             table = false;
             cellprocessing = true;
-            line += ">" + processTable(result.substring(propEnd, cellEnd).trim()) + "</td>";
+            line += ">" + processTable(input.substring(propEnd, cellEnd).trim()) + "</td>";
             table = true;
             cellprocessing = false;
-            if (cellEnd < result.length()) {
-                line += "\n" + processTable(result.substring(cellEnd));
+            if (cellEnd < input.length()) {
+                line += "\n" + processTable(input.substring(cellEnd));
             }
-            result = line;
-        } else if (result.startsWith(tableEnd) && (table)) {          // Table end
+        } else if (input.startsWith(tableEnd) && (table)) {          // Table end
             table = false;
-            line += "\t</tr>\n</table>" + result.substring(lenTableEnd);
-            result = line;
+            line += "\t</tr>\n</table>" + input.substring(lenTableEnd);
+        } else {
+            line = input;
         }
-        return result;
+        return line;
     }
 
     // contributed by [MN], changes by [FB]
@@ -174,7 +182,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
      * @param properties A string that may contain several table properties and/or junk.
      * @return A string that only contains table properties.
      */
-    private static StringBuilder parseTableProperties(final String properties) {
+    private StringBuilder parseTableProperties(final String properties) {
         final String[] values = properties.replaceAll("&quot;", "").split("[= ]");     //splitting the string at = and blanks
         final StringBuilder sb = new StringBuilder(properties.length());
         String key, value;
@@ -198,7 +206,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         return sb;
     }
 
-    private static StringBuilder addPair(final String key, final String value, final StringBuilder sb) {
+    private StringBuilder addPair(final String key, final String value, final StringBuilder sb) {
         return sb.append(" ").append(key).append("=\"").append(value).append("\"");
     }
 
@@ -468,7 +476,6 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     private String preformattedTag(String result) {
         int p0 = 0;
         int p1 = 0;
-        //implementation very similar to escape code (see above)
         //both <pre> and </pre> in the same line
         if (((p0 = result.indexOf("&lt;pre&gt;")) >= 0) && ((p1 = result.indexOf("&lt;/pre&gt;")) > 0) && (!(escaped))) {
             if (p0 < p1) {
@@ -532,8 +539,8 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
      * @return directory of the wiki
      */
     //method contributed by [MN]
-    private String directory() {
-        String directory = "";
+    private StringBuilder directory() {
+        StringBuilder directory = new StringBuilder();
         String element;
         int s = 0;
         int level = 1;
@@ -543,6 +550,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
         int doubles = 0;
         String anchorext = "";
         if ((s = dirElements.size()) > 2) {
+            directory.append("<table><tr><td><div class=\"WikiTOCBox\">\n");
             for (int i = 0; i < s; i++) {
                 if (i >= dirElements.size()) {
                     break;
@@ -578,7 +586,12 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                     level3++;
                     final String temp = element.substring(1);
                     element = level1 + "." + level2 + "." + level3 + " " + temp;
-                    directory = directory + "&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#" + temp.replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", "") + anchorext + "\" class=\"WikiTOC\">" + element + "</a><br />\n";
+                    directory.append("&nbsp;&nbsp;&nbsp;&nbsp;<a href=\"#");
+                    directory.append(temp.replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", ""));
+                    directory.append(anchorext);
+                    directory.append("\" class=\"WikiTOC\">");
+                    directory.append(element);
+                    directory.append("</a><br />\n");
                 } else if (element.startsWith("2")) {
                     if (level == 1) {
                         level2 = 0;
@@ -590,7 +603,12 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                     level2++;
                     final String temp = element.substring(1);
                     element = level1 + "." + level2 + " " + temp;
-                    directory = directory + "&nbsp;&nbsp;<a href=\"#" + temp.replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", "") + anchorext + "\" class=\"WikiTOC\">" + element + "</a><br />\n";
+                    directory.append("&nbsp;&nbsp;<a href=\"#");
+                    directory.append(temp.replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", ""));
+                    directory.append(anchorext);
+                    directory.append("\" class=\"WikiTOC\">");
+                    directory.append(element);
+                    directory.append("</a><br />\n");
                 } else if (element.startsWith("1")) {
                     if (level > 1) {
                         level = 1;
@@ -600,13 +618,16 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                     level1++;
                     final String temp = element.substring(1);
                     element = level1 + ". " + temp;
-                    directory = directory + "<a href=\"#" + temp.replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", "") + anchorext + "\" class=\"WikiTOC\">" + element + "</a><br />\n";
+                    directory.append("<a href=\"#");
+                    directory.append(temp.replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", ""));
+                    directory.append(anchorext + "\" class=\"WikiTOC\">");
+                    directory.append(element);
+                    directory.append("</a><br />\n");
                 }
                 anchorext = "";
             }
-            directory = "<table><tr><td><div class=\"WikiTOCBox\">\n" + directory + "</div></td></tr></table>\n";
+            directory.append("</div></td></tr></table>\n");
         }
-        // [MN]
         if (!dirElements.isEmpty()) {
             dirElements.clear();
         }
@@ -624,44 +645,42 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
      */
     //[MN]
     private String pairReplace(String input, final String pat, final String repl1, final String repl2) {
-        String direlem = "";    //string to keep headlines until they get added to List dirElements
+        String direlem = null;    //string to keep headlines until they get added to List dirElements
         int p0 = 0;
         int p1 = 0;
         final int l = pat.length();
         //replace pattern if a pair of the pattern can be found in the line
         if (((p0 = input.indexOf(pat)) >= 0) && ((p1 = input.indexOf(pat, p0 + l)) >= 0)) {
             //extra treatment for headlines
-            if ((pat.equals("====")) || (pat.equals("===")) || (pat.equals("=="))) {
+            if (Arrays.binarySearch(headlineTags, pat) >= 0) {
                 //add anchor and create headline
                 direlem = input.substring(p0 + l, p1);
-                //counting double headlines
-                int doubles = 0;
-                for (int i = 0; i < dirElements.size(); i++) {
-                    if (dirElements.get(i) == null) {
-                        continue;
+                if (direlem != null) {
+                    //counting double headlines
+                    int doubles = 0;
+                    for (int i = 0; i < dirElements.size(); i++) {
+                        // no element with null value should ever be in directory
+                        assert (dirElements.get(i) != null);
+
+                        if (dirElements.size() > i && dirElements.get(i).substring(1).equals(direlem)) {
+                            doubles++;
+                        }
                     }
-                    if (dirElements.size() > i && dirElements.get(i).substring(1).equals(direlem)) {
-                        doubles++;
+                    String anchor = direlem.replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", ""); //replace blanks with underscores and delete everything thats not a regular character, a number or _
+                    //if there are doubles, add underscore and number of doubles plus one
+                    if (doubles > 0) {
+                        anchor = anchor + "_" + (doubles + 1);
                     }
-                }
-                String anchor = direlem.replaceAll(" ", "_").replaceAll("[^a-zA-Z0-9_]", ""); //replace blanks with underscores and delete everything thats not a regular character, a number or _
-                //if there are doubles, add underscore and number of doubles plus one
-                if (doubles > 0) {
-                    anchor = anchor + "_" + (doubles + 1);
-                }
-                input = input.substring(0, p0) + "<a name=\"" + anchor + "\"></a>" + repl1 +
-                        direlem + repl2 + input.substring(p1 + l);
-                //add headlines to list of headlines (so TOC can be created)
-                if (pat.equals("====")) {
-                    dirElements.add("3" + direlem);
-                } else if (pat.equals("===")) {
-                    dirElements.add("2" + direlem);
-                } else if (pat.equals("==")) {
-                    dirElements.add("1" + direlem);
+                    input = input.substring(0, p0) + "<a name=\"" + anchor + "\"></a>" + repl1 +
+                            direlem + repl2 + input.substring(p1 + l);
+                    //add headlines to list of headlines (so TOC can be created)
+                    if (Arrays.binarySearch(headlineTags, pat) >= 0) {
+                        dirElements.add((pat.length() - 1) + direlem);
+                    }
                 }
             } else {
                 input = input.substring(0, p0) + repl1 +
-                        (/*direlem =*/input.substring(p0 + l, p1)) + repl2 +
+                        (input.substring(p0 + l, p1)) + repl2 +
                         input.substring(p1 + l);
             }
         }
@@ -674,7 +693,6 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
 
     /** Replaces wiki tags with HTML tags.
      * @param result a line of text
-     * @param switchboard
      * @return the line of text with HTML tags instead of wiki tags
      */
     public String transformLine(String result) {
