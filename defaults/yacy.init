@@ -482,6 +482,7 @@ browserPopUpApplication=firefox
 
 # defines if the YaCy icon appears in the system tray on supported platforms
 trayIcon=true
+trayIcon.force=false
 tray.label=YaCy
 
 # index sharing attributes: by default, sharing is on.

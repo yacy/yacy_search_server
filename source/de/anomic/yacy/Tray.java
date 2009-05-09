@@ -61,7 +61,7 @@ public final class Tray {
 		trayLabel = sb.getConfig(plasmaSwitchboardConstants.TRAY_LABEL, "YaCy");
 		try {
 			final boolean trayIcon = sb.getConfigBool(plasmaSwitchboardConstants.TRAY_ICON_ENABLED, false);
-			if (trayIcon && serverSystem.isWindows) {
+			if (trayIcon && (serverSystem.isWindows || sb.getConfigBool(plasmaSwitchboardConstants.TRAY_ICON_FORCED, false))) {
 				System.setProperty("java.awt.headless", "false");
 
 				if(nativeTrayIcon.isSupported()) {

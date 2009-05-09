@@ -521,6 +521,7 @@ public final class plasmaSwitchboardConstants {
      * system tray
      */
 	public static final String TRAY_ICON_ENABLED	 = "trayIcon";
+	public static final String TRAY_ICON_FORCED		 = "trayIcon.force";
 	public static final String TRAY_LABEL			 = "tray.label";
 	public static final String BROWSERINTEGRATION	 = "browserintegration";
 }
