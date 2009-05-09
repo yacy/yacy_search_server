@@ -741,10 +741,10 @@ public class yacySeed implements Cloneable {
         // generate a seed for the local peer
         // this is the birthplace of a seed, that then will start to travel to other peers
 
-        final byte[] hash = bestGap(db);
-        yacyCore.log.logInfo("init: OWN SEED = " + hash);
+        final String hashs = new String(bestGap(db));
+        yacyCore.log.logInfo("init: OWN SEED = " + hashs);
 
-        final yacySeed newSeed = new yacySeed(new String(hash));
+        final yacySeed newSeed = new yacySeed(hashs);
 
         // now calculate other information about the host
         newSeed.dna.put(yacySeed.NAME, (name) == null ? "anonymous" : name);
