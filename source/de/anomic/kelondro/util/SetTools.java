@@ -426,7 +426,7 @@ public class SetTools {
         final StringBuilder sb = new StringBuilder(set.size() * 7);
         if (i.hasNext()) sb.append(new String(i.next()));
         while (i.hasNext()) {
-            sb.append(separator).append(i.next());
+            sb.append(separator).append(new String(i.next()));
         }
         return new String(sb);
     }
