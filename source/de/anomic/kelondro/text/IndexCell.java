@@ -344,6 +344,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     public void setBufferMaxWordCount(int maxWords) {
         this.maxRamEntries = maxWords;
+        this.cleanCache();
     }    
     
 }

@@ -50,7 +50,6 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
 
     private final Row payloadrow;
     private final ByteOrder termOrder;
-    //private SortedMap<byte[], ReferenceContainer<ReferenceType>> cache;
     private Map<ByteArray, ReferenceContainer<ReferenceType>> cache;
     
     /**
