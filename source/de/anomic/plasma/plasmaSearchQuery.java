@@ -316,6 +316,7 @@ public final class plasmaSearchQuery {
             "*" + new String(Word.word2hash(this.ranking.toExternalString())) +
             "*" + this.prefer +
             "*" + this.urlMask +
+            "*" + this.sitehash +
             "*" + this.targetlang +
             "*" + this.constraint +
             "*" + this.maxDistance;

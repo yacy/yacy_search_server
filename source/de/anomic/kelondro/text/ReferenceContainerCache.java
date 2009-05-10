@@ -433,6 +433,31 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         	cache.put(tha, container);
         }
     }
+    
+    /*
+    public void add(final byte[] termHash, final ReferenceType newEntry) {
+        assert this.cache != null;
+        ByteArray tha = new ByteArray(termHash);
+        
+        // first access the cache without synchronization
+        ReferenceContainer<ReferenceType> container = cache.remove(tha);
+        if (container == null) container = new ReferenceContainer<ReferenceType>(factory, termHash, this.payloadrow, 1);
+        container.put(newEntry);
+        
+        // then try to replace the entry that should be empty,
+        // but it can be possible that another thread has written something in between
+        ReferenceContainer<ReferenceType> containerNew = cache.put(tha, container);
+        if (containerNew == null) return;
+        container = containerNew;
+        
+        // finally use synchronization: ensure that the entry is written exclusively
+        synchronized (cache) {
+            containerNew = cache.get(tha);
+            if (containerNew != null) container.putAllRecent(containerNew);
+        	cache.put(tha, container);
+        }
+    }
+    */
 
     public int minMem() {
         return 0;
