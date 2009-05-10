@@ -1,9 +1,13 @@
-// kelondroMSetTools.java 
+// kelondroMSetTools.java
 // -------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
 // last major change: 28.12.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -420,7 +424,7 @@ public class SetTools {
         }
         return list;
     }
-    
+
     public static String setToString(final TreeSet<byte[]> set, final char separator) {
         final Iterator<byte[]> i = set.iterator();
         final StringBuilder sb = new StringBuilder(set.size() * 7);
@@ -428,7 +432,7 @@ public class SetTools {
         while (i.hasNext()) {
             sb.append(separator).append(new String(i.next()));
         }
-        return new String(sb);
+        return sb.toString();
     }
     public static String setToString(final Set<String> set, final char separator) {
         final Iterator<String> i = set.iterator();
@@ -437,9 +441,9 @@ public class SetTools {
         while (i.hasNext()) {
             sb.append(separator).append(i.next());
         }
-        return new String(sb);
+        return sb.toString();
     }
-    
+
     // ------------------------------------------------------------------------------------------------
 
     
