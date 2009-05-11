@@ -381,7 +381,10 @@ public class Network {
                             prop.putHTML(STR_TABLE_LIST + conCount + "_type_url", seed.get(yacySeed.SEEDLIST, "http://nowhere/"));
 
                             final long lastseen = Math.abs((System.currentTimeMillis() - seed.getLastSeenUTC()) / 1000 / 60);
-                            if (page == 2 || lastseen > 1440) { // Passive Peers should be passive, also Peers without contact greater than an day
+                            if (page == 1 && lastseen > 720) {
+                            	continue;
+                            }
+                            if (page == 2 || (page == 1 && lastseen > 360)) { // Passive Peers should be passive, also Peers without contact greater than 6 hours
                                 // principal/senior/junior: red/red=offline
                                 prop.put(STR_TABLE_LIST + conCount + "_type_direct", 2);
                             } else {

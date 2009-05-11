@@ -56,8 +56,8 @@ public class Threaddump_p {
     	
     	final StringBuilder buffer = new StringBuilder(1000);
     	
-	    final boolean plain = post.get("plain", "false").equals("true");
-	    final int sleep = post.getInt("sleep", 0); // a sleep before creation of a thread dump can be used for profiling
+	    final boolean plain = post != null && post.get("plain", "false").equals("true");
+	    final int sleep = (post == null) ? 0 : post.getInt("sleep", 0); // a sleep before creation of a thread dump can be used for profiling
 	    if (sleep > 0) try {Thread.sleep(sleep);} catch (final InterruptedException e) {}
 	    prop.put("dump", "1");
     	// Thread dump
