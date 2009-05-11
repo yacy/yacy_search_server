@@ -96,7 +96,7 @@ void draw() {
 
 void initRequest(boolean update) {
   myClient = new Client(this, host, port);
-  myClient.write((update) ? "GET /xml/webstructure.xml?latest= HTTP/1.1\n" : "GET /xml/webstructure.xml HTTP/1.1\n");
+  myClient.write((update) ? "GET /api/webstructure.xml?latest= HTTP/1.1\n" : "GET /xml/webstructure.xml HTTP/1.1\n");
   myClient.write("Host: localhost\n\n");
 }
 
@@ -111,8 +111,31 @@ void processRequestResponse(int steps) {
       String line = myClient.readStringUntil((byte) 10);
       //println("Line: " + line);
       if (line == null) line = ""; else line = line.trim();
-      if (line.startsWith("<domain")) processDomain(parseProps(line.substring(7, line.length() - 1).trim()));
-      if (line.startsWith("<citation")) processCitation(parseProps(line.substring(9, line.length() - 2).trim()));
+      /*
+      <domain host="www.oreilly.com" id="-1po3Y" date="20090510">
+        <reference id="uU2r5Q" count="2">www.catb.org</reference>
+        <reference id="zG43kY" count="516">oreilly.com</reference>
+        <reference id="QEf_LZ" count="44">www.oreillynet.com</reference>
+        
+      </domain>
+      */
+      int p = line.indexOf("<domain");
+      if (p >= 0) {
+        //println("domain   :" + line.substring(p + 8, line.length() - 1).trim());
+        processDomain(parseProps(line.substring(p + 8, line.length() - 1).trim()));
+      }
+      p = line.indexOf("<reference");
+      if (p >= 0) {
+        int q = line.indexOf("</reference>");
+        if (q > 0) {
+            int r = line.lastIndexOf('>', q);
+            if (r > 0) {
+              String refhost = line.substring(r, q);
+              //println("reference:" + line.substring(p + 11, r).trim());
+              processCitation(refhost, parseProps(line.substring(p + 11, r).trim()));
+            }
+        }
+      }
       lastUpdate = System.currentTimeMillis();
     } else {
       initTime = false;
@@ -135,9 +158,8 @@ void processDomain(HashMap props) {
   addAttraction(h.node);
 }
 
-void processCitation(HashMap props) {
+void processCitation(String host, HashMap props) {
   //println("Citation: " + props.toString());
-  String host = (String) props.get("host"); if (host == null) host = "";
   String id = (String) props.get("id"); if (id == null) id = "";
   int count = 0;
   try {
