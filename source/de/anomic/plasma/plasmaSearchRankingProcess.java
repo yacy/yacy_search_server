@@ -192,6 +192,7 @@ public final class plasmaSearchRankingProcess {
             // check site constraints
             if (query.sitehash != null && !iEntry.metadataHash().substring(6).equals(query.sitehash)) {
                 // filter out all domains that do not match with the site constraint
+            	continue;
             }
             
             // count domZones
