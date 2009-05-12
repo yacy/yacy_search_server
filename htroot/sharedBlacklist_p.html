@@ -5,15 +5,15 @@
     #%env/templates/metas.template%#
     <script>
     <!--
-    function selectall(){
-        var selectForm = document.forms[0];
+    function selectall(name){
+        var selectForm = document.forms.namedItem(name);
         var count = selectForm.elements["num"].value;
         for(i = 0; i<= count; i++){
     	    selectForm.elements["item" + i].checked = true;
         }
     }
-    function deselectall(){
-        var selectForm = document.forms[0];
+    function deselectall(name){
+        var selectForm = document.forms.namedItem(name);
         var count = selectForm.elements["num"].value;
         for(i = 0; i<= count; i++){
             selectForm.elements["item" + i].checked = false;
@@ -51,7 +51,7 @@
 	  Parse Error! An error occured while parsing XML data. Please check if the XML is valid.
 	  #(/status)#
     </p>
-    <form action="sharedBlacklist_p.html" method="post" enctype="multipart/form-data">
+    <form action="sharedBlacklist_p.html" method="post" enctype="multipart/form-data" name="blacklist_0">
       <input type="hidden" name="num" value="#[num]#" />
       #(page)#<!-- [0] -->
       <table>
@@ -83,8 +83,8 @@
         </tr>#{/urllist}#
         <tr class="small" style="background-color: #eeeeee">
           <td colspan="2">
-            <input type="button" onclick="selectall()" value="select all" />
-            <input type="button" onclick="deselectall()" value="deselect all" />
+            <input type="button" onclick="selectall(this.form.name)" value="select all" />
+            <input type="button" onclick="deselectall(this.form.name)" value="deselect all" />
             <input type="submit" value="add" name="add" />
           </td>
         </tr>
