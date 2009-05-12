@@ -188,8 +188,8 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
             assert posBuffer + 4 + key.length <= ba.length : "posBuffer = " + posBuffer + ", key.length = " + key.length + ", ba.length = " + ba.length;
             System.arraycopy(key, 0, ba, posBuffer + 4, key.length);
             assert posBuffer + 4 + key.length + blob.length <= ba.length : "posBuffer = " + posBuffer + ", key.length = " + key.length + ", blob.length = " + blob.length + ", ba.length = " + ba.length;
-            System.out.println("*** DEBUG posFile=" + posFile + ",blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length);
-            System.err.println("*** DEBUG posFile=" + posFile + ",blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length);
+            //System.out.println("*** DEBUG posFile=" + posFile + ",blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length);
+            //System.err.println("*** DEBUG posFile=" + posFile + ",blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length);
             System.arraycopy(blob, 0, ba, posBuffer + 4 + this.keylength, blob.length); //java.lang.ArrayIndexOutOfBoundsException here
             posFile += 4 + key.length + blob.length;
             posBuffer += 4 + key.length + blob.length;
@@ -200,48 +200,6 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
         this.buffer.clear();
         this.buffersize = 0;
     }
-    /*
-     private void flushBuffer() throws IOException {
-        // check size of buffer
-        Iterator<Map.Entry<String, byte[]>> i = this.buffer.entrySet().iterator();
-        int l = 0;
-        while (i.hasNext()) l += i.next().getValue().length;
-        assert l == this.buffersize;
-        
-        // append all contents of the buffer into one byte[]
-        i = this.buffer.entrySet().iterator();
-        final long pos = file.length();
-        long posFile = pos;
-        int posBuffer = 0;
-        
-        byte[] ba = new byte[l + (4 + this.index.row().primaryKeyLength) * this.buffer.size()];
-        Map.Entry<String, byte[]> entry;
-        byte[] key, blob, b;
-        while (i.hasNext()) {
-            entry = i.next();
-            key = entry.getKey().getBytes();
-            blob = entry.getValue();
-            index.put(key, posFile);
-            b = AbstractRandomAccess.int2array(key.length + blob.length);
-            assert b.length == 4;
-            assert posBuffer + 4 < ba.length : "posBuffer = " + posBuffer + ", ba.length = " + ba.length;
-            System.arraycopy(b, 0, ba, posBuffer, 4);
-            assert posBuffer + 4 + key.length <= ba.length : "posBuffer = " + posBuffer + ", key.length = " + key.length + ", ba.length = " + ba.length;
-            System.arraycopy(key, 0, ba, posBuffer + 4, key.length);
-            assert posBuffer + 4 + key.length + blob.length <= ba.length : "posBuffer = " + posBuffer + ", key.length = " + key.length + ", blob.length = " + blob.length + ", ba.length = " + ba.length;
-            System.out.println("*** DEBUG posFile=" + posFile + ",blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length);
-            System.err.println("*** DEBUG posFile=" + posFile + ",blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length);
-            System.arraycopy(blob, 0, ba, posBuffer + 4 + key.length, blob.length); //java.lang.ArrayIndexOutOfBoundsException here
-            posFile += 4 + key.length + blob.length;
-            posBuffer += 4 + key.length + blob.length;
-        }
-        assert ba.length == posBuffer; // must fit exactly
-        this.file.seek(pos);
-        this.file.write(ba);
-        this.buffer.clear();
-        this.buffersize = 0;
-    }
-     */
     
     /**
      * read a blob from the heap
