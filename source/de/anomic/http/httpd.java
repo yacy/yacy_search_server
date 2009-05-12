@@ -68,6 +68,7 @@ import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
@@ -897,6 +898,11 @@ public final class httpd implements serverHandler, Cloneable {
         // check information
         if (!FileUploadBase.isMultipartContent(request)) {
             throw new IOException("the request is not a multipart-message!");
+        }
+        
+        // check if we have enough memory
+        if (!MemoryControl.request(request.getContentLength() * 3, false)) {
+        	throw new IOException("not enough memory available for request. request.getContentLength() = " + request.getContentLength() + ", MemoryControl.available() = " + MemoryControl.available());
         }
 
         // parse data in memory
