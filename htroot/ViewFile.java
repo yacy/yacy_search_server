@@ -111,7 +111,7 @@ public class ViewFile {
             }
             url = metadata.url();
             descr = metadata.dc_title();
-            urlEntry.wordCount();
+            //urlEntry.wordCount();
             size = urlEntry.size();
             pre = urlEntry.flags().get(Condenser.flag_cat_indexof);
         }

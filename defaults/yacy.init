@@ -159,8 +159,7 @@ clientTimeout = 10000
 # maximal number of httpd sessions
 # a client may open several connections at once, and the httpdMaxBusySessions value sets
 # a limit on the number of concurrent connections
-httpdMaxBusySessions = 100
-httpdMaxBusySessions__pro = 200
+httpdMaxBusySessions = 200
 
 # default root path for the file server
 # may be overridden by the htdocs parameter
@@ -220,8 +219,7 @@ mimeConfig = httpd.mime
 proxyCache = DATA/HTCACHE
 
 # the maximum disc cache size for files in proxyCache in megabytes
-proxyCacheSize = 100
-proxyCacheSize__pro = 1024
+proxyCacheSize = 1024
 
 # a path to the surrogate input directory
 surrogates.in = DATA/SURROGATES/in
@@ -246,16 +244,11 @@ minimumGlobalDelta = 500
 # parseableMimeTypes.HTML: specifies mime-types that can be indexed with built-in html parser
 # parseableMime: specifies mime-types that can be indexed but not on the fly
 parseableMimeTypes.HTML=application/xhtml+xml,text/html,text/plain,text/sgml
-parseableMimeTypes=
-parseableMimeTypes__pro=application/atom+xml,application/bzip2,application/excel,application/gzip,application/java-archive,application/msexcel,application/mspowerpoint,application/msword,application/octet-stream,application/pdf,application/postscript,application/powerpoint,application/rdf+xml,application/rss+xml,application/rtf,application/tar,application/vcard,application/vnd.ms-excel,application/vnd.ms-powerpoint,application/vnd.oasis.opendocument.text,application/x-7z-compressed,application/x-bz2,application/x-bzip2,application/x-compress,application/x-compressed,application/x-excel,application/x-gzip,application/x-msexcel,application/x-redhat packet manager,application/x-redhat-package-manager,application/x-rpm,application/x-shockwave-flash,application/x-shockwave-flash2-preview,application/x-tar,application/x-vnd.oasis.opendocument.text,application/x-xml,application/x-zip,application/x-zip-compressed,application/xml,application/zip,text/postscript,text/rss,text/rtf,text/x-vcard,text/xml
-parseableMimeTypes.CRAWLER=
-parseableMimeTypes.CRAWLER__pro=application/atom+xml,application/bzip2,application/excel,application/gzip,application/java-archive,application/msexcel,application/mspowerpoint,application/msword,application/octet-stream,application/pdf,application/postscript,application/powerpoint,application/rdf+xml,application/rss+xml,application/rtf,application/tar,application/vcard,application/vnd.ms-excel,application/vnd.ms-powerpoint,application/vnd.oasis.opendocument.text,application/x-7z-compressed,application/x-bz2,application/x-bzip2,application/x-compress,application/x-compressed,application/x-excel,application/x-gzip,application/x-msexcel,application/x-redhat packet manager,application/x-redhat-package-manager,application/x-rpm,application/x-shockwave-flash,application/x-shockwave-flash2-preview,application/x-tar,application/x-vnd.oasis.opendocument.text,application/x-xml,application/x-zip,application/x-zip-compressed,application/xml,application/zip,text/postscript,text/rss,text/rtf,text/x-vcard,text/xml
-parseableMimeTypes.PROXY=
-parseableMimeTypes.PROXY__pro=application/atom+xml,application/bzip2,application/excel,application/gzip,application/java-archive,application/msexcel,application/mspowerpoint,application/msword,application/octet-stream,application/pdf,application/postscript,application/powerpoint,application/rdf+xml,application/rss+xml,application/rtf,application/tar,application/vcard,application/vnd.ms-excel,application/vnd.ms-powerpoint,application/vnd.oasis.opendocument.text,application/x-7z-compressed,application/x-bz2,application/x-bzip2,application/x-compress,application/x-compressed,application/x-excel,application/x-gzip,application/x-msexcel,application/x-redhat packet manager,application/x-redhat-package-manager,application/x-rpm,application/x-shockwave-flash,application/x-shockwave-flash2-preview,application/x-tar,application/x-vnd.oasis.opendocument.text,application/x-xml,application/x-zip,application/x-zip-compressed,application/xml,application/zip,text/postscript,text/rss,text/rtf,text/x-vcard,text/xml
-parseableMimeTypes.ICAP=
-parseableMimeTypes.ICAP__pro=application/atom+xml,application/bzip2,application/excel,application/gzip,application/java-archive,application/msexcel,application/mspowerpoint,application/msword,application/octet-stream,application/pdf,application/postscript,application/powerpoint,application/rdf+xml,application/rss+xml,application/rtf,application/tar,application/vcard,application/vnd.ms-excel,application/vnd.ms-powerpoint,application/vnd.oasis.opendocument.text,application/x-7z-compressed,application/x-bz2,application/x-bzip2,application/x-compress,application/x-compressed,application/x-excel,application/x-gzip,application/x-msexcel,application/x-redhat packet manager,application/x-redhat-package-manager,application/x-rpm,application/x-shockwave-flash,application/x-shockwave-flash2-preview,application/x-tar,application/x-vnd.oasis.opendocument.text,application/x-xml,application/x-zip,application/x-zip-compressed,application/xml,application/zip,text/postscript,text/rss,text/rtf,text/x-vcard,text/xml
-parseableMimeTypes.URLREDIRECTOR=
-parseableMimeTypes.URLREDIRECTOR__pro=application/atom+xml,application/bzip2,application/excel,application/gzip,application/java-archive,application/msexcel,application/mspowerpoint,application/msword,application/octet-stream,application/pdf,application/postscript,application/powerpoint,application/rdf+xml,application/rss+xml,application/rtf,application/tar,application/vcard,application/vnd.ms-excel,application/vnd.ms-powerpoint,application/vnd.oasis.opendocument.text,application/x-7z-compressed,application/x-bz2,application/x-bzip2,application/x-compress,application/x-compressed,application/x-excel,application/x-gzip,application/x-msexcel,application/x-redhat packet manager,application/x-redhat-package-manager,application/x-rpm,application/x-shockwave-flash,application/x-shockwave-flash2-preview,application/x-tar,application/x-vnd.oasis.opendocument.text,application/x-xml,application/x-zip,application/x-zip-compressed,application/xml,application/zip,text/postscript,text/rss,text/rtf,text/x-vcard,text/xml
+parseableMimeTypes=application/atom+xml,application/bzip2,application/excel,application/gzip,application/java-archive,application/msexcel,application/mspowerpoint,application/msword,application/octet-stream,application/pdf,application/postscript,application/powerpoint,application/rdf+xml,application/rss+xml,application/rtf,application/tar,application/vcard,application/vnd.ms-excel,application/vnd.ms-powerpoint,application/vnd.oasis.opendocument.text,application/x-7z-compressed,application/x-bz2,application/x-bzip2,application/x-compress,application/x-compressed,application/x-excel,application/x-gzip,application/x-msexcel,application/x-redhat packet manager,application/x-redhat-package-manager,application/x-rpm,application/x-shockwave-flash,application/x-shockwave-flash2-preview,application/x-tar,application/x-vnd.oasis.opendocument.text,application/x-xml,application/x-zip,application/x-zip-compressed,application/xml,application/zip,text/postscript,text/rss,text/rtf,text/x-vcard,text/xml
+parseableMimeTypes.CRAWLER=application/atom+xml,application/bzip2,application/excel,application/gzip,application/java-archive,application/msexcel,application/mspowerpoint,application/msword,application/octet-stream,application/pdf,application/postscript,application/powerpoint,application/rdf+xml,application/rss+xml,application/rtf,application/tar,application/vcard,application/vnd.ms-excel,application/vnd.ms-powerpoint,application/vnd.oasis.opendocument.text,application/x-7z-compressed,application/x-bz2,application/x-bzip2,application/x-compress,application/x-compressed,application/x-excel,application/x-gzip,application/x-msexcel,application/x-redhat packet manager,application/x-redhat-package-manager,application/x-rpm,application/x-shockwave-flash,application/x-shockwave-flash2-preview,application/x-tar,application/x-vnd.oasis.opendocument.text,application/x-xml,application/x-zip,application/x-zip-compressed,application/xml,application/zip,text/postscript,text/rss,text/rtf,text/x-vcard,text/xml
+parseableMimeTypes.PROXY=application/atom+xml,application/bzip2,application/excel,application/gzip,application/java-archive,application/msexcel,application/mspowerpoint,application/msword,application/octet-stream,application/pdf,application/postscript,application/powerpoint,application/rdf+xml,application/rss+xml,application/rtf,application/tar,application/vcard,application/vnd.ms-excel,application/vnd.ms-powerpoint,application/vnd.oasis.opendocument.text,application/x-7z-compressed,application/x-bz2,application/x-bzip2,application/x-compress,application/x-compressed,application/x-excel,application/x-gzip,application/x-msexcel,application/x-redhat packet manager,application/x-redhat-package-manager,application/x-rpm,application/x-shockwave-flash,application/x-shockwave-flash2-preview,application/x-tar,application/x-vnd.oasis.opendocument.text,application/x-xml,application/x-zip,application/x-zip-compressed,application/xml,application/zip,text/postscript,text/rss,text/rtf,text/x-vcard,text/xml
+parseableMimeTypes.ICAP=application/atom+xml,application/bzip2,application/excel,application/gzip,application/java-archive,application/msexcel,application/mspowerpoint,application/msword,application/octet-stream,application/pdf,application/postscript,application/powerpoint,application/rdf+xml,application/rss+xml,application/rtf,application/tar,application/vcard,application/vnd.ms-excel,application/vnd.ms-powerpoint,application/vnd.oasis.opendocument.text,application/x-7z-compressed,application/x-bz2,application/x-bzip2,application/x-compress,application/x-compressed,application/x-excel,application/x-gzip,application/x-msexcel,application/x-redhat packet manager,application/x-redhat-package-manager,application/x-rpm,application/x-shockwave-flash,application/x-shockwave-flash2-preview,application/x-tar,application/x-vnd.oasis.opendocument.text,application/x-xml,application/x-zip,application/x-zip-compressed,application/xml,application/zip,text/postscript,text/rss,text/rtf,text/x-vcard,text/xml
+parseableMimeTypes.URLREDIRECTOR=application/atom+xml,application/bzip2,application/excel,application/gzip,application/java-archive,application/msexcel,application/mspowerpoint,application/msword,application/octet-stream,application/pdf,application/postscript,application/powerpoint,application/rdf+xml,application/rss+xml,application/rtf,application/tar,application/vcard,application/vnd.ms-excel,application/vnd.ms-powerpoint,application/vnd.oasis.opendocument.text,application/x-7z-compressed,application/x-bz2,application/x-bzip2,application/x-compress,application/x-compressed,application/x-excel,application/x-gzip,application/x-msexcel,application/x-redhat packet manager,application/x-redhat-package-manager,application/x-rpm,application/x-shockwave-flash,application/x-shockwave-flash2-preview,application/x-tar,application/x-vnd.oasis.opendocument.text,application/x-xml,application/x-zip,application/x-zip-compressed,application/xml,application/zip,text/postscript,text/rss,text/rtf,text/x-vcard,text/xml
 parseableMimeTypes.IMAGE=image/gif,image/jpeg,image/png,image/tiff,image/vnd.wap.wbmp,image/x-icon,image/bmp
 
 # media extension string
@@ -580,7 +573,7 @@ filterOutStopwordsFromTopwords=true
 40_peerseedcycle_busysleep=1200000
 40_peerseedcycle_memprereq=4194304
 50_localcrawl_idlesleep=2000
-50_localcrawl_busysleep=50
+50_localcrawl_busysleep=2
 50_localcrawl_memprereq=12582912
 50_localcrawl_isPaused=false
 60_remotecrawlloader_idlesleep=60000
@@ -592,7 +585,7 @@ filterOutStopwordsFromTopwords=true
 62_remotetriggeredcrawl_memprereq=12582912
 62_remotetriggeredcrawl_isPaused=false
 80_indexing_idlesleep=1000
-80_indexing_busysleep=10
+80_indexing_busysleep=0
 80_indexing_memprereq=12582912
 90_cleanup_idlesleep=300000
 90_cleanup_busysleep=300000
@@ -883,10 +876,7 @@ wikiParser.class = de.anomic.data.wikiCode
 # settings for automatic deletion of old entries in passive and potential seed-db
 # time means max time (in days) a peer may not have been seen before it is deleted
 routing.deleteOldSeeds.permission = true
-routing.deleteOldSeeds.permission__pro = true
 routing.deleteOldSeeds.time = 7
-routing.deleteOldSeeds.time__pro = 30
-
 
 # options to remember the default search engines when using the search compare features
 compare_yacy.left = YaCy
