@@ -151,7 +151,7 @@ public class LogalizerHandler extends Handler {
     }
     
     public Hashtable<String, Object> getParserResults(final LogParser parsername) {
-        return parsername.getResults();
+        return (parsername == null) ? null : parsername.getResults();
     }
     
     public void close() throws SecurityException {

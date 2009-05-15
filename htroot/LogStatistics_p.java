@@ -57,7 +57,7 @@ public class LogStatistics_p {
                 displaySubmenu = true;
                 final LogalizerHandler h = ((LogalizerHandler)handlers[i]);
                 r = h.getParserResults(h.getParser(0));
-                break;
+                if (r != null) break;
             }
         }
         
