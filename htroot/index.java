@@ -67,6 +67,7 @@ public class index {
         final int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
         final String former = (post == null) ? "" : post.get("former", "");
         final int count = Math.min(100, (post == null) ? 10 : post.getInt("count", 10));
+        final int maximumRecords = Integer.parseInt((sb.getConfig(plasmaSwitchboardConstants.DEFAULT_SEARCHITEMS, "10")));
         final String urlmaskfilter = (post == null) ? ".*" : post.get("urlmaskfilter", ".*");
         final String prefermaskfilter = (post == null) ? "" : post.get("prefermaskfilter", "");
         final String constraint = (post == null) ? "" : post.get("constraint", "");
@@ -98,6 +99,7 @@ public class index {
         prop.put("combine", "0");
         prop.put("resultbottomline", "0");
         prop.put("searchoptions", searchoptions);
+        prop.put("searchoptions_maximumRecords", maximumRecords);
         prop.put("searchoptions_count-10", (count == 10) ? "1" : "0");
         prop.put("searchoptions_count-50", (count == 50) ? "1" : "0");
         prop.put("searchoptions_count-100", (count == 100) ? "1" : "0");

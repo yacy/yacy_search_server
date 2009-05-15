@@ -37,7 +37,7 @@
 	        <input type="radio" id="app" name="contentdom" value="app" #(contentdomCheckApp)#::checked="checked"#(/contentdomCheckApp)# /><label for="app">Applications</label>
         </div>
       #(searchoptions)#
-        <input type="hidden" name="maximumRecords" value="10" />
+        <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
         <input type="hidden" name="startRecord" value="0" />
         <input type="hidden" name="resource" value="global" />
         <input type="hidden" name="urlmaskfilter" value=".*" />

@@ -517,6 +517,8 @@ public final class plasmaSwitchboardConstants {
     
     public static final String UPNP_ENABLED			= "upnp.enabled";
     
+    public static final String DEFAULT_SEARCHITEMS 	= "search.items";
+    
     /**
      * system tray
      */

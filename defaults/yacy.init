@@ -693,6 +693,9 @@ indexer.threads = 1
 # maximum size of stacker queue
 stacker.slots = 2000
 
+# number of search results displayed by default
+search.items = 10
+
 # specifies if yacy should set it's own referer if no referer URL
 # was set by the client.
 useYacyReferer = false
