@@ -762,23 +762,20 @@ public class RowCollection implements Iterable<Row.Entry> {
         int i = chunkcount - 2;
         final long t = System.currentTimeMillis(); // for time-out
         int d = 0;
-        boolean u = true;
         try {
             while (i >= 0) {
                 if (match(i, i + 1)) {
                     removeRow(i + 1, true);
                     d++;
-                    if (i + 1 < chunkcount - 1) u = false;
                 }
                 i--;
                 if (System.currentTimeMillis() - t > 60000) {
-                    throw new RuntimeException("uniq() time-out at " + i + " (backwards) from " + chunkcount + " elements after " + (System.currentTimeMillis() - t) + " milliseconds; " + d + " deletions so far");
+                	Log.logWarning("RowCollection", "uniq() time-out at " + i + " (backwards) from " + chunkcount + " elements after " + (System.currentTimeMillis() - t) + " milliseconds; " + d + " deletions so far");
+                	return;
                 }
             }
         } catch (final RuntimeException e) {
-            Log.logWarning("kelondroRowCollection", e.getMessage(), e);
-        } finally {
-            if (!u) this.sort();
+            Log.logWarning("RowCollection", e.getMessage(), e);
         }
     }
     
