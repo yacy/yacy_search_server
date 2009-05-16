@@ -24,6 +24,7 @@ CRAWLER-POOL.level = INFO
 STACKCRAWL.level = INFO
 MEMORY.level = INFO
 HTTPC.level = INFO
+INDEX-TRANSFER-DISPATCHER.level = INFO
 # UPnP related
 UPNP.level = INFO
 sun.net.www.protocol.http.HttpURLConnection.level = INFO

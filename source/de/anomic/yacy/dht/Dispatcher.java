@@ -107,7 +107,7 @@ public class Dispatcher {
         this.transmissionCloud = new TreeMap<byte[], Transmission.Chunk>(Base64Order.enhancedCoder);
         this.backend = backend;
         this.seeds = seeds;
-        this.log = new Log("INDEX TRANSFER DISPATCHER");
+        this.log = new Log("INDEX-TRANSFER-DISPATCHER");
         this.transmission = new Transmission(
             log,
             repository, 
