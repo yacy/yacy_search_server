@@ -2009,9 +2009,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         } else if (MemoryControl.available() < 1024*1024*25) {
         	log.logInfo("dhtTransferJob: no selection, too less memory available : " + (MemoryControl.available() / 1024 / 1024) + " MB");
         } else {
-            byte[] startHash = PeerSelection.selectTransferStart();
+            byte[] startHash = null, limitHash = null;
+            int tries = 10;
+            while (tries-- > 0) {
+            	startHash = PeerSelection.selectTransferStart();
+            	assert startHash != null;
+            	limitHash = PeerSelection.limitOver(this.webIndex.peers(), startHash);
+            	if (limitHash != null) break;
+            }
+            if (limitHash == null || startHash == null) {
+            	log.logInfo("dhtTransferJob: approaching full DHT dispersion.");
+            	return false;
+            }
 	        log.logInfo("dhtTransferJob: selected " + new String(startHash) + " as start hash");
-	        byte[] limitHash = PeerSelection.limitOver(this.webIndex.peers(), startHash);
 	        log.logInfo("dhtTransferJob: selected " + new String(limitHash) + " as limit hash");
 	        try {
 	            boolean enqueued = this.dhtDispatcher.selectContainersEnqueueToCloud(
