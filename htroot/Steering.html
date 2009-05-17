@@ -5,6 +5,26 @@
     #%env/templates/metas.template%#
   </head>
   <body style="margin:40px;text-align:center;">
+
+      <script type="text/javascript" language="JavaScript">
+        <!--
+
+        function online() {
+            if(!document.images) return
+            var url = "env/grafics/kaskelix_exit.png" + '?' + Math.random();
+            var img = new Image();
+            img.onload = function () {
+                 window.location.replace('Status.html');
+            };
+            img.onerror = function () {
+                 setTimeout('online()', 10000);
+            }
+            img.src = url;
+        }
+        //-->
+      </script>
+
+
       <p><img src="env/grafics/kaskelix_exit.png"></p>
       #(info)#
       <b>No action submitted</b><br />
@@ -24,10 +44,12 @@
       Application will terminate after working off all scheduled tasks.<br />
       Then YaCy will restart.<br />
       If you can't reach YaCy's interface after 5 minutes restart failed.
+      <script type="text/javascript" language="JavaScript">setTimeout('online()', 60000);</script>
 ::
       <h2>Just a moment, please!</h2>
       <b>Installing release #[release]#</b><br />
       <p>YaCy will be restarted after installation</p>
+      <script type="text/javascript" language="JavaScript">setTimeout('online()', 60000);</script>
       #(/info)#
     </p>
   </body>
