@@ -593,11 +593,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // init robinson cluster
         // before we do that, we wait some time until the seed list is loaded.
         //while (((System.currentTimeMillis() - startedSeedListAquisition) < 8000) && (this.webIndex.seedDB.sizeConnected() == 0)) try {Thread.sleep(1000);} catch (final InterruptedException e) {}
-        try {Thread.sleep(1000);} catch (final InterruptedException e) {}
+        //try {Thread.sleep(1000);} catch (final InterruptedException e) {}
         this.clusterhashes = this.webIndex.peers().clusterHashes(getConfig("cluster.peers.yacydomain", ""));
         
         // deploy blocking threads
-        int indexerThreads = (int) this.getConfigLong(plasmaSwitchboardConstants.INDEXER_THREADS, 1);
+        int indexerThreads = Math.max(1, serverProcessor.useCPU / 2);
         indexingStorageProcessor      = new serverProcessor<indexingQueueEntry>(
                 "storeDocumentIndex",
                 "This is the sequencing step of the indexing queue: no concurrency is wanted here, because the access of the indexer works better if it is not concurrent. Files are written as streams, councurrency would destroy IO performance. In this process the words are written to the RWI cache, which flushes if it is full.",

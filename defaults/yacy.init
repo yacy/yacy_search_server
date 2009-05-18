@@ -688,7 +688,6 @@ crawler.MaxActiveThreads = 30
 
 # maximum size of indexing queue
 indexer.slots = 40
-indexer.threads = 1
 
 # maximum size of stacker queue
 stacker.slots = 2000
