@@ -696,7 +696,7 @@ public final class Condenser {
             if (c < ' ') c = ' ';
             if ((lc == ' ') && (c == ' ')) continue; // ignore double spaces
             s.append(c);
-            if (htmlFilterContentScraper.punctuation(c)) break;
+            if (htmlFilterContentScraper.punctuation(lc) && invisible(c)) break;
             lc = c;
         }
         
