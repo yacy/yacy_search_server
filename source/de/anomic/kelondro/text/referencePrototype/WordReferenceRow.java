@@ -255,11 +255,6 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return (int) this.entry.getColLong(col_posintext);
     }
 
-    public void addPosition(int position) {
-        throw new UnsupportedOperationException("");
-        
-    }
-    
     public int posinphrase() {
         return (int) this.entry.getColLong(col_posinphrase);
     }
@@ -316,12 +311,6 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return toPropertyForm();
     }
 
-    public boolean isNewer(final Reference other) {
-        if (other == null) return true;
-        if (this.lastModified() > other.lastModified()) return true;
-        return false;
-    }
- 
     public boolean isOlder(final Reference other) {
         if (other == null) return false;
         if (this.lastModified() < other.lastModified()) return true;

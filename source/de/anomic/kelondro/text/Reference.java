@@ -39,8 +39,6 @@ public interface Reference {
     public long lastModified();
     
     public String toString();
-    
-    public boolean isNewer(Reference other);
  
     public boolean isOlder(Reference other);
 
@@ -55,8 +53,6 @@ public interface Reference {
     public int minposition();
     
     public int position(int p);
-    
-    public void addPosition(int position);
     
     public int distance();
         

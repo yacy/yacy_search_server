@@ -168,11 +168,6 @@ public class WordReferenceVars  extends AbstractReference implements WordReferen
         return hitcount;
     }
 
-    public boolean isNewer(final Reference other) {
-        assert false; // should not be used
-        return false;
-    }
-
     public boolean isOlder(final Reference other) {
         assert false; // should not be used
         return false;

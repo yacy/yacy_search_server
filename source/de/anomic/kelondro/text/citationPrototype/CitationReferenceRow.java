@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.text.referencePrototype;
+package de.anomic.kelondro.text.citationPrototype;
 
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
