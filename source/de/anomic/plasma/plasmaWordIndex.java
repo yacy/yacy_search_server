@@ -46,7 +46,6 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.text.BufferedIndex;
 import de.anomic.kelondro.text.IndexCell;
-import de.anomic.kelondro.text.IndexCollectionMigration;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.IODispatcher;
 import de.anomic.kelondro.text.MetadataRepository;
@@ -151,37 +150,18 @@ public final class plasmaWordIndex {
             }
         }
         
-        // check if the peer has migrated the index
-        if (new File(indexPrimaryTextLocation, "RICOLLECTION").exists()) {
-            this.merger = new IODispatcher<WordReference>(plasmaWordIndex.wordReferenceFactory, 1, 1, writeBufferSize);
-            if (this.merger != null) this.merger.start();
-            this.index = new IndexCollectionMigration<WordReference>(
-                                    indexPrimaryTextLocation,
-                                    wordReferenceFactory,
-                                    wordOrder,
-                                    WordReferenceRow.urlEntryRow,
-                                    entityCacheMaxSize,
-                                    targetFileSize,
-                                    maxFileSize,
-                                    this.merger,
-                                    writeBufferSize,
-                                    log);
-        } else {
-            this.merger = new IODispatcher<WordReference>(plasmaWordIndex.wordReferenceFactory, 1, 1, writeBufferSize);
-            this.merger.start();
-            this.index = new IndexCell<WordReference>(
-                                    new File(indexPrimaryTextLocation, "RICELL"),
-                                    wordReferenceFactory,
-                                    wordOrder,
-                                    WordReferenceRow.urlEntryRow,
-                                    entityCacheMaxSize,
-                                    targetFileSize,
-                                    maxFileSize,
-                                    this.merger,
-                                    writeBufferSize);
-        }
-        
-        
+        this.merger = new IODispatcher<WordReference>(plasmaWordIndex.wordReferenceFactory, 1, 1, writeBufferSize);
+        this.merger.start();
+        this.index = new IndexCell<WordReference>(
+                                new File(indexPrimaryTextLocation, "RICELL"),
+                                wordReferenceFactory,
+                                wordOrder,
+                                WordReferenceRow.urlEntryRow,
+                                entityCacheMaxSize,
+                                targetFileSize,
+                                maxFileSize,
+                                this.merger,
+                                writeBufferSize);
             
         // migrate LURL-db files into new subdirectory METADATA
         File textdir = new File(this.secondaryRoot, "TEXT");

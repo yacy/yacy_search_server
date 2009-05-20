@@ -38,8 +38,9 @@ import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.table.EcoTable;
-import de.anomic.kelondro.text.IndexCollection;
+import de.anomic.kelondro.text.IndexCell;
 import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.citationPrototype.CitationReferenceRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.MemoryControl;
@@ -142,7 +143,7 @@ public class plasmaRankingCRProcess {
         return true;
     }
     
-    private static boolean accumulate_upd(final File f, final ObjectIndex acc, final IndexCollection<WordReference> seq) throws IOException {
+    private static boolean accumulate_upd(final File f, final ObjectIndex acc, final IndexCell<CitationReferenceRow> seq) throws IOException {
         // open file
         AttrSeq source_cr = null;
         try {
@@ -174,7 +175,7 @@ public class plasmaRankingCRProcess {
                 Vita   = (int) acc_entry.getColLong("Vita", 0);
                 
                 // update counters and dates
-                seq.put(key.getBytes(), new_entry.getSeqCollection()); // FIXME: old and new collection must be joined
+                //seq.add(key.getBytes(), new_entry.getSeqCollection());
                 
                 UCount++; // increase update counter
                 PCount += (new_flags.get(1)) ? 1 : 0;
@@ -194,7 +195,7 @@ public class plasmaRankingCRProcess {
                 for (int i = 1; i < acc.row().columns(); i++) {
                     acc_entry.setCol(i, new_entry.getAttr(acc.row().column(i).nickname, 0));
                 }
-                seq.put(key.getBytes(), new_entry.getSeqCollection());
+                //seq.put(key.getBytes(), new_entry.getSeqCollection());
                 FUDate = MicroDate.microDateHoursInt(System.currentTimeMillis()); // first update date
                 FDDate = MicroDate.microDateHoursInt(System.currentTimeMillis()); // very difficult to compute; this is only a quick-hack
                 LUDate = (int) new_entry.getAttr("VDate", 0);
@@ -242,11 +243,16 @@ public class plasmaRankingCRProcess {
         // open target file
         AttrSeq acc = null;
         ObjectIndex newacc = null;
-        IndexCollection<WordReference> newseq = null;
+        IndexCell<WordReference> newseq = null;
         if (newdb) {
             final File path = to_file.getParentFile(); // path to storage place
             newacc = new EcoTable(new File(path, CRG_accname), CRG_accrow, EcoTable.tailCacheUsageAuto, 0, 0);
-            newseq = new IndexCollection<WordReference>(path, CRG_seqname, plasmaWordIndex.wordReferenceFactory, 12, Base64Order.enhancedCoder, 9, CRG_colrow, false);
+            newseq = new IndexCell<WordReference>(
+                                    path,
+                                    plasmaWordIndex.wordReferenceFactory,
+                                    Base64Order.enhancedCoder,
+                                    CRG_colrow,
+                                    10000, 1000000000L, 20, null, 1000000);
         } else {
             if (!(to_file.exists())) {
                 acc = new AttrSeq("Global Ranking Accumulator File",
@@ -266,6 +272,7 @@ public class plasmaRankingCRProcess {
             // open file
             source_file = new File(from_dir, files[i]);
             if (newdb) {
+                /*
                 if (accumulate_upd(source_file, newacc, newseq)) {
                     // move CR file to temporary folder
                     source_file.renameTo(new File(tmp_dir, files[i]));
@@ -273,6 +280,7 @@ public class plasmaRankingCRProcess {
                     // error case: the CR-file is not valid; move to error path
                     source_file.renameTo(new File(err_dir, files[i]));
                 }
+                */
             } else {
                 if (accumulate_upd(source_file, acc)) {
                     // move CR file to temporary folder
@@ -374,8 +382,10 @@ public class plasmaRankingCRProcess {
     
     public static int genrcix(final File cr_path_in, final File rci_path_out) throws IOException {
         //kelondroFlexTable       acc = new kelondroFlexTable(cr_path_in, CRG_accname, kelondroBase64Order.enhancedCoder, 128 * 1024 * 1024, -1, CRG_accrow, true);
-        final IndexCollection<WordReference> seq = new IndexCollection<WordReference>(cr_path_in, CRG_seqname, plasmaWordIndex.wordReferenceFactory, 12, Base64Order.enhancedCoder, 9, CRG_colrow, false);
-        final IndexCollection<WordReference> rci = new IndexCollection<WordReference>(rci_path_out, RCI_colname, plasmaWordIndex.wordReferenceFactory, 6, Base64Order.enhancedCoder, 9, RCI_coli, false);
+        final IndexCell<WordReference> seq = new IndexCell<WordReference>(
+                                cr_path_in, plasmaWordIndex.wordReferenceFactory, Base64Order.enhancedCoder, CRG_colrow, 10000, 1000000000L, 20, null, 1000000);
+        final IndexCell<WordReference> rci = new IndexCell<WordReference>(
+                                rci_path_out, plasmaWordIndex.wordReferenceFactory, Base64Order.enhancedCoder, RCI_coli, 10000, 1000000000L, 20, null, 1000000);
         
         // loop over all referees
         int count = 0;
@@ -406,7 +416,7 @@ public class plasmaRankingCRProcess {
                 rci_entry.add(refereeDom.getBytes());
                 
                 // insert entry
-                rci.put(anchorDom.getBytes(), rci_entry);
+                //rci.put(anchorDom.getBytes(), rci_entry);
             }
             count++;
             if ((count % 1000) == 0) {

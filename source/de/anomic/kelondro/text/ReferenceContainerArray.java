@@ -32,6 +32,7 @@ import java.util.List;
 
 import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.BLOBArray;
+import de.anomic.kelondro.index.IntegerHandleIndex;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.ByteOrder;
@@ -283,5 +284,44 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         return donesomething;
     }
     
+    public static <ReferenceType extends Reference> IntegerHandleIndex referenceHashes(
+                            final File heapLocation,
+                            final ReferenceFactory<ReferenceType> factory,
+                            final ByteOrder termOrder,
+                            final Row payloadrow) throws IOException {
+       
+        System.out.println("CELL REFERENCE COLLECTION startup");
+        IntegerHandleIndex references = new IntegerHandleIndex(payloadrow.primaryKeyLength, termOrder, 0, 1000000);
+        String[] files = heapLocation.list();
+        for (String f: files) {
+            if (f.length() < 22 && !f.startsWith("index") && !f.endsWith(".blob")) continue;
+            File fl = new File(heapLocation, f);
+            System.out.println("CELL REFERENCE COLLECTION opening blob " + fl);
+            CloneableIterator<ReferenceContainer<ReferenceType>>  ei = new ReferenceContainerCache.blobFileEntries<ReferenceType>(fl, factory, payloadrow);
+        
+            ReferenceContainer<ReferenceType> container;
+            final long start = System.currentTimeMillis();
+            long lastlog = start - 27000;
+            int count = 0;
+            while (ei.hasNext()) {
+                container = ei.next();
+                if (container == null) continue;
+                Iterator<ReferenceType> refi = container.entries();
+                while (refi.hasNext()) {
+                    references.inc(refi.next().metadataHash().getBytes(), 1);
+                }
+                count++;
+                // write a log
+                if (System.currentTimeMillis() - lastlog > 30000) {
+                    System.out.println("CELL REFERENCE COLLECTION scanned " + count + " RWI index entries. ");
+                    //Log.logInfo("COLLECTION INDEX REFERENCE COLLECTION", "scanned " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() + array.free() - count) / count) / 60000) + " minutes remaining for this array");
+                    lastlog = System.currentTimeMillis();
+                }
+            }
+        }
+        System.out.println("CELL REFERENCE COLLECTION finished");
+        return references;
+    }
+
     
 }

@@ -34,7 +34,7 @@ import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.yacy.yacySeedDB;
 
-public final class CitationReferenceRow /*implements Reference, Cloneable*/ {
+public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
 
     // this object stores citation attributes to URL references
 
@@ -131,10 +131,10 @@ public final class CitationReferenceRow /*implements Reference, Cloneable*/ {
         return this.entry;
     }
 
-    public String urlHash() {
+    public String metadataHash() {
         return this.entry.getColString(col_urlhash, null);
     }
-
+    
     public int virtualAge() {
         return (int) this.entry.getColLong(col_lastModified);  // this is the time in MicoDateDays format
     }
@@ -170,12 +170,6 @@ public final class CitationReferenceRow /*implements Reference, Cloneable*/ {
     public String toString() {
         return toPropertyForm();
     }
-
-    public boolean isNewer(final Reference other) {
-        if (other == null) return true;
-        if (this.lastModified() > other.lastModified()) return true;
-        return false;
-    }
  
     public boolean isOlder(final Reference other) {
         if (other == null) return false;
@@ -184,6 +178,31 @@ public final class CitationReferenceRow /*implements Reference, Cloneable*/ {
     }
     
     public int hashCode() {
-        return this.urlHash().hashCode();
+        return this.metadataHash().hashCode();
+    }
+
+    
+    public int distance() {
+        throw new UnsupportedOperationException();
+    }
+
+    public void join(Reference oe) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int maxposition() {
+        throw new UnsupportedOperationException();
+    }
+
+    public int minposition() {
+        throw new UnsupportedOperationException();
+    }
+
+    public int position(int p) {
+        throw new UnsupportedOperationException();
+    }
+
+    public int positions() {
+        throw new UnsupportedOperationException();
     }
 }

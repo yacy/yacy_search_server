@@ -538,6 +538,74 @@ public final class Condenser {
 
     }
 
+    /*
+    private static class unsievedWordsEnum implements Enumeration<StringBuilder> {
+        // returns an enumeration of StringBuilder Objects
+        StringBuilder buffer = null;
+        sentencesFromInputStreamEnum e;
+        StringBuilder s;
+        int off;
+
+        public unsievedWordsEnum(final InputStream is) throws UnsupportedEncodingException {
+            e = new sentencesFromInputStreamEnum(is);
+            s = new StringBuilder(0);
+            off = 0;
+            buffer = nextElement0();
+        }
+
+        public void pre(final boolean x) {
+            e.pre(x);
+        }
+        
+        private StringBuilder nextElement0() {
+            StringBuilder r;
+            StringBuilder sb;
+            char c;
+            while (s.length() - off <= 0) {
+                if (e.hasNext()) {
+                    r = e.next();
+                    if (r == null) return null;
+                    r = trim(r);
+                    sb = new StringBuilder(r.length() * 2);
+                    for (int i = 0; i < r.length(); i++) {
+                        c = r.charAt(i);
+                        if (invisible(c)) sb = sb.append(' '); // TODO: Bugfix needed for UTF-8
+                        else if (htmlFilterContentScraper.punctuation(c)) sb = sb.append(' ').append(c).append(' ');
+                        else sb = sb.append(c);
+                    }
+                    s = trim(sb);
+                    off = 0;
+                    //System.out.println("PARSING-LINE '" + r + "'->'" + s + "'");
+                } else {
+                    return null;
+                }
+            }
+            final int p = s.indexOf(" ", off);
+            if (p < 0) {
+                r = new StringBuilder(s.substring(off));
+                s = new StringBuilder(0);
+                off = 0;
+                return r;
+            }
+            r = trim(new StringBuilder(s.substring(off, p)));
+            off = p + 1;
+            while (off < s.length() && s.charAt(off) <= ' ') off++;
+            return r;
+        }
+
+        public boolean hasMoreElements() {
+            return buffer != null;
+        }
+
+        public StringBuilder nextElement() {
+            final StringBuilder r = buffer;
+            buffer = nextElement0();
+            return r;
+        }
+
+    }
+     */
+    
     private static class unsievedWordsEnum implements Enumeration<StringBuilder> {
         // returns an enumeration of StringBuilder Objects
         StringBuilder buffer = null;

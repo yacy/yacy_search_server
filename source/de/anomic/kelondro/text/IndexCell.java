@@ -346,5 +346,5 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         this.maxRamEntries = maxWords;
         this.cleanCache();
     }    
-    
+
 }

@@ -53,12 +53,13 @@ import java.util.zip.GZIPOutputStream;
 import de.anomic.kelondro.index.HandleSet;
 import de.anomic.kelondro.index.IntegerHandleIndex;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.text.IndexCollection;
 import de.anomic.kelondro.text.MetadataRepository;
+import de.anomic.kelondro.text.ReferenceContainerArray;
 import de.anomic.kelondro.text.MetadataRepository.Export;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.MemoryControl;
+import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.yacy.yacyURL;
 
 public class URLAnalysis {
@@ -393,12 +394,11 @@ public class URLAnalysis {
         System.out.println("finished");
     }
     
-    public static void incollection(String collectionPath, String statisticPath) {
+    public static void incell(File cellPath, String statisticPath) {
         try {
-            IntegerHandleIndex idx = IndexCollection.referenceHashes(
-                new File(collectionPath),
-                "collection",
-                12,
+            IntegerHandleIndex idx = ReferenceContainerArray.referenceHashes(
+                cellPath,
+                plasmaWordIndex.wordReferenceFactory,
                 Base64Order.enhancedCoder,
                 WordReferenceRow.urlEntryRow);
             System.out.println("COLLECTION INDEX REFERENCE COLLECTION starting dump of statistics");
@@ -475,11 +475,11 @@ public class URLAnalysis {
         } else if (args[0].equals("-sort") && args.length >= 2) {
             // generate file <file>.x.sort with sorted lists and split the file in smaller pieces
             for (int i = 1; i < args.length; i++) sortsplit(args[i]);
-        } else if (args[0].equals("-incollection") && args.length >= 2) {
-            // generate a dump of all referenced URL hashes from a given RICOLLECTION
+        } else if (args[0].equals("-incell") && args.length >= 2) {
+            // generate a dump of all referenced URL hashes from a given RICELL
             // example:
-            // java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -incollection DATA/INDEX/freeworld/TEXT/RICOLLECTION used.dump
-            incollection(args[1], args[2]);
+            // java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -incell DATA/INDEX/freeworld/TEXT/RICELL used.dump
+            incell(new File(args[1]), args[2]);
         } else if (args[0].equals("-diffurlcol") && args.length >= 3) {
             // make a diff-file that contains hashes from the url database that do not occur in the collection reference dump
             // example:
