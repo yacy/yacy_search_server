@@ -96,11 +96,11 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return index >= 0;
     }
     
-    public Row.Entry get(final byte[] key) {
+    public synchronized Row.Entry get(final byte[] key) {
         return get(key, 0, key.length);
     }
     
-    private synchronized Row.Entry get(final byte[] key, final int astart, final int alength) {
+    private Row.Entry get(final byte[] key, final int astart, final int alength) {
         final int index = find(key, astart, alength);
         final Row.Entry entry = (index >= 0) ? get(index, true) : null;
         return entry;
@@ -197,7 +197,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return entry;
     }
 
-    private synchronized int find(final byte[] a, final int astart, final int alength) {
+    private int find(final byte[] a, final int astart, final int alength) {
         // returns the chunknumber; -1 if not found
         
         if (rowdef.objectOrder == null) return iterativeSearch(a, astart, alength, 0, this.chunkcount);
