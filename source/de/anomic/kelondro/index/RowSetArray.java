@@ -130,10 +130,6 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         accessArray(i).put(row);
     }
 
-    public void put(List<Entry> rows) {
-        for (Entry row: rows) put(row);
-    }
-
     public Entry remove(byte[] key) {
         int i = indexFor(key);
         if (i < 0) return null;

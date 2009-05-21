@@ -282,10 +282,6 @@ public class SplitTable implements ObjectIndex {
         return table;
     }
     
-    public synchronized void put(final List<Row.Entry> rows) throws IOException {
-        for (Row.Entry entry: rows) put(entry);
-    }
-    
     public synchronized Row.Entry replace(final Row.Entry row) throws IOException {
         assert row.objectsize() <= this.rowdef.objectsize;
         ObjectIndex keeper = keeperOf(row.getColBytes(0));

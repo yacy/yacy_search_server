@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -199,45 +198,6 @@ public class FlexTable extends FlexWidthArray implements ObjectIndex {
 		//}
 	}
     
-    public synchronized void put(final List<Row.Entry> rows) throws IOException {
-        // put a list of entries in a ordered way.
-        // this should save R/W head positioning time
-        final Iterator<Row.Entry> i = rows.iterator();
-        Row.Entry row;
-        int pos;
-        byte[] key;
-        final TreeMap<Integer, Row.Entry> old_rows_ordered = new TreeMap<Integer, Row.Entry>();
-        final ArrayList<Row.Entry> new_rows_sequential = new ArrayList<Row.Entry>();
-        assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
-        while (i.hasNext()) {
-            row = i.next();
-            key = row.getColBytes(0);
-            pos = index.get(key);
-            if (pos < 0) {
-                new_rows_sequential.add(row);
-            } else {
-                old_rows_ordered.put(Integer.valueOf(pos), row);
-            }
-        }
-        // overwrite existing entries in index
-        super.setMultiple(old_rows_ordered);
-        
-        // write new entries to index
-        
-        // add a list of entries in a ordered way.
-        // this should save R/W head positioning time
-        final TreeMap<Integer, byte[]> indexed_result = super.addMultiple(new_rows_sequential);
-        // indexed_result is a Integer/byte[] relation
-        // that is used here to store the index
-        final Iterator<Map.Entry<Integer, byte[]>> j = indexed_result.entrySet().iterator();
-        Map.Entry<Integer, byte[]> entry;
-        while (j.hasNext()) {
-            entry = j.next();
-            index.put(entry.getValue(), entry.getKey().intValue());
-        }
-        assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
-    }
-
     public synchronized Row.Entry put(final Row.Entry row, final Date entryDate) throws IOException {
     	assert this.size() == index.size() : "content.size() = " + this.size() + ", index.size() = " + index.size();
 		return replace(row);

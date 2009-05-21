@@ -31,7 +31,6 @@ import java.util.Map;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.server.serverInstantBusyThread;
 import de.anomic.tools.diskUsage;
 
 public final class ResourceObserver {

@@ -118,12 +118,7 @@ public class ObjectIndexCache implements ObjectIndex {
         index1.put(entry);
     }
    
-    public void put(final List<Entry> rows) {
-		final Iterator<Entry> i = rows.iterator();
-		while (i.hasNext()) put(i.next());
-	}
-
-	public synchronized void addUnique(final Row.Entry entry) {
+    public synchronized void addUnique(final Row.Entry entry) {
     	assert (entry != null);
     	if (entry == null) return;
         if (index1 == null) {

@@ -268,11 +268,6 @@ public class Cache implements ObjectIndex {
         return entry;
     }
 
-    public synchronized void put(final List<Entry> rows) throws IOException {
-        final Iterator<Entry> i = rows.iterator();
-        while (i.hasNext()) put(i.next());
-    }
-
     public synchronized void put(final Entry row) throws IOException {
         assert (row != null);
         assert (row.columns() == row().columns());

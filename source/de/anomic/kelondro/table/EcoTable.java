@@ -444,13 +444,6 @@ public class EcoTable implements ObjectIndex {
         return replace(row);
     }
 
-    public synchronized void put(final List<Entry> rows) throws IOException {
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        final Iterator<Entry> i = rows.iterator();
-        while (i.hasNext()) put(i.next());
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
-    }
-
     private void removeInFile(final int i) throws IOException {
         assert i >= 0;
         

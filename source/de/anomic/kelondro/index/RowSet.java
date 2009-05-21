@@ -27,7 +27,6 @@ package de.anomic.kelondro.index;
 import java.io.DataInput;
 import java.io.IOException;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 
 import de.anomic.kelondro.order.Base64Order;
@@ -97,18 +96,9 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
     }
     
     public synchronized Row.Entry get(final byte[] key) {
-        return get(key, 0, key.length);
-    }
-    
-    private Row.Entry get(final byte[] key, final int astart, final int alength) {
-        final int index = find(key, astart, alength);
-        final Row.Entry entry = (index >= 0) ? get(index, true) : null;
-        return entry;
-    }
-    
-    public synchronized void put(final List<Row.Entry> rows) {
-        final Iterator<Row.Entry> i = rows.iterator();
-        while (i.hasNext()) put(i.next());
+        final int index = find(key, 0, key.length);
+        if (index < 0) return null;
+        return get(index, true);
     }
     
     public synchronized void put(final Row.Entry entry) {
@@ -508,7 +498,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());
         for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());
         d.sort();
-        d.remove("fuenf".getBytes(), 0, 5);
+        d.remove("fuenf".getBytes());
         final Iterator<Row.Entry> ii = d.iterator();
         String s;
         System.out.print("INPUT-ITERATOR: ");

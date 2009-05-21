@@ -47,7 +47,6 @@ import java.util.logging.Logger;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.index.ObjectIndex;
-import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
@@ -311,11 +310,6 @@ public class Tree extends CachedRecords implements ObjectIndex {
         final RecordHandle lc = parentn.getOHHandle(child);
         if (lc == null) return false;
         return (lc.equals(childn.handle()));
-    }
-    
-    public synchronized void put(final List<Entry> rows) throws IOException {
-        final Iterator<Entry> i = rows.iterator();
-        while (i.hasNext()) put(i.next());
     }
     
     public void put(final Row.Entry newrow) throws IOException {

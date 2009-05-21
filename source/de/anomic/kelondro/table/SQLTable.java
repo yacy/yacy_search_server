@@ -34,7 +34,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 
 import de.anomic.kelondro.index.Row;
@@ -175,11 +174,6 @@ public class SQLTable implements ObjectIndex {
         }
     }
 
-    public synchronized void put(final List<Row.Entry> rows) throws IOException {
-        final Iterator<Row.Entry> i = rows.iterator();
-        while (i.hasNext()) put(i.next());
-    }
-    
     public Row.Entry replace(final Row.Entry row) throws IOException {
         try {
             final Row.Entry oldEntry = remove(row.getColBytes(0));

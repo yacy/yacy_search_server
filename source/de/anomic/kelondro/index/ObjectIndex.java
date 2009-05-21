@@ -33,7 +33,6 @@ package de.anomic.kelondro.index;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
 import de.anomic.kelondro.order.CloneableIterator;
 
@@ -46,7 +45,6 @@ public interface ObjectIndex {
     public Row.Entry get(byte[] key) throws IOException;
     public Row.Entry replace(Row.Entry row) throws IOException;
     public void put(Row.Entry row) throws IOException;
-    public void put(List<Row.Entry> rows) throws IOException; // for R/W head path optimization
     public void addUnique(Row.Entry row) throws IOException; // no double-check
     public ArrayList<RowCollection> removeDoubles() throws IOException; // removes all elements that are double (to be used after all addUnique)
     public Row.Entry remove(byte[] key) throws IOException;
