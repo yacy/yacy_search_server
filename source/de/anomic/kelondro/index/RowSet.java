@@ -2,9 +2,9 @@
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 20.06.2006 on http://www.anomic.de
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -96,11 +96,11 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return index >= 0;
     }
     
-    public synchronized Row.Entry get(final byte[] key) {
+    public Row.Entry get(final byte[] key) {
         return get(key, 0, key.length);
     }
     
-    private Row.Entry get(final byte[] key, final int astart, final int alength) {
+    private synchronized Row.Entry get(final byte[] key, final int astart, final int alength) {
         final int index = find(key, astart, alength);
         final Row.Entry entry = (index >= 0) ? get(index, true) : null;
         return entry;
@@ -167,18 +167,20 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
             return Long.MIN_VALUE;
         }
     }
-    
+
     private synchronized Row.Entry remove(final byte[] a, final int start, final int length) {
         int index;
         Row.Entry entry = null;
-        int s = this.size();
+        final int s = this.size();
         while ((index = find(a, start, length)) >= 0) {
-        	entry = super.get(index, true);
-        	super.removeRow(index, true); // keep order of collection!
-        	// in case that the RowSet is not uniq, we must search again to delete all entries
-        	// the following check will ensure that the process terminates
-        	assert (this.size() < s);
-        	if (this.size() >= s) return entry;
+            entry = super.get(index, true);
+            super.removeRow(index, true); // keep order of collection!
+            // in case that the RowSet is not uniq, we must search again to delete all entries
+            // the following check will ensure that the process terminates
+            assert (this.size() < s);
+            if (this.size() >= s) {
+                return entry;
+            }
             //assert (findagainindex = find(a, start, length)) < 0 : "remove: chunk found again at index position (after  remove) " + findagainindex + ", index(before) = " + index + ", inset=" + NaturalOrder.arrayList(super.chunkcache, super.rowdef.objectsize * findagainindex, length) + ", searchkey=" + NaturalOrder.arrayList(a, start, length); // check if the remove worked
         }
         return entry;
@@ -189,11 +191,11 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
      * if the entry was found, return the entry, but delete the entry from the set
      * if the entry was not found, return null.
      */
-    public Row.Entry remove(final byte[] a) {
+    public final synchronized Row.Entry remove(final byte[] a) {
         return remove(a, 0, a.length);
     }
 
-    private int find(final byte[] a, final int astart, final int alength) {
+    private synchronized int find(final byte[] a, final int astart, final int alength) {
         // returns the chunknumber; -1 if not found
         
         if (rowdef.objectOrder == null) return iterativeSearch(a, astart, alength, 0, this.chunkcount);
