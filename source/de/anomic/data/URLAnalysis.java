@@ -401,20 +401,20 @@ public class URLAnalysis {
                 plasmaWordIndex.wordReferenceFactory,
                 Base64Order.enhancedCoder,
                 WordReferenceRow.urlEntryRow);
-            System.out.println("COLLECTION INDEX REFERENCE COLLECTION starting dump of statistics");
+            System.out.println("INDEX REFERENCE COLLECTION starting dump of statistics");
             idx.dump(new File(statisticPath));
-            System.out.println("COLLECTION INDEX REFERENCE COLLECTION finished dump, wrote " + idx.size() + " entries to " + statisticPath);
+            System.out.println("INDEX REFERENCE COLLECTION finished dump, wrote " + idx.size() + " entries to " + statisticPath);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public static int diffurlcol(String metadataPath, String statisticFile, String diffFile) throws IOException {
-        System.out.println("COLLECTION INDEX DIFF URL-COL startup");
+        System.out.println("INDEX DIFF URL-COL startup");
         IntegerHandleIndex idx = new IntegerHandleIndex(URLMetadataRow.rowdef.primaryKeyLength, URLMetadataRow.rowdef.objectOrder, new File(statisticFile), 0);
         MetadataRepository mr = new MetadataRepository(new File(metadataPath));
         HandleSet hs = new HandleSet(URLMetadataRow.rowdef.primaryKeyLength, URLMetadataRow.rowdef.objectOrder, 0, 1000000);
-        System.out.println("COLLECTION INDEX DIFF URL-COL loaded dump, starting diff");
+        System.out.println("INDEX DIFF URL-COL loaded dump, starting diff");
         long start = System.currentTimeMillis();
         long update = start - 7000;
         int c = 0;
@@ -425,14 +425,14 @@ public class URLAnalysis {
             }
             c++;
             if (System.currentTimeMillis() - update > 10000) {
-                System.out.println("COLLECTION INDEX DIFF URL-COL running, checked " + c + ", found " + hs.size() + " missing references so far, " + (((System.currentTimeMillis() - start) * (mr.size() - c) / c) / 60000) + " minutes remaining");
+                System.out.println("INDEX DIFF URL-COL running, checked " + c + ", found " + hs.size() + " missing references so far, " + (((System.currentTimeMillis() - start) * (mr.size() - c) / c) / 60000) + " minutes remaining");
                 update = System.currentTimeMillis();
             }
         }
         mr.close();
-        System.out.println("COLLECTION INDEX DIFF URL-COL finished diff, starting dump to " + diffFile);
+        System.out.println("INDEX DIFF URL-COL finished diff, starting dump to " + diffFile);
         c = hs.dump(new File(diffFile));
-        System.out.println("COLLECTION INDEX DIFF URL-COL finished dump, wrote " + c + " references that occur in the URL-DB, but not in the collection-dump");
+        System.out.println("INDEX DIFF URL-COL finished dump, wrote " + c + " references that occur in the URL-DB, but not in the collection-dump");
         return c;
     }
     
