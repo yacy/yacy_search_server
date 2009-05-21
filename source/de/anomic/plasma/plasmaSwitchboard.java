@@ -576,9 +576,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         wikiParser = new wikiCode(this.webIndex.peers().mySeed().getClusterAddress());
         
         // initializing the resourceObserver
-        this.observer = new ResourceObserver(this);
-        // run the oberver here a first time
-        this.observer.resourceObserverJob();
+        serverInstantBusyThread.oneTimeJob(ResourceObserver.class, "initThread", ResourceObserver.log, 0);
         
         // initializing the stackCrawlThread
         this.crawlStacker = new CrawlStacker(

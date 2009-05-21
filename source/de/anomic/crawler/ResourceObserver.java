@@ -31,6 +31,7 @@ import java.util.Map;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.server.serverInstantBusyThread;
 import de.anomic.tools.diskUsage;
 
 public final class ResourceObserver {
@@ -47,7 +48,7 @@ public final class ResourceObserver {
     private static final int MEDIUM = 1;
     private static final int HIGH = 2;
     
-    private static final Log log = new Log("RESOURCE OBSERVER");
+    public static final Log log = new Log("RESOURCE OBSERVER");
     private final plasmaSwitchboard sb;
 
     private int checkDiskUsageCount;
@@ -90,6 +91,14 @@ public final class ResourceObserver {
         checkMemoryUsageCount = 0;
         disksFree = HIGH;
         memoryFree = HIGH;
+    }
+    
+    public static void initThread() {
+    	plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+    	// initializing the resourceObserver
+    	sb.observer =  new ResourceObserver(sb);
+    	// run the oberver here a first time
+    	sb.observer.resourceObserverJob();
     }
 
     /**
