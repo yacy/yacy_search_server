@@ -168,21 +168,15 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         }
     }
 
-    private synchronized Row.Entry remove(final byte[] a, final int start, final int length) {
-        int index;
-        Row.Entry entry = null;
-        final int s = this.size();
-        while ((index = find(a, start, length)) >= 0) {
-            entry = super.get(index, true);
-            super.removeRow(index, true); // keep order of collection!
-            // in case that the RowSet is not uniq, we must search again to delete all entries
-            // the following check will ensure that the process terminates
-            assert (this.size() < s);
-            if (this.size() >= s) {
-                return entry;
-            }
-            //assert (findagainindex = find(a, start, length)) < 0 : "remove: chunk found again at index position (after  remove) " + findagainindex + ", index(before) = " + index + ", inset=" + NaturalOrder.arrayList(super.chunkcache, super.rowdef.objectsize * findagainindex, length) + ", searchkey=" + NaturalOrder.arrayList(a, start, length); // check if the remove worked
+    private Row.Entry remove(final byte[] a, final int start, final int length) {
+        final int index = find(a, start, length);
+        if (index < 0) {
+            return null;
         }
+        final Row.Entry entry = super.get(index, true);
+        super.removeRow(index, true); // keep order of collection!
+        //int findagainindex = 0;
+        //assert (findagainindex = find(a, start, length)) < 0 : "remove: chunk found again at index position (after  remove) " + findagainindex + ", index(before) = " + index + ", inset=" + NaturalOrder.arrayList(super.chunkcache, super.rowdef.objectsize * findagainindex, length) + ", searchkey=" + NaturalOrder.arrayList(a, start, length); // check if the remove worked
         return entry;
     }
 
@@ -192,7 +186,15 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
      * if the entry was not found, return null.
      */
     public final synchronized Row.Entry remove(final byte[] a) {
-        return remove(a, 0, a.length);
+        Row.Entry entry = null;
+        Row.Entry tmp;
+        do {
+            tmp = remove(a, 0, a.length);
+            if (tmp != null) {
+                entry = tmp;
+            }
+        } while (tmp != null);
+        return entry;
     }
 
     private synchronized int find(final byte[] a, final int astart, final int alength) {
