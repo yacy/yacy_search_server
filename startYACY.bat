@@ -26,7 +26,14 @@ set javacmd=%javacmd% -Djava.net.preferIPv4Stack=true
 Rem Starting YaCy
 Echo Generated classpath:%CLASSPATH%
 Echo JRE Parameters:%javacmd%
-Echo Priority:%priority%    
+Echo Priority:%priority%
+Echo ***************************************************************************
+Echo.
+Echo If you see a message like "javaw" not found, you probably have to install Java.
+Echo.
+Echo You can download Java at http://java.com/
+Echo.
+Echo ***************************************************************************
 start %priority% javaw %javacmd% -classpath %CLASSPATH% yacy
 Echo You can close the console safely now.
 
