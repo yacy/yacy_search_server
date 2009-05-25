@@ -170,6 +170,7 @@ import de.anomic.server.serverProcessorJob;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverSystem;
 import de.anomic.server.serverThread;
 import de.anomic.tools.crypt;
 import de.anomic.tools.CryptoLib;
@@ -319,8 +320,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // start indexing management
         log.logConfig("Starting Indexing Management");
         final String networkName = getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "");
-        final boolean useCommons = getConfigBool("index.storeCommons", false);
-        final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);        
+        final long fileSizeMax = (serverSystem.isWindows) ? sb.getConfigLong("filesize.max.win", (long) Integer.MAX_VALUE) : sb.getConfigLong("filesize.max.other", (long) Integer.MAX_VALUE);
+        final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
         final int paritionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
         try {
 			webIndex = new plasmaWordIndex(
@@ -329,7 +330,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 			        indexPrimaryPath,
 			        indexSecondaryPath,
 			        wordCacheMaxCount,
-			        useCommons,
+			        fileSizeMax,
 			        redundancy,
 			        paritionExponent);
 		} catch (IOException e1) {
@@ -795,7 +796,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             final File indexPrimaryPath = getConfigPath(plasmaSwitchboardConstants.INDEX_PRIMARY_PATH, plasmaSwitchboardConstants.INDEX_PATH_DEFAULT);
             final File indexSecondaryPath = (getConfig(plasmaSwitchboardConstants.INDEX_SECONDARY_PATH, "").length() == 0) ? indexPrimaryPath : new File(getConfig(plasmaSwitchboardConstants.INDEX_SECONDARY_PATH, ""));
             final int wordCacheMaxCount = (int) getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
-            final boolean useCommons = getConfigBool("index.storeCommons", false);
+            final long fileSizeMax = (serverSystem.isWindows) ? sb.getConfigLong("filesize.max.win", (long) Integer.MAX_VALUE) : sb.getConfigLong("filesize.max.other", (long) Integer.MAX_VALUE);
             final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
             final int paritionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
             try {
@@ -805,7 +806,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 				        indexPrimaryPath,
 				        indexSecondaryPath,
 				        wordCacheMaxCount,
-				        useCommons,
+				        fileSizeMax,
 				        redundancy,
 				        paritionExponent);
 			} catch (IOException e) {

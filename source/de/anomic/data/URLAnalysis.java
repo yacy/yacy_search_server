@@ -483,7 +483,7 @@ public class URLAnalysis {
         } else if (args[0].equals("-diffurlcol") && args.length >= 3) {
             // make a diff-file that contains hashes from the url database that do not occur in the collection reference dump
             // example:
-            // java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -diffurlcol DATA/INDEX/freeworld/TEXT used.dump diffurlcol.dump
+            // java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -diffurlcol DATA/INDEX/freeworld/TEXT/METADATA used.dump diffurlcol.dump
             try {
                 diffurlcol(args[1], args[2], args[3]);
             } catch (IOException e) {

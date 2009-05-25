@@ -41,7 +41,6 @@ import de.anomic.crawler.IndexingStack;
 import de.anomic.data.Blacklist;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpdProxyCacheEntry;
-import de.anomic.kelondro.blob.BLOBArray;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.text.BufferedIndex;
@@ -71,9 +70,7 @@ public final class plasmaWordIndex {
     public static final long wCacheMaxAge    = 1000 * 60 * 30; // milliseconds; 30 minutes
     public static final int  wCacheMaxChunk  =  800;           // maximum number of references for each urlhash
     public static final int  lowcachedivisor =  900;
-    public static final int  maxCollectionPartition = 7;       // should be 7
-    public static final long targetFileSize  = 100 * 1024 * 1024; // 100 MB
-    public static final long maxFileSize     = BLOBArray.oneGigabyte; // 1GB
+    public static final long targetFileSize  = 256 * 1024 * 1024; // 256 MB
     public static final int  writeBufferSize = 4 * 1024 * 1024;
     
     // the reference factory
@@ -120,7 +117,7 @@ public final class plasmaWordIndex {
             final File indexPrimaryRoot,
             final File indexSecondaryRoot,
             final int entityCacheMaxSize,
-            final boolean useCommons,
+            final long maxFileSize,
             final int redundancy,
             final int partitionExponent) throws IOException {
         

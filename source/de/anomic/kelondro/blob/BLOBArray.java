@@ -66,7 +66,6 @@ public class BLOBArray implements BLOB {
      */
     
     public static final long oneMonth    = 1000L * 60L * 60L * 24L * 365L / 12L;
-    public static final long oneGigabyte = 1024L * 1024L * 1024L;
     
     private int keylength;
     private ByteOrder ordering;
@@ -91,7 +90,7 @@ public class BLOBArray implements BLOB {
         this.buffersize = buffersize;
         this.heapLocation = heapLocation;
         this.fileAgeLimit = oneMonth;
-        this.fileSizeLimit = oneGigabyte;
+        this.fileSizeLimit = (long) Integer.MAX_VALUE;
         this.repositoryAgeMax = Long.MAX_VALUE;
         this.repositorySizeMax = Long.MAX_VALUE;
 
@@ -327,7 +326,7 @@ public class BLOBArray implements BLOB {
     
     public void setMaxSize(long maxSize) {
         this.repositorySizeMax = maxSize;
-        this.fileSizeLimit = Math.min(oneGigabyte, maxSize / 10);
+        this.fileSizeLimit = Math.min((long) Integer.MAX_VALUE, maxSize / 10L);
     }
     
     private void executeLimits() {

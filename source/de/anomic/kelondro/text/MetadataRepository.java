@@ -68,7 +68,6 @@ public final class MetadataRepository implements Iterable<byte[]> {
         this.urlIndexFile = new Cache(new SplitTable(this.location, "urls", URLMetadataRow.rowdef, false));
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
-       
     }
 
     public void clearCache() {

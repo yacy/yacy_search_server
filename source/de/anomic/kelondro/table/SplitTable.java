@@ -90,7 +90,7 @@ public class SplitTable implements ObjectIndex {
             final String tablename, 
             final Row rowdef,
             final boolean resetOnFail) {
-        this(path, tablename, rowdef, BLOBArray.oneMonth, BLOBArray.oneGigabyte, resetOnFail);
+        this(path, tablename, rowdef, BLOBArray.oneMonth, (long) Integer.MAX_VALUE, resetOnFail);
     }
 
     public SplitTable(
