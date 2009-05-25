@@ -52,6 +52,7 @@ import de.anomic.kelondro.util.SortStore;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.parser.Word;
 import de.anomic.plasma.parser.Condenser;
+import de.anomic.plasma.plasmaSearchRankingProcess.hostnaventry;
 import de.anomic.plasma.plasmaSnippetCache.MediaSnippet;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacySearch;
@@ -94,7 +95,8 @@ public final class plasmaSearchEvent {
     TreeSet<byte[]> snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     long urlRetrievalAllTime;
     long snippetComputationAllTime;
-    ResultURLs crawlResults;
+    public ResultURLs crawlResults;
+    public ArrayList<hostnaventry> hostNavigator;
     
     @SuppressWarnings("unchecked")
     private plasmaSearchEvent(final plasmaSearchQuery query,
@@ -135,6 +137,7 @@ public final class plasmaSearchEvent {
             (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
             // do a global search
             this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, max_results_preparation, 16);
+            this.hostNavigator = null;
             
             final int fetchpeers = 12;
 
@@ -171,6 +174,7 @@ public final class plasmaSearchEvent {
             // do a local search
             this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, max_results_preparation, 2);
             this.rankedCache.execQuery();
+            this.hostNavigator = rankedCache.getHostNavigator(10);
             //plasmaWordIndex.Finding finding = wordIndex.retrieveURLs(query, false, 2, ranking, process);
             
             if (generateAbstracts) {
@@ -230,6 +234,7 @@ public final class plasmaSearchEvent {
             // so following sortings together with the global results will be fast
             try {
                 rankedCache.execQuery();
+                hostNavigator = rankedCache.getHostNavigator(10);
             } catch (final Exception e) {
                 e.printStackTrace();
             }
@@ -563,51 +568,15 @@ public final class plasmaSearchEvent {
         Log.logInfo("search", "sorted out hash " + urlhash + " during search: " + reason);
     }
     
-    /*
-    public ResultEntry oneResult(final int item) {
-    	return oneResult(item, System.currentTimeMillis() + 100);
+    public ArrayList<hostnaventry> getHostNavigator(int maxentries) {
+    	if (this.hostNavigator != null) return this.hostNavigator;
+    	if (localSearchThread != null && localSearchThread.isAlive()) {
+             try {Thread.sleep(100L);} catch (final InterruptedException e) {}
+        }
+    	this.hostNavigator = rankedCache.getHostNavigator(10);
+    	if (this.hostNavigator.size() == 0) this.hostNavigator = null;
+    	return this.hostNavigator;
     }
-    
-    public ResultEntry oneResult(final int item, long timeout) {
-        // check if we already retrieved this item (happens if a search pages is accessed a second time)
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "obtain one result entry - start", 0, 0));
-        if (this.result.sizeStore() > item) {
-            // we have the wanted result already in the result array .. return that
-            return this.result.element(item).element;
-        }
-        
-        if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
-            (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
-            // this is a search using remote search threads. Also the local search thread is started as background process
-            while (
-            	localSearchThread != null &&
-            	localSearchThread.isAlive() &&
-            	System.currentTimeMillis() < timeout) {
-                // in case that the local search takes longer than some other remote search requests, 
-                // do some sleeps to give the local process a chance to contribute
-                try {Thread.sleep(10);} catch (final InterruptedException e) {}
-            }
-            // now wait until as many remote worker threads have finished, as we want to display results
-            while (
-            	this.primarySearchThreads != null &&
-            	anyWorkerAlive() &&
-            	countWorkerFinished() <= item &&
-            	System.currentTimeMillis() < timeout &&
-                (result.size() <= item || countFinishedRemoteSearch() <= item)) {
-                try {Thread.sleep(10);} catch (final InterruptedException e) {}
-            }
-            
-        }
-        // finally wait until enough results are there produced from the snippet fetch process
-        while (anyWorkerAlive() && result.size() <= item) {
-            try {Thread.sleep(10);} catch (final InterruptedException e) {}
-        }
-        
-        // finally, if there is something, return the result
-        if (this.result.size() <= item) return null;
-        return this.result.element(item).element;
-    }
-     */
     
     public ResultEntry oneResult(final int item) {
         // check if we already retrieved this item (happens if a search

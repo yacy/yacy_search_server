@@ -28,6 +28,7 @@
 // if the shell's current path is HTROOT
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
 
@@ -47,6 +48,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.parser.Word;
 import de.anomic.plasma.parser.Condenser;
+import de.anomic.plasma.plasmaSearchRankingProcess.hostnaventry;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
@@ -464,7 +466,7 @@ public class yacysearch {
                 resnav.append(navurla(thispage - 1, display, theQuery, originalUrlMask));
                 resnav.append("<strong>&lt;</strong></a>&nbsp;");
                 */
-            	resnav.append(navurla(thispage - 1, display, theQuery, originalUrlMask));
+            	resnav.append(navurla(thispage - 1, display, theQuery, originalUrlMask, null));
             	resnav.append("<img src=\"env/grafics/navdl.gif\" width=\"16\" height=\"16\"></a>&nbsp;");
             }
             final int numberofpages = Math.min(10, Math.max(thispage + 2, totalcount / theQuery.displayResults()));
@@ -484,7 +486,7 @@ public class yacysearch {
                     resnav.append(i + 1);
                     resnav.append("</a>&nbsp;");
                     */
-                	resnav.append(navurla(i, display, theQuery, originalUrlMask));
+                	resnav.append(navurla(i, display, theQuery, originalUrlMask, null));
                 	resnav.append("<img src=\"env/grafics/navd");
                 	resnav.append(i + 1);
                 	resnav.append(".gif\" width=\"16\" height=\"16\"></a>&nbsp;");
@@ -498,12 +500,26 @@ public class yacysearch {
                 resnav.append(navurla(thispage + 1, display, theQuery, originalUrlMask));
                 resnav.append("<strong>&gt;</strong></a>");
                 */
-            	resnav.append(navurla(thispage + 1, display, theQuery, originalUrlMask));
+            	resnav.append(navurla(thispage + 1, display, theQuery, originalUrlMask, null));
             	resnav.append("<img src=\"env/grafics/navdr.gif\" width=\"16\" height=\"16\"></a>");
             }
             prop.put("num-results_resnav", resnav.toString());
+            
+            // compose search navigation
+            ArrayList<hostnaventry> hostNavigator = theSearch.getHostNavigator(10);
+            if (hostNavigator == null) {
+            	prop.put("navigation", 0);
+            } else {
+            	prop.put("navigation", 1);
+            	hostnaventry entry;
+            	for (int i = 0; i < hostNavigator.size(); i++) {
+            		entry = hostNavigator.get(i);
+            		prop.put("navigation_domains_" + i + "_domain", navurla(thispage, display, theQuery, originalUrlMask, "site:" + entry.host) + entry.host + " (" + entry.count + ")</a>");
+            	}
+            	prop.put("navigation_domains", hostNavigator.size());
+            }
         
-            // generate the search result lines; they will be produced by another servlet
+            // generate the search result lines; the content will be produced by another servlet
             for (int i = 0; i < theQuery.displayResults(); i++) {
                 prop.put("results_" + i + "_item", offset + i);
                 prop.put("results_" + i + "_eventID", theQuery.id(false));
@@ -573,10 +589,10 @@ public class yacysearch {
     /**
      * generates the page navigation bar
      */
-    private static String navurla(final int page, final int display, final plasmaSearchQuery theQuery, final String originalUrlMask) {
+    private static String navurla(final int page, final int display, final plasmaSearchQuery theQuery, final String originalUrlMask, String addToQuery) {
         return
         "<a href=\"yacysearch.html?display=" + display +
-        "&amp;search=" + theQuery.queryString(true) +
+        "&amp;search=" + theQuery.queryString(true) + ((addToQuery == null) ? "" : "+" + addToQuery) +
         "&amp;maximumRecords="+ theQuery.displayResults() +
         "&amp;startRecord=" + (page * theQuery.displayResults()) +
         "&amp;resource=" + ((theQuery.isLocal()) ? "local" : "global") +

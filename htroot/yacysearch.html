@@ -120,17 +120,18 @@ document.getElementById("Enter").value = "search again";
 var progressbar = new Progressbar(#[results]#, document.getElementById("results"));
 </script>
 
-#(display)#
-::
-::
+#(navigation)#
 ::
 <div id="sidebar" style="float: right;">
- <h3><a href="#">Sidebar-1</a></h3>
- <p>Sidebar-1 TEXT TEXT</p>
-  <h3><a href="#">Sidebar-2</a></h3>
- <p>Sidebar-2 TEXT TEXT</p>
+ <h3><a href="#">Navigation</a></h3>
+ <h4><a href="#">Domains</a></h4>
+ <ul>
+#{domains}#
+<li>#[domain]#</li>
+#{/domains}#
+ </ul>
 </div>
-#(/display)#
+#(/navigation)#
 
 <!-- linklist begin -->
 #(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</tr>#(/resultTable)#

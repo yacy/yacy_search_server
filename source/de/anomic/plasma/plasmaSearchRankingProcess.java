@@ -74,6 +74,7 @@ public final class plasmaSearchRankingProcess {
     private final plasmaWordIndex wordIndex;
     private HashMap<byte[], ReferenceContainer<WordReference>>[] localSearchContainerMaps;
     private final int[] domZones;
+    private HashMap<String, hoststat> hostNavigator;
     
     public plasmaSearchRankingProcess(
             final plasmaWordIndex wordIndex,
@@ -101,6 +102,7 @@ public final class plasmaSearchRankingProcess {
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
         this.domZones = new int[8];
+        this.hostNavigator = new HashMap<String, hoststat>();
         for (int i = 0; i < 8; i++) {this.domZones[i] = 0;}
     }
     
@@ -158,6 +160,8 @@ public final class plasmaSearchRankingProcess {
         final Iterator<WordReferenceVars> i = decodedEntries.iterator();
         WordReferenceVars iEntry;
         Long r;
+        hoststat hs;
+        String domhash;
         while (i.hasNext()) {
             iEntry = i.next();
             assert (iEntry.metadataHash().length() == index.row().primaryKeyLength);
@@ -196,12 +200,16 @@ public final class plasmaSearchRankingProcess {
             }
             
             // count domZones
-            /*
-            indexURLEntry uentry = wordIndex.loadedURL.load(iEntry.urlHash, iEntry, 0); // this eats up a lot of time!!!
-            yacyURL uurl = (uentry == null) ? null : uentry.comp().url();
-            System.out.println("DEBUG domDomain dom=" + ((uurl == null) ? "null" : uurl.getHost()) + ", zone=" + yacyURL.domDomain(iEntry.urlHash()));
-            */
             this.domZones[yacyURL.domDomain(iEntry.metadataHash())]++;
+            
+            // get statistics for host navigator
+            domhash = iEntry.urlHash.substring(6);
+            hs = this.hostNavigator.get(domhash);
+            if (hs == null) {
+            	this.hostNavigator.put(domhash, new hoststat(iEntry.urlHash));
+            } else {
+            	hs.inc();
+            }
             
             // insert
             if ((maxentries < 0) || (stack.size() < maxentries)) {
@@ -224,6 +232,51 @@ public final class plasmaSearchRankingProcess {
         
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
+    }
+    
+    public class hoststat {
+    	public int count;
+    	public String hashsample;
+    	public hoststat(String urlhash) {
+    		this.count = 1;
+    		this.hashsample = urlhash;
+    	}
+    	public void inc() {
+    		this.count++;
+    	}
+    }
+    
+    public class hostnaventry {
+    	public int count;
+    	public String host;
+    	public hostnaventry(String host, int count) {
+    		this.host = host;
+    		this.count = count;
+    	}
+    }
+    
+    public ArrayList<hostnaventry> getHostNavigator(int maxentries) {
+    	ScoreCluster<String> score = new ScoreCluster<String>();
+    	for (Map.Entry<String, hoststat> hsentry: this.hostNavigator.entrySet()) {
+    		score.addScore(hsentry.getKey(), hsentry.getValue().count);
+    	}
+    	int rc = Math.min(maxentries, score.size());
+    	ArrayList<hostnaventry> result = new ArrayList<hostnaventry>();
+    	String hosthash;
+    	hoststat hs;
+    	URLMetadataRow mr;
+    	yacyURL url;
+    	for (int i = 0; i < rc; i++) {
+    		hosthash = score.getMaxObject();
+    		hs = this.hostNavigator.get(hosthash);
+    		mr = wordIndex.metadata().load(hs.hashsample, null, 0);
+    		if (mr == null) continue;
+    		url = mr.metadata().url();
+    		if (url == null) continue;
+    		result.add(new hostnaventry(url.getHost(), score.getScore(hosthash)));
+    		score.deleteScore(hosthash);
+    	}
+    	return result;
     }
 
     private boolean testFlags(final WordReference ientry) {
