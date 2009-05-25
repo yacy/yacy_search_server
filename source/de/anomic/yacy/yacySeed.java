@@ -578,7 +578,7 @@ public class yacySeed implements Cloneable {
     }
 
     public Set<String> getPeerTags() {
-        return serverCodings.string2set(get(PEERTAGS, ""), "|");
+        return serverCodings.string2set(get(PEERTAGS, "*"), "|");
     }
 
     public boolean matchPeerTags(final TreeSet<byte[]> searchHashes) {
