@@ -43,6 +43,19 @@ public class DCEntry extends HashMap<String, String> {
         super();
     }
     
+    public DCEntry(
+            yacyURL url,
+            String title,
+            String author,
+            String body
+            ) {
+        super();
+        this.put("url", url.toNormalform(true, false));
+        this.put("title", title);
+        this.put("author", author);
+        this.put("body", body);
+    }
+    
     /*
     DC according to rfc 5013
 
@@ -96,6 +109,14 @@ public class DCEntry extends HashMap<String, String> {
     public String title() {
         String t = this.get("title");
         if (t == null) t = this.get("dc:Title");
+        t = stripCDATA(t);
+        if (t == null) return "";
+        return t;
+    }
+    
+    public String author() {
+        String t = this.get("author");
+        if (t == null) t = this.get("dc:Creator");
         t = stripCDATA(t);
         if (t == null) return "";
         return t;
