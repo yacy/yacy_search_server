@@ -29,6 +29,8 @@ package de.anomic.plasma;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -246,6 +248,14 @@ public final class plasmaSearchRankingProcess {
     	}
     }
     
+    public static final Comparator<hoststat> hscomp = new Comparator<hoststat>() {
+		public int compare(hoststat o1, hoststat o2) {
+			if (o1.count < o2.count) return 1;
+			if (o2.count < o1.count) return -1;
+			return 0;
+		}
+    };
+    
     public class hostnaventry {
     	public int count;
     	public String host;
@@ -256,25 +266,18 @@ public final class plasmaSearchRankingProcess {
     }
     
     public ArrayList<hostnaventry> getHostNavigator(int maxentries) {
-    	ScoreCluster<String> score = new ScoreCluster<String>();
-    	for (Map.Entry<String, hoststat> hsentry: this.hostNavigator.entrySet()) {
-    		score.addScore(hsentry.getKey(), hsentry.getValue().count);
-    	}
-    	int rc = Math.min(maxentries, score.size());
+    	hoststat[] hsa = this.hostNavigator.values().toArray(new hoststat[this.hostNavigator.size()]);
+    	Arrays.sort(hsa, hscomp);
+    	int rc = Math.min(maxentries, hsa.length);
     	ArrayList<hostnaventry> result = new ArrayList<hostnaventry>();
-    	String hosthash;
-    	hoststat hs;
     	URLMetadataRow mr;
     	yacyURL url;
     	for (int i = 0; i < rc; i++) {
-    		hosthash = score.getMaxObject();
-    		hs = this.hostNavigator.get(hosthash);
-    		mr = wordIndex.metadata().load(hs.hashsample, null, 0);
+    		mr = wordIndex.metadata().load(hsa[i].hashsample, null, 0);
     		if (mr == null) continue;
     		url = mr.metadata().url();
     		if (url == null) continue;
-    		result.add(new hostnaventry(url.getHost(), score.getScore(hosthash)));
-    		score.deleteScore(hosthash);
+    		result.add(new hostnaventry(url.getHost(), hsa[i].count));
     	}
     	return result;
     }
