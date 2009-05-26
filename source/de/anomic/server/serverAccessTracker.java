@@ -78,7 +78,12 @@ public class serverAccessTracker {
     }
 
     private SortedMap<Long, String> clearTooOldAccess(final SortedMap<Long, String> access) {
-        return access.tailMap(Long.valueOf(System.currentTimeMillis() - maxTrackingTime));
+        try {
+            return access.tailMap(Long.valueOf(System.currentTimeMillis() - maxTrackingTime));
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            return new TreeMap<Long, String>();
+        }
     }
     
     public void track(final String host, String accessPath) {
