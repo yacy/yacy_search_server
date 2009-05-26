@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import de.anomic.content.RSSMessage;
 import de.anomic.data.Blacklist;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
@@ -43,7 +44,6 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.xml.RSSFeed;
-import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;

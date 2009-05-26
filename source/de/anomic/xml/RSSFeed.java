@@ -31,6 +31,8 @@ import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import de.anomic.content.RSSMessage;
+
 public class RSSFeed implements Iterable<RSSMessage> {
 
     // static channel names of feeds

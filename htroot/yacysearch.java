@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
 
+import de.anomic.content.RSSMessage;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
@@ -57,7 +58,6 @@ import de.anomic.server.serverSwitch;
 import de.anomic.tools.iso639;
 import de.anomic.tools.Formatter;
 import de.anomic.xml.RSSFeed;
-import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;

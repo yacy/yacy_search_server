@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.anomic.content.RSSMessage;
 import de.anomic.http.httpClient;
 import de.anomic.kelondro.table.FlexWidthArray;
 import de.anomic.kelondro.util.DateFormatter;
@@ -47,7 +48,6 @@ import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.parser.Document;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.xml.RSSFeed;
-import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;

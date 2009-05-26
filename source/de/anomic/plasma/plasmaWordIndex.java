@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import de.anomic.content.RSSMessage;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.IndexingStack;
 import de.anomic.data.Blacklist;
@@ -60,7 +61,6 @@ import de.anomic.plasma.parser.Word;
 import de.anomic.plasma.parser.Condenser;
 import de.anomic.tools.iso639;
 import de.anomic.xml.RSSFeed;
-import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 

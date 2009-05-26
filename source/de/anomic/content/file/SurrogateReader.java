@@ -22,7 +22,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.xml;
+package de.anomic.content.file;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -40,18 +40,18 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import de.anomic.crawler.Surrogate;
+import de.anomic.content.DCEntry;
 
 public class SurrogateReader extends DefaultHandler implements Runnable {
 
-	public static final Surrogate poison = new Surrogate();
+	public static final DCEntry poison = new DCEntry();
 	
     // class variables
     private final StringBuilder buffer;
     private boolean parsingValue;
-    private Surrogate surrogate;
+    private DCEntry surrogate;
     private String elementName;
-    private BlockingQueue<Surrogate> surrogates;
+    private BlockingQueue<DCEntry> surrogates;
     private SAXParser saxParser;
     private InputStream stream;
     
@@ -60,7 +60,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         this.parsingValue = false;
         this.surrogate = null;
         this.elementName = null;
-        this.surrogates = new ArrayBlockingQueue<Surrogate>(queueSize);
+        this.surrogates = new ArrayBlockingQueue<DCEntry>(queueSize);
         this.stream = stream;
         final SAXParserFactory factory = SAXParserFactory.newInstance();
         try {
@@ -97,7 +97,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     
     public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
         if ("record".equals(tag) || "document".equals(tag)) {
-            this.surrogate = new Surrogate();
+            this.surrogate = new DCEntry();
         } else if ("element".equals(tag)) {
             this.elementName = atts.getValue("name");
         } else if ("value".equals(tag)) {
@@ -151,7 +151,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         }
     }
 
-    public Surrogate take() {
+    public DCEntry take() {
         try {
             return this.surrogates.take();
         } catch (InterruptedException e) {
@@ -168,7 +168,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
 
             Thread t = new Thread(sr, "Surrogate-Reader " + f.getAbsolutePath());
             t.start();
-            Surrogate s;
+            DCEntry s;
             System.out.println("1");
             while ((s = sr.take()) != SurrogateReader.poison) {
                 System.out.println("Title: " + s.title());

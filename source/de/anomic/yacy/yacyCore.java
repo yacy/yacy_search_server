@@ -51,13 +51,13 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import de.anomic.content.RSSMessage;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
 import de.anomic.xml.RSSFeed;
-import de.anomic.xml.RSSMessage;
 import de.anomic.yacy.dht.PeerSelection;
 
 public class yacyCore {

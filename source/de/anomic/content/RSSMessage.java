@@ -25,7 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-package de.anomic.xml;
+package de.anomic.content;
 
 import java.util.Date;
 import java.util.HashMap;

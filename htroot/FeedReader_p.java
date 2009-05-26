@@ -24,12 +24,12 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import de.anomic.content.RSSMessage;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 import de.anomic.xml.RSSFeed;
-import de.anomic.xml.RSSMessage;
 import de.anomic.xml.RSSReader;
 import de.anomic.yacy.yacyURL;
 

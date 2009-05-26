@@ -111,6 +111,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import de.anomic.content.DCEntry;
+import de.anomic.content.file.SurrogateReader;
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlQueues;
@@ -124,7 +126,6 @@ import de.anomic.crawler.ResourceObserver;
 import de.anomic.crawler.ResultImages;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.RobotsTxt;
-import de.anomic.crawler.Surrogate;
 import de.anomic.crawler.ZURL;
 import de.anomic.crawler.CrawlProfile.entry;
 import de.anomic.crawler.IndexingStack.QueueEntry;
@@ -174,7 +175,6 @@ import de.anomic.server.serverSystem;
 import de.anomic.server.serverThread;
 import de.anomic.tools.crypt;
 import de.anomic.tools.CryptoLib;
-import de.anomic.xml.SurrogateReader;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
@@ -1220,7 +1220,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             SurrogateReader reader = new SurrogateReader(new BufferedInputStream(new FileInputStream(surrogateFile)), 3);
             Thread readerThread = new Thread(reader, "Surrogate-Reader " + surrogateFile.getAbsolutePath());
             readerThread.start();
-            Surrogate surrogate;
+            DCEntry surrogate;
             QueueEntry queueentry;
             while ((surrogate = reader.take()) != SurrogateReader.poison) {
                 // check if url is in accepted domain

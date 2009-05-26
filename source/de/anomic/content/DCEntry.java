@@ -1,4 +1,4 @@
-// Surrogate.java
+// DCEntry.java
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 15.04.2009 on http://yacy.net
 //
@@ -23,7 +23,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-package de.anomic.crawler;
+package de.anomic.content;
 
 import java.net.MalformedURLException;
 import java.text.ParseException;
@@ -35,10 +35,11 @@ import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.yacy.yacyURL;
 
-public class Surrogate extends HashMap<String, String> {
+public class DCEntry extends HashMap<String, String> {
+    
     private static final long serialVersionUID = -2050291583515701559L;
 
-    public Surrogate() {
+    public DCEntry() {
         super();
     }
     
@@ -73,6 +74,7 @@ public class Surrogate extends HashMap<String, String> {
             return new Date();
         }
     }
+    
     public yacyURL url() {
         String u = this.get("url");
         if (u == null) u = this.get("dc:Identifier");
@@ -84,11 +86,13 @@ public class Surrogate extends HashMap<String, String> {
             return null;
         }
     }
+    
     public String language() {
         String l = this.get("language");
         if (l == null) l = this.get("dc:Language");
         if (l == null) return "en"; else return l;
     }
+    
     public String title() {
         String t = this.get("title");
         if (t == null) t = this.get("dc:Title");
@@ -96,6 +100,7 @@ public class Surrogate extends HashMap<String, String> {
         if (t == null) return "";
         return t;
     }
+    
     public String body() {
         String t = this.get("body");
         if (t == null) t = this.get("dc:Description");
@@ -103,6 +108,7 @@ public class Surrogate extends HashMap<String, String> {
         if (t == null) return "";
         return t;
     }
+    
     public String[] categories() {
         String t = this.get("categories");
         if (t == null) this.get("dc:Subject");
@@ -110,6 +116,7 @@ public class Surrogate extends HashMap<String, String> {
         if (t == null) return new String[]{};
         return t.split(";");
     }
+    
     private String stripCDATA(String s) {
         if (s == null) return null;
         s = s.trim();
@@ -117,6 +124,7 @@ public class Surrogate extends HashMap<String, String> {
         if (s.endsWith("]]")) s = s.substring(0, s.length() - 2);
         return s;
     }
+    
     public plasmaParserDocument document() {
         HashSet<String> languages = new HashSet<String>();
         languages.add(language());
