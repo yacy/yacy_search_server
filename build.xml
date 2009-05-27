@@ -13,7 +13,7 @@
 # This Software is Copyrighted
 # (C) by Michael Peter Christen; mc@yacy.net
 # first published on http://yacy.net
-# Frankfurt, Germany, 2005-2007
+# Frankfurt, Germany, 2005-2009
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -194,6 +194,7 @@
       <pathelement location="${lib}/servlet-api.jar" />
       <pathelement location="${lib}/xerces.jar" />
       <pathelement location="${lib}/bzip2.jar" />
+      <pathelement location="${lib}/mysql-connector-java-5.1.7-bin.jar" />
       <!-- upnp (+ commons-logging) -->
       <pathelement location="${lib}/sbbi-upnplib-1.0.4.jar" />
       <pathelement location="${lib}/commons-jxpath-1.1.jar" />
@@ -918,6 +919,7 @@
         <pathelement location="${lib}/servlet-api.jar" />
         <pathelement location="${lib}/sbbi-upnplib-1.0.4.jar" />
         <pathelement location="${lib}/commons-jxpath-1.1.jar" />
+        <pathelement location="${lib}/mysql-connector-java-5.1.7-bin.jar" />
         <pathelement location="${libx}" />
         <fileset dir="${libx}" includes="**/*.jar" />
       </classpath>
