@@ -25,6 +25,9 @@
 
 package de.anomic.content;
 
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
 import java.util.Date;
@@ -37,23 +40,26 @@ import de.anomic.yacy.yacyURL;
 
 public class DCEntry extends HashMap<String, String> {
     
-    private static final long serialVersionUID = -2050291583515701559L;
-
+    private static final long    serialVersionUID = -2050291583515701559L;
+    public  static final DCEntry poison           = new DCEntry();
+    
     public DCEntry() {
         super();
     }
     
     public DCEntry(
             yacyURL url,
+            Date date,
             String title,
             String author,
             String body
             ) {
         super();
         this.put("url", url.toNormalform(true, false));
-        this.put("title", title);
-        this.put("author", author);
-        this.put("body", body);
+        this.put("dc:Date", DateFormatter.formatISO8601(date));
+        this.put("dc:Title", title);
+        this.put("dc:Creator", author);
+        this.put("dc:Description", body);
     }
     
     /*
@@ -103,7 +109,7 @@ public class DCEntry extends HashMap<String, String> {
     public String language() {
         String l = this.get("language");
         if (l == null) l = this.get("dc:Language");
-        if (l == null) return "en"; else return l;
+        if (l == null) return url().language(); else return l;
     }
     
     public String title() {
@@ -150,9 +156,30 @@ public class DCEntry extends HashMap<String, String> {
         HashSet<String> languages = new HashSet<String>();
         languages.add(language());
         
-        return new plasmaParserDocument(url(), "text/html", "utf-8", languages,
-                                categories(), title(), "",
-                                null, "",
-                                body().getBytes(), null, null);
+        try {
+            return new plasmaParserDocument(
+                url(),
+                "text/html",
+                "UTF-8",
+                languages,
+                categories(),
+                title(),
+                author(),
+                null,
+                "",
+                body().getBytes("UTF-8"),
+                null,
+                null);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    
+    public void writeXML(OutputStreamWriter os) throws IOException {
+        plasmaParserDocument doc = document();
+        if (doc != null) {
+            doc.writeXML(os, this.date());
+        }
     }
 }

@@ -24,8 +24,9 @@
 
 package de.anomic.content.dao;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.Date;
+import java.util.concurrent.BlockingQueue;
 
 import de.anomic.content.DCEntry;
 
@@ -37,25 +38,27 @@ public interface Dao {
     // item-oriented retrieval
     
     /**
-     * get the maximum number of items in the database
+     * get the maximum number of possible DCEntry items in the database
      */
-    public int maxItems();
+    public int size();
     
     /**
      * retrieve a single item from the database
      * @param item
-     * @return
+     * @return a single result entry in Dublin Core format
      */
     public DCEntry get(int item);
     
     /**
-     * retrieve a list of entries in the database;
-     * the object denoted with until is not contained in the list
-     * @param from
-     * @param until
-     * @return
+     * retrieve a set of entries in the database;
+     * the object denoted with until is not contained in the result set
+     * all retrieved objects are pushed concurrently to a blocking queue
+     * @param from the first id
+     * @param until the limit of the last id (the id is not included)
+     * @param queueSize the maximum number of entries in the blocing queue
+     * @return a quere where the results are written in concurrently
      */
-    public ArrayList<DCEntry> get(int from, int until);
+    public BlockingQueue<DCEntry> query(int from, int until, int queueSize);
     
     
     // date-oriented retrieval
@@ -63,20 +66,38 @@ public interface Dao {
     /**
      * return the date of the first entry
      */
-    public Date firstEntry();
+    public Date first();
     
     /**
      * return the date of the latest entry
-     * @return
+     * @return the date of the latest entry
      */
-    public Date latestEntry();
+    public Date latest();
     
     /**
-     * get a list of entries in the database;
-     * the returned list contains all entries up to the most recent
+     * retrieve a set of entries in the database;
+     * the result set contains all entries up to the most recent
+     * all retrieved objects are pushed to the blocking queue
      * @param from
-     * @return
+     * @return a quere where the results are written in concurrently
      */
-    public ArrayList<DCEntry> get(Date from);
+    public BlockingQueue<DCEntry> query(Date from, int queueSize);
     
+    
+    // export methods
+    
+    public int writeSurrogates(
+                            BlockingQueue<DCEntry> queue,
+                            File targetdir,
+                            String versioninfo,
+                            int maxEntriesInFile
+                        );
+    
+    // workflow
+    
+    /**
+     * close the connection to the database
+     */
+    public void close();
+
 }

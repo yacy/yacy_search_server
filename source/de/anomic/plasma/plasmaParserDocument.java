@@ -467,6 +467,7 @@ dc_rights
         os.write("<record>\n");
         os.write("<dc:Title><![CDATA[" + this.dc_title() + "]]></dc:Title>\n");
         os.write("<dc:Identifier>" + this.dc_identifier() + "</dc:Identifier>\n");
+        os.write("<dc:Creator><![CDATA[" + this.dc_creator() + "]]></dc:Creator>\n");
         os.write("<dc:Description><![CDATA[");
         byte[] buffer = new byte[1000];
         int c = 0;

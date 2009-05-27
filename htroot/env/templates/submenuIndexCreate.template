@@ -1,10 +1,10 @@
 <div class="SubMenu">
-  <h3>Web Crawler Control</h3>
+  <h3>Content Integration</h3>
 </div>
 <div class="SubMenu">
 
   <div class="SubMenugroup">
-    <h3>Start a Web Crawl</h3>
+    <h3>Web Crawler</h3>
     <ul class="SubMenu">
       <li><a href="/CrawlStart_p.html" class="MenuItemLink lock">Crawl Start</a></li>
       <li><a href="/CrawlProfileEditor_p.html" class="MenuItemLink lock">Crawl Profile Editor</a></li>
@@ -27,6 +27,13 @@
     <ul class="SubMenu">
       <li><a href="/IndexCreateLoaderQueue_p.html" class="MenuItemLink lock">Loader</a></li>
       <li><a href="/IndexCreateIndexingQueue_p.html" class="MenuItemLink lock">Indexing</a></li>
+    </ul>
+  </div>
+  
+  <div class="SubMenugroup">
+    <h3>Database Import</h3>
+    <ul class="SubMenu">
+      <li><a href="/ContentIntegrationPHPBB3_p.html" class="MenuItemLink lock">phpBB3 forum</a></li>
     </ul>
   </div>
   

@@ -643,13 +643,13 @@ public final class httpdFileHandler {
 
                     InputStream is = new BufferedInputStream(p.getInputStream());
 
-                    StringBuilder stringBuffer = new StringBuilder(1024);
+                    StringBuilder StringBuilder = new StringBuilder(1024);
 
                     while (is.available() > 0) {
-                    	stringBuffer.append((char) is.read());
+                        StringBuilder.append((char) is.read());
                     }
 
-                    String cgiReturn = stringBuffer.toString();
+                    String cgiReturn = StringBuilder.toString();
                     int indexOfDelimiter = cgiReturn.indexOf("\n\n");
                     String[] cgiHeader = new String[0];
                     if (indexOfDelimiter > -1) {

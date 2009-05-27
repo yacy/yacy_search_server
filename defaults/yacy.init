@@ -899,3 +899,13 @@ cgi.suffixes = cgi,pl
 
 # whether this is a version for a web browser
 browserintegration = false
+
+# content integration settings
+content.phpbb3.urlstub = http://<mydomain>/
+content.phpbb3.dbtype = mysql
+content.phpbb3.dbhost = localhost
+content.phpbb3.dbport = 3306
+content.phpbb3.dbname = forum
+content.phpbb3.dbuser = notroot
+content.phpbb3.dbpw = joshua
+content.phpbb3.ppf = 1000
