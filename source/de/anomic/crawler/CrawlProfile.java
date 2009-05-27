@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.BLOBHeap;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
@@ -67,8 +66,8 @@ public class CrawlProfile {
     public CrawlProfile(final File file) throws IOException {
         this.profileTableFile = file;
         profileTableFile.getParentFile().mkdirs();
-        final BLOB dyn = new BLOBHeap(profileTableFile, yacySeedDB.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
-        profileTable = new MapView(dyn, 500);
+        final BLOBHeap dyn = new BLOBHeap(profileTableFile, yacySeedDB.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
+        profileTable = new MapView(dyn, 500, '_');
     }
     
     public void clear() {
@@ -76,13 +75,13 @@ public class CrawlProfile {
         if (profileTable != null) profileTable.close();
         FileUtils.deletedelete(profileTableFile);
         profileTableFile.getParentFile().mkdirs();
-        BLOB dyn = null;
+        BLOBHeap dyn = null;
         try {
             dyn = new BLOBHeap(profileTableFile, yacySeedDB.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        profileTable = new MapView(dyn, 500);
+        profileTable = new MapView(dyn, 500, '_');
     }
     
     public void close() {

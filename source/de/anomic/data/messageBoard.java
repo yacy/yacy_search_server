@@ -51,10 +51,11 @@ public class messageBoard {
     MapView database = null;
     private int sn = 0;
 
-    public messageBoard(final File path) {
+    public messageBoard(final File path, final File pathNew) throws IOException {
         new File(path.getParent()).mkdir();
+        new File(pathNew.getParent()).mkdir();
         if (database == null) {
-            database = new MapView(new BLOBTree(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
+            database = new MapView(BLOBTree.toHeap(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', NaturalOrder.naturalOrder, true, false, false, pathNew), 500, '_');
         }
         sn = 0;
     }

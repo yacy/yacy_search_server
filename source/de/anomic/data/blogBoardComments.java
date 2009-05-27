@@ -60,28 +60,34 @@ public class blogBoardComments {
     private static final int recordSize = 512;
 
     static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
-
     static {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
+    
     private MapView database = null;
-    public blogBoardComments(final File actpath) {
-    		new File(actpath.getParent()).mkdir();
+    
+    public blogBoardComments(final File actpath, final File newFile) throws IOException {
+        new File(actpath.getParent()).mkdir();
+        new File(newFile.getParent()).mkdir();
         if (database == null) {
-            database = new MapView(new BLOBTree(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, false, false, false), 500);
+            database = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, false, false, false, newFile), 500, '_');
         }
     }
+    
     public int size() {
         return database.size();
     }
+    
     public void close() {
         database.close();
     }
+    
     static String dateString(final Date date) {
         synchronized (SimpleFormatter) {
             return SimpleFormatter.format(date);
         }
     }
+    
     private static String normalize(final String key) {
         if (key == null) return "null";
         return key.trim().toLowerCase();

@@ -150,6 +150,8 @@ public class BLOBArray implements BLOB {
                } catch (ParseException e) {continue;}
             }
         }
+        
+        // open all blob files
         for (int i = 0; i < files.length; i++) {
             if (files[i].length() >= 22 && files[i].startsWith(prefix) && files[i].endsWith(".blob")) {
                 try {

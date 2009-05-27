@@ -43,7 +43,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.BLOBHeap;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.NaturalOrder;
@@ -71,13 +70,13 @@ public class RobotsTxt {
     public RobotsTxt(final File robotsTableFile) {
         this.robotsTableFile = robotsTableFile;
         robotsTableFile.getParentFile().mkdirs();
-        BLOB blob = null;
+        BLOBHeap blob = null;
         try {
             blob = new BLOBHeap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
         } catch (final IOException e) {
             e.printStackTrace();
         }
-        robotsTable = new MapView(blob, 100);
+        robotsTable = new MapView(blob, 100, '_');
         syncObjects = new ConcurrentHashMap<String, DomSync>();
     }
     
@@ -86,13 +85,13 @@ public class RobotsTxt {
         if (robotsTable != null) robotsTable.close();
         FileUtils.deletedelete(robotsTableFile);
         robotsTableFile.getParentFile().mkdirs();
-        BLOB blob = null;
+        BLOBHeap blob = null;
         try {
             blob = new BLOBHeap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
         } catch (final IOException e) {
             e.printStackTrace();
         }
-        robotsTable = new MapView(blob, 100);
+        robotsTable = new MapView(blob, 100, '_');
         syncObjects.clear();
     }
     

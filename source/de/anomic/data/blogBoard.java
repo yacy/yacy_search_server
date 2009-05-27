@@ -63,10 +63,11 @@ public class blogBoard {
     
     MapView database = null;
     
-    public blogBoard(final File actpath) {
-    		new File(actpath.getParent()).mkdir();
+    public blogBoard(final File actpath, final File newFile) throws IOException {
+        new File(actpath.getParent()).mkdir();
+        new File(newFile.getParent()).mkdir();
         if (database == null) {
-            database = new MapView(new BLOBTree(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
+            database = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, true, false, false, newFile), 500, '_');
         }
     }
     

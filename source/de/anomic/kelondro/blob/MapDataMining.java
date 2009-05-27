@@ -44,8 +44,8 @@ public class MapDataMining extends MapView {
     private HashMap<String, Object> accMap; // to store accumulations of specific fields
     
 	@SuppressWarnings("unchecked")
-	public MapDataMining(final BLOB dyn, final int cachesize, final String[] sortfields, final String[] longaccfields, final String[] doubleaccfields, final Method externalInitializer, final Object externalHandler) {
-        super(dyn, cachesize);
+	public MapDataMining(final BLOBHeap dyn, final int cachesize, final String[] sortfields, final String[] longaccfields, final String[] doubleaccfields, final Method externalInitializer, final Object externalHandler) {
+        super(dyn, cachesize, '_');
         
         // create fast ordering clusters and acc fields
         this.sortfields = sortfields;

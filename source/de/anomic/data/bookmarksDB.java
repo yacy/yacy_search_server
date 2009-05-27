@@ -108,22 +108,25 @@ public class bookmarksDB {
 	// bookmarksDB's class constructor
 	// ------------------------------------
 
-    public bookmarksDB(final File bookmarksFile, final File tagsFile, final File datesFile) {
+    public bookmarksDB(
+            final File bookmarksFile, final File bookmarksFileNew,
+            final File tagsFile, final File tagsFileNew,
+            final File datesFile, final File datesFileNew) throws IOException {
         // bookmarks
         tagCache=new TreeMap<String, Tag>();
         bookmarksFile.getParentFile().mkdirs();
         //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
-        this.bookmarksTable = new MapView(new BLOBTree(bookmarksFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, true, false, false), 1000);
+        this.bookmarksTable = new MapView(BLOBTree.toHeap(bookmarksFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, true, false, false, bookmarksFileNew), 1000, '_');
 
         // tags
         tagsFile.getParentFile().mkdirs();
         final boolean tagsFileExisted = tagsFile.exists();
-        this.tagsTable = new MapView(new BLOBTree(tagsFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, true, false, false), 500);
+        this.tagsTable = new MapView(BLOBTree.toHeap(tagsFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, true, false, false, tagsFileNew), 500, '_');
         if (!tagsFileExisted) rebuildTags();
 
         // dates
         final boolean datesExisted = datesFile.exists();
-        this.datesTable = new MapView(new BLOBTree(datesFile, true, true, 20, 256, '_', NaturalOrder.naturalOrder, true, false, false), 500);
+        this.datesTable = new MapView(BLOBTree.toHeap(datesFile, true, true, 20, 256, '_', NaturalOrder.naturalOrder, true, false, false, datesFileNew), 500, '_');
         if (!datesExisted) rebuildDates();
 
         // autoReCrawl

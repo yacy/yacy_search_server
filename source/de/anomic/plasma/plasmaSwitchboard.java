@@ -269,7 +269,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     private static plasmaSwitchboard sb = null;
     
-    public plasmaSwitchboard(final File rootPath, final String initPath, final String configPath, final boolean applyPro) {
+    public plasmaSwitchboard(final File rootPath, final String initPath, final String configPath, final boolean applyPro) throws IOException {
         super(rootPath, initPath, configPath, applyPro);
         serverProfiling.startSystemProfiling();
         sb=this;
@@ -438,7 +438,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // loading the robots.txt db
         this.log.logConfig("Initializing robots.txt DB");
-        final File robotsDBFile = new File(this.plasmaPath, plasmaSwitchboardConstants.DBFILE_CRAWL_ROBOTS);
+        final File robotsDBFile = new File(this.plasmaPath, "crawlRobotsTxt.heap");
         robots = new RobotsTxt(robotsDBFile);
         this.log.logConfig("Loaded robots.txt DB from file " + robotsDBFile.getName() +
         ", " + robots.size() + " entries" +
@@ -477,8 +477,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // Init User DB
         this.log.logConfig("Loading User DB");
-        final File userDbFile = new File(getRootPath(), plasmaSwitchboardConstants.DBFILE_USER);
-        this.userDB = new userDB(userDbFile);
+        final File userDbFileOld = new File(getRootPath(), "DATA/SETTINGS/user.db");
+        final File userDbFile = new File(getRootPath(), "DATA/SETTINGS/user.heap");
+        this.userDB = new userDB(userDbFileOld, userDbFile);
         this.log.logConfig("Loaded User DB from file " + userDbFile.getName() +
         ", " + this.userDB.size() + " entries" +
         ", " + ppRamString(userDbFile.length()/1024));
@@ -849,45 +850,55 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         setConfig(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, Math.max(30000, 3600000 / ppm));
     }
     
-    public void initMessages() {
+    public void initMessages() throws IOException {
         this.log.logConfig("Starting Message Board");
-        final File messageDbFile = new File(workPath, plasmaSwitchboardConstants.DBFILE_MESSAGE);
-        this.messageDB = new messageBoard(messageDbFile);
+        final File messageDbFileOld = new File(workPath, "message.db");
+        final File messageDbFile = new File(workPath, "message.heap");
+        this.messageDB = new messageBoard(messageDbFileOld, messageDbFile);
         this.log.logConfig("Loaded Message Board DB from file " + messageDbFile.getName() +
         ", " + this.messageDB.size() + " entries" +
         ", " + ppRamString(messageDbFile.length()/1024));
     }
     
-    public void initWiki() {
+    public void initWiki() throws IOException {
         this.log.logConfig("Starting Wiki Board");
-        final File wikiDbFile = new File(workPath, plasmaSwitchboardConstants.DBFILE_WIKI);
-        this.wikiDB = new wikiBoard(wikiDbFile, new File(workPath, plasmaSwitchboardConstants.DBFILE_WIKI_BKP));
+        final File wikiDbFileOld = new File(workPath, "wiki.db");
+        final File wikiDbFile = new File(workPath, "wiki.heap");
+        this.wikiDB = new wikiBoard(wikiDbFileOld, wikiDbFile, new File(workPath, "wiki-bkp.db"), new File(workPath, "wiki-bkp.heap"));
         this.log.logConfig("Loaded Wiki Board DB from file " + wikiDbFile.getName() +
         ", " + this.wikiDB.size() + " entries" +
         ", " + ppRamString(wikiDbFile.length()/1024));
     }
     
-    public void initBlog() {
+    public void initBlog() throws IOException {
         this.log.logConfig("Starting Blog");
-        final File blogDbFile = new File(workPath, plasmaSwitchboardConstants.DBFILE_BLOG);
-        this.blogDB = new blogBoard(blogDbFile);
+        final File blogDbFileOld = new File(workPath, "blog.db");
+        final File blogDbFile = new File(workPath, "blog.heap");
+        this.blogDB = new blogBoard(blogDbFileOld, blogDbFile);
         this.log.logConfig("Loaded Blog DB from file " + blogDbFile.getName() +
         ", " + this.blogDB.size() + " entries" +
         ", " + ppRamString(blogDbFile.length()/1024));
 
-        final File blogCommentDbFile = new File(workPath, plasmaSwitchboardConstants.DBFILE_BLOGCOMMENTS);
-        this.blogCommentDB = new blogBoardComments(blogCommentDbFile);
+        final File blogCommentDbFileOld = new File(workPath, "blogComment.db");
+        final File blogCommentDbFile = new File(workPath, "blogComment.heap");
+        this.blogCommentDB = new blogBoardComments(blogCommentDbFileOld, blogCommentDbFile);
         this.log.logConfig("Loaded Blog-Comment DB from file " + blogCommentDbFile.getName() +
         ", " + this.blogCommentDB.size() + " entries" +
         ", " + ppRamString(blogCommentDbFile.length()/1024));
     }
     
-    public void initBookmarks(){
+    public void initBookmarks() throws IOException{
         this.log.logConfig("Loading Bookmarks DB");
-        final File bookmarksFile = new File(workPath, plasmaSwitchboardConstants.DBFILE_BOOKMARKS);
-        final File tagsFile = new File(workPath, plasmaSwitchboardConstants.DBFILE_BOOKMARKS_TAGS);
-        final File datesFile = new File(workPath, plasmaSwitchboardConstants.DBFILE_BOOKMARKS_DATES);
-        this.bookmarksDB = new bookmarksDB(bookmarksFile, tagsFile, datesFile);
+        final File bookmarksFileOld = new File(workPath, "bookmarks.db");
+        final File tagsFileOld = new File(workPath, "bookmarkTags.db");
+        final File datesFileOld = new File(workPath, "bookmarkDates.db");
+        final File bookmarksFile = new File(workPath, "bookmarks.heap");
+        final File tagsFile = new File(workPath, "bookmarkTags.heap");
+        final File datesFile = new File(workPath, "bookmarkDates.heap");
+        this.bookmarksDB = new bookmarksDB(
+                bookmarksFileOld, bookmarksFile,
+                tagsFileOld, tagsFile,
+                datesFileOld, datesFile);
         this.log.logConfig("Loaded Bookmarks DB from files "+ bookmarksFile.getName()+ ", "+tagsFile.getName());
         this.log.logConfig(this.bookmarksDB.tagsSize()+" Tag, "+this.bookmarksDB.bookmarksSize()+" Bookmarks");
     }

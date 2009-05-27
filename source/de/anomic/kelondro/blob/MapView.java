@@ -52,14 +52,16 @@ public class MapView {
     private HashMap<String, Map<String, String>> cache;
     private final long startup;
     private final int cachesize;
+    private final char fillchar;
 
-    public MapView(final BLOB blob, final int cachesize) {
+    
+    public MapView(final BLOBHeap blob, final int cachesize, char fillchar) {
         this.blob = blob;
         this.cache = new HashMap<String, Map<String, String>>();
         this.cacheScore = new ScoreCluster<String>();
         this.startup = System.currentTimeMillis();
         this.cachesize = cachesize;
-        
+        this.fillchar = fillchar;
         /*
         // debug
         try {
@@ -103,15 +105,15 @@ public class MapView {
     }
 
     private static String map2string(final Map<String, String> map, final String comment) {
-        final Iterator<Map.Entry<String, String>> iter = map.entrySet().iterator();
-        Map.Entry<String, String> entry;
         final StringBuilder bb = new StringBuilder(map.size() * 40);
         bb.append("# ").append(comment).append("\r\n");
-        while (iter.hasNext()) {
-            entry = iter.next();
-            bb.append(entry.getKey()).append('=');
-            if (entry.getValue() != null) { bb.append(entry.getValue()); }
-            bb.append("\r\n");
+        for (Map.Entry<String, String> entry: map.entrySet()) {
+            if (entry.getValue() != null) {
+                bb.append(entry.getKey());
+                bb.append('=');
+                bb.append(entry.getValue());
+                bb.append("\r\n");
+             }
         }
         bb.append("# EOF\r\n");
         return bb.toString();
@@ -147,7 +149,7 @@ public class MapView {
         key = normalizeKey(key);
         
         // write entry
-        blob.put(key.getBytes(), map2string(newMap, "W" + DateFormatter.formatShortSecond() + " ").getBytes());
+        blob.put(key.getBytes("UTF-8"), map2string(newMap, "W" + DateFormatter.formatShortSecond() + " ").getBytes("UTF-8"));
 
         // check for space in cache
         checkCacheSpace();
@@ -202,7 +204,7 @@ public class MapView {
     
     private String normalizeKey(String key) {
     	if (key.length() > blob.keylength()) key = key.substring(0, blob.keylength());
-        while (key.length() < blob.keylength()) key += "_";
+        while (key.length() < blob.keylength()) key += fillchar;
         return key;
     }
 
@@ -215,13 +217,13 @@ public class MapView {
         Map<String, String> map = cache.get(key);
         if (map != null) return map;
 
-        // load map from kra
+        // load map
         if (!(blob.has(key.getBytes()))) return null;
         
         // read object
         final byte[] b = blob.get(key.getBytes());
         if (b == null) return null;
-        map = string2map(new String(b));
+        map = string2map(new String(b, "UTF-8"));
 
         if (storeCache) {
             // cache it also
@@ -330,7 +332,7 @@ public class MapView {
                 return null;
             }
             try {
-                final Map<String, String> obj = get(new String(nextKey));
+                final Map<String, String> obj = get(new String(nextKey, "UTF-8"));
                 if (obj == null) throw new kelondroException("no more elements available");
                 return obj;
             } catch (final IOException e) {
@@ -350,9 +352,9 @@ public class MapView {
         if (f.exists()) FileUtils.deletedelete(f);
         try {
             // make a blob
-            BLOB blob = new BLOBHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 1024);
+            BLOBHeap blob = new BLOBHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 1024);
             // make map
-            MapView map = new MapView(blob, 1024);
+            MapView map = new MapView(blob, 1024, '_');
             // put some values into the map
             Map<String, String> m = new HashMap<String, String>();
             m.put("k", "000"); map.put("123", m);
@@ -361,7 +363,7 @@ public class MapView {
             // iterate over keys
             Iterator<byte[]> i = map.keys(true, false);
             while (i.hasNext()) {
-                System.out.println("key: " + new String(i.next()));
+                System.out.println("key: " + new String(i.next(), "UTF-8"));
             }
             // clean up
             map.close();

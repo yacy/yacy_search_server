@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Random;
 
 import de.anomic.http.httpRequestHeader;
+import de.anomic.kelondro.blob.BLOBHeap;
 import de.anomic.kelondro.blob.BLOBTree;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
@@ -55,10 +56,11 @@ public final class userDB {
 	HashMap<String, String> ipUsers = new HashMap<String, String>();
     HashMap<String, Object> cookieUsers = new HashMap<String, Object>();
     
-    public userDB(final File userTableFile) {
-        this.userTableFile = userTableFile;
+    public userDB(final File userTableFile, final File userTableFileNew) throws IOException {
+        this.userTableFile = userTableFileNew;
         userTableFile.getParentFile().mkdirs();
-        this.userTable = new MapView(new BLOBTree(userTableFile, true, true, 128, 256, '_', NaturalOrder.naturalOrder, true, false, false), 10);
+        userTableFileNew.getParentFile().mkdirs();
+        this.userTable = new MapView(BLOBTree.toHeap(userTableFile, true, true, 128, 256, '_', NaturalOrder.naturalOrder, true, false, false, userTableFile), 10, '_');
     }
     
     void resetDatabase() {
@@ -66,7 +68,11 @@ public final class userDB {
         if (userTable != null) userTable.close();
         FileUtils.deletedelete(userTableFile);
         userTableFile.getParentFile().mkdirs();
-        userTable = new MapView(new BLOBTree(userTableFile, true, true, 256, 512, '_', NaturalOrder.naturalOrder, true, false, false), 10);
+        try {
+            userTable = new MapView(new BLOBHeap(userTableFile, 256, NaturalOrder.naturalOrder, 1024 * 64), 10, '_');
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     public void close() {

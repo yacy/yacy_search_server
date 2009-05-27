@@ -128,7 +128,7 @@ public final class HeapWriter  {
         String n = f.getName();
         String[] l = d.list();
         for (int i = 0; i < l.length; i++) {
-            if (l[i].startsWith(n) && (l[i].endsWith(".idx") || l[i].endsWith(".gap"))) FileUtils.deletedelete(new File(d, l[i]));
+            if (l[i].startsWith(n) && (l[i].endsWith(".idx") || l[i].endsWith(".gap") || l[i].endsWith(".idx.gz") || l[i].endsWith(".gap.gz"))) FileUtils.deletedelete(new File(d, l[i]));
         }
     }
     

@@ -52,14 +52,16 @@ public class wikiBoard {
     MapView bkpbase = null;
     static HashMap<String, String> authors = new HashMap<String, String>();
 
-    public wikiBoard(final File actpath, final File bkppath) {
+    public wikiBoard(
+            final File actpath, final File actpathNew,
+            final File bkppath, final File bkppathNew) throws IOException {
         new File(actpath.getParent()).mkdirs();
         if (datbase == null) {
-            datbase = new MapView(new BLOBTree(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
+            datbase = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, true, false, false, actpathNew), 500, '_');
         }
         new File(bkppath.getParent()).mkdirs();
         if (bkpbase == null) {
-            bkpbase = new MapView(new BLOBTree(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', NaturalOrder.naturalOrder, true, false, false), 500);
+            bkpbase = new MapView(BLOBTree.toHeap(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', NaturalOrder.naturalOrder, true, false, false, bkppathNew), 500, '_');
         }
     }
 

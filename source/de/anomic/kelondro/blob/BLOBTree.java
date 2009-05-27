@@ -48,16 +48,14 @@ import de.anomic.kelondro.io.AbstractRandomAccess;
 import de.anomic.kelondro.io.RandomAccessInterface;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.table.FlexTable;
-import de.anomic.kelondro.table.FlexWidthArray;
 import de.anomic.kelondro.table.Tree;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 
-public class BLOBTree implements BLOB {
+public class BLOBTree {
 
     private static final int counterlen = 8;
     private static final int EcoFSBufferSize = 20;
@@ -69,17 +67,14 @@ public class BLOBTree implements BLOB {
     private final ObjectIndex index;
     private ObjectBuffer buffer;
     private final Row rowdef;
-    private File file;
     
     /**
      * Deprecated Class. Please use kelondroBLOBHeap instead
      */
-    @Deprecated
-    public BLOBTree(final File file, final boolean useNodeCache, final boolean useObjectCache, final int key,
+    private BLOBTree(final File file, final boolean useNodeCache, final boolean useObjectCache, final int key,
             final int nodesize, final char fillChar, final ByteOrder objectOrder, final boolean usetree, final boolean writebuffer, final boolean resetOnFail) {
         // creates or opens a dynamic tree
         rowdef = new Row("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize, objectOrder);
-        this.file = file;
         ObjectIndex fbi;
         if (usetree) {
 			try {
@@ -117,57 +112,38 @@ public class BLOBTree implements BLOB {
         //this.segmentCount = 0;
         //if (!(tree.fileExisted)) writeSegmentCount();
         buffer = new ObjectBuffer(file.toString());
-        /*
-        // debug
-        try {
-            kelondroCloneableIterator<byte[]> i = keys(true, false);
-            HashSet<String> t = new HashSet<String>();
-            while (i.hasNext()) {
-                byte[] b = i.next();
-                String s = new String(b);
-                t.add(s);
-                System.out.println("*** DEBUG BLOBTree " + file.getName() + " KEY=" + s);
-            }
-            Iterator<String> j = t.iterator();
-            while (j.hasNext()) {
-                String s = j.next();
-                byte[] r = this.get(s.getBytes());
-                if (r == null) System.out.println("*** DEBUG BLOBTree " + file.getName() + " KEY=" + s + " cannot be retrieved");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+    }
+    
+    public static BLOBHeap toHeap(final File file, final boolean useNodeCache, final boolean useObjectCache, final int key,
+            final int nodesize, final char fillChar, final ByteOrder objectOrder, final boolean usetree, final boolean writebuffer, final boolean resetOnFail, final File blob) throws IOException {
+        if (blob.exists() || !file.exists()) {
+            // open the blob file and ignore the tree
+            return new BLOBHeap(blob, key, objectOrder, 1024 * 64);
         }
-        */
-    }
-    
-    public String name() {
-        return this.file.getName();
-    }
-    
-    public static final void delete(final File file) {
-        if (file.isFile()) {
-            FileUtils.deletedelete(file);
-        } else {
-            FlexWidthArray.delete(file.getParentFile(), file.getName());
+        // open a Tree and migrate everything to a Heap
+        BLOBTree tree = new BLOBTree(file, useNodeCache, useObjectCache, key, nodesize, fillChar, objectOrder, usetree, writebuffer, resetOnFail);
+        BLOBHeap heap = new BLOBHeap(blob, key, objectOrder, 1024 * 64);
+        Iterator<byte[]> i = tree.keys(true, false);
+        byte[] k, kk = new byte[key], v;
+        String s;
+        while (i.hasNext()) {
+            k = i.next();
+            //assert k.length == key : "k.length = " + k.length + ", key = " + key;
+            if (k == null) continue;
+            v = tree.get(k);
+            if (v == null) continue;
+            s = new String(v, "UTF-8").trim();
+            // enlarge entry key to fit into the given key length
+            if (k.length == key) {
+                heap.put(k, s.getBytes("UTF-8"));
+            } else {
+                System.arraycopy(k, 0, kk, 0, k.length);
+                for (int j = k.length; j < key; j++) kk[j] = (byte) fillChar;
+                heap.put(kk, s.getBytes("UTF-8"));
+            }
         }
-    }
-    
-    public synchronized void clear() throws IOException {
-    	final String name = this.index.filename();
-    	this.index.clear();
-    	this.buffer = new ObjectBuffer(name);
-    }
-    
-    public int keylength() {
-        return this.keylen;
-    }
-    
-    public ByteOrder ordering() {
-        return this.rowdef.objectOrder;
-    }
-    
-    public synchronized int size() {
-        return index.size();
+        tree.close(false);
+        return heap;
     }
     
     private static String counter(final int c) {
@@ -187,7 +163,7 @@ public class BLOBTree implements BLOB {
 	}
     }
 
-    String origKey(final byte[] rawKey) {
+    private String origKey(final byte[] rawKey) {
         int n = keylen - 1;
         if (n >= rawKey.length) n = rawKey.length - 1;
         while ((n > 0) && (rawKey[n] == (byte) fillChar)) n--;
@@ -198,12 +174,12 @@ public class BLOBTree implements BLOB {
 	}
     }
 
-    public class keyIterator implements CloneableIterator<byte[]> {
+    private class keyIterator implements CloneableIterator<byte[]> {
         // the iterator iterates all keys
         CloneableIterator<Row.Entry> ri;
         String nextKey;
 
-        public keyIterator(final CloneableIterator<Row.Entry> iter) {
+        private keyIterator(final CloneableIterator<Row.Entry> iter) {
             ri = iter;
             nextKey = n();
         }
@@ -212,11 +188,11 @@ public class BLOBTree implements BLOB {
 			return new keyIterator(ri.clone(modifier));
 		}
 
-        public boolean hasNext() {
+		public boolean hasNext() {
             return nextKey != null;
         }
 
-        public byte[] next() {
+		public byte[] next() {
             final String result = nextKey;
             nextKey = n();
             try {
@@ -226,7 +202,7 @@ public class BLOBTree implements BLOB {
 	    }
         }
 
-        public void remove() {
+		public void remove() {
             throw new UnsupportedOperationException("no remove in RawKeyIterator");
         }
 
@@ -263,16 +239,12 @@ public class BLOBTree implements BLOB {
 
     }
 
-    public synchronized CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
+    private synchronized CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
         // iterates only the keys of the Nodes
         // enumerated objects are of type String
         final keyIterator i = new keyIterator(index.rows(up, null));
         if (rotating) return new RotateIterator<byte[]>(i, null, index.size());
         return i;
-    }
-
-    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
-        return new keyIterator(index.rows(up, firstKey));
     }
     
     private byte[] getValueCached(final byte[] key) throws IOException {
@@ -297,7 +269,7 @@ public class BLOBTree implements BLOB {
         }
     }
 
-    synchronized int get(final String key, final int pos) throws IOException {
+    private synchronized int get(final String key, final int pos) throws IOException {
         final int reccnt = pos / reclen;
         // read within a single record
         final byte[] buf = getValueCached(elementKey(key, reccnt));
@@ -307,13 +279,13 @@ public class BLOBTree implements BLOB {
         return buf[recpos] & 0xFF;
     }
     
-    public synchronized byte[] get(final byte[] key) throws IOException {
+    private synchronized byte[] get(final byte[] key) throws IOException {
         final RandomAccessInterface ra = getRA(new String(key, "UTF-8"));
         if (ra == null) return null;
         return ra.readFully();
     }
     
-    synchronized byte[] get(final String key, final int pos, final int len) throws IOException {
+    private synchronized byte[] get(final String key, final int pos, final int len) throws IOException {
         final int recpos = pos % reclen;
         final int reccnt = pos / reclen;
         byte[] segment1;
@@ -356,12 +328,8 @@ public class BLOBTree implements BLOB {
         System.arraycopy(segment2, 0, result, segment1.length, segment2.length);
         return result;
     }
-
-    public synchronized void put(final byte[] key, final byte[] b) throws IOException {
-        put(new String(key), 0, b, 0, b.length);
-    }
     
-    synchronized void put(final String key, final int pos, final byte[] b, final int off, final int len) throws IOException {
+    private synchronized void put(final String key, final int pos, final byte[] b, final int off, final int len) throws IOException {
         final int recpos = pos % reclen;
         final int reccnt = pos / reclen;
         byte[] buf;
@@ -397,7 +365,7 @@ public class BLOBTree implements BLOB {
         }
     }
 
-    synchronized void put(final String key, final int pos, final int b) throws IOException {
+    private synchronized void put(final String key, final int pos, final int b) throws IOException {
         final int recpos = pos % reclen;
         final int reccnt = pos / reclen;
         byte[] buf;
@@ -413,42 +381,21 @@ public class BLOBTree implements BLOB {
         buf[recpos] = (byte) b;
         setValueCached(elementKey(key, reccnt), buf);
     }
-
-    public synchronized void remove(final byte[] key) throws IOException {
-        // remove value in cache and tree
-        if (key == null) return;
-        int recpos = 0;
-        byte[] k;
-        while (index.get(k = elementKey(new String(key, "UTF-8"), recpos)) != null) {
-            index.remove(k);
-            buffer.remove(k);
-            recpos++;
-        }
-        //segmentCount--; writeSegmentCount();
-    }
-
-    public synchronized boolean has(final byte[] key) {
-        try {
-			return (key != null) && (getValueCached(elementKey(new String(key), 0)) != null);
-		} catch (IOException e) {
-			return false;
-		}
-    }
-
-    public synchronized RandomAccessInterface getRA(final String filekey) {
+    
+    private synchronized RandomAccessInterface getRA(final String filekey) {
         // this returns always a RARecord, even if no existed bevore
         //return new kelondroBufferedRA(new RARecord(filekey), 512, 0);
         return new RARecord(filekey);
     }
 
-    public class RARecord extends AbstractRandomAccess implements RandomAccessInterface {
+    private class RARecord extends AbstractRandomAccess implements RandomAccessInterface {
 
         int seekpos = 0;
         int compLength = -1;
         
         String filekey;
 
-        public RARecord(final String filekey) {
+        private RARecord(final String filekey) {
             this.filekey = filekey;
         }
 
@@ -500,62 +447,7 @@ public class BLOBTree implements BLOB {
 
     }
     
-    public synchronized void close(boolean writeIDX) {
+    private synchronized void close(boolean writeIDX) {
         index.close();
-    }
-
-    public static void main(final String[] args) {
-        // test app for DB functions
-        // reads/writes files to a database table
-        // arguments:
-        // {-f2db/-db2f} <db-name> <key> <filename>
-
-        if (args.length == 1) {
-            // open a db and list keys
-            try {
-                final BLOB kd = new BLOBTree(new File(args[0]), true, true, 4 ,100, '_', NaturalOrder.naturalOrder, true, false, false);
-                System.out.println(kd.size() + " elements in DB");
-                final Iterator<byte[]> i = kd.keys(true, false);
-                while (i.hasNext())
-                    System.out.println(new String(i.next()));
-                kd.close(true);
-            } catch (final IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-    
-    public static int countElements(final BLOBTree t) {
-        int count = 0;
-        try {
-            final Iterator<byte[]> iter = t.keys(true, false);
-            while (iter.hasNext()) {count++; if (iter.next() == null) System.out.println("ERROR! null element found");}
-            return count;
-        } catch (final IOException e) {
-            return -1;
-        }
-    }
-
-    public long length(byte[] key) throws IOException {
-        byte[] b = get(key);
-        if (b == null) return -1;
-        return b.length;
-    }
-
-    public long length() throws IOException {
-        return this.file.length();
-    }
-
-    public int replace(byte[] key, Rewriter rewriter) throws IOException {
-        byte[] b = get(key);
-        if (b == null) {
-            remove(key);
-            return 0;
-        }
-        byte[] c = rewriter.rewrite(b);
-        int reduced = b.length - c.length;
-        assert reduced >= 0;
-        put(key, c);
-        return reduced;
     }
 }

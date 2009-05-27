@@ -41,6 +41,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
@@ -75,6 +77,7 @@ public class LongHandleIndex {
         this(keylength, objectOrder, (int) (file.length() / (keylength + 8)), expectedspace);
         // read the index dump and fill the index
         InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
+        if (file.getName().endsWith(".gz")) is = new GZIPInputStream(is);
         byte[] a = new byte[keylength + 8];
         int c;
         while (true) {
@@ -101,6 +104,7 @@ public class LongHandleIndex {
         File tmp = new File(file.getParentFile(), file.getName() + ".tmp");
         Iterator<Row.Entry> i = this.index.rows(true, null);
         OutputStream os = new BufferedOutputStream(new FileOutputStream(tmp), 4 * 1024 * 1024);
+        if (file.getName().endsWith(".gz")) os = new GZIPOutputStream(os);
         int c = 0;
         while (i.hasNext()) {
             os.write(i.next().bytes());

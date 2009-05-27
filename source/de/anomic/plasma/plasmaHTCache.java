@@ -42,7 +42,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.anomic.http.httpResponseHeader;
-import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.BLOBArray;
 import de.anomic.kelondro.blob.BLOBCompressor;
 import de.anomic.kelondro.blob.BLOBHeap;
@@ -128,13 +127,13 @@ public final class plasmaHTCache {
     private static void openDB() {
         // open the response header database
         final File dbfile = new File(cachePath, RESPONSE_HEADER_DB_NAME);
-        BLOB blob = null;
+        BLOBHeap blob = null;
         try {
             blob = new BLOBHeap(dbfile, yacySeedDB.commonHashLength, Base64Order.enhancedCoder, 1024 * 1024);
         } catch (final IOException e) {
             e.printStackTrace();
         }
-        responseHeaderDB = new MapView(blob, 500);
+        responseHeaderDB = new MapView(blob, 500, '_');
         try {
             fileDBunbuffered = new BLOBArray(new File(cachePath, FILE_DB_NAME), prefix, 12, Base64Order.enhancedCoder, 1024 * 1024 * 2);
             fileDBunbuffered.setMaxSize(maxCacheSize);

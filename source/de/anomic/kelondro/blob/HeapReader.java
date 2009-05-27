@@ -29,6 +29,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -101,7 +102,9 @@ public class HeapReader {
         // if this is successfull, return true; otherwise false
         String fingerprint = HeapWriter.fingerprintFileHash(this.heapFile);
         File fif = HeapWriter.fingerprintIndexFile(this.heapFile, fingerprint);
+        if (!fif.exists()) fif = new File(fif.getAbsolutePath() + ".gz");
         File fgf = HeapWriter.fingerprintGapFile(this.heapFile, fingerprint);
+        if (!fgf.exists()) fgf = new File(fgf.getAbsolutePath() + ".gz");
         if (!fif.exists() || !fgf.exists()) {
             HeapWriter.deleteAllFingerprints(this.heapFile);
             return false;
@@ -325,6 +328,17 @@ public class HeapReader {
 
     public long length() throws IOException {
         return this.heapFile.length();
+    }
+
+    public String excave(final byte[] rawKey, char fillChar) {
+        int n = this.keylength - 1;
+        if (n >= rawKey.length) n = rawKey.length - 1;
+        while ((n > 0) && (rawKey[n] == (byte) fillChar)) n--;
+        try {
+            return new String(rawKey, 0, n + 1, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return new String(rawKey, 0, n + 1);
+        }
     }
     
     /**

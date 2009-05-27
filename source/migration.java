@@ -133,7 +133,11 @@ public class migration {
             delete(tagsDBFile);
             Log.logInfo("MIGRATION", "Migrating bookmarkTags.db to use wordhashs as keys.");
         }
-        sb.initBookmarks();
+        try {
+            sb.initBookmarks();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 	/**
@@ -165,7 +169,11 @@ public class migration {
                     file.delete();
                 } catch (final IOException e) {}        
             }
-            sb.initWiki();
+            try {
+                sb.initWiki();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         
         
@@ -178,7 +186,11 @@ public class migration {
                 FileUtils.copy(file, file2);
                 file.delete();
             } catch (final IOException e) {}
-            sb.initMessages();
+            try {
+                sb.initMessages();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 

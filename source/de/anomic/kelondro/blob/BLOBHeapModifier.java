@@ -39,7 +39,10 @@ import de.anomic.kelondro.util.Log;
 public class BLOBHeapModifier extends HeapReader implements BLOB {
  
     /*
-     * This class adds a remove operation to a BLOBHeapReader
+     * This class adds a remove operation to a BLOBHeapReader. That means that a BLOBModifier can
+     * - read elements from a BLOB
+     * - remove elements from a BLOB
+     * but cannot write new entries to the BLOB
      */
 
     /**
