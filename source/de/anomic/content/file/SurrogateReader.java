@@ -44,8 +44,6 @@ import de.anomic.content.DCEntry;
 
 public class SurrogateReader extends DefaultHandler implements Runnable {
 
-	public static final DCEntry poison = new DCEntry();
-	
     // class variables
     private final StringBuilder buffer;
     private boolean parsingValue;
@@ -83,7 +81,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             e.printStackTrace();
         } finally {
         	try {
-				this.surrogates.put(poison);
+				this.surrogates.put(DCEntry.poison);
 			} catch (InterruptedException e1) {
 				e1.printStackTrace();
 			}
@@ -170,7 +168,7 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             t.start();
             DCEntry s;
             System.out.println("1");
-            while ((s = sr.take()) != SurrogateReader.poison) {
+            while ((s = sr.take()) != DCEntry.poison) {
                 System.out.println("Title: " + s.title());
                 System.out.println("Date: " + s.date());
                 System.out.println("URL: " + s.url());

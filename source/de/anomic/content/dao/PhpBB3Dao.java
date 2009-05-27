@@ -144,13 +144,11 @@ public class PhpBB3Dao implements Dao {
     }
 
     public int size() {
-        StringBuilder sql = new StringBuilder(256);
-        sql.append("select count(*) from phpbb_posts");
         Statement stmt = null;
         ResultSet rs = null;
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery(sql.toString());
+            rs = stmt.executeQuery("select count(*) from phpbb_posts");
             if (rs.next()) {
                 return rs.getInt(1);
             }

@@ -96,7 +96,7 @@ public final class plasmaWordIndex {
     
     public static final ByteOrder wordOrder = Base64Order.enhancedCoder;
     
-    private final BufferedIndex<WordReference> index;
+    private final IndexCell<WordReference> index;
     private final Log             log;
     private MetadataRepository    metadata;
     private final yacySeedDB      peers;
@@ -250,7 +250,7 @@ public final class plasmaWordIndex {
         return this.peers;
     }
 
-    public BufferedIndex<WordReference> index() {
+    public IndexCell<WordReference> index() {
         return this.index;
     }
     
@@ -559,60 +559,6 @@ public final class plasmaWordIndex {
         
         // finished
         return newEntry;
-    }
-    
-    @SuppressWarnings("unchecked")
-    public HashMap<byte[], ReferenceContainer<WordReference>>[] localSearchContainers(
-                            final TreeSet<byte[]> queryHashes, 
-                            final TreeSet<byte[]> excludeHashes, 
-                            final Set<String> urlselection) {
-        // search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
-
-        // retrieve entities that belong to the hashes
-        HashMap<byte[], ReferenceContainer<WordReference>> inclusionContainers =
-            (queryHashes.size() == 0) ?
-                    new HashMap<byte[], ReferenceContainer<WordReference>>(0) :
-                    getContainers(queryHashes, urlselection);
-        if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < queryHashes.size())) inclusionContainers = new HashMap<byte[], ReferenceContainer<WordReference>>(0); // prevent that only a subset is returned
-        final HashMap<byte[], ReferenceContainer<WordReference>> exclusionContainers =
-            (inclusionContainers.size() == 0) ?
-                    new HashMap<byte[], ReferenceContainer<WordReference>>(0) :
-                    getContainers(excludeHashes, urlselection);
-        return new HashMap[]{inclusionContainers, exclusionContainers};
-    }
-
-    /**
-     * collect containers for given word hashes. This collection stops if a single container does not contain any references.
-     * In that case only a empty result is returned.
-     * @param wordHashes
-     * @param urlselection
-     * @return map of wordhash:indexContainer
-     */
-    private HashMap<byte[], ReferenceContainer<WordReference>> getContainers(final TreeSet<byte[]> wordHashes, final Set<String> urlselection) {
-        // retrieve entities that belong to the hashes
-        final HashMap<byte[], ReferenceContainer<WordReference>> containers = new HashMap<byte[], ReferenceContainer<WordReference>>(wordHashes.size());
-        byte[] singleHash;
-        ReferenceContainer<WordReference> singleContainer;
-            final Iterator<byte[]> i = wordHashes.iterator();
-            while (i.hasNext()) {
-            
-                // get next word hash:
-                singleHash = i.next();
-            
-                // retrieve index
-                try {
-                    singleContainer = index.get(singleHash, urlselection);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    continue;
-                }
-            
-                // check result
-                if ((singleContainer == null || singleContainer.size() == 0)) return new HashMap<byte[], ReferenceContainer<WordReference>>(0);
-            
-                containers.put(singleHash, singleContainer);
-            }
-        return containers;
     }
     
     //  The Cleaner class was provided as "UrldbCleaner" by Hydrox

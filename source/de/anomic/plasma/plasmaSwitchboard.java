@@ -1233,7 +1233,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             readerThread.start();
             DCEntry surrogate;
             QueueEntry queueentry;
-            while ((surrogate = reader.take()) != SurrogateReader.poison) {
+            while ((surrogate = reader.take()) != DCEntry.poison) {
                 // check if url is in accepted domain
                 final String urlRejectReason = crawlStacker.urlInAcceptedDomain(surrogate.url());
                 if (urlRejectReason != null) {

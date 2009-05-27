@@ -28,6 +28,7 @@
 package de.anomic.kelondro.text;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -85,4 +86,69 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         }
         return containers; // this may return less containers as demanded
     }
+    
+    
+    // methods to search in the index
+    
+    /**
+     * collect containers for given word hashes. This collection stops if a single container does not contain any references.
+     * In that case only a empty result is returned.
+     * @param wordHashes
+     * @param urlselection
+     * @return map of wordhash:indexContainer
+     */
+    public HashMap<byte[], ReferenceContainer<ReferenceType>> searchConjunction(final TreeSet<byte[]> wordHashes, final Set<String> urlselection) {
+    	// first check if there is any entry that has no match; this uses only operations in ram
+    	/*
+    	Iterator<byte[]> i = wordHashes.iterator();
+        while (i.hasNext()) {
+            if (!this.has(i.next())); return new HashMap<byte[], ReferenceContainer<ReferenceType>>(0);
+        }
+        */
+    	// retrieve entities that belong to the hashes
+        final HashMap<byte[], ReferenceContainer<ReferenceType>> containers = new HashMap<byte[], ReferenceContainer<ReferenceType>>(wordHashes.size());
+        byte[] singleHash;
+        ReferenceContainer<ReferenceType> singleContainer;
+        Iterator<byte[]> i = wordHashes.iterator();
+        while (i.hasNext()) {
+        
+            // get next word hash:
+            singleHash = i.next();
+        
+            // retrieve index
+            try {
+                singleContainer = this.get(singleHash, urlselection);
+            } catch (IOException e) {
+                e.printStackTrace();
+                continue;
+            }
+        
+            // check result
+            if ((singleContainer == null || singleContainer.size() == 0)) return new HashMap<byte[], ReferenceContainer<ReferenceType>>(0);
+        
+            containers.put(singleHash, singleContainer);
+        }
+        return containers;
+    }
+    
+    @SuppressWarnings("unchecked")
+	public HashMap<byte[], ReferenceContainer<ReferenceType>>[] searchTerm(
+            final TreeSet<byte[]> queryHashes, 
+            final TreeSet<byte[]> excludeHashes, 
+            final Set<String> urlselection) {
+		// search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
+		
+		// retrieve entities that belong to the hashes
+		HashMap<byte[], ReferenceContainer<ReferenceType>> inclusionContainers =
+		(queryHashes.size() == 0) ?
+		    new HashMap<byte[], ReferenceContainer<ReferenceType>>(0) :
+		    this.searchConjunction(queryHashes, urlselection);
+		if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < queryHashes.size())) inclusionContainers = new HashMap<byte[], ReferenceContainer<ReferenceType>>(0); // prevent that only a subset is returned
+		final HashMap<byte[], ReferenceContainer<ReferenceType>> exclusionContainers =
+		(inclusionContainers.size() == 0) ?
+		    new HashMap<byte[], ReferenceContainer<ReferenceType>>(0) :
+		    this.searchConjunction(excludeHashes, urlselection);
+		return new HashMap[]{inclusionContainers, exclusionContainers};
+    }
+    
 }

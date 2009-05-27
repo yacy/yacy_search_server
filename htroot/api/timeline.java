@@ -80,7 +80,7 @@ public final class timeline {
         //yacyCore.log.logInfo("INIT TIMELINE SEARCH: " + plasmaSearchQuery.anonymizedQueryHashes(query[0]) + " - " + count + " links");
         
         // get the index container with the result vector
-        HashMap<byte[], ReferenceContainer<WordReference>>[] localSearchContainerMaps = sb.webIndex.localSearchContainers(q, Word.words2hashes(query[1]), null);
+        HashMap<byte[], ReferenceContainer<WordReference>>[] localSearchContainerMaps = sb.webIndex.index().searchTerm(q, Word.words2hashes(query[1]), null);
         final ReferenceContainer<WordReference> index =
             ReferenceContainer.joinExcludeContainers(
                 plasmaWordIndex.wordReferenceFactory,
