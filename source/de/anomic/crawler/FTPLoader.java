@@ -66,7 +66,7 @@ public class FTPLoader {
         Document metadata = new httpdProxyCacheEntry(
                 entry.depth(), entry.url(), entry.name(), "OK",
                 requestHeader, responseHeader,
-                entry.initiator(), sb.webIndex.profilesActiveCrawls.getEntry(entry.profileHandle()));
+                entry.initiator(), sb.crawler.profilesActiveCrawls.getEntry(entry.profileHandle()));
         plasmaHTCache.storeMetadata(responseHeader, metadata);
         return metadata;
     }
@@ -145,7 +145,7 @@ public class FTPLoader {
         if (berr.size() > 0 || htCache == null) {
             // some error logging
             final String detail = (berr.size() > 0) ? "\n    Errorlog: " + berr.toString() : "";
-            sb.crawlQueues.errorURL.newEntry(entry, sb.webIndex.peers().mySeed().hash, new Date(), 1, "server download" + detail);
+            sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "server download" + detail);
             throw new IOException("FTPLoader: Unable to download URL " + entry.url().toString() + detail);
         }
         
@@ -243,13 +243,13 @@ public class FTPLoader {
                 htCache.setCacheArray(b);
             } else {
                 log.logInfo("REJECTED TOO BIG FILE with size " + size + " Bytes for URL " + entry.url().toString());
-                sb.crawlQueues.errorURL.newEntry(entry, this.sb.webIndex.peers().mySeed().hash, new Date(), 1, "file size limit exceeded");
+                sb.crawlQueues.errorURL.newEntry(entry, this.sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");
                 throw new Exception("file size exceeds limit");
             }
         } else {
             // if the response has not the right file type then reject file
             log.logInfo("REJECTED WRONG MIME/EXT TYPE " + mimeType + " for URL " + entry.url().toString());
-            sb.crawlQueues.errorURL.newEntry(entry, this.sb.webIndex.peers().mySeed().hash, new Date(), 1, "wrong mime type or wrong extension");
+            sb.crawlQueues.errorURL.newEntry(entry, this.sb.peers.mySeed().hash, new Date(), 1, "wrong mime type or wrong extension");
             throw new Exception("response has not the right file type -> rejected");
         }
         return htCache;

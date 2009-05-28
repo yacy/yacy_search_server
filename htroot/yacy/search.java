@@ -159,10 +159,10 @@ public final class search {
         
         // store accessing peer
         final yacySeed remoteSeed = yacySeed.genRemoteSeed(oseed, key, false);
-        if (sb.webIndex.peers() == null) {
+        if (sb.peers == null) {
             yacyCore.log.logSevere("yacy.search: seed cache not initialized");
         } else {
-            sb.webIndex.peers().peerActions.peerArrival(remoteSeed, true);
+            sb.peers.peerActions.peerArrival(remoteSeed, true);
         }
 
         // prepare search
@@ -209,7 +209,7 @@ public final class search {
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
             final long timer = System.currentTimeMillis();
-            final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.webIndex.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
+            final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
 
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.COLLECTION, containers[0].size(), System.currentTimeMillis() - timer), false);
             if (containers != null) {
@@ -260,7 +260,7 @@ public final class search {
             RSSFeed.channels(RSSFeed.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes), ""));
             
             // make event
-            theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.webIndex, sb.crawlResults, null, true); 
+            theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.indexSegment, sb.peers, sb.crawlResults, null, true); 
             
             // set statistic details of search result and find best result index set
             if (theSearch.getRankingResult().getLocalResourceSize() == 0) {
@@ -362,7 +362,7 @@ public final class search {
         prop.put("fwrec", ""); // peers that would have helped to construct this result (recommendations)
 
         // prepare search statistics
-        theQuery.remotepeer = sb.webIndex.peers().lookupByIP(natLib.getInetAddress(client), true, false, false);
+        theQuery.remotepeer = sb.peers.lookupByIP(natLib.getInetAddress(client), true, false, false);
         theQuery.resultcount = (theSearch == null) ? 0 : theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
         theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.getURLRetrievalTime();
@@ -384,8 +384,8 @@ public final class search {
         prop.put("searchtime", System.currentTimeMillis() - timestamp);
 
         final int links = Integer.parseInt(prop.get("linkcount","0"));
-        sb.webIndex.peers().mySeed().incSI(links);
-        sb.webIndex.peers().mySeed().incSU(links);
+        sb.peers.mySeed().incSI(links);
+        sb.peers.mySeed().incSU(links);
         return prop;
     }
 

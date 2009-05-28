@@ -44,6 +44,7 @@ import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceOrder;
+import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
@@ -73,13 +74,13 @@ public final class plasmaSearchRankingProcess {
     private final ScoreCluster<String> ref;  // reference score computation for the commonSense heuristic
     private final int[] flagcount; // flag counter
     private final TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
-    private final plasmaWordIndex wordIndex;
+    private final Segment indexSegment;
     private HashMap<byte[], ReferenceContainer<WordReference>>[] localSearchContainerMaps;
     private final int[] domZones;
     private HashMap<String, hoststat> hostNavigator;
     
     public plasmaSearchRankingProcess(
-            final plasmaWordIndex wordIndex,
+            final Segment indexSegment,
             final plasmaSearchQuery query,
             final int maxentries,
             final int concurrency) {
@@ -100,7 +101,7 @@ public final class plasmaSearchRankingProcess {
         this.urlhashes = new ConcurrentHashMap<String, Integer>(0, 0.75f, concurrency);
         this.ref = new ScoreCluster<String>();
         this.misses = new TreeSet<String>();
-        this.wordIndex = wordIndex;
+        this.indexSegment = indexSegment;
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
         this.domZones = new int[8];
@@ -119,14 +120,14 @@ public final class plasmaSearchRankingProcess {
     public void execQuery() {
         
         long timer = System.currentTimeMillis();
-        this.localSearchContainerMaps = wordIndex.index().searchTerm(query.queryHashes, query.excludeHashes, null);
+        this.localSearchContainerMaps = indexSegment.index().searchTerm(query.queryHashes, query.excludeHashes, null);
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.COLLECTION, this.localSearchContainerMaps[0].size(), System.currentTimeMillis() - timer), false);
         
         // join and exclude the local result
         timer = System.currentTimeMillis();
         final ReferenceContainer<WordReference> index =
             ReferenceContainer.joinExcludeContainers(
-                plasmaWordIndex.wordReferenceFactory,
+                Segment.wordReferenceFactory,
                 this.localSearchContainerMaps[0].values(),
                 this.localSearchContainerMaps[1].values(),
                 query.maxDistance);
@@ -273,7 +274,7 @@ public final class plasmaSearchRankingProcess {
     	URLMetadataRow mr;
     	yacyURL url;
     	for (int i = 0; i < rc; i++) {
-    		mr = wordIndex.metadata().load(hsa[i].hashsample, null, 0);
+    		mr = indexSegment.metadata().load(hsa[i].hashsample, null, 0);
     		if (mr == null) continue;
     		url = mr.metadata().url();
     		if (url == null) continue;
@@ -363,7 +364,7 @@ public final class plasmaSearchRankingProcess {
                 if (((stack.size() == 0) && (size() == 0))) break;
                 final SortStack<WordReferenceVars>.stackElement obrwi = bestRWI(skipDoubleDom);
                 if (obrwi == null) continue; // *** ? this happened and the thread was suspended silently. cause?
-                final URLMetadataRow u = wordIndex.metadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
+                final URLMetadataRow u = indexSegment.metadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
                 if (u != null) {
                     final URLMetadataRow.Components metadata = u.metadata();
                     if (metadata.url() != null) {

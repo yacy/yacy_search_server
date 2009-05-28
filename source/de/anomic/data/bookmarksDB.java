@@ -247,23 +247,23 @@ public class bookmarksDB {
 	    			Pattern.compile(newcrawlingMustMatch);	    			
                     
                     String urlhash = crawlingStartURL.hash();
-                    sb.webIndex.metadata().remove(urlhash);
+                    sb.indexSegment.metadata().remove(urlhash);
                     sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                     sb.crawlQueues.errorURL.remove(urlhash);
 	               
 	                // stack url
-	                sb.webIndex.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
-	                CrawlProfile.entry pe = sb.webIndex.profilesActiveCrawls.newEntry(
+	                sb.crawler.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
+	                CrawlProfile.entry pe = sb.crawler.profilesActiveCrawls.newEntry(
 	                        folder+"/"+crawlingStartURL, crawlingStartURL, CrawlProfile.KEYWORDS_USER,
 	                        newcrawlingMustMatch,
 	                        CrawlProfile.MATCH_NEVER,
 	                        newcrawlingdepth,
-	                        sb.webIndex.profilesActiveCrawls.getRecrawlDate(crawlingIfOlder), crawlingDomFilterDepth, crawlingDomMaxPages,
+	                        sb.crawler.profilesActiveCrawls.getRecrawlDate(crawlingIfOlder), crawlingDomFilterDepth, crawlingDomMaxPages,
 	                        crawlingQ,
 	                        indexText, indexMedia,
 	                        storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
 	                sb.crawlStacker.enqueueEntry(new CrawlEntry(
-	                        sb.webIndex.peers().mySeed().hash,
+	                        sb.peers.mySeed().hash,
                             crawlingStartURL,
 	                        null,
 	                        "CRAWLING-ROOT",
@@ -291,7 +291,7 @@ public class bookmarksDB {
                         m.remove("generalFilter");
                         m.remove("specificFilter");
                         m.put("intention", "Automatic ReCrawl!");
-                        sb.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));	                      
+                        sb.peers.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.peers.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));	                      
                     }
 	    		} catch (MalformedURLException e1) {}
 			} // if

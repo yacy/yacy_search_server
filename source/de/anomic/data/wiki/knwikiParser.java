@@ -126,7 +126,7 @@ public class knwikiParser implements wikiParser {
         tokens = new Token[] {
                 new SimpleToken('=', '=', new String[][] { null, { "h2" }, { "h3" }, { "h4" } }, true),
                 new SimpleToken('\'', '\'', new String[][] { null, { "i" }, { "b" }, null, { "b", "i" } }, false),
-                new LinkToken((publicAddress == null) ? sb.webIndex.peers().mySeed().getPublicAddress() : publicAddress, "Wiki.html?page=", sb),
+                new LinkToken((publicAddress == null) ? sb.peers.mySeed().getPublicAddress() : publicAddress, "Wiki.html?page=", sb),
                 new ListToken('*', "ul"),
                 new ListToken('#', "ol"),
                 new ListToken(':', "blockquote", null),

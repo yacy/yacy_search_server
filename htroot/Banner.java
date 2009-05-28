@@ -67,14 +67,14 @@ public class Banner {
         double myqph   = 0;
         String type    = "";
         final String network = env.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "unspecified").toUpperCase();
-        final int    peers   = sb.webIndex.peers().sizeConnected() + 1; // the '+ 1': the own peer is not included in sizeConnected()
-        long   nlinks  = sb.webIndex.peers().countActiveURL();
-        long   nwords  = sb.webIndex.peers().countActiveRWI();
-        final double nqpm    = sb.webIndex.peers().countActiveQPM();
-        long   nppm    = sb.webIndex.peers().countActivePPM();
+        final int    peers   = sb.peers.sizeConnected() + 1; // the '+ 1': the own peer is not included in sizeConnected()
+        long   nlinks  = sb.peers.countActiveURL();
+        long   nwords  = sb.peers.countActiveRWI();
+        final double nqpm    = sb.peers.countActiveQPM();
+        long   nppm    = sb.peers.countActivePPM();
         double nqph    = 0;
 
-        final yacySeed seed = sb.webIndex.peers().mySeed();
+        final yacySeed seed = sb.peers.mySeed();
         if (seed != null){
             name    = seed.get(yacySeed.NAME, "-").toUpperCase();
             links   = Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
@@ -82,19 +82,19 @@ public class Banner {
             myppm   = seed.getPPM();
             myqph   = 60d * seed.getQPM();
 
-            if (sb.webIndex.peers().mySeed().isVirgin()) {
+            if (sb.peers.mySeed().isVirgin()) {
                 type = "VIRGIN";
                 nqph = Math.round(6000d * nqpm) / 100d;
-            } else if(sb.webIndex.peers().mySeed().isJunior()) {
+            } else if(sb.peers.mySeed().isJunior()) {
                 type = "JUNIOR";
                 nqph = Math.round(6000d * nqpm) / 100d;
-            } else if(sb.webIndex.peers().mySeed().isSenior()) {
+            } else if(sb.peers.mySeed().isSenior()) {
                 type = "SENIOR";
                 nlinks = nlinks + links;
                 nwords = nwords + words;
                 nqph = Math.round(6000d * nqpm + 100d * myqph) / 100d;
                 nppm = nppm + myppm;
-            } else if(sb.webIndex.peers().mySeed().isPrincipal()) {
+            } else if(sb.peers.mySeed().isPrincipal()) {
                 type = "PRINCIPAL";
                 nlinks = nlinks + links;
                 nwords = nwords + words;

@@ -66,30 +66,30 @@ public class Network {
         prop.putHTML("page_networkName", sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "unspecified"));
         final boolean overview = (post == null) || (post.get("page", "0").equals("0"));
 
-        final String mySeedType = sb.webIndex.peers().mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
+        final String mySeedType = sb.peers.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
         final boolean iAmActive = (mySeedType.equals(yacySeed.PEERTYPE_SENIOR) || mySeedType.equals(yacySeed.PEERTYPE_PRINCIPAL));
 
         if (overview) {
-            long accActLinks = sb.webIndex.peers().countActiveURL();
-            long accActWords = sb.webIndex.peers().countActiveRWI();
-            final long accPassLinks = sb.webIndex.peers().countPassiveURL();
-            final long accPassWords = sb.webIndex.peers().countPassiveRWI();
-            long accPotLinks = sb.webIndex.peers().countPotentialURL();
-            long accPotWords = sb.webIndex.peers().countPotentialRWI();
+            long accActLinks = sb.peers.countActiveURL();
+            long accActWords = sb.peers.countActiveRWI();
+            final long accPassLinks = sb.peers.countPassiveURL();
+            final long accPassWords = sb.peers.countPassiveRWI();
+            long accPotLinks = sb.peers.countPotentialURL();
+            long accPotWords = sb.peers.countPotentialRWI();
 
-            int conCount = sb.webIndex.peers().sizeConnected();
-            final int disconCount = sb.webIndex.peers().sizeDisconnected();
-            int potCount = sb.webIndex.peers().sizePotential();
+            int conCount = sb.peers.sizeConnected();
+            final int disconCount = sb.peers.sizeDisconnected();
+            int potCount = sb.peers.sizePotential();
 
 //          final boolean complete = ((post == null) ? false : post.get("links", "false").equals("true"));
-            final long otherppm = sb.webIndex.peers().countActivePPM();
-            final double otherqpm = sb.webIndex.peers().countActiveQPM();
+            final long otherppm = sb.peers.countActivePPM();
+            final double otherqpm = sb.peers.countActiveQPM();
             long myppm = 0;
             double myqph = 0d;
 
             // create own peer info
-            final yacySeed seed = sb.webIndex.peers().mySeed();
-            if (sb.webIndex.peers().mySeed() != null){ //our Peer
+            final yacySeed seed = sb.peers.mySeed();
+            if (sb.peers.mySeed() != null){ //our Peer
                 // update seed info
                 sb.updateMySeed();
                 
@@ -105,17 +105,17 @@ public class Network {
                 // my-info
                 prop.putHTML("table_my-name", seed.get(yacySeed.NAME, "-") );
                 prop.put("table_my-hash", seed.hash );
-                if (sb.webIndex.peers().mySeed().isVirgin()) {
+                if (sb.peers.mySeed().isVirgin()) {
                     prop.put("table_my-info", 0);
-                } else if(sb.webIndex.peers().mySeed().isJunior()) {
+                } else if(sb.peers.mySeed().isJunior()) {
                     prop.put("table_my-info", 1);
                     accPotLinks += LCount;
                     accPotWords += ICount;
-                } else if(sb.webIndex.peers().mySeed().isSenior()) {
+                } else if(sb.peers.mySeed().isSenior()) {
                     prop.put("table_my-info", 2);
                     accActLinks += LCount;
                     accActWords += ICount;
-                } else if(sb.webIndex.peers().mySeed().isPrincipal()) {
+                } else if(sb.peers.mySeed().isPrincipal()) {
                     prop.put("table_my-info", 3);
                     accActLinks += LCount;
                     accActWords += ICount;
@@ -186,13 +186,13 @@ public class Network {
                 yacySeed peer = new yacySeed(post.get("peerHash"),map);
 
                 sb.updateMySeed();
-                final int added = yacyClient.publishMySeed(sb.webIndex.peers().mySeed(), sb.webIndex.peers().peerActions, peer.getPublicAddress(), peer.hash);
+                final int added = yacyClient.publishMySeed(sb.peers.mySeed(), sb.peers.peerActions, peer.getPublicAddress(), peer.hash);
 
                 if (added <= 0) {
                     prop.put("table_comment",1);
                     prop.putHTML("table_comment_status","publish: disconnected peer '" + peer.getName() + "/" + post.get("peerHash") + "' from " + peer.getPublicAddress());
                 } else {
-                    peer = sb.webIndex.peers().getConnected(peer.hash);
+                    peer = sb.peers.getConnected(peer.hash);
                     if (peer == null) {
                         prop.put("table_comment",1);
                         prop.putHTML("table_comment_status","publish: disconnected peer 'UNKNOWN/" + post.get("peerHash") + "' from UNKNOWN");
@@ -218,14 +218,14 @@ public class Network {
             final int page = (post == null ? 1 : Integer.parseInt(post.get("page", "1")));
             final int maxCount = (post == null ? 300 : Integer.parseInt(post.get("maxCount", "300")));
             int conCount = 0;            
-            if (sb.webIndex.peers() == null) {
+            if (sb.peers == null) {
                 prop.put("table", 0);//no remote senior/principal proxies known"
             } else {
                 int size = 0;
                 switch (page) {
-                    case 1 : size = sb.webIndex.peers().sizeConnected(); break;
-                    case 2 : size = sb.webIndex.peers().sizeDisconnected(); break;
-                    case 3 : size = sb.webIndex.peers().sizePotential(); break;
+                    case 1 : size = sb.peers.sizeConnected(); break;
+                    case 2 : size = sb.peers.sizeDisconnected(); break;
+                    case 3 : size = sb.peers.sizePotential(); break;
                     default: break;
                 }
                 if (size == 0) {
@@ -234,7 +234,7 @@ public class Network {
                     // add temporary the own seed to the database
                     if (iAmActive) {
                         sb.updateMySeed();
-                        sb.webIndex.peers().addConnected(sb.webIndex.peers().mySeed());
+                        sb.peers.addConnected(sb.peers.mySeed());
                     }
 
                     // find updated Information using YaCyNews
@@ -243,7 +243,7 @@ public class Network {
                     final HashMap<String, Map<String, String>> updatedBlog = new HashMap<String, Map<String, String>>();
                     final HashMap<String, String> isCrawling = new HashMap<String, String>();
                     yacyNewsRecord record;
-                    final Iterator<yacyNewsRecord> recordIterator = sb.webIndex.peers().newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
+                    final Iterator<yacyNewsRecord> recordIterator = sb.peers.newsPool.recordIterator(yacyNewsPool.INCOMING_DB, true);
                     while (recordIterator.hasNext()) {
                         record = recordIterator.next();
                         if (record == null) {
@@ -266,9 +266,9 @@ public class Network {
                     final boolean order = (post != null && post.get("order", "down").equals("up"));
                     final String sort = (post == null ? null : post.get("sort", null));
                     switch (page) {
-                        case 1 : e = sb.webIndex.peers().seedsSortedConnected(order, (sort == null ? yacySeed.LCOUNT : sort)); break;
-                        case 2 : e = sb.webIndex.peers().seedsSortedDisconnected(order, (sort == null ? yacySeed.LASTSEEN : sort)); break;
-                        case 3 : e = sb.webIndex.peers().seedsSortedPotential(order, (sort == null ? yacySeed.LASTSEEN : sort)); break;
+                        case 1 : e = sb.peers.seedsSortedConnected(order, (sort == null ? yacySeed.LCOUNT : sort)); break;
+                        case 2 : e = sb.peers.seedsSortedDisconnected(order, (sort == null ? yacySeed.LASTSEEN : sort)); break;
+                        case 3 : e = sb.peers.seedsSortedPotential(order, (sort == null ? yacySeed.LASTSEEN : sort)); break;
                         default: break;
                     }
                     String startURL;
@@ -309,7 +309,7 @@ public class Network {
                             prop.put(STR_TABLE_LIST + conCount + "_updatedBlog", 0);
                             prop.put(STR_TABLE_LIST + conCount + "_isCrawling", 0);
                             if (conCount >= maxCount) { break; }
-                            if (sb.webIndex.peers() != null && sb.webIndex.peers().mySeed() != null && seed.hash != null && seed.hash.equals(sb.webIndex.peers().mySeed().hash)) {
+                            if (sb.peers != null && sb.peers.mySeed() != null && seed.hash != null && seed.hash.equals(sb.peers.mySeed().hash)) {
                                 prop.put(STR_TABLE_LIST + conCount + "_dark", 2);
                             } else {
                                 prop.put(STR_TABLE_LIST + conCount + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
@@ -347,11 +347,11 @@ public class Network {
                             prop.putHTML(STR_TABLE_LIST + conCount + "_shortname", shortname);
                             prop.putHTML(STR_TABLE_LIST + conCount + "_fullname", seed.get(yacySeed.NAME, "deadlink"));
                             userAgent = null;
-                            if (seed.hash != null && seed.hash.equals(sb.webIndex.peers().mySeed().hash)) {
+                            if (seed.hash != null && seed.hash.equals(sb.peers.mySeed().hash)) {
                                 userAgent = HTTPLoader.yacyUserAgent;
                                 location = httpClient.generateLocation();
                             } else {
-                               userAgent = sb.webIndex.peers().peerActions.getUserAgent(seed.getIP());
+                               userAgent = sb.peers.peerActions.getUserAgent(seed.getIP());
                                location = parseLocationInUserAgent(userAgent);
                             }
                             prop.put(STR_TABLE_LIST + conCount + "_location", location);
@@ -439,7 +439,7 @@ public class Network {
                         } // seed != null
                     } // while
                     }
-                    if (iAmActive) { sb.webIndex.peers().removeMySeed(); }
+                    if (iAmActive) { sb.peers.removeMySeed(); }
                     prop.putNum("table_list", conCount);
                     prop.put("table", 1);
                     prop.putNum("table_num", conCount);

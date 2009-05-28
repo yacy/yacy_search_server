@@ -79,7 +79,7 @@ public class yacyNetwork {
         post.add(new DefaultCharsetStringPart("key", salt));
         
         // just standard identification essentials
-		post.add(new DefaultCharsetStringPart("iam", sb.webIndex.peers().mySeed().hash));
+		post.add(new DefaultCharsetStringPart("iam", sb.peers.mySeed().hash));
 		if (targetHash != null) post.add(new DefaultCharsetStringPart("youare", targetHash));
         
         // time information for synchronization
@@ -96,7 +96,7 @@ public class yacyNetwork {
             if (authentificationMethod.equals("salted-magic-sim")) {
                 // generate an authentification essential using the salt, the iam-hash and the network magic
                 final String magic = sb.getConfig("network.unit.protocol.request.authentification.essentials", "");
-                final String md5 = Digest.encodeMD5Hex(salt + sb.webIndex.peers().mySeed().hash + magic);
+                final String md5 = Digest.encodeMD5Hex(salt + sb.peers.mySeed().hash + magic);
                 post.add(new DefaultCharsetStringPart("magicmd5", md5));
             }
         }        

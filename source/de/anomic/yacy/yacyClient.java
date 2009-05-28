@@ -73,6 +73,7 @@ import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerCache;
+import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.ByteBuffer;
@@ -82,7 +83,6 @@ import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.parser.Word;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
@@ -431,7 +431,7 @@ public final class yacyClient {
             final boolean global, 
             final int partitions,
             final yacySeed target,
-            final plasmaWordIndex wordIndex,
+            final Segment indexSegment,
             final ResultURLs crawlResults,
             final plasmaSearchRankingProcess containerCache,
             final Map<String, TreeMap<String, String>> abstractCache,
@@ -529,7 +529,7 @@ public final class yacyClient {
 		final int words = wordhashes.length() / yacySeedDB.commonHashLength;
 		final ReferenceContainer<WordReference>[] container = new ReferenceContainer[words];
 		for (int i = 0; i < words; i++) {
-			container[i] = ReferenceContainer.emptyContainer(plasmaWordIndex.wordReferenceFactory, wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength).getBytes(), count);
+			container[i] = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength).getBytes(), count);
 		}
 
 		// insert results to containers
@@ -569,7 +569,7 @@ public final class yacyClient {
 
 			// passed all checks, store url
 			try {
-				wordIndex.metadata().store(urlEntry);
+			    indexSegment.metadata().store(urlEntry);
 				crawlResults.stack(urlEntry, mySeed.hash, target.hash, 2);
 			} catch (final IOException e) {
 				yacyCore.log.logSevere("could not store search result", e);
@@ -638,7 +638,7 @@ public final class yacyClient {
 
 		// insert the containers to the index
         for (int m = 0; m < words; m++) try {
-                wordIndex.index().add(container[m]);
+                indexSegment.index().add(container[m]);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -1076,7 +1076,7 @@ public final class yacyClient {
             final plasmaSwitchboard sb = new plasmaSwitchboard(new File(args[0]), "httpProxy.init", "DATA/SETTINGS/yacy.conf", false);
             /*final yacyCore core =*/ new yacyCore(sb);
             sb.loadSeedLists();
-            final yacySeed target = sb.webIndex.peers().getConnected(args[1]);
+            final yacySeed target = sb.peers.getConnected(args[1]);
             final byte[] wordhashe = Word.word2hash("test");
             //System.out.println("permission=" + permissionMessage(args[1]));
             
@@ -1084,9 +1084,9 @@ public final class yacyClient {
             reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
             final byte[] content = httpClient.wget(
                                               "http://" + target.getPublicAddress() + "/yacy/search.html" +
-                                                      "?myseed=" + sb.webIndex.peers().mySeed().genSeedStr(null) +
+                                                      "?myseed=" + sb.peers.mySeed().genSeedStr(null) +
                                                       "&youare=" + target.hash + "&key=" +
-                                                      "&myseed=" + sb.webIndex.peers().mySeed() .genSeedStr(null) +
+                                                      "&myseed=" + sb.peers.mySeed() .genSeedStr(null) +
                                                       "&count=10" +
                                                       "&resource=global" +
                                                       "&query=" + new String(wordhashe) +

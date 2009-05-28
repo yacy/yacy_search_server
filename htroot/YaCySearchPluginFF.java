@@ -54,7 +54,7 @@ public class YaCySearchPluginFF {
         
         prop.put("host", host);
         prop.put("port", port);
-        prop.putHTML("name", sb.webIndex.peers().mySeed().getName());
+        prop.putHTML("name", sb.peers.mySeed().getName());
         
         return prop;
     }

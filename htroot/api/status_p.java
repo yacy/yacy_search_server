@@ -23,8 +23,8 @@ public class status_p {
         sb.updateMySeed();
         final int cacheMaxSize = (int) sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 10000);
         prop.putNum("ppm", sb.currentPPM());
-        prop.putNum("qpm", sb.webIndex.peers().mySeed().getQPM());
-        prop.put("wordCacheSize", Integer.toString(sb.webIndex.index().getBufferSize()));
+        prop.putNum("qpm", sb.peers.mySeed().getQPM());
+        prop.put("wordCacheSize", Integer.toString(sb.indexSegment.index().getBufferSize()));
         prop.put("wordCacheMaxSize", Integer.toString(cacheMaxSize));
 		//
 		// memory usage and system attributes

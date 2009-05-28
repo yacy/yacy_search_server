@@ -70,7 +70,7 @@ public class ConfigBasic {
         // starting a peer ping
         
         //boolean doPeerPing = false;
-        if ((sb.webIndex.peers().mySeed().isVirgin()) || (sb.webIndex.peers().mySeed().isJunior())) {
+        if ((sb.peers.mySeed().isVirgin()) || (sb.peers.mySeed().isJunior())) {
             serverInstantBusyThread.oneTimeJob(sb.yc, "peerPing", null, 0);
             //doPeerPing = true;
         }
@@ -90,7 +90,7 @@ public class ConfigBasic {
 		}
 
         // check if peer name already exists
-        final yacySeed oldSeed = sb.webIndex.peers().lookupByName(peerName);
+        final yacySeed oldSeed = sb.peers.lookupByName(peerName);
         if ((oldSeed == null) && (!(env.getConfig("peerName", "").equals(peerName)))) {
             // the name is new
         	final boolean nameOK = Pattern.compile("[A-Za-z0-9\\-_]{3,80}").matcher(peerName).matches();
@@ -190,7 +190,7 @@ public class ConfigBasic {
         // check if values are proper
         final boolean properPassword = (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0) || sb.getConfigBool("adminAccountForLocalhost", false);
         final boolean properName = (env.getConfig("peerName","").length() >= 3) && (!(yacySeed.isDefaultPeerName(env.getConfig("peerName",""))));
-        final boolean properPort = (sb.webIndex.peers().mySeed().isSenior()) || (sb.webIndex.peers().mySeed().isPrincipal());
+        final boolean properPort = (sb.peers.mySeed().isSenior()) || (sb.peers.mySeed().isPrincipal());
         
         if ((env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {
         	env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));

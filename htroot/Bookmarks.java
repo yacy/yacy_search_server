@@ -92,7 +92,7 @@ public class Bookmarks {
     	*/
     
     	// set peer address
-    	final String address = sb.webIndex.peers().mySeed().getPublicAddress();
+    	final String address = sb.peers.mySeed().getPublicAddress();
     	prop.put("address", address);
     
     	//defaultvalues
@@ -183,7 +183,7 @@ public class Bookmarks {
                     final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        final URLMetadataRow urlentry = sb.webIndex.metadata().load(urlHash, null, 0);
+                        final URLMetadataRow urlentry = sb.indexSegment.metadata().load(urlHash, null, 0);
                         plasmaParserDocument document = null;
                         if (urlentry != null) {
                             final URLMetadataRow.Components metadata = urlentry.metadata();
@@ -432,7 +432,7 @@ public class Bookmarks {
     	map.put("title", title.replace(',', ' '));
     	map.put("description", description.replace(',', ' '));
     	map.put("tags", tagsString.replace(',', ' '));
-    	sb.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_BOOKMARK_ADD, map));
+    	sb.peers.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.peers.mySeed(), yacyNewsPool.CATEGORY_BOOKMARK_ADD, map));
     }
 
 }

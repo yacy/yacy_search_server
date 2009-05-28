@@ -74,7 +74,7 @@ public class plasmaSearchAPI {
         yacySeed seed;
         int hc = 0;
         prop.put("searchresult_keyhash", startHash);
-        final Iterator<yacySeed> e = PeerSelection.getAcceptRemoteIndexSeeds(sb.webIndex.peers(), startHash, sb.webIndex.peers().sizeConnected(), true);
+        final Iterator<yacySeed> e = PeerSelection.getAcceptRemoteIndexSeeds(sb.peers, startHash, sb.peers.sizeConnected(), true);
         while (e.hasNext()) {
             seed = e.next();
             if (seed != null) {
@@ -88,7 +88,7 @@ public class plasmaSearchAPI {
 
     public static plasmaSearchRankingProcess genSearchresult(final serverObjects prop, final plasmaSwitchboard sb, final byte[] keyhash, final Bitfield filter) {
         final plasmaSearchQuery query = new plasmaSearchQuery(new String(keyhash), -1, sb.getRanking(), filter);
-        final plasmaSearchRankingProcess ranked = new plasmaSearchRankingProcess(sb.webIndex, query, Integer.MAX_VALUE, 1);
+        final plasmaSearchRankingProcess ranked = new plasmaSearchRankingProcess(sb.indexSegment, query, Integer.MAX_VALUE, 1);
         ranked.execQuery();
         
         if (ranked.filteredCount() == 0) {

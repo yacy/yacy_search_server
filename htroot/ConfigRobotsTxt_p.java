@@ -44,7 +44,7 @@ public class ConfigRobotsTxt_p {
         final servletProperties prop = new servletProperties();
         
         final httpdRobotsTxtConfig rbc = ((plasmaSwitchboard)env).robotstxtConfig;
-        prop.put("clientname", sb.webIndex.peers().mySeed().getPublicAddress());
+        prop.put("clientname", sb.peers.mySeed().getPublicAddress());
         
         if (post != null) {
             if (post.containsKey("save")) {

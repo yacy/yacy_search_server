@@ -58,7 +58,7 @@ public class ViewProfile {
         prop.put("display", display);
         final String hash = (post == null) ? null : (String) post.get("hash");
         
-        if ((hash == null) || (sb.webIndex.peers() == null)) {
+        if ((hash == null) || (sb.peers == null)) {
             // wrong access
             prop.put("success", "0");
             return prop;
@@ -81,19 +81,19 @@ public class ViewProfile {
             profile.putAll(p);
             prop.put("success", "3"); // everything ok
             prop.put("localremotepeer", "0");
-            prop.putHTML("success_peername", sb.webIndex.peers().mySeed().getName());
-            prop.put("success_peerhash", sb.webIndex.peers().mySeed().hash);
+            prop.putHTML("success_peername", sb.peers.mySeed().getName());
+            prop.put("success_peerhash", sb.peers.mySeed().hash);
         } else {
             // read the profile from remote peer
-            yacySeed seed = sb.webIndex.peers().getConnected(hash);
-            if (seed == null) seed = sb.webIndex.peers().getDisconnected(hash);
+            yacySeed seed = sb.peers.getConnected(hash);
+            if (seed == null) seed = sb.peers.getDisconnected(hash);
             if (seed == null) {
                 prop.put("success", "1"); // peer unknown
             } else {
                 // process news if existent
                 try {
-                    final yacyNewsRecord record = sb.webIndex.peers().newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, yacyNewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
-                    if (record != null) sb.webIndex.peers().newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
+                    final yacyNewsRecord record = sb.peers.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, yacyNewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
+                    if (record != null) sb.peers.newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
                 } catch (final IOException e) {}
                 
                 // try to get the profile from remote peer

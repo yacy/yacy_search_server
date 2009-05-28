@@ -63,20 +63,20 @@ public class IndexCreateIndexingQueue_p {
             }
             if (post.containsKey("clearIndexingQueue")) {
                 try {
-                    synchronized (sb.webIndex.queuePreStack) {
+                    synchronized (sb.crawler.queuePreStack) {
                         IndexingStack.QueueEntry entry = null;
-                        while ((entry = sb.webIndex.queuePreStack.pop()) != null) {
+                        while ((entry = sb.crawler.queuePreStack.pop()) != null) {
                             if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
                                 plasmaHTCache.deleteFromCache(entry.url());
                             }                            
                         }
-                        sb.webIndex.queuePreStack.clear(); // reset file to clean up content completely
+                        sb.crawler.queuePreStack.clear(); // reset file to clean up content completely
                     } 
                 } catch (final Exception e) {}
             } else if (post.containsKey("deleteEntry")) {
                 final String urlHash = post.get("deleteEntry");
                 try {
-                    sb.webIndex.queuePreStack.remove(urlHash);
+                    sb.crawler.queuePreStack.remove(urlHash);
                 } catch (final Exception e) {}
                 prop.put("LOCATION","");
                 return prop;
@@ -86,7 +86,7 @@ public class IndexCreateIndexingQueue_p {
         yacySeed initiator;
         boolean dark;
         
-        if ((sb.webIndex.queuePreStack.size() == 0) && (sb.webIndex.queuePreStack.getActiveQueueSize() == 0)) {
+        if ((sb.crawler.queuePreStack.size() == 0) && (sb.crawler.queuePreStack.getActiveQueueSize() == 0)) {
             prop.put("indexing-queue", "0"); //is empty
         } else {
             prop.put("indexing-queue", "1"); // there are entries in the queue or in process
@@ -98,12 +98,12 @@ public class IndexCreateIndexingQueue_p {
             
             // getting all entries that are currently in process
             final ArrayList<IndexingStack.QueueEntry> entryList = new ArrayList<IndexingStack.QueueEntry>();
-            entryList.addAll(sb.webIndex.queuePreStack.getActiveQueueEntries());
+            entryList.addAll(sb.crawler.queuePreStack.getActiveQueueEntries());
             final int inProcessCount = entryList.size();
             
             // getting all enqueued entries
-            if ((sb.webIndex.queuePreStack.size() > 0)) {
-                final Iterator<IndexingStack.QueueEntry> i = sb.webIndex.queuePreStack.entryIterator(false);
+            if ((sb.crawler.queuePreStack.size() > 0)) {
+                final Iterator<IndexingStack.QueueEntry> i = sb.crawler.queuePreStack.entryIterator(false);
                 while (i.hasNext()) entryList.add(i.next());
             }
                             
@@ -116,7 +116,7 @@ public class IndexCreateIndexingQueue_p {
                 if ((pcentry != null)&&(pcentry.url() != null)) {
                     final long entrySize = pcentry.size();
                     totalSize += entrySize;
-                    initiator = sb.webIndex.peers().getConnected(pcentry.initiator());
+                    initiator = sb.peers.getConnected(pcentry.initiator());
                     prop.put("indexing-queue_list_"+entryCount+"_dark", inProcess ? "2" : (dark ? "1" : "0"));
                     prop.putHTML("indexing-queue_list_"+entryCount+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("indexing-queue_list_"+entryCount+"_depth", pcentry.depth());
@@ -163,8 +163,8 @@ public class IndexCreateIndexingQueue_p {
                     
                     initiatorHash = entry.initiator();
                     executorHash = entry.executor();
-                    initiatorSeed = sb.webIndex.peers().getConnected(initiatorHash);
-                    executorSeed = sb.webIndex.peers().getConnected(executorHash);
+                    initiatorSeed = sb.peers.getConnected(initiatorHash);
+                    executorSeed = sb.peers.getConnected(executorHash);
                     prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
                     prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
                     prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false, true));

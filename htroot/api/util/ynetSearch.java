@@ -32,7 +32,7 @@ public class ynetSearch {
     			    String searchaddress = post.get("url");
     			    if (!searchaddress.startsWith("http://")) {
     			        // a relative path .. this addresses the local peer
-    			        searchaddress = "http://" + switchboard.webIndex.peers().mySeed().getPublicAddress() + (searchaddress.startsWith("/") ? "" : "/") + searchaddress;
+    			        searchaddress = "http://" + switchboard.peers.mySeed().getPublicAddress() + (searchaddress.startsWith("/") ? "" : "/") + searchaddress;
     			    }
     			    post.remove("url");
     			    post.remove("login");

@@ -35,10 +35,10 @@ import de.anomic.kelondro.text.Index;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerCache;
 import de.anomic.kelondro.text.MetadataRepository;
+import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.Log;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
@@ -107,7 +107,7 @@ public class Transmission {
                 final Row payloadrow) {
             super();
             this.primaryTarget = primaryTarget;
-            this.containers = new ReferenceContainerCache<WordReference>(plasmaWordIndex.wordReferenceFactory, payloadrow, plasmaWordIndex.wordOrder);
+            this.containers = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, payloadrow, Segment.wordOrder);
             this.containers.initWriteMode();
             this.references = new HashMap<String, URLMetadataRow>();
             this.badReferences = new HashSet<String>();

@@ -39,11 +39,11 @@ public class queues_p {
         yacySeed initiator;
         
         //indexing queue
-        prop.putNum("indexingSize", sb.getThread(plasmaSwitchboardConstants.INDEXER).getJobCount() + sb.webIndex.queuePreStack.getActiveQueueSize());
+        prop.putNum("indexingSize", sb.getThread(plasmaSwitchboardConstants.INDEXER).getJobCount() + sb.crawler.queuePreStack.getActiveQueueSize());
         prop.putNum("indexingMax", (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30));
-        prop.putNum("urlpublictextSize", sb.webIndex.metadata().size());
-        prop.putNum("rwipublictextSize", sb.webIndex.index().size());
-        if ((sb.webIndex.queuePreStack.size() == 0) && (sb.webIndex.queuePreStack.getActiveQueueSize() == 0)) {
+        prop.putNum("urlpublictextSize", sb.indexSegment.metadata().size());
+        prop.putNum("rwipublictextSize", sb.indexSegment.index().size());
+        if ((sb.crawler.queuePreStack.size() == 0) && (sb.crawler.queuePreStack.getActiveQueueSize() == 0)) {
             prop.put("list", "0"); //is empty
         } else {
             IndexingStack.QueueEntry pcentry;
@@ -52,12 +52,12 @@ public class queues_p {
             
             // getting all entries that are currently in process
             final ArrayList<IndexingStack.QueueEntry> entryList = new ArrayList<IndexingStack.QueueEntry>();
-            entryList.addAll(sb.webIndex.queuePreStack.getActiveQueueEntries());
+            entryList.addAll(sb.crawler.queuePreStack.getActiveQueueEntries());
             final int inProcessCount = entryList.size();
             
             // getting all enqueued entries
-            if ((sb.webIndex.queuePreStack.size() > 0)) {
-                final Iterator<IndexingStack.QueueEntry> i1 = sb.webIndex.queuePreStack.entryIterator(false);
+            if ((sb.crawler.queuePreStack.size() > 0)) {
+                final Iterator<IndexingStack.QueueEntry> i1 = sb.crawler.queuePreStack.entryIterator(false);
                 while (i1.hasNext()) try {
                     entryList.add(i1.next());
                 } catch (kelondroException e) {
@@ -75,7 +75,7 @@ public class queues_p {
                 if ((pcentry != null) && (pcentry.url() != null)) {
                     final long entrySize = pcentry.size();
                     totalSize += entrySize;
-                    initiator = sb.webIndex.peers().getConnected(pcentry.initiator());
+                    initiator = sb.peers.getConnected(pcentry.initiator());
                     prop.put("list-indexing_"+i+"_profile", (pcentry.profile() != null) ? pcentry.profile().name() : "deleted");
                     prop.putHTML("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                     prop.put("list-indexing_"+i+"_depth", pcentry.depth());
@@ -102,7 +102,7 @@ public class queues_p {
             for (int i = 0; i < w.length; i++)  {
                 if (w[i] == null) continue;
                 prop.put("list-loader_"+count+"_profile", w[i].profileHandle());
-                initiator = sb.webIndex.peers().getConnected(w[i].initiator());
+                initiator = sb.peers.getConnected(w[i].initiator());
                 prop.putHTML("list-loader_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("list-loader_"+count+"_depth", w[i].depth());
                 prop.putXML("list-loader_"+count+"_url", w[i].url().toString());
@@ -146,7 +146,7 @@ public class queues_p {
         for (int i = 0; i < crawlerList.size(); i++) {
             urle = crawlerList.get(i);
             if ((urle != null) && (urle.url() != null)) {
-                initiator = sb.webIndex.peers().getConnected(urle.initiator());
+                initiator = sb.peers.getConnected(urle.initiator());
                 prop.put(tableName + "_" + showNum + "_profile", urle.profileHandle());
                 prop.put(tableName + "_" + showNum + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put(tableName + "_" + showNum + "_depth", urle.depth());

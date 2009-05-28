@@ -51,7 +51,7 @@ public class opensearchdescription {
         prop.putXML("compareyacy_thisaddress", thisaddress);
         prop.putXML("thisaddress", thisaddress);
         prop.putXML("SearchPageGreeting", promoteSearchPageGreeting);
-        prop.putXML("clientname", sb.webIndex.peers().mySeed().getName());
+        prop.putXML("clientname", sb.peers.mySeed().getName());
         
         // return rewrite properties
         return prop;

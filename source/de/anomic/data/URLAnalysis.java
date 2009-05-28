@@ -55,11 +55,11 @@ import de.anomic.kelondro.index.IntegerHandleIndex;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.ReferenceContainerArray;
+import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.MetadataRepository.Export;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.yacy.yacyURL;
 
 public class URLAnalysis {
@@ -398,7 +398,7 @@ public class URLAnalysis {
         try {
             IntegerHandleIndex idx = ReferenceContainerArray.referenceHashes(
                 cellPath,
-                plasmaWordIndex.wordReferenceFactory,
+                Segment.wordReferenceFactory,
                 Base64Order.enhancedCoder,
                 WordReferenceRow.urlEntryRow);
             System.out.println("INDEX REFERENCE COLLECTION starting dump of statistics");

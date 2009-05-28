@@ -30,10 +30,10 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.crawler.CrawlProfile.entry;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
@@ -88,37 +88,37 @@ public class CrawlProfileEditor_p {
         if (post != null) {
             if (post.containsKey("terminate")) {
                 // termination of a crawl: shift the crawl from active to passive
-                final CrawlProfile.entry entry = sb.webIndex.profilesActiveCrawls.getEntry(handle);
-                if (entry != null) sb.webIndex.profilesPassiveCrawls.newEntry(entry.map());
-                sb.webIndex.profilesActiveCrawls.removeEntry(handle);
+                final CrawlProfile.entry entry = sb.crawler.profilesActiveCrawls.getEntry(handle);
+                if (entry != null) sb.crawler.profilesPassiveCrawls.newEntry(entry.map());
+                sb.crawler.profilesActiveCrawls.removeEntry(handle);
                 // delete all entries from the crawl queue that are deleted here
                 sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000);
             }
             if (post.containsKey("delete")) {
                 // deletion of a terminated crawl profile
-                sb.webIndex.profilesPassiveCrawls.removeEntry(handle);
+                sb.crawler.profilesPassiveCrawls.removeEntry(handle);
             }
             if (post.containsKey("deleteTerminatedProfiles")) {
-                Iterator<CrawlProfile.entry> profiles = sb.webIndex.profilesPassiveCrawls.profiles(false);
+                Iterator<CrawlProfile.entry> profiles = sb.crawler.profilesPassiveCrawls.profiles(false);
                 while (profiles.hasNext()) {
                     profiles.next();
                     profiles.remove();
-                    profiles = sb.webIndex.profilesPassiveCrawls.profiles(false);
+                    profiles = sb.crawler.profilesPassiveCrawls.profiles(false);
                 }
             }
         }
         
         // generate handle list
         int count = 0;
-        Iterator<CrawlProfile.entry> it = sb.webIndex.profilesActiveCrawls.profiles(true);
+        Iterator<CrawlProfile.entry> it = sb.crawler.profilesActiveCrawls.profiles(true);
         entry selentry;
         while (it.hasNext()) {
             selentry = it.next();
-            if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_SURROGATE) ||
-                    selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_PROXY) ||
-                    selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_REMOTE) /*||
-                    selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_TEXT) ||
-                    selentry.name().equals(plasmaSwitchboard.CRAWL_PROFILE_SNIPPET_MEDIA)*/)
+            if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE) ||
+                    selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY) ||
+                    selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE) /*||
+                    selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_TEXT) ||
+                    selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_MEDIA)*/)
                 continue;
             prop.put("profiles_" + count + "_name", selentry.name());
             prop.put("profiles_" + count + "_handle", selentry.handle());
@@ -127,7 +127,7 @@ public class CrawlProfileEditor_p {
             count++;
         }
         prop.put("profiles", count);
-        selentry = sb.webIndex.profilesActiveCrawls.getEntry(handle);
+        selentry = sb.crawler.profilesActiveCrawls.getEntry(handle);
         
         // read post for change submit
         if ((post != null) && (selentry != null)) {
@@ -139,7 +139,7 @@ public class CrawlProfileEditor_p {
 						tee = lit.next();
 						final String cval = selentry.map().get(tee.name);
 						final String val = (tee.type == eentry.BOOLEAN) ? Boolean.toString(post.containsKey(tee.name)) : post.get(tee.name, cval);
-						if (!cval.equals(val)) sb.webIndex.profilesActiveCrawls.changeEntry(selentry, tee.name, val);
+						if (!cval.equals(val)) sb.crawler.profilesActiveCrawls.changeEntry(selentry, tee.name, val);
 					}
 				} catch (final IOException ex) {
 					prop.put("error", "1");
@@ -154,7 +154,7 @@ public class CrawlProfileEditor_p {
         final int domlistlength = (post == null) ? 160 : post.getInt("domlistlength", 160);
         CrawlProfile.entry profile;
         // put active crawls into list
-        it = sb.webIndex.profilesActiveCrawls.profiles(true);
+        it = sb.crawler.profilesActiveCrawls.profiles(true);
         while (it.hasNext()) {
             profile = it.next();
             putProfileEntry(prop, profile, true, dark, count, domlistlength);
@@ -163,7 +163,7 @@ public class CrawlProfileEditor_p {
         }
         // put passive crawls into list
         boolean existPassiveCrawls = false;
-        it = sb.webIndex.profilesPassiveCrawls.profiles(true);
+        it = sb.crawler.profilesPassiveCrawls.profiles(true);
         while (it.hasNext()) {
             profile = it.next();
             putProfileEntry(prop, profile, false, dark, count, domlistlength);

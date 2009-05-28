@@ -119,7 +119,7 @@ public class WatchCrawler_p {
             
             if (post.containsKey("crawlingstart")) {
                 // init crawl
-                if (sb.webIndex.peers() == null) {
+                if (sb.peers == null) {
                     prop.put("info", "3");
                 } else {
                     // set new properties
@@ -209,13 +209,13 @@ public class WatchCrawler_p {
                             // first delete old entry, if exists
                             final yacyURL url = new yacyURL(crawlingStart, null);
                             final String urlhash = url.hash();
-                            sb.webIndex.metadata().remove(urlhash);
+                            sb.indexSegment.metadata().remove(urlhash);
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             sb.crawlQueues.errorURL.remove(urlhash);
                             
                             // stack url
-                            sb.webIndex.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
-                            final CrawlProfile.entry pe = sb.webIndex.profilesActiveCrawls.newEntry(
+                            sb.crawler.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
+                            final CrawlProfile.entry pe = sb.crawler.profilesActiveCrawls.newEntry(
                                     crawlingStartURL.getHost(),
                                     crawlingStartURL,
                                     CrawlProfile.KEYWORDS_USER,
@@ -227,7 +227,7 @@ public class WatchCrawler_p {
                                     indexText, indexMedia,
                                     storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
                             final String reasonString = sb.crawlStacker.stackCrawl(new CrawlEntry(
-                                    sb.webIndex.peers().mySeed().hash,
+                                    sb.peers.mySeed().hash,
                                     url,
                                     null,
                                     "CRAWLING-ROOT",
@@ -272,7 +272,7 @@ public class WatchCrawler_p {
                                     m.remove("generalFilter");
                                     m.remove("specificFilter");
                                     m.put("intention", post.get("intention", "").replace(',', '/'));
-                                    sb.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));
+                                    sb.peers.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.peers.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));
                                 }                                
                             } else {
                                 prop.put("info", "5"); //Crawling failed
@@ -281,7 +281,7 @@ public class WatchCrawler_p {
                                 
                                 final ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
                                         new CrawlEntry(
-                                                sb.webIndex.peers().mySeed().hash, 
+                                                sb.peers.mySeed().hash, 
                                                 crawlingStartURL, 
                                                 "", 
                                                 "", 
@@ -291,7 +291,7 @@ public class WatchCrawler_p {
                                                 0, 
                                                 0, 
                                                 0),
-                                        sb.webIndex.peers().mySeed().hash,
+                                        sb.peers.mySeed().hash,
                                         new Date(),
                                         1,
                                         reasonString);
@@ -337,7 +337,7 @@ public class WatchCrawler_p {
                                 
                                 // creating a crawler profile
                                 final yacyURL crawlURL = new yacyURL("file://" + file.toString(), null);
-                                final CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.newEntry(
+                                final CrawlProfile.entry profile = sb.crawler.profilesActiveCrawls.newEntry(
                                         fileName, crawlURL, CrawlProfile.KEYWORDS_USER,
                                         newcrawlingMustMatch,
                                         CrawlProfile.MATCH_NEVER,
@@ -366,7 +366,7 @@ public class WatchCrawler_p {
                                     
                                     // enqueuing the url for crawling
                                     sb.crawlStacker.enqueueEntry(new CrawlEntry(
-                                            sb.webIndex.peers().mySeed().hash, 
+                                            sb.peers.mySeed().hash, 
                                             nexturl, 
                                             "", 
                                             e.getValue(), 
@@ -401,7 +401,7 @@ public class WatchCrawler_p {
                     		final yacyURL sitemapURL = new yacyURL(sitemapURLStr, null);
                             
                     		// create a new profile
-                    		final CrawlProfile.entry pe = sb.webIndex.profilesActiveCrawls.newEntry(
+                    		final CrawlProfile.entry pe = sb.crawler.profilesActiveCrawls.newEntry(
                     				sitemapURLStr, sitemapURL, CrawlProfile.KEYWORDS_USER,
                     				newcrawlingMustMatch,
                     				CrawlProfile.MATCH_NEVER,

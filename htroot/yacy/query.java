@@ -74,7 +74,7 @@ public final class query {
         prop.put("mytime", DateFormatter.formatShortSecond());
 
         // check if we are the right target and requester has correct information about this peer
-        if (sb.webIndex.peers().mySeed() == null || !sb.webIndex.peers().mySeed().hash.equals(youare)) {
+        if (sb.peers.mySeed() == null || !sb.peers.mySeed().hash.equals(youare)) {
             // this request has a wrong target
             prop.put("response", "-1"); // request rejected
             return prop;
@@ -84,7 +84,7 @@ public final class query {
         if (obj.equals("rwiurlcount")) try {
             // the total number of different urls in the rwi is returned
             // <env> shall contain a word hash, the number of assigned lurls to this hash is returned
-            prop.put("response", sb.webIndex.index().get(env.getBytes(), null).size());
+            prop.put("response", sb.indexSegment.index().get(env.getBytes(), null).size());
             return prop;
         } catch (IOException e) {
             e.printStackTrace();
@@ -92,13 +92,13 @@ public final class query {
 
         if (obj.equals("rwicount")) {
             // return the total number of available word indexes
-            prop.put("response", sb.webIndex.index().size());
+            prop.put("response", sb.indexSegment.index().size());
             return prop;
         }
 
         if (obj.equals("lurlcount")) {
             // return the number of all available l-url's
-            prop.put("response", sb.webIndex.metadata().size());
+            prop.put("response", sb.indexSegment.metadata().size());
             return prop;
         }
 

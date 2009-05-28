@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaWordIndex;
+import de.anomic.crawler.CrawlSwitchboard;
 
 public class NoticeURLImporter extends AbstractImporter implements Importer {
 
@@ -31,7 +31,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
         // TODO: we need more error handling here
         this.plasmaPath = crawlerPath;
         final File noticeUrlDbFile = new File(plasmaPath,"urlNotice1.db");
-        final File profileDbFile = new File(plasmaPath, plasmaWordIndex.DBFILE_ACTIVE_CRAWL_PROFILES);
+        final File profileDbFile = new File(plasmaPath, CrawlSwitchboard.DBFILE_ACTIVE_CRAWL_PROFILES);
         
         String errorMsg = null;
         if (!plasmaPath.exists()) 

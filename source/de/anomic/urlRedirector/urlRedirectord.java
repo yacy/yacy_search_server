@@ -34,7 +34,7 @@ public class urlRedirectord implements serverHandler, Cloneable {
         }
         
         if (profile == null) {
-                profile = sb.webIndex.profilesActiveCrawls.newEntry(
+                profile = sb.crawler.profilesActiveCrawls.newEntry(
                             // name
                             "URL Redirector",
                             // start URL
@@ -151,7 +151,7 @@ public class urlRedirectord implements serverHandler, Cloneable {
                     if (pos != -1) {
                         final String newDepth = line.substring(pos).trim();
                         theLogger.logFine("Changing crawling depth to '" + newDepth + "'.");
-                        sb.webIndex.profilesActiveCrawls.changeEntry(profile, "generalDepth",newDepth);
+                        sb.crawler.profilesActiveCrawls.changeEntry(profile, "generalDepth",newDepth);
                     }
                     outputWriter.print("\r\n");
                     outputWriter.flush();
@@ -160,7 +160,7 @@ public class urlRedirectord implements serverHandler, Cloneable {
                     if (pos != -1) {
                         final String newValue = line.substring(pos).trim();
                         theLogger.logFine("Changing crawl dynamic setting to '" + newValue + "'");
-                        sb.webIndex.profilesActiveCrawls.changeEntry(profile, "crawlingQ",newValue);
+                        sb.crawler.profilesActiveCrawls.changeEntry(profile, "crawlingQ",newValue);
                     }
                     outputWriter.print("\r\n");
                     outputWriter.flush();                    
@@ -191,13 +191,13 @@ public class urlRedirectord implements serverHandler, Cloneable {
                         ) {
                             // first delete old entry, if exists
                             final String urlhash = reqURL.hash();
-                            sb.webIndex.metadata().remove(urlhash);
+                            sb.indexSegment.metadata().remove(urlhash);
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             sb.crawlQueues.errorURL.remove(urlhash);                            
                             
                             // enqueuing URL for crawling
                             sb.crawlStacker.enqueueEntry(new CrawlEntry(
-                                    sb.webIndex.peers().mySeed().hash, 
+                                    sb.peers.mySeed().hash, 
                                     reqURL, 
                                     null, 
                                     "URL Redirector", 

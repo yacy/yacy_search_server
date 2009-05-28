@@ -32,12 +32,13 @@ import java.net.UnknownHostException;
 import java.util.Date;
 
 import de.anomic.data.Blacklist;
+import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverProcessor;
+import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
 public final class CrawlStacker {
@@ -47,14 +48,24 @@ public final class CrawlStacker {
     private serverProcessor<CrawlEntry> fastQueue, slowQueue;
     private long                      dnsHit, dnsMiss;
     private CrawlQueues               nextQueue;
-    private plasmaWordIndex           wordIndex;
+    private CrawlSwitchboard          crawler;
+    private Segment                   indexSegment;
+    private yacySeedDB                peers;
     private boolean                   acceptLocalURLs, acceptGlobalURLs;
 
     // this is the process that checks url for double-occurrences and for allowance/disallowance by robots.txt
 
-    public CrawlStacker(CrawlQueues cq, plasmaWordIndex wordIndex, boolean acceptLocalURLs, boolean acceptGlobalURLs) {
+    public CrawlStacker(
+            CrawlQueues cq,
+            CrawlSwitchboard cs,
+            Segment indexSegment,
+            yacySeedDB peers,
+            boolean acceptLocalURLs,
+            boolean acceptGlobalURLs) {
         this.nextQueue = cq;
-        this.wordIndex = wordIndex;
+        this.crawler = cs;
+        this.indexSegment = indexSegment;
+        this.peers = peers;
         this.dnsHit = 0;
         this.dnsMiss = 0;
         this.acceptLocalURLs = acceptLocalURLs;
@@ -123,7 +134,7 @@ public final class CrawlStacker {
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null) {
-                final ZURL.Entry ee = nextQueue.errorURL.newEntry(entry, wordIndex.peers().mySeed().hash, new Date(), 1, rejectReason);
+                final ZURL.Entry ee = nextQueue.errorURL.newEntry(entry, peers.mySeed().hash, new Date(), 1, rejectReason);
                 ee.store();
                 nextQueue.errorURL.push(ee);
             }
@@ -185,7 +196,7 @@ public final class CrawlStacker {
             return "url in blacklist";
         }
 
-        final CrawlProfile.entry profile = wordIndex.profilesActiveCrawls.getEntry(entry.profileHandle());
+        final CrawlProfile.entry profile = crawler.profilesActiveCrawls.getEntry(entry.profileHandle());
         if (profile == null) {
             final String errorMsg = "LOST STACKER PROFILE HANDLE '" + entry.profileHandle() + "' for URL " + entry.url();
             log.logWarning(errorMsg);
@@ -243,8 +254,8 @@ public final class CrawlStacker {
 
         // check if the url is double registered
         final String dbocc = nextQueue.urlExists(entry.url().hash());
-        if (dbocc != null || wordIndex.metadata().exists(entry.url().hash())) {
-            final URLMetadataRow oldEntry = wordIndex.metadata().load(entry.url().hash(), null, 0);
+        if (dbocc != null || indexSegment.metadata().exists(entry.url().hash())) {
+            final URLMetadataRow oldEntry = indexSegment.metadata().load(entry.url().hash(), null, 0);
             final boolean recrawl = (oldEntry != null) && (profile.recrawlIfOlder() > oldEntry.loaddate().getTime());
             // do double-check
             if ((dbocc != null) && (!recrawl)) {
@@ -264,16 +275,16 @@ public final class CrawlStacker {
         }
 
         // store information
-        final boolean local = entry.initiator().equals(wordIndex.peers().mySeed().hash);
-        final boolean proxy = (entry.initiator() == null || entry.initiator().equals("------------")) && profile.handle().equals(wordIndex.defaultProxyProfile.handle());
-        final boolean remote = profile.handle().equals(wordIndex.defaultRemoteProfile.handle());
+        final boolean local = entry.initiator().equals(peers.mySeed().hash);
+        final boolean proxy = (entry.initiator() == null || entry.initiator().equals("------------")) && profile.handle().equals(crawler.defaultProxyProfile.handle());
+        final boolean remote = profile.handle().equals(crawler.defaultRemoteProfile.handle());
         final boolean global =
             (profile.remoteIndexing()) /* granted */ &&
             (entry.depth() == profile.depth()) /* leaf node */ &&
             //(initiatorHash.equals(yacyCore.seedDB.mySeed.hash)) /* not proxy */ &&
             (
-                    (wordIndex.peers().mySeed().isSenior()) ||
-                    (wordIndex.peers().mySeed().isPrincipal())
+                    (peers.mySeed().isSenior()) ||
+                    (peers.mySeed().isPrincipal())
             ) /* qualified */;
 
         if (!local && !global && !remote && !proxy) {

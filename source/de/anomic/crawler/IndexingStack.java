@@ -39,12 +39,12 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.table.Stack;
+import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
@@ -53,12 +53,12 @@ public class IndexingStack {
 
     private final Stack sbQueueStack;
     private final CrawlProfile profiles;
-    private final plasmaWordIndex wordIndex;
+    private final yacySeedDB peers;
     private final ConcurrentHashMap<String, QueueEntry> queueInProcess;
     
-    public IndexingStack(final plasmaWordIndex wordIndex, final File sbQueueStackPath, final CrawlProfile profiles) {
+    public IndexingStack(final yacySeedDB peers, final File sbQueueStackPath, final CrawlProfile profiles) {
         this.profiles = profiles;
-        this.wordIndex = wordIndex;
+        this.peers = peers;
         this.queueInProcess = new ConcurrentHashMap<String, QueueEntry>();
         this.sbQueueStack = Stack.open(sbQueueStackPath, rowdef);
     }
@@ -327,12 +327,12 @@ public class IndexingStack {
         
         public yacySeed initiatorPeer() {
             if ((initiator == null) || (initiator.length() == 0)) return null;
-            if (initiator.equals(wordIndex.peers().mySeed().hash)) {
+            if (initiator.equals(peers.mySeed().hash)) {
                 // normal crawling
                 return null;
             }
             // this was done for remote peer (a global crawl)
-            return wordIndex.peers().getConnected(initiator);
+            return peers.getConnected(initiator);
         }
 
         public int depth() {
@@ -371,11 +371,11 @@ public class IndexingStack {
             return (responseHeader == null) ? new Date() : responseHeader.lastModified();            
         }
         
-        public yacyURL referrerURL() {
+        public yacyURL referrerURL(MetadataRepository repository) {
             if (referrerURL == null) {
                 // FIXME the equals seems to be incorrect: String.equals(boolean)
                 if ((referrerHash == null) || ((initiator != null) && (referrerHash.equals(initiator.length() == 0)))) return null;
-                final URLMetadataRow entry = wordIndex.metadata().load(referrerHash, null, 0);
+                final URLMetadataRow entry = repository.load(referrerHash, null, 0);
                 if (entry == null) referrerURL = null; else referrerURL = entry.metadata().url();
             }
             return referrerURL;
@@ -402,7 +402,7 @@ public class IndexingStack {
             if ((initiator == null) || initiator.length() == 0 || initiator.equals("------------")) {
                 // proxy-load
                 processCase = plasmaSwitchboardConstants.PROCESSCASE_4_PROXY_LOAD;
-            } else if (initiator.equals(wordIndex.peers().mySeed().hash)) {
+            } else if (initiator.equals(peers.mySeed().hash)) {
                 // normal crawling
                 processCase = plasmaSwitchboardConstants.PROCESSCASE_5_LOCAL_CRAWLING;
             } else {

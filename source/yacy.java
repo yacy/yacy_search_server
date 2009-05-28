@@ -59,6 +59,7 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.MetadataRepository;
+import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.DateFormatter;
@@ -68,7 +69,6 @@ import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.parser.Word;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
@@ -661,14 +661,13 @@ public final class yacy {
         // run with "java -classpath classes yacy -minimizeUrlDB"
         try {Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
         final File indexPrimaryRoot = new File(homePath, "DATA/INDEX");
-        final File indexSecondaryRoot = new File(homePath, "DATA/INDEX");
         final File indexRoot2 = new File(homePath, "DATA/INDEX2");
         final Log log = new Log("URL-CLEANUP");
         try {
             log.logInfo("STARTING URL CLEANUP");
             
             // db containing all currently loades urls
-            final MetadataRepository currentUrlDB = new MetadataRepository(new File(new File(indexSecondaryRoot, networkName), "TEXT"));
+            final MetadataRepository currentUrlDB = new MetadataRepository(new File(new File(indexPrimaryRoot, networkName), "TEXT"));
             
             // db used to hold all neede urls
             final MetadataRepository minimizedUrlDB = new MetadataRepository(new File(new File(indexRoot2, networkName), "TEXT"));
@@ -676,15 +675,11 @@ public final class yacy {
             final int cacheMem = (int)(MemoryControl.maxMemory - MemoryControl.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
                 
-            final plasmaWordIndex wordIndex = new plasmaWordIndex(
-                    networkName,
+            final Segment wordIndex = new Segment(
                     log,
-                    indexPrimaryRoot,
-                    indexSecondaryRoot,
+                    new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"),
                     10000,
-                    (long) Integer.MAX_VALUE,
-                    0,
-                    0);
+                    (long) Integer.MAX_VALUE);
             final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = wordIndex.index().references("AAAAAAAAAAAA".getBytes(), false, false);
             
             long urlCounter = 0, wordCounter = 0;
@@ -864,10 +859,9 @@ public final class yacy {
     }
     
     private static void RWIHashList(final File homePath, final String targetName, final String resource, final String format) {
-        plasmaWordIndex WordIndex = null;
+        Segment WordIndex = null;
         final Log log = new Log("HASHLIST");
         final File indexPrimaryRoot = new File(homePath, "DATA/INDEX");
-        final File indexSecondaryRoot = new File(homePath, "DATA/INDEX");
         final String wordChunkStartHash = "AAAAAAAAAAAA";
         try {Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
         log.logInfo("STARTING CREATION OF RWI-HASHLIST");
@@ -875,15 +869,11 @@ public final class yacy {
         try {
             Iterator<ReferenceContainer<WordReference>> indexContainerIterator = null;
             if (resource.equals("all")) {
-                WordIndex = new plasmaWordIndex(
-                        "freeworld",
-                        log, 
-                        indexPrimaryRoot, 
-                        indexSecondaryRoot,
+                WordIndex = new Segment(
+                        log,
+                        new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"),
                         10000,
-                        (long) Integer.MAX_VALUE,
-                        1,
-                        0);
+                        (long) Integer.MAX_VALUE);
                 indexContainerIterator = WordIndex.index().references(wordChunkStartHash.getBytes(), false, false);
             }
             int counter = 0;

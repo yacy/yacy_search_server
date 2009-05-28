@@ -384,7 +384,7 @@ public class icapd implements serverHandler, Cloneable {
                     httpRespStatusLine,
                     httpReqHeader, httpResHeader,
                     null, 
-                    sb.webIndex.defaultProxyProfile
+                    sb.crawler.defaultProxyProfile
             );
             
             // copy the response body into the file

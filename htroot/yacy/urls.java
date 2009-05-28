@@ -45,7 +45,7 @@ public class urls {
         
         // insert default values
         final serverObjects prop = new serverObjects();
-        prop.put("iam", sb.webIndex.peers().mySeed().hash);
+        prop.put("iam", sb.peers.mySeed().hash);
         prop.put("response", "rejected - insufficient call parameters");
         prop.put("channel_title", "");
         prop.put("channel_description", "");
@@ -68,7 +68,7 @@ public class urls {
                    (System.currentTimeMillis() < timeout) &&
                    (sb.crawlQueues.noticeURL.stackSize(stackType) > 0)) {
                 try {
-                    entry = sb.crawlQueues.noticeURL.pop(stackType, false, sb.webIndex.profilesActiveCrawls);
+                    entry = sb.crawlQueues.noticeURL.pop(stackType, false, sb.crawler.profilesActiveCrawls);
                 } catch (final IOException e) {
                     break;
                 }
@@ -81,7 +81,7 @@ public class urls {
                 sb.crawlQueues.delegatedURL.push(
                         sb.crawlQueues.delegatedURL.newEntry(
                                 entry,
-                                sb.webIndex.peers().mySeed().hash,
+                                sb.peers.mySeed().hash,
                                 new Date(),
                                 0,
                                 "client=____________")
@@ -112,7 +112,7 @@ public class urls {
         	URLMetadataRow.Components metadata;
             yacyURL referrer;
             for (int i = 0; i < count; i++) {
-                entry = sb.webIndex.metadata().load(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);
+                entry = sb.indexSegment.metadata().load(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);
                 if (entry == null) continue;
                 // find referrer, if there is one
                 referrer = sb.getURL(entry.referrerHash());

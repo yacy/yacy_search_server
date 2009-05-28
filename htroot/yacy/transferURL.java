@@ -69,11 +69,11 @@ public final class transferURL {
         String result = "";
         String doublevalues = "0";
 
-        final yacySeed otherPeer = sb.webIndex.peers().get(iam);
+        final yacySeed otherPeer = sb.peers.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));
 
-        if ((youare == null) || (!youare.equals(sb.webIndex.peers().mySeed().hash))) {
-        	sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.webIndex.peers().mySeed().hash);
+        if ((youare == null) || (!youare.equals(sb.peers.mySeed().hash))) {
+        	sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.peers.mySeed().hash);
             result = "wrong_target";
         } else if ((!granted) || (sb.isRobinsonMode())) {
         	sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Not granted.");
@@ -81,7 +81,7 @@ public final class transferURL {
         } else {
             int received = 0;
             int blocked = 0;
-            final int sizeBefore = sb.webIndex.metadata().size();
+            final int sizeBefore = sb.indexSegment.metadata().size();
             // read the urls from the other properties and store
             String urls;
             URLMetadataRow lEntry;
@@ -138,7 +138,7 @@ public final class transferURL {
                 
                 // write entry to database
                 try {
-                    sb.webIndex.metadata().store(lEntry);
+                    sb.indexSegment.metadata().store(lEntry);
                     sb.crawlResults.stack(lEntry, iam, iam, 3);
                     if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: received URL '" + metadata.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     received++;
@@ -147,10 +147,10 @@ public final class transferURL {
                 }
             }
 
-            sb.webIndex.peers().mySeed().incRU(received);
+            sb.peers.mySeed().incRU(received);
 
             // return rewrite properties
-            final int more = sb.webIndex.metadata().size() - sizeBefore;
+            final int more = sb.indexSegment.metadata().size() - sizeBefore;
             doublevalues = Integer.toString(received - more);
             sb.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " URLs");
             RSSFeed.channels(RSSFeed.INDEXRECEIVE).addMessage(new RSSMessage("Received " + received + " URLs from peer " + otherPeerName + ", blocked " + blocked, "", ""));

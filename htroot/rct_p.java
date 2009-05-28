@@ -53,8 +53,8 @@ public class rct_p {
         if (post != null) {
             if (post.containsKey("retrieve")) {
                 final String peerhash = post.get("peer", null);
-                final yacySeed seed = (peerhash == null) ? null : sb.webIndex.peers().getConnected(peerhash);
-                final RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.webIndex.peers(), seed, 20, 60000);
+                final yacySeed seed = (peerhash == null) ? null : sb.peers.getConnected(peerhash);
+                final RSSFeed feed = (seed == null) ? null : yacyClient.queryRemoteCrawlURLs(sb.peers, seed, 20, 60000);
                 if (feed != null) {
                     for (final RSSMessage item: feed) {
                         //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
@@ -84,7 +84,7 @@ public class rct_p {
                                     "REMOTE-CRAWLING",
                                     null,
                                     loaddate,
-                                    sb.webIndex.defaultRemoteProfile.handle(),
+                                    sb.crawler.defaultRemoteProfile.handle(),
                                     0,
                                     0,
                                     0
@@ -115,8 +115,8 @@ public class rct_p {
         // list known hosts
         yacySeed seed;
         int hc = 0;
-        if (sb.webIndex.peers() != null && sb.webIndex.peers().sizeConnected() > 0) {
-            final Iterator<yacySeed> e = PeerSelection.getProvidesRemoteCrawlURLs(sb.webIndex.peers());
+        if (sb.peers != null && sb.peers.sizeConnected() > 0) {
+            final Iterator<yacySeed> e = PeerSelection.getProvidesRemoteCrawlURLs(sb.peers);
             while (e.hasNext()) {
                 seed = e.next();
                 if (seed != null) {

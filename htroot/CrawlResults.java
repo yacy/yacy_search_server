@@ -104,7 +104,7 @@ public class CrawlResults {
             final String hash = post.get("hash", null);
             if (hash != null) {
                 // delete from database
-                sb.webIndex.metadata().remove(hash);
+                sb.indexSegment.metadata().remove(hash);
             }
         }
         
@@ -114,7 +114,7 @@ public class CrawlResults {
             if (hashpart != null) {
                 // delete all urls for this domain from database
                 try {
-                    sb.webIndex.metadata().deleteDomain(hashpart);
+                    sb.indexSegment.metadata().deleteDomain(hashpart);
                     sb.crawlResults.deleteDomain(tabletype, domain, hashpart);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -178,7 +178,7 @@ public class CrawlResults {
                 executorHash = sb.crawlResults.getExecutorHash(tabletype, i);
                 urlHash = sb.crawlResults.getUrlHash(tabletype, i);
                 try {
-                    urle = sb.webIndex.metadata().load(urlHash, null, 0);
+                    urle = sb.indexSegment.metadata().load(urlHash, null, 0);
                     if(urle == null) {
                         Log.logWarning("PLASMA", "CrawlResults: URL not in index for crawl result "+ i +" with hash "+ urlHash);
                         urlstr = null;
@@ -189,8 +189,8 @@ public class CrawlResults {
                         urlstr = metadata.url().toNormalform(false, true);
                         urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
                     }
-                    initiatorSeed = sb.webIndex.peers().getConnected(initiatorHash);
-                    executorSeed = sb.webIndex.peers().getConnected(executorHash);
+                    initiatorSeed = sb.peers.getConnected(initiatorHash);
+                    executorSeed = sb.peers.getConnected(executorHash);
 
                     prop.put("table_indexed_" + cnt + "_dark", (dark) ? "1" : "0");
                     prop.put("table_indexed_" + cnt + "_feedbackpage", "CrawlResults.html");

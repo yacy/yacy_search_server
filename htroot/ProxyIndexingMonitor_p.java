@@ -96,15 +96,15 @@ public class ProxyIndexingMonitor_p {
                 plasmaHTCache.setCacheSize(Long.parseLong(newProxyCacheSize) * 1024 * 1024);                
 
                 // implant these settings also into the crawling profile for the proxy
-                if (sb.webIndex.defaultProxyProfile == null) {
+                if (sb.crawler.defaultProxyProfile == null) {
                     prop.put("info", "1"); //delete DATA/PLASMADB/crawlProfiles0.db
                 } else {
                     try {
-                        sb.webIndex.profilesActiveCrawls.changeEntry(sb.webIndex.defaultProxyProfile, "generalDepth", Integer.toString(newProxyPrefetchDepth));
-                        sb.webIndex.profilesActiveCrawls.changeEntry(sb.webIndex.defaultProxyProfile, "storeHTCache", (proxyStoreHTCache) ? "true": "false");
-                        sb.webIndex.profilesActiveCrawls.changeEntry(sb.webIndex.defaultProxyProfile, "remoteIndexing",proxyIndexingRemote ? "true":"false");
-                        sb.webIndex.profilesActiveCrawls.changeEntry(sb.webIndex.defaultProxyProfile, "indexText",proxyIndexingLocalText ? "true":"false");
-                        sb.webIndex.profilesActiveCrawls.changeEntry(sb.webIndex.defaultProxyProfile, "indexMedia",proxyIndexingLocalMedia ? "true":"false");
+                        sb.crawler.profilesActiveCrawls.changeEntry(sb.crawler.defaultProxyProfile, "generalDepth", Integer.toString(newProxyPrefetchDepth));
+                        sb.crawler.profilesActiveCrawls.changeEntry(sb.crawler.defaultProxyProfile, "storeHTCache", (proxyStoreHTCache) ? "true": "false");
+                        sb.crawler.profilesActiveCrawls.changeEntry(sb.crawler.defaultProxyProfile, "remoteIndexing",proxyIndexingRemote ? "true":"false");
+                        sb.crawler.profilesActiveCrawls.changeEntry(sb.crawler.defaultProxyProfile, "indexText",proxyIndexingLocalText ? "true":"false");
+                        sb.crawler.profilesActiveCrawls.changeEntry(sb.crawler.defaultProxyProfile, "indexMedia",proxyIndexingLocalMedia ? "true":"false");
                         
                         prop.put("info", "2");//new proxyPrefetchdepth
                         prop.put("info_message", newProxyPrefetchDepth);

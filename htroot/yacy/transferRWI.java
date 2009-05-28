@@ -84,7 +84,7 @@ public final class transferRWI {
         boolean granted       = sb.getConfig("allowReceiveIndex", "false").equals("true");
         final boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
         final long cachelimit = sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 100000);
-        final yacySeed otherPeer = sb.webIndex.peers().get(iam);
+        final yacySeed otherPeer = sb.peers.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));                
         
         // response values
@@ -92,8 +92,8 @@ public final class transferRWI {
         String result = "ok";
         final StringBuilder unknownURLs = new StringBuilder();
         
-        if ((youare == null) || (!youare.equals(sb.webIndex.peers().mySeed().hash))) {
-        	sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.webIndex.peers().mySeed().hash);
+        if ((youare == null) || (!youare.equals(sb.peers.mySeed().hash))) {
+        	sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.peers.mySeed().hash);
             result = "wrong_target";
             pause = 0;
         } else if (otherPeer == null) {
@@ -111,9 +111,9 @@ public final class transferRWI {
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted. This peer is in robinson mode");
             result = "not_granted";
             pause = 60000;
-        } else if (sb.webIndex.index().getBufferSize() > cachelimit) {
+        } else if (sb.indexSegment.index().getBufferSize() > cachelimit) {
             // we are too busy to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.webIndex.index().getBufferSize() + ").");
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.indexSegment.index().getBufferSize() + ").");
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 60000;
@@ -183,7 +183,7 @@ public final class transferRWI {
                 
                 // learn entry
                 try {
-                    sb.webIndex.index().add(wordHash.getBytes(), iEntry);
+                    sb.indexSegment.index().add(wordHash.getBytes(), iEntry);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -191,7 +191,7 @@ public final class transferRWI {
 
                 // check if we need to ask for the corresponding URL
                 if (!(knownURL.contains(urlHash)||unknownURL.contains(urlHash)))  try {
-                    if (sb.webIndex.metadata().exists(urlHash)) {
+                    if (sb.indexSegment.metadata().exists(urlHash)) {
                         knownURL.add(urlHash);
                     } else {
                         unknownURL.add(urlHash);
@@ -204,7 +204,7 @@ public final class transferRWI {
                 }
                 received++;
             }
-            sb.webIndex.peers().mySeed().incRI(received);
+            sb.peers.mySeed().incRI(received);
 
             // finally compose the unknownURL hash list
             final Iterator<String> it = unknownURL.iterator();  
@@ -216,13 +216,13 @@ public final class transferRWI {
             if ((wordhashes.length == 0) || (received == 0)) {
                 sb.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs");
             } else {
-                final long avdist = (FlatWordPartitionScheme.std.dhtDistance(wordhashes[0].getBytes(), null, sb.webIndex.peers().mySeed()) + FlatWordPartitionScheme.std.dhtDistance(wordhashes[received - 1].getBytes(), null, sb.webIndex.peers().mySeed())) / 2;
+                final long avdist = (FlatWordPartitionScheme.std.dhtDistance(wordhashes[0].getBytes(), null, sb.peers.mySeed()) + FlatWordPartitionScheme.std.dhtDistance(wordhashes[received - 1].getBytes(), null, sb.peers.mySeed())) / 2;
                 sb.getLog().logInfo("Received " + received + " Entries " + wordc + " Words [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + "/" + receivedURL + " URLs, blocked " + blocked + " RWIs");
                 RSSFeed.channels(RSSFeed.INDEXRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", requesting " + unknownURL.size() + " URLs, blocked " + blocked, "", ""));
             }
             result = "ok";
             
-            pause = (int) (sb.webIndex.index().getBufferSize() * 20000 / sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 100000)); // estimation of necessary pause time
+            pause = (int) (sb.indexSegment.index().getBufferSize() * 20000 / sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 100000)); // estimation of necessary pause time
         }
 
         prop.put("unknownURL", unknownURLs.toString());

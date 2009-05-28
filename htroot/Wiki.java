@@ -73,8 +73,8 @@ public class Wiki {
         if (author.equals("anonymous")) {
             author = wikiBoard.guessAuthor(ip);
             if (author == null) {
-                if (sb.webIndex.peers().mySeed() == null) author = "anonymous";
-                else author = sb.webIndex.peers().mySeed().get("Name", "anonymous");
+                if (sb.peers.mySeed() == null) author = "anonymous";
+                else author = sb.peers.mySeed().get("Name", "anonymous");
             }
         }
         
@@ -116,7 +116,7 @@ public class Wiki {
             map.put("page", pagename);
             map.put("author", author.replace(',', ' '));
             if (post.get("content", "").trim().length() > 0 && !page.page().equals(content))
-                sb.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_WIKI_UPDATE, map));
+                sb.peers.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.peers.mySeed(), yacyNewsPool.CATEGORY_WIKI_UPDATE, map));
             page = newEntry;
             prop.putHTML("LOCATION", "/Wiki.html?page=" + pagename);
         }

@@ -205,7 +205,7 @@ public final class Settings_p {
         }
         
         // general settings
-        prop.put("seedURL", sb.webIndex.peers().mySeed().get(yacySeed.SEEDLIST, ""));
+        prop.put("seedURL", sb.peers.mySeed().get(yacySeed.SEEDLIST, ""));
         
         /*
          * Message forwarding configuration

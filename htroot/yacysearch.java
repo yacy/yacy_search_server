@@ -224,7 +224,7 @@ public class yacysearch {
             
             // check available memory and clean up if necessary
             if (!MemoryControl.request(8000000L, false)) {
-                sb.webIndex.metadata().clearCache();
+                sb.indexSegment.metadata().clearCache();
                 plasmaSearchEvent.cleanupEvents(true);
             }
             
@@ -333,14 +333,14 @@ public class yacysearch {
                 
                 // delete the index entry locally
                 final String delHash = post.get("deleteref", ""); // urlhash
-                sb.webIndex.index().remove(Word.words2hashes(query[0]), delHash);
+                sb.indexSegment.index().remove(Word.words2hashes(query[0]), delHash);
 
                 // make new news message with negative voting
                 final HashMap<String, String> map = new HashMap<String, String>();
                 map.put("urlhash", delHash);
                 map.put("vote", "negative");
                 map.put("refid", "");
-                sb.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
+                sb.peers.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -352,7 +352,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                final URLMetadataRow urlentry = sb.webIndex.metadata().load(recommendHash, null, 0);
+                final URLMetadataRow urlentry = sb.indexSegment.metadata().load(recommendHash, null, 0);
                 if (urlentry != null) {
                     final URLMetadataRow.Components metadata = urlentry.metadata();
                     plasmaParserDocument document;
@@ -365,7 +365,7 @@ public class yacysearch {
                         map.put("description", document.dc_title().replace(',', ' '));
                         map.put("author", document.dc_creator());
                         map.put("tags", document.dc_subject(' '));
-                        sb.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
+                        sb.peers.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_ADD, map));
                         document.close();
                     }
                 }
@@ -419,7 +419,7 @@ public class yacysearch {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
-            final plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, sb.webIndex, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
+            final plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, sb.indexSegment, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
             
             // generate result object
             //serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + (System.currentTimeMillis() - timestamp) + " ms");

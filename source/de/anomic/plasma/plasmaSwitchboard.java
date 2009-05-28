@@ -112,11 +112,13 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 
 import de.anomic.content.DCEntry;
+import de.anomic.content.RSSMessage;
 import de.anomic.content.file.SurrogateReader;
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.CrawlStacker;
+import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.crawler.ImporterManager;
 import de.anomic.crawler.IndexingStack;
@@ -148,6 +150,7 @@ import de.anomic.http.httpd;
 import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.DateFormatter;
@@ -175,12 +178,14 @@ import de.anomic.server.serverSystem;
 import de.anomic.server.serverThread;
 import de.anomic.tools.crypt;
 import de.anomic.tools.CryptoLib;
+import de.anomic.xml.RSSFeed;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.Tray;
+import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyUpdateLocation;
 import de.anomic.yacy.yacyRelease;
@@ -218,7 +223,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  File                           surrogatesInPath;
     public  File                           surrogatesOutPath;
     public  Map<String, String>            rankingPermissions;
-    public  plasmaWordIndex                webIndex;
+    public  Segment                        indexSegment;
+    public  CrawlSwitchboard               crawler;
     public  CrawlQueues                    crawlQueues;
     public  ResultURLs                     crawlResults;
     public  CrawlStacker                   crawlStacker;
@@ -250,6 +256,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  List<Pattern>                  networkWhitelist, networkBlacklist;
     public  Dispatcher                     dhtDispatcher;
     public  List<String>                   trail;
+    public  yacySeedDB                     peers;
     
     public serverProcessor<indexingQueueEntry> indexingDocumentProcessor;
     public serverProcessor<indexingQueueEntry> indexingCondensementProcessor;
@@ -293,8 +300,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
         final File indexPrimaryPath = getConfigPath(plasmaSwitchboardConstants.INDEX_PRIMARY_PATH, plasmaSwitchboardConstants.INDEX_PATH_DEFAULT);
         this.log.logConfig("Index Primary Path: " + indexPrimaryPath.toString());
-        final File indexSecondaryPath = (getConfig(plasmaSwitchboardConstants.INDEX_SECONDARY_PATH, "").length() == 0) ? indexPrimaryPath : new File(getConfig(plasmaSwitchboardConstants.INDEX_SECONDARY_PATH, ""));
-        this.log.logConfig("Index Secondary Path: " + indexSecondaryPath.toString());
         this.listsPath      = getConfigPath(plasmaSwitchboardConstants.LISTS_PATH, plasmaSwitchboardConstants.LISTS_PATH_DEFAULT);
         this.log.logConfig("Lists Path:     " + this.listsPath.toString());
         this.htDocsPath   = getConfigPath(plasmaSwitchboardConstants.HTDOCS_PATH, plasmaSwitchboardConstants.HTDOCS_PATH_DEFAULT);
@@ -322,20 +327,32 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         final String networkName = getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "");
         final long fileSizeMax = (serverSystem.isWindows) ? sb.getConfigLong("filesize.max.win", (long) Integer.MAX_VALUE) : sb.getConfigLong("filesize.max.other", (long) Integer.MAX_VALUE);
         final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
-        final int paritionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
+        final int partitionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
         try {
-			webIndex = new plasmaWordIndex(
-			        networkName,
-			        log,
-			        indexPrimaryPath,
-			        indexSecondaryPath,
-			        wordCacheMaxCount,
-			        fileSizeMax,
-			        redundancy,
-			        paritionExponent);
+			final File networkRoot = new File(new File(indexPrimaryPath, networkName), "NETWORK");
+	        networkRoot.mkdirs();
+	        final File mySeedFile = new File(networkRoot, yacySeedDB.DBFILE_OWN_SEED);
+	        peers = new yacySeedDB(
+	                networkRoot,
+	                "seed.new.heap",
+	                "seed.old.heap",
+	                "seed.pot.heap",
+	                mySeedFile,
+	                redundancy,
+	                partitionExponent);
+	        indexSegment = new Segment(
+                    log,
+                    new File(new File(indexPrimaryPath, networkName), "TEXT"),
+                    wordCacheMaxCount,
+                    fileSizeMax);
+	        crawler = new CrawlSwitchboard(
+	                peers,
+	                networkName,
+	                log,
+	                new File(new File(indexPrimaryPath, networkName), "QUEUES"));
 		} catch (IOException e1) {
 			e1.printStackTrace();
-			webIndex = null;
+			indexSegment = null;
 		}
         crawlResults = new ResultURLs();
         
@@ -347,9 +364,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // init a DHT transmission dispatcher
         this.dhtDispatcher = new Dispatcher(
-                webIndex.index(),
-                webIndex.metadata(),
-                webIndex.peers(),
+                indexSegment.index(),
+                indexSegment.metadata(),
+                peers,
                 true, 
                 30000);
         
@@ -451,7 +468,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         htCachePath = getConfigPath(plasmaSwitchboardConstants.HTCACHE_PATH, plasmaSwitchboardConstants.HTCACHE_PATH_DEFAULT);
         this.log.logInfo("HTCACHE Path = " + htCachePath.getAbsolutePath());
         final long maxCacheSize = 1024 * 1024 * Long.parseLong(getConfig(plasmaSwitchboardConstants.PROXY_CACHE_SIZE, "2")); // this is megabyte
-        plasmaHTCache.init(htCachePath, webIndex.peers().mySeed().hash, maxCacheSize);
+        plasmaHTCache.init(htCachePath, peers.mySeed().hash, maxCacheSize);
         
         // create the surrogates directories
         surrogatesInPath = getConfigPath(plasmaSwitchboardConstants.SURROGATES_IN_PATH, plasmaSwitchboardConstants.SURROGATES_IN_PATH_DEFAULT);
@@ -564,8 +581,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         CRDist1Target  = kaskelix.de:8080,yacy.dyndns.org:8000,suma-lab.de:8080
          **/
         rankingOn = getConfig(plasmaSwitchboardConstants.RANKING_DIST_ON, "true").equals("true") && networkName.equals("freeworld");
-        rankingOwnDistribution = new plasmaRankingDistribution(log, webIndex.peers(), new File(rankingPath, getConfig(plasmaSwitchboardConstants.RANKING_DIST_0_PATH, plasmaRankingDistribution.CR_OWN)), (int) getConfigLong(plasmaSwitchboardConstants.RANKING_DIST_0_METHOD, plasmaRankingDistribution.METHOD_ANYSENIOR), (int) getConfigLong(plasmaSwitchboardConstants.RANKING_DIST_0_METHOD, 0), getConfig(plasmaSwitchboardConstants.RANKING_DIST_0_TARGET, ""));
-        rankingOtherDistribution = new plasmaRankingDistribution(log, webIndex.peers(), new File(rankingPath, getConfig(plasmaSwitchboardConstants.RANKING_DIST_1_PATH, plasmaRankingDistribution.CR_OTHER)), (int) getConfigLong(plasmaSwitchboardConstants.RANKING_DIST_1_METHOD, plasmaRankingDistribution.METHOD_MIXEDSENIOR), (int) getConfigLong(plasmaSwitchboardConstants.RANKING_DIST_1_METHOD, 30), getConfig(plasmaSwitchboardConstants.RANKING_DIST_1_TARGET, "kaskelix.de:8080,yacy.dyndns.org:8000"));
+        rankingOwnDistribution = new plasmaRankingDistribution(log, peers, new File(rankingPath, getConfig(plasmaSwitchboardConstants.RANKING_DIST_0_PATH, plasmaRankingDistribution.CR_OWN)), (int) getConfigLong(plasmaSwitchboardConstants.RANKING_DIST_0_METHOD, plasmaRankingDistribution.METHOD_ANYSENIOR), (int) getConfigLong(plasmaSwitchboardConstants.RANKING_DIST_0_METHOD, 0), getConfig(plasmaSwitchboardConstants.RANKING_DIST_0_TARGET, ""));
+        rankingOtherDistribution = new plasmaRankingDistribution(log, peers, new File(rankingPath, getConfig(plasmaSwitchboardConstants.RANKING_DIST_1_PATH, plasmaRankingDistribution.CR_OTHER)), (int) getConfigLong(plasmaSwitchboardConstants.RANKING_DIST_1_METHOD, plasmaRankingDistribution.METHOD_MIXEDSENIOR), (int) getConfigLong(plasmaSwitchboardConstants.RANKING_DIST_1_METHOD, 30), getConfig(plasmaSwitchboardConstants.RANKING_DIST_1_TARGET, "kaskelix.de:8080,yacy.dyndns.org:8000"));
 
         // init nameCacheNoCachingList
         serverDomains.setNoCachingPatterns(getConfig(plasmaSwitchboardConstants.HTTPC_NAME_CACHE_CACHING_PATTERNS_NO,""));
@@ -575,15 +592,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         plasmaSnippetCache.init(parser, log, this);
         
         // init the wiki
-        wikiParser = new wikiCode(this.webIndex.peers().mySeed().getClusterAddress());
+        wikiParser = new wikiCode(this.peers.mySeed().getClusterAddress());
         
         // initializing the resourceObserver
         serverInstantBusyThread.oneTimeJob(ResourceObserver.class, "initThread", ResourceObserver.log, 0);
         
         // initializing the stackCrawlThread
         this.crawlStacker = new CrawlStacker(
-                crawlQueues,
-                this.webIndex,
+                this.crawlQueues,
+                this.crawler,
+                this.indexSegment,
+                this.peers,
                 "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0,
                 "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0);
         
@@ -594,7 +613,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // before we do that, we wait some time until the seed list is loaded.
         //while (((System.currentTimeMillis() - startedSeedListAquisition) < 8000) && (this.webIndex.seedDB.sizeConnected() == 0)) try {Thread.sleep(1000);} catch (final InterruptedException e) {}
         //try {Thread.sleep(1000);} catch (final InterruptedException e) {}
-        this.clusterhashes = this.webIndex.peers().clusterHashes(getConfig("cluster.peers.yacydomain", ""));
+        this.clusterhashes = this.peers.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
         
         // deploy blocking threads
         int indexerThreads = Math.max(1, serverProcessor.useCPU / 2);
@@ -645,8 +664,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 
         // test routine for snippet fetch
         //Set query = new HashSet();
-        //query.add(plasmaWordIndexEntry.word2hash("Weitergabe"));
-        //query.add(plasmaWordIndexEntry.word2hash("Zahl"));
+        //query.add(CrawlSwitchboardEntry.word2hash("Weitergabe"));
+        //query.add(CrawlSwitchboardEntry.word2hash("Zahl"));
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/mobil/newsticker/meldung/mail/54980"), query, true);
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/security/news/foren/go.shtml?read=1&msg_id=7301419&forum_id=72721"), query, true);
         //plasmaSnippetCache.result scr = snippetCache.retrieve(new URL("http://www.heise.de/kiosk/archiv/ct/2003/4/20"), query, true, 260);
@@ -785,8 +804,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // switch the networks
         synchronized (this) {
             // shut down
-            synchronized (this.webIndex) {
-                this.webIndex.close();
+            synchronized (this.indexSegment) {
+                this.indexSegment.close();
             }
             this.crawlStacker.announceClose();
             this.crawlStacker.close();
@@ -795,29 +814,43 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             setConfig("network.unit.definition", networkDefinition);
             overwriteNetworkDefinition();
             final File indexPrimaryPath = getConfigPath(plasmaSwitchboardConstants.INDEX_PRIMARY_PATH, plasmaSwitchboardConstants.INDEX_PATH_DEFAULT);
-            final File indexSecondaryPath = (getConfig(plasmaSwitchboardConstants.INDEX_SECONDARY_PATH, "").length() == 0) ? indexPrimaryPath : new File(getConfig(plasmaSwitchboardConstants.INDEX_SECONDARY_PATH, ""));
             final int wordCacheMaxCount = (int) getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
             final long fileSizeMax = (serverSystem.isWindows) ? sb.getConfigLong("filesize.max.win", (long) Integer.MAX_VALUE) : sb.getConfigLong("filesize.max.other", (long) Integer.MAX_VALUE);
             final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
-            final int paritionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
+            final int partitionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
             try {
-				this.webIndex = new plasmaWordIndex(
-				        getConfig(plasmaSwitchboardConstants.NETWORK_NAME, ""),
-				        getLog(),
-				        indexPrimaryPath,
-				        indexSecondaryPath,
-				        wordCacheMaxCount,
-				        fileSizeMax,
-				        redundancy,
-				        paritionExponent);
+                String networkName = getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "");
+                final File networkRoot = new File(new File(indexPrimaryPath, networkName), "NETWORK");
+	            networkRoot.mkdirs();
+	            final File mySeedFile = new File(networkRoot, yacySeedDB.DBFILE_OWN_SEED);
+	            peers = new yacySeedDB(
+	                    networkRoot,
+	                    "seed.new.heap",
+	                    "seed.old.heap",
+	                    "seed.pot.heap",
+	                    mySeedFile,
+	                    redundancy,
+	                    partitionExponent);
+	            indexSegment = new Segment(
+	                    log,
+	                    new File(new File(indexPrimaryPath, networkName), "TEXT"),
+	                    wordCacheMaxCount,
+	                    fileSizeMax);
+	            crawler = new CrawlSwitchboard(
+	                    peers,
+	                    networkName,
+	                    log,
+	                    new File(new File(indexPrimaryPath, networkName), "QUEUES"));
 			} catch (IOException e) {
 				e.printStackTrace();
-				this.webIndex = null;
+				this.indexSegment = null;
 			}
             // we need a new stacker, because this uses network-specific attributes to sort out urls (local, global)
             this.crawlStacker = new CrawlStacker(
-                    crawlQueues,
-                    this.webIndex,
+                    this.crawlQueues,
+                    this.crawler,
+                    this.indexSegment,
+                    this.peers,
                     "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0,
                     "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0);
         }
@@ -964,12 +997,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,
         // if it not exists, null is returned
-        if (webIndex.metadata().exists(hash)) return "loaded";
+        if (indexSegment.metadata().exists(hash)) return "loaded";
         return this.crawlQueues.urlExists(hash);
     }
     
     public void urlRemove(final String hash) {
-        webIndex.metadata().remove(hash);
+        indexSegment.metadata().remove(hash);
         crawlResults.remove(hash);
         crawlQueues.urlRemove(hash);
     }
@@ -979,7 +1012,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (urlhash.length() == 0) return null;
         final yacyURL ne = crawlQueues.getURL(urlhash);
         if (ne != null) return ne;
-        final URLMetadataRow le = webIndex.metadata().load(urlhash, null, 0);
+        final URLMetadataRow le = indexSegment.metadata().load(urlhash, null, 0);
         if (le != null) return le.metadata().url();
         return null;
     }
@@ -1033,7 +1066,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             (crawlStacker != null && crawlStacker.size() > 0) ||
             (crawlQueues.noticeURL.notEmpty())) 
             return false;
-        return this.webIndex.cleanProfiles();
+        return this.crawler.cleanProfiles();
     }
     
     public boolean htEntryStoreProcess(final Document entry) {
@@ -1071,7 +1104,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             doIndexing = false;
         }
         
-        synchronized (webIndex.queuePreStack) {
+        synchronized (crawler.queuePreStack) {
         /* =========================================================================
          * STORING DATA
          * 
@@ -1107,7 +1140,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (doIndexing && isSupportedContent) {
             
             // enqueue for further crawling
-            enQueue(this.webIndex.queuePreStack.newEntry(
+            enQueue(this.crawler.queuePreStack.newEntry(
                     entry.url(), 
                     (entry.referrerURL() == null) ? null : entry.referrerURL().hash(),
                     entry.ifModifiedSince(), 
@@ -1162,7 +1195,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         webStructure.close();
         crawlQueues.close();
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
-        webIndex.close();
+        indexSegment.close();
+        peers.close();
         plasmaHTCache.close();
         UPnP.deletePortMapping();
         Tray.removeTray();
@@ -1170,13 +1204,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     }
     
     public int queueSize() {
-        return webIndex.queuePreStack.size();
+        return crawler.queuePreStack.size();
     }
     
     public void enQueue(final IndexingStack.QueueEntry job) {
         assert job != null;
         try {
-            webIndex.queuePreStack.push(job);
+            crawler.queuePreStack.push(job);
         } catch (final IOException e) {
             log.logSevere("IOError in plasmaSwitchboard.enQueue: " + e.getMessage(), e);
         }
@@ -1184,32 +1218,32 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public void deQueueFreeMem() {
         // flush some entries from the RAM cache
-        webIndex.index().cleanupBuffer(5000);
+        indexSegment.index().cleanupBuffer(5000);
         // empty some caches
-        webIndex.metadata().clearCache();
+        indexSegment.metadata().clearCache();
         plasmaSearchEvent.cleanupEvents(true);
     }
     
     public IndexingStack.QueueEntry deQueue() {
         // getting the next entry from the indexing queue
         IndexingStack.QueueEntry nextentry = null;
-        synchronized (webIndex.queuePreStack) {
+        synchronized (crawler.queuePreStack) {
             // do one processing step
-            if (this.log.isFine()) log.logFine("DEQUEUE: sbQueueSize=" + webIndex.queuePreStack.size() +
+            if (this.log.isFine()) log.logFine("DEQUEUE: sbQueueSize=" + crawler.queuePreStack.size() +
                     ", coreStackSize=" + crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) +
                     ", limitStackSize=" + crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT) +
                     ", overhangStackSize=" + crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_OVERHANG) +
                     ", remoteStackSize=" + crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE));
             try {
-                final int sizeBefore = webIndex.queuePreStack.size();
-                nextentry = webIndex.queuePreStack.pop();
+                final int sizeBefore = crawler.queuePreStack.size();
+                nextentry = crawler.queuePreStack.pop();
                 if (nextentry == null) {
                     log.logWarning("deQueue: null entry on queue stack.");
-                    if (webIndex.queuePreStack.size() == sizeBefore) {
+                    if (crawler.queuePreStack.size() == sizeBefore) {
                         // this is a severe problem: because this time a null is returned, it means that this status will last forever
                         // to re-enable use of the sbQueue, it must be emptied completely
                         log.logSevere("deQueue: does not shrink after pop() == null. Emergency reset.");
-                        webIndex.queuePreStack.clear();
+                        crawler.queuePreStack.clear();
                     }
                     return null;
                 }
@@ -1243,7 +1277,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 
                 // create a queue entry
                 plasmaParserDocument document = surrogate.document();
-                queueentry = this.webIndex.queuePreStack.newEntry(surrogate.url(), null, null, false, null, 0, this.webIndex.defaultSurrogateProfile.handle(), null);
+                queueentry = this.crawler.queuePreStack.newEntry(surrogate.url(), null, null, false, null, 0, this.crawler.defaultSurrogateProfile.handle(), null);
                 /*
                  * public QueueEntry newEntry(final yacyURL url, final String referrer, final Date ifModifiedSince, final boolean requestWithCookie,
                      final String initiator, final int depth, final String profilehandle, final String anchorName) 
@@ -1292,7 +1326,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             }
 
             // getting the next entry from the indexing queue
-            if (webIndex.queuePreStack.size() == 0) {
+            if (crawler.queuePreStack.size() == 0) {
                 //log.logFine("deQueue: nothing to do, queue is emtpy");
                 return doneSomething; // nothing to do
             }
@@ -1323,7 +1357,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             
             if (noIndexReason != null) {
                 // this document should not be indexed. log cause and close queue
-                final yacyURL referrerURL = queueEntry.referrerURL();
+                final yacyURL referrerURL = queueEntry.referrerURL(this.indexSegment.metadata());
                 log.logFine("Not indexed any word in URL " + queueEntry.url() + "; cause: " + noIndexReason);
                 addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? "" : referrerURL.hash(), queueEntry.initiator(), queueEntry.anchorName(), noIndexReason);
                 // finish this entry
@@ -1331,7 +1365,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             }
             
             // put document into the concurrent processing queue            
-            webIndex.queuePreStack.enQueueToActive(queueEntry);
+            crawler.queuePreStack.enQueueToActive(queueEntry);
             
             // check for interruption
             checkInterruption();
@@ -1376,7 +1410,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             
             // clear caches if necessary
             if (!MemoryControl.request(8000000L, false)) {
-                webIndex.metadata().clearCache();
+                indexSegment.metadata().clearCache();
                 plasmaSearchEvent.cleanupEvents(true);
             }
             
@@ -1389,29 +1423,29 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             
             // refresh recrawl dates
             try{
-            	Iterator<CrawlProfile.entry> it = webIndex.profilesActiveCrawls.profiles(true);
+            	Iterator<CrawlProfile.entry> it = crawler.profilesActiveCrawls.profiles(true);
                 entry selentry;
                 while (it.hasNext()) {
                     selentry = it.next();
-                    if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_PROXY))
-                    	webIndex.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
-                    			Long.toString(webIndex.profilesActiveCrawls.getRecrawlDate(plasmaWordIndex.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE)));
-                    // if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_REMOTE));
-                    if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT))
-                    	webIndex.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
-                    			Long.toString(webIndex.profilesActiveCrawls.getRecrawlDate(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE)));
-                    if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT))
-                    	webIndex.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
-                    			Long.toString(webIndex.profilesActiveCrawls.getRecrawlDate(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE)));
-                    if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA))
-                    	webIndex.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
-                    			Long.toString(webIndex.profilesActiveCrawls.getRecrawlDate(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE)));
-                    if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA))
-                    	webIndex.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
-                    			Long.toString(webIndex.profilesActiveCrawls.getRecrawlDate(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE)));
-                    if (selentry.name().equals(plasmaWordIndex.CRAWL_PROFILE_SURROGATE))
-                        webIndex.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
-                                Long.toString(webIndex.profilesActiveCrawls.getRecrawlDate(plasmaWordIndex.CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE)));
+                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY))
+                    	crawler.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
+                    			Long.toString(crawler.profilesActiveCrawls.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE)));
+                    // if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE));
+                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT))
+                    	crawler.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
+                    			Long.toString(crawler.profilesActiveCrawls.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE)));
+                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT))
+                    	crawler.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
+                    			Long.toString(crawler.profilesActiveCrawls.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE)));
+                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA))
+                    	crawler.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
+                    			Long.toString(crawler.profilesActiveCrawls.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE)));
+                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA))
+                    	crawler.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
+                    			Long.toString(crawler.profilesActiveCrawls.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE)));
+                    if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE))
+                        crawler.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
+                                Long.toString(crawler.profilesActiveCrawls.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE)));
                 }
             } catch (final IOException e) {};
             
@@ -1463,20 +1497,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             // clean up news
             checkInterruption();
             try {                
-                if (this.log.isFine()) log.logFine("Cleaning Incoming News, " + this.webIndex.peers().newsPool.size(yacyNewsPool.INCOMING_DB) + " entries on stack");
-                if (this.webIndex.peers().newsPool.automaticProcess(webIndex.peers()) > 0) hasDoneSomething = true;
+                if (this.log.isFine()) log.logFine("Cleaning Incoming News, " + this.peers.newsPool.size(yacyNewsPool.INCOMING_DB) + " entries on stack");
+                if (this.peers.newsPool.automaticProcess(peers) > 0) hasDoneSomething = true;
             } catch (final IOException e) {}
             if (getConfigBool("cleanup.deletionProcessedNews", true)) {
-                this.webIndex.peers().newsPool.clear(yacyNewsPool.PROCESSED_DB);
+                this.peers.newsPool.clear(yacyNewsPool.PROCESSED_DB);
             }
             if (getConfigBool("cleanup.deletionPublishedNews", true)) {
-                this.webIndex.peers().newsPool.clear(yacyNewsPool.PUBLISHED_DB);
+                this.peers.newsPool.clear(yacyNewsPool.PUBLISHED_DB);
             }
             
             // clean up seed-dbs
             if(getConfigBool("routing.deleteOldSeeds.permission",true)) {
             	final long deleteOldSeedsTime = getConfigLong("routing.deleteOldSeeds.time",7)*24*3600000;
-                Iterator<yacySeed> e = this.webIndex.peers().seedsSortedDisconnected(true,yacySeed.LASTSEEN);
+                Iterator<yacySeed> e = this.peers.seedsSortedDisconnected(true,yacySeed.LASTSEEN);
                 yacySeed seed = null;
                 final ArrayList<String> deleteQueue = new ArrayList<String>();
                 checkInterruption();
@@ -1490,9 +1524,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 		deleteQueue.add(seed.hash);
                 	}
                 }
-                for(int i=0;i<deleteQueue.size();++i) this.webIndex.peers().removeDisconnected(deleteQueue.get(i));
+                for(int i=0;i<deleteQueue.size();++i) this.peers.removeDisconnected(deleteQueue.get(i));
                 deleteQueue.clear();
-                e = this.webIndex.peers().seedsSortedPotential(true,yacySeed.LASTSEEN);
+                e = this.peers.seedsSortedPotential(true,yacySeed.LASTSEEN);
                 checkInterruption();
                 //clean potential seeds
                 while(e.hasNext()) {
@@ -1504,7 +1538,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 		deleteQueue.add(seed.hash);
                 	}
                 }
-                for (int i = 0; i < deleteQueue.size(); ++i) this.webIndex.peers().removePotential(deleteQueue.get(i));
+                for (int i = 0; i < deleteQueue.size(); ++i) this.peers.removePotential(deleteQueue.get(i));
             }
             
             // check if update is available and
@@ -1527,7 +1561,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             }
             
             // initiate broadcast about peer startup to spread supporter url
-            if (this.webIndex.peers().newsPool.size(yacyNewsPool.OUTGOING_DB) == 0) {
+            if (this.peers.newsPool.size(yacyNewsPool.OUTGOING_DB) == 0) {
                 // read profile
                 final Properties profile = new Properties();
                 FileInputStream fileIn = null;
@@ -1542,12 +1576,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 if ((homepage != null) && (homepage.length() > 10)) {
                     final Properties news = new Properties();
                     news.put("homepage", profile.get("homepage"));
-                    this.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_PROFILE_BROADCAST, news));
+                    this.peers.newsPool.publishMyNews(yacyNewsRecord.newRecord(peers.mySeed(), yacyNewsPool.CATEGORY_PROFILE_BROADCAST, news));
                 }
             }
             
             // update the cluster set
-            this.clusterhashes = this.webIndex.peers().clusterHashes(getConfig("cluster.peers.yacydomain", ""));
+            this.clusterhashes = this.peers.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
             
             
             // after all clean up is done, check the resource usage
@@ -1738,7 +1772,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // CREATE INDEX
         final String dc_title = document.dc_title();
-        final yacyURL referrerURL = queueEntry.referrerURL();
+        final yacyURL referrerURL = queueEntry.referrerURL(this.indexSegment.metadata());
         final int processCase = queueEntry.processCase();
 
         // remove stopwords                        
@@ -1747,7 +1781,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // STORE URL TO LOADED-URL-DB
         URLMetadataRow newEntry = null;
         try {
-            newEntry = webIndex.storeDocument(queueEntry, document, condenser);
+            newEntry = indexSegment.storeDocument(queueEntry, document, condenser);
+            RSSFeed.channels((queueEntry.initiator().equals(peers.mySeed().hash)) ? RSSFeed.LOCALINDEXING : RSSFeed.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
         } catch (final IOException e) {
             if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
             addURLtoErrorDB(queueEntry.url(), referrerURL.hash(), queueEntry.initiator(), dc_title, "error storing url: " + e.getMessage());
@@ -1758,7 +1793,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         crawlResults.stack(
                 newEntry,                      // loaded url db entry
                 queueEntry.initiator(),        // initiator peer hash
-                this.webIndex.peers().mySeed().hash, // executor peer hash
+                this.peers.mySeed().hash, // executor peer hash
                 processCase                    // process case
         );
         
@@ -1800,7 +1835,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             this.reference = reference;
         }
         public void run() {
-            yacyClient.crawlReceipt(webIndex.peers().mySeed(), initiatorPeer, "crawl", "fill", "indexed", reference, "");
+            yacyClient.crawlReceipt(peers.mySeed(), initiatorPeer, "crawl", "fill", "indexed", reference, "");
         }
     }
     
@@ -1826,7 +1861,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public String toString() {
         // it is possible to use this method in the cgi pages.
         // actually it is used there for testing purpose
-        return "PROPS: " + super.toString() + "; QUEUE: " + webIndex.queuePreStack.toString();
+        return "PROPS: " + super.toString() + "; QUEUE: " + crawler.queuePreStack.toString();
     }
     
     // method for index deletion
@@ -1840,7 +1875,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         if (urlhash == null) return 0;
         // determine the url string
-        final URLMetadataRow entry = webIndex.metadata().load(urlhash, null, 0);
+        final URLMetadataRow entry = indexSegment.metadata().load(urlhash, null, 0);
         if (entry == null) return 0;
         final URLMetadataRow.Components metadata = entry.metadata();
         if (metadata.url() == null) return 0;
@@ -1856,7 +1891,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             }
             if (resource == null) {
                 // delete just the url entry
-                webIndex.metadata().remove(urlhash);
+                indexSegment.metadata().remove(urlhash);
                 return 0;
             } else {
                 resourceContent = (InputStream) resource[0];
@@ -1875,10 +1910,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 
                 // delete all word references
                 int count = 0;
-                if (words != null) count = webIndex.index().remove(Word.words2hashes(words), urlhash);
+                if (words != null) count = indexSegment.index().remove(Word.words2hashes(words), urlhash);
                 
                 // finally delete the url entry itself
-                webIndex.metadata().remove(urlhash);
+                indexSegment.metadata().remove(urlhash);
                 return count;
             }
         } catch (final ParserException e) {
@@ -1974,16 +2009,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     }
     
     public String dhtShallTransfer() {
-        if (this.webIndex.peers() == null) {
+        if (this.peers == null) {
             return "no DHT distribution: seedDB == null";
         }
-        if (this.webIndex.peers().mySeed() == null) {
+        if (this.peers.mySeed() == null) {
             return "no DHT distribution: mySeed == null";
         }
-        if (this.webIndex.peers().mySeed().isVirgin()) {
+        if (this.peers.mySeed().isVirgin()) {
             return "no DHT distribution: status is virgin";
         }
-        if (this.webIndex.peers().noDHTActivity()) {
+        if (this.peers.noDHTActivity()) {
             return "no DHT distribution: network too small";
         }
         if (!this.getConfigBool("network.unit.dht", true)) {
@@ -1992,17 +2027,17 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, "false").equalsIgnoreCase("false")) {
             return "no DHT distribution: not enabled (ser setting)";
         }
-        if (webIndex.metadata().size() < 10) {
-            return "no DHT distribution: loadedURL.size() = " + webIndex.metadata().size();
+        if (indexSegment.metadata().size() < 10) {
+            return "no DHT distribution: loadedURL.size() = " + indexSegment.metadata().size();
         }
-        if (webIndex.index().size() < 100) {
-            return "no DHT distribution: not enough words - wordIndex.size() = " + webIndex.index().size();
+        if (indexSegment.index().size() < 100) {
+            return "no DHT distribution: not enough words - wordIndex.size() = " + indexSegment.index().size();
         }
         if ((getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) && (crawlQueues.noticeURL.notEmptyLocal())) {
-            return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + webIndex.queuePreStack.size();
+            return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + crawler.queuePreStack.size();
         }
-        if ((getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "false").equalsIgnoreCase("false")) && (webIndex.queuePreStack.size() > 1)) {
-            return "no DHT distribution: indexing in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + webIndex.queuePreStack.size();
+        if ((getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "false").equalsIgnoreCase("false")) && (crawler.queuePreStack.size() > 1)) {
+            return "no DHT distribution: indexing in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + crawler.queuePreStack.size();
         }
         return null; // this means; yes, please do dht transfer
     }
@@ -2014,7 +2049,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             return false;
         }
         boolean hasDoneSomething = false;
-        if (this.dhtDispatcher.cloudSize() > this.webIndex.peers().scheme.verticalPartitions() * 4) {
+        if (this.dhtDispatcher.cloudSize() > this.peers.scheme.verticalPartitions() * 4) {
         	log.logInfo("dhtTransferJob: no selection, too many entries in transmission cloud: " + this.dhtDispatcher.cloudSize());
         } else if (MemoryControl.available() < 1024*1024*25) {
         	log.logInfo("dhtTransferJob: no selection, too less memory available : " + (MemoryControl.available() / 1024 / 1024) + " MB");
@@ -2024,7 +2059,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             while (tries-- > 0) {
             	startHash = PeerSelection.selectTransferStart();
             	assert startHash != null;
-            	limitHash = PeerSelection.limitOver(this.webIndex.peers(), startHash);
+            	limitHash = PeerSelection.limitOver(this.peers, startHash);
             	if (limitHash != null) break;
             }
             if (limitHash == null || startHash == null) {
@@ -2095,28 +2130,28 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             // generate new peer name
             setConfig("peerName", yacySeed.makeDefaultPeerName());
         }
-        webIndex.peers().mySeed().put(yacySeed.NAME, getConfig("peerName", "nameless"));
-        webIndex.peers().mySeed().put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(getConfig("port", "8080"))));
+        peers.mySeed().put(yacySeed.NAME, getConfig("peerName", "nameless"));
+        peers.mySeed().put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(getConfig("port", "8080"))));
         
         //the speed of indexing (pages/minute) of the peer
         final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
-        webIndex.peers().mySeed().put(yacySeed.ISPEED, Integer.toString(currentPPM()));
+        peers.mySeed().put(yacySeed.ISPEED, Integer.toString(currentPPM()));
         totalQPM = requestedQueries * 60d / Math.max(uptime, 1d);
-        webIndex.peers().mySeed().put(yacySeed.RSPEED, Double.toString(totalQPM /*Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f)*/ ));
+        peers.mySeed().put(yacySeed.RSPEED, Double.toString(totalQPM /*Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f)*/ ));
         
-        webIndex.peers().mySeed().put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        webIndex.peers().mySeed().put(yacySeed.LCOUNT, Integer.toString(webIndex.metadata().size())); // the number of links that the peer has stored (LURL's)
-        webIndex.peers().mySeed().put(yacySeed.NCOUNT, Integer.toString(crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
-        webIndex.peers().mySeed().put(yacySeed.RCOUNT, Integer.toString(crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
-        webIndex.peers().mySeed().put(yacySeed.ICOUNT, Integer.toString(webIndex.index().size())); // the minimum number of words that the peer has indexed (as it says)
-        webIndex.peers().mySeed().put(yacySeed.SCOUNT, Integer.toString(webIndex.peers().sizeConnected())); // the number of seeds that the peer has stored
-        webIndex.peers().mySeed().put(yacySeed.CCOUNT, Double.toString(((int) ((webIndex.peers().sizeConnected() + webIndex.peers().sizeDisconnected() + webIndex.peers().sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
-        webIndex.peers().mySeed().put(yacySeed.VERSION, getConfig("version", ""));
-        webIndex.peers().mySeed().setFlagDirectConnect(true);
-        webIndex.peers().mySeed().setLastSeenUTC();
-        webIndex.peers().mySeed().put(yacySeed.UTC, DateFormatter.UTCDiffString());
-        webIndex.peers().mySeed().setFlagAcceptRemoteCrawl(getConfig("crawlResponse", "").equals("true"));
-        webIndex.peers().mySeed().setFlagAcceptRemoteIndex(getConfig("allowReceiveIndex", "").equals("true"));
+        peers.mySeed().put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
+        peers.mySeed().put(yacySeed.LCOUNT, Integer.toString(indexSegment.metadata().size())); // the number of links that the peer has stored (LURL's)
+        peers.mySeed().put(yacySeed.NCOUNT, Integer.toString(crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
+        peers.mySeed().put(yacySeed.RCOUNT, Integer.toString(crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
+        peers.mySeed().put(yacySeed.ICOUNT, Integer.toString(indexSegment.index().size())); // the minimum number of words that the peer has indexed (as it says)
+        peers.mySeed().put(yacySeed.SCOUNT, Integer.toString(peers.sizeConnected())); // the number of seeds that the peer has stored
+        peers.mySeed().put(yacySeed.CCOUNT, Double.toString(((int) ((peers.sizeConnected() + peers.sizeDisconnected() + peers.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
+        peers.mySeed().put(yacySeed.VERSION, getConfig("version", ""));
+        peers.mySeed().setFlagDirectConnect(true);
+        peers.mySeed().setLastSeenUTC();
+        peers.mySeed().put(yacySeed.UTC, DateFormatter.UTCDiffString());
+        peers.mySeed().setFlagAcceptRemoteCrawl(getConfig("crawlResponse", "").equals("true"));
+        peers.mySeed().setFlagAcceptRemoteIndex(getConfig("allowReceiveIndex", "").equals("true"));
         //mySeed.setFlagAcceptRemoteIndex(true);
     }
 
@@ -2129,7 +2164,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         ArrayList<String>  seedList;
         Iterator<String>   enu;
         int                lc;
-        final int          sc = webIndex.peers().sizeConnected();
+        final int          sc = peers.sizeConnected();
         httpResponseHeader header;
         
         yacyCore.log.logInfo("BOOTSTRAP: " + sc + " seeds known from previous run");
@@ -2175,8 +2210,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                         while (enu.hasNext()) {
                             ys = yacySeed.genRemoteSeed(enu.next(), null, false);
                             if ((ys != null) &&
-                                ((!webIndex.peers().mySeedIsDefined()) || !webIndex.peers().mySeed().hash.equals(ys.hash))) {
-                                if (webIndex.peers().peerActions.connectPeer(ys, false)) lc++;
+                                ((!peers.mySeedIsDefined()) || !peers.mySeed().hash.equals(ys.hash))) {
+                                if (peers.peerActions.connectPeer(ys, false)) lc++;
                                 //seedDB.writeMap(ys.hash, ys.getMap(), "init");
                                 //System.out.println("BOOTSTRAP: received peer " + ys.get(yacySeed.NAME, "anonymous") + "/" + ys.getAddress());
                                 //lc++;
@@ -2194,7 +2229,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 }
             }
         }
-        yacyCore.log.logInfo("BOOTSTRAP: " + (webIndex.peers().sizeConnected() - sc) + " new seeds while bootstraping.");
+        yacyCore.log.logInfo("BOOTSTRAP: " + (peers.sizeConnected() - sc) + " new seeds while bootstraping.");
     }
     
     public void checkInterruption() throws InterruptedException {

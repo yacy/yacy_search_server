@@ -180,31 +180,31 @@ public class Status {
         // peer information
         String thisHash = "";
         final String thisName = sb.getConfig("peerName", "<nameless>");
-        if (sb.webIndex.peers().mySeed() == null)  {
+        if (sb.peers.mySeed() == null)  {
             thisHash = "not assigned";
             prop.put("peerAddress", "0");    // not assigned
             prop.put("peerStatistics", "0"); // unknown
         } else {
-            final long uptime = 60000 * Long.parseLong(sb.webIndex.peers().mySeed().get(yacySeed.UPTIME, "0"));
+            final long uptime = 60000 * Long.parseLong(sb.peers.mySeed().get(yacySeed.UPTIME, "0"));
             prop.put("peerStatistics", "1");
             prop.put("peerStatistics_uptime", DateFormatter.formatInterval(uptime));
-            prop.putNum("peerStatistics_pagesperminute", sb.webIndex.peers().mySeed().getPPM());
-            prop.putNum("peerStatistics_queriesperhour", Math.round(6000d * sb.webIndex.peers().mySeed().getQPM()) / 100d);
-            prop.putNum("peerStatistics_links", sb.webIndex.peers().mySeed().getLinkCount());
-            prop.put("peerStatistics_words", Formatter.number(sb.webIndex.peers().mySeed().get(yacySeed.ICOUNT, "0")));
-            prop.putNum("peerStatistics_disconnects", sb.webIndex.peers().peerActions.disconnects);
-            prop.put("peerStatistics_connects", Formatter.number(sb.webIndex.peers().mySeed().get(yacySeed.CCOUNT, "0")));
-            thisHash = sb.webIndex.peers().mySeed().hash;
-            if (sb.webIndex.peers().mySeed().getPublicAddress() == null) {
+            prop.putNum("peerStatistics_pagesperminute", sb.peers.mySeed().getPPM());
+            prop.putNum("peerStatistics_queriesperhour", Math.round(6000d * sb.peers.mySeed().getQPM()) / 100d);
+            prop.putNum("peerStatistics_links", sb.peers.mySeed().getLinkCount());
+            prop.put("peerStatistics_words", Formatter.number(sb.peers.mySeed().get(yacySeed.ICOUNT, "0")));
+            prop.putNum("peerStatistics_disconnects", sb.peers.peerActions.disconnects);
+            prop.put("peerStatistics_connects", Formatter.number(sb.peers.mySeed().get(yacySeed.CCOUNT, "0")));
+            thisHash = sb.peers.mySeed().hash;
+            if (sb.peers.mySeed().getPublicAddress() == null) {
                 prop.put("peerAddress", "0"); // not assigned + instructions
                 prop.put("warningGoOnline", "1");
             } else {
                 prop.put("peerAddress", "1"); // Address
-                prop.put("peerAddress_address", sb.webIndex.peers().mySeed().getPublicAddress());
+                prop.put("peerAddress_address", sb.peers.mySeed().getPublicAddress());
                 prop.putXML("peerAddress_peername", sb.getConfig("peerName", "<nameless>").toLowerCase());
             }
         }
-        final String peerStatus = ((sb.webIndex.peers().mySeed() == null) ? yacySeed.PEERTYPE_VIRGIN : sb.webIndex.peers().mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN));
+        final String peerStatus = ((sb.peers.mySeed() == null) ? yacySeed.PEERTYPE_VIRGIN : sb.peers.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN));
         if (peerStatus.equals(yacySeed.PEERTYPE_VIRGIN) && sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "").equals("freeworld")) {
             prop.put(PEERSTATUS, "0");
             prop.put("urgentStatusVirgin", "1");
@@ -217,7 +217,7 @@ public class Status {
         } else if (peerStatus.equals(yacySeed.PEERTYPE_PRINCIPAL)) {
             prop.put(PEERSTATUS, "3");
             prop.put("hintStatusPrincipal", "1");
-            prop.put("hintStatusPrincipal_seedURL", sb.webIndex.peers().mySeed().get(yacySeed.SEEDLIST, "?"));
+            prop.put("hintStatusPrincipal_seedURL", sb.peers.mySeed().get(yacySeed.SEEDLIST, "?"));
         }
         prop.putHTML("peerName", thisName);
         prop.put("hash", thisHash);
@@ -246,14 +246,14 @@ public class Status {
                 prop.putHTML("seedServer_seedFile", sb.getConfig("seedFilePath", ""));
             }
             prop.put("seedServer_lastUpload",
-                    DateFormatter.formatInterval(System.currentTimeMillis() - sb.webIndex.peers().lastSeedUpload_timeStamp));
+                    DateFormatter.formatInterval(System.currentTimeMillis() - sb.peers.lastSeedUpload_timeStamp));
         } else {
             prop.put(SEEDSERVER, "0"); // disabled
         }
         
-        if (sb.webIndex.peers() != null && sb.webIndex.peers().sizeConnected() > 0){
+        if (sb.peers != null && sb.peers.sizeConnected() > 0){
             prop.put("otherPeers", "1");
-            prop.putNum("otherPeers_num", sb.webIndex.peers().sizeConnected());
+            prop.putNum("otherPeers_num", sb.peers.sizeConnected());
         }else{
             prop.put("otherPeers", "0"); // not online
         }
@@ -287,7 +287,7 @@ public class Status {
         prop.putNum("connectionsMax", httpd.getMaxSessionCount());
         
         // Queue information
-        final int indexingJobCount = sb.getThread("80_indexing").getJobCount() + sb.webIndex.queuePreStack.getActiveQueueSize();
+        final int indexingJobCount = sb.getThread("80_indexing").getJobCount() + sb.crawler.queuePreStack.getActiveQueueSize();
         final int indexingMaxCount = (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30);
         final int indexingPercent = (indexingMaxCount==0)?0:indexingJobCount*100/indexingMaxCount;
         prop.putNum("indexingQueueSize", indexingJobCount);

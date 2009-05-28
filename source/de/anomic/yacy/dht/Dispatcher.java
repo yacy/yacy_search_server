@@ -36,10 +36,10 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.BufferedIndex;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.MetadataRepository;
+import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.Log;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
@@ -228,7 +228,7 @@ public class Dispatcher {
         for (ReferenceContainer container: containers) {
             // init the new partitions
             for (int j = 0; j < partitionBuffer.length; j++) {
-                partitionBuffer[j] = new ReferenceContainer(plasmaWordIndex.wordReferenceFactory, container.getTermHash(), container.row(), container.size() / partitionCount);
+                partitionBuffer[j] = new ReferenceContainer(Segment.wordReferenceFactory, container.getTermHash(), container.row(), container.size() / partitionCount);
             }
 
             // split the container

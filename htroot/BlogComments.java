@@ -91,11 +91,11 @@ public class BlogComments {
             StrAuthor = sb.blogDB.guessAuthor(ip);
 
             if (StrAuthor == null || StrAuthor.length() == 0) {
-                if (sb.webIndex.peers().mySeed() == null) {
+                if (sb.peers.mySeed() == null) {
                     StrAuthor = "anonymous";
                 }
                 else {
-                    StrAuthor = sb.webIndex.peers().mySeed().get("Name", "anonymous");
+                    StrAuthor = sb.peers.mySeed().get("Name", "anonymous");
                 }
             }
         }
@@ -151,15 +151,15 @@ public class BlogComments {
                     sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
                             "blogComment",
                             StrAuthor,
-                            sb.webIndex.peers().mySeed().hash,
-                            sb.webIndex.peers().mySeed().getName(), sb.webIndex.peers().mySeed().hash,
+                            sb.peers.mySeed().hash,
+                            sb.peers.mySeed().getName(), sb.peers.mySeed().hash,
                             "new blog comment: " + new String(blogEntry.getSubject(),"UTF-8"), content));
                 } catch (final UnsupportedEncodingException e1) {
                     sb.messageDB.write(msgEntry = sb.messageDB.newEntry(
                             "blogComment",
                             StrAuthor,
-                            sb.webIndex.peers().mySeed().hash,
-                            sb.webIndex.peers().mySeed().getName(), sb.webIndex.peers().mySeed().hash,
+                            sb.peers.mySeed().hash,
+                            sb.peers.mySeed().getName(), sb.peers.mySeed().hash,
                             "new blog comment: " + new String(blogEntry.getSubject()), content));
                 }
 
@@ -337,7 +337,7 @@ public class BlogComments {
             .append(sendMailTo)
             .append("\nFrom: ")
             .append("yacy@")
-            .append(sb.webIndex.peers().mySeed().getName())
+            .append(sb.peers.mySeed().getName())
             .append("\nSubject: [YaCy] ")
             .append(msgEntry.subject().replace('\n', ' '))
             .append("\nDate: ")

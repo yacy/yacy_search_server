@@ -234,7 +234,7 @@ public class SettingsAck_p {
             } else {
                 serverCore.useStaticIP = true;
             }
-            if (yacySeed.isProperIP(staticIP) == null) sb.webIndex.peers().mySeed().setIP(staticIP);
+            if (yacySeed.isProperIP(staticIP) == null) sb.peers.mySeed().setIP(staticIP);
             env.setConfig("staticIP", staticIP);
 
             // server access data
@@ -352,7 +352,7 @@ public class SettingsAck_p {
             // getting the currently used uploading method
             final String oldSeedUploadMethod = env.getConfig("seedUploadMethod","none");
             final String newSeedUploadMethod = post.get("seedUploadMethod");
-            final String oldSeedURLStr = sb.webIndex.peers().mySeed().get(yacySeed.SEEDLIST, "");
+            final String oldSeedURLStr = sb.peers.mySeed().get(yacySeed.SEEDLIST, "");
             final String newSeedURLStr = post.get("seedURL");
             
             final boolean seedUrlChanged = !oldSeedURLStr.equals(newSeedURLStr);
@@ -363,7 +363,7 @@ public class SettingsAck_p {
             
             if (seedUrlChanged || uploadMethodChanged) {
                 env.setConfig("seedUploadMethod", newSeedUploadMethod);
-                sb.webIndex.peers().mySeed().put(yacySeed.SEEDLIST, newSeedURLStr);
+                sb.peers.mySeed().put(yacySeed.SEEDLIST, newSeedURLStr);
                 
                 // try an upload
                 String error;

@@ -186,7 +186,7 @@ public class CrawlQueues {
             // move some tasks to the core crawl job so we have something to do
             final int toshift = Math.min(10, limitCrawlJobSize()); // this cannot be a big number because the balancer makes a forced waiting if it cannot balance
             for (int i = 0; i < toshift; i++) {
-                noticeURL.shift(NoticedURL.STACK_TYPE_LIMIT, NoticedURL.STACK_TYPE_CORE, sb.webIndex.profilesActiveCrawls);
+                noticeURL.shift(NoticedURL.STACK_TYPE_LIMIT, NoticedURL.STACK_TYPE_CORE, sb.crawler.profilesActiveCrawls);
             }
             log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl (coreCrawlJobSize()=" + coreCrawlJobSize() +
                     ", limitCrawlJobSize()=" + limitCrawlJobSize() + ", cluster.mode=" + sb.getConfig(plasmaSwitchboardConstants.CLUSTER_MODE, "") +
@@ -202,7 +202,7 @@ public class CrawlQueues {
         while (urlEntry == null && noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) > 0) {
             final String stats = "LOCALCRAWL[" + noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_OVERHANG) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE) + "]";
             try {
-                urlEntry = noticeURL.pop(NoticedURL.STACK_TYPE_CORE, true, sb.webIndex.profilesActiveCrawls);
+                urlEntry = noticeURL.pop(NoticedURL.STACK_TYPE_CORE, true, sb.crawler.profilesActiveCrawls);
                 if (urlEntry == null) continue;
                 final String profileHandle = urlEntry.profileHandle();
                 // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
@@ -230,7 +230,7 @@ public class CrawlQueues {
      * @return
      */
     private void generateCrawl(CrawlEntry urlEntry, final String stats, final String profileHandle) {
-        final CrawlProfile.entry profile = sb.webIndex.profilesActiveCrawls.getEntry(profileHandle);
+        final CrawlProfile.entry profile = sb.crawler.profilesActiveCrawls.getEntry(profileHandle);
         if (profile != null) {
 
             // check if the protocol is supported
@@ -246,7 +246,7 @@ public class CrawlQueues {
                             + ", crawlDepth=" + profile.depth()
                             + ", must-match=" + profile.mustMatchPattern().toString()
                             + ", must-not-match=" + profile.mustNotMatchPattern().toString()
-                            + ", permission=" + ((sb.webIndex.peers() == null) ? "undefined" : (((sb.webIndex.peers().mySeed().isSenior()) || (sb.webIndex.peers().mySeed().isPrincipal())) ? "true" : "false")));
+                            + ", permission=" + ((sb.peers == null) ? "undefined" : (((sb.peers.mySeed().isSenior()) || (sb.peers.mySeed().isPrincipal())) ? "true" : "false")));
 
                 processLocalCrawling(urlEntry, stats);
             } else {
@@ -292,9 +292,9 @@ public class CrawlQueues {
         }
 
         value = (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30);
-        if (sb.webIndex.queuePreStack.size() >= value) {
+        if (sb.crawler.queuePreStack.size() >= value) {
             if (this.log.isFine()) {
-                log.logFine(type + "Crawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.webIndex.queuePreStack.size() + ")");
+                log.logFine(type + "Crawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.crawler.queuePreStack.size() + ")");
             }
             return false;
         }
@@ -322,19 +322,19 @@ public class CrawlQueues {
 
     public boolean remoteCrawlLoaderJob() {
         // check if we are allowed to crawl urls provided by other peers
-        if (!sb.webIndex.peers().mySeed().getFlagAcceptRemoteCrawl()) {
+        if (!sb.peers.mySeed().getFlagAcceptRemoteCrawl()) {
             //this.log.logInfo("remoteCrawlLoaderJob: not done, we are not allowed to do that");
             return false;
         }
         
         // check if we are a senior peer
-        if (!sb.webIndex.peers().mySeed().isActive()) {
+        if (!sb.peers.mySeed().isActive()) {
             //this.log.logInfo("remoteCrawlLoaderJob: not done, this should be a senior or principal peer");
             return false;
         }
         
-        if (sb.webIndex.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30) / 2) {
-            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.webIndex.queuePreStack.size() + ")");
+        if (sb.crawler.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30) / 2) {
+            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.crawler.queuePreStack.size() + ")");
             return false;
         }
         
@@ -366,8 +366,8 @@ public class CrawlQueues {
         // check if we have an entry in the provider list, otherwise fill the list
         yacySeed seed;
         if (remoteCrawlProviderHashes.size() == 0) {
-            if (sb.webIndex.peers() != null && sb.webIndex.peers().sizeConnected() > 0) {
-                final Iterator<yacySeed> e = PeerSelection.getProvidesRemoteCrawlURLs(sb.webIndex.peers());
+            if (sb.peers != null && sb.peers.sizeConnected() > 0) {
+                final Iterator<yacySeed> e = PeerSelection.getProvidesRemoteCrawlURLs(sb.peers);
                 while (e.hasNext()) {
                     seed = e.next();
                     if (seed != null) {
@@ -384,7 +384,7 @@ public class CrawlQueues {
         while ((seed == null) && (remoteCrawlProviderHashes.size() > 0)) {
             hash = remoteCrawlProviderHashes.remove(remoteCrawlProviderHashes.size() - 1);
             if (hash == null) continue;
-            seed = sb.webIndex.peers().get(hash);
+            seed = sb.peers.get(hash);
             if (seed == null) continue;
             // check if the peer is inside our cluster
             if ((sb.isRobinsonMode()) && (!sb.isInMyCluster(seed))) {
@@ -395,11 +395,11 @@ public class CrawlQueues {
         if (seed == null) return false;
         
         // we know a peer which should provide remote crawl entries. load them now.
-        final RSSFeed feed = yacyClient.queryRemoteCrawlURLs(sb.webIndex.peers(), seed, 30, 60000);
+        final RSSFeed feed = yacyClient.queryRemoteCrawlURLs(sb.peers, seed, 30, 60000);
         if (feed == null || feed.size() == 0) {
             // something is wrong with this provider. To prevent that we get not stuck with this peer
             // we remove it from the peer list
-            sb.webIndex.peers().peerActions.peerDeparture(seed, "no results from provided remote crawls");
+            sb.peers.peerActions.peerDeparture(seed, "no results from provided remote crawls");
             // ask another peer
             return remoteCrawlLoaderJob();
         }
@@ -437,7 +437,7 @@ public class CrawlQueues {
                         item.getDescription(),
                         null,
                         loaddate,
-                        sb.webIndex.defaultRemoteProfile.handle(),
+                        sb.crawler.defaultRemoteProfile.handle(),
                         0,
                         0,
                         0
@@ -478,7 +478,7 @@ public class CrawlQueues {
         final String stats = "REMOTETRIGGEREDCRAWL[" + noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_OVERHANG) + ", "
                         + noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE) + "]";
         try {
-            final CrawlEntry urlEntry = noticeURL.pop(NoticedURL.STACK_TYPE_REMOTE, true, sb.webIndex.profilesActiveCrawls);
+            final CrawlEntry urlEntry = noticeURL.pop(NoticedURL.STACK_TYPE_REMOTE, true, sb.crawler.profilesActiveCrawls);
             final String profileHandle = urlEntry.profileHandle();
             // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
             // profileHandle = " + profileHandle + ", urlEntry.url = " +
@@ -513,7 +513,7 @@ public class CrawlQueues {
     ) throws IOException {
         
         final CrawlEntry centry = new CrawlEntry(
-                sb.webIndex.peers().mySeed().hash, 
+                sb.peers.mySeed().hash, 
                 url, 
                 "", 
                 "", 
@@ -521,12 +521,12 @@ public class CrawlQueues {
                 new Date(),
                 (forText) ?
                     ((global) ?
-                        sb.webIndex.defaultTextSnippetGlobalProfile.handle() :
-                        sb.webIndex.defaultTextSnippetLocalProfile.handle())
+                        sb.crawler.defaultTextSnippetGlobalProfile.handle() :
+                        sb.crawler.defaultTextSnippetLocalProfile.handle())
                     :
                     ((global) ?
-                        sb.webIndex.defaultMediaSnippetGlobalProfile.handle() :
-                        sb.webIndex.defaultMediaSnippetLocalProfile.handle()), // crawl profile
+                        sb.crawler.defaultMediaSnippetGlobalProfile.handle() :
+                        sb.crawler.defaultMediaSnippetLocalProfile.handle()), // crawl profile
                 0, 
                 0, 
                 0);
@@ -567,7 +567,7 @@ public class CrawlQueues {
                     if (log.isFine()) log.logFine("Crawling of URL '" + entry.url().toString() + "' disallowed by robots.txt.");
                     final ZURL.Entry eentry = errorURL.newEntry(
                             this.entry,
-                            sb.webIndex.peers().mySeed().hash,
+                            sb.peers.mySeed().hash,
                             new Date(),
                             1,
                             "denied by robots.txt");
@@ -581,7 +581,7 @@ public class CrawlQueues {
                     if (result != null) {
                         final ZURL.Entry eentry = errorURL.newEntry(
                                 this.entry,
-                                sb.webIndex.peers().mySeed().hash,
+                                sb.peers.mySeed().hash,
                                 new Date(),
                                 1,
                                 "cannot load: " + result);
@@ -595,7 +595,7 @@ public class CrawlQueues {
             } catch (final Exception e) {
                 final ZURL.Entry eentry = errorURL.newEntry(
                         this.entry,
-                        sb.webIndex.peers().mySeed().hash,
+                        sb.peers.mySeed().hash,
                         new Date(),
                         1,
                         e.getMessage() + " - in worker");

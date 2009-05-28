@@ -4,7 +4,7 @@ import java.util.Iterator;
 import de.anomic.crawler.CrawlProfile.entry;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWordIndex;
+import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -32,17 +32,17 @@ public class WatchWebStructure_p {
         
         if (host.equals("auto")) {
         	// try to find the host from the crawl profiles
-        	final Iterator<entry> it = sb.webIndex.profilesActiveCrawls.profiles(true);
+        	final Iterator<entry> it = sb.crawler.profilesActiveCrawls.profiles(true);
             entry e;
             while (it.hasNext()) {
                 e = it.next();
-                if (e.name().equals(plasmaWordIndex.CRAWL_PROFILE_PROXY) ||
-                    e.name().equals(plasmaWordIndex.CRAWL_PROFILE_REMOTE) ||
-                    e.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)  ||
-                    e.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT) ||
-                    e.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ||
-                    e.name().equals(plasmaWordIndex.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA) ||
-                    e.name().equals(plasmaWordIndex.CRAWL_PROFILE_SURROGATE))
+                if (e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY) ||
+                    e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE) ||
+                    e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT)  ||
+                    e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT) ||
+                    e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ||
+                    e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA) ||
+                    e.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE))
                    continue;
                 host = e.name();
                 break; // take the first one

@@ -8,6 +8,7 @@ import de.anomic.crawler.AbstractImporter;
 import de.anomic.crawler.Importer;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.DateFormatter;
@@ -17,12 +18,12 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
 	/**
 	 * the source word index (the DB to import)
 	 */
-    private final plasmaWordIndex importWordIndex;
+    private final Segment importWordIndex;
     
     /**
      * the destination word index (the home DB)
      */
-    protected plasmaWordIndex homeWordIndex;
+    protected Segment homeWordIndex;
     private final int importStartSize;   
 
     private byte[] wordHash = "------------".getBytes();
@@ -32,7 +33,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
     private long urlCounter = 0, wordCounter = 0, entryCounter = 0, notBoundEntryCounter = 0;
     
 
-    public plasmaDbImporter(final plasmaWordIndex homeWI, final plasmaWordIndex importWI) {
+    public plasmaDbImporter(final Segment homeWI, final Segment importWI) {
     	super("PLASMADB");
         this.homeWordIndex = homeWI;
         this.importWordIndex = importWI;
@@ -43,7 +44,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
      * @see Importer#getJobName()
      */
     public String getJobName() {
-        return this.importWordIndex.getLocation(true).toString();
+        return this.importWordIndex.getLocation().toString();
     }
 
     /**
@@ -92,7 +93,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
         this.log.logInfo("STARTING DB-IMPORT");  
         
         try {
-            this.log.logInfo("Importing DB from '" + this.importWordIndex.getLocation(true).getAbsolutePath() + "'");
+            this.log.logInfo("Importing DB from '" + this.importWordIndex.getLocation().getAbsolutePath() + "'");
             this.log.logInfo("Home word index contains " + homeWordIndex.index().size() + " words and " + homeWordIndex.metadata().size() + " URLs.");
             this.log.logInfo("Import word index contains " + this.importWordIndex.index().size() + " words and " + this.importWordIndex.metadata().size() + " URLs.");                        
             
@@ -100,7 +101,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
             final HashSet<String> importedUrlBuffer = new HashSet<String>();
 			
             // iterate over all words from import db
-            //Iterator importWordHashIterator = this.importWordIndex.wordHashes(this.wordChunkStartHash, plasmaWordIndex.RL_WORDFILES, false);
+            //Iterator importWordHashIterator = this.importWordIndex.wordHashes(this.wordChunkStartHash, CrawlSwitchboard.RL_WORDFILES, false);
             Iterator<ReferenceContainer<WordReference>> indexContainerIterator = this.importWordIndex.index().references(this.wordChunkStartHash, false, 100, false).iterator();
             while (!isAborted() && indexContainerIterator.hasNext()) {
                 

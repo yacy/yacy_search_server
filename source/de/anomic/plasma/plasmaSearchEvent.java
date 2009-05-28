@@ -42,6 +42,7 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
@@ -57,6 +58,7 @@ import de.anomic.plasma.plasmaSnippetCache.MediaSnippet;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
 
@@ -78,7 +80,8 @@ public final class plasmaSearchEvent {
     
     private long eventTime;
     plasmaSearchQuery query;
-    private final plasmaWordIndex wordIndex;
+    private final Segment indexSegment;
+    private final yacySeedDB peers;
     plasmaSearchRankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
     private final Map<String, TreeMap<String, String>> rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
@@ -100,12 +103,14 @@ public final class plasmaSearchEvent {
     
     @SuppressWarnings("unchecked")
     private plasmaSearchEvent(final plasmaSearchQuery query,
-                             final plasmaWordIndex wordIndex,
+                             final Segment indexSegment,
+                             final yacySeedDB peers,
                              final ResultURLs crawlResults,
                              final TreeMap<byte[], String> preselectedPeerHashes,
                              final boolean generateAbstracts) {
         this.eventTime = System.currentTimeMillis(); // for lifetime check
-        this.wordIndex = wordIndex;
+        this.indexSegment = indexSegment;
+        this.peers = peers;
         this.crawlResults = crawlResults;
         this.query = query;
         this.rcAbstracts = (query.queryHashes.size() > 1) ? new TreeMap<String, TreeMap<String, String>>() : null; // generate abstracts only for combined searches
@@ -136,7 +141,7 @@ public final class plasmaSearchEvent {
         if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
             (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
             // do a global search
-            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, max_results_preparation, 16);
+            this.rankedCache = new plasmaSearchRankingProcess(indexSegment, query, max_results_preparation, 16);
             this.hostNavigator = null;
             
             final int fetchpeers = 12;
@@ -153,7 +158,8 @@ public final class plasmaSearchEvent {
                     query.targetlang,
                     query.displayResults(),
                     query.maxDistance,
-                    wordIndex,
+                    indexSegment,
+                    peers,
                     crawlResults,
                     rankedCache,
                     rcAbstracts,
@@ -172,10 +178,10 @@ public final class plasmaSearchEvent {
             Log.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
         } else {
             // do a local search
-            this.rankedCache = new plasmaSearchRankingProcess(wordIndex, query, max_results_preparation, 2);
+            this.rankedCache = new plasmaSearchRankingProcess(indexSegment, query, max_results_preparation, 2);
             this.rankedCache.execQuery();
             this.hostNavigator = rankedCache.getHostNavigator(10);
-            //plasmaWordIndex.Finding finding = wordIndex.retrieveURLs(query, false, 2, ranking, process);
+            //CrawlSwitchboard.Finding finding = wordIndex.retrieveURLs(query, false, 2, ranking, process);
             
             if (generateAbstracts) {
                 // compute index abstracts
@@ -191,7 +197,7 @@ public final class plasmaSearchEvent {
                         IAmaxcounthash = wordhash;
                         maxcount = container.size();
                     }
-                    l = FlatWordPartitionScheme.std.dhtDistance(wordhash, null, wordIndex.peers().mySeed());
+                    l = FlatWordPartitionScheme.std.dhtDistance(wordhash, null, peers.mySeed());
                     if (l < mindhtdistance) {
                         // calculate the word hash that is closest to our dht position
                         mindhtdistance = l;
@@ -254,7 +260,7 @@ public final class plasmaSearchEvent {
                     final TreeSet<byte[]> removeWords = cleanEvent.query.queryHashes;
                     removeWords.addAll(cleanEvent.query.excludeHashes);
                     try {
-                        cleanEvent.wordIndex.index().remove(removeWords, cleanEvent.failedURLs.keySet());
+                        cleanEvent.indexSegment.index().remove(removeWords, cleanEvent.failedURLs.keySet());
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -310,7 +316,7 @@ public final class plasmaSearchEvent {
             (query.constraint.get(Condenser.flag_cat_indexof)) &&
             (!(metadata.dc_title().startsWith("Index of")))) {
             final Iterator<byte[]> wi = query.queryHashes.iterator();
-            while (wi.hasNext()) try { wordIndex.index().remove(wi.next(), page.hash()); } catch (IOException e) {}
+            while (wi.hasNext()) try { indexSegment.index().remove(wi.next(), page.hash()); } catch (IOException e) {}
             registerFailure(page.hash(), "index-of constraint not fullfilled");
             return null;
         }
@@ -333,7 +339,7 @@ public final class plasmaSearchEvent {
         }
 
         if (snippetFetchMode == 0) {
-            return new ResultEntry(page, wordIndex, null, null, dbRetrievalTime, 0); // result without snippet
+            return new ResultEntry(page, indexSegment, peers, null, null, dbRetrievalTime, 0); // result without snippet
         }
         
         // load snippet
@@ -346,15 +352,15 @@ public final class plasmaSearchEvent {
             
             if (snippet.getErrorCode() < 11) {
                 // we loaded the file and found the snippet
-                return new ResultEntry(page, wordIndex, snippet, null, dbRetrievalTime, snippetComputationTime); // result with snippet attached
+                return new ResultEntry(page, indexSegment, peers, snippet, null, dbRetrievalTime, snippetComputationTime); // result with snippet attached
             } else if (snippetFetchMode == 1) {
                 // we did not demand online loading, therefore a failure does not mean that the missing snippet causes a rejection of this result
                 // this may happen during a remote search, because snippet loading is omitted to retrieve results faster
-                return new ResultEntry(page, wordIndex, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
+                return new ResultEntry(page, indexSegment, peers, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
             } else {
                 // problems with snippet fetch
                 registerFailure(page.hash(), "no text snippet for URL " + metadata.url());
-                if (!wordIndex.peers().mySeed().isVirgin())
+                if (!peers.mySeed().isVirgin())
                     try {
                         plasmaSnippetCache.failConsequences(snippet, query.id(false));
                     } catch (IOException e) {
@@ -371,9 +377,9 @@ public final class plasmaSearchEvent {
             
             if ((mediaSnippets != null) && (mediaSnippets.size() > 0)) {
                 // found media snippets, return entry
-                return new ResultEntry(page, wordIndex, null, mediaSnippets, dbRetrievalTime, snippetComputationTime);
+                return new ResultEntry(page, indexSegment, peers, null, mediaSnippets, dbRetrievalTime, snippetComputationTime);
             } else if (snippetFetchMode == 1) {
-                return new ResultEntry(page, wordIndex, null, null, dbRetrievalTime, snippetComputationTime);
+                return new ResultEntry(page, indexSegment, peers, null, null, dbRetrievalTime, snippetComputationTime);
             } else {
                 // problems with snippet fetch
                 registerFailure(page.hash(), "no media snippet for URL " + metadata.url());
@@ -451,7 +457,8 @@ public final class plasmaSearchEvent {
     public static plasmaSearchEvent getEvent(
             final plasmaSearchQuery query,
             final plasmaSearchRankingProfile ranking,
-            final plasmaWordIndex wordIndex,
+            final Segment indexSegment,
+            final yacySeedDB peers,
             final ResultURLs crawlResults,
             final TreeMap<byte[], String> preselectedPeerHashes,
             final boolean generateAbstracts) {
@@ -474,7 +481,7 @@ public final class plasmaSearchEvent {
         }
         if (event == null) {
             // generate a new event
-            event = new plasmaSearchEvent(query, wordIndex, crawlResults, preselectedPeerHashes, generateAbstracts);
+            event = new plasmaSearchEvent(query, indexSegment, peers, crawlResults, preselectedPeerHashes, generateAbstracts);
         } else {
             // if worker threads had been alive, but did not succeed, start them again to fetch missing links
             if ((!event.anyWorkerAlive()) &&
@@ -689,18 +696,18 @@ public final class plasmaSearchEvent {
             final TreeMap<String, String> secondarySearchURLs = new TreeMap<String, String>(); // a (peerhash:urlhash-liststring) mapping
             Iterator<Map.Entry<String, String>> i1 = abstractJoin.entrySet().iterator();
             Map.Entry<String, String> entry1;
-            String url, urls, peer, peers;
-            final String mypeerhash = wordIndex.peers().mySeed().hash;
+            String url, urls, peer, ps;
+            final String mypeerhash = peers.mySeed().hash;
             boolean mypeerinvolved = false;
             int mypeercount;
             while (i1.hasNext()) {
                 entry1 = i1.next();
                 url = entry1.getKey();
-                peers = entry1.getValue();
+                ps = entry1.getValue();
                 //System.out.println("DEBUG-INDEXABSTRACT: url " + url + ": from peers " + peers);
                 mypeercount = 0;
-                for (int j = 0; j < peers.length(); j = j + 12) {
-                    peer = peers.substring(j, j + 12);
+                for (int j = 0; j < ps.length(); j = j + 12) {
+                    peer = ps.substring(j, j + 12);
                     if ((peer.equals(mypeerhash)) && (mypeercount++ > 1)) continue;
                     //if (peers.indexOf(peer) < j) continue; // avoid doubles that may appear in the abstractJoin
                     urls = secondarySearchURLs.get(peer);
@@ -724,7 +731,7 @@ public final class plasmaSearchEvent {
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls);
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
-                        words, "", urls, wordIndex, crawlResults, this.rankedCache, peer, plasmaSwitchboard.urlBlacklist,
+                        words, "", urls, indexSegment, peers, crawlResults, this.rankedCache, peer, plasmaSwitchboard.urlBlacklist,
                         query.ranking, query.constraint, preselectedPeerHashes);
 
             }
@@ -784,7 +791,9 @@ public final class plasmaSearchEvent {
         // statistic objects
         public long dbRetrievalTime, snippetComputationTime;
         
-        public ResultEntry(final URLMetadataRow urlentry, final plasmaWordIndex wordIndex,
+        public ResultEntry(final URLMetadataRow urlentry,
+                           final Segment indexSegment,
+                           yacySeedDB peers,
                            final plasmaSnippetCache.TextSnippet textSnippet,
                            final ArrayList<plasmaSnippetCache.MediaSnippet> mediaSnippets,
                            final long dbRetrievalTime, final long snippetComputationTime) {
@@ -801,13 +810,13 @@ public final class plasmaSearchEvent {
                 // translate host into current IP
                 int p = host.indexOf(".");
                 final String hash = yacySeed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));
-                final yacySeed seed = wordIndex.peers().getConnected(hash);
+                final yacySeed seed = peers.getConnected(hash);
                 final String filename = urlcomps.url().getFile();
                 String address = null;
                 if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
                     // seed is not known from here
                     try {
-                        wordIndex.index().remove(
+                        indexSegment.index().remove(
                             Word.words2hashes(Condenser.getWords(
                                 ("yacyshare " +
                                  filename.replace('?', ' ') +
@@ -817,7 +826,7 @@ public final class plasmaSearchEvent {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    wordIndex.metadata().remove(urlentry.hash()); // clean up
+                    indexSegment.metadata().remove(urlentry.hash()); // clean up
                     throw new RuntimeException("index void");
                 }
                 alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + filename;

@@ -82,6 +82,6 @@ public class add_p {
     	map.put("title", title.replace(',', ' '));
     	map.put("description", description.replace(',', ' '));
     	map.put("tags", tagsString.replace(',', ' '));
-    	sb.webIndex.peers().newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.webIndex.peers().mySeed(), yacyNewsPool.CATEGORY_BOOKMARK_ADD, map));
+    	sb.peers.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.peers.mySeed(), yacyNewsPool.CATEGORY_BOOKMARK_ADD, map));
     }
 }

@@ -41,13 +41,13 @@ import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerCache;
+import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.plasma.plasmaSearchAPI;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWordIndex;
 import de.anomic.plasma.parser.Word;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -109,7 +109,7 @@ public class IndexControlRWIs_p {
             
             // delete everything
             if (post.containsKey("deletecomplete") && post.containsKey("confirmDelete")) {
-                sb.webIndex.clear();
+                sb.indexSegment.clear();
                 sb.crawlQueues.clear();
                 sb.crawlStacker.clear();
                 try {
@@ -125,7 +125,7 @@ public class IndexControlRWIs_p {
                 if (delurl || delurlref) {
                     // generate an urlx array
                     ReferenceContainer<WordReference> index = null;
-                    index = sb.webIndex.index().get(keyhash, null);
+                    index = sb.indexSegment.index().get(keyhash, null);
                     final Iterator<WordReference> en = index.entries();
                     int i = 0;
                     urlx = new String[index.size()];
@@ -142,7 +142,7 @@ public class IndexControlRWIs_p {
                         sb.urlRemove(urlx[i]);
                     }
                 }
-                sb.webIndex.index().delete(keyhash);
+                sb.indexSegment.index().delete(keyhash);
                 post.remove("keyhashdeleteall");
                 post.put("urllist", "generated");
             } catch (IOException e) {
@@ -161,7 +161,7 @@ public class IndexControlRWIs_p {
                 }
                 final Set<String> urlHashes = new HashSet<String>();
                 for (int i = 0; i < urlx.length; i++) urlHashes.add(urlx[i]);
-                sb.webIndex.index().remove(keyhash, urlHashes);
+                sb.indexSegment.index().remove(keyhash, urlHashes);
                 // this shall lead to a presentation of the list; so handle that the remaining program
                 // thinks that it was called for a list presentation
                 post.remove("keyhashdelete");
@@ -192,20 +192,20 @@ public class IndexControlRWIs_p {
                 if (host.length() != 0) {
                     if (host.length() == 12) {
                         // the host string is a peer hash
-                        seed = sb.webIndex.peers().getConnected(host);
+                        seed = sb.peers.getConnected(host);
                     } else {
                         // the host string can be a host name
-                        seed = sb.webIndex.peers().lookupByName(host);
+                        seed = sb.peers.lookupByName(host);
                     }
                 } else {
                     host = post.get("hostHash", ""); // if input field is empty, get from select box
-                    seed = sb.webIndex.peers().getConnected(host);
+                    seed = sb.peers.getConnected(host);
                 }
                 
                 // prepare index
                 ReferenceContainer<WordReference> index;
                 final long starttime = System.currentTimeMillis();
-                index = sb.webIndex.index().get(keyhash, null);
+                index = sb.indexSegment.index().get(keyhash, null);
                 // built urlCache
                 final Iterator<WordReference> urlIter = index.entries();
                 final HashMap<String, URLMetadataRow> knownURLs = new HashMap<String, URLMetadataRow>();
@@ -214,7 +214,7 @@ public class IndexControlRWIs_p {
                 URLMetadataRow lurl;
                 while (urlIter.hasNext()) {
                     iEntry = urlIter.next();
-                    lurl = sb.webIndex.metadata().load(iEntry.metadataHash(), null, 0);
+                    lurl = sb.indexSegment.metadata().load(iEntry.metadataHash(), null, 0);
                     if (lurl == null) {
                         unknownURLEntries.add(iEntry.metadataHash());
                         urlIter.remove();
@@ -224,7 +224,7 @@ public class IndexControlRWIs_p {
                 }
                 
                 // make an indexContainerCache
-                ReferenceContainerCache<WordReference> icc = new ReferenceContainerCache<WordReference>(plasmaWordIndex.wordReferenceFactory, index.rowdef, plasmaWordIndex.wordOrder);
+                ReferenceContainerCache<WordReference> icc = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, index.rowdef, Segment.wordOrder);
                 icc.add(index);
                 
                 // transport to other peer
@@ -244,7 +244,7 @@ public class IndexControlRWIs_p {
     
             // generate list
             if (post.containsKey("keyhashsimilar")) try {
-                final Iterator<ReferenceContainer<WordReference>> containerIt = sb.webIndex.index().references(keyhash, true, 256, false).iterator();
+                final Iterator<ReferenceContainer<WordReference>> containerIt = sb.indexSegment.index().references(keyhash, true, 256, false).iterator();
                     ReferenceContainer<WordReference> container;
                     int i = 0;
                     int rows = 0, cols = 0;
@@ -278,8 +278,8 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final URLMetadataRow e = sb.webIndex.metadata().load(urlx[i], null, 0);
-                            sb.webIndex.metadata().remove(urlx[i]);
+                            final URLMetadataRow e = sb.indexSegment.metadata().load(urlx[i], null, 0);
+                            sb.indexSegment.metadata().remove(urlx[i]);
                             if (e != null) {
                                 url = e.metadata().url();
                                 pw.println(url.getHost() + "/" + url.getFile());
@@ -306,8 +306,8 @@ public class IndexControlRWIs_p {
                         yacyURL url;
                         for (int i=0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final URLMetadataRow e = sb.webIndex.metadata().load(urlx[i], null, 0);
-                            sb.webIndex.metadata().remove(urlx[i]);
+                            final URLMetadataRow e = sb.indexSegment.metadata().load(urlx[i], null, 0);
+                            sb.indexSegment.metadata().remove(urlx[i]);
                             if (e != null) {
                                 url = e.metadata().url();
                                 pw.println(url.getHost() + "/.*");
@@ -325,7 +325,7 @@ public class IndexControlRWIs_p {
                     }
                 }
                 try {
-                    sb.webIndex.index().remove(keyhash, urlHashes);
+                    sb.indexSegment.index().remove(keyhash, urlHashes);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -336,7 +336,7 @@ public class IndexControlRWIs_p {
         
 
         // insert constants
-        prop.putNum("wcount", sb.webIndex.index().size());
+        prop.putNum("wcount", sb.indexSegment.index().size());
         // return rewrite properties
         return prop;
     }

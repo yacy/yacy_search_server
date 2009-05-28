@@ -394,7 +394,7 @@ public final class httpdProxyHandler {
                         requestHeader,
                         cachedResponseHeader,
                         null,                            // initiator
-                        sb.webIndex.defaultProxyProfile  // profile
+                        sb.crawler.defaultProxyProfile   // profile
                 );
                 plasmaHTCache.storeMetadata(cachedResponseHeader, cacheEntry); // TODO: check if this storeMetadata is necessary
 
@@ -507,7 +507,7 @@ public final class httpdProxyHandler {
                         requestHeader,
                         responseHeader,
                         null,
-                        sb.webIndex.defaultProxyProfile
+                        sb.crawler.defaultProxyProfile
                 );
                 plasmaHTCache.storeMetadata(responseHeader, cacheEntry);
 
