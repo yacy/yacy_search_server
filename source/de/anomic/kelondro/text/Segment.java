@@ -117,6 +117,7 @@ public final class Segment {
         } catch (final IOException e) {
             e.printStackTrace();
         }
+        plasmaSwitchboard.getSwitchboard().peers.mySeed().resetCounters();
     }
     
     public File getLocation() {

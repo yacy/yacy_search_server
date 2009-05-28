@@ -396,6 +396,13 @@ public class yacySeed implements Cloneable {
         if (v == null) { v = yacySeed.ZERO; }
         dna.put(yacySeed.URL_IN, Long.toString(Long.parseLong(v) + (long) count));
     }
+    
+    public final void resetCounters(){
+    	dna.put(yacySeed.INDEX_OUT, yacySeed.ZERO);
+    	dna.put(yacySeed.INDEX_IN, yacySeed.ZERO);
+    	dna.put(yacySeed.URL_OUT, yacySeed.ZERO);
+    	dna.put(yacySeed.URL_IN, yacySeed.ZERO);
+    }
 
     /**
      * <code>12 * 6 bit = 72 bit = 24</code> characters octal-hash
