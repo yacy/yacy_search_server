@@ -120,6 +120,7 @@ public final class HeapWriter  {
         assert f.exists() : "file = " + f.toString();
         String fp = Digest.fastFingerprintB64(f, false);
         assert fp != null : "file = " + f.toString();
+        if (fp == null) return null;
         return fp.substring(0, 12);
     }
     
@@ -156,9 +157,13 @@ public final class HeapWriter  {
             try {
                 long start = System.currentTimeMillis();
                 String fingerprint = HeapWriter.fingerprintFileHash(this.heapFileREADY);
-                new Gap().dump(fingerprintGapFile(this.heapFileREADY, fingerprint));
-                index.dump(fingerprintIndexFile(this.heapFileREADY, fingerprint));
-                Log.logInfo("kelondroBLOBHeapWriter", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFileREADY.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                if (fingerprint == null) {
+                    Log.logSevere("kelondroBLOBHeapWriter", "cannot write a dump for " + heapFileREADY.getName()+ ": fingerprint is null");
+                } else {
+                    new Gap().dump(fingerprintGapFile(this.heapFileREADY, fingerprint));
+                    index.dump(fingerprintIndexFile(this.heapFileREADY, fingerprint));
+                    Log.logInfo("kelondroBLOBHeapWriter", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFileREADY.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                }
                 index.close();
                 index = null;
             } catch (IOException e) {

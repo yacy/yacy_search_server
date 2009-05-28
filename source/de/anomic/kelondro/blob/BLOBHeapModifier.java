@@ -116,11 +116,17 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
             try {
                 long start = System.currentTimeMillis();
                 String fingerprint = HeapWriter.fingerprintFileHash(this.heapFile);
-                free.dump(HeapWriter.fingerprintGapFile(this.heapFile, fingerprint));
+                if (fingerprint == null) {
+                    Log.logSevere("kelondroBLOBHeap", "cannot write a dump for " + heapFile.getName()+ ": fingerprint is null");
+                } else {
+                    free.dump(HeapWriter.fingerprintGapFile(this.heapFile, fingerprint));
+                }
                 free.clear();
                 free = null;
-                index.dump(HeapWriter.fingerprintIndexFile(this.heapFile, fingerprint));
-                Log.logInfo("kelondroBLOBHeap", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                if (fingerprint != null) {
+                    index.dump(HeapWriter.fingerprintIndexFile(this.heapFile, fingerprint));
+                    Log.logInfo("kelondroBLOBHeap", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                }
                 index.close();
                 index = null;
             } catch (IOException e) {

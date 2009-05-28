@@ -101,6 +101,10 @@ public class HeapReader {
         // look for an index dump and read it if it exist
         // if this is successfull, return true; otherwise false
         String fingerprint = HeapWriter.fingerprintFileHash(this.heapFile);
+        if (fingerprint == null) {
+            Log.logSevere("HeapReader", "cannot generate a fingerprint for " + this.heapFile + ": null");
+            return false;
+        }
         File fif = HeapWriter.fingerprintIndexFile(this.heapFile, fingerprint);
         if (!fif.exists()) fif = new File(fif.getAbsolutePath() + ".gz");
         File fgf = HeapWriter.fingerprintGapFile(this.heapFile, fingerprint);

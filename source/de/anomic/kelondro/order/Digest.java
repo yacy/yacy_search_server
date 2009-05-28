@@ -249,6 +249,7 @@ public class Digest {
         try {
             byte[] b = fastFingerprintRaw(file, includeDate);
             assert b != null : "file = " + file.toString();
+            if (b == null || b.length == 0) return null;
             assert b.length != 0 : "file = " + file.toString();
             return Base64Order.enhancedCoder.encode(b);
         } catch (IOException e) {
