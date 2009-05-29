@@ -295,7 +295,10 @@ public class yacySeed implements Cloneable {
      * try to get the IP<br>
      * @return the IP or null
      */
-    public final String getIP() { return get(yacySeed.IP, ""); }
+    public final String getIP() {
+        String ip = get(yacySeed.IP, "localhost");
+        return (ip == null || ip.length() == 0) ? "localhost" : ip;
+    }
     /**
      * try to get the peertype<br>
      * @return the peertype or null
@@ -473,9 +476,8 @@ public class yacySeed implements Cloneable {
      * either the IP or the port could be retrieved from this yacySeed object
      */
     public final String getPublicAddress() {
-        final String ip = this.dna.get(yacySeed.IP);
-        if (ip == null) { return null; }
-        if (ip.length() < 8) { return null; } // 10.0.0.0
+        String ip = this.getIP();
+        if (ip == null || ip.length() < 8) ip = "localhost";
         // if (ip.equals(yacyCore.seedDB.mySeed.dna.get(yacySeed.IP))) ip = "127.0.0.1";
         // if (this.hash.equals("xxxxxxxxxxxx")) return "192.168.100.1:3300";
         
@@ -505,7 +507,7 @@ public class yacySeed implements Cloneable {
      * @return the IP address of the peer represented by this yacySeed object as {@link InetAddress}
      */
     public final InetAddress getInetAddress() {
-        return natLib.getInetAddress(this.dna.get(yacySeed.IP));
+        return natLib.getInetAddress(this.getIP());
     }
     
     /** @return the portnumber of this seed or <code>-1</code> if not present */
@@ -822,7 +824,7 @@ public class yacySeed implements Cloneable {
         // check IP
         if (!checkOwnIP) {
             // checking of IP is omitted if we read the own seed file        
-            final String ipCheck = isProperIP(this.dna.get(yacySeed.IP));
+            final String ipCheck = isProperIP(this.getIP());
             if (ipCheck != null) return ipCheck;
         }
         

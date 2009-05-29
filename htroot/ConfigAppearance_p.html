@@ -6,11 +6,13 @@
   </head>
   <body id="ConfigSkins">
     #%env/templates/header.template%#
-    #%env/templates/submenuCustomizationIntegration.template%#
+    #%env/templates/submenuCustomization.template%#
     <h2>Appearance and Integration</h2>
     <p>
-      You can change the appearance of YaCy with skins
-      and the default icons and links on the search page can be replaced with you own.
+      You can change the appearance of the YaCy interface with skins.
+      The selected skin and language also affects the appearance of the search page.
+      If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can
+      change the appearance of the search page here.
     </p>
     
     <h3>Skin Selection</h3>
@@ -53,113 +55,7 @@
     ::<p><strong>Unable to get URL: #[url]#</strong></p>
     ::<p><strong>Error saving the skin.</strong></p>
     #(/status)#
-    
-    
-    <h3>Search Page Integration</h3>
-    <p>
-      The search page may be customized. You can change the 'corporate identity'-images, the greeting line
-      and a link to a home page that is reached when the 'corporate identity'-images are clicked.
-    </p>
-    <form action="ConfigAppearance_p.html">
-      <fieldset>
-        <dl>
-          <dt>Greeting Line</dt>
-          <dd><input type="text" name="promoteSearchPageGreeting" value="#[promoteSearchPageGreeting]#" size="60" /></dd>
-          
-          <dt>URL of Home Page</dt>
-          <dd><input type="text" name="promoteSearchPageGreeting.homepage" value="#[promoteSearchPageGreeting.homepage]#" size="60" /></dd>
-          
-          <dt>URL of a Small Corporate Image</dt>
-          <dd><input type="text" name="promoteSearchPageGreeting.smallImage" value="#[promoteSearchPageGreeting.smallImage]#" size="60" /></dd>
-          
-          <dt>URL of a Large Corporate Image</dt>
-          <dd><input type="text" name="promoteSearchPageGreeting.largeImage" value="#[promoteSearchPageGreeting.largeImage]#" size="60" /></dd>
-          
-          <dt>Default Pop-Up Page</dt>
-          <dd>
-          <input type="radio" name="popup" value="status" #(popupStatus)#::checked="checked"#(/popupStatus)# />Status Page&nbsp;
-          <input type="radio" name="popup" value="front" #(popupFront)#::checked="checked"#(/popupFront)# />Search Front Page&nbsp;
-          <input type="radio" name="popup" value="search" #(popupSearch)#::checked="checked"#(/popupSearch)# />Search Page (small header)&nbsp;
-          <input type="radio" name="popup" value="interactive" #(popupInteractive)#::checked="checked"#(/popupInteractive)# />Interactive Search Page&nbsp;
-          </dd>
-          
-          <dd>
-            <input type="submit" name="searchpage_set" value="Change Search Page" />&nbsp;&nbsp;
-            <input type="submit" name="searchpage_default" value="Set to Default Values" />
-          </dd>
-        </dl>
-      </fieldset>
-    </form>
-    
-    <h3>
-      The search page can be integrated in your own web pages with an iframe. Simply use the following code:
-    </h3>
-    <fieldset><pre>
-      &lt;iframe name="target"
-       src="http://#[myaddress]#/index.html?display=2&amp;resource=local"
-       width="100%"
-       height="560"
-       frameborder="0"
-       scrolling="auto"
-       id="target"&gt; 
-      &lt;/iframe&gt;  
-    </pre></fieldset>
-    This would look like:
-    <iframe name="target"
-       src="http://#[myaddress]#/index.html?display=2&amp;resource=local"
-       width="100%"
-       height="340"
-       frameborder="0"
-       scrolling="auto"
-       id="target">
-      </iframe>
-    
-    <h3>
-      For a search page with a small header, use this code:
-    </h3>
-    <fieldset><pre>
-      &lt;iframe name="target"
-       src="http://#[myaddress]#/yacysearch.html?display=2&amp;resource=local"
-       width="100%"
-       height="560"
-       frameborder="0"
-       scrolling="auto"
-       id="target"&gt; 
-      &lt;/iframe&gt;  
-    </pre></fieldset>
-    This would look like:
-    <iframe name="target"
-       src="http://#[myaddress]#/yacysearch.html?display=2&amp;resource=local"
-       width="100%"
-       height="180"
-       frameborder="0"
-       scrolling="auto"
-       id="target">
-      </iframe>
-      
-    <h3>
-      A third option is the interactive search. Use this code:
-    </h3>
-    <fieldset><pre>
-      &lt;iframe name="target"
-       src="http://#[myaddress]#/yacyinteractive.html?display=2"
-       width="100%"
-       height="560"
-       frameborder="0"
-       scrolling="auto"
-       id="target"&gt; 
-      &lt;/iframe&gt;  
-    </pre></fieldset>
-    This would look like:
-    <iframe name="target"
-       src="http://#[myaddress]#/yacyinteractive.html?display=2"
-       width="100%"
-       height="180"
-       frameborder="0"
-       scrolling="auto"
-       id="target">
-      </iframe>
-    
+
     #%env/templates/footer.template%#
   </body>
 </html>

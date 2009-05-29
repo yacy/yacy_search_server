@@ -13,5 +13,6 @@
     <li><a href="/Performance_p.html" class="MenuItemLink lock">Performance</a></li>
     <li><a href="/Settings_p.html" class="MenuItemLink lock">Advanced Settings</a></li>
     <li><a href="/ConfigProperties_p.html" class="MenuItemLink lock">Advanced Properties</a></li>
+    <li><a href="/ConfigRobotsTxt_p.html" class="MenuItemLink lock">Local robots.txt</a></li>
   </ul>
 </div>

@@ -1,6 +1,6 @@
-// ConfigSkins_p.java 
+// ConfigAppearance_p.java 
 // -----------------------
-// part of YACY
+// part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
@@ -40,7 +40,6 @@ import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
@@ -115,31 +114,6 @@ public class ConfigAppearance_p {
                     changeSkin(sb, skinPath, url.substring(url.lastIndexOf("/"), url.length()));
                 }
             }
-            if (post.containsKey("searchpage_set")) {
-                sb.setConfig(plasmaSwitchboardConstants.GREETING, post.get(plasmaSwitchboardConstants.GREETING, ""));
-                sb.setConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, post.get(plasmaSwitchboardConstants.GREETING_HOMEPAGE, ""));
-                sb.setConfig(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, post.get(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, ""));
-                sb.setConfig(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, post.get(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, ""));
-            }
-            if (post.containsKey("searchpage_default")) {
-                sb.setConfig(plasmaSwitchboardConstants.GREETING, "P2P Web Search");
-                sb.setConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, "http://yacy.net");
-                sb.setConfig(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, "/env/grafics/YaCyLogo_120ppi.png");
-                sb.setConfig(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, "/env/grafics/YaCyLogo_60ppi.png");
-            }
-            
-            if (post.containsKey("popup")) {
-                String popup = post.get("popup", "status");
-                if (popup.equals("front")) {
-                    sb.setConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "index.html?display=2");
-                } else if (popup.equals("search")) {
-                    sb.setConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "yacysearch.html?display=2");
-                } else if (popup.equals("interactive")) {
-                    sb.setConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "yacyinteractive.html?display=2");
-                } else {
-                    sb.setConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "Status.html");
-                }
-            }
             
         }
 
@@ -154,32 +128,7 @@ public class ConfigAppearance_p {
             }
         }
         prop.put("skinlist", count);
-
         prop.putHTML("currentskin", env.getConfig("currentSkin", "default"));
-        
-        prop.putHTML(plasmaSwitchboardConstants.GREETING, sb.getConfig(plasmaSwitchboardConstants.GREETING, ""));
-        prop.putHTML(plasmaSwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, ""));
-        prop.putHTML(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, sb.getConfig(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, ""));
-        prop.putHTML(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, sb.getConfig(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, ""));
-        
-        final String  browserPopUpPage = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
-        prop.put("popupFront", 0);
-        prop.put("popupSearch", 0);
-        prop.put("popupInteractive", 0);
-        prop.put("popupStatus", 0);
-        if (browserPopUpPage.startsWith("index")) {
-            prop.put("popupFront", 1);
-        } else if (browserPopUpPage.startsWith("yacysearch")) {
-            prop.put("popupSearch", 1);
-        } else if (browserPopUpPage.startsWith("yacyinteractive")) {
-            prop.put("popupInteractive", 1);
-        } else {
-            prop.put("popupStatus", 1);
-        }
-        
-        String myaddress = sb.peers.mySeed().getPublicAddress();
-        if (myaddress == null) myaddress = "localhost:" + sb.getConfig("port", "8080");
-        prop.put("myaddress", myaddress);
         return prop;
     }
 
