@@ -991,8 +991,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     		return false;
     	}
     }
-   
-    
+
     public String urlExists(final String hash) {
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,
@@ -1217,8 +1216,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     }
     
     public void deQueueFreeMem() {
-        // flush some entries from the RAM cache
-        indexSegment.termIndex().cleanupBuffer(5000);
         // empty some caches
         indexSegment.urlMetadata().clearCache();
         plasmaSearchEvent.cleanupEvents(true);

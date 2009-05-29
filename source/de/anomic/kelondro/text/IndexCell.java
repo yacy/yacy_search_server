@@ -313,10 +313,6 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         // for migration of cache files
         this.array.mountBLOBFile(blobFile);
     }
-    
-    public void cleanupBuffer(int time) {
-        // do nothing
-    }
 
     public int getBackendSize() {
         return this.array.size();

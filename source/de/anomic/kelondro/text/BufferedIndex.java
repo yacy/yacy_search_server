@@ -88,14 +88,6 @@ public interface BufferedIndex<ReferenceType extends Reference> extends Index<Re
     public long getBufferSizeBytes();
 
     /**
-     * clean the buffer for a given time. The buffer may need operations
-     * for flushing, cleaning etc. The buffer operates this cleanup by itself,
-     * but may perform better if in spare time this method is called
-     * @param time the number of milliseconds that the operation may take
-     */
-    public void cleanupBuffer(int time);
-
-    /**
      * get the size of the buffer backend
      * @return number of word references
      */
