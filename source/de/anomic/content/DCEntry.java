@@ -29,22 +29,31 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
+import java.text.Collator;
 import java.text.ParseException;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
+import java.util.TreeMap;
 
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.yacy.yacyURL;
 
-public class DCEntry extends HashMap<String, String> {
+public class DCEntry extends TreeMap<String, String> {
     
     private static final long    serialVersionUID = -2050291583515701559L;
     public  static final DCEntry poison           = new DCEntry();
     
+    // use a collator to relax when distinguishing between lowercase und uppercase letters
+    private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
+    static {
+        insensitiveCollator.setStrength(Collator.SECONDARY);
+        insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
+    }
+    
     public DCEntry() {
-        super();
+        super((Collator) insensitiveCollator.clone());
     }
     
     public DCEntry(
@@ -54,12 +63,12 @@ public class DCEntry extends HashMap<String, String> {
             String author,
             String body
             ) {
-        super();
-        this.put("url", url.toNormalform(true, false));
-        this.put("dc:Date", DateFormatter.formatISO8601(date));
-        this.put("dc:Title", title);
-        this.put("dc:Creator", author);
-        this.put("dc:Description", body);
+        super((Collator) insensitiveCollator.clone());
+        this.put("dc:identifier", url.toNormalform(true, false));
+        this.put("dc:date", DateFormatter.formatISO8601(date));
+        this.put("dc:title", title);
+        this.put("dc:creator", author);
+        this.put("dc:description", body);
     }
     
     /*
@@ -84,7 +93,7 @@ public class DCEntry extends HashMap<String, String> {
     
     public Date date() {
         String d = this.get("docdatetime");
-        if (d == null) d = this.get("dc:Date");
+        if (d == null) d = this.get("dc:date");
         if (d == null) return null;
         try {
             return DateFormatter.parseISO8601(d);
@@ -96,7 +105,7 @@ public class DCEntry extends HashMap<String, String> {
     
     public yacyURL url() {
         String u = this.get("url");
-        if (u == null) u = this.get("dc:Identifier");
+        if (u == null) u = this.get("dc:identifier");
         if (u == null) return null;
         try {
             return new yacyURL(u, null);
@@ -108,13 +117,13 @@ public class DCEntry extends HashMap<String, String> {
     
     public String language() {
         String l = this.get("language");
-        if (l == null) l = this.get("dc:Language");
+        if (l == null) l = this.get("dc:language");
         if (l == null) return url().language(); else return l;
     }
     
     public String title() {
         String t = this.get("title");
-        if (t == null) t = this.get("dc:Title");
+        if (t == null) t = this.get("dc:title");
         t = stripCDATA(t);
         if (t == null) return "";
         return t;
@@ -122,7 +131,7 @@ public class DCEntry extends HashMap<String, String> {
     
     public String author() {
         String t = this.get("author");
-        if (t == null) t = this.get("dc:Creator");
+        if (t == null) t = this.get("dc:creator");
         t = stripCDATA(t);
         if (t == null) return "";
         return t;
@@ -130,7 +139,7 @@ public class DCEntry extends HashMap<String, String> {
     
     public String body() {
         String t = this.get("body");
-        if (t == null) t = this.get("dc:Description");
+        if (t == null) t = this.get("dc:description");
         t = stripCDATA(t);
         if (t == null) return "";
         return t;
@@ -138,7 +147,7 @@ public class DCEntry extends HashMap<String, String> {
     
     public String[] categories() {
         String t = this.get("categories");
-        if (t == null) this.get("dc:Subject");
+        if (t == null) this.get("dc:subject");
         t = stripCDATA(t);
         if (t == null) return new String[]{};
         return t.split(";");

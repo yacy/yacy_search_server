@@ -104,13 +104,11 @@ public class PhpBB3Dao implements Dao {
     }
     
     public Date first() {
-        StringBuilder sql = new StringBuilder(256);
-        sql.append("select min(post_time) from " + prefix + "posts");
         Statement stmt = null;
         ResultSet rs = null;
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery(sql.toString());
+            rs = stmt.executeQuery("select min(post_time) from " + prefix + "posts");
             if (rs.next()) {
                 return new Date(rs.getLong(1) * 1000L);
             }
@@ -125,13 +123,11 @@ public class PhpBB3Dao implements Dao {
     }
 
     public Date latest() {
-        StringBuilder sql = new StringBuilder(256);
-        sql.append("select max(post_time) from " + prefix + "posts");
         Statement stmt = null;
         ResultSet rs = null;
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery(sql.toString());
+            rs = stmt.executeQuery("select max(post_time) from " + prefix + "posts");
             if (rs.next()) {
                 return new Date(rs.getLong(1) * 1000L);
             }
@@ -165,10 +161,7 @@ public class PhpBB3Dao implements Dao {
     }
 
     public DCEntry get(int item) {
-        StringBuilder sql = new StringBuilder(256);
-        sql.append("select * from " + prefix + "posts where post_id = ");
-        sql.append(item);
-        return getOne(sql);
+        return getOne("select * from " + prefix + "posts where post_id = " + item);
     }
     
     public BlockingQueue<DCEntry> query(int from, int until, int queueSize) {
@@ -198,12 +191,12 @@ public class PhpBB3Dao implements Dao {
     }
     
     
-    private DCEntry getOne(StringBuilder sql) {
+    private DCEntry getOne(String sql) {
         Statement stmt = null;
         ResultSet rs = null;
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery(sql.toString());
+            rs = stmt.executeQuery(sql);
             if (rs.next()) {
                 try {
                     return parseResultSet(rs);
