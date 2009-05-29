@@ -58,7 +58,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     private final ReferenceContainerArray<ReferenceType> array;
     private       ReferenceContainerCache<ReferenceType> ram;
     private       int                                    maxRamEntries;
-    private final IODispatcher<ReferenceType>            merger;
+    private final IODispatcher                           merger;
     private       long                                   lastCleanup;
     private final long                                   targetFileSize, maxFileSize;
     private final int                                    writeBufferSize;
@@ -72,7 +72,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             final int maxRamEntries,
             final long targetFileSize,
             final long maxFileSize,
-            IODispatcher<ReferenceType> merger,
+            IODispatcher merger,
             int writeBufferSize
             ) throws IOException {
         super(factory);

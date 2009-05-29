@@ -122,7 +122,7 @@ public class QuickCrawlLink_p {
             }
                     
             final String urlhash = crawlingStartURL.hash();
-            sb.indexSegment.metadata().remove(urlhash);
+            sb.indexSegment.urlMetadata().remove(urlhash);
             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
             sb.crawlQueues.errorURL.remove(urlhash);
             

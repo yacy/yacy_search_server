@@ -100,7 +100,11 @@ public final class Condenser {
     public Bitfield RESULT_FLAGS = new Bitfield(4);
     Identificator languageIdentificator;
     
-    public Condenser(final plasmaParserDocument document, final boolean indexText, final boolean indexMedia) throws UnsupportedEncodingException {
+    public Condenser(
+            final plasmaParserDocument document,
+            final boolean indexText,
+            final boolean indexMedia
+            ) throws UnsupportedEncodingException {
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
         this.wordminsize = 3;

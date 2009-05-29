@@ -106,8 +106,8 @@ public final class IndexImport_p {
             }
         }
         
-        prop.putNum("wcount", switchboard.indexSegment.index().size());
-        prop.putNum("ucount", switchboard.indexSegment.metadata().size());
+        prop.putNum("wcount", switchboard.indexSegment.termIndex().size());
+        prop.putNum("ucount", switchboard.indexSegment.urlMetadata().size());
         
         /*
          * Loop over all currently running jobs

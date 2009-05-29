@@ -25,7 +25,6 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeSet;
 
@@ -79,13 +78,12 @@ public final class timeline {
         // retrieve index containers
         //yacyCore.log.logInfo("INIT TIMELINE SEARCH: " + plasmaSearchQuery.anonymizedQueryHashes(query[0]) + " - " + count + " links");
         
-        // get the index container with the result vector
-        HashMap<byte[], ReferenceContainer<WordReference>>[] localSearchContainerMaps = sb.indexSegment.index().searchTerm(q, Word.words2hashes(query[1]), null);
-        final ReferenceContainer<WordReference> index =
-            ReferenceContainer.joinExcludeContainers(
+        // get the index container with the result vector        
+        final ReferenceContainer<WordReference> index = sb.indexSegment.termIndex().query(
+                q,
+                Word.words2hashes(query[1]),
+                null,
                 Segment.wordReferenceFactory,
-                localSearchContainerMaps[0].values(),
-                localSearchContainerMaps[1].values(),
                 maxdist);
         
         Iterator<WordReference> i = index.entries();

@@ -112,7 +112,7 @@ public class urls {
         	URLMetadataRow.Components metadata;
             yacyURL referrer;
             for (int i = 0; i < count; i++) {
-                entry = sb.indexSegment.metadata().load(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);
+                entry = sb.indexSegment.urlMetadata().load(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);
                 if (entry == null) continue;
                 // find referrer, if there is one
                 referrer = sb.getURL(entry.referrerHash());

@@ -68,14 +68,14 @@ public class yacydoc {
         }
         if (urlhash == null || urlhash.length() == 0) return prop;
         
-        final URLMetadataRow entry = sb.indexSegment.metadata().load(urlhash, null, 0);
+        final URLMetadataRow entry = sb.indexSegment.urlMetadata().load(urlhash, null, 0);
         if (entry == null) return prop;
 
         final URLMetadataRow.Components metadata = entry.metadata();
         if (metadata.url() == null) {
             return prop;
         }
-        final URLMetadataRow le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : sb.indexSegment.metadata().load(entry.referrerHash(), null, 0);
+        final URLMetadataRow le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : sb.indexSegment.urlMetadata().load(entry.referrerHash(), null, 0);
         
         prop.putXML("dc_title", metadata.dc_title());
         prop.putXML("dc_creator", metadata.dc_creator());

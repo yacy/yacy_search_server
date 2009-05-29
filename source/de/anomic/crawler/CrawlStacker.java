@@ -254,8 +254,8 @@ public final class CrawlStacker {
 
         // check if the url is double registered
         final String dbocc = nextQueue.urlExists(entry.url().hash());
-        if (dbocc != null || indexSegment.metadata().exists(entry.url().hash())) {
-            final URLMetadataRow oldEntry = indexSegment.metadata().load(entry.url().hash(), null, 0);
+        if (dbocc != null || indexSegment.urlMetadata().exists(entry.url().hash())) {
+            final URLMetadataRow oldEntry = indexSegment.urlMetadata().load(entry.url().hash(), null, 0);
             final boolean recrawl = (oldEntry != null) && (profile.recrawlIfOlder() > oldEntry.loaddate().getTime());
             // do double-check
             if ((dbocc != null) && (!recrawl)) {

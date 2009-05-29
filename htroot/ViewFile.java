@@ -95,7 +95,7 @@ public class ViewFile {
         if (urlHash.length() > 0) {
             // getting the urlEntry that belongs to the url hash
             URLMetadataRow urlEntry = null;
-            urlEntry = sb.indexSegment.metadata().load(urlHash, null, 0);
+            urlEntry = sb.indexSegment.urlMetadata().load(urlHash, null, 0);
             if (urlEntry == null) {
                 prop.put("error", "2");
                 prop.put("viewMode",VIEW_MODE_NO_TEXT);

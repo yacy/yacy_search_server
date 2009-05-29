@@ -569,7 +569,7 @@ public final class yacyClient {
 
 			// passed all checks, store url
 			try {
-			    indexSegment.metadata().store(urlEntry);
+			    indexSegment.urlMetadata().store(urlEntry);
 				crawlResults.stack(urlEntry, mySeed.hash, target.hash, 2);
 			} catch (final IOException e) {
 				yacyCore.log.logSevere("could not store search result", e);
@@ -638,7 +638,7 @@ public final class yacyClient {
 
 		// insert the containers to the index
         for (int m = 0; m < words; m++) try {
-                indexSegment.index().add(container[m]);
+                indexSegment.termIndex().add(container[m]);
             } catch (IOException e) {
                 e.printStackTrace();
             }

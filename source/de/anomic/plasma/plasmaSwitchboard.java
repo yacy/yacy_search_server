@@ -364,8 +364,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // init a DHT transmission dispatcher
         this.dhtDispatcher = new Dispatcher(
-                indexSegment.index(),
-                indexSegment.metadata(),
+                indexSegment.termIndex(),
+                indexSegment.urlMetadata(),
                 peers,
                 true, 
                 30000);
@@ -997,12 +997,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,
         // if it not exists, null is returned
-        if (indexSegment.metadata().exists(hash)) return "loaded";
+        if (indexSegment.urlMetadata().exists(hash)) return "loaded";
         return this.crawlQueues.urlExists(hash);
     }
     
     public void urlRemove(final String hash) {
-        indexSegment.metadata().remove(hash);
+        indexSegment.urlMetadata().remove(hash);
         crawlResults.remove(hash);
         crawlQueues.urlRemove(hash);
     }
@@ -1012,7 +1012,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (urlhash.length() == 0) return null;
         final yacyURL ne = crawlQueues.getURL(urlhash);
         if (ne != null) return ne;
-        final URLMetadataRow le = indexSegment.metadata().load(urlhash, null, 0);
+        final URLMetadataRow le = indexSegment.urlMetadata().load(urlhash, null, 0);
         if (le != null) return le.metadata().url();
         return null;
     }
@@ -1218,9 +1218,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public void deQueueFreeMem() {
         // flush some entries from the RAM cache
-        indexSegment.index().cleanupBuffer(5000);
+        indexSegment.termIndex().cleanupBuffer(5000);
         // empty some caches
-        indexSegment.metadata().clearCache();
+        indexSegment.urlMetadata().clearCache();
         plasmaSearchEvent.cleanupEvents(true);
     }
     
@@ -1357,7 +1357,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             
             if (noIndexReason != null) {
                 // this document should not be indexed. log cause and close queue
-                final yacyURL referrerURL = queueEntry.referrerURL(this.indexSegment.metadata());
+                final yacyURL referrerURL = queueEntry.referrerURL(this.indexSegment.urlMetadata());
                 log.logFine("Not indexed any word in URL " + queueEntry.url() + "; cause: " + noIndexReason);
                 addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? "" : referrerURL.hash(), queueEntry.initiator(), queueEntry.anchorName(), noIndexReason);
                 // finish this entry
@@ -1410,7 +1410,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             
             // clear caches if necessary
             if (!MemoryControl.request(8000000L, false)) {
-                indexSegment.metadata().clearCache();
+                indexSegment.urlMetadata().clearCache();
                 plasmaSearchEvent.cleanupEvents(true);
             }
             
@@ -1712,7 +1712,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 crawlStacker.enqueueEntry(new CrawlEntry(
                         entry.initiator(),
                         nextUrl,
-                        entry.urlHash(),
+                        entry.url().hash(),
                         nextEntry.getValue(),
                         null,
                         docDate,
@@ -1772,7 +1772,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // CREATE INDEX
         final String dc_title = document.dc_title();
-        final yacyURL referrerURL = queueEntry.referrerURL(this.indexSegment.metadata());
+        final yacyURL referrerURL = queueEntry.referrerURL(this.indexSegment.urlMetadata());
         final int processCase = queueEntry.processCase();
 
         // remove stopwords                        
@@ -1781,7 +1781,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // STORE URL TO LOADED-URL-DB
         URLMetadataRow newEntry = null;
         try {
-            newEntry = indexSegment.storeDocument(queueEntry, document, condenser);
+            newEntry = indexSegment.storeDocument(
+                    queueEntry.url(),
+                    referrerURL,
+                    queueEntry.getModificationDate(),
+                    queueEntry.size(),
+                    document,
+                    condenser);
             RSSFeed.channels((queueEntry.initiator().equals(peers.mySeed().hash)) ? RSSFeed.LOCALINDEXING : RSSFeed.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
         } catch (final IOException e) {
             if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
@@ -1875,7 +1881,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         if (urlhash == null) return 0;
         // determine the url string
-        final URLMetadataRow entry = indexSegment.metadata().load(urlhash, null, 0);
+        final URLMetadataRow entry = indexSegment.urlMetadata().load(urlhash, null, 0);
         if (entry == null) return 0;
         final URLMetadataRow.Components metadata = entry.metadata();
         if (metadata.url() == null) return 0;
@@ -1891,7 +1897,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             }
             if (resource == null) {
                 // delete just the url entry
-                indexSegment.metadata().remove(urlhash);
+                indexSegment.urlMetadata().remove(urlhash);
                 return 0;
             } else {
                 resourceContent = (InputStream) resource[0];
@@ -1910,10 +1916,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 
                 // delete all word references
                 int count = 0;
-                if (words != null) count = indexSegment.index().remove(Word.words2hashes(words), urlhash);
+                if (words != null) count = indexSegment.termIndex().remove(Word.words2hashes(words), urlhash);
                 
                 // finally delete the url entry itself
-                indexSegment.metadata().remove(urlhash);
+                indexSegment.urlMetadata().remove(urlhash);
                 return count;
             }
         } catch (final ParserException e) {
@@ -2027,11 +2033,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, "false").equalsIgnoreCase("false")) {
             return "no DHT distribution: not enabled (ser setting)";
         }
-        if (indexSegment.metadata().size() < 10) {
-            return "no DHT distribution: loadedURL.size() = " + indexSegment.metadata().size();
+        if (indexSegment.urlMetadata().size() < 10) {
+            return "no DHT distribution: loadedURL.size() = " + indexSegment.urlMetadata().size();
         }
-        if (indexSegment.index().size() < 100) {
-            return "no DHT distribution: not enough words - wordIndex.size() = " + indexSegment.index().size();
+        if (indexSegment.termIndex().size() < 100) {
+            return "no DHT distribution: not enough words - wordIndex.size() = " + indexSegment.termIndex().size();
         }
         if ((getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) && (crawlQueues.noticeURL.notEmptyLocal())) {
             return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + crawler.queuePreStack.size();
@@ -2140,10 +2146,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         peers.mySeed().put(yacySeed.RSPEED, Double.toString(totalQPM /*Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f)*/ ));
         
         peers.mySeed().put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        peers.mySeed().put(yacySeed.LCOUNT, Integer.toString(indexSegment.metadata().size())); // the number of links that the peer has stored (LURL's)
+        peers.mySeed().put(yacySeed.LCOUNT, Integer.toString(indexSegment.urlMetadata().size())); // the number of links that the peer has stored (LURL's)
         peers.mySeed().put(yacySeed.NCOUNT, Integer.toString(crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
         peers.mySeed().put(yacySeed.RCOUNT, Integer.toString(crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
-        peers.mySeed().put(yacySeed.ICOUNT, Integer.toString(indexSegment.index().size())); // the minimum number of words that the peer has indexed (as it says)
+        peers.mySeed().put(yacySeed.ICOUNT, Integer.toString(indexSegment.termIndex().size())); // the minimum number of words that the peer has indexed (as it says)
         peers.mySeed().put(yacySeed.SCOUNT, Integer.toString(peers.sizeConnected())); // the number of seeds that the peer has stored
         peers.mySeed().put(yacySeed.CCOUNT, Double.toString(((int) ((peers.sizeConnected() + peers.sizeDisconnected() + peers.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
         peers.mySeed().put(yacySeed.VERSION, getConfig("version", ""));

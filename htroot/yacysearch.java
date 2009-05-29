@@ -224,7 +224,7 @@ public class yacysearch {
             
             // check available memory and clean up if necessary
             if (!MemoryControl.request(8000000L, false)) {
-                sb.indexSegment.metadata().clearCache();
+                sb.indexSegment.urlMetadata().clearCache();
                 plasmaSearchEvent.cleanupEvents(true);
             }
             
@@ -333,7 +333,7 @@ public class yacysearch {
                 
                 // delete the index entry locally
                 final String delHash = post.get("deleteref", ""); // urlhash
-                sb.indexSegment.index().remove(Word.words2hashes(query[0]), delHash);
+                sb.indexSegment.termIndex().remove(Word.words2hashes(query[0]), delHash);
 
                 // make new news message with negative voting
                 final HashMap<String, String> map = new HashMap<String, String>();
@@ -352,7 +352,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                final URLMetadataRow urlentry = sb.indexSegment.metadata().load(recommendHash, null, 0);
+                final URLMetadataRow urlentry = sb.indexSegment.urlMetadata().load(recommendHash, null, 0);
                 if (urlentry != null) {
                     final URLMetadataRow.Components metadata = urlentry.metadata();
                     plasmaParserDocument document;

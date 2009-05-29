@@ -183,7 +183,7 @@ public class Bookmarks {
                     final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        final URLMetadataRow urlentry = sb.indexSegment.metadata().load(urlHash, null, 0);
+                        final URLMetadataRow urlentry = sb.indexSegment.urlMetadata().load(urlHash, null, 0);
                         plasmaParserDocument document = null;
                         if (urlentry != null) {
                             final URLMetadataRow.Components metadata = urlentry.metadata();

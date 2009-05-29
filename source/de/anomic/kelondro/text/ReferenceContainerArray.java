@@ -44,7 +44,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     private final ReferenceFactory<ReferenceType> factory;
     private final Row payloadrow;
     private final BLOBArray array;
-    private final IODispatcher<ReferenceType> merger;
+    private final IODispatcher merger;
     
     /**
      * open a index container based on a BLOB dump. The content of the BLOB will not be read
@@ -61,7 +61,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     		final ReferenceFactory<ReferenceType> factory,
     		final ByteOrder termOrder,
     		final Row payloadrow,
-    		IODispatcher<ReferenceType> merger) throws IOException {
+    		IODispatcher merger) throws IOException {
         this.factory = factory;
         this.payloadrow = payloadrow;
         this.array = new BLOBArray(
@@ -259,7 +259,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             File[] ff = this.array.unmountBestMatch(2.0, targetFileSize);
             if (ff == null) break;
             Log.logInfo("RICELL-shrink1", "unmountBestMatch(2.0, " + targetFileSize + ")");
-            merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
+            merger.merge(ff[0], ff[1], this.factory, this.array, this.payloadrow, newContainerBLOBFile());
             donesomething = true;
         }
         
@@ -268,7 +268,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             File[] ff = this.array.unmountSmallest(targetFileSize);
             if (ff == null) break;
             Log.logInfo("RICELL-shrink2", "unmountSmallest(" + targetFileSize + ")");
-            merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
+            merger.merge(ff[0], ff[1], this.factory, this.array, this.payloadrow, newContainerBLOBFile());
             donesomething = true;
         }
         
@@ -277,7 +277,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             File[] ff = this.array.unmountBestMatch(2.0, maxFileSize);
             if (ff == null) break;
             Log.logInfo("RICELL-shrink3", "unmountBestMatch(2.0, " + maxFileSize + ")");
-            merger.merge(ff[0], ff[1], this.array, this.payloadrow, newContainerBLOBFile());
+            merger.merge(ff[0], ff[1], this.factory, this.array, this.payloadrow, newContainerBLOBFile());
             donesomething = true;
         }
 

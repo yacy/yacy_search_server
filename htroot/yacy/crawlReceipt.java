@@ -136,7 +136,7 @@ public final class crawlReceipt {
         
         if (result.equals("fill")) try {
             // put new entry into database
-            sb.indexSegment.metadata().store(entry);
+            sb.indexSegment.urlMetadata().store(entry);
             sb.crawlResults.stack(entry, youare, iam, 1);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
             log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + entry.hash() + ":" + metadata.url().toNormalform(false, true));

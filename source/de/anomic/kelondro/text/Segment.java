@@ -34,13 +34,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
-import de.anomic.crawler.IndexingStack;
 import de.anomic.data.Blacklist;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.kelondro.text.navigationPrototype.NavigationReference;
+import de.anomic.kelondro.text.navigationPrototype.NavigationReferenceFactory;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceFactory;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
@@ -63,13 +64,15 @@ public final class Segment {
     
     // the reference factory
     public static final ReferenceFactory<WordReference> wordReferenceFactory = new WordReferenceFactory();
+    public static final ReferenceFactory<NavigationReference> navigationReferenceFactory = new NavigationReferenceFactory();
     public static final ByteOrder wordOrder = Base64Order.enhancedCoder;
     
-    private final IndexCell<WordReference>    index;
-    private final Log                         log;
-    private final MetadataRepository          metadata;
-    private final File                        segmentPath;
-    private final IODispatcher<WordReference> merger;
+    private final Log                            log;
+    private final IndexCell<WordReference>       termIndex;
+    //private final IndexCell<NavigationReference> authorNavIndex;
+    private final MetadataRepository             urlMetadata;
+    private final File                           segmentPath;
+    private final IODispatcher                   merger;
     
     public Segment(
             final Log log,
@@ -82,38 +85,49 @@ public final class Segment {
         this.log = log;
         this.segmentPath = segmentPath;
         
-        this.merger = new IODispatcher<WordReference>(wordReferenceFactory, 1, 1, writeBufferSize);
+        this.merger = new IODispatcher(1, 1, writeBufferSize);
         this.merger.start();
-        this.index = new IndexCell<WordReference>(
-                                new File(segmentPath, "RICELL"),
-                                wordReferenceFactory,
-                                wordOrder,
-                                WordReferenceRow.urlEntryRow,
-                                entityCacheMaxSize,
-                                targetFileSize,
-                                maxFileSize,
-                                this.merger,
-                                writeBufferSize);
-            
+        this.termIndex = new IndexCell<WordReference>(
+                new File(segmentPath, "RICELL"),
+                wordReferenceFactory,
+                wordOrder,
+                WordReferenceRow.urlEntryRow,
+                entityCacheMaxSize,
+                targetFileSize,
+                maxFileSize,
+                this.merger,
+                writeBufferSize);
+        /*
+        this.authorNavIndex = new IndexCell<NavigationReference>(
+                new File(segmentPath, "AUTHORNAV"),
+                navigationReferenceFactory,
+                wordOrder,
+                NavigationReferenceRow.navEntryRow,
+                entityCacheMaxSize,
+                targetFileSize,
+                maxFileSize,
+                this.merger,
+                writeBufferSize);
+        */
         File metadatadir = new File(segmentPath, "METADATA");
         if (!metadatadir.exists()) metadatadir.mkdirs();
         
         // create LURL-db
-        metadata = new MetadataRepository(metadatadir);
+        urlMetadata = new MetadataRepository(metadatadir);
     }
     
-    public MetadataRepository metadata() {
-        return this.metadata;
+    public MetadataRepository urlMetadata() {
+        return this.urlMetadata;
     }
 
-    public IndexCell<WordReference> index() {
-        return this.index;
+    public IndexCell<WordReference> termIndex() {
+        return this.termIndex;
     }
     
     public void clear() {
         try {
-            index.clear();
-            metadata.clear();
+            termIndex.clear();
+            urlMetadata.clear();
         } catch (final IOException e) {
             e.printStackTrace();
         }
@@ -138,7 +152,7 @@ public final class Segment {
      * @param outlinksOther
      * @return
      */
-    public int addPageIndex(final yacyURL url, final Date urlModified, final plasmaParserDocument document, final Condenser condenser, final String language, final char doctype, final int outlinksSame, final int outlinksOther) {
+    private int addPageIndex(final yacyURL url, final Date urlModified, final plasmaParserDocument document, final Condenser condenser, final String language, final char doctype, final int outlinksSame, final int outlinksOther) {
         int wordCount = 0;
         final int urlLength = url.toNormalform(true, true).length();
         final int urlComps = htmlFilterContentScraper.urlComps(url.toString()).length;
@@ -165,7 +179,7 @@ public final class Segment {
             assert (wprop.flags != null);
             ientry.setWord(wprop);
             try {
-                this.index.add(Word.word2hash(word), ientry);
+                this.termIndex.add(Word.word2hash(word), ientry);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -177,39 +191,44 @@ public final class Segment {
 
     public void close() {
         if (this.merger != null) this.merger.terminate();
-        index.close();
-        metadata.close();
+        termIndex.close();
+        urlMetadata.close();
     }
 
-    public URLMetadataRow storeDocument(final IndexingStack.QueueEntry entry, final plasmaParserDocument document, final Condenser condenser) throws IOException {
+    public URLMetadataRow storeDocument(
+            final yacyURL url,
+            final yacyURL referrerURL,
+            final Date docDate,
+            final long sourcesize,
+            final plasmaParserDocument document,
+            final Condenser condenser
+            ) throws IOException {
         final long startTime = System.currentTimeMillis();
 
         // CREATE INDEX
         
         // load some document metadata
         final String dc_title = document.dc_title();
-        final yacyURL referrerURL = entry.referrerURL(this.metadata);
-        final Date docDate = entry.getModificationDate();
         
         // do a identification of the language
         String language = condenser.language(); // this is a statistical analysation of the content: will be compared with other attributes
         String bymetadata = document.dc_language(); // the languageByMetadata may return null if there was no declaration
         if (language == null) {
             // no statistics available, we take either the metadata (if given) or the TLD
-            language = (bymetadata == null) ? entry.url().language() : bymetadata;
-            System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " FAILED, taking " + ((bymetadata == null) ? "TLD" : "metadata") + ": " + language);
+            language = (bymetadata == null) ? url.language() : bymetadata;
+            System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + url + " FAILED, taking " + ((bymetadata == null) ? "TLD" : "metadata") + ": " + language);
         } else {
             if (bymetadata == null) {
                 // two possible results: compare and report conflicts
-                if (language.equals(entry.url().language()))
-                    System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFIRMED - TLD IDENTICAL: " + language);
+                if (language.equals(url.language()))
+                    System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + url + " CONFIRMED - TLD IDENTICAL: " + language);
                 else {
-                    String error = "*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFLICTING: " + language + " (the language given by the TLD is " + entry.url().language() + ")";
+                    String error = "*** DEBUG LANGUAGE-BY-STATISTICS: " + url + " CONFLICTING: " + language + " (the language given by the TLD is " + url.language() + ")";
                     // see if we have a hint in the url that the statistic was right
-                    String u = entry.url().toNormalform(true, false).toLowerCase();
+                    String u = url.toNormalform(true, false).toLowerCase();
                     if (!u.contains("/" + language + "/") && !u.contains("/" + iso639.country(language).toLowerCase() + "/")) {
                         // no confirmation using the url, use the TLD
-                        language = entry.url().language();
+                        language = url.language();
                         System.out.println(error + ", corrected using the TLD");
                     } else {
                         // this is a strong hint that the statistics was in fact correct
@@ -220,9 +239,9 @@ public final class Segment {
                 // here we have three results: we can do a voting
                 if (language.equals(bymetadata)) {
                     //System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFIRMED - METADATA IDENTICAL: " + language);
-                } else if (language.equals(entry.url().language())) {
+                } else if (language.equals(url.language())) {
                     //System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFIRMED - TLD IS IDENTICAL: " + language);
-                } else if (bymetadata.equals(entry.url().language())) {
+                } else if (bymetadata.equals(url.language())) {
                     //System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFLICTING: " + language + " BUT METADATA AND TLD ARE IDENTICAL: " + bymetadata + ")");
                     language = bymetadata;
                 } else {
@@ -235,7 +254,7 @@ public final class Segment {
         // create a new loaded URL db entry
         final long ldate = System.currentTimeMillis();
         final URLMetadataRow newEntry = new URLMetadataRow(
-                entry.url(),                               // URL
+                url,                                       // URL
                 dc_title,                                  // document description
                 document.dc_creator(),                     // author
                 document.dc_subject(' '),                  // tags
@@ -245,7 +264,7 @@ public final class Segment {
                 new Date(ldate + Math.max(0, ldate - docDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula 
                 (referrerURL == null) ? null : referrerURL.hash(),            // referer hash
                 new byte[0],                               // md5
-                (int) entry.size(),                        // size
+                (int) sourcesize,                          // size
                 condenser.RESULT_NUMB_WORDS,               // word count
                 httpdProxyCacheEntry.docType(document.dc_format()), // doctype
                 condenser.RESULT_FLAGS,                    // flags
@@ -259,13 +278,13 @@ public final class Segment {
         );
         
         // STORE URL TO LOADED-URL-DB
-        metadata.store(newEntry); // TODO: should be serialized; integrated in IODispatcher
+        urlMetadata.store(newEntry); // TODO: should be serialized; integrated in IODispatcher
         
         final long storageEndTime = System.currentTimeMillis();
         
         // STORE PAGE INDEX INTO WORD INDEX DB
         final int words = addPageIndex(
-                entry.url(),                                  // document url
+                url,                                          // document url
                 docDate,                                      // document mod date
                 document,                                     // document content
                 condenser,                                    // document condenser
@@ -280,8 +299,8 @@ public final class Segment {
         if (log.isInfo()) {
             // TODO: UTF-8 docDescription seems not to be displayed correctly because
             // of string concatenation
-            log.logInfo("*Indexed " + words + " words in URL " + entry.url() +
-                    " [" + entry.urlHash() + "]" +
+            log.logInfo("*Indexed " + words + " words in URL " + url +
+                    " [" + url.hash() + "]" +
                     "\n\tDescription:  " + dc_title +
                     "\n\tMimeType: "  + document.dc_format() + " | Charset: " + document.getCharset() + " | " +
                     "Size: " + document.getTextLength() + " bytes | " +
@@ -311,7 +330,7 @@ public final class Segment {
         
         public ReferenceCleaner(final byte[] startHash) {
             this.startHash = startHash;
-            this.rwiCountAtStart = index().size();
+            this.rwiCountAtStart = termIndex().size();
         }
         
         public void run() {
@@ -321,7 +340,7 @@ public final class Segment {
             yacyURL url = null;
             final HashSet<String> urlHashs = new HashSet<String>();
             try {
-                Iterator<ReferenceContainer<WordReference>> indexContainerIterator = index.references(startHash, false, 100, false).iterator();
+                Iterator<ReferenceContainer<WordReference>> indexContainerIterator = termIndex.references(startHash, false, 100, false).iterator();
                 while (indexContainerIterator.hasNext() && run) {
                     waiter();
                     container = indexContainerIterator.next();
@@ -332,7 +351,7 @@ public final class Segment {
                         entry = containerIterator.next();
                         // System.out.println("Wordhash: "+wordHash+" UrlHash:
                         // "+entry.getUrlHash());
-                        final URLMetadataRow ue = metadata.load(entry.metadataHash(), entry, 0);
+                        final URLMetadataRow ue = urlMetadata.load(entry.metadataHash(), entry, 0);
                         if (ue == null) {
                             urlHashs.add(entry.metadataHash());
                         } else {
@@ -343,7 +362,7 @@ public final class Segment {
                         }
                     }
                     if (urlHashs.size() > 0) try {
-                        final int removed = index.remove(container.getTermHash(), urlHashs);
+                        final int removed = termIndex.remove(container.getTermHash(), urlHashs);
                         Log.logFine("INDEXCLEANER", container.getTermHashAsString() + ": " + removed + " of " + container.size() + " URL-entries deleted");
                         lastWordHash = container.getTermHash();
                         lastDeletionCounter = urlHashs.size();
@@ -354,7 +373,7 @@ public final class Segment {
                     
                     if (!containerIterator.hasNext()) {
                         // We may not be finished yet, try to get the next chunk of wordHashes
-                        final TreeSet<ReferenceContainer<WordReference>> containers = index.references(container.getTermHash(), false, 100, false);
+                        final TreeSet<ReferenceContainer<WordReference>> containers = termIndex.references(container.getTermHash(), false, 100, false);
                         indexContainerIterator = containers.iterator();
                         // Make sure we don't get the same wordhash twice, but don't skip a word
                         if ((indexContainerIterator.hasNext()) && (!container.getTermHash().equals(indexContainerIterator.next().getTermHash()))) {

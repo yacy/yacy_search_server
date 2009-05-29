@@ -63,5 +63,4 @@ public abstract class AbstractBufferedIndex<ReferenceType extends Reference> ext
         }
         return containers; // this may return less containers as demanded
     }
-    
 }

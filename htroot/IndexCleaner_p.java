@@ -43,7 +43,7 @@ public class IndexCleaner_p {
             //prop.putHTML("bla", "post!=null");
             if (post.get("action").equals("ustart")) {
                 if (urldbCleanerThread==null || !urldbCleanerThread.isAlive()) {
-                    urldbCleanerThread = sb.indexSegment.metadata().getBlacklistCleaner(plasmaSwitchboard.urlBlacklist);
+                    urldbCleanerThread = sb.indexSegment.urlMetadata().getBlacklistCleaner(plasmaSwitchboard.urlBlacklist);
                     urldbCleanerThread.start();
                 }
                 else {
@@ -77,7 +77,7 @@ public class IndexCleaner_p {
         //prop.put("bla", "post==null");
         if (urldbCleanerThread!=null) {
             prop.put("urldb", "1");
-            prop.putNum("urldb_percentUrls", ((double)urldbCleanerThread.totalSearchedUrls/sb.indexSegment.metadata().size())*100);
+            prop.putNum("urldb_percentUrls", ((double)urldbCleanerThread.totalSearchedUrls/sb.indexSegment.urlMetadata().size())*100);
             prop.putNum("urldb_blacklisted", urldbCleanerThread.blacklistedUrls);
             prop.putNum("urldb_total", urldbCleanerThread.totalSearchedUrls);
             prop.putHTML("urldb_lastBlacklistedUrl", urldbCleanerThread.lastBlacklistedUrl);
@@ -94,7 +94,7 @@ public class IndexCleaner_p {
             prop.put("rwidb_threadAlive", indexCleanerThread.isAlive() + "");
             prop.put("rwidb_threadToString", indexCleanerThread.toString());
             prop.putNum("rwidb_RWIcountstart", indexCleanerThread.rwiCountAtStart);
-            prop.putNum("rwidb_RWIcountnow", sb.indexSegment.index().size());
+            prop.putNum("rwidb_RWIcountnow", sb.indexSegment.termIndex().size());
             prop.put("rwidb_wordHashNow", (indexCleanerThread.wordHashNow == null) ? "NULL" : new String(indexCleanerThread.wordHashNow));
             prop.put("rwidb_lastWordHash", (indexCleanerThread.lastWordHash == null) ? "null" : new String(indexCleanerThread.lastWordHash));
             prop.putNum("rwidb_lastDeletionCounter", indexCleanerThread.lastDeletionCounter);

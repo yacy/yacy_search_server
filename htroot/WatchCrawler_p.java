@@ -209,7 +209,7 @@ public class WatchCrawler_p {
                             // first delete old entry, if exists
                             final yacyURL url = new yacyURL(crawlingStart, null);
                             final String urlhash = url.hash();
-                            sb.indexSegment.metadata().remove(urlhash);
+                            sb.indexSegment.urlMetadata().remove(urlhash);
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             sb.crawlQueues.errorURL.remove(urlhash);
                             

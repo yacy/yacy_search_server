@@ -54,15 +54,6 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         return c;
     }
     
-    public void remove(final TreeSet<byte[]> termHashes, final Set<String> urlHashes) throws IOException {
-        // remove the same url hashes for multiple words
-        // this is mainly used when correcting a index after a search
-        final Iterator<byte[]> i = termHashes.iterator();
-        while (i.hasNext()) {
-            remove(i.next(), urlHashes);
-        }
-    }
-    
     public synchronized TreeSet<ReferenceContainer<ReferenceType>> references(final byte[] startHash, final boolean rot, int count) throws IOException {
         // creates a set of indexContainers
         // this does not use the cache
@@ -151,4 +142,20 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
 		return new HashMap[]{inclusionContainers, exclusionContainers};
     }
     
+    public ReferenceContainer<ReferenceType> query(
+            final TreeSet<byte[]> queryHashes,
+            final TreeSet<byte[]> excludeHashes,
+            final Set<String> urlselection,
+            ReferenceFactory<ReferenceType> termFactory,
+            int maxDistance) {
+            
+        HashMap<byte[], ReferenceContainer<ReferenceType>>[] containerMaps = searchTerm(queryHashes, excludeHashes, urlselection);
+            
+        // join and exclude the result
+        return ReferenceContainer.joinExcludeContainers(
+                termFactory,
+                containerMaps[0].values(),
+                containerMaps[1].values(),
+                maxDistance);        
+    }
 }

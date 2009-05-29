@@ -260,7 +260,7 @@ public class SitemapParser extends DefaultHandler {
                 final String dbocc = this.sb.urlExists(nexturlhash);
                 if ((dbocc != null) && (dbocc.equalsIgnoreCase("loaded"))) {
                     // the url was already loaded. we need to check the date
-                    final URLMetadataRow oldEntry = this.sb.indexSegment.metadata().load(nexturlhash, null, 0);
+                    final URLMetadataRow oldEntry = this.sb.indexSegment.urlMetadata().load(nexturlhash, null, 0);
                     if (oldEntry != null) {
                         final Date modDate = oldEntry.moddate();
                         // check if modDate is null

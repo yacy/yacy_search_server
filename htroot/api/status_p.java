@@ -24,7 +24,7 @@ public class status_p {
         final int cacheMaxSize = (int) sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 10000);
         prop.putNum("ppm", sb.currentPPM());
         prop.putNum("qpm", sb.peers.mySeed().getQPM());
-        prop.put("wordCacheSize", Integer.toString(sb.indexSegment.index().getBufferSize()));
+        prop.put("wordCacheSize", Integer.toString(sb.indexSegment.termIndex().getBufferSize()));
         prop.put("wordCacheMaxSize", Integer.toString(cacheMaxSize));
 		//
 		// memory usage and system attributes

@@ -260,7 +260,11 @@ public final class plasmaSearchEvent {
                     final TreeSet<byte[]> removeWords = cleanEvent.query.queryHashes;
                     removeWords.addAll(cleanEvent.query.excludeHashes);
                     try {
-                        cleanEvent.indexSegment.index().remove(removeWords, cleanEvent.failedURLs.keySet());
+                        final Iterator<byte[]> j = removeWords.iterator();
+                        // remove the same url hashes for multiple words
+                        while (j.hasNext()) {
+                            cleanEvent.indexSegment.termIndex().remove(j.next(), cleanEvent.failedURLs.keySet());
+                        }                    
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -316,7 +320,7 @@ public final class plasmaSearchEvent {
             (query.constraint.get(Condenser.flag_cat_indexof)) &&
             (!(metadata.dc_title().startsWith("Index of")))) {
             final Iterator<byte[]> wi = query.queryHashes.iterator();
-            while (wi.hasNext()) try { indexSegment.index().remove(wi.next(), page.hash()); } catch (IOException e) {}
+            while (wi.hasNext()) try { indexSegment.termIndex().remove(wi.next(), page.hash()); } catch (IOException e) {}
             registerFailure(page.hash(), "index-of constraint not fullfilled");
             return null;
         }
@@ -816,7 +820,7 @@ public final class plasmaSearchEvent {
                 if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
                     // seed is not known from here
                     try {
-                        indexSegment.index().remove(
+                        indexSegment.termIndex().remove(
                             Word.words2hashes(Condenser.getWords(
                                 ("yacyshare " +
                                  filename.replace('?', ' ') +
@@ -826,7 +830,7 @@ public final class plasmaSearchEvent {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    indexSegment.metadata().remove(urlentry.hash()); // clean up
+                    indexSegment.urlMetadata().remove(urlentry.hash()); // clean up
                     throw new RuntimeException("index void");
                 }
                 alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + filename;

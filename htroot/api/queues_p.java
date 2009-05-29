@@ -41,8 +41,8 @@ public class queues_p {
         //indexing queue
         prop.putNum("indexingSize", sb.getThread(plasmaSwitchboardConstants.INDEXER).getJobCount() + sb.crawler.queuePreStack.getActiveQueueSize());
         prop.putNum("indexingMax", (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30));
-        prop.putNum("urlpublictextSize", sb.indexSegment.metadata().size());
-        prop.putNum("rwipublictextSize", sb.indexSegment.index().size());
+        prop.putNum("urlpublictextSize", sb.indexSegment.urlMetadata().size());
+        prop.putNum("rwipublictextSize", sb.indexSegment.termIndex().size());
         if ((sb.crawler.queuePreStack.size() == 0) && (sb.crawler.queuePreStack.getActiveQueueSize() == 0)) {
             prop.put("list", "0"); //is empty
         } else {
@@ -84,7 +84,7 @@ public class queues_p {
                     prop.putXML("list-indexing_"+i+"_url", pcentry.url().toNormalform(false, true));
                     prop.putNum("list-indexing_"+i+"_size", entrySize);
                     prop.put("list-indexing_"+i+"_inProcess", (inProcess) ? "1" : "0");
-                    prop.put("list-indexing_"+i+"_hash", pcentry.urlHash());
+                    prop.put("list-indexing_"+i+"_hash", pcentry.url().hash());
                     ok++;
                 }
             }

@@ -56,7 +56,10 @@ public class IndexingStack {
     private final yacySeedDB peers;
     private final ConcurrentHashMap<String, QueueEntry> queueInProcess;
     
-    public IndexingStack(final yacySeedDB peers, final File sbQueueStackPath, final CrawlProfile profiles) {
+    public IndexingStack(
+            final yacySeedDB peers,
+            final File sbQueueStackPath,
+            final CrawlProfile profiles) {
         this.profiles = profiles;
         this.peers = peers;
         this.queueInProcess = new ConcurrentHashMap<String, QueueEntry>();
@@ -131,7 +134,7 @@ public class IndexingStack {
         while (i.hasNext()) {
             rowentry = i.next();
             entry = new QueueEntry(rowentry);
-            if (entry.urlHash().equals(urlHash)) {
+            if (entry.url().hash().equals(urlHash)) {
                 i.remove();
                 return entry;
             }
@@ -191,7 +194,7 @@ public class IndexingStack {
     }
     
     public void enQueueToActive(final QueueEntry entry) {
-        queueInProcess.put(entry.urlHash(), entry);
+        queueInProcess.put(entry.url().hash(), entry);
     }
     
     public QueueEntry getActiveEntry(final String urlhash) {
@@ -306,10 +309,6 @@ public class IndexingStack {
         
         public yacyURL url() {
             return url;
-        }
-
-        public String urlHash() {
-            return url.hash();
         }
 
         public boolean requestedWithCookie() {

@@ -191,7 +191,7 @@ public class urlRedirectord implements serverHandler, Cloneable {
                         ) {
                             // first delete old entry, if exists
                             final String urlhash = reqURL.hash();
-                            sb.indexSegment.metadata().remove(urlhash);
+                            sb.indexSegment.urlMetadata().remove(urlhash);
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             sb.crawlQueues.errorURL.remove(urlhash);                            
                             

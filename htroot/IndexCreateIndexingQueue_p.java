@@ -125,7 +125,7 @@ public class IndexCreateIndexingQueue_p {
                     prop.putHTML("indexing-queue_list_"+entryCount+"_url", pcentry.url().toNormalform(false, true));
                     prop.put("indexing-queue_list_"+entryCount+"_size", Formatter.bytesToString(entrySize));
                     prop.put("indexing-queue_list_"+entryCount+"_inProcess", inProcess ? "1" :"0");
-                    prop.put("indexing-queue_list_"+entryCount+"_inProcess_hash", pcentry.urlHash());
+                    prop.put("indexing-queue_list_"+entryCount+"_inProcess_hash", pcentry.url().hash());
                     dark = !dark;
                     entryCount++;
                 }

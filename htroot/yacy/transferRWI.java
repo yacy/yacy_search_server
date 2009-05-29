@@ -111,9 +111,9 @@ public final class transferRWI {
             sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Not granted. This peer is in robinson mode");
             result = "not_granted";
             pause = 60000;
-        } else if (sb.indexSegment.index().getBufferSize() > cachelimit) {
+        } else if (sb.indexSegment.termIndex().getBufferSize() > cachelimit) {
             // we are too busy to receive indexes
-            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.indexSegment.index().getBufferSize() + ").");
+            sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". We are too busy (buffersize=" + sb.indexSegment.termIndex().getBufferSize() + ").");
             granted = false; // don't accept more words if there are too many words to flush
             result = "busy";
             pause = 60000;
@@ -183,7 +183,7 @@ public final class transferRWI {
                 
                 // learn entry
                 try {
-                    sb.indexSegment.index().add(wordHash.getBytes(), iEntry);
+                    sb.indexSegment.termIndex().add(wordHash.getBytes(), iEntry);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -191,7 +191,7 @@ public final class transferRWI {
 
                 // check if we need to ask for the corresponding URL
                 if (!(knownURL.contains(urlHash)||unknownURL.contains(urlHash)))  try {
-                    if (sb.indexSegment.metadata().exists(urlHash)) {
+                    if (sb.indexSegment.urlMetadata().exists(urlHash)) {
                         knownURL.add(urlHash);
                     } else {
                         unknownURL.add(urlHash);
@@ -222,7 +222,7 @@ public final class transferRWI {
             }
             result = "ok";
             
-            pause = (int) (sb.indexSegment.index().getBufferSize() * 20000 / sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 100000)); // estimation of necessary pause time
+            pause = (int) (sb.indexSegment.termIndex().getBufferSize() * 20000 / sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 100000)); // estimation of necessary pause time
         }
 
         prop.put("unknownURL", unknownURLs.toString());

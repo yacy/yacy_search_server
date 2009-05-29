@@ -81,7 +81,7 @@ public final class transferURL {
         } else {
             int received = 0;
             int blocked = 0;
-            final int sizeBefore = sb.indexSegment.metadata().size();
+            final int sizeBefore = sb.indexSegment.urlMetadata().size();
             // read the urls from the other properties and store
             String urls;
             URLMetadataRow lEntry;
@@ -138,7 +138,7 @@ public final class transferURL {
                 
                 // write entry to database
                 try {
-                    sb.indexSegment.metadata().store(lEntry);
+                    sb.indexSegment.urlMetadata().store(lEntry);
                     sb.crawlResults.stack(lEntry, iam, iam, 3);
                     if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: received URL '" + metadata.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     received++;
@@ -150,7 +150,7 @@ public final class transferURL {
             sb.peers.mySeed().incRU(received);
 
             // return rewrite properties
-            final int more = sb.indexSegment.metadata().size() - sizeBefore;
+            final int more = sb.indexSegment.urlMetadata().size() - sizeBefore;
             doublevalues = Integer.toString(received - more);
             sb.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " URLs");
             RSSFeed.channels(RSSFeed.INDEXRECEIVE).addMessage(new RSSMessage("Received " + received + " URLs from peer " + otherPeerName + ", blocked " + blocked, "", ""));

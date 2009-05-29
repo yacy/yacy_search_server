@@ -29,6 +29,7 @@
 // if the shell's current path is htroot/yacy
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -209,11 +210,12 @@ public final class search {
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
             final long timer = System.currentTimeMillis();
-            final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
-
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.COLLECTION, containers[0].size(), System.currentTimeMillis() - timer), false);
-            if (containers != null) {
-                final Iterator<Map.Entry<byte[], ReferenceContainer<WordReference>>> ci = containers[0].entrySet().iterator();
+            //final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
+            final HashMap<byte[], ReferenceContainer<WordReference>> incc = sb.indexSegment.termIndex().searchConjunction(theQuery.queryHashes, plasmaSearchQuery.hashes2StringSet(urls));
+            
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.COLLECTION, incc.size(), System.currentTimeMillis() - timer), false);
+            if (incc != null) {
+                final Iterator<Map.Entry<byte[], ReferenceContainer<WordReference>>> ci = incc.entrySet().iterator();
                 Map.Entry<byte[], ReferenceContainer<WordReference>> entry;
                 byte[] wordhash;
                 while (ci.hasNext()) {

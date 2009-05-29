@@ -560,7 +560,7 @@ public class BLOBArray implements BLOB {
         blobs = null;
     }
     
-    public File mergeMount(File f1, File f2, ReferenceFactory<?> factory, Row payloadrow, File newFile, int writeBuffer) throws IOException {
+    public File mergeMount(File f1, File f2, ReferenceFactory<? extends Reference> factory, Row payloadrow, File newFile, int writeBuffer) throws IOException {
         Log.logInfo("BLOBArray", "merging " + f1.getName() + " with " + f2.getName());
         File resultFile = mergeWorker(factory, this.keylength, this.ordering, f1, f2, payloadrow, newFile, writeBuffer);
         if (resultFile == null) return null;

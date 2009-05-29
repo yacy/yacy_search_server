@@ -120,16 +120,11 @@ public final class plasmaSearchRankingProcess {
     public void execQuery() {
         
         long timer = System.currentTimeMillis();
-        this.localSearchContainerMaps = indexSegment.index().searchTerm(query.queryHashes, query.excludeHashes, null);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.COLLECTION, this.localSearchContainerMaps[0].size(), System.currentTimeMillis() - timer), false);
-        
-        // join and exclude the local result
-        timer = System.currentTimeMillis();
-        final ReferenceContainer<WordReference> index =
-            ReferenceContainer.joinExcludeContainers(
+        final ReferenceContainer<WordReference> index = this.indexSegment.termIndex().query(
+                query.queryHashes,
+                query.excludeHashes,
+                null,
                 Segment.wordReferenceFactory,
-                this.localSearchContainerMaps[0].values(),
-                this.localSearchContainerMaps[1].values(),
                 query.maxDistance);
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
         if (index.size() == 0) {
@@ -274,7 +269,7 @@ public final class plasmaSearchRankingProcess {
     	URLMetadataRow mr;
     	yacyURL url;
     	for (int i = 0; i < rc; i++) {
-    		mr = indexSegment.metadata().load(hsa[i].hashsample, null, 0);
+    		mr = indexSegment.urlMetadata().load(hsa[i].hashsample, null, 0);
     		if (mr == null) continue;
     		url = mr.metadata().url();
     		if (url == null) continue;
@@ -364,7 +359,7 @@ public final class plasmaSearchRankingProcess {
                 if (((stack.size() == 0) && (size() == 0))) break;
                 final SortStack<WordReferenceVars>.stackElement obrwi = bestRWI(skipDoubleDom);
                 if (obrwi == null) continue; // *** ? this happened and the thread was suspended silently. cause?
-                final URLMetadataRow u = indexSegment.metadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
+                final URLMetadataRow u = indexSegment.urlMetadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
                 if (u != null) {
                     final URLMetadataRow.Components metadata = u.metadata();
                     if (metadata.url() != null) {

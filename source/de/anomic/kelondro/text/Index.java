@@ -110,11 +110,8 @@ public interface Index <ReferenceType extends Reference> {
      * @throws IOException
      */
     public int remove(final byte[] termHash, Set<String> referenceHashes) throws IOException;
-    
     public int remove(final TreeSet<byte[]> termHashes, final String urlHash) throws IOException;
     
-    public void remove(final TreeSet<byte[]> termHashes, final Set<String> urlHashes) throws IOException;
-
     /**
      * iterate all references from the beginning of a specific word hash
      * @param startHash

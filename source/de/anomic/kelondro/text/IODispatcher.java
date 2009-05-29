@@ -46,21 +46,20 @@ import de.anomic.kelondro.util.MemoryControl;
  * of merging with a call to the start() - method. To shut down all mergings, call terminate()
  * only once.
  */
-public class IODispatcher <ReferenceType extends Reference> extends Thread {
+public class IODispatcher extends Thread {
 
     private Semaphore                    controlQueue;
     private Semaphore                    termination;
     private ArrayBlockingQueue<MergeJob> mergeQueue;
-    private ArrayBlockingQueue<DumpJob>  dumpQueue;
-    private ReferenceFactory<ReferenceType> factory;
+    private ArrayBlockingQueue<DumpJob<? extends Reference>> dumpQueue;
+    //private ReferenceFactory<ReferenceType> factory;
     private boolean                      terminate;
     private int                          writeBufferSize;
     
-    public IODispatcher(ReferenceFactory<ReferenceType> factory, int dumpQueueLength, int mergeQueueLength, int writeBufferSize) {
-        this.factory = factory;
+    public IODispatcher(int dumpQueueLength, int mergeQueueLength, int writeBufferSize) {
         this.termination = new Semaphore(0);
         this.controlQueue = new Semaphore(0);
-        this.dumpQueue = new ArrayBlockingQueue<DumpJob>(dumpQueueLength);
+        this.dumpQueue = new ArrayBlockingQueue<DumpJob<? extends Reference>>(dumpQueueLength);
         this.mergeQueue = new ArrayBlockingQueue<MergeJob>(mergeQueueLength);
         this.writeBufferSize = writeBufferSize;
         this.terminate = false;
@@ -79,12 +78,12 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
         }
     }
     
-    public synchronized void dump(ReferenceContainerCache<ReferenceType> cache, File file, ReferenceContainerArray<ReferenceType> array) {
+    public synchronized void dump(ReferenceContainerCache<? extends Reference> cache, File file, ReferenceContainerArray<? extends Reference> array) {
         if (dumpQueue == null || controlQueue == null || !this.isAlive()) {
             Log.logWarning("IODispatcher", "emergency dump of file " + file.getName());
             cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
         } else {
-            DumpJob job = new DumpJob(cache, file, array);
+            DumpJob<? extends Reference> job = new DumpJob(cache, file, array);
             try {
                 this.dumpQueue.put(job);
                 this.controlQueue.release();
@@ -100,7 +99,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
         return (controlQueue == null || !this.isAlive()) ? 0 : controlQueue.availablePermits();
     }
     
-    public synchronized void merge(File f1, File f2, BLOBArray array, Row payloadrow, File newFile) {
+    public synchronized void merge(File f1, File f2, ReferenceFactory<? extends Reference> factory, BLOBArray array, Row payloadrow, File newFile) {
         if (mergeQueue == null || controlQueue == null || !this.isAlive()) {
             try {
                 Log.logWarning("IODispatcher", "emergency merge of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
@@ -109,7 +108,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
                 e.printStackTrace();
             }
         } else {
-            MergeJob job = new MergeJob(f1, f2, array, payloadrow, newFile);
+            MergeJob job = new MergeJob(f1, f2, factory, array, payloadrow, newFile);
             try {
                 this.mergeQueue.put(job);
                 this.controlQueue.release();
@@ -127,7 +126,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
     
     public void run() {
         MergeJob mergeJob;
-        DumpJob dumpJob;
+        DumpJob<? extends Reference> dumpJob;
         try {
             loop: while (true) {
                 controlQueue.acquire();
@@ -193,7 +192,7 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
         }
     }
     
-    public class DumpJob {
+    public class DumpJob <ReferenceType extends Reference> {
         ReferenceContainerCache<ReferenceType> cache;
         File file;
         ReferenceContainerArray<ReferenceType> array;
@@ -217,10 +216,18 @@ public class IODispatcher <ReferenceType extends Reference> extends Thread {
         File f1, f2, newFile;
         BLOBArray array;
         Row payloadrow;
+        ReferenceFactory<? extends Reference> factory;
         
-        public MergeJob(File f1, File f2, BLOBArray array, Row payloadrow, File newFile) {
+        public MergeJob(
+                File f1,
+                File f2,
+                ReferenceFactory<? extends Reference> factory,
+                BLOBArray array,
+                Row payloadrow,
+                File newFile) {
             this.f1 = f1;
             this.f2 = f2;
+            this.factory = factory;
             this.newFile = newFile;
             this.array = array;
             this.payloadrow = payloadrow;
