@@ -119,7 +119,7 @@ document.getElementById("Enter").value = "search again";
 <script type="text/javascript">
 var progressbar = new Progressbar(#[results]#, document.getElementById("results"));
 </script>
-<div style="float:left; width:80%;">
+<div style="float:left; width:70%;">
 <!-- linklist begin -->
 #(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</tr>#(/resultTable)#
 #{results}#
@@ -133,7 +133,7 @@ var progressbar = new Progressbar(#[results]#, document.getElementById("results"
 
 #(navigation)#
 ::
-<div id="sidebar" style="float: right; width: 200px; margin-top:5px;">
+<div id="sidebar" style="position:fixed; right:8px; margin-top:5px; width: 220px;">
  <h3><a href="#">Navigation</a></h3>
  <div>
 First attempt to add 'real' Navigation to yacy search results:<br />
