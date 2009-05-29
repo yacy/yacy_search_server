@@ -77,7 +77,7 @@ public final class plasmaSearchRankingProcess {
     private final Segment indexSegment;
     private HashMap<byte[], ReferenceContainer<WordReference>>[] localSearchContainerMaps;
     private final int[] domZones;
-    private HashMap<String, hoststat> hostNavigator;
+    private ConcurrentHashMap<String, hoststat> hostNavigator;
     
     public plasmaSearchRankingProcess(
             final Segment indexSegment,
@@ -105,7 +105,7 @@ public final class plasmaSearchRankingProcess {
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
         this.domZones = new int[8];
-        this.hostNavigator = new HashMap<String, hoststat>();
+        this.hostNavigator = new ConcurrentHashMap<String, hoststat>();
         for (int i = 0; i < 8; i++) {this.domZones[i] = 0;}
     }
     
