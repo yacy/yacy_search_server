@@ -46,6 +46,7 @@ public class ContentIntegrationPHPBB3_p {
             String dbhost = post.get("content.phpbb3.dbhost", "");
             int    dbport = post.getInt("content.phpbb3.dbport", 3306);
             String dbname = post.get("content.phpbb3.dbname", "");
+            String prefix = post.get("content.phpbb3.tableprefix", "");
             String dbuser = post.get("content.phpbb3.dbuser", "");
             String dbpw = post.get("content.phpbb3.dbpw", "");
             int    ppf = post.getInt("content.phpbb3.ppf", 1000);
@@ -56,6 +57,7 @@ public class ContentIntegrationPHPBB3_p {
             sb.setConfig("content.phpbb3.dbhost", dbhost);
             sb.setConfig("content.phpbb3.dbport", dbport);
             sb.setConfig("content.phpbb3.dbname", dbname);
+            sb.setConfig("content.phpbb3.tableprefix", prefix);
             sb.setConfig("content.phpbb3.dbuser", dbuser);
             sb.setConfig("content.phpbb3.dbpw", dbpw);
             sb.setConfig("content.phpbb3.ppf", ppf);
@@ -68,6 +70,7 @@ public class ContentIntegrationPHPBB3_p {
                                             dbhost,
                                             dbport,
                                             dbname,
+                                            prefix,
                                             dbuser,
                                             dbpw
                                             );
@@ -92,6 +95,7 @@ public class ContentIntegrationPHPBB3_p {
                                             dbhost,
                                             dbport,
                                             dbname,
+                                            prefix,
                                             dbuser,
                                             dbpw
                                             );
@@ -114,6 +118,7 @@ public class ContentIntegrationPHPBB3_p {
         prop.putHTML("content.phpbb3.dbhost", sb.getConfig("content.phpbb3.dbhost", ""));
         prop.putHTML("content.phpbb3.dbport", sb.getConfig("content.phpbb3.dbport", ""));
         prop.putHTML("content.phpbb3.dbname", sb.getConfig("content.phpbb3.dbname", ""));
+        prop.putHTML("content.phpbb3.tableprefix", sb.getConfig("content.phpbb3.tableprefix", ""));
         prop.putHTML("content.phpbb3.dbuser", sb.getConfig("content.phpbb3.dbuser", ""));
         prop.putHTML("content.phpbb3.dbpw", sb.getConfig("content.phpbb3.dbpw", ""));
         prop.putHTML("content.phpbb3.ppf", sb.getConfig("content.phpbb3.ppf", ""));

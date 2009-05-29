@@ -47,7 +47,7 @@ import de.anomic.yacy.yacyURL;
 public class PhpBB3Dao implements Dao {
 
     private Connection conn = null;
-    private String urlstub;
+    private String urlstub, prefix;
     private HashMap<Integer, String> users;
 
     public PhpBB3Dao(
@@ -56,10 +56,12 @@ public class PhpBB3Dao implements Dao {
             String host,
             int port,
             String dbname,
+            String prefix,
             String user,
             String pw) throws Exception  {
         this.conn = getConnection(dbType, host, port, dbname, user, pw);
         this.urlstub = urlstub;
+        this.prefix = prefix;
         this.users = new HashMap<Integer, String>();
     }
     
@@ -103,7 +105,7 @@ public class PhpBB3Dao implements Dao {
     
     public Date first() {
         StringBuilder sql = new StringBuilder(256);
-        sql.append("select min(post_time) from phpbb_posts");
+        sql.append("select min(post_time) from " + prefix + "posts");
         Statement stmt = null;
         ResultSet rs = null;
         try {
@@ -124,7 +126,7 @@ public class PhpBB3Dao implements Dao {
 
     public Date latest() {
         StringBuilder sql = new StringBuilder(256);
-        sql.append("select max(post_time) from phpbb_posts");
+        sql.append("select max(post_time) from " + prefix + "posts");
         Statement stmt = null;
         ResultSet rs = null;
         try {
@@ -148,7 +150,7 @@ public class PhpBB3Dao implements Dao {
         ResultSet rs = null;
         try {
             stmt = conn.createStatement();
-            rs = stmt.executeQuery("select count(*) from phpbb_posts");
+            rs = stmt.executeQuery("select count(*) from " + prefix + "posts");
             if (rs.next()) {
                 return rs.getInt(1);
             }
@@ -164,7 +166,7 @@ public class PhpBB3Dao implements Dao {
 
     public DCEntry get(int item) {
         StringBuilder sql = new StringBuilder(256);
-        sql.append("select * from phpbb_posts where post_id = ");
+        sql.append("select * from " + prefix + "posts where post_id = ");
         sql.append(item);
         return getOne(sql);
     }
@@ -172,7 +174,7 @@ public class PhpBB3Dao implements Dao {
     public BlockingQueue<DCEntry> query(int from, int until, int queueSize) {
         // define the sql query
         final StringBuilder sql = new StringBuilder(256);
-        sql.append("select * from phpbb_posts where post_id >= ");
+        sql.append("select * from " + prefix + "posts where post_id >= ");
         sql.append(from);
         if (until > from) {
             sql.append(" and post_id < ");
@@ -187,7 +189,7 @@ public class PhpBB3Dao implements Dao {
     public BlockingQueue<DCEntry> query(Date from, int queueSize) {
      // define the sql query
         final StringBuilder sql = new StringBuilder(256);
-        sql.append("select * from phpbb_posts where post_time >= ");
+        sql.append("select * from " + prefix + "posts where post_time >= ");
         sql.append(from.getTime() / 1000);
         sql.append(" order by post_id");
 
@@ -286,7 +288,7 @@ public class PhpBB3Dao implements Dao {
         if (nick != null) return nick;
         
         StringBuilder sql = new StringBuilder(256);
-        sql.append("select * from phpbb_users where user_id = ");
+        sql.append("select * from " + prefix + "users where user_id = ");
         sql.append(poster_id);
         Statement stmt = null;
         ResultSet rs = null;
@@ -375,6 +377,7 @@ public class PhpBB3Dao implements Dao {
                 "localhost",
                 3306,
                 "forum",
+                "forum_",
                 "root",
                 ""
                 );
