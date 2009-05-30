@@ -49,7 +49,7 @@ $(document).ready(function() {
     	.attr({type:'text/css', href: style5, rel:'stylesheet', media:'screen'})
     	.appendTo(head);
     
-    var script0 = yconf.url + '/yacy/ui/js/jquery.dimensions.js';	
+    var script0 = yconf.url + '/yacy/ui/js/jquery.dimensions.min.js';	
 	var script1 = yconf.url + '/yacy/ui/js/jquery.query.js';
 	var script2 = yconf.url + '/yacy/ui/js/jquery.form.js';
 	var script3 = yconf.url + '/yacy/ui/js/jquery.field.min.js';
@@ -81,9 +81,13 @@ $(document).ready(function() {
 				$("#yquery").setValue('');		
 			},  
 		  	buttons: {
-        		'>': function() {
-        			$("#yside").dialog('open');
-        		},
+				'@': function() {
+					if ($("#yside").dialog('isOpen')) {
+						$("#yside").dialog('close');
+					} else {
+						$("#yside").dialog('open');
+					}
+				},
         		Next: function() {
         			startRecord = startRecord + maximumRecords;
         			$('#ysearch').trigger('submit');        		
@@ -96,12 +100,21 @@ $(document).ready(function() {
     		},
     		drag: function(event, ui) {
     			var position = $(".ui-dialog").position();
-				$("#yside").dialog('option', 'position', [position.left+yconf.width+5,position.top+32]);
+    			var left = $(".ui-dialog").width()+5+position.left;
+				$("#yside").dialog('option', 'position', [left,position.top+32]);
     		},
     		dragStop: function(event, ui) {
     			var position = $(".ui-dialog").position();
-				$("#yside").dialog('option', 'position', [position.left+yconf.width+5,position.top+32]);
+    			var left = $(".ui-dialog").width()+5+position.left;
+				$("#yside").dialog('option', 'position', [left,position.top+32]);
     		},
+			resizeStop: function(event, ui) {
+				var position = $(".ui-dialog").position();
+				var height = $(".ui-dialog").height()-85;
+				var left = $(".ui-dialog").width()+5+position.left;
+				$("#yside").dialog('option', 'height', height);
+				$("#yside").dialog('option', 'position', [left,position.top+32]);
+            },
     		close: function(event, ui) {
 				$("#yside").dialog('destroy');
 				$('#yside').remove();
@@ -118,15 +131,11 @@ $(document).ready(function() {
 					height: yconf.height-85,
 					minHeight: yconf.height-85,
 					show: 'slide',
-					hide: 'drop',
+					hide: 'slide',
 					position : [position.left+yconf.width+5,position.top+32],
 					open: function(event, ui) {
 						$('div.ui-widget-shadow').remove();
-					},
-					buttons: {
-						'<': function() {
-        					$("#yside").dialog('close');
-        				}
+						$('ypopup').dialog( 'moveToTop' );
 					}
 				});
 				$('.ui-widget-shadow').remove();
