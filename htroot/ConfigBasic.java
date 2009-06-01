@@ -172,7 +172,7 @@ public class ConfigBasic {
                 sb.setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
             }
             if (post.get("usecase", "").equals("intranet")) {
-                String repositoryPath = post.get("repositoryPath", "/DATA/HTROOT/repositry");
+                String repositoryPath = post.get("repositoryPath", "/DATA/HTROOT/repository");
                 File repository = new File(sb.getRootPath(), repositoryPath);
                 if (repository.exists() && repository.isDirectory()) {
                 	sb.setConfig("repositoryPath", repositoryPath);
@@ -194,7 +194,7 @@ public class ConfigBasic {
             prop.put("setUseCase", 0);
         }
         prop.put("setUseCase_port", port);
-        prop.put("setUseCase_repositoryPath", sb.getConfig("repositoryPath", "/DATA/HTROOT/repositry"));
+        prop.put("setUseCase_repositoryPath", sb.getConfig("repositoryPath", "/DATA/HTROOT/repository"));
         
         // check if values are proper
         final boolean properPassword = (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0) || sb.getConfigBool("adminAccountForLocalhost", false);
