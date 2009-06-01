@@ -173,7 +173,7 @@ public class ConfigBasic {
             }
             if (post.get("usecase", "").equals("intranet")) {
                 String repositoryPath = post.get("repositoryPath", "/DATA/HTROOT/repository");
-                File repository = new File(sb.getRootPath(), repositoryPath);
+                File repository = (repositoryPath.startsWith("/") || repositoryPath.charAt(1) == ':') ? new File(repositoryPath) : new File(sb.getRootPath(), repositoryPath);
                 if (repository.exists() && repository.isDirectory()) {
                 	sb.setConfig("repositoryPath", repositoryPath);
                 }
