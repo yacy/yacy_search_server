@@ -131,10 +131,10 @@ public final class yacyClient {
             break;
         } catch (final Exception e) {
             if (Thread.currentThread().isInterrupted()) {
-                yacyCore.log.logWarning("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' interrupted.");
+                yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' interrupted.");
                 return -1;
             }
-            yacyCore.log.logWarning("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "', peer " +  address + "; exception: " + e.getMessage() + "; retry = " + retry);
+            yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "', peer " +  address + "; exception: " + e.getMessage() + "; retry = " + retry);
             // try again (go into loop)
             result = null;
         }
@@ -527,6 +527,7 @@ public final class yacyClient {
 
 		// create containers
 		final int words = wordhashes.length() / yacySeedDB.commonHashLength;
+		assert words > 0 : "wordhashes = " + wordhashes;
 		final ReferenceContainer<WordReference>[] container = new ReferenceContainer[words];
 		for (int i = 0; i < words; i++) {
 			container[i] = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength).getBytes(), count);
@@ -996,7 +997,7 @@ public final class yacyClient {
             result.put("indexPayloadSize", Integer.toString(entrypost.length()));
             return result;
         } catch (final Exception e) {
-            yacyCore.log.logSevere("yacyClient.transferRWI error:" + e.getMessage());
+            yacyCore.log.logInfo("yacyClient.transferRWI error:" + e.getMessage());
             return null;
         }
     }

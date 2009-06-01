@@ -126,28 +126,9 @@ var progressbar = new Progressbar(#[results]#, document.getElementById("results"
 #(resultTable)#::</table>#(/resultTable)#
 <!-- linklist end -->
 <!-- attach the bottomline -->
+</div>
 <!--#include virtual="yacysearchtrailer.html?eventID=#[eventID]#&display=#[display]#" -->
-</div>
 
-#(navigation)#
-::
-<div id="sidebar" style="position:fixed; right:8px; margin-top:5px; width: 220px;">
- <h3><a href="#">Navigation</a></h3>
- <div>
-First attempt to add 'real' Navigation to yacy search results:<br />
-After a search is started, it is analysed how many hits are in each site.
-If you click on a domain the search is modified using the efficient site: - operator!
- </div>
- <h3><a href="#">Domains</a></h3>
- <div><ul style="padding-left: 0px;">
-#{domains}#
-<li>#[domain]#</li>
-#{/domains}#
- </ul></div>
- <h3><a href="#">Authors</a></h3>
- <div>Text...</div>
-</div>
-#(/navigation)#
 </div>
 </body>
 </html>

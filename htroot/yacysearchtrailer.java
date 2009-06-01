@@ -24,6 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
@@ -35,6 +36,7 @@ import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSearchRankingProcess.hostnaventry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
@@ -48,6 +50,7 @@ public class yacysearchtrailer {
         final serverObjects prop = new serverObjects();
         
         final String eventID = post.get("eventID", "");
+        final int display = post.getInt("display", 0);
         
         // default settings for blank item
         prop.put("words", "0");
@@ -60,6 +63,20 @@ public class yacysearchtrailer {
         }
         final plasmaSearchQuery theQuery = theSearch.getQuery();
         
+
+        // compose search navigation
+        ArrayList<hostnaventry> hostNavigator = theSearch.getHostNavigator(10);
+        if (hostNavigator == null) {
+        	prop.put("navigation", 0);
+        } else {
+        	prop.put("navigation", 1);
+        	hostnaventry entry;
+        	for (int i = 0; i < hostNavigator.size(); i++) {
+        		entry = hostNavigator.get(i);
+        		prop.put("navigation_domains_" + i + "_domain", plasmaSearchQuery.navurla(0, display, theQuery, theQuery.urlMask, "site:" + entry.host) + entry.host + " (" + entry.count + ")</a>");
+        	}
+        	prop.put("navigation_domains", hostNavigator.size());
+        }
         
         // attach the bottom line with search references (topwords)
         final Set<String> references = theSearch.references(20);
@@ -99,6 +116,7 @@ public class yacysearchtrailer {
                     prop.putHTML("words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + word);
                     prop.put("words_" + hintcount + "_count", theQuery.displayResults());
                     prop.put("words_" + hintcount + "_offset", "0");
+                    prop.put("words_" + hintcount + "_display", display);
                     prop.put("words_" + hintcount + "_contentdom", theQuery.contentdom());
                     prop.put("words_" + hintcount + "_resource", ((theQuery.isLocal()) ? "local" : "global"));
                     prop.put("words_" + hintcount + "_nl", (iter.hasNext() && hintcount < MAX_TOPWORDS) ? 1 : 0);

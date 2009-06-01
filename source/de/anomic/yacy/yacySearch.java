@@ -78,6 +78,7 @@ public class yacySearch extends Thread {
               final Bitfield constraint) {
         super("yacySearch_" + targetPeer.getName());
         //System.out.println("DEBUG - yacySearch thread " + this.getName() + " initialized " + ((urlhashes.length() == 0) ? "(primary)" : "(secondary)"));
+        assert wordhashes.length() >= 12;
         this.wordhashes = wordhashes;
         this.excludehashes = excludehashes;
         this.urlhashes = urlhashes;
@@ -256,6 +257,7 @@ public class yacySearch extends Thread {
 
         // prepare seed targets and threads
         assert language != null;
+        assert wordhashes.length() >= 12 : "wordhashes = " + wordhashes;
         final yacySeed[] targetPeers =
             (clusterselection == null) ?
                     selectSearchTargets(
@@ -287,6 +289,8 @@ public class yacySearch extends Thread {
             final String targethash, final Blacklist blacklist,
             final plasmaSearchRankingProfile rankingProfile,
             final Bitfield constraint, final TreeMap<byte[], String> clusterselection) {
+    	assert wordhashes.length() >= 12;
+    	
         // check own peer status
         if (peers.mySeed() == null || peers.mySeed().getPublicAddress() == null) { return null; }
 

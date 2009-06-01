@@ -618,7 +618,7 @@ public class RowCollection implements Iterable<Row.Entry> {
      */
     final int partition(final int L, final int R, int S, final byte[] swapspace) {
         assert (L < R - 1): "L = " + L + ", R = " + R + ", S = " + S;
-        assert (R - L >= isortlimit): "L = " + L + ", R = " + R + ", S = " + S;
+        assert (R - L >= isortlimit): "L = " + L + ", R = " + R + ", S = " + S + ", isortlimit = " + isortlimit;
         
         int p = L;
         int q = R - 1;

@@ -1,3 +1,20 @@
-<p><strong>Topwords</strong>:
-#{words}#&nbsp;<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#">#[word]#</a>&nbsp;|#{/words}#
-</p>
+<div id="sidebar" style="position:fixed; right:8px; margin-top:5px; width: 220px;">
+ <h2>Navigation</h2>
+ #(navigation)#
+::
+ <h3>Domains</h3>
+  <div>
+After a search is started, it is analysed how many hits are in each site.
+If you click on a domain the search is modified using the 'site:' operator.
+ </div>
+ <div><ul style="padding-left: 0px;">
+#{domains}#
+<li>#[domain]#</li>
+#{/domains}#
+ </ul></div>
+#(/navigation)#
+ <h3>Topics</h3>
+#{words}#
+<a href="yacysearch.html?search=#[newsearch]#&amp;Enter=Search&amp;count=#[count]#&amp;offset=#[offset]#&amp;resource=#[resource]#&amp;contentdom=#[contentdom]#&amp;display=#[display]#">#[word]#</a>
+#{/words}#
+</div>

@@ -99,7 +99,7 @@ public final class plasmaSearchEvent {
     long urlRetrievalAllTime;
     long snippetComputationAllTime;
     public ResultURLs crawlResults;
-    public ArrayList<hostnaventry> hostNavigator;
+    private ArrayList<hostnaventry> hostNavigator;
     
     @SuppressWarnings("unchecked")
     private plasmaSearchEvent(final plasmaSearchQuery query,
@@ -125,6 +125,7 @@ public final class plasmaSearchEvent {
         this.snippetComputationAllTime = 0;
         this.workerThreads = null;
         this.localSearchThread = null;
+        this.hostNavigator = null;
         this.result = new SortStore<ResultEntry>(-1); // this is the result, enriched with snippets, ranked and ordered by ranking
         this.images = new SortStore<plasmaSnippetCache.MediaSnippet>(-1);
         this.failedURLs = new HashMap<String, String>(); // a map of urls to reason strings where a worker thread tried to work on, but failed.
@@ -142,7 +143,6 @@ public final class plasmaSearchEvent {
             (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
             // do a global search
             this.rankedCache = new plasmaSearchRankingProcess(indexSegment, query, max_results_preparation, 16);
-            this.hostNavigator = null;
             
             final int fetchpeers = 12;
 
@@ -180,7 +180,6 @@ public final class plasmaSearchEvent {
             // do a local search
             this.rankedCache = new plasmaSearchRankingProcess(indexSegment, query, max_results_preparation, 2);
             this.rankedCache.execQuery();
-            this.hostNavigator = rankedCache.getHostNavigator(10);
             //CrawlSwitchboard.Finding finding = wordIndex.retrieveURLs(query, false, 2, ranking, process);
             
             if (generateAbstracts) {
@@ -189,6 +188,8 @@ public final class plasmaSearchEvent {
                 int maxcount = -1;
                 long mindhtdistance = Long.MAX_VALUE, l;
                 byte[] wordhash;
+                assert this.rankedCache.searchContainerMaps() != null;
+                assert this.rankedCache.searchContainerMaps()[0] != null;
                 for (Map.Entry<byte[], ReferenceContainer<WordReference>> entry : this.rankedCache.searchContainerMaps()[0].entrySet()) {
                     wordhash = entry.getKey();
                     final ReferenceContainer container = entry.getValue();
@@ -240,7 +241,6 @@ public final class plasmaSearchEvent {
             // so following sortings together with the global results will be fast
             try {
                 rankedCache.execQuery();
-                hostNavigator = rankedCache.getHostNavigator(10);
             } catch (final Exception e) {
                 e.printStackTrace();
             }

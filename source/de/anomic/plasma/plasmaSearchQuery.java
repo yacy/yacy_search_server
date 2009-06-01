@@ -217,10 +217,14 @@ public final class plasmaSearchQuery {
     }
     
     public static String hashSet2hashString(final TreeSet<byte[]> hashes) {
-        final Iterator<byte[]> i = hashes.iterator();
-        final StringBuilder sb = new StringBuilder(hashes.size() * yacySeedDB.commonHashLength);
-        while (i.hasNext()) sb.append(new String(i.next()));
-        return new String(sb);
+        final byte[] bb = new byte[hashes.size() * yacySeedDB.commonHashLength];
+        int p = 0;
+        for (byte[] b : hashes) {
+        	assert b.length == yacySeedDB.commonHashLength : "hash = " + new String(b);
+        	System.arraycopy(b, 0, bb, p, yacySeedDB.commonHashLength);
+        	p += yacySeedDB.commonHashLength;
+        }
+        return new String(bb);
     }
 
     public static String anonymizedQueryHashes(final TreeSet<byte[]> hashes) {
@@ -326,4 +330,27 @@ public final class plasmaSearchQuery {
             return hashSet2hashString(this.queryHashes) + "-" + hashSet2hashString(this.excludeHashes) + context;
     }
     
+    /**
+     * make a query anchor tag
+     * @param page
+     * @param display
+     * @param theQuery
+     * @param originalUrlMask
+     * @param addToQuery
+     * @return
+     */
+    public static String navurla(final int page, final int display, final plasmaSearchQuery theQuery, final String originalUrlMask, String addToQuery) {
+        return
+        "<a href=\"yacysearch.html?display=" + display +
+        "&amp;search=" + theQuery.queryString(true) + ((addToQuery == null) ? "" : "+" + addToQuery) +
+        "&amp;maximumRecords="+ theQuery.displayResults() +
+        "&amp;startRecord=" + (page * theQuery.displayResults()) +
+        "&amp;resource=" + ((theQuery.isLocal()) ? "local" : "global") +
+        "&amp;verify=" + ((theQuery.onlineSnippetFetch) ? "true" : "false") +
+        "&amp;urlmaskfilter=" + originalUrlMask +
+        "&amp;prefermaskfilter=" + theQuery.prefer +
+        "&amp;cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
+        "&amp;contentdom=" + theQuery.contentdom() +
+        "&amp;former=" + theQuery.queryString(true) + "\">";
+    }
 }
