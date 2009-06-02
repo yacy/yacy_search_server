@@ -71,10 +71,15 @@ public class yacysearchtrailer {
         } else {
         	prop.put("navigation", 1);
         	hostnaventry entry;
-        	for (int i = 0; i < hostNavigator.size(); i++) {
+        	int i;
+        	for (i = 0; i < hostNavigator.size(); i++) {
         		entry = hostNavigator.get(i);
         		prop.put("navigation_domains_" + i + "_domain", plasmaSearchQuery.navurla(0, display, theQuery, theQuery.urlMask, "site:" + entry.host) + entry.host + " (" + entry.count + ")</a>");
+        		prop.putJSON("navigation_domains_" + i + "_domain-json", plasmaSearchQuery.navurla(0, display, theQuery, theQuery.urlMask, "site:" + entry.host) + entry.host + " (" + entry.count + ")</a>");
+        		prop.put("navigation_domains_" + i + "_nl", 1);
         	}
+        	i--;
+        	prop.put("navigation_domains_" + i + "_nl", 0);
         	prop.put("navigation_domains", hostNavigator.size());
         }
         

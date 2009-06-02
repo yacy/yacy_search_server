@@ -30,6 +30,7 @@ $(document).ready(function() {
 	var style3 = yconf.url + '/yacy/ui/css/themes/'+yconf.theme+'/ui.dialog.css';
 	var style4 = yconf.url + '/yacy/ui/css/themes/'+yconf.theme+'/ui.theme.css';
 	var style5 = yconf.url + '/yacy/ui/css/themes/'+yconf.theme+'/ui.resizable.css';
+	var style6 = yconf.url + '/yacy/ui/css/themes/'+yconf.theme+'/ui.accordion.css';
 
 	var head = document.getElementsByTagName('head')[0];
 	
@@ -47,6 +48,9 @@ $(document).ready(function() {
     	.appendTo(head);
     $(document.createElement('link'))
     	.attr({type:'text/css', href: style5, rel:'stylesheet', media:'screen'})
+    	.appendTo(head);
+    $(document.createElement('link'))
+    	.attr({type:'text/css', href: style6, rel:'stylesheet', media:'screen'})
     	.appendTo(head);
     
     var script0 = yconf.url + '/yacy/ui/js/jquery.dimensions.min.js';	
@@ -120,7 +124,10 @@ $(document).ready(function() {
 				$('#yside').remove();
     		},
     		open: function(event, ui) {
-				$('<div id="yside" style="padding-left:0px; margin-left:-10px;"><ul><li>text</li><li>text</li><li>text</li><li>text</li><li>text</li><li>text</li><li>text</li></ul></div>').insertAfter(".ui-dialog-content");
+				$('<div id="yside" style="padding:0px;"></div>').insertAfter(".ui-dialog-content");
+				$('<div id="ynav" style="margin0px; padding:0px;"></div>').appendTo('#yside');
+				$('<h3 style="padding-left:25px;">Topics</h3><div id="ytop"></div>').appendTo('#ynav');
+				$('<h3 style="padding-left:25px;">Domains</h3><div id="ydom"></div>').appendTo('#ynav');
 				var position = $(".ui-dialog").position();
 				$("#yside").dialog({
 					title: 'Navigation',
@@ -140,6 +147,11 @@ $(document).ready(function() {
 				});
 				$('.ui-widget-shadow').remove();
 				$('div[aria-labelledby="ui-dialog-title-yside"] div.ui-dialog-titlebar').remove();
+				$("#ynav").accordion({
+					autoHeight: false,
+					clearStyle: true,
+					header: "h3"
+				});
     		}  
 		});	
 	});
@@ -222,6 +234,32 @@ function yacysearch(global) {
 				defaultImage: yconf.url + "/yacy/ui/img-2/article.png",
 				className: "favicon"
 			});
+			
+			$("#ytop").empty();
+			var bhtml = "<ul style='padding-left: 0px;'>";
+			$.each (
+				data.channels[0].topwords,
+				function(i,topword) {
+					if (topword) {							
+						bhtml = bhtml + "<li>"+topword.word+"</li>";
+					}								
+				}
+			);
+			bhtml = bhtml + "</ul>";
+			$(bhtml).appendTo("#ytop");
+			
+			$("#ydom").empty();
+			var bhtml = "<ul style='padding-left: 0px;'>";
+			$.each (
+				data.channels[0].domains,
+				function(i,dom) {
+					if (dom) {							
+						bhtml = bhtml + "<li>"+dom.domain+"</li>";
+					}								
+				}
+			);
+			bhtml = bhtml + "</ul>";
+			$(bhtml).appendTo("#ydom");
         }
     );
 }

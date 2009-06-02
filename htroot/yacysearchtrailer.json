@@ -2,4 +2,12 @@
 #{words}#
 { "word": "#[word]#" }#(nl)#::,#(/nl)#
 #{/words}#
+],
+#(navigation)#
+::
+"domains": [
+#{domains}#
+{ "domain": "#[domain-json]#" }#(nl)#::,#(/nl)#
+#{/domains}#
 ]
+#(/navigation)#
