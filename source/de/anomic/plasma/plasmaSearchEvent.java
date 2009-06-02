@@ -32,7 +32,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,7 +52,7 @@ import de.anomic.kelondro.util.SortStore;
 import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.parser.Word;
 import de.anomic.plasma.parser.Condenser;
-import de.anomic.plasma.plasmaSearchRankingProcess.hostnaventry;
+import de.anomic.plasma.plasmaSearchRankingProcess.NavigatorEntry;
 import de.anomic.plasma.plasmaSnippetCache.MediaSnippet;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacySearch;
@@ -99,7 +98,7 @@ public final class plasmaSearchEvent {
     long urlRetrievalAllTime;
     long snippetComputationAllTime;
     public ResultURLs crawlResults;
-    private ArrayList<hostnaventry> hostNavigator;
+    private ArrayList<NavigatorEntry> hostNavigator;
     
     @SuppressWarnings("unchecked")
     private plasmaSearchEvent(final plasmaSearchQuery query,
@@ -559,7 +558,7 @@ public final class plasmaSearchEvent {
                     // place the result to the result vector
                     if (!result.exists(resultEntry)) {
                         result.push(resultEntry, Long.valueOf(rankedCache.getOrder().cardinal(resultEntry.word())));
-                        rankedCache.addReferences(resultEntry);
+                        rankedCache.addTopics(resultEntry);
                     }
                     //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
                 }
@@ -579,7 +578,7 @@ public final class plasmaSearchEvent {
         Log.logInfo("search", "sorted out hash " + urlhash + " during search: " + reason);
     }
     
-    public ArrayList<hostnaventry> getHostNavigator(int maxentries) {
+    public ArrayList<NavigatorEntry> getHostNavigator(int maxentries) {
     	if (this.hostNavigator != null) return this.hostNavigator;
     	if (localSearchThread != null && localSearchThread.isAlive()) {
              try {Thread.sleep(100L);} catch (final InterruptedException e) {}
@@ -778,9 +777,9 @@ public final class plasmaSearchEvent {
         //assert e != null;
     }
     
-    public Set<String> references(final int count) {
+    public ArrayList<NavigatorEntry> topics(final int count) {
         // returns a set of words that are computed as toplist
-        return this.rankedCache.getReferences(count);
+        return this.rankedCache.getTopicNavigator(count);
     }
     
     public static class ResultEntry {

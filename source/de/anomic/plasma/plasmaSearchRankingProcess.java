@@ -48,7 +48,6 @@ import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
-import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SortStack;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.parser.Word;
@@ -71,13 +70,13 @@ public final class plasmaSearchRankingProcess {
     private int remote_peerCount, remote_indexCount, remote_resourceSize, local_resourceSize;
     private final ReferenceOrder order;
     private final ConcurrentHashMap<String, Integer> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
-    private final ScoreCluster<String> ref;  // reference score computation for the commonSense heuristic
     private final int[] flagcount; // flag counter
     private final TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
     private final Segment indexSegment;
     private HashMap<byte[], ReferenceContainer<WordReference>>[] localSearchContainerMaps;
     private final int[] domZones;
-    private ConcurrentHashMap<String, hoststat> hostNavigator;
+    private final ConcurrentHashMap<String, hoststat> hostNavigator;
+    private final ConcurrentHashMap<String, Integer> ref;  // reference score computation for the commonSense heuristic
     
     public plasmaSearchRankingProcess(
             final Segment indexSegment,
@@ -99,13 +98,13 @@ public final class plasmaSearchRankingProcess {
         this.remote_resourceSize = 0;
         this.local_resourceSize = 0;
         this.urlhashes = new ConcurrentHashMap<String, Integer>(0, 0.75f, concurrency);
-        this.ref = new ScoreCluster<String>();
         this.misses = new TreeSet<String>();
         this.indexSegment = indexSegment;
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
-        this.domZones = new int[8];
         this.hostNavigator = new ConcurrentHashMap<String, hoststat>();
+        this.ref = new ConcurrentHashMap<String, Integer>();
+        this.domZones = new int[8];
         for (int i = 0; i < 8; i++) {this.domZones[i] = 0;}
     }
     
@@ -232,52 +231,6 @@ public final class plasmaSearchRankingProcess {
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
     }
     
-    public class hoststat {
-    	public int count;
-    	public String hashsample;
-    	public hoststat(String urlhash) {
-    		this.count = 1;
-    		this.hashsample = urlhash;
-    	}
-    	public void inc() {
-    		this.count++;
-    	}
-    }
-    
-    public static final Comparator<hoststat> hscomp = new Comparator<hoststat>() {
-		public int compare(hoststat o1, hoststat o2) {
-			if (o1.count < o2.count) return 1;
-			if (o2.count < o1.count) return -1;
-			return 0;
-		}
-    };
-    
-    public class hostnaventry {
-    	public int count;
-    	public String host;
-    	public hostnaventry(String host, int count) {
-    		this.host = host;
-    		this.count = count;
-    	}
-    }
-    
-    public ArrayList<hostnaventry> getHostNavigator(int maxentries) {
-    	hoststat[] hsa = this.hostNavigator.values().toArray(new hoststat[this.hostNavigator.size()]);
-    	Arrays.sort(hsa, hscomp);
-    	int rc = Math.min(maxentries, hsa.length);
-    	ArrayList<hostnaventry> result = new ArrayList<hostnaventry>();
-    	URLMetadataRow mr;
-    	yacyURL url;
-    	for (int i = 0; i < rc; i++) {
-    		mr = indexSegment.urlMetadata().load(hsa[i].hashsample, null, 0);
-    		if (mr == null) continue;
-    		url = mr.metadata().url();
-    		if (url == null) continue;
-    		result.add(new hostnaventry(url.getHost(), hsa[i].count));
-    	}
-    	return result;
-    }
-
     private boolean testFlags(final WordReference ientry) {
         if (query.constraint == null) return true;
         // test if ientry matches with filter
@@ -424,37 +377,103 @@ public final class plasmaSearchRankingProcess {
         return this.misses.iterator();
     }
     
-    public Set<String> getReferences(final int count) {
-        // create a list of words that had been computed by statistics over all
-        // words that appeared in the url or the description of all urls
-        final Object[] refs = ref.getScores(count, false, 2, Integer.MAX_VALUE);
-        final TreeSet<String> s = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-        for (int i = 0; i < refs.length; i++) {
-            s.add((String) refs[i]);
+    public class hoststat {
+        public int count;
+        public String hashsample;
+        public hoststat(String urlhash) {
+            this.count = 1;
+            this.hashsample = urlhash;
         }
-        return s;
+        public void inc() {
+            this.count++;
+        }
     }
     
-    public void addReferences(final String[] words) {
+    public static final Comparator<hoststat> hscomp = new Comparator<hoststat>() {
+        public int compare(hoststat o1, hoststat o2) {
+            if (o1.count < o2.count) return 1;
+            if (o2.count < o1.count) return -1;
+            return 0;
+        }
+    };
+    
+    public class NavigatorEntry {
+        public int count;
+        public String name;
+        public NavigatorEntry(String name, int count) {
+            this.name = name;
+            this.count = count;
+        }
+    }
+    
+    public ArrayList<NavigatorEntry> getHostNavigator(int count) {
+        hoststat[] hsa = this.hostNavigator.values().toArray(new hoststat[this.hostNavigator.size()]);
+        Arrays.sort(hsa, hscomp);
+        int rc = Math.min(count, hsa.length);
+        ArrayList<NavigatorEntry> result = new ArrayList<NavigatorEntry>();
+        URLMetadataRow mr;
+        yacyURL url;
+        for (int i = 0; i < rc; i++) {
+            mr = indexSegment.urlMetadata().load(hsa[i].hashsample, null, 0);
+            if (mr == null) continue;
+            url = mr.metadata().url();
+            if (url == null) continue;
+            result.add(new NavigatorEntry(url.getHost(), hsa[i].count));
+        }
+        return result;
+    }
+
+    public static final Comparator<Map.Entry<String, Integer>> mecomp = new Comparator<Map.Entry<String, Integer>>() {
+        public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
+            if (o1.getValue().intValue() < o2.getValue().intValue()) return 1;
+            if (o2.getValue().intValue() < o1.getValue().intValue()) return -1;
+            return 0;
+        }
+    };
+    
+    @SuppressWarnings("unchecked")
+    public ArrayList<NavigatorEntry> getTopicNavigator(final int count) {
+        // create a list of words that had been computed by statistics over all
+        // words that appeared in the url or the description of all urls
+        
+        Map.Entry<String, Integer>[] a = this.ref.entrySet().toArray(new Map.Entry[this.ref.size()]);
+        Arrays.sort(a, mecomp);
+        int rc = Math.min(count, a.length);
+        ArrayList<NavigatorEntry> result = new ArrayList<NavigatorEntry>();
+        Map.Entry<String, Integer> e;
+        int c;
+        for (int i = 0; i < rc; i++) {
+            e = a[i];
+            c = e.getValue().intValue();
+            if (c == 0) break;
+            result.add(new NavigatorEntry(e.getKey(), c));
+        }
+        return result;
+    }
+    
+    public void addTopic(final String[] words) {
         String word;
         for (int i = 0; i < words.length; i++) {
             word = words[i].toLowerCase();
+            Integer c;
             if ((word.length() > 2) &&
                 ("http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_".indexOf(word) < 0) &&
-                (!(query.queryHashes.contains(Word.word2hash(word)))))
-                ref.incScore(word);
+                (!(query.queryHashes.contains(Word.word2hash(word))))) {
+                c = ref.get(word);
+                if (c == null) ref.put(word, 1); else ref.put(word, c.intValue() + 1);
+            }
         }
     }
     
-    protected void addReferences(final plasmaSearchEvent.ResultEntry resultEntry) {
+    protected void addTopics(final plasmaSearchEvent.ResultEntry resultEntry) {
         // take out relevant information for reference computation
         if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;
-        final String[] urlcomps = htmlFilterContentScraper.urlComps(resultEntry.url().toNormalform(true, true)); // word components of the url
+        //final String[] urlcomps = htmlFilterContentScraper.urlComps(resultEntry.url().toNormalform(true, true)); // word components of the url
         final String[] descrcomps = resultEntry.title().toLowerCase().split(htmlFilterContentScraper.splitrex); // words in the description
         
         // add references
-        addReferences(urlcomps);
-        addReferences(descrcomps);
+        //addTopic(urlcomps);
+        addTopic(descrcomps);
     }
     
     public ReferenceOrder getOrder() {

@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.content.RSSMessage;
@@ -49,6 +48,7 @@ import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSearchEvent.ResultEntry;
+import de.anomic.plasma.plasmaSearchRankingProcess.NavigatorEntry;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
@@ -321,11 +321,10 @@ public final class search {
             
             // prepare reference hints
             final long timer = System.currentTimeMillis();
-            final Set<String> ws = theSearch.references(10);
+            final ArrayList<NavigatorEntry> ws = theSearch.topics(10);
             final StringBuilder refstr = new StringBuilder();
-            final Iterator<String> j = ws.iterator();
-            while (j.hasNext()) {
-                refstr.append(",").append(j.next());
+            for (NavigatorEntry e: ws) {
+                refstr.append(",").append(e.name);
             }
             prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), "reference collection", ws.size(), System.currentTimeMillis() - timer), false);

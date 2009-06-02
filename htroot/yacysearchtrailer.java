@@ -26,7 +26,6 @@
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.http.httpRequestHeader;
@@ -36,7 +35,7 @@ import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSearchRankingProcess.hostnaventry;
+import de.anomic.plasma.plasmaSearchRankingProcess.NavigatorEntry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
@@ -65,17 +64,17 @@ public class yacysearchtrailer {
         
 
         // compose search navigation
-        ArrayList<hostnaventry> hostNavigator = theSearch.getHostNavigator(10);
+        ArrayList<NavigatorEntry> hostNavigator = theSearch.getHostNavigator(10);
         if (hostNavigator == null) {
         	prop.put("navigation", 0);
         } else {
         	prop.put("navigation", 1);
-        	hostnaventry entry;
+        	NavigatorEntry entry;
         	int i;
         	for (i = 0; i < hostNavigator.size(); i++) {
         		entry = hostNavigator.get(i);
-        		prop.put("navigation_domains_" + i + "_domain", plasmaSearchQuery.navurla(0, display, theQuery, theQuery.urlMask, "site:" + entry.host) + entry.host + " (" + entry.count + ")</a>");
-        		prop.putJSON("navigation_domains_" + i + "_domain-json", plasmaSearchQuery.navurla(0, display, theQuery, theQuery.urlMask, "site:" + entry.host) + entry.host + " (" + entry.count + ")</a>");
+        		prop.put("navigation_domains_" + i + "_domain", plasmaSearchQuery.navurla(0, display, theQuery, theQuery.urlMask, "site:" + entry.name) + entry.name + " (" + entry.count + ")</a>");
+        		prop.putJSON("navigation_domains_" + i + "_domain-json", plasmaSearchQuery.navurla(0, display, theQuery, theQuery.urlMask, "site:" + entry.name) + entry.name + " (" + entry.count + ")</a>");
         		prop.put("navigation_domains_" + i + "_nl", 1);
         	}
         	i--;
@@ -84,16 +83,13 @@ public class yacysearchtrailer {
         }
         
         // attach the bottom line with search references (topwords)
-        final Set<String> references = theSearch.references(20);
+        final ArrayList<NavigatorEntry> references = theSearch.topics(20);
         if (references.size() > 0) {
             // get the topwords
             final TreeSet<String> topwords = new TreeSet<String>(NaturalOrder.naturalComparator);
-            String tmp = "";
-            final Iterator<String> i = references.iterator();
-            while (i.hasNext()) {
-                tmp = i.next();
-                if (tmp.matches("[a-z]+")) {
-                    topwords.add(tmp);
+            for (NavigatorEntry e: references) {
+                if (e.name.matches("[a-z]+")) {
+                    topwords.add(e.name);
                 }
             }
 
