@@ -28,7 +28,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.List;
 
 import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.BLOBArray;
@@ -197,12 +196,23 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * @throws IOException 
      */
     public synchronized ReferenceContainer<ReferenceType> get(final byte[] termHash) throws IOException {
-    	List<byte[]> entries = this.array.getAll(termHash);
-    	if (entries == null || entries.size() == 0) return null;
-    	byte[] a = entries.remove(0);
+        long timeout = System.currentTimeMillis() + 1000;
+        Iterator<byte[]> entries = this.array.getAll(termHash).iterator();
+    	if (entries == null || !entries.hasNext()) return null;
+    	byte[] a = entries.next();
+    	int k = 1;
     	ReferenceContainer<ReferenceType> c = new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(a, payloadrow));
-    	while (entries.size() > 0) {
-    		c = c.merge(new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(entries.remove(0), payloadrow)));
+    	if (System.currentTimeMillis() > timeout) {
+    	    Log.logWarning("ReferenceContainerArray", "timout in index retrieval: " + k + " tables searched. timeout = 1000");
+    	    return c;
+    	}
+    	while (entries.hasNext()) {
+    		c = c.merge(new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(entries.next(), payloadrow)));
+    		k++;
+    		if (System.currentTimeMillis() > timeout) {
+    		    Log.logWarning("ReferenceContainerArray", "timout in index retrieval: " + k + " tables searched. timeout = 1000");
+                return c;
+            }
     	}
     	return c;
     }

@@ -42,6 +42,7 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.navigationPrototype.NavigationReference;
 import de.anomic.kelondro.text.navigationPrototype.NavigationReferenceFactory;
+import de.anomic.kelondro.text.navigationPrototype.NavigationReferenceRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceFactory;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
@@ -69,7 +70,7 @@ public final class Segment {
     
     private final Log                            log;
     private final IndexCell<WordReference>       termIndex;
-    //private final IndexCell<NavigationReference> authorNavIndex;
+    private final IndexCell<NavigationReference> authorNavIndex;
     private final MetadataRepository             urlMetadata;
     private final File                           segmentPath;
     private final IODispatcher                   merger;
@@ -97,9 +98,9 @@ public final class Segment {
                 maxFileSize,
                 this.merger,
                 writeBufferSize);
-        /*
+        
         this.authorNavIndex = new IndexCell<NavigationReference>(
-                new File(segmentPath, "AUTHORNAV"),
+                new File(new File(segmentPath, "nav_author"), "idx"),
                 navigationReferenceFactory,
                 wordOrder,
                 NavigationReferenceRow.navEntryRow,
@@ -108,7 +109,7 @@ public final class Segment {
                 maxFileSize,
                 this.merger,
                 writeBufferSize);
-        */
+        
         File metadatadir = new File(segmentPath, "METADATA");
         if (!metadatadir.exists()) metadatadir.mkdirs();
         
@@ -185,6 +186,8 @@ public final class Segment {
             }
             wordCount++;
         }
+        
+        
         
         return wordCount;
     }

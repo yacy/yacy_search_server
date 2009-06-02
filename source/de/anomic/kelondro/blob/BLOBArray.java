@@ -480,7 +480,8 @@ public class BLOBArray implements BLOB {
      * @return
      * @throws IOException
      */
-    public synchronized List<byte[]> getAll(byte[] key) throws IOException {
+    public synchronized Iterable<byte[]> getAll(byte[] key) throws IOException {
+        /*
         byte[] b;
         ArrayList<byte[]> l = new ArrayList<byte[]>(blobs.size());
         for (blobItem bi: blobs) {
@@ -488,6 +489,56 @@ public class BLOBArray implements BLOB {
             if (b != null) l.add(b);
         }
         return l;
+        */
+        return new BlobValues(key);
+    }
+    
+    public class BlobValues implements Iterator<byte[]>, Iterable<byte[]> {
+
+        private Iterator<blobItem> bii;
+        private byte[] next;
+        private byte[] key;
+        
+        public BlobValues(byte[] key) {
+            this.bii = blobs.iterator();
+            this.key = key;
+            this.next = null;
+            next0();
+        }
+        
+        private void next0() {
+            while (this.bii.hasNext()) {
+                BLOB b = this.bii.next().blob;
+                try {
+                    this.next = b.get(key);
+                    if (this.next != null) return;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    this.next = null;
+                    return;
+                }
+            }
+            this.next = null;
+        }
+        
+        public Iterator<byte[]> iterator() {
+            return this;
+        }
+
+        public boolean hasNext() {
+            return this.next != null;
+        }
+
+        public byte[] next() {
+            byte[] n = this.next;
+            next0();
+            return n;
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException("no remove in BlobValues");
+        }
+        
     }
     
     /**
