@@ -30,6 +30,7 @@ import de.anomic.server.serverSwitch;
 
 public class autoconfig {
     
+	// http://web.archive.org/web/20071011034022/http://wp.netscape.com/eng/mozilla/2.0/relnotes/demo/proxy-live.html
     /**
      * Generates a proxy-autoconfig-file (application/x-ns-proxy-autoconfig) 
      * See: <a href="http://wp.netscape.com/eng/mozilla/2.0/relnotes/demo/proxy-live.html">Proxy Auto-Config File Format</a> 
