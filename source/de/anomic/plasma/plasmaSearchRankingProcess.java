@@ -459,9 +459,12 @@ public final class plasmaSearchRankingProcess {
         for (int i = 0; i < words.length; i++) {
             word = words[i].toLowerCase();
             Integer c;
-            if ((word.length() > 2) &&
-                ("http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_".indexOf(word) < 0) &&
-                (!(query.queryHashes.contains(Word.word2hash(word))))) {
+            if (word.length() > 2 &&
+                "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_".indexOf(word) < 0 &&
+                !query.queryHashes.contains(Word.word2hash(word)) &&
+                word.matches("[a-z]+") &&
+                !plasmaSwitchboard.badwords.contains(word) &&
+                !plasmaSwitchboard.stopwords.contains(word)) {
                 c = ref.get(word);
                 if (c == null) ref.put(word, 1); else ref.put(word, c.intValue() + 1);
             }

@@ -321,7 +321,7 @@ public final class search {
             
             // prepare reference hints
             final long timer = System.currentTimeMillis();
-            final ArrayList<NavigatorEntry> ws = theSearch.topics(10);
+            final ArrayList<NavigatorEntry> ws = theSearch.getTopicNavigator(10);
             final StringBuilder refstr = new StringBuilder();
             for (NavigatorEntry e: ws) {
                 refstr.append(",").append(e.name);

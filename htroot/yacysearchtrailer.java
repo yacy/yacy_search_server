@@ -26,15 +26,11 @@
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.TreeSet;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.util.SetTools;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSearchQuery;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSearchRankingProcess.NavigatorEntry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
@@ -83,38 +79,17 @@ public class yacysearchtrailer {
         }
         
         // attach the bottom line with search references (topwords)
-        final ArrayList<NavigatorEntry> references = theSearch.topics(20);
+        final ArrayList<NavigatorEntry> references = theSearch.getTopicNavigator(10);
         if (references.size() > 0) {
-            // get the topwords
-            final TreeSet<String> topwords = new TreeSet<String>(NaturalOrder.naturalComparator);
-            for (NavigatorEntry e: references) {
-                if (e.name.matches("[a-z]+")) {
-                    topwords.add(e.name);
-                }
-            }
-
-            // filter out the badwords
-            final TreeSet<String> filteredtopwords = SetTools.joinConstructive(topwords, plasmaSwitchboard.badwords);
-            if (filteredtopwords.size() > 0) {
-                SetTools.excludeDestructive(topwords, plasmaSwitchboard.badwords);
-            }
-
-            // avoid stopwords being topwords
-            if (env.getConfig("filterOutStopwordsFromTopwords", "true").equals("true")) {
-                if ((plasmaSwitchboard.stopwords != null) && (plasmaSwitchboard.stopwords.size() > 0)) {
-                    SetTools.excludeDestructive(topwords, plasmaSwitchboard.stopwords);
-                }
-            }
-        
-            String word;
             int hintcount = 0;
-            final Iterator<String> iter = topwords.iterator();
+            NavigatorEntry e;
+            Iterator<NavigatorEntry> iter = references.iterator();
             while (iter.hasNext()) {
-                word = iter.next();
+            	e = iter.next();
                 if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;
-                if (word != null) {
-                    prop.putHTML("words_" + hintcount + "_word", word);
-                    prop.putHTML("words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + word);
+                if (e.name != null) {
+                    prop.putHTML("words_" + hintcount + "_word", e.name);
+                    prop.putHTML("words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + e.name);
                     prop.put("words_" + hintcount + "_count", theQuery.displayResults());
                     prop.put("words_" + hintcount + "_offset", "0");
                     prop.put("words_" + hintcount + "_display", display);

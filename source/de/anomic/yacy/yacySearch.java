@@ -289,7 +289,7 @@ public class yacySearch extends Thread {
             final String targethash, final Blacklist blacklist,
             final plasmaSearchRankingProfile rankingProfile,
             final Bitfield constraint, final TreeMap<byte[], String> clusterselection) {
-    	assert wordhashes.length() >= 12;
+    	assert wordhashes.length() >= 12 : "wordhashes = " + wordhashes;
     	
         // check own peer status
         if (peers.mySeed() == null || peers.mySeed().getPublicAddress() == null) { return null; }

@@ -98,7 +98,6 @@ public final class plasmaSearchEvent {
     long urlRetrievalAllTime;
     long snippetComputationAllTime;
     public ResultURLs crawlResults;
-    private ArrayList<NavigatorEntry> hostNavigator;
     
     @SuppressWarnings("unchecked")
     private plasmaSearchEvent(final plasmaSearchQuery query,
@@ -124,7 +123,6 @@ public final class plasmaSearchEvent {
         this.snippetComputationAllTime = 0;
         this.workerThreads = null;
         this.localSearchThread = null;
-        this.hostNavigator = null;
         this.result = new SortStore<ResultEntry>(-1); // this is the result, enriched with snippets, ranked and ordered by ranking
         this.images = new SortStore<plasmaSnippetCache.MediaSnippet>(-1);
         this.failedURLs = new HashMap<String, String>(); // a map of urls to reason strings where a worker thread tried to work on, but failed.
@@ -578,13 +576,12 @@ public final class plasmaSearchEvent {
     }
     
     public ArrayList<NavigatorEntry> getHostNavigator(int maxentries) {
-    	if (this.hostNavigator != null) return this.hostNavigator;
-    	if (localSearchThread != null && localSearchThread.isAlive()) {
-             try {Thread.sleep(100L);} catch (final InterruptedException e) {}
-        }
-    	this.hostNavigator = rankedCache.getHostNavigator(10);
-    	if (this.hostNavigator.size() == 0) this.hostNavigator = null;
-    	return this.hostNavigator;
+    	return this.rankedCache.getHostNavigator(maxentries);
+    }
+    
+    public ArrayList<NavigatorEntry> getTopicNavigator(final int maxentries) {
+        // returns a set of words that are computed as toplist
+        return this.rankedCache.getTopicNavigator(maxentries);
     }
     
     public ResultEntry oneResult(final int item) {
@@ -730,6 +727,7 @@ public final class plasmaSearchEvent {
                 if (peer.equals(mypeerhash)) continue; // we dont need to ask ourself
                 urls = entry1.getValue();
                 words = wordsFromPeer(peer, urls);
+                assert words.length() >= 12 : "words = " + words;
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls);
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
@@ -774,11 +772,6 @@ public final class plasmaSearchEvent {
         // removes the url hash reference from last search result
         /*indexRWIEntry e =*/ this.rankedCache.remove(urlhash);
         //assert e != null;
-    }
-    
-    public ArrayList<NavigatorEntry> topics(final int count) {
-        // returns a set of words that are computed as toplist
-        return this.rankedCache.getTopicNavigator(count);
     }
     
     public static class ResultEntry {
