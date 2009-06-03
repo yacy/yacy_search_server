@@ -31,6 +31,7 @@ import java.util.TreeSet;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.Segment;
+import de.anomic.kelondro.text.TermSearch;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSearchQuery;
@@ -78,13 +79,14 @@ public final class timeline {
         // retrieve index containers
         //yacyCore.log.logInfo("INIT TIMELINE SEARCH: " + plasmaSearchQuery.anonymizedQueryHashes(query[0]) + " - " + count + " links");
         
-        // get the index container with the result vector        
-        final ReferenceContainer<WordReference> index = sb.indexSegment.termIndex().query(
+        // get the index container with the result vector
+        final TermSearch<WordReference> search = sb.indexSegment.termIndex().query(
                 q,
                 Word.words2hashes(query[1]),
                 null,
                 Segment.wordReferenceFactory,
                 maxdist);
+        ReferenceContainer<WordReference> index = search.joined();
         
         Iterator<WordReference> i = index.entries();
         WordReference entry;

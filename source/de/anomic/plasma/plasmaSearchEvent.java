@@ -187,9 +187,8 @@ public final class plasmaSearchEvent {
                 int maxcount = -1;
                 long mindhtdistance = Long.MAX_VALUE, l;
                 byte[] wordhash;
-                assert this.rankedCache.searchContainerMaps() != null;
-                assert this.rankedCache.searchContainerMaps()[0] != null;
-                for (Map.Entry<byte[], ReferenceContainer<WordReference>> entry : this.rankedCache.searchContainerMaps()[0].entrySet()) {
+                assert this.rankedCache.searchContainerMap() != null;
+                for (Map.Entry<byte[], ReferenceContainer<WordReference>> entry : this.rankedCache.searchContainerMap().entrySet()) {
                     wordhash = entry.getKey();
                     final ReferenceContainer container = entry.getValue();
                     assert (container.getTermHash().equals(wordhash));
@@ -206,7 +205,7 @@ public final class plasmaSearchEvent {
                     IACount.put(wordhash, Integer.valueOf(container.size()));
                     IAResults.put(wordhash, ReferenceContainer.compressIndex(container, null, 1000).toString());
                 }
-                serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "abstract generation", this.rankedCache.searchContainerMaps()[0].size(), System.currentTimeMillis() - timer), false);
+                serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "abstract generation", this.rankedCache.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
             }
         }
         

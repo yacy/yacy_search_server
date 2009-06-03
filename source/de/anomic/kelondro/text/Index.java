@@ -29,6 +29,7 @@
 package de.anomic.kelondro.text;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -131,7 +132,16 @@ public interface Index <ReferenceType extends Reference> {
                             boolean rot,
                             int count
                             ) throws IOException;
-    
+
+    /**
+     * collect containers for given word hashes. This collection stops if a single container does not contain any references.
+     * In that case only a empty result is returned.
+     * @param wordHashes
+     * @param urlselection
+     * @return map of wordhash:indexContainer
+     */
+    public HashMap<byte[], ReferenceContainer<ReferenceType>> searchConjunction(final TreeSet<byte[]> wordHashes, final Set<String> urlselection);        
+  
     /**
      * delete all references entries
      * @throws IOException

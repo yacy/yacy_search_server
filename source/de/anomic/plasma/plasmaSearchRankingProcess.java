@@ -45,6 +45,7 @@ import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceOrder;
 import de.anomic.kelondro.text.Segment;
+import de.anomic.kelondro.text.TermSearch;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
@@ -73,7 +74,7 @@ public final class plasmaSearchRankingProcess {
     private final int[] flagcount; // flag counter
     private final TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
     private final Segment indexSegment;
-    private HashMap<byte[], ReferenceContainer<WordReference>>[] localSearchContainerMaps;
+    private HashMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
     private final int[] domZones;
     private final ConcurrentHashMap<String, hoststat> hostNavigator;
     private final ConcurrentHashMap<String, Integer> ref;  // reference score computation for the commonSense heuristic
@@ -86,7 +87,7 @@ public final class plasmaSearchRankingProcess {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
-        this.localSearchContainerMaps = null;
+        this.localSearchInclusion = null;
         this.stack = new SortStack<WordReferenceVars>(maxentries);
         this.doubleDomCache = new HashMap<String, SortStack<WordReferenceVars>>();
         this.handover = new HashMap<String, String>();
@@ -119,12 +120,14 @@ public final class plasmaSearchRankingProcess {
     public void execQuery() {
         
         long timer = System.currentTimeMillis();
-        final ReferenceContainer<WordReference> index = this.indexSegment.termIndex().query(
+        final TermSearch<WordReference> search = this.indexSegment.termIndex().query(
                 query.queryHashes,
                 query.excludeHashes,
                 null,
                 Segment.wordReferenceFactory,
                 query.maxDistance);
+        this.localSearchInclusion = search.inclusion();
+        final ReferenceContainer<WordReference> index = search.joined();
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
         if (index.size() == 0) {
             return;
@@ -248,10 +251,10 @@ public final class plasmaSearchRankingProcess {
         return false;
     }
     
-    public Map<byte[], ReferenceContainer<WordReference>>[] searchContainerMaps() {
+    public Map<byte[], ReferenceContainer<WordReference>> searchContainerMap() {
         // direct access to the result maps is needed for abstract generation
         // this is only available if execQuery() was called before
-        return localSearchContainerMaps;
+        return localSearchInclusion;
     }
     
     // todo:

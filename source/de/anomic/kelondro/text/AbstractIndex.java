@@ -122,40 +122,13 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         return containers;
     }
     
-    @SuppressWarnings("unchecked")
-	public HashMap<byte[], ReferenceContainer<ReferenceType>>[] searchTerm(
-            final TreeSet<byte[]> queryHashes, 
-            final TreeSet<byte[]> excludeHashes, 
-            final Set<String> urlselection) {
-		// search for the set of hashes and return a map of of wordhash:indexContainer containing the seach result
-		
-		// retrieve entities that belong to the hashes
-		HashMap<byte[], ReferenceContainer<ReferenceType>> inclusionContainers =
-		(queryHashes.size() == 0) ?
-		    new HashMap<byte[], ReferenceContainer<ReferenceType>>(0) :
-		    this.searchConjunction(queryHashes, urlselection);
-		if ((inclusionContainers.size() != 0) && (inclusionContainers.size() < queryHashes.size())) inclusionContainers = new HashMap<byte[], ReferenceContainer<ReferenceType>>(0); // prevent that only a subset is returned
-		final HashMap<byte[], ReferenceContainer<ReferenceType>> exclusionContainers =
-		(inclusionContainers.size() == 0) ?
-		    new HashMap<byte[], ReferenceContainer<ReferenceType>>(0) :
-		    this.searchConjunction(excludeHashes, urlselection);
-		return new HashMap[]{inclusionContainers, exclusionContainers};
-    }
-    
-    public ReferenceContainer<ReferenceType> query(
+    public TermSearch<ReferenceType> query(
             final TreeSet<byte[]> queryHashes,
             final TreeSet<byte[]> excludeHashes,
             final Set<String> urlselection,
             ReferenceFactory<ReferenceType> termFactory,
             int maxDistance) {
-            
-        HashMap<byte[], ReferenceContainer<ReferenceType>>[] containerMaps = searchTerm(queryHashes, excludeHashes, urlselection);
-            
-        // join and exclude the result
-        return ReferenceContainer.joinExcludeContainers(
-                termFactory,
-                containerMaps[0].values(),
-                containerMaps[1].values(),
-                maxDistance);        
+
+        return new TermSearch<ReferenceType>(this, queryHashes, excludeHashes, urlselection, termFactory, maxDistance);
     }
 }
