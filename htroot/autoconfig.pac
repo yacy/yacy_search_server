@@ -4,6 +4,9 @@ function FindProxyForURL(url,host) {
         return "DIRECT";
     }
     
+    // not the proxy itself
+    if (host == "#[host]#") return "DIRECT";
+    
     // no local adresses
     ip = dnsResolve(host);
     if (   isInNet(ip, "127.0.0.0", "255.0.0.0")
@@ -12,6 +15,9 @@ function FindProxyForURL(url,host) {
         || isInNet(ip, "172.16.0.0", "255.240.0.0") ) {
         return "DIRECT";
      }
+     
+     // not the proxy itself (better: dnsResolve(#[host]#), but an additional lookup)
+     if (ip == "#[host]#") return "DIRECT";
      
      // then
      return "PROXY #[host]#:#[port]#, DIRECT";
