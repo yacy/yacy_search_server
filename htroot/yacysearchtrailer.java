@@ -74,8 +74,8 @@ public class yacysearchtrailer {
                 prop.put("nav-domains_element_" + i + "_nl", 1);
         	}
         	i--;
-        	prop.put("nav_domains_element_" + i + "_nl", 0);
-        	prop.put("nav_domains_element", hostNavigator.size());
+        	prop.put("nav-domains_element_" + i + "_nl", 0);
+        	prop.put("nav-domains_element", hostNavigator.size());
         }
         
         // attach the bottom line with search references (topwords)

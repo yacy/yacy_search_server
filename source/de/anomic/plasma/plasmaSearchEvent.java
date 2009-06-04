@@ -138,13 +138,18 @@ public final class plasmaSearchEvent {
         final long start = System.currentTimeMillis();
         if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
             (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
-            // do a global search
+            
+        	// initialize a ranking process that is the target for data
+        	// that is generated concurrently from local and global search threads
             this.rankedCache = new plasmaSearchRankingProcess(indexSegment, query, max_results_preparation, 16);
             
-            final int fetchpeers = 12;
-
-            // the result of the fetch is then in the rcGlobal
+            // start a local search
+            localSearchThread = new localSearchProcess();
+            localSearchThread.start();
+                       
+            // start global searches
             final long timer = System.currentTimeMillis();
+            final int fetchpeers = 12;
             Log.logFine("SEARCH_EVENT", "STARTING " + fetchpeers + " THREADS TO CATCH EACH " + query.displayResults() + " URLs");
             this.primarySearchThreads = yacySearch.primaryRemoteSearches(
                     plasmaSearchQuery.hashSet2hashString(query.queryHashes),
@@ -167,10 +172,6 @@ public final class plasmaSearchEvent {
                     (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes);
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "remote search thread start", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
             
-            // meanwhile do a local search
-            localSearchThread = new localSearchProcess();
-            localSearchThread.start();
-           
             // finished searching
             Log.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
         } else {
@@ -598,9 +599,8 @@ public final class plasmaSearchEvent {
             // search thread is started as background process
             if ((localSearchThread != null) && (localSearchThread.isAlive())) {
                 // in case that the local search takes longer than some other
-                // remote search requests, do some sleeps to give the local process
-                // a chance to contribute
-                try {Thread.sleep(item * 50L);} catch (final InterruptedException e) {}
+                // remote search requests, wait that the local process terminates first
+            	try {localSearchThread.join();} catch (InterruptedException e) {}
             }
             // now wait until as many remote worker threads have finished, as we
             // want to display results
