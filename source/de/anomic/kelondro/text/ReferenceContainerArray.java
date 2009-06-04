@@ -313,12 +313,18 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             final long start = System.currentTimeMillis();
             long lastlog = start - 27000;
             int count = 0;
+            ReferenceType reference;
+            String mh;
             while (ei.hasNext()) {
                 container = ei.next();
                 if (container == null) continue;
                 Iterator<ReferenceType> refi = container.entries();
                 while (refi.hasNext()) {
-                    references.inc(refi.next().metadataHash().getBytes(), 1);
+                	reference = refi.next();
+                	if (reference == null) continue;
+                	mh = reference.metadataHash();
+                	if (mh == null) continue;
+                    references.inc(mh.getBytes(), 1);
                 }
                 count++;
                 // write a log
