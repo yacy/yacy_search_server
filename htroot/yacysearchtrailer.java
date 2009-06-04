@@ -47,9 +47,6 @@ public class yacysearchtrailer {
         final String eventID = post.get("eventID", "");
         final int display = post.getInt("display", 0);
         
-        // default settings for blank item
-        prop.put("words", "0");
-        
         // find search event
         final plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(eventID);
         if (theSearch == null) {
@@ -62,46 +59,55 @@ public class yacysearchtrailer {
         // compose search navigation
         ArrayList<NavigatorEntry> hostNavigator = theSearch.getHostNavigator(10);
         if (hostNavigator == null) {
-        	prop.put("navigation", 0);
+        	prop.put("nav-domains", 0);
         } else {
-        	prop.put("navigation", 1);
+        	prop.put("nav-domains", 1);
         	NavigatorEntry entry;
         	int i;
         	for (i = 0; i < hostNavigator.size(); i++) {
         		entry = hostNavigator.get(i);
-        		prop.put("navigation_domains_" + i + "_domain", plasmaSearchQuery.navurla(0, display, theQuery, theQuery.urlMask, "site:" + entry.name) + entry.name + " (" + entry.count + ")</a>");
-        		prop.putJSON("navigation_domains_" + i + "_domain-json", plasmaSearchQuery.navurla(0, display, theQuery, theQuery.urlMask, "site:" + entry.name) + entry.name + " (" + entry.count + ")</a>");
-        		prop.put("navigation_domains_" + i + "_nl", 1);
+        		prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name) + "\">" + entry.name + " (" + entry.count + ")</a>");
+        		prop.putJSON("nav_domains_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name));
+                prop.put("nav-domains_element_" + i + "_name", entry.name);
+        		prop.put("nav-domains_element_" + i + "_count", entry.count);
+        		prop.put("nav-domains_element_" + i + "_modifier", "site:" + entry.name);
+                prop.put("nav-domains_element_" + i + "_nl", 1);
         	}
         	i--;
-        	prop.put("navigation_domains_" + i + "_nl", 0);
-        	prop.put("navigation_domains", hostNavigator.size());
+        	prop.put("nav_domains_element_" + i + "_nl", 0);
+        	prop.put("nav_domains_element", hostNavigator.size());
         }
         
         // attach the bottom line with search references (topwords)
         final ArrayList<NavigatorEntry> references = theSearch.getTopicNavigator(10);
+        // default settings for no topics
+        prop.put("nav-topics", "0");
+        
         if (references.size() > 0) {
-            int hintcount = 0;
+            int i = 0;
             NavigatorEntry e;
             Iterator<NavigatorEntry> iter = references.iterator();
             while (iter.hasNext()) {
             	e = iter.next();
                 if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;
-                if (e.name != null) {
-                    prop.putHTML("words_" + hintcount + "_word", e.name);
-                    prop.putHTML("words_" + hintcount + "_newsearch", theQuery.queryString.replace(' ', '+') + "+" + e.name);
-                    prop.put("words_" + hintcount + "_count", theQuery.displayResults());
-                    prop.put("words_" + hintcount + "_offset", "0");
-                    prop.put("words_" + hintcount + "_display", display);
-                    prop.put("words_" + hintcount + "_contentdom", theQuery.contentdom());
-                    prop.put("words_" + hintcount + "_resource", ((theQuery.isLocal()) ? "local" : "global"));
-                    prop.put("words_" + hintcount + "_nl", (iter.hasNext() && hintcount < MAX_TOPWORDS) ? 1 : 0);
+                if (e != null && e.name != null) {
+                    prop.putHTML("nav-topics_element_" + i + "_name", e.name);
+                    prop.put("nav-topics_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, e.name) + "\">" + e.name + " (" + e.count + ")</a>");
+                    prop.putJSON("nav-topics_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, e.name));
+                    prop.put("nav-topics_element_" + i + "_count", e.count);
+                    prop.put("nav-topics_element_" + i + "_offset", "0");
+                    prop.put("nav-topics_element_" + i + "_display", display);
+                    prop.put("nav-topics_element_" + i + "_modifier", e.name);
+                    prop.put("nav-topics_element_" + i + "_contentdom", theQuery.contentdom());
+                    prop.put("nav-topics_element_" + i + "_resource", ((theQuery.isLocal()) ? "local" : "global"));
+                    prop.put("nav-topics_element_" + i + "_nl", (iter.hasNext() && i < MAX_TOPWORDS) ? 1 : 0);
                 }
-                if (hintcount++ > MAX_TOPWORDS) {
+                if (i++ > MAX_TOPWORDS) {
                     break;
                 }
             }
-            prop.put("words", hintcount);
+            prop.put("nav-topics_element", i);
+            prop.put("nav-topics", "1");
         }
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.FINALIZATION + "-" + "bottomline", 0, 0), false);
         

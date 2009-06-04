@@ -339,18 +339,18 @@ public final class plasmaSearchQuery {
      * @param addToQuery
      * @return
      */
-    public static String navurla(final int page, final int display, final plasmaSearchQuery theQuery, final String originalUrlMask, String addToQuery) {
+    public static String navurl(String ext, final int page, final int display, final plasmaSearchQuery theQuery, final String originalUrlMask, String addToQuery) {
         return
-        "<a href=\"yacysearch.html?display=" + display +
-        "&amp;search=" + theQuery.queryString(true) + ((addToQuery == null) ? "" : "+" + addToQuery) +
-        "&amp;maximumRecords="+ theQuery.displayResults() +
-        "&amp;startRecord=" + (page * theQuery.displayResults()) +
-        "&amp;resource=" + ((theQuery.isLocal()) ? "local" : "global") +
-        "&amp;verify=" + ((theQuery.onlineSnippetFetch) ? "true" : "false") +
-        "&amp;urlmaskfilter=" + originalUrlMask +
-        "&amp;prefermaskfilter=" + theQuery.prefer +
-        "&amp;cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
-        "&amp;contentdom=" + theQuery.contentdom() +
-        "&amp;former=" + theQuery.queryString(true) + "\">";
+        "/yacysearch." + ext + "?display=" + display +
+        "&search=" + theQuery.queryString(true) + ((addToQuery == null) ? "" : "+" + addToQuery) +
+        "&maximumRecords="+ theQuery.displayResults() +
+        "&startRecord=" + (page * theQuery.displayResults()) +
+        "&resource=" + ((theQuery.isLocal()) ? "local" : "global") +
+        "&verify=" + ((theQuery.onlineSnippetFetch) ? "true" : "false") +
+        "&urlmaskfilter=" + originalUrlMask +
+        "&prefermaskfilter=" + theQuery.prefer +
+        "&cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
+        "&contentdom=" + theQuery.contentdom() +
+        "&former=" + theQuery.queryString(true);
     }
 }

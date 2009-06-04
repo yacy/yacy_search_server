@@ -1,5 +1,17 @@
-<yacy:topwords>
-#{words}#
-<yacy:item>#[word]#</yacy:item>
-#{/words}#
-</yacy:topwords>
+<yacy:navigation>
+#(nav-domains)#::
+<yacy:facet name="domains" displayname="Domains" type="String" min="0" max="0" mean="0">
+#{element}#
+<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" />
+#{/element}#
+</yacy:facet>
+#(/nav-domains)#
+#(nav-topics)#::
+<yacy:facet name="topwords" displayname="Topics" type="String" min="0" max="0" mean="0">
+#{element}#
+<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" />
+#{/element}#
+</yacy:facet>
+#(/nav-topics)#
+</yacy:navigation>
+

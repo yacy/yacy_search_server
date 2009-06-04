@@ -1,13 +1,28 @@
-"topwords": [
-#{words}#
-{ "word": "#[word]#" }#(nl)#::,#(/nl)#
-#{/words}#
-],
-#(navigation)#
-::
-"domains": [
-#{domains}#
-{ "domain": "#[domain-json]#" }#(nl)#::,#(/nl)#
-#{/domains}#
-]
-#(/navigation)#
+    "navigation": [#(nav-domains)#::
+    {
+      "facetname": "domains",
+      "displayname": "Domains",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#(/nav-domains)##(nav-topics)#::
+    {
+      "facetname": "topwords",
+      "displayname": "Topics",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    }#(/nav-topics)#
+    ]
