@@ -246,7 +246,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
     /**
      * close the BLOB table
      */
-    public synchronized void close() {
+    public synchronized void close(boolean writeIDX) {
     	if (file != null) {
             try {
                 flushBuffer();
@@ -255,7 +255,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
             }
         }
     	this.buffer = null;
-    	super.close();
+    	super.close(writeIDX);
     	assert file == null;
     }
 
@@ -443,7 +443,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
             heap.remove("aaaaaaaaaaab".getBytes());
             heap.remove("aaaaaaaaaaac".getBytes());
             heap.put("aaaaaaaaaaaX".getBytes(), "WXYZ".getBytes());
-            heap.close();
+            heap.close(true);
         } catch (final IOException e) {
             e.printStackTrace();
         }

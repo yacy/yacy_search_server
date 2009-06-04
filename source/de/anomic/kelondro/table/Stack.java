@@ -68,6 +68,8 @@ public final class Stack extends FullRecords {
         try {
             return new Stack(file, rowdef);
         } catch (final IOException e) {
+        	Log.logSevere("Stack", "Stack file open failed, deleting stack file " + file.toString());
+        	e.printStackTrace();
             FileUtils.deletedelete(file);
             try {
                 return new Stack(file, rowdef);
@@ -205,7 +207,7 @@ public final class Stack extends FullRecords {
         return row().newEntry(n.getValueRow());
     }
     
-    void unlinkNode(final Node n) throws IOException {
+    private void unlinkNode(final Node n) throws IOException {
         // join chaines over node
         final RecordHandle l = n.getOHHandle(left);
         final RecordHandle r = n.getOHHandle(right);
@@ -289,12 +291,6 @@ public final class Stack extends FullRecords {
         } finally {
             if (f!=null) try{f.close(); f.getChannel().close();}catch(final Exception e){}
         }
-    }
-
-    public String hp(final RecordHandle h) {
-        if (h == null)
-            return "NULL";
-        return h.toString();
     }
 
     public void print() throws IOException {

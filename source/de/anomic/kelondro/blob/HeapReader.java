@@ -290,7 +290,7 @@ public class HeapReader {
     /**
      * close the BLOB table
      */
-    public synchronized void close() {
+    public synchronized void close(boolean writeIDX) {
         if (file != null) file.close();
         file = null;
         heapFile = null;

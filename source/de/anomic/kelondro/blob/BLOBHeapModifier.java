@@ -105,10 +105,7 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
      */
     public synchronized void close(boolean writeIDX) {
         shrinkWithGapsAtEnd();
-        if (file != null) {
-            file.close();
-        }
-        file = null;
+        super.close(writeIDX);
         
         if (writeIDX && index != null && free != null && (index.size() > 3 || free.size() > 3)) {
             // now we can create a dump of the index and the gap information
@@ -134,9 +131,9 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
             }
         } else {
             // this is small.. just free resources, do not write index
-            free.clear();
+            if (free != null) free.clear();
             free = null;
-            index.close();
+            if (index != null) index.close();
             index = null;
         }
     }

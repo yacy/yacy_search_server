@@ -1233,6 +1233,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                     ", remoteStackSize=" + crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE));
             try {
                 final int sizeBefore = crawler.queuePreStack.size();
+                if (sizeBefore == 0) return null;
                 nextentry = crawler.queuePreStack.pop();
                 if (nextentry == null) {
                     log.logWarning("deQueue: null entry on queue stack.");
