@@ -63,8 +63,8 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
         assert partitionExponent > 0;
         long partitionMask = (1L << (Long.SIZE - 1 - partitionExponent)) - 1L;
         // compute the position using a specific fragment of the word hash and the url hash:
-        // - from the word hash take the (63 - <partitionExponent>) lower bits
-        // - from the url hash take the (63 - <partitionExponent>) higher bits
+        // - from the word hash take the 63 - <partitionExponent> lower bits
+        // - from the url hash take the <partitionExponent> higher bits
         // in case that the partitionExpoent is 1, only one bit is taken from the urlHash,
         // which means that the partition is in two parts.
         // With partitionExponent = 2 it is divided in four parts and so on.
