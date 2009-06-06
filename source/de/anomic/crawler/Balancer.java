@@ -53,6 +53,7 @@ public class Balancer {
     private long         minimumLocalDelta;
     private long         minimumGlobalDelta;
     private int          profileErrors;
+    private long         lastDomainStackFill;
     
     public Balancer(final File cachePath, final String stackname, final boolean fullram,
                     final long minimumLocalDelta, final long minimumGlobalDelta) {
@@ -68,6 +69,7 @@ public class Balancer {
         File f = new File(cacheStacksPath, stackname + indexSuffix);
         urlFileIndex = new EcoTable(f, CrawlEntry.rowdef, (fullram) ? EcoTable.tailCacheUsageAuto : EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
         profileErrors = 0;
+        lastDomainStackFill = 0;
         Log.logInfo("Balancer", "opened balancer file with " + urlFileIndex.size() + " entries from " + f.toString());
     }
 
@@ -376,7 +378,9 @@ public class Balancer {
     }
     
     private void fillDomainStacks(int maxdomstacksize) throws IOException {
-    	if (this.domainStacks.size() > 0) return;
+    	if (this.domainStacks.size() > 0 && System.currentTimeMillis() - lastDomainStackFill < 600000L) return;
+    	this.domainStacks.clear();
+    	this.lastDomainStackFill = System.currentTimeMillis();
     	CloneableIterator<byte[]> i = this.urlFileIndex.keys(true, null);
     	while (i.hasNext()) {
     		pushHashToDomainStacks(new String(i.next()), 50);
