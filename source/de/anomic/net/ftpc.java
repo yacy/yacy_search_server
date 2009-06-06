@@ -90,7 +90,7 @@ public class ftpc {
     private Socket ControlSocket = null;
 
     // socket timeout
-    private static final int ControlSocketTimeout = 300000;
+    private static final int ControlSocketTimeout = 10000;
 
     // data socket timeout
     private int DataSocketTimeout = 0; // in seconds (default infinite)
@@ -2235,7 +2235,7 @@ public class ftpc {
             }
         } else {
             if (DataSocketActive != null) {
-                DataSocketActive.setSoTimeout(DataSocketTimeout);
+                DataSocketActive.setSoTimeout(DataSocketTimeout * 1000);
             }
         }
     }
@@ -2530,7 +2530,7 @@ public class ftpc {
      * @return timeout in seconds
      */
     public void setDataTimeoutByMaxFilesize(final int maxFilesize) {
-        int timeout = 0;
+        int timeout = 1;
         if (DataSocketRate > 0) {
             // calculate by minDataRate and MaxFTPFileSize
             timeout = maxFilesize / DataSocketRate;

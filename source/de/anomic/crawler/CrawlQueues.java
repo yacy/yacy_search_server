@@ -153,7 +153,13 @@ public class CrawlQueues {
         for (final crawlWorker w: workers.values()) {
             w.interrupt();
         }
-        // TODO: wait some more time until all threads are finished
+        for (final crawlWorker w: workers.values()) {
+            try {
+				w.join();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+        }
         noticeURL.close();
         errorURL.close();
         delegatedURL.close();
@@ -470,9 +476,9 @@ public class CrawlQueues {
         
         // do nothing if either there are private processes to be done
         // or there is no global crawl on the stack
-        if(!crawlIsPossible(NoticedURL.STACK_TYPE_REMOTE, "Global")) return false;
+        if (!crawlIsPossible(NoticedURL.STACK_TYPE_REMOTE, "Global")) return false;
 
-        if(isPaused(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) return false;
+        if (isPaused(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) return false;
         
         // we don't want to crawl a global URL globally, since WE are the global part. (from this point of view)
         final String stats = "REMOTETRIGGEREDCRAWL[" + noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_OVERHANG) + ", "

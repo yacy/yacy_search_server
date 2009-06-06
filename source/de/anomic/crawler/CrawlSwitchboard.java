@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import de.anomic.crawler.CrawlProfile.entry;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.Log;
@@ -93,6 +94,7 @@ public final class CrawlSwitchboard {
         try {
             this.profilesActiveCrawls = new CrawlProfile(profilesActiveFile);
         } catch (IOException e) {
+        	e.printStackTrace();
             FileUtils.deletedelete(profilesActiveFile);
             try {
                 this.profilesActiveCrawls = new CrawlProfile(profilesActiveFile);
@@ -103,8 +105,13 @@ public final class CrawlSwitchboard {
         }
         initActiveCrawlProfiles();
         log.logInfo("Loaded active crawl profiles from file " + profilesActiveFile.getName() +
-                ", " + this.profilesActiveCrawls.size() + " entries" +
-                ", " + profilesActiveFile.length()/1024);
+                ", " + this.profilesActiveCrawls.size() + " entries");
+        Iterator<entry> i = this.profilesActiveCrawls.profiles(true);
+        entry c;
+        while (i.hasNext()) {
+        	c = i.next();
+        	log.logInfo("active crawl: " + c.handle() + " - " + c.name());
+        }
         final File profilesPassiveFile = new File(queuesRoot, DBFILE_PASSIVE_CRAWL_PROFILES);
         if (!profilesPassiveFile.exists()) {
             // migrate old file
@@ -261,8 +268,9 @@ public final class CrawlSwitchboard {
 
     
     public void close() {
-        profilesActiveCrawls.close();
-        queuePreStack.close();
+        this.profilesActiveCrawls.close();
+        this.profilesPassiveCrawls.close();
+        this.queuePreStack.close();
     }
 
 }

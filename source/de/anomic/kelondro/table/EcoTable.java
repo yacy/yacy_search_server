@@ -548,7 +548,7 @@ public class EcoTable implements ObjectIndex {
         final Row.Entry lr = rowdef.newEntry(le);
         final int i = index.remove(lr.getPrimaryKeyBytes());
         assert i >= 0;
-        if (table != null) table.removeOne();
+        if (table != null) table.remove(lr.getPrimaryKeyBytes());
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
         return lr;
     }

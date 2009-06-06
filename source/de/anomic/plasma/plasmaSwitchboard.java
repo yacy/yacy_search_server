@@ -1193,6 +1193,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         webStructure.flushCitationReference("crg");
         webStructure.close();
         crawlQueues.close();
+        crawler.close();
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
         indexSegment.close();
         peers.close();
@@ -1240,7 +1241,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                     if (crawler.queuePreStack.size() == sizeBefore) {
                         // this is a severe problem: because this time a null is returned, it means that this status will last forever
                         // to re-enable use of the sbQueue, it must be emptied completely
-                        log.logSevere("deQueue: does not shrink after pop() == null. Emergency reset.");
+                        log.logSevere("deQueue: does not shrink after pop() == null. Emergency reset of " + crawler.queuePreStack.file());
                         crawler.queuePreStack.clear();
                     }
                     return null;

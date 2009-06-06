@@ -96,24 +96,34 @@ public class Latency {
      * @param minimumGlobalDelta
      * @return the remaining waiting time in milliseconds
      */
-    public static long waitingRemainingGuessed(String urlhash, final long minimumLocalDelta, final long minimumGlobalDelta) {
-        assert urlhash.length() == 12 || urlhash.length() == 6;
-        Latency.Host latency = Latency.host((urlhash.length() == 6) ? urlhash : urlhash.substring(6));
-        if (latency == null) return 0;
+    public static long waitingRemainingGuessed(String hosthash, final long minimumLocalDelta, final long minimumGlobalDelta) {
+        assert hosthash.length() == 12 || hosthash.length() == 6;
+        Host host = Latency.host((hosthash.length() == 6) ? hosthash : hosthash.substring(6));
+        if (host == null) return 0;
         
-        final long delta = System.currentTimeMillis() - latency.lastacc();
-        final boolean local = yacyURL.isLocal(urlhash);
-        long deltaBase = (local) ? minimumLocalDelta : minimumGlobalDelta;
-        final long genericDelta = Math.min(
-                    60000,
-                    Math.max(
-                      deltaBase + ((latency == null || local) ? 0 : latency.flux(deltaBase)),
-                      (local || latency == null) ? 0 : latency.robotsDelay())
-                  ); // prevent that that robots file can stop our indexer completely
-        return (delta < genericDelta) ? genericDelta - delta : 0;
+        // the time since last access to the domain is the basis of the remaining calculation
+        final long timeSinceLastAccess = System.currentTimeMillis() - host.lastacc();
+        
+        // find the minimum waiting time based on the network domain (local or global)
+        final boolean local = yacyURL.isLocal(hosthash);
+        long waiting = (local) ? minimumLocalDelta : minimumGlobalDelta;
+        
+        // if we have accessed the domain many times, get slower (the flux factor)
+        if (!local) waiting += host.flux(waiting);
+        
+        // use the access latency as rule how fast we can access the server
+        // this applies also to localhost, but differently, because it is not necessary to
+        // consider so many external accesses
+        waiting = Math.max(waiting, (local) ? host.average() / 2 : host.average() * 2);
+        
+        // prevent that that a robots file can stop our indexer completely
+        waiting = Math.min(60000, waiting);
+        
+        // return time that is remaining
+        //System.out.println("Latency: " + (waiting - timeSinceLastAccess));
+        return Math.max(0, waiting - timeSinceLastAccess);
     }
     
-
     /**
      * calculates how long should be waited until the domain can be accessed again
      * this follows from:

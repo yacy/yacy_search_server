@@ -72,7 +72,7 @@ public class NoticedURL {
     }
     
     public void clear() {
-    	Log.logInfo("NoticedURL", "clearing all stacks");
+    	Log.logInfo("NoticedURL", "CLEARING ALL STACKS!");
         coreStack.clear();
         limitStack.clear();
         remoteStack.clear();
@@ -208,7 +208,7 @@ public class NoticedURL {
     }
 
     public void clear(final int stackType) {
-    	Log.logInfo("NoticedURL", "clearing stack " + stackType);
+    	Log.logInfo("NoticedURL", "CLEARING STACK " + stackType);
         switch (stackType) {
                 case STACK_TYPE_CORE:     coreStack.clear(); break;
                 case STACK_TYPE_LIMIT:    limitStack.clear(); break;
@@ -221,11 +221,14 @@ public class NoticedURL {
         // this is a filo - pop
         int s;
         CrawlEntry entry;
+        int errors = 0;
         synchronized (balancer) {
             while ((s = balancer.size()) > 0) {
                 entry = balancer.pop(delay, profile);
                 if (entry == null) {
                     if (s > balancer.size()) continue;
+                    errors++;
+                    if (errors < 100) continue;
                     final int aftersize = balancer.size();
                     balancer.clear(); // the balancer is broken and cannot shrink
                     Log.logWarning("BALANCER", "entry is null, balancer cannot shrink (bevore pop = " + s + ", after pop = " + aftersize + "); reset of balancer");
@@ -240,11 +243,7 @@ public class NoticedURL {
         // this is a filo - top
         if (count > balancer.size()) count = balancer.size();
         ArrayList<CrawlEntry> list;
-        try {
-            list = balancer.top(count);
-        } catch (final IOException e) {
-            list = new ArrayList<CrawlEntry>(0);
-        }
+        list = balancer.top(count);
         return list;
     }
     

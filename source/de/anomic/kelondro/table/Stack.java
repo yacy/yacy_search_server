@@ -188,7 +188,7 @@ public final class Stack extends FullRecords {
         // return row on the bottom of the stack and remove record
         final Node n = botNode();
         if (n == null) {
-        	Log.logInfo("Stack", "botNode() == null");
+        	Log.logInfo("Stack", "botNode() == null in " + this.filename);
         	return null;
         }
         final Row.Entry ret = row().newEntry(n.getValueRow());
@@ -251,7 +251,7 @@ public final class Stack extends FullRecords {
         }
         final RecordHandle h = getHandle(root);
         if (h == null) {
-        	Log.logInfo("Stack", "getHandle(root) == null");
+        	Log.logInfo("Stack", "getHandle(root) == null in " + this.filename);
         	return null;
         }
         return new EcoNode(h);

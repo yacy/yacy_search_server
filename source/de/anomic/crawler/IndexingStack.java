@@ -82,6 +82,10 @@ public class IndexingStack {
         return (sbQueueStack == null) ? 0 : sbQueueStack.size();
     }
 
+    public String file() {
+    	return this.sbQueueStack.filename;
+    }
+    
     public synchronized void push(final QueueEntry entry) throws IOException {
         if (entry == null) return;
         if (sbQueueStack == null) return; // may occur during shutdown
@@ -104,21 +108,21 @@ public class IndexingStack {
     	while ((sizeBefore = sbQueueStack.size()) > 0) {
 	        Row.Entry b = sbQueueStack.pot();
 	        if (b == null) {
-	        	Log.logInfo("IndexingStack", "sbQueueStack.pot() == null");
+	        	Log.logInfo("IndexingStack", "sbQueueStack.pot() == null, file = " + sbQueueStack.filename);
 	        	if (sbQueueStack.size() < sizeBefore) continue;
-	        	Log.logSevere("IndexingStack", "sbQueueStack does not shrink after pot() == null; trying pop()");
+	        	Log.logSevere("IndexingStack", "sbQueueStack " + sbQueueStack.filename + " does not shrink after pot() == null; trying pop()");
 	        }
 	        if (sbQueueStack.size() < sizeBefore) {
 	        	return new QueueEntry(b);
 	        } else {
-	        	Log.logSevere("IndexingStack", "sbQueueStack does not shrink after pot() != null; trying pop()");
+	        	Log.logSevere("IndexingStack", "sbQueueStack " + sbQueueStack.filename + " does not shrink after pot() != null; trying pop()");
 	        }
 	        sizeBefore = sbQueueStack.size();
 	        b = sbQueueStack.pop();
 	        if (b == null) {
-	        	Log.logInfo("IndexingStack", "sbQueueStack.pop() == null");
+	        	Log.logInfo("IndexingStack", "sbQueueStack.pop() == null, file = " + sbQueueStack.filename);
 	        	if (sbQueueStack.size() < sizeBefore) continue;
-	        	Log.logSevere("IndexingStack", "sbQueueStack does not shrink after pop() == null; failed");
+	        	Log.logSevere("IndexingStack", "sbQueueStack does not shrink after pop() == null; failed; file = " + sbQueueStack.filename);
 	        	return null;
 	        }
 	        return new QueueEntry(b);
