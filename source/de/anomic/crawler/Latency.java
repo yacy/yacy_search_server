@@ -45,6 +45,17 @@ public class Latency {
         }
     }
     
+    public static void update(String hosthash, String host) {
+        assert hosthash.length() == 6;
+        Host h = map.get(hosthash);
+        if (h == null) {
+            h = new Host(host, 3000);
+            map.put(hosthash, h);
+        } else {
+            h.update();
+        }
+    }
+    
     public static void slowdown(String hosthash, String host) {
         assert hosthash.length() == 6;
         Host h = map.get(hosthash);
@@ -94,7 +105,8 @@ public class Latency {
      * @param urlhash
      * @param minimumLocalDelta
      * @param minimumGlobalDelta
-     * @return the remaining waiting time in milliseconds
+     * @return the remaining waiting time in milliseconds. The return value may be negative
+     *         which expresses how long the time is over the minimum waiting time.
      */
     public static long waitingRemainingGuessed(String hosthash, final long minimumLocalDelta, final long minimumGlobalDelta) {
         assert hosthash.length() == 12 || hosthash.length() == 6;
@@ -121,7 +133,7 @@ public class Latency {
         
         // return time that is remaining
         //System.out.println("Latency: " + (waiting - timeSinceLastAccess));
-        return Math.max(0, waiting - timeSinceLastAccess);
+        return waiting - timeSinceLastAccess;
     }
     
     /**
@@ -192,6 +204,9 @@ public class Latency {
             this.lastacc = System.currentTimeMillis();
             this.timeacc += time;
             this.count++;
+        }
+        public void update() {
+            this.lastacc = System.currentTimeMillis();
         }
         public void slowdown() {
             this.lastacc = System.currentTimeMillis();

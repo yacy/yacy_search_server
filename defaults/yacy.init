@@ -684,16 +684,16 @@ crawler.clientTimeout=9000
 crawler.http.acceptEncoding=gzip
 crawler.http.acceptLanguage=en-us,en;q=0.5
 crawler.http.acceptCharset=ISO-8859-1,utf-8;q=0.7,*;q=0.7
-crawler.http.maxFileSize=262144
+crawler.http.maxFileSize=1048576
 
 # ftp crawler specific settings; size in bytes
-crawler.ftp.maxFileSize=262144
+crawler.ftp.maxFileSize=1048576
 
 # maximum number of crawler threads
-crawler.MaxActiveThreads = 30
+crawler.MaxActiveThreads = 50
 
 # maximum size of indexing queue
-indexer.slots = 40
+indexer.slots = 100
 
 # maximum size of stacker queue
 stacker.slots = 2000

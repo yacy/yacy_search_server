@@ -264,12 +264,15 @@ public class Balancer {
     public synchronized CrawlEntry pop(boolean delay, CrawlProfile profile) throws IOException {
         // returns a crawl entry from the stack and ensures minimum delta times
         
-    	filltop(delay, 600000, false);
-    	filltop(delay, 60000, false);
-    	filltop(delay, 10000, false);
-    	filltop(delay, 6000, false);
-    	filltop(delay, 3000, false);
-    	filltop(delay, 1000, false);
+    	filltop(delay, -600000, false);
+    	filltop(delay, -60000, false);
+    	filltop(delay, -10000, false);
+    	filltop(delay, -6000, false);
+    	filltop(delay, -4000, false);
+    	filltop(delay, -3000, false);
+    	filltop(delay, -2000, false);
+    	filltop(delay, -1000, false);
+    	filltop(delay, -500, false);
     	filltop(delay, 0, true);
     	
         String result = null; // the result
@@ -306,15 +309,28 @@ public class Balancer {
             // in best case, this should never happen if the balancer works propertly
             // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
-            Log.logInfo("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ((sleeptime > Math.max(minimumLocalDelta, minimumGlobalDelta)) ? " (forced latency)" : ""));
-            try {synchronized(this) { this.wait(sleeptime); }} catch (final InterruptedException e) {}
-            if (sleeptime > 1000 && this.domainStacks.size() > 1) this.domainStacks.remove(crawlEntry.url().hash().substring(6));
+            Log.logInfo("BALANCER", "forcing crawl-delay of " + (sleeptime / 1000) + " seconds for " + crawlEntry.url().getHost() + ((sleeptime > Math.max(minimumLocalDelta, minimumGlobalDelta)) ? " (forced latency)" : ""));
+            long loops = sleeptime / 3000;
+            long rest = sleeptime % 3000;
+            if (loops < 2) {
+            	rest = rest + 3000 * loops;
+            	loops = 0;
+            }
+            try {synchronized(this) { this.wait(rest); }} catch (final InterruptedException e) {}
+            for (int i = 0; i < loops; i++) {
+            	Log.logInfo("BALANCER", "waiting for " + crawlEntry.url().getHost() + ": " + ((loops - i) * 3) + " seconds remaining...");
+                try {synchronized(this) { this.wait(3000); }} catch (final InterruptedException e) {}
+            }
+            if (sleeptime > 3000 && this.domainStacks.size() > 1) this.domainStacks.remove(crawlEntry.url().hash().substring(6));
         }
+        Latency.update(crawlEntry.url().hash().substring(6), crawlEntry.url().getHost());
         return crawlEntry;
     }
     
     private void filltop(boolean delay, long maximumwaiting, boolean acceptonebest) {
     	if (this.top.size() > 0) return;
+    	
+    	//System.out.println("*** DEBUG started filltop delay=" + ((delay) ? "true":"false") + ", maximumwaiting=" + maximumwaiting + ", acceptonebest=" + ((acceptonebest) ? "true":"false"));
     	
     	// check if we need to get entries from the file index
     	try {
@@ -345,6 +361,7 @@ public class Balancer {
     				}
     				continue;
     			}
+    			//System.out.println("*** accepting " + n + " : " + w);
     		}
     		n = entry.getValue().removeFirst();
     		this.top.add(n);

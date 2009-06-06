@@ -254,7 +254,13 @@ public class CrawlQueues {
                             + ", must-not-match=" + profile.mustNotMatchPattern().toString()
                             + ", permission=" + ((sb.peers == null) ? "undefined" : (((sb.peers.mySeed().isSenior()) || (sb.peers.mySeed().isPrincipal())) ? "true" : "false")));
 
-                processLocalCrawling(urlEntry, stats);
+                // work off one Crawl stack entry
+                if ((urlEntry == null) || (urlEntry.url() == null)) {
+                    log.logInfo(stats + ": urlEntry = null");
+                } else {
+                	new crawlWorker(urlEntry);
+                }
+                
             } else {
                 this.log.logSevere("Unsupported protocol in URL '" + url.toString());
             }
@@ -496,18 +502,6 @@ public class CrawlQueues {
             if (e.getMessage().indexOf("hash is null") > 0) noticeURL.clear(NoticedURL.STACK_TYPE_REMOTE);
             return true;
         }
-    }
-    
-    private void processLocalCrawling(final CrawlEntry entry, final String stats) {
-        // work off one Crawl stack entry
-        if ((entry == null) || (entry.url() == null)) {
-            log.logInfo(stats + ": urlEntry = null");
-            return;
-        }
-        new crawlWorker(entry);
-        
-        log.logInfo(stats + ": enqueued for load " + entry.url() + " [" + entry.url().hash() + "]");
-        return;
     }
     
     public Document loadResourceFromWeb(
