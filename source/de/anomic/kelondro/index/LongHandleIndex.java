@@ -101,7 +101,7 @@ public class LongHandleIndex {
         // we must use an iterator from the combined index, because we need the entries sorted
         // otherwise we could just write the byte[] from the in kelondroRowSet which would make
         // everything much faster, but this is not an option here.
-        File tmp = new File(file.getParentFile(), file.getName() + ".tmp");
+        File tmp = new File(file.getParentFile(), file.getName() + ".prt");
         Iterator<Row.Entry> i = this.index.rows(true, null);
         OutputStream os = new BufferedOutputStream(new FileOutputStream(tmp), 4 * 1024 * 1024);
         if (file.getName().endsWith(".gz")) os = new GZIPOutputStream(os);

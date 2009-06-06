@@ -319,7 +319,7 @@ public class PhpBB3Dao implements Dao {
             int c = 0;
             while ((e = queue.take()) != DCEntry.poison) {
                 if (osw == null) {
-                    outputfiletmp = new File(targetdir, targethost + "." + versioninfo + "." + fc + ".xml.tmp");
+                    outputfiletmp = new File(targetdir, targethost + "." + versioninfo + "." + fc + ".xml.prt");
                     outputfile = new File(targetdir, targethost + "." + versioninfo + "." + fc + ".xml");
                     if (outputfiletmp.exists()) outputfiletmp.delete();
                     if (outputfile.exists()) outputfile.delete();

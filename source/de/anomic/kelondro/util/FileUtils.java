@@ -435,7 +435,7 @@ public final class FileUtils {
     }
 
     public static void saveSet(final File file, final String format, final Set<byte[]> set, final String sep) throws IOException {
-        final File tf = new File(file.toString() + ".tmp" + (System.currentTimeMillis() % 1000));
+        final File tf = new File(file.toString() + ".prt" + (System.currentTimeMillis() % 1000));
         OutputStream os = null;
         if ((format == null) || (format.equals("plain"))) {
             os = new BufferedOutputStream(new FileOutputStream(tf));
@@ -459,7 +459,7 @@ public final class FileUtils {
     }
 
     public static void saveSet(final File file, final String format, final RowSet set, final String sep) throws IOException {
-        final File tf = new File(file.toString() + ".tmp" + (System.currentTimeMillis() % 1000));
+        final File tf = new File(file.toString() + ".prt" + (System.currentTimeMillis() % 1000));
         OutputStream os = null;
         if ((format == null) || (format.equals("plain"))) {
             os = new BufferedOutputStream(new FileOutputStream(tf));

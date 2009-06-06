@@ -171,7 +171,7 @@ public class mimeTypeParser extends AbstractParser implements Parser {
     public plasmaParserDocument parse(final yacyURL location, final String mimeType,final String charset, final InputStream source) throws ParserException, InterruptedException {
         File dstFile = null;
         try {
-            dstFile = File.createTempFile("mimeTypeParser",".tmp");
+            dstFile = File.createTempFile("mimeTypeParser",".prt");
             FileUtils.copy(source,dstFile);
             return parse(location,mimeType,charset,dstFile);
         } catch (final IOException e) {

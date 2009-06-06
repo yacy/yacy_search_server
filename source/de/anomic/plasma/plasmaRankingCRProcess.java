@@ -301,9 +301,9 @@ public class plasmaRankingCRProcess {
                 // save accumulator to temporary file
                 File tmp_file;
                 if (to_file.toString().endsWith(".gz")) {
-                    tmp_file = new File(to_file.toString() + "." + (System.currentTimeMillis() % 1000) + ".tmp.gz");
+                    tmp_file = new File(to_file.toString() + "." + (System.currentTimeMillis() % 1000) + ".prt.gz");
                 } else {
-                    tmp_file = new File(to_file.toString() + "." + (System.currentTimeMillis() % 1000) + ".tmp");
+                    tmp_file = new File(to_file.toString() + "." + (System.currentTimeMillis() % 1000) + ".prt");
                 }
                 // store the file
                 acc.toFile(tmp_file);

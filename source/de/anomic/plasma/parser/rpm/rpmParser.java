@@ -79,7 +79,7 @@ public class rpmParser extends AbstractParser implements Parser {
             final InputStream source) throws ParserException {
         File dstFile = null;
         try {
-            dstFile = File.createTempFile("rpmParser",".tmp");
+            dstFile = File.createTempFile("rpmParser",".prt");
             FileUtils.copy(source,dstFile);
             return parse(location,mimeType,charset,dstFile);
         } catch (final Exception e) {            

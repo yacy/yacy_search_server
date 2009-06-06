@@ -108,7 +108,7 @@ public class BLOBArray implements BLOB {
         // delete unused temporary files
         boolean deletions = false;
         for (int i = 0; i < files.length; i++) {
-            if (files[i].endsWith(".tmp")) {
+            if (files[i].endsWith(".tmp") || files[i].endsWith(".prt")) {
                 FileUtils.deletedelete(new File(heapLocation, files[i]));
                 deletions = true;
             }
@@ -642,7 +642,7 @@ public class BLOBArray implements BLOB {
         }
         assert i1.hasNext();
         assert i2.hasNext();
-        File tmpFile = new File(newFile.getParentFile(), newFile.getName() + ".tmp");
+        File tmpFile = new File(newFile.getParentFile(), newFile.getName() + ".prt");
         HeapWriter writer = new HeapWriter(tmpFile, newFile, keylength, order, writeBuffer);
         merge(i1, i2, order, writer);
         try {

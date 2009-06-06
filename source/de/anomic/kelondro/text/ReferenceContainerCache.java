@@ -91,7 +91,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         assert this.cache != null;
         Log.logInfo("indexContainerRAMHeap", "creating rwi heap dump '" + heapFile.getName() + "', " + cache.size() + " rwi's");
         if (heapFile.exists()) FileUtils.deletedelete(heapFile);
-        File tmpFile = new File(heapFile.getParentFile(), heapFile.getName() + ".tmp");
+        File tmpFile = new File(heapFile.getParentFile(), heapFile.getName() + ".prt");
         HeapWriter dump;
         try {
             dump = new HeapWriter(tmpFile, heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder, writeBuffer);

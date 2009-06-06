@@ -80,7 +80,7 @@ public class XMLTables {
                 throw new RuntimeException("Microtables.commit: no file specified");
 
             // write first to a temporary file
-            final File tmpFile = new File(this.propFile.toString() + ".tmp");
+            final File tmpFile = new File(this.propFile.toString() + ".prt");
 
             // write file
             final XMLEncoder xmlenc = new XMLEncoder(new FileOutputStream(tmpFile));

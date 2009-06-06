@@ -87,7 +87,7 @@ public class tarParser extends AbstractParser implements Parser {
         plasmaParserDocument subDoc = null;        
         try {           
             if ((this.contentLength == -1) || (this.contentLength > Parser.MAX_KEEP_IN_MEMORY_SIZE)) {
-                outputFile = File.createTempFile("zipParser",".tmp");
+                outputFile = File.createTempFile("zipParser",".prt");
                 docText = new BufferedOutputStream(new FileOutputStream(outputFile));
             } else {
                 docText = new ByteBuffer();

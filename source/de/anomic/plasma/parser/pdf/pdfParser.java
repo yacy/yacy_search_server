@@ -120,7 +120,7 @@ public class pdfParser extends AbstractParser implements Parser {
             
             // creating a writer for output
             if ((this.contentLength == -1) || (this.contentLength > Parser.MAX_KEEP_IN_MEMORY_SIZE)) {
-                writerFile = File.createTempFile("pdfParser",".tmp");
+                writerFile = File.createTempFile("pdfParser",".prt");
                 writer = new OutputStreamWriter(new FileOutputStream(writerFile),"UTF-8");
             } else {
                 writer = new serverCharBuffer(); 

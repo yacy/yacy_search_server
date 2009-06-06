@@ -680,7 +680,7 @@ public class mediawikiIndex extends Thread {
                     
                     if (osw == null) {
                         // start writing a new file
-                        this.outputfilename = targetstub + "." + fc + ".xml.tmp";
+                        this.outputfilename = targetstub + "." + fc + ".xml.prt";
                         this.osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(targetdir, outputfilename))), "UTF-8");
                         osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<surrogates xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n");
                     }
@@ -694,7 +694,7 @@ public class mediawikiIndex extends Thread {
                         new File(targetdir, outputfilename).renameTo(new File(targetdir, finalfilename));
                         rc = 0;
                         fc++;
-                        outputfilename = targetstub + "." + fc + ".xml.tmp";
+                        outputfilename = targetstub + "." + fc + ".xml.prt";
                         osw = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(new File(targetdir, outputfilename))), "UTF-8");
                         osw.write("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<surrogates xmlns:dc=\"http://purl.org/dc/elements/1.1/\">\n");
                     }

@@ -60,7 +60,7 @@ public class odtDetector implements MagicDetector {
     public String[] process(final byte[] data, final int offset, final int length, final long bitmask, final char comparator, final String mimeType, final Map params) {
         File dstFile = null;
         try {
-            dstFile = File.createTempFile("mimeTypeParser",".tmp");
+            dstFile = File.createTempFile("mimeTypeParser",".prt");
             FileUtils.copy(data,dstFile);
             return process(dstFile, offset, length, bitmask, comparator, mimeType, params);
         } catch (final IOException e) {

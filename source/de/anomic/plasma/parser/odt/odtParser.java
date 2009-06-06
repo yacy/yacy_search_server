@@ -112,7 +112,7 @@ public class odtParser extends AbstractParser implements Parser {
                     
                     // creating a writer for output
                     if ((contentSize == -1) || (contentSize > Parser.MAX_KEEP_IN_MEMORY_SIZE)) {
-                        writerFile = File.createTempFile("odtParser",".tmp");
+                        writerFile = File.createTempFile("odtParser",".prt");
                         writer = new OutputStreamWriter(new FileOutputStream(writerFile),"UTF-8");
                     } else {
                         writer = new serverCharBuffer(); 
