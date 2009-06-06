@@ -43,7 +43,6 @@ import de.anomic.yacy.yacyURL;
 public class DCEntry extends TreeMap<String, String> {
     
     private static final long    serialVersionUID = -2050291583515701559L;
-    public  static final DCEntry poison           = new DCEntry();
     
     // use a collator to relax when distinguishing between lowercase und uppercase letters
     private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
@@ -51,6 +50,7 @@ public class DCEntry extends TreeMap<String, String> {
         insensitiveCollator.setStrength(Collator.SECONDARY);
         insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
     }
+    public  static final DCEntry poison = new DCEntry();
     
     public DCEntry() {
         super((Collator) insensitiveCollator.clone());
