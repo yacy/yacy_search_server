@@ -216,7 +216,7 @@ public class Balancer {
         assert urlFileIndex.has(hash.getBytes()) : "hash = " + hash;
         
         // add the hash to a queue
-        pushHashToDomainStacks(entry.url().hash(), 10);
+        pushHashToDomainStacks(entry.url().hash(), 50);
     }
     
     private void pushHashToDomainStacks(final String hash, int maxstacksize) {
@@ -307,8 +307,9 @@ public class Balancer {
             // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
             Log.logInfo("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ((sleeptime > Math.max(minimumLocalDelta, minimumGlobalDelta)) ? " (forced latency)" : ""));
-            if (sleeptime > 0) try {synchronized(this) { this.wait(sleeptime); }} catch (final InterruptedException e) {}
-        }        
+            try {synchronized(this) { this.wait(sleeptime); }} catch (final InterruptedException e) {}
+            if (sleeptime > 1000 && this.domainStacks.size() > 1) this.domainStacks.remove(crawlEntry.url().hash().substring(6));
+        }
         return crawlEntry;
     }
     
@@ -317,7 +318,7 @@ public class Balancer {
     	
     	// check if we need to get entries from the file index
     	try {
-			fillDomainStacks(400);
+			fillDomainStacks(800);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -361,7 +362,7 @@ public class Balancer {
     	if (this.domainStacks.size() > 0) return;
     	CloneableIterator<byte[]> i = this.urlFileIndex.keys(true, null);
     	while (i.hasNext()) {
-    		pushHashToDomainStacks(new String(i.next()), 10);
+    		pushHashToDomainStacks(new String(i.next()), 50);
     		if (this.domainStacks.size() > maxdomstacksize) break;
     	}
     }
