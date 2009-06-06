@@ -44,6 +44,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import de.anomic.kelondro.util.Log;
+
 
 public class Digest {
 	
@@ -109,23 +111,36 @@ public class Digest {
     }
 
     public static byte[] encodeMD5Raw(final String key) {
+    	MessageDigest digest = null;
+    	boolean fromPool = true;
         try {
-            final MessageDigest digest = digestPool.take();
-            byte[] keyBytes;
-            try {
-                keyBytes = key.getBytes("UTF-8");
-            } catch (UnsupportedEncodingException e) {
-                keyBytes = key.getBytes();
-            }
-            digest.update(keyBytes);
-            byte[] result = digest.digest();
-            digest.reset();
-            digestPool.put(digest);
-            return result;
+            digest = digestPool.take();
         } catch (InterruptedException e) {
-        	System.out.println("Internal Error at md5:" + e.getMessage());
+        	Log.logWarning("Digest", "using generic instead of pooled digest");
+        	try {
+				digest = MessageDigest.getInstance("MD5");
+			} catch (NoSuchAlgorithmException e1) {
+				e1.printStackTrace();
+			}
+			digest.reset();
+			fromPool = false;
 		}
-        return null;
+        byte[] keyBytes;
+        try {
+            keyBytes = key.getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            keyBytes = key.getBytes();
+        }
+        digest.update(keyBytes);
+        byte[] result = digest.digest();
+        digest.reset();
+        if (fromPool)
+			try {
+				digestPool.put(digest);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+        return result;
     }
     
     public static byte[] encodeMD5Raw(final File file) {
