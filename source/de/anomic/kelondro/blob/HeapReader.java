@@ -293,11 +293,35 @@ public class HeapReader {
     public synchronized void close(boolean writeIDX) {
         if (file != null) file.close();
         file = null;
-        heapFile = null;
-        free.clear();
-        free = null;
-        index.close();
-        index = null;
+        if (writeIDX && index != null && free != null && (index.size() > 3 || free.size() > 3)) {
+            // now we can create a dump of the index and the gap information
+            // to speed up the next start
+            try {
+                long start = System.currentTimeMillis();
+                String fingerprint = HeapWriter.fingerprintFileHash(this.heapFile);
+                if (fingerprint == null) {
+                    Log.logSevere("kelondroBLOBHeap", "cannot write a dump for " + heapFile.getName()+ ": fingerprint is null");
+                } else {
+                    free.dump(HeapWriter.fingerprintGapFile(this.heapFile, fingerprint));
+                }
+                free.clear();
+                free = null;
+                if (fingerprint != null) {
+                    index.dump(HeapWriter.fingerprintIndexFile(this.heapFile, fingerprint));
+                    Log.logInfo("kelondroBLOBHeap", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                }
+                index.close();
+                index = null;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            // this is small.. just free resources, do not write index
+            if (free != null) free.clear();
+            free = null;
+            if (index != null) index.close();
+            index = null;
+        }
     }
     
     /**
