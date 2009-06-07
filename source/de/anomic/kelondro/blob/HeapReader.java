@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
-import de.anomic.kelondro.index.LongHandleIndex;
+import de.anomic.kelondro.index.HandleMap;
 import de.anomic.kelondro.io.CachedRandomAccess;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
@@ -49,7 +49,7 @@ public class HeapReader {
     public final static long keepFreeMem = 20 * 1024 * 1024;
     
     protected int                keylength;  // the length of the primary key
-    protected LongHandleIndex    index;      // key/seek relation for used records
+    protected HandleMap    index;      // key/seek relation for used records
     protected Gap                free;       // set of {seek, size} pairs denoting space and position of free records
     protected File               heapFile;   // the file of the heap
     protected final ByteOrder    ordering;   // the ordering on keys
@@ -117,11 +117,16 @@ public class HeapReader {
         // there is an index and a gap file:
         // read the index file:
         try {
-            this.index = new LongHandleIndex(this.keylength, this.ordering, fif, 1000000);
+            this.index = new HandleMap(this.keylength, this.ordering, 8, fif, 1000000);
         } catch (IOException e) {
             e.printStackTrace();
             return false;
         }
+
+        // check saturation
+        int[] saturation = this.index.saturation();
+        Log.logInfo("HeapReader", "saturation of " + fif.getName() + ": keylength = " + saturation[0] + ", vallength = " + saturation[1] + ", possible saving: " + ((this.keylength - saturation[0] + 8 - saturation[1]) * index.size() / 1024 / 1024) + " MB");
+        
         // an index file is a one-time throw-away object, so just delete it now
         FileUtils.deletedelete(fif);
         
@@ -141,10 +146,10 @@ public class HeapReader {
     
     private void initIndexReadFromHeap() throws IOException {
         // this initializes the this.index object by reading positions from the heap file
-        Log.logInfo("HeapReader", "generating index for " + heapFile.toString() + ", " + (file.length() / 1024) + " kbytes. Please wait.");
+        Log.logInfo("HeapReader", "generating index for " + heapFile.toString() + ", " + (file.length() / 1024 / 1024) + " MB. Please wait.");
         
         this.free = new Gap();
-        LongHandleIndex.initDataConsumer indexready = LongHandleIndex.asynchronusInitializer(keylength, this.ordering, 0, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))), 100000);
+        HandleMap.initDataConsumer indexready = HandleMap.asynchronusInitializer(keylength, this.ordering, 8, 0, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))), 100000);
         byte[] key = new byte[keylength];
         int reclen;
         long seek = 0;
@@ -187,7 +192,7 @@ public class HeapReader {
             // new seek position
             seek += 4L + reclen;
         }
-        indexready.finish();
+        indexready.finish(true);
         
         // finish the index generation
         try {

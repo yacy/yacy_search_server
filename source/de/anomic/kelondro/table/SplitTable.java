@@ -164,11 +164,7 @@ public class SplitTable implements ObjectIndex {
                     maxtime = time;
                 }
                 
-                if (f.isDirectory()) {
-                    ram = FlexTable.staticRAMIndexNeed(path, tablefile[i], rowdef);
-                } else {
-                    ram = EcoTable.staticRAMIndexNeed(f, rowdef);
-                }
+                ram = EcoTable.staticRAMIndexNeed(f, rowdef);
                 if (ram > 0) {
                     t.put(tablefile[i], Long.valueOf(ram));
                     sum += ram;
@@ -200,11 +196,6 @@ public class SplitTable implements ObjectIndex {
             t.remove(maxf);
             if (maxf != null) {
                 f = new File(path, maxf);
-                if (f.isDirectory()) {
-                    // this is a kelonodroFlex table
-                    FlexTable.delete(path, maxf);
-                    Log.logInfo("kelondroSplitTable", "replaced partial flex table " + f + " by new eco table");
-                }
                 Log.logInfo("kelondroSplitTable", "opening partial eco table " + f);
                 table = new EcoTable(f, rowdef, EcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
                 tables.put(maxf, table);

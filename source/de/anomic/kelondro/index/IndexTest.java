@@ -116,7 +116,7 @@ public class IndexTest {
         System.out.println("sorted map");
         Runtime.getRuntime().gc();
         long freeStartKelondro = MemoryControl.available();
-        IntegerHandleIndex ii = new IntegerHandleIndex(12, Base64Order.enhancedCoder, count, count);
+        HandleMap ii = new HandleMap(12, Base64Order.enhancedCoder, 4, count, count);
         for (int i = 0; i < count; i++) ii.putUnique(tests[i], 1);
         ii.get(randomHash(r)); // trigger sort
         long t6 = System.currentTimeMillis();

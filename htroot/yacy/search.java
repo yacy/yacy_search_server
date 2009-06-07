@@ -193,6 +193,7 @@ public final class search {
                     prefer,
                     plasmaSearchQuery.contentdomParser(contentdom),
                     language,
+                    "", // no navigation
                     false,
                     count,
                     0,
@@ -243,7 +244,8 @@ public final class search {
                     prefer, 
                     plasmaSearchQuery.
                     contentdomParser(contentdom), 
-                    language, 
+                    language,
+                    "", // no navigation
                     false, 
                     count, 
                     0, 

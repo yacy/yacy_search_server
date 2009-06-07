@@ -31,7 +31,7 @@ import java.util.Iterator;
 
 import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.BLOBArray;
-import de.anomic.kelondro.index.IntegerHandleIndex;
+import de.anomic.kelondro.index.HandleMap;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.ByteOrder;
@@ -294,14 +294,14 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         return donesomething;
     }
     
-    public static <ReferenceType extends Reference> IntegerHandleIndex referenceHashes(
+    public static <ReferenceType extends Reference> HandleMap referenceHashes(
                             final File heapLocation,
                             final ReferenceFactory<ReferenceType> factory,
                             final ByteOrder termOrder,
                             final Row payloadrow) throws IOException {
        
         System.out.println("CELL REFERENCE COLLECTION startup");
-        IntegerHandleIndex references = new IntegerHandleIndex(payloadrow.primaryKeyLength, termOrder, 0, 1000000);
+        HandleMap references = new HandleMap(payloadrow.primaryKeyLength, termOrder, 4, 0, 1000000);
         String[] files = heapLocation.list();
         for (String f: files) {
             if (f.length() < 22 || !f.startsWith("index") || !f.endsWith(".blob")) continue;
@@ -324,7 +324,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
                 	if (reference == null) continue;
                 	mh = reference.metadataHash();
                 	if (mh == null) continue;
-                    references.inc(mh.getBytes(), 1);
+                    references.inc(mh.getBytes());
                 }
                 count++;
                 // write a log

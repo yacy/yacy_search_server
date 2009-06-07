@@ -99,60 +99,6 @@
       </tr>
     </table>
     
-    <p><strong>FlexTable RAM Index:</strong></p>
-    <table border="0" cellpadding="2" cellspacing="1">
-      <tr class="TableHeader" valign="bottom">
-        <td>Table</td>
-        <td>Count</td>
-        <td>Chunk Size</td>
-        <td>Used Memory</td>
-      </tr>
-      #{TableList}#
-      <tr class="TableCellLight">
-        <td align="left" class="TableCellDark">#[tableIndexPath]#</td>
-        <td align="right">#[tableIndexCount]#</td>
-        <td align="right">#[tableIndexChunkSize]#</td>
-        <td align="right">#[tableIndexMem]#</td>
-      </tr>
-      #{/TableList}#
-      <tr class="TableCellDark">
-        <td colspan="6">Total Mem = #[TableIndexTotalMem]# MB</td>
-      </tr>
-    </table>
-    
-    <p><strong>Node Caches:</strong></p>
-    <table border="0" cellpadding="2" cellspacing="1">
-      <tr class="TableHeader" valign="bottom">
-        <td>Table</td>
-        <td>Size</td>
-        <td>Chunk Size</td>
-        <td>Used Memory</td>
-        <td>Read Hit</td>
-        <td>Read Miss</td>
-        <td>Write Unique</td>
-        <td>Write Double</td>
-        <td>Deletes</td>
-        <td>Flushes</td>
-      </tr>
-      #{NodeList}#
-      <tr class="TableCellLight">
-        <td align="left" class="TableCellDark">#[nodeCachePath]#</td>
-        <td align="right">#[nodeCacheCount]#</td>
-        <td align="right">#[nodeChunkSize]#</td>
-        <td align="right">#[nodeCacheMem]#</td>
-        <td align="right">#[nodeCacheReadHit]#</td>
-        <td align="right">#[nodeCacheReadMiss]#</td>
-        <td align="right">#[nodeCacheWriteUnique]#</td>
-        <td align="right">#[nodeCacheWriteDouble]#</td>
-        <td align="right">#[nodeCacheDeletes]#</td>
-        <td align="right">#[nodeCacheFlushes]#</td>
-      </tr>
-      #{/NodeList}#
-      <tr class="TableCellDark">
-        <td colspan="10">Total Mem = #[nodeCacheTotalMem]# MB; Stop Grow when less than #[nodeCacheStopGrow]# MB available left; Start Shrink when less than #[nodeCacheStartShrink]# MB availabe left</td>
-      </tr>
-    </table>
-    
     <p><strong>Object Read Caches:</strong></p>
     <table border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">

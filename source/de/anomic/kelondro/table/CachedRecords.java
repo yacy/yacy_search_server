@@ -28,23 +28,17 @@ package de.anomic.kelondro.table;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectArrayCache;
-import de.anomic.kelondro.io.RandomAccessInterface;
 import de.anomic.kelondro.io.RandomAccessRecords;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
 
 public class CachedRecords extends AbstractRecords implements RandomAccessRecords {
-
-    // memory calculation
-    private   static final int element_in_cache = 4; // for kelondroCollectionObjectMap: 4; for HashMap: 52
-    
+	
     // static supervision objects: recognize and coordinate all activites
     private static final TreeMap<String, CachedRecords> recordTracker = new TreeMap<String, CachedRecords>();
     private static final long memStopGrow    = 40 * 1024 * 1024; // a limit for the node cache to stop growing if less than this memory amount is available
@@ -65,23 +59,6 @@ public class CachedRecords extends AbstractRecords implements RandomAccessRecord
             final short ohbytec, final short ohhandlec,
             final Row rowdef, final int FHandles, final int txtProps, final int txtPropWidth) throws IOException {
         super(file, useNodeCache, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth);
-        initCache(useNodeCache, preloadTime);
-        if (useNodeCache) recordTracker.put(this.filename, this);
-    }
-    
-    public CachedRecords(
-            final RandomAccessInterface ra, final String filename, final boolean useNodeCache, final long preloadTime,
-            final short ohbytec, final short ohhandlec,
-            final Row rowdef, final int FHandles, final int txtProps, final int txtPropWidth,
-            final boolean exitOnFail) {
-        super(ra, filename, useNodeCache, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, exitOnFail);
-        initCache(useNodeCache, preloadTime);
-        if (useNodeCache) recordTracker.put(this.filename, this);
-    }
-    
-    public CachedRecords(
-            final RandomAccessInterface ra, final String filename, final boolean useNodeCache, final long preloadTime) throws IOException{
-        super(ra, filename, useNodeCache);
         initCache(useNodeCache, preloadTime);
         if (useNodeCache) recordTracker.put(this.filename, this);
     }
@@ -120,7 +97,7 @@ public class CachedRecords extends AbstractRecords implements RandomAccessRecord
         }
     }
 
-    public int cacheGrowStatus() {
+    private int cacheGrowStatus() {
         final long available = MemoryControl.available();
         if ((cacheHeaders != null) && (available  - 2 * 1024 * 1024 < cacheHeaders.memoryNeededForGrow())) return 0;
         return cacheGrowStatus(available, memStopGrow, memStartShrink);
@@ -138,43 +115,6 @@ public class CachedRecords extends AbstractRecords implements RandomAccessRecord
         }
         MemoryControl.gc(30000, "kelendroCacheRecords.cacheGrowStatus(...) 0"); // thq
         return 0;
-    }
-    
-    public static long getMemStopGrow() {
-        return memStopGrow ;
-    }
-    
-    public static long getMemStartShrink() {
-        return memStartShrink ;
-    }
-    
-    public static final Iterator<String> filenames() {
-        // iterates string objects; all file names from record tracker
-        return recordTracker.keySet().iterator();
-    }
-
-    public static final Map<String, String> memoryStats(final String filename) {
-        // returns a map for each file in the tracker;
-        // the map represents properties for each record oobjects,
-        // i.e. for cache memory allocation
-        final CachedRecords theRecord = recordTracker.get(filename);
-        return theRecord.memoryStats();
-    }
-    
-    private final Map<String, String> memoryStats() {
-        // returns statistical data about this object
-        if (cacheHeaders == null) return null;
-        final HashMap<String, String> map = new HashMap<String, String>();
-        map.put("nodeChunkSize", Integer.toString(this.headchunksize + element_in_cache));
-        map.put("nodeCacheCount", Integer.toString(cacheHeaders.size()));
-        map.put("nodeCacheMem", Integer.toString(cacheHeaders.size() * (this.headchunksize + element_in_cache)));
-        map.put("nodeCacheReadHit", Integer.toString(readHit));
-        map.put("nodeCacheReadMiss", Integer.toString(readMiss));
-        map.put("nodeCacheWriteUnique", Integer.toString(writeUnique));
-        map.put("nodeCacheWriteDouble", Integer.toString(writeDouble));
-        map.put("nodeCacheDeletes", Integer.toString(cacheDelete));
-        map.put("nodeCacheFlushes", Integer.toString(cacheFlush));
-        return map;
     }
     
     protected synchronized void deleteNode(final RecordHandle handle) throws IOException {

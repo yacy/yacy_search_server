@@ -63,6 +63,7 @@ public final class plasmaSearchQuery {
     public int contentdom;
     public String urlMask;
     public String targetlang;
+    public String navigators;
     public int domType;
     public int zonecode;
     public int domMaxTargets;
@@ -115,6 +116,7 @@ public final class plasmaSearchQuery {
         this.remotepeer = null;
         this.handle = Long.valueOf(System.currentTimeMillis());
         this.specialRights = false;
+        this.navigators = "all";
     }
     
     public plasmaSearchQuery(
@@ -124,6 +126,7 @@ public final class plasmaSearchQuery {
         final plasmaSearchRankingProfile ranking,
         final int maxDistance, final String prefer, final int contentdom,
         final String language,
+        final String navigators,
         final boolean onlineSnippetFetch,
         final int lines, final int offset, final String urlMask,
         final int domType, final String domGroupName, final int domMaxTargets,
@@ -145,6 +148,7 @@ public final class plasmaSearchQuery {
 		this.urlMask = urlMask;
 		assert language != null;
         this.targetlang = language;
+        this.navigators = navigators;
         this.domType = domType;
         this.zonecode = domainzone;
 		this.domMaxTargets = domMaxTargets;

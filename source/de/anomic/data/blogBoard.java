@@ -67,7 +67,7 @@ public class blogBoard {
         new File(actpath.getParent()).mkdir();
         new File(newFile.getParent()).mkdir();
         if (database == null) {
-            database = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, true, false, false, newFile), 500, '_');
+            database = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, false, false, newFile), 500, '_');
         }
     }
     

@@ -312,6 +312,10 @@ public class yacysearch {
                 if (language == null) language = "en";
             }
             
+            // navigation
+            String navigation = (post == null) ? "" : post.get("nav", "");
+            
+            // the query
             final TreeSet<String>[] query = plasmaSearchQuery.cleanQuery(querystring.trim()); // converts also umlaute
             
             int maxDistance = (querystring.indexOf('"') >= 0) ? maxDistance = query.length - 1 : Integer.MAX_VALUE;
@@ -385,6 +389,7 @@ public class yacysearch {
                     prefermask,
                     contentdomCode,
                     language,
+                    navigation,
                     fetchSnippets,
                     itemsPerPage,
                     offset,

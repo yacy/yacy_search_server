@@ -50,7 +50,6 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.table.EcoTable;
-import de.anomic.kelondro.table.FlexTable;
 import de.anomic.kelondro.table.Tree;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
@@ -58,7 +57,6 @@ import de.anomic.kelondro.util.kelondroException;
 public class BLOBTree {
 
     private static final int counterlen = 8;
-    private static final int EcoFSBufferSize = 20;
     
     protected int keylen;
     private final int reclen;
@@ -72,39 +70,26 @@ public class BLOBTree {
      * Deprecated Class. Please use kelondroBLOBHeap instead
      */
     private BLOBTree(final File file, final boolean useNodeCache, final boolean useObjectCache, final int key,
-            final int nodesize, final char fillChar, final ByteOrder objectOrder, final boolean usetree, final boolean writebuffer, final boolean resetOnFail) {
+            final int nodesize, final char fillChar, final ByteOrder objectOrder, final boolean writebuffer, final boolean resetOnFail) {
         // creates or opens a dynamic tree
         rowdef = new Row("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize, objectOrder);
         ObjectIndex fbi;
-        if (usetree) {
-			try {
-				fbi = new Tree(file, useNodeCache, 0, rowdef, 1, 8);
-			} catch (final IOException e) {
-				e.printStackTrace();
-				if (resetOnFail) {
-				    FileUtils.deletedelete(file);
-					try {
-						fbi = new Tree(file, useNodeCache, -1, rowdef, 1, 8);
-					} catch (final IOException e1) {
-						e1.printStackTrace();
-						throw new kelondroException(e.getMessage());
-					}
-				} else {
+		try {
+			fbi = new Tree(file, useNodeCache, 0, rowdef, 1, 8);
+		} catch (final IOException e) {
+			e.printStackTrace();
+			if (resetOnFail) {
+			    FileUtils.deletedelete(file);
+				try {
+					fbi = new Tree(file, useNodeCache, -1, rowdef, 1, 8);
+				} catch (final IOException e1) {
+					e1.printStackTrace();
 					throw new kelondroException(e.getMessage());
 				}
+			} else {
+				throw new kelondroException(e.getMessage());
 			}
-            
-        } else {
-            if (file.exists()) {
-                if (file.isDirectory()) {
-                    fbi = new FlexTable(file.getParentFile(), file.getName(), rowdef, 0, resetOnFail);
-                } else {
-                    fbi = new EcoTable(file, rowdef, EcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
-                }
-            } else {
-                fbi = new EcoTable(file, rowdef, EcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
-            }
-        }
+		}
         this.index = ((useObjectCache) && (!(fbi instanceof EcoTable))) ? (ObjectIndex) new Cache(fbi) : fbi;
         this.keylen = key;
         this.reclen = nodesize;
@@ -115,13 +100,13 @@ public class BLOBTree {
     }
     
     public static BLOBHeap toHeap(final File file, final boolean useNodeCache, final boolean useObjectCache, final int key,
-            final int nodesize, final char fillChar, final ByteOrder objectOrder, final boolean usetree, final boolean writebuffer, final boolean resetOnFail, final File blob) throws IOException {
+            final int nodesize, final char fillChar, final ByteOrder objectOrder, final boolean writebuffer, final boolean resetOnFail, final File blob) throws IOException {
         if (blob.exists() || !file.exists()) {
             // open the blob file and ignore the tree
             return new BLOBHeap(blob, key, objectOrder, 1024 * 64);
         }
         // open a Tree and migrate everything to a Heap
-        BLOBTree tree = new BLOBTree(file, useNodeCache, useObjectCache, key, nodesize, fillChar, objectOrder, usetree, writebuffer, resetOnFail);
+        BLOBTree tree = new BLOBTree(file, useNodeCache, useObjectCache, key, nodesize, fillChar, objectOrder, writebuffer, resetOnFail);
         BLOBHeap heap = new BLOBHeap(blob, key, objectOrder, 1024 * 64);
         Iterator<byte[]> i = tree.keys(true, false);
         byte[] k, kk = new byte[key], v;

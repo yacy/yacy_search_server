@@ -38,8 +38,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.index.IntegerHandleIndex;
 import de.anomic.kelondro.index.Column;
+import de.anomic.kelondro.index.HandleMap;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.index.RowSet;
@@ -76,7 +76,7 @@ public class EcoTable implements ObjectIndex {
     public static final long maxarraylength = 134217727L; // that may be the maxmimum size of array length in some JVMs
     private static final long minmemremaining = 20 * 1024 * 1024; // if less than this memory is remaininig, the memory copy of a table is abandoned
     private RowSet table;
-    private IntegerHandleIndex index;
+    private HandleMap index;
     private BufferedEcoFS file;
     private Row rowdef;
     private int fail;
@@ -132,7 +132,7 @@ public class EcoTable implements ObjectIndex {
                 table = null; System.gc();
                 Log.logSevere("ECOTABLE", tablefile + ": RAM after releasing the table: " + (MemoryControl.available() / 1024 / 1024) + "MB");
             }
-            index = new IntegerHandleIndex(rowdef.primaryKeyLength, rowdef.objectOrder, records, 100000);
+            index = new HandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, records, 100000);
             Log.logInfo("ECOTABLE", tablefile + ": EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
 
             // read all elements from the file into the copy table
@@ -175,7 +175,7 @@ public class EcoTable implements ObjectIndex {
  
             // remove doubles
             if (!freshFile) {
-                final ArrayList<Integer[]> doubles = index.removeDoubles();
+                final ArrayList<Long[]> doubles = index.removeDoubles();
                 //assert index.size() + doubles.size() + fail == i;
                 //System.out.println(" -removed " + doubles.size() + " doubles- done.");
                 if (doubles.size() > 0) {
@@ -184,19 +184,19 @@ public class EcoTable implements ObjectIndex {
                     // first put back one element each
                     final byte[] record = new byte[rowdef.objectsize];
                     key = new byte[rowdef.primaryKeyLength];
-                    for (final Integer[] ds: doubles) {
+                    for (final Long[] ds: doubles) {
                         file.get(ds[0].intValue(), record, 0);
                         System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
                         index.putUnique(key, ds[0].intValue());
                     }
                     // then remove the other doubles by removing them from the table, but do a re-indexing while doing that
                     // first aggregate all the delete positions because the elements from the top positions must be removed first
-                    final TreeSet<Integer> delpos = new TreeSet<Integer>();
-                    for (final Integer[] ds: doubles) {
+                    final TreeSet<Long> delpos = new TreeSet<Long>();
+                    for (final Long[] ds: doubles) {
                         for (int j = 1; j < ds.length; j++) delpos.add(ds[j]);
                     }
                     // now remove the entries in a sorted way (top-down)
-                    Integer top;
+                    Long top;
                     while (delpos.size() > 0) {
                         top = delpos.last();
                         delpos.remove(top);
@@ -292,13 +292,13 @@ public class EcoTable implements ObjectIndex {
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
         final ArrayList<RowCollection> report = new ArrayList<RowCollection>();
         RowSet rows;
-        final TreeSet<Integer> d = new TreeSet<Integer>();
+        final TreeSet<Long> d = new TreeSet<Long>();
         final byte[] b = new byte[rowdef.objectsize];
-        Integer L;
+        Long L;
         Row.Entry inconsistentEntry;
         // iterate over all entries that have inconsistent index references
         long lastlog = System.currentTimeMillis();
-        for (final Integer[] is: index.removeDoubles()) {
+        for (final Long[] is: index.removeDoubles()) {
             // 'is' is the set of all indexes, that have the same reference
             // we collect that entries now here
             rows = new RowSet(this.rowdef, is.length);
@@ -314,7 +314,7 @@ public class EcoTable implements ObjectIndex {
             report.add(rows);
         }
         // finally delete the affected rows, but start with largest id first, otherwise we overwrite wrong entries
-        Integer s;
+        Long s;
         while (d.size() > 0) {
             s = d.last();
             d.remove(s);
@@ -347,7 +347,7 @@ public class EcoTable implements ObjectIndex {
     	if ((file == null) || (index == null)) return null;
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", fail = " + fail;
         assert ((table == null) || (table.size() == index.size()));
-        final int i = index.get(key);
+        final int i = (int) index.get(key);
         if (i == -1) return null;
         final byte[] b = new byte[rowdef.objectsize];
         if (table == null) {
@@ -388,7 +388,7 @@ public class EcoTable implements ObjectIndex {
         assert row != null;
         assert row.bytes() != null;
         if ((row == null) || (row.bytes() == null)) return null;
-        final int i = index.get(row.getPrimaryKeyBytes());
+        final int i = (int) index.get(row.getPrimaryKeyBytes());
         if (i == -1) {
             addUnique(row);
             return null;
@@ -422,7 +422,7 @@ public class EcoTable implements ObjectIndex {
         assert row != null;
         assert row.bytes() != null;
         if (file == null || row == null || row.bytes() == null) return;
-        final int i = index.get(row.getPrimaryKeyBytes());
+        final int i = (int) index.get(row.getPrimaryKeyBytes());
         if (i == -1) {
             addUnique(row);
             return;
@@ -480,7 +480,7 @@ public class EcoTable implements ObjectIndex {
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert ((table == null) || (table.size() == index.size()));
         assert key.length == rowdef.primaryKeyLength;
-        final int i = index.get(key);
+        final int i = (int) index.get(key);
         if (i == -1) return null; // nothing to do
         
         // prepare result
@@ -491,12 +491,12 @@ public class EcoTable implements ObjectIndex {
         assert i < index.size();
         if (table == null) {
             if (i == index.size() - 1) {
-                ix = index.remove(key);
+                ix = (int) index.remove(key);
                 assert ix == i;
                 file.cleanLast(b, 0);
             } else {
                 assert i < index.size() - 1;
-                ix = index.remove(key);
+                ix = (int) index.remove(key);
                 assert ix == i;
                 file.get(i, b, 0);
                 file.cleanLast(p, 0);
@@ -514,13 +514,13 @@ public class EcoTable implements ObjectIndex {
             
             if (i == index.size() - 1) {
                 // special handling if the entry is the last entry in the file
-                ix = index.remove(key);
+                ix = (int) index.remove(key);
                 assert ix == i;
                 table.removeRow(i, false);
                 file.cleanLast();
             } else {
                 // switch values
-                ix = index.remove(key);
+                ix = (int) index.remove(key);
                 assert ix == i;
                 
                 final Row.Entry te = table.removeOne();
@@ -546,7 +546,7 @@ public class EcoTable implements ObjectIndex {
         final byte[] le = new byte[rowdef.objectsize];
         file.cleanLast(le, 0);
         final Row.Entry lr = rowdef.newEntry(le);
-        final int i = index.remove(lr.getPrimaryKeyBytes());
+        final int i = (int) index.remove(lr.getPrimaryKeyBytes());
         assert i >= 0;
         if (table != null) table.remove(lr.getPrimaryKeyBytes());
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
@@ -579,7 +579,7 @@ public class EcoTable implements ObjectIndex {
         
         // initialize index and copy table
         table = (table == null) ? null : new RowSet(taildef, 1);
-        index = new IntegerHandleIndex(rowdef.primaryKeyLength, rowdef.objectOrder, 1, 100000);        
+        index = new HandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, 1, 100000);        
     }
 
     public Row row() {
@@ -659,7 +659,7 @@ public class EcoTable implements ObjectIndex {
             final byte[] k = i.next();
             assert k != null;
             if (k == null) return null;
-            this.c = index.get(k);
+            this.c = (int) index.get(k);
             if (this.c < 0) throw new ConcurrentModificationException(); // this should only happen if the table was modified during the iteration
             final byte[] b = new byte[rowdef.objectsize];
             if (table == null) {

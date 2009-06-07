@@ -60,7 +60,7 @@ public final class userDB {
         this.userTableFile = userTableFileNew;
         userTableFile.getParentFile().mkdirs();
         userTableFileNew.getParentFile().mkdirs();
-        this.userTable = new MapView(BLOBTree.toHeap(userTableFile, true, true, 128, 256, '_', NaturalOrder.naturalOrder, true, false, false, userTableFile), 10, '_');
+        this.userTable = new MapView(BLOBTree.toHeap(userTableFile, true, true, 128, 256, '_', NaturalOrder.naturalOrder, false, false, userTableFile), 10, '_');
     }
     
     void resetDatabase() {

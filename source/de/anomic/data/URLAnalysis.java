@@ -51,7 +51,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import de.anomic.kelondro.index.HandleSet;
-import de.anomic.kelondro.index.IntegerHandleIndex;
+import de.anomic.kelondro.index.HandleMap;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.ReferenceContainerArray;
@@ -396,7 +396,7 @@ public class URLAnalysis {
     
     public static void incell(File cellPath, String statisticPath) {
         try {
-            IntegerHandleIndex idx = ReferenceContainerArray.referenceHashes(
+        	HandleMap idx = ReferenceContainerArray.referenceHashes(
                 cellPath,
                 Segment.wordReferenceFactory,
                 Base64Order.enhancedCoder,
@@ -411,7 +411,7 @@ public class URLAnalysis {
 
     public static int diffurlcol(String metadataPath, String statisticFile, String diffFile) throws IOException {
         System.out.println("INDEX DIFF URL-COL startup");
-        IntegerHandleIndex idx = new IntegerHandleIndex(URLMetadataRow.rowdef.primaryKeyLength, URLMetadataRow.rowdef.objectOrder, new File(statisticFile), 0);
+        HandleMap idx = new HandleMap(URLMetadataRow.rowdef.primaryKeyLength, URLMetadataRow.rowdef.objectOrder, 4, new File(statisticFile), 0);
         MetadataRepository mr = new MetadataRepository(new File(metadataPath));
         HandleSet hs = new HandleSet(URLMetadataRow.rowdef.primaryKeyLength, URLMetadataRow.rowdef.objectOrder, 0, 1000000);
         System.out.println("INDEX DIFF URL-COL loaded dump, starting diff");

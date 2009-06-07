@@ -154,11 +154,12 @@ public class Column {
             ((typename.equals("long")) && (this.cellwidth > 8)) ||
             ((typename.equals("char")) && (this.cellwidth > 1))
            ) throw new kelondroException("kelondroColumn - cell width " + this.cellwidth + " too wide for type " + typename);
+        /*
         if (((typename.equals("short")) && (this.cellwidth <= 1)) ||
             ((typename.equals("int")) && (this.cellwidth <= 2)) ||
             ((typename.equals("long")) && (this.cellwidth <= 4))
            ) throw new kelondroException("kelondroColumn - cell width " + this.cellwidth + " not appropriate for type " + typename);
-        
+        */
         // parse/check encoder type
         if ((celldef.length() > 0) && (celldef.charAt(0) == '{')) {
             p = celldef.indexOf('}');
