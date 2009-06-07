@@ -525,6 +525,7 @@ public final class plasmaSearchEvent {
             // start fetching urls and snippets
             URLMetadataRow page;
             final int fetchAhead = snippetMode == 0 ? 0 : 10;
+            boolean nav_topics = query.navigators.equals("all") || query.navigators.indexOf("topics") >= 0;
             try {
                 while (System.currentTimeMillis() < this.timeout) {
                     this.lastLifeSign = System.currentTimeMillis();
@@ -556,7 +557,7 @@ public final class plasmaSearchEvent {
                     // place the result to the result vector
                     if (!result.exists(resultEntry)) {
                         result.push(resultEntry, Long.valueOf(rankedCache.getOrder().cardinal(resultEntry.word())));
-                        rankedCache.addTopics(resultEntry);
+                        if (nav_topics) rankedCache.addTopics(resultEntry);
                     }
                     //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
                 }

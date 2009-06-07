@@ -343,7 +343,7 @@ public final class plasmaSearchQuery {
      * @param addToQuery
      * @return
      */
-    public static String navurl(String ext, final int page, final int display, final plasmaSearchQuery theQuery, final String originalUrlMask, String addToQuery) {
+    public static String navurl(String ext, final int page, final int display, final plasmaSearchQuery theQuery, final String originalUrlMask, String addToQuery, String nav) {
         return
         "/yacysearch." + ext + "?display=" + display +
         "&search=" + theQuery.queryString(true) + ((addToQuery == null) ? "" : "+" + addToQuery) +
@@ -351,6 +351,7 @@ public final class plasmaSearchQuery {
         "&startRecord=" + (page * theQuery.displayResults()) +
         "&resource=" + ((theQuery.isLocal()) ? "local" : "global") +
         "&verify=" + ((theQuery.onlineSnippetFetch) ? "true" : "false") +
+        "&nav=" + nav +
         "&urlmaskfilter=" + originalUrlMask +
         "&prefermaskfilter=" + theQuery.prefer +
         "&cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +

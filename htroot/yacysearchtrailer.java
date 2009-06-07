@@ -66,8 +66,8 @@ public class yacysearchtrailer {
         	int i;
         	for (i = 0; i < hostNavigator.size(); i++) {
         		entry = hostNavigator.get(i);
-        		prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name) + "\">" + entry.name + " (" + entry.count + ")</a>");
-        		prop.putJSON("nav_domains_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name));
+        		prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
+        		prop.putJSON("nav_domains_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name, theQuery.navigators));
                 prop.put("nav-domains_element_" + i + "_name", entry.name);
         		prop.put("nav-domains_element_" + i + "_count", entry.count);
         		prop.put("nav-domains_element_" + i + "_modifier", "site:" + entry.name);
@@ -92,8 +92,8 @@ public class yacysearchtrailer {
                 if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;
                 if (e != null && e.name != null) {
                     prop.putHTML("nav-topics_element_" + i + "_name", e.name);
-                    prop.put("nav-topics_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, e.name) + "\">" + e.name + " (" + e.count + ")</a>");
-                    prop.putJSON("nav-topics_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, e.name));
+                    prop.put("nav-topics_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators) + "\">" + e.name + " (" + e.count + ")</a>");
+                    prop.putJSON("nav-topics_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators));
                     prop.put("nav-topics_element_" + i + "_count", e.count);
                     prop.put("nav-topics_element_" + i + "_offset", "0");
                     prop.put("nav-topics_element_" + i + "_display", display);

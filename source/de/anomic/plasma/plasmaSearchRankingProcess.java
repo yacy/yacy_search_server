@@ -162,6 +162,7 @@ public final class plasmaSearchRankingProcess {
         Long r;
         hoststat hs;
         String domhash;
+        boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts") >= 0;
         while (i.hasNext()) {
             iEntry = i.next();
             assert (iEntry.metadataHash().length() == index.row().primaryKeyLength);
@@ -203,12 +204,14 @@ public final class plasmaSearchRankingProcess {
             this.domZones[yacyURL.domDomain(iEntry.metadataHash())]++;
             
             // get statistics for host navigator
-            domhash = iEntry.urlHash.substring(6);
-            hs = this.hostNavigator.get(domhash);
-            if (hs == null) {
-            	this.hostNavigator.put(domhash, new hoststat(iEntry.urlHash));
-            } else {
-            	hs.inc();
+            if (nav_hosts) {
+	            domhash = iEntry.urlHash.substring(6);
+	            hs = this.hostNavigator.get(domhash);
+	            if (hs == null) {
+	            	this.hostNavigator.put(domhash, new hoststat(iEntry.urlHash));
+	            } else {
+	            	hs.inc();
+	            }
             }
             
             // insert
@@ -410,7 +413,9 @@ public final class plasmaSearchRankingProcess {
     }
     
     public ArrayList<NavigatorEntry> getHostNavigator(int count) {
-        hoststat[] hsa = this.hostNavigator.values().toArray(new hoststat[this.hostNavigator.size()]);
+    	if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("hosts") < 0) return new ArrayList<NavigatorEntry>(0);
+        
+    	hoststat[] hsa = this.hostNavigator.values().toArray(new hoststat[this.hostNavigator.size()]);
         Arrays.sort(hsa, hscomp);
         int rc = Math.min(count, hsa.length);
         ArrayList<NavigatorEntry> result = new ArrayList<NavigatorEntry>();
@@ -438,6 +443,7 @@ public final class plasmaSearchRankingProcess {
     public ArrayList<NavigatorEntry> getTopicNavigator(final int count) {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("topics") < 0) return new ArrayList<NavigatorEntry>(0);
         
         Map.Entry<String, Integer>[] a = this.ref.entrySet().toArray(new Map.Entry[this.ref.size()]);
         Arrays.sort(a, mecomp);

@@ -465,7 +465,7 @@ public class yacysearch {
             	resnav.append("<img src=\"env/grafics/navdl.gif\" width=\"16\" height=\"16\">&nbsp;");
             } else {
             	resnav.append("<a href=\"");
-                resnav.append(plasmaSearchQuery.navurl("html", thispage - 1, display, theQuery, originalUrlMask, null));
+                resnav.append(plasmaSearchQuery.navurl("html", thispage - 1, display, theQuery, originalUrlMask, null, navigation));
             	resnav.append("\"><img src=\"env/grafics/navdl.gif\" width=\"16\" height=\"16\"></a>&nbsp;");
             }
             final int numberofpages = Math.min(10, Math.min(thispage + 2, totalcount / theQuery.displayResults()));
@@ -476,7 +476,7 @@ public class yacysearch {
                     resnav.append(".gif\" width=\"16\" height=\"16\">&nbsp;");
                 } else {
                     resnav.append("<a href=\"");
-                    resnav.append(plasmaSearchQuery.navurl("html", i, display, theQuery, originalUrlMask, null));
+                    resnav.append(plasmaSearchQuery.navurl("html", i, display, theQuery, originalUrlMask, null, navigation));
                     resnav.append("\"><img src=\"env/grafics/navd");
                 	resnav.append(i + 1);
                 	resnav.append(".gif\" width=\"16\" height=\"16\"></a>&nbsp;");
@@ -486,7 +486,7 @@ public class yacysearch {
             	resnav.append("<img src=\"env/grafics/navdr.gif\" width=\"16\" height=\"16\">");
             } else {
                 resnav.append("<a href=\"");
-                resnav.append(plasmaSearchQuery.navurl("html", thispage + 1, display, theQuery, originalUrlMask, null));
+                resnav.append(plasmaSearchQuery.navurl("html", thispage + 1, display, theQuery, originalUrlMask, null, navigation));
                 resnav.append("\"><img src=\"env/grafics/navdr.gif\" width=\"16\" height=\"16\"></a>");
             }
             prop.put("num-results_resnav", resnav.toString());
