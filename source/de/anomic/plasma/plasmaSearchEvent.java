@@ -586,6 +586,11 @@ public final class plasmaSearchEvent {
         return this.rankedCache.getTopicNavigator(maxentries);
     }
     
+    public ArrayList<NavigatorEntry> getAuthorNavigator(final int maxentries) {
+        // returns a list of authors so far seen on result set
+        return this.rankedCache.getAuthorNavigator(maxentries);
+    }
+    
     public ResultEntry oneResult(final int item) {
         // check if we already retrieved this item (happens if a search
         // pages is accessed a second time)

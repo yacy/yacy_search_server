@@ -55,8 +55,9 @@ public class yacysearchtrailer {
         }
         final plasmaSearchQuery theQuery = theSearch.getQuery();
         
-
         // compose search navigation
+        
+        // host navigators
         ArrayList<NavigatorEntry> hostNavigator = theSearch.getHostNavigator(10);
         if (hostNavigator == null) {
         	prop.put("nav-domains", 0);
@@ -66,10 +67,10 @@ public class yacysearchtrailer {
         	int i;
         	for (i = 0; i < hostNavigator.size(); i++) {
         		entry = hostNavigator.get(i);
-        		prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
-        		prop.putJSON("nav_domains_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name, theQuery.navigators));
-                prop.put("nav-domains_element_" + i + "_name", entry.name);
-        		prop.put("nav-domains_element_" + i + "_count", entry.count);
+        		prop.put("nav-domains_element_" + i + "_name", entry.name);
+                prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
+        		prop.putJSON("nav-domains_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name, theQuery.navigators));
+                prop.put("nav-domains_element_" + i + "_count", entry.count);
         		prop.put("nav-domains_element_" + i + "_modifier", "site:" + entry.name);
                 prop.put("nav-domains_element_" + i + "_nl", 1);
         	}
@@ -95,11 +96,7 @@ public class yacysearchtrailer {
                     prop.put("nav-topics_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators) + "\">" + e.name + " (" + e.count + ")</a>");
                     prop.putJSON("nav-topics_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators));
                     prop.put("nav-topics_element_" + i + "_count", e.count);
-                    prop.put("nav-topics_element_" + i + "_offset", "0");
-                    prop.put("nav-topics_element_" + i + "_display", display);
                     prop.put("nav-topics_element_" + i + "_modifier", e.name);
-                    prop.put("nav-topics_element_" + i + "_contentdom", theQuery.contentdom());
-                    prop.put("nav-topics_element_" + i + "_resource", ((theQuery.isLocal()) ? "local" : "global"));
                     prop.put("nav-topics_element_" + i + "_nl", (iter.hasNext() && i < MAX_TOPWORDS) ? 1 : 0);
                 }
                 if (i++ > MAX_TOPWORDS) {
@@ -109,6 +106,29 @@ public class yacysearchtrailer {
             prop.put("nav-topics_element", i);
             prop.put("nav-topics", "1");
         }
+        
+        // author navigators
+        ArrayList<NavigatorEntry> authorNavigator = theSearch.getAuthorNavigator(10);
+        if (authorNavigator == null) {
+            prop.put("nav-authors", 0);
+        } else {
+            prop.put("nav-authors", 1);
+            NavigatorEntry entry;
+            int i;
+            for (i = 0; i < authorNavigator.size(); i++) {
+                entry = authorNavigator.get(i);
+                prop.put("nav-authors_element_" + i + "_name", entry.name);
+                prop.put("nav-authors_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, "author:'" + entry.name + "'", theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
+                prop.putJSON("nav-authors_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, "author:'" + entry.name + "'", theQuery.navigators));
+                prop.put("nav-authors_element_" + i + "_count", entry.count);
+                prop.put("nav-authors_element_" + i + "_modifier", "author:'" + entry.name + "'");
+                prop.put("nav-authors_element_" + i + "_nl", 1);
+            }
+            i--;
+            prop.put("nav-authors_element_" + i + "_nl", 0);
+            prop.put("nav-authors_element", authorNavigator.size());
+        }
+
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.FINALIZATION + "-" + "bottomline", 0, 0), false);
         
         return prop;

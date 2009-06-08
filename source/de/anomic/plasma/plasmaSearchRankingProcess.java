@@ -35,11 +35,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.kelondro.index.BinSearch;
+import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
@@ -76,8 +78,9 @@ public final class plasmaSearchRankingProcess {
     private final Segment indexSegment;
     private HashMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
     private final int[] domZones;
-    private final ConcurrentHashMap<String, hoststat> hostNavigator;
+    private final ConcurrentHashMap<String, HostInfo> hostNavigator;
     private final ConcurrentHashMap<String, Integer> ref;  // reference score computation for the commonSense heuristic
+    private final TreeMap<byte[], AuthorInfo> authorNavigator;
     
     public plasmaSearchRankingProcess(
             final Segment indexSegment,
@@ -103,7 +106,8 @@ public final class plasmaSearchRankingProcess {
         this.indexSegment = indexSegment;
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
-        this.hostNavigator = new ConcurrentHashMap<String, hoststat>();
+        this.hostNavigator = new ConcurrentHashMap<String, HostInfo>();
+        this.authorNavigator = new TreeMap<byte[], AuthorInfo>(Base64Order.enhancedCoder);
         this.ref = new ConcurrentHashMap<String, Integer>();
         this.domZones = new int[8];
         for (int i = 0; i < 8; i++) {this.domZones[i] = 0;}
@@ -160,7 +164,7 @@ public final class plasmaSearchRankingProcess {
         final Iterator<WordReferenceVars> i = decodedEntries.iterator();
         WordReferenceVars iEntry;
         Long r;
-        hoststat hs;
+        HostInfo hs;
         String domhash;
         boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts") >= 0;
         while (i.hasNext()) {
@@ -208,7 +212,7 @@ public final class plasmaSearchRankingProcess {
 	            domhash = iEntry.urlHash.substring(6);
 	            hs = this.hostNavigator.get(domhash);
 	            if (hs == null) {
-	            	this.hostNavigator.put(domhash, new hoststat(iEntry.urlHash));
+	            	this.hostNavigator.put(domhash, new HostInfo(iEntry.urlHash));
 	            } else {
 	            	hs.inc();
 	            }
@@ -321,6 +325,24 @@ public final class plasmaSearchRankingProcess {
                 final URLMetadataRow u = indexSegment.urlMetadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
                 if (u != null) {
                     final URLMetadataRow.Components metadata = u.metadata();
+
+                    // evaluate information of metadata for navigation
+                    // author navigation:
+                    String author = metadata.dc_creator();
+                    if (author != null && author.length() > 0) {
+                        byte[] authorhash = Word.word2hash(author);
+                        //synchronized (this.authorNavigator) {
+                            AuthorInfo in = this.authorNavigator.get(authorhash);
+                            if (in == null) {
+                                this.authorNavigator.put(authorhash, new AuthorInfo(author));
+                            } else {
+                                in.inc();
+                                this.authorNavigator.put(authorhash, in);
+                            }
+                        //}
+                    }
+                    
+                    // get the url
                     if (metadata.url() != null) {
                     	String urlstring = metadata.url().toNormalform(true, true);
                     	if (urlstring == null || !urlstring.matches(query.urlMask)) continue;                    
@@ -383,10 +405,10 @@ public final class plasmaSearchRankingProcess {
         return this.misses.iterator();
     }
     
-    public class hoststat {
+    public class HostInfo {
         public int count;
         public String hashsample;
-        public hoststat(String urlhash) {
+        public HostInfo(String urlhash) {
             this.count = 1;
             this.hashsample = urlhash;
         }
@@ -395,8 +417,28 @@ public final class plasmaSearchRankingProcess {
         }
     }
     
-    public static final Comparator<hoststat> hscomp = new Comparator<hoststat>() {
-        public int compare(hoststat o1, hoststat o2) {
+    public class AuthorInfo {
+        public int count;
+        public String author;
+        public AuthorInfo(String author) {
+            this.count = 1;
+            this.author = author;
+        }
+        public void inc() {
+            this.count++;
+        }
+    }
+    
+    public static final Comparator<HostInfo> hscomp = new Comparator<HostInfo>() {
+        public int compare(HostInfo o1, HostInfo o2) {
+            if (o1.count < o2.count) return 1;
+            if (o2.count < o1.count) return -1;
+            return 0;
+        }
+    };
+    
+    public static final Comparator<AuthorInfo> aicomp = new Comparator<AuthorInfo>() {
+        public int compare(AuthorInfo o1, AuthorInfo o2) {
             if (o1.count < o2.count) return 1;
             if (o2.count < o1.count) return -1;
             return 0;
@@ -415,7 +457,7 @@ public final class plasmaSearchRankingProcess {
     public ArrayList<NavigatorEntry> getHostNavigator(int count) {
     	if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("hosts") < 0) return new ArrayList<NavigatorEntry>(0);
         
-    	hoststat[] hsa = this.hostNavigator.values().toArray(new hoststat[this.hostNavigator.size()]);
+    	HostInfo[] hsa = this.hostNavigator.values().toArray(new HostInfo[this.hostNavigator.size()]);
         Arrays.sort(hsa, hscomp);
         int rc = Math.min(count, hsa.length);
         ArrayList<NavigatorEntry> result = new ArrayList<NavigatorEntry>();
@@ -486,6 +528,24 @@ public final class plasmaSearchRankingProcess {
         // add references
         //addTopic(urlcomps);
         addTopic(descrcomps);
+    }
+    
+    public ArrayList<NavigatorEntry> getAuthorNavigator(final int count) {
+        // create a list of words that had been computed by statistics over all
+        // words that appeared in the url or the description of all urls
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("authors") < 0) return new ArrayList<NavigatorEntry>(0);
+        
+        AuthorInfo[] a = this.authorNavigator.values().toArray(new AuthorInfo[this.authorNavigator.size()]);
+        Arrays.sort(a, aicomp);
+        int rc = Math.min(count, a.length);
+        ArrayList<NavigatorEntry> result = new ArrayList<NavigatorEntry>();
+        AuthorInfo e;
+        for (int i = 0; i < rc; i++) {
+            e = a[i];
+            //System.out.println("*** DEBUG Author = " + e.author + ", count = " + e.count);
+            result.add(new NavigatorEntry(e.author, e.count));
+        }
+        return result;
     }
     
     public ReferenceOrder getOrder() {

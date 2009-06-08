@@ -99,6 +99,7 @@ public class pdfParser extends AbstractParser implements Parser {
             checkInterruption();
             
             // creating a text stripper
+            synchronized (SUPPORTED_MIME_TYPES) {
             final PDFTextStripper stripper = new PDFTextStripper();
             theDocument = parser.getPDDocument();
             
@@ -168,6 +169,7 @@ public class pdfParser extends AbstractParser implements Parser {
             }
             
             return theDoc;
+            }
         }
         catch (final Exception e) {       
             if (e instanceof InterruptedException) throw (InterruptedException) e;
