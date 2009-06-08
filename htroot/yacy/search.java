@@ -90,6 +90,7 @@ public final class search {
         final String  contentdom = post.get("contentdom", "text");
         final String  filter = post.get("filter", ".*");
         String  sitehash = post.get("sitehash", ""); if (sitehash.length() == 0) sitehash = null;
+        String  authorhash = post.get("authorhash", ""); if (authorhash.length() == 0) authorhash = null;
         String  language = post.get("language", "");
         if (!iso639.exists(language)) {
             // take language from the user agent
@@ -204,6 +205,7 @@ public final class search {
                     null,
                     false,
                     sitehash, 
+                    authorhash,
                     yacyURL.TLD_any_zone_filter,
                     client,
                     false);
@@ -255,7 +257,8 @@ public final class search {
                     -1, 
                     constraint, 
                     false,
-                    sitehash, 
+                    sitehash,
+                    authorhash,
                     yacyURL.TLD_any_zone_filter,
                     client, 
                     false);

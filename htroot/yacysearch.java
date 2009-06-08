@@ -282,6 +282,28 @@ public class yacysearch {
                 while(domain.endsWith(".")) domain = domain.substring(0, domain.length() - 1);
                 sitehash = yacyURL.domhash(domain);
             }
+            int authori = querystring.indexOf("author:");
+        	String authorhash = null;
+            if (authori >= 0) {
+            	// check if the author was given with single quotes or without
+            	boolean quotes = false;
+            	if (querystring.charAt(authori + 7) == (char) 39) {
+            		quotes = true;
+            	}
+            	String author;
+            	if (quotes) {
+            		int ftb = querystring.indexOf((char) 39, authori + 8);
+                    if (ftb == -1) ftb = querystring.length() + 1;
+                    author = querystring.substring(authori + 8, ftb);
+                    querystring = querystring.replace("author:'" + author + "'", "");
+            	} else {
+            		int ftb = querystring.indexOf(' ', authori);
+            		if (ftb == -1) ftb = querystring.length();
+            		author = querystring.substring(authori + 7, ftb);
+                    querystring = querystring.replace("author:" + author, "");
+            	}
+            	authorhash = new String(Word.word2hash(author));
+            }
             int tld = querystring.indexOf("tld:");
             if (tld >= 0) {
                 int ftb = querystring.indexOf(' ', tld);
@@ -401,6 +423,7 @@ public class yacysearch {
                     constraint,
                     true,
                     sitehash,
+                    authorhash,
                     yacyURL.TLD_any_zone_filter,
                     client,
                     authenticated);

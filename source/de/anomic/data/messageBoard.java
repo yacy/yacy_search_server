@@ -55,7 +55,7 @@ public class messageBoard {
         new File(path.getParent()).mkdir();
         new File(pathNew.getParent()).mkdir();
         if (database == null) {
-            database = new MapView(BLOBTree.toHeap(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', NaturalOrder.naturalOrder, false, false, pathNew), 500, '_');
+            database = new MapView(BLOBTree.toHeap(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', NaturalOrder.naturalOrder, pathNew), 500, '_');
         }
         sn = 0;
     }

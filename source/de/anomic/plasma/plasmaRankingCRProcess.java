@@ -144,7 +144,7 @@ public class plasmaRankingCRProcess {
         return true;
     }
     
-    private static boolean accumulate_upd(final File f, final ObjectIndex acc, final IndexCell<CitationReferenceRow> seq) throws IOException {
+    public static boolean accumulate_upd(final File f, final ObjectIndex acc, final IndexCell<CitationReferenceRow> seq) throws IOException {
         // open file
         AttrSeq source_cr = null;
         try {

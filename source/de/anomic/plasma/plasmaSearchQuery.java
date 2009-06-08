@@ -74,6 +74,7 @@ public final class plasmaSearchQuery {
     public plasmaSearchRankingProfile ranking;
     public String host; // this is the client host that starts the query, not a site operator
     public String sitehash; // this is a domain hash, 6 bytes long or null
+    public String authorhash;
     public yacySeed remotepeer;
     public Long handle;
     // values that are set after a search:
@@ -113,6 +114,7 @@ public final class plasmaSearchQuery {
         this.onlineSnippetFetch = false;
         this.host = null;
         this.sitehash = null;
+        this.authorhash = null;
         this.remotepeer = null;
         this.handle = Long.valueOf(System.currentTimeMillis());
         this.specialRights = false;
@@ -132,6 +134,7 @@ public final class plasmaSearchQuery {
         final int domType, final String domGroupName, final int domMaxTargets,
         final Bitfield constraint, final boolean allofconstraint,
         final String site,
+        final String authorhash,
         final int domainzone,
         final String host,
         final boolean specialRights) {
@@ -155,6 +158,7 @@ public final class plasmaSearchQuery {
 		this.constraint = constraint;
 		this.allofconstraint = allofconstraint;
 		this.sitehash = site; assert site == null || site.length() == 6;
+		this.authorhash = authorhash; assert authorhash == null || authorhash.length() > 0;
 		this.onlineSnippetFetch = onlineSnippetFetch;
 		this.host = host;
         this.remotepeer = null;
@@ -325,6 +329,7 @@ public final class plasmaSearchQuery {
             "*" + this.prefer +
             "*" + this.urlMask +
             "*" + this.sitehash +
+            "*" + this.authorhash +
             "*" + this.targetlang +
             "*" + this.constraint +
             "*" + this.maxDistance;

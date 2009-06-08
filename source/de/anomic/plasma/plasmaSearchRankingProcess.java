@@ -35,13 +35,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.kelondro.index.BinSearch;
-import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
@@ -78,9 +76,9 @@ public final class plasmaSearchRankingProcess {
     private final Segment indexSegment;
     private HashMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
     private final int[] domZones;
-    private final ConcurrentHashMap<String, HostInfo> hostNavigator;
     private final ConcurrentHashMap<String, Integer> ref;  // reference score computation for the commonSense heuristic
-    private final TreeMap<byte[], AuthorInfo> authorNavigator;
+    private final ConcurrentHashMap<String, HostInfo> hostNavigator;
+    private final ConcurrentHashMap<String, AuthorInfo> authorNavigator;
     
     public plasmaSearchRankingProcess(
             final Segment indexSegment,
@@ -107,7 +105,7 @@ public final class plasmaSearchRankingProcess {
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
         this.hostNavigator = new ConcurrentHashMap<String, HostInfo>();
-        this.authorNavigator = new TreeMap<byte[], AuthorInfo>(Base64Order.enhancedCoder);
+        this.authorNavigator = new ConcurrentHashMap<String, AuthorInfo>();
         this.ref = new ConcurrentHashMap<String, Integer>();
         this.domZones = new int[8];
         for (int i = 0; i < 8; i++) {this.domZones[i] = 0;}
@@ -330,16 +328,25 @@ public final class plasmaSearchRankingProcess {
                     // author navigation:
                     String author = metadata.dc_creator();
                     if (author != null && author.length() > 0) {
-                        byte[] authorhash = Word.word2hash(author);
-                        //synchronized (this.authorNavigator) {
-                            AuthorInfo in = this.authorNavigator.get(authorhash);
-                            if (in == null) {
-                                this.authorNavigator.put(authorhash, new AuthorInfo(author));
-                            } else {
-                                in.inc();
-                                this.authorNavigator.put(authorhash, in);
-                            }
-                        //}
+                    	// add author to the author navigator
+                        String authorhash = new String(Word.word2hash(author));
+                        System.out.println("*** DEBUG authorhash = " + authorhash + ", query.authorhash = " + this.query.authorhash + ", author = " + author);
+                        
+                        // check if we already are filtering for authors
+                    	if (this.query.authorhash != null && !this.query.authorhash.equals(authorhash)) {
+                    		continue;
+                    	}
+                    	
+                    	// add author to the author navigator
+                        AuthorInfo in = this.authorNavigator.get(authorhash);
+                        if (in == null) {
+                            this.authorNavigator.put(authorhash, new AuthorInfo(author));
+                        } else {
+                            in.inc();
+                            this.authorNavigator.put(authorhash, in);
+                        }
+                    } else if (this.query.authorhash != null) {
+                    	continue;
                     }
                     
                     // get the url

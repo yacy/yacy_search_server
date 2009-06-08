@@ -11,7 +11,20 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#(/nav-domains)##(nav-topics)#::
+    },#(/nav-domains)##(nav-authors)#::
+    {
+      "facetname": "authors",
+      "displayname": "Authors",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    }#(/nav-authors)##(nav-topics)#::
     {
       "facetname": "topwords",
       "displayname": "Topics",

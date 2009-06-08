@@ -116,17 +116,17 @@ public class bookmarksDB {
         tagCache=new TreeMap<String, Tag>();
         bookmarksFile.getParentFile().mkdirs();
         //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
-        this.bookmarksTable = new MapView(BLOBTree.toHeap(bookmarksFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, false, false, bookmarksFileNew), 1000, '_');
+        this.bookmarksTable = new MapView(BLOBTree.toHeap(bookmarksFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, bookmarksFileNew), 1000, '_');
 
         // tags
         tagsFile.getParentFile().mkdirs();
         final boolean tagsFileExisted = tagsFile.exists();
-        this.tagsTable = new MapView(BLOBTree.toHeap(tagsFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, false, false, tagsFileNew), 500, '_');
+        this.tagsTable = new MapView(BLOBTree.toHeap(tagsFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, tagsFileNew), 500, '_');
         if (!tagsFileExisted) rebuildTags();
 
         // dates
         final boolean datesExisted = datesFile.exists();
-        this.datesTable = new MapView(BLOBTree.toHeap(datesFile, true, true, 20, 256, '_', NaturalOrder.naturalOrder, false, false, datesFileNew), 500, '_');
+        this.datesTable = new MapView(BLOBTree.toHeap(datesFile, true, true, 20, 256, '_', NaturalOrder.naturalOrder, datesFileNew), 500, '_');
         if (!datesExisted) rebuildDates();
 
         // autoReCrawl

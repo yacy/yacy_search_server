@@ -115,11 +115,13 @@ public class yacysearchtrailer {
             prop.put("nav-authors", 1);
             NavigatorEntry entry;
             int i;
+            String anav;
             for (i = 0; i < authorNavigator.size(); i++) {
                 entry = authorNavigator.get(i);
+                anav = (entry.name.indexOf(' ') < 0) ? "author:" + entry.name : "author:'" + entry.name + "'";
                 prop.put("nav-authors_element_" + i + "_name", entry.name);
-                prop.put("nav-authors_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, "author:'" + entry.name + "'", theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
-                prop.putJSON("nav-authors_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, "author:'" + entry.name + "'", theQuery.navigators));
+                prop.put("nav-authors_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, anav, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
+                prop.putJSON("nav-authors_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, anav, theQuery.navigators));
                 prop.put("nav-authors_element_" + i + "_count", entry.count);
                 prop.put("nav-authors_element_" + i + "_modifier", "author:'" + entry.name + "'");
                 prop.put("nav-authors_element_" + i + "_nl", 1);

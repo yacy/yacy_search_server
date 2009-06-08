@@ -70,7 +70,7 @@ public class BLOBTree {
      * Deprecated Class. Please use kelondroBLOBHeap instead
      */
     private BLOBTree(final File file, final boolean useNodeCache, final boolean useObjectCache, final int key,
-            final int nodesize, final char fillChar, final ByteOrder objectOrder, final boolean writebuffer, final boolean resetOnFail) {
+            final int nodesize, final char fillChar, final ByteOrder objectOrder) {
         // creates or opens a dynamic tree
         rowdef = new Row("byte[] key-" + (key + counterlen) + ", byte[] node-" + nodesize, objectOrder);
         ObjectIndex fbi;
@@ -78,17 +78,8 @@ public class BLOBTree {
 			fbi = new Tree(file, useNodeCache, 0, rowdef, 1, 8);
 		} catch (final IOException e) {
 			e.printStackTrace();
-			if (resetOnFail) {
-			    FileUtils.deletedelete(file);
-				try {
-					fbi = new Tree(file, useNodeCache, -1, rowdef, 1, 8);
-				} catch (final IOException e1) {
-					e1.printStackTrace();
-					throw new kelondroException(e.getMessage());
-				}
-			} else {
-				throw new kelondroException(e.getMessage());
-			}
+			FileUtils.deletedelete(file);
+			throw new kelondroException(e.getMessage());
 		}
         this.index = ((useObjectCache) && (!(fbi instanceof EcoTable))) ? (ObjectIndex) new Cache(fbi) : fbi;
         this.keylen = key;
@@ -100,13 +91,13 @@ public class BLOBTree {
     }
     
     public static BLOBHeap toHeap(final File file, final boolean useNodeCache, final boolean useObjectCache, final int key,
-            final int nodesize, final char fillChar, final ByteOrder objectOrder, final boolean writebuffer, final boolean resetOnFail, final File blob) throws IOException {
+            final int nodesize, final char fillChar, final ByteOrder objectOrder, final File blob) throws IOException {
         if (blob.exists() || !file.exists()) {
             // open the blob file and ignore the tree
             return new BLOBHeap(blob, key, objectOrder, 1024 * 64);
         }
         // open a Tree and migrate everything to a Heap
-        BLOBTree tree = new BLOBTree(file, useNodeCache, useObjectCache, key, nodesize, fillChar, objectOrder, writebuffer, resetOnFail);
+        BLOBTree tree = new BLOBTree(file, useNodeCache, useObjectCache, key, nodesize, fillChar, objectOrder);
         BLOBHeap heap = new BLOBHeap(blob, key, objectOrder, 1024 * 64);
         Iterator<byte[]> i = tree.keys(true, false);
         byte[] k, kk = new byte[key], v;
