@@ -44,7 +44,7 @@ import de.anomic.yacy.dht.PeerSelection;
 
 public class yacySearch extends Thread {
 
-    final private String wordhashes, excludehashes, urlhashes;
+    final private String wordhashes, excludehashes, urlhashes, sitehash, authorhash;
     final private boolean global;
     final private int partitions;
     final private Segment indexSegment;
@@ -65,6 +65,8 @@ public class yacySearch extends Thread {
               final String wordhashes, final String excludehashes,
               final String urlhashes,
               final String prefer, final String filter, final String language,
+              final String sitehash,
+              final String authorhash,
               final int count, final int maxDistance, 
               final boolean global, final int partitions,
               final yacySeed targetPeer,
@@ -85,6 +87,8 @@ public class yacySearch extends Thread {
         this.prefer = prefer;
         this.filter = filter;
         this.language = language;
+        this.sitehash = sitehash;
+        this.authorhash = authorhash;
         this.global = global;
         this.partitions = partitions;
         this.indexSegment = indexSegment;
@@ -105,7 +109,9 @@ public class yacySearch extends Thread {
         try {
             this.urls = yacyClient.search(
                         peers.mySeed(),
-                        wordhashes, excludehashes, urlhashes, prefer, filter, language, count, maxDistance, global, partitions,
+                        wordhashes, excludehashes, urlhashes, prefer, filter, language,
+                        sitehash, authorhash,
+                        count, maxDistance, global, partitions,
                         targetPeer, indexSegment, crawlResults, containerCache, abstractCache,
                         blacklist, rankingProfile, constraint);
             if (urls != null) {
@@ -241,6 +247,8 @@ public class yacySearch extends Thread {
     public static yacySearch[] primaryRemoteSearches(
             final String wordhashes, final String excludehashes, final String urlhashes,
             final String prefer, final String filter, String language,
+            final String sitehash,
+            final String authorhash,
             final int count, final int maxDist,
             final Segment indexSegment,
             final yacySeedDB peers,
@@ -272,7 +280,10 @@ public class yacySearch extends Thread {
         final yacySearch[] searchThreads = new yacySearch[targets];
         for (int i = 0; i < targets; i++) {
             if (targetPeers[i] == null || targetPeers[i].hash == null) continue;
-            searchThreads[i] = new yacySearch(wordhashes, excludehashes, urlhashes, prefer, filter, language, count, maxDist, true, targets, targetPeers[i],
+            searchThreads[i] = new yacySearch(
+                    wordhashes, excludehashes, urlhashes, prefer, filter, language,
+                    sitehash, authorhash,
+                    count, maxDist, true, targets, targetPeers[i],
                     indexSegment, peers, crawlResults, containerCache, abstractCache, blacklist, rankingProfile, constraint);
             searchThreads[i].start();
             //try {Thread.sleep(20);} catch (InterruptedException e) {}
@@ -298,7 +309,8 @@ public class yacySearch extends Thread {
         final yacySeed targetPeer = peers.getConnected(targethash);
         if (targetPeer == null || targetPeer.hash == null) return null;
         if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(targetPeer.hash.getBytes()));
-        final yacySearch searchThread = new yacySearch(wordhashes, excludehashes, urlhashes, "", "", "en", 0, 9999, true, 0, targetPeer,
+        final yacySearch searchThread = new yacySearch(
+                wordhashes, excludehashes, urlhashes, "", "", "", "", "", 0, 9999, true, 0, targetPeer,
                 indexSegment, peers, crawlResults, containerCache, new TreeMap<String, TreeMap<String, String>>(), blacklist, rankingProfile, constraint);
         searchThread.start();
         return searchThread;

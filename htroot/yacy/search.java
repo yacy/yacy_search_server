@@ -92,7 +92,7 @@ public final class search {
         String  sitehash = post.get("sitehash", ""); if (sitehash.length() == 0) sitehash = null;
         String  authorhash = post.get("authorhash", ""); if (authorhash.length() == 0) authorhash = null;
         String  language = post.get("language", "");
-        if (!iso639.exists(language)) {
+        if (language == null || language.length() == 0 || !iso639.exists(language)) {
             // take language from the user agent
             String agent = header.get("User-Agent");
             if (agent == null) agent = System.getProperty("user.language");
