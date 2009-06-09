@@ -121,6 +121,7 @@ public class URLMetadataRow implements Metadata {
     private final String snippet;
     private WordReference word; // this is only used if the url is transported via remote search requests
     private final long ranking; // during generation of a search result this value is set
+    private Components comp;
     
     public URLMetadataRow(
             final yacyURL url,
@@ -176,6 +177,7 @@ public class URLMetadataRow implements Metadata {
         this.snippet = null;
         this.word = null;
         this.ranking = 0;
+        this.comp = null;
     }
 
     private void encodeDate(final int col, final Date d) {
@@ -206,6 +208,7 @@ public class URLMetadataRow implements Metadata {
         this.snippet = null;
         this.word = searchedWord;
         this.ranking = ranking;
+        this.comp = null;
     }
 
     public URLMetadataRow(final Properties prop) {
@@ -270,6 +273,7 @@ public class URLMetadataRow implements Metadata {
             this.word = new WordReferenceRow(Base64Order.enhancedCoder.decodeString(prop.getProperty("wi", ""), "de.anomic.index.indexURLEntry.indexURLEntry()"));
         }
         this.ranking = 0;
+        this.comp = null;
     }
 
     public static URLMetadataRow importEntry(final String propStr) {
@@ -345,14 +349,18 @@ public class URLMetadataRow implements Metadata {
     }
     
     public Components metadata() {
+        // avoid double computation of metadata elements
+        if (this.comp != null) return this.comp;
+        // parse elements from comp string;
         final ArrayList<String> cl = FileUtils.strings(this.entry.getCol("comp", null), "UTF-8");
-        return new Components(
+        this.comp = new Components(
                 (cl.size() > 0) ? (cl.get(0)).trim() : "",
                 hash(),
                 (cl.size() > 1) ? (cl.get(1)).trim() : "",
                 (cl.size() > 2) ? (cl.get(2)).trim() : "",
                 (cl.size() > 3) ? (cl.get(3)).trim() : "",
                 (cl.size() > 4) ? (cl.get(4)).trim() : "");
+        return this.comp;
     }
     
     public Date moddate() {

@@ -541,7 +541,7 @@ public final class plasmaSearchEvent {
                     if (page == null) {
                     	if (!anyRemoteSearchAlive()) break; // we cannot expect more results
                         // if we did not get another entry, sleep some time and try again
-                        try {Thread.sleep(100);} catch (final InterruptedException e1) {}
+                        try {Thread.sleep(10);} catch (final InterruptedException e1) {}
                         continue;
                     }
                     if (result.exists(page.hash().hashCode())) continue;

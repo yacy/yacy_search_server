@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -65,7 +66,7 @@ public final class plasmaSearchRankingProcess {
     
     private final SortStack<WordReferenceVars> stack;
     private final HashMap<String, SortStack<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
-    private final HashMap<String, String> handover; // key = urlhash, value = urlstring; used for double-check of urls that had been handed over to search process
+    private final HashSet<String> handover; // key = urlhash; used for double-check of urls that had been handed over to search process
     private final plasmaSearchQuery query;
     private final int maxentries;
     private int remote_peerCount, remote_indexCount, remote_resourceSize, local_resourceSize;
@@ -91,7 +92,7 @@ public final class plasmaSearchRankingProcess {
         this.localSearchInclusion = null;
         this.stack = new SortStack<WordReferenceVars>(maxentries);
         this.doubleDomCache = new HashMap<String, SortStack<WordReferenceVars>>();
-        this.handover = new HashMap<String, String>();
+        this.handover = new HashSet<String>();
         this.order = (query == null) ? null : new ReferenceOrder(query.ranking, query.targetlang);
         this.query = query;
         this.maxentries = maxentries;
@@ -317,47 +318,47 @@ public final class plasmaSearchRankingProcess {
     public URLMetadataRow bestURL(final boolean skipDoubleDom) {
         // returns from the current RWI list the best URL entry and removes this entry from the list
         while ((stack.size() > 0) || (size() > 0)) {
-                if (((stack.size() == 0) && (size() == 0))) break;
-                final SortStack<WordReferenceVars>.stackElement obrwi = bestRWI(skipDoubleDom);
-                if (obrwi == null) continue; // *** ? this happened and the thread was suspended silently. cause?
-                final URLMetadataRow u = indexSegment.urlMetadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
-                if (u != null) {
-                    final URLMetadataRow.Components metadata = u.metadata();
+            if (((stack.size() == 0) && (size() == 0))) break;
+            final SortStack<WordReferenceVars>.stackElement obrwi = bestRWI(skipDoubleDom);
+            if (obrwi == null) continue; // *** ? this happened and the thread was suspended silently. cause?
+            final URLMetadataRow u = indexSegment.urlMetadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
+            if (u != null) {
+                final URLMetadataRow.Components metadata = u.metadata();
 
-                    // evaluate information of metadata for navigation
-                    // author navigation:
-                    String author = metadata.dc_creator();
-                    if (author != null && author.length() > 0) {
-                    	// add author to the author navigator
-                        String authorhash = new String(Word.word2hash(author));
-                        System.out.println("*** DEBUG authorhash = " + authorhash + ", query.authorhash = " + this.query.authorhash + ", author = " + author);
-                        
-                        // check if we already are filtering for authors
-                    	if (this.query.authorhash != null && !this.query.authorhash.equals(authorhash)) {
-                    		continue;
-                    	}
-                    	
-                    	// add author to the author navigator
-                        AuthorInfo in = this.authorNavigator.get(authorhash);
-                        if (in == null) {
-                            this.authorNavigator.put(authorhash, new AuthorInfo(author));
-                        } else {
-                            in.inc();
-                            this.authorNavigator.put(authorhash, in);
-                        }
-                    } else if (this.query.authorhash != null) {
-                    	continue;
-                    }
+                // evaluate information of metadata for navigation
+                // author navigation:
+                String author = metadata.dc_creator();
+                if (author != null && author.length() > 0) {
+                	// add author to the author navigator
+                    String authorhash = new String(Word.word2hash(author));
+                    //System.out.println("*** DEBUG authorhash = " + authorhash + ", query.authorhash = " + this.query.authorhash + ", author = " + author);
                     
-                    // get the url
-                    if (metadata.url() != null) {
-                    	String urlstring = metadata.url().toNormalform(true, true);
-                    	if (urlstring == null || !urlstring.matches(query.urlMask)) continue;                    
-                        this.handover.put(u.hash(), metadata.url().toNormalform(true, false)); // remember that we handed over this url
-                        return u;
+                    // check if we already are filtering for authors
+                	if (this.query.authorhash != null && !this.query.authorhash.equals(authorhash)) {
+                		continue;
+                	}
+                	
+                	// add author to the author navigator
+                    AuthorInfo in = this.authorNavigator.get(authorhash);
+                    if (in == null) {
+                        this.authorNavigator.put(authorhash, new AuthorInfo(author));
+                    } else {
+                        in.inc();
+                        this.authorNavigator.put(authorhash, in);
                     }
+                } else if (this.query.authorhash != null) {
+                	continue;
                 }
-                misses.add(obrwi.element.metadataHash());
+                
+                // get the url
+                if (metadata.url() != null) {
+                	String urlstring = metadata.url().toNormalform(true, true);
+                	if (urlstring == null || !urlstring.matches(query.urlMask)) continue;                    
+                    this.handover.add(u.hash()); // remember that we handed over this url
+                    return u;
+                }
+            }
+            misses.add(obrwi.element.metadataHash());
         }
         return null;
     }
