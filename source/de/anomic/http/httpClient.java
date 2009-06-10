@@ -165,7 +165,7 @@ public class httpClient {
     private httpRemoteProxyConfig proxyConfig = null;
     private boolean useGlobalProxyConfig = true;
     private boolean followRedirects = true;
-    private boolean ignoreCookies = false;
+    //private boolean ignoreCookies = true;
 
     /**
      * creates a new JakartaCommonsHttpClient with given timeout using global remoteProxyConfig
@@ -241,19 +241,6 @@ public class httpClient {
         followRedirects = follow;
     }
 
-    /**
-     * <p>by default Cookies are accepted and used autmatically</p>
-     * 
-     * <q cite="http://hc.apache.org/httpclient-3.x/cookies.html">HttpClient supports automatic management of cookies, including allowing the server to set cookies and
-     * automatically return them to the server when required.</q>
-     * <cite>HttpClient Cookie Guide</cite>
-     * 
-     * @param ignoreCookies
-     */
-    public void setIgnoreCookies(final boolean ignoreCookies) {
-        this.ignoreCookies = ignoreCookies;
-    }
-
     /*
      * (non-Javadoc)
      * @see de.anomic.http.HttpClient#getUserAgent()
@@ -272,6 +259,7 @@ public class httpClient {
     public httpResponse GET(final String uri) throws IOException {
         final HttpMethod get = new GetMethod(uri);
         get.setFollowRedirects(followRedirects);
+        get.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
         return execute(get);
     }
 
@@ -286,6 +274,7 @@ public class httpClient {
         assert uri != null : "precondition violated: uri != null";
         final HttpMethod head = new HeadMethod(uri);
         head.setFollowRedirects(followRedirects);
+        head.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
         return execute(head);
     }
 
@@ -374,6 +363,7 @@ public class httpClient {
         hostConfig.setHost(host, port);
         final HttpMethod connect = new ConnectMethod(hostConfig);
         connect.setFollowRedirects(false); // there are no redirects possible for CONNECT commands as far as I know.
+        connect.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
         return execute(connect);
     }
 
@@ -437,7 +427,6 @@ public class httpClient {
      */
     private httpResponse execute(final HttpMethod method) throws IOException {
         assert method != null : "precondition violated: method != null";
-        checkIgnoreCookies(method);
         setHeader(method);
 
         final httpRemoteProxyConfig hostProxyConfig = setProxy(method);
@@ -515,16 +504,6 @@ public class httpClient {
         // set header
         for (final Header header : headers) {
             method.setRequestHeader(header);
-        }
-    }
-
-    /**
-     * @param method
-     */
-    private void checkIgnoreCookies(final HttpMethod method) {
-        // ignore cookies
-        if(ignoreCookies) {
-            method.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
         }
     }
 

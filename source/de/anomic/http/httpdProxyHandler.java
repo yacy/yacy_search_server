@@ -1055,7 +1055,6 @@ public final class httpdProxyHandler {
         final httpClient client = new httpClient(timeout, requestHeader);
         client.setFollowRedirects(false);
         // cookies are handled by the user's browser
-        client.setIgnoreCookies(true);
         client.setProxy(httpRemoteProxyConfig.getProxyConfigForURI(connectHost));
         return client;
     }
