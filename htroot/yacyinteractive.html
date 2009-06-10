@@ -29,6 +29,12 @@ function search(query) {
     self.xmlHttpReq.send(null);
 }
 
+function navget(list, name) {
+  for (var i = 0; i < list.length; i++) {
+    if (list[i].facetname = name) return list[i];
+  }
+}
+
 function updatepage(str) {
   var raw = document.getElementById("raw");
   if (raw != null) raw.innerHTML = str;
@@ -37,12 +43,14 @@ function updatepage(str) {
   var totalResults = firstChannel.totalResults.replace(/[,.]/,"");
   var startIndex = firstChannel.startIndex;
   var itemsPerPage = firstChannel.itemsPerPage;
+  var navigation = firstChannel.navigation;
+  var topics = navget(navigation, "topics");
   
   var html = "<span id=\"resCounter\" style=\"display: inline;\">total results = " + totalResults;
-  if (firstChannel.topwords.length > 0) {
+  if (topics.length > 0) {
     var topwords = "";
-    for (var i = 0; i < firstChannel.topwords.length; i++) {
-        topwords += "<a href=\"yacyinteractive.html?query=" + firstChannel.searchTerms + "+" + firstChannel.topwords[i].word + "\">" + firstChannel.topwords[i].word + "</a> ";
+    for (var i = 0; i < topics.elements.length; i++) {
+        topwords += "<a href=\"yacyinteractive.html?query=" + firstChannel.searchTerms + "+" + topics.elements[i].name + "\">" + topics.elements[i].name + "</a> ";
         if (i > 10) break;
     }
     html += "&nbsp;&nbsp;&nbsp;topwords: " + topwords;
