@@ -373,18 +373,20 @@ public class HandleMap implements Iterable<Row.Entry> {
     
     public static void main(String[] args) {
     	int count = (args.length == 0) ? 1000000 : Integer.parseInt(args[0]);
-        System.out.println("Starting test with " + count + " objects, minimum memory: " + (count * 16) + " bytes; " + MemoryControl.available() + " available");
+    	System.out.println("Starting test with " + count + " objects");
+    	System.out.println("expected  memory: " + (count * 16) + " bytes");
+    	System.out.println("available memory: " + MemoryControl.available());
         Random r = new Random(0);
         long start = System.currentTimeMillis();
 
         System.gc(); // for resource measurement
         long a = MemoryControl.available();
-        HandleMap idx = new HandleMap(12, Base64Order.enhancedCoder, 8, 0, 150000);
+        HandleMap idx = new HandleMap(12, Base64Order.enhancedCoder, 4, 0, 150000);
         for (int i = 0; i < count; i++) {
             idx.inc(FlatWordPartitionScheme.positionToHash(r.nextInt(count)));
         }
         long timek = ((long) count) * 1000L / (System.currentTimeMillis() - start);
-        System.out.println("Result LongHandleIndex: " + timek + " inc per second " + count + " loops.");
+        System.out.println("Result HandleMap: " + timek + " inc per second");
         System.gc();
         long memk = a - MemoryControl.available();
         System.out.println("Used Memory: " + memk + " bytes");
@@ -404,13 +406,13 @@ public class HandleMap implements Iterable<Row.Entry> {
             if (d == null) hm.put(hash, 1); else hm.put(hash, d + 1);
         }
         long timej =  ((long) count) * 1000L / (System.currentTimeMillis() - start);
-        System.out.println("Result HashMap: " +timej + " inc per second; " + count + " loops.");
+        System.out.println("Result   TreeMap: " + timej + " inc per second");
         System.gc();
         long memj = a - MemoryControl.available();
         System.out.println("Used Memory: " + memj + " bytes");
         System.out.println("x " + hm.get(FlatWordPartitionScheme.positionToHash(0)));
-        System.out.println("Geschwindigkeitsfaktor j/k: " + (timej / timek));
-        System.out.println("Speicherplatzfaktor    j/k: " + (memj / memk));
+        System.out.println("Geschwindigkeitsfaktor j/k: " + ((float) (10 * timej / timek) / 10.0) + " - je kleiner desto besser fuer kelondro");
+        System.out.println("Speicherplatzfaktor    j/k: " + ((float) (10 * memj / memk) / 10.0) + " - je groesser desto besser fuer kelondro");
         System.exit(0);
     }
 
