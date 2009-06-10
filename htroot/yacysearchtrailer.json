@@ -24,7 +24,7 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    }#(/nav-authors)##(nav-topics)#::
+    },#(/nav-authors)##(nav-topics)#::
     {
       "facetname": "topics",
       "displayname": "Topics",

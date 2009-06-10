@@ -39,7 +39,7 @@ import de.anomic.server.serverSwitch;
 
 public class yacysearchtrailer {
 
-    private static final int MAX_TOPWORDS = 24;
+    private static final int MAX_TOPWORDS = 10;
     
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final serverObjects prop = new serverObjects();
@@ -59,7 +59,7 @@ public class yacysearchtrailer {
         
         // host navigators
         ArrayList<NavigatorEntry> hostNavigator = theSearch.getHostNavigator(10);
-        if (hostNavigator == null) {
+        if (hostNavigator == null || hostNavigator.size() == 0) {
         	prop.put("nav-domains", 0);
         } else {
         	prop.put("nav-domains", 1);
@@ -79,37 +79,9 @@ public class yacysearchtrailer {
         	prop.put("nav-domains_element", hostNavigator.size());
         }
         
-        // attach the bottom line with search references (topwords)
-        final ArrayList<NavigatorEntry> references = theSearch.getTopicNavigator(10);
-        // default settings for no topics
-        prop.put("nav-topics", "0");
-        
-        if (references.size() > 0) {
-            int i = 0;
-            NavigatorEntry e;
-            Iterator<NavigatorEntry> iter = references.iterator();
-            while (iter.hasNext()) {
-            	e = iter.next();
-                if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;
-                if (e != null && e.name != null) {
-                    prop.putHTML("nav-topics_element_" + i + "_name", e.name);
-                    prop.put("nav-topics_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators) + "\">" + e.name + " (" + e.count + ")</a>");
-                    prop.putJSON("nav-topics_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators));
-                    prop.put("nav-topics_element_" + i + "_count", e.count);
-                    prop.put("nav-topics_element_" + i + "_modifier", e.name);
-                    prop.put("nav-topics_element_" + i + "_nl", (iter.hasNext() && i < MAX_TOPWORDS) ? 1 : 0);
-                }
-                if (i++ > MAX_TOPWORDS) {
-                    break;
-                }
-            }
-            prop.put("nav-topics_element", i);
-            prop.put("nav-topics", "1");
-        }
-        
         // author navigators
         ArrayList<NavigatorEntry> authorNavigator = theSearch.getAuthorNavigator(10);
-        if (authorNavigator == null) {
+        if (authorNavigator == null || authorNavigator.size() == 0) {
             prop.put("nav-authors", 0);
         } else {
             prop.put("nav-authors", 1);
@@ -131,6 +103,30 @@ public class yacysearchtrailer {
             prop.put("nav-authors_element", authorNavigator.size());
         }
 
+        // attach always the topics
+        ArrayList<NavigatorEntry> topicNavigator = theSearch.getTopicNavigator(10);
+        if (topicNavigator == null) topicNavigator = new ArrayList<NavigatorEntry>(); 
+        int i = 0;
+        NavigatorEntry e;
+        Iterator<NavigatorEntry> iter = topicNavigator.iterator();
+        while (iter.hasNext()) {
+            e = iter.next();
+            if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;
+            if (e != null && e.name != null) {
+                prop.putHTML("nav-topics_element_" + i + "_name", e.name);
+                prop.put("nav-topics_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators) + "\">" + e.name + " (" + e.count + ")</a>");
+                prop.putJSON("nav-topics_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators));
+                prop.put("nav-topics_element_" + i + "_count", e.count);
+                prop.put("nav-topics_element_" + i + "_modifier", e.name);
+                prop.put("nav-topics_element_" + i + "_nl", (iter.hasNext() && i < MAX_TOPWORDS) ? 1 : 0);
+            }
+            if (i++ > MAX_TOPWORDS) {
+                break;
+            }
+        }
+        prop.put("nav-topics_element", i);
+        prop.put("nav-topics", "1");
+        
         serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.FINALIZATION + "-" + "bottomline", 0, 0), false);
         
         return prop;
