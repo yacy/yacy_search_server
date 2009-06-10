@@ -467,8 +467,14 @@ public class yacysearch {
             sb.localSearches.add(theQuery);
             
             // update the search tracker
-            trackerHandles.add(theQuery.handle);
-            sb.localSearchTracker.put(client, trackerHandles);
+            try {
+            	trackerHandles.add(theQuery.handle);
+            	if (trackerHandles.size() > 1000) trackerHandles.remove(trackerHandles.first());
+            	sb.localSearchTracker.put(client, trackerHandles);
+            	if (sb.localSearchTracker.size() > 1000) sb.localSearchTracker.remove(sb.localSearchTracker.keys().nextElement());
+            } catch (Exception e) {
+            	e.printStackTrace();
+            }
             
             final int totalcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
             prop.put("num-results_offset", offset);

@@ -109,6 +109,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import de.anomic.content.DCEntry;
@@ -247,7 +248,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  ImporterManager                dbImportManager;
     public  ArrayList<plasmaSearchQuery>   localSearches; // array of search result properties as HashMaps
     public  ArrayList<plasmaSearchQuery>   remoteSearches; // array of search result properties as HashMaps
-    public  HashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
+    public  ConcurrentHashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
     public  long                           indexedPages = 0;
     public  double                         requestedQueries = 0d;
     public  double                         totalQPM = 0d;
@@ -551,8 +552,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         this.incomingCookies = new HashMap<String, Object[]>();
         
         // init search history trackers
-        this.localSearchTracker = new HashMap<String, TreeSet<Long>>(); // String:TreeSet - IP:set of Long(accessTime)
-        this.remoteSearchTracker = new HashMap<String, TreeSet<Long>>();
+        this.localSearchTracker = new ConcurrentHashMap<String, TreeSet<Long>>(); // String:TreeSet - IP:set of Long(accessTime)
+        this.remoteSearchTracker = new ConcurrentHashMap<String, TreeSet<Long>>();
         this.localSearches = new ArrayList<plasmaSearchQuery>(); // contains search result properties as HashMaps
         this.remoteSearches = new ArrayList<plasmaSearchQuery>();
         

@@ -276,32 +276,30 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * cache control methods
      */
     
-    private synchronized void cleanCache() {
+    private void cleanCache() {
+    	
         // dump the cache if necessary
-        if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false))) {
-            try {
-                cacheDump();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        
+    	synchronized (this) {
+	        if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false))) {
+	        	// dump the ram
+				File dumpFile = this.array.newContainerBLOBFile();
+				//this.ram.dump(dumpFile, true);
+				//this.array.mountBLOBContainer(dumpFile);
+				merger.dump(this.ram, dumpFile, array);
+				// get a fresh ram cache
+				this.ram = new ReferenceContainerCache<ReferenceType>(factory, this.array.rowdef(), this.array.ordering());
+				this.ram.initWriteMode();
+	        }
+    	}
+    	
         // clean-up the cache
-        if (this.array.entries() < 50 && (this.lastCleanup + cleanupCycle > System.currentTimeMillis())) return;
-        //System.out.println("----cleanup check");
-        this.array.shrink(this.targetFileSize, this.maxFileSize);
-        this.lastCleanup = System.currentTimeMillis();
-    }
-
-    private synchronized void cacheDump() throws IOException {
-        // dump the ram
-        File dumpFile = this.array.newContainerBLOBFile();
-        //this.ram.dump(dumpFile, true);
-        //this.array.mountBLOBContainer(dumpFile);
-        merger.dump(this.ram, dumpFile, array);
-        // get a fresh ram cache
-        this.ram = new ReferenceContainerCache<ReferenceType>(factory, this.array.rowdef(), this.array.ordering());
-        this.ram.initWriteMode();
+        synchronized (this) {
+	        if (this.array.entries() > 50 || (this.lastCleanup + cleanupCycle < System.currentTimeMillis())) {
+	        	//System.out.println("----cleanup check");
+	        	this.array.shrink(this.targetFileSize, this.maxFileSize);
+	        	this.lastCleanup = System.currentTimeMillis();
+        	}
+        }
     }
     
     public File newContainerBLOBFile() {

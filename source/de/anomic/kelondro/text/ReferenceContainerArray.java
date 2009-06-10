@@ -195,7 +195,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * @return the indexContainer if one exist, null otherwise
      * @throws IOException 
      */
-    public synchronized ReferenceContainer<ReferenceType> get(final byte[] termHash) throws IOException {
+    public ReferenceContainer<ReferenceType> get(final byte[] termHash) throws IOException {
         long timeout = System.currentTimeMillis() + 1000;
         Iterator<byte[]> entries = this.array.getAll(termHash).iterator();
     	if (entries == null || !entries.hasNext()) return null;

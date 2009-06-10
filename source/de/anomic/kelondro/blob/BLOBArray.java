@@ -480,7 +480,7 @@ public class BLOBArray implements BLOB {
      * @return
      * @throws IOException
      */
-    public synchronized Iterable<byte[]> getAll(byte[] key) throws IOException {
+    public Iterable<byte[]> getAll(byte[] key) throws IOException {
         /*
         byte[] b;
         ArrayList<byte[]> l = new ArrayList<byte[]>(blobs.size());
