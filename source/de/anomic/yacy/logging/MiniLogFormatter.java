@@ -36,16 +36,14 @@ public final class MiniLogFormatter extends SimpleFormatter {
           super();
       }        
       
-      public synchronized String format(final LogRecord record) {
+      public String format(final LogRecord record) {
           
           final StringBuilder buffer = this.buffer;
           buffer.setLength(0);
-
           buffer.append(formatMessage(record));
           
           // adding the stack trace if available
           buffer.append(System.getProperty("line.separator"));
-          
           
           return buffer.toString();
       }

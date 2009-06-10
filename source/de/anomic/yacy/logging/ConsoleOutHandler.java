@@ -30,7 +30,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 import java.util.logging.StreamHandler;
 
-public final class ConsoleOutHandler extends StreamHandler{
+public final class ConsoleOutHandler extends StreamHandler {
 
     public ConsoleOutHandler() {
         setLevel(Level.FINEST);
@@ -38,12 +38,12 @@ public final class ConsoleOutHandler extends StreamHandler{
         setOutputStream(System.out);        
     }
     
-    public synchronized void publish(final LogRecord record) {
+    public void publish(final LogRecord record) {
         super.publish(record);
         flush();
     }
     
-    public synchronized void close() {
+    public void close() {
         flush();
     }
 }

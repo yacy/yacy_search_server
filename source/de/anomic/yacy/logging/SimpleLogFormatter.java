@@ -51,7 +51,7 @@ public class SimpleLogFormatter extends SimpleFormatter {
           super();
       }        
       
-      public synchronized String format(final LogRecord record) {
+      public String format(final LogRecord record) {
           
           final StringBuffer buffer = this.buffer;
           buffer.setLength(0);

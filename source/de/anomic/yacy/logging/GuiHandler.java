@@ -116,7 +116,7 @@ public class GuiHandler extends Handler {
     	return this.size;
     }
     
-    public synchronized void publish(final LogRecord record) {
+    public void publish(final LogRecord record) {
         if (!isLoggable(record)) return;
         
         // write it to the buffer
