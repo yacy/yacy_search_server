@@ -1,46 +1,25 @@
+<div id="sidebar1" style="float: right; margin-top:5px; width: 220px;">
 #(nav-domains)#::
 <h3 style="padding-left:25px;">Domains</h3>
 <div><ul style="padding-left: 0px;">#{element}#
 <li>#[url]#</li>
 #{/element}#</ul></div>
 #(/nav-domains)#
-
+</div>
+<div id="sidebar2" style="float: right; margin-top:5px; width: 220px;">
 #(nav-authors)#::
 <h3 style="padding-left:25px;">Authors</h3>
 <div><ul style="padding-left: 0px;">#{element}#
 <li>#[url]#</li>
 #{/element}#</ul></div>
 #(/nav-authors)#
-
 #(nav-topics)#::
 <h3 style="padding-left:25px;">Topics</h3>
 <div><ul style="padding-left: 0px;">#{element}#
 <li>#[url]#</li>
 #{/element}#</ul></div>
 #(/nav-topics)#
-
-<h3 style="padding-left:25px;">Timeline</h3>
-<div>
-<p>
-<input type="text" id="min" size="7" style="text-align:left; border:0; color:#f6931f; font-weight:bold;" />
-&nbsp;
-<input type="text" id="max" size="7" style="text-align:right; border:0; color:#f6931f; font-weight:bold;" />
-</p>
-<p>
-<div id="slider-range" style="margin-left:-10px;"></div>
-</p>
 </div>
-<script>
-$("#slider-range").slider({
-	range: true,
-	min: 1999,
-	max: 2009,
-	values: [2001, 2005],
-	slide: function(event, ui) {
-		$("#min").val($("#slider-range").slider("values", 0));
-		$("#max").val($("#slider-range").slider("values", 1));
-	}
-});
-$("#min").val($("#slider-range").slider("values", 0));
-$("#max").val($("#slider-range").slider("values", 1));
-</script>
+
+
+
