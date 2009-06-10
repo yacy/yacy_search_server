@@ -2,7 +2,7 @@
 cd "`dirname $0`"
 S=`date "+%s"`
 C=0
-for N in `cat searchtest.words`; do 
+for N in `cat $1`; do 
   echo search for $N:
   ./localsearch.sh $N > /dev/null
   C=$(($C+1))
