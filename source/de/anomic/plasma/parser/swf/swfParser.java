@@ -74,7 +74,13 @@ public class swfParser extends AbstractParser implements Parser {
 
         try {
             final SWF2HTML swf2html = new SWF2HTML();
-            String contents = swf2html.convertSWFToHTML(source);
+            String contents = "";
+            try {
+            	contents = swf2html.convertSWFToHTML(source);
+            } catch (Exception e) {
+            	// we have seen a lot of OOM errors in the parser...
+            	e.printStackTrace();
+            }
             String url = null;
             String urlnr = null;
             final String linebreak = System.getProperty("line.separator");
