@@ -271,8 +271,8 @@ function yacysearch(global) {
 			$('#ynav1').accordion('activate', false);
 			$('#yside a').click(function() {
 				var modifier = $(this).attr('modifier');
-				modifier = modifier.replace(/^#/,' ');
-				var query = $("#yquery").getValue() + modifier;
+				modifier = modifier.replace(/^#/,'');
+				var query = $("#yquery").getValue() + " " +modifier;
 				$("#yquery").setValue(query);
 				$("#yquery").trigger('keyup');
 			});
