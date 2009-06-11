@@ -25,6 +25,13 @@ $(document).ready(function() {
 		load_css : true	
 	}, yconf);
 	
+	$.extend($.ui.accordion.defaults, {
+		autoHeight: false,
+		clearStyle: true,
+		collapsible: true,
+		header: "h3"
+	});
+	
 	$('<div id="ypopup" class="classic"></div>').appendTo("#yacylivesearch");
 	
 	if(yconf.load_css) {	
@@ -136,7 +143,6 @@ function yrun() {
 		},
 		open: function(event, ui) {
 			$('<div id="yside" style="padding:0px;"></div>').insertAfter(".ui-dialog-content");
-			$('<div id="ynav" style="margin0px; padding:0px;"></div>').appendTo('#yside');
 			var position = $(".ui-dialog").position();
 			$("#yside").dialog({
 				title: 'Navigation',
@@ -240,30 +246,35 @@ function yacysearch(global) {
 				className: "favicon"
 			});
 			
-			$('#ynav').empty();
+			$('#yside').empty();
 			$.each (
 				data.channels[0].navigation,
 				function(i,facet) {
 					if (facet) {
+						var acc = '#ynav'+i;
+						$(acc).accordion('destroy');
+						$('<div id="ynav'+i+'" style="margin0px; padding:0px;"></div>').appendTo('#yside');
 						var id = "#y"+facet.facetname;
-						$('<h3 style="padding-left:25px;">'+facet.displayname+'</h3>').appendTo('#ynav');
-						$('<div id="y'+facet.facetname+'"></div>').appendTo('#ynav');
-						$("<ul style='padding-left: 0px;'>").appendTo(id);
+						$('<h3 style="padding-left:25px;">'+facet.displayname+'</h3>').appendTo(acc);
+						$('<div id="y'+facet.facetname+'"></div>').appendTo(acc);
+						$("<ul class='nav' style='padding-left: 0px; margin-left: -5px; font-size:85%;'></ul>").appendTo(id);
 						$.each (
 							facet.elements,
 							function(j,element) {
-								$("<li><a href='"+element.url+"'>"+element.name+" ("+element.count+")</a></li>").appendTo(id);
+								$("<li><a href='#' modifier='"+element.modifier+"'>"+element.name+" ("+element.count+")</a></li>").appendTo(id+" .nav");
 							}	
-						)	
-						$("</ul>").appendTo(id);
+						)
+						$(acc).accordion({});
 					}								
 				}
 			);
-			$("#ynav").accordion({
-				autoHeight: false,
-				clearStyle: true,
-				collapsible: true,
-				header: "h3"
+			$('#ynav1').accordion('activate', false);
+			$('#yside a').click(function() {
+				var modifier = $(this).attr('modifier');
+				modifier = modifier.replace(/^#/,' ');
+				var query = $("#yquery").getValue() + modifier;
+				$("#yquery").setValue(query);
+				$("#yquery").trigger('keyup');
 			});
         }
     );
