@@ -29,6 +29,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import de.anomic.kelondro.blob.BLOBHeap;
@@ -58,7 +59,7 @@ public class CrawlProfile {
         return s;
     }
     
-    static HashMap<String, Map<String, DomProfile>> domsCache = new HashMap<String, Map<String, DomProfile>>();
+    static HashMap<String, ConcurrentHashMap<String, DomProfile>> domsCache = new HashMap<String, ConcurrentHashMap<String, DomProfile>>();
     
     MapView profileTable;
     private final File profileTableFile;
@@ -278,7 +279,7 @@ public class CrawlProfile {
         public static final String XPSTOPW          = "xpstopw";
         
         Map<String, String> mem;
-        private Map<String, DomProfile> doms;
+        private ConcurrentHashMap<String, DomProfile> doms;
         private Pattern mustmatch = null, mustnotmatch = null;
         
         
@@ -316,7 +317,7 @@ public class CrawlProfile {
             mem.put(XDSTOPW,          Boolean.toString(xdstopw)); // exclude dynamic stop-word
             mem.put(XPSTOPW,          Boolean.toString(xpstopw)); // exclude parent stop-words
 
-            doms = new HashMap<String, DomProfile>();
+            doms = new ConcurrentHashMap<String, DomProfile>();
         }
         
         public String toString() {
@@ -332,7 +333,7 @@ public class CrawlProfile {
         public entry(final Map<String, String> mem) {
             this.mem = mem;
             this.doms = domsCache.get(this.mem.get(HANDLE));
-            if (this.doms == null) this.doms = new HashMap<String, DomProfile>();
+            if (this.doms == null) this.doms = new ConcurrentHashMap<String, DomProfile>();
         }
         
         public Map<String, String> map() {
@@ -462,41 +463,35 @@ public class CrawlProfile {
             return (r.equals(Boolean.TRUE.toString()));
         }
         public void domInc(final String domain, final String referrer, final int depth) {
-            synchronized (domain.intern()) {
-                final DomProfile dp = doms.get(domain);
-                if (dp == null) {
-                    // new domain
-                    doms.put(domain, new DomProfile(referrer, depth));
-                } else {
-                    // increase counter
-                    dp.inc();
-                    doms.put(domain, dp);
-                }
+            final DomProfile dp = doms.get(domain);
+            if (dp == null) {
+                // new domain
+                doms.put(domain, new DomProfile(referrer, depth));
+            } else {
+                // increase counter
+                dp.inc();
+                doms.put(domain, dp);
             }
             domsCache.put(this.mem.get(HANDLE), doms);
         }
         public boolean grantedDomAppearance(final String domain) {
             final int max = domFilterDepth();
             if (max == Integer.MAX_VALUE) return true;
-            synchronized (domain.intern()) {
-                final DomProfile dp = doms.get(domain);
-                if (dp == null) {
-                    return 0 < max;
-                }
-                return dp.depth <= max;
+            final DomProfile dp = doms.get(domain);
+            if (dp == null) {
+                return 0 < max;
             }
+            return dp.depth <= max;
         }
 
         public boolean grantedDomCount(final String domain) {
             final int max = domMaxPages();
             if (max == Integer.MAX_VALUE) return true;
-            synchronized (domain.intern()) {
-                final DomProfile dp = doms.get(domain);
-                if (dp == null) {
-                    return 0 < max;
-                }
-                return dp.count <= max;
+            final DomProfile dp = doms.get(domain);
+            if (dp == null) {
+                return 0 < max;
             }
+            return dp.count <= max;
         }
         public int domSize() {
             return doms.size();
