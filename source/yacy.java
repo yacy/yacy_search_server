@@ -553,12 +553,22 @@ public final class yacy {
     *
     * @param homePath Root-path where all the information is to be found.
     */
-    static void shutdown(final File homePath) {
+    public static void shutdown(final File homePath) {
         // start up
         System.out.println(copyright);
         System.out.println(hline);
+        submitURL(homePath, "Steering.html?shutdown=", "Terminate YaCy");
+    }
 
-        final Properties config = configuration("REMOTE-SHUTDOWN", homePath);
+    public static void update(final File homePath) {
+        // start up
+        System.out.println(copyright);
+        System.out.println(hline);
+        submitURL(homePath, "ConfigUpdate_p.html?autoUpdate=", "Update YaCy to most recent version");
+    }
+
+    private static void submitURL(final File homePath, String path, String processdescription) {
+        final Properties config = configuration("COMMAND-STEERING", homePath);
 
         // read port
         final int port = serverCore.getPortNr(config.getProperty("port", "8080"));
@@ -573,12 +583,11 @@ public final class yacy {
         final httpClient con = new httpClient(10000, requestHeader);
         httpResponse res = null;
         try {
-            res = con.GET("http://localhost:"+ port +"/Steering.html?shutdown=");
+            res = con.GET("http://localhost:"+ port +"/" + path);
 
             // read response
             if (res.getStatusLine().startsWith("2")) {
-                Log.logConfig("REMOTE-SHUTDOWN", "YACY accepted shutdown command.");
-                Log.logConfig("REMOTE-SHUTDOWN", "Stand by for termination, which may last some seconds.");
+                Log.logConfig("COMMAND-STEERING", "YACY accepted steering command: " + processdescription);
                 final ByteArrayOutputStream bos = new ByteArrayOutputStream();
                 try {
                     FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(bos));
@@ -586,11 +595,11 @@ public final class yacy {
                     res.closeStream();
                 }
             } else {
-                Log.logSevere("REMOTE-SHUTDOWN", "error response from YACY socket: " + res.getStatusLine());
+                Log.logSevere("COMMAND-STEERING", "error response from YACY socket: " + res.getStatusLine());
                 System.exit(-1);
             }
         } catch (final IOException e) {
-            Log.logSevere("REMOTE-SHUTDOWN", "could not establish connection to YACY socket: " + e.getMessage());
+            Log.logSevere("COMMAND-STEERING", "could not establish connection to YACY socket: " + e.getMessage());
             System.exit(-1);
         } finally {
             // release connection
@@ -600,10 +609,9 @@ public final class yacy {
         }
 
         // finished
-        Log.logConfig("REMOTE-SHUTDOWN", "SUCCESSFULLY FINISHED remote-shutdown:");
-        Log.logConfig("REMOTE-SHUTDOWN", "YACY will terminate after working off all enqueued tasks.");
+        Log.logConfig("COMMAND-STEERING", "SUCCESSFULLY FINISHED COMMAND: " + processdescription);
     }
-
+    
     /**
     * This method gets all found words and outputs a statistic about the score
     * of the words. The output of this method can be used to create stop-word
@@ -995,6 +1003,10 @@ public final class yacy {
             // normal shutdown of yacy
             if (args.length == 2) applicationRoot= new File(args[1]);
             shutdown(applicationRoot);
+        } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-update"))) {
+            // aut-update yacy
+            if (args.length == 2) applicationRoot= new File(args[1]);
+            update(applicationRoot);
         } else if ((args.length >= 1) && (args[0].toLowerCase().equals("-minimizeurldb"))) {
             // migrate words from DATA/PLASMADB/WORDS path to assortment cache, if possible
             // attention: this may run long and should not be interrupted!
