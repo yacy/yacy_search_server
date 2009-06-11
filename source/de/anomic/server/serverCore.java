@@ -127,7 +127,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
     
     private SSLSocketFactory sslSocketFactory = null;
     private ServerSocket socket;           // listener
-    private final int timeout;                   // connection time-out of the socket
+    private final int timeout;             // connection time-out of the socket
     serverHandler handlerPrototype;        // the command class (a serverHandler) 
 
     private final serverSwitch<?> switchboard;   // the command class switchboard
@@ -334,8 +334,8 @@ public final class serverCore extends serverAbstractBusyThread implements server
             
             if(this.busySessions.size() >= this.maxBusySessions)
             {
-                // immediatly close connection if too much sessions are still running
-                if (this.log.isFinest()) this.log.logFinest("* connections exceeding limit, closing new incoming connection from "+ controlSocket.getRemoteSocketAddress());
+                // immediately close connection if too much sessions are still running
+                this.log.logWarning("* connections (" + this.busySessions.size() + ") exceeding limit (" + this.maxBusySessions + "), closing new incoming connection from "+ controlSocket.getRemoteSocketAddress());
                 controlSocket.close();
                 return false;
             }
