@@ -1,8 +1,10 @@
 package de.anomic.tools;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeSet;
 
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.parser.Word;
@@ -17,11 +19,11 @@ import de.anomic.plasma.parser.Word;
 public class DidYouMean {
 
 	private static char[] alphabet = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
-									  'q','r','s','t','u','v','w','x','y','z','ä','ö','ü','ß'}; 
+									  'q','r','s','t','u','v','w','x','y','z','\u00e4','\u00f6','\u00fc','\u00df'}; 
 	private final Set<String> set;
+	private final plasmaSwitchboard sb;
 	private String word;
 	private int len;
-	private final plasmaSwitchboard sb;
 	
 	public DidYouMean(final plasmaSwitchboard env) {
 		this.set = new HashSet<String>();
@@ -30,21 +32,26 @@ public class DidYouMean {
 		this.sb = env;
 	}
 	
-	public Set<String> getSuggestion(String word) {
+	public Set<String> getSuggestion(final String word) {
 		this.word = word.toLowerCase();
 		this.len = word.length();
+		
 		ChangingOneLetter();
 		AddingOneLetter();
 		DeletingOneLetter();
 		ReversingTwoConsecutiveLetters();
-		Iterator<String> it = this.set.iterator();
+		
+		final Iterator<String> it = this.set.iterator();
+		// final TreeSet<String> rset = new TreeSet<String>(new wordSizeComparator());
+		final TreeSet<String> rset = new TreeSet<String>();
 		String s;
-		final HashSet<String> rset = new HashSet<String>();
-		while(it.hasNext()) {
+		int count = 0;
+		while(count<10 && it.hasNext()) {
 			s = it.next();			
 			if(sb.indexSegment.termIndex().has(Word.word2hash(s))) {
 				rset.add(s);
-			}
+				count++;
+			}			
 		}	
 		rset.remove(word.toLowerCase());
 		return rset;
@@ -77,6 +84,16 @@ public class DidYouMean {
 			this.set.add(this.word.substring(0,i)+this.word.charAt(i+1)+this.word.charAt(i)+this.word.substring(i+2));
 		}
 	}
+	
+    public class wordSizeComparator implements Comparator<String> {
+
+		public int compare(final String o1, final String o2) {
+    		final Integer i1 = sb.indexSegment.termIndex().count(Word.word2hash(o1));
+    		final Integer i2 = sb.indexSegment.termIndex().count(Word.word2hash(o2));
+    		return i1.compareTo(i2);
+    	}
+    	
+    }
 	
 }
 
