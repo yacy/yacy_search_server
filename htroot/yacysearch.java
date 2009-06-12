@@ -29,6 +29,7 @@
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.content.RSSMessage;
@@ -53,6 +54,7 @@ import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
+import de.anomic.tools.DidYouMean;
 import de.anomic.tools.iso639;
 import de.anomic.tools.Formatter;
 import de.anomic.xml.RSSFeed;
@@ -85,7 +87,7 @@ public class yacysearch {
         String querystring = originalquerystring;
         boolean fetchSnippets = (post != null && post.get("verify", "false").equals("true"));
         final serverObjects prop = new serverObjects();
-        
+
         //final boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, ""));
@@ -465,6 +467,37 @@ public class yacysearch {
             theQuery.urlretrievaltime = theSearch.getURLRetrievalTime();
             theQuery.snippetcomputationtime = theSearch.getSnippetComputationTime();
             sb.localSearches.add(theQuery);
+                        
+            // check suggestions
+            DidYouMean didYouMean = new DidYouMean(sb);
+            Iterator<String> meanIt = didYouMean.getSuggestion(querystring).iterator();
+            int meanCount = 0;
+            String suggestion;
+            prop.put("didYouMean", 0);
+            while(meanIt.hasNext()) {
+            	suggestion = meanIt.next();
+            	prop.put("didYouMean_suggestions_"+meanCount+"_word", suggestion);
+            	prop.put("didYouMean_suggestions_"+meanCount+"_url",
+            		"/yacysearch.html" + "?display=" + display +
+	                "&search=" + suggestion +
+	                "&maximumRecords="+ theQuery.displayResults() +
+	                "&startRecord=" + (0 * theQuery.displayResults()) +
+	                "&resource=" + ((theQuery.isLocal()) ? "local" : "global") +
+	                "&verify=" + ((theQuery.onlineSnippetFetch) ? "true" : "false") +
+	                "&nav=" + theQuery.navigators +
+	                "&urlmaskfilter=" + originalUrlMask +
+	                "&prefermaskfilter=" + theQuery.prefer +
+	                "&cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
+	                "&contentdom=" + theQuery.contentdom() +
+	                "&former=" + theQuery.queryString(true)
+	             );
+            	prop.put("didYouMean_suggestions_"+meanCount+"_sep","|");
+            	meanCount++;
+            }
+            prop.put("didYouMean_suggestions_"+(meanCount-1)+"_sep","");
+            if(meanCount > 0)
+            	prop.put("didYouMean", 1);
+            prop.put("didYouMean_suggestions", meanCount);
             
             // update the search tracker
             try {
@@ -580,7 +613,7 @@ public class yacysearch {
         // for RSS: don't HTML encode some elements
         prop.putXML("rss_query", originalquerystring);
         prop.put("rss_queryenc", originalquerystring.replace(' ', '+'));
-
+                
         sb.localSearchLastAccess = System.currentTimeMillis();
         
         // return rewrite properties

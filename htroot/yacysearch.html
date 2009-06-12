@@ -94,6 +94,10 @@ $(function() {
         <input type="hidden" name="constraint" value="#[constraint]#" />
       </fieldset>
     </form>
+    #(didYouMean)#
+	::
+    <p><b>Did you mean:</b> #{suggestions}# <a href="#[url]#">#[word]#</a> #[sep]##{/suggestions}#</p>
+    #(/didYouMean)#
 
 #(searchagain)#
 ::
