@@ -6,7 +6,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.kelondro.text.IndexCell;
+import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.plasma.parser.Word;
 
 // People make mistakes when they type words.  
@@ -21,15 +22,15 @@ public class DidYouMean {
 	private static char[] alphabet = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
 									  'q','r','s','t','u','v','w','x','y','z','\u00e4','\u00f6','\u00fc','\u00df'}; 
 	private final Set<String> set;
-	private final plasmaSwitchboard sb;
+	private final IndexCell<WordReference> index;
 	private String word;
 	private int len;
 	
-	public DidYouMean(final plasmaSwitchboard env) {
+	public DidYouMean(final IndexCell<WordReference> index) {
 		this.set = new HashSet<String>();
 		this.word = "";
 		this.len = 0;
-		this.sb = env;
+		this.index = index;
 	}
 	
 	public Set<String> getSuggestion(final String word) {
@@ -46,7 +47,7 @@ public class DidYouMean {
 		String s;
 		while(it.hasNext()) {
 			s = it.next();			
-			if(sb.indexSegment.termIndex().has(Word.word2hash(s))) {
+			if (index.has(Word.word2hash(s))) {
 				rset.add(s);
 			}			
 		}	
@@ -85,8 +86,8 @@ public class DidYouMean {
     public class wordSizeComparator implements Comparator<String> {
 
 		public int compare(final String o1, final String o2) {
-    		final Integer i1 = sb.indexSegment.termIndex().count(Word.word2hash(o1));
-    		final Integer i2 = sb.indexSegment.termIndex().count(Word.word2hash(o2));
+    		final Integer i1 = index.count(Word.word2hash(o1));
+    		final Integer i2 = index.count(Word.word2hash(o2));
     		return i2.compareTo(i1);
     	}
     	
