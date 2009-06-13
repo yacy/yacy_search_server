@@ -26,6 +26,7 @@ public class DidYouMean {
 	private final IndexCell<WordReference> index;
 	private String word;
 	private int len;
+	private boolean stop;
 	
 	private Thread ChangingOneLetter;
 	private Thread AddingOneLetter;
@@ -38,6 +39,7 @@ public class DidYouMean {
 		this.word = "";
 		this.len = 0;
 		this.index = index;
+		this.stop = false;
 		
 		this.ChangingOneLetter = new ChangingOneLetter();
 		this.AddingOneLetter = new AddingOneLetter();
@@ -61,7 +63,9 @@ public class DidYouMean {
 			this.ChangingOneLetter.join(TIMEOUT);
 			this.AddingOneLetter.join(TIMEOUT);
 		} catch (InterruptedException e) {
-		}		
+		} finally {
+			stop = true;
+		}
 		
 		this.set.remove(word.toLowerCase());
 		Log.logInfo("DidYouMean", "found "+this.set.size()+" terms; execution time: "+(System.currentTimeMillis()-startTime)+"ms");
@@ -82,6 +86,7 @@ public class DidYouMean {
 						set.add(s);
 						count++;
 					}
+					if (stop) return;
 				}
 			}
 		}
@@ -90,16 +95,17 @@ public class DidYouMean {
 	private class DeletingOneLetter extends Thread {
 		// tests: len
 		public void run() {
-		String s;
-		int count = 0;
+			String s;
+			int count = 0;
 			for(int i=0; i<len;i++) {
 				s = word.substring(0, i) + word.substring(i+1);
 				if (index.has(Word.word2hash(s))) {
 					set.add(s);
 					count++;
 				}
+				if (stop) return;
 			}
-		}		
+		}
 	}
 	
 	private class AddingOneLetter extends Thread {
@@ -114,6 +120,7 @@ public class DidYouMean {
 						set.add(s);
 						count++;
 					}
+					if (stop) return;
 				}			
 			}
 		}
@@ -130,6 +137,7 @@ public class DidYouMean {
 					set.add(s);
 					count++;
 				}
+				if (stop) return;
 			}
 		}
 	}
