@@ -910,3 +910,4 @@ content.phpbb3.tableprefix = phpbb_
 content.phpbb3.dbuser = notroot
 content.phpbb3.dbpw = joshua
 content.phpbb3.ppf = 1000
+content.phpbb3.dumpfile =

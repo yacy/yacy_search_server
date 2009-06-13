@@ -22,7 +22,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.File;
+
 import de.anomic.content.dao.Dao;
+import de.anomic.content.dao.ImportDump;
 import de.anomic.content.dao.PhpBB3Dao;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
@@ -38,6 +41,7 @@ public class ContentIntegrationPHPBB3_p {
         
         prop.put("check", 0);
         prop.put("export", 0);
+        prop.put("import", 0);
         
         if (post != null) {
             
@@ -50,6 +54,7 @@ public class ContentIntegrationPHPBB3_p {
             String dbuser = post.get("content.phpbb3.dbuser", "");
             String dbpw = post.get("content.phpbb3.dbpw", "");
             int    ppf = post.getInt("content.phpbb3.ppf", 1000);
+            String dumpfile = post.get("content.phpbb3.dumpfile", "");
             
             
             sb.setConfig("content.phpbb3.urlstub", urlstub);
@@ -61,6 +66,7 @@ public class ContentIntegrationPHPBB3_p {
             sb.setConfig("content.phpbb3.dbuser", dbuser);
             sb.setConfig("content.phpbb3.dbpw", dbpw);
             sb.setConfig("content.phpbb3.ppf", ppf);
+            sb.setConfig("content.phpbb3.dumpfile", dumpfile);
             
             if (post.containsKey("check")) {
                 try {
@@ -84,7 +90,6 @@ public class ContentIntegrationPHPBB3_p {
                     prop.put("check", 2);
                     prop.put("check_error", e.getMessage());
                 }
-                                    
             }
             
             if (post.containsKey("export")) {
@@ -111,6 +116,31 @@ public class ContentIntegrationPHPBB3_p {
                 }
             }
             
+            if (post.containsKey("import")) {
+            	File f = new File(dumpfile);
+            	if (!f.exists()) {
+            		prop.put("import", 2);
+                    prop.put("import_error", "file " + dumpfile + " does not exist");
+            	} else try {
+                	ImportDump importer = new ImportDump(
+                                            dbtype,
+                                            dbhost,
+                                            dbport,
+                                            dbname,
+                                            dbuser,
+                                            dbpw
+                                            );
+                    
+                	importer.imp(f);
+                	prop.put("import", 1);
+                    importer.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    prop.put("import", 2);
+                    prop.put("import_error", e.getMessage());
+                }
+            }
+
         }
 
         prop.putHTML("content.phpbb3.urlstub", sb.getConfig("content.phpbb3.urlstub", ""));
@@ -122,6 +152,7 @@ public class ContentIntegrationPHPBB3_p {
         prop.putHTML("content.phpbb3.dbuser", sb.getConfig("content.phpbb3.dbuser", ""));
         prop.putHTML("content.phpbb3.dbpw", sb.getConfig("content.phpbb3.dbpw", ""));
         prop.putHTML("content.phpbb3.ppf", sb.getConfig("content.phpbb3.ppf", ""));
+        prop.putHTML("content.phpbb3.dumpfile", sb.getConfig("content.phpbb3.dumpfile", ""));
 
         return prop;
     }

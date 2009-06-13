@@ -31,8 +31,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -46,7 +44,7 @@ import de.anomic.yacy.yacyURL;
 
 public class PhpBB3Dao implements Dao {
 
-    private Connection conn = null;
+    private DatabaseConnection conn = null;
     private String urlstub, prefix;
     private HashMap<Integer, String> users;
 
@@ -59,55 +57,21 @@ public class PhpBB3Dao implements Dao {
             String prefix,
             String user,
             String pw) throws Exception  {
-        this.conn = getConnection(dbType, host, port, dbname, user, pw);
+        this.conn = new DatabaseConnection(dbType, host, port, dbname, user, pw);
         this.urlstub = urlstub;
         this.prefix = prefix;
         this.users = new HashMap<Integer, String>();
     }
     
     protected void finalize() throws Throwable {
-        closeConnection();
-    }
-    
-    private Connection getConnection(final String dbType, String host, int port, String dbname, String user, String pw) throws Exception {
-        String dbDriverStr = null, dbConnStr = null;            
-        if (dbType.equalsIgnoreCase("mysql")) {
-            dbDriverStr = "com.mysql.jdbc.Driver";
-            dbConnStr = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
-        } else if (dbType.equalsIgnoreCase("pgsql")) {
-            dbDriverStr = "org.postgresql.Driver";
-            dbConnStr = "jdbc:postgresql://" + host + ":" + port + "/" + dbname;
-        } else throw new IllegalArgumentException();
-        
-        try {            
-            Class.forName(dbDriverStr).newInstance();
-        } catch (final Exception e) {
-            throw new Exception("Unable to load the jdbc driver: " + e.getMessage(),e);
-        }
-        
-        try {
-            return DriverManager.getConnection(dbConnStr, user, pw);
-        } catch (final Exception e) {
-            throw new Exception("Unable to establish a database connection: " + e.getMessage(),e);
-        }
-    }
-    
-    public void closeConnection() {
-        if (conn != null) { 
-            try {
-                conn.close();
-                conn = null;
-            } catch (SQLException e) {
-                System.out.println("PhpBB3Dao: " + e);
-            }
-        }
+        close();
     }
     
     public Date first() {
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = conn.createStatement();
+            stmt = conn.statement();
             rs = stmt.executeQuery("select min(post_time) from " + prefix + "posts");
             if (rs.next()) {
                 return new Date(rs.getLong(1) * 1000L);
@@ -126,7 +90,7 @@ public class PhpBB3Dao implements Dao {
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = conn.createStatement();
+            stmt = conn.statement();
             rs = stmt.executeQuery("select max(post_time) from " + prefix + "posts");
             if (rs.next()) {
                 return new Date(rs.getLong(1) * 1000L);
@@ -141,23 +105,8 @@ public class PhpBB3Dao implements Dao {
         }
     }
 
-    public int size() {
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = conn.createStatement();
-            rs = stmt.executeQuery("select count(*) from " + prefix + "posts");
-            if (rs.next()) {
-                return rs.getInt(1);
-            }
-            return 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return 0;
-        } finally {
-            if (rs != null) try {rs.close();} catch (SQLException e) {}
-            if (stmt != null) try {stmt.close();} catch (SQLException e) {}
-        }
+    public int size() throws SQLException {
+    	return this.conn.count(prefix + "posts");
     }
 
     public DCEntry get(int item) {
@@ -195,7 +144,7 @@ public class PhpBB3Dao implements Dao {
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = conn.createStatement();
+            stmt = conn.statement();
             rs = stmt.executeQuery(sql);
             if (rs.next()) {
                 try {
@@ -222,7 +171,7 @@ public class PhpBB3Dao implements Dao {
                 Statement stmt = null;
                 ResultSet rs = null;
                 try {
-                    stmt = conn.createStatement();
+                    stmt = conn.statement();
                     rs = stmt.executeQuery(sql.toString());
                     while (rs.next()) {
                         try {
@@ -286,7 +235,7 @@ public class PhpBB3Dao implements Dao {
         Statement stmt = null;
         ResultSet rs = null;
         try {
-            stmt = conn.createStatement();
+            stmt = conn.statement();
             rs = stmt.executeQuery(sql.toString());
             if (rs.next()) nick = rs.getString("username");
             if (nick == null) nick = "";
@@ -354,11 +303,7 @@ public class PhpBB3Dao implements Dao {
     }
     
     public void close() {
-        try {
-            this.conn.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        this.conn.close();
     }
     
     public static void main(String[] args) {

@@ -1,0 +1,105 @@
+// PhpBB3Dao.java
+// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 26.05.2009 on http://yacy.net
+//
+// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedRevision: 1986 $
+// $LastChangedBy: orbiter $
+//
+// LICENSE
+// 
+// This program is free software; you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation; either version 2 of the License, or
+// (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software
+// Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+package de.anomic.content.dao;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import de.anomic.kelondro.util.FileUtils;
+
+public class ImportDump {
+
+    private DatabaseConnection conn = null;
+
+    public ImportDump(
+            String dbType,
+            String host,
+            int port,
+            String dbname,
+            String user,
+            String pw) throws Exception  {
+        this.conn = new DatabaseConnection(dbType, host, port, dbname, user, pw);
+        this.conn.setAutoCommit(true);
+    }
+    
+    public void imp(File dump) throws SQLException {
+    	Statement statement = null;
+    	//int maxBatch = 1048576;
+        try {
+        	statement = conn.statement();
+        	ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        	FileUtils.copy(dump, baos);
+        	
+        	String s = new String(baos.toByteArray(), "UTF-8");
+        	int batchSize = 0;
+        	int p, q;
+        	String t;
+        	loop: while (s.length() > 0) {
+        		p = s.indexOf("INSERT INTO", 1);
+        		q = s.indexOf("CREATE TABLE", 1);
+        		if (q >= 0 && q < p) p = q;
+        		if (p < 0) {
+        			// finalize process
+        			statement.executeBatch();
+        			System.out.println(s);
+        			statement.addBatch(s);
+                    statement.executeBatch();
+                    break loop;
+        		}
+        		t = s.substring(0, p);
+        		s = s.substring(p);
+        		//if (batchSize + t.length() >= maxBatch) {
+        			statement.executeBatch();
+        			batchSize = 0;
+        		//}
+    			System.out.println(t);
+        		statement.addBatch(t);
+        		batchSize += t.length();
+        	}
+        	statement.executeBatch();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw e;
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new SQLException(e.getMessage());
+		} finally {
+            if (statement != null) try {statement.close();} catch (SQLException e) {}
+        }
+    }
+
+    protected void finalize() throws Throwable {
+        close();
+    }
+    
+    public void close() {
+        this.conn.close();
+    }
+    
+    
+}

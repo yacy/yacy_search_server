@@ -25,6 +25,7 @@
 package de.anomic.content.dao;
 
 import java.io.File;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 
@@ -39,8 +40,9 @@ public interface Dao {
     
     /**
      * get the maximum number of possible DCEntry items in the database
+     * @throws SQLException 
      */
-    public int size();
+    public int size() throws SQLException;
     
     /**
      * retrieve a single item from the database

@@ -55,6 +55,16 @@
           </dd>
         </dl>
       </fieldset>
+      <fieldset>
+        <dl>
+          <dt><b>Import a database dump</b>,<br /></dt>
+          <dd><input type="text" name="content.phpbb3.dumpfile" value="#[content.phpbb3.dumpfile]#" size="60" /></dd>
+        </dl>
+        <dt></dt>
+          <dd>
+            <input type="submit" name="import" value="Import Dump" />
+          </dd>
+      </fieldset>
     </form>
     
     #(check)#::
@@ -80,6 +90,11 @@
     <p>Export successful! Wrote #[files]# files in DATA/SURROGATES/in</p>::
     <p>Export failed: #[error]#</p>
     #(/export)#
+    
+    #(import)#::
+    <p>Import successful!::
+    <p>Import failed: #[error]#</p>
+    #(/import)#
     
     #%env/templates/footer.template%#
   </body>
