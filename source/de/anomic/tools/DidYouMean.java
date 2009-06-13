@@ -52,12 +52,12 @@ public class DidYouMean {
 
 		this.ChangingOneLetter.start();
 		this.AddingOneLetter.start();
-		this.ReversingTwoConsecutiveLetters.start();
 		this.DeletingOneLetter.start();
+		this.ReversingTwoConsecutiveLetters.start();
 		
 		try {
-			this.DeletingOneLetter.join(TIMEOUT);
 			this.ReversingTwoConsecutiveLetters.join(TIMEOUT);
+			this.DeletingOneLetter.join(TIMEOUT);
 			this.ChangingOneLetter.join(TIMEOUT);
 			this.AddingOneLetter.join(TIMEOUT);
 		} catch (InterruptedException e) {
@@ -120,7 +120,7 @@ public class DidYouMean {
 	}
 	
 	private class ReversingTwoConsecutiveLetters extends Thread {
-		// tests: alphabet.length * (len - 1)
+		// tests: (len - 1)
 		public void run() {
 			String s;
 			int count = 0;
