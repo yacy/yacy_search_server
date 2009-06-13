@@ -81,8 +81,8 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     	this.array.clear();
     }
     
-    public int size() {
-        return (this.array == null) ? 0 : this.array.size();
+    public int[] sizes() {
+        return (this.array == null) ? new int[0] : this.array.sizes();
     }
     
     public ByteOrder ordering() {
@@ -330,7 +330,6 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
                 // write a log
                 if (System.currentTimeMillis() - lastlog > 30000) {
                     System.out.println("CELL REFERENCE COLLECTION scanned " + count + " RWI index entries. ");
-                    //Log.logInfo("COLLECTION INDEX REFERENCE COLLECTION", "scanned " + count + " RWI index entries. " + (((System.currentTimeMillis() - start) * (array.size() + array.free() - count) / count) / 60000) + " minutes remaining for this array");
                     lastlog = System.currentTimeMillis();
                 }
             }

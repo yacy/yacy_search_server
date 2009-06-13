@@ -92,7 +92,7 @@ public final class query {
 
         if (obj.equals("rwicount")) {
             // return the total number of available word indexes
-            prop.put("response", sb.indexSegment.termIndex().size());
+            prop.put("response", sb.indexSegment.termIndex().sizesMax());
             return prop;
         }
 

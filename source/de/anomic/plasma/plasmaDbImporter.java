@@ -37,7 +37,7 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
     	super("PLASMADB");
         this.homeWordIndex = homeWI;
         this.importWordIndex = importWI;
-        this.importStartSize = this.importWordIndex.termIndex().size();
+        this.importStartSize = this.importWordIndex.termIndex().sizesMax();
     }
 
     /**
@@ -94,8 +94,8 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
         
         try {
             this.log.logInfo("Importing DB from '" + this.importWordIndex.getLocation().getAbsolutePath() + "'");
-            this.log.logInfo("Home word index contains " + homeWordIndex.termIndex().size() + " words and " + homeWordIndex.urlMetadata().size() + " URLs.");
-            this.log.logInfo("Import word index contains " + this.importWordIndex.termIndex().size() + " words and " + this.importWordIndex.urlMetadata().size() + " URLs.");                        
+            this.log.logInfo("Home word index contains " + homeWordIndex.termIndex().sizesMax() + " words and " + homeWordIndex.urlMetadata().size() + " URLs.");
+            this.log.logInfo("Import word index contains " + this.importWordIndex.termIndex().sizesMax() + " words and " + this.importWordIndex.urlMetadata().size() + " URLs.");                        
             
             final HashSet<String> unknownUrlBuffer = new HashSet<String>();
             final HashSet<String> importedUrlBuffer = new HashSet<String>();
@@ -190,8 +190,8 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                                 "Speed: "+ 500*1000/duration + " word entities/s" +
                                 " | Elapsed time: " + DateFormatter.formatInterval(getElapsedTime()) +
                                 " | Estimated time: " + DateFormatter.formatInterval(getEstimatedTime()) + "\n" + 
-                                "Home Words = " + homeWordIndex.termIndex().size() + 
-                                " | Import Words = " + this.importWordIndex.termIndex().size());
+                                "Home Words = " + homeWordIndex.termIndex().sizesMax() + 
+                                " | Import Words = " + this.importWordIndex.termIndex().sizesMax());
                         this.wordChunkStart = this.wordChunkEnd;
                         this.wordChunkStartHash = this.wordChunkEndHash;
                     }                    
@@ -213,8 +213,8 @@ public class plasmaDbImporter extends AbstractImporter implements Importer {
                 }
             }
             
-            this.log.logInfo("Home word index contains " + homeWordIndex.termIndex().size() + " words and " + homeWordIndex.urlMetadata().size() + " URLs.");
-            this.log.logInfo("Import word index contains " + this.importWordIndex.termIndex().size() + " words and " + this.importWordIndex.urlMetadata().size() + " URLs.");
+            this.log.logInfo("Home word index contains " + homeWordIndex.termIndex().sizesMax() + " words and " + homeWordIndex.urlMetadata().size() + " URLs.");
+            this.log.logInfo("Import word index contains " + this.importWordIndex.termIndex().sizesMax() + " words and " + this.importWordIndex.urlMetadata().size() + " URLs.");
         } catch (final Exception e) {
             this.log.logSevere("Database import failed.",e);
             e.printStackTrace();

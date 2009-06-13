@@ -88,12 +88,6 @@ public interface BufferedIndex<ReferenceType extends Reference> extends Index<Re
     public long getBufferSizeBytes();
 
     /**
-     * get the size of the buffer backend
-     * @return number of word references
-     */
-    public int getBackendSize();
-    
-    /**
      * get the size of the buffer content
      * @return number of word references
      */

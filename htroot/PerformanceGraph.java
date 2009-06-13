@@ -41,7 +41,7 @@ public class PerformanceGraph {
         final int width = post.getInt("width", 660);
         final int height = post.getInt("height", 240);
         
-        return plasmaProfiling.performanceGraph(width, height, sb.indexSegment.urlMetadata().size() + " URLS / " + sb.indexSegment.termIndex().getBackendSize() + " WORDS IN INDEX / " + sb.indexSegment.termIndex().getBufferSize() + " WORDS IN CACHE");
+        return plasmaProfiling.performanceGraph(width, height, sb.indexSegment.urlMetadata().size() + " URLS / " + sb.indexSegment.termIndex().sizesMax() + " WORDS IN INDEX / " + sb.indexSegment.termIndex().getBufferSize() + " WORDS IN CACHE");
     }
     
 }

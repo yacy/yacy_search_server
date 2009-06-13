@@ -94,7 +94,7 @@ public class IndexCleaner_p {
             prop.put("rwidb_threadAlive", indexCleanerThread.isAlive() + "");
             prop.put("rwidb_threadToString", indexCleanerThread.toString());
             prop.putNum("rwidb_RWIcountstart", indexCleanerThread.rwiCountAtStart);
-            prop.putNum("rwidb_RWIcountnow", sb.indexSegment.termIndex().size());
+            prop.putNum("rwidb_RWIcountnow", sb.indexSegment.termIndex().sizesMax());
             prop.put("rwidb_wordHashNow", (indexCleanerThread.wordHashNow == null) ? "NULL" : new String(indexCleanerThread.wordHashNow));
             prop.put("rwidb_lastWordHash", (indexCleanerThread.lastWordHash == null) ? "null" : new String(indexCleanerThread.lastWordHash));
             prop.putNum("rwidb_lastDeletionCounter", indexCleanerThread.lastDeletionCounter);

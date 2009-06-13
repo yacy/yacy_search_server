@@ -343,7 +343,7 @@ public class IndexControlRWIs_p {
         
 
         // insert constants
-        prop.putNum("wcount", sb.indexSegment.termIndex().size());
+        prop.putNum("wcount", sb.indexSegment.termIndex().sizesMax());
         // return rewrite properties
         return prop;
     }

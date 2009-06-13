@@ -260,7 +260,22 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     }
 
     public int size() {
-        return this.ram.size() + this.array.size();
+        throw new UnsupportedOperationException("an accumulated size of index entries would not reflect the real number of words, which cannot be computed easily");
+    }
+
+    public int[] sizes() {
+    	int[] as = this.array.sizes();
+    	int[] asr = new int[as.length + 1];
+    	System.arraycopy(as, 0, asr, 0, as.length);
+    	asr[as.length] = this.ram.size();
+    	return asr;
+    }
+    
+    public int sizesMax() {
+    	int m = 0;
+    	int[] s = sizes();
+    	for (int i = 0; i < s.length; i++) if (s[i] > m) m = s[i];
+    	return m;
     }
 
     public int minMem() {
@@ -310,10 +325,6 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     public void mountBLOBFile(File blobFile) throws IOException {
         // for migration of cache files
         this.array.mountBLOBFile(blobFile);
-    }
-
-    public int getBackendSize() {
-        return this.array.size();
     }
 
     public long getBufferMaxAge() {

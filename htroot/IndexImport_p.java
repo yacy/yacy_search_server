@@ -106,7 +106,7 @@ public final class IndexImport_p {
             }
         }
         
-        prop.putNum("wcount", switchboard.indexSegment.termIndex().size());
+        prop.putNum("wcount", switchboard.indexSegment.termIndex().sizesMax());
         prop.putNum("ucount", switchboard.indexSegment.urlMetadata().size());
         
         /*

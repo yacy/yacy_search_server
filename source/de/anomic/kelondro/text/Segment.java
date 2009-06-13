@@ -333,7 +333,7 @@ public final class Segment {
         
         public ReferenceCleaner(final byte[] startHash) {
             this.startHash = startHash;
-            this.rwiCountAtStart = termIndex().size();
+            this.rwiCountAtStart = termIndex().sizesMax();
         }
         
         public void run() {

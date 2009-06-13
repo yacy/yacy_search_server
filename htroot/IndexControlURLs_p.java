@@ -181,7 +181,7 @@ public class IndexControlURLs_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator<URLMetadataRow> entryIt = new RotateIterator<URLMetadataRow>(sb.indexSegment.urlMetadata().entries(true, urlhash), new String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), sb.indexSegment.termIndex().size()); 
+                final Iterator<URLMetadataRow> entryIt = new RotateIterator<URLMetadataRow>(sb.indexSegment.urlMetadata().entries(true, urlhash), new String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), sb.indexSegment.termIndex().sizesMax()); 
                 final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
                 URLMetadataRow entry;
                 int i = 0;
