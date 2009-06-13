@@ -42,15 +42,12 @@ public class DidYouMean {
 		ReversingTwoConsecutiveLetters();
 		
 		final Iterator<String> it = this.set.iterator();
-		// final TreeSet<String> rset = new TreeSet<String>(new wordSizeComparator());
-		final TreeSet<String> rset = new TreeSet<String>();
+		final TreeSet<String> rset = new TreeSet<String>(new wordSizeComparator());
 		String s;
-		int count = 0;
-		while(count<10 && it.hasNext()) {
+		while(it.hasNext()) {
 			s = it.next();			
 			if(sb.indexSegment.termIndex().has(Word.word2hash(s))) {
 				rset.add(s);
-				count++;
 			}			
 		}	
 		rset.remove(word.toLowerCase());
@@ -90,7 +87,7 @@ public class DidYouMean {
 		public int compare(final String o1, final String o2) {
     		final Integer i1 = sb.indexSegment.termIndex().count(Word.word2hash(o1));
     		final Integer i2 = sb.indexSegment.termIndex().count(Word.word2hash(o2));
-    		return i1.compareTo(i2);
+    		return i2.compareTo(i1);
     	}
     	
     }
