@@ -494,7 +494,8 @@ public class yacysearch {
     	                "&prefermaskfilter=" + theQuery.prefer +
     	                "&cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
     	                "&contentdom=" + theQuery.contentdom() +
-    	                "&former=" + theQuery.queryString(true)
+    	                "&former=" + theQuery.queryString(true) +
+    	                "&meanCount=" + meanMax
     	             );
                 	prop.put("didYouMean_suggestions_"+meanCount+"_sep","|");
                 	meanCount++;
