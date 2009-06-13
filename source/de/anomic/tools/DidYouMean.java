@@ -1,13 +1,12 @@
 package de.anomic.tools;
 
-import java.util.Comparator;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
-import java.util.TreeSet;
 
 import de.anomic.kelondro.text.IndexCell;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
+import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.parser.Word;
 
 // People make mistakes when they type words.  
@@ -19,79 +18,127 @@ import de.anomic.plasma.parser.Word;
 
 public class DidYouMean {
 
-	private static char[] alphabet = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
+	private static final char[] alphabet = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
 									  'q','r','s','t','u','v','w','x','y','z','\u00e4','\u00f6','\u00fc','\u00df'}; 
+	private static final long TIMEOUT = 2000;
+	
 	private final Set<String> set;
 	private final IndexCell<WordReference> index;
 	private String word;
 	private int len;
 	
+	private Thread ChangingOneLetter;
+	private Thread AddingOneLetter;
+	private Thread DeletingOneLetter;
+	private Thread ReversingTwoConsecutiveLetters;
+	
 	public DidYouMean(final IndexCell<WordReference> index) {
-		this.set = new HashSet<String>();
+		// this.set = Collections.synchronizedSortedSet(new TreeSet<String>(new wordSizeComparator()));
+		this.set = Collections.synchronizedSet(new HashSet<String>());
 		this.word = "";
 		this.len = 0;
 		this.index = index;
+		
+		this.ChangingOneLetter = new ChangingOneLetter();
+		this.AddingOneLetter = new AddingOneLetter();
+		this.DeletingOneLetter = new DeletingOneLetter();
+		this.ReversingTwoConsecutiveLetters = new ReversingTwoConsecutiveLetters();
 	}
 	
 	public Set<String> getSuggestion(final String word) {
+		long startTime = System.currentTimeMillis();
 		this.word = word.toLowerCase();
 		this.len = word.length();
+
+		this.ChangingOneLetter.start();
+		this.AddingOneLetter.start();
+		this.DeletingOneLetter.start();
+		this.ReversingTwoConsecutiveLetters.start();
 		
-		ChangingOneLetter();
-		AddingOneLetter();
-		DeletingOneLetter();
-		ReversingTwoConsecutiveLetters();
+		try {
+			this.ChangingOneLetter.join(TIMEOUT);
+			this.AddingOneLetter.join(TIMEOUT);
+			this.DeletingOneLetter.join(TIMEOUT);
+			this.ReversingTwoConsecutiveLetters.join(TIMEOUT);
+		} catch (InterruptedException e) {
+		}		
 		
-		final Iterator<String> it = this.set.iterator();
-		final TreeSet<String> rset = new TreeSet<String>(new wordSizeComparator());
-		String s;
-		while(it.hasNext()) {
-			s = it.next();			
-			if (index.has(Word.word2hash(s))) {
-				rset.add(s);
-			}			
-		}	
-		rset.remove(word.toLowerCase());
-		return rset;
+		this.set.remove(word.toLowerCase());
+		Log.logInfo("DidYouMean", "found "+this.set.size()+" terms; execution time: "+(System.currentTimeMillis()-startTime)+"ms");
+		
+		return this.set;
+			
 	}
 	
-	private void ChangingOneLetter() {		
-		for(int i=0; i<this.len; i++) {
-			for(int j=0; j<alphabet.length; j++) {
-				this.set.add(this.word.substring(0, i) + alphabet[j] + this.word.substring(i+1));
+	private class ChangingOneLetter extends Thread {		
+		public void run() {
+			String s;
+			int count = 0;
+			for(int i=0; i<len; i++) {
+				for(int j=0; j<alphabet.length; j++) {
+					s = word.substring(0, i) + alphabet[j] + word.substring(i+1);
+					if (index.has(Word.word2hash(s))) {
+						set.add(s);
+						count++;
+					}
+				}
 			}
 		}
 	}
 	
-	private void DeletingOneLetter() {
-		for(int i=0; i<this.len;i++) {
-			this.set.add(this.word.substring(0, i) + this.word.substring(i+1));			
+	private class DeletingOneLetter extends Thread {
+		public void run() {
+		String s;
+		int count = 0;
+			for(int i=0; i<len;i++) {
+				s = word.substring(0, i) + word.substring(i+1);
+				if (index.has(Word.word2hash(s))) {
+					set.add(s);
+					count++;
+				}
+			}
+		}		
+	}
+	
+	private class AddingOneLetter extends Thread {
+		public void run() {
+			String s;
+			int count = 0;
+			for(int i=0; i<=len;i++) {
+				for(int j=0; j<alphabet.length; j++) {
+					s = word.substring(0, i) + alphabet[j] + word.substring(i);
+					if (index.has(Word.word2hash(s))) {
+						set.add(s);
+						count++;
+					}
+				}			
+			}
 		}
 	}
 	
-	private void AddingOneLetter() {
-		for(int i=0; i<this.len;i++) {
-			for(int j=0; j<alphabet.length; j++) {
-				this.set.add(this.word.substring(0, i) + alphabet[j] + this.word.substring(i));
-			}			
+	private class ReversingTwoConsecutiveLetters extends Thread {
+		public void run() {
+			String s;
+			int count = 0;
+			for(int i=0; i<word.length()-1; i++) {
+				s = word.substring(0,i)+word.charAt(i+1)+word.charAt(i)+word.substring(i+2);
+				if (index.has(Word.word2hash(s))) {
+					set.add(s);
+					count++;
+				}
+			}
 		}
 	}
 	
-	private void ReversingTwoConsecutiveLetters() {
-		for(int i=0; i<this.word.length()-1; i++) {
-			this.set.add(this.word.substring(0,i)+this.word.charAt(i+1)+this.word.charAt(i)+this.word.substring(i+2));
-		}
-	}
-	
-    public class wordSizeComparator implements Comparator<String> {
-
+	/*
+    private class wordSizeComparator implements Comparator<String> {
 		public int compare(final String o1, final String o2) {
     		final Integer i1 = index.count(Word.word2hash(o1));
     		final Integer i2 = index.count(Word.word2hash(o2));
     		return i2.compareTo(i1);
-    	}
-    	
+    	}    	
     }
+    */
 	
 }
 
