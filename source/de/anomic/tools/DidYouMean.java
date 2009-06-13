@@ -52,14 +52,14 @@ public class DidYouMean {
 
 		this.ChangingOneLetter.start();
 		this.AddingOneLetter.start();
-		this.DeletingOneLetter.start();
 		this.ReversingTwoConsecutiveLetters.start();
+		this.DeletingOneLetter.start();
 		
 		try {
-			this.ChangingOneLetter.join(TIMEOUT);
-			this.AddingOneLetter.join(TIMEOUT);
 			this.DeletingOneLetter.join(TIMEOUT);
 			this.ReversingTwoConsecutiveLetters.join(TIMEOUT);
+			this.ChangingOneLetter.join(TIMEOUT);
+			this.AddingOneLetter.join(TIMEOUT);
 		} catch (InterruptedException e) {
 		}		
 		
@@ -70,7 +70,8 @@ public class DidYouMean {
 			
 	}
 	
-	private class ChangingOneLetter extends Thread {		
+	private class ChangingOneLetter extends Thread {
+		// tests: alphabet.length * len
 		public void run() {
 			String s;
 			int count = 0;
@@ -87,6 +88,7 @@ public class DidYouMean {
 	}
 	
 	private class DeletingOneLetter extends Thread {
+		// tests: len
 		public void run() {
 		String s;
 		int count = 0;
@@ -101,6 +103,7 @@ public class DidYouMean {
 	}
 	
 	private class AddingOneLetter extends Thread {
+		// tests: alphabet.length * len
 		public void run() {
 			String s;
 			int count = 0;
@@ -117,10 +120,11 @@ public class DidYouMean {
 	}
 	
 	private class ReversingTwoConsecutiveLetters extends Thread {
+		// tests: alphabet.length * (len - 1)
 		public void run() {
 			String s;
 			int count = 0;
-			for(int i=0; i<word.length()-1; i++) {
+			for(int i=0; i<len-1; i++) {
 				s = word.substring(0,i)+word.charAt(i+1)+word.charAt(i)+word.substring(i+2);
 				if (index.has(Word.word2hash(s))) {
 					set.add(s);
