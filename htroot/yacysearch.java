@@ -471,8 +471,9 @@ public class yacysearch {
             // check suggestions
             int meanMax = 0;
             if (post != null && post.containsKey("meanCount")) {
-            	meanMax = Integer.parseInt(post.get("meanCount"));
+            	meanMax = Integer.parseInt(post.get("meanCount"));            	
             }
+            prop.put("meanCount", meanMax);
             if(meanMax > 0) {
                 DidYouMean didYouMean = new DidYouMean(sb);
             	Iterator<String> meanIt = didYouMean.getSuggestion(querystring).iterator();
@@ -499,7 +500,7 @@ public class yacysearch {
                 	meanCount++;
                 }
                 prop.put("didYouMean_suggestions_"+(meanCount-1)+"_sep","");
-                prop.put("didYouMean", 1);
+                prop.put("didYouMean", meanCount>0 ? 1:0);
                 prop.put("didYouMean_suggestions", meanCount);
             } else {
                 prop.put("didYouMean", 0);
