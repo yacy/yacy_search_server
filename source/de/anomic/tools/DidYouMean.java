@@ -2,6 +2,7 @@ package de.anomic.tools;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
 import de.anomic.kelondro.text.IndexCell;
@@ -20,18 +21,19 @@ public class DidYouMean {
 
 	private static final char[] alphabet = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
 									  'q','r','s','t','u','v','w','x','y','z','\u00e4','\u00f6','\u00fc','\u00df'}; 
-	private static final long TIMEOUT = 2000;
+	private static final long TIMEOUT = 500;
 	
 	private final Set<String> set;
 	private final IndexCell<WordReference> index;
 	private String word;
 	private int len;
-	private boolean stop;
 	
 	private Thread ChangingOneLetter;
 	private Thread AddingOneLetter;
 	private Thread DeletingOneLetter;
 	private Thread ReversingTwoConsecutiveLetters;
+	
+	private final BlockingQueue bq = new BlockingQueue();
 	
 	public DidYouMean(final IndexCell<WordReference> index) {
 		// this.set = Collections.synchronizedSortedSet(new TreeSet<String>(new wordSizeComparator()));
@@ -39,7 +41,6 @@ public class DidYouMean {
 		this.word = "";
 		this.len = 0;
 		this.index = index;
-		this.stop = false;
 		
 		this.ChangingOneLetter = new ChangingOneLetter();
 		this.AddingOneLetter = new AddingOneLetter();
@@ -52,93 +53,160 @@ public class DidYouMean {
 		this.word = word.toLowerCase();
 		this.len = word.length();
 
-		this.ChangingOneLetter.start();
-		this.AddingOneLetter.start();
-		this.DeletingOneLetter.start();
-		this.ReversingTwoConsecutiveLetters.start();
+	    // create worker threads
+	    Thread[] workers = new Thread[8];
+	    for (int i=0; i<workers.length; i++) {
+		      workers[i] = new Worker("WorkerThread_"+i);
+	    }
+	    // first push the tasks for calculation of word variations on blocking queue
+		bq.push(this.ChangingOneLetter);
+		bq.push(this.AddingOneLetter);
+		bq.push(this.DeletingOneLetter);
+		bq.push(this.ReversingTwoConsecutiveLetters);		
 		
-		try {
-			this.ReversingTwoConsecutiveLetters.join(TIMEOUT);
-			this.DeletingOneLetter.join(TIMEOUT);
-			this.ChangingOneLetter.join(TIMEOUT);
-			this.AddingOneLetter.join(TIMEOUT);
-		} catch (InterruptedException e) {
-		} finally {
-			stop = true;
+		// check for timeout
+		boolean run = true;
+		while(run && (System.currentTimeMillis()-startTime) < TIMEOUT) {
+			if(bq.size() > 0) {
+				run = true;
+			} else {
+				run = false;
+			}
 		}
 		
+		// push "poison pill" for each worker thread
+	    for (int i=0; i<workers.length; i++) {
+	    	bq.push(new Thread() {
+	    		public void run() {
+	    			Thread.currentThread().interrupt();
+	    		}
+	        });
+	    }
+	    
 		this.set.remove(word.toLowerCase());
-		Log.logInfo("DidYouMean", "found "+this.set.size()+" terms; execution time: "+(System.currentTimeMillis()-startTime)+"ms");
+		Log.logInfo("DidYouMean", "found "+this.set.size()+" terms; execution time: "
+				+(System.currentTimeMillis()-startTime)+"ms"+ (run?"(timed out)":""));
 		
 		return this.set;
 			
 	}
 	
 	private class ChangingOneLetter extends Thread {
+		
+		public ChangingOneLetter() {
+			this.setName("ChangingOneLetter");
+		}
+		
 		// tests: alphabet.length * len
 		public void run() {
 			String s;
-			int count = 0;
 			for(int i=0; i<len; i++) {
 				for(int j=0; j<alphabet.length; j++) {
 					s = word.substring(0, i) + alphabet[j] + word.substring(i+1);
-					if (index.has(Word.word2hash(s))) {
-						set.add(s);
-						count++;
-					}
-					if (stop) return;
+					bq.push(new Tester(s));
 				}
 			}
 		}
 	}
 	
 	private class DeletingOneLetter extends Thread {
+		
+		public DeletingOneLetter() {
+			this.setName("DeletingOneLetter");
+		}
+		
 		// tests: len
 		public void run() {
 			String s;
-			int count = 0;
 			for(int i=0; i<len;i++) {
 				s = word.substring(0, i) + word.substring(i+1);
-				if (index.has(Word.word2hash(s))) {
-					set.add(s);
-					count++;
-				}
-				if (stop) return;
+				bq.push(new Tester(s));
 			}
 		}
 	}
 	
 	private class AddingOneLetter extends Thread {
+		
+		public AddingOneLetter() {
+			this.setName("AddingOneLetter");
+		}
+		
 		// tests: alphabet.length * len
 		public void run() {
 			String s;
-			int count = 0;
 			for(int i=0; i<=len;i++) {
 				for(int j=0; j<alphabet.length; j++) {
 					s = word.substring(0, i) + alphabet[j] + word.substring(i);
-					if (index.has(Word.word2hash(s))) {
-						set.add(s);
-						count++;
-					}
-					if (stop) return;
+					bq.push(new Tester(s));
 				}			
 			}
 		}
 	}
 	
 	private class ReversingTwoConsecutiveLetters extends Thread {
+		
+		public ReversingTwoConsecutiveLetters() {
+			this.setName("ReversingTwoConsecutiveLetters");
+		}
+		
 		// tests: (len - 1)
 		public void run() {
 			String s;
-			int count = 0;
 			for(int i=0; i<len-1; i++) {
 				s = word.substring(0,i)+word.charAt(i+1)+word.charAt(i)+word.substring(i+2);
-				if (index.has(Word.word2hash(s))) {
-					set.add(s);
-					count++;
-				}
-				if (stop) return;
+				bq.push(new Tester(s));
 			}
+		}
+	}
+	
+	private class Tester extends Thread {
+		
+		private String s;
+		
+		public Tester(String s) {
+			this.s = s;
+		}
+		public void run() {
+			if (index.has(Word.word2hash(s))) {
+				set.add(s);
+			}
+		}
+	}
+	
+	private class Worker extends Thread {
+		public Worker(String name) { 
+			super(name); 
+			start(); 
+		}		
+		public void run() {
+			try {
+				while(!isInterrupted()) {
+					((Runnable)bq.pop()).run();
+				}
+			} catch(InterruptedException e) {				
+			}
+		}
+	}
+	
+	private class BlockingQueue {
+		private final LinkedList<Thread> queue = new LinkedList<Thread>();
+
+		public void push(Thread t) {
+			synchronized(queue) {
+				queue.add(t);
+				queue.notify();
+			}
+		}
+		public Object pop() throws InterruptedException {
+			synchronized(queue) {
+				while (queue.isEmpty()) {
+					queue.wait();
+				}
+				return queue.removeFirst();
+			}
+		}
+		public int size() {
+			return queue.size();
 		}
 	}
 	
@@ -151,7 +219,7 @@ public class DidYouMean {
     	}    	
     }
     */
-	
 }
+
 
 
