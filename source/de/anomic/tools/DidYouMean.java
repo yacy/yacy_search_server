@@ -63,17 +63,31 @@ public class DidYouMean {
 	    }
 	    
 		// check if timeout has been reached
-		while(((System.currentTimeMillis()-startTime) < TIMEOUT) && queue.size()>0) {			
-			// consume more ...
+		boolean cont = false;
+	    while(((System.currentTimeMillis()-startTime) < TIMEOUT)) {			
+			if(queue.size()==0) {
+				// check if at least one producers is still running
+			    for (int i=0; i<producers.length; i++) {
+				      if(producers[i].isAlive())
+				    	  cont = true;
+			    }
+			    if(!cont) break;
+			}
 		}
 		
-		// put "poison pill" for each consumer thread
+	    // interupt all consumer threads
+	    for (int i=0; i<consumers.length; i++) {
+		      consumers[i].interrupt();
+	    }
+	    
+		/* put "poison pill" for each consumer thread
 	    for (int i=0; i<consumers.length; i++) {
 	    	try {
 				queue.put("\n"); 
 			} catch (InterruptedException e) {
 			}
 	    }
+	    */
 	    
 	    // interupt all remaining producer threads
 	    for (int i=0; i<producers.length; i++) {
@@ -82,7 +96,7 @@ public class DidYouMean {
 	    
 		this.set.remove(word.toLowerCase());
 		Log.logInfo("DidYouMean", "found "+this.set.size()+" terms; execution time: "
-				+(System.currentTimeMillis()-startTime)+"ms"+ (queue.size()>0?"(timed out)":""));
+				+(System.currentTimeMillis()-startTime)+"ms"+ " - remaining queue size: "+queue.size());
 		
 		return this.set;
 			
