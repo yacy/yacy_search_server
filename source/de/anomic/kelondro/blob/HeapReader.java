@@ -29,7 +29,6 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -49,7 +48,7 @@ public class HeapReader {
     public final static long keepFreeMem = 20 * 1024 * 1024;
     
     protected int                keylength;  // the length of the primary key
-    protected HandleMap    index;      // key/seek relation for used records
+    protected HandleMap          index;      // key/seek relation for used records
     protected Gap                free;       // set of {seek, size} pairs denoting space and position of free records
     protected File               heapFile;   // the file of the heap
     protected final ByteOrder    ordering;   // the ordering on keys
@@ -260,7 +259,7 @@ public class HeapReader {
         file.readFully(keyf, 0, keyf.length);
         if (!this.ordering.equal(key, keyf)) {
             // verification of the indexed access failed. we must re-read the index
-            Log.logWarning("kelondroBLOBHeap", "verification indexed access for " + heapFile.toString() + " failed, re-building index");
+            Log.logSevere("kelondroBLOBHeap", "verification indexed access for " + heapFile.toString() + " failed, re-building index");
             // this is a severe operation, it should never happen.
             // but if the process ends in this state, it would completely fail
             // if the index is not rebuild now at once
@@ -273,9 +272,19 @@ public class HeapReader {
         
         return blob;
     }
+    
+    protected boolean checkKey(final byte[] key, final long pos) throws IOException {
+    	file.seek(pos);
+        file.readInt(); // skip the size value
+        
+        // read the key
+        final byte[] keyf = new byte[index.row().primaryKeyLength];
+        file.readFully(keyf, 0, keyf.length);
+        return this.ordering.equal(key, keyf);
+    }
 
     /**
-     * retrieve the size of the BLOB
+     * retrieve the size of the BLOB. This should not be used excessively, because it depends on IO operations.
      * @param key
      * @return the size of the BLOB or -1 if the BLOB does not exist
      * @throws IOException
@@ -361,17 +370,6 @@ public class HeapReader {
 
     public long length() throws IOException {
         return this.heapFile.length();
-    }
-
-    public String excave(final byte[] rawKey, char fillChar) {
-        int n = this.keylength - 1;
-        if (n >= rawKey.length) n = rawKey.length - 1;
-        while ((n > 0) && (rawKey[n] == (byte) fillChar)) n--;
-        try {
-            return new String(rawKey, 0, n + 1, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            return new String(rawKey, 0, n + 1);
-        }
     }
     
     /**

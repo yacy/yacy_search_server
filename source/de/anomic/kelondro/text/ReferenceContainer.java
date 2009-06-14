@@ -37,6 +37,7 @@ import java.util.TreeMap;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.ByteBuffer;
 
@@ -380,6 +381,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         assert (keylength == i2.rowdef.width(0));
         final ReferenceContainer<ReferenceType> conj = new ReferenceContainer<ReferenceType>(factory, null, i1.rowdef, 0); // start with empty search result
         if (!((i1.rowdef.getOrdering().signature().equals(i2.rowdef.getOrdering().signature())))) return conj; // ordering must be equal
+        ByteOrder ordering = i1.rowdef.getOrdering();
         final Iterator<ReferenceType> e1 = i1.entries();
         final Iterator<ReferenceType> e2 = i2.entries();
         int c;
@@ -392,7 +394,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             while (true) {
                 assert (ie1.metadataHash().length() == keylength) : "ie1.urlHash() = " + ie1.metadataHash();
                 assert (ie2.metadataHash().length() == keylength) : "ie2.urlHash() = " + ie2.metadataHash();
-                c = i1.rowdef.getOrdering().compare(ie1.metadataHash().getBytes(), ie2.metadataHash().getBytes());
+                c = ordering.compare(ie1.metadataHash().getBytes(), ie2.metadataHash().getBytes());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
                     if (e1.hasNext()) ie1 = e1.next(); else break;

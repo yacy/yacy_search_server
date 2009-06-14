@@ -1855,7 +1855,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     private static SimpleDateFormat DateFormatter822 = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US);
     public static String dateString822(final Date date) {
         if (date == null) return "";
-        return DateFormatter822.format(date);
+        try {
+        	return DateFormatter822.format(date);
+        } catch (Exception e) {
+        	e.printStackTrace();
+        	return DateFormatter822.format(new Date());
+        }
     }
     
     

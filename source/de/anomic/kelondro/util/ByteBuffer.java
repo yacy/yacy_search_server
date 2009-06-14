@@ -178,7 +178,7 @@ public final class ByteBuffer extends OutputStream {
     }
 
     public ByteBuffer append(final byte[] bb) {
-        write(bb);
+        write(bb, 0, bb.length);
         return this;
     }
 

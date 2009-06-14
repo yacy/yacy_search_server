@@ -359,7 +359,7 @@ public final class httpTemplate {
                                 if (java.util.Arrays.equals(keyStream.toByteArray(),appendBytes(slash, key, null,null))) {
                                     pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
                                     //this maybe the wrong, but its the last
-                                    structure.append('<').append(key).append(" type=\"alternative\" which=\"".getBytes()).append(Integer.toString(whichPattern).getBytes("UTF-8")).append("\" found=\"0\">\n".getBytes());
+                                    structure.append('<').append(key).append(" type=\"alternative\" which=\"".getBytes()).append(Integer.toString(whichPattern).getBytes()).append("\" found=\"0\">\n".getBytes());
                                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
                                     structure.append("</".getBytes()).append(key).append(">\n".getBytes());
                                     found=true;
@@ -381,7 +381,7 @@ public final class httpTemplate {
                             if ((bb & 0xFF) == ':'){
                                 if(currentPattern == whichPattern){ //found the pattern
                                     pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
-                                    structure.append("<".getBytes()).append(key).append(" type=\"alternative\" which=\"".getBytes()).append(Integer.toString(whichPattern).getBytes("UTF-8")).append("\" found=\"0\">\n".getBytes());
+                                    structure.append('<').append(key).append(" type=\"alternative\" which=\"".getBytes()).append(Integer.toString(whichPattern).getBytes()).append("\" found=\"0\">\n".getBytes());
                                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
                                     structure.append("</".getBytes()).append(key).append(">\n".getBytes());
 

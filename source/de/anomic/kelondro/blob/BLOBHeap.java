@@ -272,6 +272,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
         if (b.length == 0) return;
         
         // first remove the old entry (removes from buffer and file)
+        // TODO: this can be enhanced!
         this.remove(key);
         
         // then look if we can use a free entry

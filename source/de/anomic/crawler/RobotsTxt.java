@@ -197,7 +197,13 @@ public class RobotsTxt {
                     }
                     
                     // store the data into the robots DB
+                    int sz = this.robotsTable.size();
                     addEntry(robotsTxt4Host);
+                    if (this.robotsTable.size() <= sz) {
+                    	Log.logSevere("RobotsTxt", "new entry in robots.txt table failed, reseing database");
+                    	this.resetDatabase();
+                    	addEntry(robotsTxt4Host);
+                    }
                 } else {
                     final robotsParser parserResult = new robotsParser((byte[]) result[DOWNLOAD_ROBOTS_TXT]);
                     ArrayList<String> denyPath = parserResult.denyList();

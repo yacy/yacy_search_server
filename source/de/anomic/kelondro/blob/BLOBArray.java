@@ -418,7 +418,7 @@ public class BLOBArray implements BLOB {
      * ask for the number of blob entries in each blob of the blob array
      * @return the number of entries in each blob
      */
-    public synchronized int[] sizes() {
+    public int[] sizes() {
         int[] s = new int[blobs.size()];
         int c = 0;
         for (blobItem bi: blobs) s[c++] = bi.blob.size();

@@ -120,6 +120,9 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
         final long seek = index.get(key);
         if (seek < 0) return;
         
+        // check consistency of the index
+        assert (checkKey(key, seek)) : "key compare failed; key = " + new String(key) + ", seek = " + seek;
+        
         // access the file and read the container
         this.file.seek(seek);
         int size = file.readInt();
@@ -248,12 +251,15 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
 		throw new UnsupportedOperationException("put is not supported in BLOBHeapModifier");
 	}
 
-	public int replace(byte[] key, Rewriter rewriter) throws IOException {
+	public synchronized int replace(byte[] key, Rewriter rewriter) throws IOException {
 	    assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
         
 	    // check if the index contains the key
         final long pos = index.get(key);
         if (pos < 0) return 0;
+        
+        // check consistency of the index
+        assert (checkKey(key, pos)) : "key compare failed; key = " + new String(key) + ", seek = " + pos;
         
         // access the file and read the container
         file.seek(pos);

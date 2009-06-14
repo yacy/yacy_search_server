@@ -57,14 +57,9 @@ public class IndexTest {
     public static final long mb = 1024 * 1024;
     
     public static void main(String[] args) {
-        System.out.println("Performance test: comparing HashMap, TreeMap and kelondroRow");
-        if (args.length == 0) {
-            System.out.println("use one parameter: number of test entries");
-            System.exit(0);
-        }
         
         // pre-generate test data so it will not influence test case time
-        int count = Integer.parseInt(args[0]);
+        int count = args.length == 0 ? 1000000 : Integer.parseInt(args[0]);
         byte[][] tests = new byte[count][];
         Random r = new Random(0);
         for (int i = 0; i < count; i++) tests[i] = randomHash(r);
@@ -120,7 +115,7 @@ public class IndexTest {
         for (int i = 0; i < count; i++) ii.putUnique(tests[i], 1);
         ii.get(randomHash(r)); // trigger sort
         long t6 = System.currentTimeMillis();
-        System.out.println("time   for kelondroMap<byte[]> generation: " + (t6 - t5));
+        System.out.println("time   for HandleMap<byte[]> generation: " + (t6 - t5));
         
         bugs = 0;
         for (int i = 0; i < count; i++) if (ii.get(tests[i]) != 1) bugs++;
@@ -128,8 +123,8 @@ public class IndexTest {
         long freeEndKelondro = MemoryControl.available();
         ii.clear(); ii = null;
         long t7 = System.currentTimeMillis();
-        System.out.println("time   for kelondroMap<byte[]> test: " + (t7 - t6) + ", " + bugs + " bugs");
-        System.out.println("memory for kelondroMap<byte[]>: " + (freeStartKelondro - freeEndKelondro) / mb + " MB\n");
+        System.out.println("time   for HandleMap<byte[]> test: " + (t7 - t6) + ", " + bugs + " bugs");
+        System.out.println("memory for HandleMap<byte[]>: " + (freeStartKelondro - freeEndKelondro) / mb + " MB\n");
 
         // test ByteArray
         System.out.println("unsorted map");
