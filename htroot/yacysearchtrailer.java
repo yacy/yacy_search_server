@@ -30,8 +30,8 @@ import java.util.Iterator;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProcess.NavigatorEntry;
+import de.anomic.search.Query;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
@@ -53,7 +53,7 @@ public class yacysearchtrailer {
             // the event does not exist, show empty page
             return prop;
         }
-        final plasmaSearchQuery theQuery = theSearch.getQuery();
+        final Query theQuery = theSearch.getQuery();
         
         // compose search navigation
         
@@ -68,8 +68,8 @@ public class yacysearchtrailer {
         	for (i = 0; i < hostNavigator.size(); i++) {
         		entry = hostNavigator.get(i);
         		prop.put("nav-domains_element_" + i + "_name", entry.name);
-                prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
-        		prop.putJSON("nav-domains_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name, theQuery.navigators));
+                prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + Query.navurl("html", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
+        		prop.putJSON("nav-domains_element_" + i + "_url-json", Query.navurl("json", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name, theQuery.navigators));
                 prop.put("nav-domains_element_" + i + "_count", entry.count);
         		prop.put("nav-domains_element_" + i + "_modifier", "site:" + entry.name);
                 prop.put("nav-domains_element_" + i + "_nl", 1);
@@ -92,8 +92,8 @@ public class yacysearchtrailer {
                 entry = authorNavigator.get(i);
                 anav = (entry.name.indexOf(' ') < 0) ? "author:" + entry.name : "author:'" + entry.name + "'";
                 prop.put("nav-authors_element_" + i + "_name", entry.name);
-                prop.put("nav-authors_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, anav, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
-                prop.putJSON("nav-authors_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, anav, theQuery.navigators));
+                prop.put("nav-authors_element_" + i + "_url", "<a href=\"" + Query.navurl("html", 0, display, theQuery, theQuery.urlMask, anav, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
+                prop.putJSON("nav-authors_element_" + i + "_url-json", Query.navurl("json", 0, display, theQuery, theQuery.urlMask, anav, theQuery.navigators));
                 prop.put("nav-authors_element_" + i + "_count", entry.count);
                 prop.put("nav-authors_element_" + i + "_modifier", "author:'" + entry.name + "'");
                 prop.put("nav-authors_element_" + i + "_nl", 1);
@@ -114,8 +114,8 @@ public class yacysearchtrailer {
             if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;
             if (e != null && e.name != null) {
                 prop.putHTML("nav-topics_element_" + i + "_name", e.name);
-                prop.put("nav-topics_element_" + i + "_url", "<a href=\"" + plasmaSearchQuery.navurl("html", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators) + "\">" + e.name + " (" + e.count + ")</a>");
-                prop.putJSON("nav-topics_element_" + i + "_url-json", plasmaSearchQuery.navurl("json", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators));
+                prop.put("nav-topics_element_" + i + "_url", "<a href=\"" + Query.navurl("html", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators) + "\">" + e.name + " (" + e.count + ")</a>");
+                prop.putJSON("nav-topics_element_" + i + "_url-json", Query.navurl("json", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators));
                 prop.put("nav-topics_element_" + i + "_count", e.count);
                 prop.put("nav-topics_element_" + i + "_modifier", e.name);
                 prop.put("nav-topics_element_" + i + "_nl", (iter.hasNext() && i < MAX_TOPWORDS) ? 1 : 0);

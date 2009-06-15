@@ -54,6 +54,7 @@ import de.anomic.plasma.parser.Word;
 import de.anomic.plasma.parser.Condenser;
 import de.anomic.plasma.plasmaSearchRankingProcess.NavigatorEntry;
 import de.anomic.plasma.plasmaSnippetCache.MediaSnippet;
+import de.anomic.search.Query;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
@@ -75,10 +76,10 @@ public final class plasmaSearchEvent {
     public static String lastEventID = "";
     private static ConcurrentHashMap<String, plasmaSearchEvent> lastEvents = new ConcurrentHashMap<String, plasmaSearchEvent>(); // a cache for objects from this class: re-use old search requests
     public static final long eventLifetime = 60000; // the time an event will stay in the cache, 1 Minute
-    private static final int max_results_preparation = 300;
+    private static final int max_results_preparation = 1000;
     
     private long eventTime;
-    plasmaSearchQuery query;
+    Query query;
     private final Segment indexSegment;
     private final yacySeedDB peers;
     plasmaSearchRankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
@@ -100,7 +101,7 @@ public final class plasmaSearchEvent {
     public ResultURLs crawlResults;
     
     @SuppressWarnings("unchecked")
-    private plasmaSearchEvent(final plasmaSearchQuery query,
+    private plasmaSearchEvent(final Query query,
                              final Segment indexSegment,
                              final yacySeedDB peers,
                              final ResultURLs crawlResults,
@@ -136,8 +137,8 @@ public final class plasmaSearchEvent {
         }
         
         final long start = System.currentTimeMillis();
-        if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
-            (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
+        if ((query.domType == Query.SEARCHDOM_GLOBALDHT) ||
+            (query.domType == Query.SEARCHDOM_CLUSTERALL)) {
             
         	// initialize a ranking process that is the target for data
         	// that is generated concurrently from local and global search threads
@@ -152,8 +153,8 @@ public final class plasmaSearchEvent {
             final int fetchpeers = 12;
             Log.logFine("SEARCH_EVENT", "STARTING " + fetchpeers + " THREADS TO CATCH EACH " + query.displayResults() + " URLs");
             this.primarySearchThreads = yacySearch.primaryRemoteSearches(
-                    plasmaSearchQuery.hashSet2hashString(query.queryHashes),
-                    plasmaSearchQuery.hashSet2hashString(query.excludeHashes),
+                    Query.hashSet2hashString(query.queryHashes),
+                    Query.hashSet2hashString(query.excludeHashes),
                     "",
                     query.prefer,
                     query.urlMask,
@@ -171,7 +172,7 @@ public final class plasmaSearchEvent {
                     plasmaSwitchboard.urlBlacklist,
                     query.ranking,
                     query.constraint,
-                    (query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes);
+                    (query.domType == Query.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes);
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "remote search thread start", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
             
             // finished searching
@@ -303,9 +304,9 @@ public final class plasmaSearchEvent {
         final long dbRetrievalTime = System.currentTimeMillis() - startTime;
         
         // check exclusion
-        if ((plasmaSearchQuery.matches(pagetitle, query.excludeHashes)) ||
-            (plasmaSearchQuery.matches(pageurl, query.excludeHashes)) ||
-            (plasmaSearchQuery.matches(pageauthor, query.excludeHashes))) {
+        if ((Query.matches(pagetitle, query.excludeHashes)) ||
+            (Query.matches(pageurl, query.excludeHashes)) ||
+            (Query.matches(pageauthor, query.excludeHashes))) {
             return null;
         }
             
@@ -324,19 +325,19 @@ public final class plasmaSearchEvent {
             return null;
         }
         
-        if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (page.laudio() == 0)) {
+        if ((query.contentdom == Query.CONTENTDOM_AUDIO) && (page.laudio() == 0)) {
             registerFailure(page.hash(), "contentdom-audio constraint not fullfilled");
             return null;
         }
-        if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) && (page.lvideo() == 0)) {
+        if ((query.contentdom == Query.CONTENTDOM_VIDEO) && (page.lvideo() == 0)) {
             registerFailure(page.hash(), "contentdom-video constraint not fullfilled");
             return null;
         }
-        if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (page.limage() == 0)) {
+        if ((query.contentdom == Query.CONTENTDOM_IMAGE) && (page.limage() == 0)) {
             registerFailure(page.hash(), "contentdom-image constraint not fullfilled");
             return null;
         }
-        if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_APP) && (page.lapp() == 0)) {
+        if ((query.contentdom == Query.CONTENTDOM_APP) && (page.lapp() == 0)) {
             registerFailure(page.hash(), "contentdom-app constraint not fullfilled");
             return null;
         }
@@ -346,7 +347,7 @@ public final class plasmaSearchEvent {
         }
         
         // load snippet
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) {
+        if (query.contentdom == Query.CONTENTDOM_TEXT) {
             // attach text snippet
             startTime = System.currentTimeMillis();
             final plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(metadata, snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(Condenser.flag_cat_indexof))), 180, 3000, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 30000, query.isGlobal());
@@ -429,7 +430,7 @@ public final class plasmaSearchEvent {
         return count;
     }
     
-    public plasmaSearchQuery getQuery() {
+    public Query getQuery() {
         return query;
     }
     
@@ -458,7 +459,7 @@ public final class plasmaSearchEvent {
     }
     
     public static plasmaSearchEvent getEvent(
-            final plasmaSearchQuery query,
+            final Query query,
             final plasmaSearchRankingProfile ranking,
             final Segment indexSegment,
             final yacySeedDB peers,
@@ -488,7 +489,7 @@ public final class plasmaSearchEvent {
         } else {
             // if worker threads had been alive, but did not succeed, start them again to fetch missing links
             if ((!event.anyWorkerAlive()) &&
-                (((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (event.images.size() + 30 < query.neededResults())) ||
+                (((query.contentdom == Query.CONTENTDOM_IMAGE) && (event.images.size() + 30 < query.neededResults())) ||
                  (event.result.size() < query.neededResults() + 10)) &&
                  //(event.query.onlineSnippetFetch) &&
                 (event.getRankingResult().getLocalResourceSize() + event.getRankingResult().getRemoteResourceSize() > event.result.size())) {
@@ -533,8 +534,8 @@ public final class plasmaSearchEvent {
                     this.lastLifeSign = System.currentTimeMillis();
     
                     // check if we have enough
-                    if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (images.size() >= query.neededResults() + fetchAhead)) break;
-                    if ((query.contentdom != plasmaSearchQuery.CONTENTDOM_IMAGE) && (result.size() >= query.neededResults() + fetchAhead)) break;
+                    if ((query.contentdom == Query.CONTENTDOM_IMAGE) && (images.size() >= query.neededResults() + fetchAhead)) break;
+                    if ((query.contentdom != Query.CONTENTDOM_IMAGE) && (result.size() >= query.neededResults() + fetchAhead)) break;
     
                     // get next entry
                     page = rankedCache.bestURL(true);
@@ -601,8 +602,8 @@ public final class plasmaSearchEvent {
             // we have the wanted result already in the result array .. return that
             return this.result.element(item).element;
         }
-        if ((query.domType == plasmaSearchQuery.SEARCHDOM_GLOBALDHT) ||
-             (query.domType == plasmaSearchQuery.SEARCHDOM_CLUSTERALL)) {
+        if ((query.domType == Query.SEARCHDOM_GLOBALDHT) ||
+             (query.domType == Query.SEARCHDOM_CLUSTERALL)) {
             // this is a search using remote search threads. Also the local
             // search thread is started as background process
             if ((localSearchThread != null) && (localSearchThread.isAlive())) {

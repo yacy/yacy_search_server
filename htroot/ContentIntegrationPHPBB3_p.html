@@ -14,6 +14,13 @@
       This interface gives you access to the phpBB3 forums software content.
     </p>
     <p>
+      If you read from a imported database, here are some hints to get around problems when importing dumps in phpMyAdmin:
+      <ul>
+      <li>before importing large database dumps, set <pre>$cfg['UploadDir'] = '/tmp';</pre> in phpmyadmin/config.inc.php and place your dump file in /tmp. Otherwise it is not possible to upload files larger than 2MB.</li>
+      <li>deselect the partial import flag/li>
+      </ul>
+    </p>
+    <p>
       When a export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.
       All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when a index is deleted.
     </p>

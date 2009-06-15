@@ -35,6 +35,7 @@ import java.awt.image.BufferedImage;
 import java.util.Date;
 import java.util.Iterator;
 
+import de.anomic.search.Query;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
@@ -144,7 +145,7 @@ public class plasmaGrafics {
         }
         
         // draw in the search target
-        final plasmaSearchQuery query = event.getQuery();
+        final Query query = event.getQuery();
         final Iterator<byte[]> i = query.queryHashes.iterator();
         eventPicture.setColor(ymageMatrix.GREY);
         while (i.hasNext()) {

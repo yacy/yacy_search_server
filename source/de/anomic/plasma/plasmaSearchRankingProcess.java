@@ -54,6 +54,7 @@ import de.anomic.kelondro.util.SortStack;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.parser.Word;
 import de.anomic.plasma.parser.Condenser;
+import de.anomic.search.Query;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;
 
@@ -67,7 +68,7 @@ public final class plasmaSearchRankingProcess {
     private final SortStack<WordReferenceVars> stack;
     private final HashMap<String, SortStack<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     private final HashSet<String> handover; // key = urlhash; used for double-check of urls that had been handed over to search process
-    private final plasmaSearchQuery query;
+    private final Query query;
     private final int maxentries;
     private int remote_peerCount, remote_indexCount, remote_resourceSize, local_resourceSize;
     private final ReferenceOrder order;
@@ -83,7 +84,7 @@ public final class plasmaSearchRankingProcess {
     
     public plasmaSearchRankingProcess(
             final Segment indexSegment,
-            final plasmaSearchQuery query,
+            final Query query,
             final int maxentries,
             final int concurrency) {
         // we collect the urlhashes and construct a list with urlEntry objects
@@ -184,11 +185,11 @@ public final class plasmaSearchRankingProcess {
             if (!testFlags(iEntry)) continue;
             
             // check document domain
-            if (query.contentdom != plasmaSearchQuery.CONTENTDOM_TEXT) {
-                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) continue;
-                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) continue;
-                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) continue;
-                if ((query.contentdom == plasmaSearchQuery.CONTENTDOM_APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) continue;
+            if (query.contentdom != Query.CONTENTDOM_TEXT) {
+                if ((query.contentdom == Query.CONTENTDOM_AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) continue;
+                if ((query.contentdom == Query.CONTENTDOM_VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) continue;
+                if ((query.contentdom == Query.CONTENTDOM_IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) continue;
+                if ((query.contentdom == Query.CONTENTDOM_APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) continue;
             }
 
             // check tld domain
@@ -620,10 +621,10 @@ public final class plasmaSearchRankingProcess {
         long r = (255 - position) << 8;
         
         // for media search: prefer pages with many links
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) r += rentry.limage() << query.ranking.coeff_cathasimage;
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) r += rentry.laudio() << query.ranking.coeff_cathasaudio;
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) r += rentry.lvideo() << query.ranking.coeff_cathasvideo;
-        if (query.contentdom == plasmaSearchQuery.CONTENTDOM_APP  ) r += rentry.lapp()   << query.ranking.coeff_cathasapp;
+        if (query.contentdom == Query.CONTENTDOM_IMAGE) r += rentry.limage() << query.ranking.coeff_cathasimage;
+        if (query.contentdom == Query.CONTENTDOM_AUDIO) r += rentry.laudio() << query.ranking.coeff_cathasaudio;
+        if (query.contentdom == Query.CONTENTDOM_VIDEO) r += rentry.lvideo() << query.ranking.coeff_cathasvideo;
+        if (query.contentdom == Query.CONTENTDOM_APP  ) r += rentry.lapp()   << query.ranking.coeff_cathasapp;
         
         // prefer hit with 'prefer' pattern
         if (rentry.url().toNormalform(true, true).matches(query.prefer)) r += 256 << query.ranking.coeff_prefer;

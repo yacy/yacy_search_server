@@ -37,8 +37,8 @@ import java.text.SimpleDateFormat;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.net.natLib;
-import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Query;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -138,8 +138,8 @@ public class AccessTracker_p {
             prop.put("page_num", entCount);
         }
         if ((page == 2) || (page == 4)) {
-            final ArrayList<plasmaSearchQuery> array = (page == 2) ? sb.localSearches : sb.remoteSearches;
-            plasmaSearchQuery searchProfile;
+            final ArrayList<Query> array = (page == 2) ? sb.localSearches : sb.remoteSearches;
+            Query searchProfile;
             int m = Math.min(maxCount, array.size());
             long qcountSum = 0;
             long rcountSum = 0;
@@ -167,7 +167,7 @@ public class AccessTracker_p {
                 } else {
                     // remote search
                     prop.putHTML("page_list_" + entCount + "_peername", (searchProfile.remotepeer == null) ? "<unknown>" : searchProfile.remotepeer.getName());
-                    prop.put("page_list_" + entCount + "_queryhashes", plasmaSearchQuery.anonymizedQueryHashes(searchProfile.queryHashes));
+                    prop.put("page_list_" + entCount + "_queryhashes", Query.anonymizedQueryHashes(searchProfile.queryHashes));
                 }
                 prop.putNum("page_list_" + entCount + "_querycount", searchProfile.linesPerPage);
                 prop.putNum("page_list_" + entCount + "_resultcount", searchProfile.resultcount);

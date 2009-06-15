@@ -45,7 +45,7 @@ import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.plasma.plasmaSearchQuery;
+import de.anomic.search.Query;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverCodings;
 import de.anomic.tools.crypt;
@@ -254,7 +254,7 @@ public class URLMetadataRow implements Metadata {
         this.entry.setCol(col_wc, Integer.parseInt(prop.getProperty("wc", "0")));
         this.entry.setCol(col_dt, new byte[]{(byte) prop.getProperty("dt", "t").charAt(0)});
         final String flags = prop.getProperty("flags", "AAAAAA");
-        this.entry.setCol(col_flags, (flags.length() > 6) ? plasmaSearchQuery.empty_constraint.bytes() : (new Bitfield(4, flags)).bytes());
+        this.entry.setCol(col_flags, (flags.length() > 6) ? Query.empty_constraint.bytes() : (new Bitfield(4, flags)).bytes());
         try {
 			this.entry.setCol(col_lang, prop.getProperty("lang", "uk").getBytes("UTF-8"));
 		} catch (UnsupportedEncodingException e) {

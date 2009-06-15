@@ -34,9 +34,9 @@ import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.TermSearch;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.parser.Word;
+import de.anomic.search.Query;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.iso639;
@@ -63,7 +63,7 @@ public final class timeline {
             language = (agent == null) ? "en" : iso639.userAgentLanguageDetection(agent);
             if (language == null) language = "en";
         }
-        final TreeSet<String>[] query = plasmaSearchQuery.cleanQuery(querystring); // converts also umlaute
+        final TreeSet<String>[] query = Query.cleanQuery(querystring); // converts also umlaute
         TreeSet<byte[]> q = Word.words2hashes(query[0]);
         
         // tell all threads to do nothing for a specific time
@@ -108,7 +108,7 @@ public final class timeline {
         
         // log
         yacyCore.log.logInfo("EXIT TIMELINE SEARCH: " +
-                plasmaSearchQuery.anonymizedQueryHashes(q) + " - " + joincount + " links found, " +
+                Query.anonymizedQueryHashes(q) + " - " + joincount + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstracts, " +
                 (System.currentTimeMillis() - timestamp) + " milliseconds");

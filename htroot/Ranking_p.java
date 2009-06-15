@@ -31,9 +31,9 @@ import java.util.Map.Entry;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Query;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -139,7 +139,7 @@ public class Ranking_p {
             // we create empty entries for template strings
             final serverObjects prop = defaultValues();
             final plasmaSearchRankingProfile ranking;
-            if(sb == null) ranking = new plasmaSearchRankingProfile(plasmaSearchQuery.CONTENTDOM_TEXT);
+            if(sb == null) ranking = new plasmaSearchRankingProfile(Query.CONTENTDOM_TEXT);
             else ranking = sb.getRanking();
             putRanking(prop, ranking, "local");
             return prop;
@@ -156,7 +156,7 @@ public class Ranking_p {
         
         if (post.containsKey("ResetRanking")) {
             sb.setConfig("rankingProfile", "");
-            final plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile(plasmaSearchQuery.CONTENTDOM_TEXT);
+            final plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile(Query.CONTENTDOM_TEXT);
             final serverObjects prop = defaultValues();
             //prop.putAll(ranking.toExternalMap("local"));
             putRanking(prop, ranking, "local");

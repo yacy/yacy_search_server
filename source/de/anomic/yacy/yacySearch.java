@@ -37,9 +37,9 @@ import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.Log;
-import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
+import de.anomic.search.Query;
 import de.anomic.yacy.dht.PeerSelection;
 
 public class yacySearch extends Thread {
@@ -270,7 +270,7 @@ public class yacySearch extends Thread {
             (clusterselection == null) ?
                     selectSearchTargets(
                             peers,
-                            plasmaSearchQuery.hashes2Set(wordhashes),
+                            Query.hashes2Set(wordhashes),
                             targets,
                             peers.redundancy())
                   : selectClusterPeers(peers, clusterselection);

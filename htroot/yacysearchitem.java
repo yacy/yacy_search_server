@@ -33,10 +33,10 @@ import java.util.TreeSet;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Query;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
@@ -77,7 +77,7 @@ public class yacysearchitem {
             // the event does not exist, show empty page
             return prop;
         }
-        final plasmaSearchQuery theQuery = theSearch.getQuery();
+        final Query theQuery = theSearch.getQuery();
         
         // dynamically update count values
         final int offset = theQuery.neededResults() - theQuery.displayResults() + 1;
@@ -89,7 +89,7 @@ public class yacysearchitem {
         prop.put("remoteIndexCount", Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
         prop.put("remotePeerCount", Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
         
-        if (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_TEXT) {
+        if (theQuery.contentdom == Query.CONTENTDOM_TEXT) {
             // text search
 
             // generate result object
@@ -151,7 +151,7 @@ public class yacysearchitem {
             return prop;
         }
         
-        if (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_IMAGE) {
+        if (theQuery.contentdom == Query.CONTENTDOM_IMAGE) {
             // image search; shows thumbnails
 
             prop.put("content", theQuery.contentdom + 1); // switch on specific content
@@ -171,9 +171,9 @@ public class yacysearchitem {
             return prop;
         }
         
-        if ((theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_AUDIO) ||
-            (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_VIDEO) ||
-            (theQuery.contentdom == plasmaSearchQuery.CONTENTDOM_APP)) {
+        if ((theQuery.contentdom == Query.CONTENTDOM_AUDIO) ||
+            (theQuery.contentdom == Query.CONTENTDOM_VIDEO) ||
+            (theQuery.contentdom == Query.CONTENTDOM_APP)) {
             // any other media content
 
             // generate result object

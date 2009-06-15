@@ -164,6 +164,7 @@ import de.anomic.plasma.parser.Document;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.parser.Word;
 import de.anomic.plasma.parser.Condenser;
+import de.anomic.search.Query;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCore;
@@ -246,8 +247,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  bookmarksDB                    bookmarksDB;
     public  plasmaWebStructure             webStructure;
     public  ImporterManager                dbImportManager;
-    public  ArrayList<plasmaSearchQuery>   localSearches; // array of search result properties as HashMaps
-    public  ArrayList<plasmaSearchQuery>   remoteSearches; // array of search result properties as HashMaps
+    public  ArrayList<Query>   localSearches; // array of search result properties as HashMaps
+    public  ArrayList<Query>   remoteSearches; // array of search result properties as HashMaps
     public  ConcurrentHashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
     public  long                           indexedPages = 0;
     public  double                         requestedQueries = 0d;
@@ -554,8 +555,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // init search history trackers
         this.localSearchTracker = new ConcurrentHashMap<String, TreeSet<Long>>(); // String:TreeSet - IP:set of Long(accessTime)
         this.remoteSearchTracker = new ConcurrentHashMap<String, TreeSet<Long>>();
-        this.localSearches = new ArrayList<plasmaSearchQuery>(); // contains search result properties as HashMaps
-        this.remoteSearches = new ArrayList<plasmaSearchQuery>();
+        this.localSearches = new ArrayList<Query>(); // contains search result properties as HashMaps
+        this.remoteSearches = new ArrayList<Query>();
         
         // init messages: clean up message symbol
         final File notifierSource = new File(getRootPath(), getConfig(plasmaSwitchboardConstants.HTROOT_PATH, plasmaSwitchboardConstants.HTROOT_PATH_DEFAULT) + "/env/grafics/empty.gif");
@@ -1019,7 +1020,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public plasmaSearchRankingProfile getRanking() {
         return (getConfig("rankingProfile", "").length() == 0) ?
-                  new plasmaSearchRankingProfile(plasmaSearchQuery.CONTENTDOM_TEXT) :
+                  new plasmaSearchRankingProfile(Query.CONTENTDOM_TEXT) :
                   new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
     }
     

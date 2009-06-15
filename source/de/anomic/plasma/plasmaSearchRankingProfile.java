@@ -26,6 +26,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.search.Query;
+
 public class plasmaSearchRankingProfile {
 
     // pre-sort attributes
@@ -101,11 +103,11 @@ public class plasmaSearchRankingProfile {
         coeff_app_dc_subject     = 13;
         coeff_app_dc_description = 13;
         coeff_appemph            = 10;
-        coeff_catindexof         = (mediatype == plasmaSearchQuery.CONTENTDOM_TEXT) ? 0 : 15;
-        coeff_cathasimage        = (mediatype == plasmaSearchQuery.CONTENTDOM_IMAGE) ? 15 : 0;
-        coeff_cathasaudio        = (mediatype == plasmaSearchQuery.CONTENTDOM_AUDIO) ? 15 : 0;
-        coeff_cathasvideo        = (mediatype == plasmaSearchQuery.CONTENTDOM_VIDEO) ? 15 : 0;
-        coeff_cathasapp          = (mediatype == plasmaSearchQuery.CONTENTDOM_APP) ? 15 : 0;
+        coeff_catindexof         = (mediatype == Query.CONTENTDOM_TEXT) ? 0 : 15;
+        coeff_cathasimage        = (mediatype == Query.CONTENTDOM_IMAGE) ? 15 : 0;
+        coeff_cathasaudio        = (mediatype == Query.CONTENTDOM_AUDIO) ? 15 : 0;
+        coeff_cathasvideo        = (mediatype == Query.CONTENTDOM_VIDEO) ? 15 : 0;
+        coeff_cathasapp          = (mediatype == Query.CONTENTDOM_APP) ? 15 : 0;
         coeff_termfrequency      = 14;
         coeff_urlcompintoplist   = 3;
         coeff_descrcompintoplist = 2;
@@ -114,7 +116,7 @@ public class plasmaSearchRankingProfile {
     }
     
     public plasmaSearchRankingProfile(final String prefix, final String profile) {
-        this(plasmaSearchQuery.CONTENTDOM_TEXT); // set defaults
+        this(Query.CONTENTDOM_TEXT); // set defaults
         if ((profile != null) && (profile.length() > 0)) {
             //parse external form
             final HashMap<String, Integer> coeff = new HashMap<String, Integer>();

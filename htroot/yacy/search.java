@@ -44,11 +44,11 @@ import de.anomic.kelondro.util.SortStack;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSearchEvent.ResultEntry;
 import de.anomic.plasma.plasmaSearchRankingProcess.NavigatorEntry;
+import de.anomic.search.Query;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
@@ -157,7 +157,7 @@ public final class search {
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(3000);
 
-        final TreeSet<byte[]> abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : plasmaSearchQuery.hashes2Set(abstracts);
+        final TreeSet<byte[]> abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : Query.hashes2Set(abstracts);
         
         // store accessing peer
         final yacySeed remoteSeed = yacySeed.genRemoteSeed(oseed, key, false);
@@ -168,23 +168,23 @@ public final class search {
         }
 
         // prepare search
-        final TreeSet<byte[]> queryhashes = plasmaSearchQuery.hashes2Set(query);
-        final TreeSet<byte[]> excludehashes = (exclude.length() == 0) ? new TreeSet<byte[]>(Base64Order.enhancedCoder) : plasmaSearchQuery.hashes2Set(exclude);
+        final TreeSet<byte[]> queryhashes = Query.hashes2Set(query);
+        final TreeSet<byte[]> excludehashes = (exclude.length() == 0) ? new TreeSet<byte[]>(Base64Order.enhancedCoder) : Query.hashes2Set(exclude);
         final long timestamp = System.currentTimeMillis();
         
     	// prepare a search profile
-        final plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(plasmaSearchQuery.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
+        final plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(Query.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
         
         // prepare an abstract result
         final StringBuilder indexabstract = new StringBuilder();
         int indexabstractContainercount = 0;
         int joincount = 0;
-        plasmaSearchQuery theQuery = null;
+        Query theQuery = null;
         ArrayList<SortStack<ResultEntry>.stackElement> accu = null;
         plasmaSearchEvent theSearch = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
-            theQuery = new plasmaSearchQuery(
+            theQuery = new Query(
                     null,
                     abstractSet,
                     new TreeSet<byte[]>(Base64Order.enhancedCoder),
@@ -192,14 +192,14 @@ public final class search {
                     rankingProfile,
                     maxdist,
                     prefer,
-                    plasmaSearchQuery.contentdomParser(contentdom),
+                    Query.contentdomParser(contentdom),
                     language,
                     "", // no navigation
                     false,
                     count,
                     0,
                     filter,
-                    plasmaSearchQuery.SEARCHDOM_LOCAL,
+                    Query.SEARCHDOM_LOCAL,
                     null,
                     -1,
                     null,
@@ -209,12 +209,12 @@ public final class search {
                     yacyURL.TLD_any_zone_filter,
                     client,
                     false);
-            theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
-            yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
+            theQuery.domType = Query.SEARCHDOM_LOCAL;
+            yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + Query.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
             final long timer = System.currentTimeMillis();
             //final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
-            final HashMap<byte[], ReferenceContainer<WordReference>> incc = sb.indexSegment.termIndex().searchConjunction(theQuery.queryHashes, plasmaSearchQuery.hashes2StringSet(urls));
+            final HashMap<byte[], ReferenceContainer<WordReference>> incc = sb.indexSegment.termIndex().searchConjunction(theQuery.queryHashes, Query.hashes2StringSet(urls));
             
             serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.COLLECTION, incc.size(), System.currentTimeMillis() - timer), false);
             if (incc != null) {
@@ -236,7 +236,7 @@ public final class search {
             
         } else {
             // retrieve index containers from search request
-            theQuery = new plasmaSearchQuery(
+            theQuery = new Query(
                     null, 
                     queryhashes, 
                     excludehashes, 
@@ -244,7 +244,7 @@ public final class search {
                     rankingProfile, 
                     maxdist, 
                     prefer, 
-                    plasmaSearchQuery.
+                    Query.
                     contentdomParser(contentdom), 
                     language,
                     "", // no navigation
@@ -252,7 +252,7 @@ public final class search {
                     count, 
                     0, 
                     filter, 
-                    plasmaSearchQuery.SEARCHDOM_LOCAL, 
+                    Query.SEARCHDOM_LOCAL, 
                     null, 
                     -1, 
                     constraint, 
@@ -262,9 +262,9 @@ public final class search {
                     yacyURL.TLD_any_zone_filter,
                     client, 
                     false);
-            theQuery.domType = plasmaSearchQuery.SEARCHDOM_LOCAL;
-            yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
-            RSSFeed.channels(RSSFeed.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes), ""));
+            theQuery.domType = Query.SEARCHDOM_LOCAL;
+            yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + Query.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
+            RSSFeed.channels(RSSFeed.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), Query.anonymizedQueryHashes(theQuery.queryHashes), ""));
             
             // make event
             theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.indexSegment, sb.peers, sb.crawlResults, null, true); 
@@ -382,7 +382,7 @@ public final class search {
         
         // log
         yacyCore.log.logInfo("EXIT HASH SEARCH: " +
-                plasmaSearchQuery.anonymizedQueryHashes(theQuery.queryHashes) + " - " + joincount + " links found, " +
+                Query.anonymizedQueryHashes(theQuery.queryHashes) + " - " + joincount + " links found, " +
                 prop.get("linkcount", "?") + " links selected, " +
                 indexabstractContainercount + " index abstracts, " +
                 (System.currentTimeMillis() - timestamp) + " milliseconds");

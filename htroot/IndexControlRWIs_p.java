@@ -50,11 +50,11 @@ import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaSearchQuery;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.parser.Condenser;
 import de.anomic.plasma.parser.Word;
+import de.anomic.search.Query;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -478,7 +478,7 @@ public class IndexControlRWIs_p {
     }
 
     public static plasmaSearchRankingProcess genSearchresult(final serverObjects prop, final plasmaSwitchboard sb, final byte[] keyhash, final Bitfield filter) {
-        final plasmaSearchQuery query = new plasmaSearchQuery(new String(keyhash), -1, sb.getRanking(), filter);
+        final Query query = new Query(new String(keyhash), -1, sb.getRanking(), filter);
         final plasmaSearchRankingProcess ranked = new plasmaSearchRankingProcess(sb.indexSegment, query, Integer.MAX_VALUE, 1);
         ranked.execQuery();
         

@@ -20,7 +20,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.plasma;
+package de.anomic.search;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,13 +32,14 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.SetTools;
+import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.parser.Word;
 import de.anomic.plasma.parser.Condenser;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
-public final class plasmaSearchQuery {
+public final class Query {
     
     public static final int SEARCHDOM_LOCAL = 0;
     public static final int SEARCHDOM_CLUSTERDHT = 1;
@@ -82,7 +83,7 @@ public final class plasmaSearchQuery {
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
     public boolean specialRights; // is true if the user has a special authorization and my use more database-extensive options
     
-    public plasmaSearchQuery(final String queryString,
+    public Query(final String queryString,
     						 final int lines,
     		                 final plasmaSearchRankingProfile ranking,
     		                 final Bitfield constraint) {
@@ -121,7 +122,7 @@ public final class plasmaSearchQuery {
         this.navigators = "all";
     }
     
-    public plasmaSearchQuery(
+    public Query(
 		final String queryString, final TreeSet<byte[]> queryHashes,
 		final TreeSet<byte[]> excludeHashes, 
         final TreeSet<byte[]> fullqueryHashes,
@@ -348,7 +349,7 @@ public final class plasmaSearchQuery {
      * @param addToQuery
      * @return
      */
-    public static String navurl(String ext, final int page, final int display, final plasmaSearchQuery theQuery, final String originalUrlMask, String addToQuery, String nav) {
+    public static String navurl(String ext, final int page, final int display, final Query theQuery, final String originalUrlMask, String addToQuery, String nav) {
         return
         "/yacysearch." + ext + "?display=" + display +
         "&search=" + theQuery.queryString(true) + ((addToQuery == null) ? "" : "+" + addToQuery) +

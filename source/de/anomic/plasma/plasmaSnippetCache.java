@@ -51,6 +51,7 @@ import de.anomic.plasma.parser.Document;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.parser.Word;
 import de.anomic.plasma.parser.Condenser;
+import de.anomic.search.Query;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacyURL;
 
@@ -707,10 +708,10 @@ public class plasmaSnippetCache {
         final plasmaParserDocument document = retrieveDocument(url, fetchOnline, timeout, false, reindexing);
         final ArrayList<MediaSnippet> a = new ArrayList<MediaSnippet>();
         if (document != null) {
-            if ((mediatype == plasmaSearchQuery.CONTENTDOM_ALL) || (mediatype == plasmaSearchQuery.CONTENTDOM_AUDIO)) a.addAll(computeMediaSnippets(document, queryhashes, plasmaSearchQuery.CONTENTDOM_AUDIO));
-            if ((mediatype == plasmaSearchQuery.CONTENTDOM_ALL) || (mediatype == plasmaSearchQuery.CONTENTDOM_VIDEO)) a.addAll(computeMediaSnippets(document, queryhashes, plasmaSearchQuery.CONTENTDOM_VIDEO));
-            if ((mediatype == plasmaSearchQuery.CONTENTDOM_ALL) || (mediatype == plasmaSearchQuery.CONTENTDOM_APP)) a.addAll(computeMediaSnippets(document, queryhashes, plasmaSearchQuery.CONTENTDOM_APP));
-            if ((mediatype == plasmaSearchQuery.CONTENTDOM_ALL) || (mediatype == plasmaSearchQuery.CONTENTDOM_IMAGE)) a.addAll(computeImageSnippets(document, queryhashes));
+            if ((mediatype == Query.CONTENTDOM_ALL) || (mediatype == Query.CONTENTDOM_AUDIO)) a.addAll(computeMediaSnippets(document, queryhashes, Query.CONTENTDOM_AUDIO));
+            if ((mediatype == Query.CONTENTDOM_ALL) || (mediatype == Query.CONTENTDOM_VIDEO)) a.addAll(computeMediaSnippets(document, queryhashes, Query.CONTENTDOM_VIDEO));
+            if ((mediatype == Query.CONTENTDOM_ALL) || (mediatype == Query.CONTENTDOM_APP)) a.addAll(computeMediaSnippets(document, queryhashes, Query.CONTENTDOM_APP));
+            if ((mediatype == Query.CONTENTDOM_ALL) || (mediatype == Query.CONTENTDOM_IMAGE)) a.addAll(computeImageSnippets(document, queryhashes));
         }
         return a;
     }
@@ -719,9 +720,9 @@ public class plasmaSnippetCache {
         
         if (document == null) return new ArrayList<MediaSnippet>();
         Map<yacyURL, String> media = null;
-        if (mediatype == plasmaSearchQuery.CONTENTDOM_AUDIO) media = document.getAudiolinks();
-        else if (mediatype == plasmaSearchQuery.CONTENTDOM_VIDEO) media = document.getVideolinks();
-        else if (mediatype == plasmaSearchQuery.CONTENTDOM_APP) media = document.getApplinks();
+        if (mediatype == Query.CONTENTDOM_AUDIO) media = document.getAudiolinks();
+        else if (mediatype == Query.CONTENTDOM_VIDEO) media = document.getVideolinks();
+        else if (mediatype == Query.CONTENTDOM_APP) media = document.getApplinks();
         if (media == null) return null;
         
         final Iterator<Map.Entry<yacyURL, String>> i = media.entrySet().iterator();
@@ -767,13 +768,13 @@ public class plasmaSnippetCache {
             s = removeAppearanceHashes(url.toNormalform(false, false), queryhashes);
             if (s.size() == 0) {
                 final int ranking = ientry.hashCode();
-                result.add(new MediaSnippet(plasmaSearchQuery.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
+                result.add(new MediaSnippet(Query.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
                 continue;
             }
             s = removeAppearanceHashes(desc, s);
             if (s.size() == 0) {
                 final int ranking = ientry.hashCode();
-                result.add(new MediaSnippet(plasmaSearchQuery.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
+                result.add(new MediaSnippet(Query.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
                 continue;
             }
         }
