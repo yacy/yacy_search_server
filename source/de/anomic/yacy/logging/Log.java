@@ -306,6 +306,9 @@ public final class Log {
     private static logRunner logRunnerThread = null;
     
     protected static class logRunner extends Thread {
+        public logRunner() {
+        	super("Log Runner");
+        }
         
         public void run() {
             logEntry entry;

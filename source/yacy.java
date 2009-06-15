@@ -460,6 +460,7 @@ public final class yacy {
         	startupFinishedSync.V();
         }
         Log.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
+        Log.shutdown();
         try {
             System.exit(0);
         } catch (Exception e) {} // was once stopped by de.anomic.net.ftpc$sm.checkExit(ftpc.java:1790)
