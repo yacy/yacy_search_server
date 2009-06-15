@@ -515,6 +515,9 @@ proxyIndexingRemote=false
 proxyIndexingLocalText=true
 proxyIndexingLocalMedia=true
 
+# proxy usage only for .yacy-Domains for autoconfig
+proxyYacyOnly=false
+
 # From the 'IndexCreate' menu point you can also define a crawling start point.
 # The crawling works the same way as the prefetch, but it is possible to
 # assign a different crawling depth.

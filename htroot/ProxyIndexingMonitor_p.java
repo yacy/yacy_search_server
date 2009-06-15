@@ -63,6 +63,8 @@ public class ProxyIndexingMonitor_p {
 
             if (post.containsKey("proxyprofileset")) try {
                 // read values and put them in global settings
+                final boolean proxyYaCyOnly = post.containsKey("proxyYacyOnly");
+                env.setConfig(plasmaSwitchboardConstants.PROXY_YACY_ONLY, (proxyYaCyOnly) ? "true" : "false");
                 int newProxyPrefetchDepth = post.getInt("proxyPrefetchDepth", 0);
                 if (newProxyPrefetchDepth < 0) newProxyPrefetchDepth = 0; 
                 if (newProxyPrefetchDepth > 20) newProxyPrefetchDepth = 20; // self protection ?
@@ -147,6 +149,8 @@ public class ProxyIndexingMonitor_p {
             }
         }
 
+        final boolean yacyonly = env.getConfigBool(plasmaSwitchboardConstants.PROXY_YACY_ONLY, false);
+        prop.put("proxyYacyOnly", yacyonly ? "1" : "0");
         prop.put("proxyPrefetchDepth", env.getConfigLong("proxyPrefetchDepth", 0));
         prop.put("proxyStoreHTCacheChecked", env.getConfig("proxyStoreHTCache", "").equals("true") ? "1" : "0");
         prop.put("proxyIndexingRemote", env.getConfig("proxyIndexingRemote", "").equals("true") ? "1" : "0");

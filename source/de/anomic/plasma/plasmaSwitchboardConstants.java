@@ -277,6 +277,7 @@ public final class plasmaSwitchboardConstants {
      * @see plasmaSwitchboard#PROXY_CACHE_LAYOUT_TREE
      * @see plasmaSwitchboard#PROXY_CACHE_LAYOUT_HASH
      */
+    public static final String PROXY_YACY_ONLY                 = "proxyYacyOnly";
     
     //////////////////////////////////////////////////////////////////////////////////////////////
     // Cluster settings

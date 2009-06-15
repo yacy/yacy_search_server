@@ -1,4 +1,11 @@
 function FindProxyForURL(url,host) {
+#(yacy)#
+    // .yacy only
+    if(shExpMatch(host,"*.yacy")) {
+        return "PROXY #[host]#:#[port]#, DIRECT";
+    }
+    return "DIRECT";
+::
     // http only
     if (!(url.substring(0, 5).toLowerCase() == "http:")) {
         return "DIRECT";
@@ -21,4 +28,5 @@ function FindProxyForURL(url,host) {
      
      // then
      return "PROXY #[host]#:#[port]#, DIRECT";
+#(/yacy)#
 }

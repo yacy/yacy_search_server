@@ -25,6 +25,7 @@
 //if the shell's current path is HTROOT
 
 import de.anomic.http.httpRequestHeader;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -43,6 +44,8 @@ public class autoconfig {
         
         final serverObjects prop = new serverObjects();
         
+        final boolean yacyonly = env.getConfigBool(plasmaSwitchboardConstants.PROXY_YACY_ONLY, false);
+        
         // getting the http host header
         final String hostSocket = header.get(httpRequestHeader.CONNECTION_PROP_HOST);
         
@@ -54,8 +57,9 @@ public class autoconfig {
             host = hostSocket.substring(0, pos);
         }    
         
-        prop.put("host", host);
-        prop.put("port", port);
+        prop.put("yacy", yacyonly ? "0" : "1");
+        prop.put("yacy_host", host);
+        prop.put("yacy_port", port);
         
         return prop;
     }

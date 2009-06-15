@@ -19,6 +19,19 @@
     <form action="ProxyIndexingMonitor_p.html" method="post" enctype="multipart/form-data">
       <table border="0" cellpadding="5" cellspacing="1">
         <tr class="TableCellDark">
+          <td colspan="3"><strong>Proxy Auto Config:</strong>
+          this controls the proxy auto configuration script for browsers at http://localhost:8080/autoconfig.pac
+          </td> 
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td><label for="proxyYacyOnly">.yacy-domains only</label></td>
+          <td><input type="checkbox" id="proxyYacyOnly" name="proxyYacyOnly"#(proxyYacyOnly)#:: checked="checked"#(/proxyYacyOnly)# /></td>
+          <td>
+          whether the proxy should only be used for .yacy-Domains
+          </td>
+        </tr>
+        
+        <tr class="TableCellDark">
           <td colspan="3"><strong>Proxy pre-fetch setting:</strong>
           this is an automated html page loading procedure that takes actual proxy-requested
           URLs as crawling start points for crawling.</td> 
