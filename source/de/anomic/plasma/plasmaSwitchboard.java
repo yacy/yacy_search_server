@@ -2021,7 +2021,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     }
     
     public String dhtShallTransfer() {
-        if (this.peers == null) {
+    	if (onlineCaution()) {
+            return "online caution, dht transmission";
+        }
+    	if (this.peers == null) {
             return "no DHT distribution: seedDB == null";
         }
         if (this.peers.mySeed() == null) {
@@ -2055,7 +2058,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     }
     
     public boolean dhtTransferJob() {
-        final String rejectReason = dhtShallTransfer();
+    	final String rejectReason = dhtShallTransfer();
         if (rejectReason != null) {
             if (this.log.isFine()) log.logFine(rejectReason);
             return false;
