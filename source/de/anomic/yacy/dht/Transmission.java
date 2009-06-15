@@ -38,11 +38,11 @@ import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
-import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.logging.Log;
 
 public class Transmission {
 

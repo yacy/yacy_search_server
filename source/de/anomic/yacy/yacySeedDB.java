@@ -50,7 +50,6 @@ import de.anomic.kelondro.blob.BLOBHeap;
 import de.anomic.kelondro.blob.MapDataMining;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.server.serverCore;
@@ -58,6 +57,7 @@ import de.anomic.server.serverDomains;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.dht.PartitionScheme;
 import de.anomic.yacy.dht.VerticalWordPartitionScheme;
+import de.anomic.yacy.logging.Log;
 
 public final class yacySeedDB implements httpdAlternativeDomainNames {
   

@@ -156,7 +156,6 @@ import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.net.UPnP;
@@ -194,6 +193,7 @@ import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.yacyVersion;
 import de.anomic.yacy.dht.Dispatcher;
 import de.anomic.yacy.dht.PeerSelection;
+import de.anomic.yacy.logging.Log;
 
 public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.QueueEntry> implements serverSwitch<IndexingStack.QueueEntry> {
     

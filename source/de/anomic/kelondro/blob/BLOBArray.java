@@ -48,7 +48,7 @@ import de.anomic.kelondro.text.ReferenceFactory;
 import de.anomic.kelondro.text.ReferenceContainerCache.blobFileEntries;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.kelondro.util.Log;
+import de.anomic.yacy.logging.Log;
 
 public class BLOBArray implements BLOB {
 

@@ -58,6 +58,7 @@ import java.util.zip.ZipOutputStream;
 
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
+import de.anomic.yacy.logging.Log;
 
 public final class FileUtils {
 

@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
@@ -40,6 +39,7 @@ import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyVersion;
 import de.anomic.yacy.dht.PartitionScheme;
+import de.anomic.yacy.logging.Log;
 
 
 /*

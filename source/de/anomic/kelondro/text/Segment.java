@@ -46,13 +46,13 @@ import de.anomic.kelondro.text.navigationPrototype.NavigationReferenceRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceFactory;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.parser.Word;
 import de.anomic.plasma.parser.Condenser;
 import de.anomic.tools.iso639;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 public final class Segment {
 

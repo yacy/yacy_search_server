@@ -33,9 +33,9 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Set;
 
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 public class plasmaParserConfig {
     /**

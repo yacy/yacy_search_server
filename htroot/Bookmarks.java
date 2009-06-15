@@ -43,7 +43,6 @@ import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -52,6 +51,7 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 
 public class Bookmarks {

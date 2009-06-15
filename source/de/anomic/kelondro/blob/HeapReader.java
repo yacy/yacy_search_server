@@ -41,7 +41,7 @@ import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.kelondro.util.Log;
+import de.anomic.yacy.logging.Log;
 
 public class HeapReader {
 

@@ -36,11 +36,11 @@ import de.anomic.data.Blacklist;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.util.ScoreCluster;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.search.Query;
 import de.anomic.yacy.dht.PeerSelection;
+import de.anomic.yacy.logging.Log;
 
 public class yacySearch extends Thread {
 

@@ -35,7 +35,7 @@ import java.util.zip.GZIPInputStream;
 import com.ice.tar.TarEntry;
 import com.ice.tar.TarInputStream;
 
-import de.anomic.kelondro.util.Log;
+import de.anomic.yacy.logging.Log;
 
 public class tarTools {
 	

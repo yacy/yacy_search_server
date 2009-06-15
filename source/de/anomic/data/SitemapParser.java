@@ -47,9 +47,9 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpdByteCountInputStream;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 /**
  * Class to parse a sitemap file.<br>

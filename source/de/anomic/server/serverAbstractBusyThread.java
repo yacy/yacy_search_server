@@ -27,7 +27,7 @@ package de.anomic.server;
 import java.net.SocketException;
 
 import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.kelondro.util.Log;
+import de.anomic.yacy.logging.Log;
 
 public abstract class serverAbstractBusyThread extends serverAbstractThread implements serverBusyThread {
 

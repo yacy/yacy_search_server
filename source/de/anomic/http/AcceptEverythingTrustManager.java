@@ -7,7 +7,7 @@ import java.security.cert.X509Certificate;
 
 import javax.net.ssl.X509TrustManager;
 
-import de.anomic.kelondro.util.Log;
+import de.anomic.yacy.logging.Log;
 
 /**
  * trust every server

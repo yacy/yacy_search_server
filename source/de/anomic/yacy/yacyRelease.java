@@ -51,7 +51,6 @@ import de.anomic.http.httpResponse;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCharBuffer;
@@ -60,6 +59,7 @@ import de.anomic.server.serverSystem;
 import de.anomic.tools.CryptoLib;
 import de.anomic.tools.SignatureOutputStream;
 import de.anomic.tools.tarTools;
+import de.anomic.yacy.logging.Log;
 
 public final class yacyRelease extends yacyVersion {
 

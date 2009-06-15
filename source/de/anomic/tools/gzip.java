@@ -34,7 +34,7 @@ import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import de.anomic.kelondro.util.Log;
+import de.anomic.yacy.logging.Log;
 
 public class gzip {
 

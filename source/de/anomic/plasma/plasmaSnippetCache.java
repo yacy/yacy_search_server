@@ -46,7 +46,6 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SetTools;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.parser.Document;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.parser.Word;
@@ -54,6 +53,7 @@ import de.anomic.plasma.parser.Condenser;
 import de.anomic.search.Query;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 public class plasmaSnippetCache {
 

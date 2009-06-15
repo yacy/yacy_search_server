@@ -26,10 +26,10 @@ import de.anomic.data.listManager;
 import de.anomic.http.httpd;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.yacy.logging.Log;
 
 public class migration {
     //SVN constants

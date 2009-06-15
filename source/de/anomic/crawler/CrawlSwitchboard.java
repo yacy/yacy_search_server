@@ -33,9 +33,9 @@ import java.util.Iterator;
 import de.anomic.crawler.CrawlProfile.entry;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.parser.Word;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.logging.Log;
 
 public final class CrawlSwitchboard {
 

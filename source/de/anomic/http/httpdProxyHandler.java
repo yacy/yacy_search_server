@@ -76,7 +76,6 @@ import de.anomic.data.Blacklist;
 import de.anomic.htmlFilter.htmlFilterContentTransformer;
 import de.anomic.htmlFilter.htmlFilterTransformer;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
@@ -87,6 +86,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 public final class httpdProxyHandler {
     

@@ -35,11 +35,11 @@ import java.net.MalformedURLException;
 
 import javax.imageio.ImageIO;
 
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.parser.Document;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 public class ymageOSM {
     

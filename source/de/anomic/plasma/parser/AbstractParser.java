@@ -33,11 +33,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.server.serverThread;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 /**
  * New classes implementing the {@link de.anomic.plasma.parser.Parser} interface

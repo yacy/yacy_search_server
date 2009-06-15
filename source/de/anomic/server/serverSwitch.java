@@ -36,7 +36,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 
-import de.anomic.kelondro.util.Log;
+import de.anomic.yacy.logging.Log;
 
 public interface serverSwitch<E> {
 

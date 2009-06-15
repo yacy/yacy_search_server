@@ -41,7 +41,6 @@ import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpdProxyCacheEntry;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaParser;
@@ -51,6 +50,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverHandler;
 import de.anomic.server.serverCore.Session;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 /**
  * @author theli

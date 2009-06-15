@@ -33,9 +33,9 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.tools.consoleInterface;
+import de.anomic.yacy.logging.Log;
 
 public final class serverSystem {
 

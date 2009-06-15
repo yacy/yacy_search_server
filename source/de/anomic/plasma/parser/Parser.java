@@ -29,9 +29,9 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Hashtable;
 
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 /**
  * This interface defines a list of methods that needs to be implemented

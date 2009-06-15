@@ -52,8 +52,8 @@ import de.anomic.kelondro.table.SplitTable;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.ScoreCluster;
-import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 public final class MetadataRepository implements Iterable<byte[]> {
 

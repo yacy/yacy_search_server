@@ -5,8 +5,8 @@ import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.yacy.logging.Log;
 
 public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVersion> {
 

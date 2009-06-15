@@ -37,7 +37,6 @@ import de.anomic.data.Blacklist;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCore;
@@ -48,6 +47,7 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
+import de.anomic.yacy.logging.Log;
 
 public final class transferRWI {
 

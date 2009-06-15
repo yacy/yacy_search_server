@@ -29,13 +29,13 @@ import java.io.OutputStream;
 import SevenZip.ArchiveExtractCallback;
 import SevenZip.Archive.IInArchive;
 import SevenZip.Archive.SevenZipEntry;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverCachedFileOutputStream;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 // wrapper class to redirect output of standard ArchiveExtractCallback to serverLog
 // and parse the extracted content

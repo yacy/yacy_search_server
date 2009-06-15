@@ -31,8 +31,8 @@ import java.util.concurrent.Semaphore;
 
 import de.anomic.kelondro.blob.BLOBArray;
 import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.MemoryControl;
+import de.anomic.yacy.logging.Log;
 
 /**
  * this is a concurrent merger that can merge single files that are queued for merging.

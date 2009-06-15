@@ -43,12 +43,12 @@ import de.anomic.data.AbstractBlacklist;
 import de.anomic.data.Blacklist;
 import de.anomic.data.listManager;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 public class Blacklist_p {
     private final static String EDIT             = "edit_";

@@ -30,13 +30,13 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 import de.anomic.ymage.ymageImageParser;
 
 public class ViewImage {

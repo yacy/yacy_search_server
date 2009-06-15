@@ -37,8 +37,8 @@ import java.util.StringTokenizer;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.kelondroException;
+import de.anomic.yacy.logging.Log;
 
 public final class Stack extends FullRecords {
 

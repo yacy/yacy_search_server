@@ -39,10 +39,10 @@ import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
-import de.anomic.kelondro.util.Log;
 import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
+import de.anomic.yacy.logging.Log;
 
 public class Dispatcher {
 

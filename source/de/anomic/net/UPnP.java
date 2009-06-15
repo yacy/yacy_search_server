@@ -36,9 +36,9 @@ import net.sbbi.upnp.DiscoveryEventHandler;
 import net.sbbi.upnp.devices.UPNPRootDevice;
 import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.UPNPResponseException;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.yacy.logging.Log;
 
 public class UPnP {
 	

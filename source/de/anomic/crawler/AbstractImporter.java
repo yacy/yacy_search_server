@@ -1,6 +1,6 @@
 package de.anomic.crawler;
 
-import de.anomic.kelondro.util.Log;
+import de.anomic.yacy.logging.Log;
 
 public abstract class AbstractImporter extends Thread implements Importer {
 

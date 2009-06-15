@@ -64,8 +64,8 @@ import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 
 import de.anomic.crawler.Latency;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 /**
  * HttpClient implementation which uses Jakarta Commons HttpClient 3.x {@link http://hc.apache.org/httpclient-3.x/}

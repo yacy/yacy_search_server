@@ -65,7 +65,6 @@ import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.ScoreCluster;
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
@@ -81,6 +80,7 @@ import de.anomic.yacy.Tray;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.yacyVersion;
+import de.anomic.yacy.logging.Log;
 
 /**
 * This is the main class of YaCy. Several threads are started from here:

@@ -59,11 +59,11 @@ import java.util.concurrent.TimeoutException;
 import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
 import de.anomic.kelondro.util.ByteBuffer;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 /*
  * this class provides data structures to read a mediawiki dump file in xml format

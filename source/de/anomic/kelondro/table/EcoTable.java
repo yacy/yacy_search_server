@@ -52,7 +52,7 @@ import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.kelondro.util.Log;
+import de.anomic.yacy.logging.Log;
 
 /*
  * The EcoIndex builds upon the EcoFS and tries to reduce the number of IO requests that the

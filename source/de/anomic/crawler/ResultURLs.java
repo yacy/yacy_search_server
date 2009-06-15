@@ -42,9 +42,9 @@ import java.util.List;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.ScoreCluster;
-import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 public final class ResultURLs {
 

@@ -45,7 +45,6 @@ import com.catcode.odf.OpenDocumentTextInputStream;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.parser.AbstractParser;
@@ -53,6 +52,7 @@ import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 public class odtParser extends AbstractParser implements Parser {
 

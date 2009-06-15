@@ -60,13 +60,13 @@ import de.anomic.htmlFilter.htmlFilterInputStream;
 import de.anomic.htmlFilter.htmlFilterWriter;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpResponse;
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.parser.Parser;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.parser.ParserInfo;
 import de.anomic.tools.ListDirs;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 public final class plasmaParser {
     public static final String PARSER_MODE_PROXY         = "PROXY";

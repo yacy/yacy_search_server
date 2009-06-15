@@ -51,7 +51,7 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.kelondro.util.Log;
+import de.anomic.yacy.logging.Log;
 
 public abstract class AbstractRecords implements RandomAccessRecords {
 

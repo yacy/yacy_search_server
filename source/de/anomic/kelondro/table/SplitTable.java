@@ -61,8 +61,8 @@ import de.anomic.kelondro.order.Order;
 import de.anomic.kelondro.order.StackIterator;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.NamePrefixThreadFactory;
+import de.anomic.yacy.logging.Log;
 
 public class SplitTable implements ObjectIndex {
 

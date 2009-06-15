@@ -52,7 +52,7 @@ import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.kelondro.util.Log;
+import de.anomic.yacy.logging.Log;
 
 public class Tree extends CachedRecords implements ObjectIndex {
 	

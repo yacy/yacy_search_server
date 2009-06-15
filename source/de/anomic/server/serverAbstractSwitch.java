@@ -31,8 +31,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
+import de.anomic.yacy.logging.Log;
 
 public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     

@@ -41,7 +41,6 @@ import de.anomic.http.httpClient;
 import de.anomic.kelondro.table.FlexWidthArray;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
@@ -52,6 +51,7 @@ import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.dht.PeerSelection;
+import de.anomic.yacy.logging.Log;
 
 public class CrawlQueues {
 

@@ -32,7 +32,7 @@ import java.util.Random;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.util.Log;
+import de.anomic.yacy.logging.Log;
 
 public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.Entry> {
 

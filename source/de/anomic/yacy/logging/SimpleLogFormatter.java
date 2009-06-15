@@ -33,7 +33,6 @@ import java.util.Date;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
-import de.anomic.kelondro.util.Log;
 
 public class SimpleLogFormatter extends SimpleFormatter {
 

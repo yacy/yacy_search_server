@@ -7,8 +7,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import de.anomic.kelondro.text.IndexCell;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.parser.Word;
+import de.anomic.yacy.logging.Log;
 
 // People make mistakes when they type words.  
 // The most common mistakes are the four categories listed below:

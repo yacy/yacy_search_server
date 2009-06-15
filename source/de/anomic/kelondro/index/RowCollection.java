@@ -43,9 +43,9 @@ import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.NamePrefixThreadFactory;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverProcessor;
+import de.anomic.yacy.logging.Log;
 
 public class RowCollection implements Iterable<Row.Entry> {
 

@@ -33,11 +33,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.parser.Document;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverProcessorJob;
+import de.anomic.yacy.logging.Log;
 
 public final class ProtocolLoader {
 

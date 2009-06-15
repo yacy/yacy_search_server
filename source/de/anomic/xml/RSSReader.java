@@ -40,7 +40,7 @@ import org.xml.sax.helpers.DefaultHandler;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.kelondro.util.ByteBuffer;
-import de.anomic.kelondro.util.Log;
+import de.anomic.yacy.logging.Log;
 
 public class RSSReader extends DefaultHandler {
     

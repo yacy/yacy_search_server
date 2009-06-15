@@ -33,8 +33,8 @@ import de.anomic.kelondro.index.Row.EntryIndex;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.table.Stack;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.kelondro.util.Log;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 public class URLFetcherStack {
     

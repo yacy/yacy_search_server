@@ -31,12 +31,12 @@ import java.io.File;
 import java.io.IOException;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.logging.Log;
 
 public class ProxyIndexingMonitor_p {
 

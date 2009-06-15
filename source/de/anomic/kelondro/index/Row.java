@@ -44,7 +44,7 @@ import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.Order;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.kelondro.util.Log;
+import de.anomic.yacy.logging.Log;
 
 public final class Row {
    

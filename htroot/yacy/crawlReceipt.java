@@ -32,13 +32,13 @@ import java.io.IOException;
 import de.anomic.crawler.ZURL;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
+import de.anomic.yacy.logging.Log;
 
 public final class crawlReceipt {
 

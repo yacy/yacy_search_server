@@ -12,13 +12,13 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.data.userDB;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpResponseHeader;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverHandler;
 import de.anomic.server.serverCore.Session;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 public class urlRedirectord implements serverHandler, Cloneable {
     

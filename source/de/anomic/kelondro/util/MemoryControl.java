@@ -26,6 +26,7 @@
 package de.anomic.kelondro.util;
 
 import de.anomic.tools.Formatter;
+import de.anomic.yacy.logging.Log;
 
 /**
  * Use this to get information about memory usage or try to free some memory

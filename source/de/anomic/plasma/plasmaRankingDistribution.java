@@ -30,12 +30,12 @@ import java.io.IOException;
 import java.util.Random;
 import java.util.StringTokenizer;
 
-import de.anomic.kelondro.util.Log;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyVersion;
+import de.anomic.yacy.logging.Log;
 
 public final class plasmaRankingDistribution {
 

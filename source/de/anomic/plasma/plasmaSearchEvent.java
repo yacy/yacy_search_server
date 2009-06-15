@@ -49,7 +49,6 @@ import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.SortStack;
 import de.anomic.kelondro.util.SortStore;
-import de.anomic.kelondro.util.Log;
 import de.anomic.plasma.parser.Word;
 import de.anomic.plasma.parser.Condenser;
 import de.anomic.plasma.plasmaSearchRankingProcess.NavigatorEntry;
@@ -61,6 +60,7 @@ import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
+import de.anomic.yacy.logging.Log;
 
 public final class plasmaSearchEvent {
     
