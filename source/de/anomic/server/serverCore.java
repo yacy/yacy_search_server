@@ -770,40 +770,34 @@ public final class serverCore extends serverAbstractBusyThread implements server
                         }
                         if (terminate) break;
                         
-                    } catch (final InvocationTargetException ite) {                        
-                        System.out.println("ERROR A " + this.userAddress.getHostAddress());
+                    } catch (final InvocationTargetException e) {
+                        log.logSevere("command execution, target exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
                         // we extract a target exception and let the thread survive
-                        writeLine(this.commandObj.error(ite.getTargetException()));
-                    } catch (final NoSuchMethodException nsme) {
-                        System.out.println("ERROR B " + this.userAddress.getHostAddress());
+                        writeLine(this.commandObj.error(e.getTargetException()));
+                    } catch (final NoSuchMethodException e) {
+                        log.logSevere("command execution, method exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
                         if (!this.userAddress.isSiteLocalAddress()) {
                             if (serverCore.this.denyHost != null) {
                                 serverCore.this.denyHost.put((""+this.userAddress.getHostAddress()), "deny"); // block client: hacker attempt
                             }
                         }
                         break;
-                        // the client requested a command that does not exist
-                        //Object[] errorParameter = { nsme };
-                        //writeLine((String) error.invoke(this.cmdObject, errorParameter));
-                    } catch (final IllegalAccessException iae) {
-                        System.out.println("ERROR C " + this.userAddress.getHostAddress());
+                    } catch (final IllegalAccessException e) {
+                        log.logSevere("command execution, illegal access exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
                         // wrong parameters: this an only be an internal problem
-                        writeLine(this.commandObj.error(iae));
+                        writeLine(this.commandObj.error(e));
                     } catch (final java.lang.ClassCastException e) {
-                        System.out.println("ERROR D " + this.userAddress.getHostAddress());
+                        log.logSevere("command execution, cast exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
                         // ??
                         writeLine(this.commandObj.error(e));
                     } catch (final Exception e) {
-                        System.out.println("ERROR E " + this.userAddress.getHostAddress());
+                        log.logSevere("command execution, generic exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
                         // whatever happens: the thread has to survive!
                         writeLine("UNKNOWN REASON:" + this.commandObj.error(e));
                     }
                 } // end of while
-            } /* catch (java.lang.ClassNotFoundException e) {
-                System.out.println("Internal error: Wrapper class not found: " + e.getMessage());
-                System.exit(0);
-            } */ catch (final java.io.IOException e) {
-                // connection interruption: more or less normal
+            } catch (final IOException e) {
+                log.logSevere("command execution, IO exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
             }
             //announceMoreExecTime(System.currentTimeMillis() - this.start);
         }
