@@ -195,28 +195,30 @@ public class yacysearch {
         	Log.logInfo("LOCAL_SEARCH", "ACCECC CONTROL: WHITELISTED CLIENT FROM " + client + " gets no search restrictions");
         } else if (global || fetchSnippets) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
-            int accInOneSecond = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 1000)).size();
-            int accInThreeSeconds = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 3000)).size();
-            int accInOneMinute = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 60000)).size();
-            int accInTenMinutes = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size();
-            if (accInTenMinutes > 600) {
-                global = false;
-                fetchSnippets = false;
-                block = true;
-                Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInTenMinutes + " searches in ten minutes, fully blocked (no results generated)");
-            } else if (accInOneMinute > 200) {
-                global = false;
-                fetchSnippets = false;
-                block = true;
-                Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInOneMinute + " searches in one minute, fully blocked (no results generated)");
-            } else if (accInThreeSeconds > 1) {
-                global = false;
-                fetchSnippets = false;
-                Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInThreeSeconds + " searches in three seconds, blocked global search and snippets");
-            } else if (accInOneSecond > 2) {
-                global = false;
-                fetchSnippets = false;
-                Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInOneSecond + " searches in one second, blocked global search and snippets");
+            synchronized (trackerHandles) {
+                int accInOneSecond = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 1000)).size();
+                int accInThreeSeconds = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 3000)).size();
+                int accInOneMinute = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 60000)).size();
+                int accInTenMinutes = trackerHandles.tailSet(Long.valueOf(System.currentTimeMillis() - 600000)).size();
+                if (accInTenMinutes > 600) {
+                    global = false;
+                    fetchSnippets = false;
+                    block = true;
+                    Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInTenMinutes + " searches in ten minutes, fully blocked (no results generated)");
+                } else if (accInOneMinute > 200) {
+                    global = false;
+                    fetchSnippets = false;
+                    block = true;
+                    Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInOneMinute + " searches in one minute, fully blocked (no results generated)");
+                } else if (accInThreeSeconds > 1) {
+                    global = false;
+                    fetchSnippets = false;
+                    Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInThreeSeconds + " searches in three seconds, blocked global search and snippets");
+                } else if (accInOneSecond > 2) {
+                    global = false;
+                    fetchSnippets = false;
+                    Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: CLIENT FROM " + client + ": " + accInOneSecond + " searches in one second, blocked global search and snippets");
+                }
             }
         }
         
@@ -509,9 +511,11 @@ public class yacysearch {
             
             // update the search tracker
             try {
-            	trackerHandles.add(theQuery.handle);
-            	if (trackerHandles.size() > 1000) trackerHandles.remove(trackerHandles.first());
-            	sb.localSearchTracker.put(client, trackerHandles);
+                synchronized (trackerHandles) {
+                	trackerHandles.add(theQuery.handle);
+                	if (trackerHandles.size() > 1000) trackerHandles.remove(trackerHandles.first());
+                	sb.localSearchTracker.put(client, trackerHandles);
+                }
             	if (sb.localSearchTracker.size() > 1000) sb.localSearchTracker.remove(sb.localSearchTracker.keys().nextElement());
             } catch (Exception e) {
             	e.printStackTrace();
