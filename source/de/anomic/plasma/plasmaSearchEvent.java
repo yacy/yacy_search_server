@@ -54,6 +54,7 @@ import de.anomic.plasma.parser.Condenser;
 import de.anomic.plasma.plasmaSearchRankingProcess.NavigatorEntry;
 import de.anomic.plasma.plasmaSnippetCache.MediaSnippet;
 import de.anomic.search.Query;
+import de.anomic.search.RankingProfile;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
@@ -460,7 +461,7 @@ public final class plasmaSearchEvent {
     
     public static plasmaSearchEvent getEvent(
             final Query query,
-            final plasmaSearchRankingProfile ranking,
+            final RankingProfile ranking,
             final Segment indexSegment,
             final yacySeedDB peers,
             final ResultURLs crawlResults,

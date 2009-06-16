@@ -164,6 +164,7 @@ import de.anomic.plasma.parser.ParserException;
 import de.anomic.plasma.parser.Word;
 import de.anomic.plasma.parser.Condenser;
 import de.anomic.search.Query;
+import de.anomic.search.RankingProfile;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCore;
@@ -1018,10 +1019,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         return null;
     }
     
-    public plasmaSearchRankingProfile getRanking() {
+    public RankingProfile getRanking() {
         return (getConfig("rankingProfile", "").length() == 0) ?
-                  new plasmaSearchRankingProfile(Query.CONTENTDOM_TEXT) :
-                  new plasmaSearchRankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
+                  new RankingProfile(Query.CONTENTDOM_TEXT) :
+                  new RankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
     }
     
     public boolean onlineCaution() {

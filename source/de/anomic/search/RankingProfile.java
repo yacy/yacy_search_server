@@ -1,4 +1,4 @@
-// plasmaSearchRankingProfile.java 
+// RankingProfile.java 
 // -------------------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -20,7 +20,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.plasma;
+package de.anomic.search;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -28,7 +28,7 @@ import java.util.Map;
 
 import de.anomic.search.Query;
 
-public class plasmaSearchRankingProfile {
+public class RankingProfile {
 
     // pre-sort attributes
     public static final String DOMLENGTH          = "domlength";
@@ -79,7 +79,7 @@ public class plasmaSearchRankingProfile {
         coeff_urlcompintoplist, coeff_descrcompintoplist, coeff_prefer,
         coeff_termfrequency, coeff_language;
     
-    public plasmaSearchRankingProfile(final int mediatype) {
+    public RankingProfile(final int mediatype) {
         // set default-values
         coeff_domlength          = 11;
         coeff_ybr                = 9;
@@ -115,7 +115,7 @@ public class plasmaSearchRankingProfile {
         coeff_language           = 13;
     }
     
-    public plasmaSearchRankingProfile(final String prefix, final String profile) {
+    public RankingProfile(final String prefix, final String profile) {
         this(Query.CONTENTDOM_TEXT); // set defaults
         if ((profile != null) && (profile.length() > 0)) {
             //parse external form

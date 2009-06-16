@@ -32,7 +32,6 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.SetTools;
-import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.parser.Word;
 import de.anomic.plasma.parser.Condenser;
 import de.anomic.yacy.yacySeed;
@@ -72,7 +71,7 @@ public final class Query {
     public Bitfield constraint;
     public boolean allofconstraint;
     public boolean onlineSnippetFetch;
-    public plasmaSearchRankingProfile ranking;
+    public RankingProfile ranking;
     public String host; // this is the client host that starts the query, not a site operator
     public String sitehash; // this is a domain hash, 6 bytes long or null
     public String authorhash;
@@ -85,7 +84,7 @@ public final class Query {
     
     public Query(final String queryString,
     						 final int lines,
-    		                 final plasmaSearchRankingProfile ranking,
+    		                 final RankingProfile ranking,
     		                 final Bitfield constraint) {
     	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(queryString.getBytes()))) {
     		this.queryString = null;
@@ -126,7 +125,7 @@ public final class Query {
 		final String queryString, final TreeSet<byte[]> queryHashes,
 		final TreeSet<byte[]> excludeHashes, 
         final TreeSet<byte[]> fullqueryHashes,
-        final plasmaSearchRankingProfile ranking,
+        final RankingProfile ranking,
         final int maxDistance, final String prefer, final int contentdom,
         final String language,
         final String navigators,

@@ -37,19 +37,19 @@ import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.plasma.plasmaSearchRankingProcess;
-import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.parser.Condenser;
+import de.anomic.search.RankingProfile;
 import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacyURL;
 
 public class ReferenceOrder {
     private WordReferenceVars min, max;
-    private final plasmaSearchRankingProfile ranking;
+    private final RankingProfile ranking;
     private final ScoreCluster<String> doms; // collected for "authority" heuristic 
     private int maxdomcount;
     private String language;
     
-    public ReferenceOrder(final plasmaSearchRankingProfile profile, String language) {
+    public ReferenceOrder(final RankingProfile profile, String language) {
         this.min = null;
         this.max = null;
         this.ranking = profile;

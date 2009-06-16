@@ -31,9 +31,9 @@ import java.util.Map.Entry;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.search.Query;
+import de.anomic.search.RankingProfile;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -44,38 +44,38 @@ public class Ranking_p {
 	
 	private static final HashMap<String, String> rankingParameters = new HashMap<String, String>();
 	static {
-		rankingParameters.put(plasmaSearchRankingProfile.APP_DC_CREATOR, "Appearance In Author");
-		rankingParameters.put(plasmaSearchRankingProfile.APP_DC_TITLE, "Appearance In Title");
-		rankingParameters.put(plasmaSearchRankingProfile.APPEMPH, "Appearance In Emphasized Text");
-		rankingParameters.put(plasmaSearchRankingProfile.APP_DC_DESCRIPTION, "Appearance In Reference/Anchor Name");
-		rankingParameters.put(plasmaSearchRankingProfile.APP_DC_SUBJECT, "Appearance In Tags");
-		rankingParameters.put(plasmaSearchRankingProfile.APPURL, "Appearance In URL");
-		rankingParameters.put(plasmaSearchRankingProfile.AUTHORITY, "Authority of Domain");
-		rankingParameters.put(plasmaSearchRankingProfile.CATHASAPP, "Category App, Appearance");
-		rankingParameters.put(plasmaSearchRankingProfile.CATHASAUDIO, "Category Audio Appearance");
-		rankingParameters.put(plasmaSearchRankingProfile.CATHASIMAGE, "Category Image Appearance");
-		rankingParameters.put(plasmaSearchRankingProfile.CATHASVIDEO, "Category Video Appearance");
-		rankingParameters.put(plasmaSearchRankingProfile.CATINDEXOF, "Category Index Page");
-		rankingParameters.put(plasmaSearchRankingProfile.DATE, "Date");
-		rankingParameters.put(plasmaSearchRankingProfile.DESCRCOMPINTOPLIST, "Description Comp. Appears In Toplist");
-		rankingParameters.put(plasmaSearchRankingProfile.DOMLENGTH, "Domain Length");
-		rankingParameters.put(plasmaSearchRankingProfile.HITCOUNT, "Hit Count");
-		rankingParameters.put(plasmaSearchRankingProfile.LLOCAL, "Links To Local Domain");
-		rankingParameters.put(plasmaSearchRankingProfile.LOTHER, "Links To Other Domain");
-		rankingParameters.put(plasmaSearchRankingProfile.PHRASESINTEXT, "Phrases In Text");
-		rankingParameters.put(plasmaSearchRankingProfile.POSINTEXT, "Position In Text");
-		rankingParameters.put(plasmaSearchRankingProfile.POSOFPHRASE, "Position Of Phrase");
-		rankingParameters.put(plasmaSearchRankingProfile.POSINPHRASE, "Position In Phrase");
-		rankingParameters.put(plasmaSearchRankingProfile.PREFER, "Application Of Prefer Pattern");
-		rankingParameters.put(plasmaSearchRankingProfile.TERMFREQUENCY, "Term Frequency");
-        rankingParameters.put(plasmaSearchRankingProfile.URLCOMPINTOPLIST, "URL Component Appears In Toplist");
-		rankingParameters.put(plasmaSearchRankingProfile.URLCOMPS, "URL Components");
-		rankingParameters.put(plasmaSearchRankingProfile.URLLENGTH, "URL Length");
-		rankingParameters.put(plasmaSearchRankingProfile.WORDDISTANCE, "Word Distance");
-		rankingParameters.put(plasmaSearchRankingProfile.WORDSINTEXT, "Words In Text");
-		rankingParameters.put(plasmaSearchRankingProfile.WORDSINTITLE, "Words In Title");
-		rankingParameters.put(plasmaSearchRankingProfile.YBR, "YaCy Block Rank");
-		rankingParameters.put(plasmaSearchRankingProfile.LANGUAGE, "Preferred Language");
+		rankingParameters.put(RankingProfile.APP_DC_CREATOR, "Appearance In Author");
+		rankingParameters.put(RankingProfile.APP_DC_TITLE, "Appearance In Title");
+		rankingParameters.put(RankingProfile.APPEMPH, "Appearance In Emphasized Text");
+		rankingParameters.put(RankingProfile.APP_DC_DESCRIPTION, "Appearance In Reference/Anchor Name");
+		rankingParameters.put(RankingProfile.APP_DC_SUBJECT, "Appearance In Tags");
+		rankingParameters.put(RankingProfile.APPURL, "Appearance In URL");
+		rankingParameters.put(RankingProfile.AUTHORITY, "Authority of Domain");
+		rankingParameters.put(RankingProfile.CATHASAPP, "Category App, Appearance");
+		rankingParameters.put(RankingProfile.CATHASAUDIO, "Category Audio Appearance");
+		rankingParameters.put(RankingProfile.CATHASIMAGE, "Category Image Appearance");
+		rankingParameters.put(RankingProfile.CATHASVIDEO, "Category Video Appearance");
+		rankingParameters.put(RankingProfile.CATINDEXOF, "Category Index Page");
+		rankingParameters.put(RankingProfile.DATE, "Date");
+		rankingParameters.put(RankingProfile.DESCRCOMPINTOPLIST, "Description Comp. Appears In Toplist");
+		rankingParameters.put(RankingProfile.DOMLENGTH, "Domain Length");
+		rankingParameters.put(RankingProfile.HITCOUNT, "Hit Count");
+		rankingParameters.put(RankingProfile.LLOCAL, "Links To Local Domain");
+		rankingParameters.put(RankingProfile.LOTHER, "Links To Other Domain");
+		rankingParameters.put(RankingProfile.PHRASESINTEXT, "Phrases In Text");
+		rankingParameters.put(RankingProfile.POSINTEXT, "Position In Text");
+		rankingParameters.put(RankingProfile.POSOFPHRASE, "Position Of Phrase");
+		rankingParameters.put(RankingProfile.POSINPHRASE, "Position In Phrase");
+		rankingParameters.put(RankingProfile.PREFER, "Application Of Prefer Pattern");
+		rankingParameters.put(RankingProfile.TERMFREQUENCY, "Term Frequency");
+        rankingParameters.put(RankingProfile.URLCOMPINTOPLIST, "URL Component Appears In Toplist");
+		rankingParameters.put(RankingProfile.URLCOMPS, "URL Components");
+		rankingParameters.put(RankingProfile.URLLENGTH, "URL Length");
+		rankingParameters.put(RankingProfile.WORDDISTANCE, "Word Distance");
+		rankingParameters.put(RankingProfile.WORDSINTEXT, "Words In Text");
+		rankingParameters.put(RankingProfile.WORDSINTITLE, "Words In Title");
+		rankingParameters.put(RankingProfile.YBR, "YaCy Block Rank");
+		rankingParameters.put(RankingProfile.LANGUAGE, "Preferred Language");
 	}
 
     private static serverObjects defaultValues() {
@@ -98,7 +98,7 @@ public class Ranking_p {
         return prop;
     }
     
-    private static void putRanking(final serverObjects prop, final plasmaSearchRankingProfile rankingProfile, final String prefix) {
+    private static void putRanking(final serverObjects prop, final RankingProfile rankingProfile, final String prefix) {
     	putRanking(prop, rankingProfile.preToExternalMap(prefix), prefix, "Pre");
     	putRanking(prop, rankingProfile.postToExternalMap(prefix), prefix, "Post");
     }
@@ -138,15 +138,15 @@ public class Ranking_p {
         if ((post == null) || (sb == null)) {
             // we create empty entries for template strings
             final serverObjects prop = defaultValues();
-            final plasmaSearchRankingProfile ranking;
-            if(sb == null) ranking = new plasmaSearchRankingProfile(Query.CONTENTDOM_TEXT);
+            final RankingProfile ranking;
+            if(sb == null) ranking = new RankingProfile(Query.CONTENTDOM_TEXT);
             else ranking = sb.getRanking();
             putRanking(prop, ranking, "local");
             return prop;
         }
         
         if (post.containsKey("EnterRanking")) {
-            final plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile("local", post.toString());
+            final RankingProfile ranking = new RankingProfile("local", post.toString());
             sb.setConfig("rankingProfile", crypt.simpleEncode(ranking.toExternalString()));
             final serverObjects prop = defaultValues();
             //prop.putAll(ranking.toExternalMap("local"));
@@ -156,14 +156,14 @@ public class Ranking_p {
         
         if (post.containsKey("ResetRanking")) {
             sb.setConfig("rankingProfile", "");
-            final plasmaSearchRankingProfile ranking = new plasmaSearchRankingProfile(Query.CONTENTDOM_TEXT);
+            final RankingProfile ranking = new RankingProfile(Query.CONTENTDOM_TEXT);
             final serverObjects prop = defaultValues();
             //prop.putAll(ranking.toExternalMap("local"));
             putRanking(prop, ranking, "local");
             return prop;
         }
         
-        final plasmaSearchRankingProfile localRanking = new plasmaSearchRankingProfile("local", post.toString());
+        final RankingProfile localRanking = new RankingProfile("local", post.toString());
         final serverObjects prop = new serverObjects();
         putRanking(prop, localRanking, "local");
         prop.putAll(localRanking.toExternalMap("local"));

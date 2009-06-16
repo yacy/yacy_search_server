@@ -41,13 +41,13 @@ import de.anomic.kelondro.util.SetTools;
 import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.parser.Word;
 import de.anomic.plasma.parser.Condenser;
 import de.anomic.search.Query;
+import de.anomic.search.RankingProfile;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
@@ -230,15 +230,15 @@ public class yacysearch {
                 plasmaSearchEvent.cleanupEvents(true);
             }
             
-            final plasmaSearchRankingProfile ranking = sb.getRanking();
+            final RankingProfile ranking = sb.getRanking();
 
             if (querystring.indexOf("NEAR") >= 0) {
             	querystring = querystring.replace("NEAR", "");
-            	ranking.coeff_worddistance = plasmaSearchRankingProfile.COEFF_MAX;
+            	ranking.coeff_worddistance = RankingProfile.COEFF_MAX;
             }
             if (querystring.indexOf("RECENT") >= 0) {
             	querystring = querystring.replace("RECENT", "");
-                ranking.coeff_date = plasmaSearchRankingProfile.COEFF_MAX;
+                ranking.coeff_date = RankingProfile.COEFF_MAX;
             }
             int lrp = querystring.indexOf("LANGUAGE:");
             String lr = "";

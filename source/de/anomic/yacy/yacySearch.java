@@ -37,8 +37,8 @@ import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.plasma.plasmaSearchRankingProcess;
-import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.search.Query;
+import de.anomic.search.RankingProfile;
 import de.anomic.yacy.dht.PeerSelection;
 import de.anomic.yacy.logging.Log;
 
@@ -54,7 +54,7 @@ public class yacySearch extends Thread {
     final private yacySeed targetPeer;
     private String[] urls;
     private final int count, maxDistance;
-    final private plasmaSearchRankingProfile rankingProfile;
+    final private RankingProfile rankingProfile;
     final private String prefer, filter, language;
     final private Bitfield constraint;
     final private yacySeedDB peers;
@@ -76,7 +76,7 @@ public class yacySearch extends Thread {
               final plasmaSearchRankingProcess containerCache,
               final Map<String, TreeMap<String, String>> abstractCache,
               final Blacklist blacklist,
-              final plasmaSearchRankingProfile rankingProfile,
+              final RankingProfile rankingProfile,
               final Bitfield constraint) {
         super("yacySearch_" + targetPeer.getName());
         //System.out.println("DEBUG - yacySearch thread " + this.getName() + " initialized " + ((urlhashes.length() == 0) ? "(primary)" : "(secondary)"));
@@ -257,7 +257,7 @@ public class yacySearch extends Thread {
             final Map<String, TreeMap<String, String>> abstractCache,
             int targets,
             final Blacklist blacklist,
-            final plasmaSearchRankingProfile rankingProfile,
+            final RankingProfile rankingProfile,
             final Bitfield constraint,
             final TreeMap<byte[], String> clusterselection) {
         // check own peer status
@@ -298,7 +298,7 @@ public class yacySearch extends Thread {
             final ResultURLs crawlResults,
             final plasmaSearchRankingProcess containerCache,
             final String targethash, final Blacklist blacklist,
-            final plasmaSearchRankingProfile rankingProfile,
+            final RankingProfile rankingProfile,
             final Bitfield constraint, final TreeMap<byte[], String> clusterselection) {
     	assert wordhashes.length() >= 12 : "wordhashes = " + wordhashes;
     	

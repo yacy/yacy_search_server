@@ -79,11 +79,11 @@ import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSearchRankingProcess;
-import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.plasma.parser.Word;
+import de.anomic.search.RankingProfile;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.tools.crypt;
@@ -438,7 +438,7 @@ public final class yacyClient {
             final plasmaSearchRankingProcess containerCache,
             final Map<String, TreeMap<String, String>> abstractCache,
             final Blacklist blacklist,
-            final plasmaSearchRankingProfile rankingProfile,
+            final RankingProfile rankingProfile,
             final Bitfield constraint
     ) {
         // send a search request to peer with remote Hash

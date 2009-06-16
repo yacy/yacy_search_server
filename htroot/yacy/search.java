@@ -44,11 +44,11 @@ import de.anomic.kelondro.util.SortStack;
 import de.anomic.net.natLib;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaSearchRankingProfile;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSearchEvent.ResultEntry;
 import de.anomic.plasma.plasmaSearchRankingProcess.NavigatorEntry;
 import de.anomic.search.Query;
+import de.anomic.search.RankingProfile;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
@@ -173,7 +173,7 @@ public final class search {
         final long timestamp = System.currentTimeMillis();
         
     	// prepare a search profile
-        final plasmaSearchRankingProfile rankingProfile = (profile.length() == 0) ? new plasmaSearchRankingProfile(Query.contentdomParser(contentdom)) : new plasmaSearchRankingProfile("", profile);
+        final RankingProfile rankingProfile = (profile.length() == 0) ? new RankingProfile(Query.contentdomParser(contentdom)) : new RankingProfile("", profile);
         
         // prepare an abstract result
         final StringBuilder indexabstract = new StringBuilder();
