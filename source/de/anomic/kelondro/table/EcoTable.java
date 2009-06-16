@@ -491,14 +491,20 @@ public class EcoTable implements ObjectIndex {
         assert i < index.size();
         if (table == null) {
             if (i == index.size() - 1) {
+                // element is at last entry position
                 ix = (int) index.remove(key);
                 assert ix == i;
                 file.cleanLast(b, 0);
             } else {
+                // remove entry from index
                 assert i < index.size() - 1;
                 ix = (int) index.remove(key);
                 assert ix == i;
+                
+                // read element that shall be removed
                 file.get(i, b, 0);
+                
+                // fill the gap with value from last entry in file
                 file.cleanLast(p, 0);
                 file.put(i, p, 0);
                 final byte[] k = new byte[rowdef.primaryKeyLength];
@@ -519,15 +525,20 @@ public class EcoTable implements ObjectIndex {
                 table.removeRow(i, false);
                 file.cleanLast();
             } else {
-                // switch values
+                // remove entry from index
                 ix = (int) index.remove(key);
                 assert ix == i;
-                
+
+                // switch values:
+                // remove last entry from the file copy to fill it in the gap
                 final Row.Entry te = table.removeOne();
+                // fill the gap in file copy
                 table.set(i, te);
 
+                // move entry from last entry in file to gap position
                 file.cleanLast(p, 0);
                 file.put(i, p, 0);
+                // set new index for moved entry in index
                 final Row.Entry lr = rowdef.newEntry(p);
                 index.put(lr.getPrimaryKeyBytes(), i);
             }
