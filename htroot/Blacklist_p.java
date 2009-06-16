@@ -246,6 +246,7 @@ public class Blacklist_p {
                         }
                     }
                 }
+                listManager.reloadBlacklists(); 
 
             } else if (post.containsKey("addBlacklistEntry")) {
                 
@@ -261,6 +262,7 @@ public class Blacklist_p {
                     prop.put("LOCATION", temp);
                     return prop;
                 }
+                listManager.reloadBlacklists(); 
                 
             } else if (action.equals("moveBlacklistEntry")) {
                 
@@ -297,6 +299,7 @@ public class Blacklist_p {
                         }
                     }
                 }
+                listManager.reloadBlacklists(); 
 
             } else if (action.equals("editBlacklistEntry")) {
                 
@@ -336,7 +339,7 @@ public class Blacklist_p {
                             }
                         }
                     }
-                    
+                    listManager.reloadBlacklists(); 
                     prop.putHTML(DISABLED + EDIT + "currentBlacklist", blacklistToUse);
                     
                 // else return entry to be edited
