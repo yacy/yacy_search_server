@@ -20,7 +20,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.plasma;
+package de.anomic.search;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,15 +31,17 @@ import java.util.Iterator;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.htmlFilter.htmlFilterImageEntry;
 import de.anomic.kelondro.util.DateFormatter;
+import de.anomic.plasma.plasmaParserDocument;
+import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.parser.ParserException;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
-public final class plasmaSearchImages {
+public final class ImageCollector {
 
     private final HashMap<String, htmlFilterImageEntry> images;
     
-    public plasmaSearchImages(final long maxTime, final yacyURL url, final int depth, final boolean indexing) {
+    public ImageCollector(final long maxTime, final yacyURL url, final int depth, final boolean indexing) {
         final long start = System.currentTimeMillis();
         this.images = new HashMap<String, htmlFilterImageEntry>();
         if (maxTime > 10) {
@@ -75,7 +77,7 @@ public final class plasmaSearchImages {
                     while (i.hasNext()) {
                         try {
                             nexturlstring = i.next().toNormalform(true, true);
-                            addAll(new plasmaSearchImages(DateFormatter.remainingTime(start, maxTime, 10), new yacyURL(nexturlstring, null), depth - 1, indexing));
+                            addAll(new ImageCollector(DateFormatter.remainingTime(start, maxTime, 10), new yacyURL(nexturlstring, null), depth - 1, indexing));
                         } catch (final MalformedURLException e1) {
                             e1.printStackTrace();
                         }
@@ -86,7 +88,7 @@ public final class plasmaSearchImages {
         }
     }
     
-    public void addAll(final plasmaSearchImages m) {
+    public void addAll(final ImageCollector m) {
         synchronized (m.images) {
             htmlFilterContentScraper.addAllImages(this.images, m.images);
         }
