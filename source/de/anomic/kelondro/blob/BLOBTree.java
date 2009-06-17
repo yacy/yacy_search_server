@@ -42,6 +42,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Iterator;
 
+import de.anomic.kelondro.index.Cache;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.io.AbstractRandomAccess;
@@ -67,7 +68,7 @@ public class BLOBTree {
     private final Row rowdef;
     
     /**
-     * Deprecated Class. Please use kelondroBLOBHeap instead
+     * Deprecated Class. Please use Heap instead
      */
     private BLOBTree(final File file, final boolean useNodeCache, final boolean useObjectCache, final int key,
             final int nodesize, final char fillChar, final ByteOrder objectOrder) {
@@ -90,15 +91,15 @@ public class BLOBTree {
         buffer = new ObjectBuffer(file.toString());
     }
     
-    public static BLOBHeap toHeap(final File file, final boolean useNodeCache, final boolean useObjectCache, final int key,
+    public static Heap toHeap(final File file, final boolean useNodeCache, final boolean useObjectCache, final int key,
             final int nodesize, final char fillChar, final ByteOrder objectOrder, final File blob) throws IOException {
         if (blob.exists() || !file.exists()) {
             // open the blob file and ignore the tree
-            return new BLOBHeap(blob, key, objectOrder, 1024 * 64);
+            return new Heap(blob, key, objectOrder, 1024 * 64);
         }
         // open a Tree and migrate everything to a Heap
         BLOBTree tree = new BLOBTree(file, useNodeCache, useObjectCache, key, nodesize, fillChar, objectOrder);
-        BLOBHeap heap = new BLOBHeap(blob, key, objectOrder, 1024 * 64);
+        Heap heap = new Heap(blob, key, objectOrder, 1024 * 64);
         Iterator<byte[]> i = tree.keys(true, false);
         byte[] k, kk = new byte[key], v;
         String s;

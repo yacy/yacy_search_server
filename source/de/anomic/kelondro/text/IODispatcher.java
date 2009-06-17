@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Semaphore;
 
-import de.anomic.kelondro.blob.BLOBArray;
+import de.anomic.kelondro.blob.ArrayStack;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.yacy.logging.Log;
@@ -99,7 +99,7 @@ public class IODispatcher extends Thread {
         return (controlQueue == null || !this.isAlive()) ? 0 : controlQueue.availablePermits();
     }
     
-    public synchronized void merge(File f1, File f2, ReferenceFactory<? extends Reference> factory, BLOBArray array, Row payloadrow, File newFile) {
+    public synchronized void merge(File f1, File f2, ReferenceFactory<? extends Reference> factory, ArrayStack array, Row payloadrow, File newFile) {
         if (mergeQueue == null || controlQueue == null || !this.isAlive()) {
             try {
                 Log.logWarning("IODispatcher", "emergency merge of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
@@ -214,7 +214,7 @@ public class IODispatcher extends Thread {
     public class MergeJob {
 
         File f1, f2, newFile;
-        BLOBArray array;
+        ArrayStack array;
         Row payloadrow;
         ReferenceFactory<? extends Reference> factory;
         
@@ -222,7 +222,7 @@ public class IODispatcher extends Thread {
                 File f1,
                 File f2,
                 ReferenceFactory<? extends Reference> factory,
-                BLOBArray array,
+                ArrayStack array,
                 Row payloadrow,
                 File newFile) {
             this.f1 = f1;

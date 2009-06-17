@@ -47,8 +47,8 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import de.anomic.kelondro.blob.BLOBArray;
-import de.anomic.kelondro.blob.Cache;
+import de.anomic.kelondro.blob.ArrayStack;
+import de.anomic.kelondro.index.Cache;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.ObjectIndexCache;
 import de.anomic.kelondro.index.Row;
@@ -90,7 +90,7 @@ public class SplitTable implements ObjectIndex {
             final String tablename, 
             final Row rowdef,
             final boolean resetOnFail) {
-        this(path, tablename, rowdef, BLOBArray.oneMonth, (long) Integer.MAX_VALUE, resetOnFail);
+        this(path, tablename, rowdef, ArrayStack.oneMonth, (long) Integer.MAX_VALUE, resetOnFail);
     }
 
     public SplitTable(

@@ -43,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.blob.BLOBHeap;
+import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.ByteBuffer;
@@ -70,9 +70,9 @@ public class RobotsTxt {
     public RobotsTxt(final File robotsTableFile) {
         this.robotsTableFile = robotsTableFile;
         robotsTableFile.getParentFile().mkdirs();
-        BLOBHeap blob = null;
+        Heap blob = null;
         try {
-            blob = new BLOBHeap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
+            blob = new Heap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
         } catch (final IOException e) {
             e.printStackTrace();
         }
@@ -85,9 +85,9 @@ public class RobotsTxt {
         if (robotsTable != null) robotsTable.close();
         FileUtils.deletedelete(robotsTableFile);
         robotsTableFile.getParentFile().mkdirs();
-        BLOBHeap blob = null;
+        Heap blob = null;
         try {
-            blob = new BLOBHeap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
+            blob = new Heap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
         } catch (final IOException e) {
             e.printStackTrace();
         }

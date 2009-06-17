@@ -50,11 +50,11 @@ import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.logging.Log;
 
-public class BLOBArray implements BLOB {
+public class ArrayStack implements BLOB {
 
     /*
-     * This class implements a BLOB using a set of kelondroBLOBHeap objects
-     * In addition to a kelondroBLOBHeap this BLOB can delete large amounts of data using a given time limit.
+     * This class implements a BLOB using a set of Heap objects
+     * In addition to a Heap this BLOB can delete large amounts of data using a given time limit.
      * This is realized by creating separate BLOB files. New Files are created when either
      * - a given time limit is reached
      * - a given space limit is reached
@@ -78,7 +78,7 @@ public class BLOBArray implements BLOB {
     private String prefix;
     private int buffersize;
     
-    public BLOBArray(
+    public ArrayStack(
             final File heapLocation,
             final String prefix,
             final int keylength,
@@ -158,7 +158,7 @@ public class BLOBArray implements BLOB {
                    d = DateFormatter.parseShortMilliSecond(files[i].substring(prefix.length() + 1, prefix.length() + 18));
                    f = new File(heapLocation, files[i]);
                    time = d.getTime();
-                   oneBlob = (time == maxtime) ? new BLOBHeap(f, keylength, ordering, buffersize) : new BLOBHeapModifier(f, keylength, ordering);
+                   oneBlob = (time == maxtime) ? new Heap(f, keylength, ordering, buffersize) : new HeapModifier(f, keylength, ordering);
                    sortedItems.put(Long.valueOf(time), new blobItem(d, f, oneBlob));
                } catch (ParseException e) {continue;}
             }
@@ -184,7 +184,7 @@ public class BLOBArray implements BLOB {
         } catch (ParseException e) {
             throw new IOException("date parse problem with file " + location.toString() + ": " + e.getMessage());
         }
-        BLOB oneBlob = (full && buffersize > 0) ? new BLOBHeap(location, keylength, ordering, buffersize) : new BLOBHeapModifier(location, keylength, ordering);
+        BLOB oneBlob = (full && buffersize > 0) ? new Heap(location, keylength, ordering, buffersize) : new HeapModifier(location, keylength, ordering);
         blobs.add(new blobItem(d, location, oneBlob));
     }
     
@@ -379,7 +379,7 @@ public class BLOBArray implements BLOB {
             // make a new blob file and assign it in this item
             this.creation = new Date();
             this.location = newBLOB(this.creation);
-            this.blob = (buffer == 0) ? new BLOBHeapModifier(location, keylength, ordering) : new BLOBHeap(location, keylength, ordering, buffer);
+            this.blob = (buffer == 0) ? new HeapModifier(location, keylength, ordering) : new Heap(location, keylength, ordering, buffer);
         }
     }
 
@@ -586,7 +586,7 @@ public class BLOBArray implements BLOB {
             bi = new blobItem(buffersize);
             blobs.add(bi);
         }
-        assert bi.blob instanceof BLOBHeap;
+        assert bi.blob instanceof Heap;
         bi.blob.put(key, b);
         executeLimits();
     }
@@ -746,7 +746,7 @@ public class BLOBArray implements BLOB {
         final File f = new File("/Users/admin/blobarraytest");
         try {
             //f.delete();
-            final BLOBArray heap = new BLOBArray(f, "test", 12, NaturalOrder.naturalOrder, 512 * 1024);
+            final ArrayStack heap = new ArrayStack(f, "test", 12, NaturalOrder.naturalOrder, 512 * 1024);
             heap.put("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
             heap.put("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
             heap.put("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());

@@ -46,7 +46,7 @@ import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdAlternativeDomainNames;
-import de.anomic.kelondro.blob.BLOBHeap;
+import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapDataMining;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.kelondroException;
@@ -264,12 +264,12 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
             initializeHandlerMethod = null;
         }
         try {
-            return new MapDataMining(new BLOBHeap(seedDBFile, commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new MapDataMining(new Heap(seedDBFile, commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
         } catch (final Exception e) {
             // try again
             FileUtils.deletedelete(seedDBFile);
             try {
-                return new MapDataMining(new BLOBHeap(seedDBFile, commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+                return new MapDataMining(new Heap(seedDBFile, commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
             } catch (IOException e1) {
                 e1.printStackTrace();
                 System.exit(-1);

@@ -1,4 +1,4 @@
-// kelondroBLOBCompressor.java
+// Compressor.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 17.10.2008 on http://yacy.net
 //
@@ -41,7 +41,7 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.util.ByteArray;
 
-public class BLOBCompressor implements BLOB {
+public class Compressor implements BLOB {
 
     static byte[] gzipMagic  = {(byte) 'z', (byte) '|'}; // magic for gzip-encoded content
     static byte[] plainMagic = {(byte) 'p', (byte) '|'}; // magic for plain content (no encoding)
@@ -52,7 +52,7 @@ public class BLOBCompressor implements BLOB {
     private long maxbufferlength;
     private int cdr;
     
-    public BLOBCompressor(BLOB backend, long buffersize) {
+    public Compressor(BLOB backend, long buffersize) {
         this.backend = backend;
         this.maxbufferlength = buffersize;
         this.cdr = 0;

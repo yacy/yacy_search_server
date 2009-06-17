@@ -30,7 +30,7 @@ import java.util.Date;
 import java.util.Iterator;
 
 import de.anomic.kelondro.blob.BLOB;
-import de.anomic.kelondro.blob.BLOBArray;
+import de.anomic.kelondro.blob.ArrayStack;
 import de.anomic.kelondro.index.HandleMap;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
@@ -42,7 +42,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
 
     private final ReferenceFactory<ReferenceType> factory;
     private final Row payloadrow;
-    private final BLOBArray array;
+    private final ArrayStack array;
     private final IODispatcher merger;
     
     /**
@@ -63,7 +63,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     		IODispatcher merger) throws IOException {
         this.factory = factory;
         this.payloadrow = payloadrow;
-        this.array = new BLOBArray(
+        this.array = new ArrayStack(
             heapLocation,
             "index",
             payloadrow.primaryKeyLength,

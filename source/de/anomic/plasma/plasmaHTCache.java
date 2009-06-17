@@ -42,9 +42,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.anomic.http.httpResponseHeader;
-import de.anomic.kelondro.blob.BLOBArray;
-import de.anomic.kelondro.blob.BLOBCompressor;
-import de.anomic.kelondro.blob.BLOBHeap;
+import de.anomic.kelondro.blob.ArrayStack;
+import de.anomic.kelondro.blob.Compressor;
+import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.FileUtils;
@@ -61,8 +61,8 @@ public final class plasmaHTCache {
     public  static final long oneday = 1000L * 60L * 60L * 24L; // milliseconds of a day
 
     private static MapView responseHeaderDB = null;
-    private static BLOBCompressor fileDB = null;
-    private static BLOBArray fileDBunbuffered = null;
+    private static Compressor fileDB = null;
+    private static ArrayStack fileDBunbuffered = null;
     
     public static long maxCacheSize = 0l;
     public static File cachePath = null;
@@ -127,17 +127,17 @@ public final class plasmaHTCache {
     private static void openDB() {
         // open the response header database
         final File dbfile = new File(cachePath, RESPONSE_HEADER_DB_NAME);
-        BLOBHeap blob = null;
+        Heap blob = null;
         try {
-            blob = new BLOBHeap(dbfile, yacySeedDB.commonHashLength, Base64Order.enhancedCoder, 1024 * 1024);
+            blob = new Heap(dbfile, yacySeedDB.commonHashLength, Base64Order.enhancedCoder, 1024 * 1024);
         } catch (final IOException e) {
             e.printStackTrace();
         }
         responseHeaderDB = new MapView(blob, 500, '_');
         try {
-            fileDBunbuffered = new BLOBArray(new File(cachePath, FILE_DB_NAME), prefix, 12, Base64Order.enhancedCoder, 1024 * 1024 * 2);
+            fileDBunbuffered = new ArrayStack(new File(cachePath, FILE_DB_NAME), prefix, 12, Base64Order.enhancedCoder, 1024 * 1024 * 2);
             fileDBunbuffered.setMaxSize(maxCacheSize);
-            fileDB = new BLOBCompressor(fileDBunbuffered, 2 * 1024 * 1024);
+            fileDB = new Compressor(fileDBunbuffered, 2 * 1024 * 1024);
         } catch (IOException e) {
             e.printStackTrace();
         }

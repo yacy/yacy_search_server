@@ -37,7 +37,7 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 
-public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
+public final class Heap extends HeapModifier implements BLOB {
 
     private HashMap<String, byte[]> buffer;     // a write buffer to limit IO to the file; attention: Maps cannot use byte[] as key
     private int                     buffersize; // bytes that are buffered in buffer
@@ -73,7 +73,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
      * @param ordering
      * @throws IOException
      */
-    public BLOBHeap(
+    public Heap(
             final File heapFile,
             final int keylength,
             final ByteOrder ordering,
@@ -427,7 +427,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
         final File f = new File("/Users/admin/blobtest.heap");
         try {
             //f.delete();
-            final BLOBHeap heap = new BLOBHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 512);
+            final Heap heap = new Heap(f, 12, NaturalOrder.naturalOrder, 1024 * 512);
             heap.put("aaaaaaaaaaaa".getBytes(), "eins zwei drei".getBytes());
             heap.put("aaaaaaaaaaab".getBytes(), "vier fuenf sechs".getBytes());
             heap.put("aaaaaaaaaaac".getBytes(), "sieben acht neun".getBytes());
@@ -460,7 +460,7 @@ public final class BLOBHeap extends BLOBHeapModifier implements BLOB {
         final File f = new File("/Users/admin/blobtest.heap");
         try {
             //f.delete();
-            final MapView heap = new MapView(new BLOBHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 512), 500, '_');
+            final MapView heap = new MapView(new Heap(f, 12, NaturalOrder.naturalOrder, 1024 * 512), 500, '_');
             heap.put("aaaaaaaaaaaa", map("aaaaaaaaaaaa", "eins zwei drei"));
             heap.put("aaaaaaaaaaab", map("aaaaaaaaaaab", "vier fuenf sechs"));
             heap.put("aaaaaaaaaaac", map("aaaaaaaaaaac", "sieben acht neun"));

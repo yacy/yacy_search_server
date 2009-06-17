@@ -36,7 +36,7 @@ import java.util.Map;
 import java.util.Random;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.blob.BLOBHeap;
+import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.BLOBTree;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
@@ -69,7 +69,7 @@ public final class userDB {
         FileUtils.deletedelete(userTableFile);
         userTableFile.getParentFile().mkdirs();
         try {
-            userTable = new MapView(new BLOBHeap(userTableFile, 256, NaturalOrder.naturalOrder, 1024 * 64), 10, '_');
+            userTable = new MapView(new Heap(userTableFile, 256, NaturalOrder.naturalOrder, 1024 * 64), 10, '_');
         } catch (IOException e) {
             e.printStackTrace();
         }

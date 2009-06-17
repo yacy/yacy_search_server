@@ -43,7 +43,7 @@ import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRemoteProxyConfig;
-import de.anomic.kelondro.blob.Cache;
+import de.anomic.kelondro.index.Cache;
 import de.anomic.kelondro.index.HandleSet;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;

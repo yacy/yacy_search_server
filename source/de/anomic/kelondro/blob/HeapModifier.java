@@ -36,7 +36,7 @@ import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.yacy.logging.Log;
 
-public class BLOBHeapModifier extends HeapReader implements BLOB {
+public class HeapModifier extends HeapReader implements BLOB {
  
     /*
      * This class adds a remove operation to a BLOBHeapReader. That means that a BLOBModifier can
@@ -53,7 +53,7 @@ public class BLOBHeapModifier extends HeapReader implements BLOB {
      * @param ordering
      * @throws IOException
      */
-    public BLOBHeapModifier(final File heapFile, final int keylength, final ByteOrder ordering) throws IOException {
+    public HeapModifier(final File heapFile, final int keylength, final ByteOrder ordering) throws IOException {
         super(heapFile, keylength, ordering);
         mergeFreeEntries();
     }

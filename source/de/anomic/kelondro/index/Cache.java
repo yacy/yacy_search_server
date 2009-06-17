@@ -25,7 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-package de.anomic.kelondro.blob;
+package de.anomic.kelondro.index;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,12 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.index.Column;
-import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.index.RowCollection;
-import de.anomic.kelondro.index.RowSet;
-import de.anomic.kelondro.index.ObjectIndex;
-import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.table.CachedRecords;
 import de.anomic.kelondro.util.MemoryControl;
@@ -227,7 +221,7 @@ public class Cache implements ObjectIndex {
         return index.has(key);
     }
     
-    public synchronized Entry get(final byte[] key) throws IOException {
+    public synchronized Row.Entry get(final byte[] key) throws IOException {
         // first look into the miss cache
         if (readMissCache != null) {
             if (readMissCache.get(key) == null) {
@@ -238,7 +232,7 @@ public class Cache implements ObjectIndex {
             }
         }
 
-        Entry entry = null;
+        Row.Entry entry = null;
         
         // then try the hit cache and the buffers
         if (readHitCache != null) {
@@ -268,7 +262,7 @@ public class Cache implements ObjectIndex {
         return entry;
     }
 
-    public synchronized void put(final Entry row) throws IOException {
+    public synchronized void put(final Row.Entry row) throws IOException {
         assert (row != null);
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
@@ -298,7 +292,7 @@ public class Cache implements ObjectIndex {
         }
     }
     
-    public synchronized Entry replace(final Entry row) throws IOException {
+    public synchronized Row.Entry replace(final Row.Entry row) throws IOException {
         assert (row != null);
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
@@ -320,7 +314,7 @@ public class Cache implements ObjectIndex {
             }
         }
         
-        Entry entry;
+        Row.Entry entry;
         
         if (readHitCache != null) {
             entry = readHitCache.get(key);
@@ -344,7 +338,7 @@ public class Cache implements ObjectIndex {
         return entry;
     }
 
-    public synchronized void addUnique(final Entry row) throws IOException {
+    public synchronized void addUnique(final Row.Entry row) throws IOException {
         assert (row != null);
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
@@ -373,7 +367,7 @@ public class Cache implements ObjectIndex {
         }
     }
 
-    public synchronized void addUnique(final Entry row, final Date entryDate) throws IOException {
+    public synchronized void addUnique(final Row.Entry row, final Date entryDate) throws IOException {
         if (entryDate == null) {
             addUnique(row);
             return;
@@ -399,8 +393,8 @@ public class Cache implements ObjectIndex {
         }
     }
     
-    public synchronized void addUnique(final List<Entry> rows) throws IOException {
-        final Iterator<Entry> i = rows.iterator();
+    public synchronized void addUnique(final List<Row.Entry> rows) throws IOException {
+        final Iterator<Row.Entry> i = rows.iterator();
         while (i.hasNext()) addUnique(i.next());
     }
 
@@ -409,7 +403,7 @@ public class Cache implements ObjectIndex {
         // todo: remove reported entries from the cache!!!
     }
     
-    public synchronized Entry remove(final byte[] key) throws IOException {
+    public synchronized Row.Entry remove(final byte[] key) throws IOException {
         checkMissSpace();
         
         // add entry to miss-cache
@@ -426,7 +420,7 @@ public class Cache implements ObjectIndex {
         
         // remove entry from hit-cache
         if (readHitCache != null) {
-            final Entry entry = readHitCache.remove(key);
+            final Row.Entry entry = readHitCache.remove(key);
             if (entry == null) {
                 this.readMiss++;
             } else {
@@ -438,11 +432,11 @@ public class Cache implements ObjectIndex {
         return index.remove(key);
     }
 
-    public synchronized Entry removeOne() throws IOException {
+    public synchronized Row.Entry removeOne() throws IOException {
         
         checkMissSpace();
         
-        final Entry entry = index.removeOne();
+        final Row.Entry entry = index.removeOne();
         if (entry == null) return null;
         final byte[] key = entry.getPrimaryKeyBytes();
         if (readMissCache != null) {

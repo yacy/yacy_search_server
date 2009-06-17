@@ -30,7 +30,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.blob.Cache;
+import de.anomic.kelondro.index.Cache;
 import de.anomic.kelondro.table.EcoTable;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.FileUtils;

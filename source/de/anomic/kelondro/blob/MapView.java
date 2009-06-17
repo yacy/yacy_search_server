@@ -55,7 +55,7 @@ public class MapView {
     private final char fillchar;
 
     
-    public MapView(final BLOBHeap blob, final int cachesize, char fillchar) {
+    public MapView(final Heap blob, final int cachesize, char fillchar) {
         this.blob = blob;
         this.cache = new HashMap<String, Map<String, String>>();
         this.cacheScore = new ScoreCluster<String>();
@@ -352,7 +352,7 @@ public class MapView {
         if (f.exists()) FileUtils.deletedelete(f);
         try {
             // make a blob
-            BLOBHeap blob = new BLOBHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 1024);
+            Heap blob = new Heap(f, 12, NaturalOrder.naturalOrder, 1024 * 1024);
             // make map
             MapView map = new MapView(blob, 1024, '_');
             // put some values into the map
