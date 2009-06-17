@@ -22,8 +22,11 @@
 #%env/templates/header.template%# 
 #%env/templates/submenuWebStructure.template%#
 
-<div id="api"><a href="/api/webstructure.xml"><img src="env/grafics/api.png"></a>
-<span>The data that is visualized here can also be retrieved in a XML file. The XM L contains a back-reference of domains. That means you can see the set of domains that all link to the same (other) domain, which could be called a 'reverse domain index'.
+<div id="api"><a href="/api/webstructure.xml?about=#[besthost]#"><img src="env/grafics/api.png"></a>
+<span>
+The data that is visualized here can also be retrieved in a XML file, which lists the reference relation between the domains.
+With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.
+With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.
 Click the API icon to see the XML file.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
 </div>
@@ -33,7 +36,8 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 
 <div id="left">
 <form action="/WatchWebStructure_p.html">
-<dl>
+<fieldset>
+  <dl>
 	<dt>host</dt>
 	<dd>
 	  <input type="text" value="#[host]#" name="host" id="host" size="20" maxlength="80" />
@@ -57,14 +61,15 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 	  <a href="WatchWebStructure_p.html?host=#[host]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[timei]#"><img src="env/grafics/plus.gif"  alt="plus"/></a>
 	</dd>
     <dt>size</dt>
-	<dd><input type="text" name="width" value="#[width]#" size="4" maxlength="4" />&nbsp;x&nbsp;<input type="text" name="height" value="#[height]#" size="4" maxlength="4" /></dd>
+	<dd><input type="text" name="width" value="#[width]#" size="5" maxlength="5" />&nbsp;x&nbsp;<input type="text" name="height" value="#[height]#" size="5" maxlength="5" /></dd>
     <dt>&nbsp;</dt>
     <dd><input type="submit" value="change" /></dd>
-</dl>
+  </dl>
+</fieldset>
 </form>
-</div>
+</div><br>
 
-<img src="WebStructurePicture_p.png?host=#[host]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[time]#" alt="WebStructurePicture"/>
+<img align="right" src="WebStructurePicture_p.png?host=#[besthost]#&amp;depth=#[depth]#&amp;width=#[width]#&amp;height=#[height]#&amp;nodes=#[nodes]#&amp;time=#[time]#" alt="WebStructurePicture"/>
 
 #%env/templates/footer.template%# 
 </body>

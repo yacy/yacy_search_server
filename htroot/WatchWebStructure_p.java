@@ -20,6 +20,7 @@ public class WatchWebStructure_p {
         int nodes = 500; // maximum number of host nodes that are painted
         int time = -1;
         String host = "auto";
+        String besthost;
         
         if (post != null) {
             width = post.getInt("width", 768);
@@ -49,7 +50,16 @@ public class WatchWebStructure_p {
             }
         }
         
+        // find start point
+        if ((host == null) || (host.length() == 0) || (host.equals("auto"))) {
+            // find domain with most references
+            besthost = sb.webStructure.hostWithMaxReferences();
+        } else {
+            besthost = host;
+        }
+        
         prop.putHTML("host", host);
+        prop.putHTML("besthost", besthost);
         prop.put("depth", depth);
         prop.put("depthi", Math.min(8, depth + 1));
         prop.put("depthd", Math.max(0, depth - 1));

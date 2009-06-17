@@ -65,11 +65,11 @@ public class WebStructurePicture_p {
             host = post.get("host", null);
         }
         
-        //too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
+        // too small values lead to an error, too big to huge CPU/memory consumption, resulting in possible DOS.
         if (width < 32 ) width = 32;
-        if (width > 1920) width = 1920;
+        if (width > 10000) width = 10000;
         if (height < 24) height = 24;
-        if (height > 1920) height = 1920;
+        if (height > 10000) height = 10000;
         if (depth > 8) depth = 8;
         if (depth < 0) depth = 0;
         

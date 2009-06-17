@@ -176,7 +176,7 @@ public class plasmaWebStructure {
     
     private static int refstr2count(final String refs) {
         if ((refs == null) || (refs.length() <= 8)) return 0;
-        assert (refs.length() - 8) % 10 == 0;
+        assert (refs.length() - 8) % 10 == 0 : "refs = " + refs + ", length = " + refs.length();
         return (refs.length() - 8) / 10;
     }
     
@@ -471,21 +471,20 @@ public class plasmaWebStructure {
 
         private void next0() {
             Map.Entry<String, String> entry = null;
-            String dom = null, ref;
+            String dom = null, ref = "";
             while (i.hasNext()) {
                 entry = i.next();
+                ref = entry.getValue();
+                if ((ref.length() - 8) % 10 != 0) continue;
                 dom = entry.getKey();
                 if (dom.length() >= 8) break;
-                if (!i.hasNext()) {
-                    nextentry = null;
-                    return;
-                }
+                dom = null;
             }
             if ((entry == null) || (dom == null)) {
                 nextentry = null;
                 return;
             }
-            ref = entry.getValue();
+            assert (ref.length() - 8) % 10 == 0 : "refs = " + ref + ", length = " + ref.length();
             nextentry = new structureEntry(dom.substring(0, 6), dom.substring(7), ref.substring(0, 8), refstr2map(ref));
         }
         
