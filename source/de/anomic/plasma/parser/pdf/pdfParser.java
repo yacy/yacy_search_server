@@ -76,6 +76,7 @@ public class pdfParser extends AbstractParser implements Parser {
     public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         
         PDDocument theDocument = null;
+        plasmaParserDocument theDoc = null;
         Writer writer = null;
         File writerFile = null;
         try {       
@@ -135,8 +136,6 @@ public class pdfParser extends AbstractParser implements Parser {
             String[] docKeywords = null;
             if (docKeywordStr != null) docKeywords = docKeywordStr.split(" |,");
             
-            plasmaParserDocument theDoc = null;
-            
             if (writer instanceof serverCharBuffer) {
                 final byte[] contentBytes = ((serverCharBuffer)writer).toString().getBytes("UTF-8");
                 theDoc = new plasmaParserDocument(
@@ -187,6 +186,7 @@ public class pdfParser extends AbstractParser implements Parser {
             if (theDocument != null) try { theDocument.close(); } catch (final Exception e) {/* ignore this */}
             if (writer != null)      try { writer.close(); }      catch (final Exception e) {/* ignore this */}
             Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
+            if (theDoc == null) throw new ParserException("Unexpected error while parsing pdf file. possibly out of memory",location); 
         }
     }
     
