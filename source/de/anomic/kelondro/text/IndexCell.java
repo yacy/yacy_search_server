@@ -86,7 +86,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         this.targetFileSize = targetFileSize;
         this.maxFileSize = maxFileSize;
         this.writeBufferSize = writeBufferSize;
-        cleanCache();
+        //cleanCache();
     }
 
     
