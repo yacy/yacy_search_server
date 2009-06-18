@@ -233,6 +233,7 @@ public class HeapModifier extends HeapReader implements BLOB {
     
     protected void shrinkWithGapsAtEnd() {
         // find gaps at the end of the file and shrink the file by these gaps
+    	if (this.free == null) return;
         try {
             while (this.free.size() > 0) {
                 Long seek = this.free.lastKey();

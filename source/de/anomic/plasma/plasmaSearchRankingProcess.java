@@ -312,7 +312,7 @@ public final class plasmaSearchRankingProcess {
         // finally remove the best entry from the doubledom cache
         m = this.doubleDomCache.get(bestEntry.element.metadataHash().substring(6));
         o = m.pop();
-        assert o == null || o.element.metadataHash().equals(bestEntry.element.metadataHash()) : "bestEntry.element.metadataHash() = " + bestEntry.element.metadataHash() + ", o.element.metadataHash() = " + o.element.metadataHash();
+        //assert o == null || o.element.metadataHash().equals(bestEntry.element.metadataHash()) : "bestEntry.element.metadataHash() = " + bestEntry.element.metadataHash() + ", o.element.metadataHash() = " + o.element.metadataHash();
         return bestEntry;
     }
     

@@ -298,8 +298,7 @@ public class SplitTable implements ObjectIndex {
         
         // start a concurrent query to database tables
         final CompletionService<ObjectIndex> cs = new ExecutorCompletionService<ObjectIndex>(executor);
-        final int s = tables.size();
-        int rejected = 0;
+        int accepted = 0;
         for (final ObjectIndex table : tables.values()) {
             try {
                 cs.submit(new Callable<ObjectIndex>() {
@@ -308,22 +307,24 @@ public class SplitTable implements ObjectIndex {
                         return dummyIndex;
                     }
                 });
+                accepted++;
             } catch (final RejectedExecutionException e) {
                 // the executor is either shutting down or the blocking queue is full
                 // execute the search direct here without concurrency
                 if (table.has(key)) return table;
-                rejected++;
             }
         }
 
         // read the result
         try {
-            for (int i = 0, n = s - rejected; i < n; i++) {
+            for (int i = 0; i < accepted; i++) {
                 final Future<ObjectIndex> f = cs.take();
+                //hash(System.out.println("**********accepted = " + accepted + ", i =" + i);
+                if (f == null) continue;
                 final ObjectIndex index = f.get();
                 if (index != dummyIndex) {
                     //System.out.println("*DEBUG SplitTable success.time = " + (System.currentTimeMillis() - start) + " ms");
-                    return index;
+                	return index;
                 }
             }
             //System.out.println("*DEBUG SplitTable fail.time = " + (System.currentTimeMillis() - start) + " ms");

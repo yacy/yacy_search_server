@@ -35,7 +35,17 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.ByteOrder;
@@ -48,6 +58,7 @@ import de.anomic.kelondro.text.ReferenceFactory;
 import de.anomic.kelondro.text.ReferenceContainerCache.blobFileEntries;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
+import de.anomic.kelondro.util.NamePrefixThreadFactory;
 import de.anomic.yacy.logging.Log;
 
 public class ArrayStack implements BLOB {
@@ -78,6 +89,9 @@ public class ArrayStack implements BLOB {
     private String prefix;
     private int buffersize;
     
+    // the thread pool for the keeperOf executor service
+    private ExecutorService executor;
+    
     public ArrayStack(
             final File heapLocation,
             final String prefix,
@@ -94,6 +108,14 @@ public class ArrayStack implements BLOB {
         this.repositoryAgeMax = Long.MAX_VALUE;
         this.repositorySizeMax = Long.MAX_VALUE;
 
+        // init the thread pool for the keeperOf executor service
+        this.executor = new ThreadPoolExecutor(
+        		Runtime.getRuntime().availableProcessors() + 1, 
+        		Runtime.getRuntime().availableProcessors() + 1, 10, 
+        		TimeUnit.SECONDS, 
+        		new LinkedBlockingQueue<Runnable>(), 
+        		new NamePrefixThreadFactory(prefix));
+        
         // check existence of the heap directory
         if (heapLocation.exists()) {
             if (!heapLocation.isDirectory()) throw new IOException("the BLOBArray directory " + heapLocation.toString() + " does not exist (is blocked by a file with same name)");
@@ -465,8 +487,59 @@ public class ArrayStack implements BLOB {
      * @throws IOException
      */
     public synchronized boolean has(byte[] key) {
-        for (blobItem bi: blobs) if (bi.blob.has(key)) return true;
-        return false;
+    	blobItem bi = keeperOf(key);
+    	return bi != null;
+        //for (blobItem bi: blobs) if (bi.blob.has(key)) return true;
+        //return false;
+    }
+    
+    public synchronized blobItem keeperOf(final byte[] key) {
+        // because the index is stored only in one table,
+        // and the index is completely in RAM, a concurrency will create
+        // not concurrent File accesses
+        //long start = System.currentTimeMillis();
+        
+        // start a concurrent query to database tables
+        final CompletionService<blobItem> cs = new ExecutorCompletionService<blobItem>(executor);
+        int accepted = 0;
+        for (final blobItem bi : blobs) {
+            try {
+                cs.submit(new Callable<blobItem>() {
+                    public blobItem call() {
+                        if (bi.blob.has(key)) return bi;
+                        return null;
+                    }
+                });
+                accepted++;
+            } catch (final RejectedExecutionException e) {
+                // the executor is either shutting down or the blocking queue is full
+                // execute the search direct here without concurrency
+                if (bi.blob.has(key)) return bi;
+            }
+        }
+
+        // read the result
+        try {
+            for (int i = 0; i < accepted; i++) {
+                final Future<blobItem> f = cs.take();
+                //hash(System.out.println("**********accepted = " + accepted + ", i =" + i);
+                if (f == null) continue;
+                final blobItem index = f.get();
+                if (index != null) {
+                    //System.out.println("*DEBUG SplitTable success.time = " + (System.currentTimeMillis() - start) + " ms");
+                	return index;
+                }
+            }
+            //System.out.println("*DEBUG SplitTable fail.time = " + (System.currentTimeMillis() - start) + " ms");
+            return null;
+        } catch (final InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } catch (final ExecutionException e) {
+        	e.printStackTrace();
+            throw new RuntimeException(e.getCause());
+        }
+        //System.out.println("*DEBUG SplitTable fail.time = " + (System.currentTimeMillis() - start) + " ms");
+        return null;
     }
     
     /**
@@ -476,12 +549,16 @@ public class ArrayStack implements BLOB {
      * @throws IOException
      */
     public synchronized byte[] get(byte[] key) throws IOException {
-        byte[] b;
+    	//blobItem bi = keeperOf(key);
+    	//return (bi == null) ? null : bi.blob.get(key);
+        
+    	byte[] b;
         for (blobItem bi: blobs) {
             b = bi.blob.get(key);
             if (b != null) return b;
         }
         return null;
+        
     }
     
     /**
