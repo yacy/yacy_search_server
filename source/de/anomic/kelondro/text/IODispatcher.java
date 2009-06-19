@@ -118,7 +118,7 @@ public class IODispatcher extends Thread {
                 try {
                     array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
                 } catch (IOException ee) {
-                    Log.logSevere("IODispatcher", "IO failed: " + e.getMessage(), e);
+                    Log.logSevere("IODispatcher", "IO failed: " + e.getMessage(), ee);
                 }
             }
         }
