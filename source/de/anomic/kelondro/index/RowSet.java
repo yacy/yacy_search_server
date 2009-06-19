@@ -24,8 +24,6 @@
 
 package de.anomic.kelondro.index;
 
-import java.io.DataInput;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Random;
 
@@ -63,26 +61,19 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         assert rowdef.objectOrder != null;
     }
     
-    public static RowSet importRowSet(final DataInput is, final Row rowdef) throws IOException {
-        final byte[] byte6 = new byte[6];
-        final int size = is.readInt();
-        is.readFully(byte6);
-        //short lastread = (short) kelondroNaturalOrder.decodeLong(byte2);
-        //short lastwrote = (short) kelondroNaturalOrder.decodeLong(byte2);
-        //String orderkey = new String(byte2);
-        final int orderbound = is.readInt();
-        final byte[] chunkcache = new byte[size * rowdef.objectsize];
-        is.readFully(chunkcache);
-        return new RowSet(rowdef, size, chunkcache, orderbound);
-    }
-    
     public static RowSet importRowSet(byte[] b, final Row rowdef) {
-    	assert b.length >= 14 : "b.length = " + b.length;
+    	assert b.length >= exportOverheadSize : "b.length = " + b.length;
+    	if (b.length < exportOverheadSize) return new RowSet(rowdef, 0);
         final int size = (int) NaturalOrder.decodeLong(b, 0, 4);
+        assert size >= 0 : "size = " + size;
+        if (size < 0) return new RowSet(rowdef, 0);
         final int orderbound = (int) NaturalOrder.decodeLong(b, 10, 4);
+        assert orderbound >= 0 : "orderbound = " + orderbound;
+        if (orderbound < 0) return new RowSet(rowdef, 0);
         final byte[] chunkcache = new byte[size * rowdef.objectsize];
         assert b.length - exportOverheadSize == size * rowdef.objectsize;
-        System.arraycopy(b, 14, chunkcache, 0, chunkcache.length);
+        if (b.length - exportOverheadSize != size * rowdef.objectsize) return new RowSet(rowdef, 0);
+        System.arraycopy(b, exportOverheadSize, chunkcache, 0, chunkcache.length);
         return new RowSet(rowdef, size, chunkcache, orderbound);
     }
     
