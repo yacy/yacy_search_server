@@ -90,6 +90,10 @@ public class UPnP {
 		return init;
 	}
 	
+	private static String getRemoteHost() {
+		return sb.getConfig(plasmaSwitchboardConstants.UPNP_REMOTEHOST, "");
+	}
+	
 	/**
 	 * add port mapping for configured port
 	 */
@@ -109,7 +113,7 @@ public class UPnP {
 		if (mappedPort == 0 && ((IGDs != null && localHostIP != null) || init())) {
 			for (InternetGatewayDevice IGD : IGDs) {
 				try {
-					boolean mapped = IGD.addPortMapping(mappedName, null, port, port, localHostIP, 0, mappedProtocol);
+					boolean mapped = IGD.addPortMapping(mappedName, getRemoteHost(), port, port, localHostIP, 0, mappedProtocol);
 					String msg = "port " + port + " on device "+ IGD.getIGDRootDevice().getFriendlyName();
 					if (mapped) {
 						log.logInfo("mapped " + msg);
@@ -128,7 +132,7 @@ public class UPnP {
 		if (mappedPort > 0 && IGDs != null && localHostIP != null) {
 			for (InternetGatewayDevice IGD : IGDs) {
 				try {
-					boolean unmapped = IGD.deletePortMapping(null, mappedPort, mappedProtocol);
+					boolean unmapped = IGD.deletePortMapping(getRemoteHost(), mappedPort, mappedProtocol);
 					String msg = "port " + mappedPort + " on device "+ IGD.getIGDRootDevice().getFriendlyName();
 					if (unmapped) log.logInfo("unmapped " + msg);
 					else log.logWarning("could not unmap " + msg);

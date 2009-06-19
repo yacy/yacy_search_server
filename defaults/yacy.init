@@ -17,6 +17,8 @@ port = 8080
 
 # use UPnP [true/false]
 upnp.enabled = 
+# remote host on UPnP device
+upnp.remoteHost =
 
 #sometimes you may want yacy to bind to another port, than the one reachable from outside.
 #then set bindPort to the port yacy should bind on, and port to the port, visible from outside

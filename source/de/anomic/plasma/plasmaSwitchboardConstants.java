@@ -443,6 +443,7 @@ public final class plasmaSwitchboardConstants {
     public static final String BROWSER_POP_UP_PAGE        = "browserPopUpPage";
     
     public static final String UPNP_ENABLED			= "upnp.enabled";
+    public static final String UPNP_REMOTEHOST		= "upnp.remoteHost";
     
     public static final String DEFAULT_SEARCHITEMS 	= "search.items";
     
