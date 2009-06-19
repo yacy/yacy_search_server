@@ -105,7 +105,7 @@ public class IODispatcher extends Thread {
                 Log.logWarning("IODispatcher", "emergency merge of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
                 array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logSevere("IODispatcher", "emergency merge failed: " + e.getMessage(), e);
             }
         } else {
             MergeJob job = new MergeJob(f1, f2, factory, array, payloadrow, newFile);
@@ -114,11 +114,11 @@ public class IODispatcher extends Thread {
                 this.controlQueue.release();
                 Log.logInfo("IODispatcher", "appended merge job of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logWarning("IODispatcher", "interrupted: " + e.getMessage(), e);
                 try {
                     array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
                 } catch (IOException ee) {
-                    ee.printStackTrace();
+                    Log.logSevere("IODispatcher", "IO failed: " + e.getMessage(), e);
                 }
             }
         }
@@ -245,7 +245,7 @@ public class IODispatcher extends Thread {
             try {
                 return array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logSevere("IODispatcher", "mergeMount failed: " + e.getMessage(), e);
             }
             return null;
         }

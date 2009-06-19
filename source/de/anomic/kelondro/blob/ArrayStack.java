@@ -702,7 +702,10 @@ public class ArrayStack implements BLOB {
     public File mergeMount(File f1, File f2, ReferenceFactory<? extends Reference> factory, Row payloadrow, File newFile, int writeBuffer) throws IOException {
         Log.logInfo("BLOBArray", "merging " + f1.getName() + " with " + f2.getName());
         File resultFile = mergeWorker(factory, this.keylength, this.ordering, f1, f2, payloadrow, newFile, writeBuffer);
-        if (resultFile == null) return null;
+        if (resultFile == null) {
+            Log.logWarning("BLOBArray", "merge of files " + f1 + ", " + f2 + " returned null. newFile = " + newFile);
+            return null;
+        }
         mountBLOB(resultFile, false);
         Log.logInfo("BLOBArray", "merged " + f1.getName() + " with " + f2.getName() + " into " + resultFile);
         return resultFile;
@@ -740,6 +743,7 @@ public class ArrayStack implements BLOB {
             FileUtils.deletedelete(f2);
             return newFile;
         } catch (IOException e) {
+            Log.logSevere("ArrayStack", "cannot close writing: " + e.getMessage(), e);
             FileUtils.deletedelete(tmpFile);
             FileUtils.deletedelete(newFile);
             e.printStackTrace();
