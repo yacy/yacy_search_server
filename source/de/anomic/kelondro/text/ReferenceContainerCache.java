@@ -133,8 +133,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             dump.close(true);
             Log.logInfo("indexContainerRAMHeap", "finished rwi heap dump: " + wordcount + " words, " + urlcount + " word/URL relations in " + (System.currentTimeMillis() - startTime) + " milliseconds");
         } catch (IOException e) {
-            e.printStackTrace();
-            Log.logInfo("indexContainerRAMHeap", "failed rwi heap dump: " + e.getMessage());
+            Log.logSevere("indexContainerRAMHeap", "failed rwi heap dump: " + e.getMessage(), e);
         } finally {
             dump = null;
         }

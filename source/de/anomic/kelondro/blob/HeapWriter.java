@@ -154,21 +154,17 @@ public final class HeapWriter  {
         if (writeIDX && index.size() > 3) {
             // now we can create a dump of the index and the gap information
             // to speed up the next start
-            try {
-                long start = System.currentTimeMillis();
-                String fingerprint = HeapWriter.fingerprintFileHash(this.heapFileREADY);
-                if (fingerprint == null) {
-                    Log.logSevere("kelondroBLOBHeapWriter", "cannot write a dump for " + heapFileREADY.getName()+ ": fingerprint is null");
-                } else {
-                    new Gap().dump(fingerprintGapFile(this.heapFileREADY, fingerprint));
-                    index.dump(fingerprintIndexFile(this.heapFileREADY, fingerprint));
-                    Log.logInfo("kelondroBLOBHeapWriter", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFileREADY.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
-                }
-                index.close();
-                index = null;
-            } catch (IOException e) {
-                e.printStackTrace();
+            long start = System.currentTimeMillis();
+            String fingerprint = HeapWriter.fingerprintFileHash(this.heapFileREADY);
+            if (fingerprint == null) {
+                Log.logSevere("kelondroBLOBHeapWriter", "cannot write a dump for " + heapFileREADY.getName()+ ": fingerprint is null");
+            } else {
+                new Gap().dump(fingerprintGapFile(this.heapFileREADY, fingerprint));
+                index.dump(fingerprintIndexFile(this.heapFileREADY, fingerprint));
+                Log.logInfo("kelondroBLOBHeapWriter", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFileREADY.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
             }
+            index.close();
+            index = null;
         } else {
             // this is small.. just free resources, do not write index
             index.close();
