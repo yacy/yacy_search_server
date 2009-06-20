@@ -268,7 +268,7 @@ function yacysearch(global) {
 					}								
 				}
 			);
-			$('#ynav1').accordion('activate', false);
+			$('#ynav1 .ui-accordion-header').trigger('click');
 			$('#yside a').click(function() {
 				var modifier = $(this).attr('modifier');
 				modifier = modifier.replace(/^#/,'');
