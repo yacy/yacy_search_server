@@ -52,11 +52,16 @@ public class LogalizerHandler extends Handler {
     
     public LogalizerHandler() {
         super();
-        configure();
-    }    
+        
+        final LogManager manager = LogManager.getLogManager();
+        String className = getClass().getName();
 
-    private HashMap<String, Object> loadParsers() {
-        final HashMap<String, Object> logParsers = new HashMap<String, Object>();
+        if(manager.getProperty(className + ".enabled").equalsIgnoreCase("true")) enabled = true;
+        if(manager.getProperty(className + ".debug").equalsIgnoreCase("true")) debug = true;
+
+        logParserPackage = manager.getProperty(className + ".parserPackage");
+
+        parsers = new HashMap<String, Object>();
         try {
             if (debug) System.out.println("Searching for additional content parsers in package " + logParserPackage);
             // getting an uri to the parser subpackage
@@ -70,66 +75,65 @@ public class LogalizerHandler extends Handler {
             }
 		    for (final String filename: parserDirFiles) {
 		    	if (filename.endsWith("Log.class") || filename.endsWith("LogalizerHandler.class")) continue;
-		    	final Pattern patternGetClassName = Pattern.compile(".*\\"+ File.separator +"([^\\"+ File.separator +"]+)\\.class");
-		    	final Matcher matcherClassName = patternGetClassName.matcher(filename);
-		    	matcherClassName.find();
-	            final String className = matcherClassName.group(1);
-	            final Class<?> tempClass = Class.forName(logParserPackage+"."+className);
-	            if (tempClass.isInterface()) {
-	                if (debug) System.out.println(tempClass.getName() + " is an Interface");
-	            } else {
-	                final Object theParser = tempClass.newInstance();
-	                if (theParser instanceof LogParser) {
-	                    final LogParser theLogParser = (LogParser) theParser;
-	                    //System.out.println(bla.getName() + " is a logParser");
-	                    logParsers.put(theLogParser.getParserType(), theParser);
-	                    
-	                    if (debug) System.out.println("Added " + theLogParser.getClass().getName() + " as " + theLogParser.getParserType() + " Parser.");
-	                }
-	                else {
-	                    //System.out.println(bla.getName() + " is not a logParser");
-	                    if (debug) System.out.println("Rejected " + tempClass.getName() + ". Class does not implement the logParser-Interface");
-	
-	                }
-	            }
+		    	System.out.println("************ logparser=" + filename);
+		    	registerParser(filename);
 	        }
-        } catch (final ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (final InstantiationException e) {
-            e.printStackTrace();
-        } catch (final IllegalAccessException e) {
-            e.printStackTrace();
         } catch (final IOException e) {
             e.printStackTrace();
         } catch (final URISyntaxException e) {
             e.printStackTrace();
         }
-        return logParsers;
     }
     
-    /**
-     * Get any configuration properties set
-     */
-    private void configure() {
-        final LogManager manager = LogManager.getLogManager();
-        final String className = getClass().getName();
-
-        if(manager.getProperty(className + ".enabled").equalsIgnoreCase("true")) enabled = true;
-        if(manager.getProperty(className + ".debug").equalsIgnoreCase("true")) debug = true;
-
-        logParserPackage = manager.getProperty(className + ".parserPackage");
-
-        parsers = loadParsers();
+    private void registerParser(String filename) {
+    	try {
+	    	final Pattern patternGetClassName = Pattern.compile(".*\\"+ File.separator +"([^\\"+ File.separator +"]+)\\.class");
+	    	final Matcher matcherClassName = patternGetClassName.matcher(filename);
+	    	matcherClassName.find();
+	        String className = matcherClassName.group(1);
+	        final Class<?> tempClass = Class.forName(logParserPackage+"."+className);
+	        if (tempClass.isInterface()) {
+	            if (debug) System.out.println(tempClass.getName() + " is an Interface");
+	        } else {
+	            final Object theParser = tempClass.newInstance();
+	            if (theParser instanceof LogParser) {
+	                final LogParser theLogParser = (LogParser) theParser;
+	                //System.out.println(bla.getName() + " is a logParser");
+	                parsers.put(theLogParser.getParserType(), theParser);
+	                
+	                if (debug) System.out.println("Added " + theLogParser.getClass().getName() + " as " + theLogParser.getParserType() + " Parser.");
+	            }
+	            else {
+	                //System.out.println(bla.getName() + " is not a logParser");
+	                if (debug) System.out.println("Rejected " + tempClass.getName() + ". Class does not implement the logParser-Interface");
+	
+	            }
+	        }
+    	} catch (final ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (final InstantiationException e) {
+            e.printStackTrace();
+        } catch (final IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public void registerParser(LogParser theParser) {
+	    final LogParser theLogParser = (LogParser) theParser;
+	    //System.out.println(bla.getName() + " is a logParser");
+	    parsers.put(theLogParser.getParserType(), theParser);
+	    
+	    if (debug) System.out.println("Added " + theLogParser.getClass().getName() + " as " + theLogParser.getParserType() + " Parser.");
     }
     
     public void publish(final LogRecord record) {
         if (enabled) {
             final LogParser temp = (LogParser) parsers.get(record.getLoggerName());
-            if (temp != null) {
+            if (temp != null) try {
                 final int returnV = temp.parse(record.getLevel().toString(), record.getMessage());
                 //if (debug) System.out.println("Logalizertest: " + returnV + " --- " + record.getLevel() + " --- " + record.getMessage());
                 if (debug) System.out.println("Logalizertest: " + returnV + " --- " + record.getLevel());
-            }
+            } catch (Exception e) {}
         }
         flush();
     }
