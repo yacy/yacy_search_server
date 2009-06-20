@@ -85,12 +85,12 @@ public final class yacyRelease extends yacyVersion {
     }
     
     public yacyRelease(final File releaseFile) {
-	super(releaseFile.getName());
-	this.releaseFile = releaseFile;
+    super(releaseFile.getName());
+    this.releaseFile = releaseFile;
     }
 
     public yacyURL getUrl() {
-	return url;
+    return url;
     }
     
     public static final yacyRelease rulebasedUpdateInfo(final boolean manual) {
@@ -121,9 +121,9 @@ public final class yacyRelease extends yacyVersion {
         final String concept = sb.getConfig("update.concept", "any");
         String blacklist = sb.getConfig("update.blacklist", "...[123]");
         if (blacklist.equals("....[123]")) {
-        	// patch the blacklist because of a release strategy change from 0.7 and up
-        	blacklist = "...[123]";
-        	sb.setConfig("update.blacklist", blacklist);
+            // patch the blacklist because of a release strategy change from 0.7 and up
+            blacklist = "...[123]";
+            sb.setConfig("update.blacklist", blacklist);
         }
         
         if ((manual) || (concept.equals("any"))) {
@@ -199,7 +199,7 @@ public final class yacyRelease extends yacyVersion {
      */
     private static DevAndMainVersions getReleases(final yacyUpdateLocation location, final boolean force) {
         // get release info from a Internet resource
-	DevAndMainVersions locLatestRelease = latestReleases.get(location);
+        DevAndMainVersions locLatestRelease = latestReleases.get(location);
         if (force ||
             (locLatestRelease == null) /*||
             ((latestRelease[0].size() == 0) &&
@@ -277,103 +277,99 @@ public final class yacyRelease extends yacyVersion {
         
         httpResponse res = null;
         final String name = this.getUrl().getFileName();
-	byte[] signatureBytes = null;
-	// download signature first, if public key is available
-	if(this.publicKey != null) {
-	    final byte[] signatureData = httpClient.wget(this.getUrl().toString() + ".sig", reqHeader, 6000);
-	    if(signatureData == null) {
-		Log.logSevere("yacyVersion", "download of signature " + this.getUrl().toString() + " failed");
-		return null;
+        byte[] signatureBytes = null;
+        
+        // download signature first, if public key is available
+        if (this.publicKey != null) {
+	        final byte[] signatureData = httpClient.wget(this.getUrl().toString() + ".sig", reqHeader, 6000);
+	        if (signatureData == null) {
+	            Log.logWarning("yacyVersion", "download of signature " + this.getUrl().toString() + " failed. ignoring signature file.");
+	        } else try {
+	            signatureBytes = Base64Order.standardCoder.decode(new String(signatureData, "UTF8").trim(), "decode signature");
+	        } catch (UnsupportedEncodingException e) {
+	            Log.logWarning("yacyVersion", "download of signature " + this.getUrl().toString() + " failed: unsupported encoding");
+	        }
+	        // in case that the download of a signature file failed (can be caused by bad working http servers), then it is assumed that no signature exists
 	    }
 	    try {
-		signatureBytes = Base64Order.standardCoder.decode(new String(signatureData, "UTF8").trim(), "decode signature");
-	    } catch (UnsupportedEncodingException e) {
-		Log.logSevere("yacyVersion", "download of signature " + this.getUrl().toString() + " failed: unsupported encoding");
-		return null;
+	        final httpClient client = new httpClient(120000, reqHeader);
+	        res = client.GET(this.getUrl().toString());
+	
+	        final boolean unzipped = res.getResponseHeader().gzip() && (res.getResponseHeader().mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
+	        if ((unzipped) && (name.endsWith(".tar.gz"))) {
+	        	download = new File(storagePath, name.substring(0, name.length() - 3));
+	        } else {
+	        	download = new File(storagePath, name);
+	        }
+	        if (this.publicKey != null && signatureBytes != null) {
+		        // copy to file and check signature
+		        SignatureOutputStream verifyOutput = null;
+		        try {
+		            verifyOutput = new SignatureOutputStream(new FileOutputStream(download), CryptoLib.signAlgorithm, publicKey);
+		            FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(verifyOutput));
+		
+		            if (!verifyOutput.verify(signatureBytes)) throw new IOException("Bad Signature!");
+		        } catch (NoSuchAlgorithmException e) {
+		            throw new IOException("No such algorithm");
+		        } catch (SignatureException e) {
+		            throw new IOException("Signature exception");
+		        } finally {
+		            if (verifyOutput != null)
+		            verifyOutput.close();
+		        }
+		        // Save signature
+		        File signatureFile = new File(download.getAbsoluteFile() + ".sig");
+		        FileUtils.copy(Base64Order.standardCoder.encode(signatureBytes).getBytes("UTF-8"), signatureFile);
+		        if ((!signatureFile.exists()) || (signatureFile.length() == 0)) throw new IOException("create signature file failed");
+	        } else {
+		        // just copy into file
+		        FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(new FileOutputStream(download)));
+	        }
+	        if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + this.getUrl() + " failed");
+	    } catch (final IOException e) {
+	        // Saving file failed, abort download
+	        res.abort();
+	        Log.logSevere("yacyVersion", "download of " + this.getName() + " failed: " + e.getMessage());
+	        if (download != null && download.exists()) {
+	        	FileUtils.deletedelete(download);
+	        	if (download.exists()) Log.logWarning("yacyVersion", "could not delete file "+ download);
+	        }
+	        download = null;
+	    } finally {
+	        if (res != null) {
+	        	// release connection
+	        	res.closeStream();
+	        }
 	    }
-	}
-	try {
-	    final httpClient client = new httpClient(120000, reqHeader);
-	    res = client.GET(this.getUrl().toString());
-
-	    final boolean unzipped = res.getResponseHeader().gzip() && (res.getResponseHeader().mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
-	    if ((unzipped) && (name.endsWith(".tar.gz"))) {
-		download = new File(storagePath, name.substring(0, name.length() - 3));
-	    } else {
-		download = new File(storagePath, name);
-	    }
-	    if(this.publicKey != null) {
-		// copy to file and check signature
-		SignatureOutputStream verifyOutput = null;
-		try {
-		    verifyOutput = new SignatureOutputStream(new FileOutputStream(download), CryptoLib.signAlgorithm, publicKey);
-		    FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(verifyOutput));
-
-		    if(!verifyOutput.verify(signatureBytes)) {
-			throw new IOException("Bad Signature!");
-		    }
-		} catch (NoSuchAlgorithmException e) {
-		    throw new IOException("No such algorithm");
-		} catch (SignatureException e) {
-		    throw new IOException("Signature exception");
-		} finally {
-		    if(verifyOutput != null)
-			verifyOutput.close();
-		}
-		// Save signature
-		File signatureFile = new File(download.getAbsoluteFile() + ".sig");
-		FileUtils.copy(Base64Order.standardCoder.encode(signatureBytes).getBytes("UTF-8"), signatureFile);
-		if ((!signatureFile.exists()) || (signatureFile.length() == 0)) throw new IOException("create signature file failed");
-	    } else {
-		// just copy into file
-		FileUtils.copyToStream(new BufferedInputStream(res.getDataAsStream()), new BufferedOutputStream(new FileOutputStream(download)));
-	    }
-	    if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + this.getUrl() + " failed");
-	} catch (final IOException e) {
-	    // Saving file failed, abort download
-	    res.abort();
-	    Log.logSevere("yacyVersion", "download of " + this.getName() + " failed: " + e.getMessage());
-	    if (download != null && download.exists()) {
-		FileUtils.deletedelete(download);
-		if (download.exists())
-		    Log.logWarning("yacyVersion", "could not delete file "+ download);
-	    }
-	    download = null;
-	} finally {
-	    if (res != null) {
-		// release connection
-		res.closeStream();
-	    }
-	}
         this.releaseFile = download;
         plasmaSwitchboard.getSwitchboard().setConfig("update.time.download", System.currentTimeMillis());
         return this.releaseFile;
     }
     
     public boolean checkSignature() {
-	if(releaseFile != null) {
-	    try {
-		serverCharBuffer signBuffer;
-		signBuffer = new serverCharBuffer(getSignatureFile());
-		byte[] signByteBuffer = Base64Order.standardCoder.decode(
-			signBuffer.toString().trim(), "Signature");
-		CryptoLib cl = new CryptoLib();
-		for(yacyUpdateLocation updateLocation : latestReleaseLocations) {
-		    try {
-			if(cl.verifySignature(updateLocation.getPublicKey(),
-				new FileInputStream(releaseFile), signByteBuffer)) {
-			    return true;
-			}
-		    } catch (InvalidKeyException e) {
-		    } catch (SignatureException e) {
-		    }
-		}
-	    } catch (IOException e1) {
-	    } catch (NoSuchAlgorithmException e) {
-	    }
+    if(releaseFile != null) {
+        try {
+        serverCharBuffer signBuffer;
+        signBuffer = new serverCharBuffer(getSignatureFile());
+        byte[] signByteBuffer = Base64Order.standardCoder.decode(
+            signBuffer.toString().trim(), "Signature");
+        CryptoLib cl = new CryptoLib();
+        for(yacyUpdateLocation updateLocation : latestReleaseLocations) {
+            try {
+            if(cl.verifySignature(updateLocation.getPublicKey(),
+                new FileInputStream(releaseFile), signByteBuffer)) {
+                return true;
+            }
+            } catch (InvalidKeyException e) {
+            } catch (SignatureException e) {
+            }
+        }
+        } catch (IOException e1) {
+        } catch (NoSuchAlgorithmException e) {
+        }
 
-	}
-	return false;
+    }
+    return false;
     }
 
     /**
@@ -385,35 +381,35 @@ public final class yacyRelease extends yacyVersion {
             final String apphome = sb.getRootPath().toString();
             
             if (serverSystem.isWindows) {
-            	final File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole".replace("/", File.separator));
-            	String starterFile = "startYACY_debug.bat";
-            	if (startType.exists()) starterFile = "startYACY.bat"; // startType noconsole
-            	
-            	try{
+                final File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole".replace("/", File.separator));
+                String starterFile = "startYACY_debug.bat";
+                if (startType.exists()) starterFile = "startYACY.bat"; // startType noconsole
+                
+                try{
                     Log.logInfo("RESTART", "INITIATED");
-            		final String script =
-    	            	"@echo off" + serverCore.LF_STRING +
-    	            	"title YaCy restarter" + serverCore.LF_STRING +
-    	            	"set loading=YACY RESTARTER" + serverCore.LF_STRING +
-    	            	"echo %loading%" + serverCore.LF_STRING +
-    	            	"cd \"" + apphome + "/DATA/RELEASE/".replace("/", File.separator) + "\"" + serverCore.LF_STRING +
-    	            	":WAIT" + serverCore.LF_STRING +
-    	            	"set loading=%loading%." + serverCore.LF_STRING +
-    	            	"cls" + serverCore.LF_STRING +
-    	            	"echo %loading%" + serverCore.LF_STRING +
-    	            	"ping -n 2 127.0.0.1 >nul" + serverCore.LF_STRING +
-    	            	"IF exist ..\\yacy.running goto WAIT" + serverCore.LF_STRING +
-    	            	"cd \"" + apphome + "\"" + serverCore.LF_STRING +
-    	            	"start /MIN CMD /C " + starterFile + serverCore.LF_STRING;
-    	            final File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.bat".replace("/", File.separator));
-    	            serverSystem.deployScript(scriptFile, script);
-    	            Log.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
-    	            serverSystem.execAsynchronous(scriptFile);
-    	            Log.logInfo("RESTART", "script is running");
-    	            sb.terminate(5000);
-    	        } catch (final IOException e) {
-    	            Log.logSevere("RESTART", "restart failed", e);
-    	        }
+                    final String script =
+                        "@echo off" + serverCore.LF_STRING +
+                        "title YaCy restarter" + serverCore.LF_STRING +
+                        "set loading=YACY RESTARTER" + serverCore.LF_STRING +
+                        "echo %loading%" + serverCore.LF_STRING +
+                        "cd \"" + apphome + "/DATA/RELEASE/".replace("/", File.separator) + "\"" + serverCore.LF_STRING +
+                        ":WAIT" + serverCore.LF_STRING +
+                        "set loading=%loading%." + serverCore.LF_STRING +
+                        "cls" + serverCore.LF_STRING +
+                        "echo %loading%" + serverCore.LF_STRING +
+                        "ping -n 2 127.0.0.1 >nul" + serverCore.LF_STRING +
+                        "IF exist ..\\yacy.running goto WAIT" + serverCore.LF_STRING +
+                        "cd \"" + apphome + "\"" + serverCore.LF_STRING +
+                        "start /MIN CMD /C " + starterFile + serverCore.LF_STRING;
+                    final File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.bat".replace("/", File.separator));
+                    serverSystem.deployScript(scriptFile, script);
+                    Log.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
+                    serverSystem.execAsynchronous(scriptFile);
+                    Log.logInfo("RESTART", "script is running");
+                    sb.terminate(5000);
+                } catch (final IOException e) {
+                    Log.logSevere("RESTART", "restart failed", e);
+                }
             
                 // create yacy.restart file which is used in Windows startscript
     /*            final File yacyRestart = new File(sb.getRootPath(), "DATA/yacy.restart");
@@ -465,77 +461,77 @@ public final class yacyRelease extends yacyVersion {
             try{
             tarTools.unTar(tarTools.getInputStream(releaseFile), sb.getRootPath() + "/DATA/RELEASE/".replace("/", File.separator));
             } catch (final Exception e){
-            	Log.logSevere("UNTAR", "failed", e);
+                Log.logSevere("UNTAR", "failed", e);
             }
             String script = null;
             String scriptFileName = null;
-            if(serverSystem.isWindows){
-            	final File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole".replace("/", File.separator));
-            	String starterFile = "startYACY_debug.bat";
-            	if (startType.exists()) starterFile = "startYACY.bat"; // startType noconsole
-            	script = 
-	            	"@echo off" + serverCore.LF_STRING +
-	            	"title YaCy updater" + serverCore.LF_STRING +
-	            	"set loading=YACY UPDATER" + serverCore.LF_STRING +
-	            	"echo %loading%" + serverCore.LF_STRING +
-	            	"cd \"" + apphome + "/DATA/RELEASE/".replace("/", File.separator) + "\"" + serverCore.LF_STRING +
-	
-	            	":WAIT" + serverCore.LF_STRING +
-	            	"set loading=%loading%." + serverCore.LF_STRING +
-	            	"cls" + serverCore.LF_STRING +
-	            	"echo %loading%" + serverCore.LF_STRING +
-	            	"ping -n 2 127.0.0.1 >nul" + serverCore.LF_STRING +
-	            	"IF exist ..\\yacy.running goto WAIT" + serverCore.LF_STRING +
-	            	"IF not exist yacy goto NODATA" + serverCore.LF_STRING +
+            if (serverSystem.isWindows) {
+                final File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole".replace("/", File.separator));
+                String starterFile = "startYACY_debug.bat";
+                if (startType.exists()) starterFile = "startYACY.bat"; // startType noconsole
+                script = 
+                    "@echo off" + serverCore.LF_STRING +
+                    "title YaCy updater" + serverCore.LF_STRING +
+                    "set loading=YACY UPDATER" + serverCore.LF_STRING +
+                    "echo %loading%" + serverCore.LF_STRING +
+                    "cd \"" + apphome + "/DATA/RELEASE/".replace("/", File.separator) + "\"" + serverCore.LF_STRING +
+    
+                    ":WAIT" + serverCore.LF_STRING +
+                    "set loading=%loading%." + serverCore.LF_STRING +
+                    "cls" + serverCore.LF_STRING +
+                    "echo %loading%" + serverCore.LF_STRING +
+                    "ping -n 2 127.0.0.1 >nul" + serverCore.LF_STRING +
+                    "IF exist ..\\yacy.running goto WAIT" + serverCore.LF_STRING +
+                    "IF not exist yacy goto NODATA" + serverCore.LF_STRING +
 
-	            	"cd yacy" + serverCore.LF_STRING +
-	            	"xcopy *.* \"" + apphome + "\" /E /Y >nul" + serverCore.LF_STRING +
-	            	// /E - all subdirectories
-	            	// /Y - don't ask
-	            	"cd .." + serverCore.LF_STRING +
-	            	"rd yacy /S /Q" + serverCore.LF_STRING +
-	            	// /S delete tree
-	            	// /Q don't ask
-	            	"goto END" + serverCore.LF_STRING +
-	
-	            	":NODATA" + serverCore.LF_STRING +
-	            	"echo YACY UPDATER ERROR: NO UPDATE SOURCE FILES ON FILESYSTEM" + serverCore.LF_STRING +
-	            	"pause" + serverCore.LF_STRING +
-	
-	            	":END" + serverCore.LF_STRING +
-	            	"cd \"" + apphome + "\"" + serverCore.LF_STRING +
-	            	"start /MIN CMD /C " + starterFile + serverCore.LF_STRING;
-            	scriptFileName = "update.bat";
+                    "cd yacy" + serverCore.LF_STRING +
+                    "xcopy *.* \"" + apphome + "\" /E /Y >nul" + serverCore.LF_STRING +
+                    // /E - all subdirectories
+                    // /Y - don't ask
+                    "cd .." + serverCore.LF_STRING +
+                    "rd yacy /S /Q" + serverCore.LF_STRING +
+                    // /S delete tree
+                    // /Q don't ask
+                    "goto END" + serverCore.LF_STRING +
+    
+                    ":NODATA" + serverCore.LF_STRING +
+                    "echo YACY UPDATER ERROR: NO UPDATE SOURCE FILES ON FILESYSTEM" + serverCore.LF_STRING +
+                    "pause" + serverCore.LF_STRING +
+    
+                    ":END" + serverCore.LF_STRING +
+                    "cd \"" + apphome + "\"" + serverCore.LF_STRING +
+                    "start /MIN CMD /C " + starterFile + serverCore.LF_STRING;
+                scriptFileName = "update.bat";
             } else { // unix/linux
-	            script =
-	                "#!/bin/sh" + serverCore.LF_STRING +
-	                "cd " + sb.getRootPath() + "/DATA/RELEASE/" + serverCore.LF_STRING +
-	/*                ((releaseFile.getName().endsWith(".gz")) ?
-	                        // test gz-file for integrity and tar xfz then
-	                       ("if gunzip -t " + releaseFile.getAbsolutePath() + serverCore.LF_STRING +
-	                        "then" + serverCore.LF_STRING + 
-	                        "gunzip -c " + releaseFile.getAbsolutePath() + " | tar xf -" + serverCore.LF_STRING) :
-	                        // just tar xf the file, no integrity test possible?
-	                       ("tar xf " + releaseFile.getAbsolutePath() + serverCore.LF_STRING)
-	                ) +*/
-	                "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
-	                "sleep 1" + serverCore.LF_STRING +
-	                "done" + serverCore.LF_STRING +
-	                "cp -Rf yacy/* " + apphome + serverCore.LF_STRING +
-	                "rm -Rf yacy" + serverCore.LF_STRING +
-	/*                ((releaseFile.getName().endsWith(".gz")) ?
-	                        // else-case of gunzip -t test: if failed, just restart
-	                       ("else" + serverCore.LF_STRING +
-	                        "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
-	                        "sleep 1" + serverCore.LF_STRING +
-	                        "done" + serverCore.LF_STRING +
-	                        "fi" + serverCore.LF_STRING) :
-	                        // in case that we did not made the integrity test, there is no else case
-	                        ""
-	                ) +*/
-	                "cd " + apphome + serverCore.LF_STRING +
-	                "nohup ./startYACY.sh > /dev/null" + serverCore.LF_STRING;
-	            scriptFileName = "update.sh";
+                script =
+                    "#!/bin/sh" + serverCore.LF_STRING +
+                    "cd " + sb.getRootPath() + "/DATA/RELEASE/" + serverCore.LF_STRING +
+    /*                ((releaseFile.getName().endsWith(".gz")) ?
+                            // test gz-file for integrity and tar xfz then
+                           ("if gunzip -t " + releaseFile.getAbsolutePath() + serverCore.LF_STRING +
+                            "then" + serverCore.LF_STRING + 
+                            "gunzip -c " + releaseFile.getAbsolutePath() + " | tar xf -" + serverCore.LF_STRING) :
+                            // just tar xf the file, no integrity test possible?
+                           ("tar xf " + releaseFile.getAbsolutePath() + serverCore.LF_STRING)
+                    ) +*/
+                    "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
+                    "sleep 1" + serverCore.LF_STRING +
+                    "done" + serverCore.LF_STRING +
+                    "cp -Rf yacy/* " + apphome + serverCore.LF_STRING +
+                    "rm -Rf yacy" + serverCore.LF_STRING +
+    /*                ((releaseFile.getName().endsWith(".gz")) ?
+                            // else-case of gunzip -t test: if failed, just restart
+                           ("else" + serverCore.LF_STRING +
+                            "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
+                            "sleep 1" + serverCore.LF_STRING +
+                            "done" + serverCore.LF_STRING +
+                            "fi" + serverCore.LF_STRING) :
+                            // in case that we did not made the integrity test, there is no else case
+                            ""
+                    ) +*/
+                    "cd " + apphome + serverCore.LF_STRING +
+                    "nohup ./startYACY.sh > /dev/null" + serverCore.LF_STRING;
+                scriptFileName = "update.sh";
             }
             final File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/".replace("/", File.separator) + scriptFileName); 
             serverSystem.deployScript(scriptFile, script);
