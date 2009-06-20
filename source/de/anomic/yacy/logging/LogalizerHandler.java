@@ -75,7 +75,6 @@ public class LogalizerHandler extends Handler {
             }
 		    for (final String filename: parserDirFiles) {
 		    	if (filename.endsWith("Log.class") || filename.endsWith("LogalizerHandler.class")) continue;
-		    	System.out.println("************ logparser=" + filename);
 		    	registerParser(filename);
 	        }
         } catch (final IOException e) {
