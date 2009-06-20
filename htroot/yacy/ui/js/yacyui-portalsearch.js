@@ -70,7 +70,7 @@ $(document).ready(function() {
 		var script2 = yconf.url + '/yacy/ui/js/jquery.form.js';
 		var script3 = yconf.url + '/yacy/ui/js/jquery.field.min.js';
 		var script4 = yconf.url + '/yacy/ui/js/jquery-faviconize-1.0.js';
-		var script5 = yconf.url + '/yacy/ui/js/jquery.ui.all.min.js';
+		var script5 = yconf.url + '/yacy/ui/js/jquery-ui-1.7.2.min.js';
 		
 		$.getScript(script0, function(){});
 		$.getScript(script1, function(){});
