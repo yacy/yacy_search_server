@@ -24,14 +24,7 @@ $(document).ready(function() {
 		load_js	 : true,
 		load_css : true	
 	}, yconf);
-	
-	$.extend($.ui.accordion.defaults, {
-		autoHeight: false,
-		clearStyle: true,
-		collapsible: true,
-		header: "h3"
-	});
-	
+		
 	$('<div id="ypopup" class="classic"></div>').appendTo("#yacylivesearch");
 	
 	if(yconf.load_css) {	
@@ -86,6 +79,13 @@ $(document).ready(function() {
 });
 
 function yrun() {
+	$.extend($.ui.accordion.defaults, {
+		autoHeight: false,
+		clearStyle: true,
+		collapsible: true,
+		header: "h3"
+	});
+
 	maximumRecords = parseInt($("#ysearch input[name='maximumRecords']").getValue());
 	
 	$("#ypopup").dialog({			
