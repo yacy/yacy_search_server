@@ -1,3 +1,11 @@
+function status() {
+	if(load_status < 6) {
+		return;
+	} else {
+		window.clearInterval(loading);
+		yrun();
+	}
+}
 $(document).ready(function() {
 	$.ajaxSetup({
 		timeout: 5000,
@@ -78,16 +86,6 @@ $(document).ready(function() {
     	yrun();
     }
 });
-
-function status() {
-	if(load_status < 6) {
-		return;
-	} else {
-		window.clearInterval(loading);
-		yrun();
-	}
-}
-
 function yrun() {
 	
 	$.extend($.ui.accordion.defaults, {
@@ -177,11 +175,14 @@ function yrun() {
 	});
 	
 	$('#ysearch').keyup(function(e) {
-		if(e.which == 27) {	// ESC
+		if(ycurr == $("#yquery").getValue()) {
+			return false;
+		}
+		if(e.which == 27) {						// ESC
 			$("#ypopup").dialog('close');
-		} else if(e.which == 34) {	// PageDown
+		} else if(e.which == 34) {				// PageDown
 			startRecord = startRecord + maximumRecords;
-		} else if(e.which == 33) {	// PageUp
+		} else if(e.which == 33) {				// PageUp
 			startRecord = startRecord - maximumRecords;
 			if(startRecord < 0) startRecord = 0;			  
 		} else {
@@ -190,6 +191,7 @@ function yrun() {
 		if ($("#yquery").getValue() == '') {
 			$("#ypopup").dialog('close');
 		} else {
+			ycurr = $("#yquery").getValue();
 			if(!submit) yacysearch(false);
 			else submit = false;
 		}		
@@ -197,14 +199,16 @@ function yrun() {
 	});
 	
 	$('#ysearch').submit(function() {
-		submit = true;		
+		submit = true;
+		ycurr = $("#yquery").getValue();		
 		yacysearch(yconf.global);		
 		return false;
 	});	
 }
 
 function yacysearch(global) {	
-	var url = yconf.url + '/yacysearch.json?callback=?'		
+	var url = yconf.url + '/yacysearch.json?callback=?'
+		
 	$('#ypopup').empty();
 	$('#ypopup').append("<div class='yloading'><h3 class='linktitle'><em>Loading: "+yconf.url+"</em><br/><img src='"+yconf.url+"/yacy/ui/img/loading2.gif' align='absmiddle'/></h3></div>");	
 	if (!$("#ypopup").dialog('isOpen'))			
@@ -219,15 +223,22 @@ function yacysearch(global) {
 			if(item.value == 'global') global = true;
 			if(global) item.value = 'global';
 		}
+		if(item.name == 'query' || item.name == 'search') {
+			if(item.value != ycurr)				
+				ycurr = item.value;
+		}
 		param[i] = item;
 	});
 	param[param.length] = { name : 'startRecord', value : startRecord };
 	$.getJSON(url, param,
-        function(json, status){  
-			ycurr = $("#yquery").getValue();	
+        function(json, status) {	
 			if (json[0]) data = json[0];
 			else data = json;
-			$('#ypopup').empty();
+			if(ycurr != data.channels[0].searchTerms)
+				return false;		
+			if(data.channels[0].searchTerms != ycurr)
+				return false;
+			$('#ypopup').empty();			
 			var total = data.channels[0].totalResults.replace(/[,.]/,"");	
 	   		var page = (data.channels[0].startIndex / data.channels[0].itemsPerPage) + 1;		
 			var start = startRecord + 1;				
@@ -294,7 +305,7 @@ function yacysearch(global) {
 	function autoOpenSidebar() {			
 		window.setTimeout(function() {
 			if(	$("#yquery").getValue() == ycurr) {								
-				if (!$("#yside").dialog('isOpen')) {
+				if (!$("#yside").dialog('isOpen')) {					
 					$("#yside").dialog('open');
 					$('#ynav1').accordion('activate', false);
 					$("#yquery").focus();
@@ -303,3 +314,4 @@ function yacysearch(global) {
 		} , 3000);	
 	}
 }
+
