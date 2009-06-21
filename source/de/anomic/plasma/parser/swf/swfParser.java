@@ -1,4 +1,4 @@
-//docParser.java 
+//swfParser.java 
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -6,7 +6,10 @@
 //Frankfurt, Germany, 2005
 //
 //this file is contributed by Marc Nause
-//last major change: 01.11.2006
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -146,6 +149,7 @@ public class swfParser extends AbstractParser implements Parser {
         }
     }
 
+    @Override
     public void reset() {
     // this code is executed if the parser class is returned into the parser pool
         super.reset();
