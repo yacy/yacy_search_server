@@ -4,6 +4,7 @@ $(document).ready(function() {
 		cache: false
 	})
 	// apply default properties
+	ycurr = '';
 	startRecord = 0;
 	maximumRecords = 10;	
 	submit = false;	
@@ -202,14 +203,14 @@ function yrun() {
 	});	
 }
 
-function yacysearch(global) {
+function yacysearch(global) {	
 	var url = yconf.url + '/yacysearch.json?callback=?'		
 	$('#ypopup').empty();
-	$('#ypopup').append("<div class='yloading'><h3 class='linktitle'><em>Loading: "+yconf.url+"</em><br/><img src='"+yconf.url+"/yacy/ui/img/loading2.gif' align='absmiddle'/></h3></div>");
-	
-	if (!$("#ypopup").dialog('isOpen')) {			
+	$('#ypopup').append("<div class='yloading'><h3 class='linktitle'><em>Loading: "+yconf.url+"</em><br/><img src='"+yconf.url+"/yacy/ui/img/loading2.gif' align='absmiddle'/></h3></div>");	
+	if (!$("#ypopup").dialog('isOpen'))			
 		$("#ypopup").dialog('open');
-	}					
+	if ($("#yside").dialog('isOpen'))
+		$("#yside").dialog('close');					
 	$("#yquery").focus();			
 	var param = [];		
 	$("#ysearch input").each(function(i){
@@ -222,7 +223,8 @@ function yacysearch(global) {
 	});
 	param[param.length] = { name : 'startRecord', value : startRecord };
 	$.getJSON(url, param,
-        function(json, status){				
+        function(json, status){  
+			ycurr = $("#yquery").getValue();	
 			if (json[0]) data = json[0];
 			else data = json;
 			$('#ypopup').empty();
@@ -236,7 +238,7 @@ function yacysearch(global) {
 			var ylogo = "<div class='ybpane'><a href='"+yconf.link+"' target='_blank'><img src='"+yconf.logo+"' alt='"+yconf.logo+"' title='"+yconf.logo+"' /></a></div>";
 			var yresult = "<div class='ybpane'><em>Displaying result "+start+" to "+end+"<br/> of "+total+" "+result+" results.</em></div>";				
 			$('div[aria-labelledby="ui-dialog-title-ypopup"] div.ui-dialog-buttonpane').prepend(ylogo+yresult);
-
+			var count = 0;
 		   	$.each (
 				data.channels[0].items,
 				function(i,item) {
@@ -247,15 +249,15 @@ function yacysearch(global) {
 						var date = "<p class='date'>"+item.pubDate.substring(0,16);
 						var size = " | "+item.sizename+"</p>";
 						$(title+desc+url+date+size).appendTo("#ypopup");	
-					}								
+					}
+					count++;								
 				}
 			);
 			$("#ypopup .linktitle a").faviconize({
 				position: "before",
 				defaultImage: yconf.url + "/yacy/ui/img-2/article.png",
 				className: "favicon"
-			});
-			
+			});			
 			$('#yside').empty();
 			$.each (
 				data.channels[0].navigation,
@@ -278,7 +280,6 @@ function yacysearch(global) {
 					}								
 				}
 			);
-			$('#ynav1 .ui-accordion-header').trigger('click');
 			$('#yside a').click(function() {
 				var modifier = $(this).attr('modifier');
 				modifier = modifier.replace(/^#/,'');
@@ -286,6 +287,19 @@ function yacysearch(global) {
 				$("#yquery").setValue(query);
 				$("#yquery").trigger('keyup');
 			});
+			if(count>0)
+				autoOpenSidebar();
         }
     );
+	function autoOpenSidebar() {			
+		window.setTimeout(function() {
+			if(	$("#yquery").getValue() == ycurr) {								
+				if (!$("#yside").dialog('isOpen')) {
+					$("#yside").dialog('open');
+					$('#ynav1').accordion('activate', false);
+					$("#yquery").focus();
+				}					
+			}	
+		} , 3000);	
+	}
 }
