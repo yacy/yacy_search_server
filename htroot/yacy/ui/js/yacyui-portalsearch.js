@@ -1,15 +1,15 @@
 $(document).ready(function() {
 	$.ajaxSetup({
-		timeout: 15000,
-		cache: true
-	})	
+		timeout: 5000,
+		cache: false
+	})
 	// apply default properties
 	startRecord = 0;
 	maximumRecords = 10;	
 	submit = false;	
 	yconf = $.extend({
 		url      : 'is a mandatory property - no default',
-		global   : false,		
+		'global' : false,		
 		theme    : 'start',
 		title    : 'YaCy P2P Web Search',
 		logo     : yconf.url + '/yacy/ui/img/yacy-logo.png',
@@ -24,7 +24,7 @@ $(document).ready(function() {
 		load_js	 : true,
 		load_css : true	
 	}, yconf);
-		
+	
 	$('<div id="ypopup" class="classic"></div>').appendTo("#yacylivesearch");
 	
 	if(yconf.load_css) {	
@@ -56,7 +56,9 @@ $(document).ready(function() {
 	    	.attr({type:'text/css', href: style6, rel:'stylesheet', media:'screen'})
 	    	.appendTo(head);
 	}
-    
+
+	load_status = 0;
+	loading = window.setInterval("status()", 200);    
     if(yconf.load_js) {
 	    var script0 = yconf.url + '/yacy/ui/js/jquery.dimensions.min.js';	
 		var script1 = yconf.url + '/yacy/ui/js/jquery.query.js';
@@ -65,27 +67,35 @@ $(document).ready(function() {
 		var script4 = yconf.url + '/yacy/ui/js/jquery-faviconize-1.0.js';
 		var script5 = yconf.url + '/yacy/ui/js/jquery-ui-1.7.2.min.js';
 		
-		$.getScript(script0, function(){});
-		$.getScript(script1, function(){});
-		$.getScript(script2, function(){});
-		$.getScript(script3, function(){});
-		$.getScript(script4, function(){});
-		$.getScript(script5, function(){
-			yrun();
-		});
+		$.getScript(script0, function(){ load_status++; });
+		$.getScript(script1, function(){ load_status++; });
+		$.getScript(script2, function(){ load_status++; });
+		$.getScript(script3, function(){ load_status++; });
+		$.getScript(script4, function(){ load_status++; });
+		$.getScript(script5, function(){ load_status++; });
     } else {
     	yrun();
     }
 });
 
+function status() {
+	if(load_status < 6) {
+		return;
+	} else {
+		window.clearInterval(loading);
+		yrun();
+	}
+}
+
 function yrun() {
+	
 	$.extend($.ui.accordion.defaults, {
 		autoHeight: false,
 		clearStyle: true,
 		collapsible: true,
 		header: "h3"
-	});
-
+	});	
+	
 	maximumRecords = parseInt($("#ysearch input[name='maximumRecords']").getValue());
 	
 	$("#ypopup").dialog({			
