@@ -7,29 +7,29 @@ function handleResponse(){
         var response = http.responseXML;
 
 		// getting the document title
-        title="";		
+        doctitle="";		
         if(response.getElementsByTagName("title")[0].firstChild!=null){
-	        title=response.getElementsByTagName("title")[0].firstChild.nodeValue;
+	        doctitle=response.getElementsByTagName("title")[0].firstChild.nodeValue;
 	    }
-		// document.getElementById("title").innerHTML=title;
-		document.WatchCrawler.bookmarkTitle.value=title
+		// document.getElementById("title").innerHTML=doctitle;
+		document.WatchCrawler.bookmarkTitle.value=doctitle
 		
 		// deterime if crawling is allowed by the robots.txt
-        robotsOK="";		
+        docrobotsOK="";		
         if(response.getElementsByTagName("robots")[0].firstChild!=null){
-	        robotsOK=response.getElementsByTagName("robots")[0].firstChild.nodeValue;
+	        docrobotsOK=response.getElementsByTagName("robots")[0].firstChild.nodeValue;
 	    }
         robotsOKspan=document.getElementById("robotsOK");
         if(robotsOKspan.firstChild){
 	        robotsOKspan.removeChild(robotsOKspan.firstChild);
         }
-        if(robotsOK==1){
+        if(docrobotsOK==1){
         	img=document.createElement("img");
         	img.setAttribute("src", "/env/grafics/ok.png");
         	img.setAttribute("width", "32px");
         	img.setAttribute("height", "32px");
         	robotsOKspan.appendChild(img);
-        }else if(robotsOK==0){
+        }else if(docrobotsOK==0){
 			img=document.createElement("img");
         	img.setAttribute("src", "/env/grafics/bad.png");
         	img.setAttribute("width", "32px");
