@@ -75,6 +75,7 @@ public final class Query {
     public String host; // this is the client host that starts the query, not a site operator
     public String sitehash; // this is a domain hash, 6 bytes long or null
     public String authorhash;
+    public String tenant; 
     public yacySeed remotepeer;
     public Long handle;
     // values that are set after a search:
@@ -99,6 +100,7 @@ public final class Query {
     		this.fullqueryHashes = Word.words2hashes(cq[2]);
     	}
     	this.ranking = ranking;
+    	this.tenant = null;
         this.maxDistance = Integer.MAX_VALUE;
         this.prefer = "";
         this.contentdom = CONTENTDOM_ALL;
@@ -125,6 +127,7 @@ public final class Query {
 		final String queryString, final TreeSet<byte[]> queryHashes,
 		final TreeSet<byte[]> excludeHashes, 
         final TreeSet<byte[]> fullqueryHashes,
+        final String tenant,
         final RankingProfile ranking,
         final int maxDistance, final String prefer, final int contentdom,
         final String language,
@@ -142,6 +145,7 @@ public final class Query {
 		this.queryHashes = queryHashes;
 		this.excludeHashes = excludeHashes;
 		this.fullqueryHashes = fullqueryHashes;
+		this.tenant = tenant;
 		this.ranking = ranking;
 		this.maxDistance = maxDistance;
 		this.prefer = prefer;

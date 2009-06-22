@@ -472,12 +472,16 @@ public final class plasmaSearchRankingProcess {
         ArrayList<NavigatorEntry> result = new ArrayList<NavigatorEntry>();
         URLMetadataRow mr;
         yacyURL url;
+        String hostname;
         for (int i = 0; i < rc; i++) {
             mr = indexSegment.urlMetadata().load(hsa[i].hashsample, null, 0);
             if (mr == null) continue;
             url = mr.metadata().url();
             if (url == null) continue;
-            result.add(new NavigatorEntry(url.getHost(), hsa[i].count));
+            hostname = url.getHost();
+            if (hostname == null) continue;
+            if (query.tenant != null && !hostname.contains(query.tenant)) continue;
+            result.add(new NavigatorEntry(hostname, hsa[i].count));
         }
         return result;
     }
