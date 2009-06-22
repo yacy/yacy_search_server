@@ -1,10 +1,10 @@
 <div class="SubMenu">
   <h3>Search Portal Integration</h3>
   <ul class="SubMenu">
-    <li><a href="/ConfigPortal.html" class="MenuItemLink">Generic Search Portal</a></li>
     <li><a href="/ConfigLiveSearch.html" class="MenuItemLink">Live Search Anywhere</a></li>
+    <li><a href="/ConfigPortal.html" class="MenuItemLink">Generic Search Portal</a></li>
     <li><a href="/ConfigWikiSearch.html" class="MenuItemLink">Search Integration for Wikis</a></li>
-    <li><a href="/IndexImportWikimedia_p.html" class="MenuItemLink lock">Wikimedia Dump Import</a></li>
     <li><a href="/ConfigPHPBB3Search.html" class="MenuItemLink">Search Integration for phpBB3</a></li>
+    <li><a href="/IndexImportWikimedia_p.html" class="MenuItemLink lock">Wikimedia Dump Import</a></li>
   </ul>
 </div>
