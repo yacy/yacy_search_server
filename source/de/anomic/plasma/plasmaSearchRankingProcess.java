@@ -480,7 +480,7 @@ public final class plasmaSearchRankingProcess {
             if (url == null) continue;
             hostname = url.getHost();
             if (hostname == null) continue;
-            if (query.tenant != null && !hostname.contains(query.tenant)) continue;
+            if (query.tenant != null && !hostname.contains(query.tenant) && !url.toNormalform(true, true).contains(query.tenant)) continue;
             result.add(new NavigatorEntry(hostname, hsa[i].count));
         }
         return result;
