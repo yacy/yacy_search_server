@@ -277,6 +277,14 @@ public class Dispatcher {
                     true);
             this.log.logInfo("enqueueContainers: selected " + targets.size() + " targets for primary target key " + new String(primaryTarget) + "/" + vertical + " with " + containers[vertical].size() + " index containers.");
             if (entry == null) entry = transmission.newChunk(primaryTarget, targets, lastContainer.row());
+
+            /*/ lookup own target
+            int sc = 1;
+            for (yacySeed seed : targets) {
+				if(seed == seeds.mySeed())
+					this.log.logInfo("enqueueContainers: myself-target at position " + sc);
+				sc++;
+			} */
             
             // fill the entry with the containers
             for (ReferenceContainer<WordReference> c: containers[vertical]) {
