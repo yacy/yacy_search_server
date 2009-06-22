@@ -13,7 +13,7 @@
 <script>			
 	$(document).ready(function() {
 		yconf = {
-			url      : '',
+			url      : ' ',
 			global   : true,
 			width    : 500,			
 			theme    : 'start',
