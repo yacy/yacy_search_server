@@ -234,7 +234,7 @@ function yacysearch(global) {
         function(json, status) {	
 			if (json[0]) data = json[0];
 			else data = json;
-			var searchTerms = data.channels[0].searchTerms.replace(/\+/," ");			
+			var searchTerms = data.channels[0].searchTerms.replace(/\+/g," ");			
 			if(ycurr != searchTerms)
 				return false;	
 			$('#ypopup').empty();			
