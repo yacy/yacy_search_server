@@ -234,10 +234,9 @@ function yacysearch(global) {
         function(json, status) {	
 			if (json[0]) data = json[0];
 			else data = json;
-			if(ycurr != data.channels[0].searchTerms)
-				return false;		
-			if(data.channels[0].searchTerms != ycurr)
-				return false;
+			var searchTerms = data.channels[0].searchTerms.replace(/\+/," ");			
+			if(ycurr != searchTerms)
+				return false;	
 			$('#ypopup').empty();			
 			var total = data.channels[0].totalResults.replace(/[,.]/,"");	
 	   		var page = (data.channels[0].startIndex / data.channels[0].itemsPerPage) + 1;		
