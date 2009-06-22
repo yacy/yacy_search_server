@@ -145,7 +145,7 @@ public final class Query {
 		this.queryHashes = queryHashes;
 		this.excludeHashes = excludeHashes;
 		this.fullqueryHashes = fullqueryHashes;
-		this.tenant = tenant;
+		this.tenant = (tenant != null && tenant.length() == 0) ? null : tenant;
 		this.ranking = ranking;
 		this.maxDistance = maxDistance;
 		this.prefer = prefer;

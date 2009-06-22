@@ -275,7 +275,9 @@ public class yacysearch {
             if (post.containsKey("tenant")) {
                 tenant = post.get("tenant");
                 if (tenant != null && tenant.length() == 0) tenant = null;
-                if (urlmask == null && tenant != null) urlmask = ".*" + tenant + ".*"; else urlmask = ".*" + tenant + urlmask;
+                if (tenant != null) {
+                	if (urlmask == null) urlmask = ".*" + tenant + ".*"; else urlmask = ".*" + tenant + urlmask;
+                }
             }
             int site = querystring.indexOf("site:");
             String sitehash = null;
