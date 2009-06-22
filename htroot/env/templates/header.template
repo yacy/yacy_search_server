@@ -19,7 +19,7 @@
 			theme    : 'start',
 			title    : 'YaCy P2P Search',
 			load_js  : false,
-			load_css : false,
+			load_css : false
 		};
 		$.getScript(yconf.url+'/yacy/ui/js/yacyui-portalsearch.js', function(){});
 	});
