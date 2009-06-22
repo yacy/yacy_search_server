@@ -88,10 +88,10 @@ function handleStatus(){
 	
 	// traffic output (no bar up to now)
     traffic = getFirstChild(statusTag, "traffic");
-    trafficCrawler = getValue(getFirstChild(traffic, "crawler"));
+    trafficCrawlerValue = getValue(getFirstChild(traffic, "crawler"));
     trafCrawlerSpan = document.getElementById("trafficCrawler");
     removeAllChildren(trafCrawlerSpan);
-	trafCrawlerSpan.appendChild(document.createTextNode(Math.round((trafficCrawler) / 1024 / 10.24) / 100));
+	trafCrawlerSpan.appendChild(document.createTextNode(Math.round((trafficCrawlerValue) / 1024 / 10.24) / 100));
     
 	var wordCacheSize=getValue(getFirstChild(statusTag, "wordCacheSize"));
 	var wordCacheMaxSize=getValue(getFirstChild(statusTag, "wordCacheMaxSize"));
