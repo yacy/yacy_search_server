@@ -99,15 +99,15 @@ ComponentText "YaCy v@REPL_VERSION@ (Build @REPL_DATE@)"
 
 LangString stillRunning ${LANG_ENGLISH} "YaCy is still active. Please stop YaCy first."
 LangString keepData 0 "Do you want to keep the data?"
-LangString noAdminForJava 0 "You need Administrator privileges to install Java. It will now be downloaded to the shared documents folder. YaCy won't run without Java."
+LangString noAdminForJava 0 "You need Administrator privileges to install Java. Java will now be downloaded to the shared documents folder. YaCy won't run without Java."
 
 LangString stillRunning ${LANG_FRENCH} "YaCy is still active. Please stop YaCy first."
 LangString keepData 0 "Do you want to keep the data?"
-LangString noAdminForJava 0 "You need Administrator privileges to install Java. It will now be downloaded to the shared documents folder. YaCy won't run without Java."
+LangString noAdminForJava 0 "You need Administrator privileges to install Java. Java will now be downloaded to the shared documents folder. YaCy won't run without Java."
 
 LangString stillRunning ${LANG_GERMAN} "YaCy ist noch aktiv. Bitte beenden Sie YaCy."
 LangString keepData 0 "Moechten Sie die Daten behalten?"
-LangString noAdminForJava 0 "Sie benoetigen Administrator-Rechte um Java zu installieren. Es wird nun in 'Gemeinsame Dokumente' gespeichert. YaCy benoetigt Java zur Ausfuehrung."
+LangString noAdminForJava 0 "Sie benoetigen Administrator-Rechte um Java zu installieren. Java wird nun in 'Gemeinsame Dokumente' gespeichert. YaCy benoetigt Java zur Ausfuehrung."
 
 ; ----------------------------------------
 ; INSTALLABLE MODULES
