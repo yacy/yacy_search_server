@@ -93,8 +93,10 @@ div .ybpane {
 }
 ul.nav {
 	padding-left: 0px;
+	margin-botton: 0px;
 	margin-left: -5px;
 	font-size: 85%;
+	line-height: 1.0em;
 }
 ul.nav li {
 	list-style-type:square;
