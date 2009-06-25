@@ -100,3 +100,7 @@ ul.nav li {
 	list-style-type:square;
 	list-style-position:outside;
 }
+ul.nav li a {
+	text-decoration: none;
+	font-size: 85%;
+}
