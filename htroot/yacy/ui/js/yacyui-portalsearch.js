@@ -247,7 +247,7 @@ function yacysearch(global) {
 			var total = data.channels[0].totalResults.replace(/[,.]/,"");	
 	   		var page = (data.channels[0].startIndex / data.channels[0].itemsPerPage) + 1;		
 			var start = startRecord + 1;				
-			var end = startRecord + maximumRecords;
+			var end = startRecord + data.channels[0].items.length;
 			$("div .ybpane").remove();
 			if(global) var result = 'global';
 			else var result = 'local';
