@@ -9,7 +9,7 @@ function status() {
 $(document).ready(function() {
 	$.ajaxSetup({
 		timeout: 5000,
-		cache: false
+		cache: true
 	})
 	// apply default properties
 	ycurr = '';
@@ -281,7 +281,7 @@ function yacysearch(global) {
 						var id = "#y"+facet.facetname;
 						$('<h3 style="padding-left:25px;">'+facet.displayname+'</h3>').appendTo(acc);
 						$('<div id="y'+facet.facetname+'"></div>').appendTo(acc);
-						$("<ul class='nav' style='padding-left: 0px; margin-left: -5px; font-size:85%;'></ul>").appendTo(id);
+						$("<ul class='nav'></ul>").appendTo(id);
 						$.each (
 							facet.elements,
 							function(j,element) {

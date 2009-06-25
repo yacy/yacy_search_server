@@ -91,6 +91,11 @@ div .ybpane {
 	margin-left: -12px;
 	text-align: center;
 }
+ul.nav {
+	padding-left: 0px;
+	margin-left: -5px;
+	font-size: 85%;
+}
 ul.nav li {
 	list-style-type:square;
 	list-style-position:outside;
