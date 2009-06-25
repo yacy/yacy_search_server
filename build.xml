@@ -510,7 +510,7 @@
     <!-- copy searchtest -->
     <copy todir="${release_main}/bin">
       <fileset dir="bin">
-        <include name="searchtest.*"/>
+        <include name="searchtest*"/>
         <include name="localsearch.sh"/>
       </fileset>
     </copy>
