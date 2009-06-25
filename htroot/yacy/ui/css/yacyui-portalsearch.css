@@ -94,8 +94,8 @@ div .ybpane {
 ul.nav {
 	padding-left: 0px;
 	margin-botton: 0px;
+	margin-top: 5px;
 	margin-left: -5px;
-	font-size: 0.85em;
 	line-height: 1.0em;
 }
 ul.nav li {
@@ -103,6 +103,7 @@ ul.nav li {
 	list-style-position:outside;
 }
 ul.nav li a {
+	font-family:Verdana,Arial,sans-serif;
 	text-decoration: none;
-	font-size: 0.85em;
+	font-size: 12px;
 }
