@@ -18,6 +18,7 @@
 	-webkit-border-radius: 5px;
 }
 #ypopup * {
+	inherit: none;
 	margin: 0;
     padding: 0;
 	font-size: 12px;	
@@ -93,12 +94,14 @@ div .ybpane {
 	text-align: center;
 }
 ul.nav {
+	inherit: none;
 	padding-left: 0px;
 	margin-botton: 0px;
 	margin-top: 5px;
 	margin-left: -5px;
 }
 ul.nav li {
+	inherit: none;
 	line-height: 1.0em;
 	list-style-image:none;
 	list-style-type:square;
