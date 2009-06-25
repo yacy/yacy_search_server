@@ -45,6 +45,7 @@
     line-height: 1.2em;
 	color:#239AFF;
 	padding-left: 18px;
+	border-bottom: none;
 }
 #ypopup h3.linktitle a {
 	text-decoration:none;
@@ -96,14 +97,15 @@ ul.nav {
 	margin-botton: 0px;
 	margin-top: 5px;
 	margin-left: -5px;
-	line-height: 1.0em;
 }
 ul.nav li {
+	line-height: 1.0em;
+	list-style-image:none;
 	list-style-type:square;
 	list-style-position:outside;
+	font-family:Verdana,Arial,sans-serif;
+	font-size: 12px;
 }
 ul.nav li a {
-	font-family:Verdana,Arial,sans-serif;
 	text-decoration: none;
-	font-size: 12px;
 }
