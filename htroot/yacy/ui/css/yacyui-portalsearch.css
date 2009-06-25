@@ -95,7 +95,7 @@ ul.nav {
 	padding-left: 0px;
 	margin-botton: 0px;
 	margin-left: -5px;
-	font-size: 85%;
+	font-size: 0.85em;
 	line-height: 1.0em;
 }
 ul.nav li {
@@ -104,5 +104,5 @@ ul.nav li {
 }
 ul.nav li a {
 	text-decoration: none;
-	font-size: 85%;
+	font-size: 0.85em;
 }
