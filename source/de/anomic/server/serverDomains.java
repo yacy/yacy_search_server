@@ -646,6 +646,7 @@ public class serverDomains {
             return ia[0];
         } catch (final java.net.UnknownHostException e) {
             System.err.println("ERROR: (internal) " + e.getMessage());
+            e.printStackTrace();
             return null;
         }
     }

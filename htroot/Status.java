@@ -27,6 +27,7 @@
 // javac -classpath .:../Classes Status.java
 // if the shell's current path is HTROOT
 
+import java.net.InetAddress;
 import java.util.Date;
 
 import de.anomic.http.httpRequestHeader;
@@ -163,7 +164,8 @@ public class Status {
         } else {
             prop.put("extPortFormat", "0");
         }
-        prop.put("host", serverDomains.myPublicLocalIP().getHostAddress());
+        InetAddress hostIP = serverDomains.myPublicLocalIP();
+        prop.put("host", hostIP!=null ? hostIP.getHostAddress() : "Unkown IP");
         
         // ssl support
         prop.put("sslSupport",sb.getConfig("keyStore", "").length() == 0 ? "0" : "1");
