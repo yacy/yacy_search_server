@@ -6,6 +6,11 @@ function status() {
 		yrun();
 	}
 }
+function openNavigator(modifier) {
+	var query = $("#yquery").getValue() + " " +modifier;
+	$("#yquery").setValue(query);
+	$("#yquery").trigger('keyup');		
+}
 $(document).ready(function() {
 	$.ajaxSetup({
 		timeout: 5000,
@@ -285,20 +290,13 @@ function yacysearch(global) {
 						$.each (
 							facet.elements,
 							function(j,element) {
-								$("<li><a href='#' modifier='"+element.modifier+"'>"+element.name+" ("+element.count+")</a></li>").appendTo(id+" .nav");
+								$("<li><a href='javascript:openNavigator(\""+element.modifier+"\")'>"+element.name+" ("+element.count+")</a></li>").appendTo(id+" .nav");
 							}	
 						)
 						$(acc).accordion({});
 					}								
 				}
 			);
-			$('#yside a').click(function() {
-				var modifier = $(this).attr('modifier');
-				modifier = modifier.replace(/^#/,'');
-				var query = $("#yquery").getValue() + " " +modifier;
-				$("#yquery").setValue(query);
-				$("#yquery").trigger('keyup');
-			});
 			if(count>0)
 				autoOpenSidebar();
         }
