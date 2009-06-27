@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project name="YACY - xlsParser" default="dist">
-    <description>A class to parse ppt files</description>
+    <description>A class to parse xls files</description>
  
     <!-- the parsers short name -->
     <property name="parserShortName" value="xls"/>

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <project name="YACY - vsdParser" default="dist">
-    <description>A class to parse ppt files</description>
+    <description>A class to parse vsd files</description>
 
     <!-- the parsers short name -->
     <property name="parserShortName" value="vsd"/>
