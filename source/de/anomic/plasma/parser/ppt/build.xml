@@ -18,8 +18,8 @@
   	  	  <pathelement location="${build}" />	
   	  	  
   	  	  	<!-- libraries needed by this parser -->
-            <pathelement location="${libx}/poi-3.0-alpha2-20060616.jar" />
-	  	  	<pathelement location="${libx}/poi-scratchpad-3.0-alpha2-20060616.jar" />
+            <pathelement location="${libx}/poi-3.2-FINAL-20081019.jar" />
+	  	  	<pathelement location="${libx}/poi-scratchpad-3.2-FINAL-20081019.jar" />
   	  	</classpath>
   	  </javac>    	
     </target>

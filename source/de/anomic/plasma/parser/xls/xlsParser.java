@@ -4,20 +4,23 @@
 //(C) by Michael Peter Christen; mc@yacy.net
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2005
-
+//
 //this file is contributed by Tim Riemann
-//last major change: 12.09.2006
-
+//
+// $LastChangedDate:$
+// $LastChangedRevision:$
+// $LastChangedBy:$
+//
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
 //the Free Software Foundation; either version 2 of the License, or
 //(at your option) any later version.
-
+//
 //This program is distributed in the hope that it will be useful,
 //but WITHOUT ANY WARRANTY; without even the implied warranty of
 //MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 //GNU General Public License for more details.
-
+//
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
@@ -68,8 +71,8 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
      * @see Parser#getLibxDependences()
      */
     private static final String[] LIBX_DEPENDENCIES = new String[] {
-        "poi-3.0-alpha2-20060616.jar",
-        "poi-scratchpad-3.0-alpha2-20060616.jar",
+        "poi-3.2-FINAL-20081019.jar",
+        "poi-scratchpad-3.2-FINAL-20081019.jar"
     }; 
 
     public xlsParser(){
@@ -143,6 +146,7 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
         return SUPPORTED_MIME_TYPES;
     }
 
+    @Override
     public void reset(){
         //nothing to do
         super.reset();
