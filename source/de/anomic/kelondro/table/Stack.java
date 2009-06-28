@@ -40,7 +40,7 @@ import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.yacy.logging.Log;
 
-public final class Stack extends FullRecords {
+public final class Stack extends Records {
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes
@@ -99,8 +99,8 @@ public final class Stack extends FullRecords {
     }
 
     public class stackIterator implements Iterator<Row.Entry> {
-        RecordHandle nextHandle = null;
-        RecordHandle lastHandle = null;
+    	Records.Handle nextHandle = null;
+    	Records.Handle lastHandle = null;
         boolean up;
 
         public stackIterator(final boolean up) {
@@ -115,8 +115,8 @@ public final class Stack extends FullRecords {
         public Row.Entry next() {
         	lastHandle = nextHandle;
             try {
-                nextHandle = new EcoNode(nextHandle).getOHHandle((up) ? right : left);
-                return row().newEntry(new EcoNode(lastHandle).getValueRow());
+                nextHandle = new Node(nextHandle).getOHHandle((up) ? right : left);
+                return row().newEntry(new Node(lastHandle).getValueRow());
             } catch (final IOException e) {
                 e.printStackTrace();
                 throw new kelondroException(filename, "IO error at stackIterator.next(): " + e.getMessage());
@@ -125,7 +125,7 @@ public final class Stack extends FullRecords {
 
         public void remove() {
         	try {
-				unlinkNode(new EcoNode(lastHandle));
+				unlinkNode(new Node(lastHandle));
 			} catch (final IOException e) {
 				e.printStackTrace();
 			}
@@ -141,7 +141,7 @@ public final class Stack extends FullRecords {
         if (getHandle(toor) == null) {
             if (getHandle(root) != null) throw new RuntimeException("push: internal organisation of root and toor");
             // create node
-            final Node n = new EcoNode(row.bytes());
+            final Node n = new Node(row.bytes());
             n.setOHHandle(left, null);
             n.setOHHandle(right, null);
             n.commit();
@@ -151,10 +151,10 @@ public final class Stack extends FullRecords {
             // thats it
         } else {
             // expand the list at the end
-            final Node n = new EcoNode(row.bytes());
+            final Node n = new Node(row.bytes());
             n.setOHHandle(left, getHandle(toor));
             n.setOHHandle(right, null);
-            final Node n1 = new EcoNode(getHandle(toor));
+            final Node n1 = new Node(getHandle(toor));
             n1.setOHHandle(right, n.handle());
             n.commit();
             n1.commit();
@@ -209,15 +209,15 @@ public final class Stack extends FullRecords {
     
     private void unlinkNode(final Node n) throws IOException {
         // join chaines over node
-        final RecordHandle l = n.getOHHandle(left);
-        final RecordHandle r = n.getOHHandle(right);
+        final Records.Handle l = n.getOHHandle(left);
+        final Records.Handle r = n.getOHHandle(right);
         // look left
         if (l == null) {
             // reached the root on left side
             setHandle(root, r);
         } else {
             // un-link the previous record
-            final Node k = new EcoNode(l);
+            final Node k = new Node(l);
             k.setOHHandle(left, k.getOHHandle(left));
             k.setOHHandle(right, r);
             k.commit();
@@ -228,7 +228,7 @@ public final class Stack extends FullRecords {
             setHandle(toor, l);
         } else {
             // un-link the following record
-            final Node k = new EcoNode(r);
+            final Node k = new Node(r);
             k.setOHHandle(left, l);
             k.setOHHandle(right, k.getOHHandle(right));
             k.commit();
@@ -238,9 +238,9 @@ public final class Stack extends FullRecords {
     private Node topNode() throws IOException {
         // return node ontop of the stack
         if (size() == 0) return null;
-        final RecordHandle h = getHandle(toor);
+        final Records.Handle h = getHandle(toor);
         if (h == null) return null;
-        return new EcoNode(h);
+        return new Node(h);
     }
     
     private Node botNode() throws IOException {
@@ -249,12 +249,12 @@ public final class Stack extends FullRecords {
         	Log.logInfo("Stack", "size() == 0");
         	return null;
         }
-        final RecordHandle h = getHandle(root);
+        final Records.Handle h = getHandle(root);
         if (h == null) {
         	Log.logInfo("Stack", "getHandle(root) == null in " + this.filename);
         	return null;
         }
-        return new EcoNode(h);
+        return new Node(h);
     }
     
     public int imp(final File file, final String separator) throws IOException {

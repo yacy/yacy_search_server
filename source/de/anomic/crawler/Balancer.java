@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.table.Table;
 import de.anomic.yacy.logging.Log;
 
 public class Balancer {
@@ -71,7 +71,7 @@ public class Balancer {
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
         cacheStacksPath.mkdirs();
         File f = new File(cacheStacksPath, stackname + indexSuffix);
-        urlFileIndex = new EcoTable(f, CrawlEntry.rowdef, (fullram) ? EcoTable.tailCacheUsageAuto : EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
+        urlFileIndex = new Table(f, CrawlEntry.rowdef, (fullram) ? Table.tailCacheUsageAuto : Table.tailCacheDenyUsage, EcoFSBufferSize, 0);
         profileErrors = 0;
         lastDomainStackFill = 0;
         Log.logInfo("Balancer", "opened balancer file with " + urlFileIndex.size() + " entries from " + f.toString());

@@ -164,7 +164,7 @@ public class SplitTable implements ObjectIndex {
                     maxtime = time;
                 }
                 
-                ram = EcoTable.staticRAMIndexNeed(f, rowdef);
+                ram = Table.staticRAMIndexNeed(f, rowdef);
                 if (ram > 0) {
                     t.put(tablefile[i], Long.valueOf(ram));
                     sum += ram;
@@ -197,7 +197,7 @@ public class SplitTable implements ObjectIndex {
             if (maxf != null) {
                 f = new File(path, maxf);
                 Log.logInfo("kelondroSplitTable", "opening partial eco table " + f);
-                table = new EcoTable(f, rowdef, EcoTable.tailCacheUsageAuto, EcoFSBufferSize, 0);
+                table = new Table(f, rowdef, Table.tailCacheUsageAuto, EcoFSBufferSize, 0);
                 tables.put(maxf, table);
             }
         }
@@ -267,7 +267,7 @@ public class SplitTable implements ObjectIndex {
     private ObjectIndex newTable() {
         this.current = newFilename();
         final File f = new File(path, this.current);
-        EcoTable table = new EcoTable(f, rowdef, EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
+        Table table = new Table(f, rowdef, Table.tailCacheDenyUsage, EcoFSBufferSize, 0);
         tables.put(this.current, table);
         return table;
     }

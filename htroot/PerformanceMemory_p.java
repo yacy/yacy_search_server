@@ -31,7 +31,7 @@ import java.util.Map;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.index.Cache;
-import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.table.Table;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -88,15 +88,15 @@ public class PerformanceMemory_p {
         prop.putNum("memoryUsedAfterInitAGC", (memoryTotalAfterInitAGC - memoryFreeAfterInitAGC) / KB);
         prop.putNum("memoryUsedNow", (memoryTotalNow - memoryFreeNow) / MB);
         
-        // write table for EcoTable index sizes
-        Iterator<String> i = EcoTable.filenames();
+        // write table for Table index sizes
+        Iterator<String> i = Table.filenames();
         String filename;
         Map<String, String> map;
         int p, c = 0;
         long mem, totalmem = 0;
         while (i.hasNext()) {
             filename = i.next();
-            map = EcoTable.memoryStats(filename);
+            map = Table.memoryStats(filename);
             prop.put("EcoList_" + c + "_tableIndexPath", ((p = filename.indexOf("DATA")) < 0) ? filename : filename.substring(p));
             prop.putNum("EcoList_" + c + "_tableSize", map.get("tableSize"));
             

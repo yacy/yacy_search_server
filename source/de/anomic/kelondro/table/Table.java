@@ -64,10 +64,10 @@ import de.anomic.yacy.logging.Log;
  * The content cache can also be deleted during run-time, if the available RAM gets too low.
  */
 
-public class EcoTable implements ObjectIndex {
+public class Table implements ObjectIndex {
 
     // static tracker objects
-    private static TreeMap<String, EcoTable> tableTracker = new TreeMap<String, EcoTable>();
+    private static TreeMap<String, Table> tableTracker = new TreeMap<String, Table>();
     
     public static final int tailCacheDenyUsage  = 0;
     public static final int tailCacheForceUsage = 1;
@@ -84,7 +84,7 @@ public class EcoTable implements ObjectIndex {
     private Row taildef;
     private final int buffersize;
     
-    public EcoTable(final File tablefile, final Row rowdef, final int useTailCache, final int buffersize, final int initialSpace) {
+    public Table(final File tablefile, final Row rowdef, final int useTailCache, final int buffersize, final int initialSpace) {
         this.tablefile = tablefile;
         this.rowdef = rowdef;
         this.buffersize = buffersize;
@@ -122,21 +122,21 @@ public class EcoTable implements ObjectIndex {
                      ((useTailCache == tailCacheForceUsage) ||
                       ((useTailCache == tailCacheUsageAuto) && (MemoryControl.free() > neededRAM4table + 200 * 1024 * 1024)))) ?
                     new RowSet(taildef, records) : null;
-            Log.logInfo("ECOTABLE", "initialization of " + tablefile + ": available RAM: " + (MemoryControl.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
+            Log.logInfo("TABLE", "initialization of " + tablefile + ": available RAM: " + (MemoryControl.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
             final long neededRAM4index = 2 * 1024 * 1024 + records * (rowdef.primaryKeyLength + 4) * 3 / 2;
             if (!MemoryControl.request(neededRAM4index, false)) {
                 // despite calculations seemed to show that there is enough memory for the table AND the index
                 // there is now not enough memory left for the index. So delete the table again to free the memory
                 // for the index
-                Log.logSevere("ECOTABLE", tablefile + ": not enough RAM (" + (MemoryControl.available() / 1024 / 1024) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
+                Log.logSevere("TABLE", tablefile + ": not enough RAM (" + (MemoryControl.available() / 1024 / 1024) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
                 table = null; System.gc();
-                Log.logSevere("ECOTABLE", tablefile + ": RAM after releasing the table: " + (MemoryControl.available() / 1024 / 1024) + "MB");
+                Log.logSevere("TABLE", tablefile + ": RAM after releasing the table: " + (MemoryControl.available() / 1024 / 1024) + "MB");
             }
             index = new HandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, records, 100000);
-            Log.logInfo("ECOTABLE", tablefile + ": EcoTable " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
+            Log.logInfo("TABLE", tablefile + ": TABLE " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
 
             // read all elements from the file into the copy table
-            Log.logInfo("ECOTABLE", "initializing RAM index for EcoTable " + tablefile.getName() + ", please wait.");
+            Log.logInfo("TABLE", "initializing RAM index for TABLE " + tablefile.getName() + ", please wait.");
             int i = 0;
             byte[] key;
             if (table == null) {
@@ -179,7 +179,7 @@ public class EcoTable implements ObjectIndex {
                 //assert index.size() + doubles.size() + fail == i;
                 //System.out.println(" -removed " + doubles.size() + " doubles- done.");
                 if (doubles.size() > 0) {
-                    Log.logInfo("ECOTABLE", tablefile + ": WARNING - EcoTable " + tablefile + " has " + doubles.size() + " doubles");
+                    Log.logInfo("TABLE", tablefile + ": WARNING - TABLE " + tablefile + " has " + doubles.size() + " doubles");
                     // from all the doubles take one, put it back to the index and remove the others from the file
                     // first put back one element each
                     final byte[] record = new byte[rowdef.objectsize];
@@ -236,8 +236,8 @@ public class EcoTable implements ObjectIndex {
         // returns a map for each file in the tracker;
         // the map represents properties for each record objects,
         // i.e. for cache memory allocation
-        final EcoTable theEcoTable = tableTracker.get(filename);
-        return theEcoTable.memoryStats();
+        final Table theTABLE = tableTracker.get(filename);
+        return theTABLE.memoryStats();
     }
 
     private final Map<String, String> memoryStats() {
@@ -320,7 +320,7 @@ public class EcoTable implements ObjectIndex {
             d.remove(s);
             this.removeInFile(s.intValue());
             if (System.currentTimeMillis() - lastlog > 30000) {
-                Log.logInfo("EcoTable", "removing " + d.size() + " entries in " + this.filename());
+                Log.logInfo("TABLE", "removing " + d.size() + " entries in " + this.filename());
                 lastlog = System.currentTimeMillis();
             }
         }
@@ -693,7 +693,7 @@ public class EcoTable implements ObjectIndex {
         }
 
         public void remove() {
-            throw new UnsupportedOperationException("no remove in EcoTable");
+            throw new UnsupportedOperationException("no remove in TABLE");
         }
         
     }
@@ -727,7 +727,7 @@ public class EcoTable implements ObjectIndex {
     private static ObjectIndex testTable(final File f, final String testentities, final int testcase) throws IOException {
         if (f.exists()) FileUtils.deletedelete(f);
         final Row rowdef = new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder);
-        final ObjectIndex tt = new EcoTable(f, rowdef, testcase, 100, 0);
+        final ObjectIndex tt = new Table(f, rowdef, testcase, 100, 0);
         byte[] b;
         final Row.Entry row = rowdef.newEntry();
         for (int i = 0; i < testentities.length(); i++) {
@@ -813,7 +813,7 @@ public class EcoTable implements ObjectIndex {
         /*
         kelondroRow row = new kelondroRow("byte[] key-4, byte[] x-5", kelondroNaturalOrder.naturalOrder, 0);
         try {
-            kelondroEcoTable t = new kelondroEcoTable(f, row);
+            kelondroTABLE t = new kelondroTABLE(f, row);
             kelondroRow.Entry entry = row.newEntry();
             entry.setCol(0, "abcd".getBytes());
             entry.setCol(1, "dummy".getBytes());

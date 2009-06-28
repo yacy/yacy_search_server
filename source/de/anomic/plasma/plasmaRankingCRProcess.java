@@ -37,7 +37,7 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.MicroDate;
-import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.table.Table;
 import de.anomic.kelondro.text.IndexCell;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.Segment;
@@ -247,7 +247,7 @@ public class plasmaRankingCRProcess {
         IndexCell<WordReference> newseq = null;
         if (newdb) {
             final File path = to_file.getParentFile(); // path to storage place
-            newacc = new EcoTable(new File(path, CRG_accname), CRG_accrow, EcoTable.tailCacheUsageAuto, 0, 0);
+            newacc = new Table(new File(path, CRG_accname), CRG_accrow, Table.tailCacheUsageAuto, 0, 0);
             newseq = new IndexCell<WordReference>(
                                     path,
                                     Segment.wordReferenceFactory,

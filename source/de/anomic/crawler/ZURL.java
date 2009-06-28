@@ -36,7 +36,7 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.table.Table;
 import de.anomic.kelondro.table.SplitTable;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacySeedDB;
@@ -70,7 +70,7 @@ public class ZURL {
                 if (f.isDirectory()) SplitTable.delete(cachePath, tablename); else FileUtils.deletedelete(f);
             }
         }
-        this.urlIndex = new EcoTable(f, rowdef, EcoTable.tailCacheDenyUsage, EcoFSBufferSize, 0);
+        this.urlIndex = new Table(f, rowdef, Table.tailCacheDenyUsage, EcoFSBufferSize, 0);
         //urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, 0, true);
         this.stack = new LinkedList<String>();
     }

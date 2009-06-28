@@ -81,14 +81,14 @@ public class Relations {
                 if (!list[i].equals(targetfilename)) continue;
                 final Row row = rowdef(list[i]);
                 if (row.primaryKeyLength != keysize || row.column(1).cellwidth != payloadsize) continue; // a wrong table
-                final ObjectIndex table = new EcoTable(new File(baseDir, list[i]), row, EcoTable.tailCacheUsageAuto, 1024*1024, 0);
+                final ObjectIndex table = new Table(new File(baseDir, list[i]), row, Table.tailCacheUsageAuto, 1024*1024, 0);
                 relations.put(name, table);
                 return;
             }
         }
         // the relation does not exist, create it
         final Row row = rowdef(keysize, payloadsize);
-        final ObjectIndex table = new EcoTable(new File(baseDir, targetfilename), row, EcoTable.tailCacheUsageAuto, 1024*1024, 0);
+        final ObjectIndex table = new Table(new File(baseDir, targetfilename), row, Table.tailCacheUsageAuto, 1024*1024, 0);
         relations.put(name, table);
     }
     
@@ -101,7 +101,7 @@ public class Relations {
         for (int i = 0; i < list.length; i++) {
             if (list[i].startsWith(name)) {
                 final Row row = rowdef(list[i]);
-                final ObjectIndex table = new EcoTable(new File(baseDir, list[i]), row, EcoTable.tailCacheUsageAuto, 1024*1024, 0);
+                final ObjectIndex table = new Table(new File(baseDir, list[i]), row, Table.tailCacheUsageAuto, 1024*1024, 0);
                 relations.put(name, table);
                 return table;
             }

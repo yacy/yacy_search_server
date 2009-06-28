@@ -19,7 +19,7 @@ import de.anomic.kelondro.index.ObjectArrayCache;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.table.Table;
 import de.anomic.kelondro.table.SQLTable;
 import de.anomic.kelondro.table.SplitTable;
 import de.anomic.kelondro.util.MemoryControl;
@@ -199,7 +199,7 @@ public class dbtest {
             return new SplitTable(tablepath, new File(tablename).getName(), testRow, true);
         }
         if (dbe.equals("kelondroEcoTable")) {
-            return new EcoTable(new File(tablename), testRow, EcoTable.tailCacheForceUsage, 1000, 0);
+            return new Table(new File(tablename), testRow, Table.tailCacheForceUsage, 1000, 0);
         }
         if (dbe.equals("mysql")) {
             return new SQLTable("mysql", testRow);

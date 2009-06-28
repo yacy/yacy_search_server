@@ -52,7 +52,7 @@ import java.util.Iterator;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.table.EcoTable;
+import de.anomic.kelondro.table.Table;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
@@ -65,14 +65,14 @@ public class yacyNewsDB {
 
     public yacyNewsDB(final File path) {
         this.path = path;
-        this.news = new EcoTable(path, yacyNewsRecord.rowdef, EcoTable.tailCacheUsageAuto, 10, 0);
+        this.news = new Table(path, yacyNewsRecord.rowdef, Table.tailCacheUsageAuto, 10, 0);
         //this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef));
     }
 
     private void resetDB() {
         try {close();} catch (final Exception e) {}
         if (path.exists()) FileUtils.deletedelete(path);
-        this.news = new EcoTable(path, yacyNewsRecord.rowdef, EcoTable.tailCacheUsageAuto, 10, 0);
+        this.news = new Table(path, yacyNewsRecord.rowdef, Table.tailCacheUsageAuto, 10, 0);
     }
     
     public void close() {

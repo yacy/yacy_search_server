@@ -46,14 +46,13 @@ import de.anomic.kelondro.io.FileRandomAccess;
 import de.anomic.kelondro.io.IOChunksInterface;
 import de.anomic.kelondro.io.RandomAccessInterface;
 import de.anomic.kelondro.io.RandomAccessIOChunks;
-import de.anomic.kelondro.io.RandomAccessRecords;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.yacy.logging.Log;
 
-public abstract class AbstractRecords implements RandomAccessRecords {
+public class Records {
 
     private static final boolean useChannel = false;
     
@@ -100,7 +99,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
     protected short             OHBYTEC;     // number of extra bytes in each node
     protected short             OHHANDLEC;   // number of handles in each node
     protected Row       ROW;         // array with widths of columns
-    private   RecordHandle    HANDLES[];   // array with handles
+    private   Handle    HANDLES[];   // array with handles
     private   byte[]            TXTPROPS[];  // array with text properties
     private   int               TXTPROPW;    // size of a single TXTPROPS element
 
@@ -122,13 +121,13 @@ public abstract class AbstractRecords implements RandomAccessRecords {
     protected final class usageControl {
         protected int            USEDC; // counter of used elements
         protected int            FREEC; // counter of free elements in list of free Nodes
-        protected RecordHandle FREEH; // pointer to first element in list of free Nodes, empty = NUL
+        protected Handle FREEH; // pointer to first element in list of free Nodes, empty = NUL
 
         protected usageControl(final boolean init) throws IOException {
             if (init) {
                 this.USEDC = 0;
                 this.FREEC = 0;
-                this.FREEH = new RecordHandle(RecordHandle.NUL);
+                this.FREEH = new Handle(Handle.NUL);
             } else {
                 readusedfree();
                 try {
@@ -176,13 +175,13 @@ public abstract class AbstractRecords implements RandomAccessRecords {
                 int freeh = entryFile.readInt(POS_FREEH);
                 if (freeh > this.USEDC) {
                 	logFailure("INCONSISTENCY in FREEH reading: USEDC = " + this.USEDC + ", FREEC = " + this.FREEC  + ", this.FREEH = " + freeh + ", file = " + filename);
-                	this.FREEH = new RecordHandle(RecordHandle.NUL);
+                	this.FREEH = new Handle(Handle.NUL);
                 	this.FREEC = 0;
                 	entryFile.writeInt(POS_FREEC, FREEC);
                     entryFile.writeInt(POS_FREEH, FREEH.index);
                     entryFile.commit();
                 } else {
-                	this.FREEH = new RecordHandle(freeh);
+                	this.FREEH = new Handle(freeh);
                 	this.FREEC = entryFile.readInt(POS_FREEC);
                 }
             }
@@ -198,12 +197,12 @@ public abstract class AbstractRecords implements RandomAccessRecords {
             return this.USEDC;
         }
         
-        protected synchronized void dispose(final RecordHandle h) throws IOException {
+        protected synchronized void dispose(final Handle h) throws IOException {
             // delete element with handle h
             // this element is then connected to the deleted-chain and can be
             // re-used change counter
             assert (h.index >= 0);
-            assert (h.index != RecordHandle.NUL);
+            assert (h.index != Handle.NUL);
             synchronized (USAGE) {
                 synchronized (entryFile) {
                     assert (h.index < USEDC + FREEC) : "USEDC = " + USEDC + ", FREEC = " + FREEC + ", h.index = " + h.index;
@@ -245,7 +244,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
                     USAGE.FREEC--;
                     // take link
                     int index = USAGE.FREEH.index;
-                    if (index == RecordHandle.NUL) {
+                    if (index == Handle.NUL) {
                         Log.logSevere("kelondroAbstractRecords/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): re-use of records failed, lost " + (USAGE.FREEC + 1) + " records.");
                         // try to heal..
                         USAGE.USEDC = (int) ((entryFile.length() - POS_NODES) / recordsize);
@@ -262,12 +261,12 @@ public abstract class AbstractRecords implements RandomAccessRecords {
                             index = USAGE.allCount(); // a place at the end of the file
                             USAGE.USEDC += USAGE.FREEC; // to avoid that non-empty records at the end are overwritten
                             USAGE.FREEC = 0; // discard all possible empty nodes
-                            USAGE.FREEH.index = RecordHandle.NUL;
+                            USAGE.FREEH.index = Handle.NUL;
                         } else {
                             // read link to next element of FREEH chain
                             USAGE.FREEH.index = entryFile.readInt(seekp);
                             // check consistency
-                            if (((USAGE.FREEH.index != RecordHandle.NUL) || (USAGE.FREEC != 0)) && seekpos(USAGE.FREEH) >= entryFile.length()) {
+                            if (((USAGE.FREEH.index != Handle.NUL) || (USAGE.FREEC != 0)) && seekpos(USAGE.FREEH) >= entryFile.length()) {
                                 // the FREEH pointer cannot be correct, because it points to a place outside of the file.
                                 // to correct this, we reset the FREH pointer and return a index that has been calculated as if USAGE.FREE == 0
                                 Log.logSevere("kelondroAbstractRecords/" + filename, "INTERNAL ERROR (DATA INCONSISTENCY): USAGE.FREEH.index = " + USAGE.FREEH.index + ", entryFile.length() = " + entryFile.length() + "; wrong FREEH has been patched, lost " + (USAGE.FREEC + 1) + " records.");
@@ -315,14 +314,14 @@ public abstract class AbstractRecords implements RandomAccessRecords {
                     } else {
                         // write beyond the end of the file
                         // records that are in between are marked as deleted
-                        RecordHandle h;
+                        Handle h;
                         while (index > USAGE.allCount()) {
-                            h = new RecordHandle(USAGE.allCount());
+                            h = new Handle(USAGE.allCount());
                             USAGE.FREEC++;
                             entryFile.writeSpace(seekpos(h), overhead + ROW.objectsize); // occupy space, otherwise the USAGE computation does not work
                             entryFile.writeInt(seekpos(h), USAGE.FREEH.index);
                             USAGE.FREEH = h;
-                            assert ((USAGE.FREEH.index == RecordHandle.NUL) && (USAGE.FREEC == 0)) || seekpos(USAGE.FREEH) < entryFile.length() : "allocateRecord: USAGE.FREEH.index = " + USAGE.FREEH.index;
+                            assert ((USAGE.FREEH.index == Handle.NUL) && (USAGE.FREEC == 0)) || seekpos(USAGE.FREEH) < entryFile.length() : "allocateRecord: USAGE.FREEH.index = " + USAGE.FREEH.index;
                             USAGE.writefree();
                             entryFile.commit();
                         }
@@ -369,9 +368,10 @@ public abstract class AbstractRecords implements RandomAccessRecords {
         }
     }
 
-    public AbstractRecords(final File file, final boolean useNodeCache,
+    public Records(final File file,
                            final short ohbytec, final short ohhandlec,
-                           final Row rowdef, final int FHandles, final int txtProps, final int txtPropWidth) throws IOException {
+                           final Row rowdef, final int FHandles,
+                           final int txtProps, final int txtPropWidth) throws IOException {
         // opens an existing file or creates a new file
         // file: the file that shall be created
         // oha : overhead size array of four bytes: oha[0]=# of bytes, oha[1]=# of shorts, oha[2]=# of ints, oha[3]=# of longs, 
@@ -393,7 +393,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
             //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
             //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
             //raf = new kelondroCachedRA(raf);
-            initExistingFile(raf, useNodeCache);
+            initExistingFile(raf, true);
         } else {
             this.filename = file.getCanonicalPath();
             final RandomAccessInterface raf = (useChannel) ? new ChannelRandomAccess(new File(this.filename)) : new FileRandomAccess(new File(this.filename));
@@ -414,7 +414,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
         }
     }
 
-    public AbstractRecords(final RandomAccessInterface ra, final String filename, final boolean useCache,
+    public Records(final RandomAccessInterface ra, final String filename, final boolean useCache,
                            final short ohbytec, final short ohhandlec,
                            final Row rowdef, final int FHandles, final int txtProps, final int txtPropWidth,
                            final boolean exitOnFail) {
@@ -465,8 +465,8 @@ public abstract class AbstractRecords implements RandomAccessRecords {
 
         // store dynamic back-up variables
         USAGE     = new usageControl(true);
-        HANDLES   = new RecordHandle[FHandles];
-        for (int i = 0; i < FHandles; i++) HANDLES[i] = new RecordHandle(RecordHandle.NUL);
+        HANDLES   = new Handle[FHandles];
+        for (int i = 0; i < FHandles; i++) HANDLES[i] = new Handle(Handle.NUL);
         TXTPROPS  = new byte[txtProps][];
         for (int i = 0; i < txtProps; i++) TXTPROPS[i] = new byte[0];
 
@@ -493,8 +493,8 @@ public abstract class AbstractRecords implements RandomAccessRecords {
             entryFile.writeInt(POS_COLWIDTHS + 4 * i, this.ROW.width(i));
         }
         for (int i = 0; i < this.HANDLES.length; i++) {
-            entryFile.writeInt(POS_HANDLES + 4 * i, RecordHandle.NUL);
-            HANDLES[i] = new RecordHandle(RecordHandle.NUL);
+            entryFile.writeInt(POS_HANDLES + 4 * i, Handle.NUL);
+            HANDLES[i] = new Handle(Handle.NUL);
         }
         final byte[] ea = new byte[TXTPROPW];
         for (int j = 0; j < TXTPROPW; j++) ea[j] = 0;
@@ -543,7 +543,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
             this.theLogger.fine("KELONDRO DEBUG " + this.filename + ": " + message);
     }
 
-    public AbstractRecords(final RandomAccessInterface ra, final String filename, final boolean useNodeCache) throws IOException{
+    public Records(final RandomAccessInterface ra, final String filename, final boolean useNodeCache) throws IOException{
         this.fileExisted = false;
         this.filename = filename;
         initExistingFile(ra, useNodeCache);
@@ -566,7 +566,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
         this.OHHANDLEC = entryFile.readShort(POS_OHHANDLEC);
 
         final Column[] COLDEFS = new Column[entryFile.readShort(POS_COLUMNS)];
-        this.HANDLES = new RecordHandle[entryFile.readInt(POS_INTPROPC)];
+        this.HANDLES = new Handle[entryFile.readInt(POS_INTPROPC)];
         this.TXTPROPS = new byte[entryFile.readInt(POS_TXTPROPC)][];
         this.TXTPROPW = entryFile.readInt(POS_TXTPROPW);
 
@@ -583,7 +583,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
             COLDEFS[i] = new Column("col-" + i, Column.celltype_binary, Column.encoder_bytes, entryFile.readInt(POS_COLWIDTHS + 4 * i), "");
         }
         for (int i = 0; i < HANDLES.length; i++) {
-            HANDLES[i] = new RecordHandle(entryFile.readInt(POS_HANDLES + 4 * i));
+            HANDLES[i] = new Handle(entryFile.readInt(POS_HANDLES + 4 * i));
         }
         for (int i = 0; i < TXTPROPS.length; i++) {
             TXTPROPS[i] = new byte[TXTPROPW];
@@ -635,7 +635,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
         return bulk;
     }
 
-    protected synchronized void deleteNode(final RecordHandle handle) throws IOException {
+    protected synchronized void deleteNode(final Handle handle) throws IOException {
         USAGE.dispose(handle);
     }
     
@@ -669,7 +669,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
         this.ROW = rowdef;
     }
 
-    protected final long seekpos(final RecordHandle handle) {
+    protected final long seekpos(final Handle handle) {
         assert (handle.index >= 0): "handle index too low: " + handle.index;
         return POS_NODES + ((long) recordsize * (long) handle.index);
     }
@@ -684,16 +684,16 @@ public abstract class AbstractRecords implements RandomAccessRecords {
         return this.HANDLES.length;
     }
 
-    protected final void setHandle(final int pos, RecordHandle handle) throws IOException {
+    protected final void setHandle(final int pos, Handle handle) throws IOException {
         if (pos >= HANDLES.length) throw new IllegalArgumentException("setHandle: handle array exceeded");
-        if (handle == null) handle = new RecordHandle(RecordHandle.NUL);
+        if (handle == null) handle = new Handle(Handle.NUL);
         HANDLES[pos] = handle;
         entryFile.writeInt(POS_HANDLES + 4L * pos, handle.index);
     }
 
-    protected final RecordHandle getHandle(final int pos) {
+    protected final Handle getHandle(final int pos) {
         if (pos >= HANDLES.length) throw new IllegalArgumentException("getHandle: handle array exceeded");
-        return (HANDLES[pos].index == RecordHandle.NUL) ? null : HANDLES[pos];
+        return (HANDLES[pos].index == Handle.NUL) ? null : HANDLES[pos];
     }
 
     // custom texts
@@ -724,24 +724,24 @@ public abstract class AbstractRecords implements RandomAccessRecords {
         return USAGE.FREEC;
     }
     
-    protected final Set<RecordHandle> deletedHandles(final long maxTime) throws IOException {
+    protected final Set<Handle> deletedHandles(final long maxTime) throws IOException {
         // initialize set with deleted nodes; the set contains Handle-Objects
         // this may last only the given maxInitTime
         // if the initTime is exceeded, the method returns what it found so far
-        final TreeSet<RecordHandle> markedDeleted = new TreeSet<RecordHandle>();
+        final TreeSet<Handle> markedDeleted = new TreeSet<Handle>();
         final long timeLimit = (maxTime < 0) ? Long.MAX_VALUE : System.currentTimeMillis() + maxTime;
         long seekp;
         synchronized (USAGE) {
             if (USAGE.FREEC != 0) {
-                RecordHandle h = USAGE.FREEH;
+                Handle h = USAGE.FREEH;
                 long repair_position = POS_FREEH;
-                while (h.index != RecordHandle.NUL) {
+                while (h.index != Handle.NUL) {
                     // check handle
                     seekp = seekpos(h);
                     if (seekp > entryFile.length()) {
                         // repair last handle store position
                         this.theLogger.severe("KELONDRO WARNING " + this.filename + ": seek position " + seekp + "/" + h.index + " out of file size " + entryFile.length() + "/" + ((entryFile.length() - POS_NODES) / recordsize) + " after " + markedDeleted.size() + " iterations; patched wrong node");
-                        entryFile.writeInt(repair_position, RecordHandle.NUL);
+                        entryFile.writeInt(repair_position, Handle.NUL);
                         return markedDeleted;
                     }
 
@@ -750,14 +750,14 @@ public abstract class AbstractRecords implements RandomAccessRecords {
                     
                     // move to next handle
                     repair_position = seekp;
-                    h = new RecordHandle(entryFile.readInt(seekp));
-                    if (h.index == RecordHandle.NUL) break;
+                    h = new Handle(entryFile.readInt(seekp));
+                    if (h.index == Handle.NUL) break;
                     
                     // double-check for already stored handles: detect loops
                     if (markedDeleted.contains(h)) {
                         // loop detection
                         this.theLogger.severe("KELONDRO WARNING " + this.filename + ": FREE-Queue contains loops");
-                        entryFile.writeInt(repair_position, RecordHandle.NUL);
+                        entryFile.writeInt(repair_position, Handle.NUL);
                         return markedDeleted;
                     }
                     
@@ -811,10 +811,10 @@ public abstract class AbstractRecords implements RandomAccessRecords {
     }
     
     public final static void NUL2bytes(final byte[] b, final int offset) {
-        b[offset    ] = (byte) (0XFF & (RecordHandle.NUL >> 24));
-        b[offset + 1] = (byte) (0XFF & (RecordHandle.NUL >> 16));
-        b[offset + 2] = (byte) (0XFF & (RecordHandle.NUL >>  8));
-        b[offset + 3] = (byte) (0XFF & RecordHandle.NUL);
+        b[offset    ] = (byte) (0XFF & (Handle.NUL >> 24));
+        b[offset + 1] = (byte) (0XFF & (Handle.NUL >> 16));
+        b[offset + 2] = (byte) (0XFF & (Handle.NUL >>  8));
+        b[offset + 3] = (byte) (0XFF & Handle.NUL);
     }
     
     public final static void int2bytes(final long i, final byte[] b, final int offset) {
@@ -858,7 +858,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
         System.out.println("  USEDC      : " + USAGE.used());
         System.out.println("  FREEC      : " + USAGE.FREEC);
         System.out.println("  FREEH      : " + USAGE.FREEH.toString());
-        System.out.println("  NUL repres.: 0x" + Integer.toHexString(RecordHandle.NUL));
+        System.out.println("  NUL repres.: 0x" + Integer.toHexString(Handle.NUL));
         System.out.println("  Data Offset: 0x" + Long.toHexString(POS_NODES));
         System.out.println("--");
         System.out.println("RECORDS");
@@ -869,9 +869,9 @@ public abstract class AbstractRecords implements RandomAccessRecords {
         System.out.println("  Recordsize : " + this.recordsize + " bytes");
         System.out.println("--");
         System.out.println("DELETED HANDLES");
-        final Set<RecordHandle> dh =  deletedHandles(-1);
-        final Iterator<RecordHandle> dhi = dh.iterator();
-        RecordHandle h;
+        final Set<Handle> dh =  deletedHandles(-1);
+        final Iterator<Handle> dhi = dh.iterator();
+        Handle h;
         while (dhi.hasNext()) {
             h = dhi.next();
             System.out.print(h.index + ", ");
@@ -949,8 +949,8 @@ public abstract class AbstractRecords implements RandomAccessRecords {
         // all records that are marked as deleted are ommitted
         // this is probably also the fastest way to iterate all objects
         
-        private final Set<RecordHandle> markedDeleted;
-        private final RecordHandle pos;
+        private final Set<Handle> markedDeleted;
+        private final Handle pos;
         private final byte[] bulk;
         private final int bulksize;
         private int bulkstart;  // the offset of the bulk array to the node position
@@ -963,7 +963,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
             fullyMarked = (maxInitTime < 0);
             
             // seek first position according the delete node set
-            pos = new RecordHandle(0);
+            pos = new Handle(0);
             while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
             
             // initialize bulk
@@ -990,7 +990,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
         public Node next0() {
             // read Objects until a non-deleted Node appears
             while (hasNext0()) {
-                Node nn;
+            	Node nn;
                 try {
                     nn = next00();
                 } catch (final IOException e) {
@@ -1034,7 +1034,7 @@ public abstract class AbstractRecords implements RandomAccessRecords {
                POS_NODES = 302, bulkstart = 820, recordsize = 2621466
                POS_NODES = 302, bulkstart = 13106, recordsize = 163866 */                
             // read node from bulk
-            final Node n = newNode(new RecordHandle(pos.index), bulk, (pos.index - bulkstart) * recordsize);
+            final Node n = newNode(new Handle(pos.index), bulk, (pos.index - bulkstart) * recordsize);
             pos.index++;
             while ((markedDeleted.contains(pos)) && (pos.index < USAGE.allCount())) pos.index++;
             return n;
@@ -1059,6 +1059,268 @@ public abstract class AbstractRecords implements RandomAccessRecords {
         this.entryFile.deleteOnExit();
     }
     
-    public abstract Node newNode(RecordHandle handle, byte[] bulk, int offset) throws IOException;
+    public Node newNode(final Handle handle, final byte[] bulk, final int offset) throws IOException {
+        return new Node(handle, bulk, offset);
+    }
     
+    public final class Node {
+        private Handle handle = null; // index of the entry, by default NUL means undefined
+        private byte[] ohChunk = null; // contains overhead values
+        private byte[] bodyChunk = null; // contains all row values
+        private boolean ohChanged = false;
+        private boolean bodyChanged = false;
+
+        public Node(final byte[] rowinstance) throws IOException {
+            // this initializer is used to create nodes from bulk-read byte arrays
+            assert ((rowinstance == null) || (rowinstance.length == ROW.objectsize)) : "bulkchunk.length = " + (rowinstance == null ? "null" : rowinstance.length) + ", ROW.width(0) = " + ROW.width(0);
+            this.handle = new Handle(USAGE.allocatePayload(rowinstance));
+            
+            // create chunks
+            this.ohChunk = new byte[overhead];
+            this.bodyChunk = new byte[ROW.objectsize];
+            for (int i = this.ohChunk.length - 1; i >= 0; i--) this.ohChunk[i] = (byte) 0xff;
+            if (rowinstance == null) {
+                for (int i = this.bodyChunk.length - 1; i >= 0; i--) this.bodyChunk[i] = (byte) 0xff;
+            } else {
+               System.arraycopy(rowinstance, 0, this.bodyChunk, 0, this.bodyChunk.length);
+            }
+            
+            // mark chunks as not changed, we wrote that already during allocatePayload
+            this.ohChanged = false;
+            this.bodyChanged = false;
+        }
+        
+        public Node(final Handle handle, final byte[] bulkchunk, final int offset) throws IOException {
+            // this initializer is used to create nodes from bulk-read byte arrays
+            // if write is true, then the chunk in bulkchunk is written to the file
+            // othervise it is considered equal to what is stored in the file
+            // (that is ensured during pre-loaded enumeration)
+            this.handle = handle;
+            boolean changed;
+            if (handle.index >= USAGE.allCount()) {
+                // this causes only a write action if we create a node beyond the end of the file
+                USAGE.allocateRecord(handle.index, bulkchunk, offset);
+                changed = false; // we have already wrote the record, so it is considered as unchanged
+            } else {
+                changed = true;
+            }
+            assert ((bulkchunk == null) || (bulkchunk.length - offset >= recordsize)) : "bulkchunk.length = " + (bulkchunk == null ? "null" : bulkchunk.length) + ", offset = " + offset + ", recordsize = " + recordsize;
+            
+            /*if ((offset == 0) && (overhead == 0) && ((bulkchunk == null) || (bulkchunk.length == ROW.objectsize()))) {
+                this.ohChunk = new byte[0];
+                if (bulkchunk == null) {
+                    this.bodyChunk = new byte[ROW.objectsize()];
+                } else {
+                    this.bodyChunk = bulkchunk;
+                }
+            } else { */
+                // create empty chunks
+                this.ohChunk = new byte[overhead];
+                this.bodyChunk = new byte[ROW.objectsize];
+                
+                // write content to chunks
+                if (bulkchunk != null) {
+                    if (overhead > 0) System.arraycopy(bulkchunk, offset, this.ohChunk, 0, overhead);
+                    System.arraycopy(bulkchunk, offset + overhead, this.bodyChunk, 0, ROW.objectsize);
+                }
+            //}
+            
+            // mark chunks as changed
+            this.ohChanged = changed;
+            this.bodyChanged = changed;
+        }
+        
+        public Node(final Handle handle) throws IOException {
+            // this creates an entry with an pre-reserved entry position.
+            // values can be written using the setValues() method,
+            // but we expect that values are already there in the file.
+            assert (handle != null): "node handle is null";
+            assert (handle.index >= 0): "node handle too low: " + handle.index;
+           
+            if (handle == null) throw new kelondroException(filename, "INTERNAL ERROR: node handle is null.");
+            if (handle.index >= USAGE.allCount()) {
+                throw new kelondroException(filename, "INTERNAL ERROR, Node/init: node handle index " + handle.index + " exceeds size. No auto-fix node was submitted. This is a serious failure.");
+            }
+
+            // use given handle
+            this.handle = new Handle(handle.index);
+
+            // read record
+            this.ohChunk = new byte[overhead];
+            if (overhead > 0) entryFile.readFully(seekpos(this.handle), this.ohChunk, 0, overhead);
+            this.bodyChunk = null; /*new byte[ROW.objectsize];
+            entryFile.readFully(seekpos(this.handle) + overhead, this.bodyChunk, 0, this.bodyChunk.length);
+            */
+            // mark chunks as not changed
+            this.ohChanged = false;
+            this.bodyChanged = false;
+        }
+        
+        public Handle handle() {
+            // if this entry has an index, return it
+            if (this.handle.index == Handle.NUL) throw new kelondroException(filename, "the entry has no index assigned");
+            return this.handle;
+        }
+
+        public void setOHByte(final int i, final byte b) {
+            if (i >= OHBYTEC) throw new IllegalArgumentException("setOHByte: wrong index " + i);
+            if (this.handle.index == Handle.NUL) throw new kelondroException(filename, "setOHByte: no handle assigned");
+            this.ohChunk[i] = b;
+            this.ohChanged = true;
+        }
+        
+        public void setOHHandle(final int i, final Handle otherhandle) {
+            assert (i < OHHANDLEC): "setOHHandle: wrong array size " + i;
+            assert (this.handle.index != Handle.NUL): "setOHHandle: no handle assigned ind file" + filename;
+            if (otherhandle == null) {
+                NUL2bytes(this.ohChunk, OHBYTEC + 4 * i);
+            } else {
+                if (otherhandle.index >= USAGE.allCount()) throw new kelondroException(filename, "INTERNAL ERROR, setOHHandles: handle " + i + " exceeds file size (" + handle.index + " >= " + USAGE.allCount() + ")");
+                int2bytes(otherhandle.index, this.ohChunk, OHBYTEC + 4 * i);
+            }
+            this.ohChanged = true;
+        }
+        
+        public byte getOHByte(final int i) {
+            if (i >= OHBYTEC) throw new IllegalArgumentException("getOHByte: wrong index " + i);
+            if (this.handle.index == Handle.NUL) throw new kelondroException(filename, "Cannot load OH values");
+            return this.ohChunk[i];
+        }
+
+        public Handle getOHHandle(final int i) {
+            if (this.handle.index == Handle.NUL) throw new kelondroException(filename, "Cannot load OH values");
+            assert (i < OHHANDLEC): "handle index out of bounds: " + i + " in file " + filename;
+            final int h = bytes2int(this.ohChunk, OHBYTEC + 4 * i);
+            return (h == Handle.NUL) ? null : new Handle(h);
+        }
+
+        public synchronized void setValueRow(final byte[] row) throws IOException {
+            // if the index is defined, then write values directly to the file, else only to the object
+            if ((row != null) && (row.length != ROW.objectsize)) throw new IOException("setValueRow with wrong (" + row.length + ") row length instead correct: " + ROW.objectsize);
+            
+            // set values
+            if (this.handle.index != Handle.NUL) {
+                this.bodyChunk = row;
+                this.bodyChanged = true;
+            }
+        }
+
+        public synchronized boolean valid() {
+            // returns true if the key starts with non-zero byte
+            // this may help to detect deleted entries
+            return this.bodyChunk == null || (this.bodyChunk[0] != 0) && ((this.bodyChunk[0] != -128) || (this.bodyChunk[1] != 0));
+        }
+
+        public synchronized byte[] getKey() throws IOException {
+            // read key
+            if (this.bodyChunk == null) {
+                // load all values from the database file
+                this.bodyChunk = new byte[ROW.objectsize];
+                // read values
+                entryFile.readFully(seekpos(this.handle) + overhead, this.bodyChunk, 0, this.bodyChunk.length);
+            }
+            return trimCopy(this.bodyChunk, 0, ROW.width(0));
+        }
+
+        public synchronized byte[] getValueRow() throws IOException {
+            
+            if (this.bodyChunk == null) {
+                // load all values from the database file
+                this.bodyChunk = new byte[ROW.objectsize];
+                // read values
+                entryFile.readFully(seekpos(this.handle) + overhead, this.bodyChunk, 0, this.bodyChunk.length);
+            }
+
+            return this.bodyChunk;
+        }
+
+        public synchronized void commit() throws IOException {
+            // this must be called after all write operations to the node are finished
+
+            // place the data to the file
+
+            final boolean doCommit = this.ohChanged || this.bodyChanged;
+            
+            // save head
+            synchronized (entryFile) {
+            if (this.ohChanged) {
+                //System.out.println("WRITEH(" + filename + ", " + seekpos(this.handle) + ", " + this.headChunk.length + ")");
+                assert (ohChunk == null) || (ohChunk.length == overhead);
+                entryFile.write(seekpos(this.handle), (this.ohChunk == null) ? new byte[overhead] : this.ohChunk);
+                this.ohChanged = false;
+            }
+
+            // save tail
+            if ((this.bodyChunk != null) && (this.bodyChanged)) {
+                //System.out.println("WRITET(" + filename + ", " + (seekpos(this.handle) + headchunksize) + ", " + this.tailChunk.length + ")");
+                assert (this.bodyChunk == null) || (this.bodyChunk.length == ROW.objectsize);
+                entryFile.write(seekpos(this.handle) + overhead, (this.bodyChunk == null) ? new byte[ROW.objectsize] : this.bodyChunk);
+                this.bodyChanged = false;
+            }
+            
+            if (doCommit) entryFile.commit();
+            }
+        }
+        
+    }
+
+    public class Handle implements Comparable<Handle> {
+        
+        public final static int NUL = Integer.MIN_VALUE; // the meta value for the kelondroTray' NUL abstraction
+
+        protected int index;
+
+        protected Handle(final int i) {
+        	assert i != 1198412402;
+            assert (i == NUL) || (i >= 0) : "node handle index too low: " + i;
+            //assert (i == NUL) || (i < USAGE.allCount()) : "node handle index too high: " + i + ", USEDC=" + USAGE.USEDC + ", FREEC=" + USAGE.FREEC;
+            this.index = i;
+            //if ((USAGE != null) && (this.index != NUL)) USAGE.allocate(this.index);
+        }
+
+        public boolean isNUL() {
+            return index == NUL;
+        }
+
+        public String toString() {
+            if (index == NUL) return "NULL";
+            String s = Integer.toHexString(index);
+            while (s.length() < 4) s = "0" + s;
+            return s;
+        }
+
+        public boolean equals(final Handle h) {
+            assert (index != NUL);
+            assert (h.index != NUL);
+            return (this.index == h.index);
+        }
+
+        public boolean equals(final Object h) {
+            assert (index != NUL);
+            assert (h instanceof Handle && ((Handle) h).index != NUL);
+            return (h instanceof Handle && this.index == ((Handle) h).index);
+        }
+
+        public int compare(final Handle h0, final Handle h1) {
+            assert ((h0).index != NUL);
+            assert ((h1).index != NUL);
+            if ((h0).index < (h1).index) return -1;
+            if ((h0).index > (h1).index) return 1;
+            return 0;
+        }
+
+        public int compareTo(final Handle h) {
+            // this is needed for a TreeMap
+            assert (index != NUL) : "this.index is NUL in compareTo";
+            assert ((h).index != NUL) : "handle.index is NUL in compareTo";
+            if (index < (h).index) return -1;
+            if (index > (h).index) return 1;
+            return 0;
+        }
+
+        public int hashCode() {
+            assert (index != NUL);
+            return this.index;
+        }
+    }
 }
