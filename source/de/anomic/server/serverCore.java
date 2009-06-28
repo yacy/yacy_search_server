@@ -342,6 +342,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
             
             final String cIP = clientAddress(controlSocket);
             //System.out.println("server bfHosts=" + bfHost.toString());
+            /*
             if (bfHost.get(cIP) != null) {
                 Integer attempts = bfHost.get(cIP);
                 if (attempts == null) attempts = Integer.valueOf(1); else attempts = Integer.valueOf(attempts.intValue() + 1);
@@ -349,12 +350,13 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 this.log.logWarning("SLOWING DOWN ACCESS FOR BRUTE-FORCE PREVENTION FROM " + cIP + ", ATTEMPT " + attempts.intValue());
                 // add a delay to make brute-force harder
                 announceThreadBlockApply();
-                try {Thread.sleep(attempts.intValue() /*BFPATCH*/);} catch (final InterruptedException e) {}
+                try {Thread.sleep(attempts.intValue());} catch (final InterruptedException e) {}
                 announceThreadBlockRelease();
                 if ((attempts.intValue() >= 10) && (this.denyHost != null)) {
                     this.denyHost.put(cIP, "deny");
                 }
             }
+            */
             
             if ((this.denyHost == null) || (this.denyHost.get(cIP) == null)) {
                 // setting the timeout properly
