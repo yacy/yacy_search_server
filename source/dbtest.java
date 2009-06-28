@@ -20,7 +20,6 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.table.EcoTable;
-import de.anomic.kelondro.table.Tree;
 import de.anomic.kelondro.table.SQLTable;
 import de.anomic.kelondro.table.SplitTable;
 import de.anomic.kelondro.util.MemoryControl;
@@ -390,7 +389,6 @@ public class dbtest {
             
             if (command.equals("list")) {
                 CloneableIterator<Row.Entry> i = null;
-                if (table_test instanceof Tree) i = ((Tree) table_test).rows();
                 if (table_test instanceof SQLTable) i = ((SQLTable) table_test).rows();
                 if(i != null) {
                     Row.Entry row;

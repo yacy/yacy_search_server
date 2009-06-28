@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.table.CachedRecords;
 import de.anomic.kelondro.util.MemoryControl;
 
 public class Cache implements ObjectIndex {
@@ -141,10 +140,7 @@ public class Cache implements ObjectIndex {
         // future feature .. map.put("objectElderTimeRead", index.profile().)
         return map;
     }
-    
-    private int cacheGrowStatus(long available) {
-        return CachedRecords.cacheGrowStatus(MemoryControl.available(), memStopGrow, memStartShrink);
-    }
+
     
     private boolean checkMissSpace() {
         // returns true if it is allowed to write into this cache
@@ -155,12 +151,6 @@ public class Cache implements ObjectIndex {
             }
     		return false;
     	}
-        if (cacheGrowStatus(available) < 1) {
-            if (readMissCache != null) {
-                readMissCache.clear();
-            }
-            return false;
-        }
         return true;
     }
     
@@ -173,16 +163,6 @@ public class Cache implements ObjectIndex {
             }
     		return false;
     	}
-        final int status = cacheGrowStatus(available);
-        if (status < 1) {
-            if (readHitCache != null) {
-                readHitCache.clear();
-            }
-            return false;
-        }
-        if (status < 2) {
-            if (readHitCache != null) readHitCache.clear();
-        }
         return true;
     }
     

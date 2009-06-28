@@ -47,7 +47,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.anomic.data.wiki.wikiBoard;
-import de.anomic.kelondro.blob.BLOBTree;
+import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.NaturalOrder;
@@ -57,7 +57,6 @@ public class blogBoardComments {
     
     public  static final int keyLength = 64;
     private static final String dateFormat = "yyyyMMddHHmmss";
-    private static final int recordSize = 512;
 
     static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
     static {
@@ -66,11 +65,11 @@ public class blogBoardComments {
     
     private MapView database = null;
     
-    public blogBoardComments(final File actpath, final File newFile) throws IOException {
+    public blogBoardComments(final File actpath) throws IOException {
         new File(actpath.getParent()).mkdir();
-        new File(newFile.getParent()).mkdir();
         if (database == null) {
-            database = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, newFile), 500, '_');
+            //database = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, newFile), 500, '_');
+            database = new MapView(new Heap(actpath, keyLength, NaturalOrder.naturalOrder, 1024 * 64), 500, '_');
         }
     }
     

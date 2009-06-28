@@ -37,7 +37,6 @@ import java.util.Random;
 
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.blob.Heap;
-import de.anomic.kelondro.blob.BLOBTree;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.CloneableIterator;
@@ -56,11 +55,11 @@ public final class userDB {
 	HashMap<String, String> ipUsers = new HashMap<String, String>();
     HashMap<String, Object> cookieUsers = new HashMap<String, Object>();
     
-    public userDB(final File userTableFile, final File userTableFileNew) throws IOException {
-        this.userTableFile = userTableFileNew;
+    public userDB(final File userTableFile) throws IOException {
+        this.userTableFile = userTableFile;
         userTableFile.getParentFile().mkdirs();
-        userTableFileNew.getParentFile().mkdirs();
-        this.userTable = new MapView(BLOBTree.toHeap(userTableFile, true, true, 128, 256, '_', NaturalOrder.naturalOrder, userTableFile), 10, '_');
+        //this.userTable = new MapView(BLOBTree.toHeap(userTableFile, true, true, 128, 256, '_', NaturalOrder.naturalOrder, userTableFile), 10, '_');
+        this.userTable = new MapView(new Heap(userTableFile, 128, NaturalOrder.naturalOrder, 1024 * 64), 10, '_');
     }
     
     void resetDatabase() {

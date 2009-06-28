@@ -209,10 +209,26 @@ public class SplitTable implements ObjectIndex {
     	for (int i = 0; i < l.length; i++) {
     		if (l[i].startsWith(prefix)) {
     		    final File f = new File(path, l[i]);
-    		    if (f.isDirectory()) FlexWidthArray.delete(path, l[i]); else FileUtils.deletedelete(f);
+    		    if (f.isDirectory()) delete(path, l[i]); else FileUtils.deletedelete(f);
     		}
     	}
     	init(true);
+    }
+    
+    public static void delete(final File path, final String tablename) {
+        final File tabledir = new File(path, tablename);
+        if (!(tabledir.exists())) return;
+        if ((!(tabledir.isDirectory()))) {
+            FileUtils.deletedelete(tabledir);
+            return;
+        }
+
+        final String[] files = tabledir.list();
+        for (int i = 0; i < files.length; i++) {
+            FileUtils.deletedelete(new File(tabledir, files[i]));
+        }
+
+        FileUtils.deletedelete(tabledir);
     }
     
     public String filename() {

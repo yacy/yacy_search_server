@@ -31,7 +31,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 
-import de.anomic.kelondro.blob.BLOBTree;
+import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.NaturalOrder;
@@ -40,7 +40,6 @@ public class wikiBoard {
 
     public  static final int keyLength = 64;
     private static final String dateFormat = "yyyyMMddHHmmss";
-    private static final int recordSize = 512;
 
     static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
 
@@ -52,16 +51,16 @@ public class wikiBoard {
     MapView bkpbase = null;
     static HashMap<String, String> authors = new HashMap<String, String>();
 
-    public wikiBoard(
-            final File actpath, final File actpathNew,
-            final File bkppath, final File bkppathNew) throws IOException {
+    public wikiBoard( final File actpath, final File bkppath) throws IOException {
         new File(actpath.getParent()).mkdirs();
         if (datbase == null) {
-            datbase = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, actpathNew), 500, '_');
+            //datbase = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, actpathNew), 500, '_');
+            datbase = new MapView(new Heap(actpath, keyLength, NaturalOrder.naturalOrder, 1024 * 64), 500, '_');
         }
         new File(bkppath.getParent()).mkdirs();
         if (bkpbase == null) {
-            bkpbase = new MapView(BLOBTree.toHeap(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', NaturalOrder.naturalOrder, bkppathNew), 500, '_');
+            //bkpbase = new MapView(BLOBTree.toHeap(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', NaturalOrder.naturalOrder, bkppathNew), 500, '_');
+            bkpbase = new MapView(new Heap(bkppath, keyLength + dateFormat.length(), NaturalOrder.naturalOrder, 1024 * 64), 500, '_');
         }
     }
 

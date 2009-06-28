@@ -56,12 +56,6 @@ public class FullRecords extends AbstractRecords {
         super(ra, filename, true, ohbytec, ohhandlec, rowdef, FHandles, txtProps, txtPropWidth, exitOnFail);
         recordTracker.put(this.filename, this);
     }
-    
-    public FullRecords(
-            final RandomAccessInterface ra, final String filename) throws IOException{
-        super(ra, filename, true);
-        recordTracker.put(this.filename, this);
-    }
 
     public static final Iterator<String> filenames() {
         // iterates string objects; all file names from record tracker

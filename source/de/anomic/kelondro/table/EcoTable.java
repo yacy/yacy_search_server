@@ -698,14 +698,40 @@ public class EcoTable implements ObjectIndex {
         
     }
     
-    public static ObjectIndex testTable(final File f, final String testentities, final int testcase) throws IOException {
+    private static byte[] testWord(final char c) {
+        return new byte[]{(byte) c, 32, 32, 32};
+    }
+
+    private static String[] permutations(final int letters) {
+        String p = "";
+        for (int i = 0; i < letters; i++) p = p + ((char) (('A') + i));
+        return permutations(p);
+    }
+    
+    private static String[] permutations(final String source) {
+        if (source.length() == 0) return new String[0];
+        if (source.length() == 1) return new String[]{source};
+        final char c = source.charAt(0);
+        final String[] recres = permutations(source.substring(1));
+        final String[] result = new String[source.length() * recres.length];
+        for (int perm = 0; perm < recres.length; perm++) {
+            result[perm * source.length()] = c + recres[perm];
+            for (int pos = 1; pos < source.length() - 1; pos++) {
+                result[perm * source.length() + pos] = recres[perm].substring(0, pos) + c + recres[perm].substring(pos);
+            }
+	    result[perm * source.length() + source.length() - 1] = recres[perm] + c;
+        }
+        return result;
+    }
+
+    private static ObjectIndex testTable(final File f, final String testentities, final int testcase) throws IOException {
         if (f.exists()) FileUtils.deletedelete(f);
         final Row rowdef = new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder);
         final ObjectIndex tt = new EcoTable(f, rowdef, testcase, 100, 0);
         byte[] b;
         final Row.Entry row = rowdef.newEntry();
         for (int i = 0; i < testentities.length(); i++) {
-            b = Tree.testWord(testentities.charAt(i));
+            b = testWord(testentities.charAt(i));
             row.setCol(0, b);
             row.setCol(1, b);
             tt.put(row);
@@ -713,17 +739,34 @@ public class EcoTable implements ObjectIndex {
         return tt;
     }
     
-   public static void bigtest(final int elements, final File testFile, final int testcase) {
+    private static int countElements(final ObjectIndex t) {
+        int count = 0;
+        try {
+            final Iterator<Row.Entry> iter = t.rows();
+            Row.Entry row;
+            while (iter.hasNext()) {
+                count++;
+                row = iter.next();
+                if (row == null) System.out.println("ERROR! null element found");
+                // else System.out.println("counted element: " + new                                                    
+                // String(n.getKey()));                                                                                 
+            }
+        } catch (final IOException e) {
+        }
+        return count;
+    }
+    
+    public static void bigtest(final int elements, final File testFile, final int testcase) {
         System.out.println("starting big test with " + elements + " elements:");
         final long start = System.currentTimeMillis();
-        final String[] s = Tree.permutations(elements);
+        final String[] s = permutations(elements);
         ObjectIndex tt;
         try {
             for (int i = 0; i < s.length; i++) {
                 System.out.println("*** probing tree " + i + " for permutation " + s[i]);
                 // generate tree and delete elements
                 tt = testTable(testFile, s[i], testcase);
-                if (Tree.countElements(tt) != tt.size()) {
+                if (countElements(tt) != tt.size()) {
                     System.out.println("wrong size for " + s[i]);
                 }
                 tt.close();
@@ -731,8 +774,8 @@ public class EcoTable implements ObjectIndex {
                     tt = testTable(testFile, s[i], testcase);
                     // delete by permutation j
                     for (int elt = 0; elt < s[j].length(); elt++) {
-                        tt.remove(Tree.testWord(s[j].charAt(elt)));
-                        if (Tree.countElements(tt) != tt.size()) {
+                        tt.remove(testWord(s[j].charAt(elt)));
+                        if (countElements(tt) != tt.size()) {
                             System.out.println("ERROR! wrong size for probe tree " + s[i] + "; probe delete " + s[j] + "; position " + elt);
                         }
                     }

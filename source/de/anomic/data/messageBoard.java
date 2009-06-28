@@ -31,7 +31,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 
-import de.anomic.kelondro.blob.BLOBTree;
+import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.NaturalOrder;
@@ -40,7 +40,6 @@ public class messageBoard {
     
     private static final int categoryLength = 12;
     private static final String dateFormat = "yyyyMMddHHmmss";
-    private static final int recordSize = 512;
 
     static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
 
@@ -51,11 +50,11 @@ public class messageBoard {
     MapView database = null;
     private int sn = 0;
 
-    public messageBoard(final File path, final File pathNew) throws IOException {
+    public messageBoard(final File path) throws IOException {
         new File(path.getParent()).mkdir();
-        new File(pathNew.getParent()).mkdir();
         if (database == null) {
-            database = new MapView(BLOBTree.toHeap(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', NaturalOrder.naturalOrder, pathNew), 500, '_');
+            //database = new MapView(BLOBTree.toHeap(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', NaturalOrder.naturalOrder, pathNew), 500, '_');
+            database = new MapView(new Heap(path, categoryLength + dateFormat.length() + 2, NaturalOrder.naturalOrder, 1024 * 64), 500, '_');
         }
         sn = 0;
     }
