@@ -241,8 +241,10 @@ public class ArrayStack implements BLOB {
         double min = Double.MAX_VALUE;
         File[] bestMatch = new File[2];
         maxResultSize = maxResultSize >> 1;
-        for (int i = 0; i < this.blobs.size() - 1; i++) {
+    	int loopcount = 0;
+        mainloop: for (int i = 0; i < this.blobs.size() - 1; i++) {
             for (int j = i + 1; j < this.blobs.size(); j++) {
+                loopcount++;
             	lf = this.blobs.get(i).location;
             	rf = this.blobs.get(j).location;
                 l = 1 + (lf.length() >> 1);
@@ -254,6 +256,7 @@ public class ArrayStack implements BLOB {
                     bestMatch[0] = lf;
                     bestMatch[1] = rf;
                 }
+                if (loopcount > 1000 && min <= maxq && min != Double.MAX_VALUE) break mainloop;
             }
         }
         if (min > maxq) return null;
@@ -290,6 +293,7 @@ public class ArrayStack implements BLOB {
                 smallest = f.length();
                 bestFile = f;
             }
+            if (i > 70 && smallest <= maxsize && smallest != Long.MAX_VALUE) break;
         }
         if (smallest > maxsize) return null;
         return bestFile;
@@ -302,6 +306,7 @@ public class ArrayStack implements BLOB {
         return unmount(idx);
     }
     
+    /*
     public synchronized File unmountSimilarSizeBLOB(long otherSize) {
         if (this.blobs.size() == 0 || otherSize == 0) return null;
         blobItem b;
@@ -319,7 +324,7 @@ public class ArrayStack implements BLOB {
         }
         return unmount(bestIndex);
     }
-    
+    */
     /**
      * return the number of BLOB files in this array
      * @return
