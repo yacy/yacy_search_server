@@ -481,17 +481,17 @@ public final class Condenser {
 
     public final static boolean invisible(final char c) {
     	final int type = Character.getType(c);
-    	if(
-    			(type == Character.LOWERCASE_LETTER)
-    			|| (type == Character.DECIMAL_DIGIT_NUMBER)
-				|| (type == Character.UPPERCASE_LETTER)
-    			|| (type == Character.MODIFIER_LETTER)
-				|| (type == Character.OTHER_LETTER)
-				|| (type == Character.TITLECASE_LETTER)
-				|| (htmlFilterContentScraper.punctuation(c)))
+    	if (
+			(type == Character.LOWERCASE_LETTER)
+			|| (type == Character.DECIMAL_DIGIT_NUMBER)
+			|| (type == Character.UPPERCASE_LETTER)
+			|| (type == Character.MODIFIER_LETTER)
+			|| (type == Character.OTHER_LETTER)
+			|| (type == Character.TITLECASE_LETTER)
+			|| (htmlFilterContentScraper.punctuation(c))) {
     		return false;
-    	else
-    		return true;
+    	}
+    	return true;
     }
     
     public static Enumeration<StringBuilder> wordTokenizer(final String s, final String charset) {

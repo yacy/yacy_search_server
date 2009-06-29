@@ -206,12 +206,11 @@ public class HandleMap implements Iterable<Row.Entry> {
             newentry.setCol(1, a);
             index.addUnique(newentry);
             return 1;
-        } else {
-            long i = indexentry.getColLong(1) + a;
-            indexentry.setCol(1, i);
-            index.put(indexentry);
-            return i;
         }
+        long i = indexentry.getColLong(1) + a;
+        indexentry.setCol(1, i);
+        index.put(indexentry);
+        return i;
     }
     
     public synchronized long inc(final byte[] key) {

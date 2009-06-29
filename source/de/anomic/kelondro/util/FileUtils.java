@@ -264,12 +264,11 @@ public final class FileUtils {
             	return bb;
             }
             return b;
-        } else {
-            final ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
-            copy(source, baos, count);
-            baos.close();
-            return baos.toByteArray();
         }
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream(512);
+        copy(source, baos, count);
+        baos.close();
+        return baos.toByteArray();
     }
 
     public static byte[] read(final File source) throws IOException {

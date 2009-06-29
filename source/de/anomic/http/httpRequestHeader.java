@@ -37,9 +37,6 @@ import de.anomic.server.serverCore;
 public class httpRequestHeader extends httpHeader {
 
     // request header properties    
-    public static final String ACCEPT = "Accept";
-    public static final String ACCEPT_CHARSET = "Accept-Charset";
-    public static final String ACCEPT_LANGUAGE = "Accept-Language";
     
     public static final String CONNECTION = "Connection";
     public static final String PROXY_CONNECTION = "Proxy-Connection";
@@ -58,7 +55,6 @@ public class httpRequestHeader extends httpHeader {
     
     public static final String COOKIE = "Cookie";
     
-    public static final String ACCEPT_ENCODING = "Accept-Encoding";
     public static final String IF_MODIFIED_SINCE = "If-Modified-Since";
     public static final String IF_RANGE = "If-Range";
     public static final String REFERER = "Referer";

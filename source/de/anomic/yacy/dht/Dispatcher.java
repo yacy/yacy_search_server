@@ -377,11 +377,10 @@ public class Dispatcher {
                 return null;
             }
             return chunk;
-        } else {
-            this.log.logInfo("STORE: Chunk " + new String(chunk.primaryTarget()) + " has not enough targets left. This transmission has failed, putting back index to backend");
-            chunk.restore();
-            return null;
         }
+        this.log.logInfo("STORE: Chunk " + new String(chunk.primaryTarget()) + " has not enough targets left. This transmission has failed, putting back index to backend");
+        chunk.restore();
+        return null;
     }
 
     public void close() {

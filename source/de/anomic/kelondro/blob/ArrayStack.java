@@ -460,7 +460,7 @@ public class ArrayStack implements BLOB {
      * @throws IOException
      */
     public synchronized CloneableIterator<byte[]> keys(boolean up, boolean rotating) throws IOException {
-        assert rotating = false;
+        assert rotating == false;
         final List<CloneableIterator<byte[]>> c = new ArrayList<CloneableIterator<byte[]>>(blobs.size());
         final Iterator<blobItem> i = blobs.iterator();
         while (i.hasNext()) {
@@ -726,11 +726,10 @@ public class ArrayStack implements BLOB {
                 FileUtils.deletedelete(f1);
                 if (f2.renameTo(newFile)) return newFile;
                 return f2;
-            } else {
-                FileUtils.deletedelete(f1);
-                FileUtils.deletedelete(f2);
-                return null;
             }
+            FileUtils.deletedelete(f1);
+            FileUtils.deletedelete(f2);
+            return null;
         } else if (!i2.hasNext()) {
             FileUtils.deletedelete(f2);
             if (f1.renameTo(newFile)) return newFile;

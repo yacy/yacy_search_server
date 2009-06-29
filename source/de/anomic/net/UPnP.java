@@ -178,8 +178,6 @@ public class UPnP {
 		}
 		
 		private static class Handler implements DiscoveryEventHandler {
-			
-			private final Log log = UPnP.log;
 		
 			public void eventSSDPAlive(String usn, String udn, String nt, String maxAge, URL location) {
 				InternetGatewayDevice[] newIGD = { null };

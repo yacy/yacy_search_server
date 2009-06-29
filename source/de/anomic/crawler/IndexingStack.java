@@ -114,9 +114,9 @@ public class IndexingStack {
 	        }
 	        if (sbQueueStack.size() < sizeBefore) {
 	        	return new QueueEntry(b);
-	        } else {
-	        	Log.logSevere("IndexingStack", "sbQueueStack " + sbQueueStack.filename + " does not shrink after pot() != null; trying pop()");
 	        }
+	        Log.logSevere("IndexingStack", "sbQueueStack " + sbQueueStack.filename + " does not shrink after pot() != null; trying pop()");
+	        
 	        sizeBefore = sbQueueStack.size();
 	        b = sbQueueStack.pop();
 	        if (b == null) {

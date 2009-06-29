@@ -118,7 +118,8 @@ public class DCEntry extends TreeMap<String, String> {
     public String language() {
         String l = this.get("language");
         if (l == null) l = this.get("dc:language");
-        if (l == null) return url().language(); else return l;
+        if (l == null) return url().language();
+        return l;
     }
     
     public String title() {
