@@ -18,8 +18,8 @@
   	  	  <pathelement location="${build}" />	
 
   	  	  	<!-- libraries needed by this parser -->
-            <pathelement location="${libx}/poi-3.2-FINAL-20081019.jar" />
-	  	  	<pathelement location="${libx}/poi-scratchpad-3.2-FINAL-20081019.jar" />
+            <pathelement location="${lib}/poi-3.2-FINAL-20081019.jar" />
+	  	  	<pathelement location="${lib}/poi-scratchpad-3.2-FINAL-20081019.jar" />
   	  	</classpath>
   	  </javac>    	
     </target>
@@ -28,9 +28,9 @@
     <target name="zip" depends="compile">
   	  <tar destfile="${parserArchive}" compression="gzip">
   	  	<!-- needed libraries and license files of these libs -->
-  	  	<tarfileset dir="${libx}" 
+  	  	<tarfileset dir="${lib}" 
   	  				includes="poi-*.*" 
-  	  				prefix="${releaseFileParentDir}/libx/"
+  	  				prefix="${releaseFileParentDir}/lib/"
 			  	  	dirmode="755" mode="644"/>  	  	
 		<!-- source files of this parser -->
   	  	<tarfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" 
@@ -46,8 +46,8 @@
     <!-- just copy all parts of this parser into the release directory -->
     <target name="copy" depends="compile">
         <!-- copy needed libs -->
-        <copy todir="${release}/libx/">
-             <fileset dir="${libx}" includes="poi-*.*"/> 
+        <copy todir="${release}/lib/">
+             <fileset dir="${lib}" includes="poi-*.*"/> 
         </copy>  
 	
         <!-- copy source code files -->

@@ -16,10 +16,10 @@
   	  	  <pathelement location="${build}" />	
   	  	
 		  <!-- main lib needed to parse doc files -->  	  	
-  		  <pathelement location="${libx}/jmimemagic-0.1.0.jar" /> 
-          <pathelement location="${libx}/jakarta-oro-2.0.7.jar" />                          
-          <pathelement location="${libx}/log4j-1.2.9.jar" /> 
-          <pathelement location="${libx}/xerces.jar"/>     
+  		  <pathelement location="${lib}/jmimemagic-0.1.0.jar" /> 
+          <pathelement location="${lib}/jakarta-oro-2.0.7.jar" />                          
+          <pathelement location="${lib}/log4j-1.2.9.jar" /> 
+          <pathelement location="${lib}/xerces.jar"/>     
   	  	</classpath>
   	  </javac> 
 	  <!-- copy log4j.properties, to disable logging -->
@@ -29,9 +29,9 @@
 
     <target name="zip" depends="compile">
   	  <tar destfile="${parserArchive}" compression="gzip">
-  	  	<tarfileset dir="${libx}" 
+  	  	<tarfileset dir="${lib}" 
   	  				includes="jmimemagic-0.1.0.jar,jakarta-oro-2.0.7.jar,log4j-1.2.9.jar,xerces.jar" 
-  	  				prefix="${releaseFileParentDir}/libx/"
+  	  				prefix="${releaseFileParentDir}/lib/"
 			  	  	dirmode="755" mode="644"/>
   	  	<tarfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" 
   	  				prefix="${releaseFileParentDir}/source/de/anomic/plasma/parser/${parserShortName}"
@@ -43,8 +43,8 @@
     </target>	
 
     <target name="copy" depends="compile">
-        <copy todir="${release}/libx/">
-             <fileset dir="${libx}" includes="jmimemagic-0.1.0.jar,jakarta-oro-2.0.7.jar,log4j-1.2.9.jar,xerces.jar"/> 
+        <copy todir="${release}/lib/">
+             <fileset dir="${lib}" includes="jmimemagic-0.1.0.jar,jakarta-oro-2.0.7.jar,log4j-1.2.9.jar,xerces.jar"/> 
         </copy>
         <copy todir="${release}/source/de/anomic/plasma/parser/${parserShortName}">
              <fileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" includes="**/*"/> 

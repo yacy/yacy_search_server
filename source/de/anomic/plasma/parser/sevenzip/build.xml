@@ -17,7 +17,7 @@
   	  	<classpath>
   	  	  <pathelement location="${build}" />	
   	  	
-  		  <pathelement location="${libx}/J7Zip-modified.jar" />        	  
+  		  <pathelement location="${lib}/J7Zip-modified.jar" />        	  
   	  	</classpath>
   	  </javac>    	
     </target>
@@ -25,9 +25,9 @@
 
     <target name="zip" depends="compile">
   	  <tar destfile="${parserArchive}" compression="gzip">
-  	  	<tarfileset dir="${libx}" 
+  	  	<tarfileset dir="${lib}" 
   	  				includes="J7Zip-modified.jar" 
-  	  				prefix="${releaseFileParentDir}/libx/"
+  	  				prefix="${releaseFileParentDir}/lib/"
 			  	  	dirmode="755" mode="644"/>
   	  	<tarfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" 
   	  				prefix="${releaseFileParentDir}/source/de/anomic/plasma/parser/${parserShortName}"
@@ -39,8 +39,8 @@
     </target>	
 
     <target name="copy" depends="compile">
-        <copy todir="${release}/libx/">
-             <fileset dir="${libx}" includes="J7Zip-modified.jar"/> 
+        <copy todir="${release}/lib/">
+             <fileset dir="${lib}" includes="J7Zip-modified.jar"/> 
         </copy>
         <copy todir="${release}/source/de/anomic/plasma/parser/${parserShortName}">
              <fileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" includes="**/*"/> 

@@ -41,7 +41,6 @@
   <property name="src" location="source"/>
   <property name="data" location="DATA"/>
   <property name="lib" location="lib"/>
-  <property name="libx" location="libx"/>
   <property name="libt" location="libt"/>
   <property name="libbuild" location="libbuild"/>
   <property name="build" location="classes"/>
@@ -182,22 +181,42 @@
   <target name="compileMain" depends="init" description="Compiling the yacy sources ...">
     <!-- defining the classpath that should be used for compiling -->
     <path id="project.class.path">
-      <pathelement location="${build}" />
-      <pathelement location="${htroot}" />
-
-      <!-- standard libs -->
-      <pathelement location="${lib}/tar.jar" />
-      <pathelement location="${lib}/commons-fileupload-1.2.1.jar" />
-      <pathelement location="${lib}/commons-httpclient-3.1.jar" />
-      <pathelement location="${lib}/commons-logging-1.1.1.jar" />
-      <pathelement location="${lib}/commons-io-1.4.jar" />
-      <pathelement location="${lib}/servlet-api.jar" />
-      <pathelement location="${lib}/xerces.jar" />
-      <pathelement location="${lib}/bzip2.jar" />
-      <pathelement location="${lib}/mysql-connector-java-5.1.7-bin.jar" />
-      <!-- upnp (+ commons-logging) -->
-      <pathelement location="${lib}/sbbi-upnplib-1.0.4.jar" />
-      <pathelement location="${lib}/commons-jxpath-1.1.jar" />
+        <pathelement location="${build}" />
+        <pathelement location="${htroot}" />
+    	<pathelement location="${lib}/FontBox-0.1.0-dev.jar" />
+    	<pathelement location="${lib}/J7Zip-modified.jar" />
+    	<pathelement location="${lib}/PDFBox-0.7.3.jar" />
+    	<pathelement location="${lib}/activation.jar" />
+    	<pathelement location="${lib}/bcmail-jdk14-139.jar" />
+    	<pathelement location="${lib}/bcprov-jdk14-139.jar" />
+    	<pathelement location="${lib}/bzip2.jar" />
+    	<pathelement location="${lib}/commons-codec-1.3.jar" />
+    	<pathelement location="${lib}/commons-discovery.jar" />
+    	<pathelement location="${lib}/commons-fileupload-1.2.1.jar" />
+    	<pathelement location="${lib}/commons-httpclient-3.1.jar" />
+    	<pathelement location="${lib}/commons-io-1.4.jar" />
+    	<pathelement location="${lib}/commons-jxpath-1.1.jar" />
+    	<pathelement location="${lib}/commons-logging-1.1.1.jar" />
+    	<pathelement location="${lib}/gnumail.jar" />
+    	<pathelement location="${lib}/inetlib.jar" />
+    	<pathelement location="${lib}/jakarta-oro-2.0.7.jar" />
+    	<pathelement location="${lib}/jaxrpc.jar" />
+    	<pathelement location="${lib}/jmimemagic-0.1.0.jar" />
+    	<pathelement location="${lib}/jrpm-SNAPSHOT.jar" />
+    	<pathelement location="${lib}/jrpm-head.jar" />
+    	<pathelement location="${lib}/jsch-0.1.21.jar" />
+    	<pathelement location="${lib}/log4j-1.2.9.jar" />
+    	<pathelement location="${lib}/mysql-connector-java-5.1.7-bin.jar" />
+    	<pathelement location="${lib}/odf_utils_05_11_29.jar" />
+    	<pathelement location="${lib}/poi-3.2-FINAL-20081019.jar" />
+    	<pathelement location="${lib}/poi-scratchpad-3.2-FINAL-20081019.jar" />
+    	<pathelement location="${lib}/sbbi-upnplib-1.0.4.jar" />
+    	<pathelement location="${lib}/servlet-api.jar" />
+    	<pathelement location="${lib}/tar.jar" />
+    	<pathelement location="${lib}/tm-extractors-1.0.jar" />
+    	<pathelement location="${lib}/webcat-0.1-swf.jar" />
+    	<pathelement location="${lib}/wsdl4j.jar" />
+    	<pathelement location="${lib}/xerces.jar" />
     </path>
 
     <!-- compiling yacy.java -->
@@ -239,8 +258,6 @@
       <pathelement location="${build}"/>
       <pathelement location="${htroot}"/>
 
-      <!-- libs needed for the yacy thread/object-pools -->
-      <pathelement location="${lib}/tar.jar" />
       <!-- userspecific libs -->
       <pathelement location="${htdocsWWW}/lib/*.jar" />
       <pathelement location="${htdocsWWW}/" />
@@ -259,7 +276,6 @@
       <property name="src" location="${src}"/>
       <property name="build" location="${build}"/>
       <property name="lib" location="${lib}"/>
-      <property name="libx" location="${libx}"/>
       <property name="release" location="${release_ext}"/>
       <property name="javacSource" value="${javacSource}"/>
       <property name="javacTarget" value="${javacTarget}"/>
@@ -273,7 +289,7 @@
     <subant target="${extensionTarget}">
       <property name="src" location="${src}"/>
       <property name="build" location="${build}"/>
-      <property name="libx" location="${libx}"/>
+      <property name="lib" location="${lib}"/>
       <property name="htroot" value="${htroot}"/>
       <property name="release" location="${release_ext}"/>
       <property name="javacSource" value="${javacSource}"/>
@@ -361,13 +377,6 @@
 
     <!-- copy yacy.jar (if available) -->
     <copy todir="${release_main}" file="yacy.jar" failonerror="false"/>
-
-    <!-- copy libs -->
-    <copy todir="${release_main}/lib">
-      <fileset dir="${lib}" 
-               includes="**/*"/>
-               
-    </copy>
 
     <!-- copy build libs -->
     <copy todir="${release_main}/libbuild">
@@ -542,11 +551,6 @@
     <!-- copy libs -->
     <copy todir="${release_source}/lib">
       <fileset dir="${lib}" 
-               includes="**/*"/>
-               
-    </copy>
-    <copy todir="${release_source}/libx">
-      <fileset dir="${libx}" 
                includes="**/*"/>
                
     </copy>
@@ -914,17 +918,8 @@
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${htroot}"/>
-        <pathelement location="${lib}/tar.jar" />
-        <pathelement location="${lib}/commons-fileupload-1.2.1.jar" />
-        <pathelement location="${lib}/commons-httpclient-3.1.jar" />
-        <pathelement location="${lib}/commons-logging-1.1.1.jar" />
-        <pathelement location="${lib}/commons-io-1.4.jar" />
-        <pathelement location="${lib}/servlet-api.jar" />
-        <pathelement location="${lib}/sbbi-upnplib-1.0.4.jar" />
-        <pathelement location="${lib}/commons-jxpath-1.1.jar" />
-        <pathelement location="${lib}/mysql-connector-java-5.1.7-bin.jar" />
-        <pathelement location="${libx}" />
-        <fileset dir="${libx}" includes="**/*.jar" />
+        <pathelement location="${lib}" />
+        <fileset dir="${lib}" includes="**/*.jar" />
       </classpath>
       <!--<arg value="-Xrunhprof"/>-->
       <arg line="-start"/>
@@ -941,9 +936,8 @@
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${htroot}"/>
-        <pathelement location="${lib}/tar.jar" />
-        <pathelement location="${libx}" />
-        <fileset dir="${libx}" includes="**/*.jar" />
+        <pathelement location="${lib}" />
+        <fileset dir="${lib}" includes="**/*.jar" />
       </classpath>
       <arg line=""/>
     </java>
@@ -955,9 +949,8 @@
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${htroot}"/>
-        <pathelement location="${libx}" />
+        <pathelement location="${lib}" />
         <fileset dir="${lib}" includes="**/*.jar" />
-        <fileset dir="${libx}" includes="**/*.jar" />
       </classpath>
       <arg line="-start"/>
       <jvmarg line="-Xdebug"/>
@@ -973,10 +966,8 @@
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${htroot}"/>
-        <pathelement location="${lib}/tar.jar" />
-        <pathelement location="${libx}" />
+        <pathelement location="${lib}" />
         <fileset dir="${lib}" includes="**/*.jar" />
-        <fileset dir="${libx}" includes="**/*.jar" />
       </classpath>
       <arg line="-stop"/>
     </java>
@@ -993,9 +984,6 @@
              windowtitle="YaCy API Documentation">
       <classpath>
         <fileset dir="${lib}">
-          <include name="**/*.jar"/>
-        </fileset>
-        <fileset dir="${libx}">
           <include name="**/*.jar"/>
         </fileset>
         <pathelement location="${build}"/>
@@ -1053,7 +1041,7 @@
   <target name="distWithWinStartExe" depends="makeWinStartExe,dist">
   </target>
 
-  <target name="rpm" depends="all" description="Creates the main rpm-package and another for libx">
+  <target name="rpm" depends="all" description="Creates the main rpm-package and another for lib">
     <mkdir dir="${release}/RPMS/noarch" />
     <mkdir dir="${release}/BUILD" />
     <copy file="yacy-svn-4.spec" tofile="${release}/SPECS/yacy-svn.spec" overwrite="true" filtering="true" />
@@ -1062,8 +1050,8 @@
 
     <move file="${release}/RPMS/noarch/yacy-${releaseVersion}_${releaseNr}-3.noarch.rpm"
           tofile="${release}/yacy-${releaseVersion}_${releaseNr}-3.noarch.rpm" />
-    <move file="${release}/RPMS/noarch/yacy-libx-${releaseVersion}_${releaseNr}-3.noarch.rpm"
-          tofile="${release}/yacy-libx-${releaseVersion}_${releaseNr}-3.noarch.rpm" />
+    <move file="${release}/RPMS/noarch/yacy-lib-${releaseVersion}_${releaseNr}-3.noarch.rpm"
+          tofile="${release}/yacy-lib-${releaseVersion}_${releaseNr}-3.noarch.rpm" />
 
     <delete dir="${release}/SPECS" failonerror="false" />
     <delete dir="${release}/RPMS" failonerror="false" />

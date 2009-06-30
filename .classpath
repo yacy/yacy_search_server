@@ -13,27 +13,6 @@
 	<classpathentry kind="src" path="htroot/api/bookmarks/tags"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry exported="true" kind="lib" path="lib/tar.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/commons-discovery.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/jakarta-oro-2.0.7.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/jaxrpc.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/jmimemagic-0.1.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/jrpm-head.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/jrpm-SNAPSHOT.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/jsch-0.1.21.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/log4j-1.2.9.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/odf_utils_05_11_29.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/tm-extractors-1.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/wsdl4j.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/inetlib.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/gnumail.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/activation.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/webcat-0.1-swf.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/J7Zip-modified.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/PDFBox-0.7.3.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/FontBox-0.1.0-dev.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/bcprov-jdk14-139.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/bcmail-jdk14-139.jar"/>
-	<classpathentry exported="true" kind="lib" path="libx/commons-codec-1.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-httpclient-3.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-io-1.4.jar"/>
@@ -44,7 +23,28 @@
 	<classpathentry kind="lib" path="lib/xerces.jar"/>
 	<classpathentry kind="lib" path="lib/bzip2.jar"/>
 	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.7-bin.jar"/>
-	<classpathentry kind="lib" path="libx/poi-3.2-FINAL-20081019.jar"/>
-	<classpathentry kind="lib" path="libx/poi-scratchpad-3.2-FINAL-20081019.jar"/>
+	<classpathentry kind="lib" path="lib/activation.jar"/>
+	<classpathentry kind="lib" path="lib/bcmail-jdk14-139.jar"/>
+	<classpathentry kind="lib" path="lib/bcprov-jdk14-139.jar"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.3.jar"/>
+	<classpathentry kind="lib" path="lib/commons-discovery.jar"/>
+	<classpathentry kind="lib" path="lib/FontBox-0.1.0-dev.jar"/>
+	<classpathentry kind="lib" path="lib/gnumail.jar"/>
+	<classpathentry kind="lib" path="lib/inetlib.jar"/>
+	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.7.jar"/>
+	<classpathentry kind="lib" path="lib/jaxrpc.jar"/>
+	<classpathentry kind="lib" path="lib/jmimemagic-0.1.0.jar"/>
+	<classpathentry kind="lib" path="lib/jrpm-head.jar"/>
+	<classpathentry kind="lib" path="lib/jrpm-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/jsch-0.1.21.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.9.jar"/>
+	<classpathentry kind="lib" path="lib/odf_utils_05_11_29.jar"/>
+	<classpathentry kind="lib" path="lib/PDFBox-0.7.3.jar"/>
+	<classpathentry kind="lib" path="lib/poi-3.2-FINAL-20081019.jar"/>
+	<classpathentry kind="lib" path="lib/poi-scratchpad-3.2-FINAL-20081019.jar"/>
+	<classpathentry kind="lib" path="lib/tm-extractors-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/webcat-0.1-swf.jar"/>
+	<classpathentry kind="lib" path="lib/wsdl4j.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

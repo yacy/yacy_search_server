@@ -14,7 +14,7 @@
   	  	  <pathelement location="${build}" />	
   	  	  
   	  	  <!-- libraries needed by this parser -->
-    	  <pathelement location="${libx}/commons-codec-1.3.jar" />
+    	  <pathelement location="${lib}/commons-codec-1.3.jar" />
   	  	</classpath>
   	  </javac>    	
     </target>
@@ -23,9 +23,9 @@
     <target name="zip" depends="compile">
   	  <tar destfile="${parserArchive}" compression="gzip">
   	  	<!-- needed libraries -->
-  	  	<tarfileset dir="${libx}" 
+  	  	<tarfileset dir="${lib}" 
   	  				includes="commons-codec-1.3.*" 
-  	  				prefix="${releaseFileParentDir}/libx/"
+  	  				prefix="${releaseFileParentDir}/lib/"
 			  	  	dirmode="755" mode="644"/>  	  	
 		<!-- source files of this parser -->
   	  	<tarfileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" 
@@ -41,8 +41,8 @@
 	<!-- just copy all parts of this parser into the release directory -->
     <target name="copy" depends="compile">
 		<!-- copy needed libs -->
-        <copy todir="${release}/libx/">
-             <fileset dir="${libx}" includes="commons-codec-1.3.*"/> 
+        <copy todir="${release}/lib/">
+             <fileset dir="${lib}" includes="commons-codec-1.3.*"/> 
         </copy>  
 	
 		<!-- copy source code files -->
