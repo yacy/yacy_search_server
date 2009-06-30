@@ -177,7 +177,7 @@ public class UPnP {
 //			DiscoveryAdvertisement.getInstance().unRegisterEvent(DiscoveryAdvertisement.EVENT_SSDP_BYE_BYE, devicetype, handler);
 		}
 		
-		private static class Handler implements DiscoveryEventHandler {
+		protected static class Handler implements DiscoveryEventHandler {
 		
 			public void eventSSDPAlive(String usn, String udn, String nt, String maxAge, URL location) {
 				InternetGatewayDevice[] newIGD = { null };

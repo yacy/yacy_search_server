@@ -44,9 +44,9 @@ import de.anomic.yacy.yacyURL;
 
 public class PhpBB3Dao implements Dao {
 
-    private DatabaseConnection conn = null;
-    private String urlstub, prefix;
-    private HashMap<Integer, String> users;
+    protected DatabaseConnection conn = null;
+    private   String urlstub, prefix;
+    private   HashMap<Integer, String> users;
 
     public PhpBB3Dao(
             String urlstub,
@@ -195,7 +195,7 @@ public class PhpBB3Dao implements Dao {
         return queue;
     }
     
-    private DCEntry parseResultSet(ResultSet rs) throws SQLException, MalformedURLException {
+    protected DCEntry parseResultSet(ResultSet rs) throws SQLException, MalformedURLException {
         yacyURL url;
         int item = rs.getInt("post_id");
         url = new yacyURL(this.urlstub + "/viewtopic.php?t=" + item);

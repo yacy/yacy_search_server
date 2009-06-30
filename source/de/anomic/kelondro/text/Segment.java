@@ -68,12 +68,12 @@ public final class Segment {
     public static final ReferenceFactory<NavigationReference> navigationReferenceFactory = new NavigationReferenceFactory();
     public static final ByteOrder wordOrder = Base64Order.enhancedCoder;
     
-    private final Log                            log;
-    private final IndexCell<WordReference>       termIndex;
-    private final IndexCell<NavigationReference> authorNavIndex;
-    private final MetadataRepository             urlMetadata;
-    private final File                           segmentPath;
-    private final IODispatcher                   merger;
+    private   final Log                            log;
+    protected final IndexCell<WordReference>       termIndex;
+    private   final IndexCell<NavigationReference> authorNavIndex;
+    protected final MetadataRepository             urlMetadata;
+    private   final File                           segmentPath;
+    private   final IODispatcher                   merger;
     
     public Segment(
             final Log log,

@@ -73,16 +73,16 @@ public class Table implements ObjectIndex {
     public static final int tailCacheForceUsage = 1;
     public static final int tailCacheUsageAuto  = 2;
     
-    public static final long maxarraylength = 134217727L; // that may be the maxmimum size of array length in some JVMs
-    private static final long minmemremaining = 20 * 1024 * 1024; // if less than this memory is remaininig, the memory copy of a table is abandoned
-    private RowSet table;
-    private HandleMap index;
-    private BufferedEcoFS file;
-    private Row rowdef;
-    private int fail;
-    private File tablefile;
-    private Row taildef;
-    private final int buffersize;
+    public    static final long maxarraylength = 134217727L; // that may be the maxmimum size of array length in some JVMs
+    private   static final long minmemremaining = 20 * 1024 * 1024; // if less than this memory is remaininig, the memory copy of a table is abandoned
+    private   int fail;
+    private   final int buffersize;
+    protected HandleMap index;
+    protected BufferedEcoFS file;
+    protected Row rowdef;
+    protected File tablefile;
+    protected RowSet table;
+    protected Row taildef;
     
     public Table(final File tablefile, final Row rowdef, final int useTailCache, final int buffersize, final int initialSpace) {
         this.tablefile = tablefile;

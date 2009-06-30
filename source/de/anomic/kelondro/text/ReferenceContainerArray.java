@@ -40,10 +40,10 @@ import de.anomic.yacy.logging.Log;
 
 public final class ReferenceContainerArray<ReferenceType extends Reference> {
 
-    private final ReferenceFactory<ReferenceType> factory;
-    private final Row payloadrow;
-    private final ArrayStack array;
-    private final IODispatcher merger;
+    protected final ReferenceFactory<ReferenceType> factory;
+    protected final Row payloadrow;
+    protected final ArrayStack array;
+    private   final IODispatcher merger;
     
     /**
      * open a index container based on a BLOB dump. The content of the BLOB will not be read
@@ -128,7 +128,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         // plus the mentioned features
         
         private final boolean rot;
-        private CloneableIterator<byte[]> iterator;
+        protected CloneableIterator<byte[]> iterator;
         
         public heapCacheIterator(final byte[] startWordHash, final boolean rot) throws IOException {
             this.rot = rot;

@@ -301,9 +301,9 @@ public final class Log {
         }
     }
     
-    private static logEntry poison = new logEntry();
-    private static BlockingQueue<logEntry> logQueue = new LinkedBlockingQueue<logEntry>();
-    private static logRunner logRunnerThread = null;
+    protected static logEntry poison = new logEntry();
+    protected static BlockingQueue<logEntry> logQueue = new LinkedBlockingQueue<logEntry>();
+    private   static logRunner logRunnerThread = null;
     
     protected static class logRunner extends Thread {
         public logRunner() {

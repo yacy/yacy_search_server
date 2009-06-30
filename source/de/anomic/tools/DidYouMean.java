@@ -28,16 +28,16 @@ import de.anomic.yacy.logging.Log;
  */
 public class DidYouMean {
 
-	private static final char[] alphabet = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
+    protected static final char[] alphabet = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
 									  'q','r','s','t','u','v','w','x','y','z','\u00e4','\u00f6','\u00fc','\u00df'}; 
 	
 	public static final int availableCPU = Runtime.getRuntime().availableProcessors();
 	final LinkedBlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 	
-	private final Set<String> set;
-	private final IndexCell<WordReference> index;
-	private String word;
-	private int len;
+	protected final Set<String> set;
+	protected final IndexCell<WordReference> index;
+	protected String word;
+	protected int len;
 	
 	
 	/**
@@ -140,7 +140,7 @@ public class DidYouMean {
      * based on the given alphabet and puts it on the blocking queue, to be 'consumed' by a consumer thread.<p/>
      * <b>Note:</b> the loop runs (alphabet.length * len) tests.
      */	
-	private class ChangingOneLetter extends Thread {
+	public class ChangingOneLetter extends Thread {
 		
 		public void run() {
 			String s;
@@ -161,7 +161,7 @@ public class DidYouMean {
      * and puts it on the blocking queue, to be 'consumed' by a consumer thread.<p/>
      * <b>Note:</b> the loop runs (len) tests.
      */
-	private class DeletingOneLetter extends Thread {
+	protected class DeletingOneLetter extends Thread {
 		
 		public void run() {
 			String s;
@@ -180,7 +180,7 @@ public class DidYouMean {
      * based on the given alphabet and puts it on the blocking queue, to be 'consumed' by a consumer thread.<p/>
      * <b>Note:</b> the loop runs (alphabet.length * len) tests.
      */
-	private class AddingOneLetter extends Thread {
+	protected class AddingOneLetter extends Thread {
 		
 		public void run() {
 			String s;
@@ -201,7 +201,7 @@ public class DidYouMean {
      * and puts it on the blocking queue, to be 'consumed' by a consumer thread.<p/>
      * <b>Note:</b> the loop runs (len-1) tests.
      */
-	private class ReversingTwoConsecutiveLetters extends Thread {
+	protected class ReversingTwoConsecutiveLetters extends Thread {
 	
 		public void run() {
 			String s;
@@ -245,7 +245,7 @@ public class DidYouMean {
      * wordSizeComparator is used by DidYouMean to order terms by index.count()<p/>
      * <b>Warning:</b> this causes heavy i/o
      */
-    private class wordSizeComparator implements Comparator<String> {
+    protected class wordSizeComparator implements Comparator<String> {
 		public int compare(final String o1, final String o2) {
     		final Integer i1 = index.count(Word.word2hash(o1));
     		final Integer i2 = index.count(Word.word2hash(o2));

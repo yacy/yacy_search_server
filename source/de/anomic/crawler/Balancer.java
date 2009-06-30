@@ -45,18 +45,15 @@ public class Balancer {
     private static final int EcoFSBufferSize = 200;
 
     // class variables
-    private final ConcurrentHashMap<String, LinkedList<String>>
-                         domainStacks;    // a map from domain name part to Lists with url hashs
-    private ConcurrentLinkedQueue<String>
-                         top;
-    private TreeMap<Long, String>
-                         delayed;
-    private ObjectIndex  urlFileIndex;
-    private final File   cacheStacksPath;
-    private long         minimumLocalDelta;
-    private long         minimumGlobalDelta;
-    private int          profileErrors;
-    private long         lastDomainStackFill;
+    private final ConcurrentHashMap<String, LinkedList<String>> domainStacks;    // a map from domain name part to Lists with url hashs
+    private   ConcurrentLinkedQueue<String> top;
+    private   TreeMap<Long, String> delayed;
+    protected ObjectIndex  urlFileIndex;
+    private   final File   cacheStacksPath;
+    private   long         minimumLocalDelta;
+    private   long         minimumGlobalDelta;
+    private   int          profileErrors;
+    private   long         lastDomainStackFill;
     
     public Balancer(final File cachePath, final String stackname, final boolean fullram,
                     final long minimumLocalDelta, final long minimumGlobalDelta) {

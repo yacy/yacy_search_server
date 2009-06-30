@@ -78,16 +78,16 @@ public class ArrayStack implements BLOB {
     
     public static final long oneMonth    = 1000L * 60L * 60L * 24L * 365L / 12L;
     
-    private int keylength;
-    private ByteOrder ordering;
-    private File heapLocation;
-    private long fileAgeLimit;
-    private long fileSizeLimit;
-    private long repositoryAgeMax;
-    private long repositorySizeMax;
-    private List<blobItem> blobs;
-    private String prefix;
-    private int buffersize;
+    protected int keylength;
+    protected ByteOrder ordering;
+    private   File heapLocation;
+    private   long fileAgeLimit;
+    private   long fileSizeLimit;
+    private   long repositoryAgeMax;
+    private   long repositorySizeMax;
+    protected List<blobItem> blobs;
+    private   String prefix;
+    private   int buffersize;
     
     // the thread pool for the keeperOf executor service
     private ExecutorService executor;

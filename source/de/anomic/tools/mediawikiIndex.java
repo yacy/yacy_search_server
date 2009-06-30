@@ -79,15 +79,15 @@ public class mediawikiIndex extends Thread {
     private static final byte[] pagestartb = pagestart.getBytes();
     private static final byte[] pageendb = pageend.getBytes();
     
-    private wikiParser wparser;
-    private plasmaParser hparser;
-    private String urlStub;
-    public File sourcefile;
-    public File targetdir;
-    public int count;
-    private long start;
-    private long docsize;
-    private int approxdocs;
+    protected wikiParser wparser;
+    protected plasmaParser hparser;
+    protected String urlStub;
+    public    File sourcefile;
+    public    File targetdir;
+    public    int count;
+    private   long start;
+    private   long docsize;
+    private   int approxdocs;
     
     private static final int docspermbinxmlbz2 = 800;  // documents per megabyte in a xml.bz2 wikimedia dump
     
@@ -328,7 +328,7 @@ public class mediawikiIndex extends Thread {
 
         private BlockingQueue<wikisourcerecord> entries;
         PrintWriter out;
-        private static wikisourcerecord poison = new wikisourcerecord("", 0, 0);
+        protected static wikisourcerecord poison = new wikisourcerecord("", 0, 0);
         int count;
         
         public indexProducer(int bufferCount, File indexFile) throws IOException {
@@ -375,10 +375,10 @@ public class mediawikiIndex extends Thread {
     
     private static class wikiConsumer implements Callable<Integer> {
 
-        private BlockingQueue<wikiraw> entries;
-        private static wikiraw poison = new wikiraw(new byte[0], 0, 0);
-        private indexProducer producer;
-        private int count;
+        private   BlockingQueue<wikiraw> entries;
+        protected static wikiraw poison = new wikiraw(new byte[0], 0, 0);
+        private   indexProducer producer;
+        private   int count;
         
         public wikiConsumer(int bufferCount, indexProducer producer) {
             entries = new ArrayBlockingQueue<wikiraw>(bufferCount);

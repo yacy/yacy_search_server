@@ -115,7 +115,7 @@ public final class httpdFileHandler {
     private static File     htDefaultPath  = null;
     private static File     htLocalePath   = null;
     
-    private static final class TemplateCacheEntry {
+    protected static final class TemplateCacheEntry {
     	Date lastModified;
     	byte[] content;
     }

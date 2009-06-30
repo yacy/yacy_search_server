@@ -58,7 +58,7 @@ public class ZURL {
     );
 
     // the class object
-    private final ObjectIndex urlIndex;
+    protected final ObjectIndex urlIndex;
     private final LinkedList<String> stack;
     
     public ZURL(final File cachePath, final String tablename, final boolean startWithEmptyFile) {

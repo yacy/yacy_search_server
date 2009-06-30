@@ -207,7 +207,7 @@ public final class Stack extends Records {
         return row().newEntry(n.getValueRow());
     }
     
-    private void unlinkNode(final Node n) throws IOException {
+    protected void unlinkNode(final Node n) throws IOException {
         // join chaines over node
         final Records.Handle l = n.getOHHandle(left);
         final Records.Handle r = n.getOHHandle(right);

@@ -54,8 +54,8 @@ import de.anomic.yacy.dht.FlatWordPartitionScheme;
 
 public class HandleMap implements Iterable<Row.Entry> {
     
-    private final Row rowdef;
-    private ObjectIndexCache index;
+    private   final Row rowdef;
+    protected ObjectIndexCache index;
     
     /**
      * initialize a HandleMap
@@ -296,7 +296,8 @@ public class HandleMap implements Iterable<Row.Entry> {
             this.l = l;
         }
     }
-    private static final entry poisonEntry = new entry(new byte[0], 0);
+    
+    protected static final entry poisonEntry = new entry(new byte[0], 0);
     
     public static class initDataConsumer implements Callable<HandleMap> {
 

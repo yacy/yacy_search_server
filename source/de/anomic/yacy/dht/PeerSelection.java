@@ -242,7 +242,7 @@ public class PeerSelection {
      * @param minVersion
      * @return
      */
-    private static Iterator<yacySeed> getDHTSeeds(yacySeedDB seedDB, final byte[] firstHash, final float minVersion) {
+    protected static Iterator<yacySeed> getDHTSeeds(yacySeedDB seedDB, final byte[] firstHash, final float minVersion) {
         // enumerates seed-type objects: all seeds with starting point in the middle, rotating at the end/beginning
         return new seedDHTEnum(seedDB, firstHash, minVersion);
     }

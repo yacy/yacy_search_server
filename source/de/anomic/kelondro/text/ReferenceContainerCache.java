@@ -48,9 +48,9 @@ import de.anomic.yacy.logging.Log;
 
 public final class ReferenceContainerCache<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType>, IndexReader<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
 
-    private final Row payloadrow;
-    private final ByteOrder termOrder;
-    private Map<ByteArray, ReferenceContainer<ReferenceType>> cache;
+    private   final Row payloadrow;
+    private   final ByteOrder termOrder;
+    protected Map<ByteArray, ReferenceContainer<ReferenceType>> cache;
     
     /**
      * opens an existing heap file in undefined mode

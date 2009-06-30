@@ -58,10 +58,10 @@ import de.anomic.yacy.logging.Log;
 public final class MetadataRepository implements Iterable<byte[]> {
 
     // class objects
-    private ObjectIndex         urlIndexFile;
-    private Export              exportthread; // will have a export thread assigned if exporter is running
-    private File                location;
-    private ArrayList<hostStat> statsDump;
+    protected ObjectIndex         urlIndexFile;
+    private   Export              exportthread; // will have a export thread assigned if exporter is running
+    private   File                location;
+    private   ArrayList<hostStat> statsDump;
     
     public MetadataRepository(final File path) {
         this.location = path;        

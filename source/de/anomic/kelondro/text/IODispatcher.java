@@ -48,13 +48,13 @@ import de.anomic.yacy.logging.Log;
  */
 public class IODispatcher extends Thread {
 
-    private Semaphore                    controlQueue;
-    private Semaphore                    termination;
-    private ArrayBlockingQueue<MergeJob> mergeQueue;
-    private ArrayBlockingQueue<DumpJob<? extends Reference>> dumpQueue;
+    private   Semaphore                    controlQueue;
+    private   Semaphore                    termination;
+    private   ArrayBlockingQueue<MergeJob> mergeQueue;
+    private   ArrayBlockingQueue<DumpJob<? extends Reference>> dumpQueue;
     //private ReferenceFactory<ReferenceType> factory;
-    private boolean                      terminate;
-    private int                          writeBufferSize;
+    private   boolean                      terminate;
+    protected int                          writeBufferSize;
     
     public IODispatcher(int dumpQueueLength, int mergeQueueLength, int writeBufferSize) {
         this.termination = new Semaphore(0);

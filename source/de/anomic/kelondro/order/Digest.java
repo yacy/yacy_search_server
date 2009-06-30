@@ -199,10 +199,10 @@ public class Digest {
     
     private static class md5FilechunkConsumer implements Callable<MessageDigest> {
 
-        private BlockingQueue<filechunk> empty;
-        private BlockingQueue<filechunk> filed;
-        private static filechunk poison = new filechunk(0);
-        private MessageDigest digest;
+        private   BlockingQueue<filechunk> empty;
+        private   BlockingQueue<filechunk> filed;
+        protected static filechunk poison = new filechunk(0);
+        private   MessageDigest digest;
         
         public md5FilechunkConsumer(int bufferSize, int bufferCount) {
             empty = new ArrayBlockingQueue<filechunk>(bufferCount);

@@ -55,11 +55,11 @@ import de.anomic.yacy.logging.Log;
 
 public class CrawlQueues {
 
-    private plasmaSwitchboard sb;
-    private Log log;
-    private Map<Integer, crawlWorker> workers; // mapping from url hash to Worker thread object
-    private ProtocolLoader loader;
-    private final ArrayList<String> remoteCrawlProviderHashes;
+    protected plasmaSwitchboard sb;
+    protected Log log;
+    protected Map<Integer, crawlWorker> workers; // mapping from url hash to Worker thread object
+    protected ProtocolLoader loader;
+    private   final ArrayList<String> remoteCrawlProviderHashes;
 
     public  NoticedURL noticeURL;
     public  ZURL errorURL, delegatedURL;
@@ -538,7 +538,7 @@ public class CrawlQueues {
     
     protected final class crawlWorker extends Thread {
         
-        private CrawlEntry entry;
+        protected CrawlEntry entry;
         private final Integer code;
         private long start;
         

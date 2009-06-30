@@ -52,10 +52,10 @@ import de.anomic.yacy.logging.Log;
 
 public class IndexingStack {
 
-    private final Stack sbQueueStack;
-    private final CrawlProfile profiles;
-    private final yacySeedDB peers;
-    private final ConcurrentHashMap<String, QueueEntry> queueInProcess;
+    protected final CrawlProfile profiles;
+    protected final Stack sbQueueStack;
+    protected final yacySeedDB peers;
+    protected final ConcurrentHashMap<String, QueueEntry> queueInProcess;
     
     public IndexingStack(
             final yacySeedDB peers,

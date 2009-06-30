@@ -43,7 +43,7 @@ import de.anomic.server.serverSystem;
 
 
 public final class Tray {
-	private static plasmaSwitchboard sb;
+    protected static plasmaSwitchboard sb;
 	
 	private static nativeTrayIcon ti;
 	private static boolean isIntegrated; // browser integration
@@ -142,7 +142,7 @@ public final class Tray {
 	}
     
 	
-	private static void trayClickAction(){	//doubleclick
+	protected static void trayClickAction(){	//doubleclick
 		if (lockBrowserPopup) {
 			String label;
 			if(deutsch) label = "Bitte warten bis YaCy gestartet ist.";
@@ -153,7 +153,7 @@ public final class Tray {
 		}
 	}
 	
-	private static void openBrowser(final String browserPopUpPage){
+	protected static void openBrowser(final String browserPopUpPage){
 		if(isIntegrated) return;
 		// no need for https, because we are on localhost
 		serverSystem.openBrowser("http://localhost:" + sb.getConfig("port", "8080") + "/" + browserPopUpPage);

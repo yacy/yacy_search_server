@@ -84,13 +84,13 @@ public final class serverCore extends serverAbstractBusyThread implements server
     /**
      * Line End of HTTP/ICAP headers
      */
-    public  static final byte[] CRLF = {CR, LF};
-    public  static final String CRLF_STRING = new String(CRLF);
-    public  static final String LF_STRING = new String(new byte[]{LF});
-    public  static final Class<?>[] stringType = {"".getClass()}; //  set up some reflection
-    public  static final long startupTime = System.currentTimeMillis();
-    public  static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
-    private static final HashMap<String, Object> commandObjMethodCache = new HashMap<String, Object>(5);
+    public    static final byte[] CRLF = {CR, LF};
+    public    static final String CRLF_STRING = new String(CRLF);
+    public    static final String LF_STRING = new String(new byte[]{LF});
+    public    static final Class<?>[] stringType = {"".getClass()}; //  set up some reflection
+    public    static final long startupTime = System.currentTimeMillis();
+    public    static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
+    protected static final HashMap<String, Object> commandObjMethodCache = new HashMap<String, Object>(5);
     
     /**
      * will be increased with each session and is used to return a hash code

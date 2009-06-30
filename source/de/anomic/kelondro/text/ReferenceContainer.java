@@ -50,8 +50,8 @@ import de.anomic.kelondro.util.ByteBuffer;
  */
 public class ReferenceContainer<ReferenceType extends Reference> extends RowSet {
 
-    private byte[] termHash;
-    private ReferenceFactory<ReferenceType> factory;
+    private   byte[] termHash;
+    protected ReferenceFactory<ReferenceType> factory;
     
     public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final RowSet collection) {
         super(collection);

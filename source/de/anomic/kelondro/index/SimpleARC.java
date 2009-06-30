@@ -39,9 +39,10 @@ import java.util.Map;
 
 public class SimpleARC <K, V> {
 
-    public final static boolean accessOrder = false; // if false, then a insertion-order is used
-    private int cacheSize;
-    private Map<K, V> levelA, levelB;
+    public    final static boolean accessOrder = false; // if false, then a insertion-order is used
+    
+    protected int cacheSize;
+    private   Map<K, V> levelA, levelB;
     
     public SimpleARC(int cacheSize) {
         this.cacheSize = cacheSize / 2;

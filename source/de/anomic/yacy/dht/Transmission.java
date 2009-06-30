@@ -46,12 +46,12 @@ import de.anomic.yacy.logging.Log;
 
 public class Transmission {
 
-    private Log log;
-    private MetadataRepository repository;
-    private yacySeedDB seeds;
-    private Index<WordReference> backend;
-    private boolean gzipBody4Transfer;
-    private int timeout4Transfer;
+    protected Log log;
+    protected MetadataRepository repository;
+    protected yacySeedDB seeds;
+    protected boolean gzipBody4Transfer;
+    protected int timeout4Transfer;
+    protected Index<WordReference> backend;
     
     public Transmission(
             Log log,
