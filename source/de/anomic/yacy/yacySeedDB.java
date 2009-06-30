@@ -247,30 +247,13 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
 			if(!parentDir.mkdirs())
 				Log.logWarning("yacySeedDB", "could not create directories for "+ seedDBFile.getParent());
 		}
-        Class[] args;
         try {
-            args = new Class[]{"".getClass(), Class.forName("java.util.Map")};
-        } catch (final ClassNotFoundException e2){
-            e2.printStackTrace();
-            args = null;
-        }
-        Method initializeHandlerMethod;
-        try {
-            initializeHandlerMethod = this.getClass().getMethod("initializeHandler", args);
-        } catch (final SecurityException e1) {
-            e1.printStackTrace();
-            initializeHandlerMethod = null;
-        } catch (final NoSuchMethodException e1) {
-            e1.printStackTrace();
-            initializeHandlerMethod = null;
-        }
-        try {
-            return new MapDataMining(new Heap(seedDBFile, commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+            return new MapDataMining(new Heap(seedDBFile, commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, null, this);
         } catch (final Exception e) {
             // try again
             FileUtils.deletedelete(seedDBFile);
             try {
-                return new MapDataMining(new Heap(seedDBFile, commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, initializeHandlerMethod, this);
+                return new MapDataMining(new Heap(seedDBFile, commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, null, this);
             } catch (IOException e1) {
                 e1.printStackTrace();
                 System.exit(-1);
