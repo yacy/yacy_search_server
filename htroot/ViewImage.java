@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSnippetCache;
@@ -61,7 +62,7 @@ public class ViewImage {
         
         String urlString = post.get("url", "");
         final String urlLicense = post.get("code", "");
-        final boolean auth = ((String) header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true); // handle access rights
+        final boolean auth = ((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true); // handle access rights
         
         yacyURL url = null;
         if ((urlString.length() > 0) && (auth)) try {

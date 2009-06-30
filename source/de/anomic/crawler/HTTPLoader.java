@@ -30,6 +30,7 @@ import java.util.Date;
 
 import de.anomic.data.Blacklist;
 import de.anomic.http.httpClient;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
@@ -132,13 +133,13 @@ public final class HTTPLoader {
         //try {
             // create a request header
             final httpRequestHeader requestHeader = new httpRequestHeader();
-            requestHeader.put(httpRequestHeader.USER_AGENT, crawlerUserAgent);
+            requestHeader.put(httpHeader.USER_AGENT, crawlerUserAgent);
             yacyURL refererURL = null;
             if (entry.referrerhash() != null) refererURL = sb.getURL(entry.referrerhash());
             if (refererURL != null) requestHeader.put(httpRequestHeader.REFERER, refererURL.toNormalform(true, true));
-            requestHeader.put(httpRequestHeader.ACCEPT_LANGUAGE, sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));
-            requestHeader.put(httpRequestHeader.ACCEPT_CHARSET, sb.getConfig("crawler.http.acceptCharset", DEFAULT_CHARSET));
-            requestHeader.put(httpRequestHeader.ACCEPT_ENCODING, sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
+            requestHeader.put(httpHeader.ACCEPT_LANGUAGE, sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));
+            requestHeader.put(httpHeader.ACCEPT_CHARSET, sb.getConfig("crawler.http.acceptCharset", DEFAULT_CHARSET));
+            requestHeader.put(httpHeader.ACCEPT_ENCODING, sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
 
             // HTTP-Client
             final httpClient client = new httpClient(socketTimeout, requestHeader);
@@ -195,9 +196,9 @@ public final class HTTPLoader {
                         htCache = null;
                     }*/
                 } else if (res.getStatusLine().startsWith("30")) {
-                        if (res.getResponseHeader().containsKey(httpRequestHeader.LOCATION)) {
+                        if (res.getResponseHeader().containsKey(httpHeader.LOCATION)) {
                             // getting redirection URL
-                            String redirectionUrlString = res.getResponseHeader().get(httpRequestHeader.LOCATION);
+                            String redirectionUrlString = res.getResponseHeader().get(httpHeader.LOCATION);
                             redirectionUrlString = redirectionUrlString.trim();
     
                             if (redirectionUrlString.length() == 0) {

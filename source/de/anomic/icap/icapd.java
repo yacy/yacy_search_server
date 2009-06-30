@@ -37,6 +37,7 @@ import java.util.Date;
 import java.util.Properties;
 
 import de.anomic.http.httpChunkedInputStream;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpdProxyCacheEntry;
@@ -310,9 +311,9 @@ public class icapd implements serverHandler, Cloneable {
             final Properties httpReqProps = new Properties();
             httpRequestHeader.parseRequestLine(httpRequestLine,httpReqProps,virtualHost);
             
-            if (!httpReqProps.getProperty(httpRequestHeader.CONNECTION_PROP_METHOD).equals(httpRequestHeader.METHOD_GET)) {
+            if (!httpReqProps.getProperty(httpHeader.CONNECTION_PROP_METHOD).equals(httpHeader.METHOD_GET)) {
                 log.logInfo("Wrong http request method for indexing:" +
-                        "\nRequest Method: " + httpReqProps.getProperty(httpRequestHeader.CONNECTION_PROP_METHOD) + 
+                        "\nRequest Method: " + httpReqProps.getProperty(httpHeader.CONNECTION_PROP_METHOD) + 
                         "\nRequest Line:   " + httpRequestLine);
                 reader.close();
                 if(reqHdrStream != null) {
@@ -330,10 +331,10 @@ public class icapd implements serverHandler, Cloneable {
             }
             
             // handle transparent proxy support: this function call is needed to set the host property properly
-            httpRequestHeader.handleTransparentProxySupport(httpReqHeader,httpReqProps,virtualHost,true);
+            httpHeader.handleTransparentProxySupport(httpReqHeader,httpReqProps,virtualHost,true);
             
             // getting the request URL
-            final yacyURL httpRequestURL = httpRequestHeader.getRequestURL(httpReqProps);            
+            final yacyURL httpRequestURL = httpHeader.getRequestURL(httpReqProps);            
             
             /* =========================================================================
              * Parsing response data

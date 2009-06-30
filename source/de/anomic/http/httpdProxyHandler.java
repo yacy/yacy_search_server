@@ -259,8 +259,8 @@ public final class httpdProxyHandler {
          |       "Version" "=" 1*DIGIT
          */
         if (sb.getConfigBool("proxy.monitorCookies", false)) {
-            if (respondHeader.containsKey(httpResponseHeader.SET_COOKIE)) {
-                final Object[] entry = new Object[]{new Date(), targetclient, respondHeader.getMultiple(httpResponseHeader.SET_COOKIE)};
+            if (respondHeader.containsKey(httpHeader.SET_COOKIE)) {
+                final Object[] entry = new Object[]{new Date(), targetclient, respondHeader.getMultiple(httpHeader.SET_COOKIE)};
                 synchronized(sb.incomingCookies) {
                     sb.incomingCookies.put(serverhost, entry);
                 }
@@ -511,7 +511,7 @@ public final class httpdProxyHandler {
 
                 // sending the respond header back to the client
                 if (chunkedOut != null) {
-                    responseHeader.put(httpResponseHeader.TRANSFER_ENCODING, "chunked");
+                    responseHeader.put(httpHeader.TRANSFER_ENCODING, "chunked");
                 }
 
                 if (theLogger.isFinest()) theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
@@ -672,7 +672,7 @@ public final class httpdProxyHandler {
                 conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_HIT");
                 
                 // setting the content length header to 0
-                cachedResponseHeader.put(httpResponseHeader.CONTENT_LENGTH, Integer.toString(0));
+                cachedResponseHeader.put(httpHeader.CONTENT_LENGTH, Integer.toString(0));
                 
                 // send cached header with replaced date and added length
                 httpd.sendRespondHeader(conProp,respond,httpVer,304,cachedResponseHeader);
@@ -683,7 +683,7 @@ public final class httpdProxyHandler {
                 conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_HIT");
                 
                 // setting the content header to the proper length
-                cachedResponseHeader.put(httpResponseHeader.CONTENT_LENGTH, Long.toString(cacheEntry.length));
+                cachedResponseHeader.put(httpHeader.CONTENT_LENGTH, Long.toString(cacheEntry.length));
                 
                 // send cached header with replaced date and added length 
                 httpd.sendRespondHeader(conProp,respond,httpVer,203,cachedResponseHeader);
@@ -920,7 +920,7 @@ public final class httpdProxyHandler {
             
             // sending the respond header back to the client
             if (chunked != null) {
-                responseHeader.put(httpResponseHeader.TRANSFER_ENCODING, "chunked");
+                responseHeader.put(httpHeader.TRANSFER_ENCODING, "chunked");
             }
             
             // sending response headers
@@ -1011,10 +1011,10 @@ public final class httpdProxyHandler {
         }
 
 	// only gzip-encoding is supported, remove other encodings (e. g. deflate)
-        if (((String)requestHeader.get(httpRequestHeader.ACCEPT_ENCODING,"")).indexOf("gzip") != -1) {
-            requestHeader.put(httpRequestHeader.ACCEPT_ENCODING, "gzip");
+        if (((String)requestHeader.get(httpHeader.ACCEPT_ENCODING,"")).indexOf("gzip") != -1) {
+            requestHeader.put(httpHeader.ACCEPT_ENCODING, "gzip");
 	} else {
-            requestHeader.put(httpRequestHeader.ACCEPT_ENCODING, "");
+            requestHeader.put(httpHeader.ACCEPT_ENCODING, "");
 	}
         
         addXForwardedForHeader(conProp, requestHeader);
@@ -1111,7 +1111,7 @@ public final class httpdProxyHandler {
     private static void correctContentEncoding(final httpResponseHeader responseHeader) {
         // TODO gzip again? set "correct" encoding?
         if(responseHeader.gzip()) {
-            responseHeader.remove(httpResponseHeader.CONTENT_ENCODING);
+            responseHeader.remove(httpHeader.CONTENT_ENCODING);
             responseHeader.remove(httpHeader.CONTENT_LENGTH); // remove gziped length
         }
     }
@@ -1158,11 +1158,11 @@ public final class httpdProxyHandler {
         headers.remove(httpRequestHeader.X_CACHE_LOOKUP);     
         
         // remove transfer encoding header
-        headers.remove(httpResponseHeader.TRANSFER_ENCODING);
+        headers.remove(httpHeader.TRANSFER_ENCODING);
         
         //removing yacy status headers
-        headers.remove(httpResponseHeader.X_YACY_KEEP_ALIVE_REQUEST_COUNT);
-        headers.remove(httpResponseHeader.X_YACY_ORIGINAL_REQUEST_LINE);
+        headers.remove(httpHeader.X_YACY_KEEP_ALIVE_REQUEST_COUNT);
+        headers.remove(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE);
     }
 
     private static void setViaHeader(final httpHeader header, final String httpVer) {

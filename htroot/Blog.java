@@ -36,6 +36,7 @@ import java.util.Iterator;
 
 import de.anomic.data.blogBoard;
 import de.anomic.data.userDB;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -67,7 +68,7 @@ public class Blog {
         prop.put("display", 1); // Fixed to 1
 
         
-        final boolean xml = (header.get(httpRequestHeader.CONNECTION_PROP_PATH)).endsWith(".xml");
+        final boolean xml = (header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".xml");
         final String address = sb.peers.mySeed().getPublicAddress();
 
         if(hasRights) {
@@ -96,7 +97,7 @@ public class Blog {
         }
 
         String pagename = post.get("page", DEFAULT_PAGE);
-        final String ip = (String)header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String ip = (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
         String StrAuthor = post.get("author", "");
 

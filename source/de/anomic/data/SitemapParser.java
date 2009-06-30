@@ -42,6 +42,7 @@ import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.httpClient;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpdByteCountInputStream;
@@ -152,7 +153,7 @@ public class SitemapParser extends DefaultHandler {
     public void parse() {
         // download document
         final httpRequestHeader requestHeader = new httpRequestHeader();
-        requestHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+        requestHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
         final httpClient client = new httpClient(5000, requestHeader);
         httpResponse res = null;
         try {

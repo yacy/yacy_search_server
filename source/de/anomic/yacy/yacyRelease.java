@@ -47,8 +47,8 @@ import java.util.TreeSet;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
 import de.anomic.http.httpClient;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpResponse;
-import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.FileUtils;
@@ -273,7 +273,7 @@ public final class yacyRelease extends yacyVersion {
         File download = null;
         // setup httpClient
         final httpRequestHeader reqHeader = new httpRequestHeader();
-        reqHeader.put(httpResponseHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+        reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
         
         httpResponse res = null;
         final String name = this.getUrl().getFileName();

@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaParserConfig;
@@ -162,7 +163,7 @@ public final class Settings_p {
         }
         
         // clientIP
-        prop.putXML("clientIP", (String) header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "<unknown>")); // read an artificial header addendum
+        prop.putXML("clientIP", (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "<unknown>")); // read an artificial header addendum
         
         /* 
          * seed upload settings

@@ -25,7 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -217,7 +217,7 @@ public class CrawlProfileEditor_p {
         prop.put("crawlProfiles_" + count + "_depth", profile.depth());
         prop.put("crawlProfiles_" + count + "_mustmatch", profile.mustMatchPattern().toString());
         prop.put("crawlProfiles_" + count + "_mustnotmatch", profile.mustNotMatchPattern().toString());
-        prop.put("crawlProfiles_" + count + "_crawlingIfOlder", (profile.recrawlIfOlder() == 0L) ? "no re-crawl" : ""+ SimpleDateFormat.getDateTimeInstance().format(profile.recrawlIfOlder()));
+        prop.put("crawlProfiles_" + count + "_crawlingIfOlder", (profile.recrawlIfOlder() == 0L) ? "no re-crawl" : ""+ DateFormat.getDateTimeInstance().format(profile.recrawlIfOlder()));
         prop.put("crawlProfiles_" + count + "_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : Integer.toString(profile.domFilterDepth()));
 
         // start contrib [MN]

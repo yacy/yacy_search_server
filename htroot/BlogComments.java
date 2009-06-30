@@ -40,6 +40,7 @@ import de.anomic.data.blogBoardComments;
 import de.anomic.data.messageBoard;
 import de.anomic.data.userDB;
 import de.anomic.data.blogBoard.BlogEntry;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -83,7 +84,7 @@ public class BlogComments {
         }
 
         final String pagename = post.get("page", "blog_default");
-        final String ip = post.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String ip = post.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
         String StrAuthor = post.get("author", "anonymous");
 

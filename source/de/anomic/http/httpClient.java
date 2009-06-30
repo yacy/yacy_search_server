@@ -324,7 +324,7 @@ public class httpClient {
         if (gzipBody) {
             data = zipRequest(data);
 
-            post.setRequestHeader(httpResponseHeader.CONTENT_ENCODING, httpHeader.CONTENT_ENCODING_GZIP);
+            post.setRequestHeader(httpHeader.CONTENT_ENCODING, httpHeader.CONTENT_ENCODING_GZIP);
             post.setContentChunked(true);
         }
         post.setRequestEntity(data);
@@ -790,7 +790,7 @@ public class httpClient {
                 header = new httpRequestHeader();
             }
             // set host-header
-            header.add(httpRequestHeader.HOST, vhost);
+            header.add(httpHeader.HOST, vhost);
         }
     }
 

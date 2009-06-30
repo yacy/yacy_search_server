@@ -45,6 +45,7 @@ import de.anomic.data.list.ListAccumulator;
 import de.anomic.data.list.XMLBlacklistImporter;
 import de.anomic.htmlFilter.htmlFilterCharacterCoding;
 import de.anomic.http.httpClient;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -139,9 +140,9 @@ public class sharedBlacklist_p {
                     // download the blacklist
                     try {
                         final httpRequestHeader reqHeader = new httpRequestHeader();
-                        reqHeader.put(httpRequestHeader.PRAGMA,"no-cache");
-                        reqHeader.put(httpRequestHeader.CACHE_CONTROL,"no-cache");
-                        reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+                        reqHeader.put(httpHeader.PRAGMA,"no-cache");
+                        reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
+                        reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
                         
                         // get List
                         yacyURL u = new yacyURL(downloadURLOld, null);
@@ -164,7 +165,7 @@ public class sharedBlacklist_p {
                 try {
                     final yacyURL u = new yacyURL(downloadURL, null);
                     final httpRequestHeader reqHeader = new httpRequestHeader();
-                    reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
                     otherBlacklist = FileUtils.strings(httpClient.wget(u.toString(), reqHeader, 10000), "UTF-8"); //get List
                 } catch (final Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);

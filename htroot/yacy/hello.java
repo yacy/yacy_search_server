@@ -32,6 +32,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
@@ -72,7 +73,7 @@ public final class hello {
         int  count = 0;
         try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (final NumberFormatException e) {count = 0;}
 //      final Date remoteTime = yacyCore.parseUniversalDate((String) post.get(MYTIME)); // read remote time
-        final String clientip = (String) header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
+        final String clientip = (String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
         final InetAddress ias = serverDomains.dnsResolve(clientip);
         if (ias == null) {
             prop.put("message", "cannot resolve your IP from your reported location " + clientip);
@@ -96,7 +97,7 @@ public final class hello {
 //      if ((properTest != null) && (! properTest.substring(0,1).equals("IP"))) { return null; }
 
         // we easily know the caller's IP:
-        final String userAgent = (String) header.get(httpRequestHeader.USER_AGENT, "<unknown>");
+        final String userAgent = (String) header.get(httpHeader.USER_AGENT, "<unknown>");
         final String reportedip = remoteSeed.getIP();
         final String reportedPeerType = remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
         final float clientversion = remoteSeed.getVersion();

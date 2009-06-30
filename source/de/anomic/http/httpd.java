@@ -261,33 +261,33 @@ public final class httpd implements serverHandler, Cloneable {
     private boolean handlePersistentConnection(final httpRequestHeader header) {
         
         if (!keepAliveSupport) {
-            this.prop.put(httpRequestHeader.CONNECTION_PROP_PERSISTENT,"close");
+            this.prop.put(httpHeader.CONNECTION_PROP_PERSISTENT,"close");
             return false;
         }
         
         // getting the http version that is used by the client
-        final String httpVersion = this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
+        final String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");
         
         // managing keep-alive: in HTTP/0.9 and HTTP/1.0 every connection is closed
         // afterwards. In HTTP/1.1 (and above, in the future?) connections are
         // persistent by default, but closed with the "Connection: close"
         // property.
-        boolean persistent = !(httpVersion.equals(httpRequestHeader.HTTP_VERSION_0_9) || httpVersion.equals(httpRequestHeader.HTTP_VERSION_1_0));
+        boolean persistent = !(httpVersion.equals(httpHeader.HTTP_VERSION_0_9) || httpVersion.equals(httpHeader.HTTP_VERSION_1_0));
         if (((String)header.get(httpRequestHeader.CONNECTION, "keep-alive")).toLowerCase().indexOf("close") != -1 || 
             ((String)header.get(httpRequestHeader.PROXY_CONNECTION, "keep-alive")).toLowerCase().indexOf("close") != -1) {
             persistent = false;
         }        
         
         final String transferEncoding = (String) header.get(httpHeader.TRANSFER_ENCODING, "identity");
-        final boolean isPostRequest = this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_METHOD).equals(httpRequestHeader.METHOD_POST);
+        final boolean isPostRequest = this.prop.getProperty(httpHeader.CONNECTION_PROP_METHOD).equals(httpHeader.METHOD_POST);
         final boolean hasContentLength = header.containsKey(httpHeader.CONTENT_LENGTH);
         final boolean hasTransferEncoding = header.containsKey(httpHeader.TRANSFER_ENCODING) && !transferEncoding.equalsIgnoreCase("identity");
         
         // if the request does not contain a content-length we have to close the connection
         // independently of the value of the connection header
         if (persistent && isPostRequest && !(hasContentLength || hasTransferEncoding)) 
-        	  this.prop.put(httpRequestHeader.CONNECTION_PROP_PERSISTENT,"close");
-        else  this.prop.put(httpRequestHeader.CONNECTION_PROP_PERSISTENT,persistent?"keep-alive":"close");
+        	  this.prop.put(httpHeader.CONNECTION_PROP_PERSISTENT,"close");
+        else  this.prop.put(httpHeader.CONNECTION_PROP_PERSISTENT,persistent?"keep-alive":"close");
         
         return persistent;
     }
@@ -304,7 +304,7 @@ public final class httpd implements serverHandler, Cloneable {
     
     private boolean handleServerAuthentication(final httpRequestHeader header) throws IOException {
         // getting the http version that is used by the client
-        final String httpVersion = this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");        
+        final String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");        
         
         // reading the authentication settings from switchboard
         if (this.serverAccountBase64MD5 == null) 
@@ -317,7 +317,7 @@ public final class httpd implements serverHandler, Cloneable {
                 this.session.out.write((httpVersion + " 401 log-in required" + serverCore.CRLF_STRING +
                         httpRequestHeader.WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.CRLF_STRING +
                         serverCore.CRLF_STRING).getBytes());
-                this.session.out.write((httpResponseHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
+                this.session.out.write((httpHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
                 this.session.out.write("\r\n".getBytes());
                 return false;
             } else if (!this.serverAccountBase64MD5.equals(Digest.encodeMD5Hex(auth.trim().substring(6)))) {
@@ -326,7 +326,7 @@ public final class httpd implements serverHandler, Cloneable {
                 this.session.out.write((httpVersion + " 401 log-in required" + serverCore.CRLF_STRING +
                         httpRequestHeader.WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + 
                         serverCore.CRLF_STRING).getBytes());
-                this.session.out.write((httpResponseHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
+                this.session.out.write((httpHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
                 this.session.out.write("\r\n".getBytes());                
                 this.session.out.flush();
                 return false;
@@ -342,7 +342,7 @@ public final class httpd implements serverHandler, Cloneable {
         // proxy hops must identify with 4 criteria:
         
         // the accessed port must not be port 80
-        final String host = this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_HOST);
+        final String host = this.prop.getProperty(httpHeader.CONNECTION_PROP_HOST);
         if (host == null) return false;
         int pos;
         if ((pos = host.indexOf(":")) < 0) {
@@ -352,7 +352,7 @@ public final class httpd implements serverHandler, Cloneable {
         if (Integer.parseInt(host.substring(pos + 1)) == 80) return false;
         
         // the access path must be into the yacy protocol path; it must start with 'yacy'
-        if (!(this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) return false;
+        if (!(this.prop.getProperty(httpHeader.CONNECTION_PROP_PATH, "").startsWith("/yacy/"))) return false;
 
         // the accessing client must identify with user:password, where
         // user = addressed peer name
@@ -364,12 +364,12 @@ public final class httpd implements serverHandler, Cloneable {
         }
         
         // the accessing client must use a yacy user-agent
-        if (!(((String) header.get(httpRequestHeader.USER_AGENT,"")).startsWith("yacy"))) return false;
+        if (!(((String) header.get(httpHeader.USER_AGENT,"")).startsWith("yacy"))) return false;
         
         // furthermore, YaCy hops must not exceed a specific access frequency
         
         // check access requester frequency: protection against DoS against this peer
-        final String requester = this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_CLIENTIP);
+        final String requester = this.prop.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP);
         if (requester == null) return false;
         if (lastAccessDelta(YaCyHopAccessRequester, requester) < 10000) return false;
         YaCyHopAccessRequester.put(requester, Long.valueOf(System.currentTimeMillis()));
@@ -422,8 +422,8 @@ public final class httpd implements serverHandler, Cloneable {
 			}
             // ask for authenticate
             this.session.out.write((httpVersion + " 407 Proxy Authentication Required" + serverCore.CRLF_STRING +
-                    httpRequestHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.CRLF_STRING).getBytes());
-            this.session.out.write((httpResponseHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
+                                    httpRequestHeader.PROXY_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.CRLF_STRING).getBytes());
+            this.session.out.write((httpHeader.CONTENT_LENGTH + ": 0\r\n").getBytes());
             this.session.out.write("\r\n".getBytes());                   
             this.session.out.flush();
             return false;
@@ -469,21 +469,21 @@ public final class httpd implements serverHandler, Cloneable {
     public Boolean GET(final String arg) {
         try {
             // parsing the http request line
-            parseRequestLine(httpRequestHeader.METHOD_GET,arg);
+            parseRequestLine(httpHeader.METHOD_GET,arg);
             
             // we now know the HTTP version. depending on that, we read the header            
-            final String httpVersion = this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_HTTP_VER, httpRequestHeader.HTTP_VERSION_0_9);
-            final httpRequestHeader header = (httpVersion.equals(httpRequestHeader.HTTP_VERSION_0_9)) 
+            final String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, httpHeader.HTTP_VERSION_0_9);
+            final httpRequestHeader header = (httpVersion.equals(httpHeader.HTTP_VERSION_0_9)) 
             			      ? new httpRequestHeader(reverseMappingCache) 
                               : httpRequestHeader.readHeader(this.prop,this.session);                  
             
             // handling transparent proxy support
-            httpRequestHeader.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy); 
+            httpHeader.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy); 
             
             // determines if the connection should be kept alive
             handlePersistentConnection(header);
             
-            if (this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_HOST).equals(virtualHost)) {
+            if (this.prop.getProperty(httpHeader.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
                 if (this.allowServer) {
                     if (this.handleServerAuthentication(header)) {
@@ -506,7 +506,7 @@ public final class httpd implements serverHandler, Cloneable {
                 }
             }
             
-            return this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
+            return this.prop.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (final Exception e) {
             logUnexpectedError(e);
             return serverCore.TERMINATE_CONNECTION;
@@ -537,22 +537,22 @@ public final class httpd implements serverHandler, Cloneable {
 
     public Boolean HEAD(final String arg) {
         try {
-            parseRequestLine(httpRequestHeader.METHOD_HEAD,arg);
+            parseRequestLine(httpHeader.METHOD_HEAD,arg);
             
             // we now know the HTTP version. depending on that, we read the header
             httpRequestHeader header;
-            final String httpVersion = this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_HTTP_VER, httpRequestHeader.HTTP_VERSION_0_9);
-            if (httpVersion.equals(httpRequestHeader.HTTP_VERSION_0_9)) header = new httpRequestHeader(reverseMappingCache);
+            final String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, httpHeader.HTTP_VERSION_0_9);
+            if (httpVersion.equals(httpHeader.HTTP_VERSION_0_9)) header = new httpRequestHeader(reverseMappingCache);
             else  header = httpRequestHeader.readHeader(this.prop,this.session);
             
             // handle transparent proxy support
-            httpRequestHeader.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy);
+            httpHeader.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy);
             
             // determines if the connection should be kept alive
             handlePersistentConnection(header);
             
             // return multi-line message
-            if (this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_HOST).equals(virtualHost)) {
+            if (this.prop.getProperty(httpHeader.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
                 if (allowServer) {
                     if (handleServerAuthentication(header)) {
@@ -576,7 +576,7 @@ public final class httpd implements serverHandler, Cloneable {
                     return serverCore.TERMINATE_CONNECTION;
                 }
             }
-            return this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
+            return this.prop.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (final Exception e) {
             logUnexpectedError(e);
             return serverCore.TERMINATE_CONNECTION;
@@ -585,22 +585,22 @@ public final class httpd implements serverHandler, Cloneable {
     
     public Boolean POST(final String arg) {
         try {
-            parseRequestLine(httpRequestHeader.METHOD_POST,arg);
+            parseRequestLine(httpHeader.METHOD_POST,arg);
             
             // we now know the HTTP version. depending on that, we read the header
             httpRequestHeader header;
-            final String httpVersion = this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_HTTP_VER, httpRequestHeader.HTTP_VERSION_0_9);
+            final String httpVersion = this.prop.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER, httpHeader.HTTP_VERSION_0_9);
             if (httpVersion.equals(httpHeader.HTTP_VERSION_0_9))  header = new httpRequestHeader(reverseMappingCache);
             else header = httpRequestHeader.readHeader(this.prop,this.session);
             
             // handle transfer-coding
             final InputStream sessionIn;
-            final String transferEncoding = header.get(httpRequestHeader.TRANSFER_ENCODING);
+            final String transferEncoding = header.get(httpHeader.TRANSFER_ENCODING);
             if (transferEncoding != null) {
-                if (!httpRequestHeader.HTTP_VERSION_1_1.equals(httpVersion)) {
+                if (!httpHeader.HTTP_VERSION_1_1.equals(httpVersion)) {
                     log.logWarning("client "+ session.getName() +" uses transfer-coding with HTTP version "+ httpVersion +"!");
                 }
-                if("chunked".equalsIgnoreCase(header.get(httpRequestHeader.TRANSFER_ENCODING))) {
+                if("chunked".equalsIgnoreCase(header.get(httpHeader.TRANSFER_ENCODING))) {
                     sessionIn = new ChunkedInputStream(this.session.in);
                 } else {
                     // "A server which receives an entity-body with a transfer-coding it does
@@ -614,13 +614,13 @@ public final class httpd implements serverHandler, Cloneable {
             }
             
             // handle transparent proxy support
-            httpRequestHeader.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy);
+            httpHeader.handleTransparentProxySupport(header, this.prop, virtualHost, httpdProxyHandler.isTransparentProxy);
             
             // determines if the connection should be kept alive
             handlePersistentConnection(header);
             
             // return multi-line message
-            if (prop.getProperty(httpRequestHeader.CONNECTION_PROP_HOST).equals(virtualHost)) {
+            if (prop.getProperty(httpHeader.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
                 if (allowServer) {
                     if (handleServerAuthentication(header)) {
@@ -644,7 +644,7 @@ public final class httpd implements serverHandler, Cloneable {
             }
             if(sessionIn instanceof ChunkedInputStream) sessionIn.close(); // read to end, but do not close the stream (maybe HTTP/1.1 persistent)
             //return serverCore.RESUME_CONNECTION;
-            return this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
+            return this.prop.getProperty(httpHeader.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (final Exception e) {
             logUnexpectedError(e);
             return serverCore.TERMINATE_CONNECTION;
@@ -663,10 +663,10 @@ public final class httpd implements serverHandler, Cloneable {
             httpVersion = arg.substring(pos + 1);
             arg = arg.substring(0, pos);
         }
-        prop.setProperty(httpRequestHeader.CONNECTION_PROP_HTTP_VER, httpVersion);
+        prop.setProperty(httpHeader.CONNECTION_PROP_HTTP_VER, httpVersion);
         
         // parse hostname and port
-        prop.setProperty(httpRequestHeader.CONNECTION_PROP_HOST, arg);
+        prop.setProperty(httpHeader.CONNECTION_PROP_HOST, arg);
         pos = arg.indexOf(":");
         int port = 443;
         if (pos >= 0) {
@@ -675,11 +675,11 @@ public final class httpd implements serverHandler, Cloneable {
         }       
         
         // setting other connection properties
-        prop.setProperty(httpRequestHeader.CONNECTION_PROP_CLIENTIP, this.clientIP);
-        prop.setProperty(httpRequestHeader.CONNECTION_PROP_METHOD, httpHeader.METHOD_CONNECT);
-        prop.setProperty(httpRequestHeader.CONNECTION_PROP_PATH, "/");
-        prop.setProperty(httpRequestHeader.CONNECTION_PROP_EXT, "");
-        prop.setProperty(httpRequestHeader.CONNECTION_PROP_URL, "");        
+        prop.setProperty(httpHeader.CONNECTION_PROP_CLIENTIP, this.clientIP);
+        prop.setProperty(httpHeader.CONNECTION_PROP_METHOD, httpHeader.METHOD_CONNECT);
+        prop.setProperty(httpHeader.CONNECTION_PROP_PATH, "/");
+        prop.setProperty(httpHeader.CONNECTION_PROP_EXT, "");
+        prop.setProperty(httpHeader.CONNECTION_PROP_URL, "");        
         
         // parse remaining lines
         final httpRequestHeader header = httpRequestHeader.readHeader(this.prop,this.session);               
@@ -716,18 +716,18 @@ public final class httpd implements serverHandler, Cloneable {
         httpRequestHeader.parseRequestLine(cmd,s,this.prop,virtualHost);
         
         // track the request
-        final String path = this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_URL);
-        final String args = this.prop.getProperty(httpRequestHeader.CONNECTION_PROP_ARGS, "");
+        final String path = this.prop.getProperty(httpHeader.CONNECTION_PROP_URL);
+        final String args = this.prop.getProperty(httpHeader.CONNECTION_PROP_ARGS, "");
         switchboard.track(this.userAddress.getHostName(), (args.length() > 0) ? path + "?" + args : path);
         
         // reseting the empty request counter
         this.emptyRequestCount = 0;
         
         // counting the amount of received requests within this permanent connection
-        this.prop.setProperty(httpRequestHeader.CONNECTION_PROP_KEEP_ALIVE_COUNT, Integer.toString(++this.keepAliveRequestCount));
+        this.prop.setProperty(httpHeader.CONNECTION_PROP_KEEP_ALIVE_COUNT, Integer.toString(++this.keepAliveRequestCount));
         
         // setting the client-IP
-        this.prop.setProperty(httpRequestHeader.CONNECTION_PROP_CLIENTIP, this.clientIP);
+        this.prop.setProperty(httpHeader.CONNECTION_PROP_CLIENTIP, this.clientIP);
     }
     
     // some static methods that needs to be used from any CGI
@@ -1109,20 +1109,20 @@ public final class httpd implements serverHandler, Cloneable {
         ByteArrayOutputStream o = null;
         try {
             // setting the proper http status message
-            final String httpVersion = conProp.getProperty(httpRequestHeader.CONNECTION_PROP_HTTP_VER,"HTTP/1.1");
+            final String httpVersion = conProp.getProperty(httpHeader.CONNECTION_PROP_HTTP_VER,"HTTP/1.1");
             if ((httpStatusText == null)||(httpStatusText.length()==0)) {
-                if (httpVersion.equals("HTTP/1.0") && httpRequestHeader.http1_0.containsKey(Integer.toString(httpStatusCode))) 
-                    httpStatusText = httpRequestHeader.http1_0.get(Integer.toString(httpStatusCode));
-                else if (httpVersion.equals("HTTP/1.1") && httpRequestHeader.http1_1.containsKey(Integer.toString(httpStatusCode)))
-                    httpStatusText = httpRequestHeader.http1_1.get(Integer.toString(httpStatusCode));
+                if (httpVersion.equals("HTTP/1.0") && httpHeader.http1_0.containsKey(Integer.toString(httpStatusCode))) 
+                    httpStatusText = httpHeader.http1_0.get(Integer.toString(httpStatusCode));
+                else if (httpVersion.equals("HTTP/1.1") && httpHeader.http1_1.containsKey(Integer.toString(httpStatusCode)))
+                    httpStatusText = httpHeader.http1_1.get(Integer.toString(httpStatusCode));
                 else httpStatusText = "Unknown";
             }
             
             // generating the desired request url
-            String host = conProp.getProperty(httpRequestHeader.CONNECTION_PROP_HOST);
-            final String path = conProp.getProperty(httpRequestHeader.CONNECTION_PROP_PATH,"/");
-            final String args = conProp.getProperty(httpRequestHeader.CONNECTION_PROP_ARGS);
-            final String method = conProp.getProperty(httpRequestHeader.CONNECTION_PROP_METHOD);
+            String host = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
+            final String path = conProp.getProperty(httpHeader.CONNECTION_PROP_PATH,"/");
+            final String args = conProp.getProperty(httpHeader.CONNECTION_PROP_ARGS);
+            final String method = conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD);
             
             int port = 80;
             final int pos = host.indexOf(":");        
@@ -1133,7 +1133,7 @@ public final class httpd implements serverHandler, Cloneable {
             
             String urlString;
             try {
-                urlString = (new yacyURL((method.equals(httpRequestHeader.METHOD_CONNECT)?"https":"http"), host, port, (args == null) ? path : path + "?" + args)).toString();
+                urlString = (new yacyURL((method.equals(httpHeader.METHOD_CONNECT)?"https":"http"), host, port, (args == null) ? path : path + "?" + args)).toString();
             } catch (final MalformedURLException e) {
                 urlString = "invalid URL";
             }
@@ -1144,7 +1144,7 @@ public final class httpd implements serverHandler, Cloneable {
 //            tp.put("host", serverCore.publicIP().getHostAddress());
 //            tp.put("port", switchboard.getConfig("port", "8080"));
 
-            final String clientIP = conProp.getProperty(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+            final String clientIP = conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
             // check if ip is local ip address
             final InetAddress hostAddress = serverDomains.dnsResolve(clientIP);
@@ -1171,7 +1171,7 @@ public final class httpd implements serverHandler, Cloneable {
             tp.put("peerName", (getAlternativeResolver() == null) ? "" : getAlternativeResolver().myName());
             tp.put("errorMessageType", errorcase);
             tp.put("httpStatus",       Integer.toString(httpStatusCode) + " " + httpStatusText);
-            tp.put("requestMethod",    conProp.getProperty(httpRequestHeader.CONNECTION_PROP_METHOD));
+            tp.put("requestMethod",    conProp.getProperty(httpHeader.CONNECTION_PROP_METHOD));
             tp.put("requestURL",       urlString);
 
             switch (errorcase) {
@@ -1220,11 +1220,11 @@ public final class httpd implements serverHandler, Cloneable {
 
             if(header == null)
                 header = new httpResponseHeader();
-            header.put(httpResponseHeader.CONNECTION_PROP_PROXY_RESPOND_STATUS, Integer.toString(httpStatusCode));
-            header.put(httpResponseHeader.DATE, systemDate);
-            header.put(httpResponseHeader.CONTENT_TYPE, "text/html");
-            header.put(httpResponseHeader.CONTENT_LENGTH, Integer.toString(result.length));
-            header.put(httpResponseHeader.PRAGMA, "no-cache");
+            header.put(httpHeader.CONNECTION_PROP_PROXY_RESPOND_STATUS, Integer.toString(httpStatusCode));
+            header.put(httpHeader.DATE, systemDate);
+            header.put(httpHeader.CONTENT_TYPE, "text/html");
+            header.put(httpHeader.CONTENT_LENGTH, Integer.toString(result.length));
+            header.put(httpHeader.PRAGMA, "no-cache");
             sendRespondHeader(conProp,respond,httpVersion,httpStatusCode,httpStatusText,header);
 
             if (! method.equals(httpHeader.METHOD_HEAD)) {
@@ -1274,17 +1274,17 @@ public final class httpd implements serverHandler, Cloneable {
         if(headers==null) headers = new httpResponseHeader();
         final Date now = new Date(System.currentTimeMillis());
         
-        headers.put(httpResponseHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
-        headers.put(httpResponseHeader.DATE, DateFormatter.formatRFC1123(now));
+        headers.put(httpHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
+        headers.put(httpHeader.DATE, DateFormatter.formatRFC1123(now));
         if (moddate.after(now)) {
             System.out.println("*** DEBUG: correcting moddate = " + moddate.toString() + " to now = " + now.toString());
             moddate = now;
         }
-        headers.put(httpResponseHeader.LAST_MODIFIED, DateFormatter.formatRFC1123(moddate));
+        headers.put(httpHeader.LAST_MODIFIED, DateFormatter.formatRFC1123(moddate));
         
         if (nocache) {
-            if (httpVersion.toUpperCase().equals(httpHeader.HTTP_VERSION_1_1)) headers.put(httpResponseHeader.CACHE_CONTROL, "no-cache");
-            else headers.put(httpResponseHeader.PRAGMA, "no-cache");
+            if (httpVersion.toUpperCase().equals(httpHeader.HTTP_VERSION_1_1)) headers.put(httpHeader.CACHE_CONTROL, "no-cache");
+            else headers.put(httpHeader.PRAGMA, "no-cache");
         }
         
         if (contentType == null) 
@@ -1292,11 +1292,11 @@ public final class httpd implements serverHandler, Cloneable {
         else if (contentType.startsWith("text/") && contentType.toLowerCase().indexOf("charset=")==-1)
             contentType +="; charset=" + Charset.defaultCharset().name();
         headers.put(httpHeader.CONTENT_TYPE, contentType);  
-        if (contentLength > 0)   headers.put(httpResponseHeader.CONTENT_LENGTH, Long.toString(contentLength));
-        //if (cookie != null)      headers.put(httpResponseHeader.SET_COOKIE, cookie);
-        if (expires != null)     headers.put(httpResponseHeader.EXPIRES, DateFormatter.formatRFC1123(expires));
-        if (contentEnc != null)  headers.put(httpResponseHeader.CONTENT_ENCODING, contentEnc);
-        if (transferEnc != null) headers.put(httpResponseHeader.TRANSFER_ENCODING, transferEnc);
+        if (contentLength > 0)   headers.put(httpHeader.CONTENT_LENGTH, Long.toString(contentLength));
+        //if (cookie != null)      headers.put(httpHeader.SET_COOKIE, cookie);
+        if (expires != null)     headers.put(httpHeader.EXPIRES, DateFormatter.formatRFC1123(expires));
+        if (contentEnc != null)  headers.put(httpHeader.CONTENT_ENCODING, contentEnc);
+        if (transferEnc != null) headers.put(httpHeader.TRANSFER_ENCODING, transferEnc);
         
         sendRespondHeader(conProp, respond, httpVersion, httpStatusCode, httpStatusText, headers);
     }
@@ -1327,10 +1327,10 @@ public final class httpd implements serverHandler, Cloneable {
         
         try {                        
             if ((httpStatusText == null)||(httpStatusText.length()==0)) {
-                if (httpVersion.equals(httpResponseHeader.HTTP_VERSION_1_0) && httpHeader.http1_0.containsKey(Integer.toString(httpStatusCode))) 
-                    httpStatusText = httpResponseHeader.http1_0.get(Integer.toString(httpStatusCode));
-                else if (httpVersion.equals(httpResponseHeader.HTTP_VERSION_1_1) && httpHeader.http1_1.containsKey(Integer.toString(httpStatusCode)))
-                    httpStatusText = httpResponseHeader.http1_1.get(Integer.toString(httpStatusCode));
+                if (httpVersion.equals(httpHeader.HTTP_VERSION_1_0) && httpHeader.http1_0.containsKey(Integer.toString(httpStatusCode))) 
+                    httpStatusText = httpHeader.http1_0.get(Integer.toString(httpStatusCode));
+                else if (httpVersion.equals(httpHeader.HTTP_VERSION_1_1) && httpHeader.http1_1.containsKey(Integer.toString(httpStatusCode)))
+                    httpStatusText = httpHeader.http1_1.get(Integer.toString(httpStatusCode));
                 else httpStatusText = "Unknown";
             }
             
@@ -1360,9 +1360,9 @@ public final class httpd implements serverHandler, Cloneable {
                     responseHeader.put(httpHeader.CONTENT_LENGTH, "0");
                 
                 // adding some yacy specific headers
-                responseHeader.put(httpResponseHeader.X_YACY_KEEP_ALIVE_REQUEST_COUNT,conProp.getProperty(httpRequestHeader.CONNECTION_PROP_KEEP_ALIVE_COUNT));
-                responseHeader.put(httpResponseHeader.X_YACY_ORIGINAL_REQUEST_LINE,conProp.getProperty(httpRequestHeader.CONNECTION_PROP_REQUESTLINE));
-                responseHeader.put(httpResponseHeader.X_YACY_PREVIOUS_REQUEST_LINE,conProp.getProperty(httpRequestHeader.CONNECTION_PROP_PREV_REQUESTLINE));
+                responseHeader.put(httpHeader.X_YACY_KEEP_ALIVE_REQUEST_COUNT,conProp.getProperty(httpHeader.CONNECTION_PROP_KEEP_ALIVE_COUNT));
+                responseHeader.put(httpHeader.X_YACY_ORIGINAL_REQUEST_LINE,conProp.getProperty(httpHeader.CONNECTION_PROP_REQUESTLINE));
+                responseHeader.put(httpHeader.X_YACY_PREVIOUS_REQUEST_LINE,conProp.getProperty(httpHeader.CONNECTION_PROP_PREV_REQUESTLINE));
                   
                 //read custom headers
                 /*

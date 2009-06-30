@@ -29,6 +29,7 @@
 import java.io.File;
 
 import de.anomic.data.listManager;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
@@ -60,7 +61,7 @@ public final class list {
             final yacySeed bla = sb.peers.get(post.get("iam", ""));
             if (bla != null) otherPeerName = bla.getName();
         }
-        if (otherPeerName == null) otherPeerName = header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP);
+        if (otherPeerName == null) otherPeerName = header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
         
         if ((sb.isRobinsonMode()) && (!sb.isInMyCluster(otherPeerName))) {
             // if we are a robinson cluster, answer only if this client is known by our network definition

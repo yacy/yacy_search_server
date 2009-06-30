@@ -304,7 +304,7 @@ public class httpdProxyCacheEntry implements Document {
             // -pragma in response
             // if we have a pragma non-cache, we don't cache. usually if this is wanted from
             // the server, it makes sense
-            String cacheControl = responseHeader.get(httpResponseHeader.PRAGMA);
+            String cacheControl = responseHeader.get(httpHeader.PRAGMA);
             if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return "controlled_no_cache"; }
 
             // -expires in response
@@ -313,7 +313,7 @@ public class httpdProxyCacheEntry implements Document {
 
             // -cache-control in response
             // the cache-control has many value options.
-            cacheControl = responseHeader.get(httpResponseHeader.CACHE_CONTROL);
+            cacheControl = responseHeader.get(httpHeader.CACHE_CONTROL);
             if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
                 if (cacheControl.startsWith("MAX-AGE=")) {
@@ -364,10 +364,10 @@ public class httpdProxyCacheEntry implements Document {
             if (requestHeader.containsKey(httpHeader.RANGE)) { return false; }
 
             // if the client requests a un-cached copy of the resource ...
-            cacheControl = requestHeader.get(httpResponseHeader.PRAGMA);
+            cacheControl = requestHeader.get(httpHeader.PRAGMA);
             if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return false; }
 
-            cacheControl = requestHeader.get(httpResponseHeader.CACHE_CONTROL);
+            cacheControl = requestHeader.get(httpHeader.CACHE_CONTROL);
             if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
                 if (cacheControl.startsWith("NO-CACHE") || cacheControl.startsWith("MAX-AGE=0")) { return false; }
@@ -379,7 +379,7 @@ public class httpdProxyCacheEntry implements Document {
             if (requestHeader.containsKey(httpRequestHeader.IF_MODIFIED_SINCE)) {
                 // checking this makes only sense if the cached response contains
                 // a Last-Modified field. If the field does not exist, we go the safe way
-                if (!responseHeader.containsKey(httpResponseHeader.LAST_MODIFIED)) { return false; }
+                if (!responseHeader.containsKey(httpHeader.LAST_MODIFIED)) { return false; }
                 // parse date
                 Date d1, d2;
                 d2 = responseHeader.lastModified(); if (d2 == null) { d2 = new Date(DateFormatter.correctedUTCTime()); }
@@ -396,8 +396,8 @@ public class httpdProxyCacheEntry implements Document {
                 // -set-cookie in cached response
                 // this is a similar case as for COOKIE.
                 if (requestHeader.containsKey(httpRequestHeader.COOKIE) ||
-                    responseHeader.containsKey(httpResponseHeader.SET_COOKIE) ||
-                    responseHeader.containsKey(httpResponseHeader.SET_COOKIE2)) {
+                    responseHeader.containsKey(httpHeader.SET_COOKIE) ||
+                    responseHeader.containsKey(httpHeader.SET_COOKIE2)) {
                     return false; // too strong
                 }
             }
@@ -408,7 +408,7 @@ public class httpdProxyCacheEntry implements Document {
             // logically, we would not need to care about no-cache pragmas in cached response headers,
             // because they cannot exist since they are not written to the cache.
             // So this IF should always fail..
-            cacheControl = responseHeader.get(httpResponseHeader.PRAGMA); 
+            cacheControl = responseHeader.get(httpHeader.PRAGMA); 
             if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return false; }
     
             // see for documentation also:
@@ -427,7 +427,7 @@ public class httpdProxyCacheEntry implements Document {
                 if (expires.before(new Date(DateFormatter.correctedUTCTime()))) { return false; }
             }
             final Date lastModified = responseHeader.lastModified();
-            cacheControl = responseHeader.get(httpResponseHeader.CACHE_CONTROL);
+            cacheControl = responseHeader.get(httpHeader.CACHE_CONTROL);
             if (cacheControl == null && lastModified == null && expires == null) { return false; }
     
             // -lastModified in cached response

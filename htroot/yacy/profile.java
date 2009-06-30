@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Properties;
 
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -52,7 +53,7 @@ public final class profile {
 
         if ((sb.isRobinsonMode()) &&
            	(!sb.isPublicRobinson()) &&
-           	(!sb.isInMyCluster(header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP)))) {
+           	(!sb.isInMyCluster(header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))) {
                // if we are a robinson cluster, answer only if this client is known by our network definition
         	prop.put("list", "0");
             return prop;

@@ -24,6 +24,7 @@
 //javac -classpath .:../Classes Status.java
 //if the shell's current path is HTROOT
 
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -42,7 +43,7 @@ public class YaCySearchPluginFF {
         final serverObjects prop = new serverObjects();
         
         // getting the http host header
-        final String hostSocket = header.get(httpRequestHeader.CONNECTION_PROP_HOST);
+        final String hostSocket = header.get(httpHeader.CONNECTION_PROP_HOST);
         
         String host = hostSocket;
         int port = 80;

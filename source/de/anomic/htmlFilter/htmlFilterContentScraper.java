@@ -46,6 +46,7 @@ import javax.swing.event.EventListenerList;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.httpClient;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaParser;
@@ -512,7 +513,7 @@ public class htmlFilterContentScraper extends htmlFilterAbstractScraper implemen
     public static htmlFilterContentScraper parseResource(final yacyURL location) throws IOException {
         // load page
         final httpRequestHeader reqHeader = new httpRequestHeader();
-        reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+        reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
         return parseResource(location, reqHeader);
     }
     

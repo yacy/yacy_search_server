@@ -252,7 +252,7 @@ public final class yacy {
                         final String svrReleaseNr = matcher.group(1);
                         try {
                             try {version = Double.parseDouble(vString);} catch (final NumberFormatException e) {version = (float) 0.1;}
-                            version = yacyRelease.versvn2combinedVersion(version, Integer.parseInt(svrReleaseNr));
+                            version = yacyVersion.versvn2combinedVersion(version, Integer.parseInt(svrReleaseNr));
                         } catch (final NumberFormatException e) {}
                         sb.setConfig("svnRevision", svrReleaseNr);
                     }

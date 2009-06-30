@@ -30,6 +30,7 @@
 import java.io.IOException;
 
 import de.anomic.data.userDB;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpd;
@@ -61,7 +62,7 @@ public class User{
             prop.put("logged-in_identified-by", "2");
             //try via ip
             if(entry == null){
-                entry=sb.userDB.ipAuth(((String)requestHeader.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")));
+                entry=sb.userDB.ipAuth(((String)requestHeader.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")));
                 if(entry != null){
                     prop.put("logged-in_identified-by", "0");
                 }
@@ -144,7 +145,7 @@ public class User{
         if(post!=null && post.containsKey("logout")){
             prop.put("logged-in", "0");
             if(entry != null){
-                entry.logout(((String)requestHeader.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")), userDB.getLoginToken(requestHeader.getHeaderCookies())); //todo: logout cookie
+                entry.logout(((String)requestHeader.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")), userDB.getLoginToken(requestHeader.getHeaderCookies())); //todo: logout cookie
             }else{
                 sb.userDB.adminLogout(userDB.getLoginToken(requestHeader.getHeaderCookies()));
             }

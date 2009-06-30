@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 import de.anomic.data.messageBoard;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
@@ -126,7 +127,7 @@ public class Messages_p {
                     prop.putXML("mode_messages_"+count+"_key", key);
                     prop.put("mode_messages_"+count+"_hash", message.authorHash());
 
-                    if ((header.get(httpRequestHeader.CONNECTION_PROP_PATH)).endsWith(".rss")) {
+                    if ((header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".rss")) {
                     	// set the peer address
                     	prop.put("mode_messages_"+count+"_peerAddress", peerAddress);
 

@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpdProxyCacheEntry;
@@ -61,8 +62,8 @@ public class FTPLoader {
         httpRequestHeader requestHeader = new httpRequestHeader();
         if (entry.referrerhash() != null) requestHeader.put(httpRequestHeader.REFERER, sb.getURL(entry.referrerhash()).toNormalform(true, false));
         httpResponseHeader responseHeader = new httpResponseHeader();
-        responseHeader.put(httpResponseHeader.LAST_MODIFIED, DateFormatter.formatRFC1123(fileDate));
-        responseHeader.put(httpResponseHeader.CONTENT_TYPE, mimeType);
+        responseHeader.put(httpHeader.LAST_MODIFIED, DateFormatter.formatRFC1123(fileDate));
+        responseHeader.put(httpHeader.CONTENT_TYPE, mimeType);
         Document metadata = new httpdProxyCacheEntry(
                 entry.depth(), entry.url(), entry.name(), "OK",
                 requestHeader, responseHeader,

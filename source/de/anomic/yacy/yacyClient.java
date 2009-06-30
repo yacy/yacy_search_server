@@ -64,6 +64,7 @@ import de.anomic.data.Blacklist;
 import de.anomic.http.DefaultCharsetFilePart;
 import de.anomic.http.DefaultCharsetStringPart;
 import de.anomic.http.httpClient;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpRequestHeader;
@@ -269,8 +270,8 @@ public final class yacyClient {
      */
     private static byte[] wput(final String url, final String vhost, final List<Part> post, final int timeout, final boolean gzipBody) throws IOException {
         final httpRequestHeader header = new httpRequestHeader();
-        header.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
-        header.put(httpRequestHeader.HOST, vhost);
+        header.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+        header.put(httpHeader.HOST, vhost);
         final httpClient client = new httpClient(timeout, header);
         client.setProxy(proxyConfig());
         
@@ -1086,7 +1087,7 @@ public final class yacyClient {
             //System.out.println("permission=" + permissionMessage(args[1]));
             
             final httpRequestHeader reqHeader = new httpRequestHeader();
-            reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+            reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
             final byte[] content = httpClient.wget(
                                               "http://" + target.getPublicAddress() + "/yacy/search.html" +
                                                       "?myseed=" + sb.peers.mySeed().genSeedStr(null) +

@@ -32,6 +32,7 @@ import java.io.File;
 import java.util.regex.Pattern;
 
 import de.anomic.data.translator;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.http.httpdFileHandler;
@@ -121,8 +122,8 @@ public class ConfigBasic {
             if (upnp) UPnP.addPortMapping();
             
             String host = null;
-            if (header.containsKey(httpRequestHeader.HOST)) {
-                host = header.get(httpRequestHeader.HOST);
+            if (header.containsKey(httpHeader.HOST)) {
+                host = header.get(httpHeader.HOST);
                 final int idx = host.indexOf(":");
                 if (idx != -1) host = host.substring(0,idx);
             } else {

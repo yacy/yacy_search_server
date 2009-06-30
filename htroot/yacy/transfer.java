@@ -27,6 +27,7 @@
 import java.io.File;
 import java.io.IOException;
 
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
@@ -71,8 +72,8 @@ public final class transfer {
             // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
             // reject paths that contain '..' because they are dangerous
             if (sb.getLog().isFine()) {
-                if (otherseed == null) sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "', current IP " + header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
-                if (filename.indexOf("..") >= 0) sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + (otherseed == null ? "null" : otherseed.getName() + "/" + otherseed.getPublicAddress()) + ", current IP " + header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
+                if (otherseed == null) sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "', current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
+                if (filename.indexOf("..") >= 0) sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + (otherseed == null ? "null" : otherseed.getName() + "/" + otherseed.getPublicAddress()) + ", current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
             }
             return prop;
         }

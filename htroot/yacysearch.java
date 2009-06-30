@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.content.RSSMessage;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
@@ -80,7 +81,7 @@ public class yacysearch {
         }
         String promoteSearchPageGreeting = env.getConfig(plasmaSwitchboardConstants.GREETING, "");
         if (env.getConfigBool(plasmaSwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
-        final String client = header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
+        final String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
         
         // get query
         String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
@@ -336,7 +337,7 @@ public class yacysearch {
             if (language.startsWith("lang_")) language = language.substring(5);
             if (!iso639.exists(language)) {
                 // find out language of the user by reading of the user-agent string
-                String agent = header.get(httpRequestHeader.ACCEPT_LANGUAGE);
+                String agent = header.get(httpHeader.ACCEPT_LANGUAGE);
                 if (agent == null) agent = System.getProperty("user.language");
                 language = (agent == null) ? "en" : iso639.userAgentLanguageDetection(agent);
                 if (language == null) language = "en";

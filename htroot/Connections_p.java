@@ -35,6 +35,7 @@ import java.util.Set;
 
 import de.anomic.http.HttpConnectionInfo;
 import de.anomic.http.httpClient;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
 import de.anomic.kelondro.util.DateFormatter;
@@ -151,7 +152,7 @@ public final class Connections_p {
                     final Properties conProp = (Properties) currentHttpd.getConProp().clone();
                     
                     // getting the destination host
-                    dest = conProp.getProperty(httpRequestHeader.CONNECTION_PROP_HOST);
+                    dest = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
                     if (dest==null)continue;
                 } else if (cmdObj instanceof urlRedirectord) {
                     prot = "urlRedirector";

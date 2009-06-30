@@ -42,6 +42,7 @@ import java.util.TreeMap;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.http.httpClient;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpd;
@@ -817,9 +818,9 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     private ArrayList<String> downloadSeedFile(final yacyURL seedURL) throws IOException {
         // Configure http headers
         final httpRequestHeader reqHeader = new httpRequestHeader();
-        reqHeader.put(httpRequestHeader.PRAGMA, "no-cache");
-        reqHeader.put(httpRequestHeader.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?
-        reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+        reqHeader.put(httpHeader.PRAGMA, "no-cache");
+        reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?
+        reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
         
         // init http-client
         final httpClient client = new httpClient(10000, reqHeader);

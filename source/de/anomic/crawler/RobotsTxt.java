@@ -41,6 +41,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.http.httpClient;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.blob.Heap;
@@ -518,7 +519,7 @@ public class RobotsTxt {
         httpRequestHeader reqHeaders = new httpRequestHeader();
         
         // add yacybot user agent
-        reqHeaders.put(httpRequestHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+        reqHeaders.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
         
         // adding referer
         reqHeaders.put(httpRequestHeader.REFERER, (yacyURL.newURL(robotsURL,"/")).toNormalform(true, true));
@@ -550,7 +551,7 @@ public class RobotsTxt {
                 } else {
 
                     // getting some metadata
-                    eTag = res.getResponseHeader().containsKey(httpRequestHeader.ETAG)?(res.getResponseHeader().get(httpRequestHeader.ETAG)).trim():null;
+                    eTag = res.getResponseHeader().containsKey(httpHeader.ETAG)?(res.getResponseHeader().get(httpHeader.ETAG)).trim():null;
                     lastMod = res.getResponseHeader().lastModified();                    
                     
                     // if the robots.txt file was not changed we break here
@@ -575,7 +576,7 @@ public class RobotsTxt {
                 return null;
             } else if (res.getStatusLine().startsWith("3")) {
                 // getting redirection URL
-                String redirectionUrlString = res.getResponseHeader().get(httpRequestHeader.LOCATION);
+                String redirectionUrlString = res.getResponseHeader().get(httpHeader.LOCATION);
                 if (redirectionUrlString==null) {
                     if (log.isFinest()) log.logFinest("robots.txt could not be downloaded from URL '" + robotsURL + "' because of missing redirecton header. [" + res.getStatusLine() + "].");
                     robotsTxt = null;                    

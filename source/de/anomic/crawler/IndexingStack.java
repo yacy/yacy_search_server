@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.Base64Order;
@@ -481,7 +482,7 @@ public class IndexingStack {
                 // -if-modified-since in request
                 // if the page is fresh at the very moment we can index it
                 final Date ifModifiedSince = getModificationDate();
-                if ((ifModifiedSince != null) && (responseHeader.containsKey(httpResponseHeader.LAST_MODIFIED))) {
+                if ((ifModifiedSince != null) && (responseHeader.containsKey(httpHeader.LAST_MODIFIED))) {
                     // parse date
                     Date d = responseHeader.lastModified();
                     if (d == null) {
@@ -495,8 +496,8 @@ public class IndexingStack {
                 }
     
                 // -pragma in cached response
-                if (responseHeader.containsKey(httpResponseHeader.PRAGMA) &&
-                    (responseHeader.get(httpResponseHeader.PRAGMA)).toUpperCase().equals("NO-CACHE")) {
+                if (responseHeader.containsKey(httpHeader.PRAGMA) &&
+                    (responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE")) {
                     return "Denied_(pragma_no_cache)";
                 }
     
@@ -520,7 +521,7 @@ public class IndexingStack {
     
                 // -cache-control in cached response
                 // the cache-control has many value options.
-                String cacheControl = responseHeader.get(httpResponseHeader.CACHE_CONTROL);
+                String cacheControl = responseHeader.get(httpHeader.CACHE_CONTROL);
                 if (cacheControl != null) {
                     cacheControl = cacheControl.trim().toUpperCase();
                     /* we have the following cases for cache-control:

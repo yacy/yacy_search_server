@@ -144,6 +144,7 @@ import de.anomic.data.wiki.wikiBoard;
 import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
 import de.anomic.http.httpClient;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
@@ -1931,7 +1932,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public int adminAuthenticated(final httpRequestHeader requestHeader) {
         
         // authorization for localhost, only if flag is set to grant localhost access as admin
-        final String clientIP = (String) requestHeader.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "");
+        final String clientIP = (String) requestHeader.get(httpHeader.CONNECTION_PROP_CLIENTIP, "");
         final String refererHost = requestHeader.refererHost();
         final boolean accessFromLocalhost = serverCore.isLocalhost(clientIP) && (refererHost.length() == 0 || serverCore.isLocalhost(refererHost));
         if (getConfigBool("adminAccountForLocalhost", false) && accessFromLocalhost) return 3; // soft-authenticated for localhost
@@ -2188,9 +2189,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 // load the seed list
                 try {
                     final httpRequestHeader reqHeader = new httpRequestHeader();
-                    reqHeader.put(httpRequestHeader.PRAGMA, "no-cache");
-                    reqHeader.put(httpRequestHeader.CACHE_CONTROL, "no-cache");
-                    reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+                    reqHeader.put(httpHeader.PRAGMA, "no-cache");
+                    reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache");
+                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
                     
                     url = new yacyURL(seedListFileURL, null);
                     final long start = System.currentTimeMillis();
@@ -2275,7 +2276,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         try {
             // sending request
             final httpRequestHeader reqHeader = new httpRequestHeader();
-            reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+            reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
             final HashMap<String, String> result = FileUtils.table(httpClient.wget(url.toString(), reqHeader, 10000), "UTF-8");
             if (result == null) return new HashMap<String, String>();
             return result;

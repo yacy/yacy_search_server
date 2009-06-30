@@ -5,6 +5,7 @@ import java.util.Set;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -43,7 +44,7 @@ public class getpageinfo_p {
                 try {
                     final yacyURL u = new yacyURL(url, null);
                     final httpRequestHeader reqHeader = new httpRequestHeader();
-                    reqHeader.put(httpRequestHeader.USER_AGENT, HTTPLoader.yacyUserAgent); // do not set the crawler user agent, because this page was loaded by manual entering of the url
+                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent); // do not set the crawler user agent, because this page was loaded by manual entering of the url
                     final htmlFilterContentScraper scraper = htmlFilterContentScraper.parseResource(u, reqHeader);
                     
                     // put the document title 

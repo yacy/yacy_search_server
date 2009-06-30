@@ -228,10 +228,10 @@ public final class httpdFileHandler {
         } else {
             ext = path.substring(pos + 1).toLowerCase();
         }
-        headers.put(httpResponseHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
-        headers.put(httpResponseHeader.DATE, DateFormatter.formatRFC1123(new Date()));
+        headers.put(httpHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
+        headers.put(httpHeader.DATE, DateFormatter.formatRFC1123(new Date()));
         if(!(plasmaParser.mediaExtContains(ext))){
-            headers.put(httpResponseHeader.PRAGMA, "no-cache");         
+            headers.put(httpHeader.PRAGMA, "no-cache");         
         }
         return headers;
     }
@@ -580,7 +580,7 @@ public final class httpdFileHandler {
 
                 // set environment variables
                 Map<String, String> env = pb.environment();
-                env.put("SERVER_SOFTWARE", getDefaultHeaders(path).get(httpResponseHeader.SERVER));
+                env.put("SERVER_SOFTWARE", getDefaultHeaders(path).get(httpHeader.SERVER));
                 env.put("SERVER_NAME", switchboard.getConfig("peerName", "<nameless>"));
                 env.put("GATEWAY_INTERFACE", "CGI/1.1");
                 if (httpVersion != null) {
