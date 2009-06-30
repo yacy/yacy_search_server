@@ -113,7 +113,7 @@ public class BlacklistCleaner_p {
             }
             
             // list illegal entries
-            final HashMap<String, Integer> ies = getIllegalEntries(blacklistToUse, supportedBlacklistTypes, plasmaSwitchboard.urlBlacklist);
+            final HashMap<String, Integer> ies = getIllegalEntries(blacklistToUse, plasmaSwitchboard.urlBlacklist);
             prop.put(RESULTS + "blList", blacklistToUse);
             prop.put(RESULTS + "entries", ies.size());
             prop.putHTML(RESULTS + "blEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
@@ -192,7 +192,7 @@ public class BlacklistCleaner_p {
         return r.toArray(new String[r.size()]);
     }
     
-    private static HashMap<String, Integer>/* entry, error-code */ getIllegalEntries(final String blacklistToUse, final String[] supportedBlacklistTypes, final Blacklist blEngine) {
+    private static HashMap<String, Integer>/* entry, error-code */ getIllegalEntries(final String blacklistToUse, final Blacklist blEngine) {
         final HashMap<String, Integer> r = new HashMap<String, Integer>();
         final HashSet<String> ok = new HashSet<String>();
         

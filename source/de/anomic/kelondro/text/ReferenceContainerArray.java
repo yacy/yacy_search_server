@@ -107,7 +107,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * objects in the cache.
      * @throws IOException 
      */
-    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> wordContainerIterator(final byte[] startWordHash, final boolean rot, final boolean ram) {
+    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> wordContainerIterator(final byte[] startWordHash, final boolean rot) {
         try {
             return new heapCacheIterator(startWordHash, rot);
         } catch (IOException e) {

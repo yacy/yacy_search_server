@@ -123,7 +123,7 @@ public final class Condenser {
         
         Map.Entry<yacyURL, String> entry;
         if (indexText) {
-            createCondensement(document.getText(), document.getCharset());        
+            createCondensement(document.getText());        
             // the phrase counter:
             // phrase   0 are words taken from the URL
             // phrase   1 is the MainTitle
@@ -244,17 +244,17 @@ public final class Condenser {
         }
     }
 
-    public Condenser(final InputStream text, final String charset) throws UnsupportedEncodingException {
-        this(text, charset, 3, 2);
+    public Condenser(final InputStream text) throws UnsupportedEncodingException {
+        this(text, 3, 2);
     }
 
-    public Condenser(final InputStream text, final String charset, final int wordminsize, final int wordcut) throws UnsupportedEncodingException {
+    public Condenser(final InputStream text, final int wordminsize, final int wordcut) throws UnsupportedEncodingException {
         this.wordminsize = wordminsize;
         this.wordcut = wordcut;
         this.languageIdentificator = null; // we don't need that here
         // analysis = new Properties();
         words = new TreeMap<String, Word>();
-        createCondensement(text, charset);
+        createCondensement(text);
     }
     
     public int excludeWords(final TreeSet<String> stopwords) {
@@ -280,7 +280,7 @@ public final class Condenser {
         return s;
     }
 
-    private void createCondensement(final InputStream is, final String charset) throws UnsupportedEncodingException {
+    private void createCondensement(final InputStream is) throws UnsupportedEncodingException {
         final HashSet<String> currsentwords = new HashSet<String>();
         StringBuilder sentence = new StringBuilder(100);
         String word = "";
@@ -790,7 +790,7 @@ public final class Condenser {
 			buffer = new ByteArrayInputStream(text.getBytes());
 		}
         try {
-            return new Condenser(buffer, "UTF-8", 2, 1).words();
+            return new Condenser(buffer, 2, 1).words();
         } catch (final UnsupportedEncodingException e) {
             return null;
         }

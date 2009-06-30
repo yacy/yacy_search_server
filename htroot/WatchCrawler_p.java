@@ -218,7 +218,6 @@ public class WatchCrawler_p {
                             final CrawlProfile.entry pe = sb.crawler.profilesActiveCrawls.newEntry(
                                     crawlingStartURL.getHost(),
                                     crawlingStartURL,
-                                    CrawlProfile.KEYWORDS_USER,
                                     newcrawlingMustMatch,
                                     newcrawlingMustNotMatch,
                                     newcrawlingdepth,
@@ -338,7 +337,7 @@ public class WatchCrawler_p {
                                 // creating a crawler profile
                                 final yacyURL crawlURL = new yacyURL("file://" + file.toString(), null);
                                 final CrawlProfile.entry profile = sb.crawler.profilesActiveCrawls.newEntry(
-                                        fileName, crawlURL, CrawlProfile.KEYWORDS_USER,
+                                        fileName, crawlURL,
                                         newcrawlingMustMatch,
                                         CrawlProfile.MATCH_NEVER,
                                         newcrawlingdepth,
@@ -402,7 +401,7 @@ public class WatchCrawler_p {
                             
                     		// create a new profile
                     		final CrawlProfile.entry pe = sb.crawler.profilesActiveCrawls.newEntry(
-                    				sitemapURLStr, sitemapURL, CrawlProfile.KEYWORDS_USER,
+                    				sitemapURLStr, sitemapURL,
                     				newcrawlingMustMatch,
                     				CrawlProfile.MATCH_NEVER,
                     				newcrawlingdepth,

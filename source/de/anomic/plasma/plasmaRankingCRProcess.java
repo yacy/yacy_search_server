@@ -41,7 +41,6 @@ import de.anomic.kelondro.table.Table;
 import de.anomic.kelondro.text.IndexCell;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.citationPrototype.CitationReferenceRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.MemoryControl;
@@ -144,7 +143,7 @@ public class plasmaRankingCRProcess {
         return true;
     }
     
-    public static boolean accumulate_upd(final File f, final ObjectIndex acc, final IndexCell<CitationReferenceRow> seq) throws IOException {
+    public static boolean accumulate_upd(final File f, final ObjectIndex acc) throws IOException {
         // open file
         AttrSeq source_cr = null;
         try {

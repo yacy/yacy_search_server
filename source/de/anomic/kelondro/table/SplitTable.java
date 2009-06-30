@@ -88,9 +88,8 @@ public class SplitTable implements ObjectIndex {
     public SplitTable(
             final File path, 
             final String tablename, 
-            final Row rowdef,
-            final boolean resetOnFail) {
-        this(path, tablename, rowdef, ArrayStack.oneMonth, (long) Integer.MAX_VALUE, resetOnFail);
+            final Row rowdef) {
+        this(path, tablename, rowdef, ArrayStack.oneMonth, (long) Integer.MAX_VALUE);
     }
 
     public SplitTable(
@@ -98,22 +97,21 @@ public class SplitTable implements ObjectIndex {
             final String tablename, 
             final Row rowdef, 
             final long fileAgeLimit,
-            final long fileSizeLimit,
-            final boolean resetOnFail) {
+            final long fileSizeLimit) {
         this.path = path;
         this.prefix = tablename;
         this.rowdef = rowdef;
         this.fileAgeLimit = fileAgeLimit;
         this.fileSizeLimit = fileSizeLimit;
         this.entryOrder = new Row.EntryComparator(rowdef.objectOrder);
-        init(resetOnFail);
+        init();
     }
     
     String newFilename() {
         return prefix + "." + DateFormatter.formatShortMilliSecond(new Date()) + ".table";
     }
     
-    public void init(final boolean resetOnFail) {
+    public void init() {
         current = null;
 
         // init the thread pool for the keeperOf executor service
@@ -212,7 +210,7 @@ public class SplitTable implements ObjectIndex {
     		    if (f.isDirectory()) delete(path, l[i]); else FileUtils.deletedelete(f);
     		}
     	}
-    	init(true);
+    	init();
     }
     
     public static void delete(final File path, final String tablename) {

@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
@@ -47,17 +46,6 @@ public class CrawlProfile {
     
     public static final String MATCH_ALL = ".*";
     public static final String MATCH_NEVER = "";
-    public static final HashSet<String> NO_KEYWORDS      = new HashSet<String>(0);
-    public static final HashSet<String> KEYWORDS_PROXY   = word2set("xproxy");
-    public static final HashSet<String> KEYWORDS_REMOTE  = word2set("xremote");
-    public static final HashSet<String> KEYWORDS_USER    = word2set("xuser");
-    public static final HashSet<String> KEYWORDS_SNIPPET = word2set("xsnippet");
-    
-    private static final HashSet<String> word2set(String word) {
-        HashSet<String> s = new HashSet<String>(1);
-        s.add(word);
-        return s;
-    }
     
     static HashMap<String, ConcurrentHashMap<String, DomProfile>> domsCache = new HashMap<String, ConcurrentHashMap<String, DomProfile>>();
     
@@ -168,7 +156,6 @@ public class CrawlProfile {
     
     public entry newEntry( final String name,
                            final yacyURL startURL,
-                           final Set<String> keywords,
                            final String mustmatch, final String mustnotmatch,
                            final int generalDepth,
                            final long recrawlIfOlder /*date*/, final int domFilterDepth,  final int domMaxPages,
@@ -180,7 +167,6 @@ public class CrawlProfile {
         
         final entry ne = new entry(
                              name, startURL,
-                             keywords,
                              mustmatch, mustnotmatch,
                              generalDepth,
                              recrawlIfOlder, domFilterDepth, domMaxPages,
@@ -284,7 +270,6 @@ public class CrawlProfile {
         
         
         public entry(final String name, final yacyURL startURL,
-                     final Set<String> keywords,
                      final String mustmatch,
                      final String mustnotmatch,
                      final int depth,

@@ -82,7 +82,7 @@ public class ymageOSM {
             // download resource using the crawler and keep resource in memory if possible
             Document entry = null;
             try {
-                entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(tileURL, 20000, true, false, false);
+                entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(tileURL, false, false);
             } catch (IOException e) {
                 Log.logWarning("yamyOSM", "cannot load: " + e.getMessage());
                 return null;

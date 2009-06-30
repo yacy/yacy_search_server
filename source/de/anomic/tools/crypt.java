@@ -58,26 +58,7 @@ public class crypt {
     public static final SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.ENGLISH);
 
     String cryptMethod; // one of ["TripleDES", "Blowfish", "DESede", "DES"]
-    private static final String defaultMethod = "PBEWithMD5AndDES"; //"DES";
-
-    public crypt(final String pbe) {
-    // this is possible, but not recommended
-    this(pbe, (pbe + "XXXXXXXX").substring(0, 8));
-    }
-
-    public crypt(final String pbe, final String salt) {
-    this(pbe, salt, defaultMethod);
-    }
-    private crypt(final String pbe, final String salt, final String method) {
-    // a Password-Based Encryption. The SecretKey is created on the fly
-        /* salt currently not used
-        if (salt.length() > 8) salt = salt.substring(0,8);
-        if (salt.length() < 8) salt = (salt + "XXXXXXXX").substring(0,8);
-        */
-
-        // Create a cipher and initialize it for encrypting end decrypting
-        cryptMethod = method;
-    }
+    //private static final String defaultMethod = "PBEWithMD5AndDES"; //"DES";    
 
     // --------------------------------------------------------
     // Section: simple Codings

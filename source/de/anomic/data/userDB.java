@@ -145,9 +145,9 @@ public final class userDB {
 		return null;
 	}
         public Entry getUser(final httpRequestHeader header){
-            return getUser(header.get(httpRequestHeader.AUTHORIZATION), header.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP), header.getHeaderCookies());
+            return getUser(header.get(httpRequestHeader.AUTHORIZATION), header.getHeaderCookies());
         }
-        public Entry getUser(final String auth, final String ip, final String cookies){
+        public Entry getUser(final String auth, final String cookies){
         Entry entry=null;
         if(auth != null)
             entry=proxyAuth(auth);
@@ -161,8 +161,8 @@ public final class userDB {
      * @param auth
      *            the http-headerline for authorisation
      */
-    public boolean hasAdminRight(final String auth, final String ip, final String cookies) {
-        final Entry entry = getUser(auth, ip, cookies);
+    public boolean hasAdminRight(final String auth, final String cookies) {
+        final Entry entry = getUser(auth, cookies);
         if (entry != null)
             return entry.hasAdminRight();
         // else if(entry != null && cookieAdminAuth(cookies))

@@ -49,7 +49,7 @@ public class httpSSI {
             } else {
                 out.write(in.getBytes(off, p - off));
             }
-            parseSSI(in, p, q + 3 - p, out, authorization, requesthost);
+            parseSSI(in, p, out, authorization, requesthost);
             off = q + 3;
             p = in.indexOf("<!--#".getBytes(), off);
         }
@@ -60,7 +60,7 @@ public class httpSSI {
         }
     }
     
-    private static void parseSSI(final ByteBuffer in, final int off, final int len, final OutputStream out, final String authorization, final String requesthost) {
+    private static void parseSSI(final ByteBuffer in, final int off, final OutputStream out, final String authorization, final String requesthost) {
         if (in.startsWith("<!--#include virtual=\"".getBytes(), off)) {
             final int q = in.indexOf("\"".getBytes(), off + 22);
             if (q > 0) {

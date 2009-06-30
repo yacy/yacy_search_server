@@ -39,8 +39,6 @@ public class urlRedirectord implements serverHandler, Cloneable {
                             "URL Redirector",
                             // start URL
                             null,
-                            // keywords
-                            CrawlProfile.KEYWORDS_USER,
                             // crawling filter
                             CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER, 
                             // depth

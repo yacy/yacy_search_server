@@ -54,7 +54,6 @@ import de.anomic.plasma.parser.Condenser;
 import de.anomic.plasma.plasmaSearchRankingProcess.NavigatorEntry;
 import de.anomic.plasma.plasmaSnippetCache.MediaSnippet;
 import de.anomic.search.Query;
-import de.anomic.search.RankingProfile;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeed;
@@ -351,7 +350,7 @@ public final class plasmaSearchEvent {
         if (query.contentdom == Query.CONTENTDOM_TEXT) {
             // attach text snippet
             startTime = System.currentTimeMillis();
-            final plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(metadata, snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(Condenser.flag_cat_indexof))), 180, 3000, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 30000, query.isGlobal());
+            final plasmaSnippetCache.TextSnippet snippet = plasmaSnippetCache.retrieveTextSnippet(metadata, snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(Condenser.flag_cat_indexof))), 180, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 30000, query.isGlobal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
             Log.logInfo("SEARCH_EVENT", "text snippet load time for " + metadata.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
             
@@ -461,7 +460,6 @@ public final class plasmaSearchEvent {
     
     public static plasmaSearchEvent getEvent(
             final Query query,
-            final RankingProfile ranking,
             final Segment indexSegment,
             final yacySeedDB peers,
             final ResultURLs crawlResults,

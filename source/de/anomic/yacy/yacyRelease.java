@@ -328,7 +328,7 @@ public final class yacyRelease extends yacyVersion {
 	        if ((!download.exists()) || (download.length() == 0)) throw new IOException("wget of url " + this.getUrl() + " failed");
 	    } catch (final IOException e) {
 	        // Saving file failed, abort download
-	        res.abort();
+	        if (res != null) res.abort();
 	        Log.logSevere("yacyVersion", "download of " + this.getName() + " failed: " + e.getMessage());
 	        if (download != null && download.exists()) {
 	        	FileUtils.deletedelete(download);

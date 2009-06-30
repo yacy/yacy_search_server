@@ -78,7 +78,7 @@ public class WordReferenceVars  extends AbstractReference implements WordReferen
         this.hitcount = hitcount;
         this.llocal = outlinksSame;
         this.lother = outlinksOther;
-        this.phrasesintext = outlinksOther;
+        this.phrasesintext = phrasecount;
         this.positions = new ArrayList<Integer>(ps.size());
         for (int i = 0; i < ps.size(); i++) this.positions.add(ps.get(i));
         this.posinphrase = posinphrase;

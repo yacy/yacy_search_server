@@ -505,9 +505,7 @@ public class CrawlQueues {
     }
     
     public Document loadResourceFromWeb(
-            final yacyURL url, 
-            final int socketTimeout,
-            final boolean keepInMemory,
+            final yacyURL url,
             final boolean forText,
             final boolean global
     ) throws IOException {

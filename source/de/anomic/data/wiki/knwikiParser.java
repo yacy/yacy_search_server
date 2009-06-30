@@ -46,7 +46,7 @@ public class knwikiParser implements wikiParser {
 	private String[] BEs;
     private final plasmaSwitchboard sb;
     
-    public knwikiParser(final plasmaSwitchboard sb) {
+    private knwikiParser(final plasmaSwitchboard sb) {
         this.sb = sb;
     }
 	
@@ -96,33 +96,16 @@ public class knwikiParser implements wikiParser {
         return parse(content, null);
     }
     
-    public String transform(final String content, final plasmaSwitchboard sb) {
-        return parse(content, null);
-    }
-    
     public String transform(final byte[] content) throws UnsupportedEncodingException {
         return parse(new String(content, "UTF-8"), null);
     }
     
     public String transform(
-            final byte[] content, final String encoding,
-            final plasmaSwitchboard switchboard) throws UnsupportedEncodingException {
+            final byte[] content, final String encoding) throws UnsupportedEncodingException {
         return parse(new String(content, encoding), null);
-    }
-    
-    public String transform(final byte[] content, final String encoding) throws UnsupportedEncodingException {
-        return parse(new String(content, encoding), null);
-    }
-    
-    public String transform(final byte[] text, final String encoding, final String publicAddress) throws UnsupportedEncodingException {
-        return parse(new String(text, encoding), publicAddress);
-    }
-    
-    public String transform(final String text, final String publicAddress) {
-        return parse(text, publicAddress);
     }
 	
-	public String parse(String text, final String publicAddress) {
+	private String parse(String text, final String publicAddress) {
         tokens = new Token[] {
                 new SimpleToken('=', '=', new String[][] { null, { "h2" }, { "h3" }, { "h4" } }, true),
                 new SimpleToken('\'', '\'', new String[][] { null, { "i" }, { "b" }, null, { "b", "i" } }, false),
@@ -159,7 +142,7 @@ public class knwikiParser implements wikiParser {
         return Text.mergeTexts(tt);
 	}
 	
-	public String parseUnescaped(String text) {
+	private String parseUnescaped(String text) {
 		Token st;
 		Matcher m;
 		StringBuffer sb;

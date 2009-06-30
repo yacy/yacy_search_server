@@ -427,7 +427,6 @@ public class yacysearch {
                     urlmask,
                     (clustersearch && globalsearch) ? Query.SEARCHDOM_CLUSTERALL :
                     ((globalsearch) ? Query.SEARCHDOM_GLOBALDHT : Query.SEARCHDOM_LOCAL),
-                    "",
                     20,
                     constraint,
                     true,
@@ -454,7 +453,7 @@ public class yacysearch {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
-            final plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, ranking, sb.indexSegment, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
+            final plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, sb.indexSegment, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
             
             // generate result object
             //serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + (System.currentTimeMillis() - timestamp) + " ms");

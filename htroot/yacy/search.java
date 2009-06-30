@@ -201,7 +201,6 @@ public final class search {
                     0,
                     filter,
                     Query.SEARCHDOM_LOCAL,
-                    null,
                     -1,
                     null,
                     false,
@@ -255,7 +254,6 @@ public final class search {
                     0, 
                     filter, 
                     Query.SEARCHDOM_LOCAL, 
-                    null, 
                     -1, 
                     constraint, 
                     false,
@@ -269,7 +267,7 @@ public final class search {
             RSSFeed.channels(RSSFeed.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), Query.anonymizedQueryHashes(theQuery.queryHashes), ""));
             
             // make event
-            theSearch = plasmaSearchEvent.getEvent(theQuery, rankingProfile, sb.indexSegment, sb.peers, sb.crawlResults, null, true); 
+            theSearch = plasmaSearchEvent.getEvent(theQuery, sb.indexSegment, sb.peers, sb.crawlResults, null, true); 
             
             // set statistic details of search result and find best result index set
             if (theSearch.getRankingResult().getLocalResourceSize() == 0) {

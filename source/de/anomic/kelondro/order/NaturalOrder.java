@@ -220,7 +220,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         return sb.toString();
     }
     
-    public static final String table(final byte[] b, final int linewidth, final int marker) {
+    public static final String table(final byte[] b, final int linewidth) {
         if (b == null) return "NULL";
         if (b.length == 0) return "[]";
         final StringBuilder sb = new StringBuilder(b.length * 4);

@@ -310,7 +310,7 @@ public final class httpdFileHandler {
                     return;
                 } else if (
                     (httpd.staticAdminAuthenticated(authorization.trim().substring(6), switchboard) == 4) ||
-                    (sb.userDB.hasAdminRight(authorization, conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP), requestHeader.getHeaderCookies()))) {
+                    (sb.userDB.hasAdminRight(authorization, requestHeader.getHeaderCookies()))) {
                     //Authentication successful. remove brute-force flag
                     serverCore.bfHost.remove(conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP));
                 } else {

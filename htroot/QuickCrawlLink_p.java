@@ -132,7 +132,6 @@ public class QuickCrawlLink_p {
                 pe = sb.crawler.profilesActiveCrawls.newEntry(
                         crawlingStartURL.getHost(), 
                         crawlingStartURL,
-                        CrawlProfile.KEYWORDS_USER,
                         crawlingMustMatch,
                         crawlingMustNotMatch,
                         CrawlingDepth,

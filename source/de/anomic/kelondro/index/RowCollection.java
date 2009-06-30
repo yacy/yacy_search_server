@@ -622,7 +622,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         
         int p = L;
         int q = R - 1;
-        int pivot = pivot(L, R, S, swapspace);
+        int pivot = pivot(L, R, S);
         if (this.rowdef.objectOrder instanceof Base64Order) {
         	while (p <= q) {
         		// wenn pivot < S: pivot befindet sich in sortierter Sequenz von L bis S - 1
@@ -677,7 +677,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         return p;
     }
 	
-    private final int pivot(final int L, final int R, final int S, final byte[] swapspace) {
+    private final int pivot(final int L, final int R, final int S) {
         if ((S == 0) || (S < L)) {
             // the collection has no ordering
             // or

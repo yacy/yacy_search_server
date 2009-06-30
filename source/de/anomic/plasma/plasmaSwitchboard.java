@@ -1947,7 +1947,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (accessFromLocalhost && (adminAccountBase64MD5.equals(authorization))) return 3; // soft-authenticated for localhost
 
         // authorization by hit in userDB
-        if (userDB.hasAdminRight((String) requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx"), ((String) requestHeader.get(httpRequestHeader.CONNECTION_PROP_CLIENTIP, "")), requestHeader.getHeaderCookies())) return 4; //return, because 4=max
+        if (userDB.hasAdminRight((String) requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx"), requestHeader.getHeaderCookies())) return 4; //return, because 4=max
 
         // authorization with admin keyword in configuration
         return httpd.staticAdminAuthenticated(authorization, this);

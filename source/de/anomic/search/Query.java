@@ -134,7 +134,7 @@ public final class Query {
         final String navigators,
         final boolean onlineSnippetFetch,
         final int lines, final int offset, final String urlMask,
-        final int domType, final String domGroupName, final int domMaxTargets,
+        final int domType, final int domMaxTargets,
         final Bitfield constraint, final boolean allofconstraint,
         final String site,
         final String authorhash,

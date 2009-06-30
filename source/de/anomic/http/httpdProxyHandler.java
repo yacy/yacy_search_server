@@ -333,13 +333,6 @@ public final class httpdProxyHandler {
                 host = host.substring(0, pos);
             }
 
-            String ext;
-            if ((pos = path.lastIndexOf('.')) < 0) {
-                ext = "";
-            } else {
-                ext = path.substring(pos + 1).toLowerCase();
-            }
-
             // check the blacklist
             // blacklist idea inspired by [AS]:
             // respond a 404 for all AGIS ("all you get is shit") servers
@@ -383,7 +376,7 @@ public final class httpdProxyHandler {
             // case 1 and case 3
             if (cachedResponseHeader == null) {
                 if (theLogger.isFinest()) theLogger.logFinest(reqID + " page not in cache: fulfill request from web");
-                    fulfillRequestFromWeb(conProp, url, ext, requestHeader, cachedResponseHeader, countedRespond);
+                    fulfillRequestFromWeb(conProp, url, requestHeader, cachedResponseHeader, countedRespond);
             } else {
                 final Document cacheEntry = new httpdProxyCacheEntry(
                         0,                               // crawling depth
@@ -401,10 +394,10 @@ public final class httpdProxyHandler {
                 byte[] cacheContent = plasmaHTCache.getResourceContent(url);
                 if (cacheContent != null && cacheEntry.shallUseCacheForProxy()) {
                     if (theLogger.isFinest()) theLogger.logFinest(reqID + " fulfill request from cache");
-                    fulfillRequestFromCache(conProp, url, ext, requestHeader, cachedResponseHeader, cacheContent, countedRespond);
+                    fulfillRequestFromCache(conProp, url, requestHeader, cachedResponseHeader, cacheContent, countedRespond);
                 } else {
                     if (theLogger.isFinest()) theLogger.logFinest(reqID + " fulfill request from web");
-                    fulfillRequestFromWeb(conProp, url, ext, requestHeader, cachedResponseHeader, countedRespond);
+                    fulfillRequestFromWeb(conProp, url, requestHeader, cachedResponseHeader, countedRespond);
                 }
             }
             
@@ -434,7 +427,7 @@ public final class httpdProxyHandler {
         }
     }
     
-    private static void fulfillRequestFromWeb(final Properties conProp, final yacyURL url,final String ext, final httpRequestHeader requestHeader, final httpResponseHeader cachedResponseHeader, final OutputStream respond) {
+    private static void fulfillRequestFromWeb(final Properties conProp, final yacyURL url, final httpRequestHeader requestHeader, final httpResponseHeader cachedResponseHeader, final OutputStream respond) {
         
         final GZIPOutputStream gzippedOut = null; 
        
@@ -642,7 +635,6 @@ public final class httpdProxyHandler {
     private static void fulfillRequestFromCache(
             final Properties conProp, 
             final yacyURL url,
-            final String ext,
             final httpRequestHeader requestHeader, 
             final httpResponseHeader cachedResponseHeader,
             final byte[] cacheEntry,

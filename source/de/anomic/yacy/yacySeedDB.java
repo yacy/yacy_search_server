@@ -302,12 +302,6 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         newsPool.close();
         peerActions.close();
     }
-
-    @SuppressWarnings("unchecked")
-    public void initializeHandler(final String mapname, final Map map) {
-        // this is used to set up a lastSeen lookup table
-        
-    }
     
     public Iterator<yacySeed> seedsSortedConnected(final boolean up, final String field) {
         // enumerates seed-type objects: all seeds sequentially ordered by field

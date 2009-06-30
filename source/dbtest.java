@@ -196,7 +196,7 @@ public class dbtest {
         }
         if (dbe.equals("kelondroSplitTable")) {
             final File tablepath = new File(tablename).getParentFile();
-            return new SplitTable(tablepath, new File(tablename).getName(), testRow, true);
+            return new SplitTable(tablepath, new File(tablename).getName(), testRow);
         }
         if (dbe.equals("kelondroEcoTable")) {
             return new Table(new File(tablename), testRow, Table.tailCacheForceUsage, 1000, 0);

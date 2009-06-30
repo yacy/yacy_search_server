@@ -43,12 +43,12 @@ public class plasmaParserConfig {
      * @see #loadEnabledParserList()
      * @see #setEnabledParserList(Enumeration)
      */
-    final HashSet<String> enabledParserList = new HashSet<String>();    
+    public final HashSet<String> enabledParserList = new HashSet<String>();    
     
     /**
      * A list of file extensions that are supported by all enabled parsers
      */
-    final HashSet<String> supportedFileExt = new HashSet<String>();
+    private final HashSet<String> supportedFileExt = new HashSet<String>();
     
     /**
      * Parsermode this configuration belongs to
@@ -89,8 +89,7 @@ public class plasmaParserConfig {
         }
     }        
     
-    
-    public boolean supportedFileExt(final yacyURL url) {
+    private boolean supportedFileExt(final yacyURL url) {
         if (url == null) throw new NullPointerException();
         
         // getting the file path
@@ -170,7 +169,6 @@ public class plasmaParserConfig {
             this.enabledParserList.clear();
             this.enabledParserList.addAll(newEnabledParsers);
         }
-        
         
         synchronized (this.supportedFileExt) {
             this.supportedFileExt.clear();

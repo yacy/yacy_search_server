@@ -254,7 +254,7 @@ public class bookmarksDB {
 	                // stack url
 	                sb.crawler.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
 	                CrawlProfile.entry pe = sb.crawler.profilesActiveCrawls.newEntry(
-	                        folder+"/"+crawlingStartURL, crawlingStartURL, CrawlProfile.KEYWORDS_USER,
+	                        folder+"/"+crawlingStartURL, crawlingStartURL,
 	                        newcrawlingMustMatch,
 	                        CrawlProfile.MATCH_NEVER,
 	                        newcrawlingdepth,

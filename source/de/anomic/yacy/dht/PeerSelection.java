@@ -38,7 +38,6 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyVersion;
-import de.anomic.yacy.dht.PartitionScheme;
 import de.anomic.yacy.logging.Log;
 
 
@@ -80,7 +79,7 @@ public class PeerSelection {
     private static int verifiedOwn = 0;
     private static int verifiedNotOwn = 0;
     
-    public static boolean shallBeOwnWord(final yacySeedDB seedDB, final byte[] wordhash, String urlhash, int redundancy, PartitionScheme scheme) {
+    public static boolean shallBeOwnWord(final yacySeedDB seedDB, final byte[] wordhash, String urlhash, int redundancy) {
         // the guessIfOwnWord is a fast method that should only fail in case that a 'true' may be incorrect, but a 'false' shall always be correct
         if (guessIfOwnWord(seedDB, wordhash, urlhash)) {
             // this case must be verified, because it can be wrong.

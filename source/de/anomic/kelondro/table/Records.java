@@ -393,7 +393,7 @@ public class Records {
             //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
             //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
             //raf = new kelondroCachedRA(raf);
-            initExistingFile(raf, true);
+            initExistingFile(raf);
         } else {
             this.filename = file.getCanonicalPath();
             final RandomAccessInterface raf = (useChannel) ? new ChannelRandomAccess(new File(this.filename)) : new FileRandomAccess(new File(this.filename));
@@ -412,28 +412,6 @@ public class Records {
             // create new file structure
             writeOrderType();            
         }
-    }
-
-    public Records(final RandomAccessInterface ra, final String filename, final boolean useCache,
-                           final short ohbytec, final short ohhandlec,
-                           final Row rowdef, final int FHandles, final int txtProps, final int txtPropWidth,
-                           final boolean exitOnFail) {
-        // this always creates a new file
-        this.fileExisted = false;
-        this.filename = filename;
-        this.OHBYTEC   = ohbytec;
-        this.OHHANDLEC = ohhandlec;
-        this.ROW = rowdef; // create row
-        this.TXTPROPW  = txtPropWidth;
-        
-        try {
-            initNewFile(ra, FHandles, txtProps);
-        } catch (final IOException e) {
-            logFailure("cannot create / " + e.getMessage());
-            if (exitOnFail) System.exit(-1);
-        }
-        assignRowdef(rowdef);
-        writeOrderType();
     }
 
     public void clear() throws IOException {
@@ -543,14 +521,7 @@ public class Records {
             this.theLogger.fine("KELONDRO DEBUG " + this.filename + ": " + message);
     }
 
-    public Records(final RandomAccessInterface ra, final String filename, final boolean useNodeCache) throws IOException{
-        this.fileExisted = false;
-        this.filename = filename;
-        initExistingFile(ra, useNodeCache);
-        readOrderType();
-    }
-
-    private void initExistingFile(final RandomAccessInterface ra, boolean useBuffer) throws IOException {
+    private void initExistingFile(final RandomAccessInterface ra) throws IOException {
         // read from Chunked IO
         //useBuffer = false;
         /*if (useBuffer) {

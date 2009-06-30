@@ -195,7 +195,7 @@ public class yacyPeerActions {
         final boolean res = connectPeer(peer, direct);
         if (res) {
             // perform all actions if peer is effective new
-            this.processPeerArrival(peer, direct);
+            this.processPeerArrival(peer);
             RSSFeed.channels(RSSFeed.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " joined the network", "", ""));
         }
         return res;
@@ -218,11 +218,11 @@ public class yacyPeerActions {
         // this is called only if the peer has junior status
         seedDB.addPotential(peer);
         // perform all actions
-        processPeerArrival(peer, true);
+        processPeerArrival(peer);
         RSSFeed.channels(RSSFeed.PEERNEWS).addMessage(new RSSMessage(peer.getName() + " sent me a ping", "", ""));
     }
     
-    private void processPeerArrival(final yacySeed peer, final boolean direct) {
+    private void processPeerArrival(final yacySeed peer) {
         final String recordString = peer.get("news", null);
         //System.out.println("### triggered news arrival from peer " + peer.getName() + ", news " + ((recordString == null) ? "empty" : "attached"));
         if ((recordString == null) || (recordString.length() == 0)) return;

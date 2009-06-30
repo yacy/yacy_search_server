@@ -308,7 +308,7 @@ public class SitemapParser extends DefaultHandler {
 
     private CrawlProfile.entry createProfile(final String domainName, final yacyURL sitemapURL) {
         return this.sb.crawler.profilesActiveCrawls.newEntry(
-                domainName, sitemapURL, CrawlProfile.KEYWORDS_USER,
+                domainName, sitemapURL,
                 // crawling Filter
                 CrawlProfile.MATCH_ALL, CrawlProfile.MATCH_NEVER,
                 // Depth
