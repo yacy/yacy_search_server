@@ -225,7 +225,7 @@ public class SQLTable implements ObjectIndex {
         throw new UnsupportedOperationException();
     }
     
-    public synchronized void addUnique(final List<Row.Entry> rows) throws IOException {
+    public synchronized void addUnique(final List<Row.Entry> rows) {
         throw new UnsupportedOperationException();
     }
     

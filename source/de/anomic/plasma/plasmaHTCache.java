@@ -241,7 +241,7 @@ public final class plasmaHTCache {
      * @throws <b>UnsupportedProtocolException</b> if the protocol is not supported and therefore the
      * info object couldn't be created
      */
-    public static httpResponseHeader loadResponseHeader(final yacyURL url) throws IllegalAccessException {    
+    public static httpResponseHeader loadResponseHeader(final yacyURL url) {    
         
         // loading data from database
         Map<String, String> hdb;

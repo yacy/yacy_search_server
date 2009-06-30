@@ -495,7 +495,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return pivot;
     }
 
-    public String toString() {
+    public synchronized String toString() {
         return "C[" + new String(termHash) + "] has " + this.size() + " entries";
     }
     

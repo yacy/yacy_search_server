@@ -646,7 +646,7 @@ public class Table implements ObjectIndex {
         byte[] fk;
         int c;
         
-        public rowIterator(final boolean up, final byte[] firstKey) throws IOException {
+        public rowIterator(final boolean up, final byte[] firstKey) {
             this.up = up;
             this.fk = firstKey;
             this.i  = index.keys(up, firstKey);
@@ -654,12 +654,7 @@ public class Table implements ObjectIndex {
         }
         
         public CloneableIterator<Entry> clone(final Object modifier) {
-            try {
-                return new rowIterator(up, fk);
-            } catch (final IOException e) {
-                e.printStackTrace();
-                return null;
-            }
+            return new rowIterator(up, fk);
         }
 
         public boolean hasNext() {

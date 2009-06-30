@@ -71,7 +71,7 @@ public final class CrawlSwitchboard {
             final yacySeedDB peers,
             final String networkName,
             final Log log,
-            final File queuesRoot) throws IOException {
+            final File queuesRoot) {
         
         log.logInfo("Initializing Word Index for the network '" + networkName + "', word hash cache size is " + Word.hashCacheSize + ".");
                         

@@ -30,7 +30,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.ref.SoftReference;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -240,7 +239,6 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         return this.sizeConnected() <= dhtActivityMagic;
     }
     
-    @SuppressWarnings("unchecked")
     private synchronized MapDataMining openSeedTable(final File seedDBFile) {
         final File parentDir = new File(seedDBFile.getParent());  
         if (!parentDir.exists()) {

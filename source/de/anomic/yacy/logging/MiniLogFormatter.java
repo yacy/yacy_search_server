@@ -36,7 +36,7 @@ public final class MiniLogFormatter extends SimpleFormatter {
           super();
       }        
       
-      public String format(final LogRecord record) {
+      public synchronized String format(final LogRecord record) {
           
           final StringBuilder buffer = this.buffer;
           buffer.setLength(0);

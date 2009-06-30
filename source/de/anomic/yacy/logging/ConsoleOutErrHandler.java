@@ -150,7 +150,7 @@ public final class ConsoleOutErrHandler extends Handler {
         this.stdErrHandler.close();
     }
     
-    public void setLevel(final Level newLevel) throws SecurityException {
+    public synchronized void setLevel(final Level newLevel) throws SecurityException {
         super.setLevel(newLevel);
     }
     

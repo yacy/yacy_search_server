@@ -192,16 +192,13 @@ public class knwikiParser implements wikiParser {
 		public static final String escapeNewLine = "@";
 		
 		private String text;
-		private final boolean escaped;
 		private final boolean nl;
 		
 		public Text(final String text, final boolean escaped, final boolean newLineBefore) {
 			this.text = text;
-			this.escaped = escaped;
 			this.nl = newLineBefore;
         }
 		
-		public String setTextPlain(final String text) { return this.text = text; }
 		public String setText(final String text) {
 			if (this.nl)
 				this.text = text.substring(escapeNewLine.length());
@@ -218,8 +215,6 @@ public class knwikiParser implements wikiParser {
 		}
 		
 		public String toString() { return this.text; }
-		public boolean isEscaped() { return this.escaped; }
-		public boolean isNewLineBefore() { return this.nl; }
         
 		static Text[] split2Texts(final String text, final String escapeBegin, final String escapeEnd) {
 			if (text == null) return null;

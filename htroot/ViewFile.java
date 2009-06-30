@@ -148,12 +148,7 @@ public class ViewFile {
         // trying to load the resource body
         resource = plasmaHTCache.getResourceContentStream(url);
         resourceLength = plasmaHTCache.getResourceContentLength(url);
-        try {
-            responseHeader = plasmaHTCache.loadResponseHeader(url);
-        } catch (IllegalAccessException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
-        }
+        responseHeader = plasmaHTCache.loadResponseHeader(url);
 
         // if the resource body was not cached we try to load it from web
         if (resource == null) {

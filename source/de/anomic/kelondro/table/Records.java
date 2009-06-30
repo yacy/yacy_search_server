@@ -41,7 +41,6 @@ import java.util.logging.Logger;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.EntryIndex;
-import de.anomic.kelondro.io.ChannelRandomAccess;
 import de.anomic.kelondro.io.FileRandomAccess;
 import de.anomic.kelondro.io.IOChunksInterface;
 import de.anomic.kelondro.io.RandomAccessInterface;
@@ -53,8 +52,6 @@ import de.anomic.kelondro.util.kelondroException;
 import de.anomic.yacy.logging.Log;
 
 public class Records {
-
-    private static final boolean useChannel = false;
     
     // static seek pointers
     private   static int  LEN_DESCR      = 60;
@@ -354,7 +351,7 @@ public class Records {
     public static int staticsize(final File file) {
         if (!(file.exists())) return 0;
         try {
-            final RandomAccessInterface ra = (useChannel) ? new ChannelRandomAccess(new File(file.getCanonicalPath())) : new FileRandomAccess(new File(file.getCanonicalPath()));
+            final RandomAccessInterface ra = new FileRandomAccess(new File(file.getCanonicalPath()));
             final IOChunksInterface entryFile = new RandomAccessIOChunks(ra, ra.name());
 
             final int used = entryFile.readInt(POS_USEDC); // works only if consistency with file size is given
@@ -388,7 +385,7 @@ public class Records {
         if (file.exists()) {
             // opens an existing tree
             this.filename = file.getCanonicalPath();
-            RandomAccessInterface raf = (useChannel) ? new ChannelRandomAccess(new File(this.filename)) : new FileRandomAccess(new File(this.filename));
+            RandomAccessInterface raf = new FileRandomAccess(new File(this.filename));
             //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
             //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
@@ -396,7 +393,7 @@ public class Records {
             initExistingFile(raf);
         } else {
             this.filename = file.getCanonicalPath();
-            final RandomAccessInterface raf = (useChannel) ? new ChannelRandomAccess(new File(this.filename)) : new FileRandomAccess(new File(this.filename));
+            final RandomAccessInterface raf = new FileRandomAccess(new File(this.filename));
             // kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             // kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
             initNewFile(raf, FHandles, txtProps);
@@ -420,7 +417,7 @@ public class Records {
         assert f != null;
         this.entryFile.close();
         FileUtils.deletedelete(f);
-        ra = (useChannel) ? new ChannelRandomAccess(f) : new FileRandomAccess(f);
+        ra = new FileRandomAccess(f);
         initNewFile(ra, this.HANDLES.length, this.TXTPROPS.length);
     }
     

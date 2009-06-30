@@ -40,7 +40,7 @@ public final class serverInstantBusyThread extends serverAbstractBusyThread impl
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
         // jobCount is the name of a method that returns the size of the job
         // freemem is the name of a method that tries to free memory and returns void
-        final Class<?> theClass = (env instanceof Class) ? (Class<?>) env : env.getClass();
+        final Class<?> theClass = (env instanceof Class<?>) ? (Class<?>) env : env.getClass();
         try {
             this.jobExecMethod = theClass.getMethod(jobExec, new Class[0]);
         } catch (final NoSuchMethodException e) {
@@ -64,7 +64,7 @@ public final class serverInstantBusyThread extends serverAbstractBusyThread impl
         } catch (final NoSuchMethodException e) {
             throw new RuntimeException("serverInstantThread, wrong declaration of freemem: " + e.getMessage());
         }
-        this.environment = (env instanceof Class) ? null : env;
+        this.environment = (env instanceof Class<?>) ? null : env;
         this.setName(theClass.getName() + "." + jobExec);
         this.handle = Long.valueOf(System.currentTimeMillis() + this.getName().hashCode());
     }

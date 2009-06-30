@@ -205,7 +205,7 @@ public class Compressor implements BLOB {
         return (b == null) ? 0 : b.length;
     }
     
-    private int removeFromQueues(byte[] key) throws IOException {
+    private int removeFromQueues(byte[] key) {
         byte[] b = buffer.remove(new String(key));
         if (b != null) return b.length;
         return 0;

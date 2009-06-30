@@ -368,7 +368,7 @@ public class HeapReader {
         return this.index.keys(up, firstKey);
     }
 
-    public long length() throws IOException {
+    public long length() {
         return this.heapFile.length();
     }
     

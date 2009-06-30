@@ -92,7 +92,7 @@ public abstract class AbstractRandomAccess implements RandomAccessInterface {
         this.write(int2array(v));
     }
     
-    public final static byte[] int2array(final int v) throws IOException {
+    public final static byte[] int2array(final int v) {
         byte[] b = new byte[4];
         b[0] = (byte) ((v >>> 24) & 0xFF);
         b[1] = (byte) ((v >>> 16) & 0xFF);

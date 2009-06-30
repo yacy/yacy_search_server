@@ -317,7 +317,7 @@ public final class Heap extends HeapModifier implements BLOB {
             if (entry.getValue().intValue() == reclen) {
                 // we found an entry that has exactly the size that we need!
                 // we use that entry and stop looking for a larger entry
-                file.seek(entry.getKey());
+                file.seek(entry.getKey().longValue());
                 final int reclenf = file.readInt();
                 assert reclenf == reclen;
                 file.write(key);
@@ -419,7 +419,7 @@ public final class Heap extends HeapModifier implements BLOB {
         return super.keys(up, firstKey);
     }
 
-    public synchronized long length() throws IOException {
+    public synchronized long length() {
         return super.length() + this.buffersize;
     }
 

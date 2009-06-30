@@ -41,7 +41,7 @@ public abstract class abstractWikiParser implements wikiParser {
         return transform(content, "UTF-8");
     }
     
-    public String transform(final byte[] content, final String encoding, final String publicAddress) throws UnsupportedEncodingException {
+    public String transform(final byte[] content, final String encoding, final String publicAddress) {
         final ByteArrayInputStream bais = new ByteArrayInputStream(content);
         try {
             return transform(

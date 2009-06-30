@@ -52,7 +52,7 @@ public class httpdBoundedSizeOutputStream extends httpdByteCountOutputStream {
         super.write(b);
     }
 
-    public void write(final byte[] b, final int off, final int len) throws IOException {     
+    public synchronized void write(final byte[] b, final int off, final int len) throws IOException {     
         if (this.byteCount + len > this.maxSize) {
             // write out the rest until we reach the limit
             final long rest = this.maxSize-this.byteCount;
@@ -64,7 +64,7 @@ public class httpdBoundedSizeOutputStream extends httpdByteCountOutputStream {
         super.write(b, off, len);
     }
 
-    public void write(final int b) throws IOException {
+    public synchronized void write(final int b) throws IOException {
         if (this.byteCount + 1 > this.maxSize) {
             // throw an exception
             throw new httpdLimitExceededException("Limit exceeded",this.maxSize);
