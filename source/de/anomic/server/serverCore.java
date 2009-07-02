@@ -145,29 +145,24 @@ public final class serverCore extends serverAbstractBusyThread implements server
         if (threadCount < maxBusySessions - 10) return; // don't panic
         final Thread[] threadList = new Thread[this.getJobCount()];     
         threadCount = serverCore.sessionThreadGroup.enumerate(threadList);
-        for (int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {                        
-            final Thread currentThread = threadList[currentThreadIdx];
-            if (
-                    (currentThread != null) && 
-                    (currentThread instanceof Session) && 
-                    (currentThread.isAlive()) &&
-                    (((Session) currentThread).getTime() > minage) 
-            ) {
-                this.log.logInfo("check for " + currentThread.getName() + ": " + ((Session) currentThread).getTime() + " ms alive, stopping thread");
-                Session session = (Session) currentThread;
+        for (int threadIdx = 0; threadIdx < threadCount; threadIdx++ )  {                        
+            final Thread t = threadList[threadIdx];
+            if (t != null && t instanceof Session && t.isAlive() && ((Session) t).getTime() > minage) {
+                this.log.logInfo("check for " + t.getName() + ": " + ((Session) t).getTime() + " ms alive, stopping thread");
+                
                 // trying to stop session
-                session.setStopped(true);
+                ((Session) t).setStopped(true);
                 try { Thread.sleep(100); } catch (final InterruptedException ex) {}
                 
                 // trying to interrupt session
-                if (currentThread.isAlive()) {
-                    currentThread.interrupt();
-                    try { Thread.sleep(10); } catch (final InterruptedException ex) {}
+                if (t.isAlive()) {
+                    t.interrupt();
+                    try {Thread.sleep(10);} catch (final InterruptedException ex) {}
                 } 
                 
                 // trying to close socket
-                if (currentThread.isAlive()) {
-                    ((Session)currentThread).close();
+                if (t.isAlive()) {
+                    ((Session) t).close();
                 }
             }
         }
@@ -332,8 +327,12 @@ public final class serverCore extends serverAbstractBusyThread implements server
             
             announceThreadBlockRelease();
             
-            if(this.busySessions.size() >= this.maxBusySessions)
-            {
+
+            if (this.busySessions.size() >= this.maxBusySessions) {
+                terminateOldSessions(30000);
+            }
+            
+            if (this.busySessions.size() >= this.maxBusySessions) {
                 // immediately close connection if too much sessions are still running
                 this.log.logWarning("* connections (" + this.busySessions.size() + ") exceeding limit (" + this.maxBusySessions + "), closing new incoming connection from "+ controlSocket.getRemoteSocketAddress());
                 controlSocket.close();
