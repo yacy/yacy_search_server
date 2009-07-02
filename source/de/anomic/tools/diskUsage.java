@@ -303,7 +303,7 @@ public class diskUsage {
         }
         if (path.length() < 6)
           return;
-        yacyUsedVolumes.add(path.substring(0, 1));
+        yacyUsedVolumes.add(path);
     }
 
     private static HashMap<String, long[]> dfWindows() {
@@ -313,7 +313,7 @@ public class diskUsage {
             processArgs.add(windowsCommand);
             processArgs.add("/c");
             processArgs.add("dir");
-            processArgs.add(yacyUsedVolumes.get(i) + ":\\");
+            processArgs.add("\"" + yacyUsedVolumes.get(i) + "\"");
 
             try {
                 final List<String> lines = consoleInterface.getConsoleOutput(processArgs, log);
@@ -376,6 +376,10 @@ public class diskUsage {
     }
 
     private static void checkPathUsageWindows(final String path) {
+    	// we would need to ask every path by "dir" as asking the root is not hardlink-proof:
+    	// yacyUsedVolumes.add(path);
+    	return;
+    	/*
         int index = -1;
         final String sub = path.substring(0, 1); // ?? nur ein character?
         try {
@@ -386,6 +390,7 @@ public class diskUsage {
         }
         if (index < 0)
             yacyUsedVolumes.add(sub);
+        */
     }
 
 }
