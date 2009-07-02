@@ -134,13 +134,7 @@ public final class CrawlSwitchboard {
                 ", " + profilesPassiveFile.length()/1024);
         
         // init queues
-        final File preStackFile = new File(queuesRoot, "urlNoticePreStack");
-        if (!preStackFile.exists()) {
-            // migrate old file
-            final File oldFile = new File(new File(queuesRoot.getParentFile().getParentFile().getParentFile(), "PLASMADB"), "switchboardQueue.stack");
-            if (oldFile.exists()) oldFile.renameTo(preStackFile);
-        }
-        this.queuePreStack = new IndexingStack(peers, preStackFile, this.profilesActiveCrawls);
+        this.queuePreStack = new IndexingStack(peers, new File(queuesRoot, "urlNoticePreStack.stack"), this.profilesActiveCrawls);
     }
     
     public void clear() {

@@ -628,15 +628,13 @@ public final class yacy {
         System.out.println(copyright);
         System.out.println(hline);
 
-        final Properties config = configuration("GEN-WORDSTAT", homePath);
-
         // load words
         Log.logInfo("GEN-WORDSTAT", "loading words...");
         final TreeMap<byte[], String> words = loadWordMap(new File(homePath, "yacy.words"));
 
         // find all hashes
         Log.logInfo("GEN-WORDSTAT", "searching all word-hash databases...");
-        final File dbRoot = new File(homePath, config.getProperty("dbPath"));
+        final File dbRoot = new File(homePath, "DATA/INDEX/freeworld/");
         final enumerateFiles ef = new enumerateFiles(new File(dbRoot, "WORDS"), true, false, true, true);
         File f;
         byte[] h;

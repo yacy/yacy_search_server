@@ -321,13 +321,7 @@ public final class plasmaSwitchboardConstants {
     public static final String LIST_BLUE_DEFAULT        = null;
     public static final String LIST_BADWORDS_DEFAULT    = "yacy.badwords";
     public static final String LIST_STOPWORDS_DEFAULT   = "yacy.stopwords";
-    /**
-     * <p><code>public static final String <strong>DBPATH</strong> = "dbPath"</code></p>
-     * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
-     * databases containing queues are stored</p>
-     */
-    public static final String PLASMA_PATH              = "dbPath";
-    public static final String PLASMA_PATH_DEFAULT      = "DATA/PLASMADB";
+    
     /**
      * <p><code>public static final String <strong>HTCACHE_PATH</strong> = "proxyCache"</code></p>
      * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all

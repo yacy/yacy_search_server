@@ -242,7 +242,7 @@ public class CrawlQueues {
             // check if the protocol is supported
             final yacyURL url = urlEntry.url();
             final String urlProtocol = url.getProtocol();
-            if (this.sb.crawlQueues.isSupportedProtocol(urlProtocol)) {
+            if (this.isSupportedProtocol(urlProtocol)) {
 
                 if (this.log.isFine())
                     log.logFine(stats + ": URL=" + urlEntry.url()

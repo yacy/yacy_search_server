@@ -218,12 +218,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     // storage management
     public  File                           htCachePath;
-    public  File                           plasmaPath;
     public  File                           listsPath;
     public  File                           htDocsPath;
     public  File                           rankingPath;
     public  File                           workPath;
     public  File                           releasePath;
+    public  File                           networkRoot;
+    public  File                           queuesRoot;
     public  File                           surrogatesInPath;
     public  File                           surrogatesOutPath;
     public  Map<String, String>            rankingPermissions;
@@ -300,8 +301,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         httpRemoteProxyConfig.init(this);
         
         // load values from configs        
-        this.plasmaPath   = getConfigPath(plasmaSwitchboardConstants.PLASMA_PATH, plasmaSwitchboardConstants.PLASMA_PATH_DEFAULT);
-        this.log.logConfig("Plasma DB Path: " + this.plasmaPath.toString());
         final File indexPrimaryPath = getConfigPath(plasmaSwitchboardConstants.INDEX_PRIMARY_PATH, plasmaSwitchboardConstants.INDEX_PATH_DEFAULT);
         this.log.logConfig("Index Primary Path: " + indexPrimaryPath.toString());
         this.listsPath      = getConfigPath(plasmaSwitchboardConstants.LISTS_PATH, plasmaSwitchboardConstants.LISTS_PATH_DEFAULT);
@@ -332,10 +331,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         final long fileSizeMax = (serverSystem.isWindows) ? sb.getConfigLong("filesize.max.win", (long) Integer.MAX_VALUE) : sb.getConfigLong("filesize.max.other", (long) Integer.MAX_VALUE);
         final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
         final int partitionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
+        this.networkRoot = new File(new File(indexPrimaryPath, networkName), "NETWORK");
+        this.queuesRoot = new File(new File(indexPrimaryPath, networkName), "QUEUES");
+        this.networkRoot.mkdirs();
+        this.queuesRoot.mkdirs();
         try {
-			final File networkRoot = new File(new File(indexPrimaryPath, networkName), "NETWORK");
-	        networkRoot.mkdirs();
-	        final File mySeedFile = new File(networkRoot, yacySeedDB.DBFILE_OWN_SEED);
+			final File mySeedFile = new File(networkRoot, yacySeedDB.DBFILE_OWN_SEED);
 	        peers = new yacySeedDB(
 	                networkRoot,
 	                "seed.new.heap",
@@ -353,7 +354,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 	                peers,
 	                networkName,
 	                log,
-	                new File(new File(indexPrimaryPath, networkName), "QUEUES"));
+	                this.queuesRoot);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 			indexSegment = null;
@@ -381,7 +382,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         this.proxyLastAccess = System.currentTimeMillis() - 10000;
         this.localSearchLastAccess = System.currentTimeMillis() - 10000;
         this.remoteSearchLastAccess = System.currentTimeMillis() - 10000;
-        this.webStructure = new plasmaWebStructure(log, rankingPath, "LOCAL/010_cr/", getConfig("CRDist0Path", plasmaRankingDistribution.CR_OWN), new File(plasmaPath, "webStructure.map"));
+        this.webStructure = new plasmaWebStructure(log, rankingPath, "LOCAL/010_cr/", getConfig("CRDist0Path", plasmaRankingDistribution.CR_OWN), new File(queuesRoot, "webStructure.map"));
         
         // configuring list path
         if (!(listsPath.exists())) listsPath.mkdirs();
@@ -459,7 +460,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // loading the robots.txt db
         this.log.logConfig("Initializing robots.txt DB");
-        final File robotsDBFile = new File(this.plasmaPath, "crawlRobotsTxt.heap");
+        final File robotsDBFile = new File(queuesRoot, "crawlRobotsTxt.heap");
         robots = new RobotsTxt(robotsDBFile);
         this.log.logConfig("Loaded robots.txt DB from file " + robotsDBFile.getName() +
         ", " + robots.size() + " entries" +
@@ -527,11 +528,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // start a loader
         log.logConfig("Starting Crawl Loader");
-        this.crawlQueues = new CrawlQueues(this, plasmaPath);
+        this.crawlQueues = new CrawlQueues(this, queuesRoot);
         this.crawlQueues.noticeURL.setMinimumDelta(
                 this.getConfigLong("minimumLocalDelta", this.crawlQueues.noticeURL.getMinimumLocalDelta()),
                 this.getConfigLong("minimumGlobalDelta", this.crawlQueues.noticeURL.getMinimumGlobalDelta()));
-                
+
         /*
          * Creating sync objects and loading status for the crawl jobs
          * a) local crawl
@@ -804,14 +805,20 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         proxyLastAccess = System.currentTimeMillis() + 10000; // at least 10 seconds online caution to prevent unnecessary action on database meanwhile
         // clean search events which have cached relations to the old index
         plasmaSearchEvent.cleanupEvents(true);
+       
         // switch the networks
         synchronized (this) {
+            
+            
             // shut down
             synchronized (this.indexSegment) {
                 this.indexSegment.close();
             }
             this.crawlStacker.announceClose();
             this.crawlStacker.close();
+            this.webStructure.close();
+            this.robots.close();
+            this.crawlQueues.close();
             
             // start up
             setConfig("network.unit.definition", networkDefinition);
@@ -821,34 +828,36 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             final long fileSizeMax = (serverSystem.isWindows) ? sb.getConfigLong("filesize.max.win", (long) Integer.MAX_VALUE) : sb.getConfigLong("filesize.max.other", (long) Integer.MAX_VALUE);
             final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
             final int partitionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
+            final String networkName = getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "");
+            this.networkRoot = new File(new File(indexPrimaryPath, networkName), "NETWORK");
+            this.queuesRoot = new File(new File(indexPrimaryPath, networkName), "QUEUES");
+            this.networkRoot.mkdirs();
+            this.queuesRoot.mkdirs();
+            final File mySeedFile = new File(this.networkRoot, yacySeedDB.DBFILE_OWN_SEED);
+            peers = new yacySeedDB(
+                    this.networkRoot,
+                    "seed.new.heap",
+                    "seed.old.heap",
+                    "seed.pot.heap",
+                    mySeedFile,
+                    redundancy,
+                    partitionExponent);
             try {
-                String networkName = getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "");
-                final File networkRoot = new File(new File(indexPrimaryPath, networkName), "NETWORK");
-	            networkRoot.mkdirs();
-	            final File mySeedFile = new File(networkRoot, yacySeedDB.DBFILE_OWN_SEED);
-	            peers = new yacySeedDB(
-	                    networkRoot,
-	                    "seed.new.heap",
-	                    "seed.old.heap",
-	                    "seed.pot.heap",
-	                    mySeedFile,
-	                    redundancy,
-	                    partitionExponent);
-	            indexSegment = new Segment(
-	                    log,
-	                    new File(new File(indexPrimaryPath, networkName), "TEXT"),
-	                    wordCacheMaxCount,
-	                    fileSizeMax);
-	            crawler = new CrawlSwitchboard(
-	                    peers,
-	                    networkName,
-	                    log,
-	                    new File(new File(indexPrimaryPath, networkName), "QUEUES"));
-			} catch (IOException e) {
-				e.printStackTrace();
-				this.indexSegment = null;
-			}
-            // we need a new stacker, because this uses network-specific attributes to sort out urls (local, global)
+                indexSegment = new Segment(
+                        log,
+                        new File(new File(indexPrimaryPath, networkName), "TEXT"),
+                        wordCacheMaxCount,
+                        fileSizeMax);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            crawler = new CrawlSwitchboard(
+                    peers,
+                    networkName,
+                    log,
+                    this.queuesRoot);
+
+			// we need a new stacker, because this uses network-specific attributes to sort out urls (local, global)
             this.crawlStacker = new CrawlStacker(
                     this.crawlQueues,
                     this.crawler,
@@ -856,6 +865,25 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                     this.peers,
                     "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0,
                     "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0);
+
+            // create new web structure
+            this.webStructure = new plasmaWebStructure(log, rankingPath, "LOCAL/010_cr/", getConfig("CRDist0Path", plasmaRankingDistribution.CR_OWN), new File(queuesRoot, "webStructure.map"));
+
+            // load the robots.txt database
+            this.log.logConfig("Initializing robots.txt DB");
+            final File robotsDBFile = new File(this.queuesRoot, "crawlRobotsTxt.heap");
+            this.robots = new RobotsTxt(robotsDBFile);
+            this.log.logConfig("Loaded robots.txt DB from file " + robotsDBFile.getName() +
+            ", " + robots.size() + " entries" +
+            ", " + ppRamString(robotsDBFile.length()/1024));
+            
+            // start a loader
+            log.logConfig("Starting Crawl Loader");
+            this.crawlQueues = new CrawlQueues(this, this.queuesRoot);
+            this.crawlQueues.noticeURL.setMinimumDelta(
+                    this.getConfigLong("minimumLocalDelta", this.crawlQueues.noticeURL.getMinimumLocalDelta()),
+                    this.getConfigLong("minimumGlobalDelta", this.crawlQueues.noticeURL.getMinimumGlobalDelta()));
+
         }
         // start up crawl jobs
         continueCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);

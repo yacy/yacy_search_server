@@ -67,10 +67,10 @@ public final class ResourceObserver {
         final ArrayList<String> pathsToCheck = new ArrayList<String>();
         //  FIXME whats about the secondary path???
         //   = (getConfig(plasmaSwitchboard.INDEX_SECONDARY_PATH, "");
-        final String[] pathes =  {plasmaSwitchboardConstants.HTDOCS_PATH,        
+        final String[] pathes =  {
+                            plasmaSwitchboardConstants.HTDOCS_PATH,        
                             plasmaSwitchboardConstants.INDEX_PRIMARY_PATH,
                             plasmaSwitchboardConstants.LISTS_PATH,
-                            plasmaSwitchboardConstants.PLASMA_PATH,
                             plasmaSwitchboardConstants.RANKING_PATH,
                             plasmaSwitchboardConstants.WORK_PATH};
         String path;

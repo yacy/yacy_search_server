@@ -55,7 +55,11 @@ public final class IndexImport_p {
                 try {
                     final boolean startImport = true;                    
                     if (startImport) {
-                        final Importer importerThread = new NoticeURLImporter(switchboard.plasmaPath, switchboard.crawlQueues, switchboard.crawler.profilesActiveCrawls, switchboard.dbImportManager);
+                        final Importer importerThread = new NoticeURLImporter(
+                                switchboard.queuesRoot,
+                                switchboard.crawlQueues,
+                                switchboard.crawler.profilesActiveCrawls,
+                                switchboard.dbImportManager);
 
                         if (importerThread != null) {
                             importerThread.setJobID(switchboard.dbImportManager.generateUniqueJobID());
