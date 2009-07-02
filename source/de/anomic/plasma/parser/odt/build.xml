@@ -36,9 +36,6 @@
     </target>	
 
     <target name="copy" depends="compile">
-        <copy todir="${release}/lib/">
-             <fileset dir="${lib}" includes="odf_utils_05_11_29.*"/> 
-        </copy> 
         <copy todir="${release}/source/de/anomic/plasma/parser/${parserShortName}">
              <fileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" includes="**/*"/> 
         </copy>        

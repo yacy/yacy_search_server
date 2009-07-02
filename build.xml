@@ -979,6 +979,9 @@
       <fileset dir="source" defaultexcludes="yes">
         <include name="**/*.java" />
       </fileset>
+      <fileset dir="htroot" defaultexcludes="yes">
+        <include name="**/*.java" />
+      </fileset>
     </javadoc>
   </target>
 

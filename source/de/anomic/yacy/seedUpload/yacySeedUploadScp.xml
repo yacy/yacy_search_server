@@ -46,9 +46,6 @@
 
 
     <target name="copy" depends="compile">
-        <copy todir="${release}/lib/">
-             <fileset dir="${lib}" includes="jsch-0.1.21.*"/> 
-        </copy>
         <copy todir="${release}/source/de/anomic/yacy/seedUpload/">
              <fileset dir="${src}/de/anomic/yacy/seedUpload/">
                   <include name="yacySeedUpload${addonShortName}.java"/> 

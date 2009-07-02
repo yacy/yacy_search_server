@@ -37,9 +37,6 @@
     </target>	
 
     <target name="copy" depends="compile">
-        <copy todir="${release}/lib/">
-             <fileset dir="${lib}" includes="tar.jar"/> 
-        </copy>
         <copy todir="${release}/source/de/anomic/plasma/parser/${parserShortName}">
              <fileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" includes="**/*"/> 
         </copy>        

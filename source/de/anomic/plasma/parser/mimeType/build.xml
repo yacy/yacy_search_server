@@ -43,9 +43,6 @@
     </target>	
 
     <target name="copy" depends="compile">
-        <copy todir="${release}/lib/">
-             <fileset dir="${lib}" includes="jmimemagic-0.1.0.jar,jakarta-oro-2.0.7.jar,log4j-1.2.9.jar,xerces.jar"/> 
-        </copy>
         <copy todir="${release}/source/de/anomic/plasma/parser/${parserShortName}">
              <fileset dir="${src}/de/anomic/plasma/parser/${parserShortName}" includes="**/*"/> 
         </copy>        
