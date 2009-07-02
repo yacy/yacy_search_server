@@ -378,12 +378,19 @@
     <!-- copy yacy.jar (if available) -->
     <copy todir="${release_main}" file="yacy.jar" failonerror="false"/>
 
-    <!-- copy build libs -->
-    <copy todir="${release_main}/libbuild">
-      <fileset dir="${libbuild}" 
-               includes="**/*"/>
-               
-    </copy>
+  	<!-- copy all libs -->
+  	    <copy todir="${release_main}/lib">
+  	      <fileset dir="${lib}" 
+  	               includes="**/*"/>
+  	               
+  	    </copy>
+  	
+  	<!-- copy build libs -->
+  	    <copy todir="${release_main}/libbuild">
+  	      <fileset dir="${libbuild}" 
+  	               includes="**/*"/>
+  	               
+  	    </copy>
 
     <!-- copy configuration files -->
     <copy todir="${release_main}">
