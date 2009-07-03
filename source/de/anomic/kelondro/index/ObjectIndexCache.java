@@ -72,6 +72,24 @@ public class ObjectIndexCache implements ObjectIndex {
         }
     }
     
+    public synchronized byte[] smallestKey() {
+        byte[] b0 = index0.smallestKey();
+        if (b0 == null) return null;
+        if (index1 == null) return b0;
+        byte[] b1 = index0.smallestKey();
+        if (b1 == null || rowdef.objectOrder.compare(b1, b0) > 0) return b0;
+        return b1;
+    }
+    
+    public synchronized byte[] largestKey() {
+        byte[] b0 = index0.largestKey();
+        if (b0 == null) return null;
+        if (index1 == null) return b0;
+        byte[] b1 = index0.largestKey();
+        if (b1 == null || rowdef.objectOrder.compare(b0, b1) > 0) return b0;
+        return b1;
+    }
+    
     public synchronized Row.Entry get(final byte[] key) {
         assert (key != null);
         finishInitialization();

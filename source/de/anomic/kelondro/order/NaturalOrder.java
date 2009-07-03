@@ -26,7 +26,9 @@
 
 package de.anomic.kelondro.order;
 
+import java.io.IOException;
 import java.util.Comparator;
+import java.util.Iterator;
 
 public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable {
     
@@ -234,6 +236,35 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         }
         sb.append('\n');
         return sb.toString();
+    }
+    
+    public static Iterator<Long> LongIterator(Iterator<byte[]> b256Iterator) throws IOException {
+        return new LongIter(b256Iterator);
+    }
+    
+    public static class LongIter implements Iterator<Long> {
+
+        private Iterator<byte[]> b256Iterator;
+        
+        public LongIter(Iterator<byte[]> b256Iterator) {
+            this.b256Iterator = b256Iterator;
+        }
+        
+        public boolean hasNext() {
+            return this.b256Iterator.hasNext();
+        }
+
+        public Long next() {
+            byte[] b = this.b256Iterator.next();
+            assert (b != null);
+            if (b == null) return null;
+            return new Long(decodeLong(b));
+        }
+
+        public void remove() {
+            this.b256Iterator.remove();
+        }
+        
     }
     
     public static void main(final String[] args) {

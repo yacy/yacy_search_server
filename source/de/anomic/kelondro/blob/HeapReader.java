@@ -235,6 +235,54 @@ public class HeapReader {
     }
     
     /**
+     * find a special key in the heap: the one with the smallest key
+     * this method is useful if the entries are ordered using their keys.
+     * then the key with the smallest key denotes the first entry
+     * @return the smallest key in the heap
+     * @throws IOException
+     */
+    protected synchronized byte[] firstKey() throws IOException {
+        return index.smallestKey();
+    }
+    
+    /**
+     * find a special blob in the heap: one that has the smallest key
+     * this method is useful if the entries are ordered using their keys.
+     * then the key with the smallest key denotes the first entry
+     * @return the entry which key is the smallest in the heap
+     * @throws IOException
+     */
+    protected synchronized byte[] first() throws IOException {
+        byte[] key = index.smallestKey();
+        if (key == null) return null;
+        return get(key);
+    }
+    
+    /**
+     * find a special key in the heap: the one with the largest key
+     * this method is useful if the entries are ordered using their keys.
+     * then the key with the largest key denotes the last entry
+     * @return the largest key in the heap
+     * @throws IOException
+     */
+    protected synchronized byte[] lastKey() throws IOException {
+        return index.largestKey();
+    }
+    
+    /**
+     * find a special blob in the heap: one that has the largest key
+     * this method is useful if the entries are ordered using their keys.
+     * then the key with the largest key denotes the last entry
+     * @return the entry which key is the smallest in the heap
+     * @throws IOException
+     */
+    protected synchronized byte[] last() throws IOException {
+        byte[] key = index.largestKey();
+        if (key == null) return null;
+        return get(key);
+    }
+    
+    /**
      * read a blob from the heap
      * @param key
      * @return

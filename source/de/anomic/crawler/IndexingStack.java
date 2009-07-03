@@ -39,7 +39,7 @@ import de.anomic.http.httpResponseHeader;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.table.Stack;
+import de.anomic.kelondro.table.RecordStack;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
@@ -53,7 +53,7 @@ import de.anomic.yacy.logging.Log;
 public class IndexingStack {
 
     protected final CrawlProfile profiles;
-    protected final Stack sbQueueStack;
+    protected final RecordStack sbQueueStack;
     protected final yacySeedDB peers;
     protected final ConcurrentHashMap<String, QueueEntry> queueInProcess;
     
@@ -64,7 +64,7 @@ public class IndexingStack {
         this.profiles = profiles;
         this.peers = peers;
         this.queueInProcess = new ConcurrentHashMap<String, QueueEntry>();
-        this.sbQueueStack = Stack.open(sbQueueStackPath, rowdef);
+        this.sbQueueStack = RecordStack.open(sbQueueStackPath, rowdef);
     }
     
     public static final Row rowdef = new Row(

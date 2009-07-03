@@ -40,7 +40,7 @@ import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.yacy.logging.Log;
 
-public final class Stack extends Records {
+public final class RecordStack extends Records {
 
     // define the Over-Head-Array
     private static short thisOHBytes   = 0; // our record definition does not need extra bytes
@@ -53,7 +53,7 @@ public final class Stack extends Records {
     protected static final int root  = 0; // pointer for FHandles-array: pointer to root node
     protected static final int toor  = 1; // pointer for FHandles-array: pointer to root node
 
-    public Stack(final File file, final Row rowdef) throws IOException {
+    public RecordStack(final File file, final Row rowdef) throws IOException {
         // this creates a new stack
         super(file, thisOHBytes, thisOHHandles, rowdef, thisFHandles, rowdef.columns() /* txtProps */, 80 /* txtPropWidth */);
         if (super.fileExisted) {
@@ -64,15 +64,15 @@ public final class Stack extends Records {
         }
     }
 
-    public static final Stack open(final File file, final Row rowdef) {
+    public static final RecordStack open(final File file, final Row rowdef) {
         try {
-            return new Stack(file, rowdef);
+            return new RecordStack(file, rowdef);
         } catch (final IOException e) {
         	Log.logSevere("Stack", "Stack file open failed, deleting stack file " + file.toString());
         	e.printStackTrace();
             FileUtils.deletedelete(file);
             try {
-                return new Stack(file, rowdef);
+                return new RecordStack(file, rowdef);
             } catch (final IOException ee) {
                 System.out.println("kelondroStack: cannot open or create file " + file.toString());
                 e.printStackTrace();
@@ -319,12 +319,12 @@ public final class Stack extends Records {
 		System.err.println("( create, push, view, (g)pop, imp, shell)");
 		System.exit(0);
 	    } else if (args.length == 2) {
-		Stack fm = new Stack(new File(args[1]), lens);
+		RecordStack fm = new RecordStack(new File(args[1]), lens);
 		if (args[0].equals("-v")) {
 		    fm.print();
 		    ret = null;
 		} else if (args[0].equals("-g")) {
-		    fm = new Stack(new File(args[1]), lens);
+		    fm = new RecordStack(new File(args[1]), lens);
 		    final Row.Entry ret2 = fm.pop();
 		    ret = ((ret2 == null) ? null : ret2.getColBytes(1)); 
 		    fm.close();
@@ -332,7 +332,7 @@ public final class Stack extends Records {
 		fm.close();
 	    } else if (args.length == 3) {
 		if (args[0].equals("-i")) {
-		    final Stack fm = new Stack(new File(args[2]), lens);
+		    final RecordStack fm = new RecordStack(new File(args[2]), lens);
 		    final int i = fm.imp(new File(args[1]),";");
 		    fm.close();
 		    ret = (i + " records imported").getBytes();
@@ -356,7 +356,7 @@ public final class Stack extends Records {
                 if (f != null) try {f.close();}catch(final Exception e) {}
             }
 		} else if (args[0].equals("-g")) {
-		    final Stack fm = new Stack(new File(args[2]), lens);
+		    final RecordStack fm = new RecordStack(new File(args[2]), lens);
             final Row.Entry ret2 = fm.pop();
 		    ret = ((ret2 == null) ? null : ret2.getColBytes(1)); 
 		    fm.close();
@@ -366,10 +366,10 @@ public final class Stack extends Records {
 		    // create <keylen> <valuelen> <filename>
 		    final File f = new File(args[3]);
 		    if (f.exists()) FileUtils.deletedelete(f);
-		    final Stack fm = new Stack(f, lens);
+		    final RecordStack fm = new RecordStack(f, lens);
 		    fm.close();
 		} else if (args[0].equals("-p")) {
-		    final Stack fm = new Stack(new File(args[3]), lens);
+		    final RecordStack fm = new RecordStack(new File(args[3]), lens);
 		    fm.push(fm.row().newEntry(new byte[][] {args[1].getBytes(), args[2].getBytes()}));
 		    fm.close();
 		}

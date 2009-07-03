@@ -388,6 +388,22 @@ public class RowCollection implements Iterable<Row.Entry> {
         return r;
     }
     
+    public synchronized byte[] smallestKey() {
+        if (chunkcount == 0) return null;
+        this.sort();
+        final Row.Entry r = get(0, false);
+        byte[] b = r.getPrimaryKeyBytes();
+        return b;
+    }
+    
+    public synchronized byte[] largestKey() {
+        if (chunkcount == 0) return null;
+        this.sort();
+        final Row.Entry r = get(chunkcount - 1, false);
+        byte[] b = r.getPrimaryKeyBytes();
+        return b;
+    }
+    
     public synchronized void clear() {
         if (this.chunkcache.length == 0) return;
         this.chunkcache = new byte[0];

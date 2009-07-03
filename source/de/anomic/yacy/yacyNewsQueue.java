@@ -53,14 +53,14 @@ import java.util.Iterator;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.table.Stack;
+import de.anomic.kelondro.table.RecordStack;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 
 public class yacyNewsQueue {
 
     private final File path;
-    Stack queueStack;
+    RecordStack queueStack;
     private final yacyNewsDB newsDB;
     
     public static final Row rowdef = new Row(new Column[]{
@@ -73,13 +73,13 @@ public class yacyNewsQueue {
     public yacyNewsQueue(final File path, final yacyNewsDB newsDB) {
         this.path = path;
         this.newsDB = newsDB;
-        this.queueStack = Stack.open(path, rowdef);
+        this.queueStack = RecordStack.open(path, rowdef);
     }
 
     private void resetDB() {
         try {close();} catch (final Exception e) {}
         if (path.exists()) FileUtils.deletedelete(path);
-        queueStack = Stack.open(path, rowdef);
+        queueStack = RecordStack.open(path, rowdef);
     }
 
     public void clear() {

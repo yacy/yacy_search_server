@@ -163,6 +163,14 @@ public class HandleMap implements Iterable<Row.Entry> {
         index.clear();
     }
     
+    public synchronized byte[] smallestKey() {
+        return index.smallestKey();
+    }
+    
+    public synchronized byte[] largestKey() {
+        return index.largestKey();
+    }
+    
     public synchronized boolean has(final byte[] key) {
         assert (key != null);
         return index.has(key);
