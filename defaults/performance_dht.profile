@@ -12,24 +12,21 @@
 # and another idlesleep is performed
 
 20_dhtdistribution_idlesleep=5000
-20_dhtdistribution_busysleep=2000
+20_dhtdistribution_busysleep=500
 20_dhtdistribution_memprereq=12582912
-50_localcrawl_idlesleep=4000
-50_localcrawl_busysleep=50
+50_localcrawl_idlesleep=2000
+50_localcrawl_busysleep=60
 50_localcrawl_memprereq=12582912
 50_localcrawl_isPaused=false
-60_remotecrawlloader_idlesleep=120000
-60_remotecrawlloader_busysleep=60000
+60_remotecrawlloader_idlesleep=60000
+60_remotecrawlloader_busysleep=10000
 60_remotecrawlloader_memprereq=12582912
 60_remotecrawlloader_isPaused=false
-62_remotetriggeredcrawl_idlesleep=60000
-62_remotetriggeredcrawl_busysleep=10000
+62_remotetriggeredcrawl_idlesleep=10000
+62_remotetriggeredcrawl_busysleep=2000
 62_remotetriggeredcrawl_memprereq=12582912
 62_remotetriggeredcrawl_isPaused=false
 80_indexing_idlesleep=1000
-80_indexing_busysleep=10
+80_indexing_busysleep=0
 80_indexing_memprereq=12582912
-82_crawlstack_idlesleep=5000
-82_crawlstack_busysleep=1
-82_crawlstack_memprereq=1048576
 

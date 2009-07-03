@@ -188,7 +188,7 @@ public class PerformanceQueues_p {
                     // check values to prevent short-cut loops
                     if (idlesleep < 1000) idlesleep = 1000;
                     if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
-                    if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && (busysleep < 50)) busysleep = 50;
+                    //if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && (busysleep < 50)) busysleep = 50;
                     
                 	onTheFlyReconfiguration(switchboard, threadName, idlesleep, busysleep, memprereq);
                 }
