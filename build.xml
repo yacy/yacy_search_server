@@ -52,20 +52,10 @@
   <property name="release" location="RELEASE"/>
   <property name="htdocsWWW" location="${data}/HTDOCS/www"/>
   <property name="release_main" location="${release}/MAIN"/>
-  <property name="release_ext" location="${release}/EXT"/>
   <property name="release_windows" location="${release}/WINDOWS"/>
   <property name="svnEntriesFile" location=".svn/entries"/>
   <property name="defaults" location="defaults"/>
   <property name="DESTDIR" value="DESTDIR"/>
-
-  <!-- determining if the sourcecode of the yacybar is available -->
-  <condition property="yacyBarDirExists">
-    <available file="./yacybar" />
-  </condition>
-
-  <condition property="singleExtFile">
-    <equals arg1="${extensionTarget}" arg2="copy"/>
-  </condition>
 
   <!-- determining if the .svn directory exists -->
   <condition property="svnEntriesFileExists">
@@ -121,25 +111,8 @@
     </loadproperties>
   </target>
 
-  <!-- determining the extension target -->
-  <target name="determineExtensionTarget" depends="readBuildProperties">
-    <condition property="extensionTarget" value="copy">
-      <equals arg1="${extensionMode}" arg2="singleZip"/>
-    </condition>
-    <condition property="extensionTarget" value="copy">
-      <equals arg1="${extensionMode}" arg2="copyToMain"/>
-    </condition>
-    <condition property="extensionTarget" value="zip">
-      <equals arg1="${extensionMode}" arg2="multiZip"/>
-    </condition>
-
-    <condition property="singleExtFile">
-      <equals arg1="${extensionMode}" arg2="singleZip"/>
-    </condition>
-  </target>
-
   <!-- initializing all needed variables -->
-  <target name="init" depends="determineExtensionTarget">
+  <target name="init" depends="readBuildProperties">
     <mkdir dir="${build}/de/anomic/crawler"/>
     <mkdir dir="${build}/de/anomic/data"/>
     <mkdir dir="${build}/de/anomic/htmlFilter"/>
@@ -220,29 +193,18 @@
     </path>
 
     <!-- compiling yacy.java -->
-    <javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
+    <!--<javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
            includes="yacy.java"
            classpathref="project.class.path"
            debug="true" debuglevel="lines,vars,source"
-           source="${javacSource}" target="${javacTarget}" />
+	   source="${javacSource}" target="${javacTarget}" />-->
 
     <!-- compiling the main sources -->
     <javac srcdir="${src}/" destdir="${build}"
-           excludes="de/anomic/plasma/parser/*/*,de/anomic/yacy/seedUpload/**,yacy.java,de/anomic/data/rssReader.java"
            debug="true" debuglevel="lines,vars,source"
            source="${javacSource}" target="${javacTarget}">
       <classpath refid="project.class.path" />
     </javac>
-
-    <!-- compiling the two standard seed uploader methods -->
-    <javac srcdir="${src}" destdir="${build}"
-           classpathref="project.class.path"
-           debug="true" debuglevel="lines,vars,source"
-           source="${javacSource}" target="${javacTarget}">
-      <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.java" />
-      <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.java"/>
-    </javac>
-
 
     <!-- compiling htroot, htroot/yacy and htroot/htdocsdefault -->
     <javac srcdir="${htroot}/"
@@ -270,108 +232,15 @@
            source="${javacSource}" target="${javacTarget}" />
   </target>
 
-  <!-- compiling optional content parsers and building install packages -->
-  <target name="compileParsers" depends="compileMain" description="Compiling and zipping all additional parsers">
-    <subant target="${extensionTarget}">
-      <property name="src" location="${src}"/>
-      <property name="build" location="${build}"/>
-      <property name="lib" location="${lib}"/>
-      <property name="release" location="${release_ext}"/>
-      <property name="javacSource" value="${javacSource}"/>
-      <property name="javacTarget" value="${javacTarget}"/>
-      <!-- each optional parser must have its own build file -->
-      <fileset dir="${src}/" includes="de/anomic/plasma/parser/*/build.xml"/>
-    </subant>
-  </target>
-
-  <!-- compiling optional seed uploaders and building install packages -->
-  <target name="compileSeedUploaders" depends="compileMain" description="Compiling and zipping additional seed uploaders">
-    <subant target="${extensionTarget}">
-      <property name="src" location="${src}"/>
-      <property name="build" location="${build}"/>
-      <property name="lib" location="${lib}"/>
-      <property name="htroot" value="${htroot}"/>
-      <property name="release" location="${release_ext}"/>
-      <property name="javacSource" value="${javacSource}"/>
-      <property name="javacTarget" value="${javacTarget}"/>
-      <!-- each optionl uploader module must have its own build file -->
-      <fileset dir="${src}/" includes="de/anomic/yacy/seedUpload/yacySeedUpload*.xml"/>
-    </subant>
-  </target>
-
-  <!-- compile optional classs that were not compiled elsewhere -->
-  <target name="compileExtensions" depends="compileMain,compileParsers,compileSeedUploaders">
-    <!-- compile rss Reader -->
-    <javac srcdir="${src}" destdir="${build}"
-           debug="true" debuglevel="lines,vars,source" 
-           source="${javacSource}" target="${javacTarget}">
-      <classpath>
-        <path refid="project.class.path"/>
-      </classpath>
-      <include name="de/anomic/data/rssReader.java" />
-    </javac>
-  </target>
-
-  <target name="all" depends="compileMain,compileExtensions">
+  <target name="all" depends="compileMain">
     <delete file="${build}/yacy.java" />
   </target>
 
-  <!-- compiling the yacybar -->
-  <target name="buildYacyBar" if="yacyBarDirExists" depends="init" description="Building the yacyBar XPI file">
-    <!-- building yacybar xpi -->
-    <subant target="" buildpath="./yacybar" />
-
-    <!-- move xpi file into addon folder -->
-    <move file="./yacybar/yacybar.xpi" tofile="${addon}/yacybar.xpi"/>
-  </target>
-
-  <!-- =======================================================================================================
-       putting all extensions together into a single zip file 
-       ======================================================================================================= -->
-  <target name="distExt" if="singleExtFile" depends="copyExt4Dist">
-    <tar destfile="${release}/${extensionFile}" compression="gzip" defaultexcludes="yes" longfile="gnu">
-      <tarfileset dir="${release_ext}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}">
-        <include name="**/*.*"/>
-      </tarfileset>
-    </tar>
-
-    <delete dir="${release_ext}"/>
-  </target>
-
-  <!-- copy extension files that are not copied elsewhere -->
-  <target name="copyExt4Dist" depends="compileExtensions">
-    <!-- copy extension classes -->
-    <copy todir="${release_ext}/classes" failonerror="false">
-      <fileset dir="${build}">
-        <include name="de/anomic/data/rssReader.class"/>
-      </fileset>
-    </copy>
-
-    <!-- copy extension source files -->
-    <copy todir="${release_ext}/source">
-      <fileset dir="${src}">
-        <include name="de/anomic/data/rssReader.java"/>
-      </fileset>
-    </copy>
-  </target>
-
-  <target name="copyMain4Dist" depends="compileMain,buildYacyBar">
+  <target name="copyMain4Dist" depends="compileMain">
     <!-- copy main class files -->
     <copy todir="${release_main}/classes" failonerror="false">
       <fileset dir="${build}">
         <include name="**/*.*"/>
-        <!-- excluding all additional content parsers -->
-        <exclude name="de/anomic/plasma/parser/*/*"/>
-        <!-- excluding all additional seed uploaders -->
-        <exclude name="de/anomic/yacy/seedUpload/**"/>
-        <!-- ecluding rss Reader class -->
-        <exclude name="de/anomic/data/rssReader.*"/>
-      </fileset>
-
-      <!-- copy standard seed uploaders -->
-      <fileset dir="${build}">
-        <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.class"/>
-        <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.class"/>
       </fileset>
     </copy>
 
@@ -476,16 +345,6 @@
     <copy todir="${release_main}/source">
       <fileset dir="${src}">
         <include name="**/*.*"/>
-        <!-- excluding sources for additional content parsers -->
-        <exclude name="de/anomic/plasma/parser/*/*"/>
-        <!-- excluding sources for additional seed uploaders -->
-        <exclude name="de/anomic/yacy/seedUpload/yacySeedUpload**"/>
-        <!-- ecluding rss Reader class -->
-        <exclude name="de/anomic/data/rssReader.*"/>
-      </fileset>
-      <fileset dir="${src}">
-        <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.java"/>
-        <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.java"/>
       </fileset>
     </copy>
 
@@ -493,11 +352,6 @@
     <copy todir="${release_main}/htroot">
       <fileset dir="${htroot}">
         <include name="**/*"/>
-        <exclude name="yacy/seedUpload/**"/>
-      </fileset>
-      <fileset dir="${htroot}">
-        <include name="yacy/seedUpload/yacySeedUploadFile.html"/>
-        <include name="yacy/seedUpload/yacySeedUploadFtp.html"/>
       </fileset>
     </copy>
 
@@ -540,18 +394,6 @@
     <copy todir="${release_source}/classes" failonerror="false">
       <fileset dir="${build}">
         <include name="**/*.*"/>
-        <!-- excluding all additional content parsers -->
-        <exclude name="de/anomic/plasma/parser/*/*"/>
-        <!-- excluding all additional seed uploaders -->
-        <exclude name="de/anomic/yacy/seedUpload/**"/>
-        <!-- ecluding rss Reader class -->
-        <exclude name="de/anomic/data/rssReader.*"/>
-      </fileset>
-
-      <!-- copy standard seed uploaders -->
-      <fileset dir="${build}">
-        <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.class"/>
-        <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.class"/>
       </fileset>
     </copy>
 
@@ -617,7 +459,6 @@
         -->
       </fileset>
     </copy>
-    <copy todir="${release_source}" file="yacy.exe" failonerror="false"/>
 
     <!-- copy locales  -->
     <copy todir="${release_source}/locales">
@@ -656,16 +497,6 @@
     <copy todir="${release_source}/source">
       <fileset dir="${src}">
         <include name="**/*.*"/>
-        <!-- excluding sources for additional content parsers -->
-        <exclude name="de/anomic/plasma/parser/*/*"/>
-        <!-- excluding sources for additional seed uploaders -->
-        <exclude name="de/anomic/yacy/seedUpload/yacySeedUpload**"/>
-        <!-- ecluding rss Reader class -->
-        <exclude name="de/anomic/data/rssReader.*"/>
-      </fileset>
-      <fileset dir="${src}">
-        <include name="de/anomic/yacy/seedUpload/yacySeedUploadFile.java"/>
-        <include name="de/anomic/yacy/seedUpload/yacySeedUploadFtp.java"/>
       </fileset>
     </copy>
 
@@ -673,11 +504,6 @@
     <copy todir="${release_source}/htroot">
       <fileset dir="${htroot}">
         <include name="**/*"/>
-        <exclude name="yacy/seedUpload/**"/>
-      </fileset>
-      <fileset dir="${htroot}">
-        <include name="yacy/seedUpload/yacySeedUploadFile.html"/>
-        <include name="yacy/seedUpload/yacySeedUploadFtp.html"/>
       </fileset>
     </copy>
 
@@ -717,7 +543,7 @@
        making a release file for yacy 
        ======================================================================================================= -->
 
-  <target name="dist" depends="compileExtensions,copyMain4Dist,copyExt4Dist" description="make for standard YaCy">
+  <target name="dist" depends="copyMain4Dist" description="make for standard YaCy">
     <tar destfile="${release}/${stdReleaseFile}" compression="gzip" defaultexcludes="yes" longfile="fail">
 
       <!-- packing all files into a gzipped tar -->
@@ -730,14 +556,9 @@
         <exclude name="**/*.sh"/>
         <exclude name="**/*.command"/>
       </tarfileset>
-
-      <tarfileset dir="${release_ext}" prefix="${releaseFileParentDir}/" dirmode="${accessRightsDir}" mode="${accessRightsFile}" >
-        <include name="**/*.*"/>
-      </tarfileset>
     </tar>
 
     <delete dir="${release_main}"/>
-    <delete dir="${release_ext}"/>
     <delete dir="${release_windows}" failonerror="false" />
     <delete dir="${release}/SPECS" failonerror="false" />
   </target>
@@ -763,7 +584,6 @@
   <!-- make clean -->
   <target name="clean" description="make clean">
     <delete dir="${release_main}" failonerror="false"/>
-    <delete dir="${release_ext}" failonerror="false"/>
     <delete file="${build}/yacy.java" failonerror="false"/>
     <delete file="yacy.jar" failonerror="false"/>
     <delete file="yacy.exe" failonerror="false"/>
@@ -995,7 +815,7 @@
     <ant2svg destfile="doc/build_dependencies.svg"/>
   </target>
 
-  <target name="build-jar" depends="compileMain,compileExtensions">
+  <target name="build-jar" depends="compileMain">
     <jar destfile="yacy.jar" basedir="${build}/">
       <manifest>
         <attribute name="Main-Class" value="yacy"/>
@@ -1047,14 +867,13 @@
     <delete dir="${release}/SPECS" failonerror="false" />
     <delete dir="${release}/RPMS" failonerror="false" />
     <delete dir="${release_windows}" failonerror="false" />
-    <delete dir="${release_ext}" failonerror="false" />
   </target>
 
   <!-- Alias -->
   <target name="distWinInstaller" depends="winInstallerExe">
   </target>
 	
-  <target name="winInstallerExe" depends="compileExtensions,copyMain4Dist,copyExt4Dist" description="Creates the windows installer.exe">
+  <target name="winInstallerExe" depends="copyMain4Dist" description="Creates the windows installer.exe">
     <!-- http://nsisant.sourceforge.net/ -->
     <mkdir dir="${release_windows}" />
     <copy file="build.nsi" tofile="${release_windows}/build.nsi" overwrite="true" filtering="true" />
@@ -1066,7 +885,6 @@
           tofile="${release}/yacy_v${releaseVersion}_${DSTAMP}_${releaseNr}.exe" />
   	
     <delete dir="${release_main}"/>
-    <delete dir="${release_ext}"/>
     <delete dir="${release_windows}" failonerror="false" />
   </target>
 
