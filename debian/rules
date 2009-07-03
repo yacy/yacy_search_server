@@ -32,7 +32,6 @@ install:
 	ant installonlinux -DDESTDIR=$(CURDIR)/debian/yacy
 	mkdir -p $(CURDIR)/debian/yacy/usr/share/java/yacy/
 	cp lib/*.jar $(CURDIR)/debian/yacy/usr/share/java/yacy/
-	cp libx/*.jar $(CURDIR)/debian/yacy/usr/share/java/yacy/
 	#cp -r classes $(CURDIR)/debian/yacy/usr/share/java/yacy/
 
 

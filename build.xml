@@ -55,7 +55,9 @@
   <property name="release_windows" location="${release}/WINDOWS"/>
   <property name="svnEntriesFile" location=".svn/entries"/>
   <property name="defaults" location="defaults"/>
+  <!-- variables for installonlinux target-->
   <property name="DESTDIR" value="DESTDIR"/>
+  <property name="pkgmanager" value="false"/>
 
   <!-- determining if the .svn directory exists -->
   <condition property="svnEntriesFileExists">
@@ -144,10 +146,13 @@
 
     <!-- YaCy root directory -->
     <filter token="REPL_YACY_ROOT_DIR" value="${yacyroot}"/>
+    <filter token="REPL_PKGMANAGER" value="${pkgmanager}"/>
 
     <!-- deleting old file -->
     <delete file="${build}/yacy.java" failonerror="false"/>
     <copy file="${src}/yacy.java" tofile="${build}/yacy.java" overwrite="true" filtering="true" />
+    <delete file="${build}/de/anomic/yacy/yacyBuildProperties.java" failonerror="false"/>
+    <copy file="${src}/de/anomic/yacy/yacyBuildProperties.java" tofile="${build}/de/anomic/yacy/yacyBuildProperties.java" overwrite="true" filtering="true" />
 
   </target>
 
@@ -193,14 +198,16 @@
     </path>
 
     <!-- compiling yacy.java -->
-    <!--<javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
-           includes="yacy.java"
-           classpathref="project.class.path"
-           debug="true" debuglevel="lines,vars,source"
-	   source="${javacSource}" target="${javacTarget}" />-->
+    <javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
+           includes="yacy.java,de/anomic/yacy/yacyBuildProperties.java"
+           source="${javacSource}" target="${javacTarget}">
+      <classpath refid="project.class.path" />
+    </javac>
+    <delete file="${build}/BuildProperties.java" />
 
     <!-- compiling the main sources -->
     <javac srcdir="${src}/" destdir="${build}"
+           excludes="de/anomic/yacy/yacyBuildProperties.java"
            debug="true" debuglevel="lines,vars,source"
            source="${javacSource}" target="${javacTarget}">
       <classpath refid="project.class.path" />
