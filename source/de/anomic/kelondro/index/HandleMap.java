@@ -43,6 +43,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -288,8 +289,8 @@ public class HandleMap implements Iterable<Row.Entry> {
      * @param bufferSize
      * @return
      */
-    public static initDataConsumer asynchronusInitializer(final int keylength, final ByteOrder objectOrder, int idxbytes, final int space, final int expectedspace, int bufferSize) {
-        initDataConsumer initializer = new initDataConsumer(new HandleMap(keylength, objectOrder, idxbytes, space, expectedspace), bufferSize);
+    public static initDataConsumer asynchronusInitializer(final int keylength, final ByteOrder objectOrder, int idxbytes, final int space, final int expectedspace) {
+        initDataConsumer initializer = new initDataConsumer(new HandleMap(keylength, objectOrder, idxbytes, space, expectedspace));
         ExecutorService service = Executors.newSingleThreadExecutor();
         initializer.setResult(service.submit(initializer));
         service.shutdown();
@@ -314,9 +315,9 @@ public class HandleMap implements Iterable<Row.Entry> {
         private Future<HandleMap> result;
         private boolean sortAtEnd;
         
-        public initDataConsumer(HandleMap map, int bufferCount) {
+        public initDataConsumer(HandleMap map) {
             this.map = map;
-            cache = new ArrayBlockingQueue<entry>(bufferCount);
+            cache = new LinkedBlockingQueue<entry>();
             sortAtEnd = false;
         }
         
@@ -338,7 +339,7 @@ public class HandleMap implements Iterable<Row.Entry> {
         }
         
         /**
-         * to signal the initialization thread that no more entries will be sublitted with consumer()
+         * to signal the initialization thread that no more entries will be submitted with consumer()
          * this method must be called. The process will not terminate if this is not called before.
          */
         public void finish(boolean sortAtEnd) {

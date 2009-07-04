@@ -148,7 +148,7 @@ public class HeapReader {
         Log.logInfo("HeapReader", "generating index for " + heapFile.toString() + ", " + (file.length() / 1024 / 1024) + " MB. Please wait.");
         
         this.free = new Gap();
-        HandleMap.initDataConsumer indexready = HandleMap.asynchronusInitializer(keylength, this.ordering, 8, 0, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))), 100000);
+        HandleMap.initDataConsumer indexready = HandleMap.asynchronusInitializer(keylength, this.ordering, 8, 0, Math.max(10, (int) (Runtime.getRuntime().freeMemory() / (10 * 1024 * 1024))));
         byte[] key = new byte[keylength];
         int reclen;
         long seek = 0;
