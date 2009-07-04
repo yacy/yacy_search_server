@@ -134,7 +134,7 @@ public final class CrawlSwitchboard {
                 ", " + profilesPassiveFile.length()/1024);
         
         // init queues
-        this.queuePreStack = new IndexingStack(peers, new File(queuesRoot, "urlNoticePreStack.stack"), this.profilesActiveCrawls);
+        this.queuePreStack = new IndexingStack(peers, queuesRoot, "urlNoticePreStack.stack", this.profilesActiveCrawls);
     }
     
     public void clear() {

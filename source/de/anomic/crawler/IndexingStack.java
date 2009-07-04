@@ -51,7 +51,11 @@ import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
 public class IndexingStack {
-
+    
+    private static final byte[] zbytes = new byte[0];
+    //private static final String queuesPrefix = "indexing";
+    //private static final String sbQueueName = "sbQueueStack";
+    
     protected final CrawlProfile profiles;
     protected final RecordStack sbQueueStack;
     protected final yacySeedDB peers;
@@ -59,12 +63,13 @@ public class IndexingStack {
     
     public IndexingStack(
             final yacySeedDB peers,
-            final File sbQueueStackPath,
+            final File queuesRoot,
+            final String sbQueueStackName,
             final CrawlProfile profiles) {
         this.profiles = profiles;
         this.peers = peers;
         this.queueInProcess = new ConcurrentHashMap<String, QueueEntry>();
-        this.sbQueueStack = RecordStack.open(sbQueueStackPath, rowdef);
+        this.sbQueueStack = RecordStack.open(new File(queuesRoot, sbQueueStackName), rowdef);
     }
     
     public static final Row rowdef = new Row(
@@ -92,12 +97,12 @@ public class IndexingStack {
         if (sbQueueStack == null) return; // may occur during shutdown
         sbQueueStack.push(sbQueueStack.row().newEntry(new byte[][]{
             entry.url.toString().getBytes(),
-            (entry.referrerHash == null) ? "".getBytes() : entry.referrerHash.getBytes(),
+            (entry.referrerHash == null) ? zbytes : entry.referrerHash.getBytes(),
             Base64Order.enhancedCoder.encodeLong((entry.ifModifiedSince == null) ? 0 : entry.ifModifiedSince.getTime(), 11).getBytes(),
             new byte[]{entry.flags},
-            (entry.initiator == null) ? "".getBytes() : entry.initiator.getBytes(),
+            (entry.initiator == null) ? zbytes : entry.initiator.getBytes(),
             Base64Order.enhancedCoder.encodeLong(entry.depth, rowdef.width(5)).getBytes(),
-            (entry.profileHandle == null) ? "".getBytes() : entry.profileHandle.getBytes(),
+            (entry.profileHandle == null) ? zbytes : entry.profileHandle.getBytes(),
             (entry.anchorName == null) ? "-".getBytes("UTF-8") : entry.anchorName.getBytes("UTF-8")
         }));
     }

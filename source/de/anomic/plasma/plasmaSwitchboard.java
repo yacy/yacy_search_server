@@ -1262,7 +1262,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                     if (crawler.queuePreStack.size() == sizeBefore) {
                         // this is a severe problem: because this time a null is returned, it means that this status will last forever
                         // to re-enable use of the sbQueue, it must be emptied completely
-                        log.logSevere("deQueue: does not shrink after pop() == null. Emergency reset of " + crawler.queuePreStack.file());
+                        log.logSevere("deQueue: does not shrink after pop() == null. Emergency reset of sbQueue");
                         crawler.queuePreStack.clear();
                     }
                     return null;
