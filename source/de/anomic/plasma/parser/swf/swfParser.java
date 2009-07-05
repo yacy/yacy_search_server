@@ -75,8 +75,6 @@ public class swfParser extends AbstractParser implements Parser {
      */
     public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
 
-    	plasmaParserDocument theDoc = null;
-    	
         try {
             final SWF2HTML swf2html = new SWF2HTML();
             String contents = "";
@@ -114,7 +112,7 @@ public class swfParser extends AbstractParser implements Parser {
             }
 
            // As the result of parsing this function must return a plasmaParserDocument object
-            theDoc = new plasmaParserDocument(
+            final plasmaParserDocument theDoc = new plasmaParserDocument(
                     location,     // url of the source document
                     mimeType,     // the documents mime type
                     "UTF-8",      // charset of the document text
@@ -139,13 +137,6 @@ public class swfParser extends AbstractParser implements Parser {
             final String errorMsg = "Unable to parse the swf document '" + location + "':" + e.getMessage();
             this.theLogger.logSevere(errorMsg);
             throw new ParserException(errorMsg, location);
-        } finally {
-        	if (theDoc == null) {
-                // if an unexpected error occures just log the error and raise a new ParserException
-                final String errorMsg = "Unable to parse the swf document '" + location + "': possibly out of memory";
-                this.theLogger.logSevere(errorMsg);
-                throw new ParserException(errorMsg, location);
-        	}
         }
     }
 

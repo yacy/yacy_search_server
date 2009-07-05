@@ -1693,7 +1693,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             // parse the document
             document = parser.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), plasmaHTCache.getResourceContent(entry.url()));
             assert(document != null) : "Unexpected error. Parser returned null.";
-            if (document == null) return null;
         } catch (final ParserException e) {
             this.log.logInfo("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());
             addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.anchorName(), e.getErrorCode());
@@ -1702,6 +1701,12 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 document = null;
             }
             return null;
+        } finally {
+            if (document == null) { // if you get here, comment this part out and you will possibly see a OOM in the log
+            	this.log.logInfo("Unable to parse the resource '" + entry.url() + "'. " + "no parser result");
+            	addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.anchorName(), "no parser result");
+            	return null;
+            }
         }
         
         final long parsingEndTime = System.currentTimeMillis();            
