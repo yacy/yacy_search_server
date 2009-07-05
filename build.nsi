@@ -128,7 +128,6 @@ Section "YaCy"
     Exec 'attrib +I "$INSTDIR\*" /S /D'
     
 	File /r "RELEASE\MAIN\*"
-	File /r "RELEASE\EXT\*"
 
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "DisplayName" "YaCy"
 	WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\YaCy" "UninstallString" '"$INSTDIR\uninstall.exe"'
