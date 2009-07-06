@@ -141,7 +141,7 @@ public class cryptbig {
     // Decode a string into a new string using b64, crypt and utf-8
     public String decryptString(final String str) {
 	try {
-	    final byte[] b64dec = Base64Order.standardCoder.decode(str, "de.anomic.tools.cryptbig.decryptString()");
+	    final byte[] b64dec = Base64Order.standardCoder.decode(str);
 	    if (b64dec == null) return null; // error in input string (inconsistency)
 	    final byte[] dec = decryptArray(b64dec);
 	    if (dec == null) return null;
@@ -390,7 +390,7 @@ public class cryptbig {
 	final boolean gzFlag = (s.charAt(8) == '1');
 	s = s.substring(9);
 	final cryptbig c = new cryptbig(key, salt);
-	final byte[] b64dec = Base64Order.enhancedCoder.decode(s, "de.anomic.tools.cryptbig.descrambleString()");
+	final byte[] b64dec = Base64Order.enhancedCoder.decode(s);
 	if (b64dec == null) return null; // error in input string (inconsistency)
 	final byte[] dec = c.decryptArray(b64dec);
 	if (dec == null) return null;
@@ -432,8 +432,8 @@ public class cryptbig {
 	final char method = encoded.charAt(0);
 	encoded = encoded.substring(2);
 	if (method == 'p') return encoded;
-	if (method == 'b') return Base64Order.enhancedCoder.decodeString(encoded, "de.anomic.tools.cryptbig.simpleDecode()");
-	if (method == 'z') return gzip.gunzipString(Base64Order.enhancedCoder.decode(encoded, "de.anomic.tools.cryptbig.simpleDecode()"));
+	if (method == 'b') return Base64Order.enhancedCoder.decodeString(encoded);
+	if (method == 'z') return gzip.gunzipString(Base64Order.enhancedCoder.decode(encoded));
 	if (method == 'c') return descrambleString(key, encoded);
 	return null;
     }
@@ -597,7 +597,7 @@ public class cryptbig {
 	if (s[0].equals("-ds64")) {
 	    // generate a b64 decoding from a given string
 	    if (s.length != 2) {help(); System.exit(-1);}
-	    System.out.println(Base64Order.standardCoder.decodeString(s[1], ""));
+	    System.out.println(Base64Order.standardCoder.decodeString(s[1]));
 	    System.exit(0);
 	}
 	if (s[0].equals("-ess")) {

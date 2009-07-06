@@ -418,7 +418,7 @@ public class yacySeed implements Cloneable {
      * @return the octal representation of the given base64 hash
      */
     public static String b64Hash2octalHash(final String b64Hash) {
-        return Digest.encodeOctal(Base64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2octalHash()"));
+        return Digest.encodeOctal(Base64Order.enhancedCoder.decode(b64Hash));
     }
 
     /**
@@ -428,7 +428,7 @@ public class yacySeed implements Cloneable {
      */
     public static String b64Hash2hexHash(final String b64Hash) {
         // the hash string represents 12 * 6 bit = 72 bits. This is too much for a long integer.
-        return Digest.encodeHex(Base64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2hexHash()"));
+        return Digest.encodeHex(Base64Order.enhancedCoder.decode(b64Hash));
     }
     
     /**
@@ -446,7 +446,7 @@ public class yacySeed implements Cloneable {
      */
     public static byte[] b64Hash2b256Hash(final String b64Hash) {
         assert b64Hash.length() == 12;
-        return Base64Order.enhancedCoder.decode(b64Hash, "de.anomic.yacy.yacySeed.b64Hash2b256Hash()");
+        return Base64Order.enhancedCoder.decode(b64Hash);
     }
     
     /**

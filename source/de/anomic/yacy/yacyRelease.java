@@ -285,7 +285,7 @@ public final class yacyRelease extends yacyVersion {
 	        if (signatureData == null) {
 	            Log.logWarning("yacyVersion", "download of signature " + this.getUrl().toString() + " failed. ignoring signature file.");
 	        } else try {
-	            signatureBytes = Base64Order.standardCoder.decode(new String(signatureData, "UTF8").trim(), "decode signature");
+	            signatureBytes = Base64Order.standardCoder.decode(new String(signatureData, "UTF8").trim());
 	        } catch (UnsupportedEncodingException e) {
 	            Log.logWarning("yacyVersion", "download of signature " + this.getUrl().toString() + " failed: unsupported encoding");
 	        }
@@ -351,8 +351,7 @@ public final class yacyRelease extends yacyVersion {
         try {
         serverCharBuffer signBuffer;
         signBuffer = new serverCharBuffer(getSignatureFile());
-        byte[] signByteBuffer = Base64Order.standardCoder.decode(
-            signBuffer.toString().trim(), "Signature");
+        byte[] signByteBuffer = Base64Order.standardCoder.decode(signBuffer.toString().trim());
         CryptoLib cl = new CryptoLib();
         for(yacyUpdateLocation updateLocation : latestReleaseLocations) {
             try {

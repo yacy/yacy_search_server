@@ -141,8 +141,7 @@ public class CryptoLib {
 	    } else if(args[0].equals("--sign") && args.length==3) {
 		CryptoLib cl = new CryptoLib();
 		serverCharBuffer privKeyBuffer = new serverCharBuffer(new File(args[1]));
-		byte[] privKeyByteBuffer = Base64Order.standardCoder.decode(
-			privKeyBuffer.toString(), "Private Key");
+		byte[] privKeyByteBuffer = Base64Order.standardCoder.decode(privKeyBuffer.toString());
 		PrivateKey privKey = cl.getPrivateKeyFromBytes(privKeyByteBuffer);
 
 		FileInputStream dataStream = new FileInputStream(args[2]);
@@ -154,15 +153,13 @@ public class CryptoLib {
 	    } else if(args[0].equals("--verify") && args.length==3) {
 		CryptoLib cl = new CryptoLib();
 		serverCharBuffer pubKeyBuffer = new serverCharBuffer(new File(args[1]));
-		byte[] pubKeyByteBuffer = Base64Order.standardCoder.decode(
-			pubKeyBuffer.toString().trim(), "Private Key");
+		byte[] pubKeyByteBuffer = Base64Order.standardCoder.decode(pubKeyBuffer.toString().trim());
 		PublicKey pubKey = cl.getPublicKeyFromBytes(pubKeyByteBuffer);
 
 		FileInputStream dataStream = new FileInputStream(args[2]);
 
 		serverCharBuffer signBuffer = new serverCharBuffer(new File(args[2] + ".sig"));
-		byte[] signByteBuffer = Base64Order.standardCoder.decode(
-			signBuffer.toString().trim(), "Signature");
+		byte[] signByteBuffer = Base64Order.standardCoder.decode(signBuffer.toString().trim());
 		if(cl.verifySignature(pubKey, dataStream, signByteBuffer)) {
 		    System.out.println("Signature OK!");
 		} else {

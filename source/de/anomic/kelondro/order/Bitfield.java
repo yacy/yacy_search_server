@@ -46,7 +46,7 @@ public class Bitfield implements Cloneable {
 
     public Bitfield(final int bytelength, final String exported) {
         // imports a b64-encoded bitfield
-        final byte[] b = Base64Order.enhancedCoder.decode(exported, "de.anomic.kelondro.kelondroBitfield.kelondroBitfield(...)");
+        final byte[] b = Base64Order.enhancedCoder.decode(exported);
         if (b.length == bytelength) {
             bb = b;
         } else {

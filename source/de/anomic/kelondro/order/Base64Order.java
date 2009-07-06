@@ -32,7 +32,7 @@ import java.util.Comparator;
 
 import de.anomic.yacy.logging.Log;
 
-public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Coding, Comparator<byte[]>, Cloneable {
+public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable {
 
     protected static final char[] alpha_standard = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".toCharArray();
     protected static final char[] alpha_enhanced = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_".toCharArray();
@@ -252,17 +252,17 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         return out;
     }
 
-    public final String decodeString(final String in, final String info) {
+    public final String decodeString(final String in) {
         try {
             //return new String(decode(in), "ISO-8859-1");
-            return new String(decode(in, info), "UTF-8");
+            return new String(decode(in), "UTF-8");
         } catch (final java.io.UnsupportedEncodingException e) {
             System.out.println("internal error in base64: " + e.getMessage());
             return null;
         }
     }
 
-    public final byte[] decode(String in, final String info) {
+    public final byte[] decode(String in) {
         if ((in == null) || (in.length() == 0)) return new byte[0];
         try {
             int posIn = 0;
@@ -300,24 +300,11 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         } catch (final ArrayIndexOutOfBoundsException e) {
             // maybe the input was not base64
             // throw new RuntimeException("input probably not base64");
-            if (this.log.isFine()) this.log.logFine("wrong string receive: " + in + ", call: " + info);
+            if (this.log.isFine()) this.log.logFine("wrong string receive: " + in);
             return new byte[0];
         }
     }
 
-    
-    /*
-    private final long cardinalI(final byte[] key) {
-        // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
-        long c = 0;
-        int p = 0;
-        while ((p < 10) && (p < key.length)) c = (c << 6) | ahpla[key[p++]];
-        while (p++ < 10) c = (c << 6);
-        c = c << 3;
-        assert c >= 0;
-        return c;
-    }
-    */
     private final long cardinalI(final String key) {
         // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
         long c = 0;
@@ -578,7 +565,7 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Cod
         }
         if (s[0].equals("-ds")) {
             // generate a b64 decoding from a given string
-            System.out.println(b64.decodeString(s[1], ""));
+            System.out.println(b64.decodeString(s[1]));
         }
         if (s[0].equals("-cl")) {
             // return the cardinal of a given string as long value with the enhanced encoder

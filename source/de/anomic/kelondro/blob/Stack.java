@@ -186,8 +186,8 @@ public class Stack {
     
     public class Entry {
         
-        private long h;
-        private byte[] b;
+        long h;
+        byte[] b;
         
         /**
          * create a new entry object using a long handle

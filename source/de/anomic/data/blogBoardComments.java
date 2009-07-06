@@ -256,7 +256,7 @@ public class blogBoardComments {
         public byte[] getSubject() {
             final String subject = record.get("subject");
             if (subject == null) return new byte[0];
-            final byte[] subject_bytes = Base64Order.enhancedCoder.decode(subject, "de.anomic.data.blogBoardComments.subject()");
+            final byte[] subject_bytes = Base64Order.enhancedCoder.decode(subject);
             if (subject_bytes == null) return "".getBytes();
             return subject_bytes;
         }
@@ -298,7 +298,7 @@ public class blogBoardComments {
             final String author = record.get("author");
             if (author == null) 
                 return new byte[0];
-            final byte[] author_byte = Base64Order.enhancedCoder.decode(author, "de.anomic.data.blogBoardComments.author()");
+            final byte[] author_byte = Base64Order.enhancedCoder.decode(author);
             if (author_byte == null) 
                 return "".getBytes();
             return author_byte;
@@ -324,7 +324,7 @@ public class blogBoardComments {
             final String page = record.get("page");
             if (page == null) 
                 return new byte[0];
-            final byte[] page_byte = Base64Order.enhancedCoder.decode(page, "de.anomic.data.blogBoardComments.page()");
+            final byte[] page_byte = Base64Order.enhancedCoder.decode(page);
             if (page_byte == null) 
                 return "".getBytes();
             return page_byte;

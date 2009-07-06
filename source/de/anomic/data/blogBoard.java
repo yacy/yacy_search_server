@@ -377,7 +377,7 @@ public class blogBoard {
         public byte[] getSubject() {
             final String m = record.get("subject");
             if (m == null) return new byte[0];
-            final byte[] b = Base64Order.enhancedCoder.decode(m, "de.anomic.data.blogBoard.subject()");
+            final byte[] b = Base64Order.enhancedCoder.decode(m);
             if (b == null) return "".getBytes();
             return b;
         }
@@ -420,7 +420,7 @@ public class blogBoard {
         public byte[] getAuthor() {
             final String author = record.get("author");
             if (author == null) return new byte[0];
-            final byte[] b = Base64Order.enhancedCoder.decode(author, "de.anomic.data.blogBoard.author()");
+            final byte[] b = Base64Order.enhancedCoder.decode(author);
             if (b == null) return "".getBytes();
             return b;
         }
@@ -469,7 +469,7 @@ public class blogBoard {
         public byte[] getPage() {
             final String page = record.get("page");
             if (page == null) return new byte[0];
-            final byte[] page_as_byte = Base64Order.enhancedCoder.decode(page, "de.anomic.data.blogBoard.page()");
+            final byte[] page_as_byte = Base64Order.enhancedCoder.decode(page);
             if (page_as_byte == null) return "".getBytes();
             return page_as_byte;
         }  

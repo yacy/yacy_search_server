@@ -166,7 +166,7 @@ public class wikiBoard {
         public String author() {
             final String a = record.get("author");
             if (a == null) return "anonymous";
-            final byte[] b = Base64Order.enhancedCoder.decode(a, "de.anomic.data.wikiBoard.author()");
+            final byte[] b = Base64Order.enhancedCoder.decode(a);
             if (b == null) return "anonymous";
             return new String(b);
         }
@@ -174,7 +174,7 @@ public class wikiBoard {
         public String reason() {
             final String r = record.get("reason");
             if (r == null) return "";
-            final byte[] b = Base64Order.enhancedCoder.decode(r, "de.anomic.data.wikiBoard.reason()");
+            final byte[] b = Base64Order.enhancedCoder.decode(r);
             if (b == null) return "unknown";
             return new String(b);
         }
@@ -182,7 +182,7 @@ public class wikiBoard {
         public byte[] page() {
             final String m = record.get("page");
             if (m == null) return new byte[0];
-            final byte[] b = Base64Order.enhancedCoder.decode(m, "de.anomic.data.wikiBoard.page()");
+            final byte[] b = Base64Order.enhancedCoder.decode(m);
             if (b == null) return "".getBytes();
             return b;
         }
@@ -228,7 +228,7 @@ public class wikiBoard {
         private String getChildName() {
             final String c = record.get("child");
             if (c == null) return null;
-            final byte[] subject = Base64Order.enhancedCoder.decode(c, "de.anomic.data.wikiBoard.getChildName()");
+            final byte[] subject = Base64Order.enhancedCoder.decode(c);
             if (subject == null) return null;
             return new String(subject);
         }
@@ -236,7 +236,7 @@ public class wikiBoard {
         public boolean hasChild() {
             final String c = record.get("child");
             if (c == null) return false;
-            final byte[] subject = Base64Order.enhancedCoder.decode(c, "de.anomic.data.wikiBoard.hasChild()");
+            final byte[] subject = Base64Order.enhancedCoder.decode(c);
             return (subject != null);
         }
 

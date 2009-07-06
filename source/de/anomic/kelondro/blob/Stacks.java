@@ -31,8 +31,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Stacks {
 
-    private File stacksLocation;
-    private String stacksPrefix;
+    File stacksLocation;
+    String stacksPrefix;
     private ConcurrentHashMap<String, StackInstance> stacks;
     
     /**
@@ -65,9 +65,9 @@ public class Stacks {
     }
     
     private class StackInstance {
-        private String name;
+        String name;
         private File location;
-        private Stack stack;
+        Stack stack;
         
         public StackInstance(File location) throws IOException {
             String filename = location.getName();

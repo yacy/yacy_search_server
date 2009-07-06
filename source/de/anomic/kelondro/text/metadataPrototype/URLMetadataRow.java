@@ -270,7 +270,7 @@ public class URLMetadataRow implements Metadata {
         this.word = null;
         if (prop.containsKey("word")) throw new kelondroException("old database structure is not supported");
         if (prop.containsKey("wi")) {
-            this.word = new WordReferenceRow(Base64Order.enhancedCoder.decodeString(prop.getProperty("wi", ""), "de.anomic.index.indexURLEntry.indexURLEntry()"));
+            this.word = new WordReferenceRow(Base64Order.enhancedCoder.decodeString(prop.getProperty("wi", "")));
         }
         this.ranking = 0;
         this.comp = null;

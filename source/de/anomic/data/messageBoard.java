@@ -176,7 +176,7 @@ public class messageBoard {
 	    final String m = record.get("message");
 	    if (m == null) return new byte[0];
             record.put("read", "true");
-	    return Base64Order.enhancedCoder.decode(m, "de.anomic.data.messageBoard.message()");
+	    return Base64Order.enhancedCoder.decode(m);
 	}
         
         public boolean read() {

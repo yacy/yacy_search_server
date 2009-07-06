@@ -127,7 +127,7 @@ public final class userDB {
 		auth=auth.trim().substring(6);
         
         try{
-            auth=Base64Order.standardCoder.decodeString(auth, "de.anomic.data.userDB.proxyAuth()");
+            auth=Base64Order.standardCoder.decodeString(auth);
         }catch(final RuntimeException e){} //no valid Base64
         final String[] tmp=auth.split(":");
         if(tmp.length == 2){

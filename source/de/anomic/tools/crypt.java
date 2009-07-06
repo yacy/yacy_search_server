@@ -91,11 +91,11 @@ public class crypt {
         } // not encoded
         switch (encoded.charAt(0)) {
         case 'b': {
-            return Base64Order.enhancedCoder.decodeString(encoded.substring(2), "de.anomic.tools.crypt.simpleDecode()");
+            return Base64Order.enhancedCoder.decodeString(encoded.substring(2));
         }
         case 'z':
             try {
-                return gzip.gunzipString(Base64Order.enhancedCoder.decode(encoded.substring(2), "de.anomic.tools.crypt.simpleDecode()"));
+                return gzip.gunzipString(Base64Order.enhancedCoder.decode(encoded.substring(2)));
             } catch (final Exception e) {
                 e.printStackTrace();
                 return null;
