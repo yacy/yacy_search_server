@@ -45,7 +45,6 @@ import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
-import de.anomic.server.urlRedirectord;
 import de.anomic.server.serverCore.Session;
 import de.anomic.yacy.yacySeed;
 
@@ -154,12 +153,7 @@ public final class Connections_p {
                     // getting the destination host
                     dest = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
                     if (dest==null)continue;
-                } else if (cmdObj instanceof urlRedirectord) {
-                    prot = "urlRedirector";
-                    
-                    final urlRedirectord urlRedir = (urlRedirectord)cmdObj;
-                    commandLine = urlRedir.getURL();
-                }                
+                }            
                 
                 if ((dest != null) && (dest.equals(virtualHost))) dest = sb.peers.mySeed().getName() + ".yacy";
                 

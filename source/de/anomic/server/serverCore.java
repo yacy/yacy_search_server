@@ -56,7 +56,6 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
-import de.anomic.icap.icapd;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.tools.PKCS12Tool;
 import de.anomic.yacy.logging.Log;
@@ -696,23 +695,11 @@ public final class serverCore extends serverAbstractBusyThread implements server
                         // now we need to initialize the session
                         if (this.commandCounter == 0) {
                             // first we need to determine the proper protocol handler
-                            if (this.request.indexOf("ICAP") >= 0)          reqProtocol = "ICAP";
-                            else if (this.request.startsWith("REDIRECTOR")) reqProtocol = "REDIRECTOR";
-                            else                                            reqProtocol = "HTTP";                            
+                            if (this.request.indexOf("HTTP") >= 0)          reqProtocol = "HTTP";
+                            else                                            reqProtocol = null;                            
                             
-                            // next we need to get the proper protocol handler
-                            if (reqProtocol.equals("ICAP")) {
-                                this.commandObj = new icapd();
-                            } else if (reqProtocol.equals("REDIRECTOR")) {
-                                this.commandObj = new urlRedirectord();
-                            } else {
-//                                if ((this.commandObj != null) && 
-//                                        (this.commandObj.getClass().getName().equals(serverCore.this.handlerPrototype.getClass().getName()))) {
-//                                        this.commandObj.reset();
-//                                    } else {
-//                                        this.commandObj = (serverHandler) serverCore.this.handlerPrototype.clone();
-//                                    }
-                                
+                            if (this.request == null) break;
+                            if (reqProtocol.equals("HTTP")) {
                                 this.commandObj = serverCore.this.handlerPrototype.clone();
                             }
                             
