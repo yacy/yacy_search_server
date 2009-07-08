@@ -57,7 +57,7 @@ public class bzipParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("application/x-bz2", fileExtensions);
         SUPPORTED_MIME_TYPES.put("application/octet-stream",fileExtensions);
         SUPPORTED_MIME_TYPES.put("application/x-bzip",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("/x-compressed",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/x-compressed",fileExtensions);
         SUPPORTED_MIME_TYPES.put("application/x-stuffit",fileExtensions);
     }     
     
