@@ -31,13 +31,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.document.Condenser;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.plasma.plasmaSearchRankingProcess;
-import de.anomic.plasma.parser.Condenser;
 import de.anomic.search.RankingProfile;
 import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacyURL;

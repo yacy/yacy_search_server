@@ -42,8 +42,8 @@ import de.anomic.crawler.SitemapImporter;
 import de.anomic.crawler.ZURL;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
-import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.htmlFilter.htmlFilterWriter;
+import de.anomic.document.parser.html.ContentScraper;
+import de.anomic.document.parser.html.TransformerWriter;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -325,9 +325,9 @@ public class WatchCrawler_p {
                                 final String fileString = post.get("crawlingFile$file");
                                 
                                 // parsing the bookmark file and fetching the headline and contained links
-                                final htmlFilterContentScraper scraper = new htmlFilterContentScraper(new yacyURL(file));
+                                final ContentScraper scraper = new ContentScraper(new yacyURL(file));
                                 //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-                                final Writer writer = new htmlFilterWriter(null,null,scraper,null,false);
+                                final Writer writer = new TransformerWriter(null,null,scraper,null,false);
                                 FileUtils.copy(fileString, writer);
                                 writer.close();
                                 

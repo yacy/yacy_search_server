@@ -36,8 +36,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.TreeMap;
 
+import de.anomic.document.Document;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.yacy.yacyURL;
 
 public class DCEntry extends TreeMap<String, String> {
@@ -162,12 +162,12 @@ public class DCEntry extends TreeMap<String, String> {
         return s;
     }
     
-    public plasmaParserDocument document() {
+    public Document document() {
         HashSet<String> languages = new HashSet<String>();
         languages.add(language());
         
         try {
-            return new plasmaParserDocument(
+            return new Document(
                 url(),
                 "text/html",
                 "UTF-8",
@@ -187,7 +187,7 @@ public class DCEntry extends TreeMap<String, String> {
     }
     
     public void writeXML(OutputStreamWriter os) throws IOException {
-        plasmaParserDocument doc = document();
+        Document doc = document();
         if (doc != null) {
             doc.writeXML(os, this.date());
         }

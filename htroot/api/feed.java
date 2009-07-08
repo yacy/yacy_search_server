@@ -3,11 +3,11 @@
 import java.util.Date;
 
 import de.anomic.content.RSSMessage;
+import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.xml.RSSFeed;
 
 public class feed {
  

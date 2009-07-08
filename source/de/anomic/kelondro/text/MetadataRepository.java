@@ -39,7 +39,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import de.anomic.data.Blacklist;
-import de.anomic.htmlFilter.htmlFilterCharacterCoding;
+import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRemoteProxyConfig;
@@ -487,14 +487,14 @@ public final class MetadataRepository implements Iterable<byte[]> {
                             pw.println(url);
                         }
                         if (format == 1) {
-                            pw.println("<a href=\"" + url + "\">" + htmlFilterCharacterCoding.unicode2xml(metadata.dc_title(), true) + "</a><br>");
+                            pw.println("<a href=\"" + url + "\">" + CharacterCoding.unicode2xml(metadata.dc_title(), true) + "</a><br>");
                         }
                         if (format == 2) {
                             pw.println("<item>");
-                            pw.println("<title>" + htmlFilterCharacterCoding.unicode2xml(metadata.dc_title(), true) + "</title>");
+                            pw.println("<title>" + CharacterCoding.unicode2xml(metadata.dc_title(), true) + "</title>");
                             pw.println("<link>" + yacyURL.escape(url) + "</link>");
-                            if (metadata.dc_creator().length() > 0) pw.println("<author>" + htmlFilterCharacterCoding.unicode2xml(metadata.dc_creator(), true) + "</author>");
-                            if (metadata.dc_subject().length() > 0) pw.println("<description>" + htmlFilterCharacterCoding.unicode2xml(metadata.dc_subject(), true) + "</description>");
+                            if (metadata.dc_creator().length() > 0) pw.println("<author>" + CharacterCoding.unicode2xml(metadata.dc_creator(), true) + "</author>");
+                            if (metadata.dc_subject().length() > 0) pw.println("<description>" + CharacterCoding.unicode2xml(metadata.dc_subject(), true) + "</description>");
                             pw.println("<pubDate>" + entry.moddate().toString() + "</pubDate>");
                             pw.println("<yacy:size>" + entry.size() + "</yacy:size>");
                             pw.println("<guid isPermaLink=\"false\">" + entry.hash() + "</guid>");

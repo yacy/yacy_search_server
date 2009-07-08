@@ -63,8 +63,9 @@ import org.xml.sax.SAXException;
 
 import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.htmlFilter.htmlFilterWriter;
+import de.anomic.document.Word;
+import de.anomic.document.parser.html.ContentScraper;
+import de.anomic.document.parser.html.TransformerWriter;
 import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.CloneableIterator;
@@ -73,7 +74,6 @@ import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.parser.Word;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverInstantBusyThread;
 import de.anomic.yacy.yacyNewsPool;
@@ -782,9 +782,9 @@ public class bookmarksDB {
     	final Set<String> tags=listManager.string2set(tag); //this allow multiple default tags
     	try {
     		//load the links
-    		final htmlFilterContentScraper scraper = new htmlFilterContentScraper(baseURL);    		
+    		final ContentScraper scraper = new ContentScraper(baseURL);    		
     		//OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-    		final Writer writer= new htmlFilterWriter(null,null,scraper, null, false);
+    		final Writer writer= new TransformerWriter(null,null,scraper, null, false);
     		FileUtils.copy(input,writer);
     		writer.close();
     		links = scraper.getAnchors();    		

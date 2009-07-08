@@ -37,16 +37,15 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.content.RSSMessage;
+import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.httpClient;
+import de.anomic.http.httpDocument;
 import de.anomic.kelondro.table.SplitTable;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.plasma.parser.Document;
 import de.anomic.server.serverProcessorJob;
-import de.anomic.xml.RSSFeed;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
@@ -504,7 +503,7 @@ public class CrawlQueues {
         }
     }
     
-    public Document loadResourceFromWeb(
+    public httpDocument loadResourceFromWeb(
             final yacyURL url,
             final boolean forText,
             final boolean global
@@ -529,7 +528,7 @@ public class CrawlQueues {
                 0, 
                 0);
         
-        return loader.load(centry, (forText) ? plasmaParser.PARSER_MODE_CRAWLER : plasmaParser.PARSER_MODE_IMAGE);
+        return loader.load(centry);
     }
     
     public int size() {
@@ -575,7 +574,7 @@ public class CrawlQueues {
                 } else {
                     // starting a load from the internet
                     this.entry.setStatus("worker-loading", serverProcessorJob.STATUS_RUNNING);
-                    final String result = loader.process(this.entry, plasmaParser.PARSER_MODE_CRAWLER);
+                    final String result = loader.process(this.entry);
                     if (result != null) {
                         final ZURL.Entry eentry = errorURL.newEntry(
                                 this.entry,

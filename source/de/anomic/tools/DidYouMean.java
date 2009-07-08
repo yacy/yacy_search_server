@@ -7,9 +7,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import de.anomic.document.Word;
 import de.anomic.kelondro.text.IndexCell;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
-import de.anomic.plasma.parser.Word;
 import de.anomic.yacy.logging.Log;
 
 /**

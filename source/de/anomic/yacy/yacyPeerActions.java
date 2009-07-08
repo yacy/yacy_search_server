@@ -28,9 +28,9 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import de.anomic.content.RSSMessage;
+import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.server.serverCodings;
-import de.anomic.xml.RSSFeed;
 import de.anomic.yacy.logging.Log;
 
 public class yacyPeerActions {

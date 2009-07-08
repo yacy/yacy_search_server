@@ -58,10 +58,10 @@ import java.util.concurrent.TimeoutException;
 
 import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
+import de.anomic.document.ParserDispatcher;
+import de.anomic.document.ParserException;
+import de.anomic.document.Document;
 import de.anomic.kelondro.util.ByteBuffer;
-import de.anomic.plasma.plasmaParser;
-import de.anomic.plasma.plasmaParserDocument;
-import de.anomic.plasma.parser.ParserException;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
@@ -80,7 +80,6 @@ public class mediawikiIndex extends Thread {
     private static final byte[] pageendb = pageend.getBytes();
     
     protected wikiParser wparser;
-    protected plasmaParser hparser;
     protected String urlStub;
     public    File sourcefile;
     public    File targetdir;
@@ -100,12 +99,11 @@ public class mediawikiIndex extends Thread {
     	this.targetdir = targetdir;
         this.urlStub = baseURL;
         this.wparser = new wikiCode(new URL(baseURL).getHost());
-        this.hparser = new plasmaParser();
         this.count = 0;
         this.start = 0;
         // must be called before usage:
-        plasmaParser.initHTMLParsableMimeTypes("text/html");
-        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER, "text/html");
+        ParserDispatcher.initHTMLParsableMimeTypes("text/html");
+        ParserDispatcher.addParseableMimeTypes("text/html");
     }
     
     /**
@@ -147,8 +145,8 @@ public class mediawikiIndex extends Thread {
             StringBuilder sb = new StringBuilder();
             boolean page = false, text = false;
             String title = null;
-            plasmaParser.initHTMLParsableMimeTypes("text/html");
-            plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER, "text/html");
+            ParserDispatcher.initHTMLParsableMimeTypes("text/html");
+            ParserDispatcher.addParseableMimeTypes("text/html");
             wikiparserrecord poison = newRecord();
             int threads = Math.max(2, Runtime.getRuntime().availableProcessors() - 1);
             BlockingQueue<wikiparserrecord> in = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
@@ -473,7 +471,7 @@ public class mediawikiIndex extends Thread {
         String source;
         String html;
         yacyURL url;
-        plasmaParserDocument document;
+        Document document;
         public wikiparserrecord(String title, StringBuilder sb) {
             this.title = title;
             this.source = (sb == null) ? null : sb.toString();
@@ -489,7 +487,7 @@ public class mediawikiIndex extends Thread {
         public void genDocument() throws InterruptedException, ParserException {
             try {
 				url = new yacyURL(urlStub + title, null);
-				document = hparser.parseSource(url, "text/html", "utf-8", html.getBytes("UTF-8"));
+				document = ParserDispatcher.parseSource(url, "text/html", "utf-8", html.getBytes("UTF-8"));
 				// the wiki parser is not able to find the proper title in the source text, so it must be set here
 				document.setTitle(title);
 			} catch (UnsupportedEncodingException e) {

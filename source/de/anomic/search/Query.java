@@ -26,14 +26,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import de.anomic.htmlFilter.htmlFilterAbstractScraper;
-import de.anomic.htmlFilter.htmlFilterCharacterCoding;
+import de.anomic.document.Condenser;
+import de.anomic.document.Word;
+import de.anomic.document.parser.html.AbstractScraper;
+import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.SetTools;
-import de.anomic.plasma.parser.Word;
-import de.anomic.plasma.parser.Condenser;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
@@ -276,7 +276,7 @@ public final class Query {
         if ((querystring == null) || (querystring.length() == 0)) return new TreeSet[]{query, exclude, fullquery};
         
         // convert Umlaute
-        querystring = htmlFilterAbstractScraper.stripAll(querystring).toLowerCase().trim();
+        querystring = AbstractScraper.stripAll(querystring).toLowerCase().trim();
         int c;
         for (int i = 0; i < seps.length(); i++) {
             while ((c = querystring.indexOf(seps.charAt(i))) >= 0) { querystring = querystring.substring(0, c) + (((c + 1) < querystring.length()) ? (" " + querystring.substring(c + 1)) : ""); }
@@ -307,7 +307,7 @@ public final class Query {
     
     public String queryString(final boolean encodeHTML) {
     	if(encodeHTML){
-    		return htmlFilterCharacterCoding.unicode2html(this.queryString, true);
+    		return CharacterCoding.unicode2html(this.queryString, true);
     	}
     	return this.queryString;
     }

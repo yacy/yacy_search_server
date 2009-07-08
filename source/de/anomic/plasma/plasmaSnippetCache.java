@@ -38,18 +38,20 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.anomic.htmlFilter.htmlFilterCharacterCoding;
-import de.anomic.htmlFilter.htmlFilterImageEntry;
+import de.anomic.document.Condenser;
+import de.anomic.document.ParserDispatcher;
+import de.anomic.document.ParserException;
+import de.anomic.document.Word;
+import de.anomic.document.Document;
+import de.anomic.document.parser.html.CharacterCoding;
+import de.anomic.document.parser.html.ImageEntry;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpResponseHeader;
+import de.anomic.http.httpDocument;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SetTools;
-import de.anomic.plasma.parser.Document;
-import de.anomic.plasma.parser.ParserException;
-import de.anomic.plasma.parser.Word;
-import de.anomic.plasma.parser.Condenser;
 import de.anomic.search.Query;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacyURL;
@@ -82,16 +84,13 @@ public class plasmaSnippetCache {
      * </pre>
      */
     private static final HashMap<String, yacyURL> faviconCache = new HashMap<String, yacyURL>();
-    private static plasmaParser          parser = null;
     private static Log             log = null;
     private static plasmaSwitchboard     sb = null;
     
     public static void init(
-            final plasmaParser parserx,
             final Log logx,
             final plasmaSwitchboard switchboard
     ) {
-        parser = parserx;
         log = logx;
         sb = switchboard;
         snippetsScoreCounter = 0;
@@ -231,14 +230,14 @@ public class plasmaSnippetCache {
                 for(int k=0; k < word.length(); k++) {
                     //is character a special character?
                     if(p4.matcher(word.substring(k,k+1)).find()) {
-                        if (new String(Word.word2hash(temp)).equals(new String(h))) temp = "<b>" + htmlFilterCharacterCoding.unicode2html(temp, false) + "</b>";
-                        out = out + temp + htmlFilterCharacterCoding.unicode2html(word.substring(k,k+1), false);
+                        if (new String(Word.word2hash(temp)).equals(new String(h))) temp = "<b>" + CharacterCoding.unicode2html(temp, false) + "</b>";
+                        out = out + temp + CharacterCoding.unicode2html(word.substring(k,k+1), false);
                         temp = "";
                     }
                     //last character
                     else if(k == (word.length()-1)) {
                         temp = temp + word.substring(k,k+1);
-                        if (new String(Word.word2hash(temp)).equals(new String(h))) temp = "<b>" + htmlFilterCharacterCoding.unicode2html(temp, false) + "</b>";
+                        if (new String(Word.word2hash(temp)).equals(new String(h))) temp = "<b>" + CharacterCoding.unicode2html(temp, false) + "</b>";
                         out = out + temp;
                         temp = "";
                     }
@@ -248,11 +247,11 @@ public class plasmaSnippetCache {
             }
 
             //end contrib [MN]
-            else if (new String(Word.word2hash(word)).equals(new String(h))) word = "<b>" + htmlFilterCharacterCoding.unicode2html(word, false) + "</b>";
+            else if (new String(Word.word2hash(word)).equals(new String(h))) word = "<b>" + CharacterCoding.unicode2html(word, false) + "</b>";
 
-            word = htmlFilterCharacterCoding.unicode2html(prefix, false)
+            word = CharacterCoding.unicode2html(prefix, false)
             	+ word
-            	+ htmlFilterCharacterCoding.unicode2html(postfix, false);
+            	+ CharacterCoding.unicode2html(postfix, false);
             return word;
         }
         
@@ -354,7 +353,7 @@ public class plasmaSnippetCache {
                     // if not found try to download it
                     
                     // download resource using the crawler and keep resource in memory if possible
-                    final Document entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, true, reindexing);
+                    final httpDocument entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, true, reindexing);
                     
                     // getting resource metadata (e.g. the http headers for http resources)
                     if (entry != null) {
@@ -388,7 +387,7 @@ public class plasmaSnippetCache {
         /* ===========================================================================
          * PARSING RESOURCE
          * =========================================================================== */
-        plasmaParserDocument document = null;
+        Document document = null;
         try {
              document = parseDocument(url, resContentLength, resContent, responseHeader);
         } catch (final ParserException e) {
@@ -447,9 +446,9 @@ public class plasmaSnippetCache {
      * @param timeout 
      * @param forText 
      * @param global the domain of the search. If global == true then the content is re-indexed
-     * @return the parsed document as {@link plasmaParserDocument}
+     * @return the parsed document as {@link Document}
      */
-    public static plasmaParserDocument retrieveDocument(final yacyURL url, final boolean fetchOnline, final int timeout, final boolean forText, final boolean global) {
+    public static Document retrieveDocument(final yacyURL url, final boolean fetchOnline, final int timeout, final boolean forText, final boolean global) {
 
         // load resource
         long resContentLength = 0;
@@ -466,7 +465,7 @@ public class plasmaSnippetCache {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                final Document entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, forText, global);
+                final httpDocument entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, forText, global);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
@@ -497,7 +496,7 @@ public class plasmaSnippetCache {
         } 
 
         // parse resource
-        plasmaParserDocument document = null;
+        Document document = null;
         try {
             document = parseDocument(url, resContentLength, resContent, responseHeader);            
         } catch (final ParserException e) {
@@ -705,7 +704,7 @@ public class plasmaSnippetCache {
             return new ArrayList<MediaSnippet>();
         }
         
-        final plasmaParserDocument document = retrieveDocument(url, fetchOnline, timeout, false, reindexing);
+        final Document document = retrieveDocument(url, fetchOnline, timeout, false, reindexing);
         final ArrayList<MediaSnippet> a = new ArrayList<MediaSnippet>();
         if (document != null) {
             if ((mediatype == Query.CONTENTDOM_ALL) || (mediatype == Query.CONTENTDOM_AUDIO)) a.addAll(computeMediaSnippets(document, queryhashes, Query.CONTENTDOM_AUDIO));
@@ -716,7 +715,7 @@ public class plasmaSnippetCache {
         return a;
     }
     
-    public static ArrayList<MediaSnippet> computeMediaSnippets(final plasmaParserDocument document, final TreeSet<byte[]> queryhashes, final int mediatype) {
+    public static ArrayList<MediaSnippet> computeMediaSnippets(final Document document, final TreeSet<byte[]> queryhashes, final int mediatype) {
         
         if (document == null) return new ArrayList<MediaSnippet>();
         Map<yacyURL, String> media = null;
@@ -749,14 +748,14 @@ public class plasmaSnippetCache {
         return result;
     }
     
-    public static ArrayList<MediaSnippet> computeImageSnippets(final plasmaParserDocument document, final TreeSet<byte[]> queryhashes) {
+    public static ArrayList<MediaSnippet> computeImageSnippets(final Document document, final TreeSet<byte[]> queryhashes) {
         
-        final TreeSet<htmlFilterImageEntry> images = new TreeSet<htmlFilterImageEntry>();
+        final TreeSet<ImageEntry> images = new TreeSet<ImageEntry>();
         images.addAll(document.getImages().values()); // iterates images in descending size order!
         // a measurement for the size of the images can be retrieved using the htmlFilterImageEntry.hashCode()
         
-        final Iterator<htmlFilterImageEntry> i = images.iterator();
-        htmlFilterImageEntry ientry;
+        final Iterator<ImageEntry> i = images.iterator();
+        ImageEntry ientry;
         yacyURL url;
         String desc;
         TreeSet<byte[]> s;
@@ -824,7 +823,7 @@ public class plasmaSnippetCache {
         return true;
     }
     
-    public static plasmaParserDocument parseDocument(final yacyURL url, final long contentLength, final InputStream resourceStream) throws ParserException {
+    public static Document parseDocument(final yacyURL url, final long contentLength, final InputStream resourceStream) throws ParserException {
         return parseDocument(url, contentLength, resourceStream, null);
     }
     
@@ -837,7 +836,7 @@ public class plasmaSnippetCache {
      * @return the extracted data
      * @throws ParserException
      */
-    public static plasmaParserDocument parseDocument(final yacyURL url, final long contentLength, final InputStream resourceStream, httpResponseHeader responseHeader) throws ParserException {
+    public static Document parseDocument(final yacyURL url, final long contentLength, final InputStream resourceStream, httpResponseHeader responseHeader) throws ParserException {
         try {
             if (resourceStream == null) return null;
 
@@ -871,25 +870,25 @@ public class plasmaSnippetCache {
                 if (    // if no extension is available
                         (p < 0) ||
                         // or the extension is supported by one of the parsers
-                        ((p >= 0) && (plasmaParser.supportedFileExtContains(filename.substring(p + 1))))
+                        ((p >= 0) && (ParserDispatcher.supportedFileExtContains(filename.substring(p + 1))))
                 ) {
                     String supposedMime = "text/html";
 
                     // if the mimeType Parser is installed we can set the mimeType to null to force
                     // a mimetype detection
-                    if (plasmaParser.supportedMimeTypesContains("application/octet-stream")) {
+                    if (ParserDispatcher.supportedMimeTypesContains("application/octet-stream")) {
                         supposedMime = null;
                     } else if (p != -1){
                         // otherwise we try to determine the mimeType per file Extension
-                        supposedMime = plasmaParser.getMimeTypeByFileExt(filename.substring(p + 1));
+                        supposedMime = ParserDispatcher.getMimeTypeByFileExt(filename.substring(p + 1));
                     }
 
-                    return parser.parseSource(url, supposedMime, null, contentLength, resourceStream);
+                    return ParserDispatcher.parseSource(url, supposedMime, null, contentLength, resourceStream);
                 }
                 return null;
             }            
-            if (plasmaParser.supportedMimeTypesContains(responseHeader.mime())) {
-                return parser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), contentLength, resourceStream);
+            if (ParserDispatcher.supportedMimeTypesContains(responseHeader.mime())) {
+                return ParserDispatcher.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), contentLength, resourceStream);
             }
             return null;
         } catch (final InterruptedException e) {
@@ -923,7 +922,7 @@ public class plasmaSnippetCache {
                 // if the content is not available in cache try to download it from web
                 
                 // try to download the resource using a crawler
-                final Document entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, forText, reindexing);
+                final httpDocument entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, forText, reindexing);
                 if (entry == null) return null; // not found in web
                 
                 // read resource body (if it is there)

@@ -41,14 +41,15 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.anomic.document.ParserDispatcher;
 import de.anomic.http.httpResponseHeader;
+import de.anomic.http.httpDocument;
 import de.anomic.kelondro.blob.ArrayStack;
 import de.anomic.kelondro.blob.Compressor;
 import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.parser.Document;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
@@ -180,7 +181,7 @@ public final class plasmaHTCache {
     }
 
     public static boolean isText(final String mimeType) {
-        return plasmaParser.supportedMimeTypesContains(mimeType);
+        return ParserDispatcher.supportedMimeTypesContains(mimeType);
     }
 
     public static boolean noIndexingURL(final yacyURL url) {
@@ -199,7 +200,7 @@ public final class plasmaHTCache {
 
         //php
         
-        return plasmaParser.mediaExtContains(urlString);
+        return ParserDispatcher.mediaExtContains(urlString);
     }
 
 
@@ -207,7 +208,7 @@ public final class plasmaHTCache {
     
     public static void storeMetadata(
             final httpResponseHeader responseHeader,
-            Document metadata
+            httpDocument metadata
     ) {
         if (responseHeader != null) try {
             // store the response header into the header database

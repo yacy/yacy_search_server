@@ -32,12 +32,12 @@ import java.util.Iterator;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.crawler.CrawlEntry;
+import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.xml.RSSFeed;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;

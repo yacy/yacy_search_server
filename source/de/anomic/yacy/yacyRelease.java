@@ -45,7 +45,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import de.anomic.crawler.HTTPLoader;
-import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpResponse;
@@ -222,9 +222,9 @@ public final class yacyRelease extends yacyVersion {
         // this is done by contacting a release location,
         // parsing the content and filtering+parsing links
         // returns the version info if successful, null otherwise
-        htmlFilterContentScraper scraper;
+        ContentScraper scraper;
         try {
-            scraper = htmlFilterContentScraper.parseResource(location.getLocationURL());
+            scraper = ContentScraper.parseResource(location.getLocationURL());
         } catch (final IOException e) {
             return null;
         }

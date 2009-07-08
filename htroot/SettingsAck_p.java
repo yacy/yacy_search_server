@@ -38,6 +38,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import de.anomic.document.ParserDispatcher;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpd;
@@ -45,7 +46,6 @@ import de.anomic.http.httpdProxyHandler;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -458,8 +458,8 @@ public class SettingsAck_p {
          */
         if (post.containsKey("parserSettings")) {
             post.remove("parserSettings");
-            
-            final Set<String> parserModes = plasmaParser.getParserConfigList().keySet();
+            /*
+            final Set<String> parserModes = ParserDispatcher.getParserConfigList().keySet();
             final HashMap<String, HashSet<String>> newConfigList = new HashMap<String, HashSet<String>>();     
             Iterator<String> parserModeIter = parserModes.iterator();
             while (parserModeIter.hasNext()) {
@@ -489,7 +489,7 @@ public class SettingsAck_p {
             parserModeIter = newConfigList.keySet().iterator();
             while (parserModeIter.hasNext()) {                
                 final String currParserMode = parserModeIter.next();
-                final String[] enabledMimes = plasmaParser.setEnabledParserList(currParserMode, newConfigList.get(currParserMode));
+                final String[] enabledMimes = ParserDispatcher.setEnabledParserList(newConfigList.get(currParserMode));
                 Arrays.sort(enabledMimes);
                 
                 currEnabledMimesTxt.setLength(0);
@@ -505,7 +505,7 @@ public class SettingsAck_p {
             prop.put("info_parser",enabledMimesCount);
             prop.put("info", "18");
             return prop;
-
+          */
         }
         
         // Crawler settings

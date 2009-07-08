@@ -29,16 +29,15 @@ import java.io.IOException;
 import java.util.Date;
 
 import de.anomic.data.Blacklist;
+import de.anomic.document.ParserDispatcher;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
-import de.anomic.http.httpdProxyCacheEntry;
+import de.anomic.http.httpDocument;
 import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.parser.Document;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
@@ -84,8 +83,8 @@ public final class HTTPLoader {
      * @param responseStatus Status-Code SPACE Reason-Phrase
      * @return
      */
-    protected Document createCacheEntry(final CrawlEntry entry, final Date requestDate, final httpRequestHeader requestHeader, final httpResponseHeader responseHeader, final String responseStatus) {
-        Document metadata = new httpdProxyCacheEntry(
+    protected httpDocument createCacheEntry(final CrawlEntry entry, final Date requestDate, final httpRequestHeader requestHeader, final httpResponseHeader responseHeader, final String responseStatus) {
+        httpDocument metadata = new httpDocument(
                 entry.depth(),
                 entry.url(),
                 entry.name(),
@@ -99,14 +98,14 @@ public final class HTTPLoader {
         return metadata;
     }    
    
-    public Document load(final CrawlEntry entry, final String parserMode) throws IOException {
+    public httpDocument load(final CrawlEntry entry) throws IOException {
         long start = System.currentTimeMillis();
-        Document doc = load(entry, parserMode, DEFAULT_CRAWLING_RETRY_COUNT);
+        httpDocument doc = load(entry, DEFAULT_CRAWLING_RETRY_COUNT);
         Latency.update(entry.url().hash().substring(6), entry.url().getHost(), System.currentTimeMillis() - start);
         return doc;
     }
     
-    private Document load(final CrawlEntry entry, final String parserMode, final int retryCount) throws IOException {
+    private httpDocument load(final CrawlEntry entry, final int retryCount) throws IOException {
 
         if (retryCount < 0) {
             sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "redirection counter exceeded").store();
@@ -128,7 +127,7 @@ public final class HTTPLoader {
         }
         
         // take a file from the net
-        Document htCache = null;
+        httpDocument htCache = null;
         final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE);
         //try {
             // create a request header
@@ -157,7 +156,7 @@ public final class HTTPLoader {
                     
                     // request has been placed and result has been returned. work off response
                     //try {
-                        if (plasmaParser.supportedContent(parserMode, entry.url(), res.getResponseHeader().mime())) {
+                        if (ParserDispatcher.supportedContent(entry.url(), res.getResponseHeader().mime())) {
                             
                             // get the content length and check if the length is allowed
                             long contentLength = res.getResponseHeader().getContentLength();
@@ -231,7 +230,7 @@ public final class HTTPLoader {
                             
                             // retry crawling with new url
                             entry.redirectURL(redirectionUrl);
-                            return load(entry, plasmaParser.PARSER_MODE_URLREDIRECTOR, retryCount - 1);
+                            return load(entry, retryCount - 1);
                         }
                 } else {
                     // if the response has not the right response type then reject file

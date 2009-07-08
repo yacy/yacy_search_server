@@ -39,7 +39,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.document.Condenser;
+import de.anomic.document.Word;
+import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.kelondro.index.BinSearch;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.text.Reference;
@@ -52,8 +54,6 @@ import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.SortStack;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.parser.Word;
-import de.anomic.plasma.parser.Condenser;
 import de.anomic.search.Query;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;
@@ -536,7 +536,7 @@ public final class plasmaSearchRankingProcess {
         // take out relevant information for reference computation
         if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;
         //final String[] urlcomps = htmlFilterContentScraper.urlComps(resultEntry.url().toNormalform(true, true)); // word components of the url
-        final String[] descrcomps = resultEntry.title().toLowerCase().split(htmlFilterContentScraper.splitrex); // words in the description
+        final String[] descrcomps = resultEntry.title().toLowerCase().split(ContentScraper.splitrex); // words in the description
         
         // add references
         //addTopic(urlcomps);
@@ -636,8 +636,8 @@ public final class plasmaSearchRankingProcess {
         
         // apply 'common-sense' heuristic using references
         final String urlstring = rentry.url().toNormalform(true, true);
-        final String[] urlcomps = htmlFilterContentScraper.urlComps(urlstring);
-        final String[] descrcomps = rentry.title().toLowerCase().split(htmlFilterContentScraper.splitrex);
+        final String[] urlcomps = ContentScraper.urlComps(urlstring);
+        final String[] descrcomps = rentry.title().toLowerCase().split(ContentScraper.splitrex);
         for (int j = 0; j < urlcomps.length; j++) {
             if (topwords.contains(urlcomps[j])) r += Math.max(1, 256 - urlstring.length()) << query.ranking.coeff_urlcompintoplist;
         }

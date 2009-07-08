@@ -32,16 +32,15 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
+import de.anomic.document.ParserDispatcher;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
-import de.anomic.http.httpdProxyCacheEntry;
+import de.anomic.http.httpDocument;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.net.ftpc;
 import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.parser.Document;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
@@ -57,14 +56,14 @@ public class FTPLoader {
         maxFileSize = (int) sb.getConfigLong("crawler.ftp.maxFileSize", -1l);
     }
 
-    protected Document createCacheEntry(final CrawlEntry entry, final String mimeType, final Date fileDate) {
+    protected httpDocument createCacheEntry(final CrawlEntry entry, final String mimeType, final Date fileDate) {
         if (entry == null) return null;
         httpRequestHeader requestHeader = new httpRequestHeader();
         if (entry.referrerhash() != null) requestHeader.put(httpRequestHeader.REFERER, sb.getURL(entry.referrerhash()).toNormalform(true, false));
         httpResponseHeader responseHeader = new httpResponseHeader();
         responseHeader.put(httpHeader.LAST_MODIFIED, DateFormatter.formatRFC1123(fileDate));
         responseHeader.put(httpHeader.CONTENT_TYPE, mimeType);
-        Document metadata = new httpdProxyCacheEntry(
+        httpDocument metadata = new httpDocument(
                 entry.depth(), entry.url(), entry.name(), "OK",
                 requestHeader, responseHeader,
                 entry.initiator(), sb.crawler.profilesActiveCrawls.getEntry(entry.profileHandle()));
@@ -78,14 +77,14 @@ public class FTPLoader {
      * @param entry
      * @return
      */
-    public Document load(final CrawlEntry entry) throws IOException {
+    public httpDocument load(final CrawlEntry entry) throws IOException {
         
         long start = System.currentTimeMillis();
         final yacyURL entryUrl = entry.url();
         final String fullPath = getPath(entryUrl);
 
         // the return value
-        Document htCache = null;
+        httpDocument htCache = null;
 
         // determine filename and path
         String file, path;
@@ -216,17 +215,17 @@ public class FTPLoader {
      * @return
      * @throws Exception
      */
-    private Document getFile(final ftpc ftpClient, final CrawlEntry entry) throws Exception {
+    private httpDocument getFile(final ftpc ftpClient, final CrawlEntry entry) throws Exception {
         // determine the mimetype of the resource
         final yacyURL entryUrl = entry.url();
-        final String extension = plasmaParser.getFileExt(entryUrl);
-        final String mimeType = plasmaParser.getMimeTypeByFileExt(extension);
+        final String extension = ParserDispatcher.getFileExt(entryUrl);
+        final String mimeType = ParserDispatcher.getMimeTypeByFileExt(extension);
         final String path = getPath(entryUrl);
 
         // if the mimetype and file extension is supported we start to download
         // the file
-        Document htCache = null;
-        if (plasmaParser.supportedContent(plasmaParser.PARSER_MODE_CRAWLER, entryUrl, mimeType)) {
+        httpDocument htCache = null;
+        if (ParserDispatcher.supportedContent(entryUrl, mimeType)) {
             // aborting download if content is too long
             final int size = ftpClient.fileSize(path);
             if (size <= maxFileSize || maxFileSize == -1) {

@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import de.anomic.document.Word;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.Segment;
@@ -35,7 +36,6 @@ import de.anomic.kelondro.text.TermSearch;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.parser.Word;
 import de.anomic.search.Query;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

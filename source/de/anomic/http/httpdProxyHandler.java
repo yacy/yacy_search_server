@@ -73,15 +73,14 @@ import java.util.zip.GZIPOutputStream;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.Blacklist;
-import de.anomic.htmlFilter.htmlFilterContentTransformer;
-import de.anomic.htmlFilter.htmlFilterTransformer;
+import de.anomic.document.ParserDispatcher;
+import de.anomic.document.parser.html.ContentTransformer;
+import de.anomic.document.parser.html.Transformer;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.plasma.parser.Document;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
@@ -102,7 +101,7 @@ public final class httpdProxyHandler {
     private static PrintWriter redirectorWriter = null;
     private static BufferedReader redirectorReader = null;
 
-    private static htmlFilterTransformer transformer = null;
+    private static Transformer transformer = null;
     private static File htRootPath = null;
 
     //private Properties connectionProperties = null;
@@ -175,7 +174,7 @@ public final class httpdProxyHandler {
         }
             
         // load a transformer
-        transformer = new htmlFilterContentTransformer();
+        transformer = new ContentTransformer();
         transformer.init(new File(sb.getRootPath(), sb.getConfig(plasmaSwitchboardConstants.LIST_BLUE, "")).toString());
             
         // load the yellow-list
@@ -378,7 +377,7 @@ public final class httpdProxyHandler {
                 if (theLogger.isFinest()) theLogger.logFinest(reqID + " page not in cache: fulfill request from web");
                     fulfillRequestFromWeb(conProp, url, requestHeader, cachedResponseHeader, countedRespond);
             } else {
-                final Document cacheEntry = new httpdProxyCacheEntry(
+                final httpDocument cacheEntry = new httpDocument(
                         0,                               // crawling depth
                         url,                             // url
                         "",                              // name of the url is unknown
@@ -492,7 +491,7 @@ public final class httpdProxyHandler {
                 }
 
                 // reserver cache entry
-                final Document cacheEntry = new httpdProxyCacheEntry(
+                final httpDocument cacheEntry = new httpDocument(
                         0,
                         url,
                         "",
@@ -529,7 +528,7 @@ public final class httpdProxyHandler {
 
                     final String storeError = cacheEntry.shallStoreCacheForProxy();
                     final boolean storeHTCache = cacheEntry.profile().storeHTCache();
-                    final boolean isSupportedContent = plasmaParser.supportedContent(plasmaParser.PARSER_MODE_PROXY,cacheEntry.url(),cacheEntry.getMimeType());
+                    final boolean isSupportedContent = ParserDispatcher.supportedContent(cacheEntry.url(), cacheEntry.getMimeType());
                     if (
                             /*
                              * Now we store the response into the htcache directory if

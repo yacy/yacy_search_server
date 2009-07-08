@@ -28,14 +28,11 @@
 
 import java.util.HashSet;
 import java.util.Hashtable;
-import java.util.logging.Handler;
-import java.util.logging.Logger;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.LogParser;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.logging.LogalizerHandler;
+import de.anomic.yacy.logging.LogParser;
 
 public class LogStatistics_p {
     
@@ -45,21 +42,9 @@ public class LogStatistics_p {
     public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         
         final serverObjects prop = new serverObjects();
-        final Logger logger = Logger.getLogger("");
-        
-        
-        
-        final Handler[] handlers = logger.getHandlers();
+
         Hashtable<String, Object> r = null;
         boolean displaySubmenu = false;
-        for (int i=0; i<handlers.length; i++) {
-            if (handlers[i] instanceof LogalizerHandler) {
-                displaySubmenu = true;
-                final LogalizerHandler h = ((LogalizerHandler)handlers[i]);
-                r = h.getParserResults(h.getParser(0));
-                if (r != null) break;
-            }
-        }
         
         prop.put("submenu", displaySubmenu ? "1" : "0");
         

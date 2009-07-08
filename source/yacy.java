@@ -48,6 +48,7 @@ import java.util.zip.ZipOutputStream;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
 import de.anomic.data.translator;
+import de.anomic.document.Word;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
@@ -68,7 +69,6 @@ import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.plasma.parser.Word;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSystem;

@@ -33,8 +33,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.anomic.http.httpDocument;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.parser.Document;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.yacy.logging.Log;
@@ -70,7 +70,7 @@ public final class ProtocolLoader {
         return (HashSet<String>) this.supportedProtocols.clone();
     }
     
-    public Document load(final CrawlEntry entry, final String parserMode) throws IOException {
+    public httpDocument load(final CrawlEntry entry) throws IOException {
         // getting the protocol of the next URL
         final String protocol = entry.url().getProtocol();
         final String host = entry.url().getHost();
@@ -95,7 +95,7 @@ public final class ProtocolLoader {
         accessTime.put(host, System.currentTimeMillis());
         
         // load resource
-        if ((protocol.equals("http") || (protocol.equals("https")))) return httpLoader.load(entry, parserMode);
+        if ((protocol.equals("http") || (protocol.equals("https")))) return httpLoader.load(entry);
         if (protocol.equals("ftp")) return ftpLoader.load(entry);
         
         throw new IOException("Unsupported protocol '" + protocol + "' in url " + entry.url());
@@ -111,13 +111,13 @@ public final class ProtocolLoader {
         }
     }
     
-    public String process(final CrawlEntry entry, final String parserMode) {
+    public String process(final CrawlEntry entry) {
         // load a resource, store it to htcache and push queue entry to switchboard queue
         // returns null if everything went fine, a fail reason string if a problem occurred
-        Document h;
+        httpDocument h;
         try {
             entry.setStatus("loading", serverProcessorJob.STATUS_RUNNING);
-            h = load(entry, parserMode);
+            h = load(entry);
             assert h != null;
             entry.setStatus("loaded", serverProcessorJob.STATUS_RUNNING);
             final boolean stored = sb.htEntryStoreProcess(h);

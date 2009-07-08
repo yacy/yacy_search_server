@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.userDB;
-import de.anomic.htmlFilter.htmlFilterCharacterCoding;
+import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -205,7 +205,7 @@ public class get_bookmarks {
     		count++;
     		  		
     		final String title = fn; // just to make sure fn stays untouched    		
-    		prop.put("display_xbel_"+count+"_elements", "<title>" + htmlFilterCharacterCoding.unicode2xml(title.replaceAll("(/.[^/]*)*/", ""), true) + "</title>");   		
+    		prop.put("display_xbel_"+count+"_elements", "<title>" + CharacterCoding.unicode2xml(title.replaceAll("(/.[^/]*)*/", ""), true) + "</title>");   		
     		count++;    
     		final Iterator<String> bit=sb.bookmarksDB.getBookmarksIterator(fn, isAdmin);
     		count = print_XBEL(bit, count);
@@ -231,8 +231,8 @@ public class get_bookmarks {
 			bookmark=sb.bookmarksDB.getBookmark(bit.next());
 			date=new Date(bookmark.getTimeStamp());
 			prop.put("display_xbel_"+count+"_elements", "<bookmark id=\"" + bookmark.getUrlHash()
-					+ "\" href=\"" + htmlFilterCharacterCoding.unicode2xml(bookmark.getUrl(), true)
-					+ "\" added=\"" + htmlFilterCharacterCoding.unicode2xml(DateFormatter.formatISO8601(date), true)+"\">");
+					+ "\" href=\"" + CharacterCoding.unicode2xml(bookmark.getUrl(), true)
+					+ "\" added=\"" + CharacterCoding.unicode2xml(DateFormatter.formatISO8601(date), true)+"\">");
     		count++; 
     		prop.put("display_xbel_"+count+"_elements", "<title>");
     		count++;
@@ -243,7 +243,7 @@ public class get_bookmarks {
     		prop.put("display_xbel_"+count+"_elements", "<info>");   		
     		count++;
     		prop.put("display_xbel_"+count+"_elements", "<metadata owner=\"Mozilla\" ShortcutURL=\""
-				+ htmlFilterCharacterCoding.unicode2xml(bookmark.getTagsString().replaceAll("/.*,", "").toLowerCase(), true)
+				+ CharacterCoding.unicode2xml(bookmark.getTagsString().replaceAll("/.*,", "").toLowerCase(), true)
 				+ "\"/>");   		
     		count++;
     		prop.put("display_xbel_"+count+"_elements", "<metadata owner=\"YaCy\" public=\""+Boolean.toString(bookmark.getPublic())+"\"/>");   		

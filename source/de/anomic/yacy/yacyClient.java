@@ -61,6 +61,9 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.data.Blacklist;
+import de.anomic.document.Word;
+import de.anomic.document.parser.xml.RSSFeed;
+import de.anomic.document.parser.xml.RSSReader;
 import de.anomic.http.DefaultCharsetFilePart;
 import de.anomic.http.DefaultCharsetStringPart;
 import de.anomic.http.httpClient;
@@ -83,13 +86,10 @@ import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.plasma.parser.Word;
 import de.anomic.search.RankingProfile;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.tools.crypt;
-import de.anomic.xml.RSSFeed;
-import de.anomic.xml.RSSReader;
 
 public final class yacyClient {
 

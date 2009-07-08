@@ -26,6 +26,7 @@
 
 package de.anomic.kelondro.text.referencePrototype;
 
+import de.anomic.document.Word;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.Entry;
@@ -34,7 +35,6 @@ import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.text.AbstractReference;
 import de.anomic.kelondro.text.Reference;
-import de.anomic.plasma.parser.Word;
 import de.anomic.yacy.yacySeedDB;
 
 public final class WordReferenceRow extends AbstractReference implements WordReference, Cloneable {

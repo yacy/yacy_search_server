@@ -59,7 +59,6 @@ import javax.net.ssl.SSLSocketFactory;
 import de.anomic.icap.icapd;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.tools.PKCS12Tool;
-import de.anomic.urlRedirector.urlRedirectord;
 import de.anomic.yacy.logging.Log;
 
 public final class serverCore extends serverAbstractBusyThread implements serverBusyThread {

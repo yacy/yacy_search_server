@@ -33,20 +33,21 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.content.RSSMessage;
+import de.anomic.document.Condenser;
+import de.anomic.document.Word;
+import de.anomic.document.Document;
+import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
-import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.plasma.parser.Word;
-import de.anomic.plasma.parser.Condenser;
 import de.anomic.search.Query;
 import de.anomic.search.RankingProfile;
 import de.anomic.server.serverCore;
@@ -57,7 +58,6 @@ import de.anomic.server.serverSwitch;
 import de.anomic.tools.DidYouMean;
 import de.anomic.tools.iso639;
 import de.anomic.tools.Formatter;
-import de.anomic.xml.RSSFeed;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;
@@ -388,7 +388,7 @@ public class yacysearch {
                 final URLMetadataRow urlentry = sb.indexSegment.urlMetadata().load(recommendHash, null, 0);
                 if (urlentry != null) {
                     final URLMetadataRow.Components metadata = urlentry.metadata();
-                    plasmaParserDocument document;
+                    Document document;
                     document = plasmaSnippetCache.retrieveDocument(metadata.url(), true, 5000, true, false);
                     if (document != null) {
                         // create a news message

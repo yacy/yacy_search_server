@@ -56,11 +56,11 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import de.anomic.document.Word;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.net.natLib;
-import de.anomic.plasma.parser.Word;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverSystem;

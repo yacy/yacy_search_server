@@ -30,7 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
-import de.anomic.htmlFilter.htmlFilterCharacterCoding;
+import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
@@ -83,7 +83,7 @@ public class cytag {
         sb.append('\"');
         sb.append(k);
         sb.append("\":\"");
-        sb.append(htmlFilterCharacterCoding.unicode2xml(v, true));
+        sb.append(CharacterCoding.unicode2xml(v, true));
         sb.append('\"');
     }
 }

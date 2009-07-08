@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import de.anomic.content.RSSMessage;
+import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.order.Base64Order;
@@ -56,7 +57,6 @@ import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
 import de.anomic.tools.iso639;
-import de.anomic.xml.RSSFeed;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;

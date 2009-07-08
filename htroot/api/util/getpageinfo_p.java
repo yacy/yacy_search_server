@@ -4,7 +4,7 @@ import java.net.MalformedURLException;
 import java.util.Set;
 
 import de.anomic.crawler.HTTPLoader;
-import de.anomic.htmlFilter.htmlFilterContentScraper;
+import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -45,7 +45,7 @@ public class getpageinfo_p {
                     final yacyURL u = new yacyURL(url, null);
                     final httpRequestHeader reqHeader = new httpRequestHeader();
                     reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent); // do not set the crawler user agent, because this page was loaded by manual entering of the url
-                    final htmlFilterContentScraper scraper = htmlFilterContentScraper.parseResource(u, reqHeader);
+                    final ContentScraper scraper = ContentScraper.parseResource(u, reqHeader);
                     
                     // put the document title 
                     prop.putXML("title", scraper.getTitle());

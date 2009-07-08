@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.anomic.htmlFilter.htmlFilterCharacterCoding;
+import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.server.serverCore;
 
 /** This class provides methods to handle texts that have been posted in the yacyWiki or other
@@ -698,7 +698,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
     public String transformLine(String result) {
         //If HTML has not bee replaced yet (can happen if method gets called in recursion), replace now!
         if (!replacedHTML || preformattedSpan) {
-            result = htmlFilterCharacterCoding.unicode2html(result, true);
+            result = CharacterCoding.unicode2html(result, true);
             replacedHTML = true;
         }
 

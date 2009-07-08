@@ -36,17 +36,16 @@ import java.net.InetAddress;
 import java.util.Date;
 import java.util.Properties;
 
+import de.anomic.document.ParserDispatcher;
 import de.anomic.http.httpChunkedInputStream;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
-import de.anomic.http.httpdProxyCacheEntry;
+import de.anomic.http.httpDocument;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.parser.Document;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverHandler;
 import de.anomic.server.serverCore.Session;
@@ -164,7 +163,7 @@ public class icapd implements serverHandler, Cloneable {
             resHeader.put(icapHeader.SERVICE, "YaCy ICAP Indexing Service 1.0");
             resHeader.put(icapHeader.METHODS,icapHeader.METHOD_RESPMOD);
             
-            String transferIgnoreList = plasmaParser.getMediaExtList();  
+            String transferIgnoreList = ParserDispatcher.getMediaExtList();  
             transferIgnoreList = transferIgnoreList.substring(1,transferIgnoreList.length()-1);
             resHeader.put(icapHeader.TRANSFER_IGNORE, transferIgnoreList);
         } else {
@@ -365,7 +364,7 @@ public class icapd implements serverHandler, Cloneable {
                 resHdrStream.close();
             }
             
-            if (!plasmaParser.supportedContent(plasmaParser.PARSER_MODE_ICAP, httpRequestURL, httpResHeader.mime())) {
+            if (!ParserDispatcher.supportedContent(httpRequestURL, httpResHeader.mime())) {
                 log.logInfo("Wrong mimeType or fileExtension for indexing:" +
                                  "\nMimeType:    " + httpResHeader.mime() +
                                  "\nRequest Line:" + httpRequestLine);
@@ -378,7 +377,7 @@ public class icapd implements serverHandler, Cloneable {
              * ========================================================================= */
             
             // generating a htcache entry object
-            final Document cacheEntry = new httpdProxyCacheEntry(
+            final httpDocument cacheEntry = new httpDocument(
                     0, 
                     httpRequestURL,
                     "",

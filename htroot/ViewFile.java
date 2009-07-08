@@ -34,20 +34,20 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.htmlFilter.htmlFilterImageEntry;
-import de.anomic.htmlFilter.htmlFilterCharacterCoding;
+import de.anomic.document.Condenser;
+import de.anomic.document.ParserException;
+import de.anomic.document.Document;
+import de.anomic.document.parser.html.CharacterCoding;
+import de.anomic.document.parser.html.ImageEntry;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
+import de.anomic.http.httpDocument;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.parser.Document;
-import de.anomic.plasma.parser.ParserException;
-import de.anomic.plasma.parser.Condenser;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
@@ -152,7 +152,7 @@ public class ViewFile {
 
         // if the resource body was not cached we try to load it from web
         if (resource == null) {
-            Document entry = null;
+            httpDocument entry = null;
             try {
                 entry = sb.crawlQueues.loadResourceFromWeb(url, true, false);
             } catch (final Exception e) {
@@ -239,7 +239,7 @@ public class ViewFile {
             
         } else if (viewMode.equals("parsed") || viewMode.equals("sentences")  || viewMode.equals("words") || viewMode.equals("links")) {
             // parsing the resource content
-            plasmaParserDocument document = null;
+            Document document = null;
             try {
                 document = plasmaSnippetCache.parseDocument(url, resourceLength, resource);
                 if (document == null) {
@@ -329,9 +329,9 @@ public class ViewFile {
                 i += putMediaInfo(prop, wordArray, i, document.getAudiolinks(), "audio", (i % 2 == 0));
                 dark = (i % 2 == 0);
                 
-                final HashMap<String, htmlFilterImageEntry> ts = document.getImages();
-                final Iterator<htmlFilterImageEntry> tsi = ts.values().iterator();
-                htmlFilterImageEntry entry;
+                final HashMap<String, ImageEntry> ts = document.getImages();
+                final Iterator<ImageEntry> tsi = ts.values().iterator();
+                ImageEntry entry;
                 while (tsi.hasNext()) {
                     entry = tsi.next();
                     prop.put("viewMode_links_" + i + "_nr", i);
@@ -376,7 +376,7 @@ public class ViewFile {
     }
     
     private static final String markup(final String[] wordArray, String message) {
-        message = htmlFilterCharacterCoding.unicode2html(message, true);
+        message = CharacterCoding.unicode2html(message, true);
         if (wordArray != null)
             for (int j = 0; j < wordArray.length; j++) {
                 final String currentWord = wordArray[j].trim();

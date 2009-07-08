@@ -37,11 +37,12 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import de.anomic.document.Condenser;
+import de.anomic.document.Document;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.parser.Condenser;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
@@ -91,7 +92,7 @@ public class plasmaWebStructure {
         }
     }
     
-    public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(final plasmaParserDocument document, final Condenser condenser, final Date docDate) {
+    public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(final Document document, final Condenser condenser, final Date docDate) {
         final yacyURL url = document.dc_source();
         
         // generate citation reference

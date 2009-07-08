@@ -143,12 +143,19 @@ import de.anomic.data.userDB;
 import de.anomic.data.wiki.wikiBoard;
 import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
+import de.anomic.document.Condenser;
+import de.anomic.document.ParserDispatcher;
+import de.anomic.document.ParserException;
+import de.anomic.document.Word;
+import de.anomic.document.Document;
+import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpd;
+import de.anomic.http.httpDocument;
 import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
@@ -160,10 +167,6 @@ import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.net.UPnP;
-import de.anomic.plasma.parser.Document;
-import de.anomic.plasma.parser.ParserException;
-import de.anomic.plasma.parser.Word;
-import de.anomic.plasma.parser.Condenser;
 import de.anomic.search.Query;
 import de.anomic.search.RankingProfile;
 import de.anomic.server.serverAbstractSwitch;
@@ -181,7 +184,6 @@ import de.anomic.server.serverSystem;
 import de.anomic.server.serverThread;
 import de.anomic.tools.crypt;
 import de.anomic.tools.CryptoLib;
-import de.anomic.xml.RSSFeed;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNewsPool;
@@ -242,7 +244,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  plasmaRankingDistribution      rankingOwnDistribution;
     public  plasmaRankingDistribution      rankingOtherDistribution;
     public  HashMap<String, Object[]>      outgoingCookies, incomingCookies;
-    public  plasmaParser                   parser;
     public  volatile long                  proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
     public  yacyCore                       yc;
     public  ResourceObserver               observer;
@@ -510,21 +511,16 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // make parser
         log.logConfig("Starting Parser");
-        this.parser = new plasmaParser();
         
         // define an extension-blacklist
         log.logConfig("Parser: Initializing Extension Mappings for Media/Parser");
-        plasmaParser.initMediaExt(plasmaParser.extString2extList(getConfig(plasmaSwitchboardConstants.PARSER_MEDIA_EXT,"")));
-        plasmaParser.initSupportedHTMLFileExt(plasmaParser.extString2extList(getConfig(plasmaSwitchboardConstants.PARSER_MEDIA_EXT_PARSEABLE,"")));
+        ParserDispatcher.initMediaExt(ParserDispatcher.extString2extList(getConfig(plasmaSwitchboardConstants.PARSER_MEDIA_EXT,"")));
+        ParserDispatcher.initSupportedHTMLFileExt(ParserDispatcher.extString2extList(getConfig(plasmaSwitchboardConstants.PARSER_MEDIA_EXT_PARSEABLE,"")));
         
         // define a realtime parsable mimetype list
         log.logConfig("Parser: Initializing Mime Types");
-        plasmaParser.initHTMLParsableMimeTypes(getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES_HTML, "application/xhtml+xml,text/html,text/plain"));
-        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_PROXY, getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES_PROXY, null));
-        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_CRAWLER, getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES_CRAWLER, null));
-        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_ICAP, getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES_ICAP, null));
-        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_URLREDIRECTOR, getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES_URLREDIRECTOR, null));
-        plasmaParser.initParseableMimeTypes(plasmaParser.PARSER_MODE_IMAGE, getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES_IMAGE, null));
+        ParserDispatcher.initHTMLParsableMimeTypes(getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES_HTML, "application/xhtml+xml,text/html,text/plain"));
+        ParserDispatcher.addParseableMimeTypes(getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES_CRAWLER, null));
         
         // start a loader
         log.logConfig("Starting Crawl Loader");
@@ -593,7 +589,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // generate snippets cache
         log.logConfig("Initializing Snippet Cache");
-        plasmaSnippetCache.init(parser, log, this);
+        plasmaSnippetCache.init(log, this);
         
         // init the wiki
         wikiParser = new wikiCode(this.peers.mySeed().getClusterAddress());
@@ -1089,7 +1085,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         return this.crawler.cleanProfiles();
     }
     
-    public boolean htEntryStoreProcess(final Document entry) {
+    public boolean htEntryStoreProcess(final httpDocument entry) {
         
         if (entry == null) return false;
 
@@ -1098,7 +1094,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
          * 
          * Testing if the content type is supported by the available parsers
          * ========================================================================= */
-        final boolean isSupportedContent = plasmaParser.supportedContent(entry.url(),entry.getMimeType());
+        final boolean isSupportedContent = ParserDispatcher.supportedContent(entry.url(),entry.getMimeType());
         if (log.isFinest()) log.logFinest("STORE "+ entry.url() +" content of type "+ entry.getMimeType() +" is supported: "+ isSupportedContent);
         
         /* =========================================================================
@@ -1210,7 +1206,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         bookmarksDB.close();
         messageDB.close();
         robots.close();
-        parser.close();
         webStructure.flushCitationReference("crg");
         webStructure.close();
         crawlQueues.close();
@@ -1296,7 +1291,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 }
                 
                 // create a queue entry
-                plasmaParserDocument document = surrogate.document();
+                Document document = surrogate.document();
                 queueentry = this.crawler.queuePreStack.newEntry(surrogate.url(), null, null, false, null, 0, this.crawler.defaultSurrogateProfile.handle(), null);
                 /*
                  * public QueueEntry newEntry(final yacyURL url, final String referrer, final Date ifModifiedSince, final boolean requestWithCookie,
@@ -1401,11 +1396,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public static class indexingQueueEntry extends serverProcessorJob {
         public IndexingStack.QueueEntry queueEntry;
-        public plasmaParserDocument document;
+        public Document document;
         public Condenser condenser;
         public indexingQueueEntry(
                 final IndexingStack.QueueEntry queueEntry,
-                final plasmaParserDocument document,
+                final Document document,
                 final Condenser condenser) {
             super();
             this.queueEntry = queueEntry;
@@ -1658,7 +1653,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // debug
         if (log.isFinest()) log.logFinest("PARSE "+ in.queueEntry.toString());
         
-        plasmaParserDocument document = null;
+        Document document = null;
         try {
             document = parseDocument(in.queueEntry);
         } catch (final InterruptedException e) {
@@ -1673,8 +1668,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         return new indexingQueueEntry(in.queueEntry, document, null);
     }
     
-    private plasmaParserDocument parseDocument(final IndexingStack.QueueEntry entry) throws InterruptedException {
-        plasmaParserDocument document = null;
+    private Document parseDocument(final IndexingStack.QueueEntry entry) throws InterruptedException {
+        Document document = null;
         final int processCase = entry.processCase();
         
         if (this.log.isFine()) log.logFine("processResourceStack processCase=" + processCase +
@@ -1691,10 +1686,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 
         try {
             // parse the document
-            document = parser.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), plasmaHTCache.getResourceContent(entry.url()));
+            document = ParserDispatcher.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), plasmaHTCache.getResourceContent(entry.url()));
             assert(document != null) : "Unexpected error. Parser returned null.";
         } catch (final ParserException e) {
-            this.log.logInfo("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());
+            this.log.logWarning("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());
             addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.anchorName(), e.getErrorCode());
             if (document != null) {
                 document.close();
@@ -1703,7 +1698,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             return null;
         } finally {
             if (document == null) { // if you get here, comment this part out and you will possibly see a OOM in the log
-            	this.log.logInfo("Unable to parse the resource '" + entry.url() + "'. " + "no parser result");
+            	this.log.logWarning("Unable to parse the resource '" + entry.url() + "'. " + "no parser result");
             	addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.anchorName(), "no parser result");
             	return null;
             }
@@ -1793,7 +1788,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         in.queueEntry.close();
     }
     
-    private void storeDocumentIndex(final IndexingStack.QueueEntry queueEntry, final plasmaParserDocument document, final Condenser condenser) {
+    private void storeDocumentIndex(final IndexingStack.QueueEntry queueEntry, final Document document, final Condenser condenser) {
         
         // CREATE INDEX
         final String dc_title = document.dc_title();
@@ -1934,7 +1929,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 final Long resourceContentLength = (Long) resource[1];
                 
                 // parse the resource
-                final plasmaParserDocument document = plasmaSnippetCache.parseDocument(metadata.url(), resourceContentLength.longValue(), resourceContent);
+                final Document document = plasmaSnippetCache.parseDocument(metadata.url(), resourceContentLength.longValue(), resourceContent);
                 
                 // get the word set
                 Set<String> words = null;

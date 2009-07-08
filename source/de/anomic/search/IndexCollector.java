@@ -34,6 +34,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import de.anomic.document.Condenser;
 import de.anomic.kelondro.index.BinSearch;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceOrder;
@@ -44,7 +45,6 @@ import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.SortStack;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.parser.Condenser;
 import de.anomic.search.Query;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;

@@ -30,8 +30,8 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import de.anomic.htmlFilter.htmlFilterImageEntry;
-import de.anomic.plasma.plasmaParserDocument;
+import de.anomic.document.Document;
+import de.anomic.document.parser.html.ImageEntry;
 import de.anomic.yacy.yacyURL;
 
 public class ResultImages {
@@ -49,12 +49,12 @@ public class ResultImages {
     // the same images may be linked from different pages
     private static final ConcurrentHashMap<String, Long> doubleCheck = new ConcurrentHashMap<String, Long>(); // (url-hash, time) when the url appeared first
     
-    public static void registerImages(final plasmaParserDocument document, final boolean privateEntry) {
+    public static void registerImages(final Document document, final boolean privateEntry) {
         if (document == null) return;
         if (document.dc_source() == null) return;
         
-        final HashMap<String, htmlFilterImageEntry> images = document.getImages();
-        for (final htmlFilterImageEntry image: images.values()) {
+        final HashMap<String, ImageEntry> images = document.getImages();
+        for (final ImageEntry image: images.values()) {
             // do a double-check; attention: this can be time-consuming since this possibly needs a DNS-lookup
             if (doubleCheck.containsKey(image.url().hash())) continue;
             doubleCheck.put(image.url().hash(), System.currentTimeMillis());
@@ -141,9 +141,9 @@ public class ResultImages {
     }
     
     public static class OriginEntry {
-        public htmlFilterImageEntry imageEntry;
+        public ImageEntry imageEntry;
         public yacyURL baseURL;
-        public OriginEntry(final htmlFilterImageEntry imageEntry, final yacyURL baseURL) {
+        public OriginEntry(final ImageEntry imageEntry, final yacyURL baseURL) {
             this.imageEntry = imageEntry;
             this.baseURL = baseURL;
         }

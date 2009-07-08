@@ -28,22 +28,22 @@ import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.htmlFilter.htmlFilterImageEntry;
+import de.anomic.document.ParserException;
+import de.anomic.document.Document;
+import de.anomic.document.parser.html.ContentScraper;
+import de.anomic.document.parser.html.ImageEntry;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSnippetCache;
-import de.anomic.plasma.parser.ParserException;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
 public final class ImageCollector {
 
-    private final HashMap<String, htmlFilterImageEntry> images;
+    private final HashMap<String, ImageEntry> images;
     
     public ImageCollector(final long maxTime, final yacyURL url, final int depth, final boolean indexing) {
         final long start = System.currentTimeMillis();
-        this.images = new HashMap<String, htmlFilterImageEntry>();
+        this.images = new HashMap<String, ImageEntry>();
         if (maxTime > 10) {
             Object[] resource = null;
             try {
@@ -55,7 +55,7 @@ public final class ImageCollector {
             final InputStream res = (InputStream) resource[0];
             final Long resLength = (Long) resource[1];
             if (res != null) {
-                plasmaParserDocument document = null;
+                Document document = null;
                 try {
                     // parse the document
                     document = plasmaSnippetCache.parseDocument(url, resLength.longValue(), res);
@@ -68,7 +68,7 @@ public final class ImageCollector {
                 if (document == null) return;
                 
                 // add the image links
-                htmlFilterContentScraper.addAllImages(this.images, document.getImages());
+                ContentScraper.addAllImages(this.images, document.getImages());
 
                 // add also links from pages one step deeper, if depth > 0
                 if (depth > 0) {
@@ -90,11 +90,11 @@ public final class ImageCollector {
     
     public void addAll(final ImageCollector m) {
         synchronized (m.images) {
-            htmlFilterContentScraper.addAllImages(this.images, m.images);
+            ContentScraper.addAllImages(this.images, m.images);
         }
     }
     
-    public Iterator<htmlFilterImageEntry> entries() {
+    public Iterator<ImageEntry> entries() {
         // returns htmlFilterImageEntry - Objects
         return images.values().iterator();
     }

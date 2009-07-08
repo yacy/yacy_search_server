@@ -25,30 +25,16 @@
 
 package de.anomic.yacy.logging;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.logging.Handler;
 import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import de.anomic.plasma.LogParser;
-import de.anomic.plasma.plasmaParser;
-import de.anomic.tools.ListDirs;
 
 public class LogalizerHandler extends Handler {
 
     public static boolean enabled=false;
     public static boolean debug=false;
-    private String logParserPackage;
-    private HashMap<String, Object> parsers;
     
     public LogalizerHandler() {
         super();
@@ -58,76 +44,11 @@ public class LogalizerHandler extends Handler {
 
         if(manager.getProperty(className + ".enabled").equalsIgnoreCase("true")) enabled = true;
         if(manager.getProperty(className + ".debug").equalsIgnoreCase("true")) debug = true;
-
-        logParserPackage = manager.getProperty(className + ".parserPackage");
-
-        parsers = new HashMap<String, Object>();
-        try {
-            if (debug) System.out.println("Searching for additional content parsers in package " + logParserPackage);
-            // getting an uri to the parser subpackage
-            final String packageURI = plasmaParser.class.getResource("/"+logParserPackage.replace('.','/')).toString();
-            if (debug) System.out.println("LogParser directory is " + packageURI);
-            
-            final ListDirs parserDir = new ListDirs(packageURI);
-            final ArrayList<String> parserDirFiles = parserDir.listFiles(".*\\.class");
-            if(parserDirFiles.size() == 0 && debug) {
-                System.out.println("Can't find any parsers in "+parserDir.toString());
-            }
-		    for (final String filename: parserDirFiles) {
-		    	if (filename.endsWith("Log.class") || filename.endsWith("LogalizerHandler.class")) continue;
-		    	registerParser(filename);
-	        }
-        } catch (final IOException e) {
-            e.printStackTrace();
-        } catch (final URISyntaxException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    private void registerParser(String filename) {
-    	try {
-	    	final Pattern patternGetClassName = Pattern.compile(".*\\"+ File.separator +"([^\\"+ File.separator +"]+)\\.class");
-	    	final Matcher matcherClassName = patternGetClassName.matcher(filename);
-	    	matcherClassName.find();
-	        String className = matcherClassName.group(1);
-	        final Class<?> tempClass = Class.forName(logParserPackage+"."+className);
-	        if (tempClass.isInterface()) {
-	            if (debug) System.out.println(tempClass.getName() + " is an Interface");
-	        } else {
-	            final Object theParser = tempClass.newInstance();
-	            if (theParser instanceof LogParser) {
-	                final LogParser theLogParser = (LogParser) theParser;
-	                //System.out.println(bla.getName() + " is a logParser");
-	                parsers.put(theLogParser.getParserType(), theParser);
-	                
-	                if (debug) System.out.println("Added " + theLogParser.getClass().getName() + " as " + theLogParser.getParserType() + " Parser.");
-	            }
-	            else {
-	                //System.out.println(bla.getName() + " is not a logParser");
-	                if (debug) System.out.println("Rejected " + tempClass.getName() + ". Class does not implement the logParser-Interface");
-	
-	            }
-	        }
-    	} catch (final ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (final InstantiationException e) {
-            e.printStackTrace();
-        } catch (final IllegalAccessException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    public void registerParser(LogParser theParser) {
-	    final LogParser theLogParser = (LogParser) theParser;
-	    //System.out.println(bla.getName() + " is a logParser");
-	    parsers.put(theLogParser.getParserType(), theParser);
-	    
-	    if (debug) System.out.println("Added " + theLogParser.getClass().getName() + " as " + theLogParser.getParserType() + " Parser.");
     }
     
     public void publish(final LogRecord record) {
         if (enabled) {
-            final LogParser temp = (LogParser) parsers.get(record.getLoggerName());
+            final LogParser temp = new LogParser();
             if (temp != null) try {
                 final int returnV = temp.parse(record.getLevel().toString(), record.getMessage());
                 //if (debug) System.out.println("Logalizertest: " + returnV + " --- " + record.getLevel() + " --- " + record.getMessage());
@@ -137,40 +58,13 @@ public class LogalizerHandler extends Handler {
         flush();
     }
     
-    public Set<String> getParserNames() {
-        return parsers.keySet();
-    }
-    
-    public LogParser getParser(final int number) {
-        String o;
-        final Iterator<String> it = parsers.keySet().iterator();
-        int i = 0;
-        while (it.hasNext()) {
-            o = it.next();
-            if (i++ == number)
-                return (LogParser) parsers.get(o);
-        }
-        return null;
-    }
-    
     public Hashtable<String, Object> getParserResults(final LogParser parsername) {
         return (parsername == null) ? null : parsername.getResults();
     }
     
     public void close() throws SecurityException {
-        // TODO Auto-generated method stub
-
     }
 
     public void flush() {
-        // TODO Auto-generated method stub
-
     }
-    /*  
-    private static final FilenameFilter parserNameFilter = new FilenameFilter() {
-        public boolean accept(File dir, String name) {
-            return name.matches(".*.class");
-        }
-    };
-    */
 }

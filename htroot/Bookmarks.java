@@ -40,10 +40,10 @@ import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.userDB;
 import de.anomic.data.bookmarksDB.Tag;
+import de.anomic.document.Document;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -184,7 +184,7 @@ public class Bookmarks {
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
                         final URLMetadataRow urlentry = sb.indexSegment.urlMetadata().load(urlHash, null, 0);
-                        plasmaParserDocument document = null;
+                        Document document = null;
                         if (urlentry != null) {
                             final URLMetadataRow.Components metadata = urlentry.metadata();
                             document = plasmaSnippetCache.retrieveDocument(metadata.url(), true, 5000, true, false);

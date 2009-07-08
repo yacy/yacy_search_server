@@ -29,12 +29,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import de.anomic.document.ParserDispatcher;
+import de.anomic.document.ParserConfig;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaParser;
-import de.anomic.plasma.plasmaParserConfig;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.parser.ParserInfo;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -218,11 +217,11 @@ public final class Settings_p {
         /*
          * Parser Configuration
          */
-        
-        final HashMap<String, plasmaParserConfig> configList = plasmaParser.getParserConfigList();        
+        /*
+        final HashMap<String, plasmaParserConfig> configList = ParserDispatcher.getParserConfigList();        
         final plasmaParserConfig[] configArray = configList.values().toArray(new plasmaParserConfig[configList.size()]);
         
-        final HashSet<ParserInfo> parserInfos = new HashSet<ParserInfo>(sb.parser.getAvailableParserList().values());
+        final HashSet<ParserInfo> parserInfos = new HashSet<ParserInfo>(ParserDispatcher.getAvailableParserList().values());
         
 //        // fetching a list of all available mimetypes
 //        List availableParserKeys = Arrays.asList(availableParsers.entrySet().toArray(new ParserInfo[availableParsers.size()]));
@@ -273,7 +272,7 @@ public final class Settings_p {
         prop.put("parserMode",configArray.length);
         prop.put("parser", parserIdx);
         prop.put("parser.colspan", configArray.length+2);
-        
+        */
         // Crawler settings
         prop.putHTML("crawler.clientTimeout",sb.getConfig("crawler.clientTimeout", "10000"));
         prop.putHTML("crawler.http.maxFileSize",sb.getConfig("crawler.http.maxFileSize", "-1"));

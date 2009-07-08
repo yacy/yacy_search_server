@@ -37,7 +37,7 @@ import java.util.Map.Entry;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import de.anomic.htmlFilter.htmlFilterCharacterCoding;
+import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
@@ -202,7 +202,7 @@ public class Threaddump_p {
                     className = ste.getClassName();
                     if (cutcore && (className.startsWith("java.") || className.startsWith("sun."))) {
                     	sb.setLength(0);
-                    	bufferappend(sb, plain, tracename + "at " + htmlFilterCharacterCoding.unicode2html(ste.toString(), true));
+                    	bufferappend(sb, plain, tracename + "at " + CharacterCoding.unicode2html(ste.toString(), true));
                     } else {
                     	cutcore = false;
 	                    if (i == 0) {
@@ -211,9 +211,9 @@ public class Threaddump_p {
 	                        line = null;
 	                    }
 	                    if ((line != null) && (line.length() > 0)) {
-	                        bufferappend(sb, plain, tracename + "at " + htmlFilterCharacterCoding.unicode2html(ste.toString(), true) + " [" + line.trim() + "]");
+	                        bufferappend(sb, plain, tracename + "at " + CharacterCoding.unicode2html(ste.toString(), true) + " [" + line.trim() + "]");
 	                    } else {
-	                        bufferappend(sb, plain, tracename + "at " + htmlFilterCharacterCoding.unicode2html(ste.toString(), true));
+	                        bufferappend(sb, plain, tracename + "at " + CharacterCoding.unicode2html(ste.toString(), true));
 	                    }
                     }
                 }

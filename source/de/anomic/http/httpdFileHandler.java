@@ -80,13 +80,13 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPOutputStream;
 
-import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.htmlFilter.htmlFilterInputStream;
+import de.anomic.document.ParserDispatcher;
+import de.anomic.document.parser.html.ContentScraper;
+import de.anomic.document.parser.html.ScraperInputStream;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.plasma.plasmaParser;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverClassLoader;
@@ -230,7 +230,7 @@ public final class httpdFileHandler {
         }
         headers.put(httpHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
         headers.put(httpHeader.DATE, DateFormatter.formatRFC1123(new Date()));
-        if(!(plasmaParser.mediaExtContains(ext))){
+        if(!(ParserDispatcher.mediaExtContains(ext))){
             headers.put(httpHeader.PRAGMA, "no-cache");         
         }
         return headers;
@@ -441,14 +441,14 @@ public final class httpdFileHandler {
                     long sz;
                     String headline, author, description;
                     int images, links;
-                    htmlFilterContentScraper scraper;
+                    ContentScraper scraper;
                     for (int i = 0; i < list.length; i++) {
                         f = new File(targetFile, list[i]);
                         if (f.isDirectory()) {
                             aBuffer.append("    <li><a href=\"" + path + list[i] + "/\">" + list[i] + "/</a><br></li>\n");
                         } else {
                             if (list[i].endsWith("html") || (list[i].endsWith("htm"))) {
-                                scraper = htmlFilterContentScraper.parseResource(f);
+                                scraper = ContentScraper.parseResource(f);
                                 headline = scraper.getTitle();
                                 author = scraper.getAuthor();
                                 description = scraper.getDescription();
@@ -859,8 +859,8 @@ public final class httpdFileHandler {
                     			// save position
                     			fis.mark(1000);
                     			// scrape document to look up charset
-                    			final htmlFilterInputStream htmlFilter = new htmlFilterInputStream(fis,"UTF-8",new yacyURL("http://localhost", null),null,false);
-                    			final String charset = plasmaParser.patchCharsetEncoding(htmlFilter.detectCharset());
+                    			final ScraperInputStream htmlFilter = new ScraperInputStream(fis,"UTF-8",new yacyURL("http://localhost", null),null,false);
+                    			final String charset = ParserDispatcher.patchCharsetEncoding(htmlFilter.detectCharset());
                     			if(charset != null)
                     				mimeType = mimeType + "; charset="+charset;
                     			// reset position

@@ -52,11 +52,11 @@ import java.util.List;
 import java.util.Map;
 
 import de.anomic.content.RSSMessage;
+import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
-import de.anomic.xml.RSSFeed;
 import de.anomic.yacy.dht.PeerSelection;
 import de.anomic.yacy.logging.Log;
 

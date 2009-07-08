@@ -35,8 +35,11 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import de.anomic.data.Blacklist;
-import de.anomic.htmlFilter.htmlFilterContentScraper;
-import de.anomic.http.httpdProxyCacheEntry;
+import de.anomic.document.Condenser;
+import de.anomic.document.Word;
+import de.anomic.document.Document;
+import de.anomic.document.parser.html.ContentScraper;
+import de.anomic.http.httpDocument;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
@@ -46,10 +49,7 @@ import de.anomic.kelondro.text.navigationPrototype.NavigationReferenceRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceFactory;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
-import de.anomic.plasma.plasmaParserDocument;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.parser.Word;
-import de.anomic.plasma.parser.Condenser;
 import de.anomic.tools.iso639;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
@@ -153,10 +153,10 @@ public final class Segment {
      * @param outlinksOther
      * @return
      */
-    private int addPageIndex(final yacyURL url, final Date urlModified, final plasmaParserDocument document, final Condenser condenser, final String language, final char doctype, final int outlinksSame, final int outlinksOther) {
+    private int addPageIndex(final yacyURL url, final Date urlModified, final Document document, final Condenser condenser, final String language, final char doctype, final int outlinksSame, final int outlinksOther) {
         int wordCount = 0;
         final int urlLength = url.toNormalform(true, true).length();
-        final int urlComps = htmlFilterContentScraper.urlComps(url.toString()).length;
+        final int urlComps = ContentScraper.urlComps(url.toString()).length;
         
         // iterate over all words of context text
         final Iterator<Map.Entry<String, Word>> i = condenser.words().entrySet().iterator();
@@ -203,7 +203,7 @@ public final class Segment {
             final yacyURL referrerURL,
             final Date docDate,
             final long sourcesize,
-            final plasmaParserDocument document,
+            final Document document,
             final Condenser condenser
             ) throws IOException {
         final long startTime = System.currentTimeMillis();
@@ -269,7 +269,7 @@ public final class Segment {
                 new byte[0],                               // md5
                 (int) sourcesize,                          // size
                 condenser.RESULT_NUMB_WORDS,               // word count
-                httpdProxyCacheEntry.docType(document.dc_format()), // doctype
+                httpDocument.docType(document.dc_format()), // doctype
                 condenser.RESULT_FLAGS,                    // flags
                 language,                                  // language
                 document.inboundLinks(),                   // inbound links
@@ -292,7 +292,7 @@ public final class Segment {
                 document,                                     // document content
                 condenser,                                    // document condenser
                 language,                                     // document language
-                httpdProxyCacheEntry.docType(document.dc_format()),  // document type
+                httpDocument.docType(document.dc_format()),  // document type
                 document.inboundLinks(),                      // inbound links
                 document.outboundLinks()                      // outbound links
         );

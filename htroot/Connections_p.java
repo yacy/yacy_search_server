@@ -45,8 +45,8 @@ import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverThread;
+import de.anomic.server.urlRedirectord;
 import de.anomic.server.serverCore.Session;
-import de.anomic.urlRedirector.urlRedirectord;
 import de.anomic.yacy.yacySeed;
 
 public final class Connections_p {    
