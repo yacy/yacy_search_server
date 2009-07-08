@@ -72,20 +72,14 @@
 .classic .linktitle, .classic .url, .classic .date, .classic .desc {
 	margin-left: 40px;
 }
-div .ybpane {
-	float: left;
-	font-size: 13px;
-    line-height: 1.2em;
+.ymsg {
+	margin-left: -20px;
 	color:#239AFF;
-	margin-top: 10px;
-	margin-left: 10px;
 }
-.ybpane img {
+.ymsg img {
 	width: 50px;
 	height: 32px;
-	vertical-align: middle;
-	padding-right: 15px;
-	padding-top: 3px;
+	vertical-align: middle;	
 	border: 0;
 }
 #ypopup .yloading {
