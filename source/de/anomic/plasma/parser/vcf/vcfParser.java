@@ -64,8 +64,13 @@ public class vcfParser extends AbstractParser implements Parser {
     public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
     static { 
         SUPPORTED_MIME_TYPES.put("text/x-vcard","vcf");
-        SUPPORTED_MIME_TYPES.put("application/vcard","vcf");        
-    }     
+        SUPPORTED_MIME_TYPES.put("application/vcard","vcf");
+        SUPPORTED_MIME_TYPES.put("text/anytext","vcf");
+        SUPPORTED_MIME_TYPES.put("text/directory","vcf");
+        SUPPORTED_MIME_TYPES.put("application/x-versit","vcf");
+        SUPPORTED_MIME_TYPES.put("text/x-versit","vcf");
+        SUPPORTED_MIME_TYPES.put("text/x-vcalendar","vcf");
+    }
 
     /**
      * a list of library names that are needed by this parser

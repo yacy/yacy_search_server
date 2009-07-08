@@ -53,6 +53,10 @@ public class psParser extends AbstractParser implements Parser {
     static { 
         SUPPORTED_MIME_TYPES.put("application/postscript","ps"); 
         SUPPORTED_MIME_TYPES.put("text/postscript","ps");
+        SUPPORTED_MIME_TYPES.put("application/ps","ps");
+        SUPPORTED_MIME_TYPES.put("application/x-postscript","ps");
+        SUPPORTED_MIME_TYPES.put("application/x-ps","ps");
+        SUPPORTED_MIME_TYPES.put("application/x-postscript-not-eps","ps");
     }     
     
     /**

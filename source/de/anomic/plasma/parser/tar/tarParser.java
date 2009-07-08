@@ -63,6 +63,10 @@ public class tarParser extends AbstractParser implements Parser {
     static { 
         SUPPORTED_MIME_TYPES.put("application/x-tar","tar");
         SUPPORTED_MIME_TYPES.put("application/tar","tar");
+        SUPPORTED_MIME_TYPES.put("applicaton/x-gtar","tar");
+        SUPPORTED_MIME_TYPES.put("multipart/x-tar","tar");
+        SUPPORTED_MIME_TYPES.put("application/x-compress","tar");
+        SUPPORTED_MIME_TYPES.put("application/x-compressed","tar");
     }     
 
     /**

@@ -50,11 +50,15 @@ public class bzipParser extends AbstractParser implements Parser {
      * @see #getSupportedMimeTypes()
      */
     public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();    
-    static String fileExtensions = "bz2,tbz,tbz2";
+    static final String fileExtensions = "bz2,tbz,tbz2";
     static { 
         SUPPORTED_MIME_TYPES.put("application/x-bzip2",fileExtensions);
         SUPPORTED_MIME_TYPES.put("application/bzip2", fileExtensions);
         SUPPORTED_MIME_TYPES.put("application/x-bz2", fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/octet-stream",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/x-bzip",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("/x-compressed",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/x-stuffit",fileExtensions);
     }     
     
     /**

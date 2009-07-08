@@ -57,8 +57,15 @@ public class pdfParser extends AbstractParser implements Parser {
      * @see #getSupportedMimeTypes()
      */
     public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();  
-    static { SUPPORTED_MIME_TYPES.put("application/pdf","pdf"); }     
-    
+    static { 
+        SUPPORTED_MIME_TYPES.put("application/pdf","pdf");
+        SUPPORTED_MIME_TYPES.put("application/x-pdf","pdf");
+        SUPPORTED_MIME_TYPES.put("application/acrobat","pdf");
+        SUPPORTED_MIME_TYPES.put("applications/vnd.pdf","pdf");
+        SUPPORTED_MIME_TYPES.put("text/pdf","pdf");
+        SUPPORTED_MIME_TYPES.put("text/x-pdf","pdf");
+    }
+
     /**
      * a list of library names that are needed by this parser
      * @see Parser#getLibxDependences()

@@ -46,7 +46,17 @@ public class docParser extends AbstractParser implements Parser {
      * @see #getSupportedMimeTypes()
      */    
     public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
-    static { SUPPORTED_MIME_TYPES.put("application/msword","doc"); } 
+    static {
+        SUPPORTED_MIME_TYPES.put("application/msword","doc");
+        SUPPORTED_MIME_TYPES.put("application/doc","doc");
+        SUPPORTED_MIME_TYPES.put("appl/text","doc");
+        SUPPORTED_MIME_TYPES.put("application/vnd.msword","doc");
+        SUPPORTED_MIME_TYPES.put("application/vnd.ms-word","doc");
+        SUPPORTED_MIME_TYPES.put("application/winword","doc");
+        SUPPORTED_MIME_TYPES.put("application/word","doc");
+        SUPPORTED_MIME_TYPES.put("application/x-msw6","doc");
+        SUPPORTED_MIME_TYPES.put("application/x-msword","doc"); 
+    }
     
     /**
      * a list of library names that are needed by this parser

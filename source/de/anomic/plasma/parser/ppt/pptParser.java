@@ -45,11 +45,17 @@ public class pptParser extends AbstractParser implements Parser {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();  
+    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
+    static final String fileExtensions = "ppt,pps";
     static { 
-        SUPPORTED_MIME_TYPES.put("application/mspowerpoint","ppt,pps");
-        SUPPORTED_MIME_TYPES.put("application/powerpoint","ppt,pps");
-        SUPPORTED_MIME_TYPES.put("application/vnd.ms-powerpoint","ppt,pps");
+        SUPPORTED_MIME_TYPES.put("application/mspowerpoint",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/powerpoint",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/vnd.ms-powerpoint",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/ms-powerpoint",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/mspowerpnt",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/vnd-mspowerpoint",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/x-powerpoint",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/x-m",fileExtensions);
     }     
 
     /**

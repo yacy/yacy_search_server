@@ -62,6 +62,10 @@ public class zipParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("application/zip","zip");
         SUPPORTED_MIME_TYPES.put("application/x-zip","zip");
         SUPPORTED_MIME_TYPES.put("application/x-zip-compressed","zip");
+        SUPPORTED_MIME_TYPES.put("application/octet-stream","zip");
+        SUPPORTED_MIME_TYPES.put("application/x-compress","zip");
+        SUPPORTED_MIME_TYPES.put("application/x-compressed","zip");
+        SUPPORTED_MIME_TYPES.put("multipart/x-zip","zip");
         SUPPORTED_MIME_TYPES.put("application/java-archive","jar");
     }     
 
