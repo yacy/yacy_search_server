@@ -11,7 +11,6 @@
 // $LastChangedRevision$
 // $LastChangedBy$
 //
-//
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
 //the Free Software Foundation; either version 2 of the License, or
@@ -90,7 +89,7 @@ public class pptParser extends AbstractParser implements Parser {
                 if (title.length() == l) break;
                 l = title.length();
             }
-            
+
             /*
              * create the plasmaParserDocument for the database
              * and set shortText and bodyText properly

@@ -6,6 +6,10 @@
 // Frankfurt, Germany, 2004
 // 
 // This file ist contributed by Franz Brausze
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -61,6 +65,7 @@ public class ByteArrayIInStream extends IInStream {
         return this.sbais.read();
     }
     
+    @Override
     public int read(final byte[] b, final int off, final int len) throws IOException {
         return this.sbais.read(b, off, len);
     }

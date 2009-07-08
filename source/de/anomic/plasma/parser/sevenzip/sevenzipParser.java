@@ -6,6 +6,10 @@
 // Frankfurt, Germany, 2004
 // 
 // This file ist contributed by Franz Brausze
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -91,11 +95,13 @@ public class sevenzipParser extends AbstractParser implements Parser {
         }
     }
     
+    @Override
     public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset,
             final byte[] source) throws ParserException, InterruptedException {
         return parse(location, mimeType, charset, new ByteArrayIInStream(source), Parser.MAX_KEEP_IN_MEMORY_SIZE - source.length);
     }
     
+    @Override
     public plasmaParserDocument parse(final yacyURL location, final String mimeType, final String charset,
             final File sourceFile) throws ParserException, InterruptedException {
         try {

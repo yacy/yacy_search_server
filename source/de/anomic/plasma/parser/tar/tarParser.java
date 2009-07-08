@@ -6,7 +6,10 @@
 //Frankfurt, Germany, 2005
 //
 //this file is contributed by Martin Thelian
-//last major change: 16.05.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -230,6 +233,7 @@ public class tarParser extends AbstractParser implements Parser {
         }
     }
     
+    @Override
     public void reset() {
         // Nothing todo here at the moment
         super.reset();

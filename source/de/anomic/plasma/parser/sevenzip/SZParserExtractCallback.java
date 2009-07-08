@@ -6,6 +6,10 @@
 // Frankfurt, Germany, 2004
 // 
 // This file ist contributed by Franz Brausze
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 // 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -58,6 +62,7 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
         this.prefix = prefix;
     }
     
+    @Override
     public void PrepareOperation(final int arg0) {
         this.extractMode = (arg0 == IInArchive.NExtract_NAskMode_kExtract);
         switch (arg0) {
@@ -73,6 +78,7 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
         }
     }
 
+    @Override
     public void SetOperationResult(final int arg0) throws IOException {
         if (arg0 != IInArchive.NExtract_NOperationResult_kOK) {
             this.NumErrors++;
@@ -136,6 +142,7 @@ public class SZParserExtractCallback extends ArchiveExtractCallback {
         }
     }
     
+    @Override
     public OutputStream GetStream(final int index, final int askExtractMode) throws IOException {
         final SevenZipEntry item = super.archiveHandler.getEntry(index);
         super.filePath = item.getName();
