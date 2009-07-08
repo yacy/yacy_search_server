@@ -33,11 +33,11 @@ import java.util.TreeSet;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaProfiling;
-import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaSearchRankingProcess;
-import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.search.Query;
+import de.anomic.search.QueryParams;
+import de.anomic.search.QueryEvent;
+import de.anomic.search.RankingProcess;
+import de.anomic.search.SnippetCache;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
@@ -73,12 +73,12 @@ public class yacysearchitem {
         prop.put("dynamic", "0");
         
         // find search event
-        final plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(eventID);
+        final QueryEvent theSearch = QueryEvent.getEvent(eventID);
         if (theSearch == null) {
             // the event does not exist, show empty page
             return prop;
         }
-        final Query theQuery = theSearch.getQuery();
+        final QueryParams theQuery = theSearch.getQuery();
         
         // dynamically update count values
         final int offset = theQuery.neededResults() - theQuery.displayResults() + 1;
@@ -90,11 +90,11 @@ public class yacysearchitem {
         prop.put("remoteIndexCount", Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
         prop.put("remotePeerCount", Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
         
-        if (theQuery.contentdom == Query.CONTENTDOM_TEXT) {
+        if (theQuery.contentdom == QueryParams.CONTENTDOM_TEXT) {
             // text search
 
             // generate result object
-            final plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
+            final QueryEvent.ResultEntry result = theSearch.oneResult(item);
             if (result == null) return prop; // no content
 
             
@@ -125,7 +125,7 @@ public class yacysearchitem {
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), urllength));
             prop.put("content_date", plasmaSwitchboard.dateString(result.modified()));
             prop.put("content_date822", plasmaSwitchboard.dateString822(result.modified()));
-            prop.put("content_ybr", plasmaSearchRankingProcess.ybr(result.hash()));
+            prop.put("content_ybr", RankingProcess.ybr(result.hash()));
             prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
             prop.putHTML("content_sizename", sizename(result.filesize()));
             prop.putHTML("content_host", result.url().getHost());
@@ -142,21 +142,21 @@ public class yacysearchitem {
             prop.put("content_rankingprops", result.word().toPropertyForm() + ", domLengthEstimated=" + yacyURL.domLengthEstimation(result.hash()) +
                     ((yacyURL.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
                     (((wordURL = yacyURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
-            final plasmaSnippetCache.TextSnippet snippet = result.textSnippet();
+            final SnippetCache.TextSnippet snippet = result.textSnippet();
             final String desc = (snippet == null) ? "" : snippet.getLineMarked(theQuery.fullqueryHashes);
             prop.put("content_description", desc);
             prop.putXML("content_description-xml", desc);
             prop.putJSON("content_description-json", desc);
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.FINALIZATION + "-" + item, 0, 0), false);
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), QueryEvent.FINALIZATION + "-" + item, 0, 0), false);
             
             return prop;
         }
         
-        if (theQuery.contentdom == Query.CONTENTDOM_IMAGE) {
+        if (theQuery.contentdom == QueryParams.CONTENTDOM_IMAGE) {
             // image search; shows thumbnails
 
             prop.put("content", theQuery.contentdom + 1); // switch on specific content
-            final plasmaSnippetCache.MediaSnippet ms = theSearch.oneImage(item);
+            final SnippetCache.MediaSnippet ms = theSearch.oneImage(item);
             if (ms == null) {
                 prop.put("content_items", "0");
             } else {
@@ -172,20 +172,20 @@ public class yacysearchitem {
             return prop;
         }
         
-        if ((theQuery.contentdom == Query.CONTENTDOM_AUDIO) ||
-            (theQuery.contentdom == Query.CONTENTDOM_VIDEO) ||
-            (theQuery.contentdom == Query.CONTENTDOM_APP)) {
+        if ((theQuery.contentdom == QueryParams.CONTENTDOM_AUDIO) ||
+            (theQuery.contentdom == QueryParams.CONTENTDOM_VIDEO) ||
+            (theQuery.contentdom == QueryParams.CONTENTDOM_APP)) {
             // any other media content
 
             // generate result object
-            final plasmaSearchEvent.ResultEntry result = theSearch.oneResult(item);
+            final QueryEvent.ResultEntry result = theSearch.oneResult(item);
             if (result == null) return prop; // no content
             
             prop.put("content", theQuery.contentdom + 1); // switch on specific content
-            final ArrayList<plasmaSnippetCache.MediaSnippet> media = result.mediaSnippets();
+            final ArrayList<SnippetCache.MediaSnippet> media = result.mediaSnippets();
             if (item == 0) col = true;
             if (media != null) {
-                plasmaSnippetCache.MediaSnippet ms;
+                SnippetCache.MediaSnippet ms;
                 int c = 0;
                 for (int i = 0; i < media.size(); i++) {
                     ms = media.get(i);

@@ -44,12 +44,12 @@ import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.plasma.plasmaProfiling;
-import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.search.Query;
+import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
+import de.anomic.search.QueryEvent;
+import de.anomic.search.SnippetCache;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
@@ -178,10 +178,10 @@ public class yacysearch {
         if (clustersearch) global = true; // switches search on, but search target is limited to cluster nodes
         
         // find search domain
-        final int contentdomCode = Query.contentdomParser((post == null ? "text" : post.get("contentdom", "text")));
+        final int contentdomCode = QueryParams.contentdomParser((post == null ? "text" : post.get("contentdom", "text")));
         
         // patch until better search profiles are available
-        if ((contentdomCode != Query.CONTENTDOM_TEXT) && (itemsPerPage <= 32)) itemsPerPage = 32;
+        if ((contentdomCode != QueryParams.CONTENTDOM_TEXT) && (itemsPerPage <= 32)) itemsPerPage = 32;
         
         // check the search tracker
         TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);
@@ -228,7 +228,7 @@ public class yacysearch {
             // check available memory and clean up if necessary
             if (!MemoryControl.request(8000000L, false)) {
                 sb.indexSegment.urlMetadata().clearCache();
-                plasmaSearchEvent.cleanupEvents(true);
+                QueryEvent.cleanupEvents(true);
             }
             
             final RankingProfile ranking = sb.getRanking();
@@ -347,7 +347,7 @@ public class yacysearch {
             String navigation = (post == null) ? "" : post.get("nav", "");
             
             // the query
-            final TreeSet<String>[] query = Query.cleanQuery(querystring.trim()); // converts also umlaute
+            final TreeSet<String>[] query = QueryParams.cleanQuery(querystring.trim()); // converts also umlaute
             
             int maxDistance = (querystring.indexOf('"') >= 0) ? maxDistance = query.length - 1 : Integer.MAX_VALUE;
 
@@ -389,7 +389,7 @@ public class yacysearch {
                 if (urlentry != null) {
                     final URLMetadataRow.Components metadata = urlentry.metadata();
                     Document document;
-                    document = plasmaSnippetCache.retrieveDocument(metadata.url(), true, 5000, true, false);
+                    document = SnippetCache.retrieveDocument(metadata.url(), true, 5000, true, false);
                     if (document != null) {
                         // create a news message
                         final HashMap<String, String> map = new HashMap<String, String>();
@@ -410,7 +410,7 @@ public class yacysearch {
         
             // do the search
             final TreeSet<byte[]> queryHashes = Word.words2hashes(query[0]);
-            final Query theQuery = new Query(
+            final QueryParams theQuery = new QueryParams(
         			originalquerystring,
         			queryHashes,
         			Word.words2hashes(query[1]),
@@ -426,8 +426,8 @@ public class yacysearch {
                     itemsPerPage,
                     offset,
                     urlmask,
-                    (clustersearch && globalsearch) ? Query.SEARCHDOM_CLUSTERALL :
-                    ((globalsearch) ? Query.SEARCHDOM_GLOBALDHT : Query.SEARCHDOM_LOCAL),
+                    (clustersearch && globalsearch) ? QueryParams.SEARCHDOM_CLUSTERALL :
+                    ((globalsearch) ? QueryParams.SEARCHDOM_GLOBALDHT : QueryParams.SEARCHDOM_LOCAL),
                     20,
                     constraint,
                     true,
@@ -436,7 +436,7 @@ public class yacysearch {
                     yacyURL.TLD_any_zone_filter,
                     client,
                     authenticated);
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), plasmaSearchEvent.INITIALIZATION, 0, 0), false);
+            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), QueryEvent.INITIALIZATION, 0, 0), false);
             
             // tell all threads to do nothing for a specific time
             sb.intermissionAllThreads(10000);
@@ -445,16 +445,16 @@ public class yacysearch {
             theQuery.filterOut(plasmaSwitchboard.blueList);
             
             // log
-            Log.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + Query.hashSet2hashString(theQuery.queryHashes) + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed");
+            Log.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + QueryParams.hashSet2hashString(theQuery.queryHashes) + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed");
             RSSFeed.channels(RSSFeed.LOCALSEARCH).addMessage(new RSSMessage("Local Search Request", theQuery.queryString, ""));
             final long timestamp = System.currentTimeMillis();
 
             // create a new search event
-            if (plasmaSearchEvent.getEvent(theQuery.id(false)) == null) {
+            if (QueryEvent.getEvent(theQuery.id(false)) == null) {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
-            final plasmaSearchEvent theSearch = plasmaSearchEvent.getEvent(theQuery, sb.indexSegment, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
+            final QueryEvent theSearch = QueryEvent.getEvent(theQuery, sb.indexSegment, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
             
             // generate result object
             //serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + (System.currentTimeMillis() - timestamp) + " ms");
@@ -544,7 +544,7 @@ public class yacysearch {
             	resnav.append("<img src=\"env/grafics/navdl.gif\" width=\"16\" height=\"16\">&nbsp;");
             } else {
             	resnav.append("<a href=\"");
-                resnav.append(Query.navurl("html", thispage - 1, display, theQuery, originalUrlMask, null, navigation));
+                resnav.append(QueryParams.navurl("html", thispage - 1, display, theQuery, originalUrlMask, null, navigation));
             	resnav.append("\"><img src=\"env/grafics/navdl.gif\" width=\"16\" height=\"16\"></a>&nbsp;");
             }
             final int numberofpages = Math.min(10, Math.min(thispage + 2, totalcount / theQuery.displayResults()));
@@ -555,7 +555,7 @@ public class yacysearch {
                     resnav.append(".gif\" width=\"16\" height=\"16\">&nbsp;");
                 } else {
                     resnav.append("<a href=\"");
-                    resnav.append(Query.navurl("html", i, display, theQuery, originalUrlMask, null, navigation));
+                    resnav.append(QueryParams.navurl("html", i, display, theQuery, originalUrlMask, null, navigation));
                     resnav.append("\"><img src=\"env/grafics/navd");
                 	resnav.append(i + 1);
                 	resnav.append(".gif\" width=\"16\" height=\"16\"></a>&nbsp;");
@@ -565,7 +565,7 @@ public class yacysearch {
             	resnav.append("<img src=\"env/grafics/navdr.gif\" width=\"16\" height=\"16\">");
             } else {
                 resnav.append("<a href=\"");
-                resnav.append(Query.navurl("html", thispage + 1, display, theQuery, originalUrlMask, null, navigation));
+                resnav.append(QueryParams.navurl("html", thispage + 1, display, theQuery, originalUrlMask, null, navigation));
                 resnav.append("\"><img src=\"env/grafics/navdr.gif\" width=\"16\" height=\"16\"></a>");
             }
             prop.put("num-results_resnav", resnav.toString());
@@ -621,11 +621,11 @@ public class yacysearch {
         prop.put("constraint", (constraint == null) ? "" : constraint.exportB64());
         prop.put("verify", (fetchSnippets) ? "true" : "false");
         prop.put("contentdom", (post == null ? "text" : post.get("contentdom", "text")));
-        prop.put("contentdomCheckText", (contentdomCode == Query.CONTENTDOM_TEXT) ? "1" : "0");
-        prop.put("contentdomCheckAudio", (contentdomCode == Query.CONTENTDOM_AUDIO) ? "1" : "0");
-        prop.put("contentdomCheckVideo", (contentdomCode == Query.CONTENTDOM_VIDEO) ? "1" : "0");
-        prop.put("contentdomCheckImage", (contentdomCode == Query.CONTENTDOM_IMAGE) ? "1" : "0");
-        prop.put("contentdomCheckApp", (contentdomCode == Query.CONTENTDOM_APP) ? "1" : "0");
+        prop.put("contentdomCheckText", (contentdomCode == QueryParams.CONTENTDOM_TEXT) ? "1" : "0");
+        prop.put("contentdomCheckAudio", (contentdomCode == QueryParams.CONTENTDOM_AUDIO) ? "1" : "0");
+        prop.put("contentdomCheckVideo", (contentdomCode == QueryParams.CONTENTDOM_VIDEO) ? "1" : "0");
+        prop.put("contentdomCheckImage", (contentdomCode == QueryParams.CONTENTDOM_IMAGE) ? "1" : "0");
+        prop.put("contentdomCheckApp", (contentdomCode == QueryParams.CONTENTDOM_APP) ? "1" : "0");
         
         // for RSS: don't HTML encode some elements
         prop.putXML("rss_query", originalquerystring);

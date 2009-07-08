@@ -51,10 +51,10 @@ import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.search.Query;
+import de.anomic.search.QueryParams;
+import de.anomic.search.QueryEvent;
+import de.anomic.search.RankingProcess;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -79,7 +79,7 @@ public class IndexControlRWIs_p {
         prop.put("genUrlList", 0);
         
         // clean up all search events
-        plasmaSearchEvent.cleanupEvents(true);
+        QueryEvent.cleanupEvents(true);
         
         if (post != null) {
             // default values
@@ -96,7 +96,7 @@ public class IndexControlRWIs_p {
             if (post.containsKey("keystringsearch")) {
                 keyhash = Word.word2hash(keystring);
                 prop.put("keyhash", keyhash);
-                final plasmaSearchRankingProcess ranking = genSearchresult(prop, sb, keyhash, null);
+                final RankingProcess ranking = genSearchresult(prop, sb, keyhash, null);
                 if (ranking.filteredCount() == 0) {
                     prop.put("searchresult", 1);
                     prop.putHTML("searchresult_word", keystring);
@@ -107,7 +107,7 @@ public class IndexControlRWIs_p {
                 if (keystring.length() == 0 || !new String(Word.word2hash(keystring)).equals(new String(keyhash))) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
-                final plasmaSearchRankingProcess ranking = genSearchresult(prop, sb, keyhash, null);
+                final RankingProcess ranking = genSearchresult(prop, sb, keyhash, null);
                 if (ranking.filteredCount() == 0) {
                     prop.put("searchresult", 2);
                     prop.putHTML("searchresult_wordhash", new String(keyhash));
@@ -183,7 +183,7 @@ public class IndexControlRWIs_p {
                 }
                 final Bitfield flags = compileFlags(post);
                 final int count = (post.get("lines", "all").equals("all")) ? -1 : post.getInt("lines", -1);
-                final plasmaSearchRankingProcess ranking = genSearchresult(prop, sb, keyhash, flags);
+                final RankingProcess ranking = genSearchresult(prop, sb, keyhash, flags);
                 genURLList(prop, keyhash, keystring, ranking, flags, count);
             }
 
@@ -348,7 +348,7 @@ public class IndexControlRWIs_p {
         return prop;
     }
     
-    public static void genURLList(final serverObjects prop, final byte[] keyhash, final String keystring, final plasmaSearchRankingProcess ranked, final Bitfield flags, final int maxlines) {
+    public static void genURLList(final serverObjects prop, final byte[] keyhash, final String keystring, final RankingProcess ranked, final Bitfield flags, final int maxlines) {
         // search for a word hash and generate a list of url links
         prop.put("genUrlList_keyHash", new String(keyhash));
         
@@ -381,7 +381,7 @@ public class IndexControlRWIs_p {
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlStringShort", (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20,  40) + "...") : ((us.length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ranking", (entry.ranking() - rn));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_domlength", yacyURL.domLengthEstimation(entry.hash()));
-                prop.putNum("genUrlList_urlList_"+i+"_urlExists_ybr", plasmaSearchRankingProcess.ybr(entry.hash()));
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_ybr", RankingProcess.ybr(entry.hash()));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_tf", 1000.0 * entry.word().termFrequency());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_authority", (ranked.getOrder() == null) ? -1 : ranked.getOrder().authority(entry.hash()));
                 prop.put("genUrlList_urlList_"+i+"_urlExists_date", DateFormatter.formatShortDay(new Date(entry.word().lastModified())));
@@ -477,9 +477,9 @@ public class IndexControlRWIs_p {
         prop.put("searchresult_hosts", hc);
     }
 
-    public static plasmaSearchRankingProcess genSearchresult(final serverObjects prop, final plasmaSwitchboard sb, final byte[] keyhash, final Bitfield filter) {
-        final Query query = new Query(new String(keyhash), -1, sb.getRanking(), filter);
-        final plasmaSearchRankingProcess ranked = new plasmaSearchRankingProcess(sb.indexSegment, query, Integer.MAX_VALUE, 1);
+    public static RankingProcess genSearchresult(final serverObjects prop, final plasmaSwitchboard sb, final byte[] keyhash, final Bitfield filter) {
+        final QueryParams query = new QueryParams(new String(keyhash), -1, sb.getRanking(), filter);
+        final RankingProcess ranked = new RankingProcess(sb.indexSegment, query, Integer.MAX_VALUE, 1);
         ranked.execQuery();
         
         if (ranked.filteredCount() == 0) {

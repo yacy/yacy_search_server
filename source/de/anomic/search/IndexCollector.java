@@ -44,8 +44,7 @@ import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.SortStack;
 import de.anomic.plasma.plasmaProfiling;
-import de.anomic.plasma.plasmaSearchEvent;
-import de.anomic.search.Query;
+import de.anomic.search.QueryParams;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;
 
@@ -56,7 +55,7 @@ public final class IndexCollector extends Thread {
     public  static final ReferenceContainer<WordReference> poison = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, null, 0);
     
     private final SortStack<WordReferenceVars> stack;
-    private final Query query;
+    private final QueryParams query;
     private final int maxentries;
     private int remote_peerCount, remote_indexCount, remote_resourceSize, local_resourceSize;
     private final ReferenceOrder order;
@@ -70,7 +69,7 @@ public final class IndexCollector extends Thread {
     
     public IndexCollector(
             final Segment indexSegment,
-            final Query query,
+            final QueryParams query,
             final int maxentries,
             final int concurrency) {
         // we collect the urlhashes and construct a list with urlEntry objects
@@ -146,14 +145,14 @@ public final class IndexCollector extends Thread {
         ReferenceContainer<WordReference> index = search.joined();
         insertRanked(index, true, index.size());
         
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), QueryEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
 
         try {
             while ((index = this.rwiQueue.take()) != poison) {
             
                 // normalize entries
                 final ArrayList<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
-                serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
+                serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), QueryEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
                 
                 // iterate over normalized entries and select some that are better than currently stored
                 timer = System.currentTimeMillis();
@@ -181,11 +180,11 @@ public final class IndexCollector extends Thread {
                     if (!testFlags(iEntry)) continue;
                     
                     // check document domain
-                    if (query.contentdom != Query.CONTENTDOM_TEXT) {
-                        if ((query.contentdom == Query.CONTENTDOM_AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) continue;
-                        if ((query.contentdom == Query.CONTENTDOM_VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) continue;
-                        if ((query.contentdom == Query.CONTENTDOM_IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) continue;
-                        if ((query.contentdom == Query.CONTENTDOM_APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) continue;
+                    if (query.contentdom != QueryParams.CONTENTDOM_TEXT) {
+                        if ((query.contentdom == QueryParams.CONTENTDOM_AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) continue;
+                        if ((query.contentdom == QueryParams.CONTENTDOM_VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) continue;
+                        if ((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) continue;
+                        if ((query.contentdom == QueryParams.CONTENTDOM_APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) continue;
                     }
    
                     // check tld domain
@@ -235,7 +234,7 @@ public final class IndexCollector extends Thread {
             e.printStackTrace();
         }
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), QueryEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
     }
 
     public Map<byte[], ReferenceContainer<WordReference>> searchContainerMap() {

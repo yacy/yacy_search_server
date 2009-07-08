@@ -82,11 +82,11 @@ import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSearchRankingProcess;
-import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.search.RankingProfile;
+import de.anomic.search.RankingProcess;
+import de.anomic.search.SnippetCache;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.tools.crypt;
@@ -436,7 +436,7 @@ public final class yacyClient {
             final yacySeed target,
             final Segment indexSegment,
             final ResultURLs crawlResults,
-            final plasmaSearchRankingProcess containerCache,
+            final RankingProcess containerCache,
             final Map<String, TreeMap<String, String>> abstractCache,
             final Blacklist blacklist,
             final RankingProfile rankingProfile,
@@ -587,7 +587,7 @@ public final class yacyClient {
                 // because they are search-specific.
 				// instead, they are placed in a snipped-search cache.
 				// System.out.println("--- RECEIVED SNIPPET '" + link.snippet() + "'");
-				plasmaSnippetCache.storeToCache(wordhashes, urlEntry.hash(), urlEntry.snippet());
+				SnippetCache.storeToCache(wordhashes, urlEntry.hash(), urlEntry.snippet());
 			}
             
 			// add the url entry to the word indexes

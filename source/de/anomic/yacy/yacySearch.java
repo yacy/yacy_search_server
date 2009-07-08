@@ -36,9 +36,9 @@ import de.anomic.data.Blacklist;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.util.ScoreCluster;
-import de.anomic.plasma.plasmaSearchRankingProcess;
-import de.anomic.search.Query;
+import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
+import de.anomic.search.RankingProcess;
 import de.anomic.yacy.dht.PeerSelection;
 import de.anomic.yacy.logging.Log;
 
@@ -48,7 +48,7 @@ public class yacySearch extends Thread {
     final private boolean global;
     final private int partitions;
     final private Segment indexSegment;
-    final private plasmaSearchRankingProcess containerCache;
+    final private RankingProcess containerCache;
     final private Map<String, TreeMap<String, String>> abstractCache;
     final private Blacklist blacklist;
     final private yacySeed targetPeer;
@@ -73,7 +73,7 @@ public class yacySearch extends Thread {
               final Segment indexSegment,
               final yacySeedDB peers,
               final ResultURLs crawlResults,
-              final plasmaSearchRankingProcess containerCache,
+              final RankingProcess containerCache,
               final Map<String, TreeMap<String, String>> abstractCache,
               final Blacklist blacklist,
               final RankingProfile rankingProfile,
@@ -253,7 +253,7 @@ public class yacySearch extends Thread {
             final Segment indexSegment,
             final yacySeedDB peers,
             final ResultURLs crawlResults,
-            final plasmaSearchRankingProcess containerCache,
+            final RankingProcess containerCache,
             final Map<String, TreeMap<String, String>> abstractCache,
             int targets,
             final Blacklist blacklist,
@@ -270,7 +270,7 @@ public class yacySearch extends Thread {
             (clusterselection == null) ?
                     selectSearchTargets(
                             peers,
-                            Query.hashes2Set(wordhashes),
+                            QueryParams.hashes2Set(wordhashes),
                             targets,
                             peers.redundancy())
                   : selectClusterPeers(peers, clusterselection);
@@ -296,7 +296,7 @@ public class yacySearch extends Thread {
             final Segment indexSegment,
             final yacySeedDB peers,
             final ResultURLs crawlResults,
-            final plasmaSearchRankingProcess containerCache,
+            final RankingProcess containerCache,
             final String targethash, final Blacklist blacklist,
             final RankingProfile rankingProfile,
             final Bitfield constraint, final TreeMap<byte[], String> clusterselection) {

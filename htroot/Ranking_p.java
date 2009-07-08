@@ -30,10 +30,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSearchEvent;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.search.Query;
+import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
+import de.anomic.search.QueryEvent;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -132,14 +132,14 @@ public class Ranking_p {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 
         // clean up all search events
-        plasmaSearchEvent.cleanupEvents(true);
+        QueryEvent.cleanupEvents(true);
         
         // case if no values are requested
         if ((post == null) || (sb == null)) {
             // we create empty entries for template strings
             final serverObjects prop = defaultValues();
             final RankingProfile ranking;
-            if(sb == null) ranking = new RankingProfile(Query.CONTENTDOM_TEXT);
+            if(sb == null) ranking = new RankingProfile(QueryParams.CONTENTDOM_TEXT);
             else ranking = sb.getRanking();
             putRanking(prop, ranking, "local");
             return prop;
@@ -156,7 +156,7 @@ public class Ranking_p {
         
         if (post.containsKey("ResetRanking")) {
             sb.setConfig("rankingProfile", "");
-            final RankingProfile ranking = new RankingProfile(Query.CONTENTDOM_TEXT);
+            final RankingProfile ranking = new RankingProfile(QueryParams.CONTENTDOM_TEXT);
             final serverObjects prop = defaultValues();
             //prop.putAll(ranking.toExternalMap("local"));
             putRanking(prop, ranking, "local");

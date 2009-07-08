@@ -167,8 +167,11 @@ import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.net.UPnP;
-import de.anomic.search.Query;
+import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
+import de.anomic.search.QueryEvent;
+import de.anomic.search.RankingProcess;
+import de.anomic.search.SnippetCache;
 import de.anomic.server.serverAbstractSwitch;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCore;
@@ -251,8 +254,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public  bookmarksDB                    bookmarksDB;
     public  plasmaWebStructure             webStructure;
     public  ImporterManager                dbImportManager;
-    public  ArrayList<Query>   localSearches; // array of search result properties as HashMaps
-    public  ArrayList<Query>   remoteSearches; // array of search result properties as HashMaps
+    public  ArrayList<QueryParams>   localSearches; // array of search result properties as HashMaps
+    public  ArrayList<QueryParams>   remoteSearches; // array of search result properties as HashMaps
     public  ConcurrentHashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
     public  long                           indexedPages = 0;
     public  double                         requestedQueries = 0d;
@@ -456,7 +459,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // load ranking tables
         final File YBRPath = new File(rootPath, "ranking/YBR");
         if (YBRPath.exists()) {
-            plasmaSearchRankingProcess.loadYBR(YBRPath, 15);
+            RankingProcess.loadYBR(YBRPath, 15);
         }
         
         // loading the robots.txt db
@@ -553,8 +556,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // init search history trackers
         this.localSearchTracker = new ConcurrentHashMap<String, TreeSet<Long>>(); // String:TreeSet - IP:set of Long(accessTime)
         this.remoteSearchTracker = new ConcurrentHashMap<String, TreeSet<Long>>();
-        this.localSearches = new ArrayList<Query>(); // contains search result properties as HashMaps
-        this.remoteSearches = new ArrayList<Query>();
+        this.localSearches = new ArrayList<QueryParams>(); // contains search result properties as HashMaps
+        this.remoteSearches = new ArrayList<QueryParams>();
         
         // init messages: clean up message symbol
         final File notifierSource = new File(getRootPath(), getConfig(plasmaSwitchboardConstants.HTROOT_PATH, plasmaSwitchboardConstants.HTROOT_PATH_DEFAULT) + "/env/grafics/empty.gif");
@@ -589,7 +592,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // generate snippets cache
         log.logConfig("Initializing Snippet Cache");
-        plasmaSnippetCache.init(log, this);
+        SnippetCache.init(log, this);
         
         // init the wiki
         wikiParser = new wikiCode(this.peers.mySeed().getClusterAddress());
@@ -800,7 +803,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // trigger online caution
         proxyLastAccess = System.currentTimeMillis() + 10000; // at least 10 seconds online caution to prevent unnecessary action on database meanwhile
         // clean search events which have cached relations to the old index
-        plasmaSearchEvent.cleanupEvents(true);
+        QueryEvent.cleanupEvents(true);
        
         // switch the networks
         synchronized (this) {
@@ -1035,7 +1038,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     public RankingProfile getRanking() {
         return (getConfig("rankingProfile", "").length() == 0) ?
-                  new RankingProfile(Query.CONTENTDOM_TEXT) :
+                  new RankingProfile(QueryParams.CONTENTDOM_TEXT) :
                   new RankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
     }
     
@@ -1235,7 +1238,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public void deQueueFreeMem() {
         // empty some caches
         indexSegment.urlMetadata().clearCache();
-        plasmaSearchEvent.cleanupEvents(true);
+        QueryEvent.cleanupEvents(true);
     }
     
     public IndexingStack.QueueEntry deQueue() {
@@ -1426,7 +1429,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             // clear caches if necessary
             if (!MemoryControl.request(8000000L, false)) {
                 indexSegment.urlMetadata().clearCache();
-                plasmaSearchEvent.cleanupEvents(true);
+                QueryEvent.cleanupEvents(true);
             }
             
             // set a random password if no password is configured
@@ -1916,7 +1919,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             // get the resource content
             Object[] resource = null;
             try {
-                resource = plasmaSnippetCache.getResource(metadata.url(), fetchOnline, 10000, true, false);
+                resource = SnippetCache.getResource(metadata.url(), fetchOnline, 10000, true, false);
             } catch (IOException e) {
                 Log.logWarning("removeAllUrlReferences", "cannot load: " + e.getMessage());
             }
@@ -1929,7 +1932,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 final Long resourceContentLength = (Long) resource[1];
                 
                 // parse the resource
-                final Document document = plasmaSnippetCache.parseDocument(metadata.url(), resourceContentLength.longValue(), resourceContent);
+                final Document document = SnippetCache.parseDocument(metadata.url(), resourceContentLength.longValue(), resourceContent);
                 
                 // get the word set
                 Set<String> words = null;

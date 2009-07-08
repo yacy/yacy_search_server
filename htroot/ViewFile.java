@@ -46,8 +46,8 @@ import de.anomic.http.httpDocument;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.SnippetCache;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
@@ -241,7 +241,7 @@ public class ViewFile {
             // parsing the resource content
             Document document = null;
             try {
-                document = plasmaSnippetCache.parseDocument(url, resourceLength, resource);
+                document = SnippetCache.parseDocument(url, resourceLength, resource);
                 if (document == null) {
                     prop.put("error", "5");
                     prop.put("error_errorText", "Unknown error");

@@ -22,7 +22,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.plasma;
+package de.anomic.search;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -52,12 +52,13 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SetTools;
-import de.anomic.search.Query;
+import de.anomic.plasma.plasmaHTCache;
+import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
-public class plasmaSnippetCache {
+public class SnippetCache {
 
     private static final int maxCache = 500;
     
@@ -707,10 +708,10 @@ public class plasmaSnippetCache {
         final Document document = retrieveDocument(url, fetchOnline, timeout, false, reindexing);
         final ArrayList<MediaSnippet> a = new ArrayList<MediaSnippet>();
         if (document != null) {
-            if ((mediatype == Query.CONTENTDOM_ALL) || (mediatype == Query.CONTENTDOM_AUDIO)) a.addAll(computeMediaSnippets(document, queryhashes, Query.CONTENTDOM_AUDIO));
-            if ((mediatype == Query.CONTENTDOM_ALL) || (mediatype == Query.CONTENTDOM_VIDEO)) a.addAll(computeMediaSnippets(document, queryhashes, Query.CONTENTDOM_VIDEO));
-            if ((mediatype == Query.CONTENTDOM_ALL) || (mediatype == Query.CONTENTDOM_APP)) a.addAll(computeMediaSnippets(document, queryhashes, Query.CONTENTDOM_APP));
-            if ((mediatype == Query.CONTENTDOM_ALL) || (mediatype == Query.CONTENTDOM_IMAGE)) a.addAll(computeImageSnippets(document, queryhashes));
+            if ((mediatype == QueryParams.CONTENTDOM_ALL) || (mediatype == QueryParams.CONTENTDOM_AUDIO)) a.addAll(computeMediaSnippets(document, queryhashes, QueryParams.CONTENTDOM_AUDIO));
+            if ((mediatype == QueryParams.CONTENTDOM_ALL) || (mediatype == QueryParams.CONTENTDOM_VIDEO)) a.addAll(computeMediaSnippets(document, queryhashes, QueryParams.CONTENTDOM_VIDEO));
+            if ((mediatype == QueryParams.CONTENTDOM_ALL) || (mediatype == QueryParams.CONTENTDOM_APP)) a.addAll(computeMediaSnippets(document, queryhashes, QueryParams.CONTENTDOM_APP));
+            if ((mediatype == QueryParams.CONTENTDOM_ALL) || (mediatype == QueryParams.CONTENTDOM_IMAGE)) a.addAll(computeImageSnippets(document, queryhashes));
         }
         return a;
     }
@@ -719,9 +720,9 @@ public class plasmaSnippetCache {
         
         if (document == null) return new ArrayList<MediaSnippet>();
         Map<yacyURL, String> media = null;
-        if (mediatype == Query.CONTENTDOM_AUDIO) media = document.getAudiolinks();
-        else if (mediatype == Query.CONTENTDOM_VIDEO) media = document.getVideolinks();
-        else if (mediatype == Query.CONTENTDOM_APP) media = document.getApplinks();
+        if (mediatype == QueryParams.CONTENTDOM_AUDIO) media = document.getAudiolinks();
+        else if (mediatype == QueryParams.CONTENTDOM_VIDEO) media = document.getVideolinks();
+        else if (mediatype == QueryParams.CONTENTDOM_APP) media = document.getApplinks();
         if (media == null) return null;
         
         final Iterator<Map.Entry<yacyURL, String>> i = media.entrySet().iterator();
@@ -767,13 +768,13 @@ public class plasmaSnippetCache {
             s = removeAppearanceHashes(url.toNormalform(false, false), queryhashes);
             if (s.size() == 0) {
                 final int ranking = ientry.hashCode();
-                result.add(new MediaSnippet(Query.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
+                result.add(new MediaSnippet(QueryParams.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
                 continue;
             }
             s = removeAppearanceHashes(desc, s);
             if (s.size() == 0) {
                 final int ranking = ientry.hashCode();
-                result.add(new MediaSnippet(Query.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
+                result.add(new MediaSnippet(QueryParams.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
                 continue;
             }
         }
@@ -952,7 +953,7 @@ public class plasmaSnippetCache {
             (snippet.getErrorCode() == ERROR_PARSER_NO_LINES)) {
             log.logInfo("error: '" + snippet.getError() + "', remove url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
             plasmaSwitchboard.getSwitchboard().indexSegment.urlMetadata().remove(urlHash);
-            final plasmaSearchEvent event = plasmaSearchEvent.getEvent(eventID);
+            final QueryEvent event = QueryEvent.getEvent(eventID);
             assert plasmaSwitchboard.getSwitchboard() != null;
             assert plasmaSwitchboard.getSwitchboard().indexSegment != null;
             assert event != null : "eventID = " + eventID;
@@ -963,7 +964,7 @@ public class plasmaSnippetCache {
         if (snippet.getErrorCode() == ERROR_NO_MATCH) {
             log.logInfo("error: '" + snippet.getError() + "', remove words '" + querystring + "' for url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
             plasmaSwitchboard.getSwitchboard().indexSegment.termIndex().remove(snippet.remaingHashes, urlHash);
-            plasmaSearchEvent.getEvent(eventID).remove(urlHash);
+            QueryEvent.getEvent(eventID).remove(urlHash);
         }
         return snippet.getError();
     }

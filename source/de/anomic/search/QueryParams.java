@@ -38,7 +38,7 @@ import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
-public final class Query {
+public final class QueryParams {
     
     public static final int SEARCHDOM_LOCAL = 0;
     public static final int SEARCHDOM_CLUSTERDHT = 1;
@@ -83,7 +83,7 @@ public final class Query {
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
     public boolean specialRights; // is true if the user has a special authorization and my use more database-extensive options
     
-    public Query(final String queryString,
+    public QueryParams(final String queryString,
     						 final int lines,
     		                 final RankingProfile ranking,
     		                 final Bitfield constraint) {
@@ -123,7 +123,7 @@ public final class Query {
         this.navigators = "all";
     }
     
-    public Query(
+    public QueryParams(
 		final String queryString, final TreeSet<byte[]> queryHashes,
 		final TreeSet<byte[]> excludeHashes, 
         final TreeSet<byte[]> fullqueryHashes,
@@ -352,7 +352,7 @@ public final class Query {
      * @param addToQuery
      * @return
      */
-    public static String navurl(String ext, final int page, final int display, final Query theQuery, final String originalUrlMask, String addToQuery, String nav) {
+    public static String navurl(String ext, final int page, final int display, final QueryParams theQuery, final String originalUrlMask, String addToQuery, String nav) {
         return
         "/yacysearch." + ext + "?display=" + display +
         "&search=" + theQuery.queryString(true) + ((addToQuery == null) ? "" : "+" + addToQuery) +

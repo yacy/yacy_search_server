@@ -37,8 +37,8 @@ import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.ScoreCluster;
-import de.anomic.plasma.plasmaSearchRankingProcess;
 import de.anomic.search.RankingProfile;
+import de.anomic.search.RankingProcess;
 import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacyURL;
 
@@ -125,7 +125,7 @@ public class ReferenceOrder {
         int minminpos = min.minposition();
         final long r =
              ((256 - yacyURL.domLengthNormalized(t.metadataHash())) << ranking.coeff_domlength)
-           + ((ranking.coeff_ybr > 12) ? ((256 - (plasmaSearchRankingProcess.ybr(t.metadataHash()) << 4)) << ranking.coeff_ybr) : 0)
+           + ((ranking.coeff_ybr > 12) ? ((256 - (RankingProcess.ybr(t.metadataHash()) << 4)) << ranking.coeff_ybr) : 0)
            + ((max.urlcomps()      == min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - min.urlcomps()     ) << 8) / (max.urlcomps()     - min.urlcomps())     )) << ranking.coeff_urlcomps)
            + ((max.urllength()     == min.urllength()  )   ? 0 : (256 - (((t.urllength()    - min.urllength()    ) << 8) / (max.urllength()    - min.urllength())    )) << ranking.coeff_urllength)
            + ((maxmaxpos           == minminpos        )   ? 0 : (256 - (((t.minposition()  - minminpos          ) << 8) / (maxmaxpos          - minminpos)          )) << ranking.coeff_posintext)

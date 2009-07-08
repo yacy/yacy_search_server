@@ -33,7 +33,6 @@ import de.anomic.document.Document;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.ImageEntry;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
@@ -47,7 +46,7 @@ public final class ImageCollector {
         if (maxTime > 10) {
             Object[] resource = null;
             try {
-                resource = plasmaSnippetCache.getResource(url, true, (int) maxTime, false, indexing);
+                resource = SnippetCache.getResource(url, true, (int) maxTime, false, indexing);
             } catch (IOException e) {
                 Log.logWarning("ViewImage", "cannot load: " + e.getMessage());
             }
@@ -58,7 +57,7 @@ public final class ImageCollector {
                 Document document = null;
                 try {
                     // parse the document
-                    document = plasmaSnippetCache.parseDocument(url, resLength.longValue(), res);
+                    document = SnippetCache.parseDocument(url, resLength.longValue(), res);
                 } catch (final ParserException e) {
                     // parsing failed
                     Log.logWarning("ViewImage", "cannot parse: " + e.getMessage());

@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.search.Query;
+import de.anomic.search.QueryParams;
 
 public class RankingProfile {
 
@@ -103,11 +103,11 @@ public class RankingProfile {
         coeff_app_dc_subject     = 13;
         coeff_app_dc_description = 13;
         coeff_appemph            = 10;
-        coeff_catindexof         = (mediatype == Query.CONTENTDOM_TEXT) ? 0 : 15;
-        coeff_cathasimage        = (mediatype == Query.CONTENTDOM_IMAGE) ? 15 : 0;
-        coeff_cathasaudio        = (mediatype == Query.CONTENTDOM_AUDIO) ? 15 : 0;
-        coeff_cathasvideo        = (mediatype == Query.CONTENTDOM_VIDEO) ? 15 : 0;
-        coeff_cathasapp          = (mediatype == Query.CONTENTDOM_APP) ? 15 : 0;
+        coeff_catindexof         = (mediatype == QueryParams.CONTENTDOM_TEXT) ? 0 : 15;
+        coeff_cathasimage        = (mediatype == QueryParams.CONTENTDOM_IMAGE) ? 15 : 0;
+        coeff_cathasaudio        = (mediatype == QueryParams.CONTENTDOM_AUDIO) ? 15 : 0;
+        coeff_cathasvideo        = (mediatype == QueryParams.CONTENTDOM_VIDEO) ? 15 : 0;
+        coeff_cathasapp          = (mediatype == QueryParams.CONTENTDOM_APP) ? 15 : 0;
         coeff_termfrequency      = 14;
         coeff_urlcompintoplist   = 3;
         coeff_descrcompintoplist = 2;
@@ -116,7 +116,7 @@ public class RankingProfile {
     }
     
     public RankingProfile(final String prefix, final String profile) {
-        this(Query.CONTENTDOM_TEXT); // set defaults
+        this(QueryParams.CONTENTDOM_TEXT); // set defaults
         if ((profile != null) && (profile.length() > 0)) {
             //parse external form
             final HashMap<String, Integer> coeff = new HashMap<String, Integer>();

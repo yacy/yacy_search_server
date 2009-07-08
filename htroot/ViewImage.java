@@ -32,8 +32,8 @@ import java.util.HashMap;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.SnippetCache;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
@@ -87,7 +87,7 @@ public class ViewImage {
         if (scaled == null) {
             Object[] resource = null;
             if (url != null) try {
-                resource = plasmaSnippetCache.getResource(url, true, timeout, false, true);
+                resource = SnippetCache.getResource(url, true, timeout, false, true);
             } catch (IOException e) {
                 Log.logWarning("ViewImage", "cannot load: " + e.getMessage());
             }

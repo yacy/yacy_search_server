@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.plasma;
+package de.anomic.search;
 
 import java.io.File;
 import java.io.IOException;
@@ -54,11 +54,14 @@ import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.SortStack;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.search.Query;
+import de.anomic.plasma.plasmaProfiling;
+import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaProfiling.searchEvent;
+import de.anomic.search.QueryEvent.ResultEntry;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;
 
-public final class plasmaSearchRankingProcess {
+public final class RankingProcess {
     
     public  static BinSearch[] ybrTables = null; // block-rank tables
     public  static final int maxYBR = 3; // the lower this value, the faster the search
@@ -68,7 +71,7 @@ public final class plasmaSearchRankingProcess {
     private final SortStack<WordReferenceVars> stack;
     private final HashMap<String, SortStack<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     private final HashSet<String> handover; // key = urlhash; used for double-check of urls that had been handed over to search process
-    private final Query query;
+    private final QueryParams query;
     private final int maxentries;
     private int remote_peerCount, remote_indexCount, remote_resourceSize, local_resourceSize;
     private final ReferenceOrder order;
@@ -82,9 +85,9 @@ public final class plasmaSearchRankingProcess {
     private final ConcurrentHashMap<String, HostInfo> hostNavigator;
     private final ConcurrentHashMap<String, AuthorInfo> authorNavigator;
     
-    public plasmaSearchRankingProcess(
+    public RankingProcess(
             final Segment indexSegment,
-            final Query query,
+            final QueryParams query,
             final int maxentries,
             final int concurrency) {
         // we collect the urlhashes and construct a list with urlEntry objects
@@ -132,7 +135,7 @@ public final class plasmaSearchRankingProcess {
                 query.maxDistance);
         this.localSearchInclusion = search.inclusion();
         final ReferenceContainer<WordReference> index = search.joined();
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), QueryEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
         if (index.size() == 0) {
             return;
         }
@@ -157,7 +160,7 @@ public final class plasmaSearchRankingProcess {
         
         // normalize entries
         final ArrayList<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), QueryEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
         
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
@@ -185,11 +188,11 @@ public final class plasmaSearchRankingProcess {
             if (!testFlags(iEntry)) continue;
             
             // check document domain
-            if (query.contentdom != Query.CONTENTDOM_TEXT) {
-                if ((query.contentdom == Query.CONTENTDOM_AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) continue;
-                if ((query.contentdom == Query.CONTENTDOM_VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) continue;
-                if ((query.contentdom == Query.CONTENTDOM_IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) continue;
-                if ((query.contentdom == Query.CONTENTDOM_APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) continue;
+            if (query.contentdom != QueryParams.CONTENTDOM_TEXT) {
+                if ((query.contentdom == QueryParams.CONTENTDOM_AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) continue;
+                if ((query.contentdom == QueryParams.CONTENTDOM_VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) continue;
+                if ((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) continue;
+                if ((query.contentdom == QueryParams.CONTENTDOM_APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) continue;
             }
 
             // check tld domain
@@ -238,7 +241,7 @@ public final class plasmaSearchRankingProcess {
         }
         
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), plasmaSearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
+        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), QueryEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
     }
     
     private boolean testFlags(final WordReference ientry) {
@@ -532,7 +535,7 @@ public final class plasmaSearchRankingProcess {
         }
     }
     
-    protected void addTopics(final plasmaSearchEvent.ResultEntry resultEntry) {
+    protected void addTopics(final QueryEvent.ResultEntry resultEntry) {
         // take out relevant information for reference computation
         if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;
         //final String[] urlcomps = htmlFilterContentScraper.urlComps(resultEntry.url().toNormalform(true, true)); // word components of the url
@@ -619,16 +622,16 @@ public final class plasmaSearchRankingProcess {
     
     public long postRanking(
                     final Set<String> topwords,
-                    final plasmaSearchEvent.ResultEntry rentry,
+                    final QueryEvent.ResultEntry rentry,
                     final int position) {
 
         long r = (255 - position) << 8;
         
         // for media search: prefer pages with many links
-        if (query.contentdom == Query.CONTENTDOM_IMAGE) r += rentry.limage() << query.ranking.coeff_cathasimage;
-        if (query.contentdom == Query.CONTENTDOM_AUDIO) r += rentry.laudio() << query.ranking.coeff_cathasaudio;
-        if (query.contentdom == Query.CONTENTDOM_VIDEO) r += rentry.lvideo() << query.ranking.coeff_cathasvideo;
-        if (query.contentdom == Query.CONTENTDOM_APP  ) r += rentry.lapp()   << query.ranking.coeff_cathasapp;
+        if (query.contentdom == QueryParams.CONTENTDOM_IMAGE) r += rentry.limage() << query.ranking.coeff_cathasimage;
+        if (query.contentdom == QueryParams.CONTENTDOM_AUDIO) r += rentry.laudio() << query.ranking.coeff_cathasaudio;
+        if (query.contentdom == QueryParams.CONTENTDOM_VIDEO) r += rentry.lvideo() << query.ranking.coeff_cathasvideo;
+        if (query.contentdom == QueryParams.CONTENTDOM_APP  ) r += rentry.lapp()   << query.ranking.coeff_cathasapp;
         
         // prefer hit with 'prefer' pattern
         if (rentry.url().toNormalform(true, true).matches(query.prefer)) r += 256 << query.ranking.coeff_prefer;

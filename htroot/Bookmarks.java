@@ -44,8 +44,8 @@ import de.anomic.document.Document;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSnippetCache;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.SnippetCache;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsPool;
@@ -187,7 +187,7 @@ public class Bookmarks {
                         Document document = null;
                         if (urlentry != null) {
                             final URLMetadataRow.Components metadata = urlentry.metadata();
-                            document = plasmaSnippetCache.retrieveDocument(metadata.url(), true, 5000, true, false);
+                            document = SnippetCache.retrieveDocument(metadata.url(), true, 5000, true, false);
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", metadata.url().toNormalform(false, true));
                             prop.putHTML("mode_title", metadata.dc_title());
