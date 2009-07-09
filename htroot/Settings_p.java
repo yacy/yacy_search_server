@@ -26,11 +26,10 @@
 
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 
+import de.anomic.document.Parser;
 import de.anomic.document.ParserDispatcher;
-import de.anomic.document.ParserConfig;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -217,47 +216,19 @@ public final class Settings_p {
         /*
          * Parser Configuration
          */
-        /*
-        final HashMap<String, plasmaParserConfig> configList = ParserDispatcher.getParserConfigList();        
-        final plasmaParserConfig[] configArray = configList.values().toArray(new plasmaParserConfig[configList.size()]);
-        
-        final HashSet<ParserInfo> parserInfos = new HashSet<ParserInfo>(ParserDispatcher.getAvailableParserList().values());
-        
-//        // fetching a list of all available mimetypes
-//        List availableParserKeys = Arrays.asList(availableParsers.entrySet().toArray(new ParserInfo[availableParsers.size()]));
-//        
-//        // sort it
-//        Collections.sort(availableParserKeys);
-        
-        // loop through the mimeTypes and add it to the properties
-        final boolean[] allParsersEnabled = new boolean[configList.size()];
-        for (int i=0; i<configArray.length; i++)
-        	allParsersEnabled[i] = true;
         int parserIdx = 0;
         
-        final Iterator<ParserInfo> availableParserIter = parserInfos.iterator();
+        final Iterator<Parser> availableParserIter = ParserDispatcher.availableParserList.values().iterator();
         while (availableParserIter.hasNext()) {
-            final ParserInfo parserInfo = availableParserIter.next();
-            prop.put("parser_" + parserIdx + "_name", parserInfo.parserName);
-            prop.putXML("parser_" + parserIdx + "_version", parserInfo.parserVersionNr);
-            prop.put("parser_" + parserIdx + "_usage", parserInfo.usageCount);
-            prop.put("parser_" + parserIdx + "_colspan", configArray.length);
+            final Parser parserInfo = availableParserIter.next();
+            prop.put("parser_" + parserIdx + "_name", parserInfo.getName());
             
             int mimeIdx = 0;
-            final Enumeration<String> mimeTypeIter = parserInfo.supportedMimeTypes.keys();
+            final Enumeration<String> mimeTypeIter = parserInfo.getSupportedMimeTypes().keys();
             while (mimeTypeIter.hasMoreElements()) {
                 final String mimeType = mimeTypeIter.nextElement();
-                
                 prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_mimetype", mimeType);
-                //prop.put("parser_" + parserIdx + "_name", parserName);
-                //prop.put("parser_" + parserIdx + "_shortname", parserName.substring(parserName.lastIndexOf(".")+1));
-                for (int i=0; i<configArray.length; i++) {
-                    final HashSet<String> enabledParsers =  configArray[i].getEnabledParserList();
-                    prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_parserMode_" + i + "_optionName", configArray[i].parserMode + "." + mimeType);
-                    prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_parserMode_" + i + "_status", enabledParsers.contains(mimeType) ? "1" : "0");
-                    allParsersEnabled[i] &= enabledParsers.contains(mimeType);
-                }
-                prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_parserMode", configArray.length);
+                prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_status", (ParserDispatcher.supportedMimeTypesContains(mimeType)) ? 1 : 0);
                 mimeIdx++;
             }
             prop.put("parser_" + parserIdx + "_mime", mimeIdx);
@@ -265,14 +236,8 @@ public final class Settings_p {
             parserIdx++;
         }
         
-        for (int i=0; i<configArray.length; i++) {
-            prop.put("parserMode_" + i + "_name",configArray[i].parserMode);
-            prop.put("parserMode_" + i + "_allParserEnabled",allParsersEnabled[i] ? "1" : "0");
-        }
-        prop.put("parserMode",configArray.length);
         prop.put("parser", parserIdx);
-        prop.put("parser.colspan", configArray.length+2);
-        */
+        
         // Crawler settings
         prop.putHTML("crawler.clientTimeout",sb.getConfig("crawler.clientTimeout", "10000"));
         prop.putHTML("crawler.http.maxFileSize",sb.getConfig("crawler.http.maxFileSize", "-1"));

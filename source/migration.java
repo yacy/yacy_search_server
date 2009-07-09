@@ -233,12 +233,6 @@ public class migration {
         
         // migration for additional parser settings
         String value = "";
-        if (((value = sb.getConfig("parseableMimeTypes","")).length() > 0) && (sb.getConfig("parseableMimeTypes.CRAWLER", "").length() == 0)) {
-            sb.setConfig("parseableMimeTypes.CRAWLER", value);
-            sb.setConfig("parseableMimeTypes.PROXY", value);
-            sb.setConfig("parseableMimeTypes.URLREDIRECTOR", value);
-            sb.setConfig("parseableMimeTypes.ICAP", value);
-        }
         //Locales in DATA, because DATA must be writable, htroot not.
         if(sb.getConfig("locale.translated_html", "DATA/LOCALE/htroot").equals("htroot/locale")){
         	sb.setConfig("locale.translated_html", "DATA/LOCALE/htroot");

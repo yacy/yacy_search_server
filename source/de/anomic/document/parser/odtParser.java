@@ -69,14 +69,8 @@ public class odtParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("application/x-vnd.oasis.opendocument.text","odt");
     }     
 
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {"odf_utils_05_11_29.jar"};        
-    
     public odtParser() {        
-        super(LIBX_DEPENDENCIES);
+        super();
         this.parserName = "OASIS OpenDocument V2 Text Document Parser"; 
     }
     

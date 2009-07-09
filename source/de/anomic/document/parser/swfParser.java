@@ -52,14 +52,8 @@ public class swfParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("image/vnd.rn-realflash","swf");
     }
 
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {"webcat-0.1-swf.jar"};
-
     public swfParser() {
-        super(LIBX_DEPENDENCIES);
+        super();
         this.parserName = "Adobe Flash Parser";
     }
 

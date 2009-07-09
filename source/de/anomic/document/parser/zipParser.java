@@ -69,14 +69,8 @@ public class zipParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("application/java-archive","jar");
     }     
 
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {};        
-    
     public zipParser() {        
-        super(LIBX_DEPENDENCIES);
+        super();
         this.parserName = "Compressed Archive File Parser"; 
     }
     

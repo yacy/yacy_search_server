@@ -62,14 +62,8 @@ public class gzipParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("application/x-tar",fileExtensions);
     }     
 
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {};    
-    
     public gzipParser() {        
-        super(LIBX_DEPENDENCIES);
+        super();
         this.parserName = "GNU Zip Compressed Archive Parser";
     }
     

@@ -56,8 +56,6 @@ import de.anomic.kelondro.util.SortStack;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaProfiling;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaProfiling.searchEvent;
-import de.anomic.search.QueryEvent.ResultEntry;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;
 

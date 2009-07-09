@@ -69,16 +69,8 @@ public class tarParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("application/x-compressed","tar");
     }     
 
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {
-//        "tar.jar"
-    };    
-    
     public tarParser() {        
-        super(LIBX_DEPENDENCIES);
+        super();
         this.parserName = "Tape Archive File Parser"; 
     }
     

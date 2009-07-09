@@ -69,17 +69,8 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
         SUPPORTED_MIME_TYPES.put("application/xls","xls");
     }     
 
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {
-        "poi-3.2-FINAL-20081019.jar",
-        "poi-scratchpad-3.2-FINAL-20081019.jar"
-    }; 
-
     public xlsParser(){
-        super(LIBX_DEPENDENCIES);
+        super();
         this.parserName = "Microsoft Excel Parser";
     }
 

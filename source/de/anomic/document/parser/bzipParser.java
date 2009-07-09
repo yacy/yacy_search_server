@@ -58,16 +58,10 @@ public class bzipParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("application/x-bzip",fileExtensions);
         SUPPORTED_MIME_TYPES.put("application/x-compressed",fileExtensions);
         SUPPORTED_MIME_TYPES.put("application/x-stuffit",fileExtensions);
-    }     
-    
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {};
+    }
     
     public bzipParser() {        
-        super(LIBX_DEPENDENCIES);
+        super();
         this.parserName = "Bzip 2 UNIX Compressed File Parser";
     }
     

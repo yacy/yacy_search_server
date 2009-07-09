@@ -71,15 +71,9 @@ public class vcfParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("text/x-versit","vcf");
         SUPPORTED_MIME_TYPES.put("text/x-vcalendar","vcf");
     }
-
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {};        
     
     public vcfParser() {        
-        super(LIBX_DEPENDENCIES);
+        super();
         this.parserName = "vCard Parser"; 
     }
     

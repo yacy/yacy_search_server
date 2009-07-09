@@ -56,19 +56,10 @@ public class pptParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("application/vnd-mspowerpoint",fileExtensions);
         SUPPORTED_MIME_TYPES.put("application/x-powerpoint",fileExtensions);
         SUPPORTED_MIME_TYPES.put("application/x-m",fileExtensions);
-   }     
-
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {
-        "poi-3.2-FINAL-20081019.jar",
-        "poi-scratchpad-3.2-FINAL-20081019.jar"
-    }; 
+   }
 
     public pptParser(){
-        super(LIBX_DEPENDENCIES);
+        super();
         this.parserName = "Microsoft Powerpoint Parser";
     }
 

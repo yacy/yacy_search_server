@@ -55,15 +55,9 @@ public class rtfParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("application/doc","rtf");
         SUPPORTED_MIME_TYPES.put("application/x-soffice","rtf");
     } 
-    
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {};    
-    
+
 	public rtfParser() {
-		super(LIBX_DEPENDENCIES);
+		super();
         this.parserName = "Rich Text Format Parser";  
 	}
 

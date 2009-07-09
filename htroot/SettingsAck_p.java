@@ -33,7 +33,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -458,54 +457,34 @@ public class SettingsAck_p {
          */
         if (post.containsKey("parserSettings")) {
             post.remove("parserSettings");
-            /*
-            final Set<String> parserModes = ParserDispatcher.getParserConfigList().keySet();
-            final HashMap<String, HashSet<String>> newConfigList = new HashMap<String, HashSet<String>>();     
-            Iterator<String> parserModeIter = parserModes.iterator();
-            while (parserModeIter.hasNext()) {
-                final String currParserMode = parserModeIter.next();
-                newConfigList.put(currParserMode, new HashSet<String>());
-            }
             
-            // looping through all received settings
-            int pos;
+            final HashSet<String> newConfig = new HashSet<String>();
+            
+            // loop through all received settings
             final Iterator<String> keyEnum = post.keySet().iterator();
-            while (keyEnum.hasNext()) {                
-                final String key = keyEnum.next();
-                if ((pos = key.indexOf(".")) != -1) {
-                    final String currParserMode = key.substring(0,pos).trim().toUpperCase();
-                    final String currMimeType = key.substring(pos+1).replaceAll("\n", "");
-                    if (parserModes.contains(currParserMode)) {
-                        HashSet<String> currEnabledMimeTypes;
-                        assert (newConfigList.containsKey(currParserMode)) : "Unexpected Error";
-                        currEnabledMimeTypes = newConfigList.get(currParserMode);
-                        currEnabledMimeTypes.add(currMimeType);
-                    }
-                }
+            while (keyEnum.hasNext()) {
+                String key = keyEnum.next();
+                if (key.startsWith("mimename")) newConfig.add(post.get(key));
             }
             
             int enabledMimesCount = 0;
             final StringBuilder currEnabledMimesTxt = new StringBuilder();
-            parserModeIter = newConfigList.keySet().iterator();
-            while (parserModeIter.hasNext()) {                
-                final String currParserMode = parserModeIter.next();
-                final String[] enabledMimes = ParserDispatcher.setEnabledParserList(newConfigList.get(currParserMode));
-                Arrays.sort(enabledMimes);
-                
-                currEnabledMimesTxt.setLength(0);
-                for (int i=0; i < enabledMimes.length; i++) {
-                    currEnabledMimesTxt.append(enabledMimes[i]).append(",");
-                    prop.put("info_parser_" + enabledMimesCount + "_parserMode",currParserMode);
-                    prop.put("info_parser_" + enabledMimesCount + "_enabledMime",enabledMimes[i]);
-                    enabledMimesCount++;
-                }
-                if (currEnabledMimesTxt.length() > 0) currEnabledMimesTxt.deleteCharAt(currEnabledMimesTxt.length()-1);  
-                env.setConfig("parseableMimeTypes." + currParserMode,currEnabledMimesTxt.toString());
+            final String[] enabledMimes = ParserDispatcher.setEnabledParserList(newConfig);
+            Arrays.sort(enabledMimes);
+            
+            currEnabledMimesTxt.setLength(0);
+            for (int i=0; i < enabledMimes.length; i++) {
+                currEnabledMimesTxt.append(enabledMimes[i]).append(",");
+                prop.put("info_parser_" + enabledMimesCount + "_enabledMime", newConfig.toString());
+                enabledMimesCount++;
             }
+            if (currEnabledMimesTxt.length() > 0) currEnabledMimesTxt.deleteCharAt(currEnabledMimesTxt.length()-1);  
+            env.setConfig("parseableMimeTypes", currEnabledMimesTxt.toString());
+            
             prop.put("info_parser",enabledMimesCount);
             prop.put("info", "18");
             return prop;
-          */
+          
         }
         
         // Crawler settings

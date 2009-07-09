@@ -56,17 +56,8 @@ public class vsdParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("zz-application/zz-winassoc-vsd","vsd");
     }
 
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {
-        "poi-3.2-FINAL-20081019.jar",
-        "poi-scratchpad-3.2-FINAL-20081019.jar",
-    }; 
-
     public vsdParser() {
-        super(LIBX_DEPENDENCIES);
+        super();
         this.parserName = "Microsoft Visio Parser";
     }
 

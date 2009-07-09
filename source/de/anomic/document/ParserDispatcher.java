@@ -7,11 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
-import java.nio.charset.UnsupportedCharsetException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +22,7 @@ import java.util.Set;
 import de.anomic.document.parser.bzipParser;
 import de.anomic.document.parser.docParser;
 import de.anomic.document.parser.gzipParser;
+import de.anomic.document.parser.htmlParser;
 import de.anomic.document.parser.mimeTypeParser;
 import de.anomic.document.parser.odtParser;
 import de.anomic.document.parser.pdfParser;
@@ -41,17 +38,13 @@ import de.anomic.document.parser.vcfParser;
 import de.anomic.document.parser.vsdParser;
 import de.anomic.document.parser.xlsParser;
 import de.anomic.document.parser.zipParser;
-import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.ImageEntry;
-import de.anomic.document.parser.html.ScraperInputStream;
-import de.anomic.document.parser.html.TransformerWriter;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
 public final class ParserDispatcher {
  
- private static final ParserConfig parserConfig = new ParserConfig();
+ public static final ParserConfig parserConfig = new ParserConfig();
  
  /**
   * A list containing all installed parsers and the mimeType that they support
@@ -91,30 +84,6 @@ public final class ParserDispatcher {
  private static final HashSet<String> videoExtSet = new HashSet<String>();
  private static final HashSet<String> appsExtSet = new HashSet<String>();
  
- /**
-  * This {@link FilenameFilter} is used to find all classes based on there filenames 
-  * which seems to be additional content parsers.
-  * Currently the filenames of all content parser classes must end with <code>Parser.class</code> 
-  */
- /*
- private static final FilenameFilter parserFileNameFilter = new FilenameFilter() {
-     public boolean accept(File dir, String name) {
-         return name.endsWith("Parser.class");
-     }
- };
- */
- 
- /**
-  * This {@link FileFilter} is used to get all subpackages
-  * of the parser package.
-  */
- /*
- private static final FileFilter parserDirectoryFilter = new FileFilter() {
-     public boolean accept(File file) {
-         return file.isDirectory();
-     }
- };
- */    
  
  /**
   * Initializing the 
@@ -146,9 +115,6 @@ public final class ParserDispatcher {
  
  private static final Log theLogger = new Log("PARSER");
  
- public Log getLogger() {
-     return theLogger;
- }
  
  /**
   * This function is used to initialize the HTMLParsableMimeTypes List.
@@ -187,34 +153,28 @@ public final class ParserDispatcher {
      }
  }
  
- public static void initImageExt(final List<String> imageExtList) {
+ private static void initImageExt(final List<String> imageExtList) {
      synchronized (imageExtSet) {
          imageExtSet.addAll(imageExtList);
      }
  }
  
- public static void initAudioExt(final List<String> audioExtList) {
+ private static void initAudioExt(final List<String> audioExtList) {
      synchronized (audioExtSet) {
          audioExtSet.addAll(audioExtList);
      }
  }
  
- public static void initVideoExt(final List<String> videoExtList) {
+ private static void initVideoExt(final List<String> videoExtList) {
      synchronized (videoExtSet) {
          videoExtSet.addAll(videoExtList);
      }
  }
  
- public static void initAppsExt(final List<String> appsExtList) {
+ private static void initAppsExt(final List<String> appsExtList) {
      synchronized (appsExtSet) {
          appsExtSet.addAll(appsExtList);
      }
- }
- 
- public static String getMediaExtList() {
-     synchronized (mediaExtSet) {
-         return mediaExtSet.toString();
-     }        
  }
  
  public static void initSupportedHTMLFileExt(final List<String> supportedRealtimeFileExtList) {
@@ -223,22 +183,11 @@ public final class ParserDispatcher {
      }
  }
      
- public static boolean HTMLParsableMimeTypesContains(String mimeType) {
+ private static boolean HTMLParsableMimeTypesContains(String mimeType) {
      mimeType = normalizeMimeType(mimeType);
      synchronized (supportedHTMLMimeTypes) {
          return supportedHTMLMimeTypes.contains(mimeType);
      }
- }
- 
- public static boolean supportedHTMLContent(final yacyURL url, final String mimeType) {
-     return HTMLParsableMimeTypesContains(mimeType) && supportedHTMLFileExtContains(url);
- }    
- 
- public static boolean supportedHTMLFileExtContains(final yacyURL url) {
-     final String fileExt = getFileExt(url);
-     synchronized (supportedHTMLFileExt) {
-         return supportedHTMLFileExt.contains(fileExt);
-     }   
  }
 
  public static String getFileExt(final yacyURL url) {
@@ -300,81 +249,6 @@ public final class ParserDispatcher {
      }
  }
 
- /**
-  * some html authors use wrong encoding names, either because they don't know exactly what they
-  * are doing or they produce a type. Many times, the upper/downcase scheme of the name is fuzzy
-  * This method patches wrong encoding names. The correct names are taken from
-  * http://www.iana.org/assignments/character-sets
-  * @param encoding
-  * @return patched encoding name
-  */
- public static String patchCharsetEncoding(String encoding) {
-     
-     // return the system default encoding
-     if ((encoding == null) || (encoding.length() < 3)) return Charset.defaultCharset().name();
-     
-     // trim encoding string
-     encoding = encoding.trim();
-
-     // fix upper/lowercase
-     encoding = encoding.toUpperCase();
-     if (encoding.startsWith("SHIFT")) return "Shift_JIS";
-     if (encoding.startsWith("BIG")) return "Big5";
-     // all other names but such with "windows" use uppercase
-     if (encoding.startsWith("WINDOWS")) encoding = "windows" + encoding.substring(7);
-     if (encoding.startsWith("MACINTOSH")) encoding = "MacRoman";
-     
-     // fix wrong fill characters
-     encoding = encoding.replaceAll("_", "-");
-
-     if (encoding.matches("GB[_-]?2312([-_]80)?")) return "GB2312";
-     if (encoding.matches(".*UTF[-_]?8.*")) return "UTF-8";
-     if (encoding.startsWith("US")) return "US-ASCII";
-     if (encoding.startsWith("KOI")) return "KOI8-R";
-     
-     // patch missing '-'
-     if (encoding.startsWith("windows") && encoding.length() > 7) {
-         final char c = encoding.charAt(7);
-         if ((c >= '0') && (c <= '9')) {
-             encoding = "windows-" + encoding.substring(7);
-         }
-     }
-     
-     if (encoding.startsWith("ISO")) {
-         // patch typos
-         if (encoding.length() > 3) {
-             final char c = encoding.charAt(3);
-             if ((c >= '0') && (c <= '9')) {
-                 encoding = "ISO-" + encoding.substring(3);
-             }
-         }
-         if (encoding.length() > 8) {
-             final char c = encoding.charAt(8);
-             if ((c >= '0') && (c <= '9')) {
-                 encoding = encoding.substring(0, 8) + "-" + encoding.substring(8);           
-             } 
-         }
-     }
-     
-     // patch wrong name
-     if (encoding.startsWith("ISO-8559")) {
-         // popular typo
-         encoding = "ISO-8859" + encoding.substring(8);
-     }
-
-     // converting cp\d{4} -> windows-\d{4}
-     if (encoding.matches("CP([_-])?125[0-8]")) {
-         final char c = encoding.charAt(2);
-         if ((c >= '0') && (c <= '9')) {
-             encoding = "windows-" + encoding.substring(2);
-         } else {
-             encoding = "windows" + encoding.substring(2);
-         }
-     }
-
-     return encoding;
- }
- 
  public static String normalizeMimeType(String mimeType) {
      //if (mimeType == null) doMimeTypeAnalysis
      if (mimeType == null) mimeType = "application/octet-stream";
@@ -519,7 +393,7 @@ public final class ParserDispatcher {
          
          // getting the charset of the document
          // TODO: do a charset detection here ....
-         final String documentCharset = patchCharsetEncoding(theDocumentCharset);
+         final String documentCharset = htmlParser.patchCharsetEncoding(theDocumentCharset);
          
          // testing if parsing is supported for this resource
          if (!supportedContent(location,mimeType)) {
@@ -543,7 +417,7 @@ public final class ParserDispatcher {
              // parse the resource
              doc = theParser.parse(location, mimeType,documentCharset,sourceStream);
          } else if (HTMLParsableMimeTypesContains(mimeType)) {
-             doc = parseHtml(location, mimeType, documentCharset, sourceStream);
+             doc = new htmlParser().parse(location, mimeType, documentCharset, sourceStream);
          } else {
              final String errorMsg = "No parser available to parse mimetype '" + mimeType + "' (2)";
              theLogger.logInfo("Unable to parse '" + location + "'. " + errorMsg);
@@ -558,17 +432,6 @@ public final class ParserDispatcher {
          }
          return doc;
          
-     } catch (final UnsupportedEncodingException e) {
-         final String errorMsg = "unsupported charset encoding: " + e.getMessage();
-         theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg, e);
-         throw new ParserException(errorMsg,location, errorMsg);                 
-     } catch (final IOException e) {
-         // IOExceptions may occur during html parsing when a server closes the connection during reading.
-         // This may happen here, because the html parser is a streaming parser
-         // that produces surrogates while the connection is active
-         final String errorMsg = "IOException - server may have closed the connection. " + e.getMessage();
-         theLogger.logWarning("Unable to parse '" + location + "'. " + errorMsg);
-         throw new ParserException(errorMsg, location, errorMsg);
      } catch (final Exception e) {
          // Interrupted- and Parser-Exceptions should pass through
          if (e instanceof InterruptedException) throw (InterruptedException) e;
@@ -586,71 +449,8 @@ public final class ParserDispatcher {
      }        
  }
  
- private static Document parseHtml(
-         final yacyURL location, 
-         final String mimeType, 
-         final String documentCharset, 
-         final InputStream sourceStream) throws IOException, ParserException {
-     
-     // make a scraper and transformer
-     final ScraperInputStream htmlFilter = new ScraperInputStream(sourceStream,documentCharset,location,null,false);
-     String charset = htmlFilter.detectCharset();
-     if (charset == null) {
-         charset = documentCharset;
-     } else {
-         charset = patchCharsetEncoding(charset);
-     }
-     
-     if (!documentCharset.equalsIgnoreCase(charset)) {
-         theLogger.logInfo("Charset transformation needed from '" + documentCharset + "' to '" + charset + "' for URL = " + location.toNormalform(true, true));
-     }
-     
-     Charset c;
-     try {
-         c = Charset.forName(charset);
-     } catch (IllegalCharsetNameException e) {
-         c = Charset.defaultCharset();
-     } catch (UnsupportedCharsetException e) {
-         c = Charset.defaultCharset();
-     }
-     
-     // parsing the content
-     final ContentScraper scraper = new ContentScraper(location);        
-     final TransformerWriter writer = new TransformerWriter(null,null,scraper,null,false);
-     FileUtils.copy(htmlFilter, writer, c);
-     writer.close();
-     //OutputStream hfos = new htmlFilterOutputStream(null, scraper, null, false);            
-     //serverFileUtils.copy(sourceFile, hfos);
-     //hfos.close();
-     if (writer.binarySuspect()) {
-         final String errorMsg = "Binary data found in resource";
-         theLogger.logSevere("Unable to parse '" + location + "'. " + errorMsg);
-         throw new ParserException(errorMsg,location);    
-     }
-     return transformScraper(location, mimeType, documentCharset, scraper);
- }
  
- public static Document transformScraper(final yacyURL location, final String mimeType, final String charSet, final ContentScraper scraper) {
-     final String[] sections = new String[scraper.getHeadlines(1).length + scraper.getHeadlines(2).length + scraper.getHeadlines(3).length + scraper.getHeadlines(4).length];
-     int p = 0;
-     for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];
-     final Document ppd =  new Document(
-             location,
-             mimeType,
-             charSet,
-             scraper.getContentLanguages(),
-             scraper.getKeywords(),
-             scraper.getTitle(),
-             scraper.getAuthor(),
-             sections,
-             scraper.getDescription(),
-             scraper.getText(),
-             scraper.getAnchors(),
-             scraper.getImages());
-     //scraper.close();            
-     ppd.setFavicon(scraper.getFavicon());
-     return ppd;
- }
+
  
  /**
   * This function is used to determine the parser class that should be used for a given

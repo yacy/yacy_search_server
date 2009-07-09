@@ -56,7 +56,7 @@ public class pdfParser extends AbstractParser implements Parser {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();  
+    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
     static {
         SUPPORTED_MIME_TYPES.put("application/pdf","pdf");
         SUPPORTED_MIME_TYPES.put("application/x-pdf","pdf");
@@ -66,16 +66,8 @@ public class pdfParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("text/x-pdf","pdf");
     }
     
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {
-        "PDFBox-0.7.3.jar", "FontBox-0.1.0-dev.jar", "bcprov-jdk14-139.jar", "bcmail-jdk14-139.jar"
-    };        
-    
     public pdfParser() {        
-        super(LIBX_DEPENDENCIES);
+        super();
         this.parserName = "Acrobat Portable Document Parser"; 
     }
     

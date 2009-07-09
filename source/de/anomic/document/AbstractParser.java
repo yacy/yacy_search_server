@@ -46,11 +46,6 @@ import de.anomic.yacy.logging.Log;
 public abstract class AbstractParser implements Parser {
     
     /**
-     * a list of library names that are needed by this parser
-     */
-    protected String[] libxDependencies = null;
-    
-    /**
      * the logger class that should be used by the parser module for logging
      * purposes.
      */
@@ -70,9 +65,8 @@ public abstract class AbstractParser implements Parser {
     /**
      * The Constructor of this class.
      */
-	public AbstractParser(final String[] libxDependencies) {
+	public AbstractParser() {
 		super();
-        this.libxDependencies = libxDependencies;
 	}
     
     /**
@@ -229,14 +223,6 @@ public abstract class AbstractParser implements Parser {
      * @see de.anomic.document.Parser#parse(de.anomic.net.URL, java.lang.String, java.io.InputStream)
      */
     public abstract Document parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException;
-
-    /**
-     * @return Returns a list of library names that are needed by this parser
-     * @see de.anomic.document.Parser#getLibxDependences()
-     */
-    public String[] getLibxDependences() {
-        return this.libxDependencies;
-    }
     
     /**
      * Return the name of the parser

@@ -58,16 +58,8 @@ public class docParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("application/x-msword","doc");
     }
     
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {
-        "tm-extractors-1.0.jar"
-    };    
-    
 	public docParser() {
-		super(LIBX_DEPENDENCIES);
+		super();
         this.parserName = "Word Document Parser";
 	}
 

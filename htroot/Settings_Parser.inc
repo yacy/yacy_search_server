@@ -6,31 +6,27 @@
   <a href="http://www.iana.org/assignments/media-types/">http://www.iana.org/assignments/media-types/</a>
 </p>
 <table border="0" cellpadding="2" cellspacing="1">
-  <tr class="TableHeader" valign="bottom">#{parserMode}#
-    <td class="small" >#[name]#</td>#{/parserMode}#
+  <tr class="TableHeader" valign="bottom">
+    <td class="small" >enable/disable Parser</td>
     <td class="small" >Mime-Type</td>
-    <td class="small" >Parser&nbsp;Usage</td>
   </tr>#{parser}#
   <tr class="TableCellDark">
-    <td colspan="#[colspan]#">#[name]# V#[version]#</td>
+    <td colspan="#[colspan]#">#[name]#</td>
     <td>&nbsp;</td>
-    <td>#[usage]#</td>
   </tr>#{mime}#
-  <tr class="TableCellLight">#{parserMode}#
-    <td class="small" align="center"><input type="checkbox" name="#[optionName]#" #(status)#::checked="checked" #(/status)#/></td>#{/parserMode}#
+  <tr class="TableCellLight">
+    <td class="small" align="center"><input type="checkbox" mimename.#[mimetype]#="#[mimetype]#" #(status)#::checked="checked" #(/status)#/></td>
     <td class="small">#[mimetype]#</td>
-    <td class="small">&nbsp;</td>
   </tr>#{/mime}#
   #{/parser}#
-  <tr class="TableCellDark">#{parserMode}#
+  <tr class="TableCellDark">
     <td class="small" align="center">
       <input type="checkbox" name="#[name]#.allParserEnabled" onclick="javascript: ParserCheckboxes(this);" #(allParserEnabled)#::checked="checked" #(/allParserEnabled)#/>
-    </td>#{/parserMode}#
-	 <td>&nbsp;</td>    
+    </td>
     <td colspan="2" class="small">Enable all parsers</td>
   </tr>
   <tr class="TableCellDark">
-    <td colspan="#[parser.colspan]#" class="small" ><input type="submit" name="parserSettings" value="Submit" /> Changes take effect immediately</td>
+    <td colspan="2" class="small" ><input type="submit" name="parserSettings" value="Submit" /> Changes take effect immediately</td>
   </tr>
 </table>
 </fieldset>

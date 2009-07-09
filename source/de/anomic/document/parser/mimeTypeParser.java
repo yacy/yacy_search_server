@@ -65,24 +65,13 @@ public class mimeTypeParser extends AbstractParser implements Parser {
     } 
     
     /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {
-        "commons-logging-1.1.1.jar",
-        "jmimemagic-0.1.0.jar",
-        "jakarta-oro-2.0.7.jar",
-        "log4j-1.2.9.jar"
-    };
-    
-    /**
      * Helping structure used to detect loops in the mimeType detection
      * process
      */
     private static Hashtable<Thread, Integer> threadLoopDetection = new Hashtable<Thread, Integer>();
     
     public mimeTypeParser() {
-        super(LIBX_DEPENDENCIES);
+        super();
         this.parserName = "MimeType Parser"; 
     }
     

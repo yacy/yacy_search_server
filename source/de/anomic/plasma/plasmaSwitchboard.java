@@ -523,7 +523,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         // define a realtime parsable mimetype list
         log.logConfig("Parser: Initializing Mime Types");
         ParserDispatcher.initHTMLParsableMimeTypes(getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES_HTML, "application/xhtml+xml,text/html,text/plain"));
-        ParserDispatcher.addParseableMimeTypes(getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES_CRAWLER, null));
+        ParserDispatcher.addParseableMimeTypes(getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES, null));
         
         // start a loader
         log.logConfig("Starting Crawl Loader");

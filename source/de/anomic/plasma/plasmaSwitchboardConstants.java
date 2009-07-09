@@ -244,11 +244,8 @@ public final class plasmaSwitchboardConstants {
     public static final String RANKING_DIST_1_METHOD            = "CRDist1Method";
     public static final String RANKING_DIST_1_PERCENT           = "CRDist1Percent";
     public static final String RANKING_DIST_1_TARGET            = "CRDist1Target";
+    public static final String PARSER_MIMETYPES                 = "parseableMimeTypes";
     public static final String PARSER_MIMETYPES_HTML            = "parseableMimeTypes.HTML";
-    public static final String PARSER_MIMETYPES_PROXY           = "parseableMimeTypes.PROXY";
-    public static final String PARSER_MIMETYPES_CRAWLER         = "parseableMimeTypes.CRAWLER";
-    public static final String PARSER_MIMETYPES_ICAP            = "parseableMimeTypes.ICAP";
-    public static final String PARSER_MIMETYPES_URLREDIRECTOR   = "parseableMimeTypes.URLREDIRECTOR";
     public static final String PARSER_MIMETYPES_IMAGE           = "parseableMimeTypes.IMAGE";
     public static final String PARSER_MEDIA_EXT                 = "mediaExt";
     public static final String PARSER_MEDIA_EXT_PARSEABLE       = "parseableExt";

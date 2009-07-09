@@ -45,7 +45,7 @@ import java.util.Properties;
 import javax.swing.event.EventListenerList;
 
 import de.anomic.crawler.HTTPLoader;
-import de.anomic.document.ParserDispatcher;
+import de.anomic.document.parser.htmlParser;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
@@ -501,7 +501,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         
         // scrape document to look up charset
         final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page),"UTF-8",new yacyURL("http://localhost", null),null,false);
-        final String charset = ParserDispatcher.patchCharsetEncoding(htmlFilter.detectCharset());
+        final String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
         
         // scrape content
         final ContentScraper scraper = new ContentScraper(new yacyURL("http://localhost", null));

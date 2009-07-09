@@ -55,20 +55,14 @@ public class psParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("application/x-postscript","ps");
         SUPPORTED_MIME_TYPES.put("application/x-ps","ps");
         SUPPORTED_MIME_TYPES.put("application/x-postscript-not-eps","ps");
-    }     
-    
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {};          
+    }
     
     private final static Object modeScan = new Object();
     private static boolean modeScanDone = false;
     private static String parserMode = "java";
     
     public psParser() {        
-        super(LIBX_DEPENDENCIES);
+        super();
         this.parserName = "PostScript Document Parser"; 
         if (!modeScanDone) synchronized (modeScan) {
         	if (testForPs2Ascii()) parserMode = "ps2ascii";

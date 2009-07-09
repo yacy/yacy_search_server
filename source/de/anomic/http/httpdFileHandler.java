@@ -81,6 +81,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPOutputStream;
 
 import de.anomic.document.ParserDispatcher;
+import de.anomic.document.parser.htmlParser;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.ScraperInputStream;
 import de.anomic.kelondro.util.ByteBuffer;
@@ -860,7 +861,7 @@ public final class httpdFileHandler {
                     			fis.mark(1000);
                     			// scrape document to look up charset
                     			final ScraperInputStream htmlFilter = new ScraperInputStream(fis,"UTF-8",new yacyURL("http://localhost", null),null,false);
-                    			final String charset = ParserDispatcher.patchCharsetEncoding(htmlFilter.detectCharset());
+                    			final String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
                     			if(charset != null)
                     				mimeType = mimeType + "; charset="+charset;
                     			// reset position

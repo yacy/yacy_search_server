@@ -66,16 +66,10 @@ public class rssParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("application/rdf+xml",fileExtensions);
         SUPPORTED_MIME_TYPES.put("application/rss+xml",fileExtensions);
         SUPPORTED_MIME_TYPES.put("application/atom+xml",fileExtensions);
-    }     
-  
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {};       
+    }
     
 	public rssParser() {
-		super(LIBX_DEPENDENCIES);
+		super();
         this.parserName = "Rich Site Summary/Atom Feed Parser"; 
 	}
 

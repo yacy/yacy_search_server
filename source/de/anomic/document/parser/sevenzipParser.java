@@ -59,16 +59,10 @@ public class sevenzipParser extends AbstractParser implements Parser {
     public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>(); 
     static { 
         SUPPORTED_MIME_TYPES.put("application/x-7z-compressed", "7z"); 
-    } 
-    
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] { "J7Zip-modified.jar" };
+    }
     
     public sevenzipParser() {
-        super(LIBX_DEPENDENCIES);
+        super();
         super.parserName = "7zip Archive Parser";
     }
     

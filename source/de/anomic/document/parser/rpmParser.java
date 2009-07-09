@@ -62,16 +62,10 @@ public class rpmParser extends AbstractParser implements Parser {
         SUPPORTED_MIME_TYPES.put("application/x-rpm","rpm");
         SUPPORTED_MIME_TYPES.put("application/x-redhat packet manager","rpm");    
         SUPPORTED_MIME_TYPES.put("application/x-redhat-package-manager","rpm");         
-    }     
-
-    /**
-     * a list of library names that are needed by this parser
-     * @see Parser#getLibxDependences()
-     */
-    private static final String[] LIBX_DEPENDENCIES = new String[] {"jrpm-head.jar"};        
+    }
     
     public rpmParser() {        
-        super(LIBX_DEPENDENCIES);
+        super();
         this.parserName = "rpm Parser"; 
     }
     
