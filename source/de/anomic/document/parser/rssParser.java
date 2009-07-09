@@ -6,7 +6,10 @@
 //Frankfurt, Germany, 2005
 //
 //this file is contributed by Martin Thelian
-//last major change: 16.05.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -56,12 +59,13 @@ public class rssParser extends AbstractParser implements Parser {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */  
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>(); 
+    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
+    static final String fileExtensions = "xml,rss,rdf";
     static {
-        SUPPORTED_MIME_TYPES.put("text/rss","xml,rss,rdf"); 
-        SUPPORTED_MIME_TYPES.put("application/rdf+xml","xml,rss,rdf");
-        SUPPORTED_MIME_TYPES.put("application/rss+xml","xml,rss,rdf");
-        SUPPORTED_MIME_TYPES.put("application/atom+xml","xml,atom");
+        SUPPORTED_MIME_TYPES.put("text/rss",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/rdf+xml",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/rss+xml",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/atom+xml",fileExtensions);
     }     
   
     /**
@@ -182,6 +186,7 @@ public class rssParser extends AbstractParser implements Parser {
 		return SUPPORTED_MIME_TYPES;
 	}
 
+    @Override
 	public void reset() {
         // Nothing todo here at the moment
         super.reset();

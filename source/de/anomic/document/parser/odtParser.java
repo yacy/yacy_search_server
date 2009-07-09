@@ -1,4 +1,4 @@
-//zipParser.java 
+//odtParser.java 
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -6,7 +6,10 @@
 //Frankfurt, Germany, 2005
 //
 //this file is contributed by Martin Thelian
-//last major change: 16.05.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -81,6 +84,7 @@ public class odtParser extends AbstractParser implements Parser {
         return SUPPORTED_MIME_TYPES;
     }
     
+    @Override
     public Document parse(final yacyURL location, final String mimeType, final String charset, final File dest) throws ParserException, InterruptedException {
         
         Writer writer = null;
@@ -225,6 +229,7 @@ public class odtParser extends AbstractParser implements Parser {
         }
     }
     
+    @Override
     public void reset() {
         // Nothing todo here at the moment
         super.reset();

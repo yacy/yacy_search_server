@@ -48,6 +48,8 @@ public class swfParser extends AbstractParser implements Parser {
     static {
         SUPPORTED_MIME_TYPES.put("application/x-shockwave-flash","swf");
         SUPPORTED_MIME_TYPES.put("application/x-shockwave-flash2-preview","swf");
+        SUPPORTED_MIME_TYPES.put("application/futuresplash","swf");
+        SUPPORTED_MIME_TYPES.put("image/vnd.rn-realflash","swf");
     }
 
     /**

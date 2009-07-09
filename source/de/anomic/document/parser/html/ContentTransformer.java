@@ -1,4 +1,4 @@
-// htmlFilterContentTransformer.java
+// ContentTransformer.java
 // ---------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -146,6 +146,7 @@ public class ContentTransformer extends AbstractTransformer implements Transform
         return text;
     }
 
+    @Override
     public char[] transformTag0(final String tagname, final Properties tagopts, final char quotechar) {
         if (tagname.equals("img")) {
             // check bluelist
@@ -162,12 +163,14 @@ public class ContentTransformer extends AbstractTransformer implements Transform
         return TransformerWriter.genTag0(tagname, tagopts, quotechar);
     }
 
+    @Override
     public char[] transformTag1(final String tagname, final Properties tagopts, final char[] text, final char quotechar) {
         if (bluelistHit(tagopts.getProperty("href","").toCharArray())) return genBlueLetters(text.length);
         if (bluelistHit(text)) return genBlueLetters(text.length);
         return TransformerWriter.genTag1(tagname, tagopts, text, quotechar);
     }
 
+    @Override
     public void close() {
         // free resources
         super.close();

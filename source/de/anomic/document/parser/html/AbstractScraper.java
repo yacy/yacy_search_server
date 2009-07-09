@@ -1,9 +1,12 @@
-// htmlFilterAbstractScraper.java 
+// AbstractScraper.java 
 // ---------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: 18.02.2004
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // You agree that the Author(s) is (are) not responsible for cost,
 // loss of data or any harm that may be caused by usage of this softare or
@@ -92,6 +95,7 @@ public abstract class AbstractScraper implements Scraper {
         tags1 = null;
     }
     
+    @Override
     protected void finalize() {
         close();
     }

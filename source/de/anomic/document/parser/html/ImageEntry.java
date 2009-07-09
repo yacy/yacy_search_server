@@ -1,9 +1,12 @@
-// htmlFilterImageEntry.java
+// ImageEntry.java
 // -----------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2006
-// created 04.04.2006
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -52,10 +55,12 @@ public class ImageEntry implements Comparable<ImageEntry> {
         return this.height;
     }
 
+    @Override
     public String toString() {
         return "{" + url.toString() + ", " + alt + ", " + width + "/" + height + "}";
     }
 
+    @Override
     public int hashCode() {
         // if htmlFilterImageEntry elements are stored in a TreeSet, the biggest images shall be listed first
         // this hash method therefore tries to compute a 'perfect hash' based on the size of the images
@@ -80,6 +85,7 @@ public class ImageEntry implements Comparable<ImageEntry> {
         return this.url.toString().compareTo((h).url.toString());
     }
     
+    @Override
     public boolean equals(final Object o) {
         if(o != null && o instanceof ImageEntry) {
             return compareTo((ImageEntry) o) == 0;

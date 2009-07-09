@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -169,6 +169,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
         return reader;
     }
 
+    @Override
     public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
         if ("channel".equals(tag)) {
             channel = new Item();
@@ -176,6 +177,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
         }
     }
 
+    @Override
     public void endElement(final String uri, final String name, final String tag) {
         if (tag == null) return;
         if ("channel".equals(tag)) {
@@ -187,6 +189,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
         }
     }
 
+    @Override
     public void characters(final char ch[], final int start, final int length) {
         if (parsingChannel) {
             buffer.append(ch, start, length);

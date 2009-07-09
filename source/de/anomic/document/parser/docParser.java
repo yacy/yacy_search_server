@@ -6,7 +6,10 @@
 //Frankfurt, Germany, 2005
 //
 //this file is contributed by Martin Thelian
-//last major change: 24.04.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -43,7 +46,17 @@ public class docParser extends AbstractParser implements Parser {
      * @see #getSupportedMimeTypes()
      */    
     public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
-    static { SUPPORTED_MIME_TYPES.put("application/msword","doc"); } 
+    static {
+        SUPPORTED_MIME_TYPES.put("application/msword","doc");
+        SUPPORTED_MIME_TYPES.put("application/doc","doc");
+        SUPPORTED_MIME_TYPES.put("appl/text","doc");
+        SUPPORTED_MIME_TYPES.put("application/vnd.msword","doc");
+        SUPPORTED_MIME_TYPES.put("application/vnd.ms-word","doc");
+        SUPPORTED_MIME_TYPES.put("application/winword","doc");
+        SUPPORTED_MIME_TYPES.put("application/word","doc");
+        SUPPORTED_MIME_TYPES.put("application/x-msw6","doc");
+        SUPPORTED_MIME_TYPES.put("application/x-msword","doc");
+    }
     
     /**
      * a list of library names that are needed by this parser
@@ -102,6 +115,7 @@ public class docParser extends AbstractParser implements Parser {
 		return docParser.SUPPORTED_MIME_TYPES;
 	}
 
+    @Override
 	public void reset() {
         // Nothing todo here at the moment
         super.reset();

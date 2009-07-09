@@ -1,4 +1,4 @@
-// htmlFilterContentScraper.java
+// ContentScraper.java
 // -----------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -441,6 +441,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
      *  (non-Javadoc)
      * @see de.anomic.htmlFilter.htmlFilterScraper#close()
      */
+    @Override
     public void close() {
         // free resources
         super.close();

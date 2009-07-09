@@ -6,7 +6,10 @@
 //Frankfurt, Germany, 2005
 //
 //this file is contributed by Martin Thelian
-//last major change: 24.04.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -44,10 +47,19 @@ public class gzipParser extends AbstractParser implements Parser {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();  
+    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
+    static final String fileExtensions = "gz,tgz";
     static { 
-        SUPPORTED_MIME_TYPES.put("application/x-gzip","gz,tgz");
-        SUPPORTED_MIME_TYPES.put("application/gzip","gz,tgz");
+        SUPPORTED_MIME_TYPES.put("application/x-gzip",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/gzip",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/x-gunzip",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/gzipped",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/gzip-compressed",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/x-compressed",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/x-compress",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("gzip/document",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/octet-stream",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/x-tar",fileExtensions);
     }     
 
     /**
@@ -102,6 +114,7 @@ public class gzipParser extends AbstractParser implements Parser {
         }
     }
     
+    @Override
     public void reset() {
         // Nothing todo here at the moment
         super.reset();

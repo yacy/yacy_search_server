@@ -4,9 +4,9 @@
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004, 2005
 //
-// $LastChangedDate: 2006-09-15 17:01:25 +0200 (Fr, 15 Sep 2006) $
-// $LastChangedRevision: 2598 $
-// $LastChangedBy: theli $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -351,6 +351,7 @@ public final class TransformerWriter extends Writer {
         return tag.length - 1;
     }
 
+    @Override
     public void write(final int c) throws IOException {
 //      System.out.println((char) c);
         if ((binaryUnsuspect) && (binaryHint((char)c))) {
@@ -508,6 +509,7 @@ public final class TransformerWriter extends Writer {
         }
     }
 
+    @Override
     public void write(final char b[]) throws IOException {
         write(b, 0, b.length);
     }
@@ -526,6 +528,7 @@ public final class TransformerWriter extends Writer {
         // if you want to flush all, call close() at end of writing;
     }
 
+    @Override
     protected void finalize() throws IOException {
         // if we are forced to close, we of course flush the buffer first,
         // then close the connection

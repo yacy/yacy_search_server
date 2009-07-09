@@ -6,7 +6,10 @@
 //Frankfurt, Germany, 2007
 //
 //this file is contributed by Martin Thelian
-//last major change: 15.09.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -48,8 +51,10 @@ public class psParser extends AbstractParser implements Parser {
      */
     public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();   
     static { 
-        SUPPORTED_MIME_TYPES.put("application/postscript","ps"); 
-        SUPPORTED_MIME_TYPES.put("text/postscript","ps");
+        SUPPORTED_MIME_TYPES.put("application/ps","ps");
+        SUPPORTED_MIME_TYPES.put("application/x-postscript","ps");
+        SUPPORTED_MIME_TYPES.put("application/x-ps","ps");
+        SUPPORTED_MIME_TYPES.put("application/x-postscript-not-eps","ps");
     }     
     
     /**
@@ -58,7 +63,7 @@ public class psParser extends AbstractParser implements Parser {
      */
     private static final String[] LIBX_DEPENDENCIES = new String[] {};          
     
-    private static Object modeScan = new Object();
+    private final static Object modeScan = new Object();
     private static boolean modeScanDone = false;
     private static String parserMode = "java";
     
@@ -96,6 +101,7 @@ public class psParser extends AbstractParser implements Parser {
     }
     
     
+    @Override
     public Document parse(final yacyURL location, final String mimeType, final String charset, final File sourceFile) throws ParserException, InterruptedException {
         
     	File outputFile = null;
@@ -261,6 +267,7 @@ public class psParser extends AbstractParser implements Parser {
     	if (execCode != 0) throw new Exception("Unable to convert ps to ascii. ps2ascii returned statuscode " + execCode + "\n" + procErr.toString());
     }
     
+    @Override
     public void reset() {
 		// Nothing todo here at the moment
     	super.reset();

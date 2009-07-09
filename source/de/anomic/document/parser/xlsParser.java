@@ -64,6 +64,9 @@ public class xlsParser extends AbstractParser implements Parser, HSSFListener {
         SUPPORTED_MIME_TYPES.put("application/vnd.ms-excel","xls");
         SUPPORTED_MIME_TYPES.put("application/x-excel","xls");
         SUPPORTED_MIME_TYPES.put("application/x-msexcel","xls");
+        SUPPORTED_MIME_TYPES.put("application/x-ms-excel","xls");
+        SUPPORTED_MIME_TYPES.put("application/x-dos_ms_excel","xls");
+        SUPPORTED_MIME_TYPES.put("application/xls","xls");
     }     
 
     /**

@@ -6,7 +6,11 @@
 // Frankfurt, Germany, 2004
 // 
 // This file ist contributed by Franz Brausze
-// 
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
+//
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -98,11 +102,13 @@ public class sevenzipParser extends AbstractParser implements Parser {
         }
     }
     
+    @Override
     public Document parse(final yacyURL location, final String mimeType, final String charset,
             final byte[] source) throws ParserException, InterruptedException {
         return parse(location, mimeType, charset, new ByteArrayIInStream(source), Parser.MAX_KEEP_IN_MEMORY_SIZE - source.length);
     }
     
+    @Override
     public Document parse(final yacyURL location, final String mimeType, final String charset,
             final File sourceFile) throws ParserException, InterruptedException {
         try {
@@ -150,6 +156,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
              this.prefix = prefix;
          }
          
+        @Override
          public void PrepareOperation(final int arg0) {
              this.extractMode = (arg0 == IInArchive.NExtract_NAskMode_kExtract);
              switch (arg0) {
@@ -165,6 +172,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
              }
          }
     
+        @Override
          public void SetOperationResult(final int arg0) throws IOException {
              if (arg0 != IInArchive.NExtract_NOperationResult_kOK) {
                  this.NumErrors++;
@@ -207,6 +215,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
              }
          }
          
+        @Override
          public OutputStream GetStream(final int index, final int askExtractMode) throws IOException {
              final SevenZipEntry item = super.archiveHandler.getEntry(index);
              super.filePath = item.getName();
@@ -260,6 +269,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
              return this.sbais.read();
          }
          
+        @Override
          public int read(final byte[] b, final int off, final int len) throws IOException {
              return this.sbais.read(b, off, len);
          }

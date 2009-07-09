@@ -6,7 +6,10 @@
 //Frankfurt, Germany, 2005
 //
 //this file is contributed by Martin Thelian
-//last major change: 16.05.2005
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -46,6 +49,11 @@ public class rtfParser extends AbstractParser implements Parser {
     static { 
         SUPPORTED_MIME_TYPES.put("application/rtf","rtf"); 
         SUPPORTED_MIME_TYPES.put("text/rtf","rtf");
+        SUPPORTED_MIME_TYPES.put("application/x-rtf","rtf");
+        SUPPORTED_MIME_TYPES.put("text/richtext","rtf");
+        SUPPORTED_MIME_TYPES.put("application/msword","rtf");
+        SUPPORTED_MIME_TYPES.put("application/doc","rtf");
+        SUPPORTED_MIME_TYPES.put("application/x-soffice","rtf");
     } 
     
     /**

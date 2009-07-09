@@ -1,12 +1,12 @@
-// rssReader.java
+// RSSReader.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 16.07.2007 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -122,6 +122,7 @@ public class RSSReader extends DefaultHandler {
         return reader;
     }
 
+    @Override
     public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
         if ("channel".equals(tag)) {
             item = new RSSMessage();
@@ -134,6 +135,7 @@ public class RSSReader extends DefaultHandler {
         }
     }
 
+    @Override
     public void endElement(final String uri, final String name, final String tag) {
         if (tag == null) return;
         if ("channel".equals(tag)) {
@@ -159,6 +161,7 @@ public class RSSReader extends DefaultHandler {
         }
     }
 
+    @Override
     public void characters(final char ch[], final int start, final int length) {
         if (parsingItem || parsingChannel) {
             buffer.append(ch, start, length);

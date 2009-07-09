@@ -11,7 +11,6 @@
 // $LastChangedRevision$
 // $LastChangedBy$
 //
-//
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
 //the Free Software Foundation; either version 2 of the License, or
@@ -46,12 +45,18 @@ public class pptParser extends AbstractParser implements Parser {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();  
+    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
+    static final String fileExtensions = "ppt,pps";
     static { 
-        SUPPORTED_MIME_TYPES.put("application/mspowerpoint","ppt,pps");
-        SUPPORTED_MIME_TYPES.put("application/powerpoint","ppt,pps");
-        SUPPORTED_MIME_TYPES.put("application/vnd.ms-powerpoint","ppt,pps");
-    }     
+        SUPPORTED_MIME_TYPES.put("application/mspowerpoint",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/powerpoint",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/vnd.ms-powerpoint",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/ms-powerpoint",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/mspowerpnt",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/vnd-mspowerpoint",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/x-powerpoint",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/x-m",fileExtensions);
+   }     
 
     /**
      * a list of library names that are needed by this parser
