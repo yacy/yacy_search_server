@@ -33,7 +33,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.RandomAccessFile;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
@@ -295,17 +294,7 @@ public final class Condenser {
         int idx;
         int wordInSentenceCounter = 1;
         boolean comb_indexof = false, last_last = false, last_index = false;
-        RandomAccessFile fa;
-        final boolean dumpWords = false;
         final HashMap<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>();
-        
-        if (dumpWords) try {
-            fa = new RandomAccessFile(new File("dump.txt"), "rw");
-            fa.seek(fa.length());
-        } catch (final IOException e) {
-            e.printStackTrace();
-            fa = null;
-        }
         
         // read source
         final sievedWordsEnum wordenum = new sievedWordsEnum(is);
@@ -313,15 +302,6 @@ public final class Condenser {
             word = (new String(wordenum.nextElement())).toLowerCase(Locale.ENGLISH); // TODO: does toLowerCase work for non ISO-8859-1 chars?
             if (languageIdentificator != null) languageIdentificator.add(word);
             if (word.length() < wordminsize) continue;
-            //System.out.println("PARSED-WORD " + word);
-            
-            //This is useful for testing what YaCy "sees" of a website.
-            if (dumpWords && fa != null) try {
-				fa.writeBytes(word);
-				fa.write(160);
-			} catch (final IOException e) {
-				e.printStackTrace();
-			}
             
             // distinguish punctuation and words
             wordlen = word.length();
@@ -397,15 +377,6 @@ public final class Condenser {
                 sentences.put(sentence, new Phrase(sentenceHandleCount++));
             }
         }
-        
-        if (dumpWords && fa != null) try {
-            fa.write('\n');
-            fa.close();
-        } catch (final IOException e) {
-            e.printStackTrace();
-        }
-
-        // -------------------
 
         // we reconstruct the sentence hashtable
         // and order the entries by the number of the sentence

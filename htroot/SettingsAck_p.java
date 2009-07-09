@@ -37,7 +37,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import de.anomic.document.ParserDispatcher;
+import de.anomic.document.Classification;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpd;
@@ -469,7 +469,7 @@ public class SettingsAck_p {
             
             int enabledMimesCount = 0;
             final StringBuilder currEnabledMimesTxt = new StringBuilder();
-            final String[] enabledMimes = ParserDispatcher.setEnabledParserList(newConfig);
+            final String[] enabledMimes = Classification.setEnabledParserList(newConfig);
             Arrays.sort(enabledMimes);
             
             currEnabledMimesTxt.setLength(0);

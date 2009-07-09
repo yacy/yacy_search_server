@@ -41,8 +41,9 @@ import SevenZip.Archive.IInArchive;
 import SevenZip.Archive.SevenZipEntry;
 import SevenZip.Archive.SevenZip.Handler;
 import de.anomic.document.AbstractParser;
+import de.anomic.document.Classification;
+import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
-import de.anomic.document.ParserDispatcher;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.kelondro.util.FileUtils;
@@ -50,7 +51,7 @@ import de.anomic.server.serverCachedFileOutputStream;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
-public class sevenzipParser extends AbstractParser implements Parser {
+public class sevenzipParser extends AbstractParser implements Idiom {
     
     /**
      * a list of mime types that are supported by this parser class
@@ -99,14 +100,14 @@ public class sevenzipParser extends AbstractParser implements Parser {
     @Override
     public Document parse(final yacyURL location, final String mimeType, final String charset,
             final byte[] source) throws ParserException, InterruptedException {
-        return parse(location, mimeType, charset, new ByteArrayIInStream(source), Parser.MAX_KEEP_IN_MEMORY_SIZE - source.length);
+        return parse(location, mimeType, charset, new ByteArrayIInStream(source), Idiom.MAX_KEEP_IN_MEMORY_SIZE - source.length);
     }
     
     @Override
     public Document parse(final yacyURL location, final String mimeType, final String charset,
             final File sourceFile) throws ParserException, InterruptedException {
         try {
-            return parse(location, mimeType, charset, new MyRandomAccessFile(sourceFile, "r"), Parser.MAX_KEEP_IN_MEMORY_SIZE);
+            return parse(location, mimeType, charset, new MyRandomAccessFile(sourceFile, "r"), Idiom.MAX_KEEP_IN_MEMORY_SIZE);
         } catch (final IOException e) {
             throw new ParserException("error processing 7zip archive", location, e);
         }
@@ -115,7 +116,7 @@ public class sevenzipParser extends AbstractParser implements Parser {
     public Document parse(final yacyURL location, final String mimeType, final String charset,
             final InputStream source) throws ParserException, InterruptedException {
         try {
-            final serverCachedFileOutputStream cfos = new serverCachedFileOutputStream(Parser.MAX_KEEP_IN_MEMORY_SIZE);
+            final serverCachedFileOutputStream cfos = new serverCachedFileOutputStream(Idiom.MAX_KEEP_IN_MEMORY_SIZE);
             FileUtils.copy(source, cfos);
             if (cfos.isFallback()) {
                 return parse(location, mimeType, charset, cfos.getContentFile());
@@ -189,11 +190,11 @@ public class sevenzipParser extends AbstractParser implements Parser {
                      // workaround for relative links in file, normally '#' shall be used behind the location, see
                      // below for reversion of the effects
                      final yacyURL url = yacyURL.newURL(doc.dc_source(), this.prefix + "/" + super.filePath);
-                     final String mime = ParserDispatcher.getMimeTypeByFileExt(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
+                     final String mime = Classification.getMimeTypeByFileExt(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
                      if (this.cfos.isFallback()) {
-                         theDoc = ParserDispatcher.parseSource(url, mime, null, this.cfos.getContentFile());
+                         theDoc = Parser.parseSource(url, mime, null, this.cfos.getContentFile());
                      } else {
-                         theDoc = ParserDispatcher.parseSource(url, mime, null, this.cfos.getContentBAOS());
+                         theDoc = Parser.parseSource(url, mime, null, this.cfos.getContentBAOS());
                      }
                      
                      this.doc.addSubDocument(theDoc);

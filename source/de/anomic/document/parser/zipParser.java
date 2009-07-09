@@ -41,8 +41,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import de.anomic.document.AbstractParser;
+import de.anomic.document.Classification;
+import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
-import de.anomic.document.ParserDispatcher;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.document.parser.html.ContentScraper;
@@ -51,7 +52,7 @@ import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
-public class zipParser extends AbstractParser implements Parser {
+public class zipParser extends AbstractParser implements Idiom {
 
     /**
      * a list of mime types that are supported by this parser class
@@ -85,7 +86,7 @@ public class zipParser extends AbstractParser implements Parser {
         File outputFile = null;
         Document subDoc = null;
         try {           
-            if ((this.contentLength == -1) || (this.contentLength > Parser.MAX_KEEP_IN_MEMORY_SIZE)) {
+            if ((this.contentLength == -1) || (this.contentLength > Idiom.MAX_KEEP_IN_MEMORY_SIZE)) {
                 outputFile = File.createTempFile("zipParser",".prt");
                 docText = new BufferedOutputStream(new FileOutputStream(outputFile));
             } else {
@@ -117,7 +118,7 @@ public class zipParser extends AbstractParser implements Parser {
                 final String entryExt = (idx > -1) ? entryName.substring(idx+1) : "";
                 
                 // trying to determine the mimeType per file extension   
-                final String entryMime = ParserDispatcher.getMimeTypeByFileExt(entryExt);      
+                final String entryMime = Classification.getMimeTypeByFileExt(entryExt);      
                 
                 // parsing the content
                 File subDocTempFile = null;
@@ -129,7 +130,7 @@ public class zipParser extends AbstractParser implements Parser {
                     FileUtils.copy(zippedContent,subDocTempFile,entry.getSize());                    
                     
                     // parsing the zip file entry
-                    subDoc = ParserDispatcher.parseSource(yacyURL.newURL(location,"#" + entryName),entryMime,null, subDocTempFile);
+                    subDoc = Parser.parseSource(yacyURL.newURL(location,"#" + entryName),entryMime,null, subDocTempFile);
                 } catch (final ParserException e) {
                     this.theLogger.logInfo("Unable to parse zip file entry '" + entryName + "'. " + e.getMessage());
                 } finally {

@@ -38,7 +38,7 @@ import com.jguild.jrpm.io.datatype.DataTypeIf;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.document.AbstractParser;
-import de.anomic.document.Parser;
+import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.http.httpClient;
@@ -51,7 +51,7 @@ import de.anomic.yacy.yacyURL;
  * @author theli
  *
  */
-public class rpmParser extends AbstractParser implements Parser {
+public class rpmParser extends AbstractParser implements Idiom {
 
     /**
      * a list of mime types that are supported by this parser class

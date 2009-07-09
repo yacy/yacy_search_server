@@ -34,12 +34,12 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
 
 import de.anomic.document.AbstractParser;
-import de.anomic.document.Parser;
+import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.yacy.yacyURL;
 
-public class rtfParser extends AbstractParser implements Parser {
+public class rtfParser extends AbstractParser implements Idiom {
 
     /**
      * a list of mime types that are supported by this parser class

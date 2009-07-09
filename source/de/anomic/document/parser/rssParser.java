@@ -39,7 +39,7 @@ import java.util.Map;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.document.AbstractParser;
-import de.anomic.document.Parser;
+import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.document.parser.html.AbstractScraper;
@@ -53,7 +53,7 @@ import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacyURL;
 
-public class rssParser extends AbstractParser implements Parser {
+public class rssParser extends AbstractParser implements Idiom {
 
     /**
      * a list of mime types that are supported by this parser class

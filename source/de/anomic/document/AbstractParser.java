@@ -38,12 +38,12 @@ import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
 /**
- * New classes implementing the {@link de.anomic.document.Parser} interface
+ * New classes implementing the {@link de.anomic.document.Idiom} interface
  * can extend this class to inherit all functions already implemented in this class.
  * @author Martin Thelian
  * @version $LastChangedRevision$ / $LastChangedDate$
  */
-public abstract class AbstractParser implements Parser {
+public abstract class AbstractParser implements Idiom {
     
     /**
      * the logger class that should be used by the parser module for logging
@@ -125,9 +125,9 @@ public abstract class AbstractParser implements Parser {
                         // XXX: workaround for relative paths within document
                         + file.getPath().substring(file.getPath().indexOf(File.separatorChar) + 1)
                         + "/" + file.getName());
-                final Document subdoc = ParserDispatcher.parseSource(
+                final Document subdoc = Parser.parseSource(
                         url,
-                        ParserDispatcher.getMimeTypeByFileExt(files[i].substring(files[i].indexOf('.') + 1)),
+                        Classification.getMimeTypeByFileExt(files[i].substring(files[i].indexOf('.') + 1)),
                         null, file);
                 // TODO: change anchors back to use '#' after archive name
                 doc.addSubDocument(subdoc);
@@ -150,7 +150,7 @@ public abstract class AbstractParser implements Parser {
      * and some additional metadata.
 	 * @throws ParserException if the content could not be parsed properly 
 	 * 
-	 * @see de.anomic.document.Parser#parse(de.anomic.net.URL, java.lang.String, byte[])
+	 * @see de.anomic.document.Idiom#parse(de.anomic.net.URL, java.lang.String, byte[])
 	 */
 	public Document parse(
             final yacyURL location, 
@@ -185,7 +185,7 @@ public abstract class AbstractParser implements Parser {
      * and some additional metadata.
 	 * @throws ParserException if the content could not be parsed properly 
 	 * 
-	 * @see de.anomic.document.Parser#parse(de.anomic.net.URL, java.lang.String, java.io.File)
+	 * @see de.anomic.document.Idiom#parse(de.anomic.net.URL, java.lang.String, java.io.File)
 	 */
 	public Document parse(
             final yacyURL location, 
@@ -220,7 +220,7 @@ public abstract class AbstractParser implements Parser {
      * and some additional metadata.
      * @throws ParserException if the content could not be parsed properly 
      * 
-     * @see de.anomic.document.Parser#parse(de.anomic.net.URL, java.lang.String, java.io.InputStream)
+     * @see de.anomic.document.Idiom#parse(de.anomic.net.URL, java.lang.String, java.io.InputStream)
      */
     public abstract Document parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException;
     

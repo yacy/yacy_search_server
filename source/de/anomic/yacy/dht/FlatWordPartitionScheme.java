@@ -28,6 +28,12 @@ package de.anomic.yacy.dht;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.yacy.yacySeed;
 
+/**
+ * A flat word partition scheme is a metric for words on the range of a distributed
+ * hash table. The dht is reflected by a 0..Long.MAX_VALUE integer range, each word gets
+ * a number on that range. To compute a number, the hash representation is used to compute
+ * the hash position from the first 63 bits of the b64 hash string.
+ */
 public class FlatWordPartitionScheme implements PartitionScheme {
 
     public static final FlatWordPartitionScheme std = new FlatWordPartitionScheme();

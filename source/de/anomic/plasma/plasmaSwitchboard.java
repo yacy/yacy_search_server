@@ -144,7 +144,8 @@ import de.anomic.data.wiki.wikiBoard;
 import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
 import de.anomic.document.Condenser;
-import de.anomic.document.ParserDispatcher;
+import de.anomic.document.Classification;
+import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
 import de.anomic.document.Word;
 import de.anomic.document.Document;
@@ -517,13 +518,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // define an extension-blacklist
         log.logConfig("Parser: Initializing Extension Mappings for Media/Parser");
-        ParserDispatcher.initMediaExt(ParserDispatcher.extString2extList(getConfig(plasmaSwitchboardConstants.PARSER_MEDIA_EXT,"")));
-        ParserDispatcher.initSupportedHTMLFileExt(ParserDispatcher.extString2extList(getConfig(plasmaSwitchboardConstants.PARSER_MEDIA_EXT_PARSEABLE,"")));
+        Classification.initMediaExt(Classification.extString2extList(getConfig(plasmaSwitchboardConstants.PARSER_MEDIA_EXT,"")));
+        Classification.initSupportedHTMLFileExt(Classification.extString2extList(getConfig(plasmaSwitchboardConstants.PARSER_MEDIA_EXT_PARSEABLE,"")));
         
         // define a realtime parsable mimetype list
         log.logConfig("Parser: Initializing Mime Types");
-        ParserDispatcher.initHTMLParsableMimeTypes(getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES_HTML, "application/xhtml+xml,text/html,text/plain"));
-        ParserDispatcher.addParseableMimeTypes(getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES, null));
+        Classification.initHTMLParsableMimeTypes(getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES_HTML, "application/xhtml+xml,text/html,text/plain"));
+        Classification.addParseableMimeTypes(getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES, null));
         
         // start a loader
         log.logConfig("Starting Crawl Loader");
@@ -1097,7 +1098,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
          * 
          * Testing if the content type is supported by the available parsers
          * ========================================================================= */
-        final boolean isSupportedContent = ParserDispatcher.supportedContent(entry.url(),entry.getMimeType());
+        final boolean isSupportedContent = Classification.supportedContent(entry.url(),entry.getMimeType());
         if (log.isFinest()) log.logFinest("STORE "+ entry.url() +" content of type "+ entry.getMimeType() +" is supported: "+ isSupportedContent);
         
         /* =========================================================================
@@ -1689,7 +1690,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 
         try {
             // parse the document
-            document = ParserDispatcher.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), plasmaHTCache.getResourceContent(entry.url()));
+            document = Parser.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), plasmaHTCache.getResourceContent(entry.url()));
             assert(document != null) : "Unexpected error. Parser returned null.";
         } catch (final ParserException e) {
             this.log.logWarning("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());

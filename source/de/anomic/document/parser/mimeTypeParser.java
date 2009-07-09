@@ -41,14 +41,14 @@ import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
 import de.anomic.document.AbstractParser;
+import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
-import de.anomic.document.ParserDispatcher;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
-public class mimeTypeParser extends AbstractParser implements Parser {
+public class mimeTypeParser extends AbstractParser implements Idiom {
     
     /**
      * a list of mime types that are supported by this parser class
@@ -140,7 +140,7 @@ public class mimeTypeParser extends AbstractParser implements Parser {
                 checkInterruption();
                 
                 // parsing the content using the determined mimetype
-                return ParserDispatcher.parseSource(location,mimeType,charset,sourceFile);
+                return Parser.parseSource(location,mimeType,charset,sourceFile);
             }
             throw new ParserException("Unable to detect mimetype of resource (3).",location);
         } catch (final MagicMatchNotFoundException e) {

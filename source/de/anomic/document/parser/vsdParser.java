@@ -31,14 +31,14 @@ import java.io.InputStream;
 import java.util.Hashtable;
 
 import de.anomic.document.AbstractParser;
-import de.anomic.document.Parser;
+import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.yacy.yacyURL;
 import org.apache.poi.hdgf.extractor.VisioTextExtractor;
 import org.apache.poi.hpsf.SummaryInformation;
 
-public class vsdParser extends AbstractParser implements Parser {
+public class vsdParser extends AbstractParser implements Idiom {
 
     /**
      * a list of mime types that are supported by this parser class

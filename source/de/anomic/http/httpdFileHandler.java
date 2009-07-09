@@ -80,7 +80,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPOutputStream;
 
-import de.anomic.document.ParserDispatcher;
+import de.anomic.document.Classification;
 import de.anomic.document.parser.htmlParser;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.ScraperInputStream;
@@ -231,7 +231,7 @@ public final class httpdFileHandler {
         }
         headers.put(httpHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
         headers.put(httpHeader.DATE, DateFormatter.formatRFC1123(new Date()));
-        if(!(ParserDispatcher.mediaExtContains(ext))){
+        if(!(Classification.mediaExtContains(ext))){
             headers.put(httpHeader.PRAGMA, "no-cache");         
         }
         return headers;

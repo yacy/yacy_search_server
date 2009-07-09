@@ -26,7 +26,6 @@
 
 package de.anomic.kelondro.order;
 
-import java.io.IOException;
 import java.util.Comparator;
 import java.util.Iterator;
 
@@ -238,7 +237,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
         return sb.toString();
     }
     
-    public static Iterator<Long> LongIterator(Iterator<byte[]> b256Iterator) throws IOException {
+    public static Iterator<Long> LongIterator(Iterator<byte[]> b256Iterator) {
         return new LongIter(b256Iterator);
     }
     

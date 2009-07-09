@@ -58,7 +58,8 @@ import java.util.concurrent.TimeoutException;
 
 import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
-import de.anomic.document.ParserDispatcher;
+import de.anomic.document.Classification;
+import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.kelondro.util.ByteBuffer;
@@ -102,8 +103,8 @@ public class mediawikiIndex extends Thread {
         this.count = 0;
         this.start = 0;
         // must be called before usage:
-        ParserDispatcher.initHTMLParsableMimeTypes("text/html");
-        ParserDispatcher.addParseableMimeTypes("text/html");
+        Classification.initHTMLParsableMimeTypes("text/html");
+        Classification.addParseableMimeTypes("text/html");
     }
     
     /**
@@ -145,8 +146,8 @@ public class mediawikiIndex extends Thread {
             StringBuilder sb = new StringBuilder();
             boolean page = false, text = false;
             String title = null;
-            ParserDispatcher.initHTMLParsableMimeTypes("text/html");
-            ParserDispatcher.addParseableMimeTypes("text/html");
+            Classification.initHTMLParsableMimeTypes("text/html");
+            Classification.addParseableMimeTypes("text/html");
             wikiparserrecord poison = newRecord();
             int threads = Math.max(2, Runtime.getRuntime().availableProcessors() - 1);
             BlockingQueue<wikiparserrecord> in = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);
@@ -487,7 +488,7 @@ public class mediawikiIndex extends Thread {
         public void genDocument() throws InterruptedException, ParserException {
             try {
 				url = new yacyURL(urlStub + title, null);
-				document = ParserDispatcher.parseSource(url, "text/html", "utf-8", html.getBytes("UTF-8"));
+				document = Parser.parseSource(url, "text/html", "utf-8", html.getBytes("UTF-8"));
 				// the wiki parser is not able to find the proper title in the source text, so it must be set here
 				document.setTitle(title);
 			} catch (UnsupportedEncodingException e) {

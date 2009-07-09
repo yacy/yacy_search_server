@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
-import de.anomic.document.ParserDispatcher;
+import de.anomic.document.Classification;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
@@ -218,14 +218,14 @@ public class FTPLoader {
     private httpDocument getFile(final ftpc ftpClient, final CrawlEntry entry) throws Exception {
         // determine the mimetype of the resource
         final yacyURL entryUrl = entry.url();
-        final String extension = ParserDispatcher.getFileExt(entryUrl);
-        final String mimeType = ParserDispatcher.getMimeTypeByFileExt(extension);
+        final String extension = Classification.getFileExt(entryUrl);
+        final String mimeType = Classification.getMimeTypeByFileExt(extension);
         final String path = getPath(entryUrl);
 
         // if the mimetype and file extension is supported we start to download
         // the file
         httpDocument htCache = null;
-        if (ParserDispatcher.supportedContent(entryUrl, mimeType)) {
+        if (Classification.supportedContent(entryUrl, mimeType)) {
             // aborting download if content is too long
             final int size = ftpClient.fileSize(path);
             if (size <= maxFileSize || maxFileSize == -1) {

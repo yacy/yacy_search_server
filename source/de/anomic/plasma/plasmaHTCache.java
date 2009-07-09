@@ -41,7 +41,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.anomic.document.ParserDispatcher;
+import de.anomic.document.Classification;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpDocument;
 import de.anomic.kelondro.blob.ArrayStack;
@@ -181,7 +181,7 @@ public final class plasmaHTCache {
     }
 
     public static boolean isText(final String mimeType) {
-        return ParserDispatcher.supportedMimeTypesContains(mimeType);
+        return Classification.supportedMimeTypesContains(mimeType);
     }
 
     public static boolean noIndexingURL(final yacyURL url) {
@@ -200,7 +200,7 @@ public final class plasmaHTCache {
 
         //php
         
-        return ParserDispatcher.mediaExtContains(urlString);
+        return Classification.mediaExtContains(urlString);
     }
 
 

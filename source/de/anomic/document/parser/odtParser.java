@@ -47,7 +47,7 @@ import com.catcode.odf.OpenDocumentTextInputStream;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.document.AbstractParser;
-import de.anomic.document.Parser;
+import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.http.httpClient;
@@ -57,7 +57,7 @@ import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacyURL;
 
-public class odtParser extends AbstractParser implements Parser {
+public class odtParser extends AbstractParser implements Idiom {
 
     /**
      * a list of mime types that are supported by this parser class
@@ -109,7 +109,7 @@ public class odtParser extends AbstractParser implements Parser {
                     final long contentSize = zipEntry.getSize();
                     
                     // creating a writer for output
-                    if ((contentSize == -1) || (contentSize > Parser.MAX_KEEP_IN_MEMORY_SIZE)) {
+                    if ((contentSize == -1) || (contentSize > Idiom.MAX_KEEP_IN_MEMORY_SIZE)) {
                         writerFile = File.createTempFile("odtParser",".prt");
                         writer = new OutputStreamWriter(new FileOutputStream(writerFile),"UTF-8");
                     } else {

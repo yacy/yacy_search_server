@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.Date;
 
 import de.anomic.data.Blacklist;
-import de.anomic.document.ParserDispatcher;
+import de.anomic.document.Classification;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpResponse;
@@ -156,7 +156,7 @@ public final class HTTPLoader {
                     
                     // request has been placed and result has been returned. work off response
                     //try {
-                        if (ParserDispatcher.supportedContent(entry.url(), res.getResponseHeader().mime())) {
+                        if (Classification.supportedContent(entry.url(), res.getResponseHeader().mime())) {
                             
                             // get the content length and check if the length is allowed
                             long contentLength = res.getResponseHeader().getContentLength();

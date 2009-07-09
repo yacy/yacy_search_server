@@ -43,8 +43,9 @@ import com.ice.tar.TarEntry;
 import com.ice.tar.TarInputStream;
 
 import de.anomic.document.AbstractParser;
+import de.anomic.document.Classification;
+import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
-import de.anomic.document.ParserDispatcher;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.document.parser.html.ContentScraper;
@@ -53,7 +54,7 @@ import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
-public class tarParser extends AbstractParser implements Parser {
+public class tarParser extends AbstractParser implements Idiom {
 
     /**
      * a list of mime types that are supported by this parser class
@@ -85,7 +86,7 @@ public class tarParser extends AbstractParser implements Parser {
         File outputFile = null;
         Document subDoc = null;        
         try {           
-            if ((this.contentLength == -1) || (this.contentLength > Parser.MAX_KEEP_IN_MEMORY_SIZE)) {
+            if ((this.contentLength == -1) || (this.contentLength > Idiom.MAX_KEEP_IN_MEMORY_SIZE)) {
                 outputFile = File.createTempFile("zipParser",".prt");
                 docText = new BufferedOutputStream(new FileOutputStream(outputFile));
             } else {
@@ -96,7 +97,7 @@ public class tarParser extends AbstractParser implements Parser {
              * If the mimeType was not reported correcly by the webserve we
              * have to decompress it first
              */
-            final String ext = ParserDispatcher.getFileExt(location).toLowerCase();
+            final String ext = Classification.getFileExt(location).toLowerCase();
             if (ext.equals("gz") || ext.equals("tgz")) {
                 source = new GZIPInputStream(source);
             }
@@ -129,7 +130,7 @@ public class tarParser extends AbstractParser implements Parser {
                 final String entryExt = (idx > -1) ? entryName.substring(idx+1) : "";
                 
                 // trying to determine the mimeType per file extension   
-                final String entryMime = ParserDispatcher.getMimeTypeByFileExt(entryExt);
+                final String entryMime = Classification.getMimeTypeByFileExt(entryExt);
                 
                 // getting the entry content
                 File subDocTempFile = null;
@@ -144,7 +145,7 @@ public class tarParser extends AbstractParser implements Parser {
                     checkInterruption();
                     
                     // parsing the content                    
-                    subDoc = ParserDispatcher.parseSource(yacyURL.newURL(location,"#" + entryName),entryMime,null,subDocTempFile);
+                    subDoc = Parser.parseSource(yacyURL.newURL(location,"#" + entryName),entryMime,null,subDocTempFile);
                 } catch (final ParserException e) {
                     this.theLogger.logInfo("Unable to parse tar file entry '" + entryName + "'. " + e.getMessage());
                 } finally {

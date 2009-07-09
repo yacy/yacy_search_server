@@ -30,9 +30,12 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -97,7 +100,7 @@ public class Document {
         this.languages = languages;
         
         if (text == null) try {
-            this.text = new serverCachedFileOutputStream(Parser.MAX_KEEP_IN_MEMORY_SIZE);
+            this.text = new serverCachedFileOutputStream(Idiom.MAX_KEEP_IN_MEMORY_SIZE);
         } catch (final IOException e) {
             e.printStackTrace();
             this.text = new StringBuilder();
@@ -371,14 +374,14 @@ dc_rights
                     } else {
                         ext = u.substring(extpos + 1).toLowerCase();
                     }
-                    if (ParserDispatcher.mediaExtContains(ext)) {
+                    if (Classification.mediaExtContains(ext)) {
                         // this is not a normal anchor, its a media link
-                        if (ParserDispatcher.imageExtContains(ext)) {
+                        if (Classification.imageExtContains(ext)) {
                             ContentScraper.addImage(collectedImages, new ImageEntry(url, entry.getValue(), -1, -1));
                         }
-                        else if (ParserDispatcher.audioExtContains(ext)) audiolinks.put(url, entry.getValue());
-                        else if (ParserDispatcher.videoExtContains(ext)) videolinks.put(url, entry.getValue());
-                        else if (ParserDispatcher.appsExtContains(ext)) applinks.put(url, entry.getValue());
+                        else if (Classification.audioExtContains(ext)) audiolinks.put(url, entry.getValue());
+                        else if (Classification.videoExtContains(ext)) videolinks.put(url, entry.getValue());
+                        else if (Classification.appsExtContains(ext)) applinks.put(url, entry.getValue());
                     } else {
                         hyperlinks.put(url, entry.getValue());
                     }
@@ -396,19 +399,115 @@ dc_rights
         // we add artificial hyperlinks to the hyperlink set
         // that can be calculated from given hyperlinks and imagelinks
         
-        hyperlinks.putAll(ParserDispatcher.allReflinks(images.values()));
-        hyperlinks.putAll(ParserDispatcher.allReflinks(audiolinks.keySet()));
-        hyperlinks.putAll(ParserDispatcher.allReflinks(videolinks.keySet()));
-        hyperlinks.putAll(ParserDispatcher.allReflinks(applinks.keySet()));
+        hyperlinks.putAll(allReflinks(images.values()));
+        hyperlinks.putAll(allReflinks(audiolinks.keySet()));
+        hyperlinks.putAll(allReflinks(videolinks.keySet()));
+        hyperlinks.putAll(allReflinks(applinks.keySet()));
         /*
-        hyperlinks.putAll(plasmaParser.allSubpaths(hyperlinks.keySet()));
-        hyperlinks.putAll(plasmaParser.allSubpaths(images.values()));
-        hyperlinks.putAll(plasmaParser.allSubpaths(audiolinks.keySet()));
-        hyperlinks.putAll(plasmaParser.allSubpaths(videolinks.keySet()));
-        hyperlinks.putAll(plasmaParser.allSubpaths(applinks.keySet()));
+        hyperlinks.putAll(allSubpaths(hyperlinks.keySet()));
+        hyperlinks.putAll(allSubpaths(images.values()));
+        hyperlinks.putAll(allSubpaths(audiolinks.keySet()));
+        hyperlinks.putAll(allSubpaths(videolinks.keySet()));
+        hyperlinks.putAll(allSubpaths(applinks.keySet()));
          */        
         // don't do this again
         this.resorted = true;
+    }
+    
+    public static Map<yacyURL, String> allSubpaths(final Collection<?> links) {
+        // links is either a Set of Strings (urls) or a Set of
+        // htmlFilterImageEntries
+        final HashSet<String> h = new HashSet<String>();
+        Iterator<?> i = links.iterator();
+        Object o;
+        yacyURL url;
+        String u;
+        int pos;
+        int l;
+        while (i.hasNext())
+            try {
+                o = i.next();
+                if (o instanceof yacyURL) url = (yacyURL) o;
+                else if (o instanceof String) url = new yacyURL((String) o, null);
+                else if (o instanceof ImageEntry) url = ((ImageEntry) o).url();
+                else {
+                    assert false;
+                    continue;
+                }
+                u = url.toNormalform(true, true);
+                if (u.endsWith("/"))
+                    u = u.substring(0, u.length() - 1);
+                pos = u.lastIndexOf('/');
+                while (pos > 8) {
+                    l = u.length();
+                    u = u.substring(0, pos + 1);
+                    h.add(u);
+                    u = u.substring(0, pos);
+                    assert (u.length() < l) : "u = " + u;
+                    pos = u.lastIndexOf('/');
+                }
+            } catch (final MalformedURLException e) { }
+        // now convert the strings to yacyURLs
+        i = h.iterator();
+        final HashMap<yacyURL, String> v = new HashMap<yacyURL, String>();
+        while (i.hasNext()) {
+            u = (String) i.next();
+            try {
+                url = new yacyURL(u, null);
+                v.put(url, "sub");
+            } catch (final MalformedURLException e) {
+            }
+        }
+        return v;
+    }
+    
+    public static Map<yacyURL, String> allReflinks(final Collection<?> links) {
+        // links is either a Set of Strings (with urls) or
+        // htmlFilterImageEntries
+        // we find all links that are part of a reference inside a url
+        final HashMap<yacyURL, String> v = new HashMap<yacyURL, String>();
+        final Iterator<?> i = links.iterator();
+        Object o;
+        yacyURL url;
+        String u;
+        int pos;
+        loop: while (i.hasNext())
+            try {
+                o = i.next();
+                if (o instanceof yacyURL)
+                    url = (yacyURL) o;
+                else if (o instanceof String)
+                    url = new yacyURL((String) o, null);
+                else if (o instanceof ImageEntry)
+                    url = ((ImageEntry) o).url();
+                else {
+                    assert false;
+                    continue;
+                }
+                u = url.toNormalform(true, true);
+                if ((pos = u.toLowerCase().indexOf("http://", 7)) > 0) {
+                    i.remove();
+                    u = u.substring(pos);
+                    while ((pos = u.toLowerCase().indexOf("http://", 7)) > 0)
+                        u = u.substring(pos);
+                    url = new yacyURL(u, null);
+                    if (!(v.containsKey(url)))
+                        v.put(url, "ref");
+                    continue loop;
+                }
+                if ((pos = u.toLowerCase().indexOf("/www.", 7)) > 0) {
+                    i.remove();
+                    u = "http:/" + u.substring(pos);
+                    while ((pos = u.toLowerCase().indexOf("/www.", 7)) > 0)
+                        u = "http:/" + u.substring(pos);
+                    url = new yacyURL(u, null);
+                    if (!(v.containsKey(url)))
+                        v.put(url, "ref");
+                    continue loop;
+                }
+            } catch (final MalformedURLException e) {
+            }
+        return v;
     }
     
     public void addSubDocument(final Document doc) throws IOException {
@@ -423,7 +522,7 @@ dc_rights
         this.description.append(doc.dc_description());
         
         if (!(this.text instanceof serverCachedFileOutputStream)) {
-            this.text = new serverCachedFileOutputStream(Parser.MAX_KEEP_IN_MEMORY_SIZE);
+            this.text = new serverCachedFileOutputStream(Idiom.MAX_KEEP_IN_MEMORY_SIZE);
             FileUtils.copy(getText(), (serverCachedFileOutputStream)this.text);
         }
         FileUtils.copy(doc.getText(), (serverCachedFileOutputStream)this.text);

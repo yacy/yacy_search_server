@@ -43,14 +43,14 @@ import org.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
 import org.pdfbox.util.PDFTextStripper;
 
 import de.anomic.document.AbstractParser;
-import de.anomic.document.Parser;
+import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacyURL;
 
-public class pdfParser extends AbstractParser implements Parser {
+public class pdfParser extends AbstractParser implements Idiom {
 
     /**
      * a list of mime types that are supported by this parser class
@@ -122,7 +122,7 @@ public class pdfParser extends AbstractParser implements Parser {
             }            
             
             // creating a writer for output
-            if ((this.contentLength == -1) || (this.contentLength > Parser.MAX_KEEP_IN_MEMORY_SIZE)) {
+            if ((this.contentLength == -1) || (this.contentLength > Idiom.MAX_KEEP_IN_MEMORY_SIZE)) {
                 writerFile = File.createTempFile("pdfParser",".prt");
                 writer = new OutputStreamWriter(new FileOutputStream(writerFile),"UTF-8");
             } else {

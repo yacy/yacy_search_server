@@ -39,7 +39,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.anomic.document.Condenser;
-import de.anomic.document.ParserDispatcher;
+import de.anomic.document.Classification;
+import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
 import de.anomic.document.Word;
 import de.anomic.document.Document;
@@ -871,25 +872,25 @@ public class SnippetCache {
                 if (    // if no extension is available
                         (p < 0) ||
                         // or the extension is supported by one of the parsers
-                        ((p >= 0) && (ParserDispatcher.supportedFileExtContains(filename.substring(p + 1))))
+                        ((p >= 0) && (Classification.supportedFileExtContains(filename.substring(p + 1))))
                 ) {
                     String supposedMime = "text/html";
 
                     // if the mimeType Parser is installed we can set the mimeType to null to force
                     // a mimetype detection
-                    if (ParserDispatcher.supportedMimeTypesContains("application/octet-stream")) {
+                    if (Classification.supportedMimeTypesContains("application/octet-stream")) {
                         supposedMime = null;
                     } else if (p != -1){
                         // otherwise we try to determine the mimeType per file Extension
-                        supposedMime = ParserDispatcher.getMimeTypeByFileExt(filename.substring(p + 1));
+                        supposedMime = Classification.getMimeTypeByFileExt(filename.substring(p + 1));
                     }
 
-                    return ParserDispatcher.parseSource(url, supposedMime, null, contentLength, resourceStream);
+                    return Parser.parseSource(url, supposedMime, null, contentLength, resourceStream);
                 }
                 return null;
             }            
-            if (ParserDispatcher.supportedMimeTypesContains(responseHeader.mime())) {
-                return ParserDispatcher.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), contentLength, resourceStream);
+            if (Classification.supportedMimeTypesContains(responseHeader.mime())) {
+                return Parser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), contentLength, resourceStream);
             }
             return null;
         } catch (final InterruptedException e) {

@@ -28,8 +28,9 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import de.anomic.document.Classification;
+import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
-import de.anomic.document.ParserDispatcher;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -218,9 +219,9 @@ public final class Settings_p {
          */
         int parserIdx = 0;
         
-        final Iterator<Parser> availableParserIter = ParserDispatcher.availableParserList.values().iterator();
+        final Iterator<Idiom> availableParserIter = Parser.availableParserList.values().iterator();
         while (availableParserIter.hasNext()) {
-            final Parser parserInfo = availableParserIter.next();
+            final Idiom parserInfo = availableParserIter.next();
             prop.put("parser_" + parserIdx + "_name", parserInfo.getName());
             
             int mimeIdx = 0;
@@ -228,7 +229,7 @@ public final class Settings_p {
             while (mimeTypeIter.hasMoreElements()) {
                 final String mimeType = mimeTypeIter.nextElement();
                 prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_mimetype", mimeType);
-                prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_status", (ParserDispatcher.supportedMimeTypesContains(mimeType)) ? 1 : 0);
+                prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_status", (Classification.supportedMimeTypesContains(mimeType)) ? 1 : 0);
                 mimeIdx++;
             }
             prop.put("parser_" + parserIdx + "_mime", mimeIdx);

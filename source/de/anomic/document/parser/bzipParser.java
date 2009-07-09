@@ -35,14 +35,14 @@ import java.util.Hashtable;
 import org.apache.tools.bzip2.CBZip2InputStream;
 
 import de.anomic.document.AbstractParser;
+import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
-import de.anomic.document.ParserDispatcher;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
-public class bzipParser extends AbstractParser implements Parser {
+public class bzipParser extends AbstractParser implements Idiom {
 
     /**
      * a list of mime types that are supported by this parser class
@@ -107,7 +107,7 @@ public class bzipParser extends AbstractParser implements Parser {
             checkInterruption();
             
             // creating a new parser class to parse the unzipped content
-            return ParserDispatcher.parseSource(location,null,null,tempFile);
+            return Parser.parseSource(location,null,null,tempFile);
         } catch (final Exception e) {  
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;

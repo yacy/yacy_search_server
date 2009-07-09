@@ -147,12 +147,11 @@ public class ymageChart extends ymageMatrix {
    
     public static void main(final String[] args) {
         System.setProperty("java.awt.headless", "true");
-        final boolean invers = false;
-        final String bg = (invers) ? "000000" : "FFFFFF";
-        final String fg = (invers) ? "FFFFFF" : "000000";
-        final String scale = (invers) ? "333333" : "CCCCCC";
-        final String green = (invers) ? "008800" : "008800";
-        final String blue = (invers) ? "0000FF" : "0000FF";
+        final String bg = "FFFFFF";
+        final String fg = "000000";
+        final String scale = "CCCCCC";
+        final String green = "008800";
+        final String blue = "0000FF";
         final ymageChart ip = new ymageChart(660, 240, bg, fg, fg, 30, 30, 20, 20, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY", "");
         ip.declareDimension(DIMENSION_BOTTOM, 60, 60, -600, fg, scale, "TIME/SECONDS");
         //ip.declareDimension(DIMENSION_TOP, 10, 40, "000000", null, "count");
