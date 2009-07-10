@@ -45,7 +45,7 @@ public class pptParser extends AbstractParser implements Idiom {
      * @see #getSupportedMimeTypes()
      */
     public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
-    static final String ext = "ppt,pps";
+    static final String ext = "ppt,pptx,pps";
     static { 
         SUPPORTED_MIME_TYPES.put("application/mspowerpoint",ext);
         SUPPORTED_MIME_TYPES.put("application/powerpoint",ext);

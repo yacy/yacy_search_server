@@ -59,7 +59,6 @@ public class gzipParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.put("application/x-compress",ext);
         SUPPORTED_MIME_TYPES.put("gzip/document",ext);
         SUPPORTED_MIME_TYPES.put("application/octet-stream",ext);
-        SUPPORTED_MIME_TYPES.put("application/x-tar",ext);
     }     
 
     public gzipParser() {        

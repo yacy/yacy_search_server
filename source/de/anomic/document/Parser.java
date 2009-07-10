@@ -81,7 +81,7 @@ public final class Parser {
         initParser(new docParser());
         initParser(new gzipParser());
         initParser(new htmlParser());
-        initParser(new mimeTypeParser());
+        //initParser(new mimeTypeParser()); // what does that thing do?
         initParser(new odtParser());
         initParser(new pdfParser());
         initParser(new pptParser());
@@ -107,9 +107,9 @@ public final class Parser {
     private static void initParser(Idiom parser) {
         for (Map.Entry<String, String> e: parser.getSupportedMimeTypes().entrySet()) {
             // process the mime types
-            final String mimeType = e.getKey();
+            final String mimeType = normalizeMimeType(e.getKey());
             Idiom p0 = mime2parser.get(mimeType);
-            if (p0 != null) log.logSevere("parser for mime '" + mimeType + "' was set to '" + p0.getName() + "', overwriting with new parser.");
+            if (p0 != null) log.logSevere("parser for mime '" + mimeType + "' was set to '" + p0.getName() + "', overwriting with new parser '" + parser.getName() + "'.");
             mime2parser.put(mimeType, parser);
             Log.logInfo("PARSER", "Parser for mime type '" + mimeType + "': " + parser.getName());
 
@@ -134,7 +134,7 @@ public final class Parser {
             if (sourceArray == null || sourceArray.length == 0) {
                 final String errorMsg = "No resource content available (1) " + (((sourceArray == null) ? "source == null" : "source.length() == 0") + ", url = " + location.toNormalform(true, false));
                 log.logInfo("Unable to parse '" + location + "'. " + errorMsg);
-                throw new ParserException(errorMsg, location, errorMsg);
+                throw new ParserException(errorMsg, location);
             }
             byteIn = new ByteArrayInputStream(sourceArray);
             return parseSource(location, mimeType, charset, sourceArray.length, byteIn);
@@ -142,7 +142,7 @@ public final class Parser {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
             log.logSevere("Unexpected exception in parseSource from byte-array: " + e.getMessage(), e);
-            throw new ParserException("Unexpected exception while parsing " + location, location, e);
+            throw new ParserException("Unexpected exception: " + e.getMessage(), location);
         } finally {
             if (byteIn != null) try {
                 byteIn.close();
@@ -160,7 +160,7 @@ public final class Parser {
             if (!(sourceFile.exists() && sourceFile.canRead() && sourceFile.length() > 0)) {
                 final String errorMsg = sourceFile.exists() ? "Empty resource file." : "No resource content available (2).";
                 log.logInfo("Unable to parse '" + location + "'. " + errorMsg);
-                throw new ParserException(errorMsg, location, "document has no content");
+                throw new ParserException(errorMsg, location);
             }
             sourceStream = new BufferedInputStream(new FileInputStream(sourceFile));
             return parseSource(location, mimeType, charset, sourceFile.length(), sourceStream);
@@ -168,7 +168,7 @@ public final class Parser {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;
             log.logSevere("Unexpected exception in parseSource from File: " + e.getMessage(), e);
-            throw new ParserException("Unexpected exception while parsing " + location, location, e);
+            throw new ParserException("Unexpected exception: " + e.getMessage(), location);
         } finally {
             if (sourceStream != null)try {
                 sourceStream.close();
@@ -188,12 +188,12 @@ public final class Parser {
             if (!supportsMime(mimeType)) {
                 final String errorMsg = "No parser available to parse mimetype '" + mimeType + "'";
                 log.logInfo("Unable to parse '" + location + "'. " + errorMsg);
-                throw new ParserException(errorMsg, location, "wrong mime type");
+                throw new ParserException(errorMsg, location);
             }
             if (!supportsExtension(location)) {
                 final String errorMsg = "No parser available to parse extension of url path";
                 log.logInfo("Unable to parse '" + location + "'. " + errorMsg);
-                throw new ParserException(errorMsg, location, "wrong extension");
+                throw new ParserException(errorMsg, location);
             }
             if (log.isFine()) log.logInfo("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "'.");
             Idiom parser = mime2parser.get(normalizeMimeType(mimeType));
@@ -204,7 +204,7 @@ public final class Parser {
             } else {
                 final String errorMsg = "No parser available to parse mimetype '" + mimeType + "' (2)";
                 log.logInfo("Unable to parse '" + location + "'. " + errorMsg);
-                throw new ParserException(errorMsg, location, "wrong mime type or wrong extension");
+                throw new ParserException(errorMsg, location);
             }
             if (doc == null) {
                 final String errorMsg = "Unexpected error. Parser returned null.";
@@ -217,11 +217,12 @@ public final class Parser {
             if (e instanceof ParserException) throw (ParserException) e;
             final String errorMsg = "Unexpected exception. " + e.getMessage();
             log.logSevere("Unable to parse '" + location + "'. " + errorMsg, e);
-            throw new ParserException(errorMsg, location, e);
+            throw new ParserException(errorMsg, location);
         }
     }
 
     public static boolean supportsMime(String mimeType) {
+        mimeType = normalizeMimeType(mimeType);
         return !denyMime.contains(mimeType) && mime2parser.containsKey(normalizeMimeType(mimeType));
     }
     
@@ -249,7 +250,7 @@ public final class Parser {
     
     public static void setDenyMime(String denyList) {
         denyMime.clear();
-        for (String s: denyList.split(",")) denyMime.add(s);
+        for (String s: denyList.split(",")) denyMime.add(normalizeMimeType(s));
     }
     
     public static String getDenyMime() {
@@ -260,6 +261,6 @@ public final class Parser {
     }
     
     public static void grantMime(String mime, boolean grant) {
-        if (grant) denyMime.remove(mime); else denyMime.add(mime);
+        if (grant) denyMime.remove(normalizeMimeType(mime)); else denyMime.add(normalizeMimeType(mime));
     }
 }

@@ -26,9 +26,7 @@ package de.anomic.document;
 
 import de.anomic.yacy.yacyURL;
 
-public class ParserException extends Exception
-{
-    private String errorCode = null;
+public class ParserException extends Exception {
     private yacyURL url = null;
     
 	private static final long serialVersionUID = 1L;
@@ -38,27 +36,8 @@ public class ParserException extends Exception
     }
 
     public ParserException(final String message, final yacyURL url) {
-        this(message,url, "parser error for url " + url.toString());
-    }    
-    
-    public ParserException(final String message, final yacyURL url, final String errorCode) {
-        super(message);
-        this.errorCode = errorCode;
+        super(message + "; url = " + url.toNormalform(true, false));
         this.url = url;
-    }
-
-    public ParserException(final String message, final yacyURL url, final Throwable cause) {
-        this(message,url,cause, "parser error for url " + url.toString());
-    }
-    
-    public ParserException(final String message, final yacyURL url, final Throwable cause, final String errorCode) {
-        super(message, cause);
-        this.errorCode = errorCode;
-        this.url = url;
-    }
-
-    public String getErrorCode() {
-        return this.errorCode;
     }
     
     public yacyURL getURL() {

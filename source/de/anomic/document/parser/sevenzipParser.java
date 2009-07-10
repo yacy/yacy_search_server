@@ -72,7 +72,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
         try {
             archive = new Handler(source);
         } catch (final IOException e) {
-            throw new ParserException("error opening 7zip archive", location, e);
+            throw new ParserException("error opening 7zip archive: " + e.getMessage(), location);
         }
         checkInterruption();
         final SZParserExtractCallback aec = new SZParserExtractCallback(super.theLogger, archive,
@@ -87,8 +87,8 @@ public class sevenzipParser extends AbstractParser implements Idiom {
             if (e.getCause() instanceof ParserException)
                 throw (ParserException)e.getCause();
             throw new ParserException(
-                    "error processing 7zip archive at internal file: " + aec.getCurrentFilePath(),
-                    location, e);
+                    "error processing 7zip archive at internal file " + aec.getCurrentFilePath() + ": " + e.getMessage(),
+                    location);
         } finally {
             try { archive.close(); } catch (final IOException e) {  }
         }
@@ -106,7 +106,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
         try {
             return parse(location, mimeType, charset, new MyRandomAccessFile(sourceFile, "r"), Idiom.MAX_KEEP_IN_MEMORY_SIZE);
         } catch (final IOException e) {
-            throw new ParserException("error processing 7zip archive", location, e);
+            throw new ParserException("error processing 7zip archive: " + e.getMessage(), location);
         }
     }
     
@@ -120,7 +120,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
             }
             return parse(location, mimeType, charset, cfos.getContentBAOS());
         } catch (final IOException e) {
-            throw new ParserException("error processing 7zip archive", location, e);
+            throw new ParserException("error processing 7zip archive: " + e.getMessage(), location);
         }
     }
     

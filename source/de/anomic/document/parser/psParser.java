@@ -282,7 +282,7 @@ public class psParser extends AbstractParser implements Idiom {
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;        	
         	
-            throw new ParserException("Unable to parse the ps file. " + e.getMessage(),location, e);
+            throw new ParserException("Unable to parse the ps file. " + e.getMessage(), location);
         } finally {
             if (tempFile != null) FileUtils.deletedelete(tempFile);
         }

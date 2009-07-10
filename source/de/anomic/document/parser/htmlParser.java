@@ -50,7 +50,7 @@ public class htmlParser extends AbstractParser implements Idiom {
      */
     public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();  
     static {
-        String ext = "htm,html,shtml,xhtml,php,asp,aspx,txt,jsp";
+        String ext = "htm,html,shtml,xhtml,php,asp,aspx,txt,jsp,csv";
         SUPPORTED_MIME_TYPES.put("application/xhtml+xml", ext);
         SUPPORTED_MIME_TYPES.put("text/html", ext);
         SUPPORTED_MIME_TYPES.put("text/plain", ext);

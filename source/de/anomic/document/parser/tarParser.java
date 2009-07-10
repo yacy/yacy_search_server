@@ -64,8 +64,6 @@ public class tarParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.put("application/tar","tar");
         SUPPORTED_MIME_TYPES.put("applicaton/x-gtar","tar");
         SUPPORTED_MIME_TYPES.put("multipart/x-tar","tar");
-        SUPPORTED_MIME_TYPES.put("application/x-compress","tar");
-        SUPPORTED_MIME_TYPES.put("application/x-compressed","tar");
     }     
 
     public tarParser() {        

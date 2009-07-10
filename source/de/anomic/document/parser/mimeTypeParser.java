@@ -60,9 +60,6 @@ public class mimeTypeParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.put("text/xml","xml");
         SUPPORTED_MIME_TYPES.put("application/xml","xml"); 
         SUPPORTED_MIME_TYPES.put("application/x-xml","xml");
-        SUPPORTED_MIME_TYPES.put("application/octet-stream","xml");    
-        SUPPORTED_MIME_TYPES.put("application/x-compress","xml");
-        SUPPORTED_MIME_TYPES.put("application/x-compressed","xml");
     } 
     
     /**

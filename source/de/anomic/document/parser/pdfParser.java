@@ -107,7 +107,7 @@ public class pdfParser extends AbstractParser implements Idiom {
                 theDocument.openProtection(new StandardDecryptionMaterial(""));
                 final AccessPermission perm = theDocument.getCurrentAccessPermission();
                 if (perm == null || !perm.canExtractContent())
-                    throw new ParserException("Document is encrypted",location, "document is exncrypted");
+                    throw new ParserException("Document is encrypted", location);
             }
             
             // extracting some metadata

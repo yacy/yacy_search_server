@@ -53,9 +53,7 @@ public class bzipParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.put("application/x-bzip2",fileExtensions);
         SUPPORTED_MIME_TYPES.put("application/bzip2", fileExtensions);
         SUPPORTED_MIME_TYPES.put("application/x-bz2", fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/octet-stream",fileExtensions);
         SUPPORTED_MIME_TYPES.put("application/x-bzip",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/x-compressed",fileExtensions);
         SUPPORTED_MIME_TYPES.put("application/x-stuffit",fileExtensions);
     }
     

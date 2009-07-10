@@ -65,8 +65,8 @@ public class odtParser extends AbstractParser implements Idiom {
      */
     public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
     static { 
-        SUPPORTED_MIME_TYPES.put("application/vnd.oasis.opendocument.text","odt");
-        SUPPORTED_MIME_TYPES.put("application/x-vnd.oasis.opendocument.text","odt");
+        SUPPORTED_MIME_TYPES.put("application/vnd.oasis.opendocument.text","odt,ods,odp");
+        SUPPORTED_MIME_TYPES.put("application/x-vnd.oasis.opendocument.text","odt,ods,odp");
     }     
 
     public odtParser() {        
