@@ -28,8 +28,7 @@
 package de.anomic.document.parser;
 
 import java.io.InputStream;
-import java.util.Hashtable;
-
+import java.util.HashMap;
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
 import org.apache.poi.hssf.eventusermodel.HSSFListener;
 import org.apache.poi.hssf.eventusermodel.HSSFRequest;
@@ -57,21 +56,21 @@ public class xlsParser extends AbstractParser implements Idiom, HSSFListener {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
-    static { 
-        SUPPORTED_MIME_TYPES.put("application/msexcel","xls");
-        SUPPORTED_MIME_TYPES.put("application/excel","xls");
-        SUPPORTED_MIME_TYPES.put("application/vnd.ms-excel","xls");
-        SUPPORTED_MIME_TYPES.put("application/x-excel","xls");
-        SUPPORTED_MIME_TYPES.put("application/x-msexcel","xls");
-        SUPPORTED_MIME_TYPES.put("application/x-ms-excel","xls");
-        SUPPORTED_MIME_TYPES.put("application/x-dos_ms_excel","xls");
-        SUPPORTED_MIME_TYPES.put("application/xls","xls");
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
+    static {
+        String ext = "xls,xlsx";
+        SUPPORTED_MIME_TYPES.put("application/msexcel",ext);
+        SUPPORTED_MIME_TYPES.put("application/excel",ext);
+        SUPPORTED_MIME_TYPES.put("application/vnd.ms-excel",ext);
+        SUPPORTED_MIME_TYPES.put("application/x-excel",ext);
+        SUPPORTED_MIME_TYPES.put("application/x-msexcel",ext);
+        SUPPORTED_MIME_TYPES.put("application/x-ms-excel",ext);
+        SUPPORTED_MIME_TYPES.put("application/x-dos_ms_excel",ext);
+        SUPPORTED_MIME_TYPES.put("application/xls",ext);
     }     
 
     public xlsParser(){
-        super();
-        this.parserName = "Microsoft Excel Parser";
+        super("Microsoft Excel Parser");
     }
 
     /*
@@ -135,7 +134,7 @@ public class xlsParser extends AbstractParser implements Idiom, HSSFListener {
         }
     }
     
-    public Hashtable<String, String> getSupportedMimeTypes() {
+    public HashMap<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
 

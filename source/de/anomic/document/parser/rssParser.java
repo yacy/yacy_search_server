@@ -33,7 +33,6 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -59,7 +58,7 @@ public class rssParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */  
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
     static final String fileExtensions = "xml,rss,rdf";
     static {
         SUPPORTED_MIME_TYPES.put("text/rss",fileExtensions);
@@ -69,8 +68,7 @@ public class rssParser extends AbstractParser implements Idiom {
     }
     
 	public rssParser() {
-		super();
-        this.parserName = "Rich Site Summary/Atom Feed Parser"; 
+		super("Rich Site Summary/Atom Feed Parser"); 
 	}
 
 	public Document parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
@@ -176,7 +174,7 @@ public class rssParser extends AbstractParser implements Idiom {
         }
 	}
 
-	public Hashtable<String, String> getSupportedMimeTypes() {
+	public HashMap<String, String> getSupportedMimeTypes() {
 		return SUPPORTED_MIME_TYPES;
 	}
 

@@ -31,8 +31,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.Hashtable;
-
+import java.util.HashMap;
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Document;
 import de.anomic.document.Idiom;
@@ -49,17 +48,17 @@ public class htmlParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();  
-    static { 
-        SUPPORTED_MIME_TYPES.put("application/xhtml+xml","htm,html,xhtml,php,asp");
-        SUPPORTED_MIME_TYPES.put("text/html","htm,html,xhtml,php,asp");
-        SUPPORTED_MIME_TYPES.put("text/plain","htm,html,xhtml,php,asp,txt");
-        SUPPORTED_MIME_TYPES.put("text/sgml","htm,html,xhtml,php,asp,xml");
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();  
+    static {
+        String ext = "htm,html,shtml,xhtml,php,asp,aspx,txt,jsp";
+        SUPPORTED_MIME_TYPES.put("application/xhtml+xml", ext);
+        SUPPORTED_MIME_TYPES.put("text/html", ext);
+        SUPPORTED_MIME_TYPES.put("text/plain", ext);
+        SUPPORTED_MIME_TYPES.put("text/sgml",ext);
     }
     
     public htmlParser() {
-        super();
-        this.parserName = "streaming html parser"; 
+        super("streaming html parser"); 
     }
     
     @Override
@@ -215,7 +214,7 @@ public class htmlParser extends AbstractParser implements Idiom {
     }
 
     
-    public Hashtable<String, String> getSupportedMimeTypes() {
+    public HashMap<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     

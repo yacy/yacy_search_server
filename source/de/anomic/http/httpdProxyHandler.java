@@ -73,7 +73,7 @@ import java.util.zip.GZIPOutputStream;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.data.Blacklist;
-import de.anomic.document.Classification;
+import de.anomic.document.Parser;
 import de.anomic.document.parser.html.ContentTransformer;
 import de.anomic.document.parser.html.Transformer;
 import de.anomic.kelondro.util.DateFormatter;
@@ -522,13 +522,13 @@ public final class httpdProxyHandler {
                         res.getStatusLine().substring(4), // status text
                         responseHeader);
 
-                if(hasBody(res.getStatusCode())) {
+                if (hasBody(res.getStatusCode())) {
 
                     final OutputStream outStream = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
 
                     final String storeError = cacheEntry.shallStoreCacheForProxy();
                     final boolean storeHTCache = cacheEntry.profile().storeHTCache();
-                    final boolean isSupportedContent = Classification.supportedContent(cacheEntry.url(), cacheEntry.getMimeType());
+                    final boolean isSupportedContent = Parser.supportsExtension(cacheEntry.url()) && Parser.supportsMime(cacheEntry.getMimeType());
                     if (
                             /*
                              * Now we store the response into the htcache directory if

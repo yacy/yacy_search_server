@@ -34,14 +34,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import de.anomic.document.AbstractParser;
-import de.anomic.document.Classification;
 import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
@@ -58,7 +56,7 @@ public class zipParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>(); 
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>(); 
     static { 
         SUPPORTED_MIME_TYPES.put("application/zip","zip");
         SUPPORTED_MIME_TYPES.put("application/x-zip","zip");
@@ -71,11 +69,10 @@ public class zipParser extends AbstractParser implements Idiom {
     }     
 
     public zipParser() {        
-        super();
-        this.parserName = "Compressed Archive File Parser"; 
+        super("Compressed Archive File Parser"); 
     }
     
-    public Hashtable<String, String> getSupportedMimeTypes() {
+    public HashMap<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     
@@ -118,7 +115,7 @@ public class zipParser extends AbstractParser implements Idiom {
                 final String entryExt = (idx > -1) ? entryName.substring(idx+1) : "";
                 
                 // trying to determine the mimeType per file extension   
-                final String entryMime = Classification.getMimeTypeByFileExt(entryExt);      
+                final String entryMime = Parser.mimeOf(entryExt);      
                 
                 // parsing the content
                 File subDocTempFile = null;

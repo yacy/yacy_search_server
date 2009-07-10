@@ -374,14 +374,14 @@ dc_rights
                     } else {
                         ext = u.substring(extpos + 1).toLowerCase();
                     }
-                    if (Classification.mediaExtContains(ext)) {
+                    if (Classification.isMediaExtension(ext)) {
                         // this is not a normal anchor, its a media link
-                        if (Classification.imageExtContains(ext)) {
+                        if (Classification.isImageExtension(ext)) {
                             ContentScraper.addImage(collectedImages, new ImageEntry(url, entry.getValue(), -1, -1));
                         }
-                        else if (Classification.audioExtContains(ext)) audiolinks.put(url, entry.getValue());
-                        else if (Classification.videoExtContains(ext)) videolinks.put(url, entry.getValue());
-                        else if (Classification.appsExtContains(ext)) applinks.put(url, entry.getValue());
+                        else if (Classification.isAudioExtension(ext)) audiolinks.put(url, entry.getValue());
+                        else if (Classification.isVideoExtension(ext)) videolinks.put(url, entry.getValue());
+                        else if (Classification.isApplicationExtension(ext)) applinks.put(url, entry.getValue());
                     } else {
                         hyperlinks.put(url, entry.getValue());
                     }

@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import net.sf.jmimemagic.Magic;
@@ -54,14 +55,14 @@ public class mimeTypeParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */    
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();   
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();   
     static { 
         SUPPORTED_MIME_TYPES.put("text/xml","xml");
         SUPPORTED_MIME_TYPES.put("application/xml","xml"); 
-        SUPPORTED_MIME_TYPES.put("application/x-xml","xml");        
-        SUPPORTED_MIME_TYPES.put("application/octet-stream","");        
-        SUPPORTED_MIME_TYPES.put("application/x-compress","");
-        SUPPORTED_MIME_TYPES.put("application/x-compressed","");
+        SUPPORTED_MIME_TYPES.put("application/x-xml","xml");
+        SUPPORTED_MIME_TYPES.put("application/octet-stream","xml");    
+        SUPPORTED_MIME_TYPES.put("application/x-compress","xml");
+        SUPPORTED_MIME_TYPES.put("application/x-compressed","xml");
     } 
     
     /**
@@ -71,8 +72,7 @@ public class mimeTypeParser extends AbstractParser implements Idiom {
     private static Hashtable<Thread, Integer> threadLoopDetection = new Hashtable<Thread, Integer>();
     
     public mimeTypeParser() {
-        super();
-        this.parserName = "MimeType Parser"; 
+        super("MimeType Parser"); 
     }
     
     @SuppressWarnings("unchecked")
@@ -174,7 +174,7 @@ public class mimeTypeParser extends AbstractParser implements Idiom {
         
     }
     
-    public java.util.Hashtable<String, String> getSupportedMimeTypes() {
+    public HashMap<String, String> getSupportedMimeTypes() {
         return mimeTypeParser.SUPPORTED_MIME_TYPES;
     }
     

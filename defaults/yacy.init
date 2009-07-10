@@ -247,23 +247,9 @@ releases = DATA/RELEASE
 minimumLocalDelta = 0
 minimumGlobalDelta = 500
 
-# the following mime-types are the whitelist for indexing
-#
-# parseableMime: specifies mime-types that can be indexed with any built-in parser
-parseableMimeTypes=application/atom+xml,application/bzip2,application/excel,application/gzip,application/java-archive,application/msexcel,application/mspowerpoint,application/msword,application/octet-stream,application/pdf,application/postscript,application/powerpoint,application/rdf+xml,application/rss+xml,application/rtf,application/tar,application/vcard,application/visio,application/visio.drawing,application/vnd.ms-excel,application/vnd.ms-powerpoint,application/vnd.oasis.opendocument.text,application/vnd.visio,application/vsd,application/x-7z-compressed,application/x-bz2,application/x-bzip2,application/x-compress,application/x-compressed,application/x-excel,application/x-gzip,application/x-msexcel,application/x-redhat packet manager,application/x-redhat-package-manager,application/x-rpm,application/x-shockwave-flash,application/x-shockwave-flash2-preview,application/x-tar,application/x-visio,application/x-vnd.oasis.opendocument.text,application/x-vsd,application/x-xml,application/x-zip,application/x-zip-compressed,application/xml,application/zip,image/x-vsd,text/postscript,text/rss,text/rtf,text/x-vcard,text/xml,zz-application/zz-winassoc-vsd
-
-# parseableMimeTypes.IMAGE: specifies mime-types that refer to image type content
-parseableMimeTypes.IMAGE=image/gif,image/jpeg,image/png,image/tiff,image/vnd.wap.wbmp,image/x-icon,image/bmp
-
-# parseableMimeTypes.HTML: specifies mime-types that can be indexed with built-in html parser
-parseableMimeTypes.HTML=application/xhtml+xml,text/html,text/plain,text/sgml
-
-# media extension string
-# a comma-separated list of extensions that denote media file formats
-# this is important to recognize <a href> - tags as not-html reference
-# These files will be excluded from indexing _(Please keep extensions in alphabetical order)_
-mediaExt=7z,ace,aif,aiff,arj,asf,asx,avi,bin,bmp,bz2,css,db,dcm,deb,doc,dll,dmg,exe,gif,gz,hqx,ico,img,iso,jar,jpe,jpg,jpeg,lx,lxl,m4v,mpeg,mov,mp3,mpg,ogg,png,pdf,ppt,ps,ram,rar,rm,rpm,scr,sit,so,swf,sxc,sxd,sxi,sxw,tar,tbz,tgz,torrent,vsd,war,wav,wmv,xcf,xls,zip
-parseableExt=html,htm,txt,php,shtml,asp,aspx,jsp
+# the following mime-types are a blacklist for indexing:
+# parser.mime.deny: specifies mime-types that shall not be indexed
+parser.mime.deny=
 
 # Promotion Strings
 # These strings appear in the Web Mask of the YACY search client

@@ -58,7 +58,6 @@ import java.util.concurrent.TimeoutException;
 
 import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
-import de.anomic.document.Classification;
 import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
@@ -102,9 +101,6 @@ public class mediawikiIndex extends Thread {
         this.wparser = new wikiCode(new URL(baseURL).getHost());
         this.count = 0;
         this.start = 0;
-        // must be called before usage:
-        Classification.initHTMLParsableMimeTypes("text/html");
-        Classification.addParseableMimeTypes("text/html");
     }
     
     /**
@@ -146,8 +142,6 @@ public class mediawikiIndex extends Thread {
             StringBuilder sb = new StringBuilder();
             boolean page = false, text = false;
             String title = null;
-            Classification.initHTMLParsableMimeTypes("text/html");
-            Classification.addParseableMimeTypes("text/html");
             wikiparserrecord poison = newRecord();
             int threads = Math.max(2, Runtime.getRuntime().availableProcessors() - 1);
             BlockingQueue<wikiparserrecord> in = new ArrayBlockingQueue<wikiparserrecord>(threads * 10);

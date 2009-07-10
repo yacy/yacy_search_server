@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
-import de.anomic.document.Classification;
+import de.anomic.document.Parser;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
@@ -218,15 +218,24 @@ public class FTPLoader {
     private httpDocument getFile(final ftpc ftpClient, final CrawlEntry entry) throws Exception {
         // determine the mimetype of the resource
         final yacyURL entryUrl = entry.url();
-        final String extension = Classification.getFileExt(entryUrl);
-        final String mimeType = Classification.getMimeTypeByFileExt(extension);
+        final String mimeType = Parser.mimeOf(entryUrl);
         final String path = getPath(entryUrl);
 
         // if the mimetype and file extension is supported we start to download
         // the file
         httpDocument htCache = null;
-        if (Classification.supportedContent(entryUrl, mimeType)) {
-            // aborting download if content is too long
+        if (!Parser.supportsExtension(entryUrl)) {
+            // if the response has not the right file type then reject file
+            log.logInfo("REJECTED WRONG EXTENSION TYPE " + mimeType + " for URL " + entry.url().toString());
+            sb.crawlQueues.errorURL.newEntry(entry, this.sb.peers.mySeed().hash, new Date(), 1, "wrong extension");
+            throw new Exception("response has not the right extension type -> rejected");
+        } else if (!Parser.supportsMime(mimeType)) {
+            // if the response has not the right file type then reject file
+            log.logInfo("REJECTED WRONG MIME TYPE " + mimeType + " for URL " + entry.url().toString());
+            sb.crawlQueues.errorURL.newEntry(entry, this.sb.peers.mySeed().hash, new Date(), 1, "wrong mime type");
+            throw new Exception("response has not the right mime type -> rejected");
+        } else {
+            // abort the download if content is too long
             final int size = ftpClient.fileSize(path);
             if (size <= maxFileSize || maxFileSize == -1) {
                 // timeout for download
@@ -246,11 +255,6 @@ public class FTPLoader {
                 sb.crawlQueues.errorURL.newEntry(entry, this.sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");
                 throw new Exception("file size exceeds limit");
             }
-        } else {
-            // if the response has not the right file type then reject file
-            log.logInfo("REJECTED WRONG MIME/EXT TYPE " + mimeType + " for URL " + entry.url().toString());
-            sb.crawlQueues.errorURL.newEntry(entry, this.sb.peers.mySeed().hash, new Date(), 1, "wrong mime type or wrong extension");
-            throw new Exception("response has not the right file type -> rejected");
         }
         return htCache;
     }

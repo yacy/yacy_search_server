@@ -28,8 +28,7 @@
 package de.anomic.document.parser;
 
 import java.io.InputStream;
-import java.util.Hashtable;
-
+import java.util.HashMap;
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
@@ -44,7 +43,7 @@ public class vsdParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
     static {
         SUPPORTED_MIME_TYPES.put("application/visio","vsd");
         SUPPORTED_MIME_TYPES.put("application/x-visio","vsd");
@@ -57,14 +56,13 @@ public class vsdParser extends AbstractParser implements Idiom {
     }
 
     public vsdParser() {
-        super();
-        this.parserName = "Microsoft Visio Parser";
+        super("Microsoft Visio Parser");
     }
 
     /**
      * returns a hashtable containing the mimetypes that are supported by this class
      */
-    public Hashtable<String, String> getSupportedMimeTypes() {
+    public HashMap<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
 

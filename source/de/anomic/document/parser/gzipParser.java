@@ -30,7 +30,7 @@ package de.anomic.document.parser;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.zip.GZIPInputStream;
 
 import de.anomic.document.AbstractParser;
@@ -47,27 +47,26 @@ public class gzipParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
-    static final String fileExtensions = "gz,tgz";
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
+    static final String ext = "gz,tgz";
     static { 
-        SUPPORTED_MIME_TYPES.put("application/x-gzip",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/gzip",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/x-gunzip",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/gzipped",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/gzip-compressed",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/x-compressed",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/x-compress",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("gzip/document",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/octet-stream",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/x-tar",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/x-gzip",ext);
+        SUPPORTED_MIME_TYPES.put("application/gzip",ext);
+        SUPPORTED_MIME_TYPES.put("application/x-gunzip",ext);
+        SUPPORTED_MIME_TYPES.put("application/gzipped",ext);
+        SUPPORTED_MIME_TYPES.put("application/gzip-compressed",ext);
+        SUPPORTED_MIME_TYPES.put("application/x-compressed",ext);
+        SUPPORTED_MIME_TYPES.put("application/x-compress",ext);
+        SUPPORTED_MIME_TYPES.put("gzip/document",ext);
+        SUPPORTED_MIME_TYPES.put("application/octet-stream",ext);
+        SUPPORTED_MIME_TYPES.put("application/x-tar",ext);
     }     
 
     public gzipParser() {        
-        super();
-        this.parserName = "GNU Zip Compressed Archive Parser";
+        super("GNU Zip Compressed Archive Parser");
     }
     
-    public Hashtable<String, String> getSupportedMimeTypes() {
+    public HashMap<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     

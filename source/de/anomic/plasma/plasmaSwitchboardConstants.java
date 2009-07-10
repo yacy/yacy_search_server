@@ -244,11 +244,7 @@ public final class plasmaSwitchboardConstants {
     public static final String RANKING_DIST_1_METHOD            = "CRDist1Method";
     public static final String RANKING_DIST_1_PERCENT           = "CRDist1Percent";
     public static final String RANKING_DIST_1_TARGET            = "CRDist1Target";
-    public static final String PARSER_MIMETYPES                 = "parseableMimeTypes";
-    public static final String PARSER_MIMETYPES_HTML            = "parseableMimeTypes.HTML";
-    public static final String PARSER_MIMETYPES_IMAGE           = "parseableMimeTypes.IMAGE";
-    public static final String PARSER_MEDIA_EXT                 = "mediaExt";
-    public static final String PARSER_MEDIA_EXT_PARSEABLE       = "parseableExt";
+    public static final String PARSER_MIME_DENY                 = "parser.mime.deny";
     /**
      * <p><code>public static final String <strong>PROXY_ONLINE_CAUTION_DELAY</strong> = "onlineCautionDelay"</code></p>
      * <p>Name of the setting how long indexing should pause after the last time the proxy was used in milliseconds</p> 

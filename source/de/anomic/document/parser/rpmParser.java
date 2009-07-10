@@ -31,8 +31,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Hashtable;
-
 import com.jguild.jrpm.io.RPMFile;
 import com.jguild.jrpm.io.datatype.DataTypeIf;
 
@@ -57,7 +55,7 @@ public class rpmParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();   
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();   
     static { 
         SUPPORTED_MIME_TYPES.put("application/x-rpm","rpm");
         SUPPORTED_MIME_TYPES.put("application/x-redhat packet manager","rpm");    
@@ -65,11 +63,10 @@ public class rpmParser extends AbstractParser implements Idiom {
     }
     
     public rpmParser() {        
-        super();
-        this.parserName = "rpm Parser"; 
+        super("rpm Parser"); 
     }
     
-    public Hashtable<String, String> getSupportedMimeTypes() {
+    public HashMap<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     

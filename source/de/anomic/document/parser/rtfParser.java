@@ -28,8 +28,7 @@
 package de.anomic.document.parser;
 
 import java.io.InputStream;
-import java.util.Hashtable;
-
+import java.util.HashMap;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
 
@@ -45,7 +44,7 @@ public class rtfParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */    
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
     static { 
         SUPPORTED_MIME_TYPES.put("application/rtf","rtf"); 
         SUPPORTED_MIME_TYPES.put("text/rtf","rtf");
@@ -57,8 +56,7 @@ public class rtfParser extends AbstractParser implements Idiom {
     } 
 
 	public rtfParser() {
-		super();
-        this.parserName = "Rich Text Format Parser";  
+		super("Rich Text Format Parser");  
 	}
 
 	public Document parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
@@ -100,7 +98,7 @@ public class rtfParser extends AbstractParser implements Idiom {
 		}        
 	}
 
-	public Hashtable<String, String> getSupportedMimeTypes() {
+	public HashMap<String, String> getSupportedMimeTypes() {
 		return rtfParser.SUPPORTED_MIME_TYPES;
 	}
 

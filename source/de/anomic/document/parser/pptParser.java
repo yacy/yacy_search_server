@@ -29,8 +29,7 @@ package de.anomic.document.parser;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
-import java.util.Hashtable;
-
+import java.util.HashMap;
 import org.apache.poi.hslf.extractor.PowerPointExtractor;
 
 import de.anomic.document.AbstractParser;
@@ -45,22 +44,21 @@ public class pptParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
-    static final String fileExtensions = "ppt,pps";
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
+    static final String ext = "ppt,pps";
     static { 
-        SUPPORTED_MIME_TYPES.put("application/mspowerpoint",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/powerpoint",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/vnd.ms-powerpoint",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/ms-powerpoint",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/mspowerpnt",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/vnd-mspowerpoint",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/x-powerpoint",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/x-m",fileExtensions);
+        SUPPORTED_MIME_TYPES.put("application/mspowerpoint",ext);
+        SUPPORTED_MIME_TYPES.put("application/powerpoint",ext);
+        SUPPORTED_MIME_TYPES.put("application/vnd.ms-powerpoint",ext);
+        SUPPORTED_MIME_TYPES.put("application/ms-powerpoint",ext);
+        SUPPORTED_MIME_TYPES.put("application/mspowerpnt",ext);
+        SUPPORTED_MIME_TYPES.put("application/vnd-mspowerpoint",ext);
+        SUPPORTED_MIME_TYPES.put("application/x-powerpoint",ext);
+        SUPPORTED_MIME_TYPES.put("application/x-m",ext);
    }
 
     public pptParser(){
-        super();
-        this.parserName = "Microsoft Powerpoint Parser";
+        super("Microsoft Powerpoint Parser");
     }
 
     /*
@@ -116,7 +114,7 @@ public class pptParser extends AbstractParser implements Idiom {
         }
     }
 
-    public Hashtable<String, String> getSupportedMimeTypes() {
+    public HashMap<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
 

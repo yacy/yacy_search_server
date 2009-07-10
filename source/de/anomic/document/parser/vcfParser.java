@@ -33,7 +33,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -61,7 +60,7 @@ public class vcfParser extends AbstractParser implements Idiom {
      * 
      * TODO: support of x-mozilla-cpt and x-mozilla-html tags
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
     static { 
         SUPPORTED_MIME_TYPES.put("text/x-vcard","vcf");
         SUPPORTED_MIME_TYPES.put("application/vcard","vcf");
@@ -73,11 +72,10 @@ public class vcfParser extends AbstractParser implements Idiom {
     }
     
     public vcfParser() {        
-        super();
-        this.parserName = "vCard Parser"; 
+        super("vCard Parser"); 
     }
     
-    public Hashtable<String, String> getSupportedMimeTypes() {
+    public HashMap<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     

@@ -35,8 +35,8 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -63,18 +63,17 @@ public class odtParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
     static { 
         SUPPORTED_MIME_TYPES.put("application/vnd.oasis.opendocument.text","odt");
         SUPPORTED_MIME_TYPES.put("application/x-vnd.oasis.opendocument.text","odt");
     }     
 
     public odtParser() {        
-        super();
-        this.parserName = "OASIS OpenDocument V2 Text Document Parser"; 
+        super("OASIS OpenDocument V2 Text Document Parser"); 
     }
     
-    public Hashtable<String, String> getSupportedMimeTypes() {
+    public HashMap<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     

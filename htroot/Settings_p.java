@@ -24,11 +24,9 @@
 // javac -classpath .:../Classes Settings_p.java
 // if the shell's current path is HTROOT
 
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import de.anomic.document.Classification;
 import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
 import de.anomic.http.httpHeader;
@@ -219,17 +217,15 @@ public final class Settings_p {
          */
         int parserIdx = 0;
         
-        final Iterator<Idiom> availableParserIter = Parser.availableParserList.values().iterator();
+        final Iterator<Idiom> availableParserIter = Parser.idioms().iterator();
         while (availableParserIter.hasNext()) {
             final Idiom parserInfo = availableParserIter.next();
             prop.put("parser_" + parserIdx + "_name", parserInfo.getName());
             
             int mimeIdx = 0;
-            final Enumeration<String> mimeTypeIter = parserInfo.getSupportedMimeTypes().keys();
-            while (mimeTypeIter.hasMoreElements()) {
-                final String mimeType = mimeTypeIter.nextElement();
+            for (String mimeType: parserInfo.getSupportedMimeTypes().keySet()) {
                 prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_mimetype", mimeType);
-                prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_status", (Classification.supportedMimeTypesContains(mimeType)) ? 1 : 0);
+                prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_status", (Parser.supportsMime(mimeType)) ? 1 : 0);
                 mimeIdx++;
             }
             prop.put("parser_" + parserIdx + "_mime", mimeIdx);

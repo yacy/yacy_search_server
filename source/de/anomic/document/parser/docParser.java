@@ -28,8 +28,7 @@
 package de.anomic.document.parser;
 
 import java.io.InputStream;
-import java.util.Hashtable;
-
+import java.util.HashMap;
 import org.textmining.extraction.TextExtractor;
 import org.textmining.extraction.word.WordTextExtractorFactory;
 
@@ -45,22 +44,22 @@ public class docParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */    
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
     static {
-        SUPPORTED_MIME_TYPES.put("application/msword","doc");
-        SUPPORTED_MIME_TYPES.put("application/doc","doc");
-        SUPPORTED_MIME_TYPES.put("appl/text","doc");
-        SUPPORTED_MIME_TYPES.put("application/vnd.msword","doc");
-        SUPPORTED_MIME_TYPES.put("application/vnd.ms-word","doc");
-        SUPPORTED_MIME_TYPES.put("application/winword","doc");
-        SUPPORTED_MIME_TYPES.put("application/word","doc");
-        SUPPORTED_MIME_TYPES.put("application/x-msw6","doc");
-        SUPPORTED_MIME_TYPES.put("application/x-msword","doc");
+        String ext = "doc,docx";
+        SUPPORTED_MIME_TYPES.put("application/msword",ext);
+        SUPPORTED_MIME_TYPES.put("application/doc",ext);
+        SUPPORTED_MIME_TYPES.put("appl/text",ext);
+        SUPPORTED_MIME_TYPES.put("application/vnd.msword",ext);
+        SUPPORTED_MIME_TYPES.put("application/vnd.ms-word",ext);
+        SUPPORTED_MIME_TYPES.put("application/winword",ext);
+        SUPPORTED_MIME_TYPES.put("application/word",ext);
+        SUPPORTED_MIME_TYPES.put("application/x-msw6",ext);
+        SUPPORTED_MIME_TYPES.put("application/x-msword",ext);
     }
     
 	public docParser() {
-		super();
-        this.parserName = "Word Document Parser";
+		super("Word Document Parser");
 	}
 
 	public Document parse(final yacyURL location, final String mimeType, final String charset,
@@ -103,7 +102,7 @@ public class docParser extends AbstractParser implements Idiom {
 		}        
 	}
 
-	public java.util.Hashtable<String, String> getSupportedMimeTypes() {
+	public HashMap<String, String> getSupportedMimeTypes() {
 		return docParser.SUPPORTED_MIME_TYPES;
 	}
 

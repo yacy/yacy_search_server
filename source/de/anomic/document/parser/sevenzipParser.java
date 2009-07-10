@@ -32,8 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Hashtable;
-
+import java.util.HashMap;
 import SevenZip.ArchiveExtractCallback;
 import SevenZip.IInStream;
 import SevenZip.MyRandomAccessFile;
@@ -41,7 +40,6 @@ import SevenZip.Archive.IInArchive;
 import SevenZip.Archive.SevenZipEntry;
 import SevenZip.Archive.SevenZip.Handler;
 import de.anomic.document.AbstractParser;
-import de.anomic.document.Classification;
 import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
@@ -57,14 +55,13 @@ public class sevenzipParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */    
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>(); 
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>(); 
     static { 
         SUPPORTED_MIME_TYPES.put("application/x-7z-compressed", "7z"); 
     }
     
     public sevenzipParser() {
-        super();
-        super.parserName = "7zip Archive Parser";
+        super("7zip Archive Parser");
     }
     
     public Document parse(final yacyURL location, final String mimeType, final String charset,
@@ -127,7 +124,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
         }
     }
     
-    public Hashtable<String, String> getSupportedMimeTypes() {
+    public HashMap<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     
@@ -190,7 +187,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
                      // workaround for relative links in file, normally '#' shall be used behind the location, see
                      // below for reversion of the effects
                      final yacyURL url = yacyURL.newURL(doc.dc_source(), this.prefix + "/" + super.filePath);
-                     final String mime = Classification.getMimeTypeByFileExt(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
+                     final String mime = Parser.mimeOf(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
                      if (this.cfos.isFallback()) {
                          theDoc = Parser.parseSource(url, mime, null, this.cfos.getContentFile());
                      } else {

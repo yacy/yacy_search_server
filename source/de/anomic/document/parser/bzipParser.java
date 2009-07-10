@@ -30,8 +30,7 @@ package de.anomic.document.parser;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.Hashtable;
-
+import java.util.HashMap;
 import org.apache.tools.bzip2.CBZip2InputStream;
 
 import de.anomic.document.AbstractParser;
@@ -48,7 +47,7 @@ public class bzipParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();    
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();    
     static final String fileExtensions = "bz2,tbz,tbz2";
     static { 
         SUPPORTED_MIME_TYPES.put("application/x-bzip2",fileExtensions);
@@ -61,11 +60,10 @@ public class bzipParser extends AbstractParser implements Idiom {
     }
     
     public bzipParser() {        
-        super();
-        this.parserName = "Bzip 2 UNIX Compressed File Parser";
+        super("Bzip 2 UNIX Compressed File Parser");
     }
     
-    public Hashtable<String, String> getSupportedMimeTypes() {
+    public HashMap<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     

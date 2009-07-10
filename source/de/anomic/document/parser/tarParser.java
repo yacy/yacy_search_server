@@ -34,7 +34,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.zip.GZIPInputStream;
@@ -43,7 +42,6 @@ import com.ice.tar.TarEntry;
 import com.ice.tar.TarInputStream;
 
 import de.anomic.document.AbstractParser;
-import de.anomic.document.Classification;
 import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
@@ -60,7 +58,7 @@ public class tarParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();  
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();  
     static { 
         SUPPORTED_MIME_TYPES.put("application/x-tar","tar");
         SUPPORTED_MIME_TYPES.put("application/tar","tar");
@@ -71,11 +69,10 @@ public class tarParser extends AbstractParser implements Idiom {
     }     
 
     public tarParser() {        
-        super();
-        this.parserName = "Tape Archive File Parser"; 
+        super("Tape Archive File Parser"); 
     }
     
-    public Hashtable<String, String> getSupportedMimeTypes() {
+    public HashMap<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     
@@ -97,7 +94,7 @@ public class tarParser extends AbstractParser implements Idiom {
              * If the mimeType was not reported correcly by the webserve we
              * have to decompress it first
              */
-            final String ext = Classification.getFileExt(location).toLowerCase();
+            final String ext = location.getFileExtension().toLowerCase();
             if (ext.equals("gz") || ext.equals("tgz")) {
                 source = new GZIPInputStream(source);
             }
@@ -130,7 +127,7 @@ public class tarParser extends AbstractParser implements Idiom {
                 final String entryExt = (idx > -1) ? entryName.substring(idx+1) : "";
                 
                 // trying to determine the mimeType per file extension   
-                final String entryMime = Classification.getMimeTypeByFileExt(entryExt);
+                final String entryMime = Parser.mimeOf(entryExt);
                 
                 // getting the entry content
                 File subDocTempFile = null;

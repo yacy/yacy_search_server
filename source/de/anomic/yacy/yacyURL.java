@@ -528,6 +528,13 @@ public class yacyURL implements Serializable {
         return path.substring(p + 1); // the 'real' file name
     }
 
+    public String getFileExtension() {
+        String name = getFileName();
+        int p = name.lastIndexOf('.');
+        if (p < 0) return "";
+        return name.substring(p + 1);
+    }
+    
     public String getPath() {
         return path;
     }

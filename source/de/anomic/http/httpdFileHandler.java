@@ -231,7 +231,7 @@ public final class httpdFileHandler {
         }
         headers.put(httpHeader.SERVER, "AnomicHTTPD (www.anomic.de)");
         headers.put(httpHeader.DATE, DateFormatter.formatRFC1123(new Date()));
-        if(!(Classification.mediaExtContains(ext))){
+        if(!(Classification.isMediaExtension(ext))){
             headers.put(httpHeader.PRAGMA, "no-cache");         
         }
         return headers;

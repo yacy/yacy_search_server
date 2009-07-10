@@ -54,7 +54,7 @@ public abstract class AbstractParser implements Idiom {
     /**
      * Parser name
      */
-    protected String parserName = this.getClass().getName();
+    private String parserName;
     
     /**
      * The source file file size in bytes if the source document was passed
@@ -65,7 +65,7 @@ public abstract class AbstractParser implements Idiom {
     /**
      * The Constructor of this class.
      */
-	public AbstractParser() {
+	public AbstractParser(String name) {
 		super();
 	}
     
@@ -125,10 +125,7 @@ public abstract class AbstractParser implements Idiom {
                         // XXX: workaround for relative paths within document
                         + file.getPath().substring(file.getPath().indexOf(File.separatorChar) + 1)
                         + "/" + file.getName());
-                final Document subdoc = Parser.parseSource(
-                        url,
-                        Classification.getMimeTypeByFileExt(files[i].substring(files[i].indexOf('.') + 1)),
-                        null, file);
+                final Document subdoc = Parser.parseSource(url, Parser.mimeOf(url), null, file);
                 // TODO: change anchors back to use '#' after archive name
                 doc.addSubDocument(subdoc);
                 subdoc.close();

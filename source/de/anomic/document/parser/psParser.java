@@ -34,8 +34,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Hashtable;
-
+import java.util.HashMap;
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
@@ -49,7 +48,7 @@ public class psParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final Hashtable<String, String> SUPPORTED_MIME_TYPES = new Hashtable<String, String>();   
+    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();   
     static { 
         SUPPORTED_MIME_TYPES.put("application/ps","ps");
         SUPPORTED_MIME_TYPES.put("application/x-postscript","ps");
@@ -62,8 +61,7 @@ public class psParser extends AbstractParser implements Idiom {
     private static String parserMode = "java";
     
     public psParser() {        
-        super();
-        this.parserName = "PostScript Document Parser"; 
+        super("PostScript Document Parser"); 
         if (!modeScanDone) synchronized (modeScan) {
         	if (testForPs2Ascii()) parserMode = "ps2ascii";
         	else parserMode = "java";
@@ -71,7 +69,7 @@ public class psParser extends AbstractParser implements Idiom {
 		}
     }
     
-    public Hashtable<String, String> getSupportedMimeTypes() {
+    public HashMap<String, String> getSupportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
     

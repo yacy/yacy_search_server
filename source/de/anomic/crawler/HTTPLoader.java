@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.Date;
 
 import de.anomic.data.Blacklist;
-import de.anomic.document.Classification;
+import de.anomic.document.Parser;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpResponse;
@@ -156,8 +156,15 @@ public final class HTTPLoader {
                     
                     // request has been placed and result has been returned. work off response
                     //try {
-                        if (Classification.supportedContent(entry.url(), res.getResponseHeader().mime())) {
-                            
+                        if (!Parser.supportsExtension(entry.url())) {
+                            // if the response has not the right file type then reject file
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "wrong extension");
+                            throw new IOException("REJECTED WRONG EXTENSION TYPE " + entry.url().getFileExtension()+ " for URL " + entry.url().toString());
+                        } else if (!Parser.supportsMime(res.getResponseHeader().mime())) {
+                            // if the response has not the right file type then reject file
+                            sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "wrong mime type");
+                            throw new IOException("REJECTED WRONG MIME TYPE " + res.getResponseHeader().mime() + " for URL " + entry.url().toString());
+                        } else {     
                             // get the content length and check if the length is allowed
                             long contentLength = res.getResponseHeader().getContentLength();
                             if (maxFileSize >= 0 && contentLength > maxFileSize) {
@@ -177,10 +184,6 @@ public final class HTTPLoader {
                             }
                             
                             htCache.setCacheArray(responseBody);
-                        } else {
-                            // if the response has not the right file type then reject file
-                            sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "wrong mime type or wrong extension");
-                            throw new IOException("REJECTED WRONG MIME/EXT TYPE " + res.getResponseHeader().mime() + " for URL " + entry.url().toString());
                         }
                         return htCache;
                         /*

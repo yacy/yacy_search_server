@@ -39,7 +39,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.anomic.document.Condenser;
-import de.anomic.document.Classification;
 import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
 import de.anomic.document.Word;
@@ -867,29 +866,13 @@ public class SnippetCache {
 
             // STEP 3: if the metadata is still null try to guess the mimeType of the resource
             if (responseHeader == null) {
-                final String filename = url.getFileName();
-                final int p = filename.lastIndexOf('.');
-                if (    // if no extension is available
-                        (p < 0) ||
-                        // or the extension is supported by one of the parsers
-                        ((p >= 0) && (Classification.supportedFileExtContains(filename.substring(p + 1))))
-                ) {
-                    String supposedMime = "text/html";
-
-                    // if the mimeType Parser is installed we can set the mimeType to null to force
-                    // a mimetype detection
-                    if (Classification.supportedMimeTypesContains("application/octet-stream")) {
-                        supposedMime = null;
-                    } else if (p != -1){
-                        // otherwise we try to determine the mimeType per file Extension
-                        supposedMime = Classification.getMimeTypeByFileExt(filename.substring(p + 1));
-                    }
-
+                if (Parser.supportsExtension(url)) {
+                    String supposedMime = Parser.mimeOf(url);
                     return Parser.parseSource(url, supposedMime, null, contentLength, resourceStream);
                 }
                 return null;
             }            
-            if (Classification.supportedMimeTypesContains(responseHeader.mime())) {
+            if (Parser.supportsMime(responseHeader.mime())) {
                 return Parser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), contentLength, resourceStream);
             }
             return null;

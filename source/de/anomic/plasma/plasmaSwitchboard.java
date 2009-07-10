@@ -144,7 +144,6 @@ import de.anomic.data.wiki.wikiBoard;
 import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
 import de.anomic.document.Condenser;
-import de.anomic.document.Classification;
 import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
 import de.anomic.document.Word;
@@ -513,18 +512,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         //Init bookmarks DB
         initBookmarks();
         
-        // make parser
-        log.logConfig("Starting Parser");
-        
-        // define an extension-blacklist
-        log.logConfig("Parser: Initializing Extension Mappings for Media/Parser");
-        Classification.initMediaExt(Classification.extString2extList(getConfig(plasmaSwitchboardConstants.PARSER_MEDIA_EXT,"")));
-        Classification.initSupportedHTMLFileExt(Classification.extString2extList(getConfig(plasmaSwitchboardConstants.PARSER_MEDIA_EXT_PARSEABLE,"")));
-        
         // define a realtime parsable mimetype list
-        log.logConfig("Parser: Initializing Mime Types");
-        Classification.initHTMLParsableMimeTypes(getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES_HTML, "application/xhtml+xml,text/html,text/plain"));
-        Classification.addParseableMimeTypes(getConfig(plasmaSwitchboardConstants.PARSER_MIMETYPES, null));
+        log.logConfig("Parser: Initializing Mime Type deny list");
+        Parser.setDenyMime(getConfig(plasmaSwitchboardConstants.PARSER_MIME_DENY, null));
         
         // start a loader
         log.logConfig("Starting Crawl Loader");
@@ -1098,7 +1088,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
          * 
          * Testing if the content type is supported by the available parsers
          * ========================================================================= */
-        final boolean isSupportedContent = Classification.supportedContent(entry.url(),entry.getMimeType());
+        final boolean isSupportedContent = Parser.supportsExtension(entry.url()) && Parser.supportsMime(entry.getMimeType());
         if (log.isFinest()) log.logFinest("STORE "+ entry.url() +" content of type "+ entry.getMimeType() +" is supported: "+ isSupportedContent);
         
         /* =========================================================================

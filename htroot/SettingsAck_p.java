@@ -29,15 +29,13 @@
 
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import de.anomic.document.Classification;
+import de.anomic.document.Parser;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpd;
@@ -46,6 +44,7 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -458,30 +457,16 @@ public class SettingsAck_p {
         if (post.containsKey("parserSettings")) {
             post.remove("parserSettings");
             
-            final HashSet<String> newConfig = new HashSet<String>();
-            
             // loop through all received settings
             final Iterator<String> keyEnum = post.keySet().iterator();
             while (keyEnum.hasNext()) {
                 String key = keyEnum.next();
-                if (key.startsWith("mimename")) newConfig.add(post.get(key));
+                if (key.startsWith("mimename")) Parser.grantMime(key.substring(9), post.get(key).equals("on")); 
             }
             
-            int enabledMimesCount = 0;
-            final StringBuilder currEnabledMimesTxt = new StringBuilder();
-            final String[] enabledMimes = Classification.setEnabledParserList(newConfig);
-            Arrays.sort(enabledMimes);
+            env.setConfig(plasmaSwitchboardConstants.PARSER_MIME_DENY, Parser.getDenyMime());
             
-            currEnabledMimesTxt.setLength(0);
-            for (int i=0; i < enabledMimes.length; i++) {
-                currEnabledMimesTxt.append(enabledMimes[i]).append(",");
-                prop.put("info_parser_" + enabledMimesCount + "_enabledMime", newConfig.toString());
-                enabledMimesCount++;
-            }
-            if (currEnabledMimesTxt.length() > 0) currEnabledMimesTxt.deleteCharAt(currEnabledMimesTxt.length()-1);  
-            env.setConfig("parseableMimeTypes", currEnabledMimesTxt.toString());
-            
-            prop.put("info_parser",enabledMimesCount);
+            prop.put("info_parser", 0);
             prop.put("info", "18");
             return prop;
           
