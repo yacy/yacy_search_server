@@ -31,14 +31,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import org.textmining.extraction.TextExtractor;
-import org.textmining.extraction.word.WordTextExtractorFactory;
 
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.yacy.yacyURL;
+import org.apache.poi.hwpf.extractor.WordExtractor;
 
 public class docParser extends AbstractParser implements Idiom {
 
@@ -65,20 +64,25 @@ public class docParser extends AbstractParser implements Idiom {
 	}
 
 	public Document parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
-       final WordTextExtractorFactory extractorFactory = new WordTextExtractorFactory();
-       TextExtractor extractor = null;
+
+        final WordExtractor extractor;
+
         try {
-            extractor = extractorFactory.textExtractor(source);
-        } catch (Exception e) {
+            extractor = new WordExtractor(source);
+        } catch (IOException e) {
             throw new ParserException("error in docParser, WordTextExtractorFactory: " + e.getMessage(), location);
         }
-		String contents = null;
+
+		StringBuilder contents = new StringBuilder();
         try {
-            contents = extractor.getText().trim();
-        } catch (IOException e) {
+            contents.append(extractor.getText().trim());
+            contents.append(extractor.getHeaderText());
+            contents.append(extractor.getFooterText());
+        } catch (Exception e) {
             throw new ParserException("error in docParser, getText: " + e.getMessage(), location);
         }
-	    String title = contents.replaceAll("\r"," ").replaceAll("\n"," ").replaceAll("\t"," ").trim();
+	    String title = (contents.length() > 240) ? contents.substring(0,240) : contents.toString().trim();
+        title.replaceAll("\r"," ").replaceAll("\n"," ").replaceAll("\t"," ").trim();
 	    if (title.length() > 80) title = title.substring(0, 80);
 	    int l = title.length();
 	    while (true) {
@@ -86,6 +90,7 @@ public class docParser extends AbstractParser implements Idiom {
 	        if (title.length() == l) break;
 	        l = title.length();
 	    }
+
         Document theDoc;
         try {
             theDoc = new Document(
@@ -98,7 +103,7 @@ public class docParser extends AbstractParser implements Idiom {
                       "", // TODO: AUTHOR
                       null,
                       null,
-                      contents.getBytes("UTF-8"),
+                      contents.toString().getBytes("UTF-8"),
                       null,
                       null);
         } catch (UnsupportedEncodingException e) {
