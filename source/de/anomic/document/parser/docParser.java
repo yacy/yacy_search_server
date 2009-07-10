@@ -76,7 +76,9 @@ public class docParser extends AbstractParser implements Idiom {
 		StringBuilder contents = new StringBuilder();
         try {
             contents.append(extractor.getText().trim());
+            contents.append(" ");
             contents.append(extractor.getHeaderText());
+            contents.append(" ");
             contents.append(extractor.getFooterText());
         } catch (Exception e) {
             throw new ParserException("error in docParser, getText: " + e.getMessage(), location);
