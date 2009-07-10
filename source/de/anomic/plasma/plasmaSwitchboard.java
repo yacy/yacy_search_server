@@ -1674,6 +1674,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     
     private Document parseDocument(final IndexingStack.QueueEntry entry) throws InterruptedException {
         Document document = null;
+        boolean parserException = false;
         final int processCase = entry.processCase();
         
         if (this.log.isFine()) log.logFine("processResourceStack processCase=" + processCase +
@@ -1693,6 +1694,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             document = Parser.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), plasmaHTCache.getResourceContent(entry.url()));
             assert(document != null) : "Unexpected error. Parser returned null.";
         } catch (final ParserException e) {
+        	parserException = true;
             this.log.logWarning("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());
             addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.anchorName(), e.getErrorCode());
             if (document != null) {
@@ -1701,7 +1703,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             }
             return null;
         } finally {
-            if (document == null) { // if you get here, comment this part out and you will possibly see a OOM in the log
+            if (document == null && !parserException) { // if you get here, comment this part out and you will possibly see a OOM in the log
             	this.log.logWarning("Unable to parse the resource '" + entry.url() + "'. " + "no parser result");
             	addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.anchorName(), "no parser result");
             	return null;
