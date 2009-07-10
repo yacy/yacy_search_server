@@ -35,6 +35,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpRemoteProxyConfig;
@@ -457,13 +458,11 @@ public class SettingsAck_p {
         if (post.containsKey("parserSettings")) {
             post.remove("parserSettings");
             
-            // loop through all received settings
-            final Iterator<String> keyEnum = post.keySet().iterator();
-            while (keyEnum.hasNext()) {
-                String key = keyEnum.next();
-                if (key.startsWith("mimename")) Parser.grantMime(key.substring(9), post.get(key).equals("on")); 
+            for (Idiom parser: Parser.idioms()) {
+                for (String mimeType: parser.getSupportedMimeTypes().keySet()) {
+                    Parser.grantMime(mimeType, post.get("mimename_" + mimeType, "").equals("on"));
+                }
             }
-            
             env.setConfig(plasmaSwitchboardConstants.PARSER_MIME_DENY, Parser.getDenyMime());
             
             prop.put("info_parser", 0);

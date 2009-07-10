@@ -11,11 +11,10 @@
     <td class="small" >Mime-Type</td>
   </tr>#{parser}#
   <tr class="TableCellDark">
-    <td colspan="#[colspan]#">#[name]#</td>
-    <td>&nbsp;</td>
+    <td colspan="2">#[name]#</td>
   </tr>#{mime}#
   <tr class="TableCellLight">
-    <td class="small" align="center"><input type="checkbox" mimename.#[mimetype]#="#[mimetype]#" #(status)#::checked="checked" #(/status)#/></td>
+    <td class="small" align="center"><input type="checkbox" name="mimename_#[mimetype]#" #(status)#::checked="checked" #(/status)#/></td>
     <td class="small">#[mimetype]#</td>
   </tr>#{/mime}#
   #{/parser}#

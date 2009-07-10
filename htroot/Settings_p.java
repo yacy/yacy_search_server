@@ -217,13 +217,11 @@ public final class Settings_p {
          */
         int parserIdx = 0;
         
-        final Iterator<Idiom> availableParserIter = Parser.idioms().iterator();
-        while (availableParserIter.hasNext()) {
-            final Idiom parserInfo = availableParserIter.next();
-            prop.put("parser_" + parserIdx + "_name", parserInfo.getName());
+        for (Idiom parser: Parser.idioms()) {
+            prop.put("parser_" + parserIdx + "_name", parser.getName());
             
             int mimeIdx = 0;
-            for (String mimeType: parserInfo.getSupportedMimeTypes().keySet()) {
+            for (String mimeType: parser.getSupportedMimeTypes().keySet()) {
                 prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_mimetype", mimeType);
                 prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_status", (Parser.supportsMime(mimeType)) ? 1 : 0);
                 mimeIdx++;

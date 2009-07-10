@@ -66,7 +66,7 @@ public abstract class AbstractParser implements Idiom {
      * The Constructor of this class.
      */
 	public AbstractParser(String name) {
-		super();
+	    this.parserName = name;
 	}
     
     /**
