@@ -1557,7 +1557,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 // there is a version that is more recent. Load it and re-start with it
                 log.logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.getUrl());
                 final File downloaded = updateVersion.downloadRelease();
-                final boolean devenvironment = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1")).startsWith("dev");
+                final boolean devenvironment = new File(this.getRootPath(), ".svn").exists();
                 if (devenvironment) {
                     log.logInfo("AUTO-UPDATE: omiting update because this is a development environment");
                 } else if ((downloaded == null) || (!downloaded.exists()) || (downloaded.length() == 0)) {
@@ -1948,13 +1948,13 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public int adminAuthenticated(final httpRequestHeader requestHeader) {
         
         // authorization for localhost, only if flag is set to grant localhost access as admin
-        final String clientIP = (String) requestHeader.get(httpHeader.CONNECTION_PROP_CLIENTIP, "");
+        final String clientIP = requestHeader.get(httpHeader.CONNECTION_PROP_CLIENTIP, "");
         final String refererHost = requestHeader.refererHost();
         final boolean accessFromLocalhost = serverCore.isLocalhost(clientIP) && (refererHost.length() == 0 || serverCore.isLocalhost(refererHost));
         if (getConfigBool("adminAccountForLocalhost", false) && accessFromLocalhost) return 3; // soft-authenticated for localhost
         
         // get the authorization string from the header
-        final String authorization = ((String) requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx")).trim().substring(6);
+        final String authorization = (requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx")).trim().substring(6);
         
         // security check against too long authorization strings
         if (authorization.length() > 256) return 0; 
@@ -1964,7 +1964,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (accessFromLocalhost && (adminAccountBase64MD5.equals(authorization))) return 3; // soft-authenticated for localhost
 
         // authorization by hit in userDB
-        if (userDB.hasAdminRight((String) requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx"), requestHeader.getHeaderCookies())) return 4; //return, because 4=max
+        if (userDB.hasAdminRight(requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx"), requestHeader.getHeaderCookies())) return 4; //return, because 4=max
 
         // authorization with admin keyword in configuration
         return httpd.staticAdminAuthenticated(authorization, this);

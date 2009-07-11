@@ -35,6 +35,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverSystem;
+import de.anomic.yacy.yacyBuildProperties;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.yacyVersion;
@@ -45,6 +46,19 @@ public class ConfigUpdate_p {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+
+        // set if this should be visible
+        if (yacyBuildProperties.isPkgManager()) {
+            prop.put("candeploy", "2");
+            return prop;
+        } else if (serverSystem.canExecUnix || serverSystem.isWindows) {
+            // we can deploy a new system with (i.e.)
+            // cd DATA/RELEASE;tar xfz $1;cp -Rf yacy/* ../../;rm -Rf yacy
+            prop.put("candeploy", "1");
+        } else {
+            prop.put("candeploy", "0");
+        }
+        
 
         prop.put("candeploy_configCommit", "0");
         prop.put("candeploy_autoUpdate", "0");
@@ -107,7 +121,7 @@ public class ConfigUpdate_p {
                     sb.getLog().logInfo("AUTO-UPDATE: downloading more recent release " + updateVersion.getUrl());
                     final File downloaded = updateVersion.downloadRelease();
                     prop.putHTML("candeploy_autoUpdate_downloadedRelease", updateVersion.getName());
-                    final boolean devenvironment = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1")).startsWith("dev");
+                    final boolean devenvironment = new File(sb.getRootPath(), ".svn").exists();
                     if (devenvironment) {
                         sb.getLog().logInfo("AUTO-UPDATE: omiting update because this is a development environment");
                         prop.put("candeploy_autoUpdate", "3");
@@ -133,20 +147,11 @@ public class ConfigUpdate_p {
             }
         }
         
-        // set if this should be visible
-        if (serverSystem.canExecUnix || serverSystem.isWindows) {
-            // we can deploy a new system with (i.e.)
-            // cd DATA/RELEASE;tar xfz $1;cp -Rf yacy/* ../../;rm -Rf yacy
-            prop.put("candeploy", "1");
-        } else {
-            prop.put("candeploy", "0");
-        }
-        
         // version information
-        final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
+        final String versionstring = yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
         prop.putHTML("candeploy_versionpp", versionstring);
-        final boolean devenvironment = versionstring.startsWith("dev");
-        double thisVersion = Double.parseDouble(sb.getConfig("version","0.1"));
+        final boolean devenvironment = new File(sb.getRootPath(), ".svn").exists();
+        double thisVersion = Double.parseDouble(yacyBuildProperties.getVersion());
         // cut off the SVN Rev in the Version
         try {thisVersion = Math.round(thisVersion*1000.0)/1000.0;} catch (final NumberFormatException e) {}
 

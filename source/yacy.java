@@ -78,6 +78,7 @@ import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.Tray;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.yacyBuildProperties;
 import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.yacyVersion;
 import de.anomic.yacy.logging.Log;
@@ -121,11 +122,11 @@ import de.anomic.yacy.logging.Log;
 public final class yacy {
     
     // static objects
-    public static final String vString = "@REPL_VERSION@";
+    public static final String vString = yacyBuildProperties.getVersion();
     public static double version = 0.1;
     public static boolean pro = false;
     
-    public static final String vDATE   = "@REPL_DATE@";
+    public static final String vDATE   = yacyBuildProperties.getBuildDate();
     public static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
     public static final String hline = "-------------------------------------------------------------------------------";
    
@@ -155,9 +156,6 @@ public final class yacy {
     * @param startupFree free memory at startup time, to be used later for statistics
     */
     private static void startup(final File homePath, final long startupMemFree, final long startupMemTotal) {
-        int oldRev=0;
-        int newRev=0;
-
         try {
             // start up
             System.out.println(copyright);
@@ -232,41 +230,15 @@ public final class yacy {
             sb.setConfig("htTemplatePath", "htroot/env/templates");
             sb.setConfig("parseableExt", "html,htm,txt,php,shtml,asp");
 
-            // if we are running an SVN version, we try to detect the used svn revision now ...
-            final Properties buildProp = new Properties();
-            final File buildPropFile = new File(homePath,"build.properties");
-            try {
-                buildProp.load(new FileInputStream(buildPropFile));
-            } catch (final Exception e) {
-                Log.logWarning("STARTUP", buildPropFile.toString() + " not found in settings path");
-            }
-            
-            oldRev=Integer.parseInt(sb.getConfig("svnRevision", "0"));
-            try {
-                if (buildProp.containsKey("releaseNr")) {
-                    // this normally looks like this: $Revision$
-                    final String svnReleaseNrStr = buildProp.getProperty("releaseNr");
-                    final Pattern pattern = Pattern.compile("\\$Revision:\\s(.*)\\s\\$",Pattern.DOTALL+Pattern.CASE_INSENSITIVE);
-                    final Matcher matcher = pattern.matcher(svnReleaseNrStr);
-                    if (matcher.find()) {
-                        final String svrReleaseNr = matcher.group(1);
-                        try {
-                            try {version = Double.parseDouble(vString);} catch (final NumberFormatException e) {version = (float) 0.1;}
-                            version = yacyVersion.versvn2combinedVersion(version, Integer.parseInt(svrReleaseNr));
-                        } catch (final NumberFormatException e) {}
-                        sb.setConfig("svnRevision", svrReleaseNr);
-                    }
-                }
-                newRev=Integer.parseInt(sb.getConfig("svnRevision", "0"));
-            } catch (final Exception e) {
-                System.err.println("Unable to determine the currently used SVN revision number.");
-            }
+            int oldRev = Integer.parseInt(sb.getConfig("svnRevision", "0"));
+            sb.setConfig("svnRevision", yacyBuildProperties.getSVNRevision());
+            int newRev = Integer.parseInt(yacyBuildProperties.getSVNRevision());
 
-            sb.setConfig("version", Double.toString(version));
-            sb.setConfig("vString", yacyVersion.combined2prettyVersion(Double.toString(version)));
-            sb.setConfig("vdate", (vDATE.startsWith("@")) ? DateFormatter.formatShortDay() : vDATE);
+	    // TODO: remove!
+            //sb.setConfig("version", Double.toString(version));
+            //sb.setConfig("vString", yacyVersion.combined2prettyVersion(Double.toString(version)));
+            //sb.setConfig("vdate", (vDATE.startsWith("@")) ? DateFormatter.formatShortDay() : vDATE);
             sb.setConfig("applicationRoot", homePath.toString());
-            Log.logConfig("STARTUP", "YACY Version: " + version + ", Built " + sb.getConfig("vdate", "00000000"));
             yacyVersion.latestRelease = version;
 
             // read environment

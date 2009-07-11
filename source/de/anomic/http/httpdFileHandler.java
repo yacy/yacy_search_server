@@ -95,6 +95,7 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
+import de.anomic.yacy.yacyBuildProperties;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 import de.anomic.ymage.ymageMatrix;
@@ -785,7 +786,7 @@ public final class httpdFileHandler {
                                 return;
                             }
                             // add the application version, the uptime and the client name to every rewrite table
-                            templatePatterns.put(servletProperties.PEER_STAT_VERSION, switchboard.getConfig("version", ""));
+                            templatePatterns.put(servletProperties.PEER_STAT_VERSION, yacyBuildProperties.getVersion());
                             templatePatterns.put(servletProperties.PEER_STAT_UPTIME, ((System.currentTimeMillis() -  serverCore.startupTime) / 1000) / 60); // uptime in minutes
                             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTNAME, switchboard.getConfig("peerName", "anomic"));
                             templatePatterns.putHTML(servletProperties.PEER_STAT_CLIENTID, ((plasmaSwitchboard) switchboard).peers.myID());

@@ -56,7 +56,7 @@ public class ViewProfile {
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         prop.put("display", display);
-        final String hash = (post == null) ? null : (String) post.get("hash");
+        final String hash = (post == null) ? null : post.get("hash");
         
         if ((hash == null) || (sb.peers == null)) {
             // wrong access

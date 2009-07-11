@@ -19,7 +19,7 @@ build: build-stamp
 
 build-stamp: configure-stamp 
 	# build yacy
-	ant build-jar
+	ant build-jar -DPKGMANAGER=true
 	m4 -DDebian addon/yacyInit.m4 >debian/yacy.init
 
 clean:

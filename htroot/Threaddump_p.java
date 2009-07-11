@@ -45,6 +45,7 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
+import de.anomic.yacy.yacyBuildProperties;
 import de.anomic.yacy.yacyVersion;
 
 public class Threaddump_p {
@@ -62,7 +63,7 @@ public class Threaddump_p {
 	    prop.put("dump", "1");
     	// Thread dump
     	final Date dt = new Date();
-    	final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
+    	final String versionstring = yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
     	
     	bufferappend(buffer, plain, "************* Start Thread Dump " + dt + " *******************");
     	bufferappend(buffer, plain, "");

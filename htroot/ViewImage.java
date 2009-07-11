@@ -62,7 +62,7 @@ public class ViewImage {
         
         String urlString = post.get("url", "");
         final String urlLicense = post.get("code", "");
-        final boolean auth = ((String) header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true); // handle access rights
+        final boolean auth = (header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true); // handle access rights
         
         yacyURL url = null;
         if ((urlString.length() > 0) && (auth)) try {

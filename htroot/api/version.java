@@ -3,6 +3,7 @@
 import de.anomic.http.httpRequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.yacy.yacyBuildProperties;
 
 public class version {
 
@@ -10,9 +11,9 @@ public class version {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         
-        prop.put("version", env.getConfig("version", "0.0"));
-        prop.put("svnRev", env.getConfig("svnRevision", "0"));
-        prop.put("buildDate", env.getConfig("vdate", "19700101"));
+        prop.put("versionstring", yacyBuildProperties.getLongVersion());
+        prop.put("svnRev", yacyBuildProperties.getSVNRevision());
+        prop.put("buildDate", yacyBuildProperties.getBuildDate());
         // return rewrite properties
         return prop;
     }

@@ -178,7 +178,7 @@ ifdef(`ArchLinux', `
 ')dnl
 	ARGS="$JAVA_ARGS -classpath $CLASSPATH yacy"
 define(`START_YACY_WITH_START_STOP_DAEMON',`
-	start-stop-daemon --start --background --make-pidfile --chuid $USER\
+	/sbin/start-stop-daemon --start --background --make-pidfile --chuid $USER\
 		--pidfile $PID_FILE --chdir $YACY_HOME --startas $JAVA\
 		--nicelevel $NICE_VAL\
 		-- $ARGS

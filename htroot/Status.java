@@ -44,6 +44,7 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverProcessor;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.Formatter;
+import de.anomic.yacy.yacyBuildProperties;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyVersion;
 
@@ -138,13 +139,10 @@ public class Status {
         
         
         // version information
-        final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
+        //final String versionstring = yacyVersion.combined2prettyVersion(sb.getConfig("version","0.1"));
+        final String versionstring = yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
         prop.put("versionpp", versionstring);
-        double thisVersion = Double.parseDouble(sb.getConfig("version","0.1"));
         
-        // cut off the SVN Rev in the Version
-        try {thisVersion = Math.round(thisVersion*1000.0)/1000.0;} catch (final NumberFormatException e) {}
-
         // place some more hints
         if ((adminaccess) && (sb.getThread(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0) && (sb.getThread(plasmaSwitchboardConstants.INDEXER).getJobCount() == 0)) {
             prop.put("hintCrawlStart", "1");

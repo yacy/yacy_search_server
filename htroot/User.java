@@ -150,7 +150,7 @@ public class User{
                 sb.userDB.adminLogout(userDB.getLoginToken(requestHeader.getHeaderCookies()));
             }
             //XXX: This should not be needed anymore, because of isLoggedout
-            if(! ((String) requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx")).equals("xxxxxx")){
+            if(! (requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx")).equals("xxxxxx")){
                 prop.put("AUTHENTICATE","admin log-in");
             }
         }

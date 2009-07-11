@@ -57,7 +57,8 @@
   <property name="defaults" location="defaults"/>
   <!-- variables for installonlinux target-->
   <property name="DESTDIR" value="DESTDIR"/>
-  <property name="pkgmanager" value="false"/>
+  <property name="PKGMANAGER" value="false"/>
+  <property name="RESTARTCMD" value="/etc/init.d/yacy restart"/>
 
   <!-- determining if the .svn directory exists -->
   <condition property="svnEntriesFileExists">
@@ -146,11 +147,10 @@
 
     <!-- YaCy root directory -->
     <filter token="REPL_YACY_ROOT_DIR" value="${yacyroot}"/>
-    <filter token="REPL_PKGMANAGER" value="${pkgmanager}"/>
+    <filter token="REPL_PKGMANAGER" value="${PKGMANAGER}"/>
+    <filter token="REPL_RESTARTCMD" value="${RESTARTCMD}"/>
 
-    <!-- deleting old file -->
-    <delete file="${build}/yacy.java" failonerror="false"/>
-    <copy file="${src}/yacy.java" tofile="${build}/yacy.java" overwrite="true" filtering="true" />
+    <!-- apply replacments -->
     <delete file="${build}/de/anomic/yacy/yacyBuildProperties.java" failonerror="false"/>
     <copy file="${src}/de/anomic/yacy/yacyBuildProperties.java" tofile="${build}/de/anomic/yacy/yacyBuildProperties.java" overwrite="true" filtering="true" />
 
@@ -197,11 +197,12 @@
     	<pathelement location="${lib}/xerces.jar" />
     </path>
 
-    <!-- compiling yacy.java -->
+    <!-- compiling yacyBuildProperties.java -->
     <javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
-           includes="yacy.java,de/anomic/yacy/yacyBuildProperties.java"
+           includes="de/anomic/yacy/yacyBuildProperties.java"
            source="${javacSource}" target="${javacTarget}">
       <classpath refid="project.class.path" />
+      <!--<compilerarg value="-Xlint"/>-->
     </javac>
     <delete file="${build}/BuildProperties.java" />
 
@@ -211,6 +212,7 @@
            debug="true" debuglevel="lines,vars,source"
            source="${javacSource}" target="${javacTarget}">
       <classpath refid="project.class.path" />
+      <!--<compilerarg value="-Xlint"/>-->
     </javac>
 
     <!-- compiling htroot, htroot/yacy and htroot/htdocsdefault -->
@@ -218,7 +220,9 @@
     	   excludes="processing/**"
            classpathref="project.class.path"
            debug="true" debuglevel="lines,vars,source"
-           source="${javacSource}" target="${javacTarget}"/>
+           source="${javacSource}" target="${javacTarget}">
+      <!--<compilerarg value="-Xlint"/>-->
+    </javac>
   </target>
 
   <target name="compileHtdocsWWW" depends="compileMain" description="Compiling and zipping userspecific servlets">
@@ -240,7 +244,6 @@
   </target>
 
   <target name="all" depends="compileMain">
-    <delete file="${build}/yacy.java" />
   </target>
 
   <target name="copyMain4Dist" depends="compileMain">
@@ -591,7 +594,7 @@
   <!-- make clean -->
   <target name="clean" description="make clean">
     <delete dir="${release_main}" failonerror="false"/>
-    <delete file="${build}/yacy.java" failonerror="false"/>
+    <delete file="${build}/de/anomic/yacy/yacyBuildProperties.java" failonerror="false"/>
     <delete file="yacy.jar" failonerror="false"/>
     <delete file="yacy.exe" failonerror="false"/>
     <delete file="${lib}/svnRevNr.jar" failonerror="false"/>
@@ -624,7 +627,6 @@
         <include name="yacy.stopwords"/>
         <include name="yacy.parser"/>
         <include name="httpd.mime"/>
-        <include name="build.properties"/>
       </fileset>
     </copy>
 

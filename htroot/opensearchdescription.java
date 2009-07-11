@@ -39,7 +39,7 @@ public class opensearchdescription {
         String promoteSearchPageGreeting = env.getConfig(plasmaSwitchboardConstants.GREETING, "");
         if (env.getConfigBool(plasmaSwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
         
-        String thisaddress = (String) header.get("Host", "localhost");
+        String thisaddress = header.get("Host", "localhost");
         if (thisaddress.indexOf(":") == -1) thisaddress += ":" + serverCore.getPortNr(env.getConfig("port", "8080"));
 
 	int compareyacy = 0;

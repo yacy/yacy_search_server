@@ -60,6 +60,7 @@ import de.anomic.tools.CryptoLib;
 import de.anomic.tools.SignatureOutputStream;
 import de.anomic.tools.tarTools;
 import de.anomic.yacy.logging.Log;
+import de.anomic.yacy.yacyBuildProperties;
 
 public final class yacyRelease extends yacyVersion {
 
@@ -98,6 +99,12 @@ public final class yacyRelease extends yacyVersion {
         // if true, the release that can be obtained is returned.
         // if false, null is returned
         final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        
+        // check if release was installed by packagemanager
+        if (yacyBuildProperties.isPkgManager()) {
+            yacyCore.log.logInfo("rulebasedUpdateInfo: package manager is used for update");
+            return null;
+        }
         
         // check if update process allows update retrieve
         final String process = sb.getConfig("update.process", "manual");
@@ -423,7 +430,22 @@ public final class yacyRelease extends yacyVersion {
                 
             }
     
-            if (serverSystem.canExecUnix) {
+            if (yacyBuildProperties.isPkgManager()) {
+                // start a re-start daemon
+                try {
+                    Log.logInfo("RESTART", "INITIATED");
+                    final String script =
+                        "#!/bin/sh" + serverCore.LF_STRING +
+                        yacyBuildProperties.getRestartCmd() + " >/var/lib/yacy/RELEASE/log" + serverCore.LF_STRING;
+                    final File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.sh");
+                    serverSystem.deployScript(scriptFile, script);
+                    Log.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
+                    serverSystem.execAsynchronous(scriptFile);
+                    Log.logInfo("RESTART", "script is running");
+                } catch (final IOException e) {
+                    Log.logSevere("RESTART", "restart failed", e);
+                }
+            } else if (serverSystem.canExecUnix) {
                 // start a re-start daemon
                 try {
                     Log.logInfo("RESTART", "INITIATED");
@@ -452,6 +474,9 @@ public final class yacyRelease extends yacyVersion {
      * @param releaseFile
      */
     public static void deployRelease(final File releaseFile) {
+        if(yacyBuildProperties.isPkgManager()) {
+            return;
+        }
         //byte[] script = ("cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + ";while [ -e ../yacy.running ]; do sleep 1;done;tar xfz " + release + ";cp -Rf yacy/* ../../;rm -Rf yacy;cd ../../;startYACY.sh").getBytes();
         try {
             final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();

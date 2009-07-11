@@ -88,12 +88,11 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
         if (thisVersion == null) {
             final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
             if (sb == null) return null;
-            final boolean full = new File(sb.getRootPath(), "libx").exists();
             thisVersion = new yacyVersion(
-                "yacy" + ((full) ? "" : "_emb") +
-                "_v" + sb.getConfig("version", "0.1") + "_" +
-                sb.getConfig("vdate", "19700101") + "_" +
-                sb.getConfig("svnRevision", "0") + ".tar.gz");
+                "yacy" +
+                "_v" + yacyBuildProperties.getVersion() + "_" +
+                yacyBuildProperties.getBuildDate() + "_" +
+                yacyBuildProperties.getSVNRevision() + ".tar.gz");
         }
         return thisVersion;
     }
