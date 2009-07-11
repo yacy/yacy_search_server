@@ -1008,7 +1008,7 @@ public final class httpdFileHandler {
                         try {newOut.flush();}catch (final Exception e) {}
                         
                         // wait a little time until everything closes so that clients can read from the streams/sockets
-                        if ((contentLength >= 0) && ((String)requestHeader.get(httpRequestHeader.CONNECTION, "close")).indexOf("keep-alive") == -1) {
+                        if ((contentLength >= 0) && (requestHeader.get(httpRequestHeader.CONNECTION, "close")).indexOf("keep-alive") == -1) {
                             // in case that the client knows the size in advance (contentLength present) the waiting will have no effect on the interface performance
                             // but if the client waits on a connection interruption this will slow down.
                             try {Thread.sleep(2000);} catch (final InterruptedException e) {} // FIXME: is this necessary?

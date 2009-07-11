@@ -1010,7 +1010,7 @@ public final class httpdProxyHandler {
         }
 
 	// only gzip-encoding is supported, remove other encodings (e. g. deflate)
-        if (((String)requestHeader.get(httpHeader.ACCEPT_ENCODING,"")).indexOf("gzip") != -1) {
+        if ((requestHeader.get(httpHeader.ACCEPT_ENCODING,"")).indexOf("gzip") != -1) {
             requestHeader.put(httpHeader.ACCEPT_ENCODING, "gzip");
 	} else {
             requestHeader.put(httpHeader.ACCEPT_ENCODING, "");
@@ -1538,7 +1538,7 @@ public final class httpdProxyHandler {
     private static synchronized String generateUserAgent(final httpHeader requestHeaders) {
         userAgentStr.setLength(0);
         
-        final String browserUserAgent = (String) requestHeaders.get(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+        final String browserUserAgent = requestHeaders.get(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
         final int pos = browserUserAgent.lastIndexOf(')');
         if (pos >= 0) {
             userAgentStr

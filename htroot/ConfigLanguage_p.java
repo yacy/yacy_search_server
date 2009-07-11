@@ -114,7 +114,7 @@ public class ConfigLanguage_p {
 
         //virtual entry
         prop.put("langlist_0_file", "default");
-        prop.put("langlist_0_name", ((langNames.get("default") == null) ? "default" : (String) langNames.get("default")));
+        prop.put("langlist_0_name", ((langNames.get("default") == null) ? "default" : langNames.get("default")));
         prop.put("langlist_0_selected", "selected=\"selected\"");
 
         int count = 0;

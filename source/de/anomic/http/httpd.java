@@ -273,12 +273,12 @@ public final class httpd implements serverHandler, Cloneable {
         // persistent by default, but closed with the "Connection: close"
         // property.
         boolean persistent = !(httpVersion.equals(httpHeader.HTTP_VERSION_0_9) || httpVersion.equals(httpHeader.HTTP_VERSION_1_0));
-        if (((String)header.get(httpRequestHeader.CONNECTION, "keep-alive")).toLowerCase().indexOf("close") != -1 || 
-            ((String)header.get(httpRequestHeader.PROXY_CONNECTION, "keep-alive")).toLowerCase().indexOf("close") != -1) {
+        if ((header.get(httpRequestHeader.CONNECTION, "keep-alive")).toLowerCase().indexOf("close") != -1 || 
+            (header.get(httpRequestHeader.PROXY_CONNECTION, "keep-alive")).toLowerCase().indexOf("close") != -1) {
             persistent = false;
         }        
         
-        final String transferEncoding = (String) header.get(httpHeader.TRANSFER_ENCODING, "identity");
+        final String transferEncoding = header.get(httpHeader.TRANSFER_ENCODING, "identity");
         final boolean isPostRequest = this.prop.getProperty(httpHeader.CONNECTION_PROP_METHOD).equals(httpHeader.METHOD_POST);
         final boolean hasContentLength = header.containsKey(httpHeader.CONTENT_LENGTH);
         final boolean hasTransferEncoding = header.containsKey(httpHeader.TRANSFER_ENCODING) && !transferEncoding.equalsIgnoreCase("identity");
@@ -357,14 +357,14 @@ public final class httpd implements serverHandler, Cloneable {
         // the accessing client must identify with user:password, where
         // user = addressed peer name
         // pw = addressed peer hash (b64-hash)
-        final String auth = (String) header.get(httpRequestHeader.PROXY_AUTHORIZATION,"xxxxxx");
+        final String auth = header.get(httpRequestHeader.PROXY_AUTHORIZATION,"xxxxxx");
         if (getAlternativeResolver() != null) {
             final String test = Base64Order.standardCoder.encodeString(getAlternativeResolver().myName() + ":" + getAlternativeResolver().myID());
             if (!test.equals(auth.trim().substring(6))) return false;
         }
         
         // the accessing client must use a yacy user-agent
-        if (!(((String) header.get(httpHeader.USER_AGENT,"")).startsWith("yacy"))) return false;
+        if (!((header.get(httpHeader.USER_AGENT,"")).startsWith("yacy"))) return false;
         
         // furthermore, YaCy hops must not exceed a specific access frequency
         
@@ -399,7 +399,7 @@ public final class httpd implements serverHandler, Cloneable {
 		}
         
         if (this.use_proxyAccounts) {
-            final String auth = (String) header.get(httpRequestHeader.PROXY_AUTHORIZATION,"xxxxxx");    
+            final String auth = header.get(httpRequestHeader.PROXY_AUTHORIZATION,"xxxxxx");    
             userDB.Entry entry=switchboard.userDB.ipAuth(this.clientIP);
 			if(entry == null){
 				entry=switchboard.userDB.proxyAuth(auth, this.clientIP);
@@ -1395,7 +1395,7 @@ public final class httpd implements serverHandler, Cloneable {
                     if ((tag != '*') && (tag != '#')) { // '#' in key is reserved for proxy attributes as artificial header values
                         count = responseHeader.keyCount(key);
                         for (int j = 0; j < count; j++) {
-                            header.append(key).append(": ").append((String) responseHeader.getSingle(key, j)).append("\r\n");  
+                            header.append(key).append(": ").append(responseHeader.getSingle(key, j)).append("\r\n");  
                         }
                         //System.out.println("#" + key + ": " + value);
                     }            

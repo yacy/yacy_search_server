@@ -74,7 +74,7 @@ public class httpRequestHeader extends httpHeader {
     }
     
     public String referer() {
-        return (String) get(REFERER, "");
+        return get(REFERER, "");
     }
     
     public String refererHost() {
@@ -100,7 +100,7 @@ public class httpRequestHeader extends httpHeader {
     }
     
     public String userAgent() {
-        return (String) get(USER_AGENT, "");
+        return get(USER_AGENT, "");
     }
     
     public boolean acceptGzip() {

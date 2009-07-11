@@ -367,7 +367,7 @@ public class RobotsTxt {
         }    
         
         public String getSitemap() {
-            return this.mem.containsKey(SITEMAP)? (String)this.mem.get(SITEMAP): null;
+            return this.mem.containsKey(SITEMAP)? this.mem.get(SITEMAP): null;
         }
         
         public Date getLoadedDate() {

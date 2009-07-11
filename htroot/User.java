@@ -53,7 +53,7 @@ public class User{
         prop.put("logged-in_limit", "0");
         prop.put("status", "0");
         //identified via HTTPPassword
-        entry=sb.userDB.proxyAuth(((String) requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx")));
+        entry=sb.userDB.proxyAuth((requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx")));
         if(entry != null){
         	prop.put("logged-in_identified-by", "1");
         //try via cookie
@@ -62,7 +62,7 @@ public class User{
             prop.put("logged-in_identified-by", "2");
             //try via ip
             if(entry == null){
-                entry=sb.userDB.ipAuth(((String)requestHeader.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")));
+                entry=sb.userDB.ipAuth((requestHeader.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")));
                 if(entry != null){
                     prop.put("logged-in_identified-by", "0");
                 }
@@ -145,7 +145,7 @@ public class User{
         if(post!=null && post.containsKey("logout")){
             prop.put("logged-in", "0");
             if(entry != null){
-                entry.logout(((String)requestHeader.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")), userDB.getLoginToken(requestHeader.getHeaderCookies())); //todo: logout cookie
+                entry.logout((requestHeader.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")), userDB.getLoginToken(requestHeader.getHeaderCookies())); //todo: logout cookie
             }else{
                 sb.userDB.adminLogout(userDB.getLoginToken(requestHeader.getHeaderCookies()));
             }

@@ -39,7 +39,7 @@ public class SearchEventPicture {
     
     public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
-        final String eventID = (String) header.get("event", QueryEvent.lastEventID);
+        final String eventID = header.get("event", QueryEvent.lastEventID);
         if (eventID == null) return null;
         final ymageMatrix yp = plasmaGrafics.getSearchEventPicture(sb.peers, eventID);
         if (yp == null) return new ymageMatrix(1, 1, ymageMatrix.MODE_SUB, "000000"); // empty image

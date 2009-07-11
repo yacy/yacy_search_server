@@ -91,7 +91,7 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
         this.entry.setCol(col_lother, lother);
         this.entry.setCol(col_urlLength, urlLength);
         this.entry.setCol(col_urlComps, urlComps);
-        this.entry.setCol(col_typeofurl, new byte[]{(byte) typeofurl});
+        this.entry.setCol(col_typeofurl, new byte[]{typeofurl});
         this.entry.setCol(col_reserve, 0);
     }
     

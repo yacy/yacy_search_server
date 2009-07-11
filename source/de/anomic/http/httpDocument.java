@@ -493,7 +493,7 @@ public class httpDocument {
     public yacyURL referrerURL() {
         if (requestHeader == null) return null;
         try {
-            return new yacyURL((String) requestHeader.get(httpRequestHeader.REFERER, ""), null);
+            return new yacyURL(requestHeader.get(httpRequestHeader.REFERER, ""), null);
         } catch (final Exception e) {
             return null;
         }        

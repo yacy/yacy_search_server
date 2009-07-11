@@ -326,7 +326,7 @@ public class httpHeader extends TreeMap<String, String> implements Map<String, S
     */
     
     public String mime() {
-        return (String) get(CONTENT_TYPE, "application/octet-stream");
+        return get(CONTENT_TYPE, "application/octet-stream");
     }
     
     /*
@@ -450,7 +450,7 @@ public class httpHeader extends TreeMap<String, String> implements Map<String, S
             if ((tag != '*') && (tag != '#')) { // '#' in key is reserved for proxy attributes as artificial header values
                 count = keyCount(key);
                 for (int j = 0; j < count; j++) {
-                    theHeader.append(key).append(": ").append((String) getSingle(key, j)).append("\r\n");  
+                    theHeader.append(key).append(": ").append(getSingle(key, j)).append("\r\n");  
                 }
             }            
         }

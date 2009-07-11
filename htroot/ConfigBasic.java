@@ -83,7 +83,7 @@ public class ConfigBasic {
         }
         
         // peer name settings
-        final String peerName = (post == null) ? env.getConfig("peerName","") : (String) post.get("peername", "");
+        final String peerName = (post == null) ? env.getConfig("peerName","") : post.get("peername", "");
         
         // port settings
         long port = env.getConfigLong("port", 8080); //this allows a low port, but it will only get one, if the user edits the config himself.

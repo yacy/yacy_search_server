@@ -87,7 +87,7 @@ public class Blog {
         final int num   = post.getInt("num",10);  //indicates how many entries should be shown
 
         if(!hasRights){
-            final userDB.Entry userentry = sb.userDB.proxyAuth((String)header.get(httpRequestHeader.AUTHORIZATION, "xxxxxx"));
+            final userDB.Entry userentry = sb.userDB.proxyAuth(header.get(httpRequestHeader.AUTHORIZATION, "xxxxxx"));
             if(userentry != null && userentry.hasRight(userDB.Entry.BLOG_RIGHT)){
                 hasRights=true;
             } else if(post.containsKey("login")) {
@@ -97,7 +97,7 @@ public class Blog {
         }
 
         String pagename = post.get("page", DEFAULT_PAGE);
-        final String ip = (String)header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String ip = header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
         String StrAuthor = post.get("author", "");
 

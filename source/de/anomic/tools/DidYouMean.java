@@ -225,7 +225,7 @@ public class DidYouMean {
 		public void run() {
 			try {
 				while(true) { 
-					String s = (String)queue.take();
+					String s = queue.take();
 					if(s.equals("\n"))
 						this.interrupt();
 					else

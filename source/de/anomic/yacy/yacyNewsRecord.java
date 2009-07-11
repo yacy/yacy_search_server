@@ -130,12 +130,12 @@ public class yacyNewsRecord {
     public yacyNewsRecord(final String newsString) {
         this.attributes = serverCodings.string2map(newsString, ",");
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
-        this.category = (attributes.containsKey("cat")) ? (String) attributes.get("cat") : "";
+        this.category = (attributes.containsKey("cat")) ? attributes.get("cat") : "";
         if (category.length() > categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + categoryStringLength + ")");
         this.received = (attributes.containsKey("rec")) ? DateFormatter.parseShortSecond(attributes.get("rec"), DateFormatter.UTCDiffString()) : new Date();
         this.created = (attributes.containsKey("cre")) ? DateFormatter.parseShortSecond(attributes.get("cre"), DateFormatter.UTCDiffString()) : new Date();
         this.distributed = (attributes.containsKey("dis")) ? Integer.parseInt(attributes.get("dis")) : 0;
-        this.originator = (attributes.containsKey("ori")) ? (String) attributes.get("ori") : "";
+        this.originator = (attributes.containsKey("ori")) ? attributes.get("ori") : "";
         removeStandards();
     }
 

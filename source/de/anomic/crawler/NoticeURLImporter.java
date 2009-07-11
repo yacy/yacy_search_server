@@ -179,7 +179,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
                                     this.importProfileHandleCache.add(profileHandle);
                                     HashMap<String, String> mapclone = new HashMap<String, String>();
                                     mapclone.putAll(sourceEntry.map());
-                                    this.activeCrawls.newEntry((HashMap<String, String>) mapclone);
+                                    this.activeCrawls.newEntry(mapclone);
                                 } else {
                                     this.log.logWarning("Profile '" + profileHandle + "' of url entry '" + nextHash + "' unknown.");
                                     continue;

@@ -82,7 +82,7 @@ public class MessageSend_p {
             }
 
             prop.putXML("mode_permission_peerName", peerName);
-            final String response = (result == null) ? null : (String) result.get("response");
+            final String response = (result == null) ? null : result.get("response");
             if (response == null || result == null) {
                 // we don't have permission or other peer does not exist
                 prop.put("mode_permission", "0");

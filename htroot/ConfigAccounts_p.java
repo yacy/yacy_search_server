@@ -50,9 +50,9 @@ public class ConfigAccounts_p {
         boolean localhostAccess = sb.getConfigBool("adminAccountForLocalhost", false);
         if ((post != null) && (post.containsKey("setAdmin"))) {
             localhostAccess = post.get("access", "").equals("localhost");
-            final String user   = (post == null) ? "" : (String) post.get("adminuser", "");
-            final String pw1    = (post == null) ? "" : (String) post.get("adminpw1", "");
-            final String pw2    = (post == null) ? "" : (String) post.get("adminpw2", "");
+            final String user   = (post == null) ? "" : post.get("adminuser", "");
+            final String pw1    = (post == null) ? "" : post.get("adminpw1", "");
+            final String pw2    = (post == null) ? "" : post.get("adminpw2", "");
 
             // may be overwritten if new password is given
             if ((user.length() > 0) && (pw1.length() > 3) && (pw1.equals(pw2))) {

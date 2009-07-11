@@ -83,7 +83,7 @@ public class IODispatcher extends Thread {
             Log.logWarning("IODispatcher", "emergency dump of file " + file.getName());
             cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
         } else {
-            DumpJob<? extends Reference> job = new DumpJob(cache, file, array);
+            DumpJob<? extends Reference> job = (DumpJob<? extends Reference>)new DumpJob(cache, file, array);
             try {
                 this.dumpQueue.put(job);
                 this.controlQueue.release();

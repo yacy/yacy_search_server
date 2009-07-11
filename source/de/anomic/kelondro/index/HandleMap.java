@@ -371,8 +371,8 @@ public class HandleMap implements Iterable<Row.Entry> {
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (sortAtEnd && map.index instanceof ObjectIndexCache) {
-                ((ObjectIndexCache) map.index).finishInitialization();
+            if (sortAtEnd) {
+                map.index.finishInitialization();
             }
             return map;
         }
