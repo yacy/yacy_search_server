@@ -14,6 +14,9 @@ public class yacyBuildProperties {
 	 * returns the SVN-Revision Number as a String
 	 */
 	public static String getSVNRevision() {
+		if ("@REPL_REVISION_NR@".contains("@")) {
+			return "0";
+		}
 		return "@REPL_REVISION_NR@";
 	}
 
@@ -21,6 +24,9 @@ public class yacyBuildProperties {
 	 * returns the version String (e. g. 0.9)
 	 */
 	public static String getVersion() {
+		if ("@REPL_VERSION@".contains("@")) {
+			return "0.1";
+		}
 		return "@REPL_VERSION@";
 	}
 
@@ -35,6 +41,9 @@ public class yacyBuildProperties {
 	 * returns the date, when this release was build
 	 */
 	public static String getBuildDate() {
+		if ("@REPL_DATE@".contains("@")) {
+			return "19700101";
+		}
 		return "@REPL_DATE@";
 	}
 
@@ -51,6 +60,9 @@ public class yacyBuildProperties {
 	 * when YaCy was installed with a packagemanger
 	 */
 	public static String getRestartCmd() {
+		if ("@REPL_RESTARTCMD@".contains("@")) {
+			return "echo 'error'";
+		}
 		return "@REPL_RESTARTCMD@";
 	}
 }

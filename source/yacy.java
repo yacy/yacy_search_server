@@ -230,9 +230,14 @@ public final class yacy {
             sb.setConfig("htTemplatePath", "htroot/env/templates");
             sb.setConfig("parseableExt", "html,htm,txt,php,shtml,asp");
 
-            int oldRev = Integer.parseInt(sb.getConfig("svnRevision", "0"));
-            sb.setConfig("svnRevision", yacyBuildProperties.getSVNRevision());
+            int oldRev;
+	    try {
+                oldRev = Integer.parseInt(sb.getConfig("svnRevision", "0"));
+            } catch (NumberFormatException e) {
+                oldRev = 0;
+	    }
             int newRev = Integer.parseInt(yacyBuildProperties.getSVNRevision());
+            sb.setConfig("svnRevision", yacyBuildProperties.getSVNRevision());
 
 	    // TODO: remove!
             //sb.setConfig("version", Double.toString(version));
