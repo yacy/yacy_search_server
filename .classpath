@@ -43,7 +43,6 @@
 	<classpathentry kind="lib" path="lib/PDFBox-0.7.3.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.2-FINAL-20081019.jar"/>
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.2-FINAL-20081019.jar"/>
-	<classpathentry kind="lib" path="lib/tm-extractors-1.0.jar"/>
 	<classpathentry kind="lib" path="lib/webcat-0.1-swf.jar"/>
 	<classpathentry kind="lib" path="lib/wsdl4j.jar"/>
 	<classpathentry kind="output" path="gen"/>

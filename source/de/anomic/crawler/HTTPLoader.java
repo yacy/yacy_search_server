@@ -119,6 +119,12 @@ public final class HTTPLoader {
         final boolean ssl = entry.url().getProtocol().equals("https");
         if (port < 0) port = (ssl) ? 443 : 80;
         
+        // if not the right file type then reject file
+        if (!Parser.supportsExtension(entry.url())) {
+            sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "wrong extension");
+            throw new IOException("REJECTED WRONG EXTENSION TYPE " + entry.url().getFileExtension()+ " for URL " + entry.url().toString());
+        } 
+        
         // check if url is in blacklist
         final String hostlow = host.toLowerCase();
         if (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, hostlow, path)) {
@@ -156,11 +162,7 @@ public final class HTTPLoader {
                     
                     // request has been placed and result has been returned. work off response
                     //try {
-                        if (!Parser.supportsExtension(entry.url())) {
-                            // if the response has not the right file type then reject file
-                            sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "wrong extension");
-                            throw new IOException("REJECTED WRONG EXTENSION TYPE " + entry.url().getFileExtension()+ " for URL " + entry.url().toString());
-                        } else if (!Parser.supportsMime(res.getResponseHeader().mime())) {
+                    	if (!Parser.supportsMime(res.getResponseHeader().mime())) {
                             // if the response has not the right file type then reject file
                             sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "wrong mime type");
                             throw new IOException("REJECTED WRONG MIME TYPE " + res.getResponseHeader().mime() + " for URL " + entry.url().toString());
