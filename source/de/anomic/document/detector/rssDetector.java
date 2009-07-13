@@ -30,9 +30,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Map;
 
-import net.sf.jmimemagic.MagicDetector;
-
-public class rssDetector implements MagicDetector {
+public class rssDetector {
 
     public String getDisplayName() {
         return "RSS MimeType Detector";

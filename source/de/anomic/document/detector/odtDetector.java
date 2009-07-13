@@ -31,10 +31,9 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import net.sf.jmimemagic.MagicDetector;
 import de.anomic.kelondro.util.FileUtils;
 
-public class odtDetector implements MagicDetector {
+public class odtDetector {
 
     public String getDisplayName() {
         return "ODT MimeType Detector";

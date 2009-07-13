@@ -179,7 +179,6 @@
     	<pathelement location="${lib}/inetlib.jar" />
     	<pathelement location="${lib}/jakarta-oro-2.0.7.jar" />
     	<pathelement location="${lib}/jaxrpc.jar" />
-    	<pathelement location="${lib}/jmimemagic-0.1.0.jar" />
     	<pathelement location="${lib}/jrpm-SNAPSHOT.jar" />
     	<pathelement location="${lib}/jrpm-head.jar" />
     	<pathelement location="${lib}/jsch-0.1.21.jar" />

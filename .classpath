@@ -33,7 +33,6 @@
 	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.7.jar"/>
 	<classpathentry kind="lib" path="lib/jaxrpc.jar"/>
-	<classpathentry kind="lib" path="lib/jmimemagic-0.1.0.jar"/>
 	<classpathentry kind="lib" path="lib/jrpm-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/jsch-0.1.21.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.9.jar"/>

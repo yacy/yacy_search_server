@@ -80,7 +80,6 @@ public final class Parser {
         initParser(new docParser());
         initParser(new gzipParser());
         initParser(new htmlParser());
-        //initParser(new mimeTypeParser()); // what does that thing do?
         initParser(new odtParser());
         initParser(new pdfParser());
         initParser(new pptParser());
