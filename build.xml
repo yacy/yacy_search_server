@@ -161,26 +161,21 @@
     <path id="project.class.path">
         <pathelement location="${build}" />
         <pathelement location="${htroot}" />
+    	<pathelement location="${lib}/activation.jar" />
     	<pathelement location="${lib}/FontBox-0.1.0-dev.jar" />
     	<pathelement location="${lib}/J7Zip-modified.jar" />
     	<pathelement location="${lib}/PDFBox-0.7.3.jar" />
-    	<pathelement location="${lib}/activation.jar" />
     	<pathelement location="${lib}/bcmail-jdk14-139.jar" />
     	<pathelement location="${lib}/bcprov-jdk14-139.jar" />
     	<pathelement location="${lib}/bzip2.jar" />
     	<pathelement location="${lib}/commons-codec-1.3.jar" />
-    	<pathelement location="${lib}/commons-discovery.jar" />
     	<pathelement location="${lib}/commons-fileupload-1.2.1.jar" />
     	<pathelement location="${lib}/commons-httpclient-3.1.jar" />
     	<pathelement location="${lib}/commons-io-1.4.jar" />
     	<pathelement location="${lib}/commons-jxpath-1.1.jar" />
     	<pathelement location="${lib}/commons-logging-1.1.1.jar" />
-    	<pathelement location="${lib}/gnumail.jar" />
-    	<pathelement location="${lib}/inetlib.jar" />
     	<pathelement location="${lib}/jakarta-oro-2.0.7.jar" />
-    	<pathelement location="${lib}/jaxrpc.jar" />
     	<pathelement location="${lib}/jrpm-SNAPSHOT.jar" />
-    	<pathelement location="${lib}/jrpm-head.jar" />
     	<pathelement location="${lib}/jsch-0.1.21.jar" />
     	<pathelement location="${lib}/log4j-1.2.9.jar" />
     	<pathelement location="${lib}/mysql-connector-java-5.1.7-bin.jar" />
@@ -192,7 +187,6 @@
     	<pathelement location="${lib}/tar.jar" />
     	<pathelement location="${lib}/tm-extractors-1.0.jar" />
     	<pathelement location="${lib}/webcat-0.1-swf.jar" />
-    	<pathelement location="${lib}/wsdl4j.jar" />
     	<pathelement location="${lib}/xerces.jar" />
     </path>
 
