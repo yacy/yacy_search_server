@@ -152,7 +152,9 @@ public final class HTTPLoader {
             httpResponse res = null;
             try {
                 // send request
-                res = client.GET(entry.url().toString());
+                res = client.GET(entry.url().toString(), maxFileSize);
+                // FIXME: 30*-handling (bottom) is never reached
+                // we always get the final content because httpClient.followRedirects = true
 
                 if (res.getStatusCode() == 200 || res.getStatusCode() == 203) {
                     // the transfer is ok
@@ -162,32 +164,36 @@ public final class HTTPLoader {
                     
                     // request has been placed and result has been returned. work off response
                     //try {
-                    	if (!Parser.supportsMime(res.getResponseHeader().mime())) {
-                            // if the response has not the right file type then reject file
-                            sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "wrong mime type");
-                            throw new IOException("REJECTED WRONG MIME TYPE " + res.getResponseHeader().mime() + " for URL " + entry.url().toString());
-                        } else {     
-                            // get the content length and check if the length is allowed
-                            long contentLength = res.getResponseHeader().getContentLength();
-                            if (maxFileSize >= 0 && contentLength > maxFileSize) {
-                                sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");                    
-                                throw new IOException("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes.");
-                            }
-    
-                            // we write the new cache entry to file system directly
-                            res.setAccountingName("CRAWLER");
-                            final byte[] responseBody = res.getData();
-                            contentLength = responseBody.length;
-                            
-                            // check length again in case it was not possible to get the length before loading
-                            if (maxFileSize >= 0 && contentLength > maxFileSize) {
-                                sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");                    
-                                throw new IOException("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes.");
-                            }
-                            
-                            htCache.setCacheArray(responseBody);
-                        }
-                        return htCache;
+                    
+                	// if the response has not the right file type then reject file
+                    if (!Parser.supportsMime(res.getResponseHeader().mime())) {
+                    	sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "wrong mime type");
+                    	throw new IOException("REJECTED WRONG MIME TYPE " + res.getResponseHeader().mime() + " for URL " + entry.url().toString());
+                    }
+
+                    /*
+                    // check if the content length is allowed
+                    long contentLength = res.getResponseHeader().getContentLength();
+                    if (maxFileSize >= 0 && contentLength > maxFileSize) {
+                    	sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");                    
+                    	throw new IOException("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (HEAD)");
+                    }
+                    */
+
+                    // we write the new cache entry to file system directly
+                    res.setAccountingName("CRAWLER");
+                    final byte[] responseBody = res.getData();
+                    long contentLength = responseBody.length;
+
+                    // check length again in case it was not possible to get the length before loading
+                    if (maxFileSize >= 0 && contentLength > maxFileSize) {
+                    	sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");                    
+                    	throw new IOException("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)");
+                    }
+
+                    htCache.setCacheArray(responseBody);
+
+                    return htCache;
                         /*
                     } catch (final SocketException e) {
                         // this may happen if the client suddenly closes its connection

@@ -48,7 +48,6 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.URIException;
 import org.apache.commons.httpclient.cookie.CookiePolicy;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
-import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.HeadMethod;
 import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
@@ -257,7 +256,19 @@ public class httpClient {
      * @throws IOException
      */
     public httpResponse GET(final String uri) throws IOException {
-        final HttpMethod get = new GetMethod(uri);
+    	return GET(uri, Long.MAX_VALUE);
+    }
+    
+    /**
+     * This method GETs a page from the server.
+     * 
+     * @param uri The URI to the page which should be GET.
+     * @param maxfilesize the maximum allowed filesize (else IOException)
+     * @return InputStream of content (body)
+     * @throws IOException
+     */
+    public httpResponse GET(final String uri, long maxfilesize) throws IOException {
+        final HttpMethod get = new httpClientGetMethod(uri, maxfilesize);
         get.setFollowRedirects(followRedirects);
         get.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
         return execute(get);
