@@ -197,7 +197,6 @@ import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyUpdateLocation;
 import de.anomic.yacy.yacyRelease;
-import de.anomic.yacy.yacyVersion;
 import de.anomic.yacy.dht.Dispatcher;
 import de.anomic.yacy.dht.PeerSelection;
 import de.anomic.yacy.logging.Log;

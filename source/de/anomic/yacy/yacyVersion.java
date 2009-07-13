@@ -1,6 +1,5 @@
 package de.anomic.yacy;
 
-import java.io.File;
 import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

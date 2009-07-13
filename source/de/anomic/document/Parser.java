@@ -43,7 +43,6 @@ import de.anomic.document.parser.bzipParser;
 import de.anomic.document.parser.docParser;
 import de.anomic.document.parser.gzipParser;
 import de.anomic.document.parser.htmlParser;
-import de.anomic.document.parser.mimeTypeParser;
 import de.anomic.document.parser.odtParser;
 import de.anomic.document.parser.pdfParser;
 import de.anomic.document.parser.pptParser;

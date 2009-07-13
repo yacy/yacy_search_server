@@ -12,7 +12,6 @@
 	<classpathentry kind="src" path="htroot/api/bookmarks/xbel"/>
 	<classpathentry kind="src" path="htroot/api/bookmarks/tags"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry exported="true" kind="lib" path="lib/tar.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-httpclient-3.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-logging-1.1.1.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-io-1.4.jar"/>
@@ -35,15 +34,15 @@
 	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.7.jar"/>
 	<classpathentry kind="lib" path="lib/jaxrpc.jar"/>
 	<classpathentry kind="lib" path="lib/jmimemagic-0.1.0.jar"/>
-	<classpathentry kind="lib" path="lib/jrpm-head.jar"/>
 	<classpathentry kind="lib" path="lib/jrpm-SNAPSHOT.jar"/>
 	<classpathentry kind="lib" path="lib/jsch-0.1.21.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.9.jar"/>
-	<classpathentry kind="lib" path="lib/odf_utils_05_11_29.jar"/>
 	<classpathentry kind="lib" path="lib/PDFBox-0.7.3.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.2-FINAL-20081019.jar"/>
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.2-FINAL-20081019.jar"/>
-	<classpathentry kind="lib" path="lib/webcat-0.1-swf.jar"/>
 	<classpathentry kind="lib" path="lib/wsdl4j.jar"/>
+	<classpathentry kind="lib" path="lib/tar.jar"/>
+	<classpathentry kind="lib" path="lib/webcat-0.1-swf.jar"/>
+	<classpathentry kind="lib" path="lib/odf_utils_05_11_29.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>

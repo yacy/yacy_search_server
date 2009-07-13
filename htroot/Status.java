@@ -46,7 +46,6 @@ import de.anomic.server.serverSwitch;
 import de.anomic.tools.Formatter;
 import de.anomic.yacy.yacyBuildProperties;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyVersion;
 
 public class Status {
 

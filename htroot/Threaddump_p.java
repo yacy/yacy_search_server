@@ -46,7 +46,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyBuildProperties;
-import de.anomic.yacy.yacyVersion;
 
 public class Threaddump_p {
 

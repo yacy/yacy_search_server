@@ -34,7 +34,6 @@ import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyRelease;
-import de.anomic.yacy.yacyVersion;
 
 public class Steering {
 

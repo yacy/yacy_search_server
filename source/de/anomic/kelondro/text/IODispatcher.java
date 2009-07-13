@@ -78,6 +78,7 @@ public class IODispatcher extends Thread {
         }
     }
     
+    @SuppressWarnings("unchecked")
     public synchronized void dump(ReferenceContainerCache<? extends Reference> cache, File file, ReferenceContainerArray<? extends Reference> array) {
         if (dumpQueue == null || controlQueue == null || !this.isAlive()) {
             Log.logWarning("IODispatcher", "emergency dump of file " + file.getName());
