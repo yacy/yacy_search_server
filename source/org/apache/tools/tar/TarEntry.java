@@ -20,6 +20,10 @@
  * This package is based on the work done by Timothy Gerard Endres
  * (time@ice.com) to whom the Ant project is very grateful for his great code.
  */
+/*
+ * Modifications (Michael Christen)
+ * - replaced StringBuffer with StringBuilder
+ */
 
 package org.apache.tools.tar;
 
@@ -78,7 +82,7 @@ import java.util.Locale;
 
 public class TarEntry implements TarConstants {
     /** The entry's name. */
-    private StringBuffer name;
+    private StringBuilder name;
 
     /** The entry's permission mode. */
     private int mode;
@@ -99,16 +103,16 @@ public class TarEntry implements TarConstants {
     private byte linkFlag;
 
     /** The entry's link name. */
-    private StringBuffer linkName;
+    private StringBuilder linkName;
 
     /** The entry's magic tag. */
-    private StringBuffer magic;
+    private StringBuilder magic;
 
     /** The entry's user name. */
-    private StringBuffer userName;
+    private StringBuilder userName;
 
     /** The entry's group name. */
-    private StringBuffer groupName;
+    private StringBuilder groupName;
 
     /** The entry's major device number. */
     private int devMajor;
@@ -135,9 +139,9 @@ public class TarEntry implements TarConstants {
      * Construct an empty entry and prepares the header values.
      */
     private TarEntry () {
-        this.magic = new StringBuffer(TMAGIC);
-        this.name = new StringBuffer();
-        this.linkName = new StringBuffer();
+        this.magic = new StringBuilder(TMAGIC);
+        this.name = new StringBuilder();
+        this.linkName = new StringBuilder();
 
         String user = System.getProperty("user.name", "");
 
@@ -147,8 +151,8 @@ public class TarEntry implements TarConstants {
 
         this.userId = 0;
         this.groupId = 0;
-        this.userName = new StringBuffer(user);
-        this.groupName = new StringBuffer("");
+        this.userName = new StringBuilder(user);
+        this.groupName = new StringBuilder("");
         this.file = null;
     }
 
@@ -165,16 +169,16 @@ public class TarEntry implements TarConstants {
 
         this.devMajor = 0;
         this.devMinor = 0;
-        this.name = new StringBuffer(name);
+        this.name = new StringBuilder(name);
         this.mode = isDir ? DEFAULT_DIR_MODE : DEFAULT_FILE_MODE;
         this.linkFlag = isDir ? LF_DIR : LF_NORMAL;
         this.userId = 0;
         this.groupId = 0;
         this.size = 0;
         this.modTime = (new Date()).getTime() / MILLIS_PER_SECOND;
-        this.linkName = new StringBuffer("");
-        this.userName = new StringBuffer("");
-        this.groupName = new StringBuffer("");
+        this.linkName = new StringBuilder("");
+        this.userName = new StringBuilder("");
+        this.groupName = new StringBuilder("");
         this.devMajor = 0;
         this.devMinor = 0;
 
@@ -238,8 +242,8 @@ public class TarEntry implements TarConstants {
             fileName = fileName.substring(1);
         }
 
-        this.linkName = new StringBuffer("");
-        this.name = new StringBuffer(fileName);
+        this.linkName = new StringBuilder("");
+        this.name = new StringBuilder(fileName);
 
         if (file.isDirectory()) {
             this.mode = DEFAULT_DIR_MODE;
@@ -331,7 +335,7 @@ public class TarEntry implements TarConstants {
      * @param name This entry's new name.
      */
     public void setName(String name) {
-        this.name = new StringBuffer(name);
+        this.name = new StringBuilder(name);
     }
 
     /**
@@ -403,7 +407,7 @@ public class TarEntry implements TarConstants {
      * @param userName This entry's new user name.
      */
     public void setUserName(String userName) {
-        this.userName = new StringBuffer(userName);
+        this.userName = new StringBuilder(userName);
     }
 
     /**
@@ -421,7 +425,7 @@ public class TarEntry implements TarConstants {
      * @param groupName This entry's new group name.
      */
     public void setGroupName(String groupName) {
-        this.groupName = new StringBuffer(groupName);
+        this.groupName = new StringBuilder(groupName);
     }
 
     /**

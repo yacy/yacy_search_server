@@ -20,6 +20,10 @@
  * This package is based on the work done by Timothy Gerard Endres
  * (time@ice.com) to whom the Ant project is very grateful for his great code.
  */
+/*
+ * Modifications (Michael Christen)
+ * - replaced StringBuffer with StringBuilder
+ */
 
 package org.apache.tools.tar;
 
@@ -258,7 +262,7 @@ public class TarInputStream extends FilterInputStream {
 
         if (this.currEntry != null && this.currEntry.isGNULongNameEntry()) {
             // read in the name
-            StringBuffer longName = new StringBuffer();
+            StringBuilder longName = new StringBuilder();
             byte[] buf = new byte[SMALL_BUFFER_SIZE];
             int length = 0;
             while ((length = read(buf)) >= 0) {

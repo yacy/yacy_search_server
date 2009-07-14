@@ -20,6 +20,10 @@
  * This package is based on the work done by Timothy Gerard Endres
  * (time@ice.com) to whom the Ant project is very grateful for his great code.
  */
+/*
+ * Modifications (Michael Christen)
+ * - replaced StringBuffer with StringBuilder
+ */
 
 package org.apache.tools.tar;
 
@@ -78,8 +82,8 @@ public class TarUtils {
      * @param length The number of header bytes to parse.
      * @return The header's entry name.
      */
-    public static StringBuffer parseName(byte[] header, int offset, int length) {
-        StringBuffer result = new StringBuffer(length);
+    public static StringBuilder parseName(byte[] header, int offset, int length) {
+        StringBuilder result = new StringBuilder(length);
         int          end = offset + length;
 
         for (int i = offset; i < end; ++i) {
@@ -102,7 +106,7 @@ public class TarUtils {
      * @param length The number of header bytes to parse.
      * @return The number of bytes in a header's entry name.
      */
-    public static int getNameBytes(StringBuffer name, byte[] buf, int offset, int length) {
+    public static int getNameBytes(StringBuilder name, byte[] buf, int offset, int length) {
         int i;
 
         for (i = 0; i < length && i < name.length(); ++i) {
