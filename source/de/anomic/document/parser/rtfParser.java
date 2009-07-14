@@ -50,10 +50,10 @@ public class rtfParser extends AbstractParser implements Idiom {
     public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
         SUPPORTED_EXTENSIONS.add("rtf");
-        SUPPORTED_MIME_TYPES.add("application/rtf");
         SUPPORTED_MIME_TYPES.add("text/rtf");
-        SUPPORTED_MIME_TYPES.add("application/x-rtf");
         SUPPORTED_MIME_TYPES.add("text/richtext");
+        SUPPORTED_MIME_TYPES.add("application/rtf");
+        SUPPORTED_MIME_TYPES.add("application/x-rtf");
         SUPPORTED_MIME_TYPES.add("application/x-soffice");
     } 
 

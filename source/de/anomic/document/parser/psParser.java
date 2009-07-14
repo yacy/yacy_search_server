@@ -54,6 +54,7 @@ public class psParser extends AbstractParser implements Idiom {
     public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
         SUPPORTED_EXTENSIONS.add("ps");
+        SUPPORTED_MIME_TYPES.add("application/postscript");
         SUPPORTED_MIME_TYPES.add("application/ps");
         SUPPORTED_MIME_TYPES.add("application/x-postscript");
         SUPPORTED_MIME_TYPES.add("application/x-ps");

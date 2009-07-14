@@ -68,10 +68,14 @@ public class odtParser extends AbstractParser implements Idiom {
         SUPPORTED_EXTENSIONS.add("odt");
         SUPPORTED_EXTENSIONS.add("ods");
         SUPPORTED_EXTENSIONS.add("odp");
+        SUPPORTED_EXTENSIONS.add("sxw"); // Star Office Writer file format
+        SUPPORTED_EXTENSIONS.add("sxc"); // Star Office Calc file format
         SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.text");
         SUPPORTED_MIME_TYPES.add("application/x-vnd.oasis.opendocument.text");
         SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.presentation");
         SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.spreadsheet");
+        SUPPORTED_MIME_TYPES.add("application/OOo-calc");
+        SUPPORTED_MIME_TYPES.add("application/OOo-writer");
     }
 
     public odtParser() {        

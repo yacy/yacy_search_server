@@ -69,6 +69,7 @@ public class htmlParser extends AbstractParser implements Idiom {
         SUPPORTED_MIME_TYPES.add("text/html");
         SUPPORTED_MIME_TYPES.add("text/plain");
         SUPPORTED_MIME_TYPES.add("text/sgml");
+        SUPPORTED_MIME_TYPES.add("text/csv");
     }
     
     public htmlParser() {

@@ -123,7 +123,7 @@ public final class HTTPLoader {
         String supportError = Parser.supportsExtension(entry.url());
         if (supportError != null) {
             sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, supportError);
-            throw new IOException("REJECTED WRONG EXTENSION TYPE " + entry.url().getFileExtension()+ " for URL " + entry.url().toString());
+            throw new IOException("REJECTED WRONG EXTENSION TYPE: " + supportError);
         } 
         
         // check if url is in blacklist
@@ -170,7 +170,7 @@ public final class HTTPLoader {
                     supportError = Parser.supports(entry.url(), res.getResponseHeader().mime());
                     if (supportError != null) {
                     	sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, supportError);
-                    	throw new IOException("REJECTED WRONG MIME TYPE " + res.getResponseHeader().mime() + " for URL " + entry.url().toString());
+                    	throw new IOException("REJECTED WRONG MIME TYPE: " + supportError);
                     }
 
                     /*
