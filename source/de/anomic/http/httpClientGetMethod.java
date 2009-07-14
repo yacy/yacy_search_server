@@ -45,7 +45,7 @@ public class httpClientGetMethod extends GetMethod {
 	
 	public httpClientGetMethod(String uri, long maxfilesize) {
 		super(uri);
-		this.maxfilesize = maxfilesize;
+		if (maxfilesize > 0) this.maxfilesize = maxfilesize;
 	}
 	
 	@Override

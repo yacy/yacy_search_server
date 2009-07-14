@@ -174,7 +174,7 @@ public final class HTTPLoader {
                     /*
                     // check if the content length is allowed
                     long contentLength = res.getResponseHeader().getContentLength();
-                    if (maxFileSize >= 0 && contentLength > maxFileSize) {
+                    if (maxFileSize > 0 && contentLength > maxFileSize) {
                     	sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");                    
                     	throw new IOException("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (HEAD)");
                     }
@@ -186,7 +186,7 @@ public final class HTTPLoader {
                     long contentLength = responseBody.length;
 
                     // check length again in case it was not possible to get the length before loading
-                    if (maxFileSize >= 0 && contentLength > maxFileSize) {
+                    if (maxFileSize > 0 && contentLength > maxFileSize) {
                     	sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");                    
                     	throw new IOException("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)");
                     }
