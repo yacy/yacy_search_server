@@ -35,8 +35,6 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import de.anomic.document.Idiom;
-import de.anomic.document.Parser;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpd;
@@ -45,7 +43,6 @@ import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -450,25 +447,6 @@ public class SettingsAck_p {
             prop.putHTML("info_msgForwardingTo", post.get("msgForwardingTo"));
             
             return prop;
-        }
-        
-        /*
-         * Parser configuration
-         */
-        if (post.containsKey("parserSettings")) {
-            post.remove("parserSettings");
-            
-            for (Idiom parser: Parser.idioms()) {
-                for (String mimeType: parser.getSupportedMimeTypes().keySet()) {
-                    Parser.grantMime(mimeType, post.get("mimename_" + mimeType, "").equals("on"));
-                }
-            }
-            env.setConfig(plasmaSwitchboardConstants.PARSER_MIME_DENY, Parser.getDenyMime());
-            
-            prop.put("info_parser", 0);
-            prop.put("info", "18");
-            return prop;
-          
         }
         
         // Crawler settings

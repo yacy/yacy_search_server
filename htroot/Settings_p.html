@@ -3,22 +3,6 @@
   <head>
     <title>YaCy '#[clientname]#': Advanced Settings</title>
     #%env/templates/metas.template%#
-    
-    <script type="text/javascript">
-    /* <![CDATA[ */
-    function ParserCheckboxes(reference)
-    {
-      var mode = reference.name.substring(0,reference.name.indexOf("."));
-      for(i=0; i<document.getElementById("parsersettings").elements.length; i++)
-      {
-        if(document.getElementById("parsersettings").elements[i].type=="checkbox" && document.getElementById("parsersettings").elements[i].name.indexOf(mode) >= 0)
-        {
-          document.getElementById("parsersettings").elements[i].checked=reference.checked;
-        }
-      }
-    }
-    /* ]]> */
-    </script>
   </head>
   <body id="Settings">
     #%env/templates/header.template%#
@@ -37,7 +21,6 @@
     <ul class="settingsMenu">
       <li><a href="?page=ServerAccess">Server Access Settings</a></li>
       <li><a href="?page=ProxyAccess">Proxy Access Settings</a></li>
-      <li><a href="?page=parser">Content Parser Settings</a></li>
       <li><a href="?page=crawler">Crawler Settings</a></li>
       <li><a href="?page=http">HTTP Networking</a></li>
       <li><a href="?page=proxy">Remote Proxy (optional)</a></li>

@@ -1,8 +1,6 @@
-// Settings.p.java 
-// -----------------------
-// part of the AnomicHTTPD caching proxy
+// Settings.p.java
 // (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://www.anomic.de
+// first published on http://yacy.net
 // Frankfurt, Germany, 2004
 // last change: 02.05.2004
 //
@@ -27,8 +25,6 @@
 import java.util.HashMap;
 import java.util.Iterator;
 
-import de.anomic.document.Idiom;
-import de.anomic.document.Parser;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -211,28 +207,7 @@ public final class Settings_p {
         prop.put("msgForwardingEnabled",env.getConfig("msgForwardingEnabled","false").equals("true") ? "1" : "0");
         prop.putHTML("msgForwardingCmd",env.getConfig("msgForwardingCmd", ""));
         prop.putHTML("msgForwardingTo",env.getConfig("msgForwardingTo", ""));
-        
-        /*
-         * Parser Configuration
-         */
-        int parserIdx = 0;
-        
-        for (Idiom parser: Parser.idioms()) {
-            prop.put("parser_" + parserIdx + "_name", parser.getName());
-            
-            int mimeIdx = 0;
-            for (String mimeType: parser.getSupportedMimeTypes().keySet()) {
-                prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_mimetype", mimeType);
-                prop.put("parser_" + parserIdx + "_mime_" + mimeIdx + "_status", (Parser.supportsMime(mimeType)) ? 1 : 0);
-                mimeIdx++;
-            }
-            prop.put("parser_" + parserIdx + "_mime", mimeIdx);
-            
-            parserIdx++;
-        }
-        
-        prop.put("parser", parserIdx);
-        
+
         // Crawler settings
         prop.putHTML("crawler.clientTimeout",sb.getConfig("crawler.clientTimeout", "10000"));
         prop.putHTML("crawler.http.maxFileSize",sb.getConfig("crawler.http.maxFileSize", "-1"));
