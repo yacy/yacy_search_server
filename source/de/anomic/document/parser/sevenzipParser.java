@@ -32,7 +32,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 import SevenZip.ArchiveExtractCallback;
 import SevenZip.IInStream;
 import SevenZip.MyRandomAccessFile;
@@ -55,9 +57,11 @@ public class sevenzipParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */    
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>(); 
-    static { 
-        SUPPORTED_MIME_TYPES.put("application/x-7z-compressed", "7z"); 
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
+    static {
+        SUPPORTED_EXTENSIONS.add("7z");
+        SUPPORTED_MIME_TYPES.add("application/x-7z-compressed"); 
     }
     
     public sevenzipParser() {
@@ -124,8 +128,12 @@ public class sevenzipParser extends AbstractParser implements Idiom {
         }
     }
     
-    public HashMap<String, String> getSupportedMimeTypes() {
+    public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
     }
     
 

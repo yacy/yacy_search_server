@@ -31,6 +31,9 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.jguild.jrpm.io.RPMFile;
 import com.jguild.jrpm.io.datatype.DataTypeIf;
 
@@ -55,19 +58,25 @@ public class rpmParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();   
-    static { 
-        SUPPORTED_MIME_TYPES.put("application/x-rpm","rpm");
-        SUPPORTED_MIME_TYPES.put("application/x-redhat packet manager","rpm");    
-        SUPPORTED_MIME_TYPES.put("application/x-redhat-package-manager","rpm");         
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
+    static {
+        SUPPORTED_EXTENSIONS.add("rpm");
+        SUPPORTED_MIME_TYPES.add("application/x-rpm");
+        SUPPORTED_MIME_TYPES.add("application/x-redhat packet manager");    
+        SUPPORTED_MIME_TYPES.add("application/x-redhat-package-manager");         
     }
     
     public rpmParser() {        
         super("rpm Parser"); 
     }
     
-    public HashMap<String, String> getSupportedMimeTypes() {
+    public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
     }
     
     public Document parse(final yacyURL location, final String mimeType, final String charset,

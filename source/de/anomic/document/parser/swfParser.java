@@ -29,6 +29,9 @@ package de.anomic.document.parser;
 
 import java.io.InputStream;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 import pt.tumba.parser.swf.SWF2HTML;
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
@@ -42,23 +45,26 @@ public class swfParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
-        SUPPORTED_MIME_TYPES.put("application/x-shockwave-flash","swf");
-        SUPPORTED_MIME_TYPES.put("application/x-shockwave-flash2-preview","swf");
-        SUPPORTED_MIME_TYPES.put("application/futuresplash","swf");
-        SUPPORTED_MIME_TYPES.put("image/vnd.rn-realflash","swf");
+        SUPPORTED_EXTENSIONS.add("swf");
+        SUPPORTED_MIME_TYPES.add("application/x-shockwave-flash");
+        SUPPORTED_MIME_TYPES.add("application/x-shockwave-flash2-preview");
+        SUPPORTED_MIME_TYPES.add("application/futuresplash");
+        SUPPORTED_MIME_TYPES.add("image/vnd.rn-realflash");
     }
 
     public swfParser() {
         super("Adobe Flash Parser");
     }
 
-    /**
-     * returns a hashtable containing the mimetypes that are supported by this class
-     */
-    public HashMap<String, String> getSupportedMimeTypes() {
+    public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
     }
 
     /*

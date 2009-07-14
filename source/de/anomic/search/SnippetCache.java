@@ -865,17 +865,15 @@ public class SnippetCache {
             }
 
             // STEP 3: if the metadata is still null try to guess the mimeType of the resource
-            if (responseHeader == null) {
-                if (Parser.supportsExtension(url)) {
-                    String supposedMime = Parser.mimeOf(url);
-                    return Parser.parseSource(url, supposedMime, null, contentLength, resourceStream);
-                }
+            String supportError = Parser.supports(url, responseHeader == null ? null : responseHeader.mime());
+            if (supportError != null) {
+                log.logInfo("could not generate snippet for " + url.toNormalform(true, false) + ": " + supportError);
                 return null;
-            }            
-            if (Parser.supportsMime(responseHeader.mime())) {
-                return Parser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), contentLength, resourceStream);
             }
-            return null;
+            if (responseHeader == null) {
+                return Parser.parseSource(url, null, null, contentLength, resourceStream);
+            }
+            return Parser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), contentLength, resourceStream);
         } catch (final InterruptedException e) {
             // interruption of thread detected
             return null;

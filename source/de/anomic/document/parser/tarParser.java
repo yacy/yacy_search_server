@@ -34,8 +34,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import com.ice.tar.TarEntry;
@@ -58,20 +60,26 @@ public class tarParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();  
-    static { 
-        SUPPORTED_MIME_TYPES.put("application/x-tar","tar");
-        SUPPORTED_MIME_TYPES.put("application/tar","tar");
-        SUPPORTED_MIME_TYPES.put("applicaton/x-gtar","tar");
-        SUPPORTED_MIME_TYPES.put("multipart/x-tar","tar");
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
+    static {
+        SUPPORTED_EXTENSIONS.add("tar");
+        SUPPORTED_MIME_TYPES.add("application/x-tar");
+        SUPPORTED_MIME_TYPES.add("application/tar");
+        SUPPORTED_MIME_TYPES.add("applicaton/x-gtar");
+        SUPPORTED_MIME_TYPES.add("multipart/x-tar");
     }     
 
     public tarParser() {        
         super("Tape Archive File Parser"); 
     }
     
-    public HashMap<String, String> getSupportedMimeTypes() {
+    public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
     }
     
     public Document parse(final yacyURL location, final String mimeType, final String charset, InputStream source) throws ParserException, InterruptedException {

@@ -34,8 +34,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -56,24 +58,29 @@ public class zipParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>(); 
-    static { 
-        SUPPORTED_MIME_TYPES.put("application/zip","zip");
-        SUPPORTED_MIME_TYPES.put("application/x-zip","zip");
-        SUPPORTED_MIME_TYPES.put("application/x-zip-compressed","zip");
-        SUPPORTED_MIME_TYPES.put("application/octet-stream","zip");
-        SUPPORTED_MIME_TYPES.put("application/x-compress","zip");
-        SUPPORTED_MIME_TYPES.put("application/x-compressed","zip");
-        SUPPORTED_MIME_TYPES.put("multipart/x-zip","zip");
-        SUPPORTED_MIME_TYPES.put("application/java-archive","jar");
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
+    static {
+        SUPPORTED_EXTENSIONS.add("zip");
+        SUPPORTED_MIME_TYPES.add("application/zip");
+        SUPPORTED_MIME_TYPES.add("application/x-zip");
+        SUPPORTED_MIME_TYPES.add("application/x-zip-compressed");
+        SUPPORTED_MIME_TYPES.add("application/x-compress");
+        SUPPORTED_MIME_TYPES.add("application/x-compressed");
+        SUPPORTED_MIME_TYPES.add("multipart/x-zip");
+        SUPPORTED_MIME_TYPES.add("application/java-archive");
     }     
 
     public zipParser() {        
-        super("Compressed Archive File Parser"); 
+        super("ZIP File Parser"); 
     }
     
-    public HashMap<String, String> getSupportedMimeTypes() {
+    public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
     }
     
     public Document parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {

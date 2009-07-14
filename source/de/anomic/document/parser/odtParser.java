@@ -35,7 +35,6 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -63,18 +62,28 @@ public class odtParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
-    static { 
-        SUPPORTED_MIME_TYPES.put("application/vnd.oasis.opendocument.text","odt,ods,odp");
-        SUPPORTED_MIME_TYPES.put("application/x-vnd.oasis.opendocument.text","odt,ods,odp");
-    }     
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
+    static {
+        SUPPORTED_EXTENSIONS.add("odt");
+        SUPPORTED_EXTENSIONS.add("ods");
+        SUPPORTED_EXTENSIONS.add("odp");
+        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.text");
+        SUPPORTED_MIME_TYPES.add("application/x-vnd.oasis.opendocument.text");
+        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.presentation");
+        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.spreadsheet");
+    }
 
     public odtParser() {        
         super("OASIS OpenDocument V2 Text Document Parser"); 
     }
     
-    public HashMap<String, String> getSupportedMimeTypes() {
+    public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
     }
     
     @Override

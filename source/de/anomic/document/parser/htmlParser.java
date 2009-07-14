@@ -31,7 +31,9 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Document;
 import de.anomic.document.Idiom;
@@ -48,17 +50,29 @@ public class htmlParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();  
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
-        String ext = "htm,html,shtml,xhtml,php,asp,aspx,txt,jsp,csv,pl,py";
-        SUPPORTED_MIME_TYPES.put("application/xhtml+xml", ext);
-        SUPPORTED_MIME_TYPES.put("text/html", ext);
-        SUPPORTED_MIME_TYPES.put("text/plain", ext);
-        SUPPORTED_MIME_TYPES.put("text/sgml",ext);
+        SUPPORTED_EXTENSIONS.add("htm");
+        SUPPORTED_EXTENSIONS.add("html");
+        SUPPORTED_EXTENSIONS.add("shtml");
+        SUPPORTED_EXTENSIONS.add("xhtml");
+        SUPPORTED_EXTENSIONS.add("php");
+        SUPPORTED_EXTENSIONS.add("asp");
+        SUPPORTED_EXTENSIONS.add("aspx");
+        SUPPORTED_EXTENSIONS.add("txt");
+        SUPPORTED_EXTENSIONS.add("jsp");
+        SUPPORTED_EXTENSIONS.add("csv");
+        SUPPORTED_EXTENSIONS.add("pl");
+        SUPPORTED_EXTENSIONS.add("py");
+        SUPPORTED_MIME_TYPES.add("application/xhtml+xml");
+        SUPPORTED_MIME_TYPES.add("text/html");
+        SUPPORTED_MIME_TYPES.add("text/plain");
+        SUPPORTED_MIME_TYPES.add("text/sgml");
     }
     
     public htmlParser() {
-        super("streaming html parser"); 
+        super("HTML Parser"); 
     }
     
     @Override
@@ -213,9 +227,12 @@ public class htmlParser extends AbstractParser implements Idiom {
         return encoding;
     }
 
-    
-    public HashMap<String, String> getSupportedMimeTypes() {
+    public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
     }
     
 }

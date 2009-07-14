@@ -28,7 +28,9 @@
 package de.anomic.document.parser;
 
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
 import org.apache.poi.hssf.eventusermodel.HSSFListener;
 import org.apache.poi.hssf.eventusermodel.HSSFRequest;
@@ -56,17 +58,19 @@ public class xlsParser extends AbstractParser implements Idiom, HSSFListener {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
-        String ext = "xls,xlsx";
-        SUPPORTED_MIME_TYPES.put("application/msexcel",ext);
-        SUPPORTED_MIME_TYPES.put("application/excel",ext);
-        SUPPORTED_MIME_TYPES.put("application/vnd.ms-excel",ext);
-        SUPPORTED_MIME_TYPES.put("application/x-excel",ext);
-        SUPPORTED_MIME_TYPES.put("application/x-msexcel",ext);
-        SUPPORTED_MIME_TYPES.put("application/x-ms-excel",ext);
-        SUPPORTED_MIME_TYPES.put("application/x-dos_ms_excel",ext);
-        SUPPORTED_MIME_TYPES.put("application/xls",ext);
+        SUPPORTED_EXTENSIONS.add("xls");
+        SUPPORTED_EXTENSIONS.add("xlsx");
+        SUPPORTED_MIME_TYPES.add("application/msexcel");
+        SUPPORTED_MIME_TYPES.add("application/excel");
+        SUPPORTED_MIME_TYPES.add("application/vnd.ms-excel");
+        SUPPORTED_MIME_TYPES.add("application/x-excel");
+        SUPPORTED_MIME_TYPES.add("application/x-msexcel");
+        SUPPORTED_MIME_TYPES.add("application/x-ms-excel");
+        SUPPORTED_MIME_TYPES.add("application/x-dos_ms_excel");
+        SUPPORTED_MIME_TYPES.add("application/xls");
     }     
 
     public xlsParser(){
@@ -134,8 +138,12 @@ public class xlsParser extends AbstractParser implements Idiom, HSSFListener {
         }
     }
     
-    public HashMap<String, String> getSupportedMimeTypes() {
+    public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
     }
 
     @Override

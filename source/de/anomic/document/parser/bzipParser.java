@@ -30,7 +30,9 @@ package de.anomic.document.parser;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.tools.bzip2.CBZip2InputStream;
 
 import de.anomic.document.AbstractParser;
@@ -47,22 +49,29 @@ public class bzipParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();    
-    static final String fileExtensions = "bz2,tbz,tbz2";
-    static { 
-        SUPPORTED_MIME_TYPES.put("application/x-bzip2",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/bzip2", fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/x-bz2", fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/x-bzip",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/x-stuffit",fileExtensions);
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
+    static {
+        SUPPORTED_EXTENSIONS.add("bz2");
+        SUPPORTED_EXTENSIONS.add("tbz");
+        SUPPORTED_EXTENSIONS.add("tbz2");
+        SUPPORTED_MIME_TYPES.add("application/x-bzip2");
+        SUPPORTED_MIME_TYPES.add("application/bzip2");
+        SUPPORTED_MIME_TYPES.add("application/x-bz2");
+        SUPPORTED_MIME_TYPES.add("application/x-bzip");
+        SUPPORTED_MIME_TYPES.add("application/x-stuffit");
     }
     
     public bzipParser() {        
         super("Bzip 2 UNIX Compressed File Parser");
     }
     
-    public HashMap<String, String> getSupportedMimeTypes() {
+    public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
     }
     
     public Document parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {

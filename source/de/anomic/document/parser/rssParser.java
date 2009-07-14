@@ -33,8 +33,10 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Set;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.document.AbstractParser;
@@ -58,13 +60,16 @@ public class rssParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */  
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
-    static final String fileExtensions = "xml,rss,rdf";
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
-        SUPPORTED_MIME_TYPES.put("text/rss",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/rdf+xml",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/rss+xml",fileExtensions);
-        SUPPORTED_MIME_TYPES.put("application/atom+xml",fileExtensions);
+        SUPPORTED_EXTENSIONS.add("xml");
+        SUPPORTED_EXTENSIONS.add("rss");
+        SUPPORTED_EXTENSIONS.add("rdf");
+        SUPPORTED_MIME_TYPES.add("text/rss");
+        SUPPORTED_MIME_TYPES.add("application/rdf+xml");
+        SUPPORTED_MIME_TYPES.add("application/rss+xml");
+        SUPPORTED_MIME_TYPES.add("application/atom+xml");
     }
     
 	public rssParser() {
@@ -174,9 +179,13 @@ public class rssParser extends AbstractParser implements Idiom {
         }
 	}
 
-	public HashMap<String, String> getSupportedMimeTypes() {
-		return SUPPORTED_MIME_TYPES;
-	}
+	public Set<String> supportedMimeTypes() {
+        return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
+    }
 
     @Override
 	public void reset() {

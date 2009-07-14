@@ -30,7 +30,8 @@ package de.anomic.document.parser;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
 import de.anomic.document.AbstractParser;
@@ -47,26 +48,29 @@ public class gzipParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
-    static final String ext = "gz,tgz";
-    static { 
-        SUPPORTED_MIME_TYPES.put("application/x-gzip",ext);
-        SUPPORTED_MIME_TYPES.put("application/gzip",ext);
-        SUPPORTED_MIME_TYPES.put("application/x-gunzip",ext);
-        SUPPORTED_MIME_TYPES.put("application/gzipped",ext);
-        SUPPORTED_MIME_TYPES.put("application/gzip-compressed",ext);
-        SUPPORTED_MIME_TYPES.put("application/x-compressed",ext);
-        SUPPORTED_MIME_TYPES.put("application/x-compress",ext);
-        SUPPORTED_MIME_TYPES.put("gzip/document",ext);
-        SUPPORTED_MIME_TYPES.put("application/octet-stream",ext);
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
+    static {
+        SUPPORTED_EXTENSIONS.add("gz");
+        SUPPORTED_EXTENSIONS.add("tgz");
+        SUPPORTED_MIME_TYPES.add("application/x-gzip");
+        SUPPORTED_MIME_TYPES.add("application/gzip");
+        SUPPORTED_MIME_TYPES.add("application/x-gunzip");
+        SUPPORTED_MIME_TYPES.add("application/gzipped");
+        SUPPORTED_MIME_TYPES.add("application/gzip-compressed");
+        SUPPORTED_MIME_TYPES.add("gzip/document");
     }     
 
     public gzipParser() {        
         super("GNU Zip Compressed Archive Parser");
     }
     
-    public HashMap<String, String> getSupportedMimeTypes() {
+    public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
     }
     
     public Document parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {

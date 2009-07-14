@@ -224,16 +224,12 @@ public class FTPLoader {
         // if the mimetype and file extension is supported we start to download
         // the file
         httpDocument htCache = null;
-        if (!Parser.supportsExtension(entryUrl)) {
-            // if the response has not the right file type then reject file
-            log.logInfo("REJECTED WRONG EXTENSION TYPE " + mimeType + " for URL " + entry.url().toString());
-            sb.crawlQueues.errorURL.newEntry(entry, this.sb.peers.mySeed().hash, new Date(), 1, "wrong extension");
-            throw new Exception("response has not the right extension type -> rejected");
-        } else if (!Parser.supportsMime(mimeType)) {
-            // if the response has not the right file type then reject file
-            log.logInfo("REJECTED WRONG MIME TYPE " + mimeType + " for URL " + entry.url().toString());
-            sb.crawlQueues.errorURL.newEntry(entry, this.sb.peers.mySeed().hash, new Date(), 1, "wrong mime type");
-            throw new Exception("response has not the right mime type -> rejected");
+        String supportError = Parser.supports(entryUrl, mimeType);
+        if (supportError != null) {
+            // reject file
+            log.logInfo("PARSER REJECTED URL " + entry.url().toString() + ": " + supportError);
+            sb.crawlQueues.errorURL.newEntry(entry, this.sb.peers.mySeed().hash, new Date(), 1, supportError);
+            throw new Exception(supportError);
         } else {
             // abort the download if content is too long
             final int size = ftpClient.fileSize(path);

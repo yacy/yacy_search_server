@@ -34,7 +34,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
@@ -48,12 +50,14 @@ public class psParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();   
-    static { 
-        SUPPORTED_MIME_TYPES.put("application/ps","ps");
-        SUPPORTED_MIME_TYPES.put("application/x-postscript","ps");
-        SUPPORTED_MIME_TYPES.put("application/x-ps","ps");
-        SUPPORTED_MIME_TYPES.put("application/x-postscript-not-eps","ps");
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
+    static {
+        SUPPORTED_EXTENSIONS.add("ps");
+        SUPPORTED_MIME_TYPES.add("application/ps");
+        SUPPORTED_MIME_TYPES.add("application/x-postscript");
+        SUPPORTED_MIME_TYPES.add("application/x-ps");
+        SUPPORTED_MIME_TYPES.add("application/x-postscript-not-eps");
     }
     
     private final static Object modeScan = new Object();
@@ -69,8 +73,12 @@ public class psParser extends AbstractParser implements Idiom {
 		}
     }
     
-    public HashMap<String, String> getSupportedMimeTypes() {
+    public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
     }
     
     public boolean testForPs2Ascii() {

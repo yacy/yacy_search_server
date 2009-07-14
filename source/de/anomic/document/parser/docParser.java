@@ -30,7 +30,8 @@ package de.anomic.document.parser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
@@ -45,18 +46,20 @@ public class docParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */    
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
-        String ext = "doc,docx";
-        SUPPORTED_MIME_TYPES.put("application/msword",ext);
-        SUPPORTED_MIME_TYPES.put("application/doc",ext);
-        SUPPORTED_MIME_TYPES.put("appl/text",ext);
-        SUPPORTED_MIME_TYPES.put("application/vnd.msword",ext);
-        SUPPORTED_MIME_TYPES.put("application/vnd.ms-word",ext);
-        SUPPORTED_MIME_TYPES.put("application/winword",ext);
-        SUPPORTED_MIME_TYPES.put("application/word",ext);
-        SUPPORTED_MIME_TYPES.put("application/x-msw6",ext);
-        SUPPORTED_MIME_TYPES.put("application/x-msword",ext);
+        SUPPORTED_EXTENSIONS.add("doc");
+        SUPPORTED_EXTENSIONS.add("docx");
+        SUPPORTED_MIME_TYPES.add("application/msword");
+        SUPPORTED_MIME_TYPES.add("application/doc");
+        SUPPORTED_MIME_TYPES.add("appl/text");
+        SUPPORTED_MIME_TYPES.add("application/vnd.msword");
+        SUPPORTED_MIME_TYPES.add("application/vnd.ms-word");
+        SUPPORTED_MIME_TYPES.add("application/winword");
+        SUPPORTED_MIME_TYPES.add("application/word");
+        SUPPORTED_MIME_TYPES.add("application/x-msw6");
+        SUPPORTED_MIME_TYPES.add("application/x-msword");
     }
     
 	public docParser() {
@@ -115,9 +118,13 @@ public class docParser extends AbstractParser implements Idiom {
         return theDoc;
 	}
 
-	public HashMap<String, String> getSupportedMimeTypes() {
-		return docParser.SUPPORTED_MIME_TYPES;
-	}
+	public Set<String> supportedMimeTypes() {
+        return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
+    }
 
     @Override
 	public void reset() {

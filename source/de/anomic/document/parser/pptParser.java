@@ -29,7 +29,9 @@ package de.anomic.document.parser;
 
 import java.io.BufferedInputStream;
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.apache.poi.hslf.extractor.PowerPointExtractor;
 
 import de.anomic.document.AbstractParser;
@@ -44,17 +46,20 @@ public class pptParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
-    static final String ext = "ppt,pptx,pps";
-    static { 
-        SUPPORTED_MIME_TYPES.put("application/mspowerpoint",ext);
-        SUPPORTED_MIME_TYPES.put("application/powerpoint",ext);
-        SUPPORTED_MIME_TYPES.put("application/vnd.ms-powerpoint",ext);
-        SUPPORTED_MIME_TYPES.put("application/ms-powerpoint",ext);
-        SUPPORTED_MIME_TYPES.put("application/mspowerpnt",ext);
-        SUPPORTED_MIME_TYPES.put("application/vnd-mspowerpoint",ext);
-        SUPPORTED_MIME_TYPES.put("application/x-powerpoint",ext);
-        SUPPORTED_MIME_TYPES.put("application/x-m",ext);
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
+    static {
+        SUPPORTED_EXTENSIONS.add("ppt");
+        SUPPORTED_EXTENSIONS.add("pptx");
+        SUPPORTED_EXTENSIONS.add("pps");
+        SUPPORTED_MIME_TYPES.add("application/mspowerpoint");
+        SUPPORTED_MIME_TYPES.add("application/powerpoint");
+        SUPPORTED_MIME_TYPES.add("application/vnd.ms-powerpoint");
+        SUPPORTED_MIME_TYPES.add("application/ms-powerpoint");
+        SUPPORTED_MIME_TYPES.add("application/mspowerpnt");
+        SUPPORTED_MIME_TYPES.add("application/vnd-mspowerpoint");
+        SUPPORTED_MIME_TYPES.add("application/x-powerpoint");
+        SUPPORTED_MIME_TYPES.add("application/x-m");
    }
 
     public pptParser(){
@@ -114,8 +119,12 @@ public class pptParser extends AbstractParser implements Idiom {
         }
     }
 
-    public HashMap<String, String> getSupportedMimeTypes() {
+    public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
     }
 
     @Override

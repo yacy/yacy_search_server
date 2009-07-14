@@ -49,7 +49,7 @@ public class ConfigParser {
                 post.remove("parserSettings");
                 
                 for (Idiom parser: Parser.idioms()) {
-                    for (String mimeType: parser.getSupportedMimeTypes().keySet()) {
+                    for (String mimeType: parser.supportedMimeTypes()) {
                         Parser.grantMime(mimeType, post.get("mimename_" + mimeType, "").equals("on"));
                     }
                 }
@@ -62,9 +62,9 @@ public class ConfigParser {
             prop.put("parser_" + i + "_name", parser.getName());
             
             int mimeIdx = 0;
-            for (String mimeType: parser.getSupportedMimeTypes().keySet()) {
+            for (String mimeType: parser.supportedMimeTypes()) {
                 prop.put("parser_" + i + "_mime_" + mimeIdx + "_mimetype", mimeType);
-                prop.put("parser_" + i + "_mime_" + mimeIdx + "_status", (Parser.supportsMime(mimeType)) ? 1 : 0);
+                prop.put("parser_" + i + "_mime_" + mimeIdx + "_status", (Parser.supportsMime(mimeType) == null) ? 1 : 0);
                 mimeIdx++;
             }
             prop.put("parser_" + i + "_mime", mimeIdx);

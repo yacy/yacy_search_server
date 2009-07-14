@@ -120,8 +120,9 @@ public final class HTTPLoader {
         if (port < 0) port = (ssl) ? 443 : 80;
         
         // if not the right file type then reject file
-        if (!Parser.supportsExtension(entry.url())) {
-            sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "wrong extension");
+        String supportError = Parser.supportsExtension(entry.url());
+        if (supportError != null) {
+            sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, supportError);
             throw new IOException("REJECTED WRONG EXTENSION TYPE " + entry.url().getFileExtension()+ " for URL " + entry.url().toString());
         } 
         
@@ -166,8 +167,9 @@ public final class HTTPLoader {
                     //try {
                     
                 	// if the response has not the right file type then reject file
-                    if (!Parser.supportsMime(res.getResponseHeader().mime())) {
-                    	sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "wrong mime type");
+                    supportError = Parser.supports(entry.url(), res.getResponseHeader().mime());
+                    if (supportError != null) {
+                    	sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, supportError);
                     	throw new IOException("REJECTED WRONG MIME TYPE " + res.getResponseHeader().mime() + " for URL " + entry.url().toString());
                     }
 

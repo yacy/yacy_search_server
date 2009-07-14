@@ -1087,8 +1087,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
          * 
          * Testing if the content type is supported by the available parsers
          * ========================================================================= */
-        final boolean isSupportedContent = Parser.supportsExtension(entry.url()) && Parser.supportsMime(entry.getMimeType());
-        if (log.isFinest()) log.logFinest("STORE "+ entry.url() +" content of type "+ entry.getMimeType() +" is supported: "+ isSupportedContent);
+        final String supportError = Parser.supports(entry.url(), entry.getMimeType());
+        if (log.isFinest()) log.logFinest("STORE "+ entry.url() +" content of type "+ entry.getMimeType() + " is supported: " + supportError);
         
         /* =========================================================================
          * INDEX CONTROL HEADER
@@ -1121,7 +1121,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
          * a) the user has configured to use the htcache or
          * b) the content should be indexed
          * ========================================================================= */        
-        if (((entry.profile() != null) && (entry.profile().storeHTCache())) || (doIndexing && isSupportedContent)) {
+        if (((entry.profile() != null) && (entry.profile().storeHTCache())) || (doIndexing && supportError == null)) {
             // store response header
             /*
             if (entry.writeResourceInfo()) {
@@ -1146,7 +1146,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         /* =========================================================================
          * INDEXING
          * ========================================================================= */          
-        if (doIndexing && isSupportedContent) {
+        if (doIndexing && supportError == null) {
             
             // enqueue for further crawling
             enQueue(this.crawler.queuePreStack.newEntry(

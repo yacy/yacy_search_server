@@ -33,7 +33,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 import org.pdfbox.pdfparser.PDFParser;
 import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.pdmodel.PDDocumentInformation;
@@ -55,22 +57,28 @@ public class pdfParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
-        SUPPORTED_MIME_TYPES.put("application/pdf","pdf");
-        SUPPORTED_MIME_TYPES.put("application/x-pdf","pdf");
-        SUPPORTED_MIME_TYPES.put("application/acrobat","pdf");
-        SUPPORTED_MIME_TYPES.put("applications/vnd.pdf","pdf");
-        SUPPORTED_MIME_TYPES.put("text/pdf","pdf");
-        SUPPORTED_MIME_TYPES.put("text/x-pdf","pdf");
+        SUPPORTED_EXTENSIONS.add("pdf");
+        SUPPORTED_MIME_TYPES.add("application/pdf");
+        SUPPORTED_MIME_TYPES.add("application/x-pdf");
+        SUPPORTED_MIME_TYPES.add("application/acrobat");
+        SUPPORTED_MIME_TYPES.add("applications/vnd.pdf");
+        SUPPORTED_MIME_TYPES.add("text/pdf");
+        SUPPORTED_MIME_TYPES.add("text/x-pdf");
     }
     
     public pdfParser() {        
         super("Acrobat Portable Document Parser"); 
     }
     
-    public HashMap<String, String> getSupportedMimeTypes() {
+    public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
     }
     
     public Document parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {

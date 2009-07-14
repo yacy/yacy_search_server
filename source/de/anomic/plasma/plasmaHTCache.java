@@ -42,7 +42,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.anomic.document.Classification;
-import de.anomic.document.Parser;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpDocument;
 import de.anomic.kelondro.blob.ArrayStack;
@@ -179,10 +178,6 @@ public final class plasmaHTCache {
     public static boolean isPicture(final String mimeType) {
         if (mimeType == null) return false;
         return mimeType.toUpperCase().startsWith("IMAGE");
-    }
-
-    public static boolean isText(final String mimeType) {
-        return Parser.supportsMime(mimeType);
     }
 
     public static boolean noIndexingURL(final yacyURL url) {

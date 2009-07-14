@@ -33,8 +33,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Set;
 
 import de.anomic.crawler.HTTPLoader;
 import de.anomic.document.AbstractParser;
@@ -60,23 +62,29 @@ public class vcfParser extends AbstractParser implements Idiom {
      * 
      * TODO: support of x-mozilla-cpt and x-mozilla-html tags
      */
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
-    static { 
-        SUPPORTED_MIME_TYPES.put("text/x-vcard","vcf");
-        SUPPORTED_MIME_TYPES.put("application/vcard","vcf");
-        SUPPORTED_MIME_TYPES.put("text/anytext","vcf");
-        SUPPORTED_MIME_TYPES.put("text/directory","vcf");
-        SUPPORTED_MIME_TYPES.put("application/x-versit","vcf");
-        SUPPORTED_MIME_TYPES.put("text/x-versit","vcf");
-        SUPPORTED_MIME_TYPES.put("text/x-vcalendar","vcf");
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
+    static {
+        SUPPORTED_EXTENSIONS.add("vcf");
+        SUPPORTED_MIME_TYPES.add("text/x-vcard");
+        SUPPORTED_MIME_TYPES.add("application/vcard");
+        SUPPORTED_MIME_TYPES.add("text/anytext");
+        SUPPORTED_MIME_TYPES.add("text/directory");
+        SUPPORTED_MIME_TYPES.add("application/x-versit");
+        SUPPORTED_MIME_TYPES.add("text/x-versit");
+        SUPPORTED_MIME_TYPES.add("text/x-vcalendar");
     }
     
     public vcfParser() {        
         super("vCard Parser"); 
     }
     
-    public HashMap<String, String> getSupportedMimeTypes() {
+    public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
     }
     
     public Document parse(final yacyURL url, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {

@@ -528,7 +528,7 @@ public final class httpdProxyHandler {
 
                     final String storeError = cacheEntry.shallStoreCacheForProxy();
                     final boolean storeHTCache = cacheEntry.profile().storeHTCache();
-                    final boolean isSupportedContent = Parser.supportsExtension(cacheEntry.url()) && Parser.supportsMime(cacheEntry.getMimeType());
+                    final String supportError = Parser.supports(cacheEntry.url(), cacheEntry.getMimeType());
                     if (
                             /*
                              * Now we store the response into the htcache directory if
@@ -539,7 +539,7 @@ public final class httpdProxyHandler {
                              * b) the user has configured to use the htcache OR
                              * c) the content should be indexed
                              */
-                            ((storeHTCache) || (isSupportedContent))
+                            ((storeHTCache) || (supportError != null))
                     ) {
                         // we don't write actually into a file, only to RAM, and schedule writing the file.
                         int l = res.getResponseHeader().size();
@@ -580,7 +580,7 @@ public final class httpdProxyHandler {
                         if (theLogger.isFine()) theLogger.logFine(reqID +" "+ url.toString() + " not cached." +
                                 " StoreError=" + ((storeError==null)?"None":storeError) +
                                 " StoreHTCache=" + storeHTCache +
-                                " SupportetContent=" + isSupportedContent);
+                                " SupportError=" + supportError);
 
                         FileUtils.copy(res.getDataAsStream(), outStream);
 

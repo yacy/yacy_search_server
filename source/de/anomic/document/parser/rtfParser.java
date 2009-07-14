@@ -28,7 +28,9 @@
 package de.anomic.document.parser;
 
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
 
@@ -44,13 +46,15 @@ public class rtfParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */    
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
-    static { 
-        SUPPORTED_MIME_TYPES.put("application/rtf","rtf"); 
-        SUPPORTED_MIME_TYPES.put("text/rtf","rtf");
-        SUPPORTED_MIME_TYPES.put("application/x-rtf","rtf");
-        SUPPORTED_MIME_TYPES.put("text/richtext","rtf");
-        SUPPORTED_MIME_TYPES.put("application/x-soffice","rtf");
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
+    static {
+        SUPPORTED_EXTENSIONS.add("rtf");
+        SUPPORTED_MIME_TYPES.add("application/rtf");
+        SUPPORTED_MIME_TYPES.add("text/rtf");
+        SUPPORTED_MIME_TYPES.add("application/x-rtf");
+        SUPPORTED_MIME_TYPES.add("text/richtext");
+        SUPPORTED_MIME_TYPES.add("application/x-soffice");
     } 
 
 	public rtfParser() {
@@ -96,9 +100,13 @@ public class rtfParser extends AbstractParser implements Idiom {
 		}        
 	}
 
-	public HashMap<String, String> getSupportedMimeTypes() {
-		return rtfParser.SUPPORTED_MIME_TYPES;
-	}
+	public Set<String> supportedMimeTypes() {
+        return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
+    }
 
 	public void reset() {
         // Nothing todo here at the moment

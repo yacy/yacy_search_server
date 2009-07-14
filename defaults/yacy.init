@@ -250,6 +250,7 @@ minimumGlobalDelta = 500
 # the following mime-types are a blacklist for indexing:
 # parser.mime.deny: specifies mime-types that shall not be indexed
 parser.mime.deny=
+parser.extensions.deny=
 
 # Promotion Strings
 # These strings appear in the Web Mask of the YACY search client

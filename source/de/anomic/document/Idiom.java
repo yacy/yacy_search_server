@@ -27,8 +27,7 @@ package de.anomic.document;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Hashtable;
+import java.util.Set;
 
 import de.anomic.yacy.yacyURL;
 
@@ -87,11 +86,15 @@ public interface Idiom {
             
     /**
      * Get the MimeType(s) that are supported by the parser
-     * @return a {@link Hashtable} containing a mapping from a mime type string
-     * to a comma-separated String of file extensions
-     * that are supported by the idiom parser
+     * @return a set of strings denoting the supported mime types
      */
-    public HashMap<String, String> getSupportedMimeTypes();
+    public Set<String> supportedMimeTypes();
+    
+    /**
+     * Get the File extension(s) that are supported by the parser
+     * @return a set of strings denoting the supported file extensions
+     */
+    public Set<String> supportedExtensions();
     
     /**
      * This function should be called before reusing the parser object.

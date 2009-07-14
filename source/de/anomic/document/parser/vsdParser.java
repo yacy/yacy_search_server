@@ -28,7 +28,9 @@
 package de.anomic.document.parser;
 
 import java.io.InputStream;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
@@ -43,29 +45,32 @@ public class vsdParser extends AbstractParser implements Idiom {
      * a list of mime types that are supported by this parser class
      * @see #getSupportedMimeTypes()
      */
-    public static final HashMap<String, String> SUPPORTED_MIME_TYPES = new HashMap<String, String>();
+    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
+    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
-        SUPPORTED_MIME_TYPES.put("application/visio","vsd");
-        SUPPORTED_MIME_TYPES.put("application/x-visio","vsd");
-        SUPPORTED_MIME_TYPES.put("application/vnd.visio","vsd");
-        SUPPORTED_MIME_TYPES.put("application/visio.drawing","vsd");
-        SUPPORTED_MIME_TYPES.put("application/vsd","vsd");
-        SUPPORTED_MIME_TYPES.put("application/x-vsd","vsd");
-        SUPPORTED_MIME_TYPES.put("image/x-vsd","vsd");
-        SUPPORTED_MIME_TYPES.put("zz-application/zz-winassoc-vsd","vsd");
+        SUPPORTED_EXTENSIONS.add("vsd");
+        SUPPORTED_MIME_TYPES.add("application/visio");
+        SUPPORTED_MIME_TYPES.add("application/x-visio");
+        SUPPORTED_MIME_TYPES.add("application/vnd.visio");
+        SUPPORTED_MIME_TYPES.add("application/visio.drawing");
+        SUPPORTED_MIME_TYPES.add("application/vsd");
+        SUPPORTED_MIME_TYPES.add("application/x-vsd");
+        SUPPORTED_MIME_TYPES.add("image/x-vsd");
+        SUPPORTED_MIME_TYPES.add("zz-application/zz-winassoc-vsd");
     }
 
     public vsdParser() {
         super("Microsoft Visio Parser");
     }
 
-    /**
-     * returns a hashtable containing the mimetypes that are supported by this class
-     */
-    public HashMap<String, String> getSupportedMimeTypes() {
+    public Set<String> supportedMimeTypes() {
         return SUPPORTED_MIME_TYPES;
     }
-
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
+    }
+    
     /*
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document

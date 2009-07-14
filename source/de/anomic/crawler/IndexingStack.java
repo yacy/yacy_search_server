@@ -34,6 +34,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.anomic.document.Parser;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.kelondro.index.Row;
@@ -480,8 +481,9 @@ public class IndexingStack {
                 if (plasmaHTCache.isPicture(mimeType)) {
                     return "Media_Content_(Picture)";
                 }
-                if (!plasmaHTCache.isText(mimeType)) {
-                    return "Media_Content_(not_text)";
+                String parserError = Parser.supportsMime(mimeType);
+                if (parserError != null) {
+                    return "Media_Content, no parser: " + parserError;
                 }
     
                 // -if-modified-since in request
@@ -598,7 +600,8 @@ public class IndexingStack {
             if (responseHeader != null) {
                 final String mimeType = responseHeader.mime();
                 if (plasmaHTCache.isPicture(mimeType)) { return "Media_Content_(Picture)"; }
-                if (!plasmaHTCache.isText(mimeType)) { return "Media_Content_(not_text)"; }
+                String parserError = Parser.supportsMime(mimeType);
+                if (parserError != null) { return "Media_Content, parser error: " + parserError; }
             }
             if (plasmaHTCache.noIndexingURL(url())) { return "Media_Content_(forbidden)"; }
 
