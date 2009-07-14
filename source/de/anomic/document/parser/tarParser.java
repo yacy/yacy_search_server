@@ -40,8 +40,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
-import com.ice.tar.TarEntry;
-import com.ice.tar.TarInputStream;
+import org.apache.tools.tar.TarEntry;
+import org.apache.tools.tar.TarInputStream;
 
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;

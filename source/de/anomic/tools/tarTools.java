@@ -32,8 +32,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
-import com.ice.tar.TarEntry;
-import com.ice.tar.TarInputStream;
+import org.apache.tools.tar.TarEntry;
+import org.apache.tools.tar.TarInputStream;
 
 import de.anomic.yacy.logging.Log;
 

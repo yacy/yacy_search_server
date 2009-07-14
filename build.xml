@@ -184,7 +184,6 @@
     	<pathelement location="${lib}/poi-scratchpad-3.2-FINAL-20081019.jar" />
     	<pathelement location="${lib}/sbbi-upnplib-1.0.4.jar" />
     	<pathelement location="${lib}/servlet-api.jar" />
-    	<pathelement location="${lib}/tar.jar" />
     	<pathelement location="${lib}/tm-extractors-1.0.jar" />
     	<pathelement location="${lib}/webcat-0.1-swf.jar" />
     	<pathelement location="${lib}/xerces.jar" />
