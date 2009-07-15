@@ -83,16 +83,13 @@ public final class HTTPLoader {
      * @param responseStatus Status-Code SPACE Reason-Phrase
      * @return
      */
-    protected Response createCacheEntry(final Request entry, final Date requestDate, final httpRequestHeader requestHeader, final httpResponseHeader responseHeader, final String responseStatus) {
+    protected Response createCacheEntry(final Request request, final Date requestDate, final httpRequestHeader requestHeader, final httpResponseHeader responseHeader, final String responseStatus) {
         Response metadata = new Response(
-                entry.depth(),
-                entry.url(),
-                entry.name(),
-                responseStatus,
-                requestHeader,
+        		request,
+        		requestHeader,
                 responseHeader, 
-                entry.initiator(),
-                sb.crawler.profilesActiveCrawls.getEntry(entry.profileHandle())
+                responseStatus,
+                sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle())
         );
         plasmaHTCache.storeMetadata(responseHeader, metadata);
         return metadata;
@@ -193,7 +190,7 @@ public final class HTTPLoader {
                     	throw new IOException("REJECTED URL " + entry.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)");
                     }
 
-                    htCache.setCacheArray(responseBody);
+                    htCache.setContent(responseBody);
 
                     return htCache;
                         /*

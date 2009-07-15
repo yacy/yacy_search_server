@@ -107,10 +107,9 @@ public class Request extends serverProcessorJob {
     ) {
         // create new entry and store it into database
         assert url != null;
-        assert initiator != null;
         assert profileHandle == null || profileHandle.length() == yacySeedDB.commonHashLength : profileHandle + " != " + yacySeedDB.commonHashLength;
         url.removeRef(); // remove anchor reference
-        this.initiator     = initiator;
+        this.initiator     = (initiator == null) ? null : ((initiator.length() == 0) ? null : initiator);
         this.url           = url;
         this.refhash       = (referrerhash == null) ? "" : referrerhash;
         this.name          = (name == null) ? "" : name;
@@ -138,6 +137,7 @@ public class Request extends serverProcessorJob {
         final String urlstring = entry.getColString(2, null);
         if (urlstring == null) throw new IOException ("url string is null");
         this.initiator = entry.getColString(1, null);
+        this.initiator = (initiator == null) ? null : ((initiator.length() == 0) ? null : initiator);
         this.url = new yacyURL(urlstring, entry.getColString(0, null));
         this.refhash = (entry.empty(3)) ? "" : entry.getColString(3, null);
         this.name = (entry.empty(4)) ? "" : entry.getColString(4, "UTF-8").trim();

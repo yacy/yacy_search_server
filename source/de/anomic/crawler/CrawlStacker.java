@@ -277,7 +277,7 @@ public final class CrawlStacker {
 
         // store information
         final boolean local = entry.initiator().equals(peers.mySeed().hash);
-        final boolean proxy = (entry.initiator() == null || entry.initiator().equals("------------")) && profile.handle().equals(crawler.defaultProxyProfile.handle());
+        final boolean proxy = (entry.initiator() == null || entry.initiator().length() == 0 || entry.initiator().equals("------------")) && profile.handle().equals(crawler.defaultProxyProfile.handle());
         final boolean remote = profile.handle().equals(crawler.defaultRemoteProfile.handle());
         final boolean global =
             (profile.remoteIndexing()) /* granted */ &&

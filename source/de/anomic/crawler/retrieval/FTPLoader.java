@@ -56,17 +56,19 @@ public class FTPLoader {
         maxFileSize = (int) sb.getConfigLong("crawler.ftp.maxFileSize", -1l);
     }
 
-    protected Response createCacheEntry(final Request entry, final String mimeType, final Date fileDate) {
-        if (entry == null) return null;
+    protected Response createCacheEntry(final Request request, final String mimeType, final Date fileDate) {
+        if (request == null) return null;
         httpRequestHeader requestHeader = new httpRequestHeader();
-        if (entry.referrerhash() != null) requestHeader.put(httpRequestHeader.REFERER, sb.getURL(entry.referrerhash()).toNormalform(true, false));
+        if (request.referrerhash() != null) requestHeader.put(httpRequestHeader.REFERER, sb.getURL(request.referrerhash()).toNormalform(true, false));
         httpResponseHeader responseHeader = new httpResponseHeader();
         responseHeader.put(httpHeader.LAST_MODIFIED, DateFormatter.formatRFC1123(fileDate));
         responseHeader.put(httpHeader.CONTENT_TYPE, mimeType);
         Response metadata = new Response(
-                entry.depth(), entry.url(), entry.name(), "OK",
-                requestHeader, responseHeader,
-                entry.initiator(), sb.crawler.profilesActiveCrawls.getEntry(entry.profileHandle()));
+                request, 
+                requestHeader,
+                responseHeader,
+                "OK",
+                sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()));
         plasmaHTCache.storeMetadata(responseHeader, metadata);
         return metadata;
     }
@@ -245,7 +247,7 @@ public class FTPLoader {
 
                 // download the remote file
                 byte[] b = ftpClient.get(path);
-                htCache.setCacheArray(b);
+                htCache.setContent(b);
             } else {
                 log.logInfo("REJECTED TOO BIG FILE with size " + size + " Bytes for URL " + entry.url().toString());
                 sb.crawlQueues.errorURL.newEntry(entry, this.sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");

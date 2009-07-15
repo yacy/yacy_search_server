@@ -52,16 +52,13 @@ public class Response {
     public static final char DT_UNKNOWN = 'u';
 
     // the class objects
-    private final  int                depth;           // the depth of pre-fetching
+    private final  Request            request;
+    private final  httpRequestHeader  requestHeader;
+    private final  httpResponseHeader responseHeader;
     private final  String             responseStatus;
-    private        byte[]             cacheArray;      //
-    private final  yacyURL            url;
-    private final  String             name;            // the name of the link, read as anchor from an <a>-tag
     private final  CrawlProfile.entry profile;
-    private final  String             initiator;
-    private        httpRequestHeader  requestHeader;
-    private        httpResponseHeader responseHeader;
-
+    private        byte[]             content;         //
+    
     // doctype calculation
     public static char docType(final yacyURL url) {
         final String path = url.getPath().toLowerCase();
@@ -134,58 +131,41 @@ public class Response {
     }
     
     public Response(
-            final int depth,
-            final yacyURL url,
-            final String name,
-            final String responseStatus,
+    		Request request,
             final httpRequestHeader requestHeader,
             final httpResponseHeader responseHeader,
-            final String initiator,
+            final String responseStatus,
             final CrawlProfile.entry profile) {
-        if (responseHeader == null) {
-            System.out.println("Response header information is null. " + url);
-            System.exit(0);
-        }
+        assert responseHeader != null;
+        this.request = request;
         this.requestHeader = requestHeader;
         this.responseHeader = responseHeader;
-        this.url = url;
-        this.name = name;
-
-        // assigned:
-        this.depth = depth;
         this.responseStatus = responseStatus;
         this.profile = profile;
         
-        // the initiator is the hash of the peer that caused the hash entry
-        // it is stored here only to track processed in the peer and this
-        // information is not permanently stored in the web index after the queue has
-        // been processed
-        // in case of proxy usage, the initiator hash is null,
-        // which distinguishes local crawling from proxy indexing
-        this.initiator = (initiator == null) ? null : ((initiator.length() == 0) ? null : initiator);
 
         // to be defined later:
-        this.cacheArray = null;
+        this.content = null;
     }
 
     public String name() {
         // the anchor name; can be either the text inside the anchor tag or the
         // page description after loading of the page
-        return this.name;
+        return this.request.name();
     }
 
     public yacyURL url() {
-        return this.url;
+        return this.request.url();
     }
     
     public char docType() {
         char doctype = docType(getMimeType());
-        if (doctype == DT_UNKNOWN) doctype = docType(url);
+        if (doctype == DT_UNKNOWN) doctype = docType(url());
         return doctype;
     }
 
     public String urlHash() {
-        return this.url.hash();
+        return this.url().hash();
     }
 
     public Date lastModified() {
@@ -211,7 +191,7 @@ public class Response {
     }
 
     public String initiator() {
-        return this.initiator;
+        return this.request.initiator();
     }
 
     public boolean proxy() {
@@ -219,7 +199,7 @@ public class Response {
     }
 
     public long size() {
-        if (this.cacheArray != null) return this.cacheArray.length;
+        if (this.content != null) return this.content.length;
         if (this.responseHeader != null) {
             // take the size from the response header
             return this.responseHeader.getContentLength();
@@ -229,15 +209,15 @@ public class Response {
     }
 
     public int depth() {
-        return this.depth;
+        return this.request.depth();
     }
 
-    public void setCacheArray(final byte[] data) {
-        this.cacheArray = data;
+    public void setContent(final byte[] data) {
+        this.content = data;
     }
 
-    public byte[] cacheArray() {
-        return this.cacheArray;
+    public byte[] getContent() {
+        return this.content;
     }
 
     // the following three methods for cache read/write granting shall be as loose
@@ -268,10 +248,10 @@ public class Response {
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable
         // in caches
-        if (this.url.isPOST() && !this.profile.crawlingQ()) {
+        if (this.url().isPOST() && !this.profile.crawlingQ()) {
             return "dynamic_post";
         }
-        if (this.url.isCGI()) {
+        if (this.url().isCGI()) {
             return "dynamic_cgi";
         }
         
@@ -349,10 +329,10 @@ public class Response {
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable
         // in caches
-        if (this.url.isPOST()) {
+        if (this.url().isPOST()) {
             return false;
         }
-        if (this.url.isCGI()) {
+        if (this.url().isCGI()) {
             return false;
         }
 

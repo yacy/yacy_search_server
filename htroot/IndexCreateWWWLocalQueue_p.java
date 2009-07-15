@@ -120,7 +120,7 @@ public class IndexCreateWWWLocalQueue_p {
                                     case ANCHOR:    value = entry.name(); break;
                                     case DEPTH:     value = Integer.toString(entry.depth()); break;
                                     case INITIATOR:
-                                        value = (entry.initiator() == null) ? "proxy" : entry.initiator();
+                                        value = (entry.initiator() == null || entry.initiator().length() == 0) ? "proxy" : entry.initiator();
                                         break;
                                     case MODIFIED:  value = daydate(entry.loaddate()); break;
                                     default: value = null;

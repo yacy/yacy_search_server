@@ -157,6 +157,7 @@ public class Latency {
         // first check if the domain was _ever_ accessed before
         String hosthash = url.hash().substring(6);
         Host host = host(hosthash);
+        if (host == null) return 0; // no delay if host is new
         
         // the time since last access to the domain is the basis of the remaining calculation
         final long timeSinceLastAccess = (host == null) ? 0 : System.currentTimeMillis() - host.lastacc();

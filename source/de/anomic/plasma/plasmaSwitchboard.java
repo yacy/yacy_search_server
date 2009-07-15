@@ -1147,11 +1147,11 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             */
             
             // work off unwritten files
-            if (entry.cacheArray() != null) {
+            if (entry.getContent() != null) {
                 final String error = (entry.initiator() == null) ? entry.shallStoreCacheForProxy() : null;
                 if (error == null) {
-                    plasmaHTCache.storeFile(entry.url(), entry.cacheArray());
-                    if (this.log.isFine()) this.log.logFine("WROTE FILE (" + entry.cacheArray().length + " bytes) for " + entry.url());
+                    plasmaHTCache.storeFile(entry.url(), entry.getContent());
+                    if (this.log.isFine()) this.log.logFine("WROTE FILE (" + entry.getContent().length + " bytes) for " + entry.url());
                 } else {
                     if (this.log.isWarning()) this.log.logWarning("WRITE OF FILE " + entry.url() + " FORBIDDEN: " + error);
                 }

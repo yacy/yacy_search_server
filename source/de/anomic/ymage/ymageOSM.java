@@ -87,8 +87,8 @@ public class ymageOSM {
                 Log.logWarning("yamyOSM", "cannot load: " + e.getMessage());
                 return null;
             }
-            if ((entry == null) || (entry.cacheArray() == null)) return null;
-            tileStream = new ByteArrayInputStream(entry.cacheArray());
+            if ((entry == null) || (entry.getContent() == null)) return null;
+            tileStream = new ByteArrayInputStream(entry.getContent());
         }
         try {
             return ImageIO.read(tileStream);

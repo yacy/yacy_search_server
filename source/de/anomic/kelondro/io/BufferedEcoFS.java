@@ -30,6 +30,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import de.anomic.kelondro.util.FileUtils;
+
 
 /**
  * The kelondroBufferedEcoFS extends the IO reduction to EcoFS by providing a
@@ -61,7 +63,7 @@ public class BufferedEcoFS {
     }
     
     public synchronized long size() throws IOException {
-        return efs == null ? 0 : efs.size();
+        return efs == null ? 0 : efs.size(); // stuck
     }
     
     public File filename() {
@@ -117,7 +119,7 @@ public class BufferedEcoFS {
         assert b.length - start >= efs.recordsize;
         final byte[] bb = buffer.remove(Long.valueOf(size() - 1));
         if (bb == null) {
-            efs.cleanLast(b, start);
+            efs.cleanLast(b, start); // stuck
         } else {
             System.arraycopy(bb, 0, b, start, efs.recordsize);
             efs.cleanLast();
@@ -133,4 +135,54 @@ public class BufferedEcoFS {
         efs.deleteOnExit();
     }
     
+    /**
+     * main - writes some data and checks the tables size (with time measureing)
+     * @param args
+     */
+    public static void main(final String[] args) {
+        // open a file, add one entry and exit
+        final File f = new File(args[0]);
+        if (f.exists()) FileUtils.deletedelete(f);
+        try {
+            final EcoFS t = new EcoFS(f, 8);
+            final byte[] b = new byte[8];
+            t.add("01234567".getBytes(), 0);
+            t.add("ABCDEFGH".getBytes(), 0);
+            t.add("abcdefgh".getBytes(), 0);
+            t.add("--------".getBytes(), 0);
+            t.add("********".getBytes(), 0);
+            for (int i = 0; i < 1000; i++) t.add("++++++++".getBytes(), 0);
+            t.add("=======0".getBytes(), 0);
+            t.add("=======1".getBytes(), 0);
+            t.add("=======2".getBytes(), 0);
+            t.cleanLast(b, 0);
+            System.out.println(new String(b));
+            t.cleanLast(b, 0);
+            //t.clean(2, b, 0);
+            System.out.println(new String(b));
+            t.get(1, b, 0);
+            System.out.println(new String(b));
+            t.put(1, "AbCdEfGh".getBytes(), 0);
+            t.get(1, b, 0);
+            System.out.println(new String(b));
+            t.get(3, b, 0);
+            System.out.println(new String(b));
+            t.get(4, b, 0);
+            System.out.println(new String(b));
+            System.out.println("size = " + t.size());
+            //t.clean(t.size() - 2);
+            t.cleanLast();
+            final long start = System.currentTimeMillis();
+            long c = 0;
+            for (int i = 0; i < 100000; i++) {
+                c = t.size();
+            }
+            System.out.println("size() needs " + ((System.currentTimeMillis() - start) / 100) + " nanoseconds");
+            System.out.println("size = " + c);
+            
+            t.close();
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

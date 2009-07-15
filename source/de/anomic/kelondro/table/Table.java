@@ -417,7 +417,7 @@ public class Table implements ObjectIndex {
     }
     
     public synchronized void put(final Entry row) throws IOException {
-        assert file == null || file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert file == null || file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", fail = " + fail;
         assert table == null || table.size() == index.size();
         assert row != null;
         assert row.bytes() != null;
@@ -555,7 +555,10 @@ public class Table implements ObjectIndex {
         assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
         assert ((table == null) || (table.size() == index.size()));
         final byte[] le = new byte[rowdef.objectsize];
+        long fsb = file.size();
+        assert fsb != 0 : "file.size() = " + fsb;
         file.cleanLast(le, 0);
+        assert file.size() < fsb : "file.size() = " + file.size();
         final Row.Entry lr = rowdef.newEntry(le);
         final int i = (int) index.remove(lr.getPrimaryKeyBytes());
         assert i >= 0;

@@ -566,6 +566,10 @@ public class EcoFS {
         assert this.buffercount == 0;
         this.raf.setLength((s - 1) * this.recordsize);
     }
+    
+    public void deleteOnExit() {
+        this.tablefile.deleteOnExit();
+    }
 
     /**
      * main - writes some data and checks the tables size (with time measureing)
@@ -589,6 +593,7 @@ public class EcoFS {
             t.add("=======2".getBytes(), 0);
             t.cleanLast(b, 0);
             System.out.println(new String(b));
+            t.cleanLast(b, 0);
             //t.clean(2, b, 0);
             System.out.println(new String(b));
             t.get(1, b, 0);
@@ -615,10 +620,6 @@ public class EcoFS {
         } catch (final IOException e) {
             e.printStackTrace();
         }
-    }
-    
-    public void deleteOnExit() {
-        this.tablefile.deleteOnExit();
     }
 
 }

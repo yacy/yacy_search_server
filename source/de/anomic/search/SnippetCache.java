@@ -362,7 +362,7 @@ public class SnippetCache {
                         sb.htEntryStoreProcess(entry);
                         
                         // read resource body (if it is there)
-                        final byte []resourceArray = entry.cacheArray();
+                        final byte []resourceArray = entry.getContent();
                         if (resourceArray != null) {
                             resContent = new ByteArrayInputStream(resourceArray);
                             resContentLength = resourceArray.length;
@@ -472,7 +472,7 @@ public class SnippetCache {
                 if (entry != null) {
 
                     // read resource body (if it is there)
-                    final byte[] resourceArray = entry.cacheArray();
+                    final byte[] resourceArray = entry.getContent();
                     if (resourceArray != null) {
                         resContent = new ByteArrayInputStream(resourceArray);
                         resContentLength = resourceArray.length;
@@ -909,7 +909,7 @@ public class SnippetCache {
                 if (entry == null) return null; // not found in web
                 
                 // read resource body (if it is there)
-                final byte[] resourceArray = entry.cacheArray();
+                final byte[] resourceArray = entry.getContent();
             
                 // in case that the resource was not in ram, read it from disk
                 if (resourceArray == null) {

@@ -72,6 +72,7 @@ import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.Blacklist;
 import de.anomic.document.Parser;
@@ -347,9 +348,7 @@ public final class httpdProxyHandler {
 
             // handle outgoing cookies
             handleOutgoingCookies(requestHeader, host, ip);
-
             prepareRequestHeader(conProp, requestHeader, hostlow);
-            
             httpResponseHeader cachedResponseHeader = plasmaHTCache.loadResponseHeader(url);
             
             // why are files unzipped upon arrival? why not zip all files in cache?
@@ -378,16 +377,23 @@ public final class httpdProxyHandler {
                 if (theLogger.isFinest()) theLogger.logFinest(reqID + " page not in cache: fulfill request from web");
                     fulfillRequestFromWeb(conProp, url, requestHeader, cachedResponseHeader, countedRespond);
             } else {
+            	final Request request = new Request(
+            			null, 
+                        url, 
+                        requestHeader.referer(), 
+                        "", 
+                        new Date(),
+                        new Date(),
+                        sb.crawler.defaultProxyProfile.handle(),
+                        0, 
+                        0, 
+                        0);
                 final Response cacheEntry = new Response(
-                        0,                               // crawling depth
-                        url,                             // url
-                        "",                              // name of the url is unknown
-                        //requestHeader,                 // request headers
-                        "200 OK",                        // request status
+                		request,
                         requestHeader,
                         cachedResponseHeader,
-                        null,                            // initiator
-                        sb.crawler.defaultProxyProfile   // profile
+                        "200 OK",
+                        sb.crawler.defaultProxyProfile
                 );
                 plasmaHTCache.storeMetadata(cachedResponseHeader, cacheEntry); // TODO: check if this storeMetadata is necessary
 
@@ -492,14 +498,22 @@ public final class httpdProxyHandler {
                 }
 
                 // reserver cache entry
+                final Request request = new Request(
+            			null, 
+                        url, 
+                        requestHeader.referer(), 
+                        "", 
+                        new Date(),
+                        new Date(),
+                        sb.crawler.defaultProxyProfile.handle(),
+                        0, 
+                        0, 
+                        0);
                 final Response cacheEntry = new Response(
-                        0,
-                        url,
-                        "",
-                        res.getStatusLine(),
+                		request,
                         requestHeader,
                         responseHeader,
-                        null,
+                        res.getStatusLine(),
                         sb.crawler.defaultProxyProfile
                 );
                 plasmaHTCache.storeMetadata(responseHeader, cacheEntry);
@@ -560,7 +574,7 @@ public final class httpdProxyHandler {
                         if (sizeBeforeDelete == -1) {
                             // totally fresh file
                             //cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
-                            cacheEntry.setCacheArray(cacheArray);
+                            cacheEntry.setContent(cacheArray);
                             sb.htEntryStoreProcess(cacheEntry);
                             conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
                         } else if (cacheArray != null && sizeBeforeDelete == cacheArray.length) {
@@ -572,7 +586,7 @@ public final class httpdProxyHandler {
                         } else {
                             // before we came here we deleted a cache entry
                             //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
-                            cacheEntry.setCacheArray(cacheArray);
+                            cacheEntry.setContent(cacheArray);
                             sb.htEntryStoreProcess(cacheEntry);
                             conProp.setProperty(httpHeader.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
                         }
