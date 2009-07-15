@@ -184,13 +184,13 @@ public class TarInputStream extends FilterInputStream {
      *
      * @param markLimit The limit to mark.
      */
-    public void mark(int markLimit) {
+    public synchronized void mark(int markLimit) {
     }
 
     /**
      * Since we do not support marking just yet, we do nothing.
      */
-    public void reset() {
+    public synchronized void reset() {
     }
 
     /**
