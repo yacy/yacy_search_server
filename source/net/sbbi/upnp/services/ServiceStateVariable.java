@@ -61,7 +61,7 @@ import net.sbbi.upnp.messages.UPNPResponseException;
  * @author <a href="mailto:superbonbon@sbbi.net">SuperBonBon</a>
  * @version 1.0
  */
-
+@SuppressWarnings("unchecked")
 public class ServiceStateVariable implements ServiceStateVariableTypes {
   
   private StateVariableMessage stateVarMsg = null;

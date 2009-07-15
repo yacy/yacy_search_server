@@ -56,6 +56,7 @@ import java.util.*;
  * @author <a href="mailto:superbonbon@sbbi.net">SuperBonBon</a>
  * @version 1.0
  */
+@SuppressWarnings("unchecked")
 public class ActionResponse {
 
   private Map outArguments = new HashMap();

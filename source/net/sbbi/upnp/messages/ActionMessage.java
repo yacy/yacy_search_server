@@ -66,6 +66,7 @@ import javax.xml.parsers.*;
  * @author <a href="mailto:superbonbon@sbbi.net">SuperBonBon</a>
  * @version 1.0
  */
+@SuppressWarnings("unchecked")
 public class ActionMessage {
   
   private final static Log log = LogFactory.getLog( ActionMessage.class );

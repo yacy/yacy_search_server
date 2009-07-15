@@ -57,7 +57,7 @@ import org.xml.sax.Attributes;
  * @author <a href="mailto:superbonbon@sbbi.net">SuperBonBon</a>
  * @version 1.0
  */
-
+@SuppressWarnings("unchecked")
 public class ServiceEventMessageParser extends org.xml.sax.helpers.DefaultHandler {
 
   private boolean readPropertyName = false;

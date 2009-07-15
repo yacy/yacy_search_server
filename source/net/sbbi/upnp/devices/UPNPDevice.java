@@ -61,7 +61,7 @@ import org.apache.commons.logging.LogFactory;
  * @author <a href="mailto:superbonbon@sbbi.net">SuperBonBon</a>
  * @version 1.0
  */
-
+@SuppressWarnings("unchecked")
 public class UPNPDevice {
 
   private final static Log log = LogFactory.getLog( UPNPDevice.class );

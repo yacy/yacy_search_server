@@ -66,7 +66,7 @@ import net.sbbi.upnp.services.*;
  * @author <a href="mailto:superbonbon@sbbi.net">SuperBonBon</a>
  * @version 1.0
  */
-
+@SuppressWarnings("unchecked")
 public class UPNPRootDevice extends UPNPDevice {
 
   private final static Log log = LogFactory.getLog( UPNPRootDevice.class );

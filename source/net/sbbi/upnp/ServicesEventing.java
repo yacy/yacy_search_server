@@ -76,7 +76,7 @@ import org.xml.sax.InputSource;
  * @author <a href="mailto:superbonbon@sbbi.net">SuperBonBon</a>
  * @version 1.0
  */
-
+@SuppressWarnings("unchecked")
 public class ServicesEventing implements Runnable {
 
   private final static Log log = LogFactory.getLog( ServicesEventing.class );
