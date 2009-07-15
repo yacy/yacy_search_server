@@ -62,6 +62,7 @@ public class xlsParser extends AbstractParser implements Idiom, HSSFListener {
     public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
         SUPPORTED_EXTENSIONS.add("xls");
+        SUPPORTED_EXTENSIONS.add("xla");
         SUPPORTED_EXTENSIONS.add("xlsx");
         SUPPORTED_MIME_TYPES.add("application/msexcel");
         SUPPORTED_MIME_TYPES.add("application/excel");

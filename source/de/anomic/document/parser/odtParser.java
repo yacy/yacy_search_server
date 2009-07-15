@@ -68,12 +68,32 @@ public class odtParser extends AbstractParser implements Idiom {
         SUPPORTED_EXTENSIONS.add("odt");
         SUPPORTED_EXTENSIONS.add("ods");
         SUPPORTED_EXTENSIONS.add("odp");
+        SUPPORTED_EXTENSIONS.add("odg");
+        SUPPORTED_EXTENSIONS.add("odc");
+        SUPPORTED_EXTENSIONS.add("odf");
+        SUPPORTED_EXTENSIONS.add("odb");
+        SUPPORTED_EXTENSIONS.add("odi");
+        SUPPORTED_EXTENSIONS.add("odm");
+        SUPPORTED_EXTENSIONS.add("ott");
+        SUPPORTED_EXTENSIONS.add("ots");
+        SUPPORTED_EXTENSIONS.add("otp");
+        SUPPORTED_EXTENSIONS.add("otg");
         SUPPORTED_EXTENSIONS.add("sxw"); // Star Office Writer file format
         SUPPORTED_EXTENSIONS.add("sxc"); // Star Office Calc file format
         SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.text");
-        SUPPORTED_MIME_TYPES.add("application/x-vnd.oasis.opendocument.text");
-        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.presentation");
         SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.spreadsheet");
+        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.presentation");
+        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.graphics");
+        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.chart");
+        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.formula");
+        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.database");
+        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.image");
+        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.text-master");
+        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.text-template");
+        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.spreadsheet-template");
+        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.presentation-template");
+        SUPPORTED_MIME_TYPES.add("application/vnd.oasis.opendocument.graphics-template");
+        SUPPORTED_MIME_TYPES.add("application/x-vnd.oasis.opendocument.text");
         SUPPORTED_MIME_TYPES.add("application/OOo-calc");
         SUPPORTED_MIME_TYPES.add("application/OOo-writer");
     }

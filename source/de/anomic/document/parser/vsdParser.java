@@ -49,6 +49,7 @@ public class vsdParser extends AbstractParser implements Idiom {
     public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
         SUPPORTED_EXTENSIONS.add("vsd");
+        SUPPORTED_EXTENSIONS.add("vss");
         SUPPORTED_EXTENSIONS.add("vst");
         SUPPORTED_EXTENSIONS.add("vdx");
         SUPPORTED_EXTENSIONS.add("vtx");

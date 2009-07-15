@@ -68,8 +68,6 @@ public class vcfParser extends AbstractParser implements Idiom {
         SUPPORTED_EXTENSIONS.add("vcf");
         SUPPORTED_MIME_TYPES.add("text/x-vcard");
         SUPPORTED_MIME_TYPES.add("application/vcard");
-        SUPPORTED_MIME_TYPES.add("text/anytext");
-        SUPPORTED_MIME_TYPES.add("text/directory");
         SUPPORTED_MIME_TYPES.add("application/x-versit");
         SUPPORTED_MIME_TYPES.add("text/x-versit");
         SUPPORTED_MIME_TYPES.add("text/x-vcalendar");
