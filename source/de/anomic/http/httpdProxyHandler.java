@@ -71,7 +71,8 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
-import de.anomic.crawler.HTTPLoader;
+import de.anomic.crawler.retrieval.HTTPLoader;
+import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.Blacklist;
 import de.anomic.document.Parser;
 import de.anomic.document.parser.html.ContentTransformer;
@@ -377,7 +378,7 @@ public final class httpdProxyHandler {
                 if (theLogger.isFinest()) theLogger.logFinest(reqID + " page not in cache: fulfill request from web");
                     fulfillRequestFromWeb(conProp, url, requestHeader, cachedResponseHeader, countedRespond);
             } else {
-                final httpDocument cacheEntry = new httpDocument(
+                final Response cacheEntry = new Response(
                         0,                               // crawling depth
                         url,                             // url
                         "",                              // name of the url is unknown
@@ -491,7 +492,7 @@ public final class httpdProxyHandler {
                 }
 
                 // reserver cache entry
-                final httpDocument cacheEntry = new httpDocument(
+                final Response cacheEntry = new Response(
                         0,
                         url,
                         "",

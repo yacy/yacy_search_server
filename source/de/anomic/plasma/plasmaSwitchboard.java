@@ -115,16 +115,13 @@ import java.util.regex.Pattern;
 import de.anomic.content.DCEntry;
 import de.anomic.content.RSSMessage;
 import de.anomic.content.file.SurrogateReader;
-import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.CrawlStacker;
 import de.anomic.crawler.CrawlSwitchboard;
-import de.anomic.crawler.HTTPLoader;
 import de.anomic.crawler.ImporterManager;
 import de.anomic.crawler.IndexingStack;
 import de.anomic.crawler.NoticedURL;
-import de.anomic.crawler.ProtocolLoader;
 import de.anomic.crawler.ResourceObserver;
 import de.anomic.crawler.ResultImages;
 import de.anomic.crawler.ResultURLs;
@@ -132,6 +129,10 @@ import de.anomic.crawler.RobotsTxt;
 import de.anomic.crawler.ZURL;
 import de.anomic.crawler.CrawlProfile.entry;
 import de.anomic.crawler.IndexingStack.QueueEntry;
+import de.anomic.crawler.retrieval.HTTPLoader;
+import de.anomic.crawler.retrieval.Request;
+import de.anomic.crawler.retrieval.LoaderDispatcher;
+import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.Blacklist;
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
@@ -155,7 +156,6 @@ import de.anomic.http.httpRemoteProxyConfig;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.http.httpd;
-import de.anomic.http.httpDocument;
 import de.anomic.http.httpdRobotsTxtConfig;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
@@ -669,7 +669,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         log.logConfig("Finished Switchboard Initialization");
     }
 
-
+    public int getActiveQueueSize() {
+        return
+            this.indexingDocumentProcessor.queueSize() + 
+            this.indexingCondensementProcessor.queueSize() + 
+            this.indexingAnalysisProcessor.queueSize() + 
+            this.indexingStorageProcessor.queueSize();
+    }
+    
     public void overwriteNetworkDefinition() {
 
         // load network configuration into settings
@@ -1062,7 +1069,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
      * {@link CrawlProfile Crawl Profiles} are saved independantly from the queues themselves
      * and therefore have to be cleaned up from time to time. This method only performs the clean-up
      * if - and only if - the {@link IndexingStack switchboard},
-     * {@link ProtocolLoader loader} and {@link plasmaCrawlNURL local crawl} queues are all empty.
+     * {@link LoaderDispatcher loader} and {@link plasmaCrawlNURL local crawl} queues are all empty.
      * <p>
      *   Then it iterates through all existing {@link CrawlProfile crawl profiles} and removes
      *   all profiles which are not hardcoded.
@@ -1088,7 +1095,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         return this.crawler.cleanProfiles();
     }
     
-    public boolean htEntryStoreProcess(final httpDocument entry) {
+    public boolean htEntryStoreProcess(final Response entry) {
         
         if (entry == null) return false;
 
@@ -1361,7 +1368,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 return false;
             }
             if (queueEntry.profile() == null) {
-                queueEntry.close();
                 if (this.log.isFine()) log.logFine("deQueue: profile is null");
                 return false;
             }
@@ -1390,7 +1396,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
 
             // put document into the concurrent processing queue
             if (log.isFinest()) log.logFinest("deQueue: passing entry to indexing queue");
-            this.crawler.indexingStack.store(queueEntry);
             this.indexingDocumentProcessor.enQueue(new indexingQueueEntry(queueEntry, null, null));
             return true;
         } catch (final InterruptedException e) {
@@ -1667,7 +1672,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             document = null;
         }
         if (document == null) {
-            in.queueEntry.close();
             return null;
         }
         return new indexingQueueEntry(in.queueEntry, document, null);
@@ -1728,7 +1732,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 String u = nextUrl.toNormalform(true, true);
                 if (!(u.startsWith("http") || u.startsWith("ftp"))) continue;
                 // enqueue the hyperlink into the pre-notice-url db
-                crawlStacker.enqueueEntry(new CrawlEntry(
+                crawlStacker.enqueueEntry(new Request(
                         entry.initiator(),
                         nextUrl,
                         entry.url().hash(),
@@ -1769,7 +1773,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             
             return new indexingQueueEntry(in.queueEntry, in.document, condenser);
         } catch (final UnsupportedEncodingException e) {
-            in.queueEntry.close();
             return null;
         }
     }
@@ -1784,7 +1787,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         in.queueEntry.updateStatus(IndexingStack.QUEUE_STATE_INDEXSTORAGE);
         storeDocumentIndex(in.queueEntry, in.document, in.condenser);
         in.queueEntry.updateStatus(IndexingStack.QUEUE_STATE_FINISHED);
-        in.queueEntry.close();
     }
     
     private void storeDocumentIndex(final IndexingStack.QueueEntry queueEntry, final Document document, final Condenser condenser) {
@@ -2135,7 +2137,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     ) {
         assert initiator != null;
         // create a new errorURL DB entry
-        final CrawlEntry bentry = new CrawlEntry(
+        final Request bentry = new Request(
                 initiator, 
                 url, 
                 referrerHash, 

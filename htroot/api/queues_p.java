@@ -4,9 +4,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
-import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.IndexingStack;
 import de.anomic.crawler.NoticedURL;
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -39,11 +39,11 @@ public class queues_p {
         yacySeed initiator;
         
         //indexing queue
-        prop.putNum("indexingSize", sb.getThread(plasmaSwitchboardConstants.INDEXER).getJobCount() + sb.crawler.indexingStack.getActiveQueueSize());
+        prop.putNum("indexingSize", sb.getThread(plasmaSwitchboardConstants.INDEXER).getJobCount() + sb.getActiveQueueSize());
         prop.putNum("indexingMax", (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30));
         prop.putNum("urlpublictextSize", sb.indexSegment.urlMetadata().size());
         prop.putNum("rwipublictextSize", sb.indexSegment.termIndex().sizesMax());
-        if ((sb.crawler.indexingStack.size() == 0) && (sb.crawler.indexingStack.getActiveQueueSize() == 0)) {
+        if ((sb.crawler.indexingStack.size() == 0) && (sb.getActiveQueueSize() == 0)) {
             prop.put("list", "0"); //is empty
         } else {
             IndexingStack.QueueEntry pcentry;
@@ -52,7 +52,6 @@ public class queues_p {
             
             // getting all entries that are currently in process
             final ArrayList<IndexingStack.QueueEntry> entryList = new ArrayList<IndexingStack.QueueEntry>();
-            entryList.addAll(sb.crawler.indexingStack.getActiveQueueEntries());
             final int inProcessCount = entryList.size();
             
             // getting all enqueued entries
@@ -97,7 +96,7 @@ public class queues_p {
         if (sb.crawlQueues.size() == 0) {
             prop.put("list-loader", "0");
         } else {
-            final CrawlEntry[] w = sb.crawlQueues.activeWorkerEntries();
+            final Request[] w = sb.crawlQueues.activeWorkerEntries();
             int count = 0;
             for (int i = 0; i < w.length; i++)  {
                 if (w[i] == null) continue;
@@ -138,10 +137,10 @@ public class queues_p {
     }
     
     
-    public static final void addNTable(final plasmaSwitchboard sb, final serverObjects prop, final String tableName, final ArrayList<CrawlEntry> crawlerList) {
+    public static final void addNTable(final plasmaSwitchboard sb, final serverObjects prop, final String tableName, final ArrayList<Request> crawlerList) {
 
         int showNum = 0;
-        CrawlEntry urle;
+        Request urle;
         yacySeed initiator;
         for (int i = 0; i < crawlerList.size(); i++) {
             urle = crawlerList.get(i);

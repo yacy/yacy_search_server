@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import de.anomic.crawler.HTTPLoader;
+import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpHeader;

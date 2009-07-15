@@ -38,9 +38,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.HTTPLoader;
+import de.anomic.crawler.retrieval.HTTPLoader;
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpResponse;
@@ -272,7 +272,7 @@ public class SitemapParser extends DefaultHandler {
             }
 
             // URL needs to crawled
-            this.sb.crawlStacker.enqueueEntry(new CrawlEntry(
+            this.sb.crawlStacker.enqueueEntry(new Request(
                     this.sb.peers.mySeed().hash,
                     url,
                     null, // this.siteMapURL.toString(),

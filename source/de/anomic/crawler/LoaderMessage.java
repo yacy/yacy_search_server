@@ -23,7 +23,7 @@
 
 package de.anomic.crawler;
 
-import de.anomic.http.httpDocument;
+import de.anomic.crawler.retrieval.Response;
 import de.anomic.server.serverSemaphore;
 import de.anomic.yacy.yacyURL;
 
@@ -41,7 +41,7 @@ public final class LoaderMessage {
     public final boolean keepInMemory;
     
     private serverSemaphore resultSync  = null;
-    private httpDocument result;
+    private Response result;
     private String errorMessage;
     
     // loadParallel(URL url, String referer, String initiator, int depth, plasmaCrawlProfile.entry profile) {
@@ -80,7 +80,7 @@ public final class LoaderMessage {
         return this.errorMessage;
     }
     
-    public void setResult(final httpDocument theResult) {
+    public void setResult(final Response theResult) {
         // store the result
         this.result = theResult;
         
@@ -88,8 +88,8 @@ public final class LoaderMessage {
         this.resultSync.V();        
     }
     
-    public httpDocument waitForResult() throws InterruptedException {
-        httpDocument theResult = null;
+    public Response waitForResult() throws InterruptedException {
+        Response theResult = null;
         
         this.resultSync.P();
         /* =====> CRITICAL SECTION <======== */

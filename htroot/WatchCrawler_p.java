@@ -36,10 +36,10 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.SitemapImporter;
 import de.anomic.crawler.ZURL;
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.document.parser.html.ContentScraper;
@@ -225,7 +225,7 @@ public class WatchCrawler_p {
                                     crawlingQ,
                                     indexText, indexMedia,
                                     storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
-                            final String reasonString = sb.crawlStacker.stackCrawl(new CrawlEntry(
+                            final String reasonString = sb.crawlStacker.stackCrawl(new Request(
                                     sb.peers.mySeed().hash,
                                     url,
                                     null,
@@ -279,7 +279,7 @@ public class WatchCrawler_p {
                                 prop.putHTML("info_reasonString", reasonString);
                                 
                                 final ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
-                                        new CrawlEntry(
+                                        new Request(
                                                 sb.peers.mySeed().hash, 
                                                 crawlingStartURL, 
                                                 "", 
@@ -364,7 +364,7 @@ public class WatchCrawler_p {
                                     if (nexturl == null) continue;
                                     
                                     // enqueuing the url for crawling
-                                    sb.crawlStacker.enqueueEntry(new CrawlEntry(
+                                    sb.crawlStacker.enqueueEntry(new Request(
                                             sb.peers.mySeed().hash, 
                                             nexturl, 
                                             "", 

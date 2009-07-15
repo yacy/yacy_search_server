@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.yacy.logging.Log;
 
 public class NoticedURL {
@@ -134,7 +135,7 @@ public class NoticedURL {
             remoteStack.has(urlhash);
     }
     
-    public void push(final int stackType, final CrawlEntry entry) {
+    public void push(final int stackType, final Request entry) {
         try {
             switch (stackType) {
                 case STACK_TYPE_CORE:
@@ -151,8 +152,8 @@ public class NoticedURL {
         } catch (final IOException er) {}
     }
 
-    public CrawlEntry get(final String urlhash) {
-        CrawlEntry entry = null;
+    public Request get(final String urlhash) {
+        Request entry = null;
         try {if ((entry = coreStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
         try {if ((entry = limitStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
         try {if ((entry = remoteStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
@@ -182,7 +183,7 @@ public class NoticedURL {
         return removed;
     }
     
-    public ArrayList<CrawlEntry> top(final int stackType, final int count) {
+    public ArrayList<Request> top(final int stackType, final int count) {
         switch (stackType) {
             case STACK_TYPE_CORE:     return top(coreStack, count);
             case STACK_TYPE_LIMIT:    return top(limitStack, count);
@@ -191,7 +192,7 @@ public class NoticedURL {
         }
     }
     
-    public CrawlEntry pop(final int stackType, final boolean delay, CrawlProfile profile) throws IOException {
+    public Request pop(final int stackType, final boolean delay, CrawlProfile profile) throws IOException {
         switch (stackType) {
             case STACK_TYPE_CORE:     return pop(coreStack, delay, profile);
             case STACK_TYPE_LIMIT:    return pop(limitStack, delay, profile);
@@ -202,7 +203,7 @@ public class NoticedURL {
 
     public void shift(final int fromStack, final int toStack, CrawlProfile profile) {
         try {
-            final CrawlEntry entry = pop(fromStack, false, profile);
+            final Request entry = pop(fromStack, false, profile);
             if (entry != null) push(toStack, entry);
         } catch (final IOException e) {
             return;
@@ -219,10 +220,10 @@ public class NoticedURL {
             }
     }
     
-    private CrawlEntry pop(final Balancer balancer, final boolean delay, CrawlProfile profile) throws IOException {
+    private Request pop(final Balancer balancer, final boolean delay, CrawlProfile profile) throws IOException {
         // this is a filo - pop
         int s;
-        CrawlEntry entry;
+        Request entry;
         int errors = 0;
         synchronized (balancer) {
             while ((s = balancer.size()) > 0) {
@@ -241,15 +242,15 @@ public class NoticedURL {
         return null;
     }
     
-    private ArrayList<CrawlEntry> top(final Balancer balancer, int count) {
+    private ArrayList<Request> top(final Balancer balancer, int count) {
         // this is a filo - top
         if (count > balancer.size()) count = balancer.size();
-        ArrayList<CrawlEntry> list;
+        ArrayList<Request> list;
         list = balancer.top(count);
         return list;
     }
     
-    public Iterator<CrawlEntry> iterator(final int stackType) {
+    public Iterator<Request> iterator(final int stackType) {
         // returns an iterator of plasmaCrawlBalancerEntry Objects
         try {switch (stackType) {
             case STACK_TYPE_CORE:     return coreStack.iterator();
@@ -257,7 +258,7 @@ public class NoticedURL {
             case STACK_TYPE_REMOTE:   return remoteStack.iterator();
             default: return null;
         }} catch (final IOException e) {
-            return new HashSet<CrawlEntry>().iterator();
+            return new HashSet<Request>().iterator();
         }
     }
     

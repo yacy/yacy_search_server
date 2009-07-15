@@ -29,9 +29,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
 
-import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.NoticedURL;
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverObjects;
@@ -85,9 +85,9 @@ public class IndexCreateWWWRemoteQueue_p {
             prop.put("crawler-queue", "0");
         } else {
             prop.put("crawler-queue", "1");
-            final ArrayList<CrawlEntry> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_REMOTE, showLimit);
+            final ArrayList<Request> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_REMOTE, showLimit);
             
-            CrawlEntry urle;
+            Request urle;
             boolean dark = true;
             yacySeed initiator;
             String profileHandle;

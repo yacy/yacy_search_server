@@ -33,6 +33,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.order.CloneableIterator;
@@ -68,7 +69,7 @@ public class Balancer {
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
         cacheStacksPath.mkdirs();
         File f = new File(cacheStacksPath, stackname + indexSuffix);
-        urlFileIndex = new Table(f, CrawlEntry.rowdef, (fullram) ? Table.tailCacheUsageAuto : Table.tailCacheDenyUsage, EcoFSBufferSize, 0);
+        urlFileIndex = new Table(f, Request.rowdef, (fullram) ? Table.tailCacheUsageAuto : Table.tailCacheDenyUsage, EcoFSBufferSize, 0);
         profileErrors = 0;
         lastDomainStackFill = 0;
         Log.logInfo("Balancer", "opened balancer file with " + urlFileIndex.size() + " entries from " + f.toString());
@@ -108,12 +109,12 @@ public class Balancer {
         }
     }
     
-    public CrawlEntry get(final String urlhash) throws IOException {
+    public Request get(final String urlhash) throws IOException {
         assert urlhash != null;
         if (urlFileIndex == null) return null; // case occurs during shutdown
         final Row.Entry entry = urlFileIndex.get(urlhash.getBytes());
         if (entry == null) return null;
-        return new CrawlEntry(entry);
+        return new Request(entry);
     }
     
     public int removeAllByProfileHandle(final String profileHandle, final long timeout) throws IOException {
@@ -125,11 +126,11 @@ public class Balancer {
         final Iterator<Row.Entry> i = urlFileIndex.rows();
         final HashSet<String> urlHashes = new HashSet<String>();
         Row.Entry rowEntry;
-        CrawlEntry crawlEntry;
+        Request crawlEntry;
         final long terminate = (timeout > 0) ? System.currentTimeMillis() + timeout : Long.MAX_VALUE;
         while (i.hasNext() && (System.currentTimeMillis() < terminate)) {
             rowEntry = i.next();
-            crawlEntry = new CrawlEntry(rowEntry);
+            crawlEntry = new Request(rowEntry);
             if (crawlEntry.profileHandle().equals(profileHandle)) {
                 urlHashes.add(crawlEntry.url().hash());
             }
@@ -215,7 +216,7 @@ public class Balancer {
         return false;
     }
     
-    public void push(final CrawlEntry entry) throws IOException {
+    public void push(final Request entry) throws IOException {
         assert entry != null;
         String hash = entry.url().hash();
         synchronized (this) {
@@ -289,7 +290,7 @@ public class Balancer {
      * @return a url in a CrawlEntry object
      * @throws IOException
      */
-    public CrawlEntry pop(final boolean delay, final CrawlProfile profile) throws IOException {
+    public Request pop(final boolean delay, final CrawlProfile profile) throws IOException {
         // returns a crawl entry from the stack and ensures minimum delta times
         
     	filltop(delay, -600000, false);
@@ -304,7 +305,7 @@ public class Balancer {
     	filltop(delay, 0, true);
     	
     	long sleeptime = 0;
-    	CrawlEntry crawlEntry = null;
+    	Request crawlEntry = null;
     	while (this.urlFileIndex.size() > 0) {
 	    	// first simply take one of the entries in the top list, that should be one without any delay
 	        String result = nextFromDelayed();
@@ -323,7 +324,7 @@ public class Balancer {
 	        }
 	        //assert urlFileIndex.size() + 1 == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s + ", result = " + result;
 	        
-	        crawlEntry = new CrawlEntry(rowEntry);
+	        crawlEntry = new Request(rowEntry);
 	        //Log.logInfo("Balancer", "fetched next url: " + crawlEntry.url().toNormalform(true, false));
 	        
 	        // at this point we must check if the crawlEntry has relevancy because the crawl profile still exists
@@ -433,15 +434,15 @@ public class Balancer {
     	}
     }
 
-    public ArrayList<CrawlEntry> top(int count) {
+    public ArrayList<Request> top(int count) {
     	count = Math.min(count, top.size());
-    	ArrayList<CrawlEntry> cel = new ArrayList<CrawlEntry>();
+    	ArrayList<Request> cel = new ArrayList<Request>();
     	if (count == 0) return cel;
     	for (String n: top) {
     		try {
 				Row.Entry rowEntry = urlFileIndex.get(n.getBytes());
 				if (rowEntry == null) continue;
-				final CrawlEntry crawlEntry = new CrawlEntry(rowEntry);
+				final Request crawlEntry = new Request(rowEntry);
 				cel.add(crawlEntry);
 				count--;
 				if (count <= 0) break;
@@ -451,11 +452,11 @@ public class Balancer {
     	return cel;
     }
     
-    public Iterator<CrawlEntry> iterator() throws IOException {
+    public Iterator<Request> iterator() throws IOException {
         return new EntryIterator();
     }
     
-    private class EntryIterator implements Iterator<CrawlEntry> {
+    private class EntryIterator implements Iterator<Request> {
 
         private Iterator<Row.Entry> rowIterator;
         
@@ -467,10 +468,10 @@ public class Balancer {
             return (rowIterator == null) ? false : rowIterator.hasNext();
         }
 
-        public CrawlEntry next() {
+        public Request next() {
             final Row.Entry entry = rowIterator.next();
             try {
-                return (entry == null) ? null : new CrawlEntry(entry);
+                return (entry == null) ? null : new Request(entry);
             } catch (final IOException e) {
                 rowIterator = null;
                 return null;

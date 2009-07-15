@@ -86,7 +86,7 @@ public class IndexCreateIndexingQueue_p {
         yacySeed initiator;
         boolean dark;
         
-        if ((sb.crawler.indexingStack.size() == 0) && (sb.crawler.indexingStack.getActiveQueueSize() == 0)) {
+        if ((sb.crawler.indexingStack.size() == 0) && (sb.getActiveQueueSize() == 0)) {
             prop.put("indexing-queue", "0"); //is empty
         } else {
             prop.put("indexing-queue", "1"); // there are entries in the queue or in process
@@ -98,7 +98,6 @@ public class IndexCreateIndexingQueue_p {
             
             // getting all entries that are currently in process
             final ArrayList<IndexingStack.QueueEntry> entryList = new ArrayList<IndexingStack.QueueEntry>();
-            entryList.addAll(sb.crawler.indexingStack.getActiveQueueEntries());
             final int inProcessCount = entryList.size();
             
             // getting all enqueued entries

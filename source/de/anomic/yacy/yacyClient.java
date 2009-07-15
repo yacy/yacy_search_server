@@ -58,8 +58,8 @@ import java.util.TreeMap;
 import org.apache.commons.httpclient.methods.multipart.ByteArrayPartSource;
 import org.apache.commons.httpclient.methods.multipart.Part;
 
-import de.anomic.crawler.HTTPLoader;
 import de.anomic.crawler.ResultURLs;
+import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.data.Blacklist;
 import de.anomic.document.Word;
 import de.anomic.document.parser.xml.RSSFeed;

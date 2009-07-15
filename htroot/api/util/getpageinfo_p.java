@@ -3,7 +3,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Set;
 
-import de.anomic.crawler.HTTPLoader;
+import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;

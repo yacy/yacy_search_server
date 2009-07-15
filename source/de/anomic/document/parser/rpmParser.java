@@ -37,7 +37,7 @@ import java.util.Set;
 import com.jguild.jrpm.io.RPMFile;
 import com.jguild.jrpm.io.datatype.DataTypeIf;
 
-import de.anomic.crawler.HTTPLoader;
+import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;

@@ -1,4 +1,4 @@
-// plasmaProtocolLoader.java
+// LoaderDispatcher.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 24.10.2007 on http://yacy.net
 //
@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.crawler;
+package de.anomic.crawler.retrieval;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -33,13 +33,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.http.httpDocument;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.yacy.logging.Log;
 
-public final class ProtocolLoader {
+public final class LoaderDispatcher {
 
     private static final long minDelay = 250; // milliseconds; 4 accesses per second
     private static final ConcurrentHashMap<String, Long> accessTime = new ConcurrentHashMap<String, Long>(); // to protect targets from DDoS
@@ -50,7 +49,7 @@ public final class ProtocolLoader {
     private final HTTPLoader httpLoader;
     private final FTPLoader ftpLoader;
     
-    public ProtocolLoader(final plasmaSwitchboard sb, final Log log) {
+    public LoaderDispatcher(final plasmaSwitchboard sb, final Log log) {
         this.sb = sb;
         this.log = log;
         this.supportedProtocols = new HashSet<String>(Arrays.asList(new String[]{"http","https","ftp"}));
@@ -70,7 +69,7 @@ public final class ProtocolLoader {
         return (HashSet<String>) this.supportedProtocols.clone();
     }
     
-    public httpDocument load(final CrawlEntry entry) throws IOException {
+    public Response load(final Request entry) throws IOException {
         // getting the protocol of the next URL
         final String protocol = entry.url().getProtocol();
         final String host = entry.url().getHost();
@@ -111,10 +110,10 @@ public final class ProtocolLoader {
         }
     }
     
-    public String process(final CrawlEntry entry) {
+    public String process(final Request entry) {
         // load a resource, store it to htcache and push queue entry to switchboard queue
         // returns null if everything went fine, a fail reason string if a problem occurred
-        httpDocument h;
+        Response h;
         try {
             entry.setStatus("loading", serverProcessorJob.STATUS_RUNNING);
             h = load(entry);

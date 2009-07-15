@@ -35,7 +35,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import de.anomic.crawler.HTTPLoader;
+import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.DateFormatter;

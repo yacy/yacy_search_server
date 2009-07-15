@@ -36,7 +36,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import de.anomic.crawler.HTTPLoader;
+import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.data.listManager;
 import de.anomic.data.translator;
 import de.anomic.http.httpClient;

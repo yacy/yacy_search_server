@@ -38,6 +38,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.anomic.crawler.retrieval.Response;
 import de.anomic.document.Condenser;
 import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
@@ -47,7 +48,6 @@ import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.document.parser.html.ImageEntry;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpResponseHeader;
-import de.anomic.http.httpDocument;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.ScoreCluster;
@@ -354,7 +354,7 @@ public class SnippetCache {
                     // if not found try to download it
                     
                     // download resource using the crawler and keep resource in memory if possible
-                    final httpDocument entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, true, reindexing);
+                    final Response entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, true, reindexing);
                     
                     // getting resource metadata (e.g. the http headers for http resources)
                     if (entry != null) {
@@ -466,7 +466,7 @@ public class SnippetCache {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                final httpDocument entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, forText, global);
+                final Response entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, forText, global);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
@@ -905,7 +905,7 @@ public class SnippetCache {
                 // if the content is not available in cache try to download it from web
                 
                 // try to download the resource using a crawler
-                final httpDocument entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, forText, reindexing);
+                final Response entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, forText, reindexing);
                 if (entry == null) return null; // not found in web
                 
                 // read resource body (if it is there)

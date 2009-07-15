@@ -29,10 +29,8 @@ package de.anomic.crawler;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.document.Parser;
 import de.anomic.http.httpHeader;
@@ -60,7 +58,6 @@ public class IndexingStack {
     protected final CrawlProfile profiles;
     protected final RecordStack sbQueueStack;
     protected final yacySeedDB peers;
-    protected final ConcurrentHashMap<String, QueueEntry> queueInProcess;
     
     public IndexingStack(
             final yacySeedDB peers,
@@ -69,7 +66,6 @@ public class IndexingStack {
             final CrawlProfile profiles) {
         this.profiles = profiles;
         this.peers = peers;
-        this.queueInProcess = new ConcurrentHashMap<String, QueueEntry>();
         this.sbQueueStack = RecordStack.open(new File(queuesRoot, sbQueueStackName), rowdef);
     }
     
@@ -199,27 +195,24 @@ public class IndexingStack {
         }
     }
     
-    public QueueEntry newEntry(final yacyURL url, final String referrer, final Date ifModifiedSince, final boolean requestWithCookie,
-                     final String initiator, final int depth, final String profilehandle, final String anchorName) {
-        return new QueueEntry(url, referrer, ifModifiedSince, requestWithCookie, initiator, depth, profilehandle, anchorName);
-    }
-    
-    public void store(final QueueEntry entry) {
-        queueInProcess.put(entry.url().hash(), entry);
-    }
-    
-    public QueueEntry getActiveEntry(final String urlhash) {
-        // show one entry from the queue
-        return this.queueInProcess.get(urlhash);
-    }
-    
-    public int getActiveQueueSize() {
-        return this.queueInProcess.size();
-    }
-   
-    public Collection<QueueEntry> getActiveQueueEntries() {
-        // todo: check dead entries?
-        return this.queueInProcess.values();
+    public QueueEntry newEntry(
+            final yacyURL url, 
+            final String referrer,
+            final Date ifModifiedSince,
+            final boolean requestWithCookie,
+            final String initiator,
+            final int depth,
+            final String profilehandle,
+            final String anchorName) {
+        return new QueueEntry(
+                url,
+                referrer,
+                ifModifiedSince,
+                requestWithCookie,
+                initiator,
+                depth,
+                profilehandle, 
+                anchorName);
     }
     
     public static final int QUEUE_STATE_FRESH             = 0;
@@ -229,6 +222,9 @@ public class IndexingStack {
     public static final int QUEUE_STATE_INDEXSTORAGE      = 4;
     public static final int QUEUE_STATE_FINISHED          = 5;
     
+    /**
+     * A HarvestResponse is a object that refers to a loaded entity.
+     */
     public class QueueEntry {
         yacyURL url;          // plasmaURL.urlStringLength
         String referrerHash;  // plasmaURL.urlHashLength
@@ -245,8 +241,15 @@ public class IndexingStack {
         private httpResponseHeader responseHeader;
         private yacyURL referrerURL;
 
-        public QueueEntry(final yacyURL url, final String referrer, final Date ifModifiedSince, final boolean requestWithCookie,
-                     final String initiator, final int depth, final String profileHandle, final String anchorName) {
+        public QueueEntry(
+                final yacyURL url, 
+                final String referrer,
+                final Date ifModifiedSince,
+                final boolean requestWithCookie,
+                final String initiator,
+                final int depth,
+                final String profileHandle,
+                final String anchorName) {
             this.url = url;
             this.referrerHash = referrer;
             this.ifModifiedSince = ifModifiedSince;
@@ -308,14 +311,6 @@ public class IndexingStack {
         
         public void updateStatus(final int newStatus) {
             this.status = newStatus;
-        }
-        
-        public void close() {
-            queueInProcess.remove(this.url.hash());
-        }
-        
-        protected void finalize() {
-            this.close();
         }
         
         public yacyURL url() {

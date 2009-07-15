@@ -24,16 +24,19 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.http;
+package de.anomic.crawler.retrieval;
 
 import java.util.Date;
 
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.http.httpHeader;
+import de.anomic.http.httpRequestHeader;
+import de.anomic.http.httpResponseHeader;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.yacy.yacyURL;
 
-public class httpDocument {
+public class Response {
     
     // doctypes:
     public static final char DT_PDFPS   = 'p';
@@ -51,7 +54,7 @@ public class httpDocument {
     // the class objects
     private final  int                depth;           // the depth of pre-fetching
     private final  String             responseStatus;
-    private        byte[]             cacheArray;      // or the cache as byte-array
+    private        byte[]             cacheArray;      //
     private final  yacyURL            url;
     private final  String             name;            // the name of the link, read as anchor from an <a>-tag
     private final  CrawlProfile.entry profile;
@@ -130,7 +133,7 @@ public class httpDocument {
         return doctype;
     }
     
-    public httpDocument(
+    public Response(
             final int depth,
             final yacyURL url,
             final String name,

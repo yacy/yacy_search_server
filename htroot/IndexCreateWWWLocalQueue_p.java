@@ -33,12 +33,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.crawler.CrawlSwitchboard;
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
@@ -109,8 +109,8 @@ public class IndexCreateWWWLocalQueue_p {
                             }
                         } else {
                             // iterating through the list of URLs
-                            final Iterator<CrawlEntry> iter = sb.crawlQueues.noticeURL.iterator(NoticedURL.STACK_TYPE_CORE);
-                            CrawlEntry entry;
+                            final Iterator<Request> iter = sb.crawlQueues.noticeURL.iterator(NoticedURL.STACK_TYPE_CORE);
+                            Request entry;
                             while (iter.hasNext()) {
                                 if ((entry = iter.next()) == null) continue;
                                 String value = null;
@@ -154,9 +154,9 @@ public class IndexCreateWWWLocalQueue_p {
             prop.put("crawler-queue", "0");
         } else {
             prop.put("crawler-queue", "1");
-            final ArrayList<CrawlEntry> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
+            final ArrayList<Request> crawlerList = sb.crawlQueues.noticeURL.top(NoticedURL.STACK_TYPE_CORE, (int) (showLimit * 1.20));
 
-            CrawlEntry urle;
+            Request urle;
             boolean dark = true;
             yacySeed initiator;
             String profileHandle;

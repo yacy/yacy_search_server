@@ -24,7 +24,7 @@ package de.anomic.tools;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import de.anomic.crawler.HTTPLoader;
+import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRemoteProxyConfig;

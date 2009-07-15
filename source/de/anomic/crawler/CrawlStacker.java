@@ -31,6 +31,7 @@ package de.anomic.crawler;
 import java.net.UnknownHostException;
 import java.util.Date;
 
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.data.Blacklist;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
@@ -45,7 +46,7 @@ public final class CrawlStacker {
 
     private Log log = new Log("STACKCRAWL");
 
-    private serverProcessor<CrawlEntry> fastQueue, slowQueue;
+    private serverProcessor<Request> fastQueue, slowQueue;
     private long                      dnsHit, dnsMiss;
     private CrawlQueues               nextQueue;
     private CrawlSwitchboard          crawler;
@@ -71,8 +72,8 @@ public final class CrawlStacker {
         this.acceptLocalURLs = acceptLocalURLs;
         this.acceptGlobalURLs = acceptGlobalURLs;
 
-        this.fastQueue = new serverProcessor<CrawlEntry>("CrawlStackerFast", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, "job", 10000, null, 2);
-        this.slowQueue = new serverProcessor<CrawlEntry>("CrawlStackerSlow", "This is like CrawlStackerFast, but does additionaly a DNS lookup. The CrawlStackerFast does not need this because it can use the DNS cache.", new String[]{"Balancer"}, this, "job",  1000, null, 5);
+        this.fastQueue = new serverProcessor<Request>("CrawlStackerFast", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, "job", 10000, null, 2);
+        this.slowQueue = new serverProcessor<Request>("CrawlStackerSlow", "This is like CrawlStackerFast, but does additionaly a DNS lookup. The CrawlStackerFast does not need this because it can use the DNS cache.", new String[]{"Balancer"}, this, "job",  1000, null, 5);
 
         this.log.logInfo("STACKCRAWL thread initialized.");
     }
@@ -125,7 +126,7 @@ public final class CrawlStacker {
     }
     */
 
-    public CrawlEntry job(CrawlEntry entry) {
+    public Request job(Request entry) {
         // this is the method that is called by the busy thread from outside
         if (entry == null) return null;
 
@@ -145,7 +146,7 @@ public final class CrawlStacker {
         return null;
     }
 
-    public void enqueueEntry(final CrawlEntry entry) {
+    public void enqueueEntry(final Request entry) {
 
         // DEBUG
         if (log.isFinest()) log.logFinest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + entry.initiator() + ", name=" + entry.name() + ", load=" + entry.loaddate() + ", depth=" + entry.depth());
@@ -167,7 +168,7 @@ public final class CrawlStacker {
         }
     }
 
-    public String stackCrawl(final CrawlEntry entry) {
+    public String stackCrawl(final Request entry) {
         // stacks a crawl item. The position can also be remote
         // returns null if successful, a reason string if not successful
         //this.log.logFinest("stackCrawl: nexturlString='" + nexturlString + "'");

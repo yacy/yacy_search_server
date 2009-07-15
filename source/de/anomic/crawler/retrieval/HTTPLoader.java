@@ -23,11 +23,12 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.crawler;
+package de.anomic.crawler.retrieval;
 
 import java.io.IOException;
 import java.util.Date;
 
+import de.anomic.crawler.Latency;
 import de.anomic.data.Blacklist;
 import de.anomic.document.Parser;
 import de.anomic.http.httpClient;
@@ -35,7 +36,6 @@ import de.anomic.http.httpHeader;
 import de.anomic.http.httpResponse;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
-import de.anomic.http.httpDocument;
 import de.anomic.plasma.plasmaHTCache;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.yacy.yacyURL;
@@ -83,8 +83,8 @@ public final class HTTPLoader {
      * @param responseStatus Status-Code SPACE Reason-Phrase
      * @return
      */
-    protected httpDocument createCacheEntry(final CrawlEntry entry, final Date requestDate, final httpRequestHeader requestHeader, final httpResponseHeader responseHeader, final String responseStatus) {
-        httpDocument metadata = new httpDocument(
+    protected Response createCacheEntry(final Request entry, final Date requestDate, final httpRequestHeader requestHeader, final httpResponseHeader responseHeader, final String responseStatus) {
+        Response metadata = new Response(
                 entry.depth(),
                 entry.url(),
                 entry.name(),
@@ -98,14 +98,14 @@ public final class HTTPLoader {
         return metadata;
     }    
    
-    public httpDocument load(final CrawlEntry entry) throws IOException {
+    public Response load(final Request entry) throws IOException {
         long start = System.currentTimeMillis();
-        httpDocument doc = load(entry, DEFAULT_CRAWLING_RETRY_COUNT);
+        Response doc = load(entry, DEFAULT_CRAWLING_RETRY_COUNT);
         Latency.update(entry.url().hash().substring(6), entry.url().getHost(), System.currentTimeMillis() - start);
         return doc;
     }
     
-    private httpDocument load(final CrawlEntry entry, final int retryCount) throws IOException {
+    private Response load(final Request entry, final int retryCount) throws IOException {
 
         if (retryCount < 0) {
             sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "redirection counter exceeded").store();
@@ -134,7 +134,7 @@ public final class HTTPLoader {
         }
         
         // take a file from the net
-        httpDocument htCache = null;
+        Response htCache = null;
         final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE);
         //try {
             // create a request header

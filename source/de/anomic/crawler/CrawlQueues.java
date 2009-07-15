@@ -37,9 +37,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.content.RSSMessage;
+import de.anomic.crawler.retrieval.Request;
+import de.anomic.crawler.retrieval.LoaderDispatcher;
+import de.anomic.crawler.retrieval.Response;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.httpClient;
-import de.anomic.http.httpDocument;
 import de.anomic.kelondro.table.SplitTable;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
@@ -57,7 +59,7 @@ public class CrawlQueues {
     protected plasmaSwitchboard sb;
     protected Log log;
     protected Map<Integer, crawlWorker> workers; // mapping from url hash to Worker thread object
-    protected ProtocolLoader loader;
+    protected LoaderDispatcher loader;
     private   final ArrayList<String> remoteCrawlProviderHashes;
 
     public  NoticedURL noticeURL;
@@ -67,7 +69,7 @@ public class CrawlQueues {
         this.sb = sb;
         this.log = new Log("CRAWLER");
         this.workers = new ConcurrentHashMap<Integer, crawlWorker>();
-        this.loader = new ProtocolLoader(sb, log);
+        this.loader = new LoaderDispatcher(sb, log);
         this.remoteCrawlProviderHashes = new ArrayList<String>();
         
         // start crawling management
@@ -106,7 +108,7 @@ public class CrawlQueues {
     public yacyURL getURL(final String urlhash) {
         assert urlhash != null;
         if (urlhash == null || urlhash.length() == 0) return null;
-        final CrawlEntry ne = noticeURL.get(urlhash);
+        final Request ne = noticeURL.get(urlhash);
         if (ne != null) return ne.url();
         ZURL.Entry ee = delegatedURL.getEntry(urlhash);
         if (ee != null) return ee.url();
@@ -164,9 +166,9 @@ public class CrawlQueues {
         delegatedURL.close();
     }
     
-    public CrawlEntry[] activeWorkerEntries() {
+    public Request[] activeWorkerEntries() {
         synchronized (workers) {
-            final CrawlEntry[] e = new CrawlEntry[workers.size()];
+            final Request[] e = new Request[workers.size()];
             int i = 0;
             for (final crawlWorker w: workers.values()) e[i++] = w.entry;
             return e;
@@ -203,7 +205,7 @@ public class CrawlQueues {
         if(isPaused(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) return false;
         
         // do a local crawl        
-        CrawlEntry urlEntry = null;
+        Request urlEntry = null;
         while (urlEntry == null && noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) > 0) {
             final String stats = "LOCALCRAWL[" + noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_OVERHANG) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE) + "]";
             try {
@@ -234,7 +236,7 @@ public class CrawlQueues {
      * @param stats String for log prefixing
      * @return
      */
-    private void generateCrawl(CrawlEntry urlEntry, final String stats, final String profileHandle) {
+    private void generateCrawl(Request urlEntry, final String stats, final String profileHandle) {
         final CrawlProfile.entry profile = sb.crawler.profilesActiveCrawls.getEntry(profileHandle);
         if (profile != null) {
 
@@ -443,7 +445,7 @@ public class CrawlQueues {
             if (urlRejectReason == null) {
                 // stack url
                 if (sb.getLog().isFinest()) sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
-                sb.crawlStacker.enqueueEntry(new CrawlEntry(
+                sb.crawlStacker.enqueueEntry(new Request(
                         hash,
                         url,
                         (referrer == null) ? null : referrer.hash(),
@@ -491,7 +493,7 @@ public class CrawlQueues {
         final String stats = "REMOTETRIGGEREDCRAWL[" + noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_OVERHANG) + ", "
                         + noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE) + "]";
         try {
-            final CrawlEntry urlEntry = noticeURL.pop(NoticedURL.STACK_TYPE_REMOTE, true, sb.crawler.profilesActiveCrawls);
+            final Request urlEntry = noticeURL.pop(NoticedURL.STACK_TYPE_REMOTE, true, sb.crawler.profilesActiveCrawls);
             final String profileHandle = urlEntry.profileHandle();
             // System.out.println("DEBUG plasmaSwitchboard.processCrawling:
             // profileHandle = " + profileHandle + ", urlEntry.url = " +
@@ -505,13 +507,13 @@ public class CrawlQueues {
         }
     }
     
-    public httpDocument loadResourceFromWeb(
+    public Response loadResourceFromWeb(
             final yacyURL url,
             final boolean forText,
             final boolean global
     ) throws IOException {
         
-        final CrawlEntry centry = new CrawlEntry(
+        final Request centry = new Request(
                 sb.peers.mySeed().hash, 
                 url, 
                 "", 
@@ -539,11 +541,11 @@ public class CrawlQueues {
     
     protected final class crawlWorker extends Thread {
         
-        protected CrawlEntry entry;
+        protected Request entry;
         private final Integer code;
         private long start;
         
-        public crawlWorker(final CrawlEntry entry) {
+        public crawlWorker(final Request entry) {
             this.start = System.currentTimeMillis();
             this.entry = entry;
             this.entry.setStatus("worker-initialized", serverProcessorJob.STATUS_INITIATED);

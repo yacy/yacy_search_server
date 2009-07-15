@@ -25,18 +25,18 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.crawler;
+package de.anomic.crawler.retrieval;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
+import de.anomic.crawler.Latency;
 import de.anomic.document.Parser;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
-import de.anomic.http.httpDocument;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.net.ftpc;
 import de.anomic.plasma.plasmaHTCache;
@@ -56,14 +56,14 @@ public class FTPLoader {
         maxFileSize = (int) sb.getConfigLong("crawler.ftp.maxFileSize", -1l);
     }
 
-    protected httpDocument createCacheEntry(final CrawlEntry entry, final String mimeType, final Date fileDate) {
+    protected Response createCacheEntry(final Request entry, final String mimeType, final Date fileDate) {
         if (entry == null) return null;
         httpRequestHeader requestHeader = new httpRequestHeader();
         if (entry.referrerhash() != null) requestHeader.put(httpRequestHeader.REFERER, sb.getURL(entry.referrerhash()).toNormalform(true, false));
         httpResponseHeader responseHeader = new httpResponseHeader();
         responseHeader.put(httpHeader.LAST_MODIFIED, DateFormatter.formatRFC1123(fileDate));
         responseHeader.put(httpHeader.CONTENT_TYPE, mimeType);
-        httpDocument metadata = new httpDocument(
+        Response metadata = new Response(
                 entry.depth(), entry.url(), entry.name(), "OK",
                 requestHeader, responseHeader,
                 entry.initiator(), sb.crawler.profilesActiveCrawls.getEntry(entry.profileHandle()));
@@ -77,14 +77,14 @@ public class FTPLoader {
      * @param entry
      * @return
      */
-    public httpDocument load(final CrawlEntry entry) throws IOException {
+    public Response load(final Request entry) throws IOException {
         
         long start = System.currentTimeMillis();
         final yacyURL entryUrl = entry.url();
         final String fullPath = getPath(entryUrl);
 
         // the return value
-        httpDocument htCache = null;
+        Response htCache = null;
 
         // determine filename and path
         String file, path;
@@ -215,7 +215,7 @@ public class FTPLoader {
      * @return
      * @throws Exception
      */
-    private httpDocument getFile(final ftpc ftpClient, final CrawlEntry entry) throws Exception {
+    private Response getFile(final ftpc ftpClient, final Request entry) throws Exception {
         // determine the mimetype of the resource
         final yacyURL entryUrl = entry.url();
         final String mimeType = Parser.mimeOf(entryUrl);
@@ -223,7 +223,7 @@ public class FTPLoader {
 
         // if the mimetype and file extension is supported we start to download
         // the file
-        httpDocument htCache = null;
+        Response htCache = null;
         String supportError = Parser.supports(entryUrl, mimeType);
         if (supportError != null) {
             // reject file
@@ -271,7 +271,7 @@ public class FTPLoader {
      * @param cacheFile
      * @return
      */
-    private byte[] generateDirlist(final ftpc ftpClient, final CrawlEntry entry, final String path) {
+    private byte[] generateDirlist(final ftpc ftpClient, final Request entry, final String path) {
         // getting the dirlist
         final yacyURL entryUrl = entry.url();
 

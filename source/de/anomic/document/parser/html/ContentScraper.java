@@ -44,7 +44,7 @@ import java.util.Properties;
 
 import javax.swing.event.EventListenerList;
 
-import de.anomic.crawler.HTTPLoader;
+import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.document.parser.htmlParser;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpHeader;

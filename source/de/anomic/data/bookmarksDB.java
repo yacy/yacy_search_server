@@ -61,8 +61,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.document.Word;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.TransformerWriter;
@@ -262,7 +262,7 @@ public class bookmarksDB {
 	                        crawlingQ,
 	                        indexText, indexMedia,
 	                        storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
-	                sb.crawlStacker.enqueueEntry(new CrawlEntry(
+	                sb.crawlStacker.enqueueEntry(new Request(
 	                        sb.peers.mySeed().hash,
                             crawlingStartURL,
 	                        null,

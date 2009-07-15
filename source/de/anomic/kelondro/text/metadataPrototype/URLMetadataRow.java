@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
 
-import de.anomic.crawler.CrawlEntry;
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
@@ -468,8 +468,8 @@ public class URLMetadataRow implements Metadata {
         //return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
     }
 
-    public CrawlEntry toBalancerEntry(final String initiatorHash) {
-        return new CrawlEntry(
+    public Request toBalancerEntry(final String initiatorHash) {
+        return new Request(
                 initiatorHash, 
                 metadata().url(), 
                 referrerHash(), 

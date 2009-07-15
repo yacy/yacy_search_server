@@ -31,7 +31,7 @@ import java.util.Date;
 import java.util.Iterator;
 
 import de.anomic.content.RSSMessage;
-import de.anomic.crawler.CrawlEntry;
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
@@ -77,7 +77,7 @@ public class rct_p {
                         if (urlRejectReason == null) {
                             // stack url
                             if (sb.getLog().isFinest()) sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
-                            sb.crawlStacker.enqueueEntry(new CrawlEntry(
+                            sb.crawlStacker.enqueueEntry(new Request(
                                     peerhash,
                                     url,
                                     (referrer == null) ? null : referrer.hash(),

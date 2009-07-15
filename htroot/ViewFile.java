@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.crawler.retrieval.Response;
 import de.anomic.document.Condenser;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
@@ -42,7 +43,6 @@ import de.anomic.document.parser.html.ImageEntry;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
-import de.anomic.http.httpDocument;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.plasma.plasmaHTCache;
@@ -152,7 +152,7 @@ public class ViewFile {
 
         // if the resource body was not cached we try to load it from web
         if (resource == null) {
-            httpDocument entry = null;
+            Response entry = null;
             try {
                 entry = sb.crawlQueues.loadResourceFromWeb(url, true, false);
             } catch (final Exception e) {

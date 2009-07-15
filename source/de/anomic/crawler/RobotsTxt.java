@@ -40,6 +40,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpResponse;

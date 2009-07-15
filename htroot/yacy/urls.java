@@ -27,8 +27,8 @@
 import java.io.IOException;
 import java.util.Date;
 
-import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.NoticedURL;
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
@@ -62,7 +62,7 @@ public class urls {
             long maxTime = Math.min(20000, Math.max(1000, post.getInt("time", 10000)));
             long timeout = System.currentTimeMillis() + maxTime;
             int c = 0;
-            CrawlEntry entry;
+            Request entry;
             yacyURL referrer;
             while ((maxCount > 0) &&
                    (System.currentTimeMillis() < timeout) &&

@@ -38,7 +38,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
-import de.anomic.crawler.HTTPLoader;
+import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;

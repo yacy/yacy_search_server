@@ -8,6 +8,7 @@ import java.util.Iterator;
 
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.crawler.CrawlSwitchboard;
+import de.anomic.crawler.retrieval.Request;
 
 public class NoticeURLImporter extends AbstractImporter implements Importer {
 
@@ -129,11 +130,11 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
                 }
                 
                 // getting an iterator and loop through the URL entries
-                final Iterator<CrawlEntry> entryIter = (stackTypes[stackType] == -1) ? this.importNurlDB.iterator(stackType) : null;
+                final Iterator<Request> entryIter = (stackTypes[stackType] == -1) ? this.importNurlDB.iterator(stackType) : null;
                 while (true) {
                     
                     String nextHash = null;
-                    CrawlEntry nextEntry = null;
+                    Request nextEntry = null;
                     
                     try {                        
                         if (stackTypes[stackType] != -1) {

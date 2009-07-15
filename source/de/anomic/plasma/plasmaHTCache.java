@@ -41,9 +41,9 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import de.anomic.crawler.retrieval.Response;
 import de.anomic.document.Classification;
 import de.anomic.http.httpResponseHeader;
-import de.anomic.http.httpDocument;
 import de.anomic.kelondro.blob.ArrayStack;
 import de.anomic.kelondro.blob.Compressor;
 import de.anomic.kelondro.blob.Heap;
@@ -204,7 +204,7 @@ public final class plasmaHTCache {
     
     public static void storeMetadata(
             final httpResponseHeader responseHeader,
-            httpDocument metadata
+            Response metadata
     ) {
         if (responseHeader != null) try {
             // store the response header into the header database

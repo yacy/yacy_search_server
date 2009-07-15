@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.crawler;
+package de.anomic.crawler.retrieval;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -38,7 +38,7 @@ import de.anomic.server.serverProcessorJob;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 
-public class CrawlEntry extends serverProcessorJob {
+public class Request extends serverProcessorJob {
     
     // row definition for balancer-related NURL-entries
     public final static Row rowdef = new Row(
@@ -80,6 +80,9 @@ public class CrawlEntry extends serverProcessorJob {
     
     
     /**
+     * A HarvestRequest Entry is a object that is created to provide
+     * all information to load a specific resource.
+     * 
      * @param initiator the hash of the initiator peer
      * @param url the {@link URL} to crawl
      * @param referrer the hash of the referrer URL
@@ -90,7 +93,7 @@ public class CrawlEntry extends serverProcessorJob {
      * @param anchors number of anchors of the parent
      * @param forkfactor sum of anchors of all ancestors
      */
-    public CrawlEntry(
+    public Request(
             final String initiator, 
             final yacyURL url, 
             final String referrerhash, 
@@ -126,7 +129,7 @@ public class CrawlEntry extends serverProcessorJob {
         this.status        = serverProcessorJob.STATUS_INITIATED;
     }
     
-    public CrawlEntry(final Row.Entry entry) throws IOException {
+    public Request(final Row.Entry entry) throws IOException {
         assert (entry != null);
         insertEntry(entry);
     }

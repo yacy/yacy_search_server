@@ -32,6 +32,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
@@ -53,7 +54,7 @@ public class ZURL {
             "Cardinal workdate-8 {b256}, " +                           // the time when the url was last time tried to load
             "Cardinal workcount-4 {b256}, " +                          // number of load retries
             "String anycause-132, " +                                   // string describing load failure
-            "byte[] entry-" + CrawlEntry.rowdef.objectsize,                                          // extra space
+            "byte[] entry-" + Request.rowdef.objectsize,                                          // extra space
             Base64Order.enhancedCoder
     );
 
@@ -96,7 +97,7 @@ public class ZURL {
     }
 
     public synchronized Entry newEntry(
-            final CrawlEntry bentry,
+            final Request bentry,
             final String executor,
             final Date workdate,
             final int workcount,
@@ -160,7 +161,7 @@ public class ZURL {
     
     public class Entry {
 
-        CrawlEntry bentry;    // the balancer entry
+        Request bentry;    // the balancer entry
         private final String   executor;  // the crawling executor
         private final Date     workdate;  // the time when the url was last time tried to load
         private final int      workcount; // number of tryings
@@ -168,7 +169,7 @@ public class ZURL {
         private boolean  stored;
 
         public Entry(
-                final CrawlEntry bentry,
+                final Request bentry,
                 final String executor,
                 final Date workdate,
                 final int workcount,
@@ -190,7 +191,7 @@ public class ZURL {
             this.workdate = new Date(entry.getColLong(2));
             this.workcount = (int) entry.getColLong(3);
             this.anycause = entry.getColString(4, "UTF-8");
-            this.bentry = new CrawlEntry(CrawlEntry.rowdef.newEntry(entry.getColBytes(5)));
+            this.bentry = new Request(Request.rowdef.newEntry(entry.getColBytes(5)));
             assert ((new String(entry.getColBytes(0))).equals(bentry.url().hash()));
             this.stored = true;
             return;

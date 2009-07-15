@@ -34,8 +34,8 @@ import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.util.Date;
 
-import de.anomic.crawler.CrawlEntry;
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.plasma.plasmaSwitchboard;
@@ -159,7 +159,7 @@ public class QuickCrawlLink_p {
             
             // stack URL
             String reasonString = null;
-            reasonString = sb.crawlStacker.stackCrawl(new CrawlEntry(
+            reasonString = sb.crawlStacker.stackCrawl(new Request(
                     sb.peers.mySeed().hash, 
                     crawlingStartURL,
                     null, 

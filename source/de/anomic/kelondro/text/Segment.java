@@ -34,12 +34,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.Blacklist;
 import de.anomic.document.Condenser;
 import de.anomic.document.Word;
 import de.anomic.document.Document;
 import de.anomic.document.parser.html.ContentScraper;
-import de.anomic.http.httpDocument;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
@@ -269,7 +269,7 @@ public final class Segment {
                 new byte[0],                               // md5
                 (int) sourcesize,                          // size
                 condenser.RESULT_NUMB_WORDS,               // word count
-                httpDocument.docType(document.dc_format()), // doctype
+                Response.docType(document.dc_format()), // doctype
                 condenser.RESULT_FLAGS,                    // flags
                 language,                                  // language
                 document.inboundLinks(),                   // inbound links
@@ -292,7 +292,7 @@ public final class Segment {
                 document,                                     // document content
                 condenser,                                    // document condenser
                 language,                                     // document language
-                httpDocument.docType(document.dc_format()),  // document type
+                Response.docType(document.dc_format()),  // document type
                 document.inboundLinks(),                      // inbound links
                 document.outboundLinks()                      // outbound links
         );
