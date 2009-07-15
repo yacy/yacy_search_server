@@ -286,7 +286,7 @@ public class Status {
         prop.putNum("connectionsMax", httpd.getMaxSessionCount());
         
         // Queue information
-        final int indexingJobCount = sb.getThread("80_indexing").getJobCount() + sb.crawler.queuePreStack.getActiveQueueSize();
+        final int indexingJobCount = sb.getThread("80_indexing").getJobCount() + sb.crawler.indexingStack.getActiveQueueSize();
         final int indexingMaxCount = (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30);
         final int indexingPercent = (indexingMaxCount==0)?0:indexingJobCount*100/indexingMaxCount;
         prop.putNum("indexingQueueSize", indexingJobCount);

@@ -204,7 +204,7 @@ public class IndexingStack {
         return new QueueEntry(url, referrer, ifModifiedSince, requestWithCookie, initiator, depth, profilehandle, anchorName);
     }
     
-    public void enQueueToActive(final QueueEntry entry) {
+    public void store(final QueueEntry entry) {
         queueInProcess.put(entry.url().hash(), entry);
     }
     
@@ -437,7 +437,7 @@ public class IndexingStack {
 
             // check profile
             if (!profile().indexText() && !profile().indexMedia()) {
-                return "Indexing_Not_Allowed";
+                return "indexing not allowed - indexText and indexMedia not set (for proxy)";
             }
 
             // -CGI access in request
@@ -579,7 +579,7 @@ public class IndexingStack {
 
             // check profile
             if (!profile().indexText() && !profile().indexMedia()) {
-                return "Indexing_Not_Allowed";
+                return "indexing not allowed - indexText and indexMedia not set (for crawler)";
             }
 
             // -CGI access in request

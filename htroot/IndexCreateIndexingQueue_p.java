@@ -63,20 +63,20 @@ public class IndexCreateIndexingQueue_p {
             }
             if (post.containsKey("clearIndexingQueue")) {
                 try {
-                    synchronized (sb.crawler.queuePreStack) {
+                    synchronized (sb.crawler.indexingStack) {
                         IndexingStack.QueueEntry entry = null;
-                        while ((entry = sb.crawler.queuePreStack.pop()) != null) {
+                        while ((entry = sb.crawler.indexingStack.pop()) != null) {
                             if ((entry != null) && (entry.profile() != null) && (!(entry.profile().storeHTCache()))) {
                                 plasmaHTCache.deleteFromCache(entry.url());
                             }                            
                         }
-                        sb.crawler.queuePreStack.clear(); // reset file to clean up content completely
+                        sb.crawler.indexingStack.clear(); // reset file to clean up content completely
                     } 
                 } catch (final Exception e) {}
             } else if (post.containsKey("deleteEntry")) {
                 final String urlHash = post.get("deleteEntry");
                 try {
-                    sb.crawler.queuePreStack.remove(urlHash);
+                    sb.crawler.indexingStack.remove(urlHash);
                 } catch (final Exception e) {}
                 prop.put("LOCATION","");
                 return prop;
@@ -86,7 +86,7 @@ public class IndexCreateIndexingQueue_p {
         yacySeed initiator;
         boolean dark;
         
-        if ((sb.crawler.queuePreStack.size() == 0) && (sb.crawler.queuePreStack.getActiveQueueSize() == 0)) {
+        if ((sb.crawler.indexingStack.size() == 0) && (sb.crawler.indexingStack.getActiveQueueSize() == 0)) {
             prop.put("indexing-queue", "0"); //is empty
         } else {
             prop.put("indexing-queue", "1"); // there are entries in the queue or in process
@@ -98,12 +98,12 @@ public class IndexCreateIndexingQueue_p {
             
             // getting all entries that are currently in process
             final ArrayList<IndexingStack.QueueEntry> entryList = new ArrayList<IndexingStack.QueueEntry>();
-            entryList.addAll(sb.crawler.queuePreStack.getActiveQueueEntries());
+            entryList.addAll(sb.crawler.indexingStack.getActiveQueueEntries());
             final int inProcessCount = entryList.size();
             
             // getting all enqueued entries
-            if ((sb.crawler.queuePreStack.size() > 0)) {
-                final Iterator<IndexingStack.QueueEntry> i = sb.crawler.queuePreStack.entryIterator(false);
+            if ((sb.crawler.indexingStack.size() > 0)) {
+                final Iterator<IndexingStack.QueueEntry> i = sb.crawler.indexingStack.entryIterator(false);
                 while (i.hasNext()) entryList.add(i.next());
             }
                             

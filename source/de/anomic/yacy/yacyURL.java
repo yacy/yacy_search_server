@@ -903,6 +903,7 @@ public class yacyURL implements Serializable {
             	if (this.hash == null) this.hash = urlHashComputation();
             }
         }
+        //if (domDomain(this.hash) != 7) System.out.println("*** DEBUG - not local: " + this.toNormalform(true, false));
         return domDomain(this.hash) == 7;
     }
 

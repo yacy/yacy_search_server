@@ -113,12 +113,12 @@ public final class Parser {
             if (p0 != null) log.logSevere("parser for mime '" + mimeType + "' was set to '" + p0.getName() + "', overwriting with new parser '" + parser.getName() + "'.");
             mime2parser.put(mimeType, parser);
             Log.logInfo("PARSER", "Parser for mime type '" + mimeType + "': " + parser.getName());
-
-            if (prototypeMime != null) for (String ext: parser.supportedExtensions()) {
-                String s = ext2mime.get(ext);
-                if (s != null) log.logSevere("parser for extension '" + ext + "' was set to mime '" + s + "', overwriting with new mime '" + prototypeMime + "'.");
-                ext2mime.put(ext, prototypeMime);
-            }
+        }
+        
+        if (prototypeMime != null) for (String ext: parser.supportedExtensions()) {
+            String s = ext2mime.get(ext);
+            if (s != null) log.logSevere("parser for extension '" + ext + "' was set to mime '" + s + "', overwriting with new mime '" + prototypeMime + "'.");
+            ext2mime.put(ext, prototypeMime);
         }
     }
 

@@ -95,7 +95,7 @@ public class Balancer {
     }
     
     public void clear() {
-    	Log.logInfo("Balancer", "cleaing balancer with " + urlFileIndex.size() + " entries from " + urlFileIndex.filename());
+    	Log.logInfo("Balancer", "cleaning balancer with " + urlFileIndex.size() + " entries from " + urlFileIndex.filename());
         try {
             urlFileIndex.clear();
         } catch (IOException e) {
@@ -289,7 +289,7 @@ public class Balancer {
      * @return a url in a CrawlEntry object
      * @throws IOException
      */
-    public CrawlEntry pop(boolean delay, CrawlProfile profile) throws IOException {
+    public CrawlEntry pop(final boolean delay, final CrawlProfile profile) throws IOException {
         // returns a crawl entry from the stack and ensures minimum delta times
         
     	filltop(delay, -600000, false);
@@ -355,7 +355,7 @@ public class Balancer {
             // in best case, this should never happen if the balancer works propertly
             // this is only to protection against the worst case, where the crawler could
             // behave in a DoS-manner
-            Log.logInfo("BALANCER", "forcing crawl-delay of " + (sleeptime / 1000) + " seconds for " + crawlEntry.url().getHost() + ((sleeptime > Math.max(minimumLocalDelta, minimumGlobalDelta)) ? " (forced latency)" : ""));
+            Log.logInfo("BALANCER", "forcing crawl-delay of " + sleeptime + " milliseconds for " + crawlEntry.url().getHost() + ((sleeptime > Math.max(minimumLocalDelta, minimumGlobalDelta)) ? " (forced latency)" : ""));
             long loops = sleeptime / 3000;
             long rest = sleeptime % 3000;
             if (loops < 2) {

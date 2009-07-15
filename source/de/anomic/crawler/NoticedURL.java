@@ -51,6 +51,7 @@ public class NoticedURL {
     private Balancer remoteStack;    // links from remote crawl orders
     
     public NoticedURL(final File cachePath) {
+        Log.logInfo("NoticedURL", "CREATING STACKS at " + cachePath.toString());
         this.coreStack = new Balancer(cachePath, "urlNoticeCoreStack", false, minimumLocalDeltaInit, minimumGlobalDeltaInit);
         this.limitStack = new Balancer(cachePath, "urlNoticeLimitStack", false, minimumLocalDeltaInit, minimumGlobalDeltaInit);
         //overhangStack = new plasmaCrawlBalancer(overhangStackFile);
@@ -72,13 +73,14 @@ public class NoticedURL {
     }
     
     public void clear() {
-    	Log.logInfo("NoticedURL", "CLEARING ALL STACKS!");
+    	Log.logInfo("NoticedURL", "CLEARING ALL STACKS");
         coreStack.clear();
         limitStack.clear();
         remoteStack.clear();
     }
     
     public void close() {
+        Log.logInfo("NoticedURL", "CLOSING ALL STACKS");
         if (coreStack != null) {
             coreStack.close();
             coreStack = null;

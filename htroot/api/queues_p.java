@@ -39,11 +39,11 @@ public class queues_p {
         yacySeed initiator;
         
         //indexing queue
-        prop.putNum("indexingSize", sb.getThread(plasmaSwitchboardConstants.INDEXER).getJobCount() + sb.crawler.queuePreStack.getActiveQueueSize());
+        prop.putNum("indexingSize", sb.getThread(plasmaSwitchboardConstants.INDEXER).getJobCount() + sb.crawler.indexingStack.getActiveQueueSize());
         prop.putNum("indexingMax", (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30));
         prop.putNum("urlpublictextSize", sb.indexSegment.urlMetadata().size());
         prop.putNum("rwipublictextSize", sb.indexSegment.termIndex().sizesMax());
-        if ((sb.crawler.queuePreStack.size() == 0) && (sb.crawler.queuePreStack.getActiveQueueSize() == 0)) {
+        if ((sb.crawler.indexingStack.size() == 0) && (sb.crawler.indexingStack.getActiveQueueSize() == 0)) {
             prop.put("list", "0"); //is empty
         } else {
             IndexingStack.QueueEntry pcentry;
@@ -52,12 +52,12 @@ public class queues_p {
             
             // getting all entries that are currently in process
             final ArrayList<IndexingStack.QueueEntry> entryList = new ArrayList<IndexingStack.QueueEntry>();
-            entryList.addAll(sb.crawler.queuePreStack.getActiveQueueEntries());
+            entryList.addAll(sb.crawler.indexingStack.getActiveQueueEntries());
             final int inProcessCount = entryList.size();
             
             // getting all enqueued entries
-            if ((sb.crawler.queuePreStack.size() > 0)) {
-                final Iterator<IndexingStack.QueueEntry> i1 = sb.crawler.queuePreStack.entryIterator(false);
+            if ((sb.crawler.indexingStack.size() > 0)) {
+                final Iterator<IndexingStack.QueueEntry> i1 = sb.crawler.indexingStack.entryIterator(false);
                 while (i1.hasNext()) try {
                     entryList.add(i1.next());
                 } catch (kelondroException e) {

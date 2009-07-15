@@ -149,18 +149,17 @@ public class Latency {
      * @return the remaining waiting time in milliseconds
      */
     public static long waitingRemaining(yacyURL url, final long minimumLocalDelta, final long minimumGlobalDelta) {
+
+        // find the minimum waiting time based on the network domain (local or global)
+        final boolean local = url.isLocal();
+        long waiting = (local) ? minimumLocalDelta : minimumGlobalDelta;
         
         // first check if the domain was _ever_ accessed before
         String hosthash = url.hash().substring(6);
         Host host = host(hosthash);
-        if (host == null) return 0; // no delay
         
         // the time since last access to the domain is the basis of the remaining calculation
-        final long timeSinceLastAccess = System.currentTimeMillis() - host.lastacc();
-        
-        // find the minimum waiting time based on the network domain (local or global)
-        final boolean local = url.isLocal();
-        long waiting = (local) ? minimumLocalDelta : minimumGlobalDelta;
+        final long timeSinceLastAccess = (host == null) ? 0 : System.currentTimeMillis() - host.lastacc();
         
         // for CGI accesses, we double the minimum time
         // mostly there is a database access in the background
@@ -168,7 +167,7 @@ public class Latency {
         if (url.isCGI()) waiting = waiting * 2;
 
         // if we have accessed the domain many times, get slower (the flux factor)
-        if (!local) waiting += host.flux(waiting);
+        if (!local && host != null) waiting += host.flux(waiting);
         
         // find the delay as given by robots.txt on target site
         long robotsDelay = (local) ? 0 : plasmaSwitchboard.getSwitchboard().robots.crawlDelayMillis(url);
@@ -177,7 +176,7 @@ public class Latency {
         // use the access latency as rule how fast we can access the server
         // this applies also to localhost, but differently, because it is not necessary to
         // consider so many external accesses
-        waiting = Math.max(waiting, (local) ? host.average() / 2 : host.average() * 2);
+        if (host != null) waiting = Math.max(waiting, (local) ? host.average() / 2 : host.average() * 2);
         
         // prevent that that a robots file can stop our indexer completely
         waiting = Math.min(60000, waiting);

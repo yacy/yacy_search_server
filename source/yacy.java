@@ -421,9 +421,9 @@ public final class yacy {
                         server.interrupt();
                         MultiThreadedHttpConnectionManager.shutdownAll();
                     }
+                    MultiThreadedHttpConnectionManager.shutdownAll();
                     Log.logConfig("SHUTDOWN", "server has terminated");
                     sb.close();
-                    MultiThreadedHttpConnectionManager.shutdownAll();
                 }
             } catch (final Exception e) {
                 Log.logSevere("STARTUP", "Unexpected Error: " + e.getClass().getName(),e);

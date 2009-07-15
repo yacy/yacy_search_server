@@ -303,9 +303,9 @@ public class CrawlQueues {
         }
 
         value = (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30);
-        if (sb.crawler.queuePreStack.size() >= value) {
+        if (sb.crawler.indexingStack.size() >= value) {
             if (this.log.isFine()) {
-                log.logFine(type + "Crawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.crawler.queuePreStack.size() + ")");
+                log.logFine(type + "Crawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.crawler.indexingStack.size() + ")");
             }
             return false;
         }
@@ -322,9 +322,10 @@ public class CrawlQueues {
             return false;
         }
 
-        if (sb.onlineCaution()) {
+        String cautionCause = sb.onlineCaution();
+        if (cautionCause != null) {
             if (this.log.isFine()) {
-                log.logFine(type + "Crawl: online caution, omitting processing");
+                log.logFine(type + "Crawl: online caution for " + cautionCause + ", omitting processing");
             }
             return false;
         }
@@ -344,8 +345,8 @@ public class CrawlQueues {
             return false;
         }
         
-        if (sb.crawler.queuePreStack.size() >= (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30) / 2) {
-            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.crawler.queuePreStack.size() + ")");
+        if (sb.crawler.indexingStack.size() >= (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30) / 2) {
+            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.crawler.indexingStack.size() + ")");
             return false;
         }
         
@@ -359,8 +360,9 @@ public class CrawlQueues {
             return false;
         }
         
-        if (sb.onlineCaution()) {
-            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: online caution, omitting processing");
+        String cautionCause = sb.onlineCaution();
+        if (cautionCause != null) {
+            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: online caution for " + cautionCause + ", omitting processing");
             return false;
         }
         
