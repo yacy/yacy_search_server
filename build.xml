@@ -172,7 +172,7 @@
     	<pathelement location="${lib}/commons-fileupload-1.2.1.jar" />
     	<pathelement location="${lib}/commons-httpclient-3.1.jar" />
     	<pathelement location="${lib}/commons-io-1.4.jar" />
-    	<pathelement location="${lib}/commons-jxpath-1.1.jar" />
+    	<pathelement location="${lib}/commons-jxpath-1.3.jar" />
     	<pathelement location="${lib}/commons-logging-1.1.1.jar" />
     	<pathelement location="${lib}/jakarta-oro-2.0.7.jar" />
     	<pathelement location="${lib}/jrpm-SNAPSHOT.jar" />
@@ -182,7 +182,6 @@
     	<pathelement location="${lib}/odf_utils_05_11_29.jar" />
     	<pathelement location="${lib}/poi-3.2-FINAL-20081019.jar" />
     	<pathelement location="${lib}/poi-scratchpad-3.2-FINAL-20081019.jar" />
-    	<pathelement location="${lib}/sbbi-upnplib-1.0.4.jar" />
     	<pathelement location="${lib}/servlet-api.jar" />
     	<pathelement location="${lib}/tm-extractors-1.0.jar" />
     	<pathelement location="${lib}/webcat-0.1-swf.jar" />
