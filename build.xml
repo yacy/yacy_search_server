@@ -807,33 +807,12 @@
   </target>
 
 
-  <!-- creates an image of this build.xml with ant2svg, see http://www.spiritedsw.com/ant2svg/ for details -->
-  <target name="ant2svg" description="Creates an image of the build.xml with ant2svg">
-    <taskdef name="ant2svg"
-        classname="org.apache.tools.ant.taskdefs.optional.ant2svg.Ant2SvgTask"/>
-    <ant2svg/>
-    <ant2svg srcfile="build.xml"/>
-    <ant2svg destfile="doc/build_dependencies.svg"/>
-  </target>
-
   <target name="build-jar" depends="compileMain">
     <jar destfile="yacy.jar" basedir="${build}/">
       <manifest>
         <attribute name="Main-Class" value="yacy"/>
       </manifest>
     </jar>
-  </target>
-
-  <target name="makeWinStartExe" depends="build-jar">
-    <!-- Creates a Windows Executable using JSmooth (http://jsmooth.sf.net) -->
-    <taskdef name="jsmoothgen"
-             classname="net.charabia.jsmoothgen.ant.JSmoothGen"
-             classpath="addon/jsmooth/lib/jsmoothgen-ant.jar" />
-    <jsmoothgen project="addon/jsmooth/yacy.jsmooth" skeletonroot="addon/jsmooth/skeletons" />
-
-    <delete>
-      <fileset dir="${build}" includes="**/*.class" />
-    </delete>
   </target>
 
 <!--
@@ -849,9 +828,6 @@
 
     This needs nsis-ant-1.2.jar in the yacyfolder.
 -->
-
-  <target name="distWithWinStartExe" depends="makeWinStartExe,dist">
-  </target>
 
   <target name="rpm" depends="all" description="Creates the main rpm-package and another for lib">
     <mkdir dir="${release}/RPMS/noarch" />
