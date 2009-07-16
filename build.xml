@@ -175,7 +175,6 @@
     	<pathelement location="${lib}/commons-jxpath-1.3.jar" />
     	<pathelement location="${lib}/commons-logging-1.1.1.jar" />
     	<pathelement location="${lib}/jakarta-oro-2.0.7.jar" />
-    	<pathelement location="${lib}/jrpm-SNAPSHOT.jar" />
     	<pathelement location="${lib}/jsch-0.1.21.jar" />
     	<pathelement location="${lib}/log4j-1.2.9.jar" />
     	<pathelement location="${lib}/mysql-connector-java-5.1.7-bin.jar" />
@@ -813,20 +812,6 @@
       </manifest>
     </jar>
   </target>
-
-<!--
-    Explanation of the confusing Exe Targets:
-    -makeWinStartExe creates a windows-program, which starts yacy instead
-    of the startYACY.bat file.
-    -distWithWinStartExe creates a tarball with the program included
-
-    This needs jsmoothgen
-
-    -distWininstaller and
-    winInstallerExe build a installer-programm for windows, instead of a tar.gz.
-
-    This needs nsis-ant-1.2.jar in the yacyfolder.
--->
 
   <target name="rpm" depends="all" description="Creates the main rpm-package and another for lib">
     <mkdir dir="${release}/RPMS/noarch" />
