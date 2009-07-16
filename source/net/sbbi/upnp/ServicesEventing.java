@@ -79,7 +79,7 @@ import org.xml.sax.InputSource;
 @SuppressWarnings("unchecked")
 public class ServicesEventing implements Runnable {
 
-  private final static Log log = LogFactory.getLog( ServicesEventing.class );
+  final static Log log = LogFactory.getLog( ServicesEventing.class );
 
   private final static ServicesEventing singleton = new ServicesEventing();
   private boolean inService = false;
@@ -227,7 +227,7 @@ public class ServicesEventing implements Runnable {
     return null;
   }
   
-  private Subscription lookupSubscriber( String sid, InetAddress deviceIp ) {
+  Subscription lookupSubscriber( String sid, InetAddress deviceIp ) {
     synchronized( registered ) {
       for ( Iterator i = registered.iterator(); i.hasNext(); ) {
         Subscription sub = (Subscription)i.next();
@@ -240,7 +240,7 @@ public class ServicesEventing implements Runnable {
     return null;
   }
   
-  private Subscription lookupSubscriber( String sid ) {
+  Subscription lookupSubscriber( String sid ) {
     synchronized( registered ) {
       for ( Iterator i = registered.iterator(); i.hasNext(); ) {
         Subscription sub = (Subscription)i.next();
@@ -352,16 +352,16 @@ public class ServicesEventing implements Runnable {
     }
   }
   
-  private class Subscription {
-    private ServiceEventSubscription sub = null;
-    private ServiceEventHandler handler = null;
+  class Subscription {
+    ServiceEventSubscription sub = null;
+    ServiceEventHandler handler = null;
   }
   
-  private class RequestProcessor implements Runnable {
+  class RequestProcessor implements Runnable {
     
     private Socket client;
     
-    private RequestProcessor( Socket client ) {
+    RequestProcessor( Socket client ) {
       this.client = client;
     }
     

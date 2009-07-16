@@ -428,10 +428,10 @@ public class ActionMessage {
   /**
    * Input params class container
    */
-  private class InputParamContainer {
+  class InputParamContainer {
 
-    private String name;
-    private String value;
+    String name;
+    String value;
     
   }
   

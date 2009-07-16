@@ -78,7 +78,7 @@ import org.apache.commons.logging.LogFactory;
 @SuppressWarnings("unchecked")
 public class Discovery {
 
-  private final static Log log = LogFactory.getLog( Discovery.class );
+  final static Log log = LogFactory.getLog( Discovery.class );
 
   public final static String ROOT_DEVICES = "upnp:rootdevice";
   public final static String ALL_DEVICES = "ssdp:all";
