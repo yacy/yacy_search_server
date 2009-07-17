@@ -156,7 +156,7 @@
 
   </target>
 
-  <target name="compileMain" depends="init" description="Compiling the yacy sources ...">
+  <target name="compile" depends="init" description="Compiling the yacy sources ...">
     <!-- defining the classpath that should be used for compiling -->
     <path id="project.class.path">
         <pathelement location="${build}" />
@@ -215,7 +215,7 @@
     </javac>
   </target>
 
-  <target name="compileHtdocsWWW" depends="compileMain" description="Compiling and zipping userspecific servlets">
+  <target name="compileHtdocsWWW" depends="compile" description="Compiling and zipping userspecific servlets">
     <!-- defining the classpath that should be used for compiling -->
     <path id="htdocsWWW.class.path">
       <pathelement location="${build}"/>
@@ -233,10 +233,10 @@
            source="${javacSource}" target="${javacTarget}" />
   </target>
 
-  <target name="all" depends="compileMain">
+  <target name="all" depends="compile">
   </target>
 
-  <target name="copyMain4Dist" depends="compileMain">
+  <target name="copyMain4Dist" depends="compile">
     <!-- copy main class files -->
     <copy todir="${release_main}/classes" failonerror="false">
       <fileset dir="${build}">
@@ -539,6 +539,39 @@
 
   </target>
 
+  <!-- run unittests-->
+  <target name="compileTest" depends="compile" description="run unittests">
+    <javac srcdir="test/" destdir="test/"
+           debug="true" debuglevel="lines,vars,source"
+           source="${javacSource}" target="${javacTarget}">
+      <classpath>
+        <pathelement location="${build}"/>
+        <pathelement location="${htroot}"/>
+	<pathelement location="${libt}/junit.jar" />
+        <fileset dir="${lib}" includes="**/*.jar" />
+      </classpath>
+      <compilerarg value="-Xlint"/>
+    </javac>
+  </target>
+
+  <target name="test" depends="compileTest" description="run some unittests">
+    <junit printsummary="yes" haltonfailure="no">
+      <formatter type="plain"/>
+      <batchtest>
+        <fileset dir="test/">
+	  <include name="**/*Test*.java"/>
+        </fileset>
+      </batchtest>
+      <classpath>
+	<pathelement location="test/"/>
+        <pathelement location="${build}"/>
+        <pathelement location="${htroot}"/>
+	<pathelement location="${libt}/junit.jar" />
+        <fileset dir="${lib}" includes="**/*.jar" />
+      </classpath>
+    </junit>
+  </target>
+
   <!-- ======================================================================================================= 
        making a release file for yacy 
        ======================================================================================================= -->
@@ -593,7 +626,9 @@
       <fileset dir="${src}" includes="**/*.class" />
       <fileset dir="${build}" includes="**/*.class" />
       <fileset dir="${htroot}" includes="**/*.class" />
+      <fileset dir="test/" includes="**/*.class" />
       <fileset dir="${libbuild}/svnRevNr" includes="**/*.class" />
+      <fileset dir="." includes="TEST-*" />
     </delete>
   </target>
 
@@ -736,7 +771,7 @@
   </target>
 
   <!-- run a single file (selected in NetBeans4) -->
-  <target name="run-single" depends="compileMain" description="Run Single File">
+  <target name="run-single" depends="compile" description="Run Single File">
     <fail unless="classname">Must set property 'classname'</fail>
     <java classname="yacy" fork="yes">
       <classpath refid="run.classpath"/>
@@ -805,7 +840,7 @@
   </target>
 
 
-  <target name="build-jar" depends="compileMain">
+  <target name="build-jar" depends="compile">
     <jar destfile="yacy.jar" basedir="${build}/">
       <manifest>
         <attribute name="Main-Class" value="yacy"/>

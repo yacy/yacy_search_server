@@ -1,10 +1,10 @@
-package de.anomic.net;
+package de.anomic.yacy;
 
 import java.net.MalformedURLException;
 
 import junit.framework.TestCase;
 
-public class URLTest extends TestCase {
+public class yacyURLTest extends TestCase {
 
 	public void testResolveBackpath() throws MalformedURLException {
 		String[][] testStrings = new String[][] {
@@ -21,7 +21,7 @@ public class URLTest extends TestCase {
 				new String[]{"/home/..test/../hallo/../","/home/"}
 		};		
 		
-		URL urlObj = new URL("http://yacy.net");
+		yacyURL urlObj = new yacyURL("http://yacy.net");
 		for (int i=0; i < testStrings.length; i++) {
 			// desired conversion result
 			System.out.print("testResolveBackpath: " + testStrings[i][0]);
@@ -51,7 +51,7 @@ public class URLTest extends TestCase {
 			String shouldBe = testStrings[i][1];
 			
 			// conversion result
-			String resolvedURL = (new URL(testStrings[i][0])).toString();
+			String resolvedURL = (new yacyURL(testStrings[i][0])).toString();
 			
 			// test if equal
 			assertEquals(shouldBe,resolvedURL);
