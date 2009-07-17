@@ -2126,7 +2126,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch implements ser
         peers.mySeed().put(yacySeed.ICOUNT, Integer.toString(indexSegment.termIndex().sizesMax())); // the minimum number of words that the peer has indexed (as it says)
         peers.mySeed().put(yacySeed.SCOUNT, Integer.toString(peers.sizeConnected())); // the number of seeds that the peer has stored
         peers.mySeed().put(yacySeed.CCOUNT, Double.toString(((int) ((peers.sizeConnected() + peers.sizeDisconnected() + peers.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
-        peers.mySeed().put(yacySeed.VERSION, getConfig("version", ""));
+        peers.mySeed().put(yacySeed.VERSION, yacyBuildProperties.getLongVersion());
         peers.mySeed().setFlagDirectConnect(true);
         peers.mySeed().setLastSeenUTC();
         peers.mySeed().put(yacySeed.UTC, DateFormatter.UTCDiffString());
