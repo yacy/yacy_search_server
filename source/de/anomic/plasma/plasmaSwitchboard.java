@@ -191,6 +191,7 @@ import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.Tray;
+import de.anomic.yacy.yacyBuildProperties;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyUpdateLocation;
