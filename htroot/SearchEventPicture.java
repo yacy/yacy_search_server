@@ -37,7 +37,7 @@ import de.anomic.ymage.ymageMatrix;
 
 public class SearchEventPicture {
     
-    public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final String eventID = header.get("event", QueryEvent.lastEventID);
         if (eventID == null) return null;

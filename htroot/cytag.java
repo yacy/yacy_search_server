@@ -41,7 +41,7 @@ import de.anomic.ymage.ymageImageParser;
 
 public class cytag {
     
-    public static Image respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static Image respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         
         final plasmaSwitchboard sb = (plasmaSwitchboard)env;
 

@@ -13,7 +13,7 @@ import de.anomic.server.serverSwitch;
 
 public class PeerLoadPicture {
     
-    public static Image respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static Image respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
 
         int width = 800;
         int height = 600;
@@ -29,7 +29,6 @@ public class PeerLoadPicture {
         final CircleThreadPiece misc = new CircleThreadPiece("Misc.", new Color(190,  50, 180));
         final HashMap<String, CircleThreadPiece> pieces = new HashMap<String, CircleThreadPiece>();
         pieces.put(null, idle);
-        pieces.put(plasmaSwitchboardConstants.INDEXER,    new CircleThreadPiece("Parsing/Indexing", new Color(255, 130,   0)));
         pieces.put(plasmaSwitchboardConstants.INDEX_DIST, new CircleThreadPiece("DHT-Distribution", new Color(119, 136, 153)));
         pieces.put(plasmaSwitchboardConstants.PEER_PING,  new CircleThreadPiece("YaCy Core",        new Color(255, 230, 160)));
         

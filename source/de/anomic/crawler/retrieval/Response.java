@@ -29,11 +29,13 @@ package de.anomic.crawler.retrieval;
 import java.util.Date;
 
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.document.Parser;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
 import de.anomic.http.httpResponseHeader;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.plasma.plasmaHTCache;
+import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.yacy.yacyURL;
 
 public class Response {
@@ -57,7 +59,8 @@ public class Response {
     private final  httpResponseHeader responseHeader;
     private final  String             responseStatus;
     private final  CrawlProfile.entry profile;
-    private        byte[]             content;         //
+    private        byte[]             content;
+    private        int                status;          // tracker indexing status, see status defs below
     
     // doctype calculation
     public static char docType(final yacyURL url) {
@@ -130,24 +133,39 @@ public class Response {
         return doctype;
     }
     
+    public static final int QUEUE_STATE_FRESH             = 0;
+    public static final int QUEUE_STATE_PARSING           = 1;
+    public static final int QUEUE_STATE_CONDENSING        = 2;
+    public static final int QUEUE_STATE_STRUCTUREANALYSIS = 3;
+    public static final int QUEUE_STATE_INDEXSTORAGE      = 4;
+    public static final int QUEUE_STATE_FINISHED          = 5;
+    
     public Response(
     		Request request,
             final httpRequestHeader requestHeader,
             final httpResponseHeader responseHeader,
             final String responseStatus,
             final CrawlProfile.entry profile) {
-        assert responseHeader != null;
         this.request = request;
+        // request and response headers may be zero in case that we process surrogates
         this.requestHeader = requestHeader;
         this.responseHeader = responseHeader;
         this.responseStatus = responseStatus;
         this.profile = profile;
+        this.status = QUEUE_STATE_FRESH;
         
-
         // to be defined later:
         this.content = null;
     }
 
+    public void updateStatus(final int newStatus) {
+        this.status = newStatus;
+    }
+    
+    public int getStatus() {
+        return this.status;
+    }
+    
     public String name() {
         // the anchor name; can be either the text inside the anchor tag or the
         // page description after loading of the page
@@ -458,6 +476,224 @@ public class Response {
         return true;
     }
     
+
+    /**
+     * decide upon header information if a specific file should be indexed
+     * this method returns null if the answer is 'YES'!
+     * if the answer is 'NO' (do not index), it returns a string with the reason
+     * to reject the crawling demand in clear text
+     * 
+     * This function is used by plasmaSwitchboard#processResourceStack
+     */
+    public final String shallIndexCacheForProxy() {
+        if (profile() == null) {
+            return "shallIndexCacheForProxy: profile() is null !";
+        }
+
+        // check profile
+        if (!profile().indexText() && !profile().indexMedia()) {
+            return "indexing not allowed - indexText and indexMedia not set (for proxy)";
+        }
+
+        // -CGI access in request
+        // CGI access makes the page very individual, and therefore not usable in caches
+        if (!profile().crawlingQ()) {
+            if (url().isPOST()) {
+                return "Dynamic_(POST)";
+            }
+            if (url().isCGI()) {
+                return "Dynamic_(CGI)";
+            }
+        }
+
+        // -authorization cases in request
+        // we checked that in shallStoreCache
+
+        // -ranges in request
+        // we checked that in shallStoreCache
+
+        // a picture cannot be indexed
+        if (plasmaHTCache.noIndexingURL(url())) {
+            return "Media_Content_(forbidden)";
+        }
+
+        // -cookies in request
+        // unfortunately, we cannot index pages which have been requested with a cookie
+        // because the returned content may be special for the client
+        if (requestWithCookie()) {
+//          System.out.println("***not indexed because cookie");
+            return "Dynamic_(Requested_With_Cookie)";
+        }
+
+        if (responseHeader != null) {
+            // -set-cookie in response
+            // the set-cookie from the server does not indicate that the content is special
+            // thus we do not care about it here for indexing                
+            
+            // a picture cannot be indexed
+            final String mimeType = responseHeader.mime();
+            if (plasmaHTCache.isPicture(mimeType)) {
+                return "Media_Content_(Picture)";
+            }
+            String parserError = Parser.supportsMime(mimeType);
+            if (parserError != null) {
+                return "Media_Content, no parser: " + parserError;
+            }
+
+            // -if-modified-since in request
+            // if the page is fresh at the very moment we can index it
+            final Date ifModifiedSince = this.requestHeader.ifModifiedSince();
+            if ((ifModifiedSince != null) && (responseHeader.containsKey(httpHeader.LAST_MODIFIED))) {
+                // parse date
+                Date d = responseHeader.lastModified();
+                if (d == null) {
+                    d = new Date(DateFormatter.correctedUTCTime());
+                }
+                // finally, we shall treat the cache as stale if the modification time is after the if-.. time
+                if (d.after(ifModifiedSince)) {
+                    //System.out.println("***not indexed because if-modified-since");
+                    return "Stale_(Last-Modified>Modified-Since)";
+                }
+            }
+
+            // -pragma in cached response
+            if (responseHeader.containsKey(httpHeader.PRAGMA) &&
+                (responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE")) {
+                return "Denied_(pragma_no_cache)";
+            }
+
+            // see for documentation also:
+            // http://www.web-caching.com/cacheability.html
+
+            // look for freshnes information
+
+            // -expires in cached response
+            // the expires value gives us a very easy hint when the cache is stale
+            // sometimes, the expires date is set to the past to prevent that a page is cached
+            // we use that information to see if we should index it
+            final Date expires = responseHeader.expires();
+            if (expires != null && expires.before(new Date(DateFormatter.correctedUTCTime()))) {
+                return "Stale_(Expired)";
+            }
+
+            // -lastModified in cached response
+            // this information is too weak to use it to prevent indexing
+            // even if we can apply a TTL heuristic for cache usage
+
+            // -cache-control in cached response
+            // the cache-control has many value options.
+            String cacheControl = responseHeader.get(httpHeader.CACHE_CONTROL);
+            if (cacheControl != null) {
+                cacheControl = cacheControl.trim().toUpperCase();
+                /* we have the following cases for cache-control:
+                   "public" -- can be indexed
+                   "private", "no-cache", "no-store" -- cannot be indexed
+                   "max-age=<delta-seconds>" -- stale/fresh dependent on date
+                 */
+                if (cacheControl.startsWith("PRIVATE") ||
+                    cacheControl.startsWith("NO-CACHE") ||
+                    cacheControl.startsWith("NO-STORE")) {
+                    // easy case
+                    return "Stale_(denied_by_cache-control=" + cacheControl + ")";
+//              } else if (cacheControl.startsWith("PUBLIC")) {
+//                  // ok, do nothing
+                } else if (cacheControl.startsWith("MAX-AGE=")) {
+                    // we need also the load date
+                    final Date date = responseHeader.date();
+                    if (date == null) {
+                        return "Stale_(no_date_given_in_response)";
+                    }
+                    try {
+                        final long ttl = 1000 * Long.parseLong(cacheControl.substring(8)); // milliseconds to live
+                        if (DateFormatter.correctedUTCTime() - date.getTime() > ttl) {
+                            //System.out.println("***not indexed because cache-control");
+                            return "Stale_(expired_by_cache-control)";
+                        }
+                    } catch (final Exception e) {
+                        return "Error_(" + e.getMessage() + ")";
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * decide upon header information if a specific file should be indexed
+     * this method returns null if the answer is 'YES'!
+     * if the answer is 'NO' (do not index), it returns a string with the reason
+     * to reject the crawling demand in clear text
+     *
+     * This function is used by plasmaSwitchboard#processResourceStack
+     */
+    public final String shallIndexCacheForCrawler() {
+        if (profile() == null) {
+            return "shallIndexCacheForCrawler: profile() is null !";
+        }
+
+        // check profile
+        if (!profile().indexText() && !profile().indexMedia()) {
+            return "indexing not allowed - indexText and indexMedia not set (for crawler)";
+        }
+
+        // -CGI access in request
+        // CGI access makes the page very individual, and therefore not usable in caches
+        if (!profile().crawlingQ()) {
+            if (url().isPOST()) { return "Dynamic_(POST)"; }
+            if (url().isCGI()) { return "Dynamic_(CGI)"; }
+        }
+
+        // -authorization cases in request
+        // we checked that in shallStoreCache
+
+        // -ranges in request
+        // we checked that in shallStoreCache
+
+        // a picture cannot be indexed
+        if (responseHeader != null) {
+            final String mimeType = responseHeader.mime();
+            if (plasmaHTCache.isPicture(mimeType)) { return "Media_Content_(Picture)"; }
+            String parserError = Parser.supportsMime(mimeType);
+            if (parserError != null) { return "Media_Content, parser error: " + parserError; }
+        }
+        if (plasmaHTCache.noIndexingURL(url())) { return "Media_Content_(forbidden)"; }
+
+        // -if-modified-since in request
+        // if the page is fresh at the very moment we can index it
+        // -> this does not apply for the crawler
+
+        // -cookies in request
+        // unfortunately, we cannot index pages which have been requested with a cookie
+        // because the returned content may be special for the client
+        // -> this does not apply for a crawler
+
+        // -set-cookie in response
+        // the set-cookie from the server does not indicate that the content is special
+        // thus we do not care about it here for indexing
+        // -> this does not apply for a crawler
+
+        // -pragma in cached response
+        // -> in the crawler we ignore this
+
+        // look for freshnes information
+
+        // -expires in cached response
+        // the expires value gives us a very easy hint when the cache is stale
+        // sometimes, the expires date is set to the past to prevent that a page is cached
+        // we use that information to see if we should index it
+        // -> this does not apply for a crawler
+
+        // -lastModified in cached response
+        // this information is too weak to use it to prevent indexing
+        // even if we can apply a TTL heuristic for cache usage
+
+        // -cache-control in cached response
+        // the cache-control has many value options.
+        // -> in the crawler we ignore this
+
+        return null;
+    }
+    
     public String getMimeType() {
         if (responseHeader == null) return null;
         
@@ -479,7 +715,18 @@ public class Response {
             return new yacyURL(requestHeader.get(httpRequestHeader.REFERER, ""), null);
         } catch (final Exception e) {
             return null;
-        }        
+        }
+    }
+    
+    public String referrerHash() {
+        if (requestHeader == null) return null;
+        String u = requestHeader.get(httpRequestHeader.REFERER, "");
+        if (u == null || u.length() == 0) return null;
+        try {
+            return new yacyURL(u, null).hash();
+        } catch (final Exception e) {
+            return null;
+        }
     }
     
     public boolean validResponseStatus() {
@@ -501,5 +748,27 @@ public class Response {
           (requestHeader.get(httpHeader.X_YACY_INDEX_CONTROL)).toUpperCase().equals("NO-INDEX");
     }
     
-
+    public int processCase(String mySeedHash) {
+        // we must distinguish the following cases: resource-load was initiated by
+        // 1) global crawling: the index is extern, not here (not possible here)
+        // 2) result of search queries, some indexes are here (not possible here)
+        // 3) result of index transfer, some of them are here (not possible here)
+        // 4) proxy-load (initiator is "------------")
+        // 5) local prefetch/crawling (initiator is own seedHash)
+        // 6) local fetching for global crawling (other known or unknwon initiator)
+        int processCase = plasmaSwitchboardConstants.PROCESSCASE_0_UNKNOWN;
+        // FIXME the equals seems to be incorrect: String.equals(boolean)
+        if ((initiator() == null) || initiator().length() == 0 || initiator().equals("------------")) {
+            // proxy-load
+            processCase = plasmaSwitchboardConstants.PROCESSCASE_4_PROXY_LOAD;
+        } else if (initiator().equals(mySeedHash)) {
+            // normal crawling
+            processCase = plasmaSwitchboardConstants.PROCESSCASE_5_LOCAL_CRAWLING;
+        } else {
+            // this was done for remote peer (a global crawl)
+            processCase = plasmaSwitchboardConstants.PROCESSCASE_6_GLOBAL_CRAWLING;
+        }
+        return processCase;
+    }
+    
 }

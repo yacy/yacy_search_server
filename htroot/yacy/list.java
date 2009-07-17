@@ -42,7 +42,7 @@ import de.anomic.yacy.yacySeed;
 
 public final class list {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         if (post == null || env == null) throw new NullPointerException("post: " + post + ", sb: " + env);
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
 

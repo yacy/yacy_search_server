@@ -47,7 +47,7 @@ public final class crawlReceipt {
      * this is used to respond on a remote crawling request
      */
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();

@@ -33,7 +33,7 @@ import de.anomic.ymage.ymageMatrix;
 
 public class PerformanceGraph {
     
-    public static ymageMatrix respond(final httpRequestHeader header, serverObjects post, final serverSwitch<?> env) {
+    public static ymageMatrix respond(final httpRequestHeader header, serverObjects post, final serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         if (post == null) post = new serverObjects();

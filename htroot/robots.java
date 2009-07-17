@@ -13,7 +13,7 @@ import de.anomic.server.servletProperties;
 
 public class robots {
     
-    public static servletProperties respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static servletProperties respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         final httpdRobotsTxtConfig rbc = ((plasmaSwitchboard)env).robotstxtConfig;
         

@@ -63,7 +63,7 @@ public class WatchCrawler_p {
     // this servlet does NOT create the WatchCrawler page content!
     // this servlet starts a web crawl. The interface for entering the web crawl parameters is in IndexCreate_p.html
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         // inital values for AJAX Elements (without JavaScript) 
@@ -93,7 +93,7 @@ public class WatchCrawler_p {
             if ((post.containsKey("autoforward")) &&
                 (sb.crawlQueues.coreCrawlJobSize() == 0) &&
                 (sb.crawlQueues.remoteTriggeredCrawlJobSize() == 0) &&
-                (sb.queueSize() < 30)) {
+                (sb.getActiveQueueSize() < 30)) {
                 prop.put("forwardToCrawlStart", "1");
             }
             

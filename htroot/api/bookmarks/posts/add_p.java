@@ -20,7 +20,7 @@ public class add_p {
 	private static userDB.Entry user = null;
 	private static boolean isAdmin = false;	
 	
-	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         
         sb = (plasmaSwitchboard) env;       
         isAdmin=sb.verifyAuthentication(header, true);

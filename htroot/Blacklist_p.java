@@ -59,7 +59,7 @@ public class Blacklist_p {
     
     private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         
         // initialize the list manager
         listManager.switchboard = (plasmaSwitchboard) env;

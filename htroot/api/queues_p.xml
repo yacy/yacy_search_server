@@ -4,23 +4,6 @@
   <urlpublictext>#[urlpublictextSize]#</urlpublictext>
   <rwipublictext>#[rwipublictextSize]#</rwipublictext>
 </dbsize>
-<indexingqueue>
-  <size>#[indexingSize]#</size>
-  <max>#[indexingMax]#</max>
-#{list-indexing}#
-  <entry>
-    <profile>#[profile]#</profile>
-    <initiator>#[initiator]#</initiator>
-    <depth>#[depth]#</depth>
-    <modified>#[modified]#</modified>
-    <anchor>#[anchor]#</anchor>
-    <url>#[url]#</url>
-    <size>#[size]#</size>
-    <hash>#[hash]#</hash>
-    <inProcess>#(inProcess)#false::true#(/inProcess)#</inProcess>
-  </entry>
-#{/list-indexing}#
-</indexingqueue>
 <loaderqueue>
   <size>#[loaderSize]#</size>
   <max>#[loaderMax]#</max>

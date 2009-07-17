@@ -38,7 +38,7 @@ import de.anomic.yacy.yacyURL;
 
 public class FeedReader_p {
     
-    public static servletProperties respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static servletProperties respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         
         prop.put("page", "0");

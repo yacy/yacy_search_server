@@ -16,7 +16,7 @@ public class get_folders {
 	private static userDB.Entry user = null;
 	private static boolean isAdmin = false;
 	
-	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         		
 		prop.clear();
     	sb = (plasmaSwitchboard) env;

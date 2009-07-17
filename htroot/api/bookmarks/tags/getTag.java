@@ -13,7 +13,7 @@ public class getTag {
 	final static int SORT_SIZE = 2;
 	final static int SHOW_ALL = -1;
 	
-	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
         final boolean isAdmin=switchboard.verifyAuthentication(header, true);

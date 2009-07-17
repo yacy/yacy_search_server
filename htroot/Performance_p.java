@@ -30,7 +30,7 @@ import de.anomic.server.serverSwitch;
 
 public class Performance_p {
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> sb) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch sb) {
         return PerformanceQueues_p.respond(header, post, sb);
     }
 

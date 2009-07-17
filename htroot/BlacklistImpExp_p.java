@@ -44,7 +44,7 @@ import java.util.List;
 public class BlacklistImpExp_p {
     private final static String DISABLED = "disabled_";
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         
         // initialize the list manager

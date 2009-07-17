@@ -35,7 +35,7 @@ public class get_bookmarks {
 	final static int RSS = 3;		// .xml (.rss)
 	final static int RDF = 4;		// .xml
 	
-	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         		
 		prop.clear();
     	sb = (plasmaSwitchboard) env;

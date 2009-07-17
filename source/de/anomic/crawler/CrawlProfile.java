@@ -74,7 +74,12 @@ public class CrawlProfile {
     }
     
     public void close() {
-        profileTable.close();
+        if (profileTable != null) profileTable.close();
+        this.profileTable = null;
+    }
+    
+    public void finalize() {
+        this.close();
     }
     
     public int size() {

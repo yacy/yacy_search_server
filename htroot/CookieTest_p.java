@@ -37,7 +37,7 @@ import de.anomic.server.servletProperties;
 
 public class CookieTest_p {
 
-    public static serverObjects respond(final httpResponseHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpResponseHeader header, final serverObjects post, final serverSwitch env) {
       
 
         // case if no values are requested

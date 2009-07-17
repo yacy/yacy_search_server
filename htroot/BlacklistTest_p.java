@@ -42,7 +42,7 @@ import de.anomic.yacy.yacyURL;
 
 public class BlacklistTest_p {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         
         // initialize the list manager
         listManager.switchboard = (plasmaSwitchboard) env;

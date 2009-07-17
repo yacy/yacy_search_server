@@ -45,7 +45,7 @@ public class ProxyIndexingMonitor_p {
 //      if (date == null) return ""; else return dayFormatter.format(date);
 //  }
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();

@@ -51,7 +51,7 @@ import de.anomic.yacy.logging.Log;
 
 public final class transferRWI {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) throws InterruptedException {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
         
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;

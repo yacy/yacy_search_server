@@ -71,14 +71,6 @@
     
     <dt>Queues</dt>
     <dd>
-    <a href="IndexCreateIndexingQueue_p.html">Indexing Queue</a>:
-    <table>
-      <tr>
-      <td><div class="ProgressBar"><div class="ProgressBarFill" style="width:#[indexingQueuePercent]#%;" ></div></div></td>
-      <td><div class="ProgressBarCaption">#[indexingQueueSize]#&nbsp;|&nbsp;#[indexingQueueMax]#</div></td>
-      </tr>
-    </table><br />
-    
     <a href="IndexCreateLoaderQueue_p.html">Loader Queue</a>:
     <table>
       <tr>

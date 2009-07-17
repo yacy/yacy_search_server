@@ -34,7 +34,7 @@ import de.anomic.server.serverSwitch;
 
 public class yacyinteractive {
 
-    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;

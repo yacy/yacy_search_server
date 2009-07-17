@@ -32,7 +32,7 @@ import de.anomic.ymage.ymageToolPrint;
 
 public class imagetest {
     
-    public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         /*
         BufferedImage bi = new BufferedImage(640, 400, BufferedImage.TYPE_INT_RGB); 
         Graphics2D g = bi.createGraphics();

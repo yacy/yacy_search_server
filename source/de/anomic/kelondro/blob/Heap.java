@@ -258,6 +258,14 @@ public final class Heap extends HeapModifier implements BLOB {
     	super.close(writeIDX);
     	assert file == null;
     }
+    
+    public synchronized void close() {
+        this.close(true);
+    }
+    
+    public void finalize() {
+        this.close();
+    }
 
     /**
      * write a whole byte array as BLOB to the table

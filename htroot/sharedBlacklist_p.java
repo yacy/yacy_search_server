@@ -67,7 +67,7 @@ public class sharedBlacklist_p {
 
     private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();

@@ -303,14 +303,6 @@ public class CrawlQueues {
             //log.logDebug("GlobalCrawl: queue is empty");
             return false;
         }
-
-        value = (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30);
-        if (sb.crawler.indexingStack.size() >= value) {
-            if (this.log.isFine()) {
-                log.logFine(type + "Crawl: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.crawler.indexingStack.size() + ")");
-            }
-            return false;
-        }
         value = (int) sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10);
         if (this.size() >= value) {
             // try a cleanup
@@ -344,11 +336,6 @@ public class CrawlQueues {
         // check if we are a senior peer
         if (!sb.peers.mySeed().isActive()) {
             //this.log.logInfo("remoteCrawlLoaderJob: not done, this should be a senior or principal peer");
-            return false;
-        }
-        
-        if (sb.crawler.indexingStack.size() >= (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30) / 2) {
-            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in indexing queue, dismissed (" + "sbQueueSize=" + sb.crawler.indexingStack.size() + ")");
             return false;
         }
         

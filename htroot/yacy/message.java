@@ -54,7 +54,7 @@ public final class message {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         if (post == null || env == null) { return null; }
 
         // return variable that accumulates replacements

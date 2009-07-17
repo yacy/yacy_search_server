@@ -52,7 +52,7 @@ public class PerformanceQueues_p {
         performanceProfiles.put("defaults/performance_dht.profile", "prefer DHT");
     }
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> sb) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch sb) {
         // return variable that accumulates replacements
         final plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
         final serverObjects prop = new serverObjects();

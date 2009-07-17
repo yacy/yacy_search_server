@@ -1,14 +1,11 @@
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Locale;
 
-import de.anomic.crawler.IndexingStack;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.httpRequestHeader;
-import de.anomic.kelondro.util.kelondroException;
 import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -26,7 +23,7 @@ public class queues_p {
         return dayFormatter.format(date);
     }
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         //wikiCode wikiTransformer = new wikiCode(switchboard);
@@ -38,59 +35,11 @@ public class queues_p {
         
         yacySeed initiator;
         
-        //indexing queue
-        prop.putNum("indexingSize", sb.getThread(plasmaSwitchboardConstants.INDEXER).getJobCount() + sb.getActiveQueueSize());
-        prop.putNum("indexingMax", (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30));
+        // index size
         prop.putNum("urlpublictextSize", sb.indexSegment.urlMetadata().size());
         prop.putNum("rwipublictextSize", sb.indexSegment.termIndex().sizesMax());
-        if ((sb.crawler.indexingStack.size() == 0) && (sb.getActiveQueueSize() == 0)) {
-            prop.put("list", "0"); //is empty
-        } else {
-            IndexingStack.QueueEntry pcentry;
-            long totalSize = 0;
-            int i=0; //counter
-            
-            // getting all entries that are currently in process
-            final ArrayList<IndexingStack.QueueEntry> entryList = new ArrayList<IndexingStack.QueueEntry>();
-            final int inProcessCount = entryList.size();
-            
-            // getting all enqueued entries
-            if ((sb.crawler.indexingStack.size() > 0)) {
-                final Iterator<IndexingStack.QueueEntry> i1 = sb.crawler.indexingStack.entryIterator(false);
-                while (i1.hasNext()) try {
-                    entryList.add(i1.next());
-                } catch (kelondroException e) {
-                    e.printStackTrace();
-                }
-            }
-            
-            int size = (post == null) ? entryList.size() : post.getInt("num", entryList.size());
-            if (size > entryList.size()) size = entryList.size();
-            
-            int ok = 0;
-            for (i = 0; i < size; i++) {
-                final boolean inProcess = i < inProcessCount;
-                pcentry = entryList.get(i);
-                if ((pcentry != null) && (pcentry.url() != null)) {
-                    final long entrySize = pcentry.size();
-                    totalSize += entrySize;
-                    initiator = sb.peers.getConnected(pcentry.initiator());
-                    prop.put("list-indexing_"+i+"_profile", (pcentry.profile() != null) ? pcentry.profile().name() : "deleted");
-                    prop.putHTML("list-indexing_"+i+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
-                    prop.put("list-indexing_"+i+"_depth", pcentry.depth());
-                    prop.put("list-indexing_"+i+"_modified", pcentry.getModificationDate());
-                    prop.putXML("list-indexing_"+i+"_anchor", (pcentry.anchorName()==null) ? "" : pcentry.anchorName());
-                    prop.putXML("list-indexing_"+i+"_url", pcentry.url().toNormalform(false, true));
-                    prop.putNum("list-indexing_"+i+"_size", entrySize);
-                    prop.put("list-indexing_"+i+"_inProcess", (inProcess) ? "1" : "0");
-                    prop.put("list-indexing_"+i+"_hash", pcentry.url().hash());
-                    ok++;
-                }
-            }
-            prop.put("list-indexing", ok);
-        }
-        
-        //loader queue
+
+        // loader queue
         prop.put("loaderSize", Integer.toString(sb.crawlQueues.size()));        
         prop.put("loaderMax", sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10));
         if (sb.crawlQueues.size() == 0) {

@@ -107,7 +107,7 @@ public final class httpdFileHandler {
     private static final Properties mimeTable = new Properties();
     // create a class loader
     private static final serverClassLoader provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
-    private static serverSwitch<?> switchboard = null;
+    private static serverSwitch switchboard = null;
     private static plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
     
     private static File     htRootPath     = null;
@@ -131,7 +131,7 @@ public final class httpdFileHandler {
     private static final Log theLogger = new Log("FILEHANDLER");
     
     static {
-        final serverSwitch<?> theSwitchboard = plasmaSwitchboard.getSwitchboard();
+        final serverSwitch theSwitchboard = plasmaSwitchboard.getSwitchboard();
         useTemplateCache = theSwitchboard.getConfig("enableTemplateCache","true").equalsIgnoreCase("true");
         templateCache = (useTemplateCache)? new ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>>() : new ConcurrentHashMap<File, SoftReference<TemplateCacheEntry>>(0);
         templateMethodCache = (useTemplateCache) ? new ConcurrentHashMap<File, SoftReference<Method>>() : new ConcurrentHashMap<File, SoftReference<Method>>(0);

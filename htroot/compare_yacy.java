@@ -55,7 +55,7 @@ public class compare_yacy {
         searchengines.put("Sciencenet", "http://sciencenet.fzk.de:8080/yacysearch.html?display=2&verify=true&resource=global&query=");
     }
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);

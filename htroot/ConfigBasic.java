@@ -54,7 +54,7 @@ public class ConfigBasic {
     private static final int NEXTSTEP_PEERPORT  = 3;
     private static final int NEXTSTEP_RECONNECT = 4;
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;

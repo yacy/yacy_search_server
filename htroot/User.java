@@ -43,7 +43,7 @@ import de.anomic.server.servletProperties;
 
 public class User{
     
-    public static servletProperties respond(final httpRequestHeader requestHeader, final serverObjects post, final serverSwitch<?> env) {
+    public static servletProperties respond(final httpRequestHeader requestHeader, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
         userDB.Entry entry=null;

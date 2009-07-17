@@ -39,7 +39,7 @@ import de.anomic.server.servletProperties;
 
 public class ConfigRobotsTxt_p {
     
-    public static servletProperties respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static servletProperties respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final servletProperties prop = new servletProperties();
         

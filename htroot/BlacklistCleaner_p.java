@@ -75,7 +75,7 @@ public class BlacklistCleaner_p {
         DefaultBlacklist.class
     };
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         
         // initialize the list manager

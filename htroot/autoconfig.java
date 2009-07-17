@@ -41,7 +41,7 @@ public class autoconfig {
      * @param env the serverSwitch object holding all runtime-data
      * @return the rewrite-properties for the template
      */
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         
         final serverObjects prop = new serverObjects();
         

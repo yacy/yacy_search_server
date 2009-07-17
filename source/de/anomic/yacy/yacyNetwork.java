@@ -43,7 +43,7 @@ import de.anomic.server.serverSwitch;
 
 public class yacyNetwork {
 
-	public static final boolean authentifyRequest(final serverObjects post, final serverSwitch<?> env) {
+	public static final boolean authentifyRequest(final serverObjects post, final serverSwitch env) {
 		if ((post == null) || (env == null)) return false;
 		
 		// identify network

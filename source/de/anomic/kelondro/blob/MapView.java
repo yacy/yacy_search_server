@@ -47,7 +47,7 @@ import de.anomic.kelondro.util.kelondroException;
 
 public class MapView {
 
-    private final BLOB blob;
+    private BLOB blob;
     private ScoreCluster<String> cacheScore;
     private HashMap<String, Map<String, String>> cache;
     private final long startup;
@@ -292,21 +292,23 @@ public class MapView {
      * @return the number of entries in the table
      */
     public synchronized int size() {
-        return blob.size();
+        return (blob == null) ? 0 : blob.size();
     }
 
     /**
      * close the Map table
      */
     public void close() {
-        // finish queue
-        //writeWorker.terminate(true);
-
         cache = null;
         cacheScore = null;
 
         // close file
-        blob.close(true);
+        if (blob != null) blob.close(true);
+        blob = null;
+    }
+    
+    public void finalize() {
+        close();
     }
 
     public class objectIterator implements Iterator<Map<String, String>> {

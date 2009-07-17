@@ -65,7 +65,7 @@ import de.anomic.yacy.logging.Log;
 
 public class yacysearch {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         sb.localSearchLastAccess = System.currentTimeMillis();
         

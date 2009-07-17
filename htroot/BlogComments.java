@@ -58,7 +58,7 @@ public class BlogComments {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         blogBoard.BlogEntry page = null;

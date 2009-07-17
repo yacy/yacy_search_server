@@ -147,7 +147,7 @@ public final class httpd implements serverHandler, Cloneable {
     private final static Log log = new Log("HTTPD");
 
     // class methods
-    public httpd(final serverSwitch<?> s) {
+    public httpd(final serverSwitch s) {
         // handler info
         httpd.switchboard = (plasmaSwitchboard)s;
         httpd.virtualHost = switchboard.getConfig("fileHost","localhost");
@@ -292,7 +292,7 @@ public final class httpd implements serverHandler, Cloneable {
         return persistent;
     }
     
-    public static int staticAdminAuthenticated(final String authorization, final serverSwitch<?> sw) {
+    public static int staticAdminAuthenticated(final String authorization, final serverSwitch sw) {
         // the authorization string must be given with the truncated 6 bytes at the beginning
         if (authorization == null) return 1;
         //if (authorization.length() < 6) return 1; // no authentication information given

@@ -108,6 +108,14 @@ public class HeapModifier extends HeapReader implements BLOB {
         super.close(writeIDX);
     }
     
+    public synchronized void close() {
+        close(true);
+    }
+    
+    public void finalize() {
+        this.close();
+    }
+    
     /**
      * remove a BLOB
      * @param key  the primary key

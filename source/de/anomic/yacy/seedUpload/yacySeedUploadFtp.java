@@ -39,7 +39,7 @@ public class yacySeedUploadFtp implements yacySeedUploader {
     public static final String CONFIG_FTP_PASSWORD = "seedFTPPassword";
     public static final String CONFIG_FTP_PATH = "seedFTPPath";
     
-    public String uploadSeedFile (final serverSwitch<?> sb, final yacySeedDB seedDB, final File seedFile) throws Exception {
+    public String uploadSeedFile (final serverSwitch sb, final yacySeedDB seedDB, final File seedFile) throws Exception {
         try {        
             if (sb == null) throw new NullPointerException("Reference to serverSwitch must not be null.");
             if (seedDB == null) throw new NullPointerException("Reference to seedDB must not be null.");

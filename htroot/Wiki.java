@@ -55,7 +55,7 @@ public class Wiki {
     }
 
 
-    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch<?> env) throws IOException {
+    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch env) throws IOException {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         if (post == null) {

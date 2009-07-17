@@ -39,7 +39,7 @@ import de.anomic.server.serverSwitch;
 
 public class ConfigProperties_p {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         int count=0;

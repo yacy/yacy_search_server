@@ -43,7 +43,7 @@ public class Collage {
     private static           long      imgZIndex[]   = new long[fifoMax];
     private static final     Random rand = new Random();
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final boolean authenticated = sb.verifyAuthentication(header, false);

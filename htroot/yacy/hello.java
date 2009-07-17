@@ -51,7 +51,7 @@ public final class hello {
     // example:
     // http://localhost:8080/yacy/hello.html?count=1&seed=p|{Hash=sCJ6Tq8T0N9x,IPType=&empty;,Port=8080,IP=,Uptime=8,rI=190,Version=0.10004882,PeerType=junior,UTC=+0200,RCount=0,sI=0,LastSeen=20080605103333,Name=intratest,CCount=5.0,SCount=40,news=,USpeed=0,CRTCnt=0,CRWCnt=0,BDate=20080605081349,rU=190,LCount=187,dct=1212668923654,ICount=2,sU=0,ISpeed=0,RSpeed=0.0,NCount=0,Flags=oooo}
     // http://localhost:8080/yacy/hello.html?count=10&seed=z|H4sIAAAAAAAAADWQW2vDMAyF_81eJork3GyGX-YxGigly2WFvZTQijbQJsHx1pWx_z7nMj1J4ug7B_2s6-GsP5q3G-G6vBz2e0iz8t6zfuBr7-5PUNanQfulhqyzTkuUCFXvmitrBJtq4ed3tkPTtRpXhIiRDAmq0uhHFIiQMduJ-NXYU9NCbrrP1vnjIdUqgk09uIK51V6rMBRIilAo2NajwzfhGcx8QUKsEIp5iCJo-eaTVUXPfPQ4k5dm4pp8NzaESsLzS-14QVNIMlA-ka2m1JuZJJWIBRwPo0GIIiYp4zCSkC5GQSLiJIah0p6X_rvlS-MTbWdhkCSBIni9jA_rfP3-Ae1Oye9dAQAA
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) throws InterruptedException {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         long start = System.currentTimeMillis();

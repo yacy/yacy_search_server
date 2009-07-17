@@ -112,17 +112,16 @@ public final class plasmaSwitchboardConstants {
     public static final String CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP        = "62_remotetriggeredcrawl_busysleep";
     // 80_indexing
     /**
-     * <p><code>public static final String <strong>INDEXER</strong> = "80_indexing"</code></p>
-     * <p>Name of the indexer thread, performing the actual indexing of a website</p>
+     * <p><code>public static final String <strong>SURROGATES</strong> = "70_surrogates"</code></p>
+     * <p>A thread that polls the SURROGATES path and puts all Documents in one surroagte file into the indexing queue.</p>
      */
-    public static final String INDEXER                      = "80_indexing";
-    public static final String INDEXER_MEMPREREQ            = "80_indexing_memprereq";
-    public static final String INDEXER_IDLESLEEP            = "80_indexing_idlesleep";
-    public static final String INDEXER_BUSYSLEEP            = "80_indexing_busysleep";
-    public static final String INDEXER_METHOD_START         = "deQueueProcess";
-    public static final String INDEXER_METHOD_JOBCOUNT      = "queueSize";
-    public static final String INDEXER_METHOD_FREEMEM       = "deQueueFreeMem";
-    public static final String INDEXER_SLOTS                = "indexer.slots";
+    public static final String SURROGATES                      = "70_surrogates";
+    public static final String SURROGATES_MEMPREREQ            = "70_surrogates_memprereq";
+    public static final String SURROGATES_IDLESLEEP            = "70_surrogates_idlesleep";
+    public static final String SURROGATES_BUSYSLEEP            = "70_surrogates_busysleep";
+    public static final String SURROGATES_METHOD_START         = "surrogateProcess";
+    public static final String SURROGATES_METHOD_JOBCOUNT      = "surrogateQueueSize";
+    public static final String SURROGATES_METHOD_FREEMEM       = "surrogateFreeMem";
     // 90_cleanup
     /**
      * <p><code>public static final String <strong>CLEANUP</strong> = "90_cleanup"</code></p>

@@ -38,7 +38,7 @@ import java.util.SortedMap;
 
 import de.anomic.yacy.logging.Log;
 
-public interface serverSwitch<E> {
+public interface serverSwitch {
 
     // the root path for the application
     public File getRootPath();
@@ -88,16 +88,7 @@ public interface serverSwitch<E> {
     public void removeConfig(String key);
     public Iterator<String> configKeys();
     public Map<String, String> getRemoved();
-        
-    // the switchboard also shall maintain a job list
-    // jobs can be queued by submitting a job object
-    // to work off a queue job, use deQueue, which is meant to
-    // work off exactly only one job, not all
-    public int queueSize();
-    public E queuePeek(); // looks for next element in the queue, returns but not deletes it if there is one; returns null othervise
-    public void enQueue(E job);
-    public E deQueue() throws InterruptedException; // returns a FIFO entry from the stack, blocks until one element is available
-
+    
     // authentification routines: sets and reads access attributes according to host addresses
     public void    setAuthentify(InetAddress host, String user, String rigth);
     public void    removeAuthentify(InetAddress host);

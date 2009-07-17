@@ -120,7 +120,6 @@ import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.CrawlStacker;
 import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.crawler.ImporterManager;
-import de.anomic.crawler.IndexingStack;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.ResourceObserver;
 import de.anomic.crawler.ResultImages;
@@ -128,7 +127,6 @@ import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.RobotsTxt;
 import de.anomic.crawler.ZURL;
 import de.anomic.crawler.CrawlProfile.entry;
-import de.anomic.crawler.IndexingStack.QueueEntry;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.LoaderDispatcher;
@@ -201,7 +199,7 @@ import de.anomic.yacy.dht.Dispatcher;
 import de.anomic.yacy.dht.PeerSelection;
 import de.anomic.yacy.logging.Log;
 
-public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.QueueEntry> implements serverSwitch<IndexingStack.QueueEntry> {
+public final class plasmaSwitchboard extends serverAbstractSwitch implements serverSwitch {
     
     // load slots
     public  static int  xstackCrawlSlots     = 2000;
@@ -557,10 +555,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         } catch (final IOException e) {
         }
         
-        // clean up profiles
-        this.log.logConfig("Cleaning Profiles");
-        try { cleanProfiles(); } catch (final InterruptedException e) { /* Ignore this here */ }
-        
         // init ranking transmission
         /*
         CRDistOn       = true/false
@@ -610,26 +604,30 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         // deploy blocking threads
         int indexerThreads = Math.max(1, serverProcessor.useCPU / 2);
-        indexingStorageProcessor      = new serverProcessor<indexingQueueEntry>(
+        this.indexingStorageProcessor      = new serverProcessor<indexingQueueEntry>(
                 "storeDocumentIndex",
                 "This is the sequencing step of the indexing queue: no concurrency is wanted here, because the access of the indexer works better if it is not concurrent. Files are written as streams, councurrency would destroy IO performance. In this process the words are written to the RWI cache, which flushes if it is full.",
                 new String[]{"RWI/Cache/Collections"},
                 this, "storeDocumentIndex", serverProcessor.useCPU + 40, null, indexerThreads);
-        indexingAnalysisProcessor     = new serverProcessor<indexingQueueEntry>(
+        this.indexingAnalysisProcessor     = new serverProcessor<indexingQueueEntry>(
                 "webStructureAnalysis",
                 "This just stores the link structure of the document into a web structure database.",
                 new String[]{"storeDocumentIndex"},
                 this, "webStructureAnalysis", serverProcessor.useCPU + 20, indexingStorageProcessor, serverProcessor.useCPU + 1);
-        indexingCondensementProcessor = new serverProcessor<indexingQueueEntry>(
+        this.indexingCondensementProcessor = new serverProcessor<indexingQueueEntry>(
                 "condenseDocument",
                 "This does a structural analysis of plain texts: markup of headlines, slicing into phrases (i.e. sentences), markup with position, counting of words, calculation of term frequency.",
                 new String[]{"webStructureAnalysis"},
                 this, "condenseDocument", serverProcessor.useCPU + 10, indexingAnalysisProcessor, serverProcessor.useCPU + 1);
-        indexingDocumentProcessor     = new serverProcessor<indexingQueueEntry>(
+        this.indexingDocumentProcessor     = new serverProcessor<indexingQueueEntry>(
                 "parseDocument",
                 "This does the parsing of the newly loaded documents from the web. The result is not only a plain text document, but also a list of URLs that are embedded into the document. The urls are handed over to the CrawlStacker. This process has two child process queues!",
                 new String[]{"condenseDocument", "CrawlStacker"},
                 this, "parseDocument", 2 * serverProcessor.useCPU + 1, indexingCondensementProcessor, 2 * serverProcessor.useCPU + 1);
+        
+        // clean up profiles
+        this.log.logConfig("Cleaning Profiles");
+        try { cleanProfiles(); } catch (final InterruptedException e) { /* Ignore this here */ }
         
         // deploy busy threads
         log.logConfig("Starting Threads");
@@ -637,8 +635,8 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         
         deployThread(plasmaSwitchboardConstants.CLEANUP, "Cleanup", "simple cleaning process for monitoring information", null,
                      new serverInstantBusyThread(this, plasmaSwitchboardConstants.CLEANUP_METHOD_START, plasmaSwitchboardConstants.CLEANUP_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CLEANUP_METHOD_FREEMEM), 600000); // all 5 Minutes, wait 10 minutes until first run
-        deployThread(plasmaSwitchboardConstants.INDEXER, "Indexing", "thread that either initiates a parsing/indexing queue, distributes the index into the DHT, stores parsed documents", "/IndexCreateIndexingQueue_p.html",
-                     new serverInstantBusyThread(this, plasmaSwitchboardConstants.INDEXER_METHOD_START, plasmaSwitchboardConstants.INDEXER_METHOD_JOBCOUNT, plasmaSwitchboardConstants.INDEXER_METHOD_FREEMEM), 10000);
+        deployThread(plasmaSwitchboardConstants.SURROGATES, "Surrogates", "A thread that polls the SURROGATES path and puts all Documents in one surroagte file into the indexing queue.", null,
+                     new serverInstantBusyThread(this, plasmaSwitchboardConstants.SURROGATES_METHOD_START, plasmaSwitchboardConstants.SURROGATES_METHOD_JOBCOUNT, plasmaSwitchboardConstants.SURROGATES_METHOD_FREEMEM), 10000);
         deployThread(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
                      new serverInstantBusyThread(crawlQueues, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT, plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM), 30000);
         deployThread(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER, "Remote Crawl URL Loader", "thread that loads remote crawl lists from other peers", "",
@@ -1088,7 +1086,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
      * shutdown procedure
      */
     public boolean cleanProfiles() throws InterruptedException {
-        if ((crawlQueues.size() > 0) ||
+        if ((getActiveQueueSize() > 0) || (crawlQueues.size() > 0) ||
             (crawlStacker != null && crawlStacker.size() > 0) ||
             (crawlQueues.noticeURL.notEmpty())) 
             return false;
@@ -1130,7 +1128,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             doIndexing = false;
         }
         
-        synchronized (crawler.indexingStack) {
         /* =========================================================================
          * STORING DATA
          * 
@@ -1166,16 +1163,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (doIndexing && supportError == null) {
             
             // enqueue for further crawling
-            enQueue(this.crawler.indexingStack.newEntry(
-                    entry.url(), 
-                    (entry.referrerURL() == null) ? null : entry.referrerURL().hash(),
-                    entry.ifModifiedSince(), 
-                    entry.requestWithCookie(),
-                    entry.initiator(), 
-                    entry.depth(), 
-                    entry.profile().handle(),
-                    entry.name()
-            ));
+            enQueue(entry);
         } else {
             if (!entry.profile().storeHTCache()) {
                 try {
@@ -1184,7 +1172,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                     e.printStackTrace();
                 }                
             }
-        }
         }
         
         return true;
@@ -1229,54 +1216,44 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     
-    public int queueSize() {
-        return crawler.indexingStack.size();
-    }
-    
-    public void enQueue(final IndexingStack.QueueEntry job) {
-        assert job != null;
-        try {
-            crawler.indexingStack.push(job);
-        } catch (final IOException e) {
-            log.logSevere("IOError in plasmaSwitchboard.enQueue: " + e.getMessage(), e);
+    public void enQueue(final Response queueEntry) {
+        assert queueEntry != null;
+        
+        // get next queue entry and start a queue processing
+        if (queueEntry == null) {
+            if (this.log.isFine()) log.logFine("deQueue: queue entry is null");
+            return;
         }
-    }
-    
-    public void deQueueFreeMem() {
-        // empty some caches
-        indexSegment.urlMetadata().clearCache();
-        QueryEvent.cleanupEvents(true);
-    }
-    
-    public IndexingStack.QueueEntry deQueue() {
-        // getting the next entry from the indexing queue
-        IndexingStack.QueueEntry nextentry = null;
-        synchronized (crawler.indexingStack) {
-            // do one processing step
-            if (this.log.isFine()) log.logFine("DEQUEUE: sbQueueSize=" + crawler.indexingStack.size() +
-                    ", coreStackSize=" + crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) +
-                    ", limitStackSize=" + crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT) +
-                    ", overhangStackSize=" + crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_OVERHANG) +
-                    ", remoteStackSize=" + crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_REMOTE));
-            try {
-                final int sizeBefore = crawler.indexingStack.size();
-                if (sizeBefore == 0) return null;
-                nextentry = crawler.indexingStack.pop();
-                if (nextentry == null) {
-                    log.logWarning("deQueue: null entry on queue stack.");
-                    if (crawler.indexingStack.size() == sizeBefore) {
-                        // this is a severe problem: because this time a null is returned, it means that this status will last forever
-                        // to re-enable use of the sbQueue, it must be emptied completely
-                        log.logSevere("deQueue: does not shrink after pop() == null. Emergency reset of sbQueue");
-                        crawler.indexingStack.clear();
-                    }
-                    return null;
-                }
-            } catch (final IOException e) {
-                log.logSevere("IOError in plasmaSwitchboard.deQueue: " + e.getMessage(), e);
-                return null;
-            }
-            return nextentry;
+        if (queueEntry.profile() == null) {
+            if (this.log.isFine()) log.logFine("deQueue: profile is null");
+            return;
+        }
+        
+        // check if the document should be indexed
+        String noIndexReason = "unspecified indexing error";
+        if (queueEntry.processCase(peers.mySeed().hash) == plasmaSwitchboardConstants.PROCESSCASE_4_PROXY_LOAD) {
+            // proxy-load
+            noIndexReason = queueEntry.shallIndexCacheForProxy();
+        } else {
+            // normal crawling
+            noIndexReason = queueEntry.shallIndexCacheForCrawler();
+        }
+        
+        if (noIndexReason != null) {
+            // this document should not be indexed. log cause and close queue
+            final yacyURL referrerURL = queueEntry.referrerURL();
+            if (log.isFine()) log.logFine("deQueue: not indexed any word in URL " + queueEntry.url() + "; cause: " + noIndexReason);
+            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? "" : referrerURL.hash(), queueEntry.initiator(), queueEntry.name(), noIndexReason);
+            // finish this entry
+            return;
+        }
+
+        // put document into the concurrent processing queue
+        if (log.isFinest()) log.logFinest("deQueue: passing entry to indexing queue");
+        try {
+            this.indexingDocumentProcessor.enQueue(new indexingQueueEntry(queueEntry, null, null));
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
     
@@ -1291,7 +1268,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             Thread readerThread = new Thread(reader, "Surrogate-Reader " + surrogateFile.getAbsolutePath());
             readerThread.start();
             DCEntry surrogate;
-            QueueEntry queueentry;
+            Response queueentry;
             while ((surrogate = reader.take()) != DCEntry.poison) {
                 // check if url is in accepted domain
                 final String urlRejectReason = crawlStacker.urlInAcceptedDomain(surrogate.url());
@@ -1302,11 +1279,19 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
                 
                 // create a queue entry
                 Document document = surrogate.document();
-                queueentry = this.crawler.indexingStack.newEntry(surrogate.url(), null, null, false, null, 0, this.crawler.defaultSurrogateProfile.handle(), null);
-                /*
-                 * public QueueEntry newEntry(final yacyURL url, final String referrer, final Date ifModifiedSince, final boolean requestWithCookie,
-                     final String initiator, final int depth, final String profilehandle, final String anchorName) 
-                 */
+                Request request = new Request(
+                        peers.mySeed().hash, 
+                        surrogate.url(), 
+                        null, 
+                        "", 
+                        new Date(),
+                        new Date(),
+                        this.crawler.defaultSurrogateProfile.handle(),
+                        0, 
+                        0, 
+                        0        
+                );
+                queueentry = new Response(request, null, null, "200", this.crawler.defaultSurrogateProfile);
                 indexingQueueEntry queueEntry = new indexingQueueEntry(queueentry, document, null);
                 
                 // place the queue entry into the concurrent process of the condenser (document analysis)
@@ -1324,92 +1309,62 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         }
         return moved;
     }
-    
-    public boolean deQueueProcess() {
-        try {
-            // work off fresh entries from the proxy or from the crawler
-            String cautionCause = onlineCaution();
-            if (cautionCause != null) {
-                if (this.log.isFine()) log.logFine("deQueue: online caution for " + cautionCause + ", omitting resource stack processing");
-                return false;
-            }
 
-            // check for interruption
-            checkInterruption();
-            
+    public int surrogateQueueSize() {
+        // count surrogates
+        String[] surrogatelist = this.surrogatesInPath.list();
+        if (surrogatelist.length > 100) return 100;
+        int count = 0;
+        for (String s: surrogatelist) {
+            if (s.endsWith(".xml")) count++;
+            if (count >= 100) break;
+        }
+        return count;
+    }
+    
+    public void surrogateFreeMem() {
+        // do nothing
+    }
+    
+    public boolean surrogateProcess() {
+        // work off fresh entries from the proxy or from the crawler
+        String cautionCause = onlineCaution();
+        if (cautionCause != null) {
+            if (this.log.isFine())
+                log.logFine("deQueue: online caution for " + cautionCause
+                        + ", omitting resource stack processing");
+            return false;
+        }
+        
+        try {
             // check surrogates
             String[] surrogatelist = this.surrogatesInPath.list();
             if (surrogatelist.length > 0) {
                 // look if the is any xml inside
-                for (int i = 0; i < surrogatelist.length; i++) {
-                    if (surrogatelist[i].endsWith(".xml")) {
+                for (String surrogate: surrogatelist) {
+                    
+                    // check for interruption
+                    checkInterruption();
+
+                    if (surrogate.endsWith(".xml")) {
                         // read the surrogate file and store entry in index
-                        if (processSurrogate(surrogatelist[i])) return true;
+                        if (processSurrogate(surrogate)) return true;
                     }
                 }
             }
 
-            // getting the next entry from the indexing queue
-            if (crawler.indexingStack.size() == 0) {
-                if (log.isFinest()) log.logFinest("deQueue: nothing to do, queue is emtpy");
-                return false; // nothing to do
-            }
-
-            // if we were interrupted we should return now
-            if (Thread.currentThread().isInterrupted()) {
-                if (this.log.isFine()) log.logFine("deQueue: thread was interrupted");
-                return false;
-            }
-            
-            // get next queue entry and start a queue processing
-            final IndexingStack.QueueEntry queueEntry = deQueue();
-            if (queueEntry == null) {
-                if (this.log.isFine()) log.logFine("deQueue: queue entry is null");
-                return false;
-            }
-            if (queueEntry.profile() == null) {
-                if (this.log.isFine()) log.logFine("deQueue: profile is null");
-                return false;
-            }
-            
-            // check if the document should be indexed
-            String noIndexReason = "unspecified indexing error";
-            if (queueEntry.processCase() == plasmaSwitchboardConstants.PROCESSCASE_4_PROXY_LOAD) {
-                // proxy-load
-                noIndexReason = queueEntry.shallIndexCacheForProxy();
-            } else {
-                // normal crawling
-                noIndexReason = queueEntry.shallIndexCacheForCrawler();
-            }
-            
-            if (noIndexReason != null) {
-                // this document should not be indexed. log cause and close queue
-                final yacyURL referrerURL = queueEntry.referrerURL(this.indexSegment.urlMetadata());
-                if (log.isFine()) log.logFine("deQueue: not indexed any word in URL " + queueEntry.url() + "; cause: " + noIndexReason);
-                addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? "" : referrerURL.hash(), queueEntry.initiator(), queueEntry.anchorName(), noIndexReason);
-                // finish this entry
-                return true;
-            }
-
-            // check for interruption
-            checkInterruption();
-
-            // put document into the concurrent processing queue
-            if (log.isFinest()) log.logFinest("deQueue: passing entry to indexing queue");
-            this.indexingDocumentProcessor.enQueue(new indexingQueueEntry(queueEntry, null, null));
-            return true;
-        } catch (final InterruptedException e) {
-            log.logInfo("DEQUEUE: Shutdown detected.");
+        } catch (InterruptedException e) {
             return false;
         }
+        return false;
     }
     
     public static class indexingQueueEntry extends serverProcessorJob {
-        public IndexingStack.QueueEntry queueEntry;
+        public Response queueEntry;
         public Document document;
         public Condenser condenser;
         public indexingQueueEntry(
-                final IndexingStack.QueueEntry queueEntry,
+                final Response queueEntry,
                 final Document document,
                 final Condenser condenser) {
             super();
@@ -1658,7 +1613,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     }
     
     public indexingQueueEntry parseDocument(final indexingQueueEntry in) {
-        in.queueEntry.updateStatus(IndexingStack.QUEUE_STATE_PARSING);
+        in.queueEntry.updateStatus(Response.QUEUE_STATE_PARSING);
         
         // debug
         if (log.isFinest()) log.logFinest("PARSE "+ in.queueEntry.toString());
@@ -1677,9 +1632,9 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         return new indexingQueueEntry(in.queueEntry, document, null);
     }
     
-    private Document parseDocument(final IndexingStack.QueueEntry entry) throws InterruptedException {
+    private Document parseDocument(Response entry) throws InterruptedException {
         Document document = null;
-        final int processCase = entry.processCase();
+        final int processCase = entry.processCase(peers.mySeed().hash);
         
         if (this.log.isFine()) log.logFine("processResourceStack processCase=" + processCase +
                 ", depth=" + entry.depth() +
@@ -1699,7 +1654,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             assert(document != null) : "Unexpected error. Parser returned null.";
         } catch (final ParserException e) {
             this.log.logWarning("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());
-            addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.anchorName(), e.getMessage());
+            addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.name(), e.getMessage());
             if (document != null) {
                 document.close();
                 document = null;
@@ -1710,7 +1665,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         final long parsingEndTime = System.currentTimeMillis();            
         
         // get the document date
-        final Date docDate = entry.getModificationDate();
+        final Date docDate = entry.lastModified();
         
         // put anchors on crawl stack
         final long stackStartTime = System.currentTimeMillis();
@@ -1755,7 +1710,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     }
     
     public indexingQueueEntry condenseDocument(final indexingQueueEntry in) {
-        in.queueEntry.updateStatus(IndexingStack.QUEUE_STATE_CONDENSING);
+        in.queueEntry.updateStatus(Response.QUEUE_STATE_CONDENSING);
         
         // debug
         if (log.isFinest()) log.logFinest("CONDENSE "+ in.queueEntry.toString());
@@ -1778,23 +1733,23 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     }
     
     public indexingQueueEntry webStructureAnalysis(final indexingQueueEntry in) {
-        in.queueEntry.updateStatus(IndexingStack.QUEUE_STATE_STRUCTUREANALYSIS);
-        in.document.notifyWebStructure(webStructure, in.condenser, in.queueEntry.getModificationDate());
+        in.queueEntry.updateStatus(Response.QUEUE_STATE_STRUCTUREANALYSIS);
+        in.document.notifyWebStructure(webStructure, in.condenser, in.queueEntry.lastModified());
         return in;
     }
    
     public void storeDocumentIndex(final indexingQueueEntry in) {
-        in.queueEntry.updateStatus(IndexingStack.QUEUE_STATE_INDEXSTORAGE);
+        in.queueEntry.updateStatus(Response.QUEUE_STATE_INDEXSTORAGE);
         storeDocumentIndex(in.queueEntry, in.document, in.condenser);
-        in.queueEntry.updateStatus(IndexingStack.QUEUE_STATE_FINISHED);
+        in.queueEntry.updateStatus(Response.QUEUE_STATE_FINISHED);
     }
     
-    private void storeDocumentIndex(final IndexingStack.QueueEntry queueEntry, final Document document, final Condenser condenser) {
+    private void storeDocumentIndex(final Response queueEntry, final Document document, final Condenser condenser) {
         
         // CREATE INDEX
         final String dc_title = document.dc_title();
-        final yacyURL referrerURL = queueEntry.referrerURL(this.indexSegment.urlMetadata());
-        final int processCase = queueEntry.processCase();
+        final yacyURL referrerURL = queueEntry.referrerURL();
+        final int processCase = queueEntry.processCase(peers.mySeed().hash);
 
         // remove stopwords                        
         log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + queueEntry.url());
@@ -1805,7 +1760,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             newEntry = indexSegment.storeDocument(
                     queueEntry.url(),
                     referrerURL,
-                    queueEntry.getModificationDate(),
+                    queueEntry.lastModified(),
                     queueEntry.size(),
                     document,
                     condenser);
@@ -1844,12 +1799,14 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         serverProfiling.update("indexed", queueEntry.url().toNormalform(true, false), false);
         
         // if this was performed for a remote crawl request, notify requester
-        final yacySeed initiatorPeer = queueEntry.initiatorPeer();
-        if ((processCase == plasmaSwitchboardConstants.PROCESSCASE_6_GLOBAL_CRAWLING) && (initiatorPeer != null)) {
-            log.logInfo("Sending crawl receipt for '" + queueEntry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
-            if (clusterhashes != null) initiatorPeer.setAlternativeAddress(clusterhashes.get(initiatorPeer.hash.getBytes()));
-            // start a thread for receipt sending to avoid a blocking here
-            new Thread(new receiptSending(initiatorPeer, newEntry), "sending receipt to " + initiatorPeer.hash).start();
+        if ((processCase == plasmaSwitchboardConstants.PROCESSCASE_6_GLOBAL_CRAWLING) && (queueEntry.initiator() != null)) {
+            final yacySeed initiatorPeer = peers.get(queueEntry.initiator());
+            if (initiatorPeer != null) {
+                log.logInfo("Sending crawl receipt for '" + queueEntry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
+                if (clusterhashes != null) initiatorPeer.setAlternativeAddress(clusterhashes.get(queueEntry.initiator().getBytes()));
+                // start a thread for receipt sending to avoid a blocking here
+                new Thread(new receiptSending(initiatorPeer, newEntry), "sending receipt to " + queueEntry.initiator()).start();
+            }
         }
     }
     
@@ -1888,12 +1845,6 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
     public serverObjects action(final String actionName, final serverObjects actionInput) {
         // perform an action. (not used)    
         return null;
-    }
-    
-    public String toString() {
-        // it is possible to use this method in the cgi pages.
-        // actually it is used there for testing purpose
-        return "PROPS: " + super.toString() + "; QUEUE: " + crawler.indexingStack.toString();
     }
     
     // method for index deletion
@@ -2022,14 +1973,7 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
         if (thread != null) {
         	setConfig(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP , thread.setBusySleep(newBusySleep));
         	thread.setIdleSleep(2000);
-        }
-        
-        thread = getThread(plasmaSwitchboardConstants.INDEXER);
-        if (thread != null) {
-            setConfig(plasmaSwitchboardConstants.INDEXER_BUSYSLEEP , thread.setBusySleep(newBusySleep / 8));
-            thread.setIdleSleep(2000);
-        }
-        
+        }        
     }
     
     public static int accessFrequency(final HashMap<String, TreeSet<Long>> tracker, final String host) {
@@ -2070,10 +2014,10 @@ public final class plasmaSwitchboard extends serverAbstractSwitch<IndexingStack.
             return "no DHT distribution: not enough words - wordIndex.size() = " + indexSegment.termIndex().sizesMax();
         }
         if ((getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) && (crawlQueues.noticeURL.notEmptyLocal())) {
-            return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + crawler.indexingStack.size();
+            return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + getActiveQueueSize();
         }
-        if ((getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "false").equalsIgnoreCase("false")) && (crawler.indexingStack.size() > 1)) {
-            return "no DHT distribution: indexing in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + crawler.indexingStack.size();
+        if ((getConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "false").equalsIgnoreCase("false")) && (getActiveQueueSize() > 1)) {
+            return "no DHT distribution: indexing in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + getActiveQueueSize();
         }
         return null; // this means; yes, please do dht transfer
     }

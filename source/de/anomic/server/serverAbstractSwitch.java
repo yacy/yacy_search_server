@@ -29,12 +29,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.logging.Log;
 
-public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
+public abstract class serverAbstractSwitch implements serverSwitch {
     
     // configuration management
     private   final File    configFile;
@@ -48,7 +47,6 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     private   final HashMap<InetAddress, String>         authorization;
     private   final TreeMap<String, serverBusyThread>    workerThreads;
     private   final TreeMap<String, serverSwitchAction>  switchActions;
-    private   final LinkedBlockingQueue<E>               cacheStack;
     private   final serverAccessTracker                  accessTracker;
     
     public serverAbstractSwitch(final File rootPath, final String initPath, final String configPath, final boolean applyPro) {
@@ -58,7 +56,6 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
         // be deleted, but not the init file
         // the only attribute that will always be read from the init is the
         // file name of the config file
-        this.cacheStack = new LinkedBlockingQueue<E>();
     	this.rootPath = rootPath;
     	this.configComment = "This is an automatically generated file, updated by serverAbstractSwitch and initialized by " + initPath;
         final File initFile = new File(rootPath, initPath);
@@ -414,22 +411,6 @@ public abstract class serverAbstractSwitch<E> implements serverSwitch<E> {
     
     public Iterator<String> /*of serverThread-Names (String)*/ threadNames() {
         return workerThreads.keySet().iterator();
-    }
-    
-    public int queueSize() {
-        return cacheStack.size();
-    }
-    
-    public E queuePeek() {
-        return cacheStack.peek();
-    }
-    
-    public void enQueue(final E job) {
-        cacheStack.add(job);
-    }
-    
-    public E deQueue() throws InterruptedException {
-        return cacheStack.take();
     }
 
     // authentification routines:

@@ -6,7 +6,7 @@ import de.anomic.server.servletProperties;
 //dummy class
 public class Trails {
 
-    public static servletProperties respond(final httpRequestHeader requestHeader, final serverObjects post, final serverSwitch<?> env) {
+    public static servletProperties respond(final httpRequestHeader requestHeader, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         return prop;
     }

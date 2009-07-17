@@ -47,7 +47,7 @@ public class IndexCreateWWWRemoteQueue_p {
         return dayFormatter.format(date);
     }
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         final plasmaSwitchboard sb = (plasmaSwitchboard)env;
         

@@ -41,7 +41,7 @@ import de.anomic.yacy.logging.LogalizerHandler;
 
 public class ViewLog_p {
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         String[] log = new String[0];
         boolean reversed = false;

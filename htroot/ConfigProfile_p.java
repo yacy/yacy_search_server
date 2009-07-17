@@ -44,7 +44,7 @@ import de.anomic.yacy.yacyNewsRecord;
 
 public class ConfigProfile_p {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         final Properties profile = new Properties();

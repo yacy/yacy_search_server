@@ -36,7 +36,7 @@ import de.anomic.tools.mediawikiIndex;
 public class mediawiki_p {
     
     //http://localhost:8080/mediawiki_p.html?dump=wikipedia.de.xml&title=Kartoffel
-    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch<?> env) throws IOException {
+    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch env) throws IOException {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         prop.put("title", "");

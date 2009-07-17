@@ -67,7 +67,7 @@ public class Bookmarks {
 	final static boolean TAGS = false;
 	final static boolean FOLDERS = true;
 	
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
 
     	int max_count = 10;
     	int start=0;

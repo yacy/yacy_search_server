@@ -749,7 +749,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     }
 
     public String uploadCache(final yacySeedUploader uploader, 
-            final serverSwitch<?> sb,
+            final serverSwitch sb,
             final yacySeedDB seedDB,
 //          String  seedFTPServer,
 //          String  seedFTPAccount,

@@ -49,7 +49,7 @@ import de.anomic.yacy.yacyBuildProperties;
 
 public class Threaddump_p {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
     	
     	serverObjects prop = new serverObjects();
     	plasmaSwitchboard sb = (plasmaSwitchboard) env;

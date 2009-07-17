@@ -42,7 +42,7 @@ import de.anomic.yacy.logging.Log;
 
 public class CrawlResults {
 
-    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();

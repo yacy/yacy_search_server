@@ -58,7 +58,6 @@ public final class CrawlSwitchboard {
     public static final long CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE = 60L * 24L * 30L;
     
     private final Log             log;
-    public        IndexingStack   indexingStack;
     public        CrawlProfile    profilesActiveCrawls, profilesPassiveCrawls;
     public  CrawlProfile.entry    defaultProxyProfile;
     public  CrawlProfile.entry    defaultRemoteProfile;
@@ -132,13 +131,9 @@ public final class CrawlSwitchboard {
         log.logInfo("Loaded passive crawl profiles from file " + profilesPassiveFile.getName() +
                 ", " + this.profilesPassiveCrawls.size() + " entries" +
                 ", " + profilesPassiveFile.length()/1024);
-        
-        // init queues
-        this.indexingStack = new IndexingStack(peers, queuesRoot, "urlNoticePreStack.stack", this.profilesActiveCrawls);
     }
     
     public void clear() {
-        indexingStack.clear();
     }
     
     private void initActiveCrawlProfiles() {
@@ -228,9 +223,7 @@ public final class CrawlSwitchboard {
         initActiveCrawlProfiles();
     }
     
-    
     public boolean cleanProfiles() throws InterruptedException {
-        if (indexingStack.size() > 0) return false;
         final Iterator<CrawlProfile.entry> iter = profilesActiveCrawls.profiles(true);
         CrawlProfile.entry entry;
         boolean hasDoneSomething = false;
@@ -264,7 +257,6 @@ public final class CrawlSwitchboard {
     public void close() {
         this.profilesActiveCrawls.close();
         this.profilesPassiveCrawls.close();
-        this.indexingStack.close();
     }
 
 }

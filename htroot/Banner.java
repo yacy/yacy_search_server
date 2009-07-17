@@ -43,7 +43,7 @@ import de.anomic.ymage.ymageMatrix;
 /** draw a banner with information about the peer */
 public class Banner {
 
-    public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) throws IOException {
+    public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
         final String IMAGE = "htroot/env/grafics/yacy.gif";
         int width = 468;

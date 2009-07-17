@@ -52,7 +52,7 @@ public class Status {
     private static final String SEEDSERVER = "seedServer";
     private static final String PEERSTATUS = "peerStatus";
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         final plasmaSwitchboard sb = (plasmaSwitchboard) env;
@@ -143,7 +143,7 @@ public class Status {
         prop.put("versionpp", versionstring);
         
         // place some more hints
-        if ((adminaccess) && (sb.getThread(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0) && (sb.getThread(plasmaSwitchboardConstants.INDEXER).getJobCount() == 0)) {
+        if ((adminaccess) && (sb.getThread(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0)) {
             prop.put("hintCrawlStart", "1");
         }
         
@@ -286,13 +286,6 @@ public class Status {
         prop.putNum("connectionsMax", httpd.getMaxSessionCount());
         
         // Queue information
-        final int indexingJobCount = sb.getThread("80_indexing").getJobCount() + sb.getActiveQueueSize();
-        final int indexingMaxCount = (int) sb.getConfigLong(plasmaSwitchboardConstants.INDEXER_SLOTS, 30);
-        final int indexingPercent = (indexingMaxCount==0)?0:indexingJobCount*100/indexingMaxCount;
-        prop.putNum("indexingQueueSize", indexingJobCount);
-        prop.putNum("indexingQueueMax", indexingMaxCount);
-        prop.put("indexingQueuePercent",(indexingPercent>100) ? 100 : indexingPercent);
-        
         final int loaderJobCount = sb.crawlQueues.size();
         final int loaderMaxCount = Integer.parseInt(sb.getConfig(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, "10"));
         final int loaderPercent = (loaderMaxCount==0)?0:loaderJobCount*100/loaderMaxCount;

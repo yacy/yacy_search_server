@@ -18,7 +18,7 @@ public class xbel {
 	private static boolean isAdmin = false;
 	private static int R = 1; // TODO: solve the recursion problem an remove global variable
 	
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
  
     	int count = 0;;
     	String root = "/";

@@ -37,7 +37,7 @@ import de.anomic.yacy.yacyRelease;
 
 public class Steering {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> ss) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch ss) {
         if (post == null || ss == null) { return new serverObjects(); }
 
         final plasmaSwitchboard sb = (plasmaSwitchboard) ss;

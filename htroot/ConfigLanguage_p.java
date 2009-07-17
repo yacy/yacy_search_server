@@ -50,7 +50,7 @@ import de.anomic.yacy.yacyURL;
 
 public class ConfigLanguage_p {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch<?> env) {
+    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
         //listManager.switchboard = (plasmaSwitchboard) env;
         final serverObjects prop = new serverObjects();
         final String langPath = env.getConfigPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
