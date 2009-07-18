@@ -45,6 +45,7 @@
   <property name="libbuild" location="libbuild"/>
   <property name="build" location="classes"/>
   <property name="htroot" location="htroot"/>
+  <property name="test" location="test"/>
   <property name="langstats" location="langstats"/>
   <property name="locales" location="locales"/>
   <property name="skins" location="skins"/>
@@ -178,7 +179,6 @@
     	<pathelement location="${lib}/jsch-0.1.21.jar" />
     	<pathelement location="${lib}/log4j-1.2.9.jar" />
     	<pathelement location="${lib}/mysql-connector-java-5.1.7-bin.jar" />
-    	<pathelement location="${lib}/odf_utils_05_11_29.jar" />
     	<pathelement location="${lib}/poi-3.2-FINAL-20081019.jar" />
     	<pathelement location="${lib}/poi-scratchpad-3.2-FINAL-20081019.jar" />
     	<pathelement location="${lib}/servlet-api.jar" />
@@ -541,7 +541,7 @@
 
   <!-- run unittests-->
   <target name="compileTest" depends="compile" description="run unittests">
-    <javac srcdir="test/" destdir="test/"
+	  <javac srcdir="${test}" destdir="${test}"
            debug="true" debuglevel="lines,vars,source"
            source="${javacSource}" target="${javacTarget}">
       <classpath>
@@ -558,12 +558,12 @@
     <junit printsummary="yes" haltonfailure="no">
       <formatter type="plain"/>
       <batchtest>
-        <fileset dir="test/">
+        <fileset dir="${test}">
 	  <include name="**/*Test*.java"/>
         </fileset>
       </batchtest>
       <classpath>
-	<pathelement location="test/"/>
+        <pathelement location="${test}"/>
         <pathelement location="${build}"/>
         <pathelement location="${htroot}"/>
 	<pathelement location="${libt}/junit.jar" />

@@ -33,22 +33,22 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import com.catcode.odf.ODFMetaFileAnalyzer;
-import com.catcode.odf.OpenDocumentMetadata;
-import com.catcode.odf.OpenDocumentTextInputStream;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
+import de.anomic.document.parser.xml.ODContentHandler;
+import de.anomic.document.parser.xml.ODMetaHandler;
 import de.anomic.http.httpClient;
 import de.anomic.http.httpHeader;
 import de.anomic.http.httpRequestHeader;
@@ -126,6 +126,7 @@ public class odtParser extends AbstractParser implements Idiom {
             // opening the file as zip file
             final ZipFile zipFile= new ZipFile(dest);
             final Enumeration<? extends ZipEntry> zipEnum = zipFile.entries();
+            final SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
             
             // looping through all containing files
             while (zipEnum.hasMoreElements()) {
@@ -150,18 +151,19 @@ public class odtParser extends AbstractParser implements Idiom {
                     
                     // extract data
                     final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
-                    final OpenDocumentTextInputStream odStream = new OpenDocumentTextInputStream(zipFileEntryStream);
-                    FileUtils.copy(odStream, writer, Charset.forName("UTF-8"));
+                    final SAXParser saxParser = saxParserFactory.newSAXParser();
+                    saxParser.parse(zipFileEntryStream, new ODContentHandler(writer));
                 
                     // close readers and writers
-                    odStream.close();
+                    zipFileEntryStream.close();
                     writer.close();
                     
                 } else if (entryName.equals("meta.xml")) {
                     //  meta.xml contains metadata about the document
                     final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);
-                    final ODFMetaFileAnalyzer metaAnalyzer = new ODFMetaFileAnalyzer();
-                    final OpenDocumentMetadata metaData = metaAnalyzer.analyzeMetaData(zipFileEntryStream);
+                    final SAXParser saxParser = saxParserFactory.newSAXParser();
+                    final ODMetaHandler metaData = new ODMetaHandler();
+                    saxParser.parse(zipFileEntryStream, metaData);
                     docDescription = metaData.getDescription();
                     docKeywordStr  = metaData.getKeyword();
                     docShortTitle  = metaData.getTitle();
@@ -260,7 +262,7 @@ public class odtParser extends AbstractParser implements Idiom {
         // Nothing todo here at the moment
         super.reset();
     }
-    
+
     public static void main(final String[] args) {
         try {
             if (args.length != 1) return;

@@ -32,8 +32,8 @@
 	<classpathentry kind="lib" path="lib/poi-3.2-FINAL-20081019.jar"/>
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.2-FINAL-20081019.jar"/>
 	<classpathentry kind="lib" path="lib/webcat-0.1-swf.jar"/>
-	<classpathentry kind="lib" path="lib/odf_utils_05_11_29.jar"/>
 	<classpathentry kind="lib" path="lib/activation.jar"/>
 	<classpathentry kind="lib" path="lib/commons-jxpath-1.3.jar"/>
+	<classpathentry kind="lib" path="libt/junit.jar"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>
