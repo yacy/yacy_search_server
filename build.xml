@@ -864,12 +864,8 @@
     <delete dir="${release}/RPMS" failonerror="false" />
     <delete dir="${release_windows}" failonerror="false" />
   </target>
-
-  <!-- Alias -->
-  <target name="distWinInstaller" depends="winInstallerExe">
-  </target>
 	
-  <target name="winInstallerExe" depends="copyMain4Dist" description="Creates the windows installer.exe">
+  <target name="distWinInstaller" depends="copyMain4Dist" description="Creates an NSIS Windows installer">
     <!-- http://nsisant.sourceforge.net/ -->
     <mkdir dir="${release_windows}" />
     <copy file="build.nsi" tofile="${release_windows}/build.nsi" overwrite="true" filtering="true" />
