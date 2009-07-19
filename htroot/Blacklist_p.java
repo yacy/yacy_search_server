@@ -42,9 +42,9 @@ import java.util.List;
 import de.anomic.data.AbstractBlacklist;
 import de.anomic.data.Blacklist;
 import de.anomic.data.listManager;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.QueryEvent;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
@@ -59,10 +59,10 @@ public class Blacklist_p {
     
     private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         
         // initialize the list manager
-        listManager.switchboard = (plasmaSwitchboard) env;
+        listManager.switchboard = (Switchboard) env;
         listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
         
         // clean up all search events in case that a (new) blacklist entry denies previously returned results
@@ -77,7 +77,7 @@ public class Blacklist_p {
         
         String blacklistToUse = null;
         final serverObjects prop = new serverObjects();
-        prop.putHTML("blacklistEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
+        prop.putHTML("blacklistEngine", Switchboard.urlBlacklist.getEngineInfo());
 
         // do all post operations
         if (post != null) {
@@ -94,17 +94,17 @@ public class Blacklist_p {
 				} catch (final MalformedURLException e) { testurl = null; }
 				if(testurl != null) {
 					prop.putHTML("testlist_url",testurl.toString());
-					if(plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, testurl))
+					if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, testurl))
 						prop.put("testlist_listedincrawler", "1");
-					if(plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, testurl))
+					if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, testurl))
 						prop.put("testlist_listedindht", "1");
-					if(plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_NEWS, testurl))
+					if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_NEWS, testurl))
 						prop.put("testlist_listedinnews", "1");
-					if(plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_PROXY, testurl))
+					if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_PROXY, testurl))
 						prop.put("testlist_listedinproxy", "1");
-					if(plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SEARCH, testurl))
+					if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SEARCH, testurl))
 						prop.put("testlist_listedinsearch", "1");
-					if(plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS, testurl))
+					if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS, testurl))
 						prop.put("testlist_listedinsurftips", "1");
 				}
 				else prop.put("testlist_url","not valid");
@@ -512,7 +512,7 @@ public class Blacklist_p {
      * @return null if no error occured, else a String to put into LOCATION
      */
     private static String addBlacklistEntry(final String blacklistToUse, String newEntry, 
-            final httpRequestHeader header, final String[] supportedBlacklistTypes) {
+            final RequestHeader header, final String[] supportedBlacklistTypes) {
 
         if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
             return "";
@@ -560,7 +560,7 @@ public class Blacklist_p {
             // add to blacklist
             for (int blTypes = 0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                 if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklistToUse)) {
-                    plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes], newEntry.substring(0, pos), newEntry.substring(pos + 1));
+                    Switchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes], newEntry.substring(0, pos), newEntry.substring(pos + 1));
                 }
             }
         }
@@ -577,7 +577,7 @@ public class Blacklist_p {
      * @return null if no error occured, else a String to put into LOCATION
      */
     private static String deleteBlacklistEntry(final String blacklistToUse, String oldEntry, 
-            final httpRequestHeader header, final String[] supportedBlacklistTypes) {
+            final RequestHeader header, final String[] supportedBlacklistTypes) {
 
         if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
             return "";
@@ -610,7 +610,7 @@ public class Blacklist_p {
         }
         for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
             if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
-                plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],oldEntry.substring(0, pos), oldEntry.substring(pos + 1));
+                Switchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],oldEntry.substring(0, pos), oldEntry.substring(pos + 1));
             }
         }
         

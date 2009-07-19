@@ -43,9 +43,9 @@ import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.client.Client;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.yacy.yacyURL;
 
@@ -283,9 +283,9 @@ public class vcfParser extends AbstractParser implements Idiom {
             final yacyURL contentUrl = new yacyURL(args[0], null);
             
             final vcfParser testParser = new vcfParser();
-            final httpRequestHeader reqHeader = new httpRequestHeader();
-            reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-            final byte[] content = httpClient.wget(contentUrl.toString(), reqHeader, 10000);
+            final RequestHeader reqHeader = new RequestHeader();
+            reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
+            final byte[] content = Client.wget(contentUrl.toString(), reqHeader, 10000);
             final ByteArrayInputStream input = new ByteArrayInputStream(content);
             testParser.parse(contentUrl, "text/x-vcard", "UTF-8",input);
         } catch (final Exception e) {

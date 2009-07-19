@@ -24,23 +24,23 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class ConfigWikiSearch {
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         
         // define visible variables
         String a = sb.peers.mySeed().getPublicAddress();
         if (a == null) a = "localhost:" + sb.getConfig("port", "8080");
-        boolean intranet = sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "").equals("intranet");
+        boolean intranet = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("intranet");
         String repository = "http://" + a + "/repository/";
         prop.put("starturl", (intranet) ? repository : "http://");
         prop.put("address", a);

@@ -27,8 +27,8 @@
 import java.io.File;
 import java.io.IOException;
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.mediawikiIndex;
@@ -36,8 +36,8 @@ import de.anomic.tools.mediawikiIndex;
 public class mediawiki_p {
     
     //http://localhost:8080/mediawiki_p.html?dump=wikipedia.de.xml&title=Kartoffel
-    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch env) throws IOException {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) throws IOException {
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         prop.put("title", "");
         prop.put("page", "");

@@ -29,10 +29,10 @@
 
 import java.io.IOException;
 
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNetwork;
@@ -42,11 +42,11 @@ public final class query {
     // example:
     // http://localhost:8080/yacy/query.html?youare=sCJ6Tq8T0N9x&object=lurlcount
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch ss) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch ss) {
         if (post == null || ss == null) { return null; }
 
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
+        final Switchboard sb = (Switchboard) ss;
         final serverObjects prop = new serverObjects();
         if ((post == null) || (ss == null) || !yacyNetwork.authentifyRequest(post, ss)) {
             prop.put("response", "-1"); // request rejected
@@ -55,7 +55,7 @@ public final class query {
         
         if ((sb.isRobinsonMode()) &&
             (!sb.isPublicRobinson()) &&
-            (!sb.isInMyCluster(header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))) {
+            (!sb.isInMyCluster(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP)))) {
         	// if we are a robinson cluster, answer only if we are public robinson peers,
         	// or we are a private cluster and the requester is in our cluster.
           	// if we don't answer, the remote peer will recognize us as junior peer,

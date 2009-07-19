@@ -29,10 +29,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -52,9 +52,9 @@ public class PerformanceQueues_p {
         performanceProfiles.put("defaults/performance_dht.profile", "prefer DHT");
     }
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch sb) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch sb) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
+        final Switchboard switchboard = (Switchboard) sb;
         final serverObjects prop = new serverObjects();
         File defaultSettingsFile = new File(switchboard.getRootPath(), "defaults/yacy.init");
         if(post != null) {
@@ -170,13 +170,13 @@ public class PerformanceQueues_p {
                 
                 onTheFlyReconfiguration(switchboard, threadName, idlesleep, busysleep, memprereq);
             } if (setProfile) {
-                if (threadName.equals(plasmaSwitchboardConstants.PEER_PING)
-                		|| threadName.equals(plasmaSwitchboardConstants.SEED_UPLOAD)
-                		|| threadName.equals(plasmaSwitchboardConstants.CLEANUP)
+                if (threadName.equals(SwitchboardConstants.PEER_PING)
+                		|| threadName.equals(SwitchboardConstants.SEED_UPLOAD)
+                		|| threadName.equals(SwitchboardConstants.CLEANUP)
                 		|| threadName.equals("autoReCrawl")
                 		) { /* do not change any values */ }
-                else if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER)
-                		|| threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
+                else if (threadName.equals(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER)
+                		|| threadName.equals(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
                 	switchboard.setRemotecrawlPPM(Math.max(1, (int) (switchboard.getConfigLong("network.unit.remotecrawl.speed", 60) / multiplier)));
                 }
                 else {
@@ -228,7 +228,7 @@ public class PerformanceQueues_p {
         
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
             final int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);
-            switchboard.setConfig(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
+            switchboard.setConfig(SwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
             switchboard.indexSegment.termIndex().setBufferMaxWordCount(wordCacheMaxCount);
         }
         
@@ -241,7 +241,7 @@ public class PerformanceQueues_p {
             int maxBusy = Integer.parseInt(post.get("Crawler Pool_maxActive","8"));
             
             // storing the new values into configfile
-            switchboard.setConfig(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX,maxBusy);
+            switchboard.setConfig(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX,maxBusy);
             //switchboard.setConfig("crawler.MinIdleThreads",minIdle);
             
             /* 
@@ -266,9 +266,9 @@ public class PerformanceQueues_p {
         }
         
         if ((post != null) && (post.containsKey("onlineCautionSubmit"))) {
-            switchboard.setConfig(plasmaSwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseProxy", 30000)));
-            switchboard.setConfig(plasmaSwitchboardConstants.LOCALSEACH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseLocalsearch", 30000)));
-            switchboard.setConfig(plasmaSwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseRemotesearch", 30000)));
+            switchboard.setConfig(SwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseProxy", 30000)));
+            switchboard.setConfig(SwitchboardConstants.LOCALSEACH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseLocalsearch", 30000)));
+            switchboard.setConfig(SwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseRemotesearch", 30000)));
         }
         
         if ((post != null) && (post.containsKey("minimumDeltaSubmit"))) {
@@ -291,10 +291,10 @@ public class PerformanceQueues_p {
         prop.putNum("maxAgeOfCache", switchboard.indexSegment.termIndex().getBufferMaxAge() / 1000 / 60); // minutes
         prop.putNum("minAgeOfCache", switchboard.indexSegment.termIndex().getBufferMinAge() / 1000 / 60); // minutes
         prop.putNum("maxWaitingWordFlush", switchboard.getConfigLong("maxWaitingWordFlush", 180));
-        prop.put("wordCacheMaxCount", switchboard.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 20000));
-        prop.put("crawlPauseProxy", switchboard.getConfigLong(plasmaSwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, 30000));
-        prop.put("crawlPauseLocalsearch", switchboard.getConfigLong(plasmaSwitchboardConstants.LOCALSEACH_ONLINE_CAUTION_DELAY, 30000));
-        prop.put("crawlPauseRemotesearch", switchboard.getConfigLong(plasmaSwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, 30000));
+        prop.put("wordCacheMaxCount", switchboard.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000));
+        prop.put("crawlPauseProxy", switchboard.getConfigLong(SwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, 30000));
+        prop.put("crawlPauseLocalsearch", switchboard.getConfigLong(SwitchboardConstants.LOCALSEACH_ONLINE_CAUTION_DELAY, 30000));
+        prop.put("crawlPauseRemotesearch", switchboard.getConfigLong(SwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, 30000));
         prop.putNum("crawlPauseProxyCurrent", (System.currentTimeMillis() - switchboard.proxyLastAccess) / 1000);
         prop.putNum("crawlPauseLocalsearchCurrent", (System.currentTimeMillis() - switchboard.localSearchLastAccess) / 1000);
         prop.putNum("crawlPauseRemotesearchCurrent", (System.currentTimeMillis() - switchboard.remoteSearchLastAccess) / 1000);
@@ -333,7 +333,7 @@ public class PerformanceQueues_p {
      * @param busysleep
      * @param memprereq
      */
-    private static void onTheFlyReconfiguration(final plasmaSwitchboard switchboard, final String threadName, final long idlesleep,
+    private static void onTheFlyReconfiguration(final Switchboard switchboard, final String threadName, final long idlesleep,
             final long busysleep, final long memprereq) {
         // on-the-fly re-configuration
         switchboard.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);

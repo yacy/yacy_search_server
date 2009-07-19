@@ -31,7 +31,7 @@ package de.anomic.yacy;
 import java.io.File;
 
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 
 public class yacyAccessible {
     public long lastUpdated;
@@ -43,7 +43,7 @@ public class yacyAccessible {
      */
     public static void setNewPortLink(final int newPort){
     	try {
-        	final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        	final Switchboard sb = Switchboard.getSwitchboard();
         	final File shortcut = new File(sb.getRootPath() + "/addon/YaCy-Search.html".replace("/", File.separator));
         	final String content = "<meta http-equiv=\"refresh\" content=\"0;url=http://localhost:" + newPort + "/\">";
         	FileUtils.copy(content.getBytes(), shortcut);
@@ -58,7 +58,7 @@ public class yacyAccessible {
      */
     public static void setNewPortBat(final int newPort){
     	try {
-        	final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        	final Switchboard sb = Switchboard.getSwitchboard();
         	final File shortcut = new File(sb.getRootPath() + "/addon/YaCy-Search.bat".replace("/", File.separator));
         	final String content = "rundll32 url.dll,FileProtocolHandler \"http://localhost:" + newPort + "\"";
         	FileUtils.copy(content.getBytes(), shortcut);

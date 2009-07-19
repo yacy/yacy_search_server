@@ -49,8 +49,8 @@ import de.anomic.data.AbstractBlacklist;
 import de.anomic.data.Blacklist;
 import de.anomic.data.DefaultBlacklist;
 import de.anomic.data.listManager;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.logging.Log;
@@ -75,11 +75,11 @@ public class BlacklistCleaner_p {
         DefaultBlacklist.class
     };
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         
         // initialize the list manager
-        listManager.switchboard = (plasmaSwitchboard) env;
+        listManager.switchboard = (Switchboard) env;
         listManager.listsPath = new File(env.getRootPath(), env.getConfig("listManager.listsPath", "DATA/LISTS"));
         String blacklistToUse = null;
         
@@ -113,10 +113,10 @@ public class BlacklistCleaner_p {
             }
             
             // list illegal entries
-            final HashMap<String, Integer> ies = getIllegalEntries(blacklistToUse, plasmaSwitchboard.urlBlacklist);
+            final HashMap<String, Integer> ies = getIllegalEntries(blacklistToUse, Switchboard.urlBlacklist);
             prop.put(RESULTS + "blList", blacklistToUse);
             prop.put(RESULTS + "entries", ies.size());
-            prop.putHTML(RESULTS + "blEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
+            prop.putHTML(RESULTS + "blEngine", Switchboard.urlBlacklist.getEngineInfo());
             prop.put(RESULTS + "disabled", (ies.size() == 0) ? "1" : "0");
             if (ies.size() > 0) {
                 prop.put(RESULTS + DISABLED + "entries", ies.size());
@@ -137,7 +137,7 @@ public class BlacklistCleaner_p {
     private static void putBlacklists(final serverObjects prop, final List<String> lists, final String selected) {
         boolean supported = false;
         for (int i=0; i<supportedBLEngines.length && !supported; i++) {
-            supported |= (plasmaSwitchboard.urlBlacklist.getClass() == supportedBLEngines[i]);
+            supported |= (Switchboard.urlBlacklist.getClass() == supportedBLEngines[i]);
         }
         
         if (supported) {
@@ -295,7 +295,7 @@ public class BlacklistCleaner_p {
                     final String host = (s.indexOf("/") == -1) ? s : s.substring(0, s.indexOf("/"));
                     final String path = (s.indexOf("/") == -1) ? ".*" : s.substring(s.indexOf("/") + 1);
                     try {
-                    plasmaSwitchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],
+                    Switchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],
                             host,path);
                     } catch (final RuntimeException e) {
                         //System.err.println(e.getMessage() + ": " + host + "/" + path);
@@ -332,7 +332,7 @@ public class BlacklistCleaner_p {
                 pw.println(host + "/" + path);
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                     if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
-                        plasmaSwitchboard.urlBlacklist.add(
+                        Switchboard.urlBlacklist.add(
                                 supportedBlacklistTypes[blTypes],
                                 host,
                                 path);

@@ -28,17 +28,17 @@
 //import java.net.*;
 //import java.io.*;
 //import de.anomic.tools.*;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class IndexShare_p {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
     	// return variable that accumulates replacements
-        final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        final Switchboard switchboard = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
         if(switchboard == null) {
@@ -61,7 +61,7 @@ public class IndexShare_p {
         }
         
         if (post.containsKey("indexsharesetting")) {
-            switchboard.setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, (post.containsKey("distribute")) ? "true" : "false");
+            switchboard.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, (post.containsKey("distribute")) ? "true" : "false");
             switchboard.setConfig("allowReceiveIndex", (post.containsKey("receive")) ? "true" : "false");
             switchboard.setConfig("defaultLinkReceiveFrequency", post.get("linkfreq", "30"));
             switchboard.setConfig("defaultWordReceiveFrequency", post.get("wordfreq", "10"));

@@ -26,18 +26,18 @@ import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWebStructure;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
+import de.anomic.ymage.WebStructureGraph;
 
 public class webstructure {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final boolean latest = ((post == null) ? false : post.containsKey("latest"));
         String about = ((post == null) ? null : post.get("about", null));
         prop.put("out", 0);
@@ -53,7 +53,7 @@ public class webstructure {
                 }
             }
             if (url != null && about != null) {
-                plasmaWebStructure.structureEntry sentry = sb.webStructure.outgoingReferences(about);
+                WebStructureGraph.structureEntry sentry = sb.webStructure.outgoingReferences(about);
                 if (sentry != null) {
                     reference(prop, "out", 0, sentry, sb.webStructure);
                     prop.put("out_domains", 1);
@@ -73,9 +73,9 @@ public class webstructure {
                 }
             }
         } else {
-            final Iterator<plasmaWebStructure.structureEntry> i = sb.webStructure.structureEntryIterator(latest);
+            final Iterator<WebStructureGraph.structureEntry> i = sb.webStructure.structureEntryIterator(latest);
             int c = 0;
-            plasmaWebStructure.structureEntry sentry;
+            WebStructureGraph.structureEntry sentry;
             while (i.hasNext()) {
                 sentry = i.next();
                 reference(prop, "out", c, sentry, sb.webStructure);
@@ -85,14 +85,14 @@ public class webstructure {
             prop.put("out", 1);
             if (latest) sb.webStructure.joinOldNew();
         }
-        prop.put("out_maxref", plasmaWebStructure.maxref);
-        prop.put("maxhosts", plasmaWebStructure.maxhosts);
+        prop.put("out_maxref", WebStructureGraph.maxref);
+        prop.put("maxhosts", WebStructureGraph.maxhosts);
         
         // return rewrite properties
         return prop;
     }
     
-    public static void reference(serverObjects prop, String prefix, int c, plasmaWebStructure.structureEntry sentry, plasmaWebStructure ws) {
+    public static void reference(serverObjects prop, String prefix, int c, WebStructureGraph.structureEntry sentry, WebStructureGraph ws) {
         prop.put(prefix + "_domains_" + c + "_hash", sentry.domhash);
         prop.put(prefix + "_domains_" + c + "_domain", sentry.domain);
         prop.put(prefix + "_domains_" + c + "_date", sentry.date);

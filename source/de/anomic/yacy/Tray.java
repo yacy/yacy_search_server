@@ -37,13 +37,13 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverSystem;
 
 
 public final class Tray {
-    protected static plasmaSwitchboard sb;
+    protected static Switchboard sb;
 	
 	private static nativeTrayIcon ti;
 	private static boolean isIntegrated; // browser integration
@@ -55,13 +55,13 @@ public final class Tray {
 	public static boolean lockBrowserPopup = true;
 	
 	
-	public static void init(final plasmaSwitchboard par_sb) {
+	public static void init(final Switchboard par_sb) {
 		sb = par_sb;
-		isIntegrated = sb.getConfigBool(plasmaSwitchboardConstants.BROWSERINTEGRATION, false);
-		trayLabel = sb.getConfig(plasmaSwitchboardConstants.TRAY_LABEL, "YaCy");
+		isIntegrated = sb.getConfigBool(SwitchboardConstants.BROWSERINTEGRATION, false);
+		trayLabel = sb.getConfig(SwitchboardConstants.TRAY_LABEL, "YaCy");
 		try {
-			final boolean trayIcon = sb.getConfigBool(plasmaSwitchboardConstants.TRAY_ICON_ENABLED, false);
-			if (trayIcon && (serverSystem.isWindows || sb.getConfigBool(plasmaSwitchboardConstants.TRAY_ICON_FORCED, false))) {
+			final boolean trayIcon = sb.getConfigBool(SwitchboardConstants.TRAY_ICON_ENABLED, false);
+			if (trayIcon && (serverSystem.isWindows || sb.getConfigBool(SwitchboardConstants.TRAY_ICON_FORCED, false))) {
 				System.setProperty("java.awt.headless", "false");
 
 				if(nativeTrayIcon.isSupported()) {

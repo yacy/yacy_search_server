@@ -5,27 +5,27 @@ import java.util.Iterator;
 
 import de.anomic.data.bookmarksDB;
 import de.anomic.document.parser.html.CharacterCoding;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class xbel {
 
 	private static final serverObjects prop = new serverObjects();
-	private static plasmaSwitchboard switchboard = null;
+	private static Switchboard switchboard = null;
 	private static boolean isAdmin = false;
 	private static int R = 1; // TODO: solve the recursion problem an remove global variable
 	
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
  
     	int count = 0;;
     	String root = "/";
     	int style = 0;
     	
     	prop.clear();
-    	switchboard = (plasmaSwitchboard) env;    	
+    	switchboard = (Switchboard) env;    	
     	isAdmin=switchboard.verifyAuthentication(header, true);   
 
     	if(post != null) {

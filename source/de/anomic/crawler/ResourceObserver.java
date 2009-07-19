@@ -28,8 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.tools.diskUsage;
 import de.anomic.yacy.logging.Log;
 
@@ -48,7 +48,7 @@ public final class ResourceObserver {
     private static final int HIGH = 2;
     
     public static final Log log = new Log("RESOURCE OBSERVER");
-    private final plasmaSwitchboard sb;
+    private final Switchboard sb;
 
     private int checkDiskUsageCount;
     private int checkMemoryUsageCount;
@@ -60,7 +60,7 @@ public final class ResourceObserver {
      * and pauses crawls if necessary
      * @param sb the plasmaSwitchboard
      */
-    public ResourceObserver(final plasmaSwitchboard sb) {
+    public ResourceObserver(final Switchboard sb) {
         this.sb = sb;
         log.logInfo("initializing the resource observer");
 
@@ -68,11 +68,11 @@ public final class ResourceObserver {
         //  FIXME whats about the secondary path???
         //   = (getConfig(plasmaSwitchboard.INDEX_SECONDARY_PATH, "");
         final String[] pathes =  {
-                            plasmaSwitchboardConstants.HTDOCS_PATH,        
-                            plasmaSwitchboardConstants.INDEX_PRIMARY_PATH,
-                            plasmaSwitchboardConstants.LISTS_PATH,
-                            plasmaSwitchboardConstants.RANKING_PATH,
-                            plasmaSwitchboardConstants.WORK_PATH};
+                            SwitchboardConstants.HTDOCS_PATH,        
+                            SwitchboardConstants.INDEX_PRIMARY_PATH,
+                            SwitchboardConstants.LISTS_PATH,
+                            SwitchboardConstants.RANKING_PATH,
+                            SwitchboardConstants.WORK_PATH};
         String path;
         for (final String element : pathes) {
             try {
@@ -93,7 +93,7 @@ public final class ResourceObserver {
     }
     
     public static void initThread() {
-    	plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+    	Switchboard sb = Switchboard.getSwitchboard();
     	// initializing the resourceObserver
     	sb.observer =  new ResourceObserver(sb);
     	// run the oberver here a first time
@@ -120,17 +120,17 @@ public final class ResourceObserver {
         }
         
         if (tmpDisksFree < HIGH || tmpMemoryFree < HIGH) {
-            if (!sb.crawlJobIsPaused(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
+            if (!sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
                 log.logInfo("pausing local crawls");
-                sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
             }
-            if (!sb.crawlJobIsPaused(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
+            if (!sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
                 log.logInfo("pausing remote triggered crawls");
-                sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
             }
-            if (tmpDisksFree == LOW && sb.getConfigBool(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false)) {
+            if (tmpDisksFree == LOW && sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false)) {
             	log.logInfo("disabling index receive");
-                sb.setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
                 sb.peers.mySeed().setFlagAcceptRemoteIndex(false);
             }
         }

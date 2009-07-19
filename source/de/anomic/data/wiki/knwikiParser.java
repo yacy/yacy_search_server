@@ -38,15 +38,15 @@ import de.anomic.data.wiki.tokens.ListToken;
 import de.anomic.data.wiki.tokens.SimpleToken;
 import de.anomic.data.wiki.tokens.TableToken;
 import de.anomic.data.wiki.tokens.Token;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 
 public class knwikiParser implements wikiParser {
 	
 	public Token[] tokens;
 	private String[] BEs;
-    private final plasmaSwitchboard sb;
+    private final Switchboard sb;
     
-    private knwikiParser(final plasmaSwitchboard sb) {
+    private knwikiParser(final Switchboard sb) {
         this.sb = sb;
     }
 	

@@ -6,16 +6,16 @@ import java.util.Iterator;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.userDB;
 import de.anomic.document.parser.html.CharacterCoding;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class get_bookmarks {    
 	
 	private static final serverObjects prop = new serverObjects();
-	private static plasmaSwitchboard sb = null;
+	private static Switchboard sb = null;
 	private static userDB.Entry user = null;
 	private static boolean isAdmin = false;
 	
@@ -35,10 +35,10 @@ public class get_bookmarks {
 	final static int RSS = 3;		// .xml (.rss)
 	final static int RDF = 4;		// .xml
 	
-	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         		
 		prop.clear();
-    	sb = (plasmaSwitchboard) env;
+    	sb = (Switchboard) env;
     	user = sb.userDB.getUser(header);   
     	isAdmin = (sb.verifyAuthentication(header, true) || user != null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT));
     	    	    	

@@ -35,10 +35,10 @@ import java.util.regex.PatternSyntaxException;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.NoticedURL;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.crawler.retrieval.Request;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
@@ -59,9 +59,9 @@ public class IndexCreateWWWLocalQueue_p {
     private static final int INITIATOR  = 5;
     private static final int MODIFIED   = 6;
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
  
         int showLimit = 100;

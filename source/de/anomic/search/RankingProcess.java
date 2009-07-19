@@ -54,10 +54,9 @@ import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.SortStack;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaProfiling;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;
+import de.anomic.ymage.ProfilingGraph;
 
 public final class RankingProcess {
     
@@ -133,7 +132,7 @@ public final class RankingProcess {
                 query.maxDistance);
         this.localSearchInclusion = search.inclusion();
         final ReferenceContainer<WordReference> index = search.joined();
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), QueryEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
+        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), QueryEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
         if (index.size() == 0) {
             return;
         }
@@ -158,7 +157,7 @@ public final class RankingProcess {
         
         // normalize entries
         final ArrayList<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), QueryEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
+        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), QueryEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
         
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
@@ -239,7 +238,7 @@ public final class RankingProcess {
         }
         
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), QueryEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
+        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), QueryEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
     }
     
     private boolean testFlags(final WordReference ientry) {
@@ -525,8 +524,8 @@ public final class RankingProcess {
                 "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_".indexOf(word) < 0 &&
                 !query.queryHashes.contains(Word.word2hash(word)) &&
                 word.matches("[a-z]+") &&
-                !plasmaSwitchboard.badwords.contains(word) &&
-                !plasmaSwitchboard.stopwords.contains(word)) {
+                !Switchboard.badwords.contains(word) &&
+                !Switchboard.stopwords.contains(word)) {
                 c = ref.get(word);
                 if (c == null) ref.put(word, 1); else ref.put(word, c.intValue() + 1);
             }

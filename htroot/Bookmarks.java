@@ -41,11 +41,11 @@ import de.anomic.data.listManager;
 import de.anomic.data.userDB;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.document.Document;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.search.SnippetCache;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsPool;
@@ -57,7 +57,7 @@ import de.anomic.yacy.logging.Log;
 public class Bookmarks {
 
 	private static final serverObjects prop = new serverObjects();
-	private static plasmaSwitchboard sb = null;
+	private static Switchboard sb = null;
 	private static userDB.Entry user = null;
 	private static boolean isAdmin = false;	
 
@@ -67,7 +67,7 @@ public class Bookmarks {
 	final static boolean TAGS = false;
 	final static boolean FOLDERS = true;
 	
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
     	int max_count = 10;
     	int start=0;
@@ -76,7 +76,7 @@ public class Bookmarks {
     	String username="";
     	
     	prop.clear();
-    	sb = (plasmaSwitchboard) env;
+    	sb = (Switchboard) env;
     	user = sb.userDB.getUser(header);   
     	isAdmin=(sb.verifyAuthentication(header, true) || user!= null && user.hasRight(userDB.Entry.BOOKMARK_RIGHT));
     

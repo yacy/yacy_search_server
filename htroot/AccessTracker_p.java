@@ -35,10 +35,10 @@ import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.text.SimpleDateFormat;
 
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.net.natLib;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.search.QueryParams;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -56,8 +56,8 @@ public class AccessTracker_p {
 		return accessClone;
 	}
 	
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
      
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();

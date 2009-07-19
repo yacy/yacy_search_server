@@ -34,7 +34,7 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.TreeSet;
 
-import de.anomic.http.httpTemplate;
+import de.anomic.http.server.TemplateEngine;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.server.serverCharBuffer;
 
@@ -117,13 +117,13 @@ public class ContentTransformer extends AbstractTransformer implements Transform
         final ArrayList<String> result = new ArrayList<String>();
         
         final ByteBuffer sbb = new ByteBuffer(text);
-        final ByteBuffer[] sbbs = httpTemplate.splitQuotations(sbb);
+        final ByteBuffer[] sbbs = TemplateEngine.splitQuotations(sbb);
         for (int i = 0; i < sbbs.length; i++) {
             // TODO: avoid empty if statements
             if (sbbs[i].isWhitespace(true)) {
                 //sbb.append(sbbs[i]);
-            } else if ((sbbs[i].byteAt(0) == httpTemplate.hash) ||
-                       (sbbs[i].startsWith(httpTemplate.dpdpa))) {
+            } else if ((sbbs[i].byteAt(0) == TemplateEngine.hash) ||
+                       (sbbs[i].startsWith(TemplateEngine.dpdpa))) {
                 // this is a template or a part of a template
                 //sbb.append(sbbs[i]);
             } else {

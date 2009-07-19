@@ -40,14 +40,14 @@ import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.document.parser.html.ImageEntry;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.http.httpResponseHeader;
+import de.anomic.http.client.Client;
+import de.anomic.http.client.Cache;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.search.SnippetCache;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
@@ -65,10 +65,10 @@ public class ViewFile {
     private static final String HIGHLIGHT_CSS = "searchHighlight";
     private static final int MAX_HIGHLIGHTS = 6;
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         final serverObjects prop = new serverObjects();
-        final plasmaSwitchboard sb = (plasmaSwitchboard)env;
+        final Switchboard sb = (Switchboard)env;
         
         final int display = (post == null) ? 0 : post.getInt("display", 0);
         
@@ -143,12 +143,12 @@ public class ViewFile {
         // loading the resource content as byte array
         InputStream resource = null;
         long resourceLength = -1;
-        httpResponseHeader responseHeader = null;
+        ResponseHeader responseHeader = null;
         String resMime = null;
         // trying to load the resource body
-        resource = plasmaHTCache.getResourceContentStream(url);
-        resourceLength = plasmaHTCache.getResourceContentLength(url);
-        responseHeader = plasmaHTCache.loadResponseHeader(url);
+        resource = Cache.getResourceContentStream(url);
+        resourceLength = Cache.getResourceContentLength(url);
+        responseHeader = Cache.loadResponseHeader(url);
 
         // if the resource body was not cached we try to load it from web
         if (resource == null) {
@@ -163,8 +163,8 @@ public class ViewFile {
             }
 
             if (entry != null) {
-                resource = plasmaHTCache.getResourceContentStream(url);
-                resourceLength = plasmaHTCache.getResourceContentLength(url);
+                resource = Cache.getResourceContentStream(url);
+                resourceLength = Cache.getResourceContentLength(url);
             }
 
             if (resource == null) {
@@ -180,7 +180,7 @@ public class ViewFile {
 
             // try to load the metadata from cache
             try {
-                responseHeader = plasmaHTCache.loadResponseHeader(url);
+                responseHeader = Cache.loadResponseHeader(url);
             } catch (final Exception e) {
                 /* ignore this */
             }
@@ -194,7 +194,7 @@ public class ViewFile {
                     return prop;
                 }
 
-                responseHeader = httpClient.whead(url.toString());
+                responseHeader = Client.whead(url.toString());
                 if (responseHeader == null) {
                     prop.put("error", "4");
                     prop.put("error_errorText", "Unable to load resource metadata.");

@@ -3,17 +3,17 @@ import java.awt.Image;
 import java.util.HashMap;
 import java.util.Iterator;
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaGrafics;
-import de.anomic.plasma.plasmaSwitchboardConstants;
-import de.anomic.plasma.plasmaGrafics.CircleThreadPiece;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.ymage.NetworkGraph;
+import de.anomic.ymage.NetworkGraph.CircleThreadPiece;
 
 public class PeerLoadPicture {
     
-    public static Image respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static Image respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         int width = 800;
         int height = 600;
@@ -29,8 +29,8 @@ public class PeerLoadPicture {
         final CircleThreadPiece misc = new CircleThreadPiece("Misc.", new Color(190,  50, 180));
         final HashMap<String, CircleThreadPiece> pieces = new HashMap<String, CircleThreadPiece>();
         pieces.put(null, idle);
-        pieces.put(plasmaSwitchboardConstants.INDEX_DIST, new CircleThreadPiece("DHT-Distribution", new Color(119, 136, 153)));
-        pieces.put(plasmaSwitchboardConstants.PEER_PING,  new CircleThreadPiece("YaCy Core",        new Color(255, 230, 160)));
+        pieces.put(SwitchboardConstants.INDEX_DIST, new CircleThreadPiece("DHT-Distribution", new Color(119, 136, 153)));
+        pieces.put(SwitchboardConstants.PEER_PING,  new CircleThreadPiece("YaCy Core",        new Color(255, 230, 160)));
         
         final Iterator<String> threads = env.threadNames();
         String threadname;
@@ -75,7 +75,7 @@ public class PeerLoadPicture {
         if (width > 1920) width = 1920;
         if (height < 30) height = 30;
         if (height > 1440) height = 1440;
-        return plasmaGrafics.getPeerLoadPicture(
+        return NetworkGraph.getPeerLoadPicture(
                 5000,
                 width,
                 height,

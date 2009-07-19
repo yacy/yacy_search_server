@@ -36,19 +36,18 @@ import java.util.TreeSet;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.document.parser.xml.RSSFeed;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.SortStack;
 import de.anomic.net.natLib;
-import de.anomic.plasma.plasmaProfiling;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.QueryEvent;
+import de.anomic.search.Switchboard;
 import de.anomic.search.QueryEvent.ResultEntry;
 import de.anomic.search.RankingProcess.NavigatorEntry;
 import de.anomic.server.serverCore;
@@ -61,18 +60,19 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
+import de.anomic.ymage.ProfilingGraph;
 
 public final class search {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         sb.remoteSearchLastAccess = System.currentTimeMillis();
         
         final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
-        final String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
+        final String client = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP);
 
         //System.out.println("yacy: search received request = " + post.toString());
 
@@ -127,7 +127,7 @@ public final class search {
 
         if ((sb.isRobinsonMode()) &&
              	 (!((sb.isPublicRobinson()) ||
-             	    (sb.isInMyCluster(header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
+             	    (sb.isInMyCluster(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP)))))) {
                  // if we are a robinson cluster, answer only if this client is known by our network definition
         	prop.put("links", "");
             prop.put("linkcount", "0");
@@ -217,7 +217,7 @@ public final class search {
             //final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
             final HashMap<byte[], ReferenceContainer<WordReference>> incc = sb.indexSegment.termIndex().searchConjunction(theQuery.queryHashes, QueryParams.hashes2StringSet(urls));
             
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), QueryEvent.COLLECTION, incc.size(), System.currentTimeMillis() - timer), false);
+            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), QueryEvent.COLLECTION, incc.size(), System.currentTimeMillis() - timer), false);
             if (incc != null) {
                 final Iterator<Map.Entry<byte[], ReferenceContainer<WordReference>>> ci = incc.entrySet().iterator();
                 Map.Entry<byte[], ReferenceContainer<WordReference>> entry;
@@ -333,7 +333,7 @@ public final class search {
                 refstr.append(",").append(e.name);
             }
             prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), "reference collection", ws.size(), System.currentTimeMillis() - timer), false);
+            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), "reference collection", ws.size(), System.currentTimeMillis() - timer), false);
         }
         prop.put("indexabstract", indexabstract.toString());
         
@@ -360,7 +360,7 @@ public final class search {
             }
             prop.put("links", links.toString());
             prop.put("linkcount", accu.size());
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), "result list preparation", accu.size(), System.currentTimeMillis() - timer), false);
+            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), "result list preparation", accu.size(), System.currentTimeMillis() - timer), false);
         }
         
         // add information about forward peers

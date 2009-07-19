@@ -41,14 +41,14 @@ import org.xml.sax.helpers.DefaultHandler;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpResponse;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.http.httpdByteCountInputStream;
+import de.anomic.http.client.Client;
+import de.anomic.http.io.ByteCountInputStream;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.metadata.ResponseContainer;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
@@ -131,9 +131,9 @@ public class SitemapParser extends DefaultHandler {
      * last modification date of the {@link #nextURL}
      */
     private Date lastMod = null;
-    private final plasmaSwitchboard sb;
+    private final Switchboard sb;
     
-    public SitemapParser(final plasmaSwitchboard sb, final yacyURL sitemap, final CrawlProfile.entry theCrawlingProfile) {
+    public SitemapParser(final Switchboard sb, final yacyURL sitemap, final CrawlProfile.entry theCrawlingProfile) {
         assert sitemap != null;
         this.sb = sb;
         this.siteMapURL = sitemap;
@@ -152,10 +152,10 @@ public class SitemapParser extends DefaultHandler {
      */
     public void parse() {
         // download document
-        final httpRequestHeader requestHeader = new httpRequestHeader();
-        requestHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-        final httpClient client = new httpClient(5000, requestHeader);
-        httpResponse res = null;
+        final RequestHeader requestHeader = new RequestHeader();
+        requestHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
+        final Client client = new Client(5000, requestHeader);
+        ResponseContainer res = null;
         try {
             res = client.GET(siteMapURL.toString());
             if (res.getStatusCode() != 200) {
@@ -176,7 +176,7 @@ public class SitemapParser extends DefaultHandler {
                     contentStream = new GZIPInputStream(contentStream);
                 }
 
-                final httpdByteCountInputStream counterStream = new httpdByteCountInputStream(contentStream, null);
+                final ByteCountInputStream counterStream = new ByteCountInputStream(contentStream, null);
                 // parse it
                 logger.logInfo("Start parsing sitemap file " + this.siteMapURL + "\n\tMimeType: " + contentMimeType +
                         "\n\tLength:   " + this.contentLength);

@@ -35,14 +35,14 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.http.httpRemoteProxyConfig;
-import de.anomic.http.httpd;
-import de.anomic.http.httpdProxyHandler;
+import de.anomic.http.client.RemoteProxyConfig;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.HTTPDemon;
+import de.anomic.http.server.HTTPDProxyHandler;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -55,13 +55,13 @@ public class SettingsAck_p {
     
     private static boolean nothingChanged = false;
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         
         // get referer for backlink
-        final String referer = header.get(httpRequestHeader.REFERER);
+        final String referer = header.get(RequestHeader.REFERER);
         prop.put("referer", (referer == null) ? "Settings_p.html" : referer); 
         
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
@@ -91,7 +91,7 @@ public class SettingsAck_p {
                 return prop;
             }
             // check passed. set account:
-            env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
+            env.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
             env.setConfig("adminAccount", "");
             prop.put("info", "5");//admin account changed
             prop.putHTML("info_user", user);
@@ -190,14 +190,14 @@ public class SettingsAck_p {
         if (post.containsKey("httpNetworking")) {
             
             // set transparent proxy flag
-            httpdProxyHandler.isTransparentProxy = post.containsKey("isTransparentProxy");
-            env.setConfig("isTransparentProxy", httpdProxyHandler.isTransparentProxy ? "true" : "false");
-            prop.put("info_isTransparentProxy", httpdProxyHandler.isTransparentProxy ? "on" : "off");
+            HTTPDProxyHandler.isTransparentProxy = post.containsKey("isTransparentProxy");
+            env.setConfig("isTransparentProxy", HTTPDProxyHandler.isTransparentProxy ? "true" : "false");
+            prop.put("info_isTransparentProxy", HTTPDProxyHandler.isTransparentProxy ? "on" : "off");
             
             // setting the keep alive property
-            httpd.keepAliveSupport = post.containsKey("connectionKeepAliveSupport");
-            env.setConfig("connectionKeepAliveSupport", httpd.keepAliveSupport ? "true" : "false");
-            prop.put("info_connectionKeepAliveSupport", httpd.keepAliveSupport ? "on" : "off"); 
+            HTTPDemon.keepAliveSupport = post.containsKey("connectionKeepAliveSupport");
+            env.setConfig("connectionKeepAliveSupport", HTTPDemon.keepAliveSupport ? "true" : "false");
+            prop.put("info_connectionKeepAliveSupport", HTTPDemon.keepAliveSupport ? "on" : "off"); 
             
             // setting via header property
             env.setConfig("proxy.sendViaHeader", post.containsKey("proxy.sendViaHeader")?"true":"false");
@@ -324,7 +324,7 @@ public class SettingsAck_p {
             /* ====================================================================
              * Enabling settings
              * ==================================================================== */
-            httpRemoteProxyConfig.init(sb);            
+            RemoteProxyConfig.init(sb);            
             
             prop.put("info", "15"); // The remote-proxy setting has been changed
             return prop;

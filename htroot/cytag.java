@@ -31,19 +31,19 @@ import java.io.IOException;
 import java.util.Date;
 
 import de.anomic.document.parser.html.CharacterCoding;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.ymage.ymageImageParser;
 
 public class cytag {
     
-    public static Image respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static Image respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         
-        final plasmaSwitchboard sb = (plasmaSwitchboard)env;
+        final Switchboard sb = (Switchboard)env;
 
         // harvest request information
         StringBuilder connect = new StringBuilder();

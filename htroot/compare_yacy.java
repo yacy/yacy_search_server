@@ -24,8 +24,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
@@ -55,8 +55,8 @@ public class compare_yacy {
         searchengines.put("Sciencenet", "http://sciencenet.fzk.de:8080/yacysearch.html?display=2&verify=true&resource=global&query=");
     }
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int display = ((post == null) || (!authenticated)) ? 0 : post.getInt("display", 0);
         final servletProperties prop = new servletProperties();

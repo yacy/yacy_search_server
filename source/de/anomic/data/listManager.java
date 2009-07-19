@@ -43,13 +43,13 @@ import java.util.Set;
 import java.util.Vector;
 
 import de.anomic.data.Blacklist.blacklistFile;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 
 // The Naming of the functions is a bit strange...
 
 public class listManager {
-    public static plasmaSwitchboard switchboard = null;
+    public static Switchboard switchboard = null;
     public static File listsPath = null;
 
     /**
@@ -403,8 +403,8 @@ public class listManager {
             blacklistFiles.add(blFile);
         }
         
-        plasmaSwitchboard.urlBlacklist.clear();
-        plasmaSwitchboard.urlBlacklist.loadList(
+        Switchboard.urlBlacklist.clear();
+        Switchboard.urlBlacklist.loadList(
                 blacklistFiles.toArray(new blacklistFile[blacklistFiles.size()]),
                 "/");
 

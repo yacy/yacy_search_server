@@ -36,8 +36,8 @@ import java.net.MalformedURLException;
 import javax.imageio.ImageIO;
 
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.client.Cache;
+import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
@@ -77,12 +77,12 @@ public class ymageOSM {
             return null;
         }
         System.out.println("*** DEBUG: fetching OSM tile: " + tileURL.toNormalform(true, true));
-        InputStream tileStream = plasmaHTCache.getResourceContentStream(tileURL);
+        InputStream tileStream = Cache.getResourceContentStream(tileURL);
         if (tileStream == null) {
             // download resource using the crawler and keep resource in memory if possible
             Response entry = null;
             try {
-                entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(tileURL, false, false);
+                entry = Switchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(tileURL, false, false);
             } catch (IOException e) {
                 Log.logWarning("yamyOSM", "cannot load: " + e.getMessage());
                 return null;

@@ -27,13 +27,13 @@
 import java.io.File;
 import java.io.IOException;
 
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaRankingDistribution;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
+import de.anomic.search.blockrank.CRDistribution;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNetwork;
@@ -41,8 +41,8 @@ import de.anomic.yacy.yacySeed;
 
 public final class transfer {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
@@ -72,8 +72,8 @@ public final class transfer {
             // reject unknown peers: this does not appear fair, but anonymous senders are dangerous
             // reject paths that contain '..' because they are dangerous
             if (sb.getLog().isFine()) {
-                if (otherseed == null) sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "', current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
-                if (filename.indexOf("..") >= 0) sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + (otherseed == null ? "null" : otherseed.getName() + "/" + otherseed.getPublicAddress()) + ", current IP " + header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "unknown"));
+                if (otherseed == null) sb.getLog().logFine("RankingTransmission: rejected unknown peer '" + otherpeer + "', current IP " + header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "unknown"));
+                if (filename.indexOf("..") >= 0) sb.getLog().logFine("RankingTransmission: rejected wrong path '" + filename + "' from peer " + (otherseed == null ? "null" : otherseed.getName() + "/" + otherseed.getPublicAddress()) + ", current IP " + header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "unknown"));
             }
             return prop;
         }
@@ -115,7 +115,7 @@ public final class transfer {
                     if (sb.getLog().isFine()) sb.getLog().logFine("RankingTransmission: denied " + otherpeerName + " to send CR file " + filename + ": wrong access code");
                 } else {
                     sb.rankingPermissions.remove(accesscode); // not needed any more
-                    final File path = new File(sb.rankingPath, plasmaRankingDistribution.CR_OTHER);
+                    final File path = new File(sb.rankingPath, CRDistribution.CR_OTHER);
                     path.mkdirs();
                     final File file = new File(path, filename);
                     try {

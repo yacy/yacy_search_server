@@ -46,9 +46,9 @@ import javax.swing.event.EventListenerList;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.document.parser.htmlParser;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.client.Client;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacyURL;
@@ -513,13 +513,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     
     public static ContentScraper parseResource(final yacyURL location) throws IOException {
         // load page
-        final httpRequestHeader reqHeader = new httpRequestHeader();
-        reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
+        final RequestHeader reqHeader = new RequestHeader();
+        reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
         return parseResource(location, reqHeader);
     }
     
-    public static ContentScraper parseResource(final yacyURL location, final httpRequestHeader reqHeader) throws IOException {
-        final Reader pageReader = httpClient.wgetReader(location.toString(), reqHeader, 10000);
+    public static ContentScraper parseResource(final yacyURL location, final RequestHeader reqHeader) throws IOException {
+        final Reader pageReader = Client.wgetReader(location.toString(), reqHeader, 10000);
         if (pageReader == null) throw new IOException("no response from url " + location.toString());
         
         // scrape content

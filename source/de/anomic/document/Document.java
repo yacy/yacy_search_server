@@ -47,9 +47,9 @@ import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.ImageEntry;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaWebStructure;
 import de.anomic.server.serverCachedFileOutputStream;
 import de.anomic.yacy.yacyURL;
+import de.anomic.ymage.WebStructureGraph;
 
 public class Document {
     
@@ -545,7 +545,7 @@ dc_rights
     	this.favicon = faviconURL;
     }
     
-    public void notifyWebStructure(final plasmaWebStructure webStructure, final Condenser condenser, final Date docDate) {
+    public void notifyWebStructure(final WebStructureGraph webStructure, final Condenser condenser, final Date docDate) {
         final Integer[] ioLinks = webStructure.generateCitationReference(this, condenser, docDate); // [outlinksSame, outlinksOther]
         this.inboundLinks = ioLinks[0].intValue();
         this.outboundLinks = ioLinks[1].intValue();

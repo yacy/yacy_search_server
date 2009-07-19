@@ -27,7 +27,7 @@ import java.net.MalformedURLException;
 import de.anomic.content.RSSMessage;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.document.parser.xml.RSSReader;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
@@ -38,7 +38,7 @@ import de.anomic.yacy.yacyURL;
 
 public class FeedReader_p {
     
-    public static servletProperties respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static servletProperties respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
         
         prop.put("page", "0");

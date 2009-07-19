@@ -26,7 +26,7 @@
 package de.anomic.crawler;
 
 import de.anomic.data.SitemapParser;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacyURL;
 
 public class SitemapImporter extends AbstractImporter implements Importer {
@@ -35,7 +35,7 @@ public class SitemapImporter extends AbstractImporter implements Importer {
 	private yacyURL sitemapURL = null;
 	private final ImporterManager superviser;
 	
-	public SitemapImporter(final plasmaSwitchboard sb, final ImporterManager importManager, final yacyURL sitemapURL, final CrawlProfile.entry profileEntry) throws ImporterException {
+	public SitemapImporter(final Switchboard sb, final ImporterManager importManager, final yacyURL sitemapURL, final CrawlProfile.entry profileEntry) throws ImporterException {
 		super("sitemap");
 		this.superviser = importManager;
         try {

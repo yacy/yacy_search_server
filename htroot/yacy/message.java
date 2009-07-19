@@ -35,10 +35,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import de.anomic.data.messageBoard;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -54,11 +54,11 @@ public final class message {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         if (post == null || env == null) { return null; }
 
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
@@ -82,7 +82,7 @@ public final class message {
 
         if ((sb.isRobinsonMode()) &&
         	 (!((sb.isPublicRobinson()) ||
-        	    (sb.isInMyCluster(header.get(httpHeader.CONNECTION_PROP_CLIENTIP)))))) {
+        	    (sb.isInMyCluster(header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP)))))) {
             // if we are a robinson cluster, answer only if this client is known by our network definition
         	prop.put("response", "-1"); // request rejected
             return prop;
@@ -163,7 +163,7 @@ public final class message {
 
      #[message]#
      */
-    private static void messageForwardingViaEmail(final plasmaSwitchboard sb, final messageBoard.entry msgEntry) {
+    private static void messageForwardingViaEmail(final Switchboard sb, final messageBoard.entry msgEntry) {
         try {
             if (!Boolean.valueOf(sb.getConfig("msgForwardingEnabled","false")).booleanValue()) return;
 

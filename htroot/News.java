@@ -29,9 +29,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsPool;
@@ -40,8 +40,8 @@ import de.anomic.yacy.yacySeed;
 
 public class News {
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         final boolean overview = (post == null) || (post.get("page", "0").equals("0"));
         final int tableID = (overview) ? -1 : (post == null ? 0 : Integer.parseInt(post.get("page", "0"))) - 1;

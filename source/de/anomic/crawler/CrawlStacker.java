@@ -35,7 +35,7 @@ import de.anomic.crawler.retrieval.Request;
 import de.anomic.data.Blacklist;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacySeedDB;
@@ -191,7 +191,7 @@ public final class CrawlStacker {
         }
 
         // check blacklist
-        if (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, entry.url())) {
+        if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, entry.url())) {
             if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is in blacklist. " +
                              "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
             return "url in blacklist";

@@ -37,19 +37,18 @@ import de.anomic.document.Condenser;
 import de.anomic.document.Word;
 import de.anomic.document.Document;
 import de.anomic.document.parser.xml.RSSFeed;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
-import de.anomic.plasma.plasmaProfiling;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.QueryEvent;
 import de.anomic.search.SnippetCache;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
@@ -62,11 +61,12 @@ import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
+import de.anomic.ymage.ProfilingGraph;
 
 public class yacysearch {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         sb.localSearchLastAccess = System.currentTimeMillis();
         
         final boolean searchAllowed = sb.getConfigBool("publicSearchpage", true) || sb.verifyAuthentication(header, false);
@@ -74,14 +74,14 @@ public class yacysearch {
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int display = (post == null) ? 0 : post.getInt("display", 0);
         if ((display == 1) && (!authenticated)) display = 0;
-        final boolean browserPopUpTrigger = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
+        final boolean browserPopUpTrigger = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
         if (browserPopUpTrigger) {
-            final String  browserPopUpPage = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
+            final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
             if (browserPopUpPage.startsWith("index") || browserPopUpPage.startsWith("yacysearch")) display = 2;
         }
-        String promoteSearchPageGreeting = env.getConfig(plasmaSwitchboardConstants.GREETING, "");
-        if (env.getConfigBool(plasmaSwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
-        final String client = header.get(httpHeader.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
+        String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
+        if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
+        final String client = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP); // the search client who initiated the search
         
         // get query
         String originalquerystring = (post == null) ? "" : post.get("query", post.get("search", "")).trim(); // SRU compliance
@@ -91,8 +91,8 @@ public class yacysearch {
 
         //final boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
-        prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, ""));
-        prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(plasmaSwitchboardConstants.GREETING_SMALL_IMAGE, ""));
+        prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
+        prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
         if ((post == null) || (env == null) || (!searchAllowed)) {
             // we create empty entries for template strings
             prop.put("searchagain", "0");
@@ -167,7 +167,7 @@ public class yacysearch {
         }
         
         // SEARCH
-        final boolean indexReceiveGranted = sb.getConfigBool(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+        final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
         global = global && indexReceiveGranted; // if the user does not want indexes from remote peers, it cannot be a global search
         //final boolean offline = yacyCore.seedDB.mySeed().isVirgin();
         
@@ -337,7 +337,7 @@ public class yacysearch {
             if (language.startsWith("lang_")) language = language.substring(5);
             if (!iso639.exists(language)) {
                 // find out language of the user by reading of the user-agent string
-                String agent = header.get(httpHeader.ACCEPT_LANGUAGE);
+                String agent = header.get(HeaderFramework.ACCEPT_LANGUAGE);
                 if (agent == null) agent = System.getProperty("user.language");
                 language = (agent == null) ? "en" : iso639.userAgentLanguageDetection(agent);
                 if (language == null) language = "en";
@@ -352,9 +352,9 @@ public class yacysearch {
             int maxDistance = (querystring.indexOf('"') >= 0) ? maxDistance = query.length - 1 : Integer.MAX_VALUE;
 
             // filter out stopwords
-            final TreeSet<String> filtered = SetTools.joinConstructive(query[0], plasmaSwitchboard.stopwords);
+            final TreeSet<String> filtered = SetTools.joinConstructive(query[0], Switchboard.stopwords);
             if (filtered.size() > 0) {
-                SetTools.excludeDestructive(query[0], plasmaSwitchboard.stopwords);
+                SetTools.excludeDestructive(query[0], Switchboard.stopwords);
             }
 
             // if a minus-button was hit, remove a special reference first
@@ -406,7 +406,7 @@ public class yacysearch {
 
             // prepare search properties
             //final boolean yacyonline = ((sb.webIndex.seedDB != null) && (sb.webIndex.seedDB.mySeed() != null) && (sb.webIndex.seedDB.mySeed().getPublicAddress() != null));
-            final boolean globalsearch = (global) /* && (yacyonline)*/ && (sb.getConfigBool(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false));
+            final boolean globalsearch = (global) /* && (yacyonline)*/ && (sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false));
         
             // do the search
             final TreeSet<byte[]> queryHashes = Word.words2hashes(query[0]);
@@ -436,13 +436,13 @@ public class yacysearch {
                     yacyURL.TLD_any_zone_filter,
                     client,
                     authenticated);
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), QueryEvent.INITIALIZATION, 0, 0), false);
+            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), QueryEvent.INITIALIZATION, 0, 0), false);
             
             // tell all threads to do nothing for a specific time
             sb.intermissionAllThreads(10000);
         
             // filter out words that appear in bluelist
-            theQuery.filterOut(plasmaSwitchboard.blueList);
+            theQuery.filterOut(Switchboard.blueList);
             
             // log
             Log.logInfo("LOCAL_SEARCH", "INIT WORD SEARCH: " + theQuery.queryString + ":" + QueryParams.hashSet2hashString(theQuery.queryHashes) + " - " + theQuery.neededResults() + " links to be computed, " + theQuery.displayResults() + " lines to be displayed");

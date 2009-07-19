@@ -29,17 +29,17 @@
 // if the shell's current path is HTROOT
 
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.QueryParams;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class index {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         
         // access control
@@ -58,24 +58,24 @@ public class index {
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int display = (post == null) ? 0 : post.getInt("display", 0);
         if ((display == 1) && (!authenticated)) display = 0;
-        final boolean browserPopUpTrigger = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
+        final boolean browserPopUpTrigger = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
         if (browserPopUpTrigger) {
-            final String  browserPopUpPage = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
+            final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
             if (browserPopUpPage.startsWith("index") || browserPopUpPage.startsWith("yacysearch")) display = 2;
         }
 
         final int searchoptions = (post == null) ? 0 : post.getInt("searchoptions", 0);
         final String former = (post == null) ? "" : post.get("former", "");
         final int count = Math.min(100, (post == null) ? 10 : post.getInt("count", 10));
-        final int maximumRecords = Integer.parseInt((sb.getConfig(plasmaSwitchboardConstants.DEFAULT_SEARCHITEMS, "10")));
+        final int maximumRecords = Integer.parseInt((sb.getConfig(SwitchboardConstants.DEFAULT_SEARCHITEMS, "10")));
         final String urlmaskfilter = (post == null) ? ".*" : post.get("urlmaskfilter", ".*");
         final String prefermaskfilter = (post == null) ? "" : post.get("prefermaskfilter", "");
         final String constraint = (post == null) ? "" : post.get("constraint", "");
         final String cat = (post == null) ? "href" : post.get("cat", "href");
         final int type = (post == null) ? 0 : post.getInt("type", 0);
         
-        final boolean indexDistributeGranted = sb.getConfigBool(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, true);
-        final boolean indexReceiveGranted = sb.getConfigBool(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+        final boolean indexDistributeGranted = sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW, true);
+        final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
         //global = global && indexDistributeGranted && indexReceiveGranted;
         
         // search domain
@@ -88,11 +88,11 @@ public class index {
         if (cds.equals("app")) contentdom = QueryParams.CONTENTDOM_APP;
         
         // we create empty entries for template strings
-        String promoteSearchPageGreeting = env.getConfig(plasmaSwitchboardConstants.GREETING, "");
-        if (env.getConfigBool(plasmaSwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
-        prop.putHTML(plasmaSwitchboardConstants.GREETING, promoteSearchPageGreeting);
-        prop.put(plasmaSwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(plasmaSwitchboardConstants.GREETING_HOMEPAGE, ""));
-        prop.put(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, sb.getConfig(plasmaSwitchboardConstants.GREETING_LARGE_IMAGE, ""));
+        String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
+        if (env.getConfigBool(SwitchboardConstants.GREETING_NETWORK_NAME, false)) promoteSearchPageGreeting = env.getConfig("network.unit.description", "");
+        prop.putHTML(SwitchboardConstants.GREETING, promoteSearchPageGreeting);
+        prop.put(SwitchboardConstants.GREETING_HOMEPAGE, sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
+        prop.put(SwitchboardConstants.GREETING_LARGE_IMAGE, sb.getConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, ""));
         prop.putHTML("former", former);
         prop.put("num-results", "0");
         prop.put("excluded", "0");

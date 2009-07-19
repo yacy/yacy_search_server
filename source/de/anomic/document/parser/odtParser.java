@@ -47,11 +47,12 @@ import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
+
 import de.anomic.document.parser.xml.ODContentHandler;
 import de.anomic.document.parser.xml.ODMetaHandler;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.client.Client;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacyURL;
@@ -274,9 +275,9 @@ public class odtParser extends AbstractParser implements Idiom {
             final odtParser testParser = new odtParser();
             
             // downloading the document content
-            final httpRequestHeader reqHeader = new httpRequestHeader();
-            reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-            final byte[] content = httpClient.wget(contentUrl.toString(), reqHeader, 10000);
+            final RequestHeader reqHeader = new RequestHeader();
+            reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
+            final byte[] content = Client.wget(contentUrl.toString(), reqHeader, 10000);
             final ByteArrayInputStream input = new ByteArrayInputStream(content);
             
             // parsing the document

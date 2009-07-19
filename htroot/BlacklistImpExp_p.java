@@ -34,8 +34,8 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 import de.anomic.data.listManager;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
@@ -44,11 +44,11 @@ import java.util.List;
 public class BlacklistImpExp_p {
     private final static String DISABLED = "disabled_";
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         
         // initialize the list manager
-        listManager.switchboard = (plasmaSwitchboard) env;
+        listManager.switchboard = (Switchboard) env;
         listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
         
         // loading all blacklist files located in the directory
@@ -56,7 +56,7 @@ public class BlacklistImpExp_p {
         
         String blacklistToUse = null;
         final serverObjects prop = new serverObjects();
-        prop.putHTML("blacklistEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
+        prop.putHTML("blacklistEngine", Switchboard.urlBlacklist.getEngineInfo());
 
         // if we have not chosen a blacklist until yet we use the first file
         if (blacklistToUse == null && dirlist != null && dirlist.size() > 0) {

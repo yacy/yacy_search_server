@@ -25,10 +25,10 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRemoteProxyConfig;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.client.Client;
+import de.anomic.http.client.RemoteProxyConfig;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
@@ -38,7 +38,7 @@ public class loaderThreads {
     protected int timeout;
     protected String user;
     protected String password;
-    protected httpRemoteProxyConfig remoteProxyConfig;
+    protected RemoteProxyConfig remoteProxyConfig;
 
     // management objects for collection of threads
     Hashtable<String, Thread> threads;
@@ -124,9 +124,9 @@ public class loaderThreads {
 
         public void run() {
             try {
-                final httpRequestHeader reqHeader = new httpRequestHeader();
-                reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.crawlerUserAgent);
-                page = httpClient.wget(url.toString(), reqHeader, timeout);
+                final RequestHeader reqHeader = new RequestHeader();
+                reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
+                page = Client.wget(url.toString(), reqHeader, timeout);
                 loaded = true;
                 process.feed(page);
                 if (process.status() == loaderCore.STATUS_FAILED) {

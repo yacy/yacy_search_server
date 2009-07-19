@@ -33,7 +33,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.yacy.logging.Log;
@@ -43,13 +43,13 @@ public final class LoaderDispatcher {
     private static final long minDelay = 250; // milliseconds; 4 accesses per second
     private static final ConcurrentHashMap<String, Long> accessTime = new ConcurrentHashMap<String, Long>(); // to protect targets from DDoS
     
-    private final plasmaSwitchboard sb;
+    private final Switchboard sb;
     private final Log log;
     private final HashSet<String> supportedProtocols;
     private final HTTPLoader httpLoader;
     private final FTPLoader ftpLoader;
     
-    public LoaderDispatcher(final plasmaSwitchboard sb, final Log log) {
+    public LoaderDispatcher(final Switchboard sb, final Log log) {
         this.sb = sb;
         this.log = log;
         this.supportedProtocols = new HashSet<String>(Arrays.asList(new String[]{"http","https","ftp"}));

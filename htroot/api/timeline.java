@@ -29,14 +29,14 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.document.Word;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.TermSearch;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.search.QueryParams;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.iso639;
@@ -44,9 +44,9 @@ import de.anomic.yacy.yacyCore;
 
 public final class timeline {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         
         final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;

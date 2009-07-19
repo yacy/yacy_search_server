@@ -36,9 +36,9 @@ import java.util.Date;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
@@ -53,17 +53,17 @@ public class QuickCrawlLink_p {
      * @param env the serverSwitch object holding all runtime-data
      * @return the rewrite-properties for the template
      */
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         
         final serverObjects prop = new serverObjects();
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         
         if (post == null) {
             // send back usage example
             prop.put("mode", "0");
             
             // getting the http host header
-            final String hostSocket = header.get(httpHeader.CONNECTION_PROP_HOST);
+            final String hostSocket = header.get(HeaderFramework.CONNECTION_PROP_HOST);
             
             //String host = hostSocket;
             int port = 80;

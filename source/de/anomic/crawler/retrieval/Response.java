@@ -30,12 +30,12 @@ import java.util.Date;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.document.Parser;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.http.httpResponseHeader;
+import de.anomic.http.client.Cache;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.yacy.yacyURL;
 
 public class Response {
@@ -55,8 +55,8 @@ public class Response {
 
     // the class objects
     private final  Request            request;
-    private final  httpRequestHeader  requestHeader;
-    private final  httpResponseHeader responseHeader;
+    private final  RequestHeader  requestHeader;
+    private final  ResponseHeader responseHeader;
     private final  String             responseStatus;
     private final  CrawlProfile.entry profile;
     private        byte[]             content;
@@ -142,8 +142,8 @@ public class Response {
     
     public Response(
     		Request request,
-            final httpRequestHeader requestHeader,
-            final httpResponseHeader responseHeader,
+            final RequestHeader requestHeader,
+            final ResponseHeader responseHeader,
             final String responseStatus,
             final CrawlProfile.entry profile) {
         this.request = request;
@@ -277,16 +277,16 @@ public class Response {
             // -authorization cases in request
             // authorization makes pages very individual, and therefore we cannot use the
             // content in the cache
-            if (requestHeader.containsKey(httpRequestHeader.AUTHORIZATION)) { return "personalized"; }
+            if (requestHeader.containsKey(RequestHeader.AUTHORIZATION)) { return "personalized"; }
             // -ranges in request and response
             // we do not cache partial content
-            if (requestHeader.containsKey(httpHeader.RANGE)) { return "partial"; }
+            if (requestHeader.containsKey(HeaderFramework.RANGE)) { return "partial"; }
         }
         
         if (responseHeader != null) {
             // -ranges in request and response
             // we do not cache partial content            
-            if (responseHeader.containsKey(httpHeader.CONTENT_RANGE)) { return "partial"; }
+            if (responseHeader.containsKey(HeaderFramework.CONTENT_RANGE)) { return "partial"; }
 
             // -if-modified-since in request
             // we do not care about if-modified-since, because this case only occurres if the
@@ -304,7 +304,7 @@ public class Response {
             // -pragma in response
             // if we have a pragma non-cache, we don't cache. usually if this is wanted from
             // the server, it makes sense
-            String cacheControl = responseHeader.get(httpHeader.PRAGMA);
+            String cacheControl = responseHeader.get(HeaderFramework.PRAGMA);
             if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return "controlled_no_cache"; }
 
             // -expires in response
@@ -313,7 +313,7 @@ public class Response {
 
             // -cache-control in response
             // the cache-control has many value options.
-            cacheControl = responseHeader.get(httpHeader.CACHE_CONTROL);
+            cacheControl = responseHeader.get(HeaderFramework.CACHE_CONTROL);
             if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
                 if (cacheControl.startsWith("MAX-AGE=")) {
@@ -357,17 +357,17 @@ public class Response {
         String cacheControl;
         if (requestHeader != null) {
             // -authorization cases in request
-            if (requestHeader.containsKey(httpRequestHeader.AUTHORIZATION)) { return false; }
+            if (requestHeader.containsKey(RequestHeader.AUTHORIZATION)) { return false; }
 
             // -ranges in request
             // we do not cache partial content
-            if (requestHeader.containsKey(httpHeader.RANGE)) { return false; }
+            if (requestHeader.containsKey(HeaderFramework.RANGE)) { return false; }
 
             // if the client requests a un-cached copy of the resource ...
-            cacheControl = requestHeader.get(httpHeader.PRAGMA);
+            cacheControl = requestHeader.get(HeaderFramework.PRAGMA);
             if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return false; }
 
-            cacheControl = requestHeader.get(httpHeader.CACHE_CONTROL);
+            cacheControl = requestHeader.get(HeaderFramework.CACHE_CONTROL);
             if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
                 if (cacheControl.startsWith("NO-CACHE") || cacheControl.startsWith("MAX-AGE=0")) { return false; }
@@ -376,10 +376,10 @@ public class Response {
             // -if-modified-since in request
             // The entity has to be transferred only if it has
             // been modified since the date given by the If-Modified-Since header.
-            if (requestHeader.containsKey(httpRequestHeader.IF_MODIFIED_SINCE)) {
+            if (requestHeader.containsKey(RequestHeader.IF_MODIFIED_SINCE)) {
                 // checking this makes only sense if the cached response contains
                 // a Last-Modified field. If the field does not exist, we go the safe way
-                if (!responseHeader.containsKey(httpHeader.LAST_MODIFIED)) { return false; }
+                if (!responseHeader.containsKey(HeaderFramework.LAST_MODIFIED)) { return false; }
                 // parse date
                 Date d1, d2;
                 d2 = responseHeader.lastModified(); if (d2 == null) { d2 = new Date(DateFormatter.correctedUTCTime()); }
@@ -389,15 +389,15 @@ public class Response {
             }
 
             final String mimeType = getMimeType();
-            if (!plasmaHTCache.isPicture(mimeType)) {
+            if (!Cache.isPicture(mimeType)) {
                 // -cookies in request
                 // unfortunately, we should reload in case of a cookie
                 // but we think that pictures can still be considered as fresh
                 // -set-cookie in cached response
                 // this is a similar case as for COOKIE.
-                if (requestHeader.containsKey(httpRequestHeader.COOKIE) ||
-                    responseHeader.containsKey(httpHeader.SET_COOKIE) ||
-                    responseHeader.containsKey(httpHeader.SET_COOKIE2)) {
+                if (requestHeader.containsKey(RequestHeader.COOKIE) ||
+                    responseHeader.containsKey(HeaderFramework.SET_COOKIE) ||
+                    responseHeader.containsKey(HeaderFramework.SET_COOKIE2)) {
                     return false; // too strong
                 }
             }
@@ -408,7 +408,7 @@ public class Response {
             // logically, we would not need to care about no-cache pragmas in cached response headers,
             // because they cannot exist since they are not written to the cache.
             // So this IF should always fail..
-            cacheControl = responseHeader.get(httpHeader.PRAGMA); 
+            cacheControl = responseHeader.get(HeaderFramework.PRAGMA); 
             if (cacheControl != null && cacheControl.trim().toUpperCase().equals("NO-CACHE")) { return false; }
     
             // see for documentation also:
@@ -427,7 +427,7 @@ public class Response {
                 if (expires.before(new Date(DateFormatter.correctedUTCTime()))) { return false; }
             }
             final Date lastModified = responseHeader.lastModified();
-            cacheControl = responseHeader.get(httpHeader.CACHE_CONTROL);
+            cacheControl = responseHeader.get(HeaderFramework.CACHE_CONTROL);
             if (cacheControl == null && lastModified == null && expires == null) { return false; }
     
             // -lastModified in cached response
@@ -513,7 +513,7 @@ public class Response {
         // we checked that in shallStoreCache
 
         // a picture cannot be indexed
-        if (plasmaHTCache.noIndexingURL(url())) {
+        if (Cache.noIndexingURL(url())) {
             return "Media_Content_(forbidden)";
         }
 
@@ -532,7 +532,7 @@ public class Response {
             
             // a picture cannot be indexed
             final String mimeType = responseHeader.mime();
-            if (plasmaHTCache.isPicture(mimeType)) {
+            if (Cache.isPicture(mimeType)) {
                 return "Media_Content_(Picture)";
             }
             String parserError = Parser.supportsMime(mimeType);
@@ -543,7 +543,7 @@ public class Response {
             // -if-modified-since in request
             // if the page is fresh at the very moment we can index it
             final Date ifModifiedSince = this.requestHeader.ifModifiedSince();
-            if ((ifModifiedSince != null) && (responseHeader.containsKey(httpHeader.LAST_MODIFIED))) {
+            if ((ifModifiedSince != null) && (responseHeader.containsKey(HeaderFramework.LAST_MODIFIED))) {
                 // parse date
                 Date d = responseHeader.lastModified();
                 if (d == null) {
@@ -557,8 +557,8 @@ public class Response {
             }
 
             // -pragma in cached response
-            if (responseHeader.containsKey(httpHeader.PRAGMA) &&
-                (responseHeader.get(httpHeader.PRAGMA)).toUpperCase().equals("NO-CACHE")) {
+            if (responseHeader.containsKey(HeaderFramework.PRAGMA) &&
+                (responseHeader.get(HeaderFramework.PRAGMA)).toUpperCase().equals("NO-CACHE")) {
                 return "Denied_(pragma_no_cache)";
             }
 
@@ -582,7 +582,7 @@ public class Response {
 
             // -cache-control in cached response
             // the cache-control has many value options.
-            String cacheControl = responseHeader.get(httpHeader.CACHE_CONTROL);
+            String cacheControl = responseHeader.get(HeaderFramework.CACHE_CONTROL);
             if (cacheControl != null) {
                 cacheControl = cacheControl.trim().toUpperCase();
                 /* we have the following cases for cache-control:
@@ -652,11 +652,11 @@ public class Response {
         // a picture cannot be indexed
         if (responseHeader != null) {
             final String mimeType = responseHeader.mime();
-            if (plasmaHTCache.isPicture(mimeType)) { return "Media_Content_(Picture)"; }
+            if (Cache.isPicture(mimeType)) { return "Media_Content_(Picture)"; }
             String parserError = Parser.supportsMime(mimeType);
             if (parserError != null) { return "Media_Content, parser error: " + parserError; }
         }
-        if (plasmaHTCache.noIndexingURL(url())) { return "Media_Content_(forbidden)"; }
+        if (Cache.noIndexingURL(url())) { return "Media_Content_(forbidden)"; }
 
         // -if-modified-since in request
         // if the page is fresh at the very moment we can index it
@@ -712,7 +712,7 @@ public class Response {
     public yacyURL referrerURL() {
         if (requestHeader == null) return null;
         try {
-            return new yacyURL(requestHeader.get(httpRequestHeader.REFERER, ""), null);
+            return new yacyURL(requestHeader.get(RequestHeader.REFERER, ""), null);
         } catch (final Exception e) {
             return null;
         }
@@ -720,7 +720,7 @@ public class Response {
     
     public String referrerHash() {
         if (requestHeader == null) return null;
-        String u = requestHeader.get(httpRequestHeader.REFERER, "");
+        String u = requestHeader.get(RequestHeader.REFERER, "");
         if (u == null || u.length() == 0) return null;
         try {
             return new yacyURL(u, null).hash();
@@ -738,14 +738,14 @@ public class Response {
     }
 
     public boolean requestWithCookie() {
-        return (requestHeader == null) ? false : requestHeader.containsKey(httpRequestHeader.COOKIE);
+        return (requestHeader == null) ? false : requestHeader.containsKey(RequestHeader.COOKIE);
     }
 
     public boolean requestProhibitsIndexing() {
         return (requestHeader == null) 
         ? false 
-        : requestHeader.containsKey(httpHeader.X_YACY_INDEX_CONTROL) &&
-          (requestHeader.get(httpHeader.X_YACY_INDEX_CONTROL)).toUpperCase().equals("NO-INDEX");
+        : requestHeader.containsKey(HeaderFramework.X_YACY_INDEX_CONTROL) &&
+          (requestHeader.get(HeaderFramework.X_YACY_INDEX_CONTROL)).toUpperCase().equals("NO-INDEX");
     }
     
     public int processCase(String mySeedHash) {
@@ -756,17 +756,17 @@ public class Response {
         // 4) proxy-load (initiator is "------------")
         // 5) local prefetch/crawling (initiator is own seedHash)
         // 6) local fetching for global crawling (other known or unknwon initiator)
-        int processCase = plasmaSwitchboardConstants.PROCESSCASE_0_UNKNOWN;
+        int processCase = SwitchboardConstants.PROCESSCASE_0_UNKNOWN;
         // FIXME the equals seems to be incorrect: String.equals(boolean)
         if ((initiator() == null) || initiator().length() == 0 || initiator().equals("------------")) {
             // proxy-load
-            processCase = plasmaSwitchboardConstants.PROCESSCASE_4_PROXY_LOAD;
+            processCase = SwitchboardConstants.PROCESSCASE_4_PROXY_LOAD;
         } else if (initiator().equals(mySeedHash)) {
             // normal crawling
-            processCase = plasmaSwitchboardConstants.PROCESSCASE_5_LOCAL_CRAWLING;
+            processCase = SwitchboardConstants.PROCESSCASE_5_LOCAL_CRAWLING;
         } else {
             // this was done for remote peer (a global crawl)
-            processCase = plasmaSwitchboardConstants.PROCESSCASE_6_GLOBAL_CRAWLING;
+            processCase = SwitchboardConstants.PROCESSCASE_6_GLOBAL_CRAWLING;
         }
         return processCase;
     }

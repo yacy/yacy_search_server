@@ -40,9 +40,9 @@ import java.util.TreeSet;
 
 import de.anomic.data.Blacklist;
 import de.anomic.document.parser.html.CharacterCoding;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpResponse;
-import de.anomic.http.httpRemoteProxyConfig;
+import de.anomic.http.client.Client;
+import de.anomic.http.client.RemoteProxyConfig;
+import de.anomic.http.metadata.ResponseContainer;
 import de.anomic.kelondro.index.Cache;
 import de.anomic.kelondro.index.HandleSet;
 import de.anomic.kelondro.index.Row;
@@ -230,7 +230,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
      * 
      * @param proxyConfig 
      */
-    public void deadlinkCleaner(final httpRemoteProxyConfig proxyConfig) {
+    public void deadlinkCleaner(final RemoteProxyConfig proxyConfig) {
         final Log log = new Log("URLDBCLEANUP");
         final HashSet<String> damagedURLS = new HashSet<String>();
         try {
@@ -271,9 +271,9 @@ public final class MetadataRepository implements Iterable<byte[]> {
                         final yacyURL newUrl = new yacyURL(newUrlStr, null);
 
                         // doing a http head request to test if the url is correct
-                        final httpClient client = new httpClient(10000);
+                        final Client client = new Client(10000);
                         client.setProxy(proxyConfig);
-                        httpResponse res = null;
+                        ResponseContainer res = null;
                         try {
                             res = client.HEAD(newUrl.toString());
                         } finally {

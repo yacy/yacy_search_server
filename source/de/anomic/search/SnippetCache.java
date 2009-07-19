@@ -46,14 +46,13 @@ import de.anomic.document.Word;
 import de.anomic.document.Document;
 import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.document.parser.html.ImageEntry;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpResponseHeader;
+import de.anomic.http.client.Client;
+import de.anomic.http.client.Cache;
+import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SetTools;
-import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
@@ -86,11 +85,11 @@ public class SnippetCache {
      */
     private static final HashMap<String, yacyURL> faviconCache = new HashMap<String, yacyURL>();
     private static Log             log = null;
-    private static plasmaSwitchboard     sb = null;
+    private static Switchboard     sb = null;
     
     public static void init(
             final Log logx,
-            final plasmaSwitchboard switchboard
+            final Switchboard switchboard
     ) {
         log = logx;
         sb = switchboard;
@@ -327,7 +326,7 @@ public class SnippetCache {
         // if the snippet is not in the cache, we can try to get it from the htcache
         long resContentLength = 0;
         InputStream resContent = null;
-        httpResponseHeader responseHeader = null;
+        ResponseHeader responseHeader = null;
         try {
             // first try to get the snippet from metadata
             String loc;
@@ -345,16 +344,16 @@ public class SnippetCache {
                 return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
             } else {
                 // trying to load the resource from the cache
-                resContent = plasmaHTCache.getResourceContentStream(url);
-                responseHeader = plasmaHTCache.loadResponseHeader(url);
-                if (resContent != null && ((resContentLength = plasmaHTCache.getResourceContentLength(url)) > maxDocLen) && (!fetchOnline)) {
+                resContent = Cache.getResourceContentStream(url);
+                responseHeader = Cache.loadResponseHeader(url);
+                if (resContent != null && ((resContentLength = Cache.getResourceContentLength(url)) > maxDocLen) && (!fetchOnline)) {
                     // content may be too large to be parsed here. To be fast, we omit calculation of snippet here
                     return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "resource available, but too large: " + resContentLength + " bytes");
                 } else if (fetchOnline) {
                     // if not found try to download it
                     
                     // download resource using the crawler and keep resource in memory if possible
-                    final Response entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, true, reindexing);
+                    final Response entry = Switchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, true, reindexing);
                     
                     // getting resource metadata (e.g. the http headers for http resources)
                     if (entry != null) {
@@ -367,8 +366,8 @@ public class SnippetCache {
                             resContent = new ByteArrayInputStream(resourceArray);
                             resContentLength = resourceArray.length;
                         } else {
-                            resContent = plasmaHTCache.getResourceContentStream(url); 
-                            resContentLength = plasmaHTCache.getResourceContentLength(url);
+                            resContent = Cache.getResourceContentStream(url); 
+                            resContentLength = Cache.getResourceContentLength(url);
                         }
                     }
                     
@@ -454,19 +453,19 @@ public class SnippetCache {
         // load resource
         long resContentLength = 0;
         InputStream resContent = null;
-        httpResponseHeader responseHeader = null;
+        ResponseHeader responseHeader = null;
         try {
             // trying to load the resource from the cache
-            resContent = plasmaHTCache.getResourceContentStream(url);
-            responseHeader = plasmaHTCache.loadResponseHeader(url);
+            resContent = Cache.getResourceContentStream(url);
+            responseHeader = Cache.loadResponseHeader(url);
             if (resContent != null) {
                 // if the content was found
-                resContentLength = plasmaHTCache.getResourceContentLength(url);
+                resContentLength = Cache.getResourceContentLength(url);
             } else if (fetchOnline) {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                final Response entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, forText, global);
+                final Response entry = Switchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, forText, global);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
@@ -477,8 +476,8 @@ public class SnippetCache {
                         resContent = new ByteArrayInputStream(resourceArray);
                         resContentLength = resourceArray.length;
                     } else {
-                        resContent = plasmaHTCache.getResourceContentStream(url); 
-                        resContentLength = plasmaHTCache.getResourceContentLength(url);
+                        resContent = Cache.getResourceContentStream(url); 
+                        resContentLength = Cache.getResourceContentLength(url);
                     }
                 }
                 
@@ -837,7 +836,7 @@ public class SnippetCache {
      * @return the extracted data
      * @throws ParserException
      */
-    public static Document parseDocument(final yacyURL url, final long contentLength, final InputStream resourceStream, httpResponseHeader responseHeader) throws ParserException {
+    public static Document parseDocument(final yacyURL url, final long contentLength, final InputStream resourceStream, ResponseHeader responseHeader) throws ParserException {
         try {
             if (resourceStream == null) return null;
 
@@ -845,7 +844,7 @@ public class SnippetCache {
             if (responseHeader == null) {
                 // try to get the header from the htcache directory
                 try {                    
-                    responseHeader = plasmaHTCache.loadResponseHeader(url);
+                    responseHeader = Cache.loadResponseHeader(url);
                 } catch (final Exception e) {
                     // ignore this. resource info loading failed
                 }   
@@ -858,7 +857,7 @@ public class SnippetCache {
                 
                 // getting URL mimeType
                 try {
-                    responseHeader = httpClient.whead(url.toString());
+                    responseHeader = Client.whead(url.toString());
                 } catch (final Exception e) {
                     // ingore this. http header download failed
                 } 
@@ -898,14 +897,14 @@ public class SnippetCache {
             long contentLength = -1;
             
             // trying to load the resource body from cache
-            InputStream resource = plasmaHTCache.getResourceContentStream(url);
+            InputStream resource = Cache.getResourceContentStream(url);
             if (resource != null) {
-                contentLength = plasmaHTCache.getResourceContentLength(url);
+                contentLength = Cache.getResourceContentLength(url);
             } else if (fetchOnline) {
                 // if the content is not available in cache try to download it from web
                 
                 // try to download the resource using a crawler
-                final Response entry = plasmaSwitchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, forText, reindexing);
+                final Response entry = Switchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, forText, reindexing);
                 if (entry == null) return null; // not found in web
                 
                 // read resource body (if it is there)
@@ -913,8 +912,8 @@ public class SnippetCache {
             
                 // in case that the resource was not in ram, read it from disk
                 if (resourceArray == null) {
-                    resource = plasmaHTCache.getResourceContentStream(url);   
-                    contentLength = plasmaHTCache.getResourceContentLength(url); 
+                    resource = Cache.getResourceContentStream(url);   
+                    contentLength = Cache.getResourceContentLength(url); 
                 } else {
                     resource = new ByteArrayInputStream(resourceArray);
                     contentLength = resourceArray.length;
@@ -934,18 +933,18 @@ public class SnippetCache {
             (snippet.getErrorCode() == ERROR_PARSER_FAILED) ||
             (snippet.getErrorCode() == ERROR_PARSER_NO_LINES)) {
             log.logInfo("error: '" + snippet.getError() + "', remove url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
-            plasmaSwitchboard.getSwitchboard().indexSegment.urlMetadata().remove(urlHash);
+            Switchboard.getSwitchboard().indexSegment.urlMetadata().remove(urlHash);
             final QueryEvent event = QueryEvent.getEvent(eventID);
-            assert plasmaSwitchboard.getSwitchboard() != null;
-            assert plasmaSwitchboard.getSwitchboard().indexSegment != null;
+            assert Switchboard.getSwitchboard() != null;
+            assert Switchboard.getSwitchboard().indexSegment != null;
             assert event != null : "eventID = " + eventID;
             assert event.getQuery() != null;
-            plasmaSwitchboard.getSwitchboard().indexSegment.termIndex().remove(event.getQuery().queryHashes, urlHash);
+            Switchboard.getSwitchboard().indexSegment.termIndex().remove(event.getQuery().queryHashes, urlHash);
             event.remove(urlHash);
         }
         if (snippet.getErrorCode() == ERROR_NO_MATCH) {
             log.logInfo("error: '" + snippet.getError() + "', remove words '" + querystring + "' for url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
-            plasmaSwitchboard.getSwitchboard().indexSegment.termIndex().remove(snippet.remaingHashes, urlHash);
+            Switchboard.getSwitchboard().indexSegment.termIndex().remove(snippet.remaingHashes, urlHash);
             QueryEvent.getEvent(eventID).remove(urlHash);
         }
         return snippet.getError();

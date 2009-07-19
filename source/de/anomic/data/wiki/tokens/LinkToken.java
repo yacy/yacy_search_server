@@ -37,7 +37,7 @@ import de.anomic.data.bookmarksDB;
 import de.anomic.data.bookmarksDB.Bookmark;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.data.wiki.wikiParserException;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 
 public class LinkToken extends AbstractToken {
 	
@@ -78,10 +78,10 @@ public class LinkToken extends AbstractToken {
 	
 	private final String localhost;
 	private final String wikiPath;
-    private final plasmaSwitchboard sb;
+    private final Switchboard sb;
 	private int patternNr = 0;
 	
-	public LinkToken(final String localhost, final String wikiPath, final plasmaSwitchboard sb) {
+	public LinkToken(final String localhost, final String wikiPath, final Switchboard sb) {
 		this.localhost = localhost;
 		this.wikiPath = wikiPath;
         this.sb = sb;

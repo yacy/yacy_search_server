@@ -38,10 +38,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import de.anomic.document.parser.html.CharacterCoding;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
@@ -49,10 +49,10 @@ import de.anomic.yacy.yacyBuildProperties;
 
 public class Threaddump_p {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
     	
     	serverObjects prop = new serverObjects();
-    	plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    	Switchboard sb = (Switchboard) env;
     	
     	final StringBuilder buffer = new StringBuilder(1000);
     	

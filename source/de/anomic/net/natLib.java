@@ -29,9 +29,9 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import de.anomic.http.httpClient;
+import de.anomic.http.client.Client;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverDomains;
 import de.anomic.tools.disorderHeap;
 import de.anomic.tools.nxTools;
@@ -46,7 +46,7 @@ public class natLib {
 	  rm status.htm
 	*/
 	try {
-	    ArrayList<String> x = FileUtils.strings(httpClient.wget("http://admin:"+password+"@192.168.0.1:80/status.htm", null, 10000), "UTF-8");
+	    ArrayList<String> x = FileUtils.strings(Client.wget("http://admin:"+password+"@192.168.0.1:80/status.htm", null, 10000), "UTF-8");
 	    x = nxTools.grep(x, 1, "IP Address");
 	    if ((x == null) || (x.size() == 0)) return null;
 	    final String line = nxTools.tail1(x);
@@ -59,7 +59,7 @@ public class natLib {
     private static String getWhatIsMyIP() {
 	try {
         ArrayList<String> x = FileUtils.strings(
-                httpClient.wget("http://www.whatismyip.com/", null, 10000), "UTF-8");
+                Client.wget("http://www.whatismyip.com/", null, 10000), "UTF-8");
 	    x = nxTools.grep(x, 0, "Your IP is");
 	    final String line = nxTools.tail1(x);
 	    return nxTools.awk(line, " ", 4);
@@ -71,7 +71,7 @@ public class natLib {
     private static String getStanford() {
 	try {
         ArrayList<String> x = FileUtils.strings(
-                httpClient.wget("http://www.slac.stanford.edu/cgi-bin/nph-traceroute.pl", null, 10000),
+                Client.wget("http://www.slac.stanford.edu/cgi-bin/nph-traceroute.pl", null, 10000),
         	"UTF-8");
 	    x = nxTools.grep(x, 0, "firewall protecting your browser");
 	    final String line = nxTools.tail1(x);
@@ -83,7 +83,7 @@ public class natLib {
 
     private static String getIPID() {
 	try {
-        ArrayList<String> x = FileUtils.strings(httpClient.wget("http://ipid.shat.net/", null, 10000), "UTF-8");
+        ArrayList<String> x = FileUtils.strings(Client.wget("http://ipid.shat.net/", null, 10000), "UTF-8");
 	    x = nxTools.grep(x, 2, "Your IP address");
 	    final String line = nxTools.tail1(x);
 	    return nxTools.awk(nxTools.awk(nxTools.awk(line, " ", 5), ">", 2), "<", 1);
@@ -114,7 +114,7 @@ public class natLib {
 
     //TODO: This is not IPv6 compatible
     public static boolean isProper(final String ip) {
-        final plasmaSwitchboard sb=plasmaSwitchboard.getSwitchboard();
+        final Switchboard sb=Switchboard.getSwitchboard();
         if (sb != null) {
         	if (sb.isRobinsonMode()) return true;
             final String yacyDebugMode = sb.getConfig("yacyDebugMode", "false");

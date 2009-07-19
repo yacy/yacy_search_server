@@ -36,20 +36,20 @@ import java.util.List;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.data.listManager;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.client.Client;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
 
 public class ConfigAppearance_p {
 
-	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final String skinPath = new File(env.getRootPath(), env.getConfig("skinPath", "DATA/SKINS")).toString();
 
         // Fallback
@@ -90,9 +90,9 @@ public class ConfigAppearance_p {
                 ArrayList<String> skinVector;
                 try {
                     final yacyURL u = new yacyURL(url, null);
-                    final httpRequestHeader reqHeader = new httpRequestHeader();
-                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
-                    skinVector = FileUtils.strings(httpClient.wget(u.toString(), reqHeader, 10000), "UTF-8");
+                    final RequestHeader reqHeader = new RequestHeader();
+                    reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
+                    skinVector = FileUtils.strings(Client.wget(u.toString(), reqHeader, 10000), "UTF-8");
                 } catch (final IOException e) {
                     prop.put("status", "1");// unable to get URL
                     prop.put("status_url", url);
@@ -133,7 +133,7 @@ public class ConfigAppearance_p {
         return prop;
     }
 
-    private static boolean changeSkin(final plasmaSwitchboard sb, final String skinPath, final String skin) {
+    private static boolean changeSkin(final Switchboard sb, final String skinPath, final String skin) {
         final File htdocsDir = new File(sb.getConfigPath("htDocsPath", "DATA/HTDOCS"), "env");
         final File styleFile = new File(htdocsDir, "style.css");
         final File skinFile = new File(skinPath, skin);

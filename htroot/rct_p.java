@@ -33,9 +33,9 @@ import java.util.Iterator;
 import de.anomic.content.RSSMessage;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.document.parser.xml.RSSFeed;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -45,9 +45,9 @@ import de.anomic.yacy.dht.PeerSelection;
 
 public class rct_p {
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
         if (post != null) {
@@ -111,7 +111,7 @@ public class rct_p {
         return (url == null ? "null" : url.toNormalform(true, false));
     }
     
-    private static void listHosts(final plasmaSwitchboard sb, final serverObjects prop) {
+    private static void listHosts(final Switchboard sb, final serverObjects prop) {
         // list known hosts
         yacySeed seed;
         int hc = 0;

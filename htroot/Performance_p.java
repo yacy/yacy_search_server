@@ -24,13 +24,13 @@
 //javac -classpath .:../classes Network.java
 //if the shell's current path is HTROOT
 
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class Performance_p {
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch sb) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch sb) {
         return PerformanceQueues_p.respond(header, post, sb);
     }
 

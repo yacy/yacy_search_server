@@ -25,23 +25,23 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaGrafics;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.QueryEvent;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.ymage.NetworkGraph;
 import de.anomic.ymage.ymageMatrix;
 
 // draw a picture of the yacy network
 
 public class SearchEventPicture {
     
-    public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static ymageMatrix respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         final String eventID = header.get("event", QueryEvent.lastEventID);
         if (eventID == null) return null;
-        final ymageMatrix yp = plasmaGrafics.getSearchEventPicture(sb.peers, eventID);
+        final ymageMatrix yp = NetworkGraph.getSearchEventPicture(sb.peers, eventID);
         if (yp == null) return new ymageMatrix(1, 1, ymageMatrix.MODE_SUB, "000000"); // empty image
         
         return yp;

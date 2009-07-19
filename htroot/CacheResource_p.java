@@ -27,23 +27,23 @@
 import java.io.File;
 import java.io.IOException;
 
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class CacheResource_p {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard switchboard = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
         final String path = ((post == null) ? "" : post.get("path", ""));
 
         // we dont need check the path, because we have do that in plasmaSwitchboard.java - Borg-0300
-        final File cache = switchboard.getConfigPath(plasmaSwitchboardConstants.HTCACHE_PATH, plasmaSwitchboardConstants.HTCACHE_PATH_DEFAULT);
+        final File cache = switchboard.getConfigPath(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT);
 
         final File f = new File(cache, path);
         byte[] resource;

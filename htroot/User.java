@@ -30,22 +30,22 @@
 import java.io.IOException;
 
 import de.anomic.data.userDB;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.http.httpResponseHeader;
-import de.anomic.http.httpd;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.metadata.ResponseHeader;
+import de.anomic.http.server.HTTPDemon;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 
 public class User{
     
-    public static servletProperties respond(final httpRequestHeader requestHeader, final serverObjects post, final serverSwitch env) {
+    public static servletProperties respond(final RequestHeader requestHeader, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
-        final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        final Switchboard sb = Switchboard.getSwitchboard();
         userDB.Entry entry=null;
 
         //default values
@@ -53,7 +53,7 @@ public class User{
         prop.put("logged-in_limit", "0");
         prop.put("status", "0");
         //identified via HTTPPassword
-        entry=sb.userDB.proxyAuth((requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx")));
+        entry=sb.userDB.proxyAuth((requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx")));
         if(entry != null){
         	prop.put("logged-in_identified-by", "1");
         //try via cookie
@@ -62,7 +62,7 @@ public class User{
             prop.put("logged-in_identified-by", "2");
             //try via ip
             if(entry == null){
-                entry=sb.userDB.ipAuth((requestHeader.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")));
+                entry=sb.userDB.ipAuth((requestHeader.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "xxxxxx")));
                 if(entry != null){
                     prop.put("logged-in_identified-by", "0");
                 }
@@ -95,7 +95,7 @@ public class User{
             final String password=post.get("password");
             
             entry=sb.userDB.passwordAuth(username, password);
-            final boolean staticAdmin = sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").equals(
+            final boolean staticAdmin = sb.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").equals(
                     Digest.encodeMD5Hex(
                             Base64Order.standardCoder.encodeString(username + ":" + password)
                     )
@@ -108,7 +108,7 @@ public class User{
                 cookie=sb.userDB.getAdminCookie();
                 
             if(entry != null || staticAdmin){
-                final httpResponseHeader outgoingHeader=new httpResponseHeader();
+                final ResponseHeader outgoingHeader=new ResponseHeader();
                 outgoingHeader.setCookie("login", cookie);
                 prop.setOutgoingHeader(outgoingHeader);
                 
@@ -145,12 +145,12 @@ public class User{
         if(post!=null && post.containsKey("logout")){
             prop.put("logged-in", "0");
             if(entry != null){
-                entry.logout((requestHeader.get(httpHeader.CONNECTION_PROP_CLIENTIP, "xxxxxx")), userDB.getLoginToken(requestHeader.getHeaderCookies())); //todo: logout cookie
+                entry.logout((requestHeader.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "xxxxxx")), userDB.getLoginToken(requestHeader.getHeaderCookies())); //todo: logout cookie
             }else{
                 sb.userDB.adminLogout(userDB.getLoginToken(requestHeader.getHeaderCookies()));
             }
             //XXX: This should not be needed anymore, because of isLoggedout
-            if(! (requestHeader.get(httpRequestHeader.AUTHORIZATION, "xxxxxx")).equals("xxxxxx")){
+            if(! (requestHeader.get(RequestHeader.AUTHORIZATION, "xxxxxx")).equals("xxxxxx")){
                 prop.put("AUTHENTICATE","admin log-in");
             }
         }

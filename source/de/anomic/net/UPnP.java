@@ -36,14 +36,14 @@ import net.sbbi.upnp.DiscoveryEventHandler;
 import net.sbbi.upnp.devices.UPNPRootDevice;
 import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.UPNPResponseException;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.yacy.logging.Log;
 
 public class UPnP {
 	
 	public final static Log log = new Log("UPNP");
-	private static plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+	private static Switchboard sb = Switchboard.getSwitchboard();
 	
 	private final static int discoveryTimeout = 5000; // seconds to receive a response from devices
 	private static InternetGatewayDevice[] IGDs = null;
@@ -91,7 +91,7 @@ public class UPnP {
 	}
 	
 	private static String getRemoteHost() {
-		return sb.getConfig(plasmaSwitchboardConstants.UPNP_REMOTEHOST, "");
+		return sb.getConfig(SwitchboardConstants.UPNP_REMOTEHOST, "");
 	}
 	
 	/**
@@ -200,7 +200,7 @@ public class UPnP {
 				if (newIGD[0] == null) return;
 				log.logInfo("discovered device: " + newIGD[0].getIGDRootDevice().getFriendlyName());
 				if (UPnP.setIGDs(newIGD) &&
-					plasmaSwitchboard.getSwitchboard().getConfigBool(plasmaSwitchboardConstants.UPNP_ENABLED, false))
+					Switchboard.getSwitchboard().getConfigBool(SwitchboardConstants.UPNP_ENABLED, false))
 						UPnP.addPortMapping();
 				Listener.unregister();
 			}

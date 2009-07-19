@@ -24,9 +24,9 @@
 //javac -classpath .:../Classes Status.java
 //if the shell's current path is HTROOT
 
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -41,14 +41,14 @@ public class autoconfig {
      * @param env the serverSwitch object holding all runtime-data
      * @return the rewrite-properties for the template
      */
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         
         final serverObjects prop = new serverObjects();
         
-        final boolean yacyonly = env.getConfigBool(plasmaSwitchboardConstants.PROXY_YACY_ONLY, false);
+        final boolean yacyonly = env.getConfigBool(SwitchboardConstants.PROXY_YACY_ONLY, false);
         
         // getting the http host header
-        final String hostSocket = header.get(httpHeader.CONNECTION_PROP_HOST);
+        final String hostSocket = header.get(HeaderFramework.CONNECTION_PROP_HOST);
         
         String host = hostSocket;
         int port = 80;

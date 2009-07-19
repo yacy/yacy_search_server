@@ -32,8 +32,8 @@ import java.util.Iterator;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.crawler.CrawlProfile.entry;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
@@ -79,9 +79,9 @@ public class CrawlProfileEditor_p {
         labels.add(new eentry(entry.XPSTOPW,             "Parent stop-words",     false, eentry.BOOLEAN));
     }
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
-        final plasmaSwitchboard sb = (plasmaSwitchboard)env;
+        final Switchboard sb = (Switchboard)env;
         
         // read post for handle
         final String handle = (post == null) ? "" : post.get("handle", "");

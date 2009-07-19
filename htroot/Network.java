@@ -36,11 +36,11 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.client.Client;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -54,15 +54,15 @@ public class Network {
 
     private static final String STR_TABLE_LIST = "table_list_";
 
-    public static serverObjects respond(final httpRequestHeader requestHeader, final serverObjects post, final serverSwitch switchboard) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) switchboard;
+    public static serverObjects respond(final RequestHeader requestHeader, final serverObjects post, final serverSwitch switchboard) {
+        final Switchboard sb = (Switchboard) switchboard;
         final long start = System.currentTimeMillis();
         
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         prop.setLocalized(!(requestHeader.get("PATH")).endsWith(".xml"));
         prop.putHTML("page_networkTitle", sb.getConfig("network.unit.description", "unspecified"));
-        prop.putHTML("page_networkName", sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "unspecified"));
+        prop.putHTML("page_networkName", sb.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"));
         final boolean overview = (post == null) || (post.get("page", "0").equals("0"));
 
         final String mySeedType = sb.peers.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
@@ -145,7 +145,7 @@ public class Network {
                 prop.put("table_my-url", seed.get(yacySeed.SEEDLIST, ""));
                 
                 // generating the location string
-                prop.putHTML("table_my-location", httpClient.generateLocation());
+                prop.putHTML("table_my-location", Client.generateLocation());
             }
 
             // overall results: Network statistics
@@ -174,7 +174,7 @@ public class Network {
             if (post.containsKey("addPeer")) {
 
                 // AUTHENTICATE
-                if (!requestHeader.containsKey(httpRequestHeader.AUTHORIZATION)) {
+                if (!requestHeader.containsKey(RequestHeader.AUTHORIZATION)) {
                     prop.putHTML("AUTHENTICATE","log-in");
                     return prop;
                 }
@@ -348,7 +348,7 @@ public class Network {
                             userAgent = null;
                             if (seed.hash != null && seed.hash.equals(sb.peers.mySeed().hash)) {
                                 userAgent = HTTPLoader.yacyUserAgent;
-                                location = httpClient.generateLocation();
+                                location = Client.generateLocation();
                             } else {
                                userAgent = sb.peers.peerActions.getUserAgent(seed.getIP());
                                location = parseLocationInUserAgent(userAgent);

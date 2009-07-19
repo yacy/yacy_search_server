@@ -31,19 +31,19 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.data.userDB;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.http.httpd;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.HTTPDemon;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class ConfigAccounts_p {
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
-        final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        final Switchboard sb = Switchboard.getSwitchboard();
         userDB.Entry entry=null;
 
         // admin password
@@ -57,7 +57,7 @@ public class ConfigAccounts_p {
             // may be overwritten if new password is given
             if ((user.length() > 0) && (pw1.length() > 3) && (pw1.equals(pw2))) {
                 // check passed. set account:
-                env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
+                env.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(user + ":" + pw1)));
                 env.setConfig("adminAccount", "");
             }
             
@@ -71,22 +71,22 @@ public class ConfigAccounts_p {
                     sb.setConfig("adminAccountForLocalhost", true);
                     // if an localhost access is configured, check if a local password is given
                     // if not, set a random password
-                    if (post != null && env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
+                    if (post != null && env.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() == 0) {
                         // make a 'random' password
-                        env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "0000" + Digest.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
+                        env.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "0000" + Digest.encodeMD5Hex(System.getProperties().toString() + System.currentTimeMillis()));
                         env.setConfig("adminAccount", "");
                     }
                 }
             } else {
                 sb.setConfig("adminAccountForLocalhost", false);
-                if (env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000")) {
+                if (env.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").startsWith("0000")) {
                     // make shure that the user can still use the interface after a random password was set
-                    env.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, "");
+                    env.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "");
                 }
             }
         }
         
-        if (env.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0 && !env.getConfigBool("adminAccountForLocalhost", false)) {
+        if (env.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() == 0 && !env.getConfigBool("adminAccountForLocalhost", false)) {
             prop.put("passwordNotSetWarning", 1);
         }
         

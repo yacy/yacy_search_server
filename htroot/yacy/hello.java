@@ -32,9 +32,9 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
@@ -51,8 +51,8 @@ public final class hello {
     // example:
     // http://localhost:8080/yacy/hello.html?count=1&seed=p|{Hash=sCJ6Tq8T0N9x,IPType=&empty;,Port=8080,IP=,Uptime=8,rI=190,Version=0.10004882,PeerType=junior,UTC=+0200,RCount=0,sI=0,LastSeen=20080605103333,Name=intratest,CCount=5.0,SCount=40,news=,USpeed=0,CRTCnt=0,CRWCnt=0,BDate=20080605081349,rU=190,LCount=187,dct=1212668923654,ICount=2,sU=0,ISpeed=0,RSpeed=0.0,NCount=0,Flags=oooo}
     // http://localhost:8080/yacy/hello.html?count=10&seed=z|H4sIAAAAAAAAADWQW2vDMAyF_81eJork3GyGX-YxGigly2WFvZTQijbQJsHx1pWx_z7nMj1J4ug7B_2s6-GsP5q3G-G6vBz2e0iz8t6zfuBr7-5PUNanQfulhqyzTkuUCFXvmitrBJtq4ed3tkPTtRpXhIiRDAmq0uhHFIiQMduJ-NXYU9NCbrrP1vnjIdUqgk09uIK51V6rMBRIilAo2NajwzfhGcx8QUKsEIp5iCJo-eaTVUXPfPQ4k5dm4pp8NzaESsLzS-14QVNIMlA-ka2m1JuZJJWIBRwPo0GIIiYp4zCSkC5GQSLiJIah0p6X_rvlS-MTbWdhkCSBIni9jA_rfP3-Ae1Oye9dAQAA
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         long start = System.currentTimeMillis();
         prop.put("message", "none");
@@ -73,7 +73,7 @@ public final class hello {
         int  count = 0;
         try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (final NumberFormatException e) {count = 0;}
 //      final Date remoteTime = yacyCore.parseUniversalDate(post.get(MYTIME)); // read remote time
-        final String clientip = header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
+        final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
         final InetAddress ias = serverDomains.dnsResolve(clientip);
         if (ias == null) {
             prop.put("message", "cannot resolve your IP from your reported location " + clientip);
@@ -97,7 +97,7 @@ public final class hello {
 //      if ((properTest != null) && (! properTest.substring(0,1).equals("IP"))) { return null; }
 
         // we easily know the caller's IP:
-        final String userAgent = header.get(httpHeader.USER_AGENT, "<unknown>");
+        final String userAgent = header.get(HeaderFramework.USER_AGENT, "<unknown>");
         final String reportedip = remoteSeed.getIP();
         final String reportedPeerType = remoteSeed.get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR);
         final float clientversion = remoteSeed.getVersion();

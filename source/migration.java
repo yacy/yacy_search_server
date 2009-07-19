@@ -23,12 +23,12 @@ import java.io.IOException;
 import java.util.List;
 
 import de.anomic.data.listManager;
-import de.anomic.http.httpd;
+import de.anomic.http.server.HTTPDemon;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.yacy.logging.Log;
 
 public class migration {
@@ -40,7 +40,7 @@ public class migration {
 
     }
 
-    public static void migrate(final plasmaSwitchboard sb, final int fromRev, final int toRev){
+    public static void migrate(final Switchboard sb, final int fromRev, final int toRev){
         if(fromRev < toRev){
             if(fromRev < TAGDB_WITH_TAGHASH){
                 migrateBookmarkTagsDB(sb);
@@ -58,7 +58,7 @@ public class migration {
     /*
      * remove the static defaultfiles. We use them through a overlay now.
      */
-    public static void migrateDefaultFiles(final plasmaSwitchboard sb){
+    public static void migrateDefaultFiles(final Switchboard sb){
         File file=new File(sb.htDocsPath, "share/dir.html");
         if(file.exists())
             delete(file);
@@ -78,7 +78,7 @@ public class migration {
         if(file.exists())
             delete(file);
     }
-    public static void installSkins(final plasmaSwitchboard sb){
+    public static void installSkins(final Switchboard sb){
         final File skinsPath = sb.getConfigPath("skinPath", "DATA/SKINS");
         final File defaultSkinsPath = new File(sb.getRootPath(), "skins");
         if(defaultSkinsPath.exists()){
@@ -98,7 +98,7 @@ public class migration {
         }
         final File skinsDir=sb.getConfigPath("skinPath", "DATA/SKINS");
         final File skinFile=new File(skinsDir, skin+".css");
-        final File htdocsPath=new File(sb.getConfigPath(plasmaSwitchboardConstants.HTDOCS_PATH, plasmaSwitchboardConstants.HTROOT_PATH_DEFAULT), "env");
+        final File htdocsPath=new File(sb.getConfigPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT), "env");
         final File styleFile=new File(htdocsPath, "style.css");
         if(!skinFile.exists()){
             if(styleFile.exists()){
@@ -126,7 +126,7 @@ public class migration {
 				Log.logWarning("MIGRATION", "could not create directories for "+ path);
 		}
 	}
-    public static void migrateBookmarkTagsDB(final plasmaSwitchboard sb){
+    public static void migrateBookmarkTagsDB(final Switchboard sb){
         sb.bookmarksDB.close();
         final File tagsDBFile=new File(sb.workPath, "bookmarkTags.db");
         if(tagsDBFile.exists()){
@@ -147,7 +147,7 @@ public class migration {
 		if(!filename.delete())
 			Log.logWarning("MIGRATION", "could not delete "+ filename);
 	}
-    public static void migrateWorkFiles(final plasmaSwitchboard sb){
+    public static void migrateWorkFiles(final Switchboard sb){
         File file=new File(sb.getRootPath(), "DATA/SETTINGS/wiki.db");
         File file2;
         if (file.exists()) {
@@ -194,7 +194,7 @@ public class migration {
         }
     }
 
-    public static void presetPasswords(final plasmaSwitchboard sb) {
+    public static void presetPasswords(final Switchboard sb) {
         // set preset accounts/passwords
         String acc;
         if ((acc = sb.getConfig("serverAccount", "")).length() > 0) {
@@ -202,7 +202,7 @@ public class migration {
             sb.setConfig("serverAccount", "");
         }
         if ((acc = sb.getConfig("adminAccount", "")).length() > 0) {
-            sb.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(acc)));
+            sb.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(acc)));
             sb.setConfig("adminAccount", "");
         }
     
@@ -216,7 +216,7 @@ public class migration {
             sb.setConfig("serverAccountBase64", "");
         }
         if ((acc = sb.getConfig("adminAccountBase64", "")).length() > 0) {
-            sb.setConfig(httpd.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(acc));
+            sb.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(acc));
             sb.setConfig("adminAccountBase64", "");
         }
         if ((acc = sb.getConfig("uploadAccountBase64", "")).length() > 0) {
@@ -229,7 +229,7 @@ public class migration {
         }
     }
 
-    public static void migrateSwitchConfigSettings(final plasmaSwitchboard sb) {
+    public static void migrateSwitchConfigSettings(final Switchboard sb) {
         
         // migration for additional parser settings
         String value = "";

@@ -30,10 +30,10 @@
 import java.io.File;
 import java.io.IOException;
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.http.client.Cache;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.logging.Log;
@@ -45,9 +45,9 @@ public class ProxyIndexingMonitor_p {
 //      if (date == null) return ""; else return dayFormatter.format(date);
 //  }
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
 //      int showIndexedCount = 20;
@@ -64,7 +64,7 @@ public class ProxyIndexingMonitor_p {
             if (post.containsKey("proxyprofileset")) try {
                 // read values and put them in global settings
                 final boolean proxyYaCyOnly = post.containsKey("proxyYacyOnly");
-                env.setConfig(plasmaSwitchboardConstants.PROXY_YACY_ONLY, (proxyYaCyOnly) ? "true" : "false");
+                env.setConfig(SwitchboardConstants.PROXY_YACY_ONLY, (proxyYaCyOnly) ? "true" : "false");
                 int newProxyPrefetchDepth = post.getInt("proxyPrefetchDepth", 0);
                 if (newProxyPrefetchDepth < 0) newProxyPrefetchDepth = 0; 
                 if (newProxyPrefetchDepth > 20) newProxyPrefetchDepth = 20; // self protection ?
@@ -80,22 +80,22 @@ public class ProxyIndexingMonitor_p {
                 
                 // added proxyCache, proxyCacheSize - Borg-0300
                 // proxyCache - check and create the directory
-                oldProxyCachePath = env.getConfig(plasmaSwitchboardConstants.HTCACHE_PATH, plasmaSwitchboardConstants.HTCACHE_PATH_DEFAULT);
-                newProxyCachePath = post.get("proxyCache", plasmaSwitchboardConstants.HTCACHE_PATH_DEFAULT);
+                oldProxyCachePath = env.getConfig(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT);
+                newProxyCachePath = post.get("proxyCache", SwitchboardConstants.HTCACHE_PATH_DEFAULT);
                 newProxyCachePath = newProxyCachePath.replace('\\', '/');
                 if (newProxyCachePath.endsWith("/")) {
                     newProxyCachePath = newProxyCachePath.substring(0, newProxyCachePath.length() - 1);
                 }
-                env.setConfig(plasmaSwitchboardConstants.HTCACHE_PATH, newProxyCachePath);
-                final File cache = env.getConfigPath(plasmaSwitchboardConstants.HTCACHE_PATH, oldProxyCachePath);
+                env.setConfig(SwitchboardConstants.HTCACHE_PATH, newProxyCachePath);
+                final File cache = env.getConfigPath(SwitchboardConstants.HTCACHE_PATH, oldProxyCachePath);
                 if (!cache.isDirectory() && !cache.isFile()) cache.mkdirs();
 
                 // proxyCacheSize 
-                oldProxyCacheSize = getStringLong(env.getConfig(plasmaSwitchboardConstants.PROXY_CACHE_SIZE, "64"));
-                newProxyCacheSize = getStringLong(post.get(plasmaSwitchboardConstants.PROXY_CACHE_SIZE, "64"));
+                oldProxyCacheSize = getStringLong(env.getConfig(SwitchboardConstants.PROXY_CACHE_SIZE, "64"));
+                newProxyCacheSize = getStringLong(post.get(SwitchboardConstants.PROXY_CACHE_SIZE, "64"));
                 if (getLong(newProxyCacheSize) < 4) { newProxyCacheSize = "4"; }
-                env.setConfig(plasmaSwitchboardConstants.PROXY_CACHE_SIZE, newProxyCacheSize);
-                plasmaHTCache.setCacheSize(Long.parseLong(newProxyCacheSize) * 1024 * 1024);                
+                env.setConfig(SwitchboardConstants.PROXY_CACHE_SIZE, newProxyCacheSize);
+                Cache.setCacheSize(Long.parseLong(newProxyCacheSize) * 1024 * 1024);                
 
                 // implant these settings also into the crawling profile for the proxy
                 if (sb.crawler.defaultProxyProfile == null) {
@@ -149,15 +149,15 @@ public class ProxyIndexingMonitor_p {
             }
         }
 
-        final boolean yacyonly = env.getConfigBool(plasmaSwitchboardConstants.PROXY_YACY_ONLY, false);
+        final boolean yacyonly = env.getConfigBool(SwitchboardConstants.PROXY_YACY_ONLY, false);
         prop.put("proxyYacyOnly", yacyonly ? "1" : "0");
         prop.put("proxyPrefetchDepth", env.getConfigLong("proxyPrefetchDepth", 0));
         prop.put("proxyStoreHTCacheChecked", env.getConfig("proxyStoreHTCache", "").equals("true") ? "1" : "0");
         prop.put("proxyIndexingRemote", env.getConfig("proxyIndexingRemote", "").equals("true") ? "1" : "0");
         prop.put("proxyIndexingLocalText", env.getConfig("proxyIndexingLocalText", "").equals("true") ? "1" : "0");
         prop.put("proxyIndexingLocalMedia", env.getConfig("proxyIndexingLocalMedia", "").equals("true") ? "1" : "0");
-        prop.put("proxyCache", env.getConfig(plasmaSwitchboardConstants.HTCACHE_PATH, plasmaSwitchboardConstants.HTCACHE_PATH_DEFAULT));
-        prop.put("proxyCacheSize", env.getConfigLong(plasmaSwitchboardConstants.PROXY_CACHE_SIZE, 64));
+        prop.put("proxyCache", env.getConfig(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT));
+        prop.put("proxyCacheSize", env.getConfigLong(SwitchboardConstants.PROXY_CACHE_SIZE, 64));
         // return rewrite properties
         return prop;
     }

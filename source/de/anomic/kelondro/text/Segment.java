@@ -49,7 +49,7 @@ import de.anomic.kelondro.text.navigationPrototype.NavigationReferenceRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceFactory;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.tools.iso639;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
@@ -132,7 +132,7 @@ public final class Segment {
         } catch (final IOException e) {
             e.printStackTrace();
         }
-        plasmaSwitchboard.getSwitchboard().peers.mySeed().resetCounters();
+        Switchboard.getSwitchboard().peers.mySeed().resetCounters();
     }
     
     public File getLocation() {
@@ -359,7 +359,7 @@ public final class Segment {
                             urlHashs.add(entry.metadataHash());
                         } else {
                             url = ue.metadata().url();
-                            if ((url == null) || (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, url) == true)) {
+                            if ((url == null) || (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, url) == true)) {
                                 urlHashs.add(entry.metadataHash());
                             }
                         }

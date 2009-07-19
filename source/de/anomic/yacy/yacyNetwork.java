@@ -33,11 +33,11 @@ import java.util.List;
 
 import org.apache.commons.httpclient.methods.multipart.Part;
 
-import de.anomic.http.DefaultCharsetStringPart;
+import de.anomic.http.client.DefaultCharsetStringPart;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -47,8 +47,8 @@ public class yacyNetwork {
 		if ((post == null) || (env == null)) return false;
 		
 		// identify network
-		final String unitName = post.get(plasmaSwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT); // the network unit  
-		if (!unitName.equals(env.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT))) {
+		final String unitName = post.get(SwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT); // the network unit  
+		if (!unitName.equals(env.getConfig(SwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT))) {
 			return false;
 		}
         
@@ -72,7 +72,7 @@ public class yacyNetwork {
 		return false;
 	}
 	
-	public static final List<Part> basicRequestPost(final plasmaSwitchboard sb, final String targetHash, final String salt) {
+	public static final List<Part> basicRequestPost(final Switchboard sb, final String targetHash, final String salt) {
         // put in all the essentials for routing and network authentification
 		// generate a session key
         final ArrayList<Part> post = new ArrayList<Part>();
@@ -87,7 +87,7 @@ public class yacyNetwork {
 		post.add(new DefaultCharsetStringPart("myUTC", Long.toString(System.currentTimeMillis())));
 
         // network identification
-        post.add(new DefaultCharsetStringPart(plasmaSwitchboardConstants.NETWORK_NAME, plasmaSwitchboard.getSwitchboard().getConfig(plasmaSwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT)));
+        post.add(new DefaultCharsetStringPart(SwitchboardConstants.NETWORK_NAME, Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT)));
 
         // authentification essentials
         final String authentificationControl = sb.getConfig("network.unit.protocol.control", "uncontrolled");

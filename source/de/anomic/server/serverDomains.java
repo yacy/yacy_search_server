@@ -38,7 +38,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 
 public class serverDomains {
 
@@ -580,7 +580,7 @@ public class serverDomains {
     
     public static String myPublicIP() {
         // if a static IP was configured, we have to return it here ...
-        final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        final Switchboard sb = Switchboard.getSwitchboard();
         if (sb != null) {
             final String staticIP = sb.getConfig("staticIP", "");
             if ((!staticIP.equals(""))) {

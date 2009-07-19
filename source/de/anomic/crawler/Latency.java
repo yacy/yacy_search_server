@@ -27,7 +27,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacyURL;
 
 public class Latency {
@@ -171,7 +171,7 @@ public class Latency {
         if (!local && host != null) waiting += host.flux(waiting);
         
         // find the delay as given by robots.txt on target site
-        long robotsDelay = (local) ? 0 : plasmaSwitchboard.getSwitchboard().robots.crawlDelayMillis(url);
+        long robotsDelay = (local) ? 0 : Switchboard.getSwitchboard().robots.crawlDelayMillis(url);
         waiting = Math.max(waiting, robotsDelay);
         
         // use the access latency as rule how fast we can access the server

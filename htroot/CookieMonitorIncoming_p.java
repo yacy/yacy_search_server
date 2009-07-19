@@ -28,16 +28,16 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class CookieMonitorIncoming_p {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch sb) {
-        final plasmaSwitchboard switchboard = (plasmaSwitchboard) sb;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch sb) {
+        final Switchboard switchboard = (Switchboard) sb;
 
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();

@@ -5,17 +5,17 @@ import java.util.Set;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.document.parser.html.ContentScraper;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
 
 public class getpageinfo_p {
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         
         // avoid UNRESOLVED PATTERN        
@@ -43,8 +43,8 @@ public class getpageinfo_p {
             if (actions.indexOf("title")>=0) {
                 try {
                     final yacyURL u = new yacyURL(url, null);
-                    final httpRequestHeader reqHeader = new httpRequestHeader();
-                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent); // do not set the crawler user agent, because this page was loaded by manual entering of the url
+                    final RequestHeader reqHeader = new RequestHeader();
+                    reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent); // do not set the crawler user agent, because this page was loaded by manual entering of the url
                     final ContentScraper scraper = ContentScraper.parseResource(u, reqHeader);
                     
                     // put the document title 

@@ -30,9 +30,9 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
@@ -42,9 +42,9 @@ import de.anomic.yacy.logging.Log;
 
 public class CrawlResults {
 
-    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
         int lines = 500;
@@ -77,7 +77,7 @@ public class CrawlResults {
         if (((tabletype > 0) && (tabletype < 6)) ||
             (post != null && (post.containsKey("clearlist") ||
             post.containsKey("deleteentry")))) {
-            final String authorization = (header.get(httpRequestHeader.AUTHORIZATION, "xxxxxx"));
+            final String authorization = (header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
             if (authorization.length() != 0) {
                 if (! sb.verifyAuthentication(header, true)){
                     // force log-in (again, because wrong password was given)

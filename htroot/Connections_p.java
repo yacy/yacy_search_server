@@ -33,13 +33,13 @@ import java.net.URLEncoder;
 import java.util.Properties;
 import java.util.Set;
 
-import de.anomic.http.HttpConnectionInfo;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.http.httpd;
+import de.anomic.http.client.ConnectionInfo;
+import de.anomic.http.client.Client;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.HTTPDemon;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
@@ -50,9 +50,9 @@ import de.anomic.yacy.yacySeed;
 
 public final class Connections_p {    
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
          
         
@@ -141,17 +141,17 @@ public final class Connections_p {
                 String dest = null;
                 String prot = null;
                 final serverHandler cmdObj = currentSession.getCommandObj();
-                if (cmdObj instanceof httpd) {
+                if (cmdObj instanceof HTTPDemon) {
                     prot = isSSL ? "https":"http";
                     
                     // getting the http command object
-                    final httpd currentHttpd =  (httpd)cmdObj;
+                    final HTTPDemon currentHttpd =  (HTTPDemon)cmdObj;
                     
                     // getting the connection properties of this session
                     final Properties conProp = (Properties) currentHttpd.getConProp().clone();
                     
                     // getting the destination host
-                    dest = conProp.getProperty(httpHeader.CONNECTION_PROP_HOST);
+                    dest = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HOST);
                     if (dest==null)continue;
                 }            
                 
@@ -209,12 +209,12 @@ public final class Connections_p {
         
         
         // client sessions
-        final Set<HttpConnectionInfo> allConnections = HttpConnectionInfo.getAllConnections();
+        final Set<ConnectionInfo> allConnections = ConnectionInfo.getAllConnections();
         // TODO sorting
 //        Arrays.sort(a, httpc.connectionTimeComparatorInstance);
         int c = 0;
         synchronized (allConnections) {
-        for (final HttpConnectionInfo conInfo: allConnections) {
+        for (final ConnectionInfo conInfo: allConnections) {
             prop.put("clientList_" + c + "_clientProtocol", conInfo.getProtocol());
             prop.putNum("clientList_" + c + "_clientLifetime", conInfo.getLifetime());
             prop.putNum("clientList_" + c + "_clientIdletime", conInfo.getIdletime());
@@ -225,7 +225,7 @@ public final class Connections_p {
         }
         }
         prop.put("clientList", c);
-        prop.put("clientActive", httpClient.connectionCount());
+        prop.put("clientActive", Client.connectionCount());
         
         // return rewrite values for templates
         return prop;

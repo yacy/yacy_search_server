@@ -30,13 +30,13 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Iterator;
 
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeedDB;
@@ -44,9 +44,9 @@ import de.anomic.yacy.yacyURL;
 
 public class IndexControlURLs_p {
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         
         final serverObjects prop = new serverObjects();
         prop.put("urlstring", "");
@@ -285,7 +285,7 @@ public class IndexControlURLs_p {
         return prop;
     }
     
-    private static serverObjects genUrlProfile(final plasmaSwitchboard switchboard, final URLMetadataRow entry, final String urlhash) {
+    private static serverObjects genUrlProfile(final Switchboard switchboard, final URLMetadataRow entry, final String urlhash) {
         final serverObjects prop = new serverObjects();
         if (entry == null) {
             prop.put("genUrlProfile", "1");

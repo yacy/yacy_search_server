@@ -27,9 +27,9 @@
 
 import java.net.MalformedURLException;
 
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeedDB;
@@ -37,9 +37,9 @@ import de.anomic.yacy.yacyURL;
 
 public class yacydoc {
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         
         final serverObjects prop = new serverObjects();
         prop.put("dc_title", "");

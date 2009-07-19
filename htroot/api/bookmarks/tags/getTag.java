@@ -3,8 +3,8 @@ import java.util.Iterator;
 
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.bookmarksDB.Tag;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -13,9 +13,9 @@ public class getTag {
 	final static int SORT_SIZE = 2;
 	final static int SHOW_ALL = -1;
 	
-	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        final Switchboard switchboard = (Switchboard) env;
         final boolean isAdmin=switchboard.verifyAuthentication(header, true);
         final serverObjects prop = new serverObjects();
         Iterator<Tag> it = null;

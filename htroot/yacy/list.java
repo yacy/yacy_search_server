@@ -29,10 +29,10 @@
 import java.io.File;
 
 import de.anomic.data.listManager;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -42,9 +42,9 @@ import de.anomic.yacy.yacySeed;
 
 public final class list {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         if (post == null || env == null) throw new NullPointerException("post: " + post + ", sb: " + env);
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
 
         final String blackListName = post.get("listname", "");
 
@@ -54,14 +54,14 @@ public final class list {
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
         
         final String col = post.get("col", "");
-        final File listsPath = env.getConfigPath(plasmaSwitchboardConstants.LISTS_PATH, plasmaSwitchboardConstants.LISTS_PATH_DEFAULT);
+        final File listsPath = env.getConfigPath(SwitchboardConstants.LISTS_PATH, SwitchboardConstants.LISTS_PATH_DEFAULT);
         
         String otherPeerName = null;
         if (post.containsKey("iam")) {
             final yacySeed bla = sb.peers.get(post.get("iam", ""));
             if (bla != null) otherPeerName = bla.getName();
         }
-        if (otherPeerName == null) otherPeerName = header.get(httpHeader.CONNECTION_PROP_CLIENTIP);
+        if (otherPeerName == null) otherPeerName = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP);
         
         if ((sb.isRobinsonMode()) && (!sb.isInMyCluster(otherPeerName))) {
             // if we are a robinson cluster, answer only if this client is known by our network definition

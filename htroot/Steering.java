@@ -29,18 +29,18 @@
 
 import java.io.File;
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyRelease;
 
 public class Steering {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch ss) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch ss) {
         if (post == null || ss == null) { return new serverObjects(); }
 
-        final plasmaSwitchboard sb = (plasmaSwitchboard) ss;
+        final Switchboard sb = (Switchboard) ss;
         final serverObjects prop = new serverObjects();
         prop.put("info", "0"); //no information submitted
         if (prop == null) { return null; }

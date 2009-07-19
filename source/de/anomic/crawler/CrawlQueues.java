@@ -41,12 +41,12 @@ import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.document.parser.xml.RSSFeed;
-import de.anomic.http.httpClient;
+import de.anomic.http.client.Client;
 import de.anomic.kelondro.table.SplitTable;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
@@ -56,7 +56,7 @@ import de.anomic.yacy.logging.Log;
 
 public class CrawlQueues {
 
-    protected plasmaSwitchboard sb;
+    protected Switchboard sb;
     protected Log log;
     protected Map<Integer, crawlWorker> workers; // mapping from url hash to Worker thread object
     protected LoaderDispatcher loader;
@@ -65,7 +65,7 @@ public class CrawlQueues {
     public  NoticedURL noticeURL;
     public  ZURL errorURL, delegatedURL;
     
-    public CrawlQueues(final plasmaSwitchboard sb, final File plasmaPath) {
+    public CrawlQueues(final Switchboard sb, final File plasmaPath) {
         this.sb = sb;
         this.log = new Log("CRAWLER");
         this.workers = new ConcurrentHashMap<Integer, crawlWorker>();
@@ -186,8 +186,8 @@ public class CrawlQueues {
     public boolean coreCrawlJob() {
         
         final boolean robinsonPrivateCase = ((sb.isRobinsonMode()) && 
-                (!sb.getConfig(plasmaSwitchboardConstants.CLUSTER_MODE, "").equals(plasmaSwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) &&
-                (!sb.getConfig(plasmaSwitchboardConstants.CLUSTER_MODE, "").equals(plasmaSwitchboardConstants.CLUSTER_MODE_PRIVATE_CLUSTER)));
+                (!sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) &&
+                (!sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PRIVATE_CLUSTER)));
         
         if (((robinsonPrivateCase) || (coreCrawlJobSize() <= 20)) && (limitCrawlJobSize() > 0)) {
             // move some tasks to the core crawl job so we have something to do
@@ -196,13 +196,13 @@ public class CrawlQueues {
                 noticeURL.shift(NoticedURL.STACK_TYPE_LIMIT, NoticedURL.STACK_TYPE_CORE, sb.crawler.profilesActiveCrawls);
             }
             log.logInfo("shifted " + toshift + " jobs from global crawl to local crawl (coreCrawlJobSize()=" + coreCrawlJobSize() +
-                    ", limitCrawlJobSize()=" + limitCrawlJobSize() + ", cluster.mode=" + sb.getConfig(plasmaSwitchboardConstants.CLUSTER_MODE, "") +
+                    ", limitCrawlJobSize()=" + limitCrawlJobSize() + ", cluster.mode=" + sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "") +
                     ", robinsonMode=" + ((sb.isRobinsonMode()) ? "on" : "off"));
         }
         
         if(!crawlIsPossible(NoticedURL.STACK_TYPE_CORE, "Core")) return false;
         
-        if(isPaused(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) return false;
+        if(isPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) return false;
         
         // do a local crawl        
         Request urlEntry = null;
@@ -279,10 +279,10 @@ public class CrawlQueues {
     private boolean isPaused(String crawljob) {
         final Object[] status = sb.crawlJobsStatus.get(crawljob);
         boolean pauseEnded = false;
-        synchronized(status[plasmaSwitchboardConstants.CRAWLJOB_SYNC]) {
-            if (((Boolean)status[plasmaSwitchboardConstants.CRAWLJOB_STATUS]).booleanValue()) {
+        synchronized(status[SwitchboardConstants.CRAWLJOB_SYNC]) {
+            if (((Boolean)status[SwitchboardConstants.CRAWLJOB_STATUS]).booleanValue()) {
                 try {
-                    status[plasmaSwitchboardConstants.CRAWLJOB_SYNC].wait();
+                    status[SwitchboardConstants.CRAWLJOB_SYNC].wait();
                 }
                 catch (final InterruptedException e) { pauseEnded = true;}
             }
@@ -303,7 +303,7 @@ public class CrawlQueues {
             //log.logDebug("GlobalCrawl: queue is empty");
             return false;
         }
-        value = (int) sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10);
+        value = (int) sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10);
         if (this.size() >= value) {
             // try a cleanup
             this.cleanup();
@@ -311,7 +311,7 @@ public class CrawlQueues {
         // check again
         if (this.size() >= value) {
             if (this.log.isFine()) {
-                log.logFine(type + "Crawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + "), httpClients = " + httpClient.connectionCount());
+                log.logFine(type + "Crawl: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + "), httpClients = " + Client.connectionCount());
             }
             return false;
         }
@@ -339,13 +339,13 @@ public class CrawlQueues {
             return false;
         }
         
-        if (this.size() >= sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
+        if (this.size() >= sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
             // try a cleanup
             cleanup();
         }
         // check again
-        if (this.size() >= sb.getConfigLong(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
-            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + "), httpClients = " + httpClient.connectionCount());
+        if (this.size() >= sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
+            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + "), httpClients = " + Client.connectionCount());
             return false;
         }
         
@@ -474,7 +474,7 @@ public class CrawlQueues {
         // or there is no global crawl on the stack
         if (!crawlIsPossible(NoticedURL.STACK_TYPE_REMOTE, "Global")) return false;
 
-        if (isPaused(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) return false;
+        if (isPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) return false;
         
         // we don't want to crawl a global URL globally, since WE are the global part. (from this point of view)
         final String stats = "REMOTETRIGGEREDCRAWL[" + noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT) + ", " + noticeURL.stackSize(NoticedURL.STACK_TYPE_OVERHANG) + ", "
@@ -590,7 +590,7 @@ public class CrawlQueues {
                 eentry.store();
                 errorURL.push(eentry);
                 e.printStackTrace();
-                httpClient.initConnectionManager();
+                Client.initConnectionManager();
                 this.entry.setStatus("worker-exception", serverProcessorJob.STATUS_FINISHED);
             } finally {
                 crawlWorker w = workers.remove(code);

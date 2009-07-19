@@ -29,55 +29,55 @@
 // javac -classpath .:../classes ConfigRobotsTxt_p.java
 // if the shell's current path is HTROOT
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.http.httpdRobotsTxtConfig;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RobotsTxtConfig;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 
 public class ConfigRobotsTxt_p {
     
-    public static servletProperties respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static servletProperties respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         final servletProperties prop = new servletProperties();
         
-        final httpdRobotsTxtConfig rbc = ((plasmaSwitchboard)env).robotstxtConfig;
+        final RobotsTxtConfig rbc = ((Switchboard)env).robotstxtConfig;
         prop.put("clientname", sb.peers.mySeed().getPublicAddress());
         
         if (post != null) {
             if (post.containsKey("save")) {
-                rbc.setAllDisallowed(post.containsKey(httpdRobotsTxtConfig.ALL));
-                rbc.setBlogDisallowed(post.containsKey(httpdRobotsTxtConfig.BLOG));
-                rbc.setBookmarksDisallowed(post.containsKey(httpdRobotsTxtConfig.BOOKMARKS));
-                rbc.setDirsDisallowed(post.containsKey(httpdRobotsTxtConfig.DIRS));
-                rbc.setFileshareDisallowed(post.containsKey(httpdRobotsTxtConfig.FILESHARE));
-                rbc.setHomepageDisallowed(post.containsKey(httpdRobotsTxtConfig.HOMEPAGE));
-                rbc.setLockedDisallowed(post.containsKey(httpdRobotsTxtConfig.LOCKED));
-                rbc.setNetworkDisallowed(post.containsKey(httpdRobotsTxtConfig.NETWORK));
-                rbc.setNewsDisallowed(post.containsKey(httpdRobotsTxtConfig.NEWS));
-                rbc.setStatusDisallowed(post.containsKey(httpdRobotsTxtConfig.STATUS));
-                rbc.setSurftipsDisallowed(post.containsKey(httpdRobotsTxtConfig.SURFTIPS));
-                rbc.setWikiDisallowed(post.containsKey(httpdRobotsTxtConfig.WIKI));
-                rbc.setProfileDisallowed(post.containsKey(httpdRobotsTxtConfig.PROFILE));
-                env.setConfig(plasmaSwitchboardConstants.ROBOTS_TXT, rbc.toString());
+                rbc.setAllDisallowed(post.containsKey(RobotsTxtConfig.ALL));
+                rbc.setBlogDisallowed(post.containsKey(RobotsTxtConfig.BLOG));
+                rbc.setBookmarksDisallowed(post.containsKey(RobotsTxtConfig.BOOKMARKS));
+                rbc.setDirsDisallowed(post.containsKey(RobotsTxtConfig.DIRS));
+                rbc.setFileshareDisallowed(post.containsKey(RobotsTxtConfig.FILESHARE));
+                rbc.setHomepageDisallowed(post.containsKey(RobotsTxtConfig.HOMEPAGE));
+                rbc.setLockedDisallowed(post.containsKey(RobotsTxtConfig.LOCKED));
+                rbc.setNetworkDisallowed(post.containsKey(RobotsTxtConfig.NETWORK));
+                rbc.setNewsDisallowed(post.containsKey(RobotsTxtConfig.NEWS));
+                rbc.setStatusDisallowed(post.containsKey(RobotsTxtConfig.STATUS));
+                rbc.setSurftipsDisallowed(post.containsKey(RobotsTxtConfig.SURFTIPS));
+                rbc.setWikiDisallowed(post.containsKey(RobotsTxtConfig.WIKI));
+                rbc.setProfileDisallowed(post.containsKey(RobotsTxtConfig.PROFILE));
+                env.setConfig(SwitchboardConstants.ROBOTS_TXT, rbc.toString());
             }
         }
         
-        prop.put(httpdRobotsTxtConfig.ALL + ".checked", (rbc.isAllDisallowed()) ? "1" : "0");
-        prop.put(httpdRobotsTxtConfig.BLOG + ".checked", (rbc.isBlogDisallowed()) ? "1" : "0");
-        prop.put(httpdRobotsTxtConfig.BOOKMARKS + ".checked", (rbc.isBookmarksDisallowed()) ? "1" : "0");
-        prop.put(httpdRobotsTxtConfig.DIRS + ".checked", (rbc.isDirsDisallowed()) ? "1" : "0");
-        prop.put(httpdRobotsTxtConfig.FILESHARE + ".checked", (rbc.isFileshareDisallowed()) ? "1" : "0");
-        prop.put(httpdRobotsTxtConfig.HOMEPAGE + ".checked", (rbc.isHomepageDisallowed()) ? "1" : "0");
-        prop.put(httpdRobotsTxtConfig.LOCKED + ".checked", (rbc.isLockedDisallowed()) ? "1" : "0");
-        prop.put(httpdRobotsTxtConfig.NETWORK + ".checked", (rbc.isNetworkDisallowed()) ? "1" : "0");
-        prop.put(httpdRobotsTxtConfig.NEWS + ".checked", (rbc.isNewsDisallowed()) ? "1" : "0");
-        prop.put(httpdRobotsTxtConfig.STATUS + ".checked", (rbc.isStatusDisallowed()) ? "1" : "0");
-        prop.put(httpdRobotsTxtConfig.SURFTIPS + ".checked", (rbc.isSurftipsDisallowed()) ? "1" : "0");
-        prop.put(httpdRobotsTxtConfig.WIKI + ".checked", (rbc.isWikiDisallowed()) ? "1" : "0");
-        prop.put(httpdRobotsTxtConfig.PROFILE + ".checked", (rbc.isProfileDisallowed()) ? "1" : "0");
+        prop.put(RobotsTxtConfig.ALL + ".checked", (rbc.isAllDisallowed()) ? "1" : "0");
+        prop.put(RobotsTxtConfig.BLOG + ".checked", (rbc.isBlogDisallowed()) ? "1" : "0");
+        prop.put(RobotsTxtConfig.BOOKMARKS + ".checked", (rbc.isBookmarksDisallowed()) ? "1" : "0");
+        prop.put(RobotsTxtConfig.DIRS + ".checked", (rbc.isDirsDisallowed()) ? "1" : "0");
+        prop.put(RobotsTxtConfig.FILESHARE + ".checked", (rbc.isFileshareDisallowed()) ? "1" : "0");
+        prop.put(RobotsTxtConfig.HOMEPAGE + ".checked", (rbc.isHomepageDisallowed()) ? "1" : "0");
+        prop.put(RobotsTxtConfig.LOCKED + ".checked", (rbc.isLockedDisallowed()) ? "1" : "0");
+        prop.put(RobotsTxtConfig.NETWORK + ".checked", (rbc.isNetworkDisallowed()) ? "1" : "0");
+        prop.put(RobotsTxtConfig.NEWS + ".checked", (rbc.isNewsDisallowed()) ? "1" : "0");
+        prop.put(RobotsTxtConfig.STATUS + ".checked", (rbc.isStatusDisallowed()) ? "1" : "0");
+        prop.put(RobotsTxtConfig.SURFTIPS + ".checked", (rbc.isSurftipsDisallowed()) ? "1" : "0");
+        prop.put(RobotsTxtConfig.WIKI + ".checked", (rbc.isWikiDisallowed()) ? "1" : "0");
+        prop.put(RobotsTxtConfig.PROFILE + ".checked", (rbc.isProfileDisallowed()) ? "1" : "0");
         return prop;
     }
 }

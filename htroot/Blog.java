@@ -36,10 +36,10 @@ import java.util.Iterator;
 
 import de.anomic.data.blogBoard;
 import de.anomic.data.userDB;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsPool;
@@ -56,8 +56,8 @@ public class Blog {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         blogBoard.BlogEntry page = null;
 
@@ -68,7 +68,7 @@ public class Blog {
         prop.put("display", 1); // Fixed to 1
 
         
-        final boolean xml = (header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".xml");
+        final boolean xml = (header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".xml");
         final String address = sb.peers.mySeed().getPublicAddress();
 
         if(hasRights) {
@@ -87,7 +87,7 @@ public class Blog {
         final int num   = post.getInt("num",10);  //indicates how many entries should be shown
 
         if(!hasRights){
-            final userDB.Entry userentry = sb.userDB.proxyAuth(header.get(httpRequestHeader.AUTHORIZATION, "xxxxxx"));
+            final userDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
             if(userentry != null && userentry.hasRight(userDB.Entry.BLOG_RIGHT)){
                 hasRights=true;
             } else if(post.containsKey("login")) {
@@ -97,7 +97,7 @@ public class Blog {
         }
 
         String pagename = post.get("page", DEFAULT_PAGE);
-        final String ip = header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String ip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
         String StrAuthor = post.get("author", "");
 
@@ -265,7 +265,7 @@ public class Blog {
 
     private static serverObjects putBlogDefault(
             final serverObjects prop,
-            final plasmaSwitchboard switchboard,
+            final Switchboard switchboard,
             final String address,
             int start,
             int num,

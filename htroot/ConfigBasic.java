@@ -32,13 +32,13 @@ import java.io.File;
 import java.util.regex.Pattern;
 
 import de.anomic.data.translator;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.http.httpd;
-import de.anomic.http.httpdFileHandler;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.HTTPDemon;
+import de.anomic.http.server.HTTPDFileHandler;
 import de.anomic.net.UPnP;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverInstantBusyThread;
@@ -54,10 +54,10 @@ public class ConfigBasic {
     private static final int NEXTSTEP_PEERPORT  = 3;
     private static final int NEXTSTEP_RECONNECT = 4;
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         final String langPath = env.getConfigPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
         String lang = env.getConfig("locale.language", "default");
@@ -103,8 +103,8 @@ public class ConfigBasic {
         boolean upnp = false;
         if(post != null && post.containsKey("port")) { // hack to allow checkbox
         	if (post.containsKey("enableUpnp")) upnp = true;
-        	if (upnp && !sb.getConfigBool(plasmaSwitchboardConstants.UPNP_ENABLED, false)) UPnP.addPortMapping();
-        	sb.setConfig(plasmaSwitchboardConstants.UPNP_ENABLED, upnp);
+        	if (upnp && !sb.getConfigBool(SwitchboardConstants.UPNP_ENABLED, false)) UPnP.addPortMapping();
+        	sb.setConfig(SwitchboardConstants.UPNP_ENABLED, upnp);
         	if(!upnp) UPnP.deletePortMapping();
         }
         
@@ -122,8 +122,8 @@ public class ConfigBasic {
             if (upnp) UPnP.addPortMapping();
             
             String host = null;
-            if (header.containsKey(httpHeader.HOST)) {
-                host = header.get(httpHeader.HOST);
+            if (header.containsKey(HeaderFramework.HOST)) {
+                host = header.get(HeaderFramework.HOST);
                 final int idx = host.indexOf(":");
                 if (idx != -1) host = host.substring(0,idx);
             } else {
@@ -149,28 +149,28 @@ public class ConfigBasic {
         }
 
         // set a use case
-        String networkName = sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "");
+        String networkName = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "");
         if (post != null && post.containsKey("usecase")) {
             if (post.get("usecase", "").equals("freeworld") && !networkName.equals("freeworld")) {
                 // switch to freeworld network
                 sb.switchNetwork("defaults/yacy.network.freeworld.unit");
                 // switch to p2p mode
-                sb.setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, true);
-                sb.setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+                sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, true);
+                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
             }
             if (post.get("usecase", "").equals("portal") && !networkName.equals("webportal")) {
                 // switch to webportal network
                 sb.switchNetwork("defaults/yacy.network.webportal.unit");
                 // switch to robinson mode
-                sb.setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, false);
-                sb.setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+                sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);
+                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
             }
             if (post.get("usecase", "").equals("intranet") && !networkName.equals("intranet")) {
                 // switch to intranet network
                 sb.switchNetwork("defaults/yacy.network.intranet.unit");
                 // switch to p2p mode: enable ad-hoc networks between intranet users
-                sb.setConfig(plasmaSwitchboardConstants.INDEX_DIST_ALLOW, false);
-                sb.setConfig(plasmaSwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+                sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, false);
+                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
             }
             if (post.get("usecase", "").equals("intranet")) {
                 String repositoryPath = post.get("repositoryPath", "/DATA/HTROOT/repository");
@@ -181,7 +181,7 @@ public class ConfigBasic {
             }
         }
         
-        networkName = sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "");
+        networkName = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "");
         if (networkName.equals("freeworld")) {
             prop.put("setUseCase", 1);
             prop.put("setUseCase_freeworldChecked", 1);
@@ -198,14 +198,14 @@ public class ConfigBasic {
         prop.put("setUseCase_repositoryPath", sb.getConfig("repositoryPath", "/DATA/HTROOT/repository"));
         
         // check if values are proper
-        final boolean properPassword = (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0) || sb.getConfigBool("adminAccountForLocalhost", false);
+        final boolean properPassword = (sb.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() > 0) || sb.getConfigBool("adminAccountForLocalhost", false);
         final boolean properName = (env.getConfig("peerName","").length() >= 3) && (!(yacySeed.isDefaultPeerName(env.getConfig("peerName",""))));
         final boolean properPort = (sb.peers.mySeed().isSenior()) || (sb.peers.mySeed().isPrincipal());
         
         if ((env.getConfig("defaultFiles", "").startsWith("ConfigBasic.html,"))) {
         	env.setConfig("defaultFiles", env.getConfig("defaultFiles", "").substring(17));
         	env.setConfig("browserPopUpPage", "Status.html");
-            httpdFileHandler.initDefaultPath();
+        	HTTPDFileHandler.initDefaultPath();
         }
         
         prop.put("statusName", properName ? "1" : "0");
@@ -222,7 +222,7 @@ public class ConfigBasic {
             prop.put("nextStep", NEXTSTEP_FINISHED);
         }
                 
-        final boolean upnp_enabled = env.getConfigBool(plasmaSwitchboardConstants.UPNP_ENABLED, false);
+        final boolean upnp_enabled = env.getConfigBool(SwitchboardConstants.UPNP_ENABLED, false);
         prop.put("upnp", "1");
         prop.put("upnp_enabled", upnp_enabled ? "1" : "0");
         if (upnp_enabled) prop.put("upnp_success", (UPnP.getMappedPort() > 0) ? "2" : "1");

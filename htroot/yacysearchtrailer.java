@@ -27,21 +27,21 @@
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaProfiling;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.QueryParams;
 import de.anomic.search.QueryEvent;
 import de.anomic.search.RankingProcess.NavigatorEntry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
+import de.anomic.ymage.ProfilingGraph;
 
 
 public class yacysearchtrailer {
 
     private static final int MAX_TOPWORDS = 10;
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         
         final String eventID = post.get("eventID", "");
@@ -127,7 +127,7 @@ public class yacysearchtrailer {
         prop.put("nav-topics_element", i);
         prop.put("nav-topics", "1");
         
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), QueryEvent.FINALIZATION + "-" + "bottomline", 0, 0), false);
+        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), QueryEvent.FINALIZATION + "-" + "bottomline", 0, 0), false);
         
         return prop;
     }

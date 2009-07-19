@@ -46,13 +46,13 @@ import java.util.TreeSet;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.document.parser.html.ContentScraper;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpResponse;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.client.Client;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.metadata.ResponseContainer;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSystem;
@@ -98,7 +98,7 @@ public final class yacyRelease extends yacyVersion {
         // according to update properties, decide if we should retrieve update information
         // if true, the release that can be obtained is returned.
         // if false, null is returned
-        final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        final Switchboard sb = Switchboard.getSwitchboard();
         
         // check if release was installed by packagemanager
         if (yacyBuildProperties.isPkgManager()) {
@@ -256,7 +256,7 @@ public final class yacyRelease extends yacyVersion {
                 continue;
             }
         }
-        plasmaSwitchboard.getSwitchboard().setConfig("update.time.lookup", System.currentTimeMillis());
+        Switchboard.getSwitchboard().setConfig("update.time.lookup", System.currentTimeMillis());
         return new DevAndMainVersions(devReleases, mainReleases);
     }
     
@@ -276,19 +276,19 @@ public final class yacyRelease extends yacyVersion {
      * @return file object of release file, null in case of failure
      */
     public File downloadRelease() {
-        final File storagePath = plasmaSwitchboard.getSwitchboard().releasePath;
+        final File storagePath = Switchboard.getSwitchboard().releasePath;
         File download = null;
         // setup httpClient
-        final httpRequestHeader reqHeader = new httpRequestHeader();
-        reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+        final RequestHeader reqHeader = new RequestHeader();
+        reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
         
-        httpResponse res = null;
+        ResponseContainer res = null;
         final String name = this.getUrl().getFileName();
         byte[] signatureBytes = null;
         
         // download signature first, if public key is available
         if (this.publicKey != null) {
-	        final byte[] signatureData = httpClient.wget(this.getUrl().toString() + ".sig", reqHeader, 6000);
+	        final byte[] signatureData = Client.wget(this.getUrl().toString() + ".sig", reqHeader, 6000);
 	        if (signatureData == null) {
 	            Log.logWarning("yacyVersion", "download of signature " + this.getUrl().toString() + " failed. ignoring signature file.");
 	        } else try {
@@ -299,7 +299,7 @@ public final class yacyRelease extends yacyVersion {
 	        // in case that the download of a signature file failed (can be caused by bad working http servers), then it is assumed that no signature exists
 	    }
 	    try {
-	        final httpClient client = new httpClient(120000, reqHeader);
+	        final Client client = new Client(120000, reqHeader);
 	        res = client.GET(this.getUrl().toString());
 	
 	        final boolean unzipped = res.getResponseHeader().gzip() && (res.getResponseHeader().mime().toLowerCase().equals("application/x-tar")); // if true, then the httpc has unzipped the file
@@ -349,7 +349,7 @@ public final class yacyRelease extends yacyVersion {
 	        }
 	    }
         this.releaseFile = download;
-        plasmaSwitchboard.getSwitchboard().setConfig("update.time.download", System.currentTimeMillis());
+        Switchboard.getSwitchboard().setConfig("update.time.download", System.currentTimeMillis());
         return this.releaseFile;
     }
     
@@ -383,7 +383,7 @@ public final class yacyRelease extends yacyVersion {
      * script, which waits until yacy is terminated and starts it again
      */
     public static void restart() {
-            final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+            final Switchboard sb = Switchboard.getSwitchboard();
             final String apphome = sb.getRootPath().toString();
             
             if (serverSystem.isWindows) {
@@ -479,7 +479,7 @@ public final class yacyRelease extends yacyVersion {
         }
         //byte[] script = ("cd " + plasmaSwitchboard.getSwitchboard().getRootPath() + ";while [ -e ../yacy.running ]; do sleep 1;done;tar xfz " + release + ";cp -Rf yacy/* ../../;rm -Rf yacy;cd ../../;startYACY.sh").getBytes();
         try {
-            final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+            final Switchboard sb = Switchboard.getSwitchboard();
             final String apphome = sb.getRootPath().toString();
             Log.logInfo("UPDATE", "INITIATED");
             try{

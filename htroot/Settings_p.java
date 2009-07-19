@@ -25,9 +25,9 @@
 import java.util.HashMap;
 import java.util.Iterator;
 
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -36,10 +36,10 @@ import de.anomic.yacy.yacySeedUploader;
 
 public final class Settings_p {
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
         
@@ -156,7 +156,7 @@ public final class Settings_p {
         }
         
         // clientIP
-        prop.putXML("clientIP", header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "<unknown>")); // read an artificial header addendum
+        prop.putXML("clientIP", header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>")); // read an artificial header addendum
         
         /* 
          * seed upload settings

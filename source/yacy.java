@@ -47,10 +47,10 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
 import de.anomic.data.translator;
 import de.anomic.document.Word;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpResponse;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.http.httpd;
+import de.anomic.http.client.Client;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.metadata.ResponseContainer;
+import de.anomic.http.server.HTTPDemon;
 import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapDataMining;
 import de.anomic.kelondro.index.RowCollection;
@@ -65,8 +65,8 @@ import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSystem;
@@ -129,10 +129,10 @@ public final class yacy {
     public static final String hline = "-------------------------------------------------------------------------------";
    
     /**
-     * a reference to the {@link plasmaSwitchboard} created by the
+     * a reference to the {@link Switchboard} created by the
      * {@link yacy#startup(String, long, long)} method.
      */
-    private static plasmaSwitchboard sb = null;
+    private static Switchboard sb = null;
     
     /**
      * Semaphore needed by {@link yacy#setUpdaterCallback(serverUpdaterCallback)} to block 
@@ -217,7 +217,7 @@ public final class yacy {
                 if(!oldconffile.renameTo(newconfFile))
                     Log.logSevere("STARTUP", "WARNING: the file " + oldconffile + " can not be renamed to "+ newconfFile +"!");
             }
-            sb = new plasmaSwitchboard(homePath, "defaults/yacy.init".replace("/", File.separator), newconf, pro);
+            sb = new Switchboard(homePath, "defaults/yacy.init".replace("/", File.separator), newconf, pro);
             //sbSync.V(); // signal that the sb reference was set
             
             // save information about available memory at startup time
@@ -249,7 +249,7 @@ public final class yacy {
 
             // create some directories
             final File htRootPath = new File(homePath, sb.getConfig("htRootPath", "htroot"));
-            final File htDocsPath = sb.getConfigPath(plasmaSwitchboardConstants.HTDOCS_PATH, plasmaSwitchboardConstants.HTDOCS_PATH_DEFAULT);
+            final File htDocsPath = sb.getConfigPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
             mkdirIfNeseccary(htDocsPath);
             //final File htTemplatePath = new File(homePath, sb.getConfig("htTemplatePath","htdocs"));
 
@@ -292,13 +292,13 @@ public final class yacy {
             
             // set user-agent
             final String userAgent = "yacy/" + Double.toString(version) + " (www.yacy.net; "
-                    + httpClient.getSystemOST() + ")";
-            httpClient.setUserAgent(userAgent);
+                    + Client.getSystemOST() + ")";
+            Client.setUserAgent(userAgent);
             
             // start main threads
             final String port = sb.getConfig("port", "8080");
             try {
-                final httpd protocolHandler = new httpd(sb);
+                final HTTPDemon protocolHandler = new HTTPDemon(sb);
                 final serverCore server = new serverCore(
                         timeout /*control socket timeout in milliseconds*/,
                         true /* block attacks (wrong protocol) */,
@@ -318,12 +318,12 @@ public final class yacy {
                     server.setLog(new Log("SERVER"));
 
                     // open the browser window
-                    final boolean browserPopUpTrigger = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
+                    final boolean browserPopUpTrigger = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
                     if (browserPopUpTrigger) {
-                        final String  browserPopUpPage = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
+                        final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");
                         //boolean properPW = (sb.getConfig("adminAccount", "").length() == 0) && (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
                         //if (!properPW) browserPopUpPage = "ConfigBasic.html";
-                        final String  browserPopUpApplication = sb.getConfig(plasmaSwitchboardConstants.BROWSER_POP_UP_APPLICATION, "firefox");
+                        final String  browserPopUpApplication = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_APPLICATION, "firefox");
                         serverSystem.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage, browserPopUpApplication);
                     }
                     
@@ -407,12 +407,12 @@ public final class yacy {
                     if (server.isAlive()) try {
                         // TODO only send request, don't read response (cause server is already down resulting in error)
                         final yacyURL u = new yacyURL((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port), null);
-                        httpClient.wget(u.toString(), null, 10000); // kick server
+                        Client.wget(u.toString(), null, 10000); // kick server
                         Log.logConfig("SHUTDOWN", "sent termination signal to server socket");
                     } catch (final IOException ee) {
                         Log.logConfig("SHUTDOWN", "termination signal to server socket missed (server shutdown, ok)");
                     }
-                    httpClient.closeAllConnections();
+                    Client.closeAllConnections();
                     MultiThreadedHttpConnectionManager.shutdownAll();
                     
                     // idle until the processes are down
@@ -550,14 +550,14 @@ public final class yacy {
         final int port = serverCore.getPortNr(config.getProperty("port", "8080"));
 
         // read password
-        String encodedPassword = (String) config.get(httpd.ADMIN_ACCOUNT_B64MD5);
+        String encodedPassword = (String) config.get(HTTPDemon.ADMIN_ACCOUNT_B64MD5);
         if (encodedPassword == null) encodedPassword = ""; // not defined
 
         // send 'wget' to web interface
-        final httpRequestHeader requestHeader = new httpRequestHeader();
-        requestHeader.put(httpRequestHeader.AUTHORIZATION, "realm=" + encodedPassword); // for http-authentify
-        final httpClient con = new httpClient(10000, requestHeader);
-        httpResponse res = null;
+        final RequestHeader requestHeader = new RequestHeader();
+        requestHeader.put(RequestHeader.AUTHORIZATION, "realm=" + encodedPassword); // for http-authentify
+        final Client con = new Client(10000, requestHeader);
+        ResponseContainer res = null;
         try {
             res = con.GET("http://localhost:"+ port +"/" + path);
 
@@ -1038,10 +1038,10 @@ public final class yacy {
 * machine shuts down. Signals the plasmaSwitchboard to shut down.
 */
 class shutdownHookThread extends Thread {
-    private plasmaSwitchboard sb = null;
+    private Switchboard sb = null;
     private Thread mainThread = null;
 
-    public shutdownHookThread(final Thread mainThread, final plasmaSwitchboard sb) {
+    public shutdownHookThread(final Thread mainThread, final Switchboard sb) {
         super();
         this.sb = sb;
         this.mainThread = mainThread;

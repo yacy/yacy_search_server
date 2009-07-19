@@ -51,8 +51,6 @@ import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.SortStack;
 import de.anomic.kelondro.util.SortStore;
-import de.anomic.plasma.plasmaProfiling;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.search.RankingProcess.NavigatorEntry;
 import de.anomic.search.SnippetCache.MediaSnippet;
 import de.anomic.server.serverProfiling;
@@ -62,6 +60,7 @@ import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
 import de.anomic.yacy.logging.Log;
+import de.anomic.ymage.ProfilingGraph;
 
 public final class QueryEvent {
     
@@ -131,10 +130,10 @@ public final class QueryEvent {
         
         // snippets do not need to match with the complete query hashes,
         // only with the query minus the stopwords which had not been used for the search
-        final TreeSet<byte[]> filtered = SetTools.joinConstructive(query.queryHashes, plasmaSwitchboard.stopwordHashes);
+        final TreeSet<byte[]> filtered = SetTools.joinConstructive(query.queryHashes, Switchboard.stopwordHashes);
         this.snippetFetchWordHashes = (TreeSet<byte[]>) query.queryHashes.clone();
         if ((filtered != null) && (filtered.size() > 0)) {
-            SetTools.excludeDestructive(this.snippetFetchWordHashes, plasmaSwitchboard.stopwordHashes);
+            SetTools.excludeDestructive(this.snippetFetchWordHashes, Switchboard.stopwordHashes);
         }
         
         final long start = System.currentTimeMillis();
@@ -170,11 +169,11 @@ public final class QueryEvent {
                     rankedCache,
                     rcAbstracts,
                     fetchpeers,
-                    plasmaSwitchboard.urlBlacklist,
+                    Switchboard.urlBlacklist,
                     query.ranking,
                     query.constraint,
                     (query.domType == QueryParams.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes);
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "remote search thread start", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
+            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "remote search thread start", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
             
             // finished searching
             Log.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
@@ -208,7 +207,7 @@ public final class QueryEvent {
                     IACount.put(wordhash, Integer.valueOf(container.size()));
                     IAResults.put(wordhash, ReferenceContainer.compressIndex(container, null, 1000).toString());
                 }
-                serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "abstract generation", this.rankedCache.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
+                serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "abstract generation", this.rankedCache.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
             }
         }
         
@@ -218,11 +217,11 @@ public final class QueryEvent {
             this.workerThreads[i] = new resultWorker(i, 10000, (query.onlineSnippetFetch) ? 2 : 0);
             this.workerThreads[i].start();
         }
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), this.workerThreads.length + " online snippet fetch threads started", 0, 0), false);
+        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), this.workerThreads.length + " online snippet fetch threads started", 0, 0), false);
     
         // clean up events
         cleanupEvents(false);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "event-cleanup", 0, 0), false);
+        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "event-cleanup", 0, 0), false);
         
         // store this search to a cache so it can be re-used
         if (MemoryControl.available() < 1024 * 1024 * 10) cleanupEvents(true);
@@ -469,7 +468,7 @@ public final class QueryEvent {
         
         String id = query.id(false);
         QueryEvent event = lastEvents.get(id);
-        if (plasmaSwitchboard.getSwitchboard().crawlQueues.noticeURL.size() > 0 && event != null && System.currentTimeMillis() - event.eventTime > 60000) {
+        if (Switchboard.getSwitchboard().crawlQueues.noticeURL.size() > 0 && event != null && System.currentTimeMillis() - event.eventTime > 60000) {
             // if a local crawl is ongoing, don't use the result from the cache to use possibly more results that come from the current crawl
             // to prevent that this happens during a person switches between the different result pages, a re-search happens no more than
             // once a minute
@@ -597,7 +596,7 @@ public final class QueryEvent {
     public ResultEntry oneResult(final int item) {
         // check if we already retrieved this item (happens if a search
         // pages is accessed a second time)
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), "obtain one result entry - start", 0, 0), false);
+        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "obtain one result entry - start", 0, 0), false);
         if (this.result.sizeStore() > item) {
             // we have the wanted result already in the result array .. return that
             return this.result.element(item).element;
@@ -740,7 +739,7 @@ public final class QueryEvent {
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls);
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
-                        words, "", urls, indexSegment, peers, crawlResults, this.rankedCache, peer, plasmaSwitchboard.urlBlacklist,
+                        words, "", urls, indexSegment, peers, crawlResults, this.rankedCache, peer, Switchboard.urlBlacklist,
                         query.ranking, query.constraint, preselectedPeerHashes);
 
             }

@@ -34,22 +34,22 @@ import java.net.MalformedURLException;
 
 import de.anomic.data.Blacklist;
 import de.anomic.data.listManager;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
 
 public class BlacklistTest_p {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         
         // initialize the list manager
-        listManager.switchboard = (plasmaSwitchboard) env;
+        listManager.switchboard = (Switchboard) env;
         listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
 
         final serverObjects prop = new serverObjects();
-        prop.putHTML("blacklistEngine", plasmaSwitchboard.urlBlacklist.getEngineInfo());
+        prop.putHTML("blacklistEngine", Switchboard.urlBlacklist.getEngineInfo());
        
         // do all post operations            
         if(post != null && post.containsKey("testList")) {
@@ -62,17 +62,17 @@ public class BlacklistTest_p {
             } catch (final MalformedURLException e) { testurl = null; }
             if(testurl != null) {
                 prop.putHTML("testlist_url",testurl.toString());
-                if(plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, testurl))
+                if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, testurl))
                         prop.put("testlist_listedincrawler", "1");
-                if(plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, testurl))
+                if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, testurl))
                         prop.put("testlist_listedindht", "1");
-                if(plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_NEWS, testurl))
+                if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_NEWS, testurl))
                         prop.put("testlist_listedinnews", "1");
-                if(plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_PROXY, testurl))
+                if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_PROXY, testurl))
                         prop.put("testlist_listedinproxy", "1");
-                if(plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SEARCH, testurl))
+                if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SEARCH, testurl))
                         prop.put("testlist_listedinsearch", "1");
-                if(plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS, testurl))
+                if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS, testurl))
                         prop.put("testlist_listedinsurftips", "1");
             }
             else prop.put("testlist_url","not valid");

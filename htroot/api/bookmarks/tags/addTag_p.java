@@ -1,15 +1,15 @@
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.data.bookmarksDB.Bookmark;
 
 
 public class addTag_p {
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
-        final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+        final Switchboard switchboard = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         boolean isAdmin = false;
         isAdmin = switchboard.verifyAuthentication(header, true);

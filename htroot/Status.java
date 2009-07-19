@@ -30,14 +30,14 @@
 import java.net.InetAddress;
 import java.util.Date;
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.http.httpd;
-import de.anomic.http.httpdByteCountInputStream;
-import de.anomic.http.httpdByteCountOutputStream;
+import de.anomic.http.io.ByteCountInputStream;
+import de.anomic.http.io.ByteCountOutputStream;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.HTTPDemon;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
@@ -52,10 +52,10 @@ public class Status {
     private static final String SEEDSERVER = "seedServer";
     private static final String PEERSTATUS = "peerStatus";
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
 
         if (post != null) {
             if (sb.adminAuthenticated(header) < 2) {
@@ -69,20 +69,20 @@ public class Status {
             } else if (post.containsKey("pauseCrawlJob")) {
         		final String jobType = post.get("jobType");
         		if (jobType.equals("localCrawl")) 
-                    sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                    sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
         		else if (jobType.equals("remoteTriggeredCrawl")) 
-                    sb.pauseCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                    sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         		redirect = true;
         	} else if (post.containsKey("continueCrawlJob")) {
         		final String jobType = post.get("jobType");
         		if (jobType.equals("localCrawl")) 
-                    sb.continueCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+                    sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
         		else if (jobType.equals("remoteTriggeredCrawl")) 
-                    sb.continueCrawlJob(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                    sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
         		redirect = true;
         	} else if (post.containsKey("ResetTraffic")) {
-        		httpdByteCountInputStream.resetCount();
-        		httpdByteCountOutputStream.resetCount();
+        		ByteCountInputStream.resetCount();
+        		ByteCountOutputStream.resetCount();
         		redirect = true;
         	} else if (post.containsKey("popup")) {
                 final String trigger_enabled = post.get("popup");
@@ -121,7 +121,7 @@ public class Status {
         }
 
         // password protection
-        if ((sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() == 0) && (!sb.getConfigBool("adminAccountForLocalhost", false))) {
+        if ((sb.getConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, "").length() == 0) && (!sb.getConfigBool("adminAccountForLocalhost", false))) {
             prop.put("protection", "0"); // not protected
             prop.put("urgentSetPassword", "1");
         } else {
@@ -143,11 +143,11 @@ public class Status {
         prop.put("versionpp", versionstring);
         
         // place some more hints
-        if ((adminaccess) && (sb.getThread(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0)) {
+        if ((adminaccess) && (sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() == 0)) {
             prop.put("hintCrawlStart", "1");
         }
         
-        if ((adminaccess) && (sb.getThread(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 500)) {
+        if ((adminaccess) && (sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount() > 500)) {
             prop.put("hintCrawlMonitor", "1");
         }
         
@@ -204,10 +204,10 @@ public class Status {
             }
         }
         final String peerStatus = ((sb.peers.mySeed() == null) ? yacySeed.PEERTYPE_VIRGIN : sb.peers.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN));
-        if (peerStatus.equals(yacySeed.PEERTYPE_VIRGIN) && sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "").equals("freeworld")) {
+        if (peerStatus.equals(yacySeed.PEERTYPE_VIRGIN) && sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("freeworld")) {
             prop.put(PEERSTATUS, "0");
             prop.put("urgentStatusVirgin", "1");
-        } else if (peerStatus.equals(yacySeed.PEERTYPE_JUNIOR) && sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "").equals("freeworld")) {
+        } else if (peerStatus.equals(yacySeed.PEERTYPE_JUNIOR) && sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("freeworld")) {
             prop.put(PEERSTATUS, "1");
             prop.put("warningStatusJunior", "1");
         } else if (peerStatus.equals(yacySeed.PEERTYPE_SENIOR)) {
@@ -277,8 +277,8 @@ public class Status {
 
         // proxy traffic
         //prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));
-        prop.put("trafficProxy", Formatter.bytesToString(httpdByteCountOutputStream.getAccountCount("PROXY")));
-        prop.put("trafficCrawler", Formatter.bytesToString(httpdByteCountInputStream.getAccountCount("CRAWLER")));
+        prop.put("trafficProxy", Formatter.bytesToString(ByteCountOutputStream.getAccountCount("PROXY")));
+        prop.put("trafficCrawler", Formatter.bytesToString(ByteCountInputStream.getAccountCount("CRAWLER")));
 
         // connection information
         final serverCore httpd = (serverCore) sb.getThread("10_httpd");
@@ -287,17 +287,17 @@ public class Status {
         
         // Queue information
         final int loaderJobCount = sb.crawlQueues.size();
-        final int loaderMaxCount = Integer.parseInt(sb.getConfig(plasmaSwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, "10"));
+        final int loaderMaxCount = Integer.parseInt(sb.getConfig(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, "10"));
         final int loaderPercent = (loaderMaxCount==0)?0:loaderJobCount*100/loaderMaxCount;
         prop.putNum("loaderQueueSize", loaderJobCount);
         prop.putNum("loaderQueueMax", loaderMaxCount);        
         prop.put("loaderQueuePercent", (loaderPercent>100) ? 100 : loaderPercent);
         
-        prop.putNum("localCrawlQueueSize", sb.getThread(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount());
-        prop.put("localCrawlPaused",sb.crawlJobIsPaused(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) ? "1" : "0");
+        prop.putNum("localCrawlQueueSize", sb.getThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL).getJobCount());
+        prop.put("localCrawlPaused",sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) ? "1" : "0");
 
-        prop.putNum("remoteTriggeredCrawlQueueSize", sb.getThread(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount());
-        prop.put("remoteTriggeredCrawlPaused",sb.crawlJobIsPaused(plasmaSwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? "1" : "0");
+        prop.putNum("remoteTriggeredCrawlQueueSize", sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL).getJobCount());
+        prop.put("remoteTriggeredCrawlPaused",sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL) ? "1" : "0");
         
         prop.putNum("stackCrawlQueueSize", sb.crawlStacker.size());
 

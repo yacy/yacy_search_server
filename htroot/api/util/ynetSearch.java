@@ -7,15 +7,15 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Scanner;
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class ynetSearch {
 	
-	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {        
-        final plasmaSwitchboard switchboard = (plasmaSwitchboard) env;
+	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {        
+        final Switchboard switchboard = (Switchboard) env;
         final boolean isAdmin=switchboard.verifyAuthentication(header, true);
         final serverObjects prop = new serverObjects();              
                 

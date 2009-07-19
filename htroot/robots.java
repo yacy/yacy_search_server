@@ -3,45 +3,45 @@
 import java.io.File;
 import java.util.ArrayList;
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.http.httpdRobotsTxtConfig;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RobotsTxtConfig;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 
 public class robots {
     
-    public static servletProperties respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static servletProperties respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
-        final httpdRobotsTxtConfig rbc = ((plasmaSwitchboard)env).robotstxtConfig;
+        final RobotsTxtConfig rbc = ((Switchboard)env).robotstxtConfig;
         
         if (rbc.isAllDisallowed()) {
-            prop.put(httpdRobotsTxtConfig.ALL, 1);
+            prop.put(RobotsTxtConfig.ALL, 1);
         } else {
-            if (rbc.isBlogDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.BLOG, "1");
-            if (rbc.isBookmarksDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.BOOKMARKS, "1");
-            if (rbc.isFileshareDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.FILESHARE, "1");
-            if (rbc.isHomepageDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.HOMEPAGE, "1");
-            if (rbc.isNetworkDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.NETWORK, "1");
-            if (rbc.isNewsDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.NEWS, "1");
-            if (rbc.isStatusDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.STATUS, "1");
-            if (rbc.isSurftipsDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.SURFTIPS, "1");
-            if (rbc.isWikiDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.WIKI, "1");
-            if (rbc.isProfileDisallowed()) prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.PROFILE, "1");
+            if (rbc.isBlogDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.BLOG, "1");
+            if (rbc.isBookmarksDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.BOOKMARKS, "1");
+            if (rbc.isFileshareDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.FILESHARE, "1");
+            if (rbc.isHomepageDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.HOMEPAGE, "1");
+            if (rbc.isNetworkDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.NETWORK, "1");
+            if (rbc.isNewsDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.NEWS, "1");
+            if (rbc.isStatusDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.STATUS, "1");
+            if (rbc.isSurftipsDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.SURFTIPS, "1");
+            if (rbc.isWikiDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.WIKI, "1");
+            if (rbc.isProfileDisallowed()) prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.PROFILE, "1");
             
             if (rbc.isLockedDisallowed() || rbc.isDirsDisallowed()) {
-                final ArrayList<String>[] p = getFiles(env.getConfig(plasmaSwitchboardConstants.HTROOT_PATH, plasmaSwitchboardConstants.HTROOT_PATH_DEFAULT));
+                final ArrayList<String>[] p = getFiles(env.getConfig(SwitchboardConstants.HTROOT_PATH, SwitchboardConstants.HTROOT_PATH_DEFAULT));
                 if (rbc.isLockedDisallowed()) {
-                    prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.LOCKED, p[0].size());
+                    prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.LOCKED, p[0].size());
                     for (int i=0; i<p[0].size(); i++)
-                        prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.LOCKED + "_" + i + "_page", p[0].get(i));
+                        prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.LOCKED + "_" + i + "_page", p[0].get(i));
                 }
                 if (rbc.isDirsDisallowed()) {
-                    prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.DIRS, p[1].size());
+                    prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.DIRS, p[1].size());
                     for (int i=0; i<p[1].size(); i++)
-                        prop.put(httpdRobotsTxtConfig.ALL + "_" + httpdRobotsTxtConfig.DIRS + "_" + i + "_dir", p[1].get(i));
+                        prop.put(RobotsTxtConfig.ALL + "_" + RobotsTxtConfig.DIRS + "_" + i + "_dir", p[1].get(i));
                 }
             }
         }

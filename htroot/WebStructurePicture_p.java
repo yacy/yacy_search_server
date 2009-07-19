@@ -31,13 +31,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaWebStructure;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
+import de.anomic.ymage.WebStructureGraph;
 import de.anomic.ymage.ymageGraph;
 import de.anomic.ymage.ymageMatrix;
 import de.anomic.ymage.ymageToolPrint;
@@ -46,8 +46,8 @@ public class WebStructurePicture_p {
     
     private static final double maxlongd = Long.MAX_VALUE;
     
-    public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static ymageMatrix respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         
         int width = 768;
         int height = 576;
@@ -112,7 +112,7 @@ public class WebStructurePicture_p {
         
     }
     
-    private static final int place(final ymageGraph graph, final plasmaWebStructure structure, final String centerhash, final String centerhost, int maxnodes, final long timeout, final double x, final double y, int nextlayer, final int maxlayer) {
+    private static final int place(final ymageGraph graph, final WebStructureGraph structure, final String centerhash, final String centerhost, int maxnodes, final long timeout, final double x, final double y, int nextlayer, final int maxlayer) {
         // returns the number of nodes that had been placed
         assert centerhost != null;
         ymageGraph.coordinate center = graph.getPoint(centerhost);
@@ -125,7 +125,7 @@ public class WebStructurePicture_p {
         if (nextlayer == maxlayer) return mynodes;
         nextlayer++;
         final double radius = 1.0 / (1 << nextlayer);
-        plasmaWebStructure.structureEntry sr = structure.outgoingReferences(centerhash);
+        WebStructureGraph.structureEntry sr = structure.outgoingReferences(centerhash);
         final Map<String, Integer> next = (sr == null) ? new HashMap<String, Integer>() : sr.references;
         Map.Entry<String, Integer> entry;
         String targethash, targethost;

@@ -73,7 +73,7 @@ import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverInstantBusyThread;
 import de.anomic.yacy.yacyNewsPool;
@@ -130,7 +130,7 @@ public class bookmarksDB {
         if (!datesExisted) rebuildDates();
 
         // autoReCrawl
-        plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+        Switchboard sb = Switchboard.getSwitchboard();
         this.autoReCrawl = new serverInstantBusyThread(this, "autoReCrawl", null, null);
         long sleepTime = Long.parseLong(sb.getConfig("autoReCrawl_idlesleep" , SLEEP_TIME));
         sb.deployThread("autoReCrawl", "autoReCrawl Scheduler", "simple scheduler for automatic re-crawls of bookmarked urls", null, autoReCrawl, 120000,
@@ -157,7 +157,7 @@ public class bookmarksDB {
     public boolean autoReCrawl() {
     	
     	// read crontab
-        File f = new File (plasmaSwitchboard.getSwitchboard().getRootPath(),"DATA/SETTINGS/autoReCrawl.conf");
+        File f = new File (Switchboard.getSwitchboard().getRootPath(),"DATA/SETTINGS/autoReCrawl.conf");
         String s;
         try {                    	
         	BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
@@ -179,8 +179,8 @@ public class bookmarksDB {
         } catch( FileNotFoundException ex ) {        	
         	try {
         		Log.logInfo("BOOKMARKS", "autoReCrawl - creating new autoReCrawl.conf"); 
-        		File inputFile = new File(plasmaSwitchboard.getSwitchboard().getRootPath(),"defaults/autoReCrawl.conf");
-	            File outputFile = new File(plasmaSwitchboard.getSwitchboard().getRootPath(),"DATA/SETTINGS/autoReCrawl.conf");	
+        		File inputFile = new File(Switchboard.getSwitchboard().getRootPath(),"defaults/autoReCrawl.conf");
+	            File outputFile = new File(Switchboard.getSwitchboard().getRootPath(),"DATA/SETTINGS/autoReCrawl.conf");	
 	            FileReader i = new FileReader(inputFile);
 	            FileWriter o = new FileWriter(outputFile);
 	            int c;	
@@ -208,7 +208,7 @@ public class bookmarksDB {
     		int crawlingDomFilterDepth, int crawlingDomMaxPages, boolean crawlingQ, boolean indexText, boolean indexMedia, 
     		boolean crawlOrder, boolean xsstopw, boolean storeHTCache) {
 
-	    plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+	    Switchboard sb = Switchboard.getSwitchboard();
 	    Iterator<String> bit=getBookmarksIterator(folder, true);    		
 		Log.logInfo("BOOKMARKS", "autoReCrawl - processing: "+folder);
 		 

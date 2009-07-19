@@ -33,11 +33,11 @@ import java.util.Iterator;
 import java.util.TreeMap;
 
 import de.anomic.data.messageBoard;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
@@ -51,8 +51,8 @@ public class Messages_p {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
         // set peer address / name
@@ -127,7 +127,7 @@ public class Messages_p {
                     prop.putXML("mode_messages_"+count+"_key", key);
                     prop.put("mode_messages_"+count+"_hash", message.authorHash());
 
-                    if ((header.get(httpHeader.CONNECTION_PROP_PATH)).endsWith(".rss")) {
+                    if ((header.get(HeaderFramework.CONNECTION_PROP_PATH)).endsWith(".rss")) {
                     	// set the peer address
                     	prop.put("mode_messages_"+count+"_peerAddress", peerAddress);
 

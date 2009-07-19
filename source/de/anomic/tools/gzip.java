@@ -25,6 +25,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -107,6 +108,50 @@ public class gzip {
 	bOut.close();
     }
 	
+
+    // some static helper methods
+    public static void saveGzip(final File f, final byte[] content) throws IOException {
+        java.util.zip.GZIPOutputStream gzipout = null;
+        try {
+            f.getParentFile().mkdirs();
+            gzipout = new java.util.zip.GZIPOutputStream(new FileOutputStream(f));
+            gzipout.write(content, 0, content.length);
+        } finally {
+            if (gzipout!=null)try{gzipout.close();}catch(final Exception e){}
+        }        
+    }
+
+    public static byte[] loadGzip(final File f) throws IOException {
+        java.util.zip.GZIPInputStream gzipin = null;
+        try {
+            gzipin = new java.util.zip.GZIPInputStream(new FileInputStream(f));
+            byte[] result = new byte[1024];
+            final byte[] buffer = new byte[512];
+            byte[] b;
+            int len = 0;
+            int last;
+            while ((last = gzipin.read(buffer, 0, buffer.length)) > 0) {
+                // assert the buffer to the result
+                while (result.length - len < last) {
+                    // the result array is too small, increase space
+                    b = new byte[result.length * 2];
+                    System.arraycopy(result, 0, b, 0, len); 
+                    result = b; b = null;
+                }
+                // copy the last read
+                System.arraycopy(buffer, 0, result, len, last); 
+                len += last;
+            }
+            gzipin.close();
+            // finished with reading. now cut the result to the right size
+            b = new byte[len];
+            System.arraycopy(result, 0, b, 0, len); 
+            return b;
+        } finally {
+            if (gzipin != null) try{gzipin.close();}catch(final Exception e){}
+        }
+    }
+
     private static void help() {
 	System.out.println("AnomicGzip (2004) by Michael Christen");
 	System.out.println("usage: gzip [-u] <file> [<target-file>]");

@@ -30,14 +30,13 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaProfiling;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.QueryParams;
 import de.anomic.search.QueryEvent;
 import de.anomic.search.RankingProcess;
 import de.anomic.search.SnippetCache;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
@@ -47,6 +46,7 @@ import de.anomic.tools.Formatter;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
+import de.anomic.ymage.ProfilingGraph;
 
 
 public class yacysearchitem {
@@ -55,14 +55,14 @@ public class yacysearchitem {
     private static final int namelength = 60;
     private static final int urllength = 120;
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         
         final String eventID = post.get("eventID", "");
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         final int item = post.getInt("item", -1);
-        final boolean auth = (header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
+        final boolean auth = (header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true);
         final int display = (post == null) ? 0 : post.getInt("display", 0);
         
         // default settings for blank item
@@ -123,8 +123,8 @@ public class yacysearchitem {
             prop.put("content_urlhash", result.hash());
             prop.put("content_urlhexhash", yacySeed.b64Hash2hexHash(result.hash()));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), urllength));
-            prop.put("content_date", plasmaSwitchboard.dateString(result.modified()));
-            prop.put("content_date822", plasmaSwitchboard.dateString822(result.modified()));
+            prop.put("content_date", Switchboard.dateString(result.modified()));
+            prop.put("content_date822", Switchboard.dateString822(result.modified()));
             prop.put("content_ybr", RankingProcess.ybr(result.hash()));
             prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
             prop.putHTML("content_sizename", sizename(result.filesize()));
@@ -147,7 +147,7 @@ public class yacysearchitem {
             prop.put("content_description", desc);
             prop.putXML("content_description-xml", desc);
             prop.putJSON("content_description-json", desc);
-            serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(theQuery.id(true), QueryEvent.FINALIZATION + "-" + item, 0, 0), false);
+            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), QueryEvent.FINALIZATION + "-" + item, 0, 0), false);
             
             return prop;
         }

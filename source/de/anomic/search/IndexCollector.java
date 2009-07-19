@@ -43,10 +43,10 @@ import de.anomic.kelondro.text.TermSearch;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.SortStack;
-import de.anomic.plasma.plasmaProfiling;
 import de.anomic.search.QueryParams;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;
+import de.anomic.ymage.ProfilingGraph;
 
 public final class IndexCollector extends Thread {
     
@@ -145,14 +145,14 @@ public final class IndexCollector extends Thread {
         ReferenceContainer<WordReference> index = search.joined();
         insertRanked(index, true, index.size());
         
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), QueryEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
+        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), QueryEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
 
         try {
             while ((index = this.rwiQueue.take()) != poison) {
             
                 // normalize entries
                 final ArrayList<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
-                serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), QueryEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
+                serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), QueryEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
                 
                 // iterate over normalized entries and select some that are better than currently stored
                 timer = System.currentTimeMillis();
@@ -234,7 +234,7 @@ public final class IndexCollector extends Thread {
             e.printStackTrace();
         }
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
-        serverProfiling.update("SEARCH", new plasmaProfiling.searchEvent(query.id(true), QueryEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
+        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), QueryEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
     }
 
     public Map<byte[], ReferenceContainer<WordReference>> searchContainerMap() {

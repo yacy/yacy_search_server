@@ -27,26 +27,26 @@
 import java.util.Date;
 import java.util.Iterator;
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaProfiling;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
+import de.anomic.ymage.ProfilingGraph;
 
 public class PerformanceSearch_p {
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch sb) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch sb) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         
         final Iterator<serverProfiling.Event> events = serverProfiling.history("SEARCH");
         int c = 0;
         serverProfiling.Event event;
-        plasmaProfiling.searchEvent search;
+        ProfilingGraph.searchEvent search;
         long lastt = 0;
         while (events.hasNext()) {
             event = events.next();
-            search = (plasmaProfiling.searchEvent) event.payload;
+            search = (ProfilingGraph.searchEvent) event.payload;
             prop.put("table_" + c + "_query", search.queryID);
             prop.put("table_" + c + "_event", search.processName);
             prop.putNum("table_" + c + "_count", search.resultCount);

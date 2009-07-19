@@ -35,7 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
@@ -144,8 +144,8 @@ public final class userDB {
 		}
 		return null;
 	}
-        public Entry getUser(final httpRequestHeader header){
-            return getUser(header.get(httpRequestHeader.AUTHORIZATION), header.getHeaderCookies());
+        public Entry getUser(final RequestHeader header){
+            return getUser(header.get(RequestHeader.AUTHORIZATION), header.getHeaderCookies());
         }
         public Entry getUser(final String auth, final String cookies){
         Entry entry=null;

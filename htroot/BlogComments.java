@@ -40,10 +40,10 @@ import de.anomic.data.blogBoardComments;
 import de.anomic.data.messageBoard;
 import de.anomic.data.userDB;
 import de.anomic.data.blogBoard.BlogEntry;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyCore;
@@ -58,8 +58,8 @@ public class BlogComments {
         return SimpleFormatter.format(date);
     }
 
-    public static serverObjects respond(final httpRequestHeader header, serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         blogBoard.BlogEntry page = null;
         boolean hasRights = sb.verifyAuthentication(header, true);
@@ -73,7 +73,7 @@ public class BlogComments {
         }
 
         if(!hasRights){
-            final userDB.Entry userentry = sb.userDB.proxyAuth(header.get(httpRequestHeader.AUTHORIZATION, "xxxxxx"));
+            final userDB.Entry userentry = sb.userDB.proxyAuth(header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
             if(userentry != null && userentry.hasRight(userDB.Entry.BLOG_RIGHT)){
                 hasRights=true;
             }
@@ -84,7 +84,7 @@ public class BlogComments {
         }
 
         final String pagename = post.get("page", "blog_default");
-        final String ip = post.get(httpHeader.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        final String ip = post.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
         String StrAuthor = post.get("author", "anonymous");
 
@@ -321,7 +321,7 @@ public class BlogComments {
         return prop;
     }
 
-    private static void messageForwardingViaEmail(final plasmaSwitchboard sb, final messageBoard.entry msgEntry) {
+    private static void messageForwardingViaEmail(final Switchboard sb, final messageBoard.entry msgEntry) {
         try {
             if (!Boolean.valueOf(sb.getConfig("msgForwardingEnabled","false")).booleanValue()) return;
 

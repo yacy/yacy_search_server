@@ -29,12 +29,12 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.index.Cache;
 import de.anomic.kelondro.table.Table;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -46,7 +46,7 @@ public class PerformanceMemory_p {
     private static final long MB = 1024 * KB;
     private static Map<String, String> defaultSettings = null;
         
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         if (defaultSettings == null) {
@@ -163,7 +163,7 @@ public class PerformanceMemory_p {
         prop.putNum("namecache.hit", amount);
         amount = serverDomains.nameCacheNoCachingListSize();
         prop.putNum("namecache.noCache", amount);
-        amount = plasmaSwitchboard.urlBlacklist.blacklistCacheSize();
+        amount = Switchboard.urlBlacklist.blacklistCacheSize();
         prop.putNum("blacklistcache.size", amount);
         // return rewrite values for templates
         return prop;

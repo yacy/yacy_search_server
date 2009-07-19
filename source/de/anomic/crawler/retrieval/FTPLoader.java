@@ -34,23 +34,23 @@ import java.util.Date;
 
 import de.anomic.crawler.Latency;
 import de.anomic.document.Parser;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.http.httpResponseHeader;
+import de.anomic.http.client.Cache;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.net.ftpc;
-import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
 public class FTPLoader {
 
-    private final plasmaSwitchboard sb;
+    private final Switchboard sb;
     private final Log log;
     private final int maxFileSize;
 
-    public FTPLoader(final plasmaSwitchboard sb, final Log log) {
+    public FTPLoader(final Switchboard sb, final Log log) {
         this.sb = sb;
         this.log = log;
         maxFileSize = (int) sb.getConfigLong("crawler.ftp.maxFileSize", -1l);
@@ -58,18 +58,18 @@ public class FTPLoader {
 
     protected Response createCacheEntry(final Request request, final String mimeType, final Date fileDate) {
         if (request == null) return null;
-        httpRequestHeader requestHeader = new httpRequestHeader();
-        if (request.referrerhash() != null) requestHeader.put(httpRequestHeader.REFERER, sb.getURL(request.referrerhash()).toNormalform(true, false));
-        httpResponseHeader responseHeader = new httpResponseHeader();
-        responseHeader.put(httpHeader.LAST_MODIFIED, DateFormatter.formatRFC1123(fileDate));
-        responseHeader.put(httpHeader.CONTENT_TYPE, mimeType);
+        RequestHeader requestHeader = new RequestHeader();
+        if (request.referrerhash() != null) requestHeader.put(RequestHeader.REFERER, sb.getURL(request.referrerhash()).toNormalform(true, false));
+        ResponseHeader responseHeader = new ResponseHeader();
+        responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(fileDate));
+        responseHeader.put(HeaderFramework.CONTENT_TYPE, mimeType);
         Response metadata = new Response(
                 request, 
                 requestHeader,
                 responseHeader,
                 "OK",
                 sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()));
-        plasmaHTCache.storeMetadata(responseHeader, metadata);
+        Cache.storeMetadata(responseHeader, metadata);
         return metadata;
     }
 

@@ -4,7 +4,7 @@ import java.util.Comparator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.yacy.logging.Log;
 
 public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVersion> {
@@ -85,7 +85,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
     public static final yacyVersion thisVersion() {
         // construct a virtual release name for this release
         if (thisVersion == null) {
-            final plasmaSwitchboard sb = plasmaSwitchboard.getSwitchboard();
+            final Switchboard sb = Switchboard.getSwitchboard();
             if (sb == null) return null;
             thisVersion = new yacyVersion(
                 "yacy" +

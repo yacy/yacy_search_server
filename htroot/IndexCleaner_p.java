@@ -24,10 +24,10 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.Segment;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -35,15 +35,15 @@ public class IndexCleaner_p {
     private static MetadataRepository.BlacklistCleaner urldbCleanerThread = null;
     private static Segment.ReferenceCleaner indexCleanerThread = null;
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         prop.put("title", "DbCleanup_p");
         if (post!=null) {
             //prop.putHTML("bla", "post!=null");
             if (post.get("action").equals("ustart")) {
                 if (urldbCleanerThread==null || !urldbCleanerThread.isAlive()) {
-                    urldbCleanerThread = sb.indexSegment.urlMetadata().getBlacklistCleaner(plasmaSwitchboard.urlBlacklist);
+                    urldbCleanerThread = sb.indexSegment.urlMetadata().getBlacklistCleaner(Switchboard.urlBlacklist);
                     urldbCleanerThread.start();
                 }
                 else {

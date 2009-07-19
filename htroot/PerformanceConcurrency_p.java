@@ -21,14 +21,14 @@
 
 import java.util.Iterator;
 
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProcessor;
 import de.anomic.server.serverSwitch;
 
 public class PerformanceConcurrency_p {
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch sb) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch sb) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
 

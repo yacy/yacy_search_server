@@ -29,7 +29,7 @@
 import java.util.HashSet;
 import java.util.Hashtable;
 
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.logging.LogParser;
@@ -39,7 +39,7 @@ public class LogStatistics_p {
     private static final String RESULTS = "results_";
     
     @SuppressWarnings({ "unchecked", "boxing" })
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         
         final serverObjects prop = new serverObjects();
 

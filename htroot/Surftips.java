@@ -32,13 +32,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import de.anomic.data.Blacklist;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.ScoreCluster;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
@@ -50,8 +50,8 @@ import de.anomic.yacy.yacyURL;
 
 public class Surftips {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
@@ -133,7 +133,7 @@ public class Surftips {
                 
                 url = row.getColString(0, null);
                 try{
-                	if(plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS ,new yacyURL(url, null)))
+                	if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS ,new yacyURL(url, null)))
                 		continue;
                 }catch(final MalformedURLException e){continue;};
                 title = row.getColString(1,"UTF-8");
@@ -176,7 +176,7 @@ public class Surftips {
         return (int) Math.max(0, 10 - ((System.currentTimeMillis() - created.getTime()) / 24 / 60 / 60 / 1000));
     }
     
-    private static void accumulateVotes(final plasmaSwitchboard sb, final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
+    private static void accumulateVotes(final Switchboard sb, final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));
         yacyNewsRecord record;
         final Iterator<yacyNewsRecord> recordIterator = sb.peers.newsPool.recordIterator(dbtype, true);
@@ -204,7 +204,7 @@ public class Surftips {
     }
     
     private static void accumulateSurftips(
-            final plasmaSwitchboard sb,
+            final Switchboard sb,
             final HashMap<String, Entry> surftips, final ScoreCluster<String> ranking, final Row rowdef,
             final HashMap<String, Integer> negativeHashes, final HashMap<String, Integer> positiveHashes, final int dbtype) {
         final int maxCount = Math.min(1000, sb.peers.newsPool.size(dbtype));

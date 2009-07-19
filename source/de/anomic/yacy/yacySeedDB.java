@@ -40,18 +40,17 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpResponse;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.http.httpd;
-import de.anomic.http.httpdAlternativeDomainNames;
+import de.anomic.http.client.Client;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.metadata.ResponseContainer;
+import de.anomic.http.server.HTTPDemon;
+import de.anomic.http.server.AlternativeDomainNames;
 import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapDataMining;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaHTCache;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverSwitch;
@@ -59,7 +58,7 @@ import de.anomic.yacy.dht.PartitionScheme;
 import de.anomic.yacy.dht.VerticalWordPartitionScheme;
 import de.anomic.yacy.logging.Log;
 
-public final class yacySeedDB implements httpdAlternativeDomainNames {
+public final class yacySeedDB implements AlternativeDomainNames {
   
     // global statics
 
@@ -136,7 +135,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         lastSeedUpload_seedDBSize = sizeConnected();
 
         // tell the httpdProxy how to find this table as address resolver
-        httpd.setAlternativeResolver(this);
+        HTTPDemon.setAlternativeResolver(this);
         
         // create or init news database
         this.newsPool = new yacyNewsPool(networkRoot);
@@ -599,7 +598,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         yacySeed seed = null;        
         
         // local peer?
-        if (httpd.isThisHostIP(peerIP)) {
+        if (HTTPDemon.isThisHostIP(peerIP)) {
             if (this.mySeed == null) initMySeed();
             return mySeed;
         }
@@ -751,10 +750,6 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     public String uploadCache(final yacySeedUploader uploader, 
             final serverSwitch sb,
             final yacySeedDB seedDB,
-//          String  seedFTPServer,
-//          String  seedFTPAccount,
-//          String  seedFTPPassword,
-//          File    seedFTPPath,
             final yacyURL seedURL) throws Exception {
         
         // upload a seed file, if possible
@@ -764,7 +759,7 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
         File seedFile = null;
         try {            
             // create a seed file which for uploading ...    
-            seedFile = File.createTempFile("seedFile",".txt", plasmaHTCache.cachePath);
+            seedFile = File.createTempFile("seedFile",".txt", seedDB.myOwnSeedFile.getParentFile());
             seedFile.deleteOnExit();
             if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Storing seedlist into tempfile " + seedFile.toString());
             final ArrayList<String> uv = storeCache(seedFile, true);            
@@ -798,15 +793,15 @@ public final class yacySeedDB implements httpdAlternativeDomainNames {
     
     private ArrayList<String> downloadSeedFile(final yacyURL seedURL) throws IOException {
         // Configure http headers
-        final httpRequestHeader reqHeader = new httpRequestHeader();
-        reqHeader.put(httpHeader.PRAGMA, "no-cache");
-        reqHeader.put(httpHeader.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?
-        reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+        final RequestHeader reqHeader = new RequestHeader();
+        reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
+        reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache"); // httpc uses HTTP/1.0 is this necessary?
+        reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
         
         // init http-client
-        final httpClient client = new httpClient(10000, reqHeader);
+        final Client client = new Client(10000, reqHeader);
         byte[] content = null;
-        httpResponse res = null;
+        ResponseContainer res = null;
         try {
             // send request
             res = client.GET(seedURL.toString());

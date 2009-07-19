@@ -25,22 +25,22 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class CrawlStart_p {
     
-	public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-	    final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+	    final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         
         // define visible variables
         String a = sb.peers.mySeed().getPublicAddress();
-        boolean intranet = sb.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "").equals("intranet");
+        boolean intranet = sb.getConfig(SwitchboardConstants.NETWORK_NAME, "").equals("intranet");
         String repository = "http://" + ((a == null) ? "localhost:" + sb.getConfig("port", "8080") : a) + "/repository/";
         prop.put("starturl", (intranet) ? repository : "http://");
         prop.put("proxyPrefetchDepth", env.getConfig("proxyPrefetchDepth", "0"));
@@ -67,7 +67,7 @@ public class CrawlStart_p {
         prop.put("indexingMediaChecked", env.getConfig("indexMedia", "").equals("true") ? "1" : "0");
         prop.put("crawlOrderChecked", env.getConfig("crawlOrder", "").equals("true") ? "1" : "0");
         
-        final long LCbusySleep = Integer.parseInt(env.getConfig(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
+        final long LCbusySleep = Integer.parseInt(env.getConfig(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_BUSYSLEEP, "100"));
         final int LCppm = (LCbusySleep == 0) ? 1000 : (int) (60000L / LCbusySleep);
         prop.put("crawlingSpeedMaxChecked", (LCppm >= 1000) ? "1" : "0");
         prop.put("crawlingSpeedCustChecked", ((LCppm > 10) && (LCppm < 1000)) ? "1" : "0");

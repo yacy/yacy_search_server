@@ -32,10 +32,10 @@ import java.text.ParseException;
 import de.anomic.content.RSSMessage;
 import de.anomic.data.Blacklist;
 import de.anomic.document.parser.xml.RSSFeed;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -46,13 +46,13 @@ import de.anomic.yacy.yacySeed;
 public final class transferURL {
 
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
         final long start = System.currentTimeMillis();
         long freshdate = 0;
         try {freshdate = DateFormatter.parseShortDay("20061101").getTime();} catch (final ParseException e1) {}
         
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
         if (!yacyNetwork.authentifyRequest(post, env)) return prop;
@@ -120,7 +120,7 @@ public final class transferURL {
                 }
                 
                 // check if the entry is blacklisted
-                if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, metadata.url()))) {
+                if ((blockBlacklist) && (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, metadata.url()))) {
                     if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: blocked blacklisted URL '" + metadata.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     lEntry = null;
                     blocked++;

@@ -24,26 +24,26 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaGrafics;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.ymage.NetworkGraph;
 import de.anomic.ymage.ymageMatrix;
 
 /** draw a picture of the yacy network */
 public class NetworkPicture {
     
-    public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static ymageMatrix respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         
         int width = 768;
         int height = 576;
         int passiveLimit = 300;
         int potentialLimit = 300;
         int maxCount = 1000;
-        String bgcolor = plasmaGrafics.COL_BACKGROUND;
+        String bgcolor = NetworkGraph.COL_BACKGROUND;
         boolean corona = true;
         
         if (post != null) {
@@ -64,7 +64,7 @@ public class NetworkPicture {
         if (passiveLimit > 1000000) passiveLimit = 1000000;
         if (potentialLimit > 1000000) potentialLimit = 1000000;
         if (maxCount > 1000) maxCount = 1000;
-        return plasmaGrafics.getNetworkPicture(sb.peers, 10000, width, height, passiveLimit, potentialLimit, maxCount, corona, env.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor);
+        return NetworkGraph.getNetworkPicture(sb.peers, 10000, width, height, passiveLimit, potentialLimit, maxCount, corona, env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), env.getConfig("network.unit.description", "unspecified"), bgcolor);
     }
     
 }

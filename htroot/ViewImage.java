@@ -29,11 +29,11 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.search.SnippetCache;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
@@ -52,9 +52,9 @@ public class ViewImage {
         }
     }
     
-    public static Image respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static Image respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         
-        final plasmaSwitchboard sb = (plasmaSwitchboard)env;
+        final Switchboard sb = (Switchboard)env;
         
         // the url to the image can be either submitted with an url in clear text, or using a license key
         // if the url is given as clear text, the user must be authorized as admin
@@ -62,7 +62,7 @@ public class ViewImage {
         
         String urlString = post.get("url", "");
         final String urlLicense = post.get("code", "");
-        final boolean auth = (header.get(httpHeader.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true); // handle access rights
+        final boolean auth = (header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true); // handle access rights
         
         yacyURL url = null;
         if ((urlString.length() > 0) && (auth)) try {

@@ -54,7 +54,7 @@ import java.util.Map;
 
 import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.tools.Formatter;
 
 public class serverObjects extends HashMap<String, String> implements Cloneable {
@@ -221,11 +221,11 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
 
     
     public String putWiki(final String key, final String wikiCode){
-        return this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
+        return this.put(key, Switchboard.wikiParser.transform(wikiCode));
     }
     public String putWiki(final String key, final byte[] wikiCode) {
         try {
-            return this.put(key, plasmaSwitchboard.wikiParser.transform(wikiCode));
+            return this.put(key, Switchboard.wikiParser.transform(wikiCode));
         } catch (final UnsupportedEncodingException e) {
             return this.put(key, "Internal error pasting wiki-code: " + e.getMessage());
         }

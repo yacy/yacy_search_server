@@ -41,7 +41,7 @@ import de.anomic.data.Blacklist;
 import de.anomic.data.listManager;
 import de.anomic.document.Condenser;
 import de.anomic.document.Word;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
@@ -51,10 +51,10 @@ import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
 import de.anomic.search.QueryParams;
 import de.anomic.search.QueryEvent;
 import de.anomic.search.RankingProcess;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -64,9 +64,9 @@ import de.anomic.yacy.dht.PeerSelection;
 
 public class IndexControlRWIs_p {
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
         prop.putHTML("keystring", "");
@@ -292,7 +292,7 @@ public class IndexControlRWIs_p {
                                 pw.println(url.getHost() + "/" + url.getFile());
                                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                                     if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {
-                                        plasmaSwitchboard.urlBlacklist.add(
+                                        Switchboard.urlBlacklist.add(
                                                 supportedBlacklistTypes[blTypes],
                                                 url.getHost(),
                                                 url.getFile());
@@ -320,7 +320,7 @@ public class IndexControlRWIs_p {
                                 pw.println(url.getHost() + "/.*");
                                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                                     if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklist)) {
-                                        plasmaSwitchboard.urlBlacklist.add(
+                                        Switchboard.urlBlacklist.add(
                                                 supportedBlacklistTypes[blTypes],
                                                 url.getHost(), ".*");
                                     }                
@@ -411,7 +411,7 @@ public class IndexControlRWIs_p {
                         ((entry.word().flags().get(WordReferenceRow.flag_app_emphasized)) ? "appears emphasized, " : "") +
                         ((yacyURL.probablyRootURL(entry.word().metadataHash())) ? "probably root url" : "")
                 );
-                if (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, url)) {
+                if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, url)) {
                     prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxChecked", "1");
                 }
                 i++;
@@ -460,7 +460,7 @@ public class IndexControlRWIs_p {
         return b;
     }
 
-    public static void listHosts(final serverObjects prop, final byte[] startHash, final plasmaSwitchboard sb) {
+    public static void listHosts(final serverObjects prop, final byte[] startHash, final Switchboard sb) {
         // list known hosts
         yacySeed seed;
         int hc = 0;
@@ -477,7 +477,7 @@ public class IndexControlRWIs_p {
         prop.put("searchresult_hosts", hc);
     }
 
-    public static RankingProcess genSearchresult(final serverObjects prop, final plasmaSwitchboard sb, final byte[] keyhash, final Bitfield filter) {
+    public static RankingProcess genSearchresult(final serverObjects prop, final Switchboard sb, final byte[] keyhash, final Bitfield filter) {
         final QueryParams query = new QueryParams(new String(keyhash), -1, sb.getRanking(), filter);
         final RankingProcess ranked = new RankingProcess(sb.indexSegment, query, Integer.MAX_VALUE, 1);
         ranked.execQuery();

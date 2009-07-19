@@ -23,19 +23,19 @@
 
 import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 
 public class ConfigParser {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
 
         
         if (post != null) {
@@ -53,7 +53,7 @@ public class ConfigParser {
                         Parser.grantMime(mimeType, post.get("mimename_" + mimeType, "").equals("on"));
                     }
                 }
-                env.setConfig(plasmaSwitchboardConstants.PARSER_MIME_DENY, Parser.getDenyMime());
+                env.setConfig(SwitchboardConstants.PARSER_MIME_DENY, Parser.getDenyMime());
             }
         }
         

@@ -54,7 +54,7 @@ import java.util.Map;
 import de.anomic.content.RSSMessage;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
 import de.anomic.yacy.dht.PeerSelection;
@@ -82,14 +82,14 @@ public class yacyCore {
     // public static boolean terminate = false;
 
     // class variables
-    plasmaSwitchboard sb;
+    Switchboard sb;
 
     public static int yacyTime() {
         // the time since startup of yacy in seconds
         return Math.max(0, (int) ((System.currentTimeMillis() - serverCore.startupTime) / 1000));
     }
 
-    public yacyCore(final plasmaSwitchboard sb) {
+    public yacyCore(final Switchboard sb) {
         final long time = System.currentTimeMillis();
 
         this.sb = sb;
@@ -305,7 +305,7 @@ public class yacyCore {
             // getting a list of peers to contact
             if (sb.peers.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN).equals(yacySeed.PEERTYPE_VIRGIN)) {
                 if (attempts > PING_INITIAL) { attempts = PING_INITIAL; }
-                final Map<byte[], String> ch = plasmaSwitchboard.getSwitchboard().clusterhashes;
+                final Map<byte[], String> ch = Switchboard.getSwitchboard().clusterhashes;
                 seeds = PeerSelection.seedsByAge(sb.peers, true, attempts - ((ch == null) ? 0 : ch.size())); // best for fast connection
                 // add also all peers from cluster if this is a public robinson cluster
                 if (ch != null) {
@@ -614,7 +614,7 @@ public class yacyCore {
         }
     }
 
-    public static final String saveSeedList(final plasmaSwitchboard sb) {
+    public static final String saveSeedList(final Switchboard sb) {
         try {
             // return an error if this is not successful, and NULL if everything is fine
             String logt;
@@ -683,7 +683,6 @@ public class yacyCore {
                 if (log.isFine()) log.logFine("SaveSeedList: Using seed uploading method '" + seedUploadMethod + "' for seed-list uploading." +
                             "\n\tPrevious peerType is '" + sb.peers.mySeed().get(yacySeed.PEERTYPE, yacySeed.PEERTYPE_JUNIOR) + "'.");
 
-//              logt = seedDB.uploadCache(seedFTPServer, seedFTPAccount, seedFTPPassword, seedFTPPath, seedURL);
                 logt = sb.peers.uploadCache(uploader, sb, sb.peers, seedURL);
                 if (logt != null) {
                     if (logt.indexOf("Error") >= 0) {

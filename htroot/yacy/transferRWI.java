@@ -35,11 +35,11 @@ import java.util.List;
 import de.anomic.content.RSSMessage;
 import de.anomic.data.Blacklist;
 import de.anomic.document.parser.xml.RSSFeed;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -51,10 +51,10 @@ import de.anomic.yacy.logging.Log;
 
 public final class transferRWI {
 
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
         
         // return variable that accumulates replacements
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         final String contentType = header.getContentType();
         if ((post == null) || (env == null)) {
@@ -83,7 +83,7 @@ public final class transferRWI {
         byte[] indexes        = post.get("indexes", "").getBytes();       // the indexes, as list of word entries
         boolean granted       = sb.getConfig("allowReceiveIndex", "false").equals("true");
         final boolean blockBlacklist = sb.getConfig("indexReceiveBlockBlacklist", "false").equals("true");
-        final long cachelimit = sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 100000);
+        final long cachelimit = sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 100000);
         final yacySeed otherPeer = sb.peers.get(iam);
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));                
         
@@ -166,7 +166,7 @@ public final class transferRWI {
                 urlHash = iEntry.metadataHash();
                 
                 // block blacklisted entries
-                if ((blockBlacklist) && (plasmaSwitchboard.urlBlacklist.hashInBlacklistedCache(Blacklist.BLACKLIST_DHT, urlHash))) {
+                if ((blockBlacklist) && (Switchboard.urlBlacklist.hashInBlacklistedCache(Blacklist.BLACKLIST_DHT, urlHash))) {
                     if (yacyCore.log.isFine()) yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName);
                     blocked++;
                     continue;
@@ -222,7 +222,7 @@ public final class transferRWI {
             }
             result = "ok";
             
-            pause = (int) (sb.indexSegment.termIndex().getBufferSize() * 20000 / sb.getConfigLong(plasmaSwitchboardConstants.WORDCACHE_MAX_COUNT, 100000)); // estimation of necessary pause time
+            pause = (int) (sb.indexSegment.termIndex().getBufferSize() * 20000 / sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 100000)); // estimation of necessary pause time
         }
 
         prop.put("unknownURL", unknownURLs.toString());

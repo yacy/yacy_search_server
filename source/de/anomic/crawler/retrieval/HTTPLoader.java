@@ -31,13 +31,13 @@ import java.util.Date;
 import de.anomic.crawler.Latency;
 import de.anomic.data.Blacklist;
 import de.anomic.document.Parser;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpResponse;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.http.httpResponseHeader;
-import de.anomic.plasma.plasmaHTCache;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.client.Client;
+import de.anomic.http.client.Cache;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.metadata.ResponseContainer;
+import de.anomic.http.metadata.ResponseHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
@@ -48,8 +48,8 @@ public final class HTTPLoader {
     private static final String DEFAULT_CHARSET = "ISO-8859-1,utf-8;q=0.7,*;q=0.7";
     private static final long   DEFAULT_MAXFILESIZE = 1024 * 1024 * 10;
     public  static final int    DEFAULT_CRAWLING_RETRY_COUNT = 5;
-    public  static final String crawlerUserAgent = "yacybot (" + httpClient.getSystemOST() +") http://yacy.net/bot.html";
-    public  static final String yacyUserAgent = "yacy (" + httpClient.getSystemOST() +") yacy.net";
+    public  static final String crawlerUserAgent = "yacybot (" + Client.getSystemOST() +") http://yacy.net/bot.html";
+    public  static final String yacyUserAgent = "yacy (" + Client.getSystemOST() +") yacy.net";
     
     /**
      * The socket timeout that should be used
@@ -64,10 +64,10 @@ public final class HTTPLoader {
     //private String acceptEncoding;
     //private String acceptLanguage;
     //private String acceptCharset;
-    private final plasmaSwitchboard sb;
+    private final Switchboard sb;
     private final Log log;
     
-    public HTTPLoader(final plasmaSwitchboard sb, final Log theLog) {
+    public HTTPLoader(final Switchboard sb, final Log theLog) {
         this.sb = sb;
         this.log = theLog;
         
@@ -83,7 +83,7 @@ public final class HTTPLoader {
      * @param responseStatus Status-Code SPACE Reason-Phrase
      * @return
      */
-    protected Response createCacheEntry(final Request request, final Date requestDate, final httpRequestHeader requestHeader, final httpResponseHeader responseHeader, final String responseStatus) {
+    protected Response createCacheEntry(final Request request, final Date requestDate, final RequestHeader requestHeader, final ResponseHeader responseHeader, final String responseStatus) {
         Response metadata = new Response(
         		request,
         		requestHeader,
@@ -91,7 +91,7 @@ public final class HTTPLoader {
                 responseStatus,
                 sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle())
         );
-        plasmaHTCache.storeMetadata(responseHeader, metadata);
+        Cache.storeMetadata(responseHeader, metadata);
         return metadata;
     }    
    
@@ -125,7 +125,7 @@ public final class HTTPLoader {
         
         // check if url is in blacklist
         final String hostlow = host.toLowerCase();
-        if (plasmaSwitchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, hostlow, path)) {
+        if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, hostlow, path)) {
             sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "url in blacklist").store();
             throw new IOException("CRAWLER Rejecting URL '" + entry.url().toString() + "'. URL is in blacklist.");
         }
@@ -135,19 +135,19 @@ public final class HTTPLoader {
         final long maxFileSize = sb.getConfigLong("crawler.http.maxFileSize", DEFAULT_MAXFILESIZE);
         //try {
             // create a request header
-            final httpRequestHeader requestHeader = new httpRequestHeader();
-            requestHeader.put(httpHeader.USER_AGENT, crawlerUserAgent);
+            final RequestHeader requestHeader = new RequestHeader();
+            requestHeader.put(HeaderFramework.USER_AGENT, crawlerUserAgent);
             yacyURL refererURL = null;
             if (entry.referrerhash() != null) refererURL = sb.getURL(entry.referrerhash());
-            if (refererURL != null) requestHeader.put(httpRequestHeader.REFERER, refererURL.toNormalform(true, true));
-            requestHeader.put(httpHeader.ACCEPT_LANGUAGE, sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));
-            requestHeader.put(httpHeader.ACCEPT_CHARSET, sb.getConfig("crawler.http.acceptCharset", DEFAULT_CHARSET));
-            requestHeader.put(httpHeader.ACCEPT_ENCODING, sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
+            if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true, true));
+            requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE, sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));
+            requestHeader.put(HeaderFramework.ACCEPT_CHARSET, sb.getConfig("crawler.http.acceptCharset", DEFAULT_CHARSET));
+            requestHeader.put(HeaderFramework.ACCEPT_ENCODING, sb.getConfig("crawler.http.acceptEncoding", DEFAULT_ENCODING));
 
             // HTTP-Client
-            final httpClient client = new httpClient(socketTimeout, requestHeader);
+            final Client client = new Client(socketTimeout, requestHeader);
             
-            httpResponse res = null;
+            ResponseContainer res = null;
             try {
                 // send request
                 res = client.GET(entry.url().toString(), maxFileSize);
@@ -205,9 +205,9 @@ public final class HTTPLoader {
                         htCache = null;
                     }*/
                 } else if (res.getStatusLine().startsWith("30")) {
-                        if (res.getResponseHeader().containsKey(httpHeader.LOCATION)) {
+                        if (res.getResponseHeader().containsKey(HeaderFramework.LOCATION)) {
                             // getting redirection URL
-                            String redirectionUrlString = res.getResponseHeader().get(httpHeader.LOCATION);
+                            String redirectionUrlString = res.getResponseHeader().get(HeaderFramework.LOCATION);
                             redirectionUrlString = redirectionUrlString.trim();
     
                             if (redirectionUrlString.length() == 0) {

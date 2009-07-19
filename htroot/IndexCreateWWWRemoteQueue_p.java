@@ -32,8 +32,8 @@ import java.util.Locale;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
@@ -47,9 +47,9 @@ public class IndexCreateWWWRemoteQueue_p {
         return dayFormatter.format(date);
     }
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final servletProperties prop = new servletProperties();
-        final plasmaSwitchboard sb = (plasmaSwitchboard)env;
+        final Switchboard sb = (Switchboard)env;
         
         int showLimit = 100;
         if (post != null) {

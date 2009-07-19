@@ -31,20 +31,20 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-import de.anomic.http.httpRequestHeader;
-import de.anomic.plasma.plasmaGrafics;
-import de.anomic.plasma.plasmaSwitchboard;
-import de.anomic.plasma.plasmaSwitchboardConstants;
+import de.anomic.http.metadata.RequestHeader;
+import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
+import de.anomic.ymage.NetworkGraph;
 import de.anomic.ymage.ymageMatrix;
 
 /** draw a banner with information about the peer */
 public class Banner {
 
-    public static ymageMatrix respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static ymageMatrix respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
+        final Switchboard sb = (Switchboard) env;
         final String IMAGE = "htroot/env/grafics/yacy.gif";
         int width = 468;
         int height = 60;
@@ -66,7 +66,7 @@ public class Banner {
         int    myppm   = 0;
         double myqph   = 0;
         String type    = "";
-        final String network = env.getConfig(plasmaSwitchboardConstants.NETWORK_NAME, "unspecified").toUpperCase();
+        final String network = env.getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified").toUpperCase();
         final int    peers   = sb.peers.sizeConnected() + 1; // the '+ 1': the own peer is not included in sizeConnected()
         long   nlinks  = sb.peers.countActiveURL();
         long   nwords  = sb.peers.countActiveRWI();
@@ -103,12 +103,12 @@ public class Banner {
             }
         }
 
-        if (!plasmaGrafics.logoIsLoaded()) {
+        if (!NetworkGraph.logoIsLoaded()) {
             final BufferedImage logo = ImageIO.read(new File(IMAGE));
-            return plasmaGrafics.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, peers, nlinks, nwords, nqph, nppm, logo);
+            return NetworkGraph.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, peers, nlinks, nwords, nqph, nppm, logo);
         }
         
-        return plasmaGrafics.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, peers, nlinks, nwords, nqph, nppm);
+        return NetworkGraph.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, peers, nlinks, nwords, nqph, nppm);
     }
 
 }

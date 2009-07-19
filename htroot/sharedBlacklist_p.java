@@ -44,11 +44,11 @@ import de.anomic.data.listManager;
 import de.anomic.data.list.ListAccumulator;
 import de.anomic.data.list.XMLBlacklistImporter;
 import de.anomic.document.parser.html.CharacterCoding;
-import de.anomic.http.httpClient;
-import de.anomic.http.httpHeader;
-import de.anomic.http.httpRequestHeader;
+import de.anomic.http.client.Client;
+import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.plasma.plasmaSwitchboard;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
@@ -67,8 +67,8 @@ public class sharedBlacklist_p {
 
     private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
     
-    public static serverObjects respond(final httpRequestHeader header, final serverObjects post, final serverSwitch env) {
-        final plasmaSwitchboard sb = (plasmaSwitchboard) env;
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+        final Switchboard sb = (Switchboard) env;
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
 
@@ -86,7 +86,7 @@ public class sharedBlacklist_p {
         if (post != null) {
             
             // initialize the list manager
-            listManager.switchboard = (plasmaSwitchboard) env;
+            listManager.switchboard = (Switchboard) env;
             listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
         
             
@@ -139,15 +139,15 @@ public class sharedBlacklist_p {
                 if (downloadURLOld != null) {
                     // download the blacklist
                     try {
-                        final httpRequestHeader reqHeader = new httpRequestHeader();
-                        reqHeader.put(httpHeader.PRAGMA,"no-cache");
-                        reqHeader.put(httpHeader.CACHE_CONTROL,"no-cache");
-                        reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
+                        final RequestHeader reqHeader = new RequestHeader();
+                        reqHeader.put(HeaderFramework.PRAGMA,"no-cache");
+                        reqHeader.put(HeaderFramework.CACHE_CONTROL,"no-cache");
+                        reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
                         
                         // get List
                         yacyURL u = new yacyURL(downloadURLOld, null);
 
-                        otherBlacklist = FileUtils.strings(httpClient.wget(u.toString(), reqHeader, 1000), "UTF-8");
+                        otherBlacklist = FileUtils.strings(Client.wget(u.toString(), reqHeader, 1000), "UTF-8");
                     } catch (final Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.putHTML("status_name", Hash);
@@ -164,9 +164,9 @@ public class sharedBlacklist_p {
 
                 try {
                     final yacyURL u = new yacyURL(downloadURL, null);
-                    final httpRequestHeader reqHeader = new httpRequestHeader();
-                    reqHeader.put(httpHeader.USER_AGENT, HTTPLoader.yacyUserAgent);
-                    otherBlacklist = FileUtils.strings(httpClient.wget(u.toString(), reqHeader, 10000), "UTF-8"); //get List
+                    final RequestHeader reqHeader = new RequestHeader();
+                    reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
+                    otherBlacklist = FileUtils.strings(Client.wget(u.toString(), reqHeader, 10000), "UTF-8"); //get List
                 } catch (final Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
                     prop.putHTML("status_address",downloadURL);
@@ -246,13 +246,13 @@ public class sharedBlacklist_p {
                             pw.println(newItem);
 
                             count++;
-                            if (plasmaSwitchboard.urlBlacklist != null) {
+                            if (Switchboard.urlBlacklist != null) {
                                 final String supportedBlacklistTypesStr = AbstractBlacklist.BLACKLIST_TYPES_STRING;
                                 final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");  
 
                                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                                     if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",selectedBlacklistName)) {
-                                        plasmaSwitchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],newItem.substring(0, pos), newItem.substring(pos + 1));
+                                        Switchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],newItem.substring(0, pos), newItem.substring(pos + 1));
                                     }
                                 }
                             }
