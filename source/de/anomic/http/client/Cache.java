@@ -41,8 +41,6 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.anomic.crawler.retrieval.Response;
-import de.anomic.document.Classification;
 import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.kelondro.blob.ArrayStack;
 import de.anomic.kelondro.blob.Compressor;
@@ -109,44 +107,15 @@ public final class Cache {
         responseHeaderDB.close();
         fileDB.close(true);
     }
-
-    public static boolean isPicture(final String mimeType) {
-        if (mimeType == null) return false;
-        return mimeType.toUpperCase().startsWith("IMAGE");
-    }
-
-    public static boolean noIndexingURL(final yacyURL url) {
-        if (url == null) return false;
-        String urlString = url.toString().toLowerCase();
-        
-        //http://www.yacy.net/getimage.php?image.png
-        
-        int idx = urlString.indexOf("?");
-        if (idx > 0) urlString = urlString.substring(0,idx);
-
-        //http://www.yacy.net/getimage.php
-        
-        idx = urlString.lastIndexOf(".");
-        if (idx > 0) urlString = urlString.substring(idx+1);
-
-        //php
-        
-        return Classification.isMediaExtension(urlString);
-    }
-
-
+    
     // Store to Cache
-    public static void storeMetadata(
-            final ResponseHeader responseHeader,
-            Response metadata
-    ) {
+    public static void storeMetadata(final yacyURL url, final ResponseHeader responseHeader) {
         if (responseHeader != null) try {
             // store the response header into the header database
             final HashMap<String, String> hm = new HashMap<String, String>();
             hm.putAll(responseHeader);
-            hm.put("@@URL", metadata.url().toNormalform(false, false));
-            hm.put("@@DEPTH", Integer.toString(metadata.depth()));
-            responseHeaderDB.put(metadata.urlHash(), hm);
+            hm.put("@@URL", url.toNormalform(true, false));
+            responseHeaderDB.put(url.hash(), hm);
         } catch (final Exception e) {
             log.logWarning("could not write ResourceInfo: "
                     + e.getClass() + ": " + e.getMessage());

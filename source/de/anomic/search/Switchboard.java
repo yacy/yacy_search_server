@@ -1266,7 +1266,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
             Thread readerThread = new Thread(reader, "Surrogate-Reader " + surrogateFile.getAbsolutePath());
             readerThread.start();
             DCEntry surrogate;
-            Response queueentry;
+            Response response;
             while ((surrogate = reader.take()) != DCEntry.poison) {
                 // check if url is in accepted domain
                 final String urlRejectReason = crawlStacker.urlInAcceptedDomain(surrogate.url());
@@ -1289,8 +1289,8 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
                         0, 
                         0        
                 );
-                queueentry = new Response(request, null, null, "200", this.crawler.defaultSurrogateProfile);
-                indexingQueueEntry queueEntry = new indexingQueueEntry(queueentry, document, null);
+                response = new Response(request, null, null, "200", this.crawler.defaultSurrogateProfile);
+                indexingQueueEntry queueEntry = new indexingQueueEntry(response, document, null);
                 
                 // place the queue entry into the concurrent process of the condenser (document analysis)
                 try {

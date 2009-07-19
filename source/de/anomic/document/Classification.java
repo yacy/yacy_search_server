@@ -97,4 +97,9 @@ public class Classification {
         return appsExtSet.contains(appsExt.trim().toLowerCase());
     }
     
+    public static boolean isPictureMime(final String mimeType) {
+        if (mimeType == null) return false;
+        return mimeType.toUpperCase().startsWith("IMAGE");
+    }
+
 }

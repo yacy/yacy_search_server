@@ -397,17 +397,17 @@ public final class HTTPDProxyHandler {
                         0, 
                         0, 
                         0);
-                final Response cacheEntry = new Response(
+                final Response response = new Response(
                 		request,
                         requestHeader,
                         cachedResponseHeader,
                         "200 OK",
                         sb.crawler.defaultProxyProfile
                 );
-                Cache.storeMetadata(cachedResponseHeader, cacheEntry); // TODO: check if this storeMetadata is necessary
+                //Cache.storeMetadata(cachedResponseHeader, response); // TODO: check if this storeMetadata is necessary
 
                 byte[] cacheContent = Cache.getResourceContent(url);
-                if (cacheContent != null && cacheEntry.shallUseCacheForProxy()) {
+                if (cacheContent != null && response.shallUseCacheForProxy()) {
                     if (theLogger.isFinest()) theLogger.logFinest(reqID + " fulfill request from cache");
                     fulfillRequestFromCache(conProp, url, requestHeader, cachedResponseHeader, cacheContent, countedRespond);
                 } else {
@@ -518,14 +518,14 @@ public final class HTTPDProxyHandler {
                         0, 
                         0, 
                         0);
-                final Response cacheEntry = new Response(
+                final Response response = new Response(
                 		request,
                         requestHeader,
                         responseHeader,
                         res.getStatusLine(),
                         sb.crawler.defaultProxyProfile
                 );
-                Cache.storeMetadata(responseHeader, cacheEntry);
+                Cache.storeMetadata(request.url(), responseHeader);
 
                 // handle incoming cookies
                 handleIncomingCookies(responseHeader, host, ip);
@@ -550,9 +550,9 @@ public final class HTTPDProxyHandler {
 
                     final OutputStream outStream = (gzippedOut != null) ? gzippedOut : ((chunkedOut != null)? chunkedOut : respond);
 
-                    final String storeError = cacheEntry.shallStoreCacheForProxy();
-                    final boolean storeHTCache = cacheEntry.profile().storeHTCache();
-                    final String supportError = Parser.supports(cacheEntry.url(), cacheEntry.getMimeType());
+                    final String storeError = response.shallStoreCacheForProxy();
+                    final boolean storeHTCache = response.profile().storeHTCache();
+                    final String supportError = Parser.supports(response.url(), response.getMimeType());
                     if (
                             /*
                              * Now we store the response into the htcache directory if
@@ -583,8 +583,8 @@ public final class HTTPDProxyHandler {
                         if (sizeBeforeDelete == -1) {
                             // totally fresh file
                             //cacheEntry.status = plasmaHTCache.CACHE_FILL; // it's an insert
-                            cacheEntry.setContent(cacheArray);
-                            sb.htEntryStoreProcess(cacheEntry);
+                            response.setContent(cacheArray);
+                            sb.htEntryStoreProcess(response);
                             conProp.setProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_MISS");
                         } else if (cacheArray != null && sizeBeforeDelete == cacheArray.length) {
                             // before we came here we deleted a cache entry
@@ -595,8 +595,8 @@ public final class HTTPDProxyHandler {
                         } else {
                             // before we came here we deleted a cache entry
                             //cacheEntry.status = plasmaHTCache.CACHE_STALE_RELOAD_GOOD;
-                            cacheEntry.setContent(cacheArray);
-                            sb.htEntryStoreProcess(cacheEntry);
+                            response.setContent(cacheArray);
+                            sb.htEntryStoreProcess(response);
                             conProp.setProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_MISS");
                         }
                     } else {

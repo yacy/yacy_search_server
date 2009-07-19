@@ -29,8 +29,8 @@ package de.anomic.crawler.retrieval;
 import java.util.Date;
 
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.document.Classification;
 import de.anomic.document.Parser;
-import de.anomic.http.client.Cache;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
@@ -180,10 +180,6 @@ public class Response {
         char doctype = docType(getMimeType());
         if (doctype == DT_UNKNOWN) doctype = docType(url());
         return doctype;
-    }
-
-    public String urlHash() {
-        return this.url().hash();
     }
 
     public Date lastModified() {
@@ -389,7 +385,7 @@ public class Response {
             }
 
             final String mimeType = getMimeType();
-            if (!Cache.isPicture(mimeType)) {
+            if (!Classification.isPictureMime(mimeType)) {
                 // -cookies in request
                 // unfortunately, we should reload in case of a cookie
                 // but we think that pictures can still be considered as fresh
@@ -513,7 +509,7 @@ public class Response {
         // we checked that in shallStoreCache
 
         // a picture cannot be indexed
-        if (Cache.noIndexingURL(url())) {
+        if (Classification.isMediaExtension(url().getFileExtension())) {
             return "Media_Content_(forbidden)";
         }
 
@@ -532,7 +528,7 @@ public class Response {
             
             // a picture cannot be indexed
             final String mimeType = responseHeader.mime();
-            if (Cache.isPicture(mimeType)) {
+            if (Classification.isPictureMime(mimeType)) {
                 return "Media_Content_(Picture)";
             }
             String parserError = Parser.supportsMime(mimeType);
@@ -652,11 +648,11 @@ public class Response {
         // a picture cannot be indexed
         if (responseHeader != null) {
             final String mimeType = responseHeader.mime();
-            if (Cache.isPicture(mimeType)) { return "Media_Content_(Picture)"; }
+            if (Classification.isPictureMime(mimeType)) { return "Media_Content_(Picture)"; }
             String parserError = Parser.supportsMime(mimeType);
             if (parserError != null) { return "Media_Content, parser error: " + parserError; }
         }
-        if (Cache.noIndexingURL(url())) { return "Media_Content_(forbidden)"; }
+        if (Classification.isMediaExtension(url().getFileExtension())) { return "Media_Content_(forbidden)"; }
 
         // -if-modified-since in request
         // if the page is fresh at the very moment we can index it

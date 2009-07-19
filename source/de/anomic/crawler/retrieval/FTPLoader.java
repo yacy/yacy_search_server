@@ -56,37 +56,20 @@ public class FTPLoader {
         maxFileSize = (int) sb.getConfigLong("crawler.ftp.maxFileSize", -1l);
     }
 
-    protected Response createCacheEntry(final Request request, final String mimeType, final Date fileDate) {
-        if (request == null) return null;
-        RequestHeader requestHeader = new RequestHeader();
-        if (request.referrerhash() != null) requestHeader.put(RequestHeader.REFERER, sb.getURL(request.referrerhash()).toNormalform(true, false));
-        ResponseHeader responseHeader = new ResponseHeader();
-        responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(fileDate));
-        responseHeader.put(HeaderFramework.CONTENT_TYPE, mimeType);
-        Response metadata = new Response(
-                request, 
-                requestHeader,
-                responseHeader,
-                "OK",
-                sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()));
-        Cache.storeMetadata(responseHeader, metadata);
-        return metadata;
-    }
-
     /**
      * Loads the entry from a ftp-server
      * 
-     * @param entry
+     * @param request
      * @return
      */
-    public Response load(final Request entry) throws IOException {
+    public Response load(final Request request) throws IOException {
         
         long start = System.currentTimeMillis();
-        final yacyURL entryUrl = entry.url();
+        final yacyURL entryUrl = request.url();
         final String fullPath = getPath(entryUrl);
 
         // the return value
-        Response htCache = null;
+        Response response = null;
 
         // determine filename and path
         String file, path;
@@ -125,16 +108,27 @@ public class FTPLoader {
 
                 if (file.length() == 0) {
                     // directory -> get list of files
-                    // create a htcache entry
-                    htCache = createCacheEntry(entry, "text/html", new Date());
-                    byte[] dirList = generateDirlist(ftpClient, entry, path);
+                    RequestHeader requestHeader = new RequestHeader();
+                    if (request.referrerhash() != null) requestHeader.put(RequestHeader.REFERER, sb.getURL(request.referrerhash()).toNormalform(true, false));
+                    ResponseHeader responseHeader = new ResponseHeader();
+                    responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(new Date()));
+                    responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
+                    response = new Response(
+                            request, 
+                            requestHeader,
+                            responseHeader,
+                            "OK",
+                            sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()));
+                    Cache.storeMetadata(request.url(), responseHeader);
+                    
+                    byte[] dirList = generateDirlist(ftpClient, request, path);
                     if (dirList == null) {
-                        htCache = null;
+                        response = null;
                     }
                 } else {
                     // file -> download
                     try {
-                        htCache = getFile(ftpClient, entry);
+                        response = getFile(ftpClient, request);
                     } catch (final Exception e) {
                         // add message to errorLog
                         (new PrintStream(berr)).print(e.getMessage());
@@ -144,15 +138,15 @@ public class FTPLoader {
         }
 
         // pass the downloaded resource to the cache manager
-        if (berr.size() > 0 || htCache == null) {
+        if (berr.size() > 0 || response == null) {
             // some error logging
             final String detail = (berr.size() > 0) ? "\n    Errorlog: " + berr.toString() : "";
-            sb.crawlQueues.errorURL.newEntry(entry, sb.peers.mySeed().hash, new Date(), 1, "server download" + detail);
-            throw new IOException("FTPLoader: Unable to download URL " + entry.url().toString() + detail);
+            sb.crawlQueues.errorURL.newEntry(request, sb.peers.mySeed().hash, new Date(), 1, "server download" + detail);
+            throw new IOException("FTPLoader: Unable to download URL " + request.url().toString() + detail);
         }
         
-        Latency.update(entry.url().hash().substring(6), entry.url().getHost(), System.currentTimeMillis() - start);
-        return htCache;
+        Latency.update(request.url().hash().substring(6), request.url().getHost(), System.currentTimeMillis() - start);
+        return response;
     }
 
     /**
@@ -211,26 +205,26 @@ public class FTPLoader {
 
     /**
      * @param ftpClient
-     * @param entry
+     * @param request
      * @param htCache
      * @param cacheFile
      * @return
      * @throws Exception
      */
-    private Response getFile(final ftpc ftpClient, final Request entry) throws Exception {
+    private Response getFile(final ftpc ftpClient, final Request request) throws Exception {
         // determine the mimetype of the resource
-        final yacyURL entryUrl = entry.url();
+        final yacyURL entryUrl = request.url();
         final String mimeType = Parser.mimeOf(entryUrl);
         final String path = getPath(entryUrl);
 
         // if the mimetype and file extension is supported we start to download
         // the file
-        Response htCache = null;
+        Response response = null;
         String supportError = Parser.supports(entryUrl, mimeType);
         if (supportError != null) {
             // reject file
-            log.logInfo("PARSER REJECTED URL " + entry.url().toString() + ": " + supportError);
-            sb.crawlQueues.errorURL.newEntry(entry, this.sb.peers.mySeed().hash, new Date(), 1, supportError);
+            log.logInfo("PARSER REJECTED URL " + request.url().toString() + ": " + supportError);
+            sb.crawlQueues.errorURL.newEntry(request, this.sb.peers.mySeed().hash, new Date(), 1, supportError);
             throw new Exception(supportError);
         } else {
             // abort the download if content is too long
@@ -242,19 +236,30 @@ public class FTPLoader {
                 // determine the file date
                 final Date fileDate = ftpClient.entryDate(path);
 
-                // create a htcache entry
-                htCache = createCacheEntry(entry, mimeType, fileDate);
+                // create a cache entry
+                RequestHeader requestHeader = new RequestHeader();
+                if (request.referrerhash() != null) requestHeader.put(RequestHeader.REFERER, sb.getURL(request.referrerhash()).toNormalform(true, false));
+                ResponseHeader responseHeader = new ResponseHeader();
+                responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(fileDate));
+                responseHeader.put(HeaderFramework.CONTENT_TYPE, mimeType);
+                response = new Response(
+                        request, 
+                        requestHeader,
+                        responseHeader,
+                        "OK",
+                        sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()));
+                Cache.storeMetadata(request.url(), responseHeader);
 
                 // download the remote file
                 byte[] b = ftpClient.get(path);
-                htCache.setContent(b);
+                response.setContent(b);
             } else {
-                log.logInfo("REJECTED TOO BIG FILE with size " + size + " Bytes for URL " + entry.url().toString());
-                sb.crawlQueues.errorURL.newEntry(entry, this.sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");
+                log.logInfo("REJECTED TOO BIG FILE with size " + size + " Bytes for URL " + request.url().toString());
+                sb.crawlQueues.errorURL.newEntry(request, this.sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");
                 throw new Exception("file size exceeds limit");
             }
         }
-        return htCache;
+        return response;
     }
 
     /**

@@ -71,18 +71,10 @@ public class ResponseContainer {
 	 */
 	public ResponseHeader getResponseHeader() {
 		final ResponseHeader responseHeader = new ResponseHeader();
-		for (final Header header : getHeaders()) {
+		for (final Header header : method.getResponseHeaders()) {
 			responseHeader.add(header.getName(), header.getValue());
 		}
 		return responseHeader;
-	}
-
-	/**
-	 * @see org.apache.commons.httpclient.HttpMethod#getResponseHeaders()
-	 * @return the headers
-	 */
-	private Header[] getHeaders() {
-		return method.getResponseHeaders();
 	}
 
 	/**
