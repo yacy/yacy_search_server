@@ -2111,7 +2111,7 @@ Remote triggered Crawl==eingehende Remote-Crawls
 Pre-Queueing==Vor-Pufferung
 Seed server==Seed Server
 Configure==Konfigurieren
-Enabled: Updating to server==Aktiviert: Aktualisiere auf Server
+Enabled: Updating to server==Aktiviert, Seed Server: 
 Last upload: #\[lastUpload\]# ago.==Letztesmal Hochladen #[lastUpload]# her
 Enabled: Updating to file==Aktiviert: Aktualisiere die Datei
 #-----------------------------
@@ -2432,6 +2432,7 @@ YaCy Interactive Search==YaCy interaktive Suche
 #File: yacysearch.html
 #---------------------------
 Search Page==Suchseite
+Did you mean:==Meinten Sie vielleicht:
 "Search"=="Suchen"
 'Search'=='Suchen'
 "search again"=="Erneut suchen" 
