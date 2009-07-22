@@ -2111,8 +2111,8 @@ Remote triggered Crawl==eingehende Remote-Crawls
 Pre-Queueing==Vor-Pufferung
 Seed server==Seed Server
 Configure==Konfigurieren
-Enabled: Updating to server==Aktiviert, Seed Server: 
-Last upload: #\[lastUpload\]# ago.==Letztesmal Hochladen #[lastUpload]# her
+Enabled: Updating to server==Aktiviert, Seed Server:
+Last upload: #\[lastUpload\]# ago.==letzte Aktualisierung vor: #\[lastUpload\]#
 Enabled: Updating to file==Aktiviert: Aktualisiere die Datei
 #-----------------------------
 
