@@ -77,12 +77,12 @@ public class ymageOSM {
             return null;
         }
         System.out.println("*** DEBUG: fetching OSM tile: " + tileURL.toNormalform(true, true));
-        InputStream tileStream = Cache.getResourceContentStream(tileURL);
+        InputStream tileStream = Cache.getContentStream(tileURL);
         if (tileStream == null) {
             // download resource using the crawler and keep resource in memory if possible
             Response entry = null;
             try {
-                entry = Switchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(tileURL, false, false);
+                entry = Switchboard.getSwitchboard().loader.load(tileURL, false, false);
             } catch (IOException e) {
                 Log.logWarning("yamyOSM", "cannot load: " + e.getMessage());
                 return null;

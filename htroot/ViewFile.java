@@ -146,15 +146,15 @@ public class ViewFile {
         ResponseHeader responseHeader = null;
         String resMime = null;
         // trying to load the resource body
-        resource = Cache.getResourceContentStream(url);
+        resource = Cache.getContentStream(url);
         resourceLength = Cache.getResourceContentLength(url);
-        responseHeader = Cache.loadResponseHeader(url);
+        responseHeader = Cache.getResponseHeader(url);
 
         // if the resource body was not cached we try to load it from web
         if (resource == null) {
             Response entry = null;
             try {
-                entry = sb.crawlQueues.loadResourceFromWeb(url, true, false);
+                entry = sb.loader.load(url, true, false);
             } catch (final Exception e) {
                 prop.put("error", "4");
                 prop.putHTML("error_errorText", e.getMessage());
@@ -163,7 +163,7 @@ public class ViewFile {
             }
 
             if (entry != null) {
-                resource = Cache.getResourceContentStream(url);
+                resource = Cache.getContentStream(url);
                 resourceLength = Cache.getResourceContentLength(url);
             }
 
@@ -180,7 +180,7 @@ public class ViewFile {
 
             // try to load the metadata from cache
             try {
-                responseHeader = Cache.loadResponseHeader(url);
+                responseHeader = Cache.getResponseHeader(url);
             } catch (final Exception e) {
                 /* ignore this */
             }

@@ -329,6 +329,7 @@ public class SitemapParser extends DefaultHandler {
                 // remote Indexing disabled
                 false,
                 // exclude stop-words
-                true, true, true);
+                true, true, true,
+                CrawlProfile.CACHE_STRATEGY_IFFRESH);
     }
 }

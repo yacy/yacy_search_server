@@ -36,8 +36,23 @@ public class MultiOutputStream extends OutputStream {
      */
     @Override
     public void write(int b) throws IOException {
-        for(OutputStream stream: streams) {
+        for (OutputStream stream: streams) {
             stream.write(b);
+        }
+    }
+    
+    /**
+     * writes the byte[] to each of the streams
+     * overriding this high-level method causes less overhead
+     * than overriding only the low-level write method:
+     * it causes (a large number) less 'for' loops
+     * 
+     * @see java.io.OutputStream#write(int)
+     */
+    @Override
+    public void write(byte[] b, int start, int len) throws IOException {
+        for (OutputStream stream: streams) {
+            stream.write(b, start, len);
         }
     }
 

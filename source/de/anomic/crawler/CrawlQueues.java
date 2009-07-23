@@ -38,7 +38,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.client.Client;
@@ -59,7 +58,6 @@ public class CrawlQueues {
     protected Switchboard sb;
     protected Log log;
     protected Map<Integer, crawlWorker> workers; // mapping from url hash to Worker thread object
-    protected LoaderDispatcher loader;
     private   final ArrayList<String> remoteCrawlProviderHashes;
 
     public  NoticedURL noticeURL;
@@ -69,7 +67,6 @@ public class CrawlQueues {
         this.sb = sb;
         this.log = new Log("CRAWLER");
         this.workers = new ConcurrentHashMap<Integer, crawlWorker>();
-        this.loader = new LoaderDispatcher(sb, log);
         this.remoteCrawlProviderHashes = new ArrayList<String>();
         
         // start crawling management
@@ -94,7 +91,7 @@ public class CrawlQueues {
         if (delegatedURL.exists(hash)) return "delegated";
         if (errorURL.exists(hash)) return "errors";
         for (final crawlWorker worker: workers.values()) {
-            if (worker.entry.url().hash().equals(hash)) return "worker";
+            if (worker.request.url().hash().equals(hash)) return "worker";
         }
         return null;
     }
@@ -115,7 +112,7 @@ public class CrawlQueues {
         ee = errorURL.getEntry(urlhash);
         if (ee != null) return ee.url();
         for (final crawlWorker w: workers.values()) {
-            if (w.entry.url().hash().equals(urlhash)) return w.entry.url();
+            if (w.request.url().hash().equals(urlhash)) return w.request.url();
         }
         return null;
     }
@@ -170,13 +167,9 @@ public class CrawlQueues {
         synchronized (workers) {
             final Request[] e = new Request[workers.size()];
             int i = 0;
-            for (final crawlWorker w: workers.values()) e[i++] = w.entry;
+            for (final crawlWorker w: workers.values()) e[i++] = w.request;
             return e;
         }
-    }
-    
-    public boolean isSupportedProtocol(final String protocol) {
-        return loader.isSupportedProtocol(protocol);
     }
     
     public int coreCrawlJobSize() {
@@ -243,7 +236,7 @@ public class CrawlQueues {
             // check if the protocol is supported
             final yacyURL url = urlEntry.url();
             final String urlProtocol = url.getProtocol();
-            if (this.isSupportedProtocol(urlProtocol)) {
+            if (sb.loader.isSupportedProtocol(urlProtocol)) {
 
                 if (this.log.isFine())
                     log.logFine(stats + ": URL=" + urlEntry.url()
@@ -494,48 +487,20 @@ public class CrawlQueues {
         }
     }
     
-    public Response loadResourceFromWeb(
-            final yacyURL url,
-            final boolean forText,
-            final boolean global
-    ) throws IOException {
-        
-        final Request centry = new Request(
-                sb.peers.mySeed().hash, 
-                url, 
-                "", 
-                "", 
-                new Date(),
-                new Date(),
-                (forText) ?
-                    ((global) ?
-                        sb.crawler.defaultTextSnippetGlobalProfile.handle() :
-                        sb.crawler.defaultTextSnippetLocalProfile.handle())
-                    :
-                    ((global) ?
-                        sb.crawler.defaultMediaSnippetGlobalProfile.handle() :
-                        sb.crawler.defaultMediaSnippetLocalProfile.handle()), // crawl profile
-                0, 
-                0, 
-                0);
-        
-        return loader.load(centry);
-    }
-    
     public int size() {
         return workers.size();
     }
     
     protected final class crawlWorker extends Thread {
         
-        protected Request entry;
+        protected Request request;
         private final Integer code;
         private long start;
         
         public crawlWorker(final Request entry) {
             this.start = System.currentTimeMillis();
-            this.entry = entry;
-            this.entry.setStatus("worker-initialized", serverProcessorJob.STATUS_INITIATED);
+            this.request = entry;
+            this.request.setStatus("worker-initialized", serverProcessorJob.STATUS_INITIATED);
             this.code = Integer.valueOf(entry.hashCode());
             if (!workers.containsKey(code)) {
                 workers.put(code, this);
@@ -550,39 +515,57 @@ public class CrawlQueues {
         public void run() {
             try {
                 // checking robots.txt for http(s) resources
-                this.entry.setStatus("worker-checkingrobots", serverProcessorJob.STATUS_STARTED);
-                if ((entry.url().getProtocol().equals("http") || entry.url().getProtocol().equals("https")) && sb.robots.isDisallowed(entry.url())) {
-                    if (log.isFine()) log.logFine("Crawling of URL '" + entry.url().toString() + "' disallowed by robots.txt.");
+                this.request.setStatus("worker-checkingrobots", serverProcessorJob.STATUS_STARTED);
+                if ((request.url().getProtocol().equals("http") || request.url().getProtocol().equals("https")) && sb.robots.isDisallowed(request.url())) {
+                    if (log.isFine()) log.logFine("Crawling of URL '" + request.url().toString() + "' disallowed by robots.txt.");
                     final ZURL.Entry eentry = errorURL.newEntry(
-                            this.entry,
+                            this.request,
                             sb.peers.mySeed().hash,
                             new Date(),
                             1,
                             "denied by robots.txt");
                     eentry.store();
                     errorURL.push(eentry);
-                    this.entry.setStatus("worker-disallowed", serverProcessorJob.STATUS_FINISHED);
+                    this.request.setStatus("worker-disallowed", serverProcessorJob.STATUS_FINISHED);
                 } else {
                     // starting a load from the internet
-                    this.entry.setStatus("worker-loading", serverProcessorJob.STATUS_RUNNING);
-                    final String result = loader.process(this.entry);
+                    this.request.setStatus("worker-loading", serverProcessorJob.STATUS_RUNNING);
+                    String result = null;
+                    
+                    // load a resource, store it to htcache and push queue entry to switchboard queue
+                    // returns null if everything went fine, a fail reason string if a problem occurred
+                    Response response;
+                    try {
+                        request.setStatus("loading", serverProcessorJob.STATUS_RUNNING);
+                        response = sb.loader.load(request);
+                        assert response != null;
+                        request.setStatus("loaded", serverProcessorJob.STATUS_RUNNING);
+                        final boolean stored = sb.toIndexer(response);
+                        request.setStatus("enqueued-" + ((stored) ? "ok" : "fail"), serverProcessorJob.STATUS_FINISHED);
+                        result = (stored) ? null : "not enqueued to indexer";
+                    } catch (IOException e) {
+                        request.setStatus("error", serverProcessorJob.STATUS_FINISHED);
+                        if (log.isFine()) log.logFine("problem loading " + request.url().toString() + ": " + e.getMessage());
+                        result = "load error - " + e.getMessage();
+                    }
+                    
                     if (result != null) {
                         final ZURL.Entry eentry = errorURL.newEntry(
-                                this.entry,
+                                this.request,
                                 sb.peers.mySeed().hash,
                                 new Date(),
                                 1,
                                 "cannot load: " + result);
                         eentry.store();
                         errorURL.push(eentry);
-                        this.entry.setStatus("worker-error", serverProcessorJob.STATUS_FINISHED);
+                        this.request.setStatus("worker-error", serverProcessorJob.STATUS_FINISHED);
                     } else {
-                        this.entry.setStatus("worker-processed", serverProcessorJob.STATUS_FINISHED);
+                        this.request.setStatus("worker-processed", serverProcessorJob.STATUS_FINISHED);
                     }
                 }
             } catch (final Exception e) {
                 final ZURL.Entry eentry = errorURL.newEntry(
-                        this.entry,
+                        this.request,
                         sb.peers.mySeed().hash,
                         new Date(),
                         1,
@@ -591,7 +574,7 @@ public class CrawlQueues {
                 errorURL.push(eentry);
                 e.printStackTrace();
                 Client.initConnectionManager();
-                this.entry.setStatus("worker-exception", serverProcessorJob.STATUS_FINISHED);
+                this.request.setStatus("worker-exception", serverProcessorJob.STATUS_FINISHED);
             } finally {
                 crawlWorker w = workers.remove(code);
                 assert w != null;

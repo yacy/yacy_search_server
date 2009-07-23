@@ -170,9 +170,17 @@ public class bookmarksDB {
            								Integer.parseInt(parser[5]), Integer.parseInt(parser[6]), Boolean.parseBoolean(parser[7]), 
            								Boolean.parseBoolean(parser[8]), Boolean.parseBoolean(parser[9]), 
            								Boolean.parseBoolean(parser[10]), Boolean.parseBoolean(parser[11]), 
-           								Boolean.parseBoolean(parser[12])
-           				);           			
+           								Boolean.parseBoolean(parser[12]), CrawlProfile.CACHE_STRATEGY_IFFRESH
+           				);
         			}
+        			if (parser.length == 14) {                       
+                        folderReCrawl(Long.parseLong(parser[0]), parser[1], parser[2], Integer.parseInt(parser[3]), Long.parseLong(parser[4]), 
+                                        Integer.parseInt(parser[5]), Integer.parseInt(parser[6]), Boolean.parseBoolean(parser[7]), 
+                                        Boolean.parseBoolean(parser[8]), Boolean.parseBoolean(parser[9]), 
+                                        Boolean.parseBoolean(parser[10]), Boolean.parseBoolean(parser[11]), 
+                                        Boolean.parseBoolean(parser[12]), Integer.parseInt(parser[13])
+                        ); 
+                    }
         		}        		
         	}
         	in.close();
@@ -204,9 +212,9 @@ public class bookmarksDB {
     	return true;
     }    
     
-    public void folderReCrawl (long schedule, String folder, String crawlingfilter, int newcrawlingdepth, long crawlingIfOlder, 
+    public void folderReCrawl(long schedule, String folder, String crawlingfilter, int newcrawlingdepth, long crawlingIfOlder, 
     		int crawlingDomFilterDepth, int crawlingDomMaxPages, boolean crawlingQ, boolean indexText, boolean indexMedia, 
-    		boolean crawlOrder, boolean xsstopw, boolean storeHTCache) {
+    		boolean crawlOrder, boolean xsstopw, boolean storeHTCache, int cacheStrategy) {
 
 	    Switchboard sb = Switchboard.getSwitchboard();
 	    Iterator<String> bit=getBookmarksIterator(folder, true);    		
@@ -261,7 +269,7 @@ public class bookmarksDB {
 	                        sb.crawler.profilesActiveCrawls.getRecrawlDate(crawlingIfOlder), crawlingDomFilterDepth, crawlingDomMaxPages,
 	                        crawlingQ,
 	                        indexText, indexMedia,
-	                        storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
+	                        storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw, cacheStrategy);
 	                sb.crawlStacker.enqueueEntry(new Request(
 	                        sb.peers.mySeed().hash,
                             crawlingStartURL,

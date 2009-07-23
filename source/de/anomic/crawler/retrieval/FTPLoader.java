@@ -34,7 +34,6 @@ import java.util.Date;
 
 import de.anomic.crawler.Latency;
 import de.anomic.document.Parser;
-import de.anomic.http.client.Cache;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
@@ -110,20 +109,22 @@ public class FTPLoader {
                     // directory -> get list of files
                     RequestHeader requestHeader = new RequestHeader();
                     if (request.referrerhash() != null) requestHeader.put(RequestHeader.REFERER, sb.getURL(request.referrerhash()).toNormalform(true, false));
-                    ResponseHeader responseHeader = new ResponseHeader();
-                    responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(new Date()));
-                    responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
-                    response = new Response(
-                            request, 
-                            requestHeader,
-                            responseHeader,
-                            "OK",
-                            sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()));
-                    Cache.storeMetadata(request.url(), responseHeader);
                     
                     byte[] dirList = generateDirlist(ftpClient, request, path);
+
                     if (dirList == null) {
                         response = null;
+                    } else {
+                        ResponseHeader responseHeader = new ResponseHeader();
+                        responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(new Date()));
+                        responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
+                        response = new Response(
+                                request, 
+                                requestHeader,
+                                responseHeader,
+                                "OK",
+                                sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
+                                dirList);
                     }
                 } else {
                     // file -> download
@@ -236,6 +237,9 @@ public class FTPLoader {
                 // determine the file date
                 final Date fileDate = ftpClient.entryDate(path);
 
+                // download the remote file
+                byte[] b = ftpClient.get(path);
+                
                 // create a cache entry
                 RequestHeader requestHeader = new RequestHeader();
                 if (request.referrerhash() != null) requestHeader.put(RequestHeader.REFERER, sb.getURL(request.referrerhash()).toNormalform(true, false));
@@ -247,12 +251,8 @@ public class FTPLoader {
                         requestHeader,
                         responseHeader,
                         "OK",
-                        sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()));
-                Cache.storeMetadata(request.url(), responseHeader);
-
-                // download the remote file
-                byte[] b = ftpClient.get(path);
-                response.setContent(b);
+                        sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
+                        b);
             } else {
                 log.logInfo("REJECTED TOO BIG FILE with size " + size + " Bytes for URL " + request.url().toString());
                 sb.crawlQueues.errorURL.newEntry(request, this.sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");

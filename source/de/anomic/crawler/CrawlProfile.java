@@ -168,7 +168,8 @@ public class CrawlProfile {
                            final boolean indexText, final boolean indexMedia,
                            final boolean storeHTCache, final boolean storeTXCache,
                            final boolean remoteIndexing,
-                           final boolean xsstopw, final boolean xdstopw, final boolean xpstopw) {
+                           final boolean xsstopw, final boolean xdstopw, final boolean xpstopw,
+                           final int cacheStrategy) {
         
         final entry ne = new entry(
                              name, startURL,
@@ -179,7 +180,8 @@ public class CrawlProfile {
                              indexText, indexMedia,
                              storeHTCache, storeTXCache,
                              remoteIndexing,
-                             xsstopw, xdstopw, xpstopw);
+                             xsstopw, xdstopw, xpstopw,
+                             cacheStrategy);
         try {
             profileTable.put(ne.handle(), ne.map());
         } catch (final kelondroException e) {
@@ -247,6 +249,11 @@ public class CrawlProfile {
         
     }
     
+    public final static int CACHE_STRATEGY_NOCACHE = 0;
+    public final static int CACHE_STRATEGY_IFEXIST = 1;
+    public final static int CACHE_STRATEGY_IFFRESH = 2;
+    public final static int CACHE_STRATEGY_CACHEONLY = 3;
+    
     public static class entry {
         // this is a simple record structure that hold all properties of a single crawl start
         
@@ -268,6 +275,7 @@ public class CrawlProfile {
         public static final String XSSTOPW          = "xsstopw";
         public static final String XDSTOPW          = "xdstopw";
         public static final String XPSTOPW          = "xpstopw";
+        public static final String CACHE_STRAGEGY   = "cacheStrategy";
         
         Map<String, String> mem;
         private ConcurrentHashMap<String, DomProfile> doms;
@@ -284,7 +292,8 @@ public class CrawlProfile {
                      final boolean indexText, final boolean indexMedia,
                      final boolean storeHTCache, final boolean storeTXCache,
                      final boolean remoteIndexing,
-                     final boolean xsstopw, final boolean xdstopw, final boolean xpstopw) {
+                     final boolean xsstopw, final boolean xdstopw, final boolean xpstopw,
+                     final int cacheStrategy) {
             if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
             final String handle = (startURL == null) ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, yacySeedDB.commonHashLength) : startURL.hash();
             mem = new HashMap<String, String>();
@@ -306,7 +315,7 @@ public class CrawlProfile {
             mem.put(XSSTOPW,          Boolean.toString(xsstopw)); // exclude static stop-words
             mem.put(XDSTOPW,          Boolean.toString(xdstopw)); // exclude dynamic stop-word
             mem.put(XPSTOPW,          Boolean.toString(xpstopw)); // exclude parent stop-words
-
+            mem.put(CACHE_STRAGEGY, Integer.toString(cacheStrategy));
             doms = new ConcurrentHashMap<String, DomProfile>();
         }
         
@@ -366,6 +375,15 @@ public class CrawlProfile {
                 return Integer.parseInt(r);
             } catch (final NumberFormatException e) {
                 return 0;
+            }
+        }
+        public int cacheStrategy() {
+            final String r = mem.get(CACHE_STRAGEGY);
+            if (r == null) return CACHE_STRATEGY_IFFRESH;
+            try {
+                return Integer.parseInt(r);
+            } catch (final NumberFormatException e) {
+                return CACHE_STRATEGY_IFFRESH;
             }
         }
         public long recrawlIfOlder() {

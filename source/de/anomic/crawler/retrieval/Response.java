@@ -145,7 +145,8 @@ public class Response {
             final RequestHeader requestHeader,
             final ResponseHeader responseHeader,
             final String responseStatus,
-            final CrawlProfile.entry profile) {
+            final CrawlProfile.entry profile,
+            final byte[] content) {
         this.request = request;
         // request and response headers may be zero in case that we process surrogates
         this.requestHeader = requestHeader;
@@ -153,13 +154,24 @@ public class Response {
         this.responseStatus = responseStatus;
         this.profile = profile;
         this.status = QUEUE_STATE_FRESH;
-        
-        // to be defined later:
-        this.content = null;
+        this.content = content;
+    }
+    
+    public Response(
+            Request request,
+            final RequestHeader requestHeader,
+            final ResponseHeader responseHeader,
+            final String responseStatus,
+            final CrawlProfile.entry profile) {
+        this(request, requestHeader, responseHeader, responseStatus, profile, null);
     }
 
     public void updateStatus(final int newStatus) {
         this.status = newStatus;
+    }
+    
+    public ResponseHeader getResponseHeader() {
+        return this.responseHeader;
     }
     
     public int getStatus() {
@@ -241,7 +253,7 @@ public class Response {
      * @return NULL if the answer is TRUE, in case of FALSE, the reason as
      *         String is returned
      */
-    public String shallStoreCacheForProxy() {
+    public String shallStoreCache() {
 
         // check profile (disabled: we will check this in the plasmaSwitchboard)
         // if (!this.profile.storeHTCache()) { return "storage_not_wanted"; }
@@ -252,7 +264,7 @@ public class Response {
 
         // check storage size: all files will be handled in RAM before storage, so they must not exceed
         // a given size, which we consider as 1MB
-        if (this.size() > 1024L * 1024L) return "too_large_for_caching_" + this.size();
+        if (this.size() > 10 * 1024L * 1024L) return "too_large_for_caching_" + this.size();
         
         // check status code
         if (!validResponseStatus()) {
@@ -265,8 +277,13 @@ public class Response {
         if (this.url().isPOST() && !this.profile.crawlingQ()) {
             return "dynamic_post";
         }
+        
         if (this.url().isCGI()) {
             return "dynamic_cgi";
+        }
+        
+        if (this.url().isLocal()) {
+            return "local_URL_no_cache_needed";
         }
         
         if (requestHeader != null) {
@@ -338,7 +355,7 @@ public class Response {
      * 
      * @return whether the file should be taken from the cache
      */
-    public boolean shallUseCacheForProxy() {
+    public boolean isFreshForProxy() {
 
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable
@@ -488,7 +505,7 @@ public class Response {
 
         // check profile
         if (!profile().indexText() && !profile().indexMedia()) {
-            return "indexing not allowed - indexText and indexMedia not set (for proxy)";
+            return "indexing not allowed - indexText and indexMedia not set (for proxy = " + profile.name()+ ")";
         }
 
         // -CGI access in request
@@ -629,7 +646,7 @@ public class Response {
 
         // check profile
         if (!profile().indexText() && !profile().indexMedia()) {
-            return "indexing not allowed - indexText and indexMedia not set (for crawler)";
+            return "indexing not allowed - indexText and indexMedia not set (for crawler = " + profile.name()+ ")";
         }
 
         // -CGI access in request

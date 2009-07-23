@@ -32,7 +32,6 @@ import de.anomic.crawler.Latency;
 import de.anomic.data.Blacklist;
 import de.anomic.document.Parser;
 import de.anomic.http.client.Client;
-import de.anomic.http.client.Cache;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
@@ -135,18 +134,6 @@ public final class HTTPLoader {
             if (res.getStatusCode() == 200 || res.getStatusCode() == 203) {
                 // the transfer is ok
                 
-                // create a new cache entry
-                response = new Response(
-                		request,
-                		requestHeader,
-                		res.getResponseHeader(), 
-                		res.getStatusLine(),
-                        sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle())
-                );
-                Cache.storeMetadata(request.url(), res.getResponseHeader());
-                
-                // request has been placed and result has been returned. work off response
-                
             	// if the response has not the right file type then reject file
                 supportError = Parser.supports(request.url(), res.getResponseHeader().mime());
                 if (supportError != null) {
@@ -165,7 +152,15 @@ public final class HTTPLoader {
                 	throw new IOException("REJECTED URL " + request.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)");
                 }
 
-                response.setContent(responseBody);
+                // create a new cache entry
+                response = new Response(
+                        request,
+                        requestHeader,
+                        res.getResponseHeader(), 
+                        res.getStatusLine(),
+                        sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
+                        responseBody
+                );
 
                 return response;
             } else if (res.getStatusLine().startsWith("30")) {

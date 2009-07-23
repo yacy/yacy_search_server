@@ -46,7 +46,7 @@ public final class CrawlStacker {
 
     private Log log = new Log("STACKCRAWL");
 
-    private serverProcessor<Request> fastQueue, slowQueue;
+    private serverProcessor<Request>  fastQueue, slowQueue;
     private long                      dnsHit, dnsMiss;
     private CrawlQueues               nextQueue;
     private CrawlSwitchboard          crawler;
@@ -177,7 +177,7 @@ public final class CrawlStacker {
 
         // check if the protocol is supported
         final String urlProtocol = entry.url().getProtocol();
-        if (!nextQueue.isSupportedProtocol(urlProtocol)) {
+        if (!Switchboard.getSwitchboard().loader.isSupportedProtocol(urlProtocol)) {
             this.log.logSevere("Unsupported protocol in URL '" + entry.url().toString() + "'. " +
                                "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
             return "unsupported protocol";

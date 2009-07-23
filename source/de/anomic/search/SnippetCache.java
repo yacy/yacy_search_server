@@ -344,8 +344,8 @@ public class SnippetCache {
                 return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
             } else {
                 // trying to load the resource from the cache
-                resContent = Cache.getResourceContentStream(url);
-                responseHeader = Cache.loadResponseHeader(url);
+                resContent = Cache.getContentStream(url);
+                responseHeader = Cache.getResponseHeader(url);
                 if (resContent != null && ((resContentLength = Cache.getResourceContentLength(url)) > maxDocLen) && (!fetchOnline)) {
                     // content may be too large to be parsed here. To be fast, we omit calculation of snippet here
                     return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "resource available, but too large: " + resContentLength + " bytes");
@@ -353,12 +353,12 @@ public class SnippetCache {
                     // if not found try to download it
                     
                     // download resource using the crawler and keep resource in memory if possible
-                    final Response entry = Switchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, true, reindexing);
+                    final Response entry = Switchboard.getSwitchboard().loader.load(url, true, reindexing);
                     
                     // getting resource metadata (e.g. the http headers for http resources)
                     if (entry != null) {
-                        // place entry on crawl queue
-                        sb.htEntryStoreProcess(entry);
+                        // place entry on indexing queue
+                        sb.toIndexer(entry);
                         
                         // read resource body (if it is there)
                         final byte []resourceArray = entry.getContent();
@@ -366,7 +366,7 @@ public class SnippetCache {
                             resContent = new ByteArrayInputStream(resourceArray);
                             resContentLength = resourceArray.length;
                         } else {
-                            resContent = Cache.getResourceContentStream(url); 
+                            resContent = Cache.getContentStream(url); 
                             resContentLength = Cache.getResourceContentLength(url);
                         }
                     }
@@ -456,8 +456,8 @@ public class SnippetCache {
         ResponseHeader responseHeader = null;
         try {
             // trying to load the resource from the cache
-            resContent = Cache.getResourceContentStream(url);
-            responseHeader = Cache.loadResponseHeader(url);
+            resContent = Cache.getContentStream(url);
+            responseHeader = Cache.getResponseHeader(url);
             if (resContent != null) {
                 // if the content was found
                 resContentLength = Cache.getResourceContentLength(url);
@@ -465,7 +465,7 @@ public class SnippetCache {
                 // if not found try to download it
                 
                 // download resource using the crawler and keep resource in memory if possible
-                final Response entry = Switchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, forText, global);
+                final Response entry = Switchboard.getSwitchboard().loader.load(url, forText, global);
                 
                 // getting resource metadata (e.g. the http headers for http resources)
                 if (entry != null) {
@@ -476,7 +476,7 @@ public class SnippetCache {
                         resContent = new ByteArrayInputStream(resourceArray);
                         resContentLength = resourceArray.length;
                     } else {
-                        resContent = Cache.getResourceContentStream(url); 
+                        resContent = Cache.getContentStream(url); 
                         resContentLength = Cache.getResourceContentLength(url);
                     }
                 }
@@ -844,7 +844,7 @@ public class SnippetCache {
             if (responseHeader == null) {
                 // try to get the header from the htcache directory
                 try {                    
-                    responseHeader = Cache.loadResponseHeader(url);
+                    responseHeader = Cache.getResponseHeader(url);
                 } catch (final Exception e) {
                     // ignore this. resource info loading failed
                 }   
@@ -897,14 +897,14 @@ public class SnippetCache {
             long contentLength = -1;
             
             // trying to load the resource body from cache
-            InputStream resource = Cache.getResourceContentStream(url);
+            InputStream resource = Cache.getContentStream(url);
             if (resource != null) {
                 contentLength = Cache.getResourceContentLength(url);
             } else if (fetchOnline) {
                 // if the content is not available in cache try to download it from web
                 
                 // try to download the resource using a crawler
-                final Response entry = Switchboard.getSwitchboard().crawlQueues.loadResourceFromWeb(url, forText, reindexing);
+                final Response entry = Switchboard.getSwitchboard().loader.load(url, forText, reindexing);
                 if (entry == null) return null; // not found in web
                 
                 // read resource body (if it is there)
@@ -912,7 +912,7 @@ public class SnippetCache {
             
                 // in case that the resource was not in ram, read it from disk
                 if (resourceArray == null) {
-                    resource = Cache.getResourceContentStream(url);   
+                    resource = Cache.getContentStream(url);   
                     contentLength = Cache.getResourceContentLength(url); 
                 } else {
                     resource = new ByteArrayInputStream(resourceArray);

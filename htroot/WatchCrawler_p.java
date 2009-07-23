@@ -224,7 +224,7 @@ public class WatchCrawler_p {
                                     crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
                                     crawlingQ,
                                     indexText, indexMedia,
-                                    storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
+                                    storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw, CrawlProfile.CACHE_STRATEGY_IFFRESH);
                             final String reasonString = sb.crawlStacker.stackCrawl(new Request(
                                     sb.peers.mySeed().hash,
                                     url,
@@ -350,7 +350,8 @@ public class WatchCrawler_p {
                                         storeHTCache,
                                         true,
                                         crawlOrder,
-                                        xsstopw, xdstopw, xpstopw);
+                                        xsstopw, xdstopw, xpstopw,
+                                        CrawlProfile.CACHE_STRATEGY_IFFRESH);
                                 
                                 // pause local crawl here
                                 sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
@@ -408,7 +409,9 @@ public class WatchCrawler_p {
                     				crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
                     				crawlingQ,
                     				indexText, indexMedia,
-                    				storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw);
+                    				storeHTCache, true, crawlOrder,
+                    				xsstopw, xdstopw, xpstopw,
+                    				CrawlProfile.CACHE_STRATEGY_IFFRESH);
                     		
                     		// create a new sitemap importer
                     		final SitemapImporter importerThread = new SitemapImporter(sb, sb.dbImportManager, new yacyURL(sitemapURLStr, null), pe);

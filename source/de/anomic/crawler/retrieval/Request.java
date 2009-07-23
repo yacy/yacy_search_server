@@ -1,4 +1,4 @@
-// CrawlEntry.java
+// Request.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 14.03.2007 on http://yacy.net
 //
@@ -69,7 +69,7 @@ public class Request extends serverProcessorJob {
     private long     loaddate;      // the time when the url was loaded
     private long     serverdate;    // the document date from the target server
     private long     imsdate;       // the time of a ifModifiedSince request
-    private String   profileHandle; // the name of the prefetch profile
+    private String   profileHandle; // the name of the fetch profile
     private int      depth;         // the prefetch depth so far, starts at 0
     private int      anchors;       // number of anchors of the parent
     private int      forkfactor;    // sum of anchors of all ancestors
@@ -80,7 +80,7 @@ public class Request extends serverProcessorJob {
     
     
     /**
-     * A HarvestRequest Entry is a object that is created to provide
+     * A Request Entry is a object that is created to provide
      * all information to load a specific resource.
      * 
      * @param initiator the hash of the initiator peer

@@ -230,6 +230,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
     public  File                           surrogatesOutPath;
     public  Map<String, String>            rankingPermissions;
     public  Segment                        indexSegment;
+    public  LoaderDispatcher               loader;
     public  CrawlSwitchboard               crawler;
     public  CrawlQueues                    crawlQueues;
     public  ResultURLs                     crawlResults;
@@ -514,6 +515,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         
         // start a loader
         log.logConfig("Starting Crawl Loader");
+        this.loader = new LoaderDispatcher(this);
         this.crawlQueues = new CrawlQueues(this, queuesRoot);
         this.crawlQueues.noticeURL.setMinimumDelta(
                 this.getConfigLong("minimumLocalDelta", this.crawlQueues.noticeURL.getMinimumLocalDelta()),
@@ -1092,90 +1094,6 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         return this.crawler.cleanProfiles();
     }
     
-    public boolean htEntryStoreProcess(final Response entry) {
-        
-        if (entry == null) return false;
-
-        /* =========================================================================
-         * PARSER SUPPORT
-         * 
-         * Testing if the content type is supported by the available parsers
-         * ========================================================================= */
-        final String supportError = Parser.supports(entry.url(), entry.getMimeType());
-        if (log.isFinest()) log.logFinest("STORE "+ entry.url() +" content of type "+ entry.getMimeType() + " is supported: " + supportError);
-        
-        /* =========================================================================
-         * INDEX CONTROL HEADER
-         * 
-         * With the X-YACY-Index-Control header set to "no-index" a client could disallow
-         * yacy to index the response returned as answer to a request
-         * ========================================================================= */
-        boolean doIndexing = true;        
-        if (entry.requestProhibitsIndexing()) {        
-            doIndexing = false;
-            if (this.log.isFine()) this.log.logFine("Crawling of " + entry.url() + " prohibited by request.");
-        }        
-        
-        /* =========================================================================
-         * LOCAL IP ADDRESS CHECK
-         * 
-         * check if ip is local ip address // TODO: remove this procotol specific code here
-         * ========================================================================= */
-        final String urlRejectReason = crawlStacker.urlInAcceptedDomain(entry.url());
-        if (urlRejectReason != null) {
-            if (this.log.isFine()) this.log.logFine("Rejected URL '" + entry.url() + "': " + urlRejectReason);
-            doIndexing = false;
-        }
-        
-        /* =========================================================================
-         * STORING DATA
-         * 
-         * Now we store the response header and response content if 
-         * a) the user has configured to use the htcache or
-         * b) the content should be indexed
-         * ========================================================================= */        
-        if (((entry.profile() != null) && (entry.profile().storeHTCache())) || (doIndexing && supportError == null)) {
-            // store response header
-            /*
-            if (entry.writeResourceInfo()) {
-                this.log.logInfo("WROTE HEADER for " + entry.cacheFile());
-            }
-            */
-            
-            // work off unwritten files
-            if (entry.getContent() != null) {
-                final String error = (entry.initiator() == null) ? entry.shallStoreCacheForProxy() : null;
-                if (error == null) {
-                    Cache.storeFile(entry.url(), entry.getContent());
-                    if (this.log.isFine()) this.log.logFine("WROTE FILE (" + entry.getContent().length + " bytes) for " + entry.url());
-                } else {
-                    if (this.log.isWarning()) this.log.logWarning("WRITE OF FILE " + entry.url() + " FORBIDDEN: " + error);
-                }
-            //} else {
-                //this.log.logFine("EXISTING FILE (" + entry.cacheFile.length() + " bytes) for " + entry.cacheFile);
-            }
-        }
-        
-        /* =========================================================================
-         * INDEXING
-         * ========================================================================= */          
-        if (doIndexing && supportError == null) {
-            
-            // enqueue for further crawling
-            enQueue(entry);
-        } else {
-            if (!entry.profile().storeHTCache()) {
-                try {
-                    Cache.deleteFromCache(entry.url());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }                
-            }
-        }
-        
-        return true;
-    }
-    
     public void close() {
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
         serverProfiling.stopSystemProfiling();
@@ -1215,44 +1133,65 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     
-    public void enQueue(final Response queueEntry) {
-        assert queueEntry != null;
+    public boolean toIndexer(final Response response) {
+        assert response != null;
         
         // get next queue entry and start a queue processing
-        if (queueEntry == null) {
+        if (response == null) {
             if (this.log.isFine()) log.logFine("deQueue: queue entry is null");
-            return;
+            return false;
         }
-        if (queueEntry.profile() == null) {
+        if (response.profile() == null) {
             if (this.log.isFine()) log.logFine("deQueue: profile is null");
-            return;
+            return false;
         }
         
-        // check if the document should be indexed
+        // check if the document should be indexed based on proxy/crawler rules
         String noIndexReason = "unspecified indexing error";
-        if (queueEntry.processCase(peers.mySeed().hash) == SwitchboardConstants.PROCESSCASE_4_PROXY_LOAD) {
+        if (response.processCase(peers.mySeed().hash) == SwitchboardConstants.PROCESSCASE_4_PROXY_LOAD) {
             // proxy-load
-            noIndexReason = queueEntry.shallIndexCacheForProxy();
+            noIndexReason = response.shallIndexCacheForProxy();
         } else {
             // normal crawling
-            noIndexReason = queueEntry.shallIndexCacheForCrawler();
+            noIndexReason = response.shallIndexCacheForCrawler();
+        }
+
+        // check if the parser supports the mime type
+        if (noIndexReason == null) {
+            noIndexReason = Parser.supports(response.url(), response.getMimeType());
+        }
+
+        
+        // check X-YACY-Index-Control
+        // With the X-YACY-Index-Control header set to "no-index" a client could disallow
+        // yacy to index the response returned as answer to a request
+        if (noIndexReason == null && response.requestProhibitsIndexing()) {
+            noIndexReason = "X-YACY-Index-Control header prohibits indexing";
         }
         
+        // check accepted domain / localhost accesses
+        if (noIndexReason == null) {
+            noIndexReason = crawlStacker.urlInAcceptedDomain(response.url());
+        }
+        
+        // in the noIndexReason is set, indexing is not allowed
         if (noIndexReason != null) {
-            // this document should not be indexed. log cause and close queue
-            final yacyURL referrerURL = queueEntry.referrerURL();
-            if (log.isFine()) log.logFine("deQueue: not indexed any word in URL " + queueEntry.url() + "; cause: " + noIndexReason);
-            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? "" : referrerURL.hash(), queueEntry.initiator(), queueEntry.name(), noIndexReason);
+            // log cause and close queue
+            final yacyURL referrerURL = response.referrerURL();
+            if (log.isFine()) log.logFine("deQueue: not indexed any word in URL " + response.url() + "; cause: " + noIndexReason);
+            addURLtoErrorDB(response.url(), (referrerURL == null) ? "" : referrerURL.hash(), response.initiator(), response.name(), noIndexReason);
             // finish this entry
-            return;
+            return false;
         }
 
         // put document into the concurrent processing queue
-        if (log.isFinest()) log.logFinest("deQueue: passing entry to indexing queue");
+        if (log.isFinest()) log.logFinest("deQueue: passing to indexing queue: " + response.url().toNormalform(true, false));
         try {
-            this.indexingDocumentProcessor.enQueue(new indexingQueueEntry(queueEntry, null, null));
+            this.indexingDocumentProcessor.enQueue(new indexingQueueEntry(response, null, null));
+            return true;
         } catch (InterruptedException e) {
             e.printStackTrace();
+            return false;
         }
     }
     
@@ -1649,7 +1588,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
 
         try {
             // parse the document
-            document = Parser.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), Cache.getResourceContent(entry.url()));
+            document = Parser.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), Cache.getContent(entry.url()));
             assert(document != null) : "Unexpected error. Parser returned null.";
         } catch (final ParserException e) {
             this.log.logWarning("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());

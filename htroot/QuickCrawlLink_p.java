@@ -147,7 +147,8 @@ public class QuickCrawlLink_p {
                         remoteIndexing,
                         xsstopw,
                         xdstopw,
-                        xpstopw
+                        xpstopw,
+                        CrawlProfile.CACHE_STRATEGY_IFFRESH
                 );
             } catch (final Exception e) {
                 // mist

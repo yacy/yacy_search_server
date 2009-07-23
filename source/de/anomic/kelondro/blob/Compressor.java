@@ -150,7 +150,7 @@ public class Compressor implements BLOB {
                 return null;
             }
         } else if (ByteArray.equals(b, plainMagic)) {
-            System.out.print("-"); // DEBUG
+            //System.out.print("-"); // DEBUG
             byte[] r = new byte[b.length - 2];
             System.arraycopy(b, 2, r, 0, b.length - 2);
             return r;

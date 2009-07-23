@@ -63,7 +63,7 @@ public final class Cache {
     private static long maxCacheSize = 0l;
     private static File cachePath = null;
     private static String prefix;
-    private static final Log log = new Log("HTCACHE");
+    public static final Log log = new Log("HTCACHE");
     
     public static void init(final File htCachePath, String peerSalt, final long CacheSizeMax) {
         
@@ -103,31 +103,39 @@ public final class Cache {
         fileDBunbuffered.setMaxSize(maxCacheSize);
     }
     
+    /**
+     * close the databases
+     */
     public static void close() {
         responseHeaderDB.close();
         fileDB.close(true);
     }
     
-    // Store to Cache
-    public static void storeMetadata(final yacyURL url, final ResponseHeader responseHeader) {
-        if (responseHeader != null) try {
+    public static void store(yacyURL url, final ResponseHeader responseHeader, byte[] file) {
+        if (responseHeader != null && file != null) try {
             // store the response header into the header database
             final HashMap<String, String> hm = new HashMap<String, String>();
             hm.putAll(responseHeader);
             hm.put("@@URL", url.toNormalform(true, false));
             responseHeaderDB.put(url.hash(), hm);
-        } catch (final Exception e) {
-            log.logWarning("could not write ResourceInfo: "
-                    + e.getClass() + ": " + e.getMessage());
-        }
-    }
-
-    
-    public static void storeFile(yacyURL url, byte[] file) {
-        try {
             fileDB.put(url.hash().getBytes("UTF-8"), file);
+            if (log.isFine()) log.logFine("stored in cache: " + url.toNormalform(true, false));
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+    
+    /**
+     * check if the responseHeaderDB and the fileDB has an entry for the given url
+     * @param url the url of the resource
+     * @return true if the content of the url is in the cache, false othervise
+     */
+    public static boolean has(final yacyURL url) {
+        try {
+            return responseHeaderDB.has(url.hash()) && fileDB.has(url.hash().getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
         }
     }
     
@@ -140,7 +148,7 @@ public final class Cache {
      * @throws <b>UnsupportedProtocolException</b> if the protocol is not supported and therefore the
      * info object couldn't be created
      */
-    public static ResponseHeader loadResponseHeader(final yacyURL url) {    
+    public static ResponseHeader getResponseHeader(final yacyURL url) {    
         
         // loading data from database
         Map<String, String> hdb;
@@ -161,14 +169,21 @@ public final class Cache {
      * is available or the cached file is not readable, <code>null</code>
      * is returned.
      */
-    public static InputStream getResourceContentStream(final yacyURL url) {
+    public static InputStream getContentStream(final yacyURL url) {
         // load the url as resource from the cache
-        byte[] b = getResourceContent(url);
+        byte[] b = getContent(url);
         if (b == null) return null;
         return new ByteArrayInputStream(b);
     }
     
-    public static byte[] getResourceContent(final yacyURL url) {
+    /**
+     * Returns the content of a cached resource as byte[]
+     * @param url the requested resource
+     * @return the resource content as byte[]. In no data
+     * is available or the cached file is not readable, <code>null</code>
+     * is returned.
+     */
+    public static byte[] getContent(final yacyURL url) {
         // load the url as resource from the cache
         try {
             return fileDB.get(url.hash().getBytes("UTF-8"));
@@ -178,8 +193,24 @@ public final class Cache {
         }
     }
     
+    /**
+     * requesting the content length of a resource is discouraged since it may
+     * be performed by loading of the resource from the cache and then measuring the
+     * size after decompression of the content. This may use a lot of CPU resources
+     * and maybe cause also high IO. Please omit usage of this method as much as possible.
+     * @param url
+     * @return the size of the cached content
+     */
     public static long getResourceContentLength(final yacyURL url) {
-        // load the url as resource from the cache
+        // first try to get the length from the response header,
+        // this is less costly than loading the content from its gzipped cache
+        ResponseHeader responseHeader = getResponseHeader(url);
+        if (responseHeader != null) {
+            long length = responseHeader.getContentLength();
+            if (length > 0) return length; 
+        }
+        // load the url as resource from the cache (possibly decompress it),
+        // and get the length from the content array size
         try {
             return fileDB.length(url.hash().getBytes("UTF-8"));
         } catch (IOException e) {
@@ -188,7 +219,12 @@ public final class Cache {
         }
     }
 
-    public static void deleteFromCache(yacyURL url) throws IOException {
+    /**
+     * removed response header and cached content from the database
+     * @param url
+     * @throws IOException
+     */
+    public static void delete(yacyURL url) throws IOException {
         responseHeaderDB.remove(url.hash());
         fileDB.remove(url.hash().getBytes("UTF-8"));
     }
