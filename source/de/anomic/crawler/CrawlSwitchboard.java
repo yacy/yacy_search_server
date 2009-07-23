@@ -103,14 +103,7 @@ public final class CrawlSwitchboard {
             }
         }
         initActiveCrawlProfiles();
-        log.logInfo("Loaded active crawl profiles from file " + profilesActiveFile.getName() +
-                ", " + this.profilesActiveCrawls.size() + " entries");
-        Iterator<entry> i = this.profilesActiveCrawls.profiles(true);
-        entry c;
-        while (i.hasNext()) {
-        	c = i.next();
-        	log.logInfo("active crawl: " + c.handle() + " - " + c.name());
-        }
+        log.logInfo("Loaded active crawl profiles from file " + profilesActiveFile.getName() + ", " + this.profilesActiveCrawls.size() + " entries");
         final File profilesPassiveFile = new File(queuesRoot, DBFILE_PASSIVE_CRAWL_PROFILES);
         if (!profilesPassiveFile.exists()) {
             // migrate old file

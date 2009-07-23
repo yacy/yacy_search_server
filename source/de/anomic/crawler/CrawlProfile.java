@@ -41,6 +41,7 @@ import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 public class CrawlProfile {
     
@@ -57,6 +58,12 @@ public class CrawlProfile {
         profileTableFile.getParentFile().mkdirs();
         final Heap dyn = new Heap(profileTableFile, yacySeedDB.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
         profileTable = new MapView(dyn, 500, '_');
+        profileIterator pi = new profileIterator(true);
+        entry e;
+        while (pi.hasNext()) {
+        	e = pi.next();
+        	Log.logInfo("CrawlProfiles", "loaded Profile " + e.handle() + ": " + e.name());
+        }
     }
     
     public void clear() {

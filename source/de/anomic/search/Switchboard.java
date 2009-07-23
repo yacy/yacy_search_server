@@ -626,10 +626,6 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
                 new String[]{"condenseDocument", "CrawlStacker"},
                 this, "parseDocument", 2 * serverProcessor.useCPU + 1, indexingCondensementProcessor, 2 * serverProcessor.useCPU + 1);
         
-        // clean up profiles
-        this.log.logConfig("Cleaning Profiles");
-        try { cleanProfiles(); } catch (final InterruptedException e) { /* Ignore this here */ }
-        
         // deploy busy threads
         log.logConfig("Starting Threads");
         MemoryControl.gc(10000, "plasmaSwitchboard, help for profiler"); // help for profiler - thq

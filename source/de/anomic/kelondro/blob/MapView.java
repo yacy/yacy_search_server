@@ -279,12 +279,12 @@ public class MapView {
     }
 
 
-    public synchronized objectIterator entries(final boolean up, final boolean rotating) throws IOException {
-        return new objectIterator(keys(up, rotating));
+    public synchronized MapIterator entries(final boolean up, final boolean rotating) throws IOException {
+        return new MapIterator(keys(up, rotating));
     }
 
-    public synchronized objectIterator entries(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
-        return new objectIterator(keys(up, rotating, firstKey, secondKey));
+    public synchronized MapIterator entries(final boolean up, final boolean rotating, final byte[] firstKey, final byte[] secondKey) throws IOException {
+        return new MapIterator(keys(up, rotating, firstKey, secondKey));
     }
 
     /**
@@ -311,14 +311,14 @@ public class MapView {
         close();
     }
 
-    public class objectIterator implements Iterator<Map<String, String>> {
+    public class MapIterator implements Iterator<Map<String, String>> {
         // enumerates Map-Type elements
         // the key is also included in every map that is returned; it's key is 'key'
 
         Iterator<byte[]> keyIterator;
         boolean finish;
 
-        public objectIterator(final Iterator<byte[]> keyIterator) {
+        public MapIterator(final Iterator<byte[]> keyIterator) {
             this.keyIterator = keyIterator;
             this.finish = false;
         }
