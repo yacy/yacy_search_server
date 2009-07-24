@@ -53,7 +53,6 @@ public class Balancer {
     private   final File   cacheStacksPath;
     private   long         minimumLocalDelta;
     private   long         minimumGlobalDelta;
-    private   int          profileErrors;
     private   long         lastDomainStackFill;
     
     public Balancer(final File cachePath, final String stackname, final boolean fullram,
@@ -70,7 +69,6 @@ public class Balancer {
         cacheStacksPath.mkdirs();
         File f = new File(cacheStacksPath, stackname + indexSuffix);
         urlFileIndex = new Table(f, Request.rowdef, (fullram) ? Table.tailCacheUsageAuto : Table.tailCacheDenyUsage, EcoFSBufferSize, 0);
-        profileErrors = 0;
         lastDomainStackFill = 0;
         Log.logInfo("Balancer", "opened balancer file with " + urlFileIndex.size() + " entries from " + f.toString());
     }
@@ -285,7 +283,7 @@ public class Balancer {
      * crawl-delay time which is always respected. In case the minimum time cannot ensured, this method pauses
      * the necessary time until the url is released and returned as CrawlEntry object. In case that a profile
      * for the computed Entry does not exist, null is returned
-     * @param delay
+     * @param delay true if the requester demands forced delays using explicit thread sleep
      * @param profile
      * @return a url in a CrawlEntry object
      * @throws IOException
@@ -330,13 +328,14 @@ public class Balancer {
 		        
 		        // at this point we must check if the crawlEntry has relevancy because the crawl profile still exists
 		        // if not: return null. A calling method must handle the null value and try again
-		        if (profile != null && !profile.hasEntry(crawlEntry.profileHandle())) {
-		        	profileErrors++;
-		        	if (profileErrors < 20) Log.logInfo("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
+		        CrawlProfile.entry profileEntry = (profile == null) ? null : profile.getEntry(crawlEntry.profileHandle());
+		        if (profileEntry == null) {
+		        	Log.logWarning("Balancer", "no profile entry for handle " + crawlEntry.profileHandle());
 		        	return null;
 		        }
-		        sleeptime = Latency.waitingRemaining(crawlEntry.url(), minimumLocalDelta, minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
-	    	
+		        // depending on the caching policy we need sleep time to avoid DoS-like situations
+		        sleeptime = (profileEntry.cacheStrategy() == CrawlProfile.CACHE_STRATEGY_CACHEONLY) ? 0 : Latency.waitingRemaining(crawlEntry.url(), minimumLocalDelta, minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
+		        
 		        assert result.equals(new String(rowEntry.getPrimaryKeyBytes())) : "result = " + result + ", rowEntry.getPrimaryKeyBytes() = " + new String(rowEntry.getPrimaryKeyBytes());
 		        assert result.equals(crawlEntry.url().hash()) : "result = " + result + ", crawlEntry.url().hash() = " + crawlEntry.url().hash();
 		        if (this.domainStacks.size() <= 1) break;

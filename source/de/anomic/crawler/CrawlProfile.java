@@ -256,10 +256,10 @@ public class CrawlProfile {
         
     }
     
-    public final static int CACHE_STRATEGY_NOCACHE = 0;
-    public final static int CACHE_STRATEGY_IFEXIST = 1;
-    public final static int CACHE_STRATEGY_IFFRESH = 2;
-    public final static int CACHE_STRATEGY_CACHEONLY = 3;
+    public final static int CACHE_STRATEGY_NOCACHE = 0;    // never use the cache, all content from fresh internet source
+    public final static int CACHE_STRATEGY_IFFRESH = 1;    // use the cache if the cache exists and is fresh using the proxy-fresh rules
+    public final static int CACHE_STRATEGY_IFEXIST = 2;    // use the cache if the cache exist. Do no check freshness. Othervise use online source.
+    public final static int CACHE_STRATEGY_CACHEONLY = 3;  // never go online, use all content from cache. If no cache exist, treat content as unavailable
     
     public static class entry {
         // this is a simple record structure that hold all properties of a single crawl start

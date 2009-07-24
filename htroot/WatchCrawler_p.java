@@ -182,6 +182,13 @@ public class WatchCrawler_p {
                     final boolean storeHTCache = post.get("storeHTCache", "off").equals("on");
                     env.setConfig("storeHTCache", (storeHTCache) ? "true" : "false");
                     
+                    final String cachePolicyString = post.get("cachePolicy", "iffresh");
+                    int cachePolicy = CrawlProfile.CACHE_STRATEGY_IFFRESH;
+                    if (cachePolicyString.equals("nocache")) cachePolicy = CrawlProfile.CACHE_STRATEGY_NOCACHE;
+                    if (cachePolicyString.equals("iffresh")) cachePolicy = CrawlProfile.CACHE_STRATEGY_IFFRESH;
+                    if (cachePolicyString.equals("ifexist")) cachePolicy = CrawlProfile.CACHE_STRATEGY_IFEXIST;
+                    if (cachePolicyString.equals("cacheonly")) cachePolicy = CrawlProfile.CACHE_STRATEGY_CACHEONLY;
+                    
                     final boolean xsstopw = post.get("xsstopw", "off").equals("on");
                     env.setConfig("xsstopw", (xsstopw) ? "true" : "false");
                     
@@ -224,7 +231,7 @@ public class WatchCrawler_p {
                                     crawlingIfOlder, crawlingDomFilterDepth, crawlingDomMaxPages,
                                     crawlingQ,
                                     indexText, indexMedia,
-                                    storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw, CrawlProfile.CACHE_STRATEGY_IFFRESH);
+                                    storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw, cachePolicy);
                             final String reasonString = sb.crawlStacker.stackCrawl(new Request(
                                     sb.peers.mySeed().hash,
                                     url,
@@ -351,7 +358,7 @@ public class WatchCrawler_p {
                                         true,
                                         crawlOrder,
                                         xsstopw, xdstopw, xpstopw,
-                                        CrawlProfile.CACHE_STRATEGY_IFFRESH);
+                                        cachePolicy);
                                 
                                 // pause local crawl here
                                 sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
@@ -411,7 +418,7 @@ public class WatchCrawler_p {
                     				indexText, indexMedia,
                     				storeHTCache, true, crawlOrder,
                     				xsstopw, xdstopw, xpstopw,
-                    				CrawlProfile.CACHE_STRATEGY_IFFRESH);
+                    				cachePolicy);
                     		
                     		// create a new sitemap importer
                     		final SitemapImporter importerThread = new SitemapImporter(sb, sb.dbImportManager, new yacyURL(sitemapURLStr, null), pe);

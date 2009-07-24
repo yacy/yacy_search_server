@@ -226,8 +226,9 @@ mimeConfig = httpd.mime
 # This will be used if the server is addressed as a proxy
 proxyCache = DATA/HTCACHE
 
-# the maximum disc cache size for files in proxyCache in megabytes
-proxyCacheSize = 1024
+# the maximum disc cache size for files in Cache in megabytes
+# default: 32 Gigabyte
+proxyCacheSize = 32768
 
 # a path to the surrogate input directory
 surrogates.in = DATA/SURROGATES/in

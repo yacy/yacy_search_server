@@ -532,17 +532,21 @@ public class CrawlQueues {
                     this.request.setStatus("worker-loading", serverProcessorJob.STATUS_RUNNING);
                     String result = null;
                     
-                    // load a resource, store it to htcache and push queue entry to switchboard queue
+                    // load a resource and push queue entry to switchboard queue
                     // returns null if everything went fine, a fail reason string if a problem occurred
-                    Response response;
                     try {
                         request.setStatus("loading", serverProcessorJob.STATUS_RUNNING);
-                        response = sb.loader.load(request);
-                        assert response != null;
-                        request.setStatus("loaded", serverProcessorJob.STATUS_RUNNING);
-                        final boolean stored = sb.toIndexer(response);
-                        request.setStatus("enqueued-" + ((stored) ? "ok" : "fail"), serverProcessorJob.STATUS_FINISHED);
-                        result = (stored) ? null : "not enqueued to indexer";
+                        Response response = sb.loader.load(request);
+                        if (response == null) {
+                            request.setStatus("error", serverProcessorJob.STATUS_FINISHED);
+                            if (log.isFine()) log.logFine("problem loading " + request.url().toString() + ": no content (possibly caused by cache policy)");
+                            result = "no content (possibly caused by cache policy)";
+                        } else {
+                            request.setStatus("loaded", serverProcessorJob.STATUS_RUNNING);
+                            final boolean stored = sb.toIndexer(response);
+                            request.setStatus("enqueued-" + ((stored) ? "ok" : "fail"), serverProcessorJob.STATUS_FINISHED);
+                            result = (stored) ? null : "not enqueued to indexer";
+                        }
                     } catch (IOException e) {
                         request.setStatus("error", serverProcessorJob.STATUS_FINISHED);
                         if (log.isFine()) log.logFine("problem loading " + request.url().toString() + ": " + e.getMessage());

@@ -196,6 +196,22 @@
             This option is used by default for proxy prefetch, but is not needed for explicit crawling.
           </td>
         </tr>
+        <tr valign="top" class="TableCellLight">
+          <td><label for="mustmatch">Policy for usage of Web Cache</label>:</td>
+          <td>
+			<input type="radio" name="cachePolicy" value="nocache" />no&nbsp;cache&nbsp;&nbsp;&nbsp;
+			<input type="radio" name="cachePolicy" value="ifexist" />if&nbsp;exist&nbsp;&nbsp;&nbsp;
+			<input type="radio" name="cachePolicy" value="iffresh" checked="checked" />if&nbsp;fresh&nbsp;&nbsp;&nbsp;
+			<input type="radio" name="cachePolicy" value="cacheonly" />cache&nbsp;only
+		  </td>
+          <td>
+            The caching policy states when to use the cache during crawling:
+              <b>no&nbsp;cache</b>: never use the cache, all content from fresh internet source;
+              <b>if&nbsp;fresh</b>: use the cache if the cache exists and is fresh using the proxy-fresh rules;
+              <b>if&nbsp;exist</b>: use the cache if the cache exist. Do no check freshness. Othervise use online source;
+              <b>cache&nbsp;only</b>: never go online, use all content from cache. If no cache exist, treat content as unavailable
+          </td>
+        </tr>
         <tr valign="top" class="TableCellDark">
           <td>Do Local Indexing:</td>
           <td>

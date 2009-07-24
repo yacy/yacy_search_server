@@ -14,7 +14,7 @@ function handleResponse(){
 		// document.getElementById("title").innerHTML=doctitle;
 		document.WatchCrawler.bookmarkTitle.value=doctitle
 		
-		// deterime if crawling is allowed by the robots.txt
+		// determine if crawling is allowed by the robots.txt
         docrobotsOK="";		
         if(response.getElementsByTagName("robots")[0].firstChild!=null){
 	        docrobotsOK=response.getElementsByTagName("robots")[0].firstChild.nodeValue;
