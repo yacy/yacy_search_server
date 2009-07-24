@@ -29,7 +29,6 @@ package de.anomic.document.parser.html;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.net.MalformedURLException;
@@ -44,11 +43,8 @@ import java.util.Properties;
 
 import javax.swing.event.EventListenerList;
 
-import de.anomic.crawler.retrieval.HTTPLoader;
+import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.document.parser.htmlParser;
-import de.anomic.http.client.Client;
-import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacyURL;
@@ -511,25 +507,15 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return scraper;
     }
     
-    public static ContentScraper parseResource(final yacyURL location) throws IOException {
+    public static ContentScraper parseResource(final LoaderDispatcher loader, final yacyURL location, int cachePolicy) throws IOException {
         // load page
-        final RequestHeader reqHeader = new RequestHeader();
-        reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
-        return parseResource(location, reqHeader);
-    }
-    
-    public static ContentScraper parseResource(final yacyURL location, final RequestHeader reqHeader) throws IOException {
-        final Reader pageReader = Client.wgetReader(location.toString(), reqHeader, 10000);
-        if (pageReader == null) throw new IOException("no response from url " + location.toString());
+        byte[] page = LoaderDispatcher.toBytes(loader.load(location, cachePolicy));
+        if (page == null) throw new IOException("no response from url " + location.toString());
         
         // scrape content
         final ContentScraper scraper = new ContentScraper(location);
         final Writer writer = new TransformerWriter(null, null, scraper, null, false);
-        try {
-            FileUtils.copy(pageReader, writer);
-        } finally {
-            pageReader.close();
-        }
+        writer.write(new String(page, "UTF-8"));
         
         return scraper;
     }

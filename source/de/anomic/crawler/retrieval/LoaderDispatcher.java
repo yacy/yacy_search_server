@@ -75,35 +75,69 @@ public final class LoaderDispatcher {
         return (HashSet<String>) this.supportedProtocols.clone();
     }
     
+    public static byte[] toBytes(Response response) {
+        if (response == null) return null;
+        return response.getContent();
+    }
+    
+    public Response load(final yacyURL url) throws IOException {
+        return load(url, true, false);
+    }
+    
+    public Response load(final yacyURL url, int cachePolicy) throws IOException {
+        return load(url, true, false, cachePolicy);
+    }
+    
     public Response load(
             final yacyURL url,
             final boolean forText,
             final boolean global
+                    ) throws IOException {
+        return load(request(url, forText, global));
+    }
+    
+    public Response load(
+            final yacyURL url,
+            final boolean forText,
+            final boolean global,
+            int cacheStratgy
     ) throws IOException {
-        
-        final Request centry = new Request(
-                sb.peers.mySeed().hash, 
-                url, 
-                "", 
-                "", 
-                new Date(),
-                new Date(),
-                (forText) ?
-                    ((global) ?
-                        sb.crawler.defaultTextSnippetGlobalProfile.handle() :
-                        sb.crawler.defaultTextSnippetLocalProfile.handle())
-                    :
-                    ((global) ?
-                        sb.crawler.defaultMediaSnippetGlobalProfile.handle() :
-                        sb.crawler.defaultMediaSnippetLocalProfile.handle()), // crawl profile
-                0, 
-                0, 
-                0);
-        
-        return load(centry);
+        return load(request(url, forText, global), cacheStratgy);
+    }
+    
+    public Request request(
+            final yacyURL url,
+            final boolean forText,
+            final boolean global
+                    ) throws IOException {
+        return new Request(
+                    sb.peers.mySeed().hash, 
+                    url, 
+                    "", 
+                    "", 
+                    new Date(),
+                    new Date(),
+                    (forText) ?
+                        ((global) ?
+                            sb.crawler.defaultTextSnippetGlobalProfile.handle() :
+                            sb.crawler.defaultTextSnippetLocalProfile.handle())
+                        :
+                        ((global) ?
+                            sb.crawler.defaultMediaSnippetGlobalProfile.handle() :
+                            sb.crawler.defaultMediaSnippetLocalProfile.handle()), // crawl profile
+                    0, 
+                    0, 
+                    0);
     }
     
     public Response load(final Request request) throws IOException {
+        CrawlProfile.entry crawlProfile = sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle());
+        int cacheStrategy = CrawlProfile.CACHE_STRATEGY_IFFRESH;
+        if (crawlProfile != null) cacheStrategy = crawlProfile.cacheStrategy();
+        return load(request, cacheStrategy);
+    }
+    
+    public Response load(final Request request, int cacheStrategy) throws IOException {
         // get the protocol of the next URL
         final String protocol = request.url().getProtocol();
         final String host = request.url().getHost();
@@ -115,8 +149,7 @@ public final class LoaderDispatcher {
         // check if we have the page in the cache
 
         CrawlProfile.entry crawlProfile = sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle());
-        int cacheStrategy = CrawlProfile.CACHE_STRATEGY_NOCACHE;
-        if (crawlProfile != null && (cacheStrategy = crawlProfile.cacheStrategy()) != CrawlProfile.CACHE_STRATEGY_NOCACHE) {
+        if (crawlProfile != null && cacheStrategy != CrawlProfile.CACHE_STRATEGY_NOCACHE) {
             // we have passed a first test if caching is allowed
             // now see if there is a cache entry
         

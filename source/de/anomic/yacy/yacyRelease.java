@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.http.client.Client;
@@ -231,7 +232,7 @@ public final class yacyRelease extends yacyVersion {
         // returns the version info if successful, null otherwise
         ContentScraper scraper;
         try {
-            scraper = ContentScraper.parseResource(location.getLocationURL());
+            scraper = ContentScraper.parseResource(Switchboard.getSwitchboard().loader, location.getLocationURL(), CrawlProfile.CACHE_STRATEGY_NOCACHE);
         } catch (final IOException e) {
             return null;
         }

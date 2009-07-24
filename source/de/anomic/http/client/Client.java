@@ -29,9 +29,6 @@ package de.anomic.http.client;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -77,7 +74,6 @@ import de.anomic.yacy.logging.Log;
  * 
  */
 public class Client {
-
     /**
      * "the HttpClient instance and connection manager should be shared among all threads for maximum efficiency."
      * (Concurrent execution of HTTP methods, http://hc.apache.org/httpclient-3.x/performance.html)
@@ -746,9 +742,11 @@ public class Client {
     public static byte[] wget(final String uri) {
         return wget(uri, new RequestHeader(), 10000, null);
     }
+    
     public static byte[] wget(final String uri, final RequestHeader header, final int timeout) {
         return wget(uri, header, timeout, null);
     }
+    
     public static byte[] wget(final String uri, final RequestHeader header, final int timeout, final String vhost) {
         assert uri != null : "precondition violated: uri != null";
         addHostHeader(header, vhost);
@@ -766,28 +764,6 @@ public class Client {
             if (response != null) {
                 response.closeStream();
             }
-        }
-        return null;
-    }
-    public static Reader wgetReader(final String uri) {
-        return wgetReader(uri, new RequestHeader(), 10000, null);
-    }
-    public static Reader wgetReader(final String uri, final RequestHeader header, final int timeout) {
-        return wgetReader(uri, header, timeout, null);
-    }
-    public static Reader wgetReader(final String uri, final RequestHeader header, final int timeout, final String vhost) {
-        assert uri != null : "precondition violated: uri != null";
-        addHostHeader(header, vhost);
-        final Client client = new Client(timeout, header);
-
-        // do the request
-        ResponseContainer response = null;
-        try {
-            response = client.GET(uri);
-            Charset charset = response.getResponseHeader().getCharSet();
-            return new InputStreamReader(response.getDataAsStream(), charset);
-        } catch (final IOException e) {
-            Log.logWarning("HTTPC", "wgetReader(" + uri + ") failed: " + e.getMessage());
         }
         return null;
     }
