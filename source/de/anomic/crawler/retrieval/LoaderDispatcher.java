@@ -200,7 +200,7 @@ public final class LoaderDispatcher {
         // now forget about the cache, nothing there. Try to load the content from the internet
         
         // check access time: this is a double-check (we checked possibly already in the balancer)
-        // to make shure that we don't DoS the target by mistake
+        // to make sure that we don't DoS the target by mistake
         if (!request.url().isLocal()) {
             final Long lastAccess = accessTime.get(host);
             long wait = 0;
@@ -214,7 +214,7 @@ public final class LoaderDispatcher {
             }
         }
 
-        // now it's for shure that we will access the target. Remember the access time
+        // now it's for sure that we will access the target. Remember the access time
         accessTime.put(host, System.currentTimeMillis());
         
         // load resource from the internet

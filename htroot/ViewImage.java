@@ -76,6 +76,8 @@ public class ViewImage {
             urlString = (url == null) ? null : url.toNormalform(true, true);
         }
         
+        if (urlString == null) return null;
+        
         int width = post.getInt("width", 0);
         int height = post.getInt("height", 0);
         int maxwidth = post.getInt("maxwidth", 0);

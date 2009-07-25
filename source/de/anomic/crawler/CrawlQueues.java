@@ -87,12 +87,12 @@ public class CrawlQueues {
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,
         // if it not exists, null is returned
-        if (noticeURL.existsInStack(hash)) return "crawler";
         if (delegatedURL.exists(hash)) return "delegated";
         if (errorURL.exists(hash)) return "errors";
         for (final crawlWorker worker: workers.values()) {
             if (worker.request.url().hash().equals(hash)) return "worker";
         }
+        if (noticeURL.existsInStack(hash)) return "crawler";
         return null;
     }
     
@@ -105,8 +105,6 @@ public class CrawlQueues {
     public yacyURL getURL(final String urlhash) {
         assert urlhash != null;
         if (urlhash == null || urlhash.length() == 0) return null;
-        final Request ne = noticeURL.get(urlhash);
-        if (ne != null) return ne.url();
         ZURL.Entry ee = delegatedURL.getEntry(urlhash);
         if (ee != null) return ee.url();
         ee = errorURL.getEntry(urlhash);
@@ -114,6 +112,8 @@ public class CrawlQueues {
         for (final crawlWorker w: workers.values()) {
             if (w.request.url().hash().equals(urlhash)) return w.request.url();
         }
+        final Request ne = noticeURL.get(urlhash);
+        if (ne != null) return ne.url();
         return null;
     }
     

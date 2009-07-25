@@ -202,7 +202,7 @@ public class Latency {
         }
         public void update(long time) {
             this.lastacc = System.currentTimeMillis();
-            this.timeacc += time;
+            this.timeacc += Math.min(30000, time);
             this.count++;
         }
         public void update() {

@@ -40,10 +40,24 @@ public class getpageinfo_p {
                 url = "http://" + url;
             }
             if (actions.indexOf("title")>=0) {
+                yacyURL u = null;
                 try {
-                    final yacyURL u = new yacyURL(url, null);
-                    final ContentScraper scraper = ContentScraper.parseResource(sb.loader, u, CrawlProfile.CACHE_STRATEGY_IFFRESH);
-                    
+                    u = new yacyURL(url, null);
+                } catch (final MalformedURLException e) {
+                    // fail, do nothing
+                }
+                ContentScraper scraper = null;
+                if (u != null) try {
+                    scraper = ContentScraper.parseResource(sb.loader, u, CrawlProfile.CACHE_STRATEGY_IFFRESH);
+                } catch (final IOException e) {
+                    // try again, try harder
+                    try {
+                        scraper = ContentScraper.parseResource(sb.loader, u, CrawlProfile.CACHE_STRATEGY_IFEXIST);
+                    } catch (final IOException ee) {
+                        // now thats a fail, do nothing                            
+                    }
+                }  
+                if (scraper != null) {
                     // put the document title 
                     prop.putXML("title", scraper.getTitle());
                     
@@ -54,11 +68,11 @@ public class getpageinfo_p {
                     final String list[]=scraper.getKeywords();
                     int count = 0;
                     for(int i=0;i<list.length;i++){
-                    	String tag = list[i];
-                    	if (!tag.equals("")) {                   	                 	
-                    		prop.putXML("tags_"+count+"_tag", tag);
-                    		count++;
-                    	}
+                        String tag = list[i];
+                        if (!tag.equals("")) {                                          
+                            prop.putXML("tags_"+count+"_tag", tag);
+                            count++;
+                        }
                     }
                     prop.put("tags", count);
                     // put description                    
@@ -66,9 +80,6 @@ public class getpageinfo_p {
                     // put language
                     Set<String> languages = scraper.getContentLanguages();
                     prop.putXML("lang", (languages == null) ? "unknown" : languages.iterator().next());
-
-                } catch (final MalformedURLException e) { /* ignore this */
-                } catch (final IOException e) { /* ignore this */
                 }
             }
             if(actions.indexOf("robots")>=0){

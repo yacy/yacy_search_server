@@ -202,7 +202,7 @@ public class RobotsTxt {
                     int sz = this.robotsTable.size();
                     addEntry(robotsTxt4Host);
                     if (this.robotsTable.size() <= sz) {
-                    	Log.logSevere("RobotsTxt", "new entry in robots.txt table failed, reseing database");
+                    	Log.logSevere("RobotsTxt", "new entry in robots.txt table failed, resetting database");
                     	this.resetDatabase();
                     	addEntry(robotsTxt4Host);
                     }

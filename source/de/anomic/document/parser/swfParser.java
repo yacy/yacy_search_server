@@ -78,6 +78,8 @@ public class swfParser extends AbstractParser implements Idiom {
             String contents = "";
             try {
             	contents = swf2html.convertSWFToHTML(source);
+            } catch (NegativeArraySizeException e) {
+                // seen in log
             } catch (Exception e) {
             	// we have seen a lot of OOM errors in the parser...
             	e.printStackTrace();
