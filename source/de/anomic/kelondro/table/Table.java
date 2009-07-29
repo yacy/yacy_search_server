@@ -1,4 +1,4 @@
-// kelondroEcoIndex.java
+// Table.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 14.01.2008 on http://yacy.net
 //
@@ -133,6 +133,7 @@ public class Table implements ObjectIndex {
                 Log.logSevere("TABLE", tablefile + ": RAM after releasing the table: " + (MemoryControl.available() / 1024 / 1024) + "MB");
             }
             index = new HandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, records, 100000);
+            HandleMap errors = new HandleMap(rowdef.primaryKeyLength, NaturalOrder.naturalOrder, 4, records, 10);
             Log.logInfo("TABLE", tablefile + ": TABLE " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
 
             // read all elements from the file into the copy table
@@ -146,7 +147,11 @@ public class Table implements ObjectIndex {
                     // write the key into the index table
                     assert key != null;
                     if (key == null) {i++; continue;}
-                    index.putUnique(key, i++);
+                    if (rowdef.objectOrder.wellformed(key)) {
+                        index.putUnique(key, i++);
+                    } else {
+                        errors.putUnique(key, i++);
+                    }
                 }
             } else {
                 byte[] record;
@@ -159,13 +164,16 @@ public class Table implements ObjectIndex {
                     System.arraycopy(record, 0, key, 0, rowdef.primaryKeyLength);
                     
                     // write the key into the index table
-                    index.putUnique(key, i++);
-                    
-                    // write the tail into the table
-                    table.addUnique(taildef.newEntry(record, rowdef.primaryKeyLength, true));
-                    if (abandonTable()) {
-                        table = null;
-                        break;
+                    if (rowdef.objectOrder.wellformed(key)) {
+                        index.putUnique(key, i++);
+                        // write the tail into the table
+                        table.addUnique(taildef.newEntry(record, rowdef.primaryKeyLength, true));
+                        if (abandonTable()) {
+                            table = null;
+                            break;
+                        }
+                    } else {
+                        errors.putUnique(key, i++);
                     }
                 }
             }
@@ -173,6 +181,18 @@ public class Table implements ObjectIndex {
             // open the file
             this.file = new BufferedEcoFS(new EcoFS(tablefile, rowdef.objectsize), this.buffersize);
  
+            // clean up the file by cleaning badly formed entries
+            int errorc = errors.size();
+            int errorcc = 0;
+            int idx;
+            for (Entry entry: errors) {
+                key = entry.getPrimaryKeyBytes();
+                idx = (int) entry.getColLong(1);
+                Log.logWarning("Table", "removing not well-formed entry " + idx + " with key: " + NaturalOrder.arrayList(key, 0, key.length) + ", " + errorcc++ + "/" + errorc);
+                removeInFile(idx);
+            }
+            assert index.size() == this.file.size() : "index.size() = " + index.size() + ", this.file.size() = " + this.file.size();
+            
             // remove doubles
             if (!freshFile) {
                 final ArrayList<Long[]> doubles = index.removeDoubles();
@@ -444,6 +464,11 @@ public class Table implements ObjectIndex {
         return replace(row);
     }
 
+    /**
+     * remove one entry from the file
+     * @param i an index position within the file (not a byte position)
+     * @throws IOException
+     */
     private void removeInFile(final int i) throws IOException {
         assert i >= 0;
         

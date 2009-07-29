@@ -1,4 +1,4 @@
-// kelondroByteOrder.java
+// StringOrder.java
 // -----------------------------
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 10.01.2008 on http://yacy.net
@@ -27,19 +27,20 @@
 
 package de.anomic.kelondro.order;
 
+import java.util.Comparator;
 
-public interface ByteOrder extends Order<byte[]> {
+public class StringOrder implements Comparator<String> {
 
-    public boolean wellformed(byte[] a);
+    public ByteOrder baseOrder;
+    public StringOrder(final ByteOrder base) {
+        this.baseOrder = base;
+    }
     
-    public boolean wellformed(byte[] a, int start, int len);
+    public StringOrder(final Order<byte[]> base) {
+        this.baseOrder = (ByteOrder) base;
+    }
     
-    public int compare(byte[] a, int astart, int alen, byte[] b, int bstart, int blen);
-
-    public boolean equal(final byte[] a, final byte[] b);
-    
-    public boolean equal(final byte[] a, int astart, final byte[] b, int bstart, int length);
-   
-    public long cardinal(final byte[] a, int off, int len);
-
+    public final int compare(final String s1, final String s2) {
+        return baseOrder.compare(s1.getBytes(), s2.getBytes());
+    }
 }

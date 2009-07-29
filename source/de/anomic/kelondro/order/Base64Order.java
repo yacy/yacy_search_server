@@ -403,17 +403,50 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
     }
    
     public final int compare(final byte[] a, final byte[] b) {
+        try {
         return (asc) ?
                 ((zero == null) ? compares(a, b) : compare0(a, 0, a.length, b, 0, b.length))
                 :
                 ((zero == null) ? compares(b, a) : compare0(b, 0, b.length, a, 0, a.length));
+        } catch (Exception e) {
+            // if a or b is not well-formed, an ArrayIndexOutOfBoundsException may occur
+            // in that case we don't want that the exception makes databse functions
+            // unusable and effective creates a showstopper. In such cases we apply
+            // a different order on the objects and treat not well-formed objects
+            // as bigger as all others. If both object are not well-formed, they are
+            // compared with the natural order.
+            boolean wfa = wellformed(a);
+            boolean wfb = wellformed(b);
+            if (wfa && wfb) {
+                // uh strange. throw the exception
+                if (e instanceof ArrayIndexOutOfBoundsException) throw (ArrayIndexOutOfBoundsException) e;
+                throw new RuntimeException(e.getMessage());
+            }
+            if (wfa) return (asc) ? -1 :  1;
+            if (wfb) return (asc) ?  1 : -1;
+            return ((asc) ? 1 : -1) * NaturalOrder.naturalOrder.compare(a, b);
+        }
     }
 
     public final int compare(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {
-        return (asc) ?
-                compare0(a, aoffset, alength, b, boffset, blength)
-                :
-                compare0(b, boffset, blength, a, aoffset, alength);
+        try {
+            return (asc) ?
+                    compare0(a, aoffset, alength, b, boffset, blength)
+                    :
+                    compare0(b, boffset, blength, a, aoffset, alength);
+        } catch (Exception e) {
+            // same handling as in simple compare method above
+            boolean wfa = wellformed(a, aoffset, alength);
+            boolean wfb = wellformed(b, boffset, blength);
+            if (wfa && wfb) {
+                // uh strange. throw the exception
+                if (e instanceof ArrayIndexOutOfBoundsException) throw (ArrayIndexOutOfBoundsException) e;
+                throw new RuntimeException(e.getMessage());
+            }
+            if (wfa) return (asc) ? -1 :  1;
+            if (wfb) return (asc) ?  1 : -1;
+            return ((asc) ? 1 : -1) * NaturalOrder.naturalOrder.compare(a, aoffset, alength, b, boffset, blength);
+        }
     }
     
     private final int compare0(final byte[] a, final int aoffset, final int alength, final byte[] b, final int boffset, final int blength) {

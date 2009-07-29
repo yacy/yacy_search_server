@@ -32,7 +32,7 @@ import java.util.Iterator;
 public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable {
     
     public static final ByteOrder naturalOrder = new NaturalOrder(true);
-    public static final Comparator<String> naturalComparator = new ByteOrder.StringOrder(naturalOrder);
+    public static final Comparator<String> naturalComparator = new StringOrder(naturalOrder);
     public NaturalOrder(final boolean ascending) {
         this.asc = ascending;
         this.zero = null;

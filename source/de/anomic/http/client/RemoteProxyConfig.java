@@ -63,8 +63,8 @@ public final class RemoteProxyConfig {
     /**
      * @param remoteProxyConfig the remoteProxyConfig to set
      */
-    public static synchronized void setRemoteProxyConfig(final RemoteProxyConfig remoteProxyConfig) {
-        RemoteProxyConfig.remoteProxyConfig = remoteProxyConfig;
+    public static synchronized void setRemoteProxyConfig(final RemoteProxyConfig newConfig) {
+        remoteProxyConfig = newConfig;
     }
 
     /**

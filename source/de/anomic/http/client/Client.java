@@ -208,8 +208,10 @@ public class Client {
      * @see de.anomic.http.HttpClient#setProxy(de.anomic.http.httpRemoteProxyConfig)
      */
     public void setProxy(final RemoteProxyConfig proxyConfig) {
-        this.useGlobalProxyConfig = false;
-        this.proxyConfig = proxyConfig;
+        if (proxyConfig != null) {
+            this.useGlobalProxyConfig = false;
+            this.proxyConfig = proxyConfig;
+        }
     }
 
     /*
@@ -566,16 +568,16 @@ public class Client {
      */
     private RemoteProxyConfig getProxyConfig(final String hostname) {
         final RemoteProxyConfig hostProxyConfig;
-        if (!useGlobalProxyConfig) {
+        if (useGlobalProxyConfig) {
+            // default settings
+            hostProxyConfig = RemoteProxyConfig.getProxyConfigForHost(hostname);
+        } else {
             // client specific
-            if(proxyConfig == null) {
+            if (proxyConfig == null) {
                 hostProxyConfig = null;
             } else {
                 hostProxyConfig = proxyConfig.useForHost(hostname) ? proxyConfig : null;
             }
-        } else {
-            // default settings
-            hostProxyConfig = RemoteProxyConfig.getProxyConfigForHost(hostname);
         }
         return hostProxyConfig;
     }
