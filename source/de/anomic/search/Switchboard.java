@@ -809,11 +809,10 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
             this.crawlStacker.close();
             this.webStructure.close();
             this.robots.close();
-            this.crawlQueues.close();
             
             log.logInfo("SWITCH NETWORK: START UP OF NEW INDEX DATABASE...");
             
-            // start up
+            // new properties
             setConfig("network.unit.definition", networkDefinition);
             overwriteNetworkDefinition();
             final File indexPrimaryPath = getConfigPath(SwitchboardConstants.INDEX_PRIMARY_PATH, SwitchboardConstants.INDEX_PATH_DEFAULT);
@@ -826,6 +825,9 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
             this.queuesRoot = new File(new File(indexPrimaryPath, networkName), "QUEUES");
             this.networkRoot.mkdirs();
             this.queuesRoot.mkdirs();
+            
+            // relocate
+            this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
             final File mySeedFile = new File(this.networkRoot, yacySeedDB.DBFILE_OWN_SEED);
             peers = new yacySeedDB(
                     this.networkRoot,
@@ -844,13 +846,14 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            
+            // startup
             crawler = new CrawlSwitchboard(
                     peers,
                     networkName,
                     log,
                     this.queuesRoot);
 
-			
             // create new web structure
             this.webStructure = new WebStructureGraph(log, rankingPath, "LOCAL/010_cr/", getConfig("CRDist0Path", CRDistribution.CR_OWN), new File(queuesRoot, "webStructure.map"));
 
