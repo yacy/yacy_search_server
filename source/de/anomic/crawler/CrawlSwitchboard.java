@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import de.anomic.crawler.CrawlProfile.entry;
 import de.anomic.document.Word;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;

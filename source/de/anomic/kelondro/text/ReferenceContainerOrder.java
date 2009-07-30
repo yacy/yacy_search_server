@@ -76,7 +76,6 @@ public class ReferenceContainerOrder<ReferenceType extends Reference> extends Ab
         return this.embeddedOrder.cardinal(key);
     }
     
-    @SuppressWarnings("unchecked")
 	public boolean equals(final Order<ReferenceContainer<ReferenceType>> otherOrder) {
         if (!(otherOrder instanceof ReferenceContainerOrder)) return false;
         return this.embeddedOrder.equals(((ReferenceContainerOrder<ReferenceType>) otherOrder).embeddedOrder);

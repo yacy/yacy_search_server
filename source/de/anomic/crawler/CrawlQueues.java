@@ -83,10 +83,12 @@ public class CrawlQueues {
         delegatedURL = new ZURL(plasmaPath, "urlDelegated3.db", true);
     }
     
+    /**
+     * tests if hash occurrs in any database
+     * @param hash
+     * @return if the hash exists, the name of the database is returned, otherwise null is returned
+     */
     public String urlExists(final String hash) {
-        // tests if hash occurrs in any database
-        // if it exists, the name of the database is returned,
-        // if it not exists, null is returned
         if (delegatedURL.exists(hash)) return "delegated";
         if (errorURL.exists(hash)) return "errors";
         for (final crawlWorker worker: workers.values()) {
