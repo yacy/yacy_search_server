@@ -135,14 +135,16 @@ public class MapView {
      * @throws IOException
      */
     public void put(String key, final Map<String, String> newMap) throws IOException {
-        assert (key != null);
-        assert (key.length() > 0);
-        assert (newMap != null);
+        assert key != null;
+        assert key.length() > 0;
+        assert newMap != null;
         key = normalizeKey(key);
-        
+        assert blob != null;
         synchronized (this) {
             // write entry
-            blob.put(key.getBytes("UTF-8"), map2string(newMap, "W" + DateFormatter.formatShortSecond() + " ").getBytes("UTF-8"));
+        	String s = map2string(newMap, "W" + DateFormatter.formatShortSecond() + " ");
+        	assert s != null;
+            blob.put(key.getBytes("UTF-8"), s.getBytes("UTF-8"));
     
             // write map to cache
             cache.put(key, newMap);

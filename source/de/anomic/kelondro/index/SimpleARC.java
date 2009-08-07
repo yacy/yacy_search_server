@@ -62,16 +62,18 @@ public class SimpleARC <K, V> {
     }
     
     /**
-     * put a value to the cache. The value may NOT exist before.
-     * This restriction is used here to check possible algorithm logic error cases.
+     * put a value to the cache.
      * @param s
      * @param v
      */
     public void put(K s, V v) {
-        assert this.levelA.get(s) == null;
-        assert this.levelB.get(s) == null;
-        this.levelA.put(s, v);
-        assert (this.levelA.size() <= cacheSize); // the cache should shrink automatically
+        if (this.levelB.containsKey(s)) {
+        	this.levelB.put(s, v);
+            assert (this.levelB.size() <= cacheSize); // the cache should shrink automatically
+        } else {
+        	this.levelA.put(s, v);
+            assert (this.levelA.size() <= cacheSize); // the cache should shrink automatically
+        }
     }
     
     /**

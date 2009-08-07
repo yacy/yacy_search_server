@@ -109,7 +109,7 @@ public final class LoaderDispatcher {
             final yacyURL url,
             final boolean forText,
             final boolean global
-                    ) throws IOException {
+                    ) {
         return new Request(
                     sb.peers.mySeed().hash, 
                     url, 
