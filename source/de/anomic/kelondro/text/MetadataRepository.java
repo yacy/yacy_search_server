@@ -118,7 +118,8 @@ public final class MetadataRepository implements Iterable<byte[]> {
         URLMetadataRow oldEntry;
         try {
             if (exists(entry.hash())) {
-                oldEntry = load(entry.hash(), null, 0);
+                Row.Entry oe = urlIndexFile.get(entry.hash().getBytes());
+                oldEntry = (oe == null) ? null : new URLMetadataRow(oe, null, 0);
             } else {
                 oldEntry = null;
             }
