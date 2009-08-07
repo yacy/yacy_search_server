@@ -36,31 +36,25 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import de.anomic.kelondro.index.SimpleARC;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.kelondroException;
 
 
 public class MapView {
 
     private BLOB blob;
-    private ScoreCluster<String> cacheScore;
-    private HashMap<String, Map<String, String>> cache;
-    private final long startup;
-    private final int cachesize;
+    private SimpleARC<String, Map<String, String>> cache;
     private final char fillchar;
 
     
     public MapView(final Heap blob, final int cachesize, char fillchar) {
         this.blob = blob;
-        this.cache = new HashMap<String, Map<String, String>>();
-        this.cacheScore = new ScoreCluster<String>();
-        this.startup = System.currentTimeMillis();
-        this.cachesize = cachesize;
+        this.cache = new SimpleARC<String, Map<String, String>>(cachesize);
         this.fillchar = fillchar;
         /*
         // debug
@@ -100,8 +94,7 @@ public class MapView {
      */
     public synchronized void clear() throws IOException {
     	this.blob.clear();
-        this.cache = new HashMap<String, Map<String, String>>();
-        this.cacheScore = new ScoreCluster<String>();
+        this.cache.clear();
     }
 
     private static String map2string(final Map<String, String> map, final String comment) {
@@ -141,22 +134,19 @@ public class MapView {
      * @param newMap
      * @throws IOException
      */
-    public synchronized void put(String key, final Map<String, String> newMap) throws IOException {
+    public void put(String key, final Map<String, String> newMap) throws IOException {
         assert (key != null);
         assert (key.length() > 0);
         assert (newMap != null);
-        if (cacheScore == null) return; // may appear during shutdown
         key = normalizeKey(key);
         
-        // write entry
-        blob.put(key.getBytes("UTF-8"), map2string(newMap, "W" + DateFormatter.formatShortSecond() + " ").getBytes("UTF-8"));
-
-        // check for space in cache
-        checkCacheSpace();
-
-        // write map to cache
-        cacheScore.setScore(key, (int) ((System.currentTimeMillis() - startup) / 1000));
-        cache.put(key, newMap);
+        synchronized (this) {
+            // write entry
+            blob.put(key.getBytes("UTF-8"), map2string(newMap, "W" + DateFormatter.formatShortSecond() + " ").getBytes("UTF-8"));
+    
+            // write map to cache
+            cache.put(key, newMap);
+        }
     }
 
     /**
@@ -164,17 +154,18 @@ public class MapView {
      * @param key  the primary key
      * @throws IOException
      */
-    public synchronized void remove(String key) throws IOException {
+    public void remove(String key) throws IOException {
         // update elementCount
         if (key == null) return;
         key = normalizeKey(key);
         
-        // remove from cache
-        cacheScore.deleteScore(key);
-        cache.remove(key);
-
-        // remove from file
-        blob.remove(key.getBytes());
+        synchronized (this) {
+            // remove from cache
+            cache.remove(key);
+    
+            // remove from file
+            blob.remove(key.getBytes());
+        }
     }
     
     /**
@@ -183,12 +174,14 @@ public class MapView {
      * @return
      * @throws IOException
      */
-    public synchronized boolean has(String key) throws IOException {
+    public boolean has(String key) throws IOException {
         assert key != null;
         if (cache == null) return false; // case may appear during shutdown
         key = normalizeKey(key);
-        if (this.cache.containsKey(key)) return true;
-        return this.blob.has(key.getBytes());
+        synchronized (this) {
+            if (this.cache.containsKey(key)) return true;
+            return this.blob.has(key.getBytes());
+        }
     }
 
     /**
@@ -197,7 +190,7 @@ public class MapView {
      * @return
      * @throws IOException
      */
-    public synchronized Map<String, String> get(final String key) throws IOException {
+    public Map<String, String> get(final String key) throws IOException {
         if (key == null) return null;
         return get(key, true);
     }
@@ -208,43 +201,31 @@ public class MapView {
         return key;
     }
 
-    protected synchronized Map<String, String> get(String key, final boolean storeCache) throws IOException {
+    protected Map<String, String> get(String key, final boolean storeCache) throws IOException {
         // load map from cache
         assert key != null;
         if (cache == null) return null; // case may appear during shutdown
         key = normalizeKey(key);
         
-        Map<String, String> map = cache.get(key);
-        if (map != null) return map;
-
-        // load map
-        if (!(blob.has(key.getBytes()))) return null;
-        
-        // read object
-        final byte[] b = blob.get(key.getBytes());
-        if (b == null) return null;
-        map = string2map(new String(b, "UTF-8"));
-
-        if (storeCache) {
-            // cache it also
-            checkCacheSpace();
-            // write map to cache
-            cacheScore.setScore(key, (int) ((System.currentTimeMillis() - startup) / 1000));
-            cache.put(key, map);
-        }
-
-        // return value
-        return map;
-    }
+        synchronized (this) {
+            Map<String, String> map = cache.get(key);
+            if (map != null) return map;
     
-    private synchronized void checkCacheSpace() {
-        // check for space in cache
-        if (cache == null) return; // may appear during shutdown
-        if (cache.size() >= cachesize) {
-            // delete one entry
-            final String delkey = cacheScore.getMinObject();
-            cacheScore.deleteScore(delkey);
-            cache.remove(delkey);
+            // load map
+            if (!(blob.has(key.getBytes()))) return null;
+            
+            // read object
+            final byte[] b = blob.get(key.getBytes());
+            if (b == null) return null;
+            map = string2map(new String(b, "UTF-8"));
+    
+            if (storeCache) {
+                // write map to cache
+                cache.put(key, map);
+            }
+    
+            // return value
+            return map;
         }
     }
 
@@ -298,9 +279,8 @@ public class MapView {
     /**
      * close the Map table
      */
-    public void close() {
+    public synchronized void close() {
         cache = null;
-        cacheScore = null;
 
         // close file
         if (blob != null) blob.close(true);

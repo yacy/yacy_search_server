@@ -1,4 +1,5 @@
 // SimpleARC.java
+// a Simple Adaptive Replacement Cache
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 17.04.2009 on http://yacy.net
 //
@@ -88,6 +89,27 @@ public class SimpleARC <K, V> {
         this.levelB.put(s, v);
         assert (this.levelB.size() <= cacheSize); // the cache should shrink automatically
         return v;
+    }
+    
+    /**
+     * check if the map contains the key
+     * @param s
+     * @return
+     */
+    public boolean containsKey(K s) {
+        if (this.levelB.containsKey(s)) return true;
+        return this.levelA.containsKey(s);
+    }
+    
+    /**
+     * remove an entry from the cache
+     * @param s
+     * @return the old value
+     */
+    public V remove(K s) {
+        V r = this.levelB.remove(s);
+        if (r != null) return r;
+        return this.levelA.remove(s);
     }
     
     /**
