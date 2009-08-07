@@ -116,22 +116,24 @@ public class Balancer {
         return new Request(entry);
     }
     
-    public synchronized int removeAllByProfileHandle(final String profileHandle, final long timeout) throws IOException {
+    public int removeAllByProfileHandle(final String profileHandle, final long timeout) throws IOException {
         // removes all entries with a specific profile hash.
         // this may last some time
         // returns number of deletions
         
         // first find a list of url hashes that shall be deleted
-        final Iterator<Row.Entry> i = urlFileIndex.rows();
         final HashSet<String> urlHashes = new HashSet<String>();
-        Row.Entry rowEntry;
-        Request crawlEntry;
         final long terminate = (timeout > 0) ? System.currentTimeMillis() + timeout : Long.MAX_VALUE;
-        while (i.hasNext() && (System.currentTimeMillis() < terminate)) {
-            rowEntry = i.next();
-            crawlEntry = new Request(rowEntry);
-            if (crawlEntry.profileHandle().equals(profileHandle)) {
-                urlHashes.add(crawlEntry.url().hash());
+        synchronized (this) {
+            final Iterator<Row.Entry> i = urlFileIndex.rows();
+            Row.Entry rowEntry;
+            Request crawlEntry;
+            while (i.hasNext() && (System.currentTimeMillis() < terminate)) {
+                rowEntry = i.next();
+                crawlEntry = new Request(rowEntry);
+                if (crawlEntry.profileHandle().equals(profileHandle)) {
+                    urlHashes.add(crawlEntry.url().hash());
+                }
             }
         }
         
@@ -242,10 +244,8 @@ public class Balancer {
         if (domainList == null) {
             // create new list
             domainList = new LinkedList<String>();
-            synchronized (domainStacks) {
-                domainList.add(hash);
-                domainStacks.put(dom, domainList);
-            }
+            domainList.add(hash);
+            domainStacks.put(dom, domainList);
         } else {
             // extend existent domain list
         	if (domainList.size() < maxstacksize) domainList.addLast(hash);
@@ -268,13 +268,11 @@ public class Balancer {
     
     private String nextFromDelayed() {
 		if (this.delayed.size() == 0) return null;
-    	synchronized (this.delayed) {
-    		if (this.delayed.size() == 0) return null;
-    		Long first = this.delayed.firstKey();
-    		if (first.longValue() < System.currentTimeMillis()) {
-    			return this.delayed.remove(first);
-    		}
-    	}
+		if (this.delayed.size() == 0) return null;
+		Long first = this.delayed.firstKey();
+		if (first.longValue() < System.currentTimeMillis()) {
+			return this.delayed.remove(first);
+		}
     	return null;
     }
     
