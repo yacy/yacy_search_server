@@ -49,9 +49,9 @@ import de.anomic.document.parser.html.ImageEntry;
 import de.anomic.http.client.Client;
 import de.anomic.http.client.Cache;
 import de.anomic.http.metadata.ResponseHeader;
+import de.anomic.kelondro.index.SimpleARC;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacyURL;
@@ -73,9 +73,7 @@ public class SnippetCache {
     public static final int ERROR_PARSER_NO_LINES = 15;
     public static final int ERROR_NO_MATCH = 16;
     
-    private static int                           snippetsScoreCounter = 0;
-    private static ScoreCluster<String> snippetsScore = null;
-    private static final HashMap<String, String> snippetsCache = new HashMap<String, String>();
+    private static final SimpleARC<String, String> snippetsCache = new SimpleARC<String, String>(maxCache);
     
     /**
      * a cache holding URLs to favicons specified by the page content, e.g. by using the html link-tag. e.g.
@@ -93,8 +91,6 @@ public class SnippetCache {
     ) {
         log = logx;
         sb = switchboard;
-        snippetsScoreCounter = 0;
-        snippetsScore = new ScoreCluster<String>();
         snippetsCache.clear(); 
         faviconCache.clear();
     }
@@ -508,7 +504,6 @@ public class SnippetCache {
         return document;
     }
 
-    
     public static void storeToCache(final String wordhashes, final String urlhash, final String snippet) {
         // generate key
         String key = urlhash + wordhashes;
@@ -517,22 +512,7 @@ public class SnippetCache {
         if (snippetsCache.containsKey(key)) return;
 
         // learn new snippet
-        snippetsScore.addScore(key, snippetsScoreCounter++);
         snippetsCache.put(key, snippet);
-
-        // care for counter
-        if (snippetsScoreCounter == java.lang.Integer.MAX_VALUE) {
-            snippetsScoreCounter = 0;
-            snippetsScore = new ScoreCluster<String>();
-            snippetsCache.clear();
-        }
-        
-        // flush cache if cache is full
-        while (snippetsCache.size() > maxCache) {
-            key = snippetsScore.getMinObject();
-            snippetsScore.deleteScore(key);
-            snippetsCache.remove(key);
-        }
     }
     
     private static String retrieveFromCache(final String wordhashes, final String urlhash) {
