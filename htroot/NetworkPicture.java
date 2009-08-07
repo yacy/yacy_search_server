@@ -40,8 +40,8 @@ public class NetworkPicture {
         
         int width = 768;
         int height = 576;
-        int passiveLimit = 300;
-        int potentialLimit = 300;
+        int passiveLimit = 720; // 12 hours
+        int potentialLimit = 720;
         int maxCount = 1000;
         String bgcolor = NetworkGraph.COL_BACKGROUND;
         boolean corona = true;
@@ -49,8 +49,8 @@ public class NetworkPicture {
         if (post != null) {
             width = post.getInt("width", 768);
             height = post.getInt("height", 576);
-            passiveLimit = post.getInt("pal", 300);
-            potentialLimit = post.getInt("pol", 300);
+            passiveLimit = post.getInt("pal", 720);
+            potentialLimit = post.getInt("pol", 720);
             maxCount = post.getInt("max", 1000);
             corona = post.get("corona", "true").equals("true");
             bgcolor = post.get("bgcolor", bgcolor);
