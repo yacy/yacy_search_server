@@ -1,7 +1,7 @@
 package de.anomic.crawler;
 
 import junit.framework.TestCase;
-import de.anomic.yacy.yacyURL;
+//import de.anomic.yacy.yacyURL;
 
 public class robotsParserTest extends TestCase {
 	public void testDownload() throws Exception {
