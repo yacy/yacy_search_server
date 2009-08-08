@@ -53,7 +53,7 @@ public class ODContentHandler extends DefaultHandler {
 	}
 	@Override
 	public void endElement(final String uri, final String name, final String tag) {
-	    if ("text:p".equals(tag) || "table:table-row".equals(tag)) {
+	    if ("text:p".equals(tag) || "table:table-row".equals(tag) || "w:p".equals(tag)) {
 		// add newlines after paragraphs 
 		try {
 		    out.append("\n");

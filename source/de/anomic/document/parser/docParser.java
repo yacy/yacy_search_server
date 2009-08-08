@@ -50,7 +50,6 @@ public class docParser extends AbstractParser implements Idiom {
     public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
         SUPPORTED_EXTENSIONS.add("doc");
-        SUPPORTED_EXTENSIONS.add("docx");
         SUPPORTED_MIME_TYPES.add("application/msword");
         SUPPORTED_MIME_TYPES.add("application/doc");
         SUPPORTED_MIME_TYPES.add("appl/text");

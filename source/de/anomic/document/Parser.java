@@ -44,6 +44,7 @@ import de.anomic.document.parser.docParser;
 import de.anomic.document.parser.gzipParser;
 import de.anomic.document.parser.htmlParser;
 import de.anomic.document.parser.odtParser;
+import de.anomic.document.parser.ooxmlParser;
 import de.anomic.document.parser.pdfParser;
 import de.anomic.document.parser.pptParser;
 import de.anomic.document.parser.psParser;
@@ -81,6 +82,7 @@ public final class Parser {
         initParser(new gzipParser());
         initParser(new htmlParser());
         initParser(new odtParser());
+        initParser(new ooxmlParser());
         initParser(new pdfParser());
         initParser(new pptParser());
         initParser(new psParser());
