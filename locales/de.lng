@@ -2432,6 +2432,10 @@ YaCy Interactive Search==YaCy interaktive Suche
 #File: yacysearch.html
 #---------------------------
 Search Page==Suchseite
+This search result can also be retrieved as RSS/<a href="http://www.opensearch.org">opensearch</a> output.==Diese Suchergebnisse können auch als RSS/<a href="http://www.opensearch.org">opensearch</a> abgerufen werden.
+The query format is similar to <a href="http://www.loc.gov/standards/sru/">SRU</a>.==Das Abfrageformat ist so ähnlich wie <a href="http://www.loc.gov/standards/sru/">SRU</a>.
+Click the API icon to see an example call to the search rss API.==Klicken Sie auf den API Button, um ein Beispiel zu sehen, wie das Such-RSS-API aufgerufen werden kann.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
 Did you mean:==Meinten Sie vielleicht:
 "Search"=="Suchen"
 'Search'=='Suchen'
@@ -2445,12 +2449,11 @@ Applications==Anwendungen
 The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
 No Results.==Keine Ergebnisse.
 length of search words must be at least 3 characters==Die L&auml;nge der Suchbegriffe muss mindestens 3 Zeichen betragen
-results from a total number of==Treffer aus insgesamt
-known==bekannten Links
+> of==> aus 
 g> local,==g> lokal,
 #g> remote),==g> remote),
-links from==Links von
-other YaCy peers==anderen YaCy Peers
+> from==> von
+remote YaCy peers.==remote YaCy Peers.
 #-----------------------------
 
 #File: yacysearchitem.html
@@ -2459,7 +2462,13 @@ other YaCy peers==anderen YaCy Peers
 "recommend"=="empfehlen"
 "delete"=="l&ouml;schen"
 Pictures==Bilder
-Topwords</strong>:==Topw&ouml;rter</strong>:
+#-----------------------------
+
+#File: yacysearchtrailer.html
+#---------------------------
+>Domains==>Domains
+>Authors==>Autoren
+>Topics==>Themen
 #-----------------------------
 
 #File: env/templates/simpleheader.template
@@ -2500,8 +2509,11 @@ Access Tracker==Zugriffe
 News Monitor==News Anzeige
 Cookies in Proxy==Cookies per Proxy
 Peer Control==Peer Kontrolle
-Admin Console==Admin Konsole
+Search Integration==Suchintegration
+Search Portals==Such Portale
 Customization==Anpassungen
+Admin Console==Admin Konsole
+#>Terminal==>Terminal
 >Messages==>Nachrichten
 "New Messages"=="Neue Nachrichten"
 Confirm Restart==Best&auml;tige Neustart
@@ -2549,6 +2561,8 @@ Network Configuration==Netzwerk Konfiguration
 System Update==System Aktualisierung
 >Performance==>Leistung
 Advanced Settings==Erweiterte Einstellungen
+Parser Configuration==Parser Einstellungen
+Local robots.txt==Lokale robots.txt
 Advanced Properties==Erweitertes Verhalten
 #-----------------------------
 
@@ -2559,13 +2573,12 @@ Incoming&nbsp;Cookies==Eingehende Cookies
 Outgoing&nbsp;Cookies==Ausgehende Cookies
 #-----------------------------
 
-#File: env/templates/submenuCustomizationIntegration.template
+#File: env/templates/submenuCustomization.template
 #---------------------------
-Customization &amp; Integration==Anpassung &amp; Integration 
+Customization==Anpassung
 >Appearance==>Erscheinungsbild
 User Profile==Benutzerprofil
 >Language==>Sprache
-Local robots.txt==Lokale robots.txt
 #-----------------------------
 
 #File: env/templates/submenuIndexControl.template
@@ -2597,6 +2610,16 @@ Media Crawl Queues==Medien Crawl-Puffer
 >Images==>Bilder
 >Movies==>Filme
 >Music==>Musik
+
+#File: env/templates/submenuIntegration.template
+#---------------------------
+Search Portal Integration==Suchportal Integration
+Live Search Anywhere==Live Suche &uuml;berall
+Generic Search Portal==Allgemeines Suchportal
+Search Integration for Wikis==Suchintegration f&uuml;r Wikis
+Search Integration for phpBB3==Suchintegration f&uuml;r phpBB3
+Wikimedia Dump Import==Wikimedia Dump Import
+#-----------------------------
 
 #File: env/templates/submenuPublication.template
 #---------------------------
