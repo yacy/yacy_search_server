@@ -427,8 +427,15 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         synchronized (cache) {
             ReferenceContainer<ReferenceType> containerNew = cache.put(tha, container);
             if (containerNew == null) return;
-            container.putAllRecent(containerNew);
-        	cache.put(tha, container);
+            // Now merge the smaller container into the lager.
+            // The other way around can become very slow
+            if (container.size() >= containerNew.size()) { 
+                container.putAllRecent(containerNew);
+       	        cache.put(tha, container);
+            } else {
+                containerNew.putAllRecent(container);
+                cache.put(tha, containerNew);
+            }
         }
     }
     
