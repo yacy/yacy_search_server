@@ -797,7 +797,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         proxyLastAccess = System.currentTimeMillis() + 3000; // at least 3 seconds online caution to prevent unnecessary action on database meanwhile
         log.logInfo("SWITCH NETWORK: SHUT DOWN OF OLD INDEX DATABASE...");
         // clean search events which have cached relations to the old index
-        QueryEvent.cleanupEvents(true);
+        SearchEventCache.cleanupEvents(true);
        
         // switch the networks
         synchronized (this) {            
@@ -1328,7 +1328,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
             // clear caches if necessary
             if (!MemoryControl.request(8000000L, false)) {
                 indexSegment.urlMetadata().clearCache();
-                QueryEvent.cleanupEvents(true);
+                SearchEventCache.cleanupEvents(true);
             }
             
             // set a random password if no password is configured

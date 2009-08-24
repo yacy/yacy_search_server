@@ -32,7 +32,7 @@ import java.util.Map.Entry;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
-import de.anomic.search.QueryEvent;
+import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -132,7 +132,7 @@ public class Ranking_p {
         final Switchboard sb = (Switchboard) env;
 
         // clean up all search events
-        QueryEvent.cleanupEvents(true);
+        SearchEventCache.cleanupEvents(true);
         
         // case if no values are requested
         if ((post == null) || (sb == null)) {

@@ -1,4 +1,4 @@
-// plasmaSearchEvent.java
+// SearchEvent.java
 // (C) 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 10.10.2005 on http://yacy.net
 //
@@ -28,25 +28,19 @@ package de.anomic.search;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.document.Condenser;
-import de.anomic.document.Word;
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
-import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.SortStack;
@@ -55,14 +49,12 @@ import de.anomic.search.RankingProcess.NavigatorEntry;
 import de.anomic.search.SnippetCache.MediaSnippet;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacySearch;
-import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
 import de.anomic.yacy.logging.Log;
 import de.anomic.ymage.ProfilingGraph;
 
-public final class QueryEvent {
+public final class SearchEvent {
     
     public static final String INITIALIZATION = "initialization";
     public static final String COLLECTION = "collection";
@@ -72,18 +64,16 @@ public final class QueryEvent {
     public static final String NORMALIZING = "normalizing";
     public static final String FINALIZATION = "finalization";
     
-    private final static int workerThreadCount = 10;
+    protected final static int workerThreadCount = 10;
     public static String lastEventID = "";
-    private static ConcurrentHashMap<String, QueryEvent> lastEvents = new ConcurrentHashMap<String, QueryEvent>(); // a cache for objects from this class: re-use old search requests
-    public static final long eventLifetime = 60000; // the time an event will stay in the cache, 1 Minute
     private static final int max_results_preparation = 1000;
     
-    private long eventTime;
-    QueryParams query;
-    private final Segment indexSegment;
+    protected long eventTime;
+    protected QueryParams query;
+    protected final Segment indexSegment;
     private final yacySeedDB peers;
-    RankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
-    private final Map<String, TreeMap<String, String>> rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
+    protected RankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
+    private final IndexAbstracts rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
     private Thread localSearchThread;
     private final TreeMap<byte[], String> preselectedPeerHashes;
@@ -91,17 +81,16 @@ public final class QueryEvent {
     public  TreeMap<byte[], String> IAResults;
     public  TreeMap<byte[], Integer> IACount;
     public  byte[] IAmaxcounthash, IAneardhthash;
-    private resultWorker[] workerThreads;
-    SortStore<ResultEntry> result;
-    SortStore<SnippetCache.MediaSnippet> images; // container to sort images by size
-    HashMap<String, String> failedURLs; // a mapping from a urlhash to a fail reason string
-    TreeSet<byte[]> snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
+    protected SnippetFetcher[] workerThreads;
+    protected SortStore<ResultEntry> result;
+    protected SortStore<SnippetCache.MediaSnippet> images; // container to sort images by size
+    protected HashMap<String, String> failedURLs; // a mapping from a urlhash to a fail reason string
+    protected TreeSet<byte[]> snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     long urlRetrievalAllTime;
     long snippetComputationAllTime;
     public ResultURLs crawlResults;
     
-    @SuppressWarnings("unchecked")
-    private QueryEvent(final QueryParams query,
+    @SuppressWarnings("unchecked") SearchEvent(final QueryParams query,
                              final Segment indexSegment,
                              final yacySeedDB peers,
                              final ResultURLs crawlResults,
@@ -112,7 +101,7 @@ public final class QueryEvent {
         this.peers = peers;
         this.crawlResults = crawlResults;
         this.query = query;
-        this.rcAbstracts = (query.queryHashes.size() > 1) ? new TreeMap<String, TreeMap<String, String>>() : null; // generate abstracts only for combined searches
+        this.rcAbstracts = (query.queryHashes.size() > 1) ? new IndexAbstracts() : null; // generate abstracts only for combined searches
         this.primarySearchThreads = null;
         this.secondarySearchThreads = null;
         this.preselectedPeerHashes = preselectedPeerHashes;
@@ -144,9 +133,8 @@ public final class QueryEvent {
         	// that is generated concurrently from local and global search threads
             this.rankedCache = new RankingProcess(indexSegment, query, max_results_preparation, 16);
             
-            // start a local search
-            localSearchThread = new localSearchProcess();
-            localSearchThread.start();
+            // start a local search concurrently
+            this.rankedCache.start();
                        
             // start global searches
             final long timer = System.currentTimeMillis();
@@ -212,71 +200,23 @@ public final class QueryEvent {
         }
         
         // start worker threads to fetch urls and snippets
-        this.workerThreads = new resultWorker[(query.onlineSnippetFetch) ? workerThreadCount : 1];
+        this.workerThreads = new SnippetFetcher[(query.onlineSnippetFetch) ? workerThreadCount : 1];
         for (int i = 0; i < this.workerThreads.length; i++) {
-            this.workerThreads[i] = new resultWorker(i, 10000, (query.onlineSnippetFetch) ? 2 : 0);
+            this.workerThreads[i] = new SnippetFetcher(i, 10000, (query.onlineSnippetFetch) ? 2 : 0);
             this.workerThreads[i].start();
         }
         serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), this.workerThreads.length + " online snippet fetch threads started", 0, 0), false);
     
         // clean up events
-        cleanupEvents(false);
+        SearchEventCache.cleanupEvents(false);
         serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "event-cleanup", 0, 0), false);
         
         // store this search to a cache so it can be re-used
-        if (MemoryControl.available() < 1024 * 1024 * 10) cleanupEvents(true);
+        if (MemoryControl.available() < 1024 * 1024 * 10) SearchEventCache.cleanupEvents(true);
         lastEventID = query.id(false);
-        lastEvents.put(lastEventID, this);
+        SearchEventCache.lastEvents.put(lastEventID, this);
     }
 
-    private class localSearchProcess extends Thread {
-        
-        public localSearchProcess() {
-        }
-        
-        public void run() {
-            // do a local search
-            
-            // sort the local containers and truncate it to a limited count,
-            // so following sortings together with the global results will be fast
-            try {
-                rankedCache.execQuery();
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public static void cleanupEvents(final boolean all) {
-        // remove old events in the event cache
-        final Iterator<QueryEvent> i = lastEvents.values().iterator();
-        QueryEvent cleanEvent;
-        while (i.hasNext()) {
-            cleanEvent = i.next();
-            if ((all) || (cleanEvent.eventTime + eventLifetime < System.currentTimeMillis())) {
-                // execute deletion of failed words
-                int rw = cleanEvent.failedURLs.size();
-                if (rw > 0) {
-                    final TreeSet<byte[]> removeWords = cleanEvent.query.queryHashes;
-                    removeWords.addAll(cleanEvent.query.excludeHashes);
-                    try {
-                        final Iterator<byte[]> j = removeWords.iterator();
-                        // remove the same url hashes for multiple words
-                        while (j.hasNext()) {
-                            cleanEvent.indexSegment.termIndex().remove(j.next(), cleanEvent.failedURLs.keySet());
-                        }                    
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    Log.logInfo("SearchEvents", "cleaning up event " + cleanEvent.query.id(true) + ", removed " + rw + " URL references on " + removeWords.size() + " words");
-                }                
-                
-                // remove the event
-                i.remove();
-            }
-        }
-    }
-    
     ResultEntry obtainResultEntry(final URLMetadataRow page, final int snippetFetchMode) {
 
         // a search result entry needs some work to produce a result Entry:
@@ -393,7 +333,7 @@ public final class QueryEvent {
         // finished, no more actions possible here
     }
     
-    private boolean anyWorkerAlive() {
+    boolean anyWorkerAlive() {
         if (this.workerThreads == null) return false;
         for (int i = 0; i < this.workerThreads.length; i++) {
            if ((this.workerThreads[i] != null) &&
@@ -454,68 +394,14 @@ public final class QueryEvent {
         return this.snippetComputationAllTime;
     }
 
-    public static QueryEvent getEvent(final String eventID) {
-        return lastEvents.get(eventID);
-    }
-    
-    public static QueryEvent getEvent(
-            final QueryParams query,
-            final Segment indexSegment,
-            final yacySeedDB peers,
-            final ResultURLs crawlResults,
-            final TreeMap<byte[], String> preselectedPeerHashes,
-            final boolean generateAbstracts) {
-        
-        String id = query.id(false);
-        QueryEvent event = lastEvents.get(id);
-        if (Switchboard.getSwitchboard().crawlQueues.noticeURL.size() > 0 && event != null && System.currentTimeMillis() - event.eventTime > 60000) {
-            // if a local crawl is ongoing, don't use the result from the cache to use possibly more results that come from the current crawl
-            // to prevent that this happens during a person switches between the different result pages, a re-search happens no more than
-            // once a minute
-            lastEvents.remove(id);
-            event = null;
-        } else {
-            if (event != null) {
-                //re-new the event time for this event, so it is not deleted next time too early
-                event.eventTime = System.currentTimeMillis();
-                // replace the query, because this contains the current result offset
-                event.query = query;
-            }
-        }
-        if (event == null) {
-            // generate a new event
-            event = new QueryEvent(query, indexSegment, peers, crawlResults, preselectedPeerHashes, generateAbstracts);
-        } else {
-            // if worker threads had been alive, but did not succeed, start them again to fetch missing links
-            if ((!event.anyWorkerAlive()) &&
-                (((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (event.images.size() + 30 < query.neededResults())) ||
-                 (event.result.size() < query.neededResults() + 10)) &&
-                 //(event.query.onlineSnippetFetch) &&
-                (event.getRankingResult().getLocalResourceSize() + event.getRankingResult().getRemoteResourceSize() > event.result.size())) {
-                // set new timeout
-                event.eventTime = System.currentTimeMillis();
-                // start worker threads to fetch urls and snippets
-                event.workerThreads = new resultWorker[workerThreadCount];
-                resultWorker worker;
-                for (int i = 0; i < event.workerThreads.length; i++) {
-                    worker = event.new resultWorker(i, 6000, (query.onlineSnippetFetch) ? 2 : 0);
-                    worker.start();
-                    event.workerThreads[i] = worker;
-                }
-            }
-        }
-    
-        return event;
-    }
-
-    private class resultWorker extends Thread {
+    protected class SnippetFetcher extends Thread {
         
         private final long timeout; // the date until this thread should try to work
         private long lastLifeSign; // when the last time the run()-loop was executed
         private final int id;
         private int snippetMode;
         
-        public resultWorker(final int id, final long maxlifetime, int snippetMode) {
+        public SnippetFetcher(final int id, final long maxlifetime, int snippetMode) {
             this.id = id;
             this.snippetMode = snippetMode;
             this.lastLifeSign = System.currentTimeMillis();
@@ -649,7 +535,7 @@ public final class QueryEvent {
         final int count = Math.min(5, Math.max(1, 10 * this.result.size() / (item + 1)));
         for (int i = 0; i < count; i++) {
             // generate result object
-            final QueryEvent.ResultEntry result = nextResult();
+            final ResultEntry result = nextResult();
             SnippetCache.MediaSnippet ms;
             if (result != null) {
                 // iterate over all images in the result
@@ -734,7 +620,7 @@ public final class QueryEvent {
                 peer = entry1.getKey();
                 if (peer.equals(mypeerhash)) continue; // we dont need to ask ourself
                 urls = entry1.getValue();
-                words = wordsFromPeer(peer, urls);
+                words = rcAbstracts.wordsFromPeer(peer, urls);
                 assert words.length() >= 12 : "words = " + words;
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls);
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
@@ -748,157 +634,10 @@ public final class QueryEvent {
         }
     }
     
-    private String wordsFromPeer(final String peerhash, final String urls) {
-        Map.Entry<String, TreeMap<String, String>> entry;
-        String word, peerlist, url, wordlist = "";
-        TreeMap<String, String> urlPeerlist;
-        int p;
-        boolean hasURL;
-        synchronized (rcAbstracts) {
-            final Iterator<Map.Entry <String, TreeMap<String, String>>> i = rcAbstracts.entrySet().iterator();
-            while (i.hasNext()) {
-                entry = i.next();
-                word = entry.getKey();
-                urlPeerlist = entry.getValue();
-                hasURL = true;
-                for (int j = 0; j < urls.length(); j = j + 12) {
-                    url = urls.substring(j, j + 12);
-                    peerlist = urlPeerlist.get(url);
-                    p = (peerlist == null) ? -1 : peerlist.indexOf(peerhash);
-                    if ((p < 0) || (p % 12 != 0)) {
-                        hasURL = false;
-                        break;
-                    }
-                }
-                if (hasURL) wordlist += word;
-            }
-        }
-        return wordlist;
-    }
- 
     public void remove(final String urlhash) {
         // removes the url hash reference from last search result
         /*indexRWIEntry e =*/ this.rankedCache.remove(urlhash);
         //assert e != null;
     }
     
-    public static class ResultEntry {
-        // payload objects
-        private final URLMetadataRow urlentry;
-        private final URLMetadataRow.Components urlcomps; // buffer for components
-        private String alternative_urlstring;
-        private String alternative_urlname;
-        private final SnippetCache.TextSnippet textSnippet;
-        private final ArrayList<SnippetCache.MediaSnippet> mediaSnippets;
-        
-        // statistic objects
-        public long dbRetrievalTime, snippetComputationTime;
-        
-        public ResultEntry(final URLMetadataRow urlentry,
-                           final Segment indexSegment,
-                           yacySeedDB peers,
-                           final SnippetCache.TextSnippet textSnippet,
-                           final ArrayList<SnippetCache.MediaSnippet> mediaSnippets,
-                           final long dbRetrievalTime, final long snippetComputationTime) {
-            this.urlentry = urlentry;
-            this.urlcomps = urlentry.metadata();
-            this.alternative_urlstring = null;
-            this.alternative_urlname = null;
-            this.textSnippet = textSnippet;
-            this.mediaSnippets = mediaSnippets;
-            this.dbRetrievalTime = dbRetrievalTime;
-            this.snippetComputationTime = snippetComputationTime;
-            final String host = urlcomps.url().getHost();
-            if (host.endsWith(".yacyh")) {
-                // translate host into current IP
-                int p = host.indexOf(".");
-                final String hash = yacySeed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));
-                final yacySeed seed = peers.getConnected(hash);
-                final String filename = urlcomps.url().getFile();
-                String address = null;
-                if ((seed == null) || ((address = seed.getPublicAddress()) == null)) {
-                    // seed is not known from here
-                    try {
-                        indexSegment.termIndex().remove(
-                            Word.words2hashes(Condenser.getWords(
-                                ("yacyshare " +
-                                 filename.replace('?', ' ') +
-                                 " " +
-                                 urlcomps.dc_title())).keySet()),
-                                 urlentry.hash());
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    indexSegment.urlMetadata().remove(urlentry.hash()); // clean up
-                    throw new RuntimeException("index void");
-                }
-                alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + filename;
-                alternative_urlname = "http://share." + seed.getName() + ".yacy" + filename;
-                if ((p = alternative_urlname.indexOf("?")) > 0) alternative_urlname = alternative_urlname.substring(0, p);
-            }
-        }
-        public int hashCode() {
-            return urlentry.hash().hashCode();
-        }
-        public String hash() {
-            return urlentry.hash();
-        }
-        public yacyURL url() {
-            return urlcomps.url();
-        }
-        public Bitfield flags() {
-            return urlentry.flags();
-        }
-        public String urlstring() {
-            return (alternative_urlstring == null) ? urlcomps.url().toNormalform(false, true) : alternative_urlstring;
-        }
-        public String urlname() {
-            return (alternative_urlname == null) ? yacyURL.unescape(urlcomps.url().toNormalform(false, true)) : alternative_urlname;
-        }
-        public String title() {
-            return urlcomps.dc_title();
-        }
-        public SnippetCache.TextSnippet textSnippet() {
-            return this.textSnippet;
-        }
-        public ArrayList<SnippetCache.MediaSnippet> mediaSnippets() {
-            return this.mediaSnippets;
-        }
-        public Date modified() {
-            return urlentry.moddate();
-        }
-        public int filesize() {
-            return urlentry.size();
-        }
-        public int limage() {
-            return urlentry.limage();
-        }
-        public int laudio() {
-            return urlentry.laudio();
-        }
-        public int lvideo() {
-            return urlentry.lvideo();
-        }
-        public int lapp() {
-            return urlentry.lapp();
-        }
-        public WordReferenceVars word() {
-            final Reference word = urlentry.word();
-            assert word instanceof WordReferenceVars;
-            return (WordReferenceVars) word;
-        }
-        public boolean hasTextSnippet() {
-            return (this.textSnippet != null) && (this.textSnippet.getErrorCode() < 11);
-        }
-        public boolean hasMediaSnippets() {
-            return (this.mediaSnippets != null) && (this.mediaSnippets.size() > 0);
-        }
-        public String resource() {
-            // generate transport resource
-            if ((textSnippet == null) || (!textSnippet.exists())) {
-                return urlentry.toString();
-            }
-            return urlentry.toString(textSnippet.getLineRaw());
-        }
-    }
 }

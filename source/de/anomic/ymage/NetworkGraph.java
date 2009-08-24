@@ -36,7 +36,8 @@ import java.util.Date;
 import java.util.Iterator;
 
 import de.anomic.search.QueryParams;
-import de.anomic.search.QueryEvent;
+import de.anomic.search.SearchEvent;
+import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.yacy.yacySearch;
@@ -110,7 +111,7 @@ public class NetworkGraph {
     private static long          bannerPictureDate = 0;     // [MN]
 
     public static ymageMatrix getSearchEventPicture(final yacySeedDB seedDB, final String eventID) {
-        final QueryEvent event = QueryEvent.getEvent(eventID);
+        final SearchEvent event = SearchEventCache.getEvent(eventID);
         if (event == null) return null;
         final yacySearch[] primarySearches = event.getPrimarySearchThreads();
         final yacySearch[] secondarySearches = event.getSecondarySearchThreads();

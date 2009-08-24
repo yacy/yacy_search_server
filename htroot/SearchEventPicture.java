@@ -26,7 +26,7 @@
 
 
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.search.QueryEvent;
+import de.anomic.search.SearchEvent;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -39,7 +39,7 @@ public class SearchEventPicture {
     
     public static ymageMatrix respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
-        final String eventID = header.get("event", QueryEvent.lastEventID);
+        final String eventID = header.get("event", SearchEvent.lastEventID);
         if (eventID == null) return null;
         final ymageMatrix yp = NetworkGraph.getSearchEventPicture(sb.peers, eventID);
         if (yp == null) return new ymageMatrix(1, 1, ymageMatrix.MODE_SUB, "000000"); // empty image

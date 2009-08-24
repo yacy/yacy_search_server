@@ -45,7 +45,8 @@ import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
-import de.anomic.search.QueryEvent;
+import de.anomic.search.SearchEvent;
+import de.anomic.search.SearchEventCache;
 import de.anomic.search.SnippetCache;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -228,7 +229,7 @@ public class yacysearch {
             // check available memory and clean up if necessary
             if (!MemoryControl.request(8000000L, false)) {
                 sb.indexSegment.urlMetadata().clearCache();
-                QueryEvent.cleanupEvents(true);
+                SearchEventCache.cleanupEvents(true);
             }
             
             final RankingProfile ranking = sb.getRanking();
@@ -436,7 +437,7 @@ public class yacysearch {
                     yacyURL.TLD_any_zone_filter,
                     client,
                     authenticated);
-            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), QueryEvent.INITIALIZATION, 0, 0), false);
+            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.INITIALIZATION, 0, 0), false);
             
             // tell all threads to do nothing for a specific time
             sb.intermissionAllThreads(10000);
@@ -450,11 +451,11 @@ public class yacysearch {
             final long timestamp = System.currentTimeMillis();
 
             // create a new search event
-            if (QueryEvent.getEvent(theQuery.id(false)) == null) {
+            if (SearchEventCache.getEvent(theQuery.id(false)) == null) {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
-            final QueryEvent theSearch = QueryEvent.getEvent(theQuery, sb.indexSegment, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
+            final SearchEvent theSearch = SearchEventCache.getEvent(theQuery, sb.indexSegment, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
             
             // generate result object
             //serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + (System.currentTimeMillis() - timestamp) + " ms");

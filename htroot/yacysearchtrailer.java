@@ -29,7 +29,8 @@ import java.util.Iterator;
 
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.QueryParams;
-import de.anomic.search.QueryEvent;
+import de.anomic.search.SearchEvent;
+import de.anomic.search.SearchEventCache;
 import de.anomic.search.RankingProcess.NavigatorEntry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
@@ -48,7 +49,7 @@ public class yacysearchtrailer {
         final int display = post.getInt("display", 0);
         
         // find search event
-        final QueryEvent theSearch = QueryEvent.getEvent(eventID);
+        final SearchEvent theSearch = SearchEventCache.getEvent(eventID);
         if (theSearch == null) {
             // the event does not exist, show empty page
             return prop;
@@ -127,7 +128,7 @@ public class yacysearchtrailer {
         prop.put("nav-topics_element", i);
         prop.put("nav-topics", "1");
         
-        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), QueryEvent.FINALIZATION + "-" + "bottomline", 0, 0), false);
+        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + "bottomline", 0, 0), false);
         
         return prop;
     }

@@ -33,8 +33,10 @@ import java.util.TreeSet;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.QueryParams;
-import de.anomic.search.QueryEvent;
+import de.anomic.search.SearchEvent;
 import de.anomic.search.RankingProcess;
+import de.anomic.search.ResultEntry;
+import de.anomic.search.SearchEventCache;
 import de.anomic.search.SnippetCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -73,7 +75,7 @@ public class yacysearchitem {
         prop.put("dynamic", "0");
         
         // find search event
-        final QueryEvent theSearch = QueryEvent.getEvent(eventID);
+        final SearchEvent theSearch = SearchEventCache.getEvent(eventID);
         if (theSearch == null) {
             // the event does not exist, show empty page
             return prop;
@@ -94,7 +96,7 @@ public class yacysearchitem {
             // text search
 
             // generate result object
-            final QueryEvent.ResultEntry result = theSearch.oneResult(item);
+            final ResultEntry result = theSearch.oneResult(item);
             if (result == null) return prop; // no content
 
             
@@ -147,7 +149,7 @@ public class yacysearchitem {
             prop.put("content_description", desc);
             prop.putXML("content_description-xml", desc);
             prop.putJSON("content_description-json", desc);
-            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), QueryEvent.FINALIZATION + "-" + item, 0, 0), false);
+            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + item, 0, 0), false);
             
             return prop;
         }
@@ -178,7 +180,7 @@ public class yacysearchitem {
             // any other media content
 
             // generate result object
-            final QueryEvent.ResultEntry result = theSearch.oneResult(item);
+            final ResultEntry result = theSearch.oneResult(item);
             if (result == null) return prop; // no content
             
             prop.put("content", theQuery.contentdom + 1); // switch on specific content

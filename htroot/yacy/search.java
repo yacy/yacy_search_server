@@ -46,9 +46,10 @@ import de.anomic.kelondro.util.SortStack;
 import de.anomic.net.natLib;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
-import de.anomic.search.QueryEvent;
+import de.anomic.search.SearchEvent;
+import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
-import de.anomic.search.QueryEvent.ResultEntry;
+import de.anomic.search.ResultEntry;
 import de.anomic.search.RankingProcess.NavigatorEntry;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
@@ -182,7 +183,7 @@ public final class search {
         int joincount = 0;
         QueryParams theQuery = null;
         ArrayList<SortStack<ResultEntry>.stackElement> accu = null;
-        QueryEvent theSearch = null;
+        SearchEvent theSearch = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
             theQuery = new QueryParams(
@@ -217,7 +218,7 @@ public final class search {
             //final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
             final HashMap<byte[], ReferenceContainer<WordReference>> incc = sb.indexSegment.termIndex().searchConjunction(theQuery.queryHashes, QueryParams.hashes2StringSet(urls));
             
-            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), QueryEvent.COLLECTION, incc.size(), System.currentTimeMillis() - timer), false);
+            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.COLLECTION, incc.size(), System.currentTimeMillis() - timer), false);
             if (incc != null) {
                 final Iterator<Map.Entry<byte[], ReferenceContainer<WordReference>>> ci = incc.entrySet().iterator();
                 Map.Entry<byte[], ReferenceContainer<WordReference>> entry;
@@ -268,7 +269,7 @@ public final class search {
             RSSFeed.channels(RSSFeed.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.queryHashes), ""));
             
             // make event
-            theSearch = QueryEvent.getEvent(theQuery, sb.indexSegment, sb.peers, sb.crawlResults, null, true); 
+            theSearch = SearchEventCache.getEvent(theQuery, sb.indexSegment, sb.peers, sb.crawlResults, null, true); 
             
             // set statistic details of search result and find best result index set
             if (theSearch.getRankingResult().getLocalResourceSize() == 0) {
@@ -350,7 +351,7 @@ public final class search {
             final long timer = System.currentTimeMillis();
             final StringBuilder links = new StringBuilder();
             String resource = null;
-            SortStack<QueryEvent.ResultEntry>.stackElement entry;
+            SortStack<ResultEntry>.stackElement entry;
             for (int i = 0; i < accu.size(); i++) {
                 entry = accu.get(i);
                 resource = entry.element.resource();

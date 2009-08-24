@@ -645,7 +645,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
                     return serverCore.TERMINATE_CONNECTION;
                 }
             }
-            if(sessionIn instanceof ChunkedInputStream) sessionIn.close(); // read to end, but do not close the stream (maybe HTTP/1.1 persistent)
+            if (sessionIn instanceof ChunkedInputStream) sessionIn.close(); // read to end, but do not close the stream (maybe HTTP/1.1 persistent)
             //return serverCore.RESUME_CONNECTION;
             return this.prop.getProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT).equals("keep-alive") ? serverCore.RESUME_CONNECTION : serverCore.TERMINATE_CONNECTION;
         } catch (final Exception e) {

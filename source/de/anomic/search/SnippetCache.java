@@ -914,7 +914,7 @@ public class SnippetCache {
             (snippet.getErrorCode() == ERROR_PARSER_NO_LINES)) {
             log.logInfo("error: '" + snippet.getError() + "', remove url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
             Switchboard.getSwitchboard().indexSegment.urlMetadata().remove(urlHash);
-            final QueryEvent event = QueryEvent.getEvent(eventID);
+            final SearchEvent event = SearchEventCache.getEvent(eventID);
             assert Switchboard.getSwitchboard() != null;
             assert Switchboard.getSwitchboard().indexSegment != null;
             assert event != null : "eventID = " + eventID;
@@ -925,7 +925,7 @@ public class SnippetCache {
         if (snippet.getErrorCode() == ERROR_NO_MATCH) {
             log.logInfo("error: '" + snippet.getError() + "', remove words '" + querystring + "' for url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
             Switchboard.getSwitchboard().indexSegment.termIndex().remove(snippet.remaingHashes, urlHash);
-            QueryEvent.getEvent(eventID).remove(urlHash);
+            SearchEventCache.getEvent(eventID).remove(urlHash);
         }
         return snippet.getError();
     }

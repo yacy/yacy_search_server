@@ -58,7 +58,7 @@ import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.ProfilingGraph;
 
-public final class RankingProcess {
+public final class RankingProcess extends Thread {
     
     public  static BinSearch[] ybrTables = null; // block-rank tables
     public  static final int maxYBR = 3; // the lower this value, the faster the search
@@ -113,6 +113,18 @@ public final class RankingProcess {
         for (int i = 0; i < 8; i++) {this.domZones[i] = 0;}
     }
     
+    public void run() {
+        // do a search concurrently
+        
+        // sort the local containers and truncate it to a limited count,
+        // so following sortings together with the global results will be fast
+        try {
+            execQuery();
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     public long ranking(final WordReferenceVars word) {
         return order.cardinal(word);
     }
@@ -132,7 +144,7 @@ public final class RankingProcess {
                 query.maxDistance);
         this.localSearchInclusion = search.inclusion();
         final ReferenceContainer<WordReference> index = search.joined();
-        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), QueryEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
+        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
         if (index.size() == 0) {
             return;
         }
@@ -157,7 +169,7 @@ public final class RankingProcess {
         
         // normalize entries
         final ArrayList<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
-        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), QueryEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
+        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
         
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
@@ -238,7 +250,7 @@ public final class RankingProcess {
         }
         
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
-        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), QueryEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
+        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
     }
     
     private boolean testFlags(final WordReference ientry) {
@@ -532,7 +544,7 @@ public final class RankingProcess {
         }
     }
     
-    protected void addTopics(final QueryEvent.ResultEntry resultEntry) {
+    protected void addTopics(final ResultEntry resultEntry) {
         // take out relevant information for reference computation
         if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;
         //final String[] urlcomps = htmlFilterContentScraper.urlComps(resultEntry.url().toNormalform(true, true)); // word components of the url
@@ -619,7 +631,7 @@ public final class RankingProcess {
     
     public long postRanking(
                     final Set<String> topwords,
-                    final QueryEvent.ResultEntry rentry,
+                    final ResultEntry rentry,
                     final int position) {
 
         long r = (255 - position) << 8;

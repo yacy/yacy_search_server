@@ -52,8 +52,8 @@ import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.search.QueryParams;
-import de.anomic.search.QueryEvent;
 import de.anomic.search.RankingProcess;
+import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -79,7 +79,7 @@ public class IndexControlRWIs_p {
         prop.put("genUrlList", 0);
         
         // clean up all search events
-        QueryEvent.cleanupEvents(true);
+        SearchEventCache.cleanupEvents(true);
         
         if (post != null) {
             // default values
