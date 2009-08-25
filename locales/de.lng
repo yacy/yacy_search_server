@@ -86,8 +86,8 @@ Blacklist Pattern==Blacklisteintrag
 Edit selected pattern\(s\)==Bearbeite gew&auml;hlten Eintrag
 Delete selected pattern\(s\)==L&ouml;sche gew&auml;hlten Eintrag
 Move selected pattern\(s\) to==Verschiebe gew&auml;hlten Eintrag zu
-"Save URL pattern"=="URL-Eintrag speichern"
-You can select them here for deletion==Sie k&ouml;nnen sie einzeln zum L&ouml;schen w&auml;hlen
+#"Save URL pattern"=="URL-Eintrag speichern"
+#You can select them here for deletion==Sie k&ouml;nnen sie einzeln zum L&ouml;schen w&auml;hlen
 Add new pattern:==Neuen Eintrag hinzuf&uuml;gen: 
 "Add URL pattern"=="URL hinzuf&uuml;gen"
 was removed from blacklist==wurde aus Blacklist entfernt
@@ -107,7 +107,7 @@ Here you can remove or edit illegal or double blacklist-entries.==Hier k&ouml;nn
 Check list==Liste testen
 "Check"=="Teste"
 The blacklist-cleaner only works for the following blacklist-engines up to now:==Der Blacklist-Cleaner arbeitet zur Zeit nur mit den folgenden Blacklist-Engines:
-Illegal Entries for==Ung&uuml;ltige Eintr&auml;ge f&uuml;r
+#Illegal Entries for==Ung&uuml;ltige Eintr&auml;ge f&uuml;r
 Deleted \#\[delCount\]\# entries==#[delCount]# Eintr&auml;ge gel&ouml;scht
 Altered \#\[alterCount\]\# entries!==#[alterCount]# Eintr&auml;ge ge&auml;ndert
 Two wildcards in host-part==Zwei Wildcards im Host-Teil
@@ -138,7 +138,8 @@ Blacklist Test==Blacklist testen
 Used Blacklist engine:==Benutzte Blacklist Verwaltung:
 Test list:==Teste Liste:
 "Test"=="Testen"
-The tested URL was==Die getestete URL warIt is blocked for the following cases:==Sie wird in den folgenden F&auml;llen geblockt:
+The tested URL was==Die getestete URL war
+It is blocked for the following cases:==Sie wird in den folgenden F&auml;llen geblockt:
 #Crawling==Crawling
 #DHT==DHT
 #News==News
@@ -266,8 +267,8 @@ Search Result==Suchergebnis
 #File: ConfigAppearance_p.html
 #---------------------------
 Appearance and Integration==Erscheinungsbild und Integration
-You can change the appearance of YaCy with skins==Sie k&ouml;nnen hier das Erscheinungsbild von YaCy mit Skins &auml;ndern
-and the default icons and links on the search page can be replaced with you own.==und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
+#You can change the appearance of YaCy with skins==Sie k&ouml;nnen hier das Erscheinungsbild von YaCy mit Skins &auml;ndern
+#and the default icons and links on the search page can be replaced with you own.==und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
 Skin Selection==Skinauswahl
 Select one of the default skins, download new skins, or create your own skin.==W&auml;hlen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder basteln Sie sich selber einen neuen Skin. 
 Current skin==Aktueller Skin
@@ -279,24 +280,24 @@ Use this skin==Benutze diesen Skin
 "Install"=="Installieren"
 Unable to get URL:==Nicht m&ouml;glich die angegebene Datei von folgender URL zu installieren:
 Error saving the skin.==Es trat ein Fehler beim Speichern des Skins auf.
-Search Page Integration==Suchseite Integration
-The search page may be customized. You can change the 'corporate identity'-images, the greeting line==Die Suchseite darf angepasst werden. Sie k&ouml;nnen die "corporate identity"-Grafiken, die Begr&uuml;ssungszeile 
-and a link to a home page that is reached when the 'corporate identity'-images are clicked.==und den Link zu der Homepage, die erreicht wird, wenn auf die "corporate identity"-Grafik geklickt wird, &auml;ndern.
-Greeting Line==Begr&uuml;ssungszeile
-URL of Home Page==Homepage URL
-URL of a Small Corporate Image==URL der kleinen Grafik
-URL of a Large Corporate Image==URL der grossen Grafik
-Default Pop-Up Page==Standard Pop-Up Seite
+#Search Page Integration==Suchseite Integration
+#The search page may be customized. You can change the 'corporate identity'-images, the greeting line==Die Suchseite darf angepasst werden. Sie k&ouml;nnen die "corporate identity"-Grafiken, die Begr&uuml;ssungszeile 
+#and a link to a home page that is reached when the 'corporate identity'-images are clicked.==und den Link zu der Homepage, die erreicht wird, wenn auf die "corporate identity"-Grafik geklickt wird, &auml;ndern.
+#Greeting Line==Begr&uuml;ssungszeile
+#URL of Home Page==Homepage URL
+#URL of a Small Corporate Image==URL der kleinen Grafik
+#URL of a Large Corporate Image==URL der grossen Grafik
+#Default Pop-Up Page==Standard Pop-Up Seite
 Status Page==Status Seite
-Search Front Page==Suchseite
-Search Page \(small header\)==Suchseite (kleiner Kopf)
-Interactive Search Page==Interaktive Suchseite
-"Change Search Page"=="Suchseite &auml;ndern"
-"Set to Default Values"=="Standardwerte wiederherstellen"
+#Search Front Page==Suchseite
+#Search Page \(small header\)==Suchseite (kleiner Kopf)
+#Interactive Search Page==Interaktive Suchseite
+#"Change Search Page"=="Suchseite &auml;ndern"
+#"Set to Default Values"=="Standardwerte wiederherstellen"
 The search page can be integrated in your own web pages with an iframe. Simply use the following code:==Die Suchseite kann mit einem iframe in Ihre eigene Website integriert werden. Benutzen Sie einfach folgenden Code:
 This would look like:==Das wird dann so aussehen:
-For a search page with a small header, use this code:==F&uuml;r eine Seite mit einem kleinen Kopf benutzen Sie diesen Code:
-A third option is the interactive search. Use this code:==Eine dritte Option ist die interaktive Suche. Benutzen Sie dazu diesen Code: 
+#For a search page with a small header, use this code:==F&uuml;r eine Seite mit einem kleinen Kopf benutzen Sie diesen Code:
+#A third option is the interactive search. Use this code:==Eine dritte Option ist die interaktive Suche. Benutzen Sie dazu diesen Code: 
 #-----------------------------
 
 #File: ConfigAccounts_p.html
@@ -378,7 +379,7 @@ You can also use your peer without opening it, but this is not recomended.==Sie 
 Language selection==Sprachauswahl
 You can change the language of the YaCy-webinterface with translation files.==Hier k&ouml;nnen Sie die Sprache &auml;ndern. W&auml;hlen Sie die gew&uuml;nschte Sprache aus der Liste aus.
 Current language</label>==Aktuelle Sprache</label>
-default\(english\)==Deutsch
+#default\(english\)==Deutsch
 Author\(s\) \(chronological\)</label>==Autoren (chronologisch)</label>
 Send additions to maintainer</em>==Schicken Sie Erg&auml;nzungen bitte an</em>
 Available Languages</label>==Verf&uuml;gbare Sprachen</label>
@@ -460,11 +461,11 @@ Please describe your search portal with some keywords \(comma-separated\)==Bitte
 #File: ConfigProfile_p.html
 #---------------------------
 Your Personal Profile==Ihr pers&ouml;nliches Profil
-You can create a personal profile here, which can be seen by other YaCy-members==Hier k&ouml;nnen Sie Ihr pers&ouml;nliches Profil verwalten, dass andere YaCy-Benutzer ansehen k&ouml;nnen
-or <a href="ViewProfile.html?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf?hash=localhash">FOAF RDF file</a>.==oder <a href="ViewProfile.html?hash=localhash">in der &Ouml;ffentlichkeit</a> eine <a href="ViewProfile.rdf?hash=localhash">FOAF RDF Datei</a> benutzen.
+You can create a personal profile here, which can be seen by other YaCy-members==Hier k&ouml;nnen Sie Ihr pers&ouml;nliches Profil verwalten, welches andere YaCy-Benutzer ansehen k&ouml;nnen
+#or <a href="ViewProfile.html?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf?hash=localhash">FOAF RDF file</a>.==oder <a href="ViewProfile.html?hash=localhash">in der &Ouml;ffentlichkeit</a> eine <a #href="ViewProfile.rdf?hash=localhash">FOAF RDF Datei</a> benutzen.
 #Name==Name
 #Nick Name==Nick Name
-Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==Homepage (erscheint auf der <a href="/Supporter.html">Unterst&uuml;tzer Seite, so lange wie Ihr Peer online ist</a>
+Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==Homepage (erscheint auf der <a href="/Supporter.html">Unterst&uuml;tzer Seite,</a> so lange Ihr Peer online ist).
 #eMail==eMail
 #ICQ==ICQ
 #Jabber==Jabber
@@ -473,7 +474,7 @@ Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long
 #Skype==Skype
 Comment==Kommentar
 "Save"==Speichern
-You can use==Sie können
+You can use==Sie k&ouml;nnen
 here.==im Profil benutzen.
 #-----------------------------
 
@@ -590,8 +591,8 @@ Sending Client==Sendender Client
 #---------------------------
 Crawl Profile Editor==Crawl Profil Editor
 Crawl profiles hold information about a specific URL which is internally used to perform the crawl it belongs to.==Crawl Profile enthalten Informationen &uuml;ber eine spezifische URL, welche intern genutzt wird, um nachzuvollziehen, wozu der Crawl geh&ouml;rt.
-The profiles for remote crawls, <a href="/ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==Die Profile f&uuml;r Remote Crawl, <a href="/ProxyIndexingMonitor_p.html">Indexierung per Proxy</a> und Snippet Abrufe
-cannot be altered here as they are hard-coded.==k&ouml;nnen nicht ver&auml;ndert werden, weil sie "hard-coded" sind.
+#The profiles for remote crawls, <a href="/ProxyIndexingMonitor_p.html">indexing via proxy</a> and snippet fetches==Die Profile f&uuml;r Remote Crawl, <a href="/ProxyIndexingMonitor_p.html">Indexierung per Proxy</a> und Snippet Abrufe
+#cannot be altered here as they are hard-coded.==k&ouml;nnen nicht ver&auml;ndert werden, weil sie "hard-coded" sind.
 Crawl Profile List==Crawl Profil Liste
 Crawl Thread==Crawl Art
 #Status==Status
@@ -854,7 +855,7 @@ YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
 #Text==Text
 Images==Bilder
 #Audio==Audio
-#Video==Video
+Video==Videos
 Applications==Anwendungen
 more options...==mehr Optionen...
 advanced parameters==erweiterte Parameter
@@ -2017,7 +2018,8 @@ Auto pop-up of status page on start-up:==Automatisches Pop-Up der Status-Seite b
 #---------------------------
 Shared Blacklist==Freigegebene Blacklist
 Add Items to Blacklist==Hinzuf&uuml;gen von Daten zur Blacklist
-Unable to store the items into the blacklist file:==Es war nicht m&ouml;glich in folgender Blacklist Datei die Daten zu speichern: File Error! Wrong Path?==Datei Fehler! Falscher Pfad?
+Unable to store the items into the blacklist file:==Es war nicht m&ouml;glich in folgender Blacklist Datei die Daten zu speichern: 
+File Error! Wrong Path?==Datei Fehler! Falscher Pfad?
 YaCy-Peer &quot;<span class="settingsValue">\#\[name\]\#</span>&quot; not found.==YaCy Peer YaCy-Peer &quot;<span class="settingsValue">#[name]#</span>&quot; nicht gefunden.
 not found or empty list.==nicht gefunden oder leere Liste.
 Wrong Invocation! Please invoke with==Falscher Aufruf! Bitte nur so aufrufen
@@ -2146,7 +2148,7 @@ Supporter are switched off for users without authorization==Die Unterst&uuml;tze
 "Give positive vote"=="Link positiv bewerten"
 "negative vote"=="Negative Bewertung"
 "Give negative vote"=="Link negativ bewerten"
-provided by YaCy peers with an URL in their profile. This shows only URLs from peers that are currently online.==bereitgestellt durch YaCy Peers mit einer URL in ihem Profil. Es werden nur URLs von Peers angezeigt, die online sind.
+provided by YaCy peers with an URL in their profile. This shows only URLs from peers that are currently online.==bereitgestellt durch YaCy Peers mit einer URL in ihrem Profil. Es werden nur URLs von Peers angezeigt, die online sind.
 
 provided by YaCy peers using public bookmarks, link votes and crawl start points
 #-----------------------------
@@ -2787,14 +2789,14 @@ Accounts==Konten
 'Rename'=='Umbenennen'
 'Help'=='Hilfe'
 
-"public bookmark"=="&ouml;ffentliches Lesezeichen"
-"private bookmark"=="privates Lesezeichen"
+#"public bookmark"=="&ouml;ffentliches Lesezeichen"
+#"private bookmark"=="privates Lesezeichen"
 
-"delete bookmark"=="Lesezeichen l&ouml;schen"
+#"delete bookmark"=="Lesezeichen l&ouml;schen"
 "YaCy Bookmarks"=="YaCy Lesezeichen"
->Title==>Titel
->Tags==>Tags
->Date==>Datum
+#>Title==>Titel
+#>Tags==>Tags
+#>Date==>Datum
 #-----------------------------
 
 #File: yacy/ui/sidebar/sidebar_1.html
@@ -2804,7 +2806,7 @@ YaCy P2P Websearch==YaCy P2P Websuche
 >Text==>Text
 >Images==>Bilder
 >Audio==>Audio
->Video==>Video
+>Video==>Videos
 >Application==>Anwendungen
 Search term:==Suchbegriff:
 "help"=="Hilfe"
