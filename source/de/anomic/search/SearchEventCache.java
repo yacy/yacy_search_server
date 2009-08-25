@@ -34,7 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.kelondro.text.Segment;
-import de.anomic.search.SearchEvent.SnippetFetcher;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.logging.Log;
 
@@ -51,7 +50,7 @@ public class SearchEventCache {
             cleanEvent = i.next();
             if ((all) || (cleanEvent.eventTime + eventLifetime < System.currentTimeMillis())) {
                 // execute deletion of failed words
-                int rw = cleanEvent.failedURLs.size();
+                int rw = cleanEvent.snippets.failedURLs.size();
                 if (rw > 0) {
                     final TreeSet<byte[]> removeWords = cleanEvent.query.queryHashes;
                     removeWords.addAll(cleanEvent.query.excludeHashes);
@@ -59,7 +58,7 @@ public class SearchEventCache {
                         final Iterator<byte[]> j = removeWords.iterator();
                         // remove the same url hashes for multiple words
                         while (j.hasNext()) {
-                            cleanEvent.indexSegment.termIndex().remove(j.next(), cleanEvent.failedURLs.keySet());
+                            cleanEvent.indexSegment.termIndex().remove(j.next(), cleanEvent.snippets.failedURLs.keySet());
                         }                    
                     } catch (IOException e) {
                         e.printStackTrace();
@@ -106,21 +105,15 @@ public class SearchEventCache {
             event = new SearchEvent(query, indexSegment, peers, crawlResults, preselectedPeerHashes, generateAbstracts);
         } else {
             // if worker threads had been alive, but did not succeed, start them again to fetch missing links
-            if ((!event.anyWorkerAlive()) &&
-                (((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (event.images.size() + 30 < query.neededResults())) ||
-                 (event.result.size() < query.neededResults() + 10)) &&
+            if ((!event.snippets.anyWorkerAlive()) &&
+                (((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (event.snippets.images.size() + 30 < query.neededResults())) ||
+                 (event.snippets.result.size() < query.neededResults() + 10)) &&
                  //(event.query.onlineSnippetFetch) &&
-                (event.getRankingResult().getLocalResourceSize() + event.getRankingResult().getRemoteResourceSize() > event.result.size())) {
+                (event.getRankingResult().getLocalResourceSize() + event.getRankingResult().getRemoteResourceSize() > event.snippets.result.size())) {
                 // set new timeout
                 event.eventTime = System.currentTimeMillis();
                 // start worker threads to fetch urls and snippets
-                event.workerThreads = new SnippetFetcher[SearchEvent.workerThreadCount];
-                SnippetFetcher worker;
-                for (int i = 0; i < event.workerThreads.length; i++) {
-                    worker = event.new SnippetFetcher(i, 6000, (query.onlineSnippetFetch) ? 2 : 0);
-                    worker.start();
-                    event.workerThreads[i] = worker;
-                }
+                event.snippets.restartWorker();
             }
         }
     

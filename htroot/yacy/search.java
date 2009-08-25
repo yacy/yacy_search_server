@@ -302,7 +302,7 @@ public final class search {
                 } else {
                     joincount = theSearch.getRankingResult().getLocalResourceSize();
                     prop.put("joincount", Integer.toString(joincount));
-                    accu = theSearch.completeResults(3000);
+                    accu = theSearch.snippets.completeResults(3000);
                 }
                 
                 // generate compressed index for maxcounthash
@@ -373,8 +373,8 @@ public final class search {
         theQuery.remotepeer = sb.peers.lookupByIP(natLib.getInetAddress(client), true, false, false);
         theQuery.resultcount = (theSearch == null) ? 0 : theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
-        theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.getURLRetrievalTime();
-        theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.getSnippetComputationTime();
+        theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.snippets.getURLRetrievalTime();
+        theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.snippets.getSnippetComputationTime();
         sb.remoteSearches.add(theQuery);
         
         // update the search tracker

@@ -376,6 +376,18 @@ public final class RankingProcess extends Thread {
         return null;
     }
     
+    public URLMetadataRow bestURL(final boolean skipDoubleDom, long timeout) {
+        timeout += System.currentTimeMillis();
+        long wait = 10;
+        while (System.currentTimeMillis() < timeout) {
+            URLMetadataRow row = bestURL(skipDoubleDom);
+            if (row != null) return row;
+            try {Thread.sleep(wait);} catch (final InterruptedException e1) {}
+            wait = wait * 2;
+        }
+        return null;
+    }
+    
     public int size() {
         //assert sortedRWIEntries.size() == urlhashes.size() : "sortedRWIEntries.size() = " + sortedRWIEntries.size() + ", urlhashes.size() = " + urlhashes.size();
         int c = stack.size();

@@ -472,8 +472,8 @@ public class yacysearch {
             // prepare search statistics
             theQuery.resultcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
             theQuery.searchtime = System.currentTimeMillis() - timestamp;
-            theQuery.urlretrievaltime = theSearch.getURLRetrievalTime();
-            theQuery.snippetcomputationtime = theSearch.getSnippetComputationTime();
+            theQuery.urlretrievaltime = theSearch.snippets.getURLRetrievalTime();
+            theQuery.snippetcomputationtime = theSearch.snippets.getSnippetComputationTime();
             sb.localSearches.add(theQuery);
                         
             // check suggestions
