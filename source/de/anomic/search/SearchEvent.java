@@ -26,10 +26,12 @@
 
 package de.anomic.search;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.kelondro.order.Base64Order;
@@ -56,27 +58,29 @@ public final class SearchEvent {
     public static final String NORMALIZING = "normalizing";
     public static final String FINALIZATION = "finalization";
     
-    protected final static int workerThreadCount = 10;
-    public static String lastEventID = "";
     private static final int max_results_preparation = 1000;
     
-    protected long eventTime;
-    protected QueryParams query;
-    protected final Segment indexSegment;
+    // class variables that may be implemented with an abstract class
+    private long eventTime;
+    private QueryParams query;
+    private final Segment indexSegment;
     private final yacySeedDB peers;
-    protected RankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
-    private final IndexAbstracts rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
-    private yacySearch[] primarySearchThreads, secondarySearchThreads;
-    private Thread localSearchThread;
-    private final TreeMap<byte[], String> preselectedPeerHashes;
-    //private Object[] references;
-    public  TreeMap<byte[], String> IAResults;
-    public  TreeMap<byte[], Integer> IACount;
-    public  byte[] IAmaxcounthash, IAneardhthash;
-    public ResultURLs crawlResults;
-    public SnippetFetcher snippets;
+    private RankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
+    private SnippetFetcher snippets;
     
-    @SuppressWarnings("unchecked") SearchEvent(final QueryParams query,
+    // class variables for search abstracts
+    private final IndexAbstracts rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
+
+    // class variables for remote searches
+    private yacySearch[] primarySearchThreads, secondarySearchThreads;
+    private final TreeMap<byte[], String> preselectedPeerHashes;
+    private ResultURLs crawlResults;
+    private Thread localSearchThread;
+    private TreeMap<byte[], String> IAResults;
+    private TreeMap<byte[], Integer> IACount;
+    private byte[] IAmaxcounthash, IAneardhthash;
+    
+   @SuppressWarnings("unchecked") SearchEvent(final QueryParams query,
                              final Segment indexSegment,
                              final yacySeedDB peers,
                              final ResultURLs crawlResults,
@@ -180,11 +184,71 @@ public final class SearchEvent {
         
         // store this search to a cache so it can be re-used
         if (MemoryControl.available() < 1024 * 1024 * 10) SearchEventCache.cleanupEvents(true);
-        lastEventID = query.id(false);
-        SearchEventCache.lastEvents.put(lastEventID, this);
+        SearchEventCache.put(query.id(false), this);
     }
     
-    boolean anyRemoteSearchAlive() {
+   public long getEventTime() {
+       return this.eventTime;
+   }
+   
+   public void resetEventTime() {
+       this.eventTime = System.currentTimeMillis();
+   }
+   
+   public QueryParams getQuery() {
+       return this.query;
+   }
+   
+   public void setQuery(QueryParams query) {
+       this.query = query;
+   }
+   
+   public void cleanup() {
+       // execute deletion of failed words
+       int rw = this.snippets.failedURLs.size();
+       if (rw > 0) {
+           final TreeSet<byte[]> removeWords = query.queryHashes;
+           removeWords.addAll(query.excludeHashes);
+           try {
+               final Iterator<byte[]> j = removeWords.iterator();
+               // remove the same url hashes for multiple words
+               while (j.hasNext()) {
+                   this.indexSegment.termIndex().remove(j.next(), this.snippets.failedURLs.keySet());
+               }                    
+           } catch (IOException e) {
+               e.printStackTrace();
+           }
+           Log.logInfo("SearchEvents", "cleaning up event " + query.id(true) + ", removed " + rw + " URL references on " + removeWords.size() + " words");
+       }
+   }
+   
+   public Iterator<Map.Entry<byte[], String>> abstractsString() {
+       return this.IAResults.entrySet().iterator();
+   }
+   
+   public String abstractsString(byte[] hash) {
+       return this.IAResults.get(hash);
+   }
+   
+   public Iterator<Map.Entry<byte[], Integer>> abstractsCount() {
+       return this.IACount.entrySet().iterator();
+   }
+   
+   public int abstractsCount(byte[] hash) {
+       Integer i = this.IACount.get(hash);
+       if (i == null) return -1;
+       return i.intValue();
+   }
+   
+   public byte[] getAbstractsMaxCountHash() {
+       return this.IAmaxcounthash;
+   }
+   
+   public byte[] getAbstractsNearDHTHash() {
+       return this.IAneardhthash;
+   }
+   
+   boolean anyRemoteSearchAlive() {
         // check primary search threads
         if ((this.primarySearchThreads != null) && (this.primarySearchThreads.length != 0)) {
             for (int i = 0; i < this.primarySearchThreads.length; i++) {
@@ -209,10 +273,6 @@ public final class SearchEvent {
             }
         }
         return count;
-    }
-    
-    public QueryParams getQuery() {
-        return query;
     }
     
     public yacySearch[] getPrimarySearchThreads() {
@@ -338,6 +398,10 @@ public final class SearchEvent {
         // removes the url hash reference from last search result
         /*indexRWIEntry e =*/ this.rankedCache.remove(urlhash);
         //assert e != null;
+    }
+    
+    public SnippetFetcher result() {
+        return this.snippets;
     }
     
 }

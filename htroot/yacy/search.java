@@ -279,7 +279,7 @@ public final class search {
                 // attach information about index abstracts
                 final StringBuilder indexcount = new StringBuilder();
                 Map.Entry<byte[], Integer> entry;
-                final Iterator<Map.Entry<byte[], Integer>> i = theSearch.IACount.entrySet().iterator();
+                final Iterator<Map.Entry<byte[], Integer>> i = theSearch.abstractsCount();
                 while (i.hasNext()) {
                     entry = i.next();
                     indexcount.append("indexcount.").append(new String(entry.getKey())).append('=').append((entry.getValue()).toString()).append(serverCore.CRLF_STRING);
@@ -290,8 +290,8 @@ public final class search {
                     byte[] wordhash;
                     while (j.hasNext()) {
                         wordhash = j.next();
-                        indexabstractContainercount += (theSearch.IACount.get(wordhash)).intValue();
-                        indexabstract.append("indexabstract." + wordhash + "=").append(theSearch.IAResults.get(wordhash)).append(serverCore.CRLF_STRING);
+                        indexabstractContainercount += theSearch.abstractsCount(wordhash);
+                        indexabstract.append("indexabstract." + wordhash + "=").append(theSearch.abstractsString(wordhash)).append(serverCore.CRLF_STRING);
                     }
                 }
                 prop.put("indexcount", indexcount.toString());
@@ -302,22 +302,22 @@ public final class search {
                 } else {
                     joincount = theSearch.getRankingResult().getLocalResourceSize();
                     prop.put("joincount", Integer.toString(joincount));
-                    accu = theSearch.snippets.completeResults(3000);
+                    accu = theSearch.result().completeResults(3000);
                 }
                 
                 // generate compressed index for maxcounthash
                 // this is not needed if the search is restricted to specific
                 // urls, because it is a re-search
-                if ((theSearch.IAmaxcounthash == null) || (urls.length() != 0) || (queryhashes.size() <= 1) || (abstracts.length() == 0)) {
+                if ((theSearch.getAbstractsMaxCountHash() == null) || (urls.length() != 0) || (queryhashes.size() <= 1) || (abstracts.length() == 0)) {
                     prop.put("indexabstract", "");
                 } else if (abstracts.equals("auto")) {
                     // automatically attach the index abstract for the index that has the most references. This should be our target dht position
-                    indexabstractContainercount += (theSearch.IACount.get(theSearch.IAmaxcounthash)).intValue();
-                    indexabstract.append("indexabstract." + theSearch.IAmaxcounthash + "=").append(theSearch.IAResults.get(theSearch.IAmaxcounthash)).append(serverCore.CRLF_STRING);
-                    if ((theSearch.IAneardhthash != null) && (!(theSearch.IAneardhthash.equals(theSearch.IAmaxcounthash)))) {
+                    indexabstractContainercount += theSearch.abstractsCount(theSearch.getAbstractsMaxCountHash());
+                    indexabstract.append("indexabstract." + theSearch.getAbstractsMaxCountHash() + "=").append(theSearch.abstractsString(theSearch.getAbstractsMaxCountHash())).append(serverCore.CRLF_STRING);
+                    if ((theSearch.getAbstractsNearDHTHash() != null) && (!(theSearch.getAbstractsNearDHTHash().equals(theSearch.getAbstractsMaxCountHash())))) {
                         // in case that the neardhthash is different from the maxcounthash attach also the neardhthash-container
-                        indexabstractContainercount += (theSearch.IACount.get(theSearch.IAneardhthash)).intValue();
-                        indexabstract.append("indexabstract." + theSearch.IAneardhthash + "=").append(theSearch.IAResults.get(theSearch.IAneardhthash)).append(serverCore.CRLF_STRING);
+                        indexabstractContainercount += theSearch.abstractsCount(theSearch.getAbstractsNearDHTHash());
+                        indexabstract.append("indexabstract." + theSearch.getAbstractsNearDHTHash() + "=").append(theSearch.abstractsString(theSearch.getAbstractsNearDHTHash())).append(serverCore.CRLF_STRING);
                     }
                     //System.out.println("DEBUG-ABSTRACTGENERATION: maxcounthash = " + maxcounthash);
                     //System.out.println("DEBUG-ABSTRACTGENERATION: neardhthash  = "+ neardhthash);
@@ -373,8 +373,8 @@ public final class search {
         theQuery.remotepeer = sb.peers.lookupByIP(natLib.getInetAddress(client), true, false, false);
         theQuery.resultcount = (theSearch == null) ? 0 : theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
-        theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.snippets.getURLRetrievalTime();
-        theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.snippets.getSnippetComputationTime();
+        theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.result().getURLRetrievalTime();
+        theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.result().getSnippetComputationTime();
         sb.remoteSearches.add(theQuery);
         
         // update the search tracker

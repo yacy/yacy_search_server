@@ -24,9 +24,8 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.search.SearchEvent;
+import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -39,7 +38,7 @@ public class SearchEventPicture {
     
     public static ymageMatrix respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
-        final String eventID = header.get("event", SearchEvent.lastEventID);
+        final String eventID = header.get("event", SearchEventCache.lastEventID);
         if (eventID == null) return null;
         final ymageMatrix yp = NetworkGraph.getSearchEventPicture(sb.peers, eventID);
         if (yp == null) return new ymageMatrix(1, 1, ymageMatrix.MODE_SUB, "000000"); // empty image

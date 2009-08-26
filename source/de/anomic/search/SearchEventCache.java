@@ -26,45 +26,34 @@
 
 package de.anomic.search;
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.logging.Log;
 
 public class SearchEventCache {
 
-    protected static ConcurrentHashMap<String, SearchEvent> lastEvents = new ConcurrentHashMap<String, SearchEvent>(); // a cache for objects from this class: re-use old search requests
+    private static ConcurrentHashMap<String, SearchEvent> lastEvents = new ConcurrentHashMap<String, SearchEvent>(); // a cache for objects from this class: re-use old search requests
     public static final long eventLifetime = 60000; // the time an event will stay in the cache, 1 Minute
+
+    public static String lastEventID = "";
+    
+    public static void put(String eventID, SearchEvent event) {
+        lastEventID = eventID;
+        lastEvents.put(eventID, event);
+    }
     
     public static void cleanupEvents(final boolean all) {
         // remove old events in the event cache
         final Iterator<SearchEvent> i = lastEvents.values().iterator();
-        SearchEvent cleanEvent;
+        SearchEvent event;
         while (i.hasNext()) {
-            cleanEvent = i.next();
-            if ((all) || (cleanEvent.eventTime + eventLifetime < System.currentTimeMillis())) {
-                // execute deletion of failed words
-                int rw = cleanEvent.snippets.failedURLs.size();
-                if (rw > 0) {
-                    final TreeSet<byte[]> removeWords = cleanEvent.query.queryHashes;
-                    removeWords.addAll(cleanEvent.query.excludeHashes);
-                    try {
-                        final Iterator<byte[]> j = removeWords.iterator();
-                        // remove the same url hashes for multiple words
-                        while (j.hasNext()) {
-                            cleanEvent.indexSegment.termIndex().remove(j.next(), cleanEvent.snippets.failedURLs.keySet());
-                        }                    
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                    Log.logInfo("SearchEvents", "cleaning up event " + cleanEvent.query.id(true) + ", removed " + rw + " URL references on " + removeWords.size() + " words");
-                }                
+            event = i.next();
+            if ((all) || (event.getEventTime() + eventLifetime < System.currentTimeMillis())) {
+                event.cleanup();
                 
                 // remove the event
                 i.remove();
@@ -86,7 +75,7 @@ public class SearchEventCache {
         
         String id = query.id(false);
         SearchEvent event = SearchEventCache.lastEvents.get(id);
-        if (Switchboard.getSwitchboard().crawlQueues.noticeURL.size() > 0 && event != null && System.currentTimeMillis() - event.eventTime > 60000) {
+        if (Switchboard.getSwitchboard().crawlQueues.noticeURL.size() > 0 && event != null && System.currentTimeMillis() - event.getEventTime() > 60000) {
             // if a local crawl is ongoing, don't use the result from the cache to use possibly more results that come from the current crawl
             // to prevent that this happens during a person switches between the different result pages, a re-search happens no more than
             // once a minute
@@ -95,9 +84,9 @@ public class SearchEventCache {
         } else {
             if (event != null) {
                 //re-new the event time for this event, so it is not deleted next time too early
-                event.eventTime = System.currentTimeMillis();
+                event.resetEventTime();
                 // replace the query, because this contains the current result offset
-                event.query = query;
+                event.setQuery(query);
             }
         }
         if (event == null) {
@@ -105,15 +94,15 @@ public class SearchEventCache {
             event = new SearchEvent(query, indexSegment, peers, crawlResults, preselectedPeerHashes, generateAbstracts);
         } else {
             // if worker threads had been alive, but did not succeed, start them again to fetch missing links
-            if ((!event.snippets.anyWorkerAlive()) &&
-                (((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (event.snippets.images.size() + 30 < query.neededResults())) ||
-                 (event.snippets.result.size() < query.neededResults() + 10)) &&
+            if ((!event.result().anyWorkerAlive()) &&
+                (((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (event.result().images.size() + 30 < query.neededResults())) ||
+                 (event.result().result.size() < query.neededResults() + 10)) &&
                  //(event.query.onlineSnippetFetch) &&
-                (event.getRankingResult().getLocalResourceSize() + event.getRankingResult().getRemoteResourceSize() > event.snippets.result.size())) {
+                (event.getRankingResult().getLocalResourceSize() + event.getRankingResult().getRemoteResourceSize() > event.result().result.size())) {
                 // set new timeout
-                event.eventTime = System.currentTimeMillis();
+                event.resetEventTime();
                 // start worker threads to fetch urls and snippets
-                event.snippets.restartWorker();
+                event.result().restartWorker();
             }
         }
     

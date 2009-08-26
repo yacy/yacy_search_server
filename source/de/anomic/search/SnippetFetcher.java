@@ -50,8 +50,8 @@ public class SnippetFetcher {
     protected final static int workerThreadCount = 10;
     
     // input values
-    private final RankingProcess  rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
-    private final QueryParams     query;
+    final RankingProcess  rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
+    final QueryParams     query;
     private final Segment         indexSegment;
     private final yacySeedDB      peers;
     
@@ -103,7 +103,7 @@ public class SnippetFetcher {
 
     public void restartWorker() {
     	if (anyWorkerAlive()) return;
-    	this.workerThreads = new Worker[SearchEvent.workerThreadCount];
+    	this.workerThreads = new Worker[workerThreadCount];
     	Worker worker;
         for (int i = 0; i < workerThreads.length; i++) {
             worker = new Worker(i, 6000, (query.onlineSnippetFetch) ? 2 : 0);

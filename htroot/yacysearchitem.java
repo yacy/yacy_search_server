@@ -158,7 +158,7 @@ public class yacysearchitem {
             // image search; shows thumbnails
 
             prop.put("content", theQuery.contentdom + 1); // switch on specific content
-            final SnippetCache.MediaSnippet ms = theSearch.snippets.oneImage(item);
+            final SnippetCache.MediaSnippet ms = theSearch.result().oneImage(item);
             if (ms == null) {
                 prop.put("content_items", "0");
             } else {
