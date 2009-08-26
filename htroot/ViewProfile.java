@@ -1,12 +1,17 @@
 // ViewProfile_p.java 
 // -----------------------
-// part of YaCy
-// (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2004, 2005
+// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 07.04.2005 on http://yacy.net
+//
+// This is a part of YaCy, a peer-to-peer based web search engine
 //
 // This File is contributed by Alexander Schier
-// last change: 29.06.2005 by Marc Nause
+//
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
+//
+// LICENSE
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -162,7 +167,6 @@ public class ViewProfile {
                         prop.putHTML("success_" + key + "_value", value); //put replaces HTML Chars by entities.
                     }
                 }
-                //special handling, hide flower if no icq uin is set
             } else if (key.equals("homepage")) {
                 if (value.length() > 0) {
                     if (!(value.startsWith("http"))) {
