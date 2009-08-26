@@ -401,6 +401,8 @@ public class yacyURL implements Serializable {
                     || ch == '\'' || ch == '('
                     || ch == ')' || ch == ';') {
                 sbuf.append((char)ch);
+            } else if (ch == '/') {                 // reserved, but may appear in post part where it should not be replaced
+                sbuf.append((char)ch);
             } else if (ch <= 0x007f) {              // other ASCII
                 sbuf.append(hex[ch]);
             } else if (ch <= 0x07FF) {              // non-ASCII <= 0x7FF
