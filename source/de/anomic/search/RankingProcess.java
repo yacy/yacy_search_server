@@ -176,7 +176,8 @@ public final class RankingProcess extends Thread {
         boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts") >= 0;
         WordReferenceVars iEntry;
         final ArrayList<WordReferenceVars> filteredEntries = new ArrayList<WordReferenceVars>();
-        // apply all filter
+
+        // apply all constraints
         try {
 			while ((iEntry = decodedEntries.take()) != WordReferenceVars.poison) {
 			    assert (iEntry.metadataHash().length() == index.row().primaryKeyLength);
@@ -256,7 +257,7 @@ public final class RankingProcess extends Thread {
 		    }
 		    
 		}
-        
+
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
         serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
     }

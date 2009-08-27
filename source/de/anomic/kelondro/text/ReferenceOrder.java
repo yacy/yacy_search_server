@@ -124,52 +124,6 @@ public class ReferenceOrder {
     	return n.decoded();
     }
     
-    /*
-    public ArrayList<WordReferenceVars> normalizeWith(final ReferenceContainer<WordReference> container) {
-        // normalize ranking: find minimum and maximum of separate ranking criteria
-        assert (container != null);
-        BlockingQueue<WordReferenceVars> vars = WordReferenceVars.transform(container);
-        
-        WordReferenceVars entryMin = null;
-    	WordReferenceVars entryMax = null;
-        HashMap<String, Integer> doms = new HashMap<String, Integer>();
-        Integer int1 = 1;
-        ArrayList<WordReferenceVars> decodedEntries = new ArrayList<WordReferenceVars>();
-        
-        WordReferenceVars iEntry;
-        String dom;
-        Integer count;
-        try {
-			while ((iEntry = vars.take()) != WordReferenceVars.poison) {
-			    decodedEntries.add(iEntry);
-			    // find min/max
-			    if (entryMin == null) entryMin = iEntry.clone(); else entryMin.min(iEntry);
-			    if (entryMax == null) entryMax = iEntry.clone(); else entryMax.max(iEntry);
-			    // update domcount
-			    dom = iEntry.metadataHash().substring(6);
-			    count = doms.get(dom);
-			    if (count == null) {
-			    	doms.put(dom, int1);
-			    } else {
-			    	doms.put(dom, Integer.valueOf(count.intValue() + 1));
-			    }
-			}
-		} catch (InterruptedException e) {}
-        
-        if (this.min == null) this.min = entryMin.clone(); else this.min.min(entryMin);
-        if (this.max == null) this.max = entryMax.clone(); else this.max.max(entryMax);
-        Map.Entry<String, Integer> entry;
-        final Iterator<Map.Entry<String, Integer>> di = doms.entrySet().iterator();
-        while (di.hasNext()) {
-        	entry = di.next();
-        	this.doms.addScore(entry.getKey(), (entry.getValue()).intValue());
-        }
-            
-        if (this.doms.size() > 0) this.maxdomcount = this.doms.getMaxScore();
-        return decodedEntries;
-    }
-    */
-    
     public int authority(final String urlHash) {
     	return (doms.getScore(urlHash.substring(6)) << 8) / (1 + this.maxdomcount);
     }
