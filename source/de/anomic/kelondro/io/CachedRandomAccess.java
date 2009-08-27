@@ -38,26 +38,30 @@ public final class CachedRandomAccess extends AbstractRandomAccess implements Ra
     public CachedRandomAccess(final File file) throws IOException, FileNotFoundException {
         this.name = file.getName();
         this.file = file;
-        RAFile = new RandomAccessFile(file, "rw");
-        cache = new byte[8192];
-        cachestart = 0;
-        cachelen = 0;
+        this.RAFile = new RandomAccessFile(this.file, "rw");
+        this.cache = new byte[8192];
+        this.cachestart = 0;
+        this.cachelen = 0;
     }	
     
     public synchronized long length() throws IOException {
+        checkReopen();
         return this.RAFile.length();
     }
     
     public synchronized void setLength(long length) throws IOException {
+        checkReopen();
         cachelen = 0;
         RAFile.setLength(length);
     }
     
     public synchronized long available() throws IOException {
+        checkReopen();
         return this.length() - RAFile.getFilePointer();
     }
 
     public synchronized final void readFully(final byte[] b, final int off, int len) throws IOException {
+        checkReopen();
         long seek = RAFile.getFilePointer();
         if (cache != null && cachestart <= seek && cachelen - seek + cachestart >= len) {
             // read from cache
@@ -93,6 +97,7 @@ public final class CachedRandomAccess extends AbstractRandomAccess implements Ra
     }
 
     public synchronized void write(final byte[] b, final int off, final int len) throws IOException {
+        checkReopen();
         //assert len > 0;
         // write to file
         if (this.cache.length > 512) {
@@ -122,6 +127,7 @@ public final class CachedRandomAccess extends AbstractRandomAccess implements Ra
     }
 
     public synchronized void seek(final long pos) throws IOException {
+        checkReopen();
         RAFile.seek(pos);
     }
 
@@ -134,9 +140,21 @@ public final class CachedRandomAccess extends AbstractRandomAccess implements Ra
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.file = null;
         this.cache = null;
         this.RAFile = null;
+    }
+    
+    private void checkReopen() {
+        if (this.RAFile != null) return;
+        // re-open the file
+        try {
+            this.RAFile = new RandomAccessFile(this.file, "rw");
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        this.cache = new byte[8192];
+        this.cachestart = 0;
+        this.cachelen = 0;
     }
 
     protected void finalize() throws Throwable {

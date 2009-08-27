@@ -63,7 +63,7 @@ public class HeapReader {
         this.keylength = keylength;
         this.index = null; // will be created as result of initialization process
         this.free = null; // will be initialized later depending on existing idx/gap file
-        this.file = new CachedRandomAccess(heapFile);
+        this.file = new CachedRandomAccess(this.heapFile);
         
         // read or initialize the index
         if (initIndexReadDump()) {
@@ -94,6 +94,15 @@ public class HeapReader {
             // if we did not have a dump, create a new index
             initIndexReadFromHeap();
         }
+        
+        // merge gaps that follow directly
+        mergeFreeEntries();
+        
+        // after the initial initialization of the heap, we close the file again
+        // to make more room to file pointers which may run out if the number
+        // of file descriptors is too low and the number of files is too high
+        this.file.close();
+        // the file will be opened again automatically when the next access to it comes.
     }
     
     private boolean initIndexReadDump() {
@@ -203,6 +212,35 @@ public class HeapReader {
         }
         Log.logInfo("HeapReader", "finished index generation for " + heapFile.toString() + ", " + index.size() + " entries, " + free.size() + " gaps.");
         
+    }
+    
+    private void mergeFreeEntries() throws IOException {
+
+        // try to merge free entries
+        if (free.size() > 1) {
+            int merged = 0;
+            Map.Entry<Long, Integer> lastFree, nextFree;
+            final Iterator<Map.Entry<Long, Integer>> i = this.free.entrySet().iterator();
+            lastFree = i.next();
+            while (i.hasNext()) {
+                nextFree = i.next();
+                //System.out.println("*** DEBUG BLOB: free-seek = " + nextFree.seek + ", size = " + nextFree.size);
+                // check if they follow directly
+                if (lastFree.getKey() + lastFree.getValue() + 4 == nextFree.getKey()) {
+                    // merge those records
+                    this.file.seek(lastFree.getKey());
+                    lastFree.setValue(lastFree.getValue() + nextFree.getValue() + 4); // this updates also the free map
+                    this.file.writeInt(lastFree.getValue());
+                    this.file.seek(nextFree.getKey());
+                    this.file.writeInt(0);
+                    i.remove();
+                    merged++;
+                } else {
+                    lastFree = nextFree;
+                }
+            }
+            Log.logInfo("kelondroBLOBHeap", "BLOB " + heapFile.getName() + ": merged " + merged + " free records");
+        }
     }
     
     public String name() {

@@ -305,10 +305,10 @@ public class Digest {
         byte[] a = new byte[mb];
         try {
             raf.seek(0);
-            raf.readFully(a, 0, mb - 1);
+            raf.readFully(a, 0, mb);
             digest.update(a, 0, mb);
             raf.seek(fl - mb);
-            raf.readFully(a, 0, mb - 1);
+            raf.readFully(a, 0, mb);
             digest.update(a, 0, mb);
             digest.update(NaturalOrder.encodeLong(fl, 8), 0, 8);
             if (includeDate) digest.update(NaturalOrder.encodeLong(file.lastModified(), 8), 0, 8);

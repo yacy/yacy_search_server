@@ -26,8 +26,6 @@ package de.anomic.kelondro.blob;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.SortedMap;
 
 import de.anomic.kelondro.io.CachedRandomAccess;
@@ -55,37 +53,9 @@ public class HeapModifier extends HeapReader implements BLOB {
      */
     public HeapModifier(final File heapFile, final int keylength, final ByteOrder ordering) throws IOException {
         super(heapFile, keylength, ordering);
-        mergeFreeEntries();
     }
     
-    private void mergeFreeEntries() throws IOException {
-
-        // try to merge free entries
-        if (super.free.size() > 1) {
-            int merged = 0;
-            Map.Entry<Long, Integer> lastFree, nextFree;
-            final Iterator<Map.Entry<Long, Integer>> i = this.free.entrySet().iterator();
-            lastFree = i.next();
-            while (i.hasNext()) {
-                nextFree = i.next();
-                //System.out.println("*** DEBUG BLOB: free-seek = " + nextFree.seek + ", size = " + nextFree.size);
-                // check if they follow directly
-                if (lastFree.getKey() + lastFree.getValue() + 4 == nextFree.getKey()) {
-                    // merge those records
-                    this.file.seek(lastFree.getKey());
-                    lastFree.setValue(lastFree.getValue() + nextFree.getValue() + 4); // this updates also the free map
-                    this.file.writeInt(lastFree.getValue());
-                    this.file.seek(nextFree.getKey());
-                    this.file.writeInt(0);
-                    i.remove();
-                    merged++;
-                } else {
-                    lastFree = nextFree;
-                }
-            }
-            Log.logInfo("kelondroBLOBHeap", "BLOB " + heapFile.getName() + ": merged " + merged + " free records");
-        }
-    }
+    
     
     /**
      * clears the content of the database
