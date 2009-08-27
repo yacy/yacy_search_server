@@ -66,7 +66,7 @@ public final class SearchEvent {
     private final Segment indexSegment;
     private final yacySeedDB peers;
     private RankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
-    private SnippetFetcher snippets;
+    private ResultFetcher snippets;
     
     // class variables for search abstracts
     private final IndexAbstracts rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
@@ -144,7 +144,7 @@ public final class SearchEvent {
         } else {
             // do a local search
             this.rankedCache = new RankingProcess(indexSegment, query, max_results_preparation, 2);
-            this.rankedCache.execQuery();
+            this.rankedCache.run();
             //CrawlSwitchboard.Finding finding = wordIndex.retrieveURLs(query, false, 2, ranking, process);
             
             if (generateAbstracts) {
@@ -176,7 +176,7 @@ public final class SearchEvent {
         }
         
         // start worker threads to fetch urls and snippets
-        this.snippets = new SnippetFetcher(rankedCache, query, indexSegment, peers);
+        this.snippets = new ResultFetcher(rankedCache, query, indexSegment, peers);
         
         // clean up events
         SearchEventCache.cleanupEvents(false);
@@ -400,7 +400,7 @@ public final class SearchEvent {
         //assert e != null;
     }
     
-    public SnippetFetcher result() {
+    public ResultFetcher result() {
         return this.snippets;
     }
     

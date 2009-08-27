@@ -45,7 +45,7 @@ import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.logging.Log;
 import de.anomic.ymage.ProfilingGraph;
 
-public class SnippetFetcher {
+public class ResultFetcher {
 
     protected final static int workerThreadCount = 10;
     
@@ -66,7 +66,7 @@ public class SnippetFetcher {
     
     
     @SuppressWarnings("unchecked")
-    SnippetFetcher(
+    ResultFetcher(
             RankingProcess rankedCache,
             final QueryParams query,
             final Segment indexSegment,
@@ -112,7 +112,7 @@ public class SnippetFetcher {
         }
     }
     
-    ResultEntry obtainResultEntry(final URLMetadataRow page, final int snippetFetchMode) {
+    protected ResultEntry obtainResultEntry(final URLMetadataRow page, final int snippetFetchMode) {
 
         // a search result entry needs some work to produce a result Entry:
         // - check if url entry exists in LURL-db
@@ -276,7 +276,7 @@ public class SnippetFetcher {
                     if ((query.contentdom != QueryParams.CONTENTDOM_IMAGE) && (result.size() >= query.neededResults() + fetchAhead)) break;
     
                     // get next entry
-                    page = rankedCache.bestURL(true, 10000);
+                    page = rankedCache.takeURL(true, 10000);
                     if (page == null) break;
                     if (result.exists(page.hash().hashCode())) continue;
                     if (failedURLs.get(page.hash()) != null) continue;

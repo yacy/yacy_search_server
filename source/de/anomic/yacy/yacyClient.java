@@ -602,7 +602,7 @@ public final class yacyClient {
         // store remote result to local result container
         synchronized (containerCache) {
             // insert one container into the search result buffer
-            containerCache.insertRanked(container[0], false, joincount); // one is enough
+            containerCache.add(container[0], false, joincount); // one is enough
             
             // integrate remote topwords
             final String references = result.get("references");

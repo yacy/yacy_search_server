@@ -65,19 +65,21 @@ public final class RankingProcess extends Thread {
     private static boolean useYBR = true;
     private static final int maxDoubleDomAll = 20, maxDoubleDomSpecial = 10000;
     
-    private final SortStack<WordReferenceVars> stack;
-    private final HashMap<String, SortStack<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
-    private final HashSet<String> handover; // key = urlhash; used for double-check of urls that had been handed over to search process
+    private final Segment indexSegment;
     private final QueryParams query;
     private final int maxentries;
-    private int remote_peerCount, remote_indexCount, remote_resourceSize, local_resourceSize;
     private final ReferenceOrder order;
     private final ConcurrentHashMap<String, Integer> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private final int[] flagcount; // flag counter
     private final TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
-    private final Segment indexSegment;
-    private HashMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
     private final int[] domZones;
+    private HashMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
+    
+    private int remote_peerCount, remote_indexCount, remote_resourceSize, local_resourceSize;
+    private final SortStack<WordReferenceVars> stack;
+    private final HashMap<String, SortStack<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
+    private final HashSet<String> handover; // key = urlhash; used for double-check of urls that had been handed over to search process
+    
     private final ConcurrentHashMap<String, Integer> ref;  // reference score computation for the commonSense heuristic
     private final ConcurrentHashMap<String, HostInfo> hostNavigator;
     private final ConcurrentHashMap<String, AuthorInfo> authorNavigator;
@@ -114,12 +116,26 @@ public final class RankingProcess extends Thread {
     }
     
     public void run() {
-        // do a search concurrently
+        // do a search
         
         // sort the local containers and truncate it to a limited count,
         // so following sortings together with the global results will be fast
         try {
-            execQuery();
+            long timer = System.currentTimeMillis();
+            final TermSearch<WordReference> search = this.indexSegment.termIndex().query(
+                    query.queryHashes,
+                    query.excludeHashes,
+                    null,
+                    Segment.wordReferenceFactory,
+                    query.maxDistance);
+            this.localSearchInclusion = search.inclusion();
+            final ReferenceContainer<WordReference> index = search.joined();
+            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
+            if (index.size() == 0) {
+                return;
+            }
+            
+            add(index, true, index.size());
         } catch (final Exception e) {
             e.printStackTrace();
         }
@@ -133,26 +149,7 @@ public final class RankingProcess extends Thread {
         return this.domZones;
     }
     
-    public void execQuery() {
-        
-        long timer = System.currentTimeMillis();
-        final TermSearch<WordReference> search = this.indexSegment.termIndex().query(
-                query.queryHashes,
-                query.excludeHashes,
-                null,
-                Segment.wordReferenceFactory,
-                query.maxDistance);
-        this.localSearchInclusion = search.inclusion();
-        final ReferenceContainer<WordReference> index = search.joined();
-        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
-        if (index.size() == 0) {
-            return;
-        }
-        
-        insertRanked(index, true, index.size());
-    }
-    
-    public void insertRanked(final ReferenceContainer<WordReference> index, final boolean local, final int fullResource) {
+    public void add(final ReferenceContainer<WordReference> index, final boolean local, final int fullResource) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
@@ -173,14 +170,11 @@ public final class RankingProcess extends Thread {
         
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
-        final Iterator<WordReferenceVars> i = decodedEntries.iterator();
-        WordReferenceVars iEntry;
         Long r;
         HostInfo hs;
         String domhash;
         boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts") >= 0;
-        while (i.hasNext()) {
-            iEntry = i.next();
+        for (WordReferenceVars iEntry: decodedEntries) {
             assert (iEntry.metadataHash().length() == index.row().primaryKeyLength);
             //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
 
@@ -282,7 +276,7 @@ public final class RankingProcess extends Thread {
     // - root-domain guessing to prefer the root domain over other urls if search word appears in domain name
     
     
-    private SortStack<WordReferenceVars>.stackElement bestRWI(final boolean skipDoubleDom) {
+    private SortStack<WordReferenceVars>.stackElement takeRWI(final boolean skipDoubleDom) {
         // returns from the current RWI list the best entry and removes this entry from the list
         SortStack<WordReferenceVars> m;
         SortStack<WordReferenceVars>.stackElement rwi;
@@ -328,16 +322,19 @@ public final class RankingProcess extends Thread {
         return bestEntry;
     }
     
-    public URLMetadataRow bestURL(final boolean skipDoubleDom) {
+    public URLMetadataRow takeURL(final boolean skipDoubleDom) {
         // returns from the current RWI list the best URL entry and removes this entry from the list
         while ((stack.size() > 0) || (size() > 0)) {
             if (((stack.size() == 0) && (size() == 0))) break;
-            final SortStack<WordReferenceVars>.stackElement obrwi = bestRWI(skipDoubleDom);
+            final SortStack<WordReferenceVars>.stackElement obrwi = takeRWI(skipDoubleDom);
             if (obrwi == null) continue; // *** ? this happened and the thread was suspended silently. cause?
             final URLMetadataRow u = indexSegment.urlMetadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
             if (u != null) {
                 final URLMetadataRow.Components metadata = u.metadata();
 
+                // TODO: check url constraints
+                
+                
                 // evaluate information of metadata for navigation
                 // author navigation:
                 String author = metadata.dc_creator();
@@ -376,11 +373,11 @@ public final class RankingProcess extends Thread {
         return null;
     }
     
-    public URLMetadataRow bestURL(final boolean skipDoubleDom, long timeout) {
+    public URLMetadataRow takeURL(final boolean skipDoubleDom, long timeout) {
         timeout += System.currentTimeMillis();
         long wait = 10;
         while (System.currentTimeMillis() < timeout) {
-            URLMetadataRow row = bestURL(skipDoubleDom);
+            URLMetadataRow row = takeURL(skipDoubleDom);
             if (row != null) return row;
             try {Thread.sleep(wait);} catch (final InterruptedException e1) {}
             wait = wait * 2;
@@ -391,8 +388,9 @@ public final class RankingProcess extends Thread {
     public int size() {
         //assert sortedRWIEntries.size() == urlhashes.size() : "sortedRWIEntries.size() = " + sortedRWIEntries.size() + ", urlhashes.size() = " + urlhashes.size();
         int c = stack.size();
-        final Iterator<SortStack<WordReferenceVars>> i = this.doubleDomCache.values().iterator();
-        while (i.hasNext()) c += i.next().size();
+        for (SortStack<WordReferenceVars> s: this.doubleDomCache.values()) {
+            c += s.size();
+        }
         return c;
     }
     

@@ -366,7 +366,7 @@ public class IndexControlRWIs_p {
             URLMetadataRow entry;
             String us;
             long rn = -1;
-            while ((ranked.size() > 0) && ((entry = ranked.bestURL(false)) != null)) {
+            while ((ranked.size() > 0) && ((entry = ranked.takeURL(false)) != null)) {
                 if ((entry == null) || (entry.metadata() == null)) continue;
                 url = entry.metadata().url();
                 if (url == null) continue;
@@ -480,7 +480,7 @@ public class IndexControlRWIs_p {
     public static RankingProcess genSearchresult(final serverObjects prop, final Switchboard sb, final byte[] keyhash, final Bitfield filter) {
         final QueryParams query = new QueryParams(new String(keyhash), -1, sb.getRanking(), filter);
         final RankingProcess ranked = new RankingProcess(sb.indexSegment, query, Integer.MAX_VALUE, 1);
-        ranked.execQuery();
+        ranked.run();
         
         if (ranked.filteredCount() == 0) {
             prop.put("searchresult", 2);
