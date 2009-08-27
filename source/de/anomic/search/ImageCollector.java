@@ -46,7 +46,7 @@ public final class ImageCollector {
         if (maxTime > 10) {
             Object[] resource = null;
             try {
-                resource = SnippetCache.getResource(url, true, (int) maxTime, false, indexing);
+                resource = Switchboard.getSwitchboard().loader.getResource(url, true, (int) maxTime, false, indexing);
             } catch (IOException e) {
                 Log.logWarning("ViewImage", "cannot load: " + e.getMessage());
             }
@@ -57,7 +57,7 @@ public final class ImageCollector {
                 Document document = null;
                 try {
                     // parse the document
-                    document = SnippetCache.parseDocument(url, resLength.longValue(), res);
+                    document = Document.parseDocument(url, resLength.longValue(), res);
                 } catch (final ParserException e) {
                     // parsing failed
                     Log.logWarning("ViewImage", "cannot parse: " + e.getMessage());

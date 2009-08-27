@@ -45,6 +45,9 @@ import java.util.TreeSet;
 
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.ImageEntry;
+import de.anomic.http.client.Cache;
+import de.anomic.http.client.Client;
+import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCachedFileOutputStream;
@@ -605,6 +608,62 @@ dc_rights
     protected void finalize() throws Throwable {
         this.close();
         super.finalize();
+    }
+    
+
+    /**
+     * Parse the resource
+     * @param url the URL of the resource
+     * @param contentLength the contentLength of the resource
+     * @param resourceStream the resource body as stream
+     * @param docInfo metadata about the resource
+     * @return the extracted data
+     * @throws ParserException
+     */
+    public static Document parseDocument(final yacyURL url, final long contentLength, final InputStream resourceStream, ResponseHeader responseHeader) throws ParserException {
+        try {
+            if (resourceStream == null) return null;
+
+            // STEP 1: if no resource metadata is available, try to load it from cache 
+            if (responseHeader == null) {
+                // try to get the header from the htcache directory
+                try {                    
+                    responseHeader = Cache.getResponseHeader(url);
+                } catch (final Exception e) {
+                    // ignore this. resource info loading failed
+                }   
+            }
+            
+            // STEP 2: if the metadata is still null try to download it from web
+            if ((responseHeader == null) && (url.getProtocol().startsWith("http"))) {
+                // TODO: we need a better solution here
+                // e.g. encapsulate this in the crawlLoader class
+                
+                // getting URL mimeType
+                try {
+                    responseHeader = Client.whead(url.toString());
+                } catch (final Exception e) {
+                    // ingore this. http header download failed
+                } 
+            }
+
+            // STEP 3: if the metadata is still null try to guess the mimeType of the resource
+            String supportError = Parser.supports(url, responseHeader == null ? null : responseHeader.mime());
+            if (supportError != null) {
+                return null;
+            }
+            if (responseHeader == null) {
+                return Parser.parseSource(url, null, null, contentLength, resourceStream);
+            }
+            return Parser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), contentLength, resourceStream);
+        } catch (final InterruptedException e) {
+            // interruption of thread detected
+            return null;
+        }
+    }
+    
+    public static Document parseDocument(final yacyURL url, final long contentLength, final InputStream resourceStream) throws ParserException {
+        return parseDocument(url, contentLength, resourceStream, null);
     }
     
 }

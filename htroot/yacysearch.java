@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.content.RSSMessage;
+import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.document.Condenser;
 import de.anomic.document.Word;
 import de.anomic.document.Document;
@@ -47,7 +48,6 @@ import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.SearchEvent;
 import de.anomic.search.SearchEventCache;
-import de.anomic.search.SnippetCache;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
@@ -390,7 +390,7 @@ public class yacysearch {
                 if (urlentry != null) {
                     final URLMetadataRow.Components metadata = urlentry.metadata();
                     Document document;
-                    document = SnippetCache.retrieveDocument(metadata.url(), true, 5000, true, false);
+                    document = LoaderDispatcher.retrieveDocument(metadata.url(), true, 5000, true, false);
                     if (document != null) {
                         // create a news message
                         final HashMap<String, String> map = new HashMap<String, String>();

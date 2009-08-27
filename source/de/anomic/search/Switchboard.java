@@ -577,7 +577,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         
         // generate snippets cache
         log.logConfig("Initializing Snippet Cache");
-        SnippetCache.init(log, this);
+        TextSnippet.init(log, this);
         
         // init the wiki
         wikiParser = new wikiCode(this.peers.mySeed().getClusterAddress());
@@ -1805,7 +1805,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
             // get the resource content
             Object[] resource = null;
             try {
-                resource = SnippetCache.getResource(metadata.url(), fetchOnline, 10000, true, false);
+                resource = loader.getResource(metadata.url(), fetchOnline, 10000, true, false);
             } catch (IOException e) {
                 Log.logWarning("removeAllUrlReferences", "cannot load: " + e.getMessage());
             }
@@ -1818,7 +1818,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
                 final Long resourceContentLength = (Long) resource[1];
                 
                 // parse the resource
-                final Document document = SnippetCache.parseDocument(metadata.url(), resourceContentLength.longValue(), resourceContent);
+                final Document document = Document.parseDocument(metadata.url(), resourceContentLength.longValue(), resourceContent);
                 
                 // get the word set
                 Set<String> words = null;

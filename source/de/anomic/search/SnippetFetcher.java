@@ -39,7 +39,7 @@ import de.anomic.kelondro.util.SetTools;
 import de.anomic.kelondro.util.SortStack;
 import de.anomic.kelondro.util.SortStore;
 import de.anomic.search.RankingProcess.NavigatorEntry;
-import de.anomic.search.SnippetCache.MediaSnippet;
+import de.anomic.search.MediaSnippet;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.logging.Log;
@@ -56,11 +56,11 @@ public class SnippetFetcher {
     private final yacySeedDB      peers;
     
     // result values
-    protected       Worker[]                             workerThreads;
-    protected final SortStore<ResultEntry>               result;
-    protected final SortStore<SnippetCache.MediaSnippet> images; // container to sort images by size
-    protected final HashMap<String, String>              failedURLs; // a mapping from a urlhash to a fail reason string
-    protected final TreeSet<byte[]>                      snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
+    protected       Worker[]                workerThreads;
+    protected final SortStore<ResultEntry>  result;
+    protected final SortStore<MediaSnippet> images; // container to sort images by size
+    protected final HashMap<String, String> failedURLs; // a mapping from a urlhash to a fail reason string
+    protected final TreeSet<byte[]>         snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     long urlRetrievalAllTime;
     long snippetComputationAllTime;
     
@@ -80,7 +80,7 @@ public class SnippetFetcher {
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
         this.result = new SortStore<ResultEntry>(-1); // this is the result, enriched with snippets, ranked and ordered by ranking
-        this.images = new SortStore<SnippetCache.MediaSnippet>(-1);
+        this.images = new SortStore<MediaSnippet>(-1);
         this.failedURLs = new HashMap<String, String>(); // a map of urls to reason strings where a worker thread tried to work on, but failed.
         
         // snippets do not need to match with the complete query hashes,
@@ -185,7 +185,7 @@ public class SnippetFetcher {
         if (query.contentdom == QueryParams.CONTENTDOM_TEXT) {
             // attach text snippet
             startTime = System.currentTimeMillis();
-            final SnippetCache.TextSnippet snippet = SnippetCache.retrieveTextSnippet(metadata, snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(Condenser.flag_cat_indexof))), 180, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 30000, query.isGlobal());
+            final TextSnippet snippet = TextSnippet.retrieveTextSnippet(metadata, snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(Condenser.flag_cat_indexof))), 180, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 30000, query.isGlobal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
             Log.logInfo("SEARCH_EVENT", "text snippet load time for " + metadata.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
             
@@ -201,7 +201,7 @@ public class SnippetFetcher {
                 registerFailure(page.hash(), "no text snippet for URL " + metadata.url());
                 if (!peers.mySeed().isVirgin())
                     try {
-                        SnippetCache.failConsequences(snippet, query.id(false));
+                        TextSnippet.failConsequences(snippet, query.id(false));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -210,7 +210,7 @@ public class SnippetFetcher {
         } else {
             // attach media information
             startTime = System.currentTimeMillis();
-            final ArrayList<MediaSnippet> mediaSnippets = SnippetCache.retrieveMediaSnippets(metadata.url(), snippetFetchWordHashes, query.contentdom, (snippetFetchMode == 2), 6000, query.isGlobal());
+            final ArrayList<MediaSnippet> mediaSnippets = MediaSnippet.retrieveMediaSnippets(metadata.url(), snippetFetchWordHashes, query.contentdom, (snippetFetchMode == 2), 6000, query.isGlobal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
             Log.logInfo("SEARCH_EVENT", "media snippet load time for " + metadata.url() + ": " + snippetComputationTime);
             
@@ -355,7 +355,7 @@ public class SnippetFetcher {
         return re;
     }
     
-    public SnippetCache.MediaSnippet oneImage(final int item) {
+    public MediaSnippet oneImage(final int item) {
         // check if we already retrieved this item (happens if a search pages is accessed a second time)
         if (this.images.sizeStore() > item) {
             // we have the wanted result already in the result array .. return that
@@ -367,10 +367,10 @@ public class SnippetFetcher {
         for (int i = 0; i < count; i++) {
             // generate result object
             final ResultEntry result = nextResult();
-            SnippetCache.MediaSnippet ms;
+            MediaSnippet ms;
             if (result != null) {
                 // iterate over all images in the result
-                final ArrayList<SnippetCache.MediaSnippet> imagemedia = result.mediaSnippets();
+                final ArrayList<MediaSnippet> imagemedia = result.mediaSnippets();
                 if (imagemedia != null) {
                     for (int j = 0; j < imagemedia.size(); j++) {
                         ms = imagemedia.get(j);

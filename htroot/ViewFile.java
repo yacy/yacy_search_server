@@ -46,7 +46,6 @@ import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.search.SnippetCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -241,7 +240,7 @@ public class ViewFile {
             // parsing the resource content
             Document document = null;
             try {
-                document = SnippetCache.parseDocument(url, resourceLength, resource);
+                document = Document.parseDocument(url, resourceLength, resource);
                 if (document == null) {
                     prop.put("error", "5");
                     prop.put("error_errorText", "Unknown error");

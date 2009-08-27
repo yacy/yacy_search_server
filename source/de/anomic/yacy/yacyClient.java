@@ -84,9 +84,9 @@ import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.RankingProcess;
-import de.anomic.search.SnippetCache;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
+import de.anomic.search.TextSnippet;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.tools.crypt;
@@ -587,7 +587,7 @@ public final class yacyClient {
                 // because they are search-specific.
 				// instead, they are placed in a snipped-search cache.
 				// System.out.println("--- RECEIVED SNIPPET '" + link.snippet() + "'");
-				SnippetCache.storeToCache(wordhashes, urlEntry.hash(), urlEntry.snippet());
+			    TextSnippet.storeToCache(wordhashes, urlEntry.hash(), urlEntry.snippet());
 			}
             
 			// add the url entry to the word indexes

@@ -48,6 +48,7 @@ import java.util.TreeSet;
 import de.anomic.document.language.Identificator;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.ImageEntry;
+import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.SetTools;
@@ -462,6 +463,22 @@ public final class Condenser {
     		return false;
     	}
     	return true;
+    }
+
+    public static TreeMap<byte[], Integer> hashSentence(final String sentence) {
+        // generates a word-wordPos mapping
+        final TreeMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
+        final Enumeration<StringBuilder> words = wordTokenizer(sentence, "UTF-8");
+        int pos = 0;
+        StringBuilder word;
+        byte[] hash;
+        while (words.hasMoreElements()) {
+            word = words.nextElement();
+            hash = Word.word2hash(new String(word));
+            if (!map.containsKey(hash)) map.put(hash, Integer.valueOf(pos)); // don't overwrite old values, that leads to too far word distances
+            pos += word.length() + 1;
+        }
+        return map;
     }
     
     public static Enumeration<StringBuilder> wordTokenizer(final String s, final String charset) {

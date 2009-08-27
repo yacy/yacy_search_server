@@ -26,7 +26,9 @@
 
 package de.anomic.crawler.retrieval;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -35,6 +37,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.document.Document;
+import de.anomic.document.ParserException;
 import de.anomic.http.client.Cache;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
@@ -234,7 +238,125 @@ public final class LoaderDispatcher {
         
         throw new IOException("Unsupported protocol '" + protocol + "' in url " + request.url());
     }
+
+    /**
+     * 
+     * @param url
+     * @param fetchOnline
+     * @param socketTimeout
+     * @param forText 
+     * @return an Object array containing
+     * <table>
+     * <tr><td>[0]</td><td>the content as {@link InputStream}</td></tr>
+     * <tr><td>[1]</td><td>the content-length as {@link Integer}</td></tr>
+     * </table>
+     * @throws IOException 
+     */
+    public Object[] getResource(final yacyURL url, final boolean fetchOnline, final int socketTimeout, final boolean forText, final boolean reindexing) throws IOException {
+        // load the url as resource from the web
+        long contentLength = -1;
+            
+        // trying to load the resource body from cache
+        InputStream resource = Cache.getContentStream(url);
+        if (resource != null) {
+            contentLength = Cache.getResourceContentLength(url);
+        } else if (fetchOnline) {
+            // if the content is not available in cache try to download it from web
+            
+            // try to download the resource using the loader
+            final Response entry = load(url, forText, reindexing);
+            if (entry == null) return null; // not found in web
+            
+            // read resource body (if it is there)
+            final byte[] resourceArray = entry.getContent();
+        
+            // in case that the resource was not in ram, read it from disk
+            if (resourceArray == null) {
+                resource = Cache.getContentStream(url);   
+                contentLength = Cache.getResourceContentLength(url); 
+            } else {
+                resource = new ByteArrayInputStream(resourceArray);
+                contentLength = resourceArray.length;
+            }
+        } else {
+            return null;
+        }
+        return new Object[]{resource, Long.valueOf(contentLength)};
+    }
     
+    /**
+     * Tries to load and parse a resource specified by it's URL.
+     * If the resource is not stored in cache and if fetchOnline is set the
+     * this function tries to download the resource from web.
+     * 
+     * @param url the URL of the resource
+     * @param fetchOnline specifies if the resource should be loaded from web if it'as not available in the cache
+     * @param timeout 
+     * @param forText 
+     * @param global the domain of the search. If global == true then the content is re-indexed
+     * @return the parsed document as {@link Document}
+     */
+    public static Document retrieveDocument(final yacyURL url, final boolean fetchOnline, final int timeout, final boolean forText, final boolean global) {
+
+        // load resource
+        long resContentLength = 0;
+        InputStream resContent = null;
+        ResponseHeader responseHeader = null;
+        try {
+            // trying to load the resource from the cache
+            resContent = Cache.getContentStream(url);
+            responseHeader = Cache.getResponseHeader(url);
+            if (resContent != null) {
+                // if the content was found
+                resContentLength = Cache.getResourceContentLength(url);
+            } else if (fetchOnline) {
+                // if not found try to download it
+                
+                // download resource using the crawler and keep resource in memory if possible
+                final Response entry = Switchboard.getSwitchboard().loader.load(url, forText, global);
+                
+                // getting resource metadata (e.g. the http headers for http resources)
+                if (entry != null) {
+
+                    // read resource body (if it is there)
+                    final byte[] resourceArray = entry.getContent();
+                    if (resourceArray != null) {
+                        resContent = new ByteArrayInputStream(resourceArray);
+                        resContentLength = resourceArray.length;
+                    } else {
+                        resContent = Cache.getContentStream(url); 
+                        resContentLength = Cache.getResourceContentLength(url);
+                    }
+                }
+                
+                // if it is still not available, report an error
+                if (resContent == null) {
+                    Log.logFine("snippet fetch", "plasmaHTCache.Entry cache is NULL for url " + url);
+                    return null;
+                }
+            } else {
+                Log.logFine("snippet fetch", "no resource available for url " + url);
+                return null;
+            }
+        } catch (final Exception e) {
+            Log.logFine("snippet fetch", "error loading resource: " + e.getMessage() + " for url " + url);
+            return null;
+        } 
+
+        // parse resource
+        Document document = null;
+        try {
+            document = Document.parseDocument(url, resContentLength, resContent, responseHeader);            
+        } catch (final ParserException e) {
+            Log.logFine("snippet fetch", "parser error " + e.getMessage() + " for url " + url);
+            return null;
+        } finally {
+            try { resContent.close(); } catch (final Exception e) {}
+        }
+        return document;
+    }
+    
+
     public synchronized void cleanupAccessTimeTable(long timeout) {
     	final Iterator<Map.Entry<String, Long>> i = accessTime.entrySet().iterator();
         Map.Entry<String, Long> e;

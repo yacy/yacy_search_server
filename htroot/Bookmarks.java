@@ -36,6 +36,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.userDB;
@@ -44,7 +45,6 @@ import de.anomic.document.Document;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.search.SnippetCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -187,7 +187,7 @@ public class Bookmarks {
                         Document document = null;
                         if (urlentry != null) {
                             final URLMetadataRow.Components metadata = urlentry.metadata();
-                            document = SnippetCache.retrieveDocument(metadata.url(), true, 5000, true, false);
+                            document = LoaderDispatcher.retrieveDocument(metadata.url(), true, 5000, true, false);
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", metadata.url().toNormalform(false, true));
                             prop.putHTML("mode_title", metadata.dc_title());

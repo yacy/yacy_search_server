@@ -32,7 +32,6 @@ import java.util.HashMap;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.search.SnippetCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -89,7 +88,7 @@ public class ViewImage {
         if (scaled == null) {
             Object[] resource = null;
             if (url != null) try {
-                resource = SnippetCache.getResource(url, true, timeout, false, true);
+                resource = sb.loader.getResource(url, true, timeout, false, true);
             } catch (IOException e) {
                 Log.logWarning("ViewImage", "cannot load: " + e.getMessage());
             }

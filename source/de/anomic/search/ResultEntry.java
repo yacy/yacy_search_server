@@ -48,8 +48,8 @@ public class ResultEntry {
     private final URLMetadataRow.Components urlcomps; // buffer for components
     private String alternative_urlstring;
     private String alternative_urlname;
-    private final SnippetCache.TextSnippet textSnippet;
-    private final ArrayList<SnippetCache.MediaSnippet> mediaSnippets;
+    private final TextSnippet textSnippet;
+    private final ArrayList<MediaSnippet> mediaSnippets;
     
     // statistic objects
     public long dbRetrievalTime, snippetComputationTime;
@@ -57,8 +57,8 @@ public class ResultEntry {
     public ResultEntry(final URLMetadataRow urlentry,
                        final Segment indexSegment,
                        yacySeedDB peers,
-                       final SnippetCache.TextSnippet textSnippet,
-                       final ArrayList<SnippetCache.MediaSnippet> mediaSnippets,
+                       final TextSnippet textSnippet,
+                       final ArrayList<MediaSnippet> mediaSnippets,
                        final long dbRetrievalTime, final long snippetComputationTime) {
         this.urlentry = urlentry;
         this.urlcomps = urlentry.metadata();
@@ -118,10 +118,10 @@ public class ResultEntry {
     public String title() {
         return urlcomps.dc_title();
     }
-    public SnippetCache.TextSnippet textSnippet() {
+    public TextSnippet textSnippet() {
         return this.textSnippet;
     }
-    public ArrayList<SnippetCache.MediaSnippet> mediaSnippets() {
+    public ArrayList<MediaSnippet> mediaSnippets() {
         return this.mediaSnippets;
     }
     public Date modified() {
