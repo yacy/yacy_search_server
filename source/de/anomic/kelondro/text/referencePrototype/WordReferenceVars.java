@@ -27,15 +27,24 @@
 package de.anomic.kelondro.text.referencePrototype;
 
 import java.util.ArrayList;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.text.AbstractReference;
 import de.anomic.kelondro.text.Reference;
+import de.anomic.kelondro.text.ReferenceContainer;
 
-public class WordReferenceVars  extends AbstractReference implements WordReference, Reference, Cloneable {
+public class WordReferenceVars extends AbstractReference implements WordReference, Reference, Cloneable {
 
+	/**
+	 * object for termination of concurrent blocking queue processing
+	 */
+	public static final WordReferenceVars poison = new WordReferenceVars();
+    
+	
     public Bitfield flags;
     public long lastModified;
     public String language, urlHash;
@@ -47,7 +56,8 @@ public class WordReferenceVars  extends AbstractReference implements WordReferen
     ArrayList<Integer> positions;
     public double termFrequency;
     
-    public WordReferenceVars(final String  urlHash,
+    public WordReferenceVars(
+    		final String   urlHash,
             final int      urlLength,     // byte-length of complete URL
             final int      urlComps,      // number of path components
             final int      titleLength,   // length of description/length (longer are better?)
@@ -112,6 +122,30 @@ public class WordReferenceVars  extends AbstractReference implements WordReferen
         this.wordsintext = e.wordsintext();
         this.wordsintitle = e.wordsintitle();
         this.termFrequency = e.termFrequency();
+    }
+    
+    /**
+     * initializer for special poison object
+     */
+    public WordReferenceVars() {
+        this.flags = null;
+        this.lastModified = 0;
+        this.language = null;
+        this.urlHash = null;
+        this.type = ' ';
+        this.hitcount = 0;
+        this.llocal = 0;
+        this.lother = 0;
+        this.phrasesintext = 0;
+        this.positions = null;
+        this.posinphrase = 0;
+        this.posofphrase = 0;
+        this.urlcomps = 0;
+        this.urllength = 0;
+        this.virtualAge = 0;
+        this.wordsintext = 0;
+        this.wordsintitle = 0;
+        this.termFrequency = 0.0;
     }
     
     public WordReferenceVars clone() {
@@ -265,6 +299,7 @@ public class WordReferenceVars  extends AbstractReference implements WordReferen
     }
     
     public final void min(final WordReferenceVars other) {
+    	if (other == null) return;
         int v;
         long w;
         double d;
@@ -286,6 +321,7 @@ public class WordReferenceVars  extends AbstractReference implements WordReferen
     }
     
     public final void max(final WordReferenceVars other) {
+    	if (other == null) return;
         int v;
         long w;
         double d;
@@ -327,6 +363,57 @@ public class WordReferenceVars  extends AbstractReference implements WordReferen
     public void addPosition(int position) {
         this.positions.add(position);
     }
-
     
+    /**
+     * transform a reference container into a stream of parsed entries
+     * @param container
+     * @return a blocking queue filled with WordReferenceVars that is still filled when the object is returned
+     */
+    public static BlockingQueue<WordReferenceVars> transform(ReferenceContainer<WordReference> container) {
+    	LinkedBlockingQueue<WordReferenceRow> in = new LinkedBlockingQueue<WordReferenceRow>();
+    	LinkedBlockingQueue<WordReferenceVars> out = new LinkedBlockingQueue<WordReferenceVars>();
+
+    	// start the transformation threads
+    	int cores = Math.min(Runtime.getRuntime().availableProcessors(), container.size() / 200 + 1);
+    	for (int i = 0; i < cores; i++) new Transformer(in, out).start();
+    	
+    	// fill the queue
+    	int p = 0;
+    	try {
+    		while (p < container.size()) {
+				in.put(new WordReferenceRow(container.get(p++, false)));
+            }
+    	} catch (InterruptedException e) {}
+    	
+    	// insert poison to stop the queues
+    	try {
+    	    for (int i = 0; i < cores; i++) in.put(WordReferenceRow.poison);
+    	} catch (InterruptedException e) {}
+
+    	// return the resulting queue while the processing queues are still working
+    	return out;
+    }
+
+    public static class Transformer extends Thread {
+
+    	BlockingQueue<WordReferenceRow> in;
+    	BlockingQueue<WordReferenceVars> out;
+    	
+    	public Transformer(BlockingQueue<WordReferenceRow> in, BlockingQueue<WordReferenceVars> out) {
+    		this.in = in;
+    		this.out = out;
+    	}
+    	
+    	public void run() {
+    		WordReferenceRow row;
+    		try {
+				while ((row = in.take()) != WordReferenceRow.poison) out.put(new WordReferenceVars(row));
+			} catch (InterruptedException e) {}
+
+			// insert poison to signal the termination to next queue
+	    	try {
+	    	    out.put(WordReferenceVars.poison);
+	    	} catch (InterruptedException e) {}
+    	}
+    }
 }

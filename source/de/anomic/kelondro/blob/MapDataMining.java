@@ -328,7 +328,7 @@ public class MapDataMining extends MapView {
         return super.size();
     }
     
-    public void close() {
+    public synchronized void close() {
         // close cluster
         if (sortClusterMap != null) {
             for (int i = 0; i < sortfields.length; i++) sortClusterMap.remove(sortfields[i]);

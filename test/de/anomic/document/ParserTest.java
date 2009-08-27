@@ -1,6 +1,6 @@
 package de.anomic.document;
 
-import static org.junit.Assert.*;
+//import static org.junit.Assert.*;
 import org.junit.Test;
 
 import java.io.File;

@@ -37,10 +37,18 @@ import de.anomic.kelondro.text.AbstractReference;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.yacy.yacySeedDB;
 
+/**
+ * this object stores attributes to URL references inside RWI collections
+ *
+ */
 public final class WordReferenceRow extends AbstractReference implements WordReference, Cloneable {
 
-    // this object stores attributes to URL references inside RWI collections
-
+	/**
+	 * object for termination of concurrent blocking queue processing
+	 */
+	public static final WordReferenceRow poison = new WordReferenceRow((Row.Entry) null);
+    
+    
     public static final Row urlEntryRow = new Row(new Column[]{
             new Column("h", Column.celltype_string,    Column.encoder_bytes, yacySeedDB.commonHashLength, "urlhash"),
             new Column("a", Column.celltype_cardinal,  Column.encoder_b256,  2, "lastModified"),

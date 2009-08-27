@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 
 import de.anomic.document.Condenser;
 import de.anomic.kelondro.order.Bitfield;
@@ -39,7 +40,6 @@ import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.RankingProcess;
-import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacyURL;
 
 public class ReferenceOrder {
@@ -61,54 +61,45 @@ public class ReferenceOrder {
     public ArrayList<WordReferenceVars> normalizeWith(final ReferenceContainer<WordReference> container) {
         // normalize ranking: find minimum and maxiumum of separate ranking criteria
         assert (container != null);
-        ArrayList<WordReferenceVars> result = null;
+        BlockingQueue<WordReferenceVars> vars = WordReferenceVars.transform(container);
         
-        //long s0 = System.currentTimeMillis();
-        if ((serverProcessor.useCPU > 1) && (container.size() > 600)) {
-            // run minmax with two threads
-            final int middle = container.size() / 2;
-            final minmaxfinder mmf0 = new minmaxfinder(container, 0, middle);
-            mmf0.start(); // fork here
-            final minmaxfinder mmf1 = new minmaxfinder(container, middle, container.size());
-            mmf1.run(); // execute other fork in this thread
-            if (this.min == null) this.min = mmf1.entryMin.clone(); else this.min.min(mmf1.entryMin);
-            if (this.max == null) this.max = mmf1.entryMax.clone(); else this.max.max(mmf1.entryMax);
-            Map.Entry<String, Integer> entry;
-            Iterator<Map.Entry<String, Integer>> di = mmf1.domcount().entrySet().iterator();
-            while (di.hasNext()) {
-            	entry = di.next();
-            	this.doms.addScore(entry.getKey(), (entry.getValue()).intValue());
-            }
-            try {mmf0.join();} catch (final InterruptedException e) {} // wait for fork thread to finish
-            if (this.min == null) this.min = mmf0.entryMin.clone(); else this.min.min(mmf0.entryMin);
-            if (this.max == null) this.max = mmf0.entryMax.clone(); else this.max.max(mmf0.entryMax);
-            di = mmf0.domcount().entrySet().iterator();
-            while (di.hasNext()) {
-            	entry = di.next();
-            	this.doms.addScore(entry.getKey(), (entry.getValue()).intValue());
-            }
-            result = mmf0.decodedContainer();
-            result.addAll(mmf1.decodedContainer());
-            //long s1= System.currentTimeMillis(), sc = Math.max(1, s1 - s0);
-            //System.out.println("***DEBUG*** indexRWIEntry.Order (2-THREADED): " + sc + " milliseconds for " + container.size() + " entries, " + (container.size() / sc) + " entries/millisecond");
-        } else if (container.size() > 0) {
-            // run minmax in one thread
-            final minmaxfinder mmf = new minmaxfinder(container, 0, container.size());
-            mmf.run(); // execute without multi-threading
-            if (this.min == null) this.min = mmf.entryMin.clone(); else this.min.min(mmf.entryMin);
-            if (this.max == null) this.max = mmf.entryMax.clone(); else this.max.max(mmf.entryMax);
-            Map.Entry<String, Integer> entry;
-            final Iterator<Map.Entry<String, Integer>> di = mmf.domcount().entrySet().iterator();
-            while (di.hasNext()) {
-            	entry = di.next();
-            	this.doms.addScore(entry.getKey(), (entry.getValue()).intValue());
-            }
-            result = mmf.decodedContainer();
-            //long s1= System.currentTimeMillis(), sc = Math.max(1, s1 - s0);
-            //System.out.println("***DEBUG*** indexRWIEntry.Order (ONETHREAD): " + sc + " milliseconds for " + container.size() + " entries, " + (container.size() / sc) + " entries/millisecond");
+        WordReferenceVars entryMin = null;
+    	WordReferenceVars entryMax = null;
+        HashMap<String, Integer> doms = new HashMap<String, Integer>();
+        Integer int1 = 1;
+        ArrayList<WordReferenceVars> decodedEntries = new ArrayList<WordReferenceVars>();
+        
+        WordReferenceVars iEntry;
+        String dom;
+        Integer count;
+        try {
+			while ((iEntry = vars.take()) != WordReferenceVars.poison) {
+			    decodedEntries.add(iEntry);
+			    // find min/max
+			    if (entryMin == null) entryMin = iEntry.clone(); else entryMin.min(iEntry);
+			    if (entryMax == null) entryMax = iEntry.clone(); else entryMax.max(iEntry);
+			    // update domcount
+			    dom = iEntry.metadataHash().substring(6);
+			    count = doms.get(dom);
+			    if (count == null) {
+			    	doms.put(dom, int1);
+			    } else {
+			    	doms.put(dom, Integer.valueOf(count.intValue() + 1));
+			    }
+			}
+		} catch (InterruptedException e) {}
+        
+        if (this.min == null) this.min = entryMin.clone(); else this.min.min(entryMin);
+        if (this.max == null) this.max = entryMax.clone(); else this.max.max(entryMax);
+        Map.Entry<String, Integer> entry;
+        final Iterator<Map.Entry<String, Integer>> di = doms.entrySet().iterator();
+        while (di.hasNext()) {
+        	entry = di.next();
+        	this.doms.addScore(entry.getKey(), (entry.getValue()).intValue());
         }
+            
         if (this.doms.size() > 0) this.maxdomcount = this.doms.getMaxScore();
-        return result;
+        return decodedEntries;
     }
     
     public int authority(final String urlHash) {
@@ -164,61 +155,41 @@ public class ReferenceOrder {
         if (l.equals("uk")) return "en"; else return l;
     }
     
-    public static class minmaxfinder extends Thread {
+    public static class minmaxfinder {
 
-        WordReferenceVars entryMin;
-        WordReferenceVars entryMax;
-        private final ReferenceContainer<WordReference> container;
-        private final int start, end;
+    	private WordReferenceVars entryMin;
+    	private WordReferenceVars entryMax;
         private final HashMap<String, Integer> doms;
         private final Integer int1;
-        ArrayList<WordReferenceVars> decodedEntries;
+        private final ArrayList<WordReferenceVars> decodedEntries;
         
-        public minmaxfinder(final ReferenceContainer<WordReference> container, final int start /*including*/, final int end /*excluding*/) {
-            this.container = container;
-            this.start = start;
-            this.end = end;
+        public minmaxfinder(final BlockingQueue<WordReferenceVars> vars) {
             this.doms = new HashMap<String, Integer>();
             this.int1 = 1;
             this.decodedEntries = new ArrayList<WordReferenceVars>();
-        }
-        
-        public void run() {
-            // find min/max to obtain limits for normalization
             this.entryMin = null;
             this.entryMax = null;
             WordReferenceVars iEntry;
-            int p = this.start;
             String dom;
             Integer count;
             try {
-                while (p < this.end) {
-                    iEntry = new WordReferenceVars(new WordReferenceRow(container.get(p++, false)));
-                    this.decodedEntries.add(iEntry);
-                    // find min/max
-                    if (this.entryMin == null) this.entryMin = iEntry.clone(); else this.entryMin.min(iEntry);
-                    if (this.entryMax == null) this.entryMax = iEntry.clone(); else this.entryMax.max(iEntry);
-                    // update domcount
-                    dom = iEntry.metadataHash().substring(6);
-                    count = doms.get(dom);
-                    if (count == null) {
-                    	doms.put(dom, int1);
-                    } else {
-                    	doms.put(dom, Integer.valueOf(count.intValue() + 1));
-                    }
-                }
-            } catch (final Exception e) {
-                e.printStackTrace();
-            }
+				while ((iEntry = vars.take()) != WordReferenceVars.poison) {
+				    this.decodedEntries.add(iEntry);
+				    // find min/max
+				    if (this.entryMin == null) this.entryMin = iEntry.clone(); else this.entryMin.min(iEntry);
+				    if (this.entryMax == null) this.entryMax = iEntry.clone(); else this.entryMax.max(iEntry);
+				    // update domcount
+				    dom = iEntry.metadataHash().substring(6);
+				    count = doms.get(dom);
+				    if (count == null) {
+				    	doms.put(dom, int1);
+				    } else {
+				    	doms.put(dom, Integer.valueOf(count.intValue() + 1));
+				    }
+				}
+			} catch (InterruptedException e) {}
         }
         
-        public ArrayList<WordReferenceVars> decodedContainer() {
-            return this.decodedEntries;
-        }
-        
-        public HashMap<String, Integer> domcount() {
-        	return this.doms;
-        }
     }
     
 }
