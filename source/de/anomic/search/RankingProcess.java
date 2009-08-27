@@ -37,6 +37,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.document.Condenser;
@@ -165,83 +166,96 @@ public final class RankingProcess extends Thread {
         long timer = System.currentTimeMillis();
         
         // normalize entries
-        final ArrayList<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
+        final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
         serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
         
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
-        Long r;
         HostInfo hs;
         String domhash;
         boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts") >= 0;
-        for (WordReferenceVars iEntry: decodedEntries) {
-            assert (iEntry.metadataHash().length() == index.row().primaryKeyLength);
-            //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
+        WordReferenceVars iEntry;
+        final ArrayList<WordReferenceVars> filteredEntries = new ArrayList<WordReferenceVars>();
+        // apply all filter
+        try {
+			while ((iEntry = decodedEntries.take()) != WordReferenceVars.poison) {
+			    assert (iEntry.metadataHash().length() == index.row().primaryKeyLength);
+			    //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
 
-            // increase flag counts
-            for (int j = 0; j < 32; j++) {
-                if (iEntry.flags().get(j)) {flagcount[j]++;}
-            }
-            
-            // kick out entries that are too bad according to current findings
-            r = Long.valueOf(order.cardinal(iEntry));
-            if ((maxentries >= 0) && (stack.size() >= maxentries) && (stack.bottom(r.longValue()))) continue;
-            
-            // check constraints
-            if (!testFlags(iEntry)) continue;
-            
-            // check document domain
-            if (query.contentdom != QueryParams.CONTENTDOM_TEXT) {
-                if ((query.contentdom == QueryParams.CONTENTDOM_AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) continue;
-                if ((query.contentdom == QueryParams.CONTENTDOM_VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) continue;
-                if ((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) continue;
-                if ((query.contentdom == QueryParams.CONTENTDOM_APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) continue;
-            }
+			    // increase flag counts
+			    for (int j = 0; j < 32; j++) {
+			        if (iEntry.flags().get(j)) {flagcount[j]++;}
+			    }
+			    
+			    // check constraints
+			    if (!testFlags(iEntry)) continue;
+			    
+			    // check document domain
+			    if (query.contentdom != QueryParams.CONTENTDOM_TEXT) {
+			        if ((query.contentdom == QueryParams.CONTENTDOM_AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) continue;
+			        if ((query.contentdom == QueryParams.CONTENTDOM_VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) continue;
+			        if ((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) continue;
+			        if ((query.contentdom == QueryParams.CONTENTDOM_APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) continue;
+			    }
 
-            // check tld domain
-            if (!yacyURL.matchesAnyDomDomain(iEntry.metadataHash(), this.query.zonecode)) {
-                // filter out all tld that do not match with wanted tld domain
-                continue;
-            }
-            
-            // check site constraints
-            if (query.sitehash != null && !iEntry.metadataHash().substring(6).equals(query.sitehash)) {
-                // filter out all domains that do not match with the site constraint
-            	continue;
-            }
-            
-            // count domZones
-            this.domZones[yacyURL.domDomain(iEntry.metadataHash())]++;
-            
-            // get statistics for host navigator
-            if (nav_hosts) {
-	            domhash = iEntry.urlHash.substring(6);
-	            hs = this.hostNavigator.get(domhash);
-	            if (hs == null) {
-	            	this.hostNavigator.put(domhash, new HostInfo(iEntry.urlHash));
-	            } else {
-	            	hs.inc();
-	            }
-            }
-            
-            // insert
-            if ((maxentries < 0) || (stack.size() < maxentries)) {
-                // in case that we don't have enough yet, accept any new entry
-                if (urlhashes.containsKey(iEntry.metadataHash())) continue;
-                stack.push(iEntry, r);
-            } else {
-                // if we already have enough entries, insert only such that are necessary to get a better result
-                if (stack.bottom(r.longValue())) {
-                    continue;
-                }
-                // double-check
-                if (urlhashes.containsKey(iEntry.metadataHash())) continue;
-                stack.push(iEntry, r);
-            }
-            
-            // increase counter for statistics
-            if (!local) this.remote_indexCount++;
-        }
+			    // check tld domain
+			    if (!yacyURL.matchesAnyDomDomain(iEntry.metadataHash(), this.query.zonecode)) {
+			        // filter out all tld that do not match with wanted tld domain
+			        continue;
+			    }
+			    
+			    // check site constraints
+			    if (query.sitehash != null && !iEntry.metadataHash().substring(6).equals(query.sitehash)) {
+			        // filter out all domains that do not match with the site constraint
+			    	continue;
+			    }
+			    
+			    // count domZones
+			    this.domZones[yacyURL.domDomain(iEntry.metadataHash())]++;
+			    
+			    // get statistics for host navigator
+			    if (nav_hosts) {
+			        domhash = iEntry.urlHash.substring(6);
+			        hs = this.hostNavigator.get(domhash);
+			        if (hs == null) {
+			        	this.hostNavigator.put(domhash, new HostInfo(iEntry.urlHash));
+			        } else {
+			        	hs.inc();
+			        }
+			    }
+			    
+			    // accept
+			    filteredEntries.add(iEntry);
+			    
+			    // increase counter for statistics
+			    if (!local) this.remote_indexCount++;
+			}
+		} catch (InterruptedException e) {}
+		
+		// do the ranking
+		Long r;
+		for (WordReferenceVars fEntry: filteredEntries) {
+			
+		    // kick out entries that are too bad according to current findings
+		    r = Long.valueOf(order.cardinal(fEntry));
+		    if ((maxentries >= 0) && (stack.size() >= maxentries) && (stack.bottom(r.longValue()))) continue;
+		    
+		    // insert
+		    if ((maxentries < 0) || (stack.size() < maxentries)) {
+		        // in case that we don't have enough yet, accept any new entry
+		        if (urlhashes.containsKey(fEntry.metadataHash())) continue;
+		        stack.push(fEntry, r);
+		    } else {
+		        // if we already have enough entries, insert only such that are necessary to get a better result
+		        if (stack.bottom(r.longValue())) {
+		            continue;
+		        }
+		        // double-check
+		        if (urlhashes.containsKey(fEntry.metadataHash())) continue;
+		        stack.push(fEntry, r);
+		    }
+		    
+		}
         
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
         serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
