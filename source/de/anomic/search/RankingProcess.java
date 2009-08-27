@@ -328,47 +328,80 @@ public final class RankingProcess extends Thread {
             if (((stack.size() == 0) && (size() == 0))) break;
             final SortStack<WordReferenceVars>.stackElement obrwi = takeRWI(skipDoubleDom);
             if (obrwi == null) continue; // *** ? this happened and the thread was suspended silently. cause?
-            final URLMetadataRow u = indexSegment.urlMetadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
-            if (u != null) {
-                final URLMetadataRow.Components metadata = u.metadata();
-
-                // TODO: check url constraints
-                
-                
-                // evaluate information of metadata for navigation
-                // author navigation:
-                String author = metadata.dc_creator();
-                if (author != null && author.length() > 0) {
-                	// add author to the author navigator
-                    String authorhash = new String(Word.word2hash(author));
-                    //System.out.println("*** DEBUG authorhash = " + authorhash + ", query.authorhash = " + this.query.authorhash + ", author = " + author);
-                    
-                    // check if we already are filtering for authors
-                	if (this.query.authorhash != null && !this.query.authorhash.equals(authorhash)) {
-                		continue;
-                	}
-                	
-                	// add author to the author navigator
-                    AuthorInfo in = this.authorNavigator.get(authorhash);
-                    if (in == null) {
-                        this.authorNavigator.put(authorhash, new AuthorInfo(author));
-                    } else {
-                        in.inc();
-                        this.authorNavigator.put(authorhash, in);
-                    }
-                } else if (this.query.authorhash != null) {
-                	continue;
-                }
-                
-                // get the url
-                if (metadata.url() != null) {
-                	String urlstring = metadata.url().toNormalform(true, true);
-                	if (urlstring == null || !urlstring.matches(query.urlMask)) continue;                    
-                    this.handover.add(u.hash()); // remember that we handed over this url
-                    return u;
-                }
+            final URLMetadataRow page = indexSegment.urlMetadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
+            if (page == null) {
+            	misses.add(obrwi.element.metadataHash());
+            	continue;
             }
-            misses.add(obrwi.element.metadataHash());
+            
+            // prepare values for constraint check
+            final URLMetadataRow.Components metadata = page.metadata();
+            
+            // check url constraints
+            if (metadata.url() == null) {
+                continue; // rare case where the url is corrupted
+            }
+            
+            final String pageurl = metadata.url().toNormalform(true, true);
+            final String pageauthor = metadata.dc_creator();
+            final String pagetitle = metadata.dc_title().toLowerCase();
+            
+            // check exclusion
+            if ((QueryParams.matches(pagetitle, query.excludeHashes)) ||
+                (QueryParams.matches(pageurl.toLowerCase(), query.excludeHashes)) ||
+                (QueryParams.matches(pageauthor.toLowerCase(), query.excludeHashes))) {
+                continue;
+            }
+            
+            // check url mask
+            if (!(pageurl.matches(query.urlMask))) {
+                continue;
+            }
+            
+            // check index-of constraint
+            if ((query.constraint != null) &&
+                (query.constraint.get(Condenser.flag_cat_indexof)) &&
+                (!(pagetitle.startsWith("index of")))) {
+                final Iterator<byte[]> wi = query.queryHashes.iterator();
+                while (wi.hasNext()) try { indexSegment.termIndex().remove(wi.next(), page.hash()); } catch (IOException e) {}
+                continue;
+            }
+            
+            // check content domain
+            if ((query.contentdom == QueryParams.CONTENTDOM_AUDIO && page.laudio() == 0) ||
+                (query.contentdom == QueryParams.CONTENTDOM_VIDEO && page.lvideo() == 0) ||
+                (query.contentdom == QueryParams.CONTENTDOM_IMAGE && page.limage() == 0) ||
+                (query.contentdom == QueryParams.CONTENTDOM_APP && page.lapp() == 0)) {
+            	continue;
+            }
+            
+            // evaluate information of metadata for navigation
+            // author navigation:
+            if (pageauthor != null && pageauthor.length() > 0) {
+            	// add author to the author navigator
+                String authorhash = new String(Word.word2hash(pageauthor));
+                //System.out.println("*** DEBUG authorhash = " + authorhash + ", query.authorhash = " + this.query.authorhash + ", author = " + author);
+                
+                // check if we already are filtering for authors
+            	if (this.query.authorhash != null && !this.query.authorhash.equals(authorhash)) {
+            		continue;
+            	}
+            	
+            	// add author to the author navigator
+                AuthorInfo in = this.authorNavigator.get(authorhash);
+                if (in == null) {
+                    this.authorNavigator.put(authorhash, new AuthorInfo(pageauthor));
+                } else {
+                    in.inc();
+                    this.authorNavigator.put(authorhash, in);
+                }
+            } else if (this.query.authorhash != null) {
+            	continue;
+            }
+            
+            // accept url
+            this.handover.add(page.hash()); // remember that we handed over this url
+            return page;
         }
         return null;
     }

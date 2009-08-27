@@ -29,7 +29,6 @@ package de.anomic.search;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.TreeSet;
 
 import de.anomic.document.Condenser;
@@ -66,7 +65,7 @@ public class ResultFetcher {
     
     
     @SuppressWarnings("unchecked")
-    ResultFetcher(
+    public ResultFetcher(
             RankingProcess rankedCache,
             final QueryParams query,
             final Segment indexSegment,
@@ -112,123 +111,7 @@ public class ResultFetcher {
         }
     }
     
-    protected ResultEntry obtainResultEntry(final URLMetadataRow page, final int snippetFetchMode) {
-
-        // a search result entry needs some work to produce a result Entry:
-        // - check if url entry exists in LURL-db
-        // - check exclusions, constraints, masks, media-domains
-        // - load snippet (see if page exists) and check if snippet contains searched word
-
-        // Snippet Fetching can has 3 modes:
-        // 0 - do not fetch snippets
-        // 1 - fetch snippets offline only
-        // 2 - online snippet fetch
-        
-        // load only urls if there was not yet a root url of that hash
-        // find the url entry
-
-        long startTime = System.currentTimeMillis();
-        final URLMetadataRow.Components metadata = page.metadata();
-        final String pagetitle = metadata.dc_title().toLowerCase();
-        if (metadata.url() == null) {
-            registerFailure(page.hash(), "url corrupted (null)");
-            return null; // rare case where the url is corrupted
-        }
-        final String pageurl = metadata.url().toString().toLowerCase();
-        final String pageauthor = metadata.dc_creator().toLowerCase();
-        final long dbRetrievalTime = System.currentTimeMillis() - startTime;
-        
-        // check exclusion
-        if ((QueryParams.matches(pagetitle, query.excludeHashes)) ||
-            (QueryParams.matches(pageurl, query.excludeHashes)) ||
-            (QueryParams.matches(pageauthor, query.excludeHashes))) {
-            return null;
-        }
-            
-        // check url mask
-        if (!(pageurl.matches(query.urlMask))) {
-            return null;
-        }
-            
-        // check constraints
-        if ((query.constraint != null) &&
-            (query.constraint.get(Condenser.flag_cat_indexof)) &&
-            (!(metadata.dc_title().startsWith("Index of")))) {
-            final Iterator<byte[]> wi = query.queryHashes.iterator();
-            while (wi.hasNext()) try { indexSegment.termIndex().remove(wi.next(), page.hash()); } catch (IOException e) {}
-            registerFailure(page.hash(), "index-of constraint not fullfilled");
-            return null;
-        }
-        
-        if ((query.contentdom == QueryParams.CONTENTDOM_AUDIO) && (page.laudio() == 0)) {
-            registerFailure(page.hash(), "contentdom-audio constraint not fullfilled");
-            return null;
-        }
-        if ((query.contentdom == QueryParams.CONTENTDOM_VIDEO) && (page.lvideo() == 0)) {
-            registerFailure(page.hash(), "contentdom-video constraint not fullfilled");
-            return null;
-        }
-        if ((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (page.limage() == 0)) {
-            registerFailure(page.hash(), "contentdom-image constraint not fullfilled");
-            return null;
-        }
-        if ((query.contentdom == QueryParams.CONTENTDOM_APP) && (page.lapp() == 0)) {
-            registerFailure(page.hash(), "contentdom-app constraint not fullfilled");
-            return null;
-        }
-
-        if (snippetFetchMode == 0) {
-            return new ResultEntry(page, indexSegment, peers, null, null, dbRetrievalTime, 0); // result without snippet
-        }
-        
-        // load snippet
-        if (query.contentdom == QueryParams.CONTENTDOM_TEXT) {
-            // attach text snippet
-            startTime = System.currentTimeMillis();
-            final TextSnippet snippet = TextSnippet.retrieveTextSnippet(metadata, snippetFetchWordHashes, (snippetFetchMode == 2), ((query.constraint != null) && (query.constraint.get(Condenser.flag_cat_indexof))), 180, (snippetFetchMode == 2) ? Integer.MAX_VALUE : 30000, query.isGlobal());
-            final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            Log.logInfo("SEARCH_EVENT", "text snippet load time for " + metadata.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
-            
-            if (snippet.getErrorCode() < 11) {
-                // we loaded the file and found the snippet
-                return new ResultEntry(page, indexSegment, peers, snippet, null, dbRetrievalTime, snippetComputationTime); // result with snippet attached
-            } else if (snippetFetchMode == 1) {
-                // we did not demand online loading, therefore a failure does not mean that the missing snippet causes a rejection of this result
-                // this may happen during a remote search, because snippet loading is omitted to retrieve results faster
-                return new ResultEntry(page, indexSegment, peers, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
-            } else {
-                // problems with snippet fetch
-                registerFailure(page.hash(), "no text snippet for URL " + metadata.url());
-                if (!peers.mySeed().isVirgin())
-                    try {
-                        TextSnippet.failConsequences(snippet, query.id(false));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                return null;
-            }
-        } else {
-            // attach media information
-            startTime = System.currentTimeMillis();
-            final ArrayList<MediaSnippet> mediaSnippets = MediaSnippet.retrieveMediaSnippets(metadata.url(), snippetFetchWordHashes, query.contentdom, (snippetFetchMode == 2), 6000, query.isGlobal());
-            final long snippetComputationTime = System.currentTimeMillis() - startTime;
-            Log.logInfo("SEARCH_EVENT", "media snippet load time for " + metadata.url() + ": " + snippetComputationTime);
-            
-            if ((mediaSnippets != null) && (mediaSnippets.size() > 0)) {
-                // found media snippets, return entry
-                return new ResultEntry(page, indexSegment, peers, null, mediaSnippets, dbRetrievalTime, snippetComputationTime);
-            } else if (snippetFetchMode == 1) {
-                return new ResultEntry(page, indexSegment, peers, null, null, dbRetrievalTime, snippetComputationTime);
-            } else {
-                // problems with snippet fetch
-                registerFailure(page.hash(), "no media snippet for URL " + metadata.url());
-                return null;
-            }
-        }
-        // finished, no more actions possible here
-    }
-    
-    boolean anyWorkerAlive() {
+   boolean anyWorkerAlive() {
         if (this.workerThreads == null) return false;
         for (int i = 0; i < this.workerThreads.length; i++) {
            if ((this.workerThreads[i] != null) &&
@@ -281,7 +164,8 @@ public class ResultFetcher {
                     if (result.exists(page.hash().hashCode())) continue;
                     if (failedURLs.get(page.hash()) != null) continue;
                     
-                    final ResultEntry resultEntry = obtainResultEntry(page, snippetMode);
+                    final ResultEntry resultEntry = fetchSnippet(page, snippetMode);
+                    
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
                     urlRetrievalAllTime += resultEntry.dbRetrievalTime;
                     snippetComputationAllTime += resultEntry.snippetComputationTime;
@@ -303,6 +187,70 @@ public class ResultFetcher {
         public long busytime() {
             return System.currentTimeMillis() - this.lastLifeSign;
         }
+    }
+    
+    protected ResultEntry fetchSnippet(final URLMetadataRow page, final int snippetMode) {
+        // Snippet Fetching can has 3 modes:
+        // 0 - do not fetch snippets
+        // 1 - fetch snippets offline only
+        // 2 - online snippet fetch
+        
+        // load only urls if there was not yet a root url of that hash
+        // find the url entry
+
+        long startTime = System.currentTimeMillis();
+        final URLMetadataRow.Components metadata = page.metadata();
+        final long dbRetrievalTime = System.currentTimeMillis() - startTime;
+        
+        if (snippetMode == 0) {
+            return new ResultEntry(page, indexSegment, peers, null, null, dbRetrievalTime, 0); // result without snippet
+        }
+        
+        // load snippet
+        if (query.contentdom == QueryParams.CONTENTDOM_TEXT) {
+            // attach text snippet
+            startTime = System.currentTimeMillis();
+            final TextSnippet snippet = TextSnippet.retrieveTextSnippet(metadata, snippetFetchWordHashes, (snippetMode == 2), ((query.constraint != null) && (query.constraint.get(Condenser.flag_cat_indexof))), 180, (snippetMode == 2) ? Integer.MAX_VALUE : 30000, query.isGlobal());
+            final long snippetComputationTime = System.currentTimeMillis() - startTime;
+            Log.logInfo("SEARCH_EVENT", "text snippet load time for " + metadata.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
+            
+            if (snippet.getErrorCode() < 11) {
+                // we loaded the file and found the snippet
+                return new ResultEntry(page, indexSegment, peers, snippet, null, dbRetrievalTime, snippetComputationTime); // result with snippet attached
+            } else if (snippetMode == 1) {
+                // we did not demand online loading, therefore a failure does not mean that the missing snippet causes a rejection of this result
+                // this may happen during a remote search, because snippet loading is omitted to retrieve results faster
+                return new ResultEntry(page, indexSegment, peers, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
+            } else {
+                // problems with snippet fetch
+                registerFailure(page.hash(), "no text snippet for URL " + metadata.url());
+                if (!peers.mySeed().isVirgin())
+                    try {
+                        TextSnippet.failConsequences(snippet, query.id(false));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                return null;
+            }
+        } else {
+            // attach media information
+            startTime = System.currentTimeMillis();
+            final ArrayList<MediaSnippet> mediaSnippets = MediaSnippet.retrieveMediaSnippets(metadata.url(), snippetFetchWordHashes, query.contentdom, (snippetMode == 2), 6000, query.isGlobal());
+            final long snippetComputationTime = System.currentTimeMillis() - startTime;
+            Log.logInfo("SEARCH_EVENT", "media snippet load time for " + metadata.url() + ": " + snippetComputationTime);
+            
+            if ((mediaSnippets != null) && (mediaSnippets.size() > 0)) {
+                // found media snippets, return entry
+                return new ResultEntry(page, indexSegment, peers, null, mediaSnippets, dbRetrievalTime, snippetComputationTime);
+            } else if (snippetMode == 1) {
+                return new ResultEntry(page, indexSegment, peers, null, null, dbRetrievalTime, snippetComputationTime);
+            } else {
+                // problems with snippet fetch
+                registerFailure(page.hash(), "no media snippet for URL " + metadata.url());
+                return null;
+            }
+        }
+        // finished, no more actions possible here
     }
     
     private void registerFailure(final String urlhash, final String reason) {

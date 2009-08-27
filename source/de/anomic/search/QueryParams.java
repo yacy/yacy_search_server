@@ -53,6 +53,12 @@ public final class QueryParams {
     public static final int CONTENTDOM_VIDEO = 3;
     public static final int CONTENTDOM_APP   = 4;
     
+    public static enum FetchMode {
+    	NO_FETCH_NO_VERIFY,
+    	FETCH_BUT_ACCEPT_OFFLINE_OR_USE_CACHE,
+    	FETCH_AND_VERIFY_ONLINE;
+    }
+    
     public static final Bitfield empty_constraint    = new Bitfield(4, "AAAAAA");
     public static final Bitfield catchall_constraint = new Bitfield(4, "______");
     
