@@ -114,14 +114,6 @@ public class SplitTable implements ObjectIndex {
     public void init() {
         current = null;
 
-        // init the thread pool for the keeperOf executor service
-        this.executor = new ThreadPoolExecutor(
-        		Runtime.getRuntime().availableProcessors() + 1, 
-        		Runtime.getRuntime().availableProcessors() + 1, 10, 
-        		TimeUnit.SECONDS, 
-        		new LinkedBlockingQueue<Runnable>(), 
-        		new NamePrefixThreadFactory(prefix));
-        
         // initialized tables map
         this.tables = new HashMap<String, ObjectIndex>();
         if (!(path.exists())) path.mkdirs();
@@ -199,6 +191,16 @@ public class SplitTable implements ObjectIndex {
                 tables.put(maxf, table);
             }
         }
+        
+        // init the thread pool for the keeperOf executor service
+        this.executor = new ThreadPoolExecutor(
+                Math.max(tables.size(), Runtime.getRuntime().availableProcessors()) + 1, 
+                Math.max(tables.size(), Runtime.getRuntime().availableProcessors()) + 1, 10, 
+                TimeUnit.SECONDS, 
+                new LinkedBlockingQueue<Runnable>(), 
+                new NamePrefixThreadFactory(prefix));
+        
+        
     }
     
     public void clear() throws IOException {
@@ -304,20 +306,46 @@ public class SplitTable implements ObjectIndex {
         keeper.put(row);
     }
     
+    private static final class ReadyCheck {
+        private boolean r;
+        public ReadyCheck() {
+            this.r = false;
+        }
+        public void isReady() {
+            this.r = true;
+        }
+        public boolean check() {
+            return this.r;
+        }
+    }
+    
     public synchronized ObjectIndex keeperOf(final byte[] key) {
+        
+        if (tables.size() < 2) {
+            // no concurrency if not needed
+            for (final ObjectIndex table : tables.values()) {
+                if (table.has(key)) return table;
+            }
+            return null;
+        }
+        
         // because the index is stored only in one table,
         // and the index is completely in RAM, a concurrency will create
         // not concurrent File accesses
-        //long start = System.currentTimeMillis();
         
         // start a concurrent query to database tables
         final CompletionService<ObjectIndex> cs = new ExecutorCompletionService<ObjectIndex>(executor);
         int accepted = 0;
+        final ReadyCheck ready = new ReadyCheck();
         for (final ObjectIndex table : tables.values()) {
+            if (ready.check()) break; // found already a table
             try {
                 cs.submit(new Callable<ObjectIndex>() {
                     public ObjectIndex call() {
-                        if (table.has(key)) return table;
+                        if (table.has(key)) {
+                            ready.isReady();
+                            return table;
+                        }
                         return dummyIndex;
                     }
                 });
@@ -333,15 +361,11 @@ public class SplitTable implements ObjectIndex {
         try {
             for (int i = 0; i < accepted; i++) {
                 final Future<ObjectIndex> f = cs.take();
-                //hash(System.out.println("**********accepted = " + accepted + ", i =" + i);
                 if (f == null) continue;
                 final ObjectIndex index = f.get();
-                if (index != dummyIndex) {
-                    //System.out.println("*DEBUG SplitTable success.time = " + (System.currentTimeMillis() - start) + " ms");
-                	return index;
-                }
+                if (index == dummyIndex) continue;
+                return index;
             }
-            //System.out.println("*DEBUG SplitTable fail.time = " + (System.currentTimeMillis() - start) + " ms");
             return null;
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -349,7 +373,6 @@ public class SplitTable implements ObjectIndex {
         	e.printStackTrace();
             throw new RuntimeException(e.getCause());
         }
-        //System.out.println("*DEBUG SplitTable fail.time = " + (System.currentTimeMillis() - start) + " ms");
         return null;
     }
     

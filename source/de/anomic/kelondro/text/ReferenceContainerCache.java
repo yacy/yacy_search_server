@@ -28,11 +28,11 @@ package de.anomic.kelondro.text;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.kelondro.blob.HeapReader;
@@ -48,8 +48,15 @@ import de.anomic.yacy.logging.Log;
 
 public final class ReferenceContainerCache<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType>, IndexReader<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
 
+    public class ContainerOrder implements Comparator<ReferenceContainer<ReferenceType>> {
+        public int compare(ReferenceContainer<ReferenceType> arg0, ReferenceContainer<ReferenceType> arg1) {
+            return termOrder.compare(arg0.getTermHash(), arg1.getTermHash());
+        }
+    }
+    
     private   final Row payloadrow;
-    private   final ByteOrder termOrder;
+    protected final ByteOrder termOrder;
+    private   final ContainerOrder containerOrder;
     protected Map<ByteArray, ReferenceContainer<ReferenceType>> cache;
     
     /**
@@ -63,6 +70,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         super(factory);
         this.payloadrow = payloadrow;
         this.termOrder = termOrder;
+        this.containerOrder = new ContainerOrder();
         this.cache = null;
     }
     
@@ -102,17 +110,15 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         final long startTime = System.currentTimeMillis();
         
         // sort the map
-        SortedMap<byte[], ReferenceContainer<ReferenceType>> cachecopy = sortedClone();
+        ReferenceContainer<ReferenceType>[] cachecopy = sortedClone();
         
         // write wCache
         long wordcount = 0, urlcount = 0;
         byte[] wordHash = null, lwh;
-        ReferenceContainer<ReferenceType> container;
-        for (final Map.Entry<byte[], ReferenceContainer<ReferenceType>> entry: cachecopy.entrySet()) {
+        for (final ReferenceContainer<ReferenceType> container: cachecopy) {
             // get entries
             lwh = wordHash;
-            wordHash = entry.getKey();
-            container = entry.getValue();
+            wordHash = container.getTermHash();
             
             // check consistency: entries must be ordered
             assert (lwh == null || this.ordering().compare(wordHash, lwh) > 0);
@@ -139,6 +145,19 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
     }
     
+    @SuppressWarnings("unchecked")
+    public ReferenceContainer<ReferenceType>[] sortedClone() {
+        ReferenceContainer<ReferenceType>[] cachecopy = new ReferenceContainer[cache.size()];
+        synchronized (cache) {
+            int p = 0;
+            for (final Map.Entry<ByteArray, ReferenceContainer<ReferenceType>> entry: cache.entrySet()) {
+                cachecopy[p++] = entry.getValue();
+            }
+        }
+        Arrays.sort(cachecopy, this.containerOrder);
+        return cachecopy;
+    }
+    /*
     public SortedMap<byte[], ReferenceContainer<ReferenceType>> sortedClone() {
         SortedMap<byte[], ReferenceContainer<ReferenceType>> cachecopy;
         synchronized (cache) {
@@ -149,7 +168,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
         return cachecopy;
     }
-    
+    */
     public int size() {
         return (this.cache == null) ? 0 : this.cache.size();
     }
@@ -252,14 +271,15 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         // plus the mentioned features
         
         private final boolean rot;
-        private Iterator<ReferenceContainer<ReferenceType>> iterator;
+        private ReferenceContainer<ReferenceType>[] cachecopy;
+        private int p;
         private byte[] latestTermHash;
         
         public heapCacheIterator(byte[] startWordHash, final boolean rot) {
             this.rot = rot;
             if (startWordHash != null && startWordHash.length == 0) startWordHash = null;
-            SortedMap<byte[], ReferenceContainer<ReferenceType>> cachecopy = sortedClone();
-            this.iterator = (startWordHash == null) ? cachecopy.values().iterator() : cachecopy.tailMap(startWordHash).values().iterator();
+            this.cachecopy = sortedClone();
+            this.p = 0;
             this.latestTermHash = null;
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
@@ -270,12 +290,12 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         
         public boolean hasNext() {
             if (rot) return true;
-            return iterator.hasNext();
+            return this.p < this.cachecopy.length;
         }
 
         public ReferenceContainer<ReferenceType> next() {
-            if (iterator.hasNext()) {
-                ReferenceContainer<ReferenceType> c = iterator.next();
+            if (this.p < this.cachecopy.length) {
+                ReferenceContainer<ReferenceType> c = this.cachecopy[this.p++];
                 this.latestTermHash = c.getTermHash();
                 return c.topLevelClone();
             }
@@ -283,14 +303,14 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             if (!rot) {
                 return null;
             }
-            iterator = cache.values().iterator();
-            ReferenceContainer<ReferenceType> c = iterator.next();
+            p = 0;
+            ReferenceContainer<ReferenceType> c = this.cachecopy[this.p++];
             this.latestTermHash = c.getTermHash();
             return c.topLevelClone();
         }
 
         public void remove() {
-            iterator.remove();
+            System.arraycopy(this.cachecopy, this.p, this.cachecopy, this.p - 1, this.cachecopy.length - p);
             cache.remove(new ByteArray(this.latestTermHash));
         }
 

@@ -38,7 +38,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 
 public class SetTools {
 
@@ -294,17 +293,18 @@ public class SetTools {
     // ------------------------------------------------------------------------------------------------
     // exclude
 
-    public static <A, B> TreeMap<A, B> excludeConstructive(final TreeMap<A, B> map, final TreeSet<A> set) {
-        // comparators must be equal
+    /*
+    public static <A, B> TreeMap<A, B> excludeConstructive(final TreeMap<A, B> map, final Set<A> set) {
         if (map == null) return null;
         if (set == null) return map;
         if ((map.size() == 0) || (set.size() == 0)) return map;
-        if (map.comparator() != set.comparator()) return excludeConstructiveByTestMapInSet(map, set);
+        assert !(set instanceof TreeSet) || map.comparator() == ((TreeSet<A>) set).comparator();
+        // if (map.comparator() != set.comparator()) return excludeConstructiveByTestMapInSet(map, set);
         return excludeConstructiveByTestMapInSet(map, set);
         // return excludeConstructiveByEnumeration(map, set);
     }
     
-    private static <A, B> TreeMap<A, B> excludeConstructiveByTestMapInSet(final TreeMap<A, B> map, final TreeSet<A> set) {
+    private static <A, B> TreeMap<A, B> excludeConstructiveByTestMapInSet(final TreeMap<A, B> map, final Set<A> set) {
         final TreeMap<A, B> result = new TreeMap<A, B>(map.comparator());
         A o;
         for (Entry<A, B> entry: map.entrySet()) {
@@ -313,12 +313,13 @@ public class SetTools {
         }
         return result;
     }
+    */
     
-    public static <A, B> void excludeDestructive(final TreeMap<A, B> map, final TreeSet<A> set) {
+    public static <A, B> void excludeDestructive(final Map<A, B> map, final Set<A> set) {
         // comparators must be equal
         if (map == null) return;
         if (set == null) return;
-        if (map.comparator() != set.comparator()) return;
+        assert !(map instanceof TreeMap && set instanceof TreeSet) || ((TreeMap<A, B>) map).comparator() == ((TreeSet<A>) set).comparator();
         if ((map.size() == 0) || (set.size() == 0)) return;
 
         if (map.size() < set.size())
@@ -327,22 +328,21 @@ public class SetTools {
             excludeDestructiveByTestSetInMap(map, set);
     }
     
-    private static <A, B> void excludeDestructiveByTestMapInSet(final TreeMap<A, B> map, final TreeSet<A> set) {
+    private static <A, B> void excludeDestructiveByTestMapInSet(final Map<A, B> map, final Set<A> set) {
         final Iterator<A> mi = map.keySet().iterator();
         while (mi.hasNext()) if (set.contains(mi.next())) mi.remove();
     }
     
-    private static <A, B> void excludeDestructiveByTestSetInMap(final TreeMap<A, B> map, final TreeSet<A> set) {
+    private static <A, B> void excludeDestructiveByTestSetInMap(final Map<A, B> map, final Set<A> set) {
         final Iterator<A> si = set.iterator();
         while (si.hasNext()) map.remove(si.next());
     }
     
     // and the same again with set-set
-    public static <A> void excludeDestructive(final TreeSet<A> set1, final TreeSet<A> set2) {
-        // comparators must be equal
+    public static <A> void excludeDestructive(final Set<A> set1, final Set<A> set2) {
         if (set1 == null) return;
         if (set2 == null) return;
-        if (set1.comparator() != set2.comparator()) return;
+        assert !(set1 instanceof TreeSet && set2 instanceof TreeSet) || ((TreeSet<A>) set1).comparator() == ((TreeSet<A>) set2).comparator();
         if ((set1.size() == 0) || (set2.size() == 0)) return;
         
         if (set1.size() < set2.size())
@@ -351,12 +351,12 @@ public class SetTools {
             excludeDestructiveByTestLargeInSmall(set1, set2);
     }
     
-    private static <A> void excludeDestructiveByTestSmallInLarge(final TreeSet<A> small, final TreeSet<A> large) {
+    private static <A> void excludeDestructiveByTestSmallInLarge(final Set<A> small, final Set<A> large) {
         final Iterator<A> mi = small.iterator();
         while (mi.hasNext()) if (large.contains(mi.next())) mi.remove();
     }
     
-    private static <A> void excludeDestructiveByTestLargeInSmall(final TreeSet<A> large, final TreeSet<A> small) {
+    private static <A> void excludeDestructiveByTestLargeInSmall(final Set<A> large, final Set<A> small) {
         final Iterator<A> si = small.iterator();
         while (si.hasNext()) large.remove(si.next());
     }

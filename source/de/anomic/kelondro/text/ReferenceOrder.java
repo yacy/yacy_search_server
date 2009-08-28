@@ -43,11 +43,12 @@ import de.anomic.search.RankingProcess;
 import de.anomic.yacy.yacyURL;
 
 public class ReferenceOrder {
-	private WordReferenceVars min, max;
-	private final RankingProfile ranking;
-    private final ScoreCluster<String> doms; // collected for "authority" heuristic 
-    private int maxdomcount;
-    private String language;
+	
+    protected int maxdomcount;
+	protected WordReferenceVars min, max;
+    protected final ScoreCluster<String> doms; // collected for "authority" heuristic 
+    private   final RankingProfile ranking;
+    private   String language;
     
     public ReferenceOrder(final RankingProfile profile, String language) {
         this.min = null;

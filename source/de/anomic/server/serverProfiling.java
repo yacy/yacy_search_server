@@ -26,16 +26,16 @@
 
 package de.anomic.server;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import de.anomic.kelondro.util.MemoryControl;
 
 public class serverProfiling extends Thread {
     
-    private static final Map<String, ConcurrentLinkedQueue<Event>> historyMaps = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Event>>();
+    private static final Map<String, ArrayList<Event>> historyMaps = new ConcurrentHashMap<String, ArrayList<Event>>();
     private static final Map<String, Long> eventAccess = new ConcurrentHashMap<String, Long>(); // value: last time when this was accessed
     private static serverProfiling systemProfiler = null;
     
@@ -84,26 +84,26 @@ public class serverProfiling extends Thread {
                 return; // protect against too heavy load
             }
         }
-    	ConcurrentLinkedQueue<Event> history = historyMaps.get(eventName);
-    	if (history != null) {
+        ArrayList<Event> history = historyMaps.get(eventName);
+    	if (history != null) synchronized (history) {
 
             // update entry
             history.add(new Event(eventPayload));
             
             // clean up too old entries
             int tp = history.size() - 30000;
-            while (tp-- > 0) history.poll();
+            while (tp-- > 0) history.remove(0);
             if (history.size() % 10 == 0) { // reduce number of System.currentTimeMillis() calls
                 Event e;
                 final long now = System.currentTimeMillis();
                 while (history.size() > 0) {
-                    e = history.peek();
+                    e = history.get(0);
                     if (now - e.time < 600000) break;
-                    history.poll();
+                    history.remove(0);
                 }
             }
     	} else {
-    	    history = new ConcurrentLinkedQueue<Event>();
+    	    history = new ArrayList<Event>(100);
 
             // update entry
             history.add(new Event(eventPayload));
@@ -113,16 +113,20 @@ public class serverProfiling extends Thread {
     	}
     }
     
-    public static Iterator<Event> history(final String eventName) {
-    	return (historyMaps.containsKey(eventName) ? (historyMaps.get(eventName)) : new ConcurrentLinkedQueue<Event>()).iterator();
+    public static ArrayList<Event> history(final String eventName) {
+        return historyMaps.get(eventName);
     }
 
     public static int countEvents(final String eventName, long time) {
-        Iterator<Event> i = history(eventName);
+        ArrayList<Event> event = history(eventName);
+        if (event == null) return 0;
         long now = System.currentTimeMillis();
         int count = 0;
-        while (i.hasNext()) {
-            if (now - i.next().time < time) count++;
+        synchronized (event) {
+            Iterator<Event> i = event.iterator();
+            while (i.hasNext()) {
+                if (now - i.next().time < time) count++;
+            }
         }
         return count;
     }

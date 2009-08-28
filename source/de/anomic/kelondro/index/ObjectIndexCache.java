@@ -54,7 +54,7 @@ public class ObjectIndexCache implements ObjectIndex {
     
 	public synchronized void reset(final int initialspace) {
 	    this.index0 = null; // first flush RAM to make room
-		this.index0 = new RowSet(rowdef, initialspace);
+	    this.index0 = new RowSet(rowdef, initialspace);
         this.index1 = null; // to show that this is the initialization phase
 	}
     

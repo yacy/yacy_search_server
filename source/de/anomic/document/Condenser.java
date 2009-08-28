@@ -87,7 +87,7 @@ public final class Condenser {
     private final static int numlength = 5;
 
     //private Properties analysis;
-    private TreeMap<String, Word> words; // a string (the words) to (indexWord) - relation
+    private Map<String, Word> words; // a string (the words) to (indexWord) - relation
     private final int wordminsize;
     private final int wordcut;
 
@@ -108,7 +108,7 @@ public final class Condenser {
         // added media words are flagged with the appropriate media flag
         this.wordminsize = 3;
         this.wordcut = 2;
-        this.words = new TreeMap<String, Word>();
+        this.words = new HashMap<String, Word>();
         this.RESULT_FLAGS = new Bitfield(4);
 
         // construct flag set for document
@@ -260,7 +260,7 @@ public final class Condenser {
         // subtracts the given stopwords from the word list
         // the word list shrinkes. This returns the number of shrinked words
         final int oldsize = words.size();
-        words = SetTools.excludeConstructive(words, stopwords);
+        SetTools.excludeDestructive(words, stopwords);
         return oldsize - words.size();
     }
 
@@ -738,7 +738,7 @@ public final class Condenser {
     }
 
     static StringBuilder readSentence(final Reader reader, final boolean pre) throws IOException {
-        final StringBuilder s = new StringBuilder(40);
+        final StringBuilder s = new StringBuilder(80);
         int nextChar;
         char c, lc = ' '; // starting with ' ' as last character prevents that the result string starts with a ' '
         

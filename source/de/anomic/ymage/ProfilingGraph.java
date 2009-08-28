@@ -26,8 +26,8 @@
 
 package de.anomic.ymage;
 
+import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
-import java.util.Iterator;
 
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverProfiling.Event;
@@ -37,13 +37,14 @@ public class ProfilingGraph {
     private static ymageChart bufferChart = null;
     
     public static long maxPayload(final String eventname, final long min) {
-    	final Iterator<Event> i = serverProfiling.history(eventname);
-        serverProfiling.Event event;
+    	final ArrayList<Event> list = serverProfiling.history(eventname);
+    	if (list == null) return min;
         long max = min, l;
-        while (i.hasNext()) {
-        	event = i.next();
-            l = ((Long) event.payload).longValue();
-            if (l > max) max = l;
+        synchronized (list) {
+            for (serverProfiling.Event event: list) {
+                l = ((Long) event.payload).longValue();
+                if (l > max) max = l;
+            }
         }
         return max;
     }
@@ -79,7 +80,6 @@ public class ProfilingGraph {
         final long now = System.currentTimeMillis();
         long bytes;
         int x0, x1, y0, y1, ppm, words;
-        serverProfiling.Event event;
         try {
             // draw urls
             /*
@@ -98,10 +98,9 @@ public class ProfilingGraph {
             }
             */
             // draw memory
-            Iterator<Event> i = serverProfiling.history("memory");
+            ArrayList<Event> events = serverProfiling.history("memory");
             x0 = 1; y0 = 0;
-            while (i.hasNext()) {
-                event = i.next();
+            if (events != null) synchronized (events) {for (serverProfiling.Event event: events) {
                 time = event.time - now;
                 bytes = ((Long) event.payload).longValue();
                 x1 = (int) (time/1000);
@@ -111,13 +110,12 @@ public class ProfilingGraph {
                 chart.setColor("0000FF");
                 if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x0, y0, x1, y1);
                 x0 = x1; y0 = y1;
-            }
+            }}
             
             // draw wordcache
-            i = serverProfiling.history("wordcache");
+            events = serverProfiling.history("wordcache");
             x0 = 1; y0 = 0;
-            while (i.hasNext()) {
-                event = i.next();
+            if (events != null) synchronized (events) {for (serverProfiling.Event event: events) {
                 time = event.time - now;
                 words = (int) ((Long) event.payload).longValue();
                 x1 = (int) (time/1000);
@@ -127,13 +125,12 @@ public class ProfilingGraph {
                 chart.setColor("008800");
                 if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x0, y0, x1, y1);
                 x0 = x1; y0 = y1;
-            }
+            }}
             
             // draw ppm
-            i = serverProfiling.history("ppm");
+            events = serverProfiling.history("ppm");
             x0 = 1; y0 = 0;
-            while (i.hasNext()) {
-                event = i.next();
+            if (events != null) synchronized (events) {for (serverProfiling.Event event: events) {
                 time = event.time - now;
                 ppm = (int) ((Long) event.payload).longValue();
                 x1 = (int) (time/1000);
@@ -143,7 +140,7 @@ public class ProfilingGraph {
                 chart.setColor("AA2222");
                 chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_ANOT0, x1, y1, 2, ppm + " PPM", 0);
                 x0 = x1; y0 = y1;
-            }
+            }}
             
             bufferChart = chart;
         } catch (final ConcurrentModificationException cme) {

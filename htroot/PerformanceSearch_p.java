@@ -24,6 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -39,25 +40,27 @@ public class PerformanceSearch_p {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         
-        final Iterator<serverProfiling.Event> events = serverProfiling.history("SEARCH");
+        final ArrayList<serverProfiling.Event> events = serverProfiling.history("SEARCH");
         int c = 0;
         serverProfiling.Event event;
         ProfilingGraph.searchEvent search;
         long lastt = 0;
-        while (events.hasNext()) {
-            event = events.next();
-            search = (ProfilingGraph.searchEvent) event.payload;
-            prop.put("table_" + c + "_query", search.queryID);
-            prop.put("table_" + c + "_event", search.processName);
-            prop.putNum("table_" + c + "_count", search.resultCount);
-            prop.putNum("table_" + c + "_delta", event.time - lastt);
-            prop.put("table_" + c + "_time", (new Date(event.time)).toString());
-            prop.putNum("table_" + c + "_duration", search.duration);
-            c++;
-            lastt = event.time;
+        if (events != null) synchronized (events) {
+            Iterator<serverProfiling.Event> i = events.iterator();
+            while (i.hasNext()) {
+                event = i.next();
+                search = (ProfilingGraph.searchEvent) event.payload;
+                prop.put("table_" + c + "_query", search.queryID);
+                prop.put("table_" + c + "_event", search.processName);
+                prop.putNum("table_" + c + "_count", search.resultCount);
+                prop.putNum("table_" + c + "_delta", event.time - lastt);
+                prop.put("table_" + c + "_time", (new Date(event.time)).toString());
+                prop.putNum("table_" + c + "_duration", search.duration);
+                c++;
+                lastt = event.time;
+            }
         }
         prop.put("table", c);
-        
         return prop;
     }
 }

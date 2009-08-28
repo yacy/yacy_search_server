@@ -41,7 +41,7 @@ import de.anomic.yacy.yacySeedDB;
 
 public class Word {
 
-    public static final int hashCacheSize = (int) (MemoryControl.available() / 10000L);
+    public static final int hashCacheSize = Math.max(2000, Math.min(100000, (int) (MemoryControl.available() / 20000L)));
     private static final SimpleARC<String, byte[]> hashCache = new SimpleARC<String, byte[]>(hashCacheSize);
     
     // object carries statistics for words and sentences

@@ -52,7 +52,7 @@ import de.anomic.server.serverProfiling;
 
 public final class IndexCell<ReferenceType extends Reference> extends AbstractBufferedIndex<ReferenceType> implements BufferedIndex<ReferenceType> {
 
-    private static final long cleanupCycle = 10000;
+    private static final long cleanupCycle = 60000;
     
     // class variables
     private final ReferenceContainerArray<ReferenceType> array;
@@ -101,7 +101,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      */
     public void add(ReferenceContainer<ReferenceType> newEntries) throws IOException {
         this.ram.add(newEntries);
-        if (this.ram.size() % 100 == 0) {
+        if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < System.currentTimeMillis()) {
             serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
             cleanCache();
         }
@@ -109,7 +109,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     public void add(byte[] termHash, ReferenceType entry) throws IOException {
         this.ram.add(termHash, entry);
-        if (this.ram.size() % 100 == 0) {
+        if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < System.currentTimeMillis()) {
             serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
             cleanCache();
         }

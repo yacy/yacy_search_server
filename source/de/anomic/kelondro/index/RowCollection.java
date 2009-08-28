@@ -49,7 +49,7 @@ import de.anomic.yacy.logging.Log;
 
 public class RowCollection implements Iterable<Row.Entry> {
 
-    public  static final double growfactor = 1.4;
+    public  static final long growfactor100 = 140L;
     private static final int isortlimit = 20;
     static final Integer dummy = 0;
     
@@ -142,8 +142,10 @@ public class RowCollection implements Iterable<Row.Entry> {
         return (int) (time / day) - 10957;
     }
     
+    private static Column exportColumn0, exportColumn1, exportColumn2, exportColumn3, exportColumn4;
+
     private static Row exportRow(final int chunkcachelength) {
-        // find out the size of this collection
+        /*
         return new Row(
                 "int size-4 {b256}," +
                 "short lastread-2 {b256}," + // as daysSince2000
@@ -153,6 +155,23 @@ public class RowCollection implements Iterable<Row.Entry> {
                 "byte[] collection-" + chunkcachelength,
                 NaturalOrder.naturalOrder
                 );
+         */
+        
+        if (exportColumn0 == null) exportColumn0 = new Column("int size-4 {b256}");
+        if (exportColumn1 == null) exportColumn1 = new Column("short lastread-2 {b256}");
+        if (exportColumn2 == null) exportColumn2 = new Column("short lastwrote-2 {b256}");
+        if (exportColumn3 == null) exportColumn3 = new Column("byte[] orderkey-2");
+        if (exportColumn4 == null) exportColumn4 = new Column("int orderbound-4 {b256}");
+        /*
+         * because of a strange bug these objects cannot be initialized as normal
+         * static final. If I try that, they are not initialized and are assigned null. why?
+         */
+        return new Row(new Column[]{
+                    exportColumn0, exportColumn1, exportColumn2, exportColumn3, exportColumn4,
+                    new Column("byte[] collection-" + chunkcachelength)
+                },
+                NaturalOrder.naturalOrder
+        );
     }
     
     public static final int exportOverheadSize = 14;
@@ -183,9 +202,12 @@ public class RowCollection implements Iterable<Row.Entry> {
     }
     
     protected final void ensureSize(final int elements) {
-        final int needed = elements * rowdef.objectsize;
+        assert elements > 0 : "elements = " + elements;
+        final long needed = elements * rowdef.objectsize;
         if (chunkcache.length >= needed) return;
-        byte[] newChunkcache = new byte[(int) (needed * growfactor)]; // increase space
+        assert needed > 0 : "needed = " + needed;
+        assert needed * growfactor100 / 100L > 0 : "elements = " + elements + ", new = " + (needed * growfactor100 / 100L);
+        byte[] newChunkcache = new byte[(int) (needed * growfactor100 / 100L)]; // increase space
         System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
         chunkcache = newChunkcache;
     }
@@ -193,17 +215,17 @@ public class RowCollection implements Iterable<Row.Entry> {
     /**
      * compute the needed memory in case of a cache extension. That is, if the cache is full and must
      * be copied into a new cache which is larger. In such a case the Collection needs more than the double size
-     * than is necessary to store the data. This method coputes the extra memory that is needed to perform this task.
+     * than is necessary to store the data. This method computes the extra memory that is needed to perform this task.
      * @return
      */
     public final long memoryNeededForGrow() {
-        return (long) ((((long) (chunkcount + 1)) * ((long) rowdef.objectsize)) * growfactor);
+        return (long) ((((long) (chunkcount + 1)) * ((long) rowdef.objectsize)) * growfactor100 / 100L);
     }
     
     public synchronized void trim(final boolean plusGrowFactor) {
         if (chunkcache.length == 0) return;
         int needed = chunkcount * rowdef.objectsize;
-        if (plusGrowFactor) needed = (int) (needed * growfactor);
+        if (plusGrowFactor) needed = (int) (((long) needed) * growfactor100 / 100L);
         if (needed >= chunkcache.length)
             return; // in case that the growfactor causes that the cache would
                     // grow instead of shrink, simply ignore the growfactor

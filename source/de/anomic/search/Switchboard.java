@@ -1208,6 +1208,8 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
             Response response;
             while ((surrogate = reader.take()) != DCEntry.poison) {
                 // check if url is in accepted domain
+                assert surrogate != null;
+                assert crawlStacker != null;
                 final String urlRejectReason = crawlStacker.urlInAcceptedDomain(surrogate.url());
                 if (urlRejectReason != null) {
                     if (this.log.isFine()) this.log.logInfo("Rejected URL '" + surrogate.url() + "': " + urlRejectReason);

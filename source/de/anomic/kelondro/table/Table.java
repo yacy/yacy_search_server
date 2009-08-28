@@ -266,9 +266,9 @@ public class Table implements ObjectIndex {
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("tableSize", Integer.toString(index.size()));
         map.put("tableKeyChunkSize", Integer.toString(index.row().objectsize));
-        map.put("tableKeyMem", Integer.toString((int) (index.row().objectsize * index.size() * RowCollection.growfactor)));
+        map.put("tableKeyMem", Integer.toString((int) (((long) index.row().objectsize) * ((long) index.size()) * RowCollection.growfactor100 / 100L)));
         map.put("tableValueChunkSize", (table == null) ? "0" : Integer.toString(table.row().objectsize));
-        map.put("tableValueMem", (table == null) ? "0" : Integer.toString((int) (table.row().objectsize * table.size() * RowCollection.growfactor)));
+        map.put("tableValueMem", (table == null) ? "0" : Integer.toString((int) (((long) index.row().objectsize) * ((long) index.size()) * RowCollection.growfactor100 / 100L)));
         return map;
     }
     
@@ -277,7 +277,7 @@ public class Table implements ObjectIndex {
     }
     
     public static int staticRAMIndexNeed(final File f, final Row rowdef) {
-        return (int) ((rowdef.primaryKeyLength + 4) * tableSize(f, rowdef.objectsize) * RowCollection.growfactor);
+        return (int) (((long)(rowdef.primaryKeyLength + 4)) * ((long) tableSize(f, rowdef.objectsize)) * RowCollection.growfactor100 / 100L);
     }
     
     public synchronized void addUnique(final Entry row) throws IOException {
