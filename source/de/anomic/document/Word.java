@@ -32,7 +32,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.index.SimpleARC;
+import de.anomic.kelondro.index.ARC;
+import de.anomic.kelondro.index.ConcurrentARC;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.order.Digest;
@@ -42,7 +43,7 @@ import de.anomic.yacy.yacySeedDB;
 public class Word {
 
     public static final int hashCacheSize = Math.max(2000, Math.min(100000, (int) (MemoryControl.available() / 20000L)));
-    private static final SimpleARC<String, byte[]> hashCache = new SimpleARC<String, byte[]>(hashCacheSize);
+    private static final ARC<String, byte[]> hashCache = new ConcurrentARC<String, byte[]>(hashCacheSize, Runtime.getRuntime().availableProcessors());
     
     // object carries statistics for words and sentences
     public  int      count;       // number of occurrences

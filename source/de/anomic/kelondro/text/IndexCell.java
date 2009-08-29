@@ -294,7 +294,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     private void cleanCache() {
     	
         // dump the cache if necessary
-    	synchronized (this) {
+    	if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false))) synchronized (this) {
 	        if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false))) {
 	        	// dump the ram
 				File dumpFile = this.array.newContainerBLOBFile();
@@ -308,7 +308,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     	}
     	
         // clean-up the cache
-        synchronized (this) {
+    	if (this.array.entries() > 50 || (this.lastCleanup + cleanupCycle < System.currentTimeMillis())) synchronized (this) {
 	        if (this.array.entries() > 50 || (this.lastCleanup + cleanupCycle < System.currentTimeMillis())) {
 	        	//System.out.println("----cleanup check");
 	        	this.array.shrink(this.targetFileSize, this.maxFileSize);

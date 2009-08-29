@@ -25,7 +25,6 @@
 
 package de.anomic.kelondro.index;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -38,7 +37,7 @@ import java.util.Map;
  * at the same size.
  */
 
-public class SimpleARC <K, V> {
+public class SimpleARC<K, V> implements ARC<K, V> {
 
     public    final static boolean accessOrder = false; // if false, then a insertion-order is used
     
@@ -47,18 +46,18 @@ public class SimpleARC <K, V> {
     
     public SimpleARC(int cacheSize) {
         this.cacheSize = cacheSize / 2;
-        this.levelA = Collections.synchronizedMap(new LinkedHashMap<K, V>(cacheSize, 0.1f, accessOrder) {
+        this.levelA = new LinkedHashMap<K, V>(cacheSize, 0.1f, accessOrder) {
             private static final long serialVersionUID = 1L;
             @Override protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
                 return size() > SimpleARC.this.cacheSize;
             }
-        });
-        this.levelB = Collections.synchronizedMap(new LinkedHashMap<K, V>(cacheSize, 0.1f, accessOrder) {
+        };
+        this.levelB = new LinkedHashMap<K, V>(cacheSize, 0.1f, accessOrder) {
             private static final long serialVersionUID = 1L;
             @Override protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
                 return size() > SimpleARC.this.cacheSize;
             }
-        });
+        };
     }
     
     /**
@@ -66,7 +65,7 @@ public class SimpleARC <K, V> {
      * @param s
      * @param v
      */
-    public void put(K s, V v) {
+    public synchronized void put(K s, V v) {
         if (this.levelB.containsKey(s)) {
         	this.levelB.put(s, v);
             assert (this.levelB.size() <= cacheSize); // the cache should shrink automatically
@@ -81,7 +80,7 @@ public class SimpleARC <K, V> {
      * @param s
      * @return the value
      */
-    public V get(K s) {
+    public synchronized V get(K s) {
         V v = this.levelB.get(s);
         if (v != null) return v;
         v = this.levelA.remove(s);
@@ -98,7 +97,7 @@ public class SimpleARC <K, V> {
      * @param s
      * @return
      */
-    public boolean containsKey(K s) {
+    public synchronized boolean containsKey(K s) {
         if (this.levelB.containsKey(s)) return true;
         return this.levelA.containsKey(s);
     }
@@ -108,7 +107,7 @@ public class SimpleARC <K, V> {
      * @param s
      * @return the old value
      */
-    public V remove(K s) {
+    public synchronized V remove(K s) {
         V r = this.levelB.remove(s);
         if (r != null) return r;
         return this.levelA.remove(s);
@@ -117,7 +116,7 @@ public class SimpleARC <K, V> {
     /**
      * clear the cache
      */
-    public void clear() {
+    public synchronized void clear() {
         this.levelA.clear();
         this.levelB.clear();
     }

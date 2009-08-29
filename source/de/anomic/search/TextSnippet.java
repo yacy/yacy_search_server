@@ -42,7 +42,8 @@ import de.anomic.document.Word;
 import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.client.Cache;
 import de.anomic.http.metadata.ResponseHeader;
-import de.anomic.kelondro.index.SimpleARC;
+import de.anomic.kelondro.index.ARC;
+import de.anomic.kelondro.index.ConcurrentARC;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.SetTools;
@@ -66,8 +67,8 @@ public class TextSnippet {
     public static final int ERROR_PARSER_NO_LINES = 15;
     public static final int ERROR_NO_MATCH = 16;
     
-    private static final SimpleARC<String, String> snippetsCache = new SimpleARC<String, String>(maxCache);
-    private static final SimpleARC<String, yacyURL> faviconCache = new SimpleARC<String, yacyURL>(maxCache);
+    private static final ARC<String, String> snippetsCache = new ConcurrentARC<String, String>(maxCache, Math.max(10, Runtime.getRuntime().availableProcessors()));
+    private static final ARC<String, yacyURL> faviconCache = new ConcurrentARC<String, yacyURL>(maxCache, Math.max(10, Runtime.getRuntime().availableProcessors()));
     
     private final yacyURL url;
     private String line;

@@ -36,7 +36,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.kelondro.index.SimpleARC;
+import de.anomic.kelondro.index.ARC;
+import de.anomic.kelondro.index.ConcurrentARC;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.order.RotateIterator;
@@ -48,13 +49,13 @@ import de.anomic.kelondro.util.kelondroException;
 public class MapView {
 
     private BLOB blob;
-    private SimpleARC<String, Map<String, String>> cache;
+    private ARC<String, Map<String, String>> cache;
     private final char fillchar;
 
     
     public MapView(final Heap blob, final int cachesize, char fillchar) {
         this.blob = blob;
-        this.cache = new SimpleARC<String, Map<String, String>>(cachesize);
+        this.cache = new ConcurrentARC<String, Map<String, String>>(cachesize, Runtime.getRuntime().availableProcessors());
         this.fillchar = fillchar;
         /*
         // debug
