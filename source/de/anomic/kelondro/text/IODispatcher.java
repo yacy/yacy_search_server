@@ -129,7 +129,7 @@ public class IODispatcher extends Thread {
         MergeJob mergeJob;
         DumpJob<? extends Reference> dumpJob;
         try {
-            loop: while (true) {
+            loop: while (true) try {
                 controlQueue.acquire();
                 
                 // prefer dump actions to flush memory to disc
@@ -176,11 +176,11 @@ public class IODispatcher extends Thread {
 
                 Log.logSevere("IODispatcher", "main loop in bad state, dumpQueue.size() = " + dumpQueue.size() + ", mergeQueue.size() = " + mergeQueue.size() + ", controlQueue.availablePermits() = " + controlQueue.availablePermits());
                 assert false : "this process statt should not be reached"; // this should never happen
+            } catch (Exception e) {
+                Log.logSevere("IODispatcher", "main run job failed (X)", e);
+                e.printStackTrace();
             }
             Log.logInfo("IODispatcher", "loop terminated");
-        } catch (InterruptedException e) {
-            Log.logSevere("IODispatcher", "main run job was interrupted (3)", e);
-            e.printStackTrace();
         } catch (Exception e) {
             Log.logSevere("IODispatcher", "main run job failed (4)", e);
             e.printStackTrace();
