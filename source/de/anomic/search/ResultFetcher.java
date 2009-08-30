@@ -50,7 +50,7 @@ public class ResultFetcher {
     
     // input values
     final RankingProcess  rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
-    final QueryParams     query;
+    QueryParams     query;
     private final Segment         indexSegment;
     private final yacySeedDB      peers;
     
@@ -91,23 +91,18 @@ public class ResultFetcher {
         }
         
         // start worker threads to fetch urls and snippets
-        this.workerThreads = new Worker[(query.onlineSnippetFetch) ? workerThreadCount : 1];
-        for (int i = 0; i < this.workerThreads.length; i++) {
-            this.workerThreads[i] = new Worker(i, 10000, (query.onlineSnippetFetch) ? 2 : 0);
-            this.workerThreads[i].start();
-        }
+        this.workerThreads = null;
+        deployWorker(10);
         serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), this.workerThreads.length + " online snippet fetch threads started", 0, 0), false);
         
     }
 
-    public void restartWorker() {
+    public void deployWorker(int neededResults) {
     	if (anyWorkerAlive()) return;
-    	this.workerThreads = new Worker[workerThreadCount];
-    	Worker worker;
-        for (int i = 0; i < workerThreads.length; i++) {
-            worker = new Worker(i, 6000, (query.onlineSnippetFetch) ? 2 : 0);
-            worker.start();
-            workerThreads[i] = worker;
+    	this.workerThreads = new Worker[(query.onlineSnippetFetch) ? workerThreadCount : 1];
+    	for (int i = 0; i < workerThreads.length; i++) {
+    		this.workerThreads[i] = new Worker(i, 10000, (query.onlineSnippetFetch) ? 2 : 0, neededResults);
+    		this.workerThreads[i].start();
         }
     }
     
@@ -136,12 +131,14 @@ public class ResultFetcher {
         private long lastLifeSign; // when the last time the run()-loop was executed
         private final int id;
         private int snippetMode;
+        private int neededResults;
         
-        public Worker(final int id, final long maxlifetime, int snippetMode) {
+        public Worker(final int id, final long maxlifetime, int snippetMode, int neededResults) {
             this.id = id;
             this.snippetMode = snippetMode;
             this.lastLifeSign = System.currentTimeMillis();
             this.timeout = System.currentTimeMillis() + Math.max(1000, maxlifetime);
+            this.neededResults = neededResults;
         }
 
         public void run() {
@@ -152,6 +149,7 @@ public class ResultFetcher {
             boolean nav_topics = query.navigators.equals("all") || query.navigators.indexOf("topics") >= 0;
             try {
                 while (System.currentTimeMillis() < this.timeout) {
+                	if (result.size() >= neededResults) break;
                     this.lastLifeSign = System.currentTimeMillis();
     
                     // check if we have enough
@@ -285,10 +283,24 @@ public class ResultFetcher {
             return this.result.element(item).element;
         }
         
+        System.out.println("rankedCache.size() = " + this.rankedCache.size());
+        System.out.println("result.size() = " + this.result.size());
+        System.out.println("query.neededResults() = " + query.neededResults());
+        
+        if ((!anyWorkerAlive()) &&
+            (((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (images.size() + 30 < query.neededResults())) ||
+             (this.result.size() < query.neededResults())) &&
+            //(event.query.onlineSnippetFetch) &&
+            (this.rankedCache.size() > this.result.size())
+           ) {
+            // start worker threads to fetch urls and snippets
+            deployWorker(query.neededResults());
+        }
+
         // finally wait until enough results are there produced from the
         // snippet fetch process
         while ((anyWorkerAlive()) && (result.size() <= item)) {
-            try {Thread.sleep(item * 50L);} catch (final InterruptedException e) {}
+            try {Thread.sleep((item % query.itemsPerPage) * 50L);} catch (final InterruptedException e) {}
         }
 
         // finally, if there is something, return the result

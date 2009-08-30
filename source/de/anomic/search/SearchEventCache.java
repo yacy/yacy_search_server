@@ -90,20 +90,8 @@ public class SearchEventCache {
             }
         }
         if (event == null) {
-            // generate a new event
+            // start a new event
             event = new SearchEvent(query, indexSegment, peers, crawlResults, preselectedPeerHashes, generateAbstracts);
-        } else {
-            // if worker threads had been alive, but did not succeed, start them again to fetch missing links
-            if ((!event.result().anyWorkerAlive()) &&
-                (((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (event.result().images.size() + 30 < query.neededResults())) ||
-                 (event.result().result.size() < query.neededResults() + 10)) &&
-                 //(event.query.onlineSnippetFetch) &&
-                (event.getRankingResult().getLocalResourceSize() + event.getRankingResult().getRemoteResourceSize() > event.result().result.size())) {
-                // set new timeout
-                event.resetEventTime();
-                // start worker threads to fetch urls and snippets
-                event.result().restartWorker();
-            }
         }
     
         return event;

@@ -64,7 +64,7 @@ public final class QueryParams {
     
     public String queryString;
     public TreeSet<byte[]> fullqueryHashes, queryHashes, excludeHashes;
-    public int linesPerPage, offset;
+    public int itemsPerPage, offset;
     public String prefer;
     public int contentdom;
     public String urlMask;
@@ -90,7 +90,7 @@ public final class QueryParams {
     public boolean specialRights; // is true if the user has a special authorization and my use more database-extensive options
     
     public QueryParams(final String queryString,
-    						 final int lines,
+    						 final int itemsPerPage,
     		                 final RankingProfile ranking,
     		                 final Bitfield constraint) {
     	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(queryString.getBytes()))) {
@@ -110,7 +110,7 @@ public final class QueryParams {
         this.maxDistance = Integer.MAX_VALUE;
         this.prefer = "";
         this.contentdom = CONTENTDOM_ALL;
-        this.linesPerPage = lines;
+        this.itemsPerPage = itemsPerPage;
         this.offset = 0;
         this.urlMask = ".*";
         this.targetlang = "en";
@@ -139,7 +139,7 @@ public final class QueryParams {
         final String language,
         final String navigators,
         final boolean onlineSnippetFetch,
-        final int lines, final int offset, final String urlMask,
+        final int itemsPerPage, final int offset, final String urlMask,
         final int domType, final int domMaxTargets,
         final Bitfield constraint, final boolean allofconstraint,
         final String site,
@@ -156,7 +156,7 @@ public final class QueryParams {
 		this.maxDistance = maxDistance;
 		this.prefer = prefer;
 		this.contentdom = contentdom;
-		this.linesPerPage = Math.min((specialRights) ? 1000 : 50, lines);
+		this.itemsPerPage = Math.min((specialRights) ? 1000 : 50, itemsPerPage);
 		this.offset = Math.min((specialRights) ? 10000 : 100, offset);
 		this.urlMask = urlMask;
 		assert language != null;
@@ -178,12 +178,12 @@ public final class QueryParams {
     
     public int neededResults() {
         // the number of result lines that must be computed
-        return this.offset + this.linesPerPage;
+        return this.offset + this.itemsPerPage;
     }
     
     public int displayResults() {
         // the number of result lines that are displayed at once (size of result page)
-        return this.linesPerPage;
+        return this.itemsPerPage;
     }
     
     public void setOffset(final int newOffset) {

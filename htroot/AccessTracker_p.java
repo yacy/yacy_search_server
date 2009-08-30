@@ -169,12 +169,12 @@ public class AccessTracker_p {
                     prop.putHTML("page_list_" + entCount + "_peername", (searchProfile.remotepeer == null) ? "<unknown>" : searchProfile.remotepeer.getName());
                     prop.put("page_list_" + entCount + "_queryhashes", QueryParams.anonymizedQueryHashes(searchProfile.queryHashes));
                 }
-                prop.putNum("page_list_" + entCount + "_querycount", searchProfile.linesPerPage);
+                prop.putNum("page_list_" + entCount + "_querycount", searchProfile.itemsPerPage);
                 prop.putNum("page_list_" + entCount + "_resultcount", searchProfile.resultcount);
                 prop.putNum("page_list_" + entCount + "_urltime", searchProfile.urlretrievaltime);
                 prop.putNum("page_list_" + entCount + "_snippettime", searchProfile.snippetcomputationtime);
                 prop.putNum("page_list_" + entCount + "_resulttime", searchProfile.searchtime);
-                qcountSum += searchProfile.linesPerPage;
+                qcountSum += searchProfile.itemsPerPage;
                 rcountSum += searchProfile.resultcount;
                 utimeSum += searchProfile.urlretrievaltime;
                 stimeSum += searchProfile.snippetcomputationtime;

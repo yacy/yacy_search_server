@@ -66,7 +66,7 @@ public final class SearchEvent {
     private final Segment indexSegment;
     private final yacySeedDB peers;
     private RankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
-    private ResultFetcher snippets;
+    private ResultFetcher results;
     
     // class variables for search abstracts
     private final IndexAbstracts rcAbstracts; // cache for index abstracts; word:TreeMap mapping where the embedded TreeMap is a urlhash:peerlist relation
@@ -176,7 +176,7 @@ public final class SearchEvent {
         }
         
         // start worker threads to fetch urls and snippets
-        this.snippets = new ResultFetcher(rankedCache, query, indexSegment, peers);
+        this.results = new ResultFetcher(rankedCache, query, indexSegment, peers);
         
         // clean up events
         SearchEventCache.cleanupEvents(false);
@@ -201,11 +201,12 @@ public final class SearchEvent {
    
    public void setQuery(QueryParams query) {
        this.query = query;
+       this.results.query = query;
    }
    
    public void cleanup() {
        // execute deletion of failed words
-       int rw = this.snippets.failedURLs.size();
+       int rw = this.results.failedURLs.size();
        if (rw > 0) {
            final TreeSet<byte[]> removeWords = query.queryHashes;
            removeWords.addAll(query.excludeHashes);
@@ -213,7 +214,7 @@ public final class SearchEvent {
                final Iterator<byte[]> j = removeWords.iterator();
                // remove the same url hashes for multiple words
                while (j.hasNext()) {
-                   this.indexSegment.termIndex().remove(j.next(), this.snippets.failedURLs.keySet());
+                   this.indexSegment.termIndex().remove(j.next(), this.results.failedURLs.keySet());
                }                    
            } catch (IOException e) {
                e.printStackTrace();
@@ -311,16 +312,8 @@ public final class SearchEvent {
                 // remote search requests, wait that the local process terminates first
             	try {localSearchThread.join();} catch (InterruptedException e) {}
             }
-            // now wait until as many remote worker threads have finished, as we
-            // want to display results
-            while (this.primarySearchThreads != null &&
-                   this.primarySearchThreads.length > item &&
-                   this.snippets.anyWorkerAlive() &&
-                   (this.snippets.resultCount() <= item || countFinishedRemoteSearch() <= item)) {
-                try {Thread.sleep(item * 50L);} catch (final InterruptedException e) {}
-            }
         }
-        return this.snippets.oneResult(item);
+        return this.results.oneResult(item);
     }
     
     boolean secondarySearchStartet = false;
@@ -401,7 +394,7 @@ public final class SearchEvent {
     }
     
     public ResultFetcher result() {
-        return this.snippets;
+        return this.results;
     }
     
 }
