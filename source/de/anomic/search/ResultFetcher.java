@@ -282,11 +282,11 @@ public class ResultFetcher {
             // we have the wanted result already in the result array .. return that
             return this.result.element(item).element;
         }
-        
+        /*
         System.out.println("rankedCache.size() = " + this.rankedCache.size());
         System.out.println("result.size() = " + this.result.size());
         System.out.println("query.neededResults() = " + query.neededResults());
-        
+        */
         if ((!anyWorkerAlive()) &&
             (((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (images.size() + 30 < query.neededResults())) ||
              (this.result.size() < query.neededResults())) &&
