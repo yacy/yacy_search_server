@@ -63,6 +63,7 @@ public class DidYouMeanLibrary {
     public void reload() {
         this.dict = new TreeSet<String>();
         this.tcid = new TreeSet<String>();
+        if (dictionaryPath == null || !dictionaryPath.exists()) return;
         String[] files = dictionaryPath.list();
         for (String f: files) {
             if (f.endsWith(".words")) try {
