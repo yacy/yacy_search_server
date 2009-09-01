@@ -104,12 +104,12 @@ public class DidYouMeanLibrary {
         s = s.trim().toLowerCase();
         SortedSet<String> t = this.dict.tailSet(s);
         for (String r: t) {
-            if (s.startsWith(r)) a.add(r); else break;
+            if (r.startsWith(s)) a.add(r); else break;
         }
         s = reverse(s);
         t = this.tcid.tailSet(s);
         for (String r: t) {
-            if (s.startsWith(r)) a.add(reverse(r)); else break;
+            if (r.startsWith(s)) a.add(reverse(r)); else break;
         }
         return a;
     }
