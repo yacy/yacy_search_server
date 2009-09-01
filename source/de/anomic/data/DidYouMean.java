@@ -1,4 +1,4 @@
-package de.anomic.tools;
+package de.anomic.data;
 
 import java.util.Collections;
 import java.util.Comparator;

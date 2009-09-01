@@ -34,6 +34,7 @@ import java.util.TreeSet;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.crawler.retrieval.LoaderDispatcher;
+import de.anomic.data.DidYouMean;
 import de.anomic.document.Condenser;
 import de.anomic.document.Word;
 import de.anomic.document.Document;
@@ -55,7 +56,6 @@ import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.DidYouMean;
 import de.anomic.tools.iso639;
 import de.anomic.tools.Formatter;
 import de.anomic.yacy.yacyNewsPool;
