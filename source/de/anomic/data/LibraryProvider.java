@@ -42,10 +42,12 @@ import java.util.TreeSet;
 
 public class LibraryProvider {
 
+    private static final String path_to_source_dictionaries = "source";
     private static final String path_to_did_you_mean_dictionaries = "didyoumean";
-    private static final String path_to_source = "dictionaries";
     
     public static DidYouMeanLibrary dymLib = new DidYouMeanLibrary(null);
+    public static File dictSource = null;
+    public static File dictRoot = null;
     
     /**
      * initialize the LibraryProvider as static class.
@@ -56,12 +58,27 @@ public class LibraryProvider {
      * @param pathToSource
      * @param pathToDICTIONARIES
      */
-    public static void initialize(File rootPath, File pathToDICTIONARIES) {
-
-        // translate input files (once..)
-        File dymDict = new File(pathToDICTIONARIES, path_to_did_you_mean_dictionaries);
+    public static void initialize(File rootPath) {
+    	File dictSource = new File(rootPath, path_to_source_dictionaries);
+    	if (!dictSource.exists()) dictSource.mkdirs();
+    	dictRoot = rootPath;
+        
+        // initialize libraries
+    	integrateDeReWo();
+    	initDidYouMean();
+    }
+    
+    public static void initDidYouMean() {
+    	File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
         if (!dymDict.exists()) dymDict.mkdirs();
-        File pathToSource = new File(rootPath, path_to_source);
+        dymLib = new DidYouMeanLibrary(dymDict);
+    }
+    
+    public static void integrateDeReWo() {
+        // translate input files (once..)
+        File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
+        if (!dymDict.exists()) dymDict.mkdirs();
+        File pathToSource = new File(dictRoot, path_to_source_dictionaries);
         File derewoInput = new File(pathToSource, "derewo-v-30000g-2007-12-31-0.1.txt");
         File derewoOutput = new File(dymDict, "derewo-v-30000g-2007-12-31-0.1.words");
         if (!derewoOutput.exists() && derewoInput.exists()) {
@@ -73,9 +90,6 @@ public class LibraryProvider {
                 e.printStackTrace();
             }
         }
-        
-        // initialize libraries
-        dymLib = new DidYouMeanLibrary(dymDict);
     }
     
     /*
@@ -152,7 +166,7 @@ public class LibraryProvider {
     
     public static void main(String[] args) {
         File here = new File("dummy").getParentFile();
-        initialize(here, new File(new File(here, "DATA"), "DICTIONARIES"));
+        initialize(new File(here, "DATA/DICTIONARIES"));
         System.out.println("dymDict-size = " + dymLib.size());
         Set<String> r = dymLib.recommend("da");
         for (String s: r) {

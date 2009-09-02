@@ -320,7 +320,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         
         // init libraries
         this.log.logConfig("initializing libraries");
-        LibraryProvider.initialize(rootPath, this.dictionariesPath);
+        LibraryProvider.initialize(this.dictionariesPath);
         
         // set a high maximum cache size to current size; this is adopted later automatically
         final int wordCacheMaxCount = (int) getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
