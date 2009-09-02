@@ -116,7 +116,7 @@ public final class SearchEvent {
             final long timer = System.currentTimeMillis();
             final int fetchpeers = 12;
             Log.logFine("SEARCH_EVENT", "STARTING " + fetchpeers + " THREADS TO CATCH EACH " + query.displayResults() + " URLs");
-            this.primarySearchThreads = yacySearch.primaryRemoteSearches(
+            this.primarySearchThreads = (query.queryHashes.size() == 0) ? null : yacySearch.primaryRemoteSearches(
                     QueryParams.hashSet2hashString(query.queryHashes),
                     QueryParams.hashSet2hashString(query.excludeHashes),
                     "",

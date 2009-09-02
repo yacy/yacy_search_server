@@ -219,7 +219,7 @@ public class RowCollection implements Iterable<Row.Entry> {
      * @return
      */
     public final long memoryNeededForGrow() {
-        return (long) ((((long) (chunkcount + 1)) * ((long) rowdef.objectsize)) * growfactor100 / 100L);
+        return (((long) (chunkcount + 1)) * ((long) rowdef.objectsize)) * growfactor100 / 100L;
     }
     
     public synchronized void trim(final boolean plusGrowFactor) {

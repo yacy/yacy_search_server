@@ -277,7 +277,7 @@ public class Table implements ObjectIndex {
     }
     
     public static int staticRAMIndexNeed(final File f, final Row rowdef) {
-        return (int) (((long)(rowdef.primaryKeyLength + 4)) * ((long) tableSize(f, rowdef.objectsize)) * RowCollection.growfactor100 / 100L);
+        return (int) (((long)(rowdef.primaryKeyLength + 4)) * tableSize(f, rowdef.objectsize) * RowCollection.growfactor100 / 100L);
     }
     
     public synchronized void addUnique(final Entry row) throws IOException {

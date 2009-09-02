@@ -132,6 +132,7 @@ import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.Blacklist;
+import de.anomic.data.LibraryProvider;
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
@@ -313,6 +314,10 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         this.rankingPermissions = new HashMap<String, String>(); // mapping of permission - to filename.
         this.workPath   = getConfigPath(SwitchboardConstants.WORK_PATH, SwitchboardConstants.WORK_PATH_DEFAULT);
         this.log.logConfig("Work Path:    " + this.workPath.toString());
+        
+        // init libraries
+        this.log.logConfig("initializing libraries");
+        LibraryProvider.initialize(rootPath, new File(rootPath, "dictionaries"));
         
         // set a high maximum cache size to current size; this is adopted later automatically
         final int wordCacheMaxCount = (int) getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
