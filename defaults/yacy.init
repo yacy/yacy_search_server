@@ -236,6 +236,10 @@ surrogates.in = DATA/SURROGATES/in
 # a path to the surrogate output directory
 surrogates.out = DATA/SURROGATES/out
 
+# a path to the dictionaries directory
+# this directory also contains subdirectories for input sources, the did-you-mean function and other
+dictionaries = DATA/DICTIONARIES
+
 # storage place for new releases
 releases = DATA/RELEASE
 

@@ -265,17 +265,6 @@ public final class SearchEvent {
         return false;
     }
     
-    private int countFinishedRemoteSearch() {
-        int count = 0;
-        // check only primary search threads
-        if ((this.primarySearchThreads != null) && (this.primarySearchThreads.length != 0)) {
-            for (int i = 0; i < this.primarySearchThreads.length; i++) {
-                if ((this.primarySearchThreads[i] == null) || (!(this.primarySearchThreads[i].isAlive()))) count++;
-            }
-        }
-        return count;
-    }
-    
     public yacySearch[] getPrimarySearchThreads() {
         return primarySearchThreads;
     }

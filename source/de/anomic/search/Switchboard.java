@@ -220,6 +220,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
     
     // storage management
     public  File                           htCachePath;
+    public  File                           dictionariesPath;
     public  File                           listsPath;
     public  File                           htDocsPath;
     public  File                           rankingPath;
@@ -303,8 +304,8 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         RemoteProxyConfig.init(this);
         
         // load values from configs        
-        final File indexPrimaryPath = getConfigPath(SwitchboardConstants.INDEX_PRIMARY_PATH, SwitchboardConstants.INDEX_PATH_DEFAULT);
-        this.log.logConfig("Index Primary Path: " + indexPrimaryPath.toString());
+        final File indexPath = getConfigPath(SwitchboardConstants.INDEX_PRIMARY_PATH, SwitchboardConstants.INDEX_PATH_DEFAULT);
+        this.log.logConfig("Index Primary Path: " + indexPath.toString());
         this.listsPath      = getConfigPath(SwitchboardConstants.LISTS_PATH, SwitchboardConstants.LISTS_PATH_DEFAULT);
         this.log.logConfig("Lists Path:     " + this.listsPath.toString());
         this.htDocsPath   = getConfigPath(SwitchboardConstants.HTDOCS_PATH, SwitchboardConstants.HTDOCS_PATH_DEFAULT);
@@ -314,10 +315,12 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         this.rankingPermissions = new HashMap<String, String>(); // mapping of permission - to filename.
         this.workPath   = getConfigPath(SwitchboardConstants.WORK_PATH, SwitchboardConstants.WORK_PATH_DEFAULT);
         this.log.logConfig("Work Path:    " + this.workPath.toString());
+        this.dictionariesPath = getConfigPath(SwitchboardConstants.DICTIONARY_SOURCE_PATH, SwitchboardConstants.DICTIONARY_SOURCE_PATH_DEFAULT);
+        this.log.logConfig("Dictionaries Path:" + this.dictionariesPath.toString());
         
         // init libraries
         this.log.logConfig("initializing libraries");
-        LibraryProvider.initialize(rootPath, new File(rootPath, "dictionaries"));
+        LibraryProvider.initialize(rootPath, this.dictionariesPath);
         
         // set a high maximum cache size to current size; this is adopted later automatically
         final int wordCacheMaxCount = (int) getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
@@ -337,8 +340,8 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         final long fileSizeMax = (serverSystem.isWindows) ? sb.getConfigLong("filesize.max.win", (long) Integer.MAX_VALUE) : sb.getConfigLong("filesize.max.other", (long) Integer.MAX_VALUE);
         final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
         final int partitionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
-        this.networkRoot = new File(new File(indexPrimaryPath, networkName), "NETWORK");
-        this.queuesRoot = new File(new File(indexPrimaryPath, networkName), "QUEUES");
+        this.networkRoot = new File(new File(indexPath, networkName), "NETWORK");
+        this.queuesRoot = new File(new File(indexPath, networkName), "QUEUES");
         this.networkRoot.mkdirs();
         this.queuesRoot.mkdirs();
         try {
@@ -353,7 +356,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
 	                partitionExponent);
 	        indexSegment = new Segment(
                     log,
-                    new File(new File(indexPrimaryPath, networkName), "TEXT"),
+                    new File(new File(indexPath, networkName), "TEXT"),
                     wordCacheMaxCount,
                     fileSizeMax);
 	        crawler = new CrawlSwitchboard(

@@ -332,6 +332,9 @@ public final class SwitchboardConstants {
     public static final String SURROGATES_OUT_PATH         = "surrogates.out";
     public static final String SURROGATES_OUT_PATH_DEFAULT = "DATA/SURROGATES/out";
     
+    public static final String DICTIONARY_SOURCE_PATH         = "dictionaries";
+    public static final String DICTIONARY_SOURCE_PATH_DEFAULT = "DATA/DICTIONARIES";
+    
     /**
      * <p><code>public static final String <strong>HTDOCS_PATH</strong> = "htDocsPath"</code></p>
      * <p>Name of the setting specifying the folder beginning from the YaCy-installation's top-folder, where all
