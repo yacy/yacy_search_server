@@ -100,21 +100,21 @@ public class MapView {
 
     private static String map2string(final Map<String, String> map, final String comment) {
         final StringBuilder bb = new StringBuilder(map.size() * 40);
-        bb.append("# ").append(comment).append("\r\n");
+        bb.append("# ").append(comment).append('\r').append('\n');
         for (Map.Entry<String, String> entry: map.entrySet()) {
             if (entry.getValue() != null) {
                 bb.append(entry.getKey());
                 bb.append('=');
                 bb.append(entry.getValue());
-                bb.append("\r\n");
+                bb.append('\r').append('\n');
              }
         }
         bb.append("# EOF\r\n");
         return bb.toString();
     }
 
-    private static Map<String, String> string2map(final String s) throws IOException {
-        final BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(s.getBytes())));
+    private static Map<String, String> bytes2map(byte[] b) throws IOException {
+        final BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(b)));
         final Map<String, String> map = new HashMap<String, String>();
         String line;
         int pos;
@@ -220,7 +220,7 @@ public class MapView {
             // read object
             final byte[] b = blob.get(key.getBytes());
             if (b == null) return null;
-            map = string2map(new String(b, "UTF-8"));
+            map = bytes2map(b);
     
             if (storeCache) {
                 // write map to cache

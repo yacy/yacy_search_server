@@ -264,7 +264,7 @@ public class bookmarksDB {
 	                CrawlProfile.entry pe = sb.crawler.profilesActiveCrawls.newEntry(
 	                        folder+"/"+crawlingStartURL, crawlingStartURL,
 	                        newcrawlingMustMatch,
-	                        CrawlProfile.MATCH_NEVER,
+	                        CrawlProfile.MATCH_BAD_URL,
 	                        newcrawlingdepth,
 	                        sb.crawler.profilesActiveCrawls.getRecrawlDate(crawlingIfOlder), crawlingDomFilterDepth, crawlingDomMaxPages,
 	                        crawlingQ,

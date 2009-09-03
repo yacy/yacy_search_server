@@ -94,7 +94,7 @@ public class QuickCrawlLink_p {
         
         // getting other parameters if set
         final String crawlingMustMatch  = post.get("mustmatch", CrawlProfile.MATCH_ALL);
-        final String crawlingMustNotMatch  = post.get("mustnotmatch", CrawlProfile.MATCH_NEVER);
+        final String crawlingMustNotMatch  = post.get("mustnotmatch", CrawlProfile.MATCH_BAD_URL);
         final int CrawlingDepth      = Integer.parseInt(post.get("crawlingDepth", "0"));        
         final boolean crawlDynamic   = post.get("crawlingQ", "").equals("on");
         final boolean indexText      = post.get("indexText", "on").equals("on");

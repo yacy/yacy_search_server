@@ -47,6 +47,7 @@ public class CrawlProfile {
     
     public static final String MATCH_ALL = ".*";
     public static final String MATCH_NEVER = "";
+    public static final String MATCH_BAD_URL = ".*memberlist.*|.*previous.*|.*next.*|.*p=.*";
     
     static HashMap<String, ConcurrentHashMap<String, DomProfile>> domsCache = new HashMap<String, ConcurrentHashMap<String, DomProfile>>();
     
