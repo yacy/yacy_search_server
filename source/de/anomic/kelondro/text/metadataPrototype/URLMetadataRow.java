@@ -123,6 +123,15 @@ public class URLMetadataRow implements Metadata {
     private final long ranking; // during generation of a search result this value is set
     private Components comp;
     
+    public URLMetadataRow() {
+        // create a dummy entry, good to produce poison objects
+        this.entry = rowdef.newEntry();
+        this.snippet = null;
+        this.word = null;
+        this.ranking = 0;
+        this.comp = null;
+    }
+    
     public URLMetadataRow(
             final yacyURL url,
             final String dc_title,
@@ -145,7 +154,7 @@ public class URLMetadataRow implements Metadata {
             final int limage,
             final int lvideo,
             final int lapp) {
-        // create new entry and store it into database
+        // create new entry
         this.entry = rowdef.newEntry();
         this.entry.setCol(col_hash, url.hash(), null);
         this.entry.setCol(col_comp, encodeComp(url, dc_title, dc_creator, dc_subject, ETag));

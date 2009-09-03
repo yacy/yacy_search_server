@@ -104,17 +104,17 @@ public final class SearchEvent {
         final long start = System.currentTimeMillis();
         if ((query.domType == QueryParams.SEARCHDOM_GLOBALDHT) ||
             (query.domType == QueryParams.SEARCHDOM_CLUSTERALL)) {
+        	final int fetchpeers = 12;
             
         	// initialize a ranking process that is the target for data
         	// that is generated concurrently from local and global search threads
-            this.rankedCache = new RankingProcess(indexSegment, query, max_results_preparation, 16);
+            this.rankedCache = new RankingProcess(indexSegment, query, max_results_preparation, fetchpeers + 1);
             
             // start a local search concurrently
             this.rankedCache.start();
                        
             // start global searches
             final long timer = System.currentTimeMillis();
-            final int fetchpeers = 12;
             Log.logFine("SEARCH_EVENT", "STARTING " + fetchpeers + " THREADS TO CATCH EACH " + query.displayResults() + " URLs");
             this.primarySearchThreads = (query.queryHashes.size() == 0) ? null : yacySearch.primaryRemoteSearches(
                     QueryParams.hashSet2hashString(query.queryHashes),
@@ -137,6 +137,7 @@ public final class SearchEvent {
                     query.ranking,
                     query.constraint,
                     (query.domType == QueryParams.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes);
+            if (this.primarySearchThreads.length > fetchpeers) this.rankedCache.moreFeeders(this.primarySearchThreads.length - fetchpeers);
             serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "remote search thread start", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
             
             // finished searching

@@ -126,6 +126,8 @@ public class yacySearch extends Thread {
             }
         } catch (final Exception e) {
             e.printStackTrace();
+        } finally {
+        	containerCache.oneFeederTerminated();
         }
     }
 
