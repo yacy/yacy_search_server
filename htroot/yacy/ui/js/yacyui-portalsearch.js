@@ -243,6 +243,10 @@ function yacysearch(global, clear) {
 		param[i] = item;
 	});
 	param[param.length] = { name : 'startRecord', value : startRecord };
+	$.ajaxSetup({ 
+        timeout: 10000,
+        error: function() {if (clear) $('#ypopup').empty();}
+    }); 
 	$.getJSON(url, param,
         function(json, status) {	
 			if (json[0]) data = json[0];
