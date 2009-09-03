@@ -562,7 +562,7 @@ public class CrawlQueues {
                     // returns null if everything went fine, a fail reason string if a problem occurred
                     try {
                         request.setStatus("loading", serverProcessorJob.STATUS_RUNNING);
-                        Response response = sb.loader.load(request);
+                        Response response = sb.loader.load(request, true);
                         if (response == null) {
                             request.setStatus("error", serverProcessorJob.STATUS_FINISHED);
                             if (log.isFine()) log.logFine("problem loading " + request.url().toString() + ": no content (possibly caused by cache policy)");

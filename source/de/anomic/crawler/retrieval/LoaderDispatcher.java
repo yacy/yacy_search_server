@@ -79,25 +79,12 @@ public final class LoaderDispatcher {
         return (HashSet<String>) this.supportedProtocols.clone();
     }
     
-    public static byte[] toBytes(Response response) {
-        if (response == null) return null;
-        return response.getContent();
-    }
-    
-    public Response load(final yacyURL url) throws IOException {
-        return load(url, true, false);
-    }
-    
-    public Response load(final yacyURL url, int cachePolicy) throws IOException {
-        return load(url, true, false, cachePolicy);
-    }
-    
     public Response load(
             final yacyURL url,
             final boolean forText,
             final boolean global
                     ) throws IOException {
-        return load(request(url, forText, global));
+        return load(request(url, forText, global), forText);
     }
     
     public Response load(
@@ -106,7 +93,7 @@ public final class LoaderDispatcher {
             final boolean global,
             int cacheStratgy
     ) throws IOException {
-        return load(request(url, forText, global), cacheStratgy);
+        return load(request(url, forText, global), forText, cacheStratgy);
     }
     
     public Request request(
@@ -134,14 +121,14 @@ public final class LoaderDispatcher {
                     0);
     }
     
-    public Response load(final Request request) throws IOException {
+    public Response load(final Request request, final boolean acceptOnlyParseable) throws IOException {
         CrawlProfile.entry crawlProfile = sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle());
         int cacheStrategy = CrawlProfile.CACHE_STRATEGY_IFFRESH;
         if (crawlProfile != null) cacheStrategy = crawlProfile.cacheStrategy();
-        return load(request, cacheStrategy);
+        return load(request, acceptOnlyParseable, cacheStrategy);
     }
     
-    public Response load(final Request request, int cacheStrategy) throws IOException {
+    public Response load(final Request request, final boolean acceptOnlyParseable, int cacheStrategy) throws IOException {
         // get the protocol of the next URL
         final String protocol = request.url().getProtocol();
         final String host = request.url().getHost();
@@ -223,7 +210,7 @@ public final class LoaderDispatcher {
         
         // load resource from the internet
         Response response = null;
-        if ((protocol.equals("http") || (protocol.equals("https")))) response = httpLoader.load(request);
+        if ((protocol.equals("http") || (protocol.equals("https")))) response = httpLoader.load(request, acceptOnlyParseable);
         if (protocol.equals("ftp")) response = ftpLoader.load(request);
         if (response != null) {
             // we got something. Now check if we want to store that to the cache

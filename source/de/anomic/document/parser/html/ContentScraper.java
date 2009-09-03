@@ -44,6 +44,7 @@ import java.util.Properties;
 import javax.swing.event.EventListenerList;
 
 import de.anomic.crawler.retrieval.LoaderDispatcher;
+import de.anomic.crawler.retrieval.Response;
 import de.anomic.document.parser.htmlParser;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCharBuffer;
@@ -509,7 +510,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     
     public static ContentScraper parseResource(final LoaderDispatcher loader, final yacyURL location, int cachePolicy) throws IOException {
         // load page
-        byte[] page = LoaderDispatcher.toBytes(loader.load(location, cachePolicy));
+        Response r = loader.load(location, true, false, cachePolicy);
+        byte[] page = (r == null) ? null : r.getContent();
         if (page == null) throw new IOException("no response from url " + location.toString());
         
         // scrape content

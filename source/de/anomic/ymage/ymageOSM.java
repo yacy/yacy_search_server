@@ -32,6 +32,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -99,6 +100,7 @@ public class ymageOSM {
         }
     }
 
+    public static final Random r = new Random(System.currentTimeMillis()); // to selet tile server
     public static class tileCoordinates {
         
         int xtile, ytile, zoom;
@@ -116,7 +118,8 @@ public class ymageOSM {
         }
         
         public String url() {
-            return("http://tile.openstreetmap.org/" + zoom + "/" + xtile + "/" + ytile + ".png");
+            char server = (char) ((int)'a' + r.nextInt(3));
+            return("http://" + server + ".tile.openstreetmap.org/" + zoom + "/" + xtile + "/" + ytile + ".png");
         }
 
     }
