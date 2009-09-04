@@ -30,11 +30,14 @@
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.TreeSet;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.crawler.retrieval.LoaderDispatcher;
+import de.anomic.data.Coordinates;
 import de.anomic.data.DidYouMean;
+import de.anomic.data.LibraryProvider;
 import de.anomic.document.Condenser;
 import de.anomic.document.Word;
 import de.anomic.document.Document;
@@ -124,6 +127,7 @@ public class yacysearch {
             prop.put("num-results_totalcount", 0);
             prop.put("num-results_offset", 0);
             prop.put("num-results_itemsPerPage", 10);
+            prop.put("geoinfo", "0");
             prop.put("rss_queryenc", "");
             
             return prop;
@@ -482,7 +486,7 @@ public class yacysearch {
             	meanMax = Integer.parseInt(post.get("meanCount"));            	
             }
             prop.put("meanCount", meanMax);
-            if(meanMax > 0) {
+            if (meanMax > 0) {
                 DidYouMean didYouMean = new DidYouMean(sb.indexSegment.termIndex());
             	Iterator<String> meanIt = didYouMean.getSuggestion(querystring).iterator();
                 int meanCount = 0;
@@ -513,6 +517,21 @@ public class yacysearch {
                 prop.put("didYouMean_suggestions", meanCount);
             } else {
                 prop.put("didYouMean", 0);
+            }
+            
+            // find geographic info
+            Set<Coordinates> coordinates = LibraryProvider.geoDB.find(originalquerystring);
+            if (coordinates == null || coordinates.size() == 0) {
+                prop.put("geoinfo", "0");
+            } else {
+                int i = 0;
+                for (Coordinates c: coordinates) {
+                    prop.put("geoinfo_loc_" + i + "_lon", c.lon());
+                    prop.put("geoinfo_loc_" + i + "_lat", c.lat());
+                    i++;
+                }
+                prop.put("geoinfo_loc", i);
+                prop.put("geoinfo", "1");
             }
             
             // update the search tracker

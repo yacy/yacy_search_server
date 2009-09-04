@@ -43,9 +43,9 @@ public class gzip {
     
     public static void gzipFile(final String inFile, final String outFile) {
 	try {
-	    final InputStream  fin  = new FileInputStream(inFile);
-	    final OutputStream fout = new GZIPOutputStream(new FileOutputStream(outFile), 128);
-	    copy(fout, fin, 128);
+	    final InputStream  fin  = new BufferedInputStream(new FileInputStream(inFile));
+	    final OutputStream fout = new GZIPOutputStream(new BufferedOutputStream(new FileOutputStream(outFile), 1024));
+	    copy(fout, fin, 1024);
 	    fin.close();
 	    fout.close();
 	} catch (final FileNotFoundException e) {
@@ -57,11 +57,19 @@ public class gzip {
 	}
     }
 
-    public static void gunzipFile(final String inFile, final String outFile) {
+    public static File gunzipFile(File in) {
+        assert in.getName().endsWith(".gz");
+        String on = in.getName().substring(0, in.getName().length() - 3);
+        File outf = new File(in.getParent(), on);
+        gunzipFile(in, outf);
+        return outf;
+    }
+    
+    public static void gunzipFile(final File inFile, final File outFile) {
 	try {
-	    final InputStream  fin  = new GZIPInputStream(new FileInputStream(inFile));
-	    final OutputStream fout = new FileOutputStream(outFile);
-	    copy(fout, fin, 128);
+	    final InputStream  fin  = new GZIPInputStream(new BufferedInputStream(new FileInputStream(inFile)));
+	    final OutputStream fout = new BufferedOutputStream(new FileOutputStream(outFile));
+	    copy(fout, fin, 1024);
 	    fin.close();
 	    fout.close();
 	} catch (final FileNotFoundException e) {
@@ -78,7 +86,7 @@ public class gzip {
 	    final InputStream  fin  = new ByteArrayInputStream(in.getBytes("UTF8"));
 	    final ByteArrayOutputStream baos = new ByteArrayOutputStream(in.length() / 3);
 	    final OutputStream fout = new GZIPOutputStream(baos, 128);
-	    copy(fout, fin, 128);
+	    copy(fout, fin, 1024);
 	    fin.close();
 	    fout.close();
 	    return baos.toByteArray();
@@ -92,7 +100,7 @@ public class gzip {
     public static String gunzipString(final byte[] in) throws IOException {
 	    final InputStream  fin  = new GZIPInputStream(new ByteArrayInputStream(in));
 	    final ByteArrayOutputStream fout = new ByteArrayOutputStream(in.length / 3);
-	    copy(fout, fin, 128);
+	    copy(fout, fin, 1024);
 	    fin.close();
 	    fout.close();
 	    return new String(fout.toByteArray(), "UTF-8");
@@ -178,7 +186,7 @@ public class gzip {
 	    } else {
 		target = s[2];
 	    }
-	    gzip.gunzipFile((s[1]), target);
+	    gzip.gunzipFile(new File(s[1]), new File(target));
 	    System.exit(0);
 	}
 	if ((s.length < 1) || (s.length > 2)) {help(); System.exit(-1);}

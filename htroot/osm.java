@@ -11,8 +11,8 @@ public class osm {
     public static ymageMatrix respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
 
         int zoom = 10;
-        double lat = 47.968056d;
-        double lon = 7.909167d;
+        double lat = 50.11670d;
+        double lon = 8.68333d;
         
         if (post != null) {
             zoom = post.getInt("zoom", zoom);

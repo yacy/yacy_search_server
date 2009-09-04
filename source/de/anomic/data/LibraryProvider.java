@@ -39,13 +39,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-
 public class LibraryProvider {
 
     private static final String path_to_source_dictionaries = "source";
     private static final String path_to_did_you_mean_dictionaries = "didyoumean";
     
     public static DidYouMeanLibrary dymLib = new DidYouMeanLibrary(null);
+    public static OpenGeoDB geoDB = new OpenGeoDB(null);
     public static File dictSource = null;
     public static File dictRoot = null;
     
@@ -59,13 +59,20 @@ public class LibraryProvider {
      * @param pathToDICTIONARIES
      */
     public static void initialize(File rootPath) {
-    	File dictSource = new File(rootPath, path_to_source_dictionaries);
+    	dictSource = new File(rootPath, path_to_source_dictionaries);
     	if (!dictSource.exists()) dictSource.mkdirs();
     	dictRoot = rootPath;
         
         // initialize libraries
     	integrateDeReWo();
     	initDidYouMean();
+    	integrateOpenGeoDB();
+    }
+    
+    public static void integrateOpenGeoDB() {
+        File ogdb = new File(dictSource, "opengeodb-0.2.5a-UTF8-sql.gz");
+        if (!ogdb.exists()) return;
+        geoDB = new OpenGeoDB(ogdb);
     }
     
     public static void initDidYouMean() {
