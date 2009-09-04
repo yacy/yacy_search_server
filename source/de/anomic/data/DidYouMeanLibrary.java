@@ -28,13 +28,15 @@ package de.anomic.data;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.zip.GZIPInputStream;
 
 /**
  * provide a completion library for the did-you-mean class
@@ -68,14 +70,16 @@ public class DidYouMeanLibrary {
         for (String f: files) {
             if (f.endsWith(".words")) try {
                 importFile(new File(dictionaryPath, f));
-            } catch (FileNotFoundException e) {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
     
-    private void importFile(File f) throws FileNotFoundException {
-        BufferedReader r = new BufferedReader(new FileReader(f));
+    private void importFile(File f) throws IOException {
+    	InputStream is = new FileInputStream(f);
+    	if (f.getName().endsWith(".gz")) is = new GZIPInputStream(is);
+        BufferedReader r = new BufferedReader(new InputStreamReader(is, "UTF-8"));
         String l;
         try {
             while ((l = r.readLine()) != null) {

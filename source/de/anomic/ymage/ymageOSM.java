@@ -36,6 +36,7 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.Cache;
 import de.anomic.search.Switchboard;
@@ -77,13 +78,13 @@ public class ymageOSM {
         } catch (final MalformedURLException e) {
             return null;
         }
-        System.out.println("*** DEBUG: fetching OSM tile: " + tileURL.toNormalform(true, true));
+        //System.out.println("*** DEBUG: fetching OSM tile: " + tileURL.toNormalform(true, true));
         InputStream tileStream = Cache.getContentStream(tileURL);
         if (tileStream == null) {
             // download resource using the crawler and keep resource in memory if possible
             Response entry = null;
             try {
-                entry = Switchboard.getSwitchboard().loader.load(tileURL, false, false);
+                entry = Switchboard.getSwitchboard().loader.load(tileURL, false, false, CrawlProfile.CACHE_STRATEGY_IFEXIST);
             } catch (IOException e) {
                 Log.logWarning("yamyOSM", "cannot load: " + e.getMessage());
                 return null;

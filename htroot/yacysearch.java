@@ -521,14 +521,15 @@ public class yacysearch {
             
             // find geographic info
             Set<Coordinates> coordinates = LibraryProvider.geoDB.find(originalquerystring);
-            if (coordinates == null || coordinates.size() == 0) {
+            if (coordinates == null || coordinates.size() == 0 || offset > 0) {
                 prop.put("geoinfo", "0");
             } else {
                 int i = 0;
                 for (Coordinates c: coordinates) {
-                    prop.put("geoinfo_loc_" + i + "_lon", c.lon());
-                    prop.put("geoinfo_loc_" + i + "_lat", c.lat());
+                    prop.put("geoinfo_loc_" + i + "_lon", Math.round(c.lon() * 10000.0) / 10000.0);
+                    prop.put("geoinfo_loc_" + i + "_lat", Math.round(c.lat() * 10000.0) / 10000.0);
                     i++;
+                    if (i >= 5) break;
                 }
                 prop.put("geoinfo_loc", i);
                 prop.put("geoinfo", "1");

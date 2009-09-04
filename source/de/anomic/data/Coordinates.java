@@ -26,8 +26,10 @@
 
 package de.anomic.data;
 
-public class Coordinates {
+public class Coordinates implements Comparable<Coordinates> {
 
+	private static final double tenmeter = 90.0 / 1.0e6;
+	
     private double lon, lat;
     
     public Coordinates(double lon, double lat) {
@@ -52,12 +54,37 @@ public class Coordinates {
     
     /**
      * compute the hash code of a coordinate
-     * this produces identical hash codes for locations that are close to each other on longitude
+     * this produces identical hash codes for locations that are close to each other
      */
     public int hashCode() {
         int lon1 = coord2int(this.lon) >> 15;
         int lat1 = coord2int(this.lat) >> 15;
-        return (lon1 << 15) | lat1;
+        int h = (lon1 << 15) + lat1;
+        System.out.println("lon=" + this.lon + ", lat=" + this.lat + ", hash=" + h);
+        return h;
+    }
+    
+    /**
+     * comparator that is needed to use the class inside TreeMap/TreeSet
+     */
+    public int compareTo(Coordinates o) {
+    	if (this.equals(o)) return 0;
+		int s = this.hashCode();
+		int t = o.hashCode();
+		if (s > t) return 1;
+		if (s < t) return -1;
+		return 0;
+	}
+    
+    /**
+     * equality test that is needed to use the class inside HashMap/HashSet
+     */
+    public boolean equals(Object o) {
+    	if (!(o instanceof Coordinates)) return false;
+    	Coordinates oo = (Coordinates) o;
+    	if (this.lon == oo.lon && this.lat == oo.lat) return true;
+    	// we access fuzzy values that are considered as equal if they are close to each other
+    	return Math.abs(this.lon - oo.lon) < tenmeter && Math.abs(this.lat - oo.lat) < tenmeter;
     }
     
     public String toString() {

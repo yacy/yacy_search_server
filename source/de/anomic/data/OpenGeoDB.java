@@ -38,6 +38,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.zip.GZIPInputStream;
 
@@ -85,7 +88,7 @@ public class OpenGeoDB {
         try {
             InputStream is = new FileInputStream(file);
             if (file.getName().endsWith(".gz")) is = new GZIPInputStream(is);
-            reader = new BufferedReader(new InputStreamReader(is));
+            reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
             String line;
             
             // read lines
@@ -180,4 +183,18 @@ public class OpenGeoDB {
         return a;
     }
     
+    /**
+     * read the dictionary and construct a set of recommendations to a given string 
+     * @param s input value that is used to match recommendations
+     * @return a set that contains all words that start or end with the input value
+     */
+    public Set<String> recommend(String s) {
+        Set<String> a = new HashSet<String>();
+        s = s.trim().toLowerCase();
+        SortedMap<String, List<Integer>> t = this.locationName2ids.tailMap(s);
+        for (String r: t.keySet()) {
+            if (r.startsWith(s)) a.add(r); else break;
+        }
+        return a;
+    }
 }

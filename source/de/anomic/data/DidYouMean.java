@@ -152,6 +152,14 @@ public class DidYouMean {
 		return this.resultSet;
 			
 	}
+	
+	public void test(String s) throws InterruptedException {
+		Set<String> libr = LibraryProvider.dymLib.recommend(s);
+		libr.addAll(LibraryProvider.geoDB.recommend(s));
+		if (libr.size() != 0) createGen = false;
+		for (String t: libr) guessLib.put(t);
+		if (createGen) guessGen.put(s);
+	}
 
 	/**
      * DidYouMean's producer thread that changes one letter (e.g. bat/cat) for a given term
@@ -161,15 +169,9 @@ public class DidYouMean {
 	public class ChangingOneLetter extends Thread {
 		
 		public void run() {
-			String s;
-			Set<String> libr;
 			for (int i = 0; i < wordLen; i++) try {
 				for (char c: alphabet) {
-					s = word.substring(0, i) + c + word.substring(i + 1);
-					libr = LibraryProvider.dymLib.recommend(s);
-					if (libr.size() != 0) createGen = false;
-					for (String t: libr) guessLib.put(t);
-					if (createGen) guessGen.put(s);
+					test(word.substring(0, i) + c + word.substring(i + 1));
 					if (System.currentTimeMillis() > timeLimit) return;
 				}
 			} catch (InterruptedException e) {}
@@ -184,14 +186,8 @@ public class DidYouMean {
 	protected class DeletingOneLetter extends Thread {
 		
 		public void run() {
-			String s;
-            Set<String> libr;
 			for (int i = 0; i < wordLen; i++) try {
-				s = word.substring(0, i) + word.substring(i+1);
-				libr = LibraryProvider.dymLib.recommend(s);
-                if (libr.size() != 0) createGen = false;
-                for (String t: libr) guessLib.put(t);
-                if (createGen) guessGen.put(s);
+				test(word.substring(0, i) + word.substring(i+1));
                 if (System.currentTimeMillis() > timeLimit) return;
 			} catch (InterruptedException e) {}
 		}
@@ -205,15 +201,9 @@ public class DidYouMean {
 	protected class AddingOneLetter extends Thread {
 		
 		public void run() {
-			String s;
-            Set<String> libr;
 			for (int i = 0; i <= wordLen; i++) try {
 				for (char c: alphabet) {
-					s = word.substring(0, i) + c + word.substring(i);
-					libr = LibraryProvider.dymLib.recommend(s);
-                    if (libr.size() != 0) createGen = false;
-	                for (String t: libr) guessLib.put(t);
-	                if (createGen) guessGen.put(s);
+					test(word.substring(0, i) + c + word.substring(i));
                     if (System.currentTimeMillis() > timeLimit) return;
 				}			
 			} catch (InterruptedException e) {}
@@ -228,14 +218,8 @@ public class DidYouMean {
 	protected class ReversingTwoConsecutiveLetters extends Thread {
 	
 		public void run() {
-			String s;
-            Set<String> libr;
 			for (int i = 0; i < wordLen - 1; i++) try {
-				s = word.substring(0, i) + word.charAt(i + 1) + word.charAt(i) + word.substring(i +2);
-				libr = LibraryProvider.dymLib.recommend(s);
-                if (libr.size() != 0) createGen = false;
-                for (String t: libr) guessLib.put(t);
-                if (createGen) guessGen.put(s);
+				test(word.substring(0, i) + word.charAt(i + 1) + word.charAt(i) + word.substring(i +2));
                 if (System.currentTimeMillis() > timeLimit) return;
 			} catch (InterruptedException e) {}
 		}

@@ -133,12 +133,16 @@ document.getElementById("Enter").value = "search again";
   <div class="searchresults">
   <h4 class="linktitle">
   <img src="http://www.openstreetmap.org/favicon.ico" class="favicon" style="width:16px; height:16px;" alt="" />
-  Location (click to enlarge)</h4>
+  Location -- click on map to enlarge</h4>
   <p class="url">
   #{loc}#
+  <div style="margin: 20px; width: 100px; float: left;">
   <a href="/osm.png?lon=#[lon]#&lat=#[lat]#&zoom=14" class="thumblink"  style="float:left;" onclick="return hs.expand(this)">
-      <img src="/osm.png?lon=#[lon]#&lat=#[lat]#&zoom=14" width="768" height="768">
+      <img src="/osm.png?lon=#[lon]#&lat=#[lat]#&zoom=14" width="192" height="192">
   </a>
+  <div class="highslide-caption">lat=#[lat]#, lon=#[lon]#</div>
+  <div class="TableCellDark">lat=#[lat]#,<br />lon=#[lon]#</div>
+  </div>
   #{/loc}#
   </p>
   <p class="urlinfo" style="clear:left;">Geographic information provided by <a href="http://opengeodb.hoppe-media.com">OpenGeoDB</a>, Map provided by <a href="http://www.openstreetmap.org">OpenStreetMap</a></p>

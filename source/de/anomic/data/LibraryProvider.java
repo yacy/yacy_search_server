@@ -70,9 +70,21 @@ public class LibraryProvider {
     }
     
     public static void integrateOpenGeoDB() {
-        File ogdb = new File(dictSource, "opengeodb-0.2.5a-UTF8-sql.gz"); // may also be named opengeodb-02513_2007-10-02.sql.gz
-        if (!ogdb.exists()) return;
-        geoDB = new OpenGeoDB(ogdb);
+        File ogdb = new File(dictSource, "opengeodb-0.2.5a-UTF8-sql.gz");
+        if (ogdb.exists()) {
+        	geoDB = new OpenGeoDB(ogdb);
+        	return;
+        }
+        ogdb = new File(dictSource, "opengeodb-02513_2007-10-02.sql.gz");
+        if (ogdb.exists()) {
+        	geoDB = new OpenGeoDB(ogdb);
+        	return;
+        }
+        ogdb = new File(dictSource, "opengeodb-02513_2007-10-02.sql");
+        if (ogdb.exists()) {
+        	geoDB = new OpenGeoDB(ogdb);
+        	return;
+        }
     }
     
     public static void initDidYouMean() {
@@ -140,7 +152,7 @@ public class LibraryProvider {
         final ArrayList<String> list = new ArrayList<String>();
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            reader = new BufferedReader(new InputStreamReader(new FileInputStream(file), "UTF-8"));
             String line;
             
             // read until text starts
