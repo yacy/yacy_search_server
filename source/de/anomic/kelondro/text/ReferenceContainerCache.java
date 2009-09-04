@@ -280,6 +280,11 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             if (startWordHash != null && startWordHash.length == 0) startWordHash = null;
             this.cachecopy = sortedClone();
             this.p = 0;
+            if (startWordHash != null) {
+                while ( (this.p < this.cachecopy.length) &&
+                        (termOrder.compare(this.cachecopy[this.p].getTermHash(), startWordHash) < 0)
+                      ) this.p++;
+            }
             this.latestTermHash = null;
             // The collection's iterator will return the values in the order that their corresponding keys appear in the tree.
         }
@@ -289,7 +294,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
         
         public boolean hasNext() {
-            if (rot) return true;
+            if (rot) return this.cachecopy.length > 0;
             return this.p < this.cachecopy.length;
         }
 
@@ -303,6 +308,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             if (!rot) {
                 return null;
             }
+            if (this.cachecopy.length == 0) return null;
             p = 0;
             ReferenceContainer<ReferenceType> c = this.cachecopy[this.p++];
             this.latestTermHash = c.getTermHash();
