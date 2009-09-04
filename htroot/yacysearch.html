@@ -131,19 +131,17 @@ document.getElementById("Enter").value = "search again";
 #(geoinfo)#
 	::
   <div class="searchresults">
-  <h4 class="linktitle">Location (click to enlarge)</h4>
-  <p class="snippet">
-  <table border="0"><tr><td>
+  <h4 class="linktitle">
+  <img src="http://www.openstreetmap.org/favicon.ico" class="favicon" style="width:16px; height:16px;" alt="" />
+  Location (click to enlarge)</h4>
+  <p class="url">
   #{loc}#
-  <div class="thumbcontainer">
-  <a href="/osm.png?lon=#[lon]#&lat=#[lat]#&zoom=14" class="thumblink" onclick="return hs.expand(this)">
-      <img src="/osm.png?lon=#[lon]#&lat=#[lat]#&zoom=14" width="192" height="192">
+  <a href="/osm.png?lon=#[lon]#&lat=#[lat]#&zoom=14" class="thumblink"  style="float:left;" onclick="return hs.expand(this)">
+      <img src="/osm.png?lon=#[lon]#&lat=#[lat]#&zoom=14" width="768" height="768">
   </a>
-  </div>
   #{/loc}#
-  </tr></td></table>
   </p>
-  <p class="urlinfo">Geographic information provided by <a href="http://opengeodb.hoppe-media.com">OpenGeoDB</a>, Map provided by <a href="http://www.openstreetmap.org">OpenStreetMap</a></p>
+  <p class="urlinfo" style="clear:left;">Geographic information provided by <a href="http://opengeodb.hoppe-media.com">OpenGeoDB</a>, Map provided by <a href="http://www.openstreetmap.org">OpenStreetMap</a></p>
   </div>
 #(/geoinfo)#
 

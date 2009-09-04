@@ -70,7 +70,7 @@ public class LibraryProvider {
     }
     
     public static void integrateOpenGeoDB() {
-        File ogdb = new File(dictSource, "opengeodb-0.2.5a-UTF8-sql.gz");
+        File ogdb = new File(dictSource, "opengeodb-0.2.5a-UTF8-sql.gz"); // may also be named opengeodb-02513_2007-10-02.sql.gz
         if (!ogdb.exists()) return;
         geoDB = new OpenGeoDB(ogdb);
     }
