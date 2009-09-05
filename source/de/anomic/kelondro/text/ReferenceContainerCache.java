@@ -50,6 +50,9 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
 
     public class ContainerOrder implements Comparator<ReferenceContainer<ReferenceType>> {
         public int compare(ReferenceContainer<ReferenceType> arg0, ReferenceContainer<ReferenceType> arg1) {
+        	if (arg0 == arg1) return 0;
+        	if (arg0 == null) return -1;
+        	if (arg1 == null) return 1;
             return termOrder.compare(arg0.getTermHash(), arg1.getTermHash());
         }
     }
