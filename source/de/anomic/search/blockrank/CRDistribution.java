@@ -5,9 +5,9 @@
 // Frankfurt, Germany, 2005
 // created 9.11.2005
 //
-// $LastChangedDate: 2005-11-04 14:41:51 +0100 (Fri, 04 Nov 2005) $
-// $LastChangedRevision: 1026 $
-// $LastChangedBy: borg-0300 $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

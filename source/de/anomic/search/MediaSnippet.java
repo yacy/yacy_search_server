@@ -3,9 +3,10 @@
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
-// last major change: 10.09.2009
 //
-// contributions by Marc Nause [MN]
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,6 +40,7 @@ public class MediaSnippet {
     public yacyURL href, source;
     public String name, attr;
     public int ranking;
+
     public MediaSnippet(final int type, final yacyURL href, final String name, final String attr, final int ranking, final yacyURL source) {
         this.type = type;
         this.href = href;
@@ -49,6 +51,8 @@ public class MediaSnippet {
         if ((this.name == null) || (this.name.length() == 0)) this.name = "_";
         if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
     }
+    
+    @Override
     public int hashCode() {
         return href.hashCode();
     }
