@@ -83,14 +83,15 @@ public class Word {
 
     // create a word hash
     public static final byte[] word2hash(final String word) {
-    	byte[] h = hashCache.get(word);
+    	String wordlc = word.toLowerCase(Locale.ENGLISH);
+    	byte[] h = hashCache.get(wordlc);
         if (h != null) return h;
         synchronized(hashCache) {
-        	h = hashCache.get(word); // we must test that again because another thread may have written the value in between
+        	h = hashCache.get(wordlc); // we must test that again because another thread may have written the value in between
             if (h != null) return h;
-            h = Base64Order.enhancedCoder.encodeSubstring(Digest.encodeMD5Raw(word.toLowerCase(Locale.ENGLISH)), yacySeedDB.commonHashLength);
+            h = Base64Order.enhancedCoder.encodeSubstring(Digest.encodeMD5Raw(wordlc), yacySeedDB.commonHashLength);
             assert h[2] != '@';
-            hashCache.put(word, h); // prevent expensive MD5 computation and encoding
+            hashCache.put(wordlc, h); // prevent expensive MD5 computation and encoding
         }
         return h;
     }
