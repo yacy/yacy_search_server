@@ -8,9 +8,9 @@
 //
 // This file is contributed by Franz Brausze
 //
-// $LastChangedDate: $
-// $LastChangedRevision: $
-// $LastChangedBy: $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -34,9 +34,9 @@ import de.anomic.data.wiki.wikiParserException;
 
 public interface Token {
 	
-	public Pattern[] getRegex();
-	public boolean setText(String text, int patternNr);
-	public String getText();
-	public String getMarkup() throws wikiParserException;
-	public String[] getBlockElementNames();
+    public Pattern[] getRegex();
+    public boolean setText(String text, int patternNr);
+    public String getText();
+    public String getMarkup() throws wikiParserException;
+    public String[] getBlockElementNames();
 }

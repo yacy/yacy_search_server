@@ -8,9 +8,9 @@
 //
 // This file is contributed by Franz Brausze
 //
-// $LastChangedDate: $
-// $LastChangedRevision: $
-// $LastChangedBy: $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -41,96 +41,102 @@ import de.anomic.search.Switchboard;
 
 public class LinkToken extends AbstractToken {
 	
-	private static final int IMG = 0;
+    private static final int IMG = 0;
     private static final int BKM = 1;
-	private static final int INT = 2;
-	private static final int EXT = 3;
+    private static final int INT = 2;
+    private static final int EXT = 3;
 	
-	private static final Pattern imgPattern = Pattern.compile(
-			"\\[\\[" +											// begin
-			"(Image:([^\\]|]|\\][^\\]])*)" +					// "Image:" + URL
-			"(" +												// <optional>
-				"(\\|(bottom|left|center|right|middle|top))?" +	// optional align
-				"(\\|(([^\\]]|\\][^\\]])*))" +					// description
-			")?" +												// </optional>
-			"\\]\\]");											// end
+    private static final Pattern imgPattern = Pattern.compile(
+        "\\[\\[" +                                      // begin
+        "(Image:([^\\]|]|\\][^\\]])*)" +                // "Image:" + URL
+        "(" +                                           // <optional>
+        "(\\|(bottom|left|center|right|middle|top))?" +	// optional align
+        "(\\|(([^\\]]|\\][^\\]])*))" +                  // description
+        ")?" +                                          // </optional>
+        "\\]\\]");                                      // end
     
     private static final Pattern bkmPattern = Pattern.compile(
-            "\\[\\[" +                                          // begin
-            "(Bookmark:([^\\]|]|\\][^\\]])*)" +                 // "Bookmark:" + URL
-            "(\\|(([^\\]]|\\][^\\]])*?))?" +                    // optional description
-            "\\]\\]");                                          // end 
+        "\\[\\[" +                                      // begin
+        "(Bookmark:([^\\]|]|\\][^\\]])*)" +             // "Bookmark:" + URL
+        "(\\|(([^\\]]|\\][^\\]])*?))?" +                // optional description
+        "\\]\\]");                                      // end
+
+    private static final Pattern intPattern = Pattern.compile(
+        "\\[\\[" +                                      // begin
+        "(([^\\]|]|\\][^\\]])*?)" +                     // wiki-page
+        "(\\|(([^\\]]|\\][^\\]])*?))?" +                // optional desciption
+        "\\]\\]");                                      // end
 	
-	private static final Pattern intPattern = Pattern.compile(
-			"\\[\\[" +											// begin
-			"(([^\\]|]|\\][^\\]])*?)" +							// wiki-page
-			"(\\|(([^\\]]|\\][^\\]])*?))?" +					// optional desciption
-			"\\]\\]");											// end
+    private static final Pattern extPattern = Pattern.compile(
+        "\\[" +                                         // begin
+        "([^\\] ]*)" +                                  // URL
+        "( ([^\\]]*))?" +                               // optional description
+        "\\]");                                         // end
 	
-	private static final Pattern extPattern = Pattern.compile(
-			"\\[" +												// begin
-			"([^\\] ]*)" +										// URL
-			"( ([^\\]]*))?" +									// optional description
-			"\\]");												// end
+    private static final Pattern[] patterns = new Pattern[] { imgPattern, bkmPattern, intPattern, extPattern };
 	
-	private static final Pattern[] patterns = new Pattern[] {
-		imgPattern, bkmPattern, intPattern, extPattern };
-	
-	private final String localhost;
-	private final String wikiPath;
+    private final String localhost;
+    private final String wikiPath;
     private final Switchboard sb;
-	private int patternNr = 0;
+    private int patternNr = 0;
 	
-	public LinkToken(final String localhost, final String wikiPath, final Switchboard sb) {
-		this.localhost = localhost;
-		this.wikiPath = wikiPath;
+    public LinkToken(final String localhost, final String wikiPath, final Switchboard sb) {
+        this.localhost = localhost;
+        this.wikiPath = wikiPath;
         this.sb = sb;
-	}
+    }
 	
-	protected void parse() throws wikiParserException {
-		final StringBuilder sb = new StringBuilder();
-        if (this.patternNr < 0 || this.patternNr >= patterns.length)
+    protected void parse() throws wikiParserException {
+        final StringBuilder stringBuilder = new StringBuilder();
+
+        if (this.patternNr < 0 || this.patternNr >= patterns.length) {
             throw new wikiParserException("patternNr was not set correctly: " + this.patternNr);
-		final Matcher m = patterns[this.patternNr].matcher(this.text);
-        if (!m.find())
+        }
+
+        final Matcher m = patterns[this.patternNr].matcher(this.text);
+
+        if (!m.find()) {
             throw new wikiParserException("Didn't find match for: (" + this.patternNr + ") " + this.text);
+        }
         
         switch (this.patternNr) {
-			case IMG:
-				sb.append("<img src=\"").append(formatHref(m.group(1).substring(6))).append("\"");
-				if (m.group(5) != null) sb.append(" align=\"").append(m.group(5)).append("\"");
-                sb.append(" alt=\"").append((m.group(7) == null) ? formatHref(m.group(1).substring(6)) : m.group(7)).append("\"");
-				sb.append(" />");
-				break;
+            case IMG:
+                stringBuilder.append("<img src=\"").append(formatHref(m.group(1).substring(6))).append("\"");
+                if (m.group(5) != null) {
+                    stringBuilder.append(" align=\"").append(m.group(5)).append("\"");
+                }
+                stringBuilder.append(" alt=\"").append((m.group(7) == null) ? formatHref(m.group(1).substring(6)) : m.group(7)).append("\"");
+                stringBuilder.append(" />");
+                break;
                 
             case BKM:
                 final Link[] links = getLinksFromBookmarkTag(m.group(2));
                 if (links == null) {
-                    sb.append("<span class=\"error\">Couldn't find Bookmark-Tag '").append(m.group(2)).append("'.</span>");
+                    stringBuilder.append("<span class=\"error\">Couldn't find Bookmark-Tag '").append(m.group(2)).append("'.</span>");
                 } else {
-                    appendLinks(links, sb);
+                    appendLinks(links, stringBuilder);
                 }
                 break;
 				
-			case INT:
-				sb.append(new Link(
-                                "http://" + this.localhost + "/" + this.wikiPath + m.group(1),
-                                m.group(4),
-                                (m.group(4) == null) ? m.group(1) : m.group(4)
-                        ).toString());
-				break;
+            case INT:
+                stringBuilder.append(new Link(
+                    "http://" + this.localhost + "/" + this.wikiPath + m.group(1),
+                    m.group(4),
+                    (m.group(4) == null) ? m.group(1) : m.group(4)
+                ).toString());
+                break;
 				
-			case EXT:
-				sb.append(new Link(
-                                m.group(1),
-                                m.group(3),
-                                (m.group(3) == null) ? m.group(1) : m.group(3)
-                        ).toString());
-				break;
-		}
-		this.parsed = true;
-		this.markup = new String(sb);
-	}
+            case EXT:
+                stringBuilder.append(new Link(
+                    m.group(1),
+                    m.group(3),
+                    (m.group(3) == null) ? m.group(1) : m.group(3)
+                ).toString());
+                    break;
+        }
+        this.parsed = true;
+        this.markup = new String(stringBuilder);
+    }
     
     private String formatHref(final String link) {
         if (link.indexOf("://") == -1) {        // DATA/HTDOCS-link
@@ -171,25 +177,35 @@ public class LinkToken extends AbstractToken {
             this.desc = desc;
         }
         
+        @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append("<a href=\"").append(this.href).append("\"");
-            if (this.title != null) sb.append(" title=\"").append(this.title).append("\"");
-            sb.append(">");
-            if (this.desc == null) sb.append(this.href); else sb.append(this.desc);
-            sb.append("</a>");
-            return new String(sb);
+            final StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append("<a href=\"").append(this.href).append("\"");
+            if (this.title != null) stringBuilder.append(" title=\"").append(this.title).append("\"");
+            stringBuilder.append(">");
+            if (this.desc == null) stringBuilder.append(this.href); else stringBuilder.append(this.desc);
+            stringBuilder.append("</a>");
+            return new String(stringBuilder);
         }
     }
 	
-	public String[] getBlockElementNames() { return null; }
-	public Pattern[] getRegex() { return patterns; }
+    public String[] getBlockElementNames() {
+        return null;
+    }
+
+    public Pattern[] getRegex() {
+        return patterns;
+    }
 	
-	public boolean setText(final String text, final int patternNr) {
-		this.text = text;
-		this.patternNr = patternNr;
-		this.parsed = false;
-		if (text == null) { this.markup = null; this.patternNr = -1; }
-		return true;
-	}
+    public boolean setText(final String text, final int patternNr) {
+        this.text = text;
+        this.patternNr = patternNr;
+        this.parsed = false;
+        if (text == null) {
+            this.markup = null;
+            this.patternNr = -1;
+        }
+        return true;
+    }
+    
 }

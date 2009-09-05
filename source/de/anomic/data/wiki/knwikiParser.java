@@ -1,4 +1,4 @@
-// wikiParser.java 
+// knwikiParser.java 
 // ---------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -8,9 +8,9 @@
 //
 // This file is contributed by Franz Brausze
 //
-// $LastChangedDate: $
-// $LastChangedRevision: $
-// $LastChangedBy: $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -42,55 +42,55 @@ import de.anomic.search.Switchboard;
 
 public class knwikiParser implements wikiParser {
 	
-	public Token[] tokens;
-	private String[] BEs;
+    public Token[] tokens;
+    private String[] BEs;
     private final Switchboard sb;
     
     private knwikiParser(final Switchboard sb) {
         this.sb = sb;
     }
 	
-	public static void main(final String[] args) {
-		final String text = "===T<pre>itle===\n" +
-				"==blubb== was ==ein '''shice'''==...och.bla\n" +
-				"* ein \n" +
-				"*==test=</pre>=\n" +
-				"** doppelt\n" +
-				"* ''tess*sst''\n" +
-				"*** xyz\n" +
-				"=]*** huch\n" +
-				"* ehehe***\n" +
-				"* blubb\n" +
-				"bliblablo\n\n\n" +
-				"* blubb\n" +
-				"{|border=-1\n" +
-				"|-\n" +
-				"||bla|| blubb\n" +
-				"|-\n" +
-				"||align center|och||huch||\n" +
-				"|}\n" +
-				"\n" +
-				"# bla\n" +
-				"# blubb\n" +
-				"'''''ehehehe''''', ne?!\n" +
-				"[http://www/index.html,ne?!] -\n" +
-				"[[Image:blubb|BLA]] ---- och\n" +
-				" blubb1\n" +
-				" blubb2\n" +
-				":doppel-blubb[= huch =]\n" +
-				";hier:da\n" +
-				";dort:und so\n" +
-				";;und:doppelt\n\n\n\n" +
-                "[[Image:blubb|BLA]]";
-		// text = "[=\n=]* bla";
-		String t = "[=] ein fucking [= test =]-text[=,ne?!=] joa, [=alles=]wunderbar," +
-				"[=denk ich=] mal =]";
-		final long l = System.currentTimeMillis();
-		t = new knwikiParser(null).parse((args.length > 0) ? args[0] : text, "localhost:8080");
+    public static void main(final String[] args) {
+        final String text = "===T<pre>itle===\n" +
+                            "==blubb== was ==ein '''shice'''==...och.bla\n" +
+                            "* ein \n" +
+                            "*==test=</pre>=\n" +
+                            "** doppelt\n" +
+                            "* ''tess*sst''\n" +
+                            "*** xyz\n" +
+                            "=]*** huch\n" +
+                            "* ehehe***\n" +
+                            "* blubb\n" +
+                            "bliblablo\n\n\n" +
+                            "* blubb\n" +
+                            "{|border=-1\n" +
+                            "|-\n" +
+                            "||bla|| blubb\n" +
+                            "|-\n" +
+                            "||align center|och||huch||\n" +
+                            "|}\n" +
+                            "\n" +
+                            "# bla\n" +
+                            "# blubb\n" +
+                            "'''''ehehehe''''', ne?!\n" +
+                            "[http://www/index.html,ne?!] -\n" +
+                            "[[Image:blubb|BLA]] ---- och\n" +
+                            " blubb1\n" +
+                            " blubb2\n" +
+                            ":doppel-blubb[= huch =]\n" +
+                            ";hier:da\n" +
+                            ";dort:und so\n" +
+                            ";;und:doppelt\n\n\n\n" +
+                            "[[Image:blubb|BLA]]";
+        // text = "[=\n=]* bla";
+        String t = "[=] ein fucking [= test =]-text[=,ne?!=] joa, [=alles=]wunderbar," +
+                        "[=denk ich=] mal =]";
+        final long l = System.currentTimeMillis();
+        t = new knwikiParser(null).parse((args.length > 0) ? args[0] : text, "localhost:8080");
         System.out.println("parsing time: " + (System.currentTimeMillis() - l) + " ms");
         System.out.println("--- --- ---");
         System.out.println(t);
-	}
+    }
     
     public String transform(final String content) {
         return parse(content, null);
@@ -105,7 +105,7 @@ public class knwikiParser implements wikiParser {
         return parse(new String(content, encoding), null);
     }
 	
-	private String parse(String text, final String publicAddress) {
+    private String parse(String text, final String publicAddress) {
         tokens = new Token[] {
                 new SimpleToken('=', '=', new String[][] { null, { "h2" }, { "h3" }, { "h4" } }, true),
                 new SimpleToken('\'', '\'', new String[][] { null, { "i" }, { "b" }, null, { "b", "i" } }, false),
@@ -130,124 +130,130 @@ public class knwikiParser implements wikiParser {
                 }
         r.add("hr");
         BEs = r.toArray(new String[r.size()]);
-        
+
         Text[] tt = Text.split2Texts(text, "[=", "=]");
         for (int i=0; i<tt.length; i+=2)
-        	tt[i].setText(parseUnescaped(tt[i].getText()));
+                tt[i].setText(parseUnescaped(tt[i].getText()));
         text = Text.mergeTexts(tt);
-        
+
         tt = Text.split2Texts(text, "<pre>", "</pre>");
         for (int i=0; i<tt.length; i+=2)
             tt[i].setText(replaceBRs(tt[i].getText()));
         return Text.mergeTexts(tt);
-	}
+    }
 	
-	private String parseUnescaped(String text) {
-		Token st;
-		Matcher m;
-		StringBuffer sb;
-		for (int i=0; i<tokens.length; i++) {
-			st = tokens[i];
-			for (int j=0; j<st.getRegex().length; j++) {
-				m = st.getRegex()[j].matcher(text);
-				sb = new StringBuffer();
-				while (m.find()) try {
-					//System.out.print("found " + st.getClass().getSimpleName() +  ": " +
-					//		m.group().replaceAll("\n", "\\\\n").replaceAll("\t", "    ") + ", ");
-					if (!st.setText(m.group(), j)) {
-					//	System.out.println("not usable");
-						continue;
-					//} else {
-					//	System.out.println("usable");
-					}
-					m.appendReplacement(sb, (st.getMarkup() == null) ? m.group() : st.getMarkup());
-				} catch (final wikiParserException e) {
-                    m.appendReplacement(sb, st.getText());
+    private String parseUnescaped(String text) {
+        Token st;
+        Matcher m;
+        StringBuffer stringBuffer;
+        for (int i=0; i<tokens.length; i++) {
+            st = tokens[i];
+            for (int j=0; j<st.getRegex().length; j++) {
+                m = st.getRegex()[j].matcher(text);
+                stringBuffer = new StringBuffer();
+                while (m.find()) try {
+                    if (!st.setText(m.group(), j)) {
+                        continue;
+                    }
+                    m.appendReplacement(stringBuffer, (st.getMarkup() == null) ? m.group() : st.getMarkup());
+                } catch (final wikiParserException e) {
+                    m.appendReplacement(stringBuffer, st.getText());
                 }
-				text = new String(m.appendTail(sb));
-			}
-		}
-		return text.replaceAll("----", "<hr />");
-	}
-	
-	private String replaceBRs(final String text) {
-		final StringBuilder sb = new StringBuilder(text.length());
-		final String[] tt = text.split("\n");
-		boolean replace;
-		for (int i=0, j; i<tt.length; i++) {
-			replace = true;
-			for (j=0; j<BEs.length; j++)
-				if (tt[i].endsWith(BEs[j] + ">")) { replace = false; break; }
-			sb.append(tt[i]);
-            if (i < tt.length - 1) {
-                if (replace) sb.append("<br />");
-                sb.append("\n");
+                text = new String(m.appendTail(stringBuffer));
             }
-		}
-		return new String(sb);
-	}
+        }
+        return text.replaceAll("----", "<hr />");
+    }
 	
-	private static class Text {
-		
-		public static final String escapeNewLine = "@";
-		
-		private String text;
-		private final boolean nl;
-		
-		public Text(final String text, final boolean escaped, final boolean newLineBefore) {
-			this.text = text;
-			this.nl = newLineBefore;
+    private String replaceBRs(final String text) {
+        final StringBuilder stringBuffer = new StringBuilder(text.length());
+        final String[] tt = text.split("\n");
+        boolean replace;
+        for (int i=0, j; i<tt.length; i++) {
+            replace = true;
+            for (j=0; j<BEs.length; j++)
+            if (tt[i].endsWith(BEs[j] + ">")) { replace = false; break; }
+            stringBuffer.append(tt[i]);
+            if (i < tt.length - 1) {
+                if (replace) stringBuffer.append("<br />");
+                stringBuffer.append("\n");
+            }
+        }
+        return new String(stringBuffer);
+    }
+	
+    private static class Text {
+
+        public static final String escapeNewLine = "@";
+
+        private String text;
+        private final boolean nl;
+
+        public Text(final String text, final boolean escaped, final boolean newLineBefore) {
+                this.text = text;
+                this.nl = newLineBefore;
         }
 		
-		public String setText(final String text) {
-			if (this.nl)
-				this.text = text.substring(escapeNewLine.length());
-			else
-				this.text = text;
-			return this.text;
-		}
+        public String setText(final String text) {
+            if (this.nl) {
+                this.text = text.substring(escapeNewLine.length());
+            } else {
+                this.text = text;
+            }
+            return this.text;
+        }
 		
-		public String getTextPlain() { return this.text; }
-		public String getText() {
-			if (this.nl)
-				return escapeNewLine + this.text;
-			return this.text;
-		}
+        public String getTextPlain() {
+            return this.text;
+        }
+
+        public String getText() {
+            if (this.nl) {
+                return escapeNewLine + this.text;
+            }
+            return this.text;
+        }
 		
-		public String toString() { return this.text; }
+        @Override
+        public String toString() {
+            return this.text;
+        }
         
-		static Text[] split2Texts(final String text, final String escapeBegin, final String escapeEnd) {
-			if (text == null) return null;
-			if (text.length() < 2) return new Text[] { new Text(text, false, true) };
-			
-			final int startLen = escapeBegin.length();
+        static Text[] split2Texts(final String text, final String escapeBegin, final String escapeEnd) {
+
+            if (text == null) return null;
+
+            if (text.length() < 2) return new Text[] {new Text(text, false, true) };
+
+            final int startLen = escapeBegin.length();
             final int endLen = escapeEnd.length();
-			final ArrayList<Text> r = new ArrayList<Text>();
-			boolean escaped = text.startsWith(escapeBegin);
-			if (escaped) r.add(new Text("", false, true));
-			int i, j = 0;
-			while ((i = text.indexOf((escaped) ? escapeEnd : escapeBegin, j)) > -1) {
-				r.add(resolve2Text(text, escaped, (j > 0) ? j + ((escaped) ? startLen : endLen) : 0, i, escapeEnd));
-				j = i;
-				escaped = !escaped;
-			}
-			r.add(resolve2Text(text, escaped, (escaped) ? j : (j > 0) ? j + endLen : 0, -1, escapeEnd));
-			return r.toArray(new Text[r.size()]);
-		}
+            final ArrayList<Text> r = new ArrayList<Text>();
+            boolean escaped = text.startsWith(escapeBegin);
+            if (escaped) r.add(new Text("", false, true));
+            int i, j = 0;
+            while ((i = text.indexOf((escaped) ? escapeEnd : escapeBegin, j)) > -1) {
+                r.add(resolve2Text(text, escaped, (j > 0) ? j + ((escaped) ? startLen : endLen) : 0, i, escapeEnd));
+                j = i;
+                escaped = !escaped;
+            }
+            r.add(resolve2Text(text, escaped, (escaped) ? j : (j > 0) ? j + endLen : 0, -1, escapeEnd));
+            return r.toArray(new Text[r.size()]);
+        }
 		
-		private static Text resolve2Text(final String text, final boolean escaped, final int from, int to, final String escapeEnd) {
-			if (to == -1) to = text.length();
-			return new Text(
-					text.substring(from, to),
-					escaped,
-					from < escapeEnd.length() + 2 || (!escaped && text.charAt(from - escapeEnd.length() - 1) == '\n'));
-		}
+        private static Text resolve2Text(final String text, final boolean escaped, final int from, int to, final String escapeEnd) {
+            if (to == -1) to = text.length();
+            return new Text(
+                text.substring(from, to),
+                escaped,
+                from < escapeEnd.length() + 2 || (!escaped && text.charAt(from - escapeEnd.length() - 1) == '\n'));
+        }
 		
-		static String mergeTexts(final Text[] texts) {
-			final StringBuilder sb = new StringBuilder(2000);
-			for (int n=0; n < texts.length; n++)
-				sb.append(texts[n].getTextPlain());
-			return new String(sb);
-		}
-	}
+        static String mergeTexts(final Text[] texts) {
+            final StringBuilder sb = new StringBuilder(2000);
+            for (int n=0; n < texts.length; n++) {
+                sb.append(texts[n].getTextPlain());
+            }
+            return new String(sb);
+        }
+    }
 }

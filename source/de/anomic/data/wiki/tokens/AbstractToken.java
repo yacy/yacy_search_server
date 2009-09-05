@@ -8,9 +8,9 @@
 //
 // This file is contributed by Franz Brausze
 //
-// $LastChangedDate: $
-// $LastChangedRevision: $
-// $LastChangedBy: $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -32,20 +32,32 @@ import de.anomic.data.wiki.wikiParserException;
 
 public abstract class AbstractToken implements Token {
 	
-	protected String text = null;
-	protected String markup = null;
-	protected boolean parsed = false;
+    protected String text = null;
+    protected String markup = null;
+    protected boolean parsed = false;
+
+    protected abstract void parse() throws wikiParserException;
+
+    public String getMarkup() throws wikiParserException {
+        if (this.text == null) {
+            throw new IllegalArgumentException();
+        }
+        if (!this.parsed) {
+            parse();
+        }
+        return this.markup;
+    }
 	
-	protected abstract void parse() throws wikiParserException;
+    public String getText() {
+        return this.text;
+    }
 	
-	public String getMarkup() throws wikiParserException {
-		if (this.text == null)
-			throw new IllegalArgumentException();
-		if (!this.parsed) parse();
-		return this.markup;
-	}
-	
-	public String getText() { return this.text; }
-	
-	public String toString() { try { return getMarkup(); } catch (final wikiParserException e) { return null; } }
+    @Override
+    public String toString() {
+        try {
+            return getMarkup();
+        } catch (final wikiParserException e) {
+            return null;
+        }
+    }
 }

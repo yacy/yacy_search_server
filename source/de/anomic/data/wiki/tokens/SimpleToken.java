@@ -8,9 +8,9 @@
 //
 // This file is contributed by Franz Brausze
 //
-// $LastChangedDate: $
-// $LastChangedRevision: $
-// $LastChangedBy: $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,106 +36,117 @@ import de.anomic.data.wiki.wikiParserException;
 
 public class SimpleToken extends AbstractToken {
 	
-	protected String content = null;
-	protected int grade = 0;
+    protected String content = null;
+    protected int grade = 0;
+
+    protected final Pattern[] pattern;
+    private final String[][] definitionList;
+    private final String[] blockElements;
 	
-	protected final Pattern[] pattern;
-	private final String[][] definitionList;
-	private final String[] blockElements;
-	
-	public SimpleToken(final char firstChar, final char lastChar, final String[][] definitionList, final boolean isBlockElements) {
-		this.definitionList = definitionList;
-		int i;
-		if (isBlockElements) {
-			final ArrayList<String> r = new ArrayList<String>();
-			int j;
-			for (i = 0; i < definitionList.length; i++)
-				if (definitionList[i] != null)
-					for (j = 0; j < definitionList[i].length; j++)
-						r.add(definitionList[i][j]);
-			this.blockElements = r.toArray(new String[r.size()]);
-		} else {
-			this.blockElements = null;
-		}
-		
-		for (i=0; i<definitionList.length; i++)
-			if (definitionList[i] != null) {
-				i++;
-				break;
-			}
-		this.pattern = new Pattern[] { Pattern.compile(
-				"([\\" + firstChar + "]{" + i + "," + definitionList.length + "})" +
+    public SimpleToken(final char firstChar, final char lastChar, final String[][] definitionList, final boolean isBlockElements) {
+        this.definitionList = definitionList;
+        int i;
+        if (isBlockElements) {
+            final ArrayList<String> r = new ArrayList<String>();
+            int j;
+            for (i = 0; i < definitionList.length; i++)
+                if (definitionList[i] != null)
+                    for (j = 0; j < definitionList[i].length; j++)
+                        r.add(definitionList[i][j]);
+            this.blockElements = r.toArray(new String[r.size()]);
+        } else {
+            this.blockElements = null;
+        }
+
+        for (i=0; i<definitionList.length; i++) {
+            if (definitionList[i] != null) {
+                    i++;
+                    break;
+            }
+        }
+        
+        this.pattern = new Pattern[] {
+            Pattern.compile(
+                "([\\" + firstChar + "]{" + i + "," + definitionList.length + "})" +
                 "(.*?)" +
-                "([\\" + lastChar + "]{" + i + "," + definitionList.length + "})")};
-	}
+                "([\\" + lastChar + "]{" + i + "," + definitionList.length + "})")
+        };
+    }
 	
-	public String getMarkup() throws wikiParserException {
-		if (this.content == null) {
-			if (this.text == null) {
-				throw new IllegalArgumentException();
-			}
-			setText(this.text, 0);
-		}
-		if (!this.parsed) parse();
-		return this.markup;
-	}
+    @Override
+    public String getMarkup() throws wikiParserException {
+        if (this.content == null) {
+            if (this.text == null) {
+                throw new IllegalArgumentException();
+            }
+            setText(this.text, 0);
+        }
+        if (!this.parsed) parse();
+        return this.markup;
+    }
+
+    protected void parse() throws wikiParserException {
+        String[] e;
+        if (this.grade >= this.definitionList.length || (e = this.definitionList[this.grade]) == null)
+            throw new wikiParserException("Token not defined for grade: " + this.grade);
+        this.markup = getMarkup(e);
+        this.parsed = true;
+    }
 	
-	protected void parse() throws wikiParserException {
-		String[] e;
-		if (this.grade >= this.definitionList.length || (e = this.definitionList[this.grade]) == null)
-		    throw new wikiParserException("Token not defined for grade: " + this.grade);
-		this.markup = getMarkup(e);
-		this.parsed = true;
-	}
+    protected String getMarkup(final String[] es) {
+        return getMarkup(es, false) + this.content + getMarkup(es, true);
+    }
 	
-	protected String getMarkup(final String[] es) {
-		return getMarkup(es, false) + this.content + getMarkup(es, true);
-	}
+    protected String getMarkup(final String[] es, final boolean closing) {
+        final StringBuilder result = new StringBuilder();
+        // backwards if closing
+        for (
+            int i = (closing) ? es.length - 1 : 0, j;
+            (closing && i >= 0) ^ (!closing && i < es.length);
+            i += (closing) ? -1 : +1
+        ) {
+            result.append("<");
+            if (closing) {
+                result.append("/");
+                if ((j = es[i].indexOf(' ')) > -1) {
+                    result.append(es[i].substring(0, j));
+                } else {
+                    result.append(es[i]);
+                }
+            } else {
+                result.append(es[i]);
+            }
+            result.append(">");
+        }
+        return new String(result);
+    }
 	
-	protected String getMarkup(final String[] es, final boolean closing) {
-		final StringBuilder result = new StringBuilder();
-		// backwards if closing
-		for (
-				int i = (closing) ? es.length - 1 : 0, j;
-				(closing && i >= 0) ^ (!closing && i < es.length);
-				i += (closing) ? -1 : +1
-		) {
-			result.append("<");
-			if (closing) {
-				result.append("/");
-				if ((j = es[i].indexOf(' ')) > -1) {
-					result.append(es[i].substring(0, j));
-				} else {
-					result.append(es[i]);
-				}
-			} else {
-				result.append(es[i]);
-			}
-			result.append(">");
-		}
-		return new String(result);
-	}
+    public boolean setText(final String text, final int patternNr) {
+        this.text = text;
+        this.markup = null;
+        this.parsed = false;
+        if (text != null) {
+            final Matcher m = getRegex()[0].matcher(text);
+            if (
+                (m.matches()) &&
+                (m.group(1).length() == m.group(3).length()) &&
+                (definitionList.length >= m.group(1).length()) &&
+                (definitionList[m.group(1).length() - 1] != null)
+            ) {
+                this.grade = m.group(1).length() - 1;
+                this.content = m.group(2);
+                return true;
+            }
+        }
+        return false;
+    }
 	
-	public boolean setText(final String text, final int patternNr) {
-		this.text = text;
-		this.markup = null;
-		this.parsed = false;
-		if (text != null) {
-			final Matcher m = getRegex()[0].matcher(text);
-			if (
-					(m.matches()) &&
-					(m.group(1).length() == m.group(3).length()) &&
-					(definitionList.length >= m.group(1).length()) &&
-					(definitionList[m.group(1).length() - 1] != null)
-			) {
-				this.grade = m.group(1).length() - 1;
-				this.content = m.group(2);
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	public Pattern[] getRegex() { return this.pattern; }
-	public String[] getBlockElementNames() { return this.blockElements; }
+    public Pattern[] getRegex() {
+        return this.pattern;
+    }
+
+    public String[] getBlockElementNames() {
+        return this.blockElements;
+    }
+    
 }
