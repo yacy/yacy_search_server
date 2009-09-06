@@ -38,9 +38,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.zip.GZIPInputStream;
 
@@ -170,8 +170,11 @@ public class OpenGeoDB {
      */
     public HashSet<Coordinates> find(String anyname) {
         HashSet<Integer> r = new HashSet<Integer>();
-        List<Integer> c; 
-        c = this.locationName2ids.get(anyname); if (c != null) r.addAll(c);
+        SortedMap<String, List<Integer>> cities = this.locationName2ids.tailMap(anyname);
+        for (Map.Entry<String, List<Integer>> e: cities.entrySet()) {
+        	if (e.getKey().toLowerCase().startsWith(anyname.toLowerCase())) r.addAll(e.getValue()); else break;
+        }
+        List<Integer> c;
         c = this.kfz2ids.get(anyname); if (c != null) r.addAll(c);
         c = this.predial2ids.get(anyname); if (c != null) r.addAll(c);
         Integer i = this.zip2id.get(anyname); if (i != null) r.add(i);
