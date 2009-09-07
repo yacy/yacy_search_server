@@ -222,7 +222,14 @@ public class CRProcess {
         return true;
     }
     
-    public static void accumulate(final File from_dir, final File tmp_dir, final File err_dir, final File bkp_dir, final File to_file, int max_files, final boolean newdb) throws IOException {
+    public static void accumulate(
+    		final File from_dir,
+    		final File tmp_dir,
+    		final File err_dir,
+    		final File bkp_dir,
+    		final File to_file,
+    		int max_files,
+    		final boolean newdb) throws IOException {
         if (!(from_dir.isDirectory())) {
             System.out.println("source path " + from_dir + " is not a directory.");
             return;
@@ -246,7 +253,7 @@ public class CRProcess {
         IndexCell<WordReference> newseq = null;
         if (newdb) {
             final File path = to_file.getParentFile(); // path to storage place
-            newacc = new Table(new File(path, CRG_accname), CRG_accrow, Table.tailCacheUsageAuto, 0, 0);
+            newacc = new Table(new File(path, CRG_accname), CRG_accrow, 0, 0, true, false);
             newseq = new IndexCell<WordReference>(
                                     path,
                                     Segment.wordReferenceFactory,

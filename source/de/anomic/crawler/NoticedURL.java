@@ -51,12 +51,15 @@ public class NoticedURL {
     private Balancer limitStack;     // links found by crawling at target depth
     private Balancer remoteStack;    // links from remote crawl orders
     
-    public NoticedURL(final File cachePath) {
+    public NoticedURL(
+    		final File cachePath,
+            final boolean useTailCache,
+            final boolean exceed134217727) {
         Log.logInfo("NoticedURL", "CREATING STACKS at " + cachePath.toString());
-        this.coreStack = new Balancer(cachePath, "urlNoticeCoreStack", false, minimumLocalDeltaInit, minimumGlobalDeltaInit);
-        this.limitStack = new Balancer(cachePath, "urlNoticeLimitStack", false, minimumLocalDeltaInit, minimumGlobalDeltaInit);
+        this.coreStack = new Balancer(cachePath, "urlNoticeCoreStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, useTailCache, exceed134217727);
+        this.limitStack = new Balancer(cachePath, "urlNoticeLimitStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, useTailCache, exceed134217727);
         //overhangStack = new plasmaCrawlBalancer(overhangStackFile);
-        this.remoteStack = new Balancer(cachePath, "urlNoticeRemoteStack", false, minimumLocalDeltaInit, minimumGlobalDeltaInit);
+        this.remoteStack = new Balancer(cachePath, "urlNoticeRemoteStack", minimumLocalDeltaInit, minimumGlobalDeltaInit, useTailCache, exceed134217727);
     }
 
     public long getMinimumLocalDelta() {

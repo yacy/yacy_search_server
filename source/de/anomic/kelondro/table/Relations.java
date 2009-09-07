@@ -38,9 +38,16 @@ public class Relations {
 
     private final File baseDir;
     private HashMap<String, ObjectIndex> relations;
+    private final boolean useTailCache;
+    private final boolean exceed134217727;
     
-    public Relations(final File location) {
+    public Relations(
+    		final File location,
+            final boolean useTailCache,
+            final boolean exceed134217727) {
         this.baseDir = location;
+        this.useTailCache = useTailCache;
+        this.exceed134217727 = exceed134217727;
     }
     
     private static Row rowdef(String filename) {
@@ -81,14 +88,14 @@ public class Relations {
                 if (!list[i].equals(targetfilename)) continue;
                 final Row row = rowdef(list[i]);
                 if (row.primaryKeyLength != keysize || row.column(1).cellwidth != payloadsize) continue; // a wrong table
-                final ObjectIndex table = new Table(new File(baseDir, list[i]), row, Table.tailCacheUsageAuto, 1024*1024, 0);
+                final ObjectIndex table = new Table(new File(baseDir, list[i]), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
                 relations.put(name, table);
                 return;
             }
         }
         // the relation does not exist, create it
         final Row row = rowdef(keysize, payloadsize);
-        final ObjectIndex table = new Table(new File(baseDir, targetfilename), row, Table.tailCacheUsageAuto, 1024*1024, 0);
+        final ObjectIndex table = new Table(new File(baseDir, targetfilename), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
         relations.put(name, table);
     }
     
@@ -101,7 +108,7 @@ public class Relations {
         for (int i = 0; i < list.length; i++) {
             if (list[i].startsWith(name)) {
                 final Row row = rowdef(list[i]);
-                final ObjectIndex table = new Table(new File(baseDir, list[i]), row, Table.tailCacheUsageAuto, 1024*1024, 0);
+                final ObjectIndex table = new Table(new File(baseDir, list[i]), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
                 relations.put(name, table);
                 return table;
             }
@@ -158,7 +165,7 @@ public class Relations {
     }
     
     public static void main(final String args[]) {
-        final Relations r = new Relations(new File("/Users/admin/"));
+        final Relations r = new Relations(new File("/Users/admin/"), true, true);
         try {
             final String table1 = "test1";
             r.declareRelation(table1, 12, 30);

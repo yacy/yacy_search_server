@@ -196,10 +196,10 @@ public class dbtest {
         }
         if (dbe.equals("kelondroSplitTable")) {
             final File tablepath = new File(tablename).getParentFile();
-            return new SplitTable(tablepath, new File(tablename).getName(), testRow);
+            return new SplitTable(tablepath, new File(tablename).getName(), testRow, true, true);
         }
         if (dbe.equals("kelondroEcoTable")) {
-            return new Table(new File(tablename), testRow, Table.tailCacheForceUsage, 1000, 0);
+            return new Table(new File(tablename), testRow, 1000, 0, true, true);
         }
         if (dbe.equals("mysql")) {
             return new SQLTable("mysql", testRow);

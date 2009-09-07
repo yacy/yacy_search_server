@@ -272,7 +272,8 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
     public serverProcessor<indexingQueueEntry> indexingStorageProcessor;
     
     public RobotsTxtConfig robotstxtConfig = null;
-    
+    public boolean useTailCache;
+    public boolean exceed134217727;
     
     private final serverSemaphore shutdownSync = new serverSemaphore(0);
     private boolean terminate = false;
@@ -302,6 +303,12 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         
         // remote proxy configuration
         RemoteProxyConfig.init(this);
+        
+        // memory configuration
+        this.useTailCache = getConfigBool("ramcopy", true);
+        if (MemoryControl.available() > 1024 * 1024 * 1024 * 1) this.useTailCache = true;
+        this.exceed134217727 = getConfigBool("exceed134217727", true);
+        if (MemoryControl.available() > 1024 * 1024 * 1024 * 2) this.exceed134217727 = true;
         
         // load values from configs        
         final File indexPath = getConfigPath(SwitchboardConstants.INDEX_PRIMARY_PATH, SwitchboardConstants.INDEX_PATH_DEFAULT);
@@ -353,12 +360,16 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
 	                "seed.pot.heap",
 	                mySeedFile,
 	                redundancy,
-	                partitionExponent);
+	                partitionExponent,
+	                this.useTailCache,
+	                this.exceed134217727);
 	        indexSegment = new Segment(
                     log,
                     new File(new File(indexPath, networkName), "TEXT"),
                     wordCacheMaxCount,
-                    fileSizeMax);
+                    fileSizeMax,
+                    this.useTailCache,
+                    this.exceed134217727);
 	        crawler = new CrawlSwitchboard(
 	                peers,
 	                networkName,
@@ -842,13 +853,17 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
                     "seed.pot.heap",
                     mySeedFile,
                     redundancy,
-                    partitionExponent);
+                    partitionExponent,
+                    this.useTailCache,
+                    this.exceed134217727);
             try {
                 indexSegment = new Segment(
                         log,
                         new File(new File(indexPrimaryPath, networkName), "TEXT"),
                         wordCacheMaxCount,
-                        fileSizeMax);
+                        fileSizeMax,
+                        this.useTailCache,
+                        this.exceed134217727);
             } catch (IOException e) {
                 e.printStackTrace();
             }

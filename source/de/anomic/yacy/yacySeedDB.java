@@ -109,7 +109,9 @@ public final class yacySeedDB implements AlternativeDomainNames {
             final String seedPotentialDBFileName,
             final File myOwnSeedFile, 
             final int redundancy,
-            final int partitionExponent) {
+            final int partitionExponent,
+            final boolean useTailCache,
+            final boolean exceed134217727) {
         this.seedActiveDBFile = new File(networkRoot, seedActiveDBFileName);
         this.seedPassiveDBFile = new File(networkRoot, seedPassiveDBFileName);
         this.seedPotentialDBFile = new File(networkRoot, seedPotentialDBFileName);
@@ -138,7 +140,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         HTTPDemon.setAlternativeResolver(this);
         
         // create or init news database
-        this.newsPool = new yacyNewsPool(networkRoot);
+        this.newsPool = new yacyNewsPool(networkRoot, useTailCache, exceed134217727);
         
         // deploy peer actions
         this.peerActions = new yacyPeerActions(this, newsPool);

@@ -69,10 +69,6 @@ public class Table implements ObjectIndex {
     // static tracker objects
     private static TreeMap<String, Table> tableTracker = new TreeMap<String, Table>();
     
-    public static final int tailCacheDenyUsage  = 0;
-    public static final int tailCacheForceUsage = 1;
-    public static final int tailCacheUsageAuto  = 2;
-    
     public    static final long maxarraylength = 134217727L; // that may be the maxmimum size of array length in some JVMs
     private   static final long minmemremaining = 20 * 1024 * 1024; // if less than this memory is remaininig, the memory copy of a table is abandoned
     private   int fail;
@@ -84,7 +80,13 @@ public class Table implements ObjectIndex {
     protected RowSet table;
     protected Row taildef;
     
-    public Table(final File tablefile, final Row rowdef, final int useTailCache, final int buffersize, final int initialSpace) {
+    public Table(
+    		final File tablefile,
+    		final Row rowdef,
+    		final int buffersize,
+    		final int initialSpace,
+    		final boolean useTailCache,
+    		final boolean exceed134217727) {
         this.tablefile = tablefile;
         this.rowdef = rowdef;
         this.buffersize = buffersize;
@@ -118,9 +120,8 @@ public class Table implements ObjectIndex {
             // initialize index and copy table
             final int  records = Math.max(fileSize, initialSpace);
             final long neededRAM4table = (records) * ((rowdef.objectsize) + 4L) * 3L;
-            table = (/*(neededRAM4table < maxarraylength) &&*/
-                     ((useTailCache == tailCacheForceUsage) ||
-                      ((useTailCache == tailCacheUsageAuto) && (MemoryControl.available() > neededRAM4table + 200 * 1024 * 1024)))) ?
+            table = ((exceed134217727 || neededRAM4table < maxarraylength) &&
+                     (useTailCache && MemoryControl.available() > neededRAM4table + 200 * 1024 * 1024)) ?
                     new RowSet(taildef, records) : null;
             Log.logInfo("TABLE", "initialization of " + tablefile.getName() + ". table copy: " + ((table == null) ? "no" : "yes") + ", available RAM: " + (MemoryControl.available() / 1024 / 1024) + "MB, needed: " + (neededRAM4table/1024/1024 + 200) + "MB, allocating space for " + records + " entries");
             final long neededRAM4index = 2 * 1024 * 1024 + records * (rowdef.primaryKeyLength + 4) * 3 / 2;
@@ -268,7 +269,7 @@ public class Table implements ObjectIndex {
         map.put("tableKeyChunkSize", Integer.toString(index.row().objectsize));
         map.put("tableKeyMem", Integer.toString((int) (((long) index.row().objectsize) * ((long) index.size()) * RowCollection.growfactor100 / 100L)));
         map.put("tableValueChunkSize", (table == null) ? "0" : Integer.toString(table.row().objectsize));
-        map.put("tableValueMem", (table == null) ? "0" : Integer.toString((int) (((long) index.row().objectsize) * ((long) index.size()) * RowCollection.growfactor100 / 100L)));
+        map.put("tableValueMem", (table == null) ? "0" : Integer.toString((int) (((long) table.row().objectsize) * ((long) table.size()) * RowCollection.growfactor100 / 100L)));
         return map;
     }
     
@@ -747,10 +748,10 @@ public class Table implements ObjectIndex {
         return result;
     }
 
-    private static ObjectIndex testTable(final File f, final String testentities, final int testcase) throws IOException {
+    private static ObjectIndex testTable(final File f, final String testentities, final boolean useTailCache, final boolean exceed134217727) throws IOException {
         if (f.exists()) FileUtils.deletedelete(f);
         final Row rowdef = new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder);
-        final ObjectIndex tt = new Table(f, rowdef, testcase, 100, 0);
+        final ObjectIndex tt = new Table(f, rowdef, 100, 0, useTailCache, exceed134217727);
         byte[] b;
         final Row.Entry row = rowdef.newEntry();
         for (int i = 0; i < testentities.length(); i++) {
@@ -779,7 +780,7 @@ public class Table implements ObjectIndex {
         return count;
     }
     
-    public static void bigtest(final int elements, final File testFile, final int testcase) {
+    public static void bigtest(final int elements, final File testFile, final boolean useTailCache, final boolean exceed134217727) {
         System.out.println("starting big test with " + elements + " elements:");
         final long start = System.currentTimeMillis();
         final String[] s = permutations(elements);
@@ -788,13 +789,13 @@ public class Table implements ObjectIndex {
             for (int i = 0; i < s.length; i++) {
                 System.out.println("*** probing tree " + i + " for permutation " + s[i]);
                 // generate tree and delete elements
-                tt = testTable(testFile, s[i], testcase);
+                tt = testTable(testFile, s[i], useTailCache, exceed134217727);
                 if (countElements(tt) != tt.size()) {
                     System.out.println("wrong size for " + s[i]);
                 }
                 tt.close();
                 for (int j = 0; j < s.length; j++) {
-                    tt = testTable(testFile, s[i], testcase);
+                    tt = testTable(testFile, s[i], useTailCache, exceed134217727);
                     // delete by permutation j
                     for (int elt = 0; elt < s[j].length(); elt++) {
                         tt.remove(testWord(s[j].charAt(elt)));
@@ -830,9 +831,9 @@ public class Table implements ObjectIndex {
         // open a file, add one entry and exit
         final File f = new File(args[0]);
         System.out.println("========= Testcase: no tail cache:");
-        bigtest(5, f, tailCacheDenyUsage);
+        bigtest(5, f, false, false);
         System.out.println("========= Testcase: with tail cache:");
-        bigtest(5, f, tailCacheForceUsage);
+        bigtest(5, f, true, true);
         /*
         kelondroRow row = new kelondroRow("byte[] key-4, byte[] x-5", kelondroNaturalOrder.naturalOrder, 0);
         try {

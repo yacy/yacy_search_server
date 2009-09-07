@@ -71,7 +71,7 @@ public class CrawlQueues {
         
         // start crawling management
         log.logConfig("Starting Crawling Management");
-        noticeURL = new NoticedURL(queuePath);
+        noticeURL = new NoticedURL(queuePath, sb.useTailCache, sb.exceed134217727);
         //errorURL = new plasmaCrawlZURL(); // fresh error DB each startup; can be hold in RAM and reduces IO;
         final File errorDBFile = new File(queuePath, "urlError2.db");
         if (errorDBFile.exists()) {
@@ -79,8 +79,8 @@ public class CrawlQueues {
             // this is useful because there is currently no re-use of the data in this table.
             if (errorDBFile.isDirectory()) SplitTable.delete(queuePath, "urlError2.db"); else FileUtils.deletedelete(errorDBFile);
         }
-        errorURL = new ZURL(queuePath, "urlError3.db", false);
-        delegatedURL = new ZURL(queuePath, "urlDelegated3.db", true);
+        errorURL = new ZURL(queuePath, "urlError3.db", false, sb.useTailCache, sb.exceed134217727);
+        delegatedURL = new ZURL(queuePath, "urlDelegated3.db", true, sb.useTailCache, sb.exceed134217727);
     }
     
     public void relocate(final File newQueuePath) {
@@ -89,13 +89,13 @@ public class CrawlQueues {
         this.workers = new ConcurrentHashMap<Integer, crawlWorker>();
         this.remoteCrawlProviderHashes.clear();
         
-        noticeURL = new NoticedURL(newQueuePath);
+        noticeURL = new NoticedURL(newQueuePath, sb.useTailCache, sb.exceed134217727);
         final File errorDBFile = new File(newQueuePath, "urlError2.db");
         if (errorDBFile.exists()) {
             if (errorDBFile.isDirectory()) SplitTable.delete(newQueuePath, "urlError2.db"); else FileUtils.deletedelete(errorDBFile);
         }
-        errorURL = new ZURL(newQueuePath, "urlError3.db", false);
-        delegatedURL = new ZURL(newQueuePath, "urlDelegated3.db", true);
+        errorURL = new ZURL(newQueuePath, "urlError3.db", false, sb.useTailCache, sb.exceed134217727);
+        delegatedURL = new ZURL(newQueuePath, "urlDelegated3.db", true, sb.useTailCache, sb.exceed134217727);
     }
     
     public void close() {

@@ -649,10 +649,10 @@ public final class yacy {
             log.logInfo("STARTING URL CLEANUP");
             
             // db containing all currently loades urls
-            final MetadataRepository currentUrlDB = new MetadataRepository(new File(new File(indexPrimaryRoot, networkName), "TEXT"));
+            final MetadataRepository currentUrlDB = new MetadataRepository(new File(new File(indexPrimaryRoot, networkName), "TEXT"), false, false);
             
             // db used to hold all neede urls
-            final MetadataRepository minimizedUrlDB = new MetadataRepository(new File(new File(indexRoot2, networkName), "TEXT"));
+            final MetadataRepository minimizedUrlDB = new MetadataRepository(new File(new File(indexRoot2, networkName), "TEXT"), false, false);
             
             final int cacheMem = (int)(MemoryControl.maxMemory - MemoryControl.total());
             if (cacheMem < 2048000) throw new OutOfMemoryError("Not enough memory available to start clean up.");
@@ -661,7 +661,7 @@ public final class yacy {
                     log,
                     new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"),
                     10000,
-                    (long) Integer.MAX_VALUE);
+                    (long) Integer.MAX_VALUE, false, false);
             final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = wordIndex.termIndex().references("AAAAAAAAAAAA".getBytes(), false, false);
             
             long urlCounter = 0, wordCounter = 0;
@@ -835,7 +835,7 @@ public final class yacy {
         final File root = homePath;
         final File indexroot = new File(root, "DATA/INDEX");
         try {Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));} catch (final Exception e) {}
-        final MetadataRepository currentUrlDB = new MetadataRepository(new File(new File(indexroot, networkName), "TEXT"));
+        final MetadataRepository currentUrlDB = new MetadataRepository(new File(new File(indexroot, networkName), "TEXT"), false, false);
         currentUrlDB.deadlinkCleaner(null);
         currentUrlDB.close();
     }
@@ -855,7 +855,7 @@ public final class yacy {
                         log,
                         new File(new File(indexPrimaryRoot, "freeworld"), "TEXT"),
                         10000,
-                        (long) Integer.MAX_VALUE);
+                        (long) Integer.MAX_VALUE, false, false);
                 indexContainerIterator = WordIndex.termIndex().references(wordChunkStartHash.getBytes(), false, false);
             }
             int counter = 0;

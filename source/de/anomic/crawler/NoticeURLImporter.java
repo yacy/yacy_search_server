@@ -69,7 +69,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
         
         // init noticeUrlDB
         this.log.logInfo("Initializing the source noticeUrlDB");
-        this.importNurlDB = new NoticedURL(plasmaPath);
+        this.importNurlDB = new NoticedURL(plasmaPath, false, false);
         this.importStartSize = this.importNurlDB.size();
         //int stackSize = this.importNurlDB.stackSize();
         

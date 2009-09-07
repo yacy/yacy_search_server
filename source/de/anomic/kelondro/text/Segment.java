@@ -79,7 +79,9 @@ public final class Segment {
             final Log log,
             final File segmentPath,
             final int entityCacheMaxSize,
-            final long maxFileSize) throws IOException {
+            final long maxFileSize,
+            final boolean useTailCache,
+            final boolean exceed134217727) throws IOException {
         
         log.logInfo("Initializing Segment '" + segmentPath + "', word hash cache size is " + Word.hashCacheSize + ".");
 
@@ -114,7 +116,7 @@ public final class Segment {
         if (!metadatadir.exists()) metadatadir.mkdirs();
         
         // create LURL-db
-        urlMetadata = new MetadataRepository(metadatadir);
+        urlMetadata = new MetadataRepository(metadatadir, useTailCache, exceed134217727);
     }
     
     public MetadataRepository urlMetadata() {

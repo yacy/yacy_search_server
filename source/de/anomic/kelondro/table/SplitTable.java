@@ -84,12 +84,16 @@ public class SplitTable implements ObjectIndex {
     private       String current;
     private long  fileAgeLimit;
     private long  fileSizeLimit;
+    private boolean useTailCache;
+    private boolean exceed134217727;
     
     public SplitTable(
             final File path, 
             final String tablename, 
-            final Row rowdef) {
-        this(path, tablename, rowdef, ArrayStack.oneMonth, (long) Integer.MAX_VALUE);
+            final Row rowdef,
+            final boolean useTailCache,
+            final boolean exceed134217727) {
+        this(path, tablename, rowdef, ArrayStack.oneMonth, (long) Integer.MAX_VALUE, useTailCache, exceed134217727);
     }
 
     public SplitTable(
@@ -97,12 +101,16 @@ public class SplitTable implements ObjectIndex {
             final String tablename, 
             final Row rowdef, 
             final long fileAgeLimit,
-            final long fileSizeLimit) {
+            final long fileSizeLimit,
+            final boolean useTailCache,
+            final boolean exceed134217727) {
         this.path = path;
         this.prefix = tablename;
         this.rowdef = rowdef;
         this.fileAgeLimit = fileAgeLimit;
         this.fileSizeLimit = fileSizeLimit;
+        this.useTailCache = useTailCache;
+        this.exceed134217727 = exceed134217727;
         this.entryOrder = new Row.EntryComparator(rowdef.objectOrder);
         init();
     }
@@ -187,7 +195,7 @@ public class SplitTable implements ObjectIndex {
             if (maxf != null) {
                 f = new File(path, maxf);
                 Log.logInfo("kelondroSplitTable", "opening partial eco table " + f);
-                table = new Table(f, rowdef, Table.tailCacheUsageAuto, EcoFSBufferSize, 0);
+                table = new Table(f, rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727);
                 tables.put(maxf, table);
             }
         }
@@ -267,7 +275,7 @@ public class SplitTable implements ObjectIndex {
     private ObjectIndex newTable() {
         this.current = newFilename();
         final File f = new File(path, this.current);
-        Table table = new Table(f, rowdef, Table.tailCacheDenyUsage, EcoFSBufferSize, 0);
+        Table table = new Table(f, rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727);
         tables.put(this.current, table);
         return table;
     }

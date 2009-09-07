@@ -616,6 +616,19 @@ cleanup.deletionPublishedNews = true
 javastart_Xmx=Xmx180m
 javastart_Xms=Xms180m
 
+# YaCy is able to use RAM copies of database tables. This needs a lot of RAM
+# To switch copying of file tables int RAM on, use this property
+# this value is automatically set to true, if more than one gigabyte RAM is available
+ramcopy=false
+
+# some java versions may be limited to a specific array size
+# of 134217727 entries. To prevent that tables of that size are generated,
+# set this property to false
+# If you want to have better performance and switch ramcopy on, try also to
+# set this property to true
+# this value is automatically set to true, if more than two gigabyte is available
+exceed134217727=false
+
 # priority of the yacy-process
 # is valid in unix/shell and windows environments but
 # not for first startup of YaCy
@@ -625,8 +638,8 @@ javastart_priority=10
 
 # performance properties for the word index cache
 # wordCacheMaxLow/High is the number of word indexes that shall be held in the
-# ram cache during indexing. When YaCy is shut down, this cache must be
-# flushed to disc; this may last some minutes.
+# ram cache during indexing. If you want to increase indexing speed, increase this
+# value i.e. up to one million, but increase also the memory limit to a minimum of 2GB
 wordCacheMaxCount = 100000
 
 # Specifies if yacy can be used as transparent http proxy.

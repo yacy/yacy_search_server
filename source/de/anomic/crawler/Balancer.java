@@ -56,8 +56,13 @@ public class Balancer {
     private   long         minimumGlobalDelta;
     private   long         lastDomainStackFill;
     
-    public Balancer(final File cachePath, final String stackname, final boolean fullram,
-                    final long minimumLocalDelta, final long minimumGlobalDelta) {
+    public Balancer(
+    		final File cachePath,
+    		final String stackname,
+            final long minimumLocalDelta,
+            final long minimumGlobalDelta,
+            final boolean useTailCache,
+            final boolean exceed134217727) {
         this.cacheStacksPath = cachePath;
         this.domainStacks   = new ConcurrentHashMap<String, LinkedList<String>>();
         this.top = new ConcurrentLinkedQueue<String>();
@@ -69,7 +74,7 @@ public class Balancer {
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
         cacheStacksPath.mkdirs();
         File f = new File(cacheStacksPath, stackname + indexSuffix);
-        urlFileIndex = new Table(f, Request.rowdef, (fullram) ? Table.tailCacheUsageAuto : Table.tailCacheDenyUsage, EcoFSBufferSize, 0);
+        urlFileIndex = new Table(f, Request.rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727);
         lastDomainStackFill = 0;
         Log.logInfo("Balancer", "opened balancer file with " + urlFileIndex.size() + " entries from " + f.toString());
     }

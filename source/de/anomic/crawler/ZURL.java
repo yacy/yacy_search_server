@@ -62,7 +62,12 @@ public class ZURL {
     protected final ObjectIndex urlIndex;
     private final LinkedList<String> stack;
     
-    public ZURL(final File cachePath, final String tablename, final boolean startWithEmptyFile) {
+    public ZURL(
+    		final File cachePath,
+    		final String tablename,
+    		final boolean startWithEmptyFile,
+            final boolean useTailCache,
+            final boolean exceed134217727) {
         // creates a new ZURL in a file
         cachePath.mkdirs();
         final File f = new File(cachePath, tablename);
@@ -71,7 +76,7 @@ public class ZURL {
                 if (f.isDirectory()) SplitTable.delete(cachePath, tablename); else FileUtils.deletedelete(f);
             }
         }
-        this.urlIndex = new Table(f, rowdef, Table.tailCacheDenyUsage, EcoFSBufferSize, 0);
+        this.urlIndex = new Table(f, rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727);
         //urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, 0, true);
         this.stack = new LinkedList<String>();
     }

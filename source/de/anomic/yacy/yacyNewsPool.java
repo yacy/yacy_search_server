@@ -263,8 +263,11 @@ public class yacyNewsPool {
     private final yacyNewsQueue outgoingNews, publishedNews, incomingNews, processedNews;
     private final int maxDistribution;
     
-    public yacyNewsPool(final File yacyDBPath) {
-        newsDB = new yacyNewsDB(new File(yacyDBPath, "news.db"));
+    public yacyNewsPool(
+    		final File yacyDBPath,
+            final boolean useTailCache,
+            final boolean exceed134217727) {
+        newsDB = new yacyNewsDB(new File(yacyDBPath, "news.db"), useTailCache, exceed134217727);
         outgoingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsOut.stack"), newsDB);
         publishedNews = new yacyNewsQueue(new File(yacyDBPath, "newsPublished.stack"), newsDB);
         incomingNews  = new yacyNewsQueue(new File(yacyDBPath, "newsIn.stack"), newsDB);

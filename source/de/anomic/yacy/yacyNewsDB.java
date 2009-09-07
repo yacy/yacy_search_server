@@ -63,16 +63,19 @@ public class yacyNewsDB {
     private final File path;
     protected ObjectIndex news;
 
-    public yacyNewsDB(final File path) {
+    public yacyNewsDB(
+    		final File path,
+            final boolean useTailCache,
+            final boolean exceed134217727) {
         this.path = path;
-        this.news = new Table(path, yacyNewsRecord.rowdef, Table.tailCacheUsageAuto, 10, 0);
+        this.news = new Table(path, yacyNewsRecord.rowdef, 10, 0, useTailCache, exceed134217727);
         //this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef));
     }
 
     private void resetDB() {
         try {close();} catch (final Exception e) {}
         if (path.exists()) FileUtils.deletedelete(path);
-        this.news = new Table(path, yacyNewsRecord.rowdef, Table.tailCacheUsageAuto, 10, 0);
+        this.news = new Table(path, yacyNewsRecord.rowdef, 10, 0, false, false);
     }
     
     public void close() {
