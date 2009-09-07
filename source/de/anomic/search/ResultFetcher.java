@@ -293,7 +293,7 @@ public class ResultFetcher {
             //(event.query.onlineSnippetFetch) &&
             (this.rankedCache.size() > this.result.size())
            ) {
-            // start worker threads to fetch urls and snippets
+        	// start worker threads to fetch urls and snippets
             deployWorker(query.neededResults());
         }
 

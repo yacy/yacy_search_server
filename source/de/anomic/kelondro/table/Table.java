@@ -118,19 +118,19 @@ public class Table implements ObjectIndex {
             // initialize index and copy table
             final int  records = Math.max(fileSize, initialSpace);
             final long neededRAM4table = (records) * ((rowdef.objectsize) + 4L) * 3L;
-            table = ((neededRAM4table < maxarraylength) &&
+            table = (/*(neededRAM4table < maxarraylength) &&*/
                      ((useTailCache == tailCacheForceUsage) ||
-                      ((useTailCache == tailCacheUsageAuto) && (MemoryControl.free() > neededRAM4table + 200 * 1024 * 1024)))) ?
+                      ((useTailCache == tailCacheUsageAuto) && (MemoryControl.available() > neededRAM4table + 200 * 1024 * 1024)))) ?
                     new RowSet(taildef, records) : null;
-            Log.logInfo("TABLE", "initialization of " + tablefile + ": available RAM: " + (MemoryControl.available() / 1024 / 1024) + "MB, allocating space for " + records + " entries");
+            Log.logInfo("TABLE", "initialization of " + tablefile.getName() + ". table copy: " + ((table == null) ? "no" : "yes") + ", available RAM: " + (MemoryControl.available() / 1024 / 1024) + "MB, needed: " + (neededRAM4table/1024/1024 + 200) + "MB, allocating space for " + records + " entries");
             final long neededRAM4index = 2 * 1024 * 1024 + records * (rowdef.primaryKeyLength + 4) * 3 / 2;
             if (!MemoryControl.request(neededRAM4index, false)) {
                 // despite calculations seemed to show that there is enough memory for the table AND the index
                 // there is now not enough memory left for the index. So delete the table again to free the memory
                 // for the index
-                Log.logSevere("TABLE", tablefile + ": not enough RAM (" + (MemoryControl.available() / 1024 / 1024) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
+                Log.logSevere("TABLE", tablefile.getName() + ": not enough RAM (" + (MemoryControl.available() / 1024 / 1024) + "MB) left for index, deleting allocated table space to enable index space allocation (needed: " + (neededRAM4index / 1024 / 1024) + "MB)");
                 table = null; System.gc();
-                Log.logSevere("TABLE", tablefile + ": RAM after releasing the table: " + (MemoryControl.available() / 1024 / 1024) + "MB");
+                Log.logSevere("TABLE", tablefile.getName() + ": RAM after releasing the table: " + (MemoryControl.available() / 1024 / 1024) + "MB");
             }
             index = new HandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, records, 100000);
             HandleMap errors = new HandleMap(rowdef.primaryKeyLength, NaturalOrder.naturalOrder, 4, records, 10);

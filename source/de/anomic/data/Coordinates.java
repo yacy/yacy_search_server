@@ -60,7 +60,7 @@ public class Coordinates implements Comparable<Coordinates> {
         int lon1 = coord2int(this.lon) >> 15;
         int lat1 = coord2int(this.lat) >> 15;
         int h = (lon1 << 15) + lat1;
-        System.out.println("lon=" + this.lon + ", lat=" + this.lat + ", hash=" + h);
+        //System.out.println("lon=" + this.lon + ", lat=" + this.lat + ", hash=" + h);
         return h;
     }
     
