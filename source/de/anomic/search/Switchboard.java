@@ -607,8 +607,6 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         
         // init robinson cluster
         // before we do that, we wait some time until the seed list is loaded.
-        //while (((System.currentTimeMillis() - startedSeedListAquisition) < 8000) && (this.webIndex.seedDB.sizeConnected() == 0)) try {Thread.sleep(1000);} catch (final InterruptedException e) {}
-        //try {Thread.sleep(1000);} catch (final InterruptedException e) {}
         this.clusterhashes = this.peers.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
         
         // deploy blocking threads
@@ -1885,7 +1883,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         // handle access rights
         switch (adminAuthenticated(header)) {
         case 0: // wrong password given
-            try { Thread.sleep(3000); } catch (final InterruptedException e) { } // prevent brute-force
+            //try { Thread.sleep(3000); } catch (final InterruptedException e) { } // prevent brute-force
             return false;
         case 1: // no password given
             return false;
