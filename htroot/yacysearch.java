@@ -35,9 +35,9 @@ import java.util.TreeSet;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.crawler.retrieval.LoaderDispatcher;
-import de.anomic.data.Coordinates;
 import de.anomic.data.DidYouMean;
 import de.anomic.data.LibraryProvider;
+import de.anomic.data.Location;
 import de.anomic.document.Condenser;
 import de.anomic.document.Word;
 import de.anomic.document.Document;
@@ -520,14 +520,15 @@ public class yacysearch {
             }
             
             // find geographic info
-            Set<Coordinates> coordinates = LibraryProvider.geoDB.find(originalquerystring);
+            Set<Location> coordinates = LibraryProvider.geoDB.find(originalquerystring);
             if (coordinates == null || coordinates.size() == 0 || offset > 0) {
                 prop.put("geoinfo", "0");
             } else {
                 int i = 0;
-                for (Coordinates c: coordinates) {
+                for (Location c: coordinates) {
                     prop.put("geoinfo_loc_" + i + "_lon", Math.round(c.lon() * 10000.0) / 10000.0);
                     prop.put("geoinfo_loc_" + i + "_lat", Math.round(c.lat() * 10000.0) / 10000.0);
+                    prop.put("geoinfo_loc_" + i + "_name", c.getName());
                     i++;
                     if (i >= 5) break;
                 }

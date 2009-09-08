@@ -140,8 +140,8 @@ document.getElementById("Enter").value = "search again";
   <a href="/osm.png?lon=#[lon]#&lat=#[lat]#&zoom=14" class="thumblink"  style="float:left;" onclick="return hs.expand(this)">
       <img src="/osm.png?lon=#[lon]#&lat=#[lat]#&zoom=14" width="192" height="192">
   </a>
-  <div class="highslide-caption">lat=#[lat]#, lon=#[lon]#</div>
-  <div class="TableCellDark">lat=#[lat]#,<br />lon=#[lon]#</div>
+  <div class="TableCellDark"><a href="http://www.openstreetmap.org/?lat=#[lat]#&lon=#[lon]#&zoom=14">#[name]#</a><br /><a href="http://www.openstreetmap.org/?lat=#[lat]#&lon=#[lon]#&zoom=14">lat=#[lat]#, lon=#[lon]#</a></div> <!-- preview -->
+  <div class="highslide-caption"><a href="http://www.openstreetmap.org/?lat=#[lat]#&lon=#[lon]#&zoom=14">#[name]#</a><br /><a href="http://www.openstreetmap.org/?lat=#[lat]#&lon=#[lon]#&zoom=14">lat=#[lat]#, lon=#[lon]#</a></div> <!-- zoomed -->
   </div>
   #{/loc}#
   </p>

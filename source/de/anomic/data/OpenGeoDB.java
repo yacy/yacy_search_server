@@ -66,7 +66,7 @@ public class OpenGeoDB {
     }
     
     private HashMap<Integer, String>       locTypeHash2locType;
-    private HashMap<Integer, Coordinates>  id2coord;
+    private HashMap<Integer, Location>     id2loc;
     private HashMap<Integer, Integer>      id2locTypeHash;
     private TreeMap<String, List<Integer>> locationName2ids;
     private TreeMap<String, List<Integer>> kfz2ids;
@@ -76,7 +76,7 @@ public class OpenGeoDB {
     public OpenGeoDB(final File file) {
 
         this.locTypeHash2locType = new HashMap<Integer, String>();
-        this.id2coord            = new HashMap<Integer, Coordinates>();
+        this.id2loc              = new HashMap<Integer, Location>();
         this.id2locTypeHash      = new HashMap<Integer, Integer>();
         this.locationName2ids    = new TreeMap<String, List<Integer>>(insensitiveCollator);
         this.kfz2ids             = new TreeMap<String, List<Integer>>(insensitiveCollator);
@@ -104,7 +104,7 @@ public class OpenGeoDB {
                 if (line.startsWith("geodb_coordinates ")) {
                     line = line.substring(18 + 7);v = line.split(",");
                     v = line.split(",");
-                    id2coord.put(Integer.parseInt(v[0]), new Coordinates(Double.parseDouble(v[2]), Double.parseDouble(v[3])));
+                    id2loc.put(Integer.parseInt(v[0]), new Location(Double.parseDouble(v[2]), Double.parseDouble(v[3])));
                 }
                 if (line.startsWith("geodb_textdata ")) {
                     line = line.substring(15 + 7);
@@ -116,6 +116,8 @@ public class OpenGeoDB {
                         if (l == null) l = new ArrayList<Integer>(1);
                         l.add(id);
                         this.locationName2ids.put(h, l);
+                        Location loc = this.id2loc.get(id);
+                        if (loc != null) loc.setName(h);
                     } else if (v[1].equals("500400000")) { // Vorwahl
                         id = Integer.parseInt(v[0]);
                         h = removeQuotes(v[2]);
@@ -168,7 +170,7 @@ public class OpenGeoDB {
      * @param anyname
      * @return
      */
-    public HashSet<Coordinates> find(String anyname) {
+    public HashSet<Location> find(String anyname) {
         HashSet<Integer> r = new HashSet<Integer>();
         SortedMap<String, List<Integer>> cities = this.locationName2ids.tailMap(anyname);
         for (Map.Entry<String, List<Integer>> e: cities.entrySet()) {
@@ -178,9 +180,9 @@ public class OpenGeoDB {
         c = this.kfz2ids.get(anyname); if (c != null) r.addAll(c);
         c = this.predial2ids.get(anyname); if (c != null) r.addAll(c);
         Integer i = this.zip2id.get(anyname); if (i != null) r.add(i);
-        HashSet<Coordinates> a = new HashSet<Coordinates>();
+        HashSet<Location> a = new HashSet<Location>();
         for (Integer e: r) {
-            Coordinates w = this.id2coord.get(e);
+            Location w = this.id2loc.get(e);
             if (w != null) a.add(w);
         }
         return a;
