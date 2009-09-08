@@ -27,11 +27,12 @@ import de.anomic.yacy.logging.Log;
  */
 public class DidYouMean {
 
-    protected static final char[] alphabet = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
-									  'q','r','s','t','u','v','w','x','y','z','\u00e4','\u00f6','\u00fc','\u00df'}; 
-	private static final String poisonString = "\n";
-	public static final int availableCPU = Runtime.getRuntime().availableProcessors();
-	private static final wordLengthComparator wlComp = new wordLengthComparator();
+    protected static final char[] alphabet = {
+        'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p',
+		'q','r','s','t','u','v','w','x','y','z','\u00e4','\u00f6','\u00fc','\u00df'}; 
+	private   static final String poisonString = "\n";
+	public    static final int availableCPU = Runtime.getRuntime().availableProcessors();
+	protected static final wordLengthComparator wlComp = new wordLengthComparator();
 	
 	protected final IndexCell<WordReference> index;
     protected String word;
@@ -46,11 +47,8 @@ public class DidYouMean {
 	 * @param index a termIndex - most likely retrieved from a switchboard object.
 	 * @param sort true/false -  sorts the resulting TreeSet by index.count(); <b>Warning:</b> this causes heavy i/o.
 	 */
-	public DidYouMean(final IndexCell<WordReference> index, boolean sort) {
-		if(sort)
-			this.resultSet = Collections.synchronizedSortedSet(new TreeSet<String>(new indexSizeComparator()));
-		else
-			this.resultSet = Collections.synchronizedSortedSet(new TreeSet<String>(wlComp));
+	public DidYouMean(final IndexCell<WordReference> index) {
+		this.resultSet = Collections.synchronizedSortedSet(new TreeSet<String>(wlComp));
 		this.word = "";
 		this.wordLen = 0;
 		this.index = index;
@@ -60,20 +58,50 @@ public class DidYouMean {
 	}
 	
 	/**
-	 * @param index a termIndex - most likely retrieved from a switchboard object.
+	 * get a single suggestion
+	 * @param word
+	 * @param timeout
+	 * @return
 	 */
-	public DidYouMean(final IndexCell<WordReference> index) {
-		this(index, false);
+	public String getSuggestion(final String word, long timeout) {
+	    Set<String> s = getSuggestions(word, timeout);
+	    if (s == null || s.size() == 0) return null;
+	    return s.iterator().next();
 	}
 	
 	/**
-	 * This method triggers the producer and consumer threads of DidYouMean.
-	 * <p/><b>Note:</b> the default timeout is 500ms
-	 * @param word a String with a single word
-	 * @return a Set&lt;String&gt; with word variations contained in index.
+     * get a single suggestion with additional sort
+     * @param word
+     * @param timeout
+     * @return
+     */
+    public String getSuggestion(final String word, long timeout, int preSortSelection) {
+        Set<String> s = getSuggestions(word, timeout, preSortSelection);
+        if (s == null || s.size() == 0) return null;
+        return s.iterator().next();
+    }
+	
+	/**
+	 * get suggestions for a given word. The result is first ordered using a term size ordering,
+	 * and a subset of the result is sorted again with a IO-intensive order based on the index size
+	 * @param word
+	 * @param timeout
+	 * @param preSortSelection the number of words that participate in the IO-intensive sort
+	 * @return
 	 */
-	public Set<String> getSuggestion(final String word) {
-		return getSuggestion(word, 500);
+	public Set<String> getSuggestions(final String word, long timeout, int preSortSelection) {
+	    long startTime = System.currentTimeMillis();
+	    Set<String> preSorted = getSuggestions(word, timeout);
+	    long timelimit = 2 * System.currentTimeMillis() - startTime + timeout;
+        if (System.currentTimeMillis() > timelimit) return preSorted;
+        Set<String> countSorted = Collections.synchronizedSortedSet(new TreeSet<String>(new indexSizeComparator()));
+        for (String s: preSorted) {
+	        if (System.currentTimeMillis() > timelimit) break;
+	        if (preSortSelection <= 0) break;
+	        countSorted.add(s);
+	        preSortSelection--;
+	    }
+	    return countSorted;
 	}
 	
 	/**
@@ -82,7 +110,7 @@ public class DidYouMean {
 	 * @param timeout execution time in ms.
 	 * @return a Set&lt;String&gt; with word variations contained in term index.
 	 */
-	public Set<String> getSuggestion(final String word, long timeout) {
+	public Set<String> getSuggestions(final String word, long timeout) {
 		long startTime = System.currentTimeMillis();
 		this.timeLimit = startTime + timeout;
 		this.word = word.toLowerCase();
@@ -251,7 +279,7 @@ public class DidYouMean {
 		public int compare(final String o1, final String o2) {
     		final int i1 = index.count(Word.word2hash(o1));
     		final int i2 = index.count(Word.word2hash(o2));
-    		if (i1 == i2) return o1.compareTo(o2);
+    		if (i1 == i2) return wlComp.compare(o1, o2);
     		return (i1 < i2) ? 1 : -1; // '<' is correct, because the largest count shall be ordered to be the first position in the result
     	}    	
     }

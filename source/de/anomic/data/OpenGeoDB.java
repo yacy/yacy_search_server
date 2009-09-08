@@ -191,7 +191,7 @@ public class OpenGeoDB {
     /**
      * read the dictionary and construct a set of recommendations to a given string 
      * @param s input value that is used to match recommendations
-     * @return a set that contains all words that start or end with the input value
+     * @return a set that contains all words that start with the input value
      */
     public Set<String> recommend(String s) {
         Set<String> a = new HashSet<String>();

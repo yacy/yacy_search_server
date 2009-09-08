@@ -32,10 +32,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 import de.anomic.kelondro.index.Row;
+import de.anomic.kelondro.index.SimpleARC;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.MergeIterator;
 import de.anomic.kelondro.order.Order;
+import de.anomic.kelondro.util.ByteArray;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.server.serverProfiling;
 
@@ -62,7 +64,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     private       long                                   lastCleanup;
     private final long                                   targetFileSize, maxFileSize;
     private final int                                    writeBufferSize;
-    
+    private final SimpleARC<ByteArray, Integer>          countCache;
     
     public IndexCell(
             final File cellPath,
@@ -86,6 +88,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         this.targetFileSize = targetFileSize;
         this.maxFileSize = maxFileSize;
         this.writeBufferSize = writeBufferSize;
+        this.countCache = new SimpleARC<ByteArray, Integer>(1000);
         //cleanCache();
     }
 
@@ -123,20 +126,41 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         return this.array.has(termHash);
     }
 
+    /**
+     * count number of references for a given term
+     * this method may cause strong IO load if called too frequently, because it is
+     * necessary to read the corresponding reference containers from the files and
+     * count the resulting index object.
+     * To reduce the load for processes that frequently need access to the same
+     * term objects, a ARC cache is here to reduce IO load.
+     */
     public int count(byte[] termHash) {
-        ReferenceContainer<ReferenceType> c0 = this.ram.get(termHash, null);
-        ReferenceContainer<ReferenceType> c1;
-        try {
-            c1 = this.array.get(termHash);
-        } catch (IOException e) {
-            c1 = null;
+        
+        // check if value is in cache
+        ByteArray ba = new ByteArray(termHash);
+        Integer countCache = this.countCache.get(ba);
+        int countFile;
+        if (countCache == null) {
+            // read fresh values from file
+            ReferenceContainer<ReferenceType> c1;
+            try {
+                c1 = this.array.get(termHash);
+            } catch (IOException e) {
+                c1 = null;
+            }
+            countFile = (c1 == null) ? 0 : c1.size();
+            
+            // store to cache
+            this.countCache.put(ba, countFile);
+        } else {
+            // value was in ram
+            countFile = countCache.intValue();
         }
-        if (c1 == null) {
-            if (c0 == null) return 0;
-            return c0.size();
-        }
-        if (c0 == null) return c1.size();
-        return c1.size() + c0.size();
+        
+        // count from container in ram
+        ReferenceContainer<ReferenceType> countRam = this.ram.get(termHash, null);
+
+        return (countRam == null) ? countFile : countFile + countRam.size();
     }
     
     /**
@@ -161,7 +185,10 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      */
     public ReferenceContainer<ReferenceType> delete(byte[] termHash) throws IOException {
         ReferenceContainer<ReferenceType> c1 = this.array.get(termHash);
-        if (c1 != null) this.array.delete(termHash);
+        if (c1 != null) {
+            this.array.delete(termHash);
+            this.countCache.remove(new ByteArray(termHash));
+        }
         ReferenceContainer<ReferenceType> c0 = this.ram.delete(termHash);
         cleanCache();
         if (c1 == null) return c0;
@@ -179,12 +206,14 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     public int remove(byte[] termHash, Set<String> urlHashes) throws IOException {
         int removed = this.ram.remove(termHash, urlHashes);
         int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHashes));
+        this.countCache.remove(new ByteArray(termHash));
         return removed + (reduced / this.array.rowdef().objectsize);
     }
 
     public boolean remove(byte[] termHash, String urlHash) throws IOException {
         boolean removed = this.ram.remove(termHash, urlHash);
         int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHash));
+        this.countCache.remove(new ByteArray(termHash));
         return removed || (reduced > 0);
     }
 
@@ -245,6 +274,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     public synchronized void clear() throws IOException {
         this.ram.clear();
         this.array.clear();
+        this.countCache.clear();
     }
     
     /**
@@ -257,6 +287,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         // close all
         this.ram.close();
         this.array.close();
+        this.countCache.clear();
     }
 
     public int size() {
@@ -292,6 +323,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      */
     
     private void cleanCache() {
+    	this.countCache.clear();
     	
         // dump the cache if necessary
     	if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false))) synchronized (this) {
