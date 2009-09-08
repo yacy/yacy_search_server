@@ -95,10 +95,13 @@ public class DidYouMean {
 	    long timelimit = 2 * System.currentTimeMillis() - startTime + timeout;
         if (System.currentTimeMillis() > timelimit) return preSorted;
         Set<String> countSorted = Collections.synchronizedSortedSet(new TreeSet<String>(new indexSizeComparator()));
+        int wc = index.count(Word.word2hash(word)); // all counts must be greater than this
+        int c0;
         for (String s: preSorted) {
 	        if (System.currentTimeMillis() > timelimit) break;
 	        if (preSortSelection <= 0) break;
-	        countSorted.add(s);
+	        c0 = index.count(Word.word2hash(s));
+	        if (c0 > wc) countSorted.add(s);
 	        preSortSelection--;
 	    }
 	    return countSorted;
