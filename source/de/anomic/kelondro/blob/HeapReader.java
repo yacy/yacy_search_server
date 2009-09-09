@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutionException;
 
 import de.anomic.kelondro.index.HandleMap;
 import de.anomic.kelondro.io.random.CachedFileWriter;
+import de.anomic.kelondro.io.random.Writer;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.RotateIterator;
@@ -47,12 +48,15 @@ public class HeapReader {
 
     public final static long keepFreeMem = 20 * 1024 * 1024;
     
+    // input values
     protected int                keylength;  // the length of the primary key
-    protected HandleMap          index;      // key/seek relation for used records
-    protected Gap                free;       // set of {seek, size} pairs denoting space and position of free records
     protected File               heapFile;   // the file of the heap
     protected final ByteOrder    ordering;   // the ordering on keys
-    protected CachedFileWriter file;       // a random access to the file
+    
+    // computed values
+    protected Writer             file;       // a random access to the file
+    protected HandleMap          index;      // key/seek relation for used records
+    protected Gap                free;       // set of {seek, size} pairs denoting space and position of free records
     
     public HeapReader(
             final File heapFile,
@@ -391,7 +395,12 @@ public class HeapReader {
      * close the BLOB table
      */
     public synchronized void close(boolean writeIDX) {
-        if (file != null) file.close();
+        if (file != null)
+			try {
+				file.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
         file = null;
         if (writeIDX && index != null && free != null && (index.size() > 3 || free.size() > 3)) {
             // now we can create a dump of the index and the gap information

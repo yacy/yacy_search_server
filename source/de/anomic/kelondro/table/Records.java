@@ -43,7 +43,7 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.EntryIndex;
 import de.anomic.kelondro.io.chunks.IOChunksInterface;
 import de.anomic.kelondro.io.chunks.RandomAccessIOChunks;
-import de.anomic.kelondro.io.random.FileWriter;
+import de.anomic.kelondro.io.random.CachedFileWriter;
 import de.anomic.kelondro.io.random.Writer;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.NaturalOrder;
@@ -351,7 +351,7 @@ public class Records {
     public static int staticsize(final File file) {
         if (!(file.exists())) return 0;
         try {
-            final Writer ra = new FileWriter(new File(file.getCanonicalPath()));
+            final Writer ra = new CachedFileWriter(new File(file.getCanonicalPath()));
             final IOChunksInterface entryFile = new RandomAccessIOChunks(ra, ra.name());
 
             final int used = entryFile.readInt(POS_USEDC); // works only if consistency with file size is given
@@ -385,7 +385,7 @@ public class Records {
         if (file.exists()) {
             // opens an existing tree
             this.filename = file.getCanonicalPath();
-            Writer raf = new FileWriter(new File(this.filename));
+            Writer raf = new CachedFileWriter(new File(this.filename));
             //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
             //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
@@ -393,7 +393,7 @@ public class Records {
             initExistingFile(raf);
         } else {
             this.filename = file.getCanonicalPath();
-            final Writer raf = new FileWriter(new File(this.filename));
+            final Writer raf = new CachedFileWriter(new File(this.filename));
             // kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             // kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
             initNewFile(raf, FHandles, txtProps);
@@ -417,7 +417,7 @@ public class Records {
         assert f != null;
         this.entryFile.close();
         FileUtils.deletedelete(f);
-        ra = new FileWriter(f);
+        ra = new CachedFileWriter(f);
         initNewFile(ra, this.HANDLES.length, this.TXTPROPS.length);
     }
     
