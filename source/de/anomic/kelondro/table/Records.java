@@ -41,10 +41,10 @@ import java.util.logging.Logger;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.EntryIndex;
-import de.anomic.kelondro.io.FileRandomAccess;
-import de.anomic.kelondro.io.IOChunksInterface;
-import de.anomic.kelondro.io.RandomAccessInterface;
-import de.anomic.kelondro.io.RandomAccessIOChunks;
+import de.anomic.kelondro.io.chunks.IOChunksInterface;
+import de.anomic.kelondro.io.chunks.RandomAccessIOChunks;
+import de.anomic.kelondro.io.random.FileWriter;
+import de.anomic.kelondro.io.random.Writer;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.FileUtils;
@@ -351,7 +351,7 @@ public class Records {
     public static int staticsize(final File file) {
         if (!(file.exists())) return 0;
         try {
-            final RandomAccessInterface ra = new FileRandomAccess(new File(file.getCanonicalPath()));
+            final Writer ra = new FileWriter(new File(file.getCanonicalPath()));
             final IOChunksInterface entryFile = new RandomAccessIOChunks(ra, ra.name());
 
             final int used = entryFile.readInt(POS_USEDC); // works only if consistency with file size is given
@@ -385,7 +385,7 @@ public class Records {
         if (file.exists()) {
             // opens an existing tree
             this.filename = file.getCanonicalPath();
-            RandomAccessInterface raf = new FileRandomAccess(new File(this.filename));
+            Writer raf = new FileWriter(new File(this.filename));
             //kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             //kelondroRA raf = new kelondroCachedRA(new kelondroFileRA(this.filename), 5000000, 1000);
             //kelondroRA raf = new kelondroNIOFileRA(this.filename, (file.length() < 4000000), 10000);
@@ -393,7 +393,7 @@ public class Records {
             initExistingFile(raf);
         } else {
             this.filename = file.getCanonicalPath();
-            final RandomAccessInterface raf = new FileRandomAccess(new File(this.filename));
+            final Writer raf = new FileWriter(new File(this.filename));
             // kelondroRA raf = new kelondroBufferedRA(new kelondroFileRA(this.filename), 1024, 100);
             // kelondroRA raf = new kelondroNIOFileRA(this.filename, false, 10000);
             initNewFile(raf, FHandles, txtProps);
@@ -412,16 +412,16 @@ public class Records {
     }
 
     public void clear() throws IOException {
-        RandomAccessInterface ra = this.entryFile.getRA();
+        Writer ra = this.entryFile.getRA();
         final File f = ra.file();
         assert f != null;
         this.entryFile.close();
         FileUtils.deletedelete(f);
-        ra = new FileRandomAccess(f);
+        ra = new FileWriter(f);
         initNewFile(ra, this.HANDLES.length, this.TXTPROPS.length);
     }
     
-    private void initNewFile(final RandomAccessInterface ra, final int FHandles, final int txtProps) throws IOException {
+    private void initNewFile(final Writer ra, final int FHandles, final int txtProps) throws IOException {
 
         // create new Chunked IO
         this.entryFile = new RandomAccessIOChunks(ra, ra.name());
@@ -518,7 +518,7 @@ public class Records {
             this.theLogger.fine("KELONDRO DEBUG " + this.filename + ": " + message);
     }
 
-    private void initExistingFile(final RandomAccessInterface ra) throws IOException {
+    private void initExistingFile(final Writer ra) throws IOException {
         // read from Chunked IO
         //useBuffer = false;
         /*if (useBuffer) {

@@ -1,5 +1,5 @@
-// kelondroCachedFileRA.java 
-// -----------------------
+// CachedRandomAccessFileWriter.java 
+// ---------------------------------
 // part of The Kelondro Database
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://yacy.net
@@ -20,7 +20,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.io;
+package de.anomic.kelondro.io.random;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -28,14 +28,15 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 
-public final class CachedRandomAccess extends AbstractRandomAccess implements RandomAccessInterface {
+
+public final class CachedFileWriter extends AbstractWriter implements Writer {
 
     private RandomAccessFile RAFile;
     private byte[] cache;
     private long cachestart;
     private int cachelen;
 
-    public CachedRandomAccess(final File file) throws IOException, FileNotFoundException {
+    public CachedFileWriter(final File file) throws IOException, FileNotFoundException {
         this.name = file.getName();
         this.file = file;
         this.RAFile = new RandomAccessFile(this.file, "rw");

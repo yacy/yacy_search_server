@@ -28,7 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.SortedMap;
 
-import de.anomic.kelondro.io.CachedRandomAccess;
+import de.anomic.kelondro.io.random.CachedFileWriter;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
@@ -67,7 +67,7 @@ public class HeapModifier extends HeapReader implements BLOB {
         this.file.close();
         this.file = null;
         FileUtils.deletedelete(this.heapFile);
-        this.file = new CachedRandomAccess(heapFile);
+        this.file = new CachedFileWriter(heapFile);
     }
 
     /**

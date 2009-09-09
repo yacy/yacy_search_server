@@ -39,7 +39,7 @@ import de.anomic.yacy.logging.Log;
 public final class HeapWriter  {
 
     private int                keylength;     // the length of the primary key
-    private HandleMap    index;         // key/seek relation for used records
+    private HandleMap          index;         // key/seek relation for used records
     private final File         heapFileTMP;   // the temporary file of the heap during writing
     private final File         heapFileREADY; // the final file of the heap when the file is closed
     private DataOutputStream   os;            // the output stream where the BLOB is written

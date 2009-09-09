@@ -1,10 +1,8 @@
-// kelondroFileRA.java 
+// RandomAccessFileWriter.java 
 // -----------------------
-// part of The Kelondro Database
-// (C) by Michael Peter Christen; mc@yacy.net
+// (C) 2004-2008 by Michael Peter Christen; mc@yacy.net
 // first published on http://yacy.net
-// Frankfurt, Germany, 2004-2008
-// last major change: 09.12.2008
+// Frankfurt, Germany, 09.12.2008
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,7 +18,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.io;
+package de.anomic.kelondro.io.random;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -29,11 +27,12 @@ import java.io.RandomAccessFile;
 import java.util.Map;
 
 
-public final class FileRandomAccess extends AbstractRandomAccess implements RandomAccessInterface {
+
+public final class FileWriter extends AbstractWriter implements Writer {
 
     private RandomAccessFile RAFile;
 
-    public FileRandomAccess(final File file) throws IOException, FileNotFoundException {
+    public FileWriter(final File file) throws IOException, FileNotFoundException {
         this.name = file.getName();
         this.file = file;
         RAFile = new RandomAccessFile(file, "rw");
@@ -79,9 +78,9 @@ public final class FileRandomAccess extends AbstractRandomAccess implements Rand
     public static void writeMap(final File f, final Map<String, String> map, final String comment) throws IOException {
         final File fp = f.getParentFile();
         if (fp != null) fp.mkdirs();
-        RandomAccessInterface kra = null;
+        Writer kra = null;
         try {
-            kra = new CachedRandomAccess(f);
+            kra = new CachedFileWriter(f);
             kra.writeMap(map, comment);
             kra.close();
         } finally {
@@ -90,9 +89,9 @@ public final class FileRandomAccess extends AbstractRandomAccess implements Rand
     }
 
     public static Map<String, String> readMap(final File f) throws IOException {
-        RandomAccessInterface kra = null;
+        Writer kra = null;
         try {
-            kra = new CachedRandomAccess(f);
+            kra = new CachedFileWriter(f);
             final Map<String, String> map = kra.readMap();
             kra.close();
             return map;

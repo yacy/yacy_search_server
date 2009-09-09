@@ -45,8 +45,8 @@ import de.anomic.kelondro.index.RowCollection;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.index.Row.Entry;
-import de.anomic.kelondro.io.BufferedEcoFS;
-import de.anomic.kelondro.io.EcoFS;
+import de.anomic.kelondro.io.records.BufferedRecords;
+import de.anomic.kelondro.io.records.Records;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.FileUtils;
@@ -74,7 +74,7 @@ public class Table implements ObjectIndex {
     private   int fail;
     private   final int buffersize;
     protected HandleMap index;
-    protected BufferedEcoFS file;
+    protected BufferedRecords file;
     protected Row rowdef;
     protected File tablefile;
     protected RowSet table;
@@ -180,7 +180,7 @@ public class Table implements ObjectIndex {
             }
             
             // open the file
-            this.file = new BufferedEcoFS(new EcoFS(tablefile, rowdef.objectsize), this.buffersize);
+            this.file = new BufferedRecords(new Records(tablefile, rowdef.objectsize), this.buffersize);
  
             // clean up the file by cleaning badly formed entries
             int errorc = errors.size();
@@ -245,7 +245,7 @@ public class Table implements ObjectIndex {
     
     public static long tableSize(final File tablefile, final int recordsize) {
         // returns number of records in table
-        return EcoFS.tableSize(tablefile, recordsize);
+        return Records.tableSize(tablefile, recordsize);
     }
 
     public static final Iterator<String> filenames() {
@@ -611,7 +611,7 @@ public class Table implements ObjectIndex {
         
         // open an existing table file
         try {
-            this.file = new BufferedEcoFS(new EcoFS(f, rowdef.objectsize), this.buffersize);
+            this.file = new BufferedRecords(new Records(f, rowdef.objectsize), this.buffersize);
         } catch (final FileNotFoundException e) {
             // should never happen
             e.printStackTrace();

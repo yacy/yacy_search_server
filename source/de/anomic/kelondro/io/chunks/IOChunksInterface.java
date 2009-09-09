@@ -20,9 +20,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.io;
+package de.anomic.kelondro.io.chunks;
 
 import java.io.IOException;
+
+import de.anomic.kelondro.io.random.Writer;
 
 
 public interface IOChunksInterface {
@@ -31,7 +33,7 @@ public interface IOChunksInterface {
     public String name();
     
     // reference handling
-    public RandomAccessInterface getRA();
+    public Writer getRA();
     
     // pseudo-native methods:
     public long length() throws IOException;

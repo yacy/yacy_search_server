@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.kelondro.io.AbstractRandomAccess;
+import de.anomic.kelondro.io.random.AbstractWriter;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
@@ -181,7 +181,7 @@ public final class Heap extends HeapModifier implements BLOB {
             assert key.length == this.keylength : "key.length = " + key.length + ", this.keylength = " + this.keylength;
             blob = entry.getValue();
             index.put(key, posFile);
-            b = AbstractRandomAccess.int2array(key.length + blob.length);
+            b = AbstractWriter.int2array(key.length + blob.length);
             assert b.length == 4;
             assert posBuffer + 4 < ba.length : "posBuffer = " + posBuffer + ", ba.length = " + ba.length;
             System.arraycopy(b, 0, ba, posBuffer, 4);

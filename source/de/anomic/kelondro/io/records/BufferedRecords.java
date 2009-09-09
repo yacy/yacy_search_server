@@ -1,4 +1,4 @@
-// kelondroBufferedEcoFS.java
+// BufferedRecords.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 14.01.2008 on http://yacy.net
 //
@@ -22,7 +22,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.io;
+package de.anomic.kelondro.io.records;
 
 import java.io.File;
 import java.io.IOException;
@@ -39,13 +39,13 @@ import de.anomic.kelondro.util.FileUtils;
  * That means, each time, an entry is written to the end of the file, it is NOT buffered here,
  * but possibly buffered in the enclosed kelondroEcoFS
  */
-public class BufferedEcoFS {
+public class BufferedRecords {
 
-    private EcoFS efs;
+    private Records efs;
     private final int maxEntries;
     private final TreeMap<Long, byte[]> buffer;
     
-    public BufferedEcoFS(final EcoFS efs, final int maxEntries) {
+    public BufferedRecords(final Records efs, final int maxEntries) {
         this.efs = efs;
         this.maxEntries = maxEntries;
         this.buffer = new TreeMap<Long, byte[]>();
@@ -144,7 +144,7 @@ public class BufferedEcoFS {
         final File f = new File(args[0]);
         if (f.exists()) FileUtils.deletedelete(f);
         try {
-            final EcoFS t = new EcoFS(f, 8);
+            final Records t = new Records(f, 8);
             final byte[] b = new byte[8];
             t.add("01234567".getBytes(), 0);
             t.add("ABCDEFGH".getBytes(), 0);

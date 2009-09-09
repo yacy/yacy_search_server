@@ -35,7 +35,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
 import de.anomic.kelondro.index.HandleMap;
-import de.anomic.kelondro.io.CachedRandomAccess;
+import de.anomic.kelondro.io.random.CachedFileWriter;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.RotateIterator;
@@ -52,7 +52,7 @@ public class HeapReader {
     protected Gap                free;       // set of {seek, size} pairs denoting space and position of free records
     protected File               heapFile;   // the file of the heap
     protected final ByteOrder    ordering;   // the ordering on keys
-    protected CachedRandomAccess file;       // a random access to the file
+    protected CachedFileWriter file;       // a random access to the file
     
     public HeapReader(
             final File heapFile,
@@ -63,7 +63,7 @@ public class HeapReader {
         this.keylength = keylength;
         this.index = null; // will be created as result of initialization process
         this.free = null; // will be initialized later depending on existing idx/gap file
-        this.file = new CachedRandomAccess(this.heapFile);
+        this.file = new CachedFileWriter(this.heapFile);
         
         // read or initialize the index
         if (initIndexReadDump()) {
@@ -107,7 +107,7 @@ public class HeapReader {
     
     private boolean initIndexReadDump() {
         // look for an index dump and read it if it exist
-        // if this is successfull, return true; otherwise false
+        // if this is successful, return true; otherwise false
         String fingerprint = HeapWriter.fingerprintFileHash(this.heapFile);
         if (fingerprint == null) {
             Log.logSevere("HeapReader", "cannot generate a fingerprint for " + this.heapFile + ": null");

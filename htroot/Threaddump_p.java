@@ -73,7 +73,7 @@ public class Threaddump_p {
     	bufferappend(buffer, plain, "");
     	bufferappend(buffer, plain, "");
     	
-    	int multipleCount = 1000;
+    	int multipleCount = 100;
         if (post != null && post.containsKey("multipleThreaddump")) {
         	multipleCount = post.getInt("count", multipleCount);
             final ArrayList<Map<Thread,StackTraceElement[]>> traces = new ArrayList<Map<Thread,StackTraceElement[]>>();

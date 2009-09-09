@@ -1,4 +1,4 @@
-// kelondroEcoFS.java
+// Records.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 14.01.2008 on http://yacy.net
 //
@@ -22,7 +22,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.io;
+package de.anomic.kelondro.io.records;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -49,7 +49,7 @@ import de.anomic.kelondro.util.MemoryControl;
  * All access to the file is made with byte[] that are generated outside of this class
  * This class only references byte[] that are handed over to methods of this class.
  */
-public class EcoFS {
+public class Records {
     
     private RandomAccessFile raf;
     private final File tablefile;
@@ -72,7 +72,7 @@ public class EcoFS {
     private static final int maxWriteBuffer = 16 * 1024;
     
     
-    public EcoFS(final File tablefile, final int recordsize) throws IOException {
+    public Records(final File tablefile, final int recordsize) throws IOException {
         this.tablefile = tablefile;
         this.recordsize = recordsize;
 
@@ -580,7 +580,7 @@ public class EcoFS {
         final File f = new File(args[0]);
         if (f.exists()) FileUtils.deletedelete(f);
         try {
-            final EcoFS t = new EcoFS(f, 8);
+            final Records t = new Records(f, 8);
             final byte[] b = new byte[8];
             t.add("01234567".getBytes(), 0);
             t.add("ABCDEFGH".getBytes(), 0);

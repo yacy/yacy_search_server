@@ -20,21 +20,23 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.io;
+package de.anomic.kelondro.io.chunks;
 
 import java.io.IOException;
+
+import de.anomic.kelondro.io.random.Writer;
 
 
 public final class RandomAccessIOChunks extends AbstractIOChunks implements IOChunksInterface {
 
-    protected RandomAccessInterface ra;
+    protected Writer ra;
     
-    public RandomAccessIOChunks(final RandomAccessInterface ra, final String name) {
+    public RandomAccessIOChunks(final Writer ra, final String name) {
         this.name = name;
         this.ra = ra;
     }
     
-    public RandomAccessInterface getRA() {
+    public Writer getRA() {
     	return this.ra;
     }
 

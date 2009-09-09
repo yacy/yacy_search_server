@@ -1,10 +1,8 @@
-// kelondroRA.java 
+// RandomAccessWriter.java 
 // -----------------------
-// part of The Kelondro Database
-// (C) by Michael Peter Christen; mc@yacy.net
+// (C) 2004 by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
-// Frankfurt, Germany, 2004
-// last major change: 09.02.2004
+// Frankfurt, Germany, 09.02.2004
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,53 +18,24 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-/*
-  The random access interface for the kelondro database.
-  kelondro stores data always through the kelondroRecords class,
-  which in turn also needs a random access file or similar
-  to store the database structure. To provide more than
-  ony file - random-access, we need an abstract interface.
-*/
+package de.anomic.kelondro.io.random;
 
-package de.anomic.kelondro.io;
-
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-public interface RandomAccessInterface {
 
-    // logging support
-    public String name();
-    public File   file();
-    
+public interface Writer extends Reader {
+
     // pseudo-native methods:
-    public long length() throws IOException;
     public void setLength(long length) throws IOException;
-    public long available() throws IOException;
-    
-    public void readFully(byte[] b, int off, int len) throws IOException;
-    
     public void write(byte[] b, int off, int len) throws IOException;
 
-    public void seek(long pos) throws IOException;
-    public void close() throws IOException;
-
     // derived methods:
-    public byte[] readFully() throws IOException;
-    
-    public short readShort() throws IOException;
     public void writeShort(int v) throws IOException;
-
-    public int readInt() throws IOException;
     public void writeInt(int v) throws IOException;
-
-    public long readLong() throws IOException;
     public void writeLong(long v) throws IOException;
-
     public void write(byte[] b) throws IOException;
-
     public void writeLine(String line) throws IOException;
     
     public void writeMap(Map<String, String> props, String comment) throws IOException;
