@@ -106,27 +106,31 @@ public class yacysearchtrailer {
 
         // attach always the topics
         ArrayList<NavigatorEntry> topicNavigator = theSearch.getTopicNavigator(10);
-        if (topicNavigator == null) topicNavigator = new ArrayList<NavigatorEntry>(); 
-        int i = 0;
-        NavigatorEntry e;
-        Iterator<NavigatorEntry> iter = topicNavigator.iterator();
-        while (iter.hasNext()) {
-            e = iter.next();
-            if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;
-            if (e != null && e.name != null) {
-                prop.putHTML("nav-topics_element_" + i + "_name", e.name);
-                prop.put("nav-topics_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators) + "\">" + e.name + " (" + e.count + ")</a>");
-                prop.putJSON("nav-topics_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators));
-                prop.put("nav-topics_element_" + i + "_count", e.count);
-                prop.put("nav-topics_element_" + i + "_modifier", e.name);
-                prop.put("nav-topics_element_" + i + "_nl", (iter.hasNext() && i < MAX_TOPWORDS) ? 1 : 0);
+        if (topicNavigator == null || topicNavigator.size() == 0) {
+            topicNavigator = new ArrayList<NavigatorEntry>(); 
+            prop.put("nav-topics", "0");
+        } else {
+            prop.put("nav-topics", "1");
+            int i = 0;
+            NavigatorEntry e;
+            Iterator<NavigatorEntry> iter = topicNavigator.iterator();
+            while (iter.hasNext()) {
+                e = iter.next();
+                if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;
+                if (e != null && e.name != null) {
+                    prop.putHTML("nav-topics_element_" + i + "_name", e.name);
+                    prop.put("nav-topics_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators) + "\">" + e.name + " (" + e.count + ")</a>");
+                    prop.putJSON("nav-topics_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators));
+                    prop.put("nav-topics_element_" + i + "_count", e.count);
+                    prop.put("nav-topics_element_" + i + "_modifier", e.name);
+                    prop.put("nav-topics_element_" + i + "_nl", (iter.hasNext() && i < MAX_TOPWORDS) ? 1 : 0);
+                }
+                if (i++ > MAX_TOPWORDS) {
+                    break;
+                }
             }
-            if (i++ > MAX_TOPWORDS) {
-                break;
-            }
+            prop.put("nav-topics_element", i);
         }
-        prop.put("nav-topics_element", i);
-        prop.put("nav-topics", "1");
         
         serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + "bottomline", 0, 0), false);
         
