@@ -67,8 +67,12 @@ public class yacyURL implements Serializable {
         return (url == null) ? null : url.hash().substring(6);
     }
     
+    public yacyURL(final File file) throws MalformedURLException {
+        this("file", "", -1, file.getAbsolutePath());
+    }
+
     public yacyURL(final String url) throws MalformedURLException {
-	this(url, null);
+        this(url, null);
     }
     
     public yacyURL(final String url, final String hash) throws MalformedURLException {
@@ -89,7 +93,7 @@ public class yacyURL implements Serializable {
         }
         this.protocol = url.substring(0, p).toLowerCase().trim();
         if (url.length() < p + 4) throw new MalformedURLException("URL not parseable: '" + url + "'");
-        if (url.substring(p + 1, p + 3).equals("//")) {
+        if (!this.protocol.equals("file") && url.substring(p + 1, p + 3).equals("//")) {
             // identify host, userInfo and file for http and ftp protocol
             final int q = url.indexOf('/', p + 3);
             int r;
@@ -112,7 +116,7 @@ public class yacyURL implements Serializable {
                 }
                 path = url.substring(q);
             }
-            if (host.length() < 4) throw new MalformedURLException("host too short: '" + host + "'");
+            if (host.length() < 4 && !protocol.equals("file")) throw new MalformedURLException("host too short: '" + host + "'");
             if (host.indexOf('&') >= 0) throw new MalformedURLException("invalid '&' in host");
             path = resolveBackpath(path);
             identPort(url, (protocol.equals("http") ? 80 : ((protocol.equals("https")) ? 443 : ((protocol.equals("ftp")) ? 21 : -1))));
@@ -133,6 +137,46 @@ public class yacyURL implements Serializable {
                 port = -1;
                 quest = null;
                 ref = null;
+            } if (protocol.equals("file")) {
+                // parse file url
+                String h = url.substring(p + 1);
+                if (h.startsWith("//")) {
+                    // host may be given, but may be also empty
+                    final int q = h.indexOf('/', 2);
+                    if (q <= 0) {
+                        // no host given
+                        host = null;
+                        path = h.substring(2);
+                    } else {
+                        host = h.substring(2, q);
+                        if (host.length() == 0 || host.equals("localhost")) host = null;
+                        h = h.substring(q);
+                        char c = h.charAt(2);
+                        if (c == ':' || c == '|')
+                            path = h.substring(1);
+                        else
+                            path = h;
+                    }
+                } else {
+                    host = null;
+                    if (h.startsWith("/")) {
+                        char c = h.charAt(2);
+                        if (c == ':' || c == '|')
+                            path = h.substring(1);
+                        else
+                            path = h;
+                    } else {
+                        char c = h.charAt(1);
+                        if (c == ':' || c == '|')
+                            path = h;
+                        else
+                            path = "/" + h;
+                    }
+                }
+                userInfo = null;
+                port = -1;
+                quest = null;
+                ref = null;
             } else {
                 throw new MalformedURLException("unknown protocol: " + url);
             }
@@ -144,22 +188,18 @@ public class yacyURL implements Serializable {
             StringBuilder buffer = new StringBuilder();
             // encode each domainpart seperately
             for(int i=0; i<domainParts.length; i++) {
-        	final String part = domainParts[i];
-        	if(!Punycode.isBasic(part)) {
-        	    buffer.append("xn--" + Punycode.encode(part));
-        	} else {
-        	    buffer.append(part);
-        	}
-        	if(i != domainParts.length-1) {
-        	    buffer.append('.');
-        	}
+            final String part = domainParts[i];
+            if(!Punycode.isBasic(part)) {
+                buffer.append("xn--" + Punycode.encode(part));
+            } else {
+                buffer.append(part);
+            }
+            if(i != domainParts.length-1) {
+                buffer.append('.');
+            }
             }
             host = buffer.toString();
         } catch (final PunycodeException e) {}
-    }
-
-    public yacyURL(final File file) throws MalformedURLException {
-        this("file", "", -1, file.getAbsolutePath());
     }
 
     public static yacyURL newURL(final String baseURL, final String relPath) throws MalformedURLException {
@@ -212,8 +252,8 @@ public class yacyURL implements Serializable {
                 (relPath.startsWith("smb://"))) {
             this.path = baseURL.path;
         } else if (relPath.contains(":") && patternMail.matcher(relPath.toLowerCase()).find()) { // discards also any unknown protocol from previous if
-    		throw new MalformedURLException("relative path malformed: " + relPath);
-    	} else if (relPath.startsWith("/")) {
+            throw new MalformedURLException("relative path malformed: " + relPath);
+        } else if (relPath.startsWith("/")) {
             this.path = relPath;
         } else if (baseURL.path.endsWith("/")) {
             if (relPath.startsWith("#") || relPath.startsWith("?")) {
@@ -315,7 +355,7 @@ public class yacyURL implements Serializable {
                 qtmp.append('=');
                 qtmp.append(escape(questp[i].substring(questp[i].indexOf('=') + 1)));
             } else {
-            	qtmp.append('&');
+                qtmp.append('&');
                 qtmp.append(escape(questp[i]));
             }
         }
@@ -541,6 +581,20 @@ public class yacyURL implements Serializable {
         return path;
     }
 
+    /**
+     * return the file object to a local file
+     * this patches also 'strange' windows file paths
+     * @return the file as absolute path
+     */
+    public File getLocalFile() {
+        char c = path.charAt(1);
+        if (c == ':') return new File(path.replace('/', '\\'));
+        if (c == '|') return new File(path.charAt(0) + ":" + path.substring(2).replace('/', '\\'));
+        c = path.charAt(2);
+        if (c == ':' || c == '|') return new File(path.charAt(1) + ":" + path.substring(3).replace('/', '\\'));
+        return new File(path);
+    }
+
     public String getAuthority() {
         return ((port >= 0) && (host != null)) ? host + ":" + port : ((host != null) ? host : "");
     }
@@ -562,7 +616,7 @@ public class yacyURL implements Serializable {
     }
 
     public void removeRef() {
-    	ref = null;
+        ref = null;
     }
     
     public String getUserInfo() {
@@ -596,13 +650,16 @@ public class yacyURL implements Serializable {
             if (this.port < 0 || this.port == 21)  { defaultPort = true; }
         } else if (this.protocol.equals("https")) {
             if (this.port < 0 || this.port == 443) { defaultPort = true; }
+        } else if (this.protocol.equals("file")) {
+            defaultPort = true;
         }
         final String path = this.getFile(includeReference);
         
         if (defaultPort) {
-            return this.protocol + "://" +
-                   ((this.userInfo != null) ? (this.userInfo + "@") : ("")) +
-                   this.getHost().toLowerCase() + path;
+            return
+              this.protocol + ":" +
+              ((this.getHost() == null) ? "" : "//" + ((this.userInfo != null) ? (this.userInfo + "@") : ("")) + this.getHost().toLowerCase()) +
+              path;
         }
         return this.protocol + "://" +
                ((this.userInfo != null) ? (this.userInfo + "@") : ("")) +
@@ -610,78 +667,78 @@ public class yacyURL implements Serializable {
     }
     
     /* (non-Javadoc)
-	 * @see java.lang.Object#hashCode()
-	 */
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((host == null) ? 0 : host.hashCode());
-		result = prime * result + ((path == null) ? 0 : path.hashCode());
-		result = prime * result + port;
-		result = prime * result
-				+ ((protocol == null) ? 0 : protocol.hashCode());
-		result = prime * result + ((quest == null) ? 0 : quest.hashCode());
-		result = prime * result + ((ref == null) ? 0 : ref.hashCode());
-		result = prime * result
-				+ ((userInfo == null) ? 0 : userInfo.hashCode());
-		return result;
-	}
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((host == null) ? 0 : host.hashCode());
+        result = prime * result + ((path == null) ? 0 : path.hashCode());
+        result = prime * result + port;
+        result = prime * result
+                + ((protocol == null) ? 0 : protocol.hashCode());
+        result = prime * result + ((quest == null) ? 0 : quest.hashCode());
+        result = prime * result + ((ref == null) ? 0 : ref.hashCode());
+        result = prime * result
+                + ((userInfo == null) ? 0 : userInfo.hashCode());
+        return result;
+    }
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#equals(java.lang.Object)
-	 */
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (!(obj instanceof yacyURL))
-			return false;
-		yacyURL other = (yacyURL) obj;
-		if (host == null) {
-			if (other.host != null)
-				return false;
-		} else if (!host.equals(other.host))
-			return false;
-		if (path == null) {
-			if (other.path != null)
-				return false;
-		} else if (!path.equals(other.path))
-			return false;
-		if (port != other.port)
-			return false;
-		if (protocol == null) {
-			if (other.protocol != null)
-				return false;
-		} else if (!protocol.equals(other.protocol))
-			return false;
-		if (quest == null) {
-			if (other.quest != null)
-				return false;
-		} else if (!quest.equals(other.quest))
-			return false;
-		if (ref == null) {
-			if (other.ref != null)
-				return false;
-		} else if (!ref.equals(other.ref))
-			return false;
-		if (userInfo == null) {
-			if (other.userInfo != null)
-				return false;
-		} else if (!userInfo.equals(other.userInfo))
-			return false;
-		return true;
-	}
+    /* (non-Javadoc)
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (!(obj instanceof yacyURL))
+            return false;
+        yacyURL other = (yacyURL) obj;
+        if (host == null) {
+            if (other.host != null)
+                return false;
+        } else if (!host.equals(other.host))
+            return false;
+        if (path == null) {
+            if (other.path != null)
+                return false;
+        } else if (!path.equals(other.path))
+            return false;
+        if (port != other.port)
+            return false;
+        if (protocol == null) {
+            if (other.protocol != null)
+                return false;
+        } else if (!protocol.equals(other.protocol))
+            return false;
+        if (quest == null) {
+            if (other.quest != null)
+                return false;
+        } else if (!quest.equals(other.quest))
+            return false;
+        if (ref == null) {
+            if (other.ref != null)
+                return false;
+        } else if (!ref.equals(other.ref))
+            return false;
+        if (userInfo == null) {
+            if (other.userInfo != null)
+                return false;
+        } else if (!userInfo.equals(other.userInfo))
+            return false;
+        return true;
+    }
 
-	public int compareTo(final Object h) {
+    public int compareTo(final Object h) {
         assert (h instanceof yacyURL);
         return this.toString().compareTo(((yacyURL) h).toString());
     }
     
     public boolean isPOST() {
-    	return (this.quest != null) && (this.quest.length() > 0);
+        return (this.quest != null) && (this.quest.length() > 0);
     }
 
     public final boolean isCGI() {
@@ -741,7 +798,7 @@ public class yacyURL implements Serializable {
 
         final int id = serverDomains.getDomainID(this.host); // id=7: tld is local
         final boolean isHTTP = this.protocol.equals("http");
-        int p = this.host.lastIndexOf('.');
+        int p = (host == null) ? -1 : this.host.lastIndexOf('.');
         String dom = (p > 0) ? dom = host.substring(0, p) : "";
         p = dom.lastIndexOf('.'); // locate subdomain
         String subdom = "";
@@ -797,7 +854,7 @@ public class yacyURL implements Serializable {
     }
 
     private static final String hosthash5(final String protocol, final String host, final int port) {
-        return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(protocol + ":" + host + ":" + port)).substring(0, 5);
+        return Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(protocol + ((host == null) ? "" : (":" + host + ":" + port)))).substring(0, 5);
     }
     
     /**
@@ -902,7 +959,7 @@ public class yacyURL implements Serializable {
         if (this.hash == null) {
             if (this.host.startsWith("127.") || this.host.equals("localhost") || this.host.startsWith("0:0:0:0:0:0:0:1")) return true;
             synchronized (this) {
-            	if (this.hash == null) this.hash = urlHashComputation();
+                if (this.hash == null) this.hash = urlHashComputation();
             }
         }
         //if (domDomain(this.hash) != 7) System.out.println("*** DEBUG - not local: " + this.toNormalform(true, false));
@@ -916,6 +973,7 @@ public class yacyURL implements Serializable {
     // language calculation
     public final String language() {
         String language = "en";
+        if (host == null) return language;
         final int pos = host.lastIndexOf(".");
         if (pos > 0 && host.length() - pos == 3) language = host.substring(pos + 1).toLowerCase();
         if (language.equals("uk")) language = "en";
@@ -924,36 +982,42 @@ public class yacyURL implements Serializable {
 
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
+          new String[]{null, "file://C:WINDOWS\\CMD0.EXE"},
+          new String[]{null, "file:/bin/yacy1"}, // file://<host>/<path> may have many '/' if the host is omitted and the path starts with '/'
+          new String[]{null, "file:///bin/yacy2"}, // file://<host>/<path> may have many '/' if the host is omitted and the path starts with '/'
+          new String[]{null, "file:C:WINDOWS\\CMD.EXE"},
+          new String[]{null, "file:///C:WINDOWS\\CMD1.EXE"},
+          new String[]{null, "file:///C|WINDOWS\\CMD2.EXE"},
           new String[]{null, "http://www.anomic.de/test/"},
           new String[]{null, "http://www.anomic.de/"},
           new String[]{null, "http://www.anomic.de"},
           new String[]{null, "http://www.anomic.de/home/test?x=1#home"},
           new String[]{null, "http://www.anomic.de/home/test?x=1"},
-	      new String[]{null, "http://www.anomic.de/home/test#home"},
-	      new String[]{null, "ftp://ftp.anomic.de/home/test#home"},
-	      new String[]{null, "http://www.anomic.de/home/../abc/"},
-	      new String[]{null, "mailto:abcdefg@nomailnomail.com"},
-	      new String[]{"http://www.anomic.de/home", "test"},
-	      new String[]{"http://www.anomic.de/home", "test/"},
-	      new String[]{"http://www.anomic.de/home/", "test"},
-	      new String[]{"http://www.anomic.de/home/", "test/"},
-	      new String[]{"http://www.anomic.de/home/index.html", "test.htm"},
-	      new String[]{"http://www.anomic.de/home/index.html", "http://www.yacy.net/test"},
-	      new String[]{"http://www.anomic.de/home/index.html", "ftp://ftp.yacy.net/test"},
-	      new String[]{"http://www.anomic.de/home/index.html", "../test"},
-	      new String[]{"http://www.anomic.de/home/index.html", "mailto:abcdefg@nomailnomail.com"},
-	      new String[]{null, "news:de.test"},
-	      new String[]{"http://www.anomic.de/home", "news:de.test"},
-	      new String[]{null, "mailto:bob@web.com"},
-	      new String[]{"http://www.anomic.de/home", "mailto:bob@web.com"},
-	      new String[]{"http://www.anomic.de/home", "ftp://ftp.anomic.de/src"},
-	      new String[]{null, "ftp://ftp.delegate.org/"},
-	      new String[]{"http://www.anomic.de/home", "ftp://ftp.delegate.org/"},
-	      new String[]{"http://www.anomic.de","mailto:yacy@weltherrschaft.org"},
-	      new String[]{"http://www.anomic.de","javascipt:temp"},
-	      new String[]{null,"http://yacy-websuche.de/wiki/index.php?title=De:IntroInformationFreedom&action=history"},
-	      new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&showuser=23585"},
-	      new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&amp;showuser=23585"}
+          new String[]{null, "http://www.anomic.de/home/test#home"},
+          new String[]{null, "ftp://ftp.anomic.de/home/test#home"},
+          new String[]{null, "http://www.anomic.de/home/../abc/"},
+          new String[]{null, "mailto:abcdefg@nomailnomail.com"},
+          new String[]{"http://www.anomic.de/home", "test"},
+          new String[]{"http://www.anomic.de/home", "test/"},
+          new String[]{"http://www.anomic.de/home/", "test"},
+          new String[]{"http://www.anomic.de/home/", "test/"},
+          new String[]{"http://www.anomic.de/home/index.html", "test.htm"},
+          new String[]{"http://www.anomic.de/home/index.html", "http://www.yacy.net/test"},
+          new String[]{"http://www.anomic.de/home/index.html", "ftp://ftp.yacy.net/test"},
+          new String[]{"http://www.anomic.de/home/index.html", "../test"},
+          new String[]{"http://www.anomic.de/home/index.html", "mailto:abcdefg@nomailnomail.com"},
+          new String[]{null, "news:de.test"},
+          new String[]{"http://www.anomic.de/home", "news:de.test"},
+          new String[]{null, "mailto:bob@web.com"},
+          new String[]{"http://www.anomic.de/home", "mailto:bob@web.com"},
+          new String[]{"http://www.anomic.de/home", "ftp://ftp.anomic.de/src"},
+          new String[]{null, "ftp://ftp.delegate.org/"},
+          new String[]{"http://www.anomic.de/home", "ftp://ftp.delegate.org/"},
+          new String[]{"http://www.anomic.de","mailto:yacy@weltherrschaft.org"},
+          new String[]{"http://www.anomic.de","javascipt:temp"},
+          new String[]{null,"http://yacy-websuche.de/wiki/index.php?title=De:IntroInformationFreedom&action=history"},
+          new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&showuser=23585"},
+          new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&amp;showuser=23585"}
           };
         String environment, url;
         yacyURL aURL, aURL1;
@@ -961,7 +1025,7 @@ public class yacyURL implements Serializable {
         for (int i = 0; i < test.length; i++) {
             environment = test[i][0];
             url = test[i][1];
-            try {aURL = yacyURL.newURL(environment, url);} catch (final MalformedURLException e) {aURL = null;}
+            try {aURL = yacyURL.newURL(environment, url);} catch (final MalformedURLException e) {e.printStackTrace(); aURL = null;}
             if (aURL != null) System.out.println("normalized: " + aURL.toNormalform(true, true));
             if (environment == null) {
                 try {jURL = new java.net.URL(url);} catch (final MalformedURLException e) {jURL = null;}

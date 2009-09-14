@@ -1,5 +1,5 @@
 // Segment.java
-// (C) 2005-209 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// (C) 2005-2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 2005 on http://yacy.net; full redesign for segments 28.5.2009
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
@@ -45,7 +45,6 @@ import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.navigationPrototype.NavigationReference;
 import de.anomic.kelondro.text.navigationPrototype.NavigationReferenceFactory;
-import de.anomic.kelondro.text.navigationPrototype.NavigationReferenceRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceFactory;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
@@ -54,7 +53,7 @@ import de.anomic.tools.iso639;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
-public final class Segment {
+public class Segment {
 
     // environment constants
     public static final long wCacheMaxAge    = 1000 * 60 * 30; // milliseconds; 30 minutes
@@ -70,7 +69,7 @@ public final class Segment {
     
     private   final Log                            log;
     protected final IndexCell<WordReference>       termIndex;
-    private   final IndexCell<NavigationReference> authorNavIndex;
+    //private   final IndexCell<NavigationReference> authorNavIndex;
     protected final MetadataRepository             urlMetadata;
     private   final File                           segmentPath;
     private   final IODispatcher                   merger;
@@ -100,7 +99,7 @@ public final class Segment {
                 maxFileSize,
                 this.merger,
                 writeBufferSize);
-        
+        /*
         this.authorNavIndex = new IndexCell<NavigationReference>(
                 new File(new File(segmentPath, "nav_author"), "idx"),
                 navigationReferenceFactory,
@@ -111,7 +110,7 @@ public final class Segment {
                 maxFileSize,
                 this.merger,
                 writeBufferSize);
-        
+        */
         File metadatadir = new File(segmentPath, "METADATA");
         if (!metadatadir.exists()) metadatadir.mkdirs();
         
@@ -221,14 +220,14 @@ public final class Segment {
         if (language == null) {
             // no statistics available, we take either the metadata (if given) or the TLD
             language = (bymetadata == null) ? url.language() : bymetadata;
-            System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + url + " FAILED, taking " + ((bymetadata == null) ? "TLD" : "metadata") + ": " + language);
+            if (log.isFine()) log.logFine("LANGUAGE-BY-STATISTICS: " + url + " FAILED, taking " + ((bymetadata == null) ? "TLD" : "metadata") + ": " + language);
         } else {
             if (bymetadata == null) {
                 // two possible results: compare and report conflicts
                 if (language.equals(url.language()))
-                    System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + url + " CONFIRMED - TLD IDENTICAL: " + language);
+                    if (log.isFine()) log.logFine("LANGUAGE-BY-STATISTICS: " + url + " CONFIRMED - TLD IDENTICAL: " + language);
                 else {
-                    String error = "*** DEBUG LANGUAGE-BY-STATISTICS: " + url + " CONFLICTING: " + language + " (the language given by the TLD is " + url.language() + ")";
+                    String error = "LANGUAGE-BY-STATISTICS: " + url + " CONFLICTING: " + language + " (the language given by the TLD is " + url.language() + ")";
                     // see if we have a hint in the url that the statistic was right
                     String u = url.toNormalform(true, false).toLowerCase();
                     if (!u.contains("/" + language + "/") && !u.contains("/" + iso639.country(language).toLowerCase() + "/")) {
@@ -243,14 +242,14 @@ public final class Segment {
             } else {
                 // here we have three results: we can do a voting
                 if (language.equals(bymetadata)) {
-                    //System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFIRMED - METADATA IDENTICAL: " + language);
+                    //if (log.isFine()) log.logFine("LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFIRMED - METADATA IDENTICAL: " + language);
                 } else if (language.equals(url.language())) {
-                    //System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFIRMED - TLD IS IDENTICAL: " + language);
+                    //if (log.isFine()) log.logFine("LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFIRMED - TLD IS IDENTICAL: " + language);
                 } else if (bymetadata.equals(url.language())) {
-                    //System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFLICTING: " + language + " BUT METADATA AND TLD ARE IDENTICAL: " + bymetadata + ")");
+                    //if (log.isFine()) log.logFine("LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFLICTING: " + language + " BUT METADATA AND TLD ARE IDENTICAL: " + bymetadata + ")");
                     language = bymetadata;
                 } else {
-                    //System.out.println("*** DEBUG LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFLICTING: ALL DIFFERENT! statistic: " + language + ", metadata: " + bymetadata + ", TLD: + " + entry.url().language() + ". taking metadata.");
+                    //if (log.isFine()) log.logFine("LANGUAGE-BY-STATISTICS: " + entry.url() + " CONFLICTING: ALL DIFFERENT! statistic: " + language + ", metadata: " + bymetadata + ", TLD: + " + entry.url().language() + ". taking metadata.");
                     language = bymetadata;
                 }
             }

@@ -69,7 +69,7 @@ public class ResultEntry {
         this.dbRetrievalTime = dbRetrievalTime;
         this.snippetComputationTime = snippetComputationTime;
         final String host = urlcomps.url().getHost();
-        if (host.endsWith(".yacyh")) {
+        if (host != null && host.endsWith(".yacyh")) {
             // translate host into current IP
             int p = host.indexOf(".");
             final String hash = yacySeed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));

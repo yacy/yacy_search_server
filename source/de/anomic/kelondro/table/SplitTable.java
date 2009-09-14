@@ -283,6 +283,7 @@ public class SplitTable implements ObjectIndex {
     private ObjectIndex checkTable(ObjectIndex table) {
         // check size and age of given table; in case it is too large or too old
         // create a new table
+        assert table != null;
         String name = new File(table.filename()).getName();
         long d;
         try {

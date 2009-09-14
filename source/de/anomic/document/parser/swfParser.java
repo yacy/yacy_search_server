@@ -27,6 +27,7 @@
 
 package de.anomic.document.parser;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -80,9 +81,14 @@ public class swfParser extends AbstractParser implements Idiom {
             	contents = swf2html.convertSWFToHTML(source);
             } catch (NegativeArraySizeException e) {
                 // seen in log
+                return null;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
             } catch (Exception e) {
             	// we have seen a lot of OOM errors in the parser...
             	e.printStackTrace();
+            	return null;
             }
             String url = null;
             String urlnr = null;

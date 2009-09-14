@@ -223,6 +223,7 @@ public class Punycode
 
   // the following method has been added by Michael Christen
   public static boolean isBasic(final String input) {
+      if (input == null) return true;
       for (int j = 0; j < input.length(); j++) {
           if (!isBasic(input.charAt(j))) return false;
       }

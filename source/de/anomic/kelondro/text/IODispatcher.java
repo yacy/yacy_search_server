@@ -82,7 +82,7 @@ public class IODispatcher extends Thread {
     public synchronized void dump(ReferenceContainerCache<? extends Reference> cache, File file, ReferenceContainerArray<? extends Reference> array) {
         if (dumpQueue == null || controlQueue == null || !this.isAlive()) {
             Log.logWarning("IODispatcher", "emergency dump of file " + file.getName());
-            cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
+             if (cache.size() > 0) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
         } else {
             DumpJob<? extends Reference> job = (DumpJob<? extends Reference>)new DumpJob(cache, file, array);
             try {
@@ -204,7 +204,7 @@ public class IODispatcher extends Thread {
         }
         public void dump() {
             try {
-                cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
+                if (cache.size() > 0) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
                 array.mountBLOBFile(file);
             } catch (IOException e) {
                 e.printStackTrace();

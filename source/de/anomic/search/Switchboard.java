@@ -208,9 +208,9 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
     public  static long lastPPMUpdate        = System.currentTimeMillis()- 30000;
 
     // colored list management
-    public static TreeSet<String> badwords       = null;
+    public static TreeSet<String> badwords       = new TreeSet<String>();
+    public static TreeSet<String> stopwords      = new TreeSet<String>();    
     public static TreeSet<String> blueList       = null;
-    public static TreeSet<String> stopwords      = null;    
     public static TreeSet<byte[]> badwordHashes  = null;
     public static TreeSet<byte[]> blueListHashes = null;
     public static TreeSet<byte[]> stopwordHashes = null;    

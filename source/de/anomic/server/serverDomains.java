@@ -530,6 +530,7 @@ public class serverDomains {
     }
     
     public static int getDomainID(final String host) {
+        if (host == null) return TLD_Local_ID;
         final int p = host.lastIndexOf('.');
         String tld = "";
         if (p > 0) {
