@@ -156,8 +156,8 @@
     <copy file="${src}/de/anomic/yacy/yacyBuildProperties.java" tofile="${build}/de/anomic/yacy/yacyBuildProperties.java" overwrite="true" filtering="true" />
 
   </target>
-
-  <target name="compile" depends="init" description="Compiling the yacy sources ...">
+	
+  <target name="compile" depends="init" description="compile YaCy core and YaCy servlets">
     <!-- defining the classpath that should be used for compiling -->
     <path id="project.class.path">
         <pathelement location="${build}" />
@@ -187,7 +187,7 @@
     	<pathelement location="${lib}/xerces.jar" />
     </path>
 
-    <!-- compiling yacyBuildProperties.java -->
+    <!-- compile yacyBuildProperties.java -->
     <javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
            includes="de/anomic/yacy/yacyBuildProperties.java"
            source="${javacSource}" target="${javacTarget}">
@@ -196,7 +196,7 @@
     </javac>
     <delete file="${build}/BuildProperties.java" />
 
-    <!-- compiling the main sources -->
+    <!-- compile the core sources -->
     <javac srcdir="${src}/" destdir="${build}"
            excludes="de/anomic/yacy/yacyBuildProperties.java"
            debug="true" debuglevel="lines,vars,source"
@@ -205,7 +205,7 @@
       <compilerarg value="-Xlint"/>
     </javac>
 
-    <!-- compiling htroot, htroot/yacy and htroot/htdocsdefault -->
+    <!-- compile htroot, htroot/yacy and htroot/htdocsdefault -->
     <javac srcdir="${htroot}/"
     	   excludes="processing/**"
            classpathref="project.class.path"
@@ -215,7 +215,7 @@
     </javac>
   </target>
 
-  <target name="compileHtdocsWWW" depends="compile" description="Compiling and zipping userspecific servlets">
+  <target name="compileHtdocsWWW" depends="compile" description="compile and zip user-specific servlets">
     <!-- defining the classpath that should be used for compiling -->
     <path id="htdocsWWW.class.path">
       <pathelement location="${build}"/>
@@ -226,7 +226,7 @@
       <pathelement location="${htdocsWWW}/" />
     </path>
 
-    <!-- compiling htroot, htroot/yacy and htroot/htdocsdefault -->
+    <!-- compile htroot, htroot/yacy and htroot/htdocsdefault -->
     <javac srcdir="${htdocsWWW}/"
            classpathref="htdocsWWW.class.path"
            debug="true" debuglevel="lines,vars,source"
@@ -237,15 +237,9 @@
   </target>
 
   <target name="copyMain4Dist" depends="compile">
-    <!-- copy main class files -->
-    <copy todir="${release_main}/classes" failonerror="false">
-      <fileset dir="${build}">
-        <include name="**/*.*"/>
-      </fileset>
-    </copy>
 
-    <!-- copy yacy.jar (if available) -->
-    <copy todir="${release_main}" file="yacy.jar" failonerror="false"/>
+    <!-- make a jar file for the YaCy core -->
+    <jar jarfile="${lib}/yacycore.jar" basedir="${build}"/>
 
   	<!-- copy all libs -->
   	    <copy todir="${release_main}/lib">
@@ -618,7 +612,6 @@
   <target name="clean" description="make clean">
     <delete dir="${release_main}" failonerror="false"/>
     <delete file="${build}/de/anomic/yacy/yacyBuildProperties.java" failonerror="false"/>
-    <delete file="yacy.jar" failonerror="false"/>
     <delete file="yacy.exe" failonerror="false"/>
     <delete file="${lib}/svnRevNr.jar" failonerror="false"/>
     <delete file="${libbuild}/svnRevNr.jar" failonerror="false"/>
@@ -633,15 +626,6 @@
   </target>
 
   <target name="installonlinux">
-    <!-- check for jar-file -->
-    <available file="yacy.jar" property="built"/>
-    <fail message="Please build yacy with 'ant clean build-jar'" unless="built"/>
-    <!-- copy main class files -->
-    <copy todir="${DESTDIR}/usr/share/java/">
-      <fileset dir=".">
-        <include name="yacy.jar"/>
-      </fileset>
-    </copy>
 
     <!-- copy configuration files -->
     <copy todir="${DESTDIR}/usr/share/yacy">
@@ -837,15 +821,6 @@
         <include name="**/*.java" />
       </fileset>
     </javadoc>
-  </target>
-
-
-  <target name="build-jar" depends="compile">
-    <jar destfile="yacy.jar" basedir="${build}/">
-      <manifest>
-        <attribute name="Main-Class" value="yacy"/>
-      </manifest>
-    </jar>
   </target>
 
   <target name="rpm" depends="all" description="Creates the main rpm-package and another for lib">

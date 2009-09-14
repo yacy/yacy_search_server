@@ -169,7 +169,6 @@ fi
 # generating the proper classpath
 CLASSPATH=""
 for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
-for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 CLASSPATH="classes:.:htroot:$CLASSPATH"
 
 cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy";
