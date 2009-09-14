@@ -44,6 +44,7 @@
   <property name="libt" location="libt"/>
   <property name="libbuild" location="libbuild"/>
   <property name="build" location="classes"/>
+  <property name="javadoc" location="api"/>
   <property name="htroot" location="htroot"/>
   <property name="test" location="test"/>
   <property name="langstats" location="langstats"/>
@@ -155,6 +156,18 @@
     <delete file="${build}/de/anomic/yacy/yacyBuildProperties.java" failonerror="false"/>
     <copy file="${src}/de/anomic/yacy/yacyBuildProperties.java" tofile="${build}/de/anomic/yacy/yacyBuildProperties.java" overwrite="true" filtering="true" />
 
+  </target>
+
+  <target name="javadoc" depends="init" description="make javadoc for YaCy core">
+    <javadoc destdir="${javadoc}"
+      windowtitle="YaCy API"
+      encoding="UTF-8"
+      charset="UTF-8"
+      access="private">
+      <fileset dir="${src}">
+        <include name="**/*.java"/>
+      </fileset>
+    </javadoc>
   </target>
 	
   <target name="compile" depends="init" description="compile YaCy core and YaCy servlets">
@@ -613,6 +626,7 @@
     <delete dir="${release_main}" failonerror="false"/>
     <delete file="${build}/de/anomic/yacy/yacyBuildProperties.java" failonerror="false"/>
     <delete file="yacy.exe" failonerror="false"/>
+  	<delete file="${lib}/yacycore.jar" failonerror="false"/>
     <delete file="${lib}/svnRevNr.jar" failonerror="false"/>
     <delete file="${libbuild}/svnRevNr.jar" failonerror="false"/>
     <delete failonerror="false">

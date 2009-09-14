@@ -47,11 +47,7 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
         }
         // cut off tail
         release = release.substring(0, release.length() - ((release.endsWith(".gz")) ? 7 : 4));
-        if (release.startsWith("yacy_pro_v")) {
-            release = release.substring(10);
-        } else if (release.startsWith("yacy_emb_v")) {
-            throw new RuntimeException("release file name '" + release + "' is not valid, no support for emb");
-        } else if (release.startsWith("yacy_v")) {
+        if (release.startsWith("yacy_v")) {
             release = release.substring(6);
         } else {
             throw new RuntimeException("release file name '" + release + "' is not valid, wrong prefix");
