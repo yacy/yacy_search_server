@@ -8,7 +8,7 @@ echo . >DATA\yacy.noconsole
 If %1.==CPGEN. GoTo :CPGEN
 
 Rem Generating the proper classpath unsing loops and labels
-Set CLASSPATH=classes;htroot
+Set CLASSPATH=htroot
 For %%X in (lib/*.jar) Do Call %0 CPGEN lib\%%X
 
 REM Please change the "javastart" settings in the web-interface "Basic Configuration" -> "Advanced" 
