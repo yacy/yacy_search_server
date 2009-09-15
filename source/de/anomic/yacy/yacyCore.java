@@ -38,11 +38,8 @@
 
 package de.anomic.yacy;
 
-import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -59,6 +56,9 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
 import de.anomic.yacy.dht.PeerSelection;
 import de.anomic.yacy.logging.Log;
+import de.anomic.yacy.seedUpload.yacySeedUploadFile;
+import de.anomic.yacy.seedUpload.yacySeedUploadFtp;
+import de.anomic.yacy.seedUpload.yacySeedUploadScp;
 
 public class yacyCore {
 
@@ -70,7 +70,7 @@ public class yacyCore {
     /** pseudo-random key derived from a time-interval while YaCy startup*/
     public static long speedKey = 0;
     public static final Map<String, yacyAccessible> amIAccessibleDB = Collections.synchronizedMap(new HashMap<String, yacyAccessible>()); // Holds PeerHash / yacyAccessible Relations
-    // constants for PeerPing behaviour
+    // constants for PeerPing behavior
     private static final int PING_INITIAL = 10;
     private static final int PING_MAX_RUNNING = 3;
     private static final int PING_MIN_RUNNING = 1;
@@ -554,54 +554,13 @@ public class yacyCore {
     }
 
     public static void loadSeedUploadMethods() {
-        final HashMap<String, String> availableUploaders = new HashMap<String, String>();
-        try {
-            final String uploadersPkgName = yacyCore.class.getPackage().getName() + ".seedUpload";
-            final String packageURI = yacyCore.class.getResource("/" + uploadersPkgName.replace('.', '/')).toString();
-
-            // open the parser directory
-            final File uploadersDir = new File(new URI(packageURI));
-            if ((uploadersDir == null) || (!uploadersDir.exists()) || (!uploadersDir.isDirectory())) {
-                yacyCore.seedUploadMethods.clear();
-                changeSeedUploadMethod("none");
-            }
-
-            final String[] uploaderClasses = uploadersDir.list(new FilenameFilter() {
-                public boolean accept(final File dir, final String name) {
-                    return name.startsWith("yacySeedUpload") && name.endsWith(".class");
-                }
-            });
-
-            final String javaClassPath = System.getProperty("java.class.path");
-
-            if (uploaderClasses == null) { return; }
-            for (int uploaderNr = 0; uploaderNr < uploaderClasses.length; uploaderNr++) {
-                final String className = uploaderClasses[uploaderNr].substring(0, uploaderClasses[uploaderNr].indexOf(".class"));
-                final String fullClassName = uploadersPkgName + "." + className;
-                try {
-                    final Class<?> uploaderClass = Class.forName(fullClassName);
-                    final Object theUploader = uploaderClass.newInstance();
-                    if (!(theUploader instanceof yacySeedUploader)) { continue; }
-                    final String[] neededLibx = ((yacySeedUploader)theUploader).getLibxDependencies();
-                    if (neededLibx != null) {
-                        for (int libxId=0; libxId < neededLibx.length; libxId++) {
-                            if (javaClassPath.indexOf(neededLibx[libxId]) == -1) {
-                                throw new Exception("Missing dependency");
-                            }
-                        }
-                    }
-                    availableUploaders.put(className.substring("yacySeedUpload".length()), fullClassName);
-                } catch (final Exception e) { /* we can ignore this for the moment */
-                } catch (final Error e)     { /* we can ignore this for the moment */
-                }
-            }
-        } catch (final Exception e) {
-        } finally {
-            synchronized (yacyCore.seedUploadMethods) {
-                yacyCore.seedUploadMethods.clear();
-                yacyCore.seedUploadMethods.putAll(availableUploaders);
-            }
-        }
+        yacySeedUploader uploader;
+        uploader = new yacySeedUploadFile();
+        yacyCore.seedUploadMethods.put(uploader.getClass().getSimpleName().substring("yacySeedUpload".length()), uploader.getClass().getCanonicalName());
+        uploader = new yacySeedUploadFtp();
+        yacyCore.seedUploadMethods.put(uploader.getClass().getSimpleName().substring("yacySeedUpload".length()), uploader.getClass().getCanonicalName());
+        uploader = new yacySeedUploadScp();
+        yacyCore.seedUploadMethods.put(uploader.getClass().getSimpleName().substring("yacySeedUpload".length()), uploader.getClass().getCanonicalName());
     }
 
     public static boolean changeSeedUploadMethod(final String method) {
