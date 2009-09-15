@@ -286,6 +286,7 @@ public final class SwitchboardConstants {
      */
     public static final String CRAWLER_THREADS_ACTIVE_MAX       = "crawler.MaxActiveThreads";
     public static final String YACY_MODE_DEBUG                  = "yacyDebugMode";
+    
     /**
      * <p><code>public static final String <strong>WORDCACHE_MAX_COUNT</strong> = "wordCacheMaxCount"</code></p>
      * <p>Name of the setting how many words the word-cache (or DHT-Out cache) shall contain maximal. Indexing pages if the
@@ -295,20 +296,13 @@ public final class SwitchboardConstants {
     public static final String HTTPC_NAME_CACHE_CACHING_PATTERNS_NO = "httpc.nameCacheNoCachingPatterns";
     public static final String ROBOTS_TXT                       = "httpd.robots.txt";
     public static final String ROBOTS_TXT_DEFAULT               = RobotsTxtConfig.LOCKED + "," + RobotsTxtConfig.DIRS;
-    /**
-     * <p><code>public static final String <strong>BLACKLIST_CLASS</strong> = "Blacklist.class"</code></p>
-     * <p>Name of the setting which Blacklist backend shall be used. Due to different requirements of users, the
-     * {@link plasmaURLPattern}-interface has been created to support blacklist engines different from YaCy's default</p>
-     * <p>Attention is required when the backend is changed, because different engines may have different syntaxes</p>
-     */
-    public static final String BLACKLIST_CLASS          = "BlackLists.class";
+    
     /**
      * <p><code>public static final String <strong>BLACKLIST_CLASS_DEFAULT</strong> = "de.anomic.plasma.urlPattern.defaultURLPattern"</code></p>
      * <p>Package and name of YaCy's {@link DefaultBlacklist default} blacklist implementation</p>
      * 
      * @see DefaultBlacklist for a detailed overview about the syntax of the default implementation
      */
-    public static final String BLACKLIST_CLASS_DEFAULT  = "de.anomic.data.DefaultBlacklist";
     public static final String LIST_BLUE                = "plasmaBlueList";
     public static final String LIST_BLUE_DEFAULT        = null;
     public static final String LIST_BADWORDS_DEFAULT    = "yacy.badwords";

@@ -91,7 +91,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Constructor;
 import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
@@ -132,6 +131,7 @@ import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.Blacklist;
+import de.anomic.data.DefaultBlacklist;
 import de.anomic.data.LibraryProvider;
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
@@ -208,8 +208,8 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
     public  static long lastPPMUpdate        = System.currentTimeMillis()- 30000;
 
     // colored list management
-    public static TreeSet<String> badwords       = new TreeSet<String>();
-    public static TreeSet<String> stopwords      = new TreeSet<String>();    
+    public static TreeSet<String> badwords       = new TreeSet<String>(NaturalOrder.naturalComparator);
+    public static TreeSet<String> stopwords      = new TreeSet<String>(NaturalOrder.naturalComparator);    
     public static TreeSet<String> blueList       = null;
     public static TreeSet<byte[]> badwordHashes  = null;
     public static TreeSet<byte[]> blueListHashes = null;
@@ -419,35 +419,10 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
             ppRamString(plasmaBlueListFile.length()/1024));
         }
         
-        // load the black-list / inspired by [AS]
+        // load blacklist
+        this.log.logConfig("Loading blacklist ...");
         final File blacklistsPath = getConfigPath(SwitchboardConstants.LISTS_PATH, SwitchboardConstants.LISTS_PATH_DEFAULT);
-        String[] blacklistClassName = new String[] {
-                                getConfig(SwitchboardConstants.BLACKLIST_CLASS, SwitchboardConstants.BLACKLIST_CLASS_DEFAULT),
-                                SwitchboardConstants.BLACKLIST_CLASS_DEFAULT
-        };
-            
-        this.log.logConfig("Starting blacklist engine ...");
-        urlBlacklist = null;
-        for (int i = 0; i < blacklistClassName.length; i++) {
-            try {
-                final Class<?> blacklistClass = Class.forName(blacklistClassName[i]);
-                final Constructor<?> blacklistClassConstr = blacklistClass.getConstructor( new Class[] { File.class } );
-                urlBlacklist = (Blacklist) blacklistClassConstr.newInstance(new Object[] { blacklistsPath });
-                this.log.logFine("Used blacklist engine class: " + blacklistClassName);
-                this.log.logConfig("Using blacklist engine: " + urlBlacklist.getEngineInfo());
-                break;
-            } catch (final Exception e) {
-                continue; // try next
-            } catch (final Error e) {
-                continue; // try next
-            }
-        }
-        if (urlBlacklist == null) {
-            this.log.logSevere("Unable to load the blacklist engine");
-            System.exit(-1);
-        }
-      
-        this.log.logConfig("Loading backlist data ...");
+        urlBlacklist = new DefaultBlacklist(blacklistsPath);
         listManager.switchboard = this;
         listManager.listsPath = blacklistsPath;        
         listManager.reloadBlacklists();

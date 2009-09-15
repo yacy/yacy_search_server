@@ -33,9 +33,6 @@ import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-
-
-
 public class DefaultBlacklist extends AbstractBlacklist implements Blacklist {
 
     public DefaultBlacklist(final File rootPath) {
