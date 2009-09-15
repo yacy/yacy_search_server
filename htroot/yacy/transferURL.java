@@ -73,10 +73,10 @@ public final class transferURL {
         final String otherPeerName = iam + ":" + ((otherPeer == null) ? "NULL" : (otherPeer.getName() + "/" + otherPeer.getVersion()));
 
         if ((youare == null) || (!youare.equals(sb.peers.mySeed().hash))) {
-        	sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.peers.mySeed().hash);
+            yacyCore.log.logInfo("Rejecting URLs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.peers.mySeed().hash);
             result = "wrong_target";
         } else if ((!granted) || (sb.isRobinsonMode())) {
-        	sb.getLog().logInfo("Rejecting URLs from peer " + otherPeerName + ". Not granted.");
+            yacyCore.log.logInfo("Rejecting URLs from peer " + otherPeerName + ". Not granted.");
             result = "error_not_granted";
         } else {
             int received = 0;
@@ -137,6 +137,7 @@ public final class transferURL {
                 }
                 
                 // write entry to database
+                yacyCore.log.logInfo("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.metadata().url().toNormalform(true, false));
                 try {
                     sb.indexSegment.urlMetadata().store(lEntry);
                     sb.crawlResults.stack(lEntry, iam, iam, 3);
@@ -152,9 +153,9 @@ public final class transferURL {
             // return rewrite properties
             final int more = sb.indexSegment.urlMetadata().size() - sizeBefore;
             doublevalues = Integer.toString(received - more);
-            sb.getLog().logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " URLs");
+            yacyCore.log.logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " URLs");
             RSSFeed.channels(RSSFeed.INDEXRECEIVE).addMessage(new RSSMessage("Received " + received + " URLs from peer " + otherPeerName + ", blocked " + blocked, "", ""));
-            if ((received - more) > 0) sb.getLog().logSevere("Received " + doublevalues + " double URLs from peer " + otherPeerName);
+            if ((received - more) > 0) yacyCore.log.logSevere("Received " + doublevalues + " double URLs from peer " + otherPeerName);
             result = "ok";
         }
 
