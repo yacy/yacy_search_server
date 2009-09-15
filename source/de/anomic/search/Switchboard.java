@@ -428,7 +428,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         listManager.reloadBlacklists();
 
         // load badwords (to filter the topwords)
-        if (badwords == null) {
+        if (badwords == null || badwords.size() == 0) {
             final File badwordsFile = new File(rootPath, SwitchboardConstants.LIST_BADWORDS_DEFAULT);
             badwords = SetTools.loadList(badwordsFile, NaturalOrder.naturalComparator);
             badwordHashes = Word.words2hashes(badwords);
@@ -438,7 +438,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         }
 
         // load stopwords
-        if (stopwords == null) {
+        if (stopwords == null || stopwords.size() == 0) {
             final File stopwordsFile = new File(rootPath, SwitchboardConstants.LIST_STOPWORDS_DEFAULT);
             stopwords = SetTools.loadList(stopwordsFile, NaturalOrder.naturalComparator);
             stopwordHashes = Word.words2hashes(stopwords);
