@@ -7,7 +7,8 @@
 # Frankfurt, Germany, 2005
 #
 # This file is maintained by Oliver Wunder <webmaster@daburna.de>
-# This file is written by (chronological order) Roland Ramthun <admin@yacy-forum.de>, Oliver Wunder <webmaster@daburna.de>, Jan Sandbrink
+# This file is written by (chronological order) Roland Ramthun <admin@yacy-forum.de>, Oliver Wunder <webmaster@daburna.de>, Jan Sandbrink,
+# Thomas Süß <th-suess@gmx.de>
 
 # If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
 
@@ -2384,8 +2385,8 @@ Changes will be published as announcement on YaCyNews==&Auml;nderungen werden &u
 #-----------------------------
 Wiki Help==Wiki Hilfe
 Wiki-Code==Wiki-Befehle
-This table contains a short description of the tags that can be used in the Wiki and several other servlets==Diese Tabelle ent&auml;lt eine kurze Beschreibung der Tags, die in diesem Wiki und an anderen Stellen 
-of YaCy. For a more detailed description visit the==in YaCy benutzen k&ouml;nnen. F&uuml;r eine detailliertere Beschreibung besuchen Sie bitte das
+This table contains a short description of the tags that can be used in the Wiki and several other servlets==Diese Tabelle enth&auml;lt eine kurze Beschreibung der Tags, die in diesem Wiki und an anderen Stellen
+of YaCy. For a more detailed description visit the==in YaCy benutzt werden k&ouml;nnen. F&uuml;r eine detailliertere Beschreibung besuchen Sie bitte das
 #YaCy Wiki==YaCy Wiki
 Description==Beschreibung
 \=\=headline====&Uuml;berschrift
@@ -2446,7 +2447,7 @@ more options==Mehr Optionen
 #Text==Text
 Images==Bilder
 #Audio==Audio
-#Video==Video
+Video==Videos
 Applications==Anwendungen
 The following words are stop-words and had been excluded from the search:==Folgende W&ouml;rter sind Stopwords und wurden von der Suche ausgeschlossen:
 No Results.==Keine Ergebnisse.
