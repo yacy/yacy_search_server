@@ -71,7 +71,7 @@ public class docParser extends AbstractParser implements Idiom {
 
         try {
             extractor = new WordExtractor(source);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new ParserException("error in docParser, WordTextExtractorFactory: " + e.getMessage(), location);
         }
 
