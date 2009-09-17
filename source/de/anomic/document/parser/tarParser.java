@@ -124,6 +124,7 @@ public class tarParser extends AbstractParser implements Idiom {
                 
                 // skip directories
                 if (entry.isDirectory()) continue;
+                if (entry.getSize() <= 0) continue;
                 
                 // Get the short entry name
                 final String entryName = entry.getName();

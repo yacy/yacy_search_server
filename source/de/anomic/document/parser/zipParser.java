@@ -113,6 +113,7 @@ public class zipParser extends AbstractParser implements Idiom {
                 
                 // skip directories
                 if (entry.isDirectory()) continue;
+                if (entry.getSize() <= 0) continue;
                 
                 // Get the entry name
                 final String entryName = entry.getName();                

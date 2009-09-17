@@ -555,12 +555,10 @@ dc_rights
     }
     
     public int inboundLinks() {
-        assert this.inboundLinks >= 0;
         return (this.inboundLinks < 0) ? 0 : this.inboundLinks;
     }
     
     public int outboundLinks() {
-        assert this.outboundLinks >= 0;
         return (this.outboundLinks < 0) ? 0 : this.outboundLinks;
     }
     

@@ -82,7 +82,7 @@ public class DocumentIndex extends Segment {
             throw new IOException("cannot parse " + file.toString() + ": " + e.getMessage());
         }
         final Condenser condenser = new Condenser(document, true, true);
-    	return super.storeDocument(
+        return super.storeDocument(
                 url,
                 null,
                 new Date(file.lastModified()),
@@ -119,7 +119,7 @@ public class DocumentIndex extends Segment {
                     try {
                         add(w);
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        if (e.getMessage().indexOf("cannot parse") < 0) e.printStackTrace();
                     }
                 }
             }
@@ -152,6 +152,10 @@ public class DocumentIndex extends Segment {
      */
     public File[] find(String querystring) {
         return find(querystring, 0, 20);
+    }
+    
+    public void close() {
+        super.close();
     }
     
     public static void main(String[] args) {
