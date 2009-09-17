@@ -202,6 +202,7 @@
 
     <!-- compile yacyBuildProperties.java -->
     <javac srcdir="${build}" destdir="${build}" sourcepath="${src}"
+           debug="true" debuglevel="lines,vars,source"
            includes="de/anomic/yacy/yacyBuildProperties.java"
            source="${javacSource}" target="${javacTarget}">
       <classpath refid="project.class.path" />
@@ -211,6 +212,7 @@
 
     <!-- compile the core sources -->
     <javac srcdir="${src}/" destdir="${build}"
+           debug="true" debuglevel="lines,vars,source"
            excludes="de/anomic/yacy/yacyBuildProperties.java"
            source="${javacSource}" target="${javacTarget}">
       <classpath refid="project.class.path" />
@@ -221,7 +223,8 @@
     <javac srcdir="${htroot}/"
     	   excludes="processing/**"
            classpathref="project.class.path"
-           source="${javacSource}" target="${javacTarget}">
+           source="${javacSource}" target="${javacTarget}"
+           debug="true" debuglevel="lines,vars,source">
       <compilerarg value="-Xlint"/>
     </javac>
   </target>
