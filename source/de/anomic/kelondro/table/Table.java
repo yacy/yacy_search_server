@@ -71,7 +71,7 @@ public class Table implements ObjectIndex {
     
     public    static final long maxarraylength = 134217727L; // that may be the maxmimum size of array length in some JVMs
     private   static final long minmemremaining = 20 * 1024 * 1024; // if less than this memory is remaininig, the memory copy of a table is abandoned
-    private   int fail;
+    //private   int fail;
     private   final int buffersize;
     protected HandleMap index;
     protected BufferedRecords file;
@@ -263,7 +263,7 @@ public class Table implements ObjectIndex {
 
     private final Map<String, String> memoryStats() {
         // returns statistical data about this object
-        assert ((table == null) || (table.size() == index.size()));
+        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("tableSize", Integer.toString(index.size()));
         map.put("tableKeyChunkSize", Integer.toString(index.row().objectsize));
@@ -282,8 +282,8 @@ public class Table implements ObjectIndex {
     }
     
     public synchronized void addUnique(final Entry row) throws IOException {
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert ((table == null) || (table.size() == index.size()));
+        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         final int i = (int) file.size();
         index.putUnique(row.getPrimaryKeyBytes(), i);
         if (table != null) {
@@ -292,16 +292,16 @@ public class Table implements ObjectIndex {
             if (abandonTable()) table = null;
         }
         file.add(row.bytes(), 0);
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
     }
 
     public synchronized void addUnique(final List<Entry> rows) throws IOException {
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         final Iterator<Entry> i = rows.iterator();
         while (i.hasNext()) {
             addUnique(i.next());
         }
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
     }
 
     /**
@@ -310,7 +310,7 @@ public class Table implements ObjectIndex {
      * and 
      */
     public synchronized ArrayList<RowCollection> removeDoubles() throws IOException {
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         final ArrayList<RowCollection> report = new ArrayList<RowCollection>();
         RowSet rows;
         final TreeSet<Long> d = new TreeSet<Long>();
@@ -345,7 +345,7 @@ public class Table implements ObjectIndex {
                 lastlog = System.currentTimeMillis();
             }
         }
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         return report;
     }
     
@@ -366,8 +366,8 @@ public class Table implements ObjectIndex {
     
     public synchronized Entry get(final byte[] key) throws IOException {
     	if ((file == null) || (index == null)) return null;
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", fail = " + fail;
-        assert ((table == null) || (table.size() == index.size()));
+        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         final int i = (int) index.get(key);
         if (i == -1) return null;
         final byte[] b = new byte[rowdef.objectsize];
@@ -383,19 +383,17 @@ public class Table implements ObjectIndex {
             System.arraycopy(key, 0, b, 0, key.length);
             System.arraycopy(v.bytes(), 0, b, rowdef.primaryKeyLength, rowdef.objectsize - rowdef.primaryKeyLength);
         }
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert ((table == null) || (table.size() == index.size()));
         return rowdef.newEntry(b);
     }
 
     public synchronized boolean has(final byte[] key) {
         try {
-            assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
+            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         } catch (final IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        assert ((table == null) || (table.size() == index.size()));
+        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         return index.has(key);
     }
 
@@ -404,8 +402,8 @@ public class Table implements ObjectIndex {
     }
 
     public synchronized Entry replace(final Entry row) throws IOException {
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert ((table == null) || (table.size() == index.size()));
+        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         assert row != null;
         assert row.bytes() != null;
         if ((row == null) || (row.bytes() == null)) return null;
@@ -431,15 +429,15 @@ public class Table implements ObjectIndex {
             table.set(i, taildef.newEntry(row.bytes(), rowdef.primaryKeyLength, true));
             file.put(i, row.bytes(), 0);
         }
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert ((table == null) || (table.size() == index.size()));
+        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         // return old value
         return rowdef.newEntry(b);
     }
     
     public synchronized void put(final Entry row) throws IOException {
-        assert file == null || file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size() + ", fail = " + fail;
-        assert table == null || table.size() == index.size();
+        assert file == null || file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         assert row != null;
         assert row.bytes() != null;
         if (file == null || row == null || row.bytes() == null) return;
@@ -457,8 +455,8 @@ public class Table implements ObjectIndex {
             table.set(i, taildef.newEntry(row.bytes(), rowdef.primaryKeyLength, true));
             file.put(i, row.bytes(), 0);
         }
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert ((table == null) || (table.size() == index.size()));
+        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
     }
 
     public synchronized Entry put(final Entry row, final Date entryDate) throws IOException {
@@ -503,8 +501,8 @@ public class Table implements ObjectIndex {
     }
     
     public synchronized Entry remove(final byte[] key) throws IOException {
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert ((table == null) || (table.size() == index.size()));
+        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         assert key.length == rowdef.primaryKeyLength;
         final int i = (int) index.get(key);
         if (i == -1) return null; // nothing to do
@@ -537,7 +535,7 @@ public class Table implements ObjectIndex {
                 System.arraycopy(p, 0, k, 0, rowdef.primaryKeyLength);
                 index.put(k, i);
             }
-            assert (file.size() == index.size() + fail);
+            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         } else {
             // get result value from the table copy, so we don't need to read it from the file
             final Row.Entry v = table.get(i, false);
@@ -568,18 +566,18 @@ public class Table implements ObjectIndex {
                 final Row.Entry lr = rowdef.newEntry(p);
                 index.put(lr.getPrimaryKeyBytes(), i);
             }
-            assert (file.size() == index.size() + fail);
-            assert (table.size() == index.size()) : "table.size() = " + table.size() + ", index.size() = " + index.size();
+            assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+            assert table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         }
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert ((table == null) || (table.size() == index.size()));
+        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         assert index.size() + 1 == sb : "index.size() = " + index.size() + ", sb = " + sb;
         return rowdef.newEntry(b);
     }
 
     public synchronized Entry removeOne() throws IOException {
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
-        assert ((table == null) || (table.size() == index.size()));
+        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         final byte[] le = new byte[rowdef.objectsize];
         long fsb = file.size();
         assert fsb != 0 : "file.size() = " + fsb;
@@ -588,12 +586,13 @@ public class Table implements ObjectIndex {
         final Row.Entry lr = rowdef.newEntry(le);
         final int i = (int) index.remove(lr.getPrimaryKeyBytes());
         assert i >= 0;
-        if (table != null) table.remove(lr.getPrimaryKeyBytes());
-        assert file.size() == index.size() + fail : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        if (table != null) table.removeOne();
+        assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
+        assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         return lr;
     }
 
-    public void clear() throws IOException {
+    public synchronized void clear() throws IOException {
         final File f = file.filename();
         file.close();
         FileUtils.deletedelete(f);
