@@ -311,6 +311,7 @@ public class SplitTable implements ObjectIndex {
         assert row.objectsize() <= this.rowdef.objectsize;
         ObjectIndex keeper = keeperOf(row.getColBytes(0));
         if (keeper != null) {keeper.put(row); return;}
+        assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
         keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
         keeper.put(row);
     }
