@@ -63,13 +63,14 @@ public class Threaddump_p {
     	// Thread dump
     	final Date dt = new Date();
     	final String versionstring = yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision();
+    	Runtime runtime = Runtime.getRuntime();
     	
     	bufferappend(buffer, plain, "************* Start Thread Dump " + dt + " *******************");
     	bufferappend(buffer, plain, "");
     	bufferappend(buffer, plain, "YaCy Version: " + versionstring);
-    	bufferappend(buffer, plain, "Total Memory = " + (Runtime.getRuntime().totalMemory()));
-    	bufferappend(buffer, plain, "Used&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()));
-    	bufferappend(buffer, plain, "Free&nbsp;&nbsp;Memory = " + (Runtime.getRuntime().freeMemory()));
+    	bufferappend(buffer, plain, "Assigned&nbsp;&nbsp;&nbsp;Memory = " + (runtime.maxMemory()));
+    	bufferappend(buffer, plain, "Used&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Memory = " + (runtime.totalMemory() - runtime.freeMemory()));
+    	bufferappend(buffer, plain, "Available&nbsp;&nbsp;Memory = " + (runtime.maxMemory() - runtime.totalMemory() + runtime.freeMemory()));
     	bufferappend(buffer, plain, "");
     	bufferappend(buffer, plain, "");
     	

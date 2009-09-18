@@ -62,19 +62,21 @@ public class ResultFetcher {
     protected final TreeSet<byte[]>         snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     long urlRetrievalAllTime;
     long snippetComputationAllTime;
-    
+    int taketimeout;
     
     @SuppressWarnings("unchecked")
     public ResultFetcher(
             RankingProcess rankedCache,
             final QueryParams query,
             final Segment indexSegment,
-            final yacySeedDB peers) {
+            final yacySeedDB peers,
+            final int taketimeout) {
     	
     	this.rankedCache = rankedCache;
     	this.query = query;
         this.indexSegment = indexSegment;
         this.peers = peers;
+        this.taketimeout = taketimeout;
         
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
@@ -157,7 +159,7 @@ public class ResultFetcher {
                     if ((query.contentdom != QueryParams.CONTENTDOM_IMAGE) && (result.size() >= query.neededResults() + fetchAhead)) break;
     
                     // get next entry
-                    page = rankedCache.takeURL(true, 10000);
+                    page = rankedCache.takeURL(true, taketimeout);
                     if (page == null) break;
                     if (result.exists(page.hash().hashCode())) continue;
                     if (failedURLs.get(page.hash()) != null) continue;

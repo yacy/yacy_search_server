@@ -147,7 +147,8 @@ public final class SearchEvent {
                 Log.logFine("SEARCH_EVENT", "NO SEARCH STARTED DUE TO EMPTY SEARCH REQUEST.");
             }
             
-            
+            // start worker threads to fetch urls and snippets
+            this.results = new ResultFetcher(rankedCache, query, indexSegment, peers, 10000);
         } else {
             // do a local search
             this.rankedCache = new RankingProcess(indexSegment, query, max_results_preparation, 2);
@@ -180,11 +181,11 @@ public final class SearchEvent {
                 }
                 serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "abstract generation", this.rankedCache.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
             }
+            
+            // start worker threads to fetch urls and snippets
+            this.results = new ResultFetcher(rankedCache, query, indexSegment, peers, 10);
         }
-        
-        // start worker threads to fetch urls and snippets
-        this.results = new ResultFetcher(rankedCache, query, indexSegment, peers);
-        
+         
         // clean up events
         SearchEventCache.cleanupEvents(false);
         serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "event-cleanup", 0, 0), false);

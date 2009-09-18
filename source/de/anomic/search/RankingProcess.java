@@ -358,7 +358,7 @@ public final class RankingProcess extends Thread {
         return bestEntry;
     }
     
-    public URLMetadataRow takeURL(final boolean skipDoubleDom, final long timeout) {
+    public URLMetadataRow takeURL(final boolean skipDoubleDom, final int timeout) {
         // returns from the current RWI list the best URL entry and removes this entry from the list
     	long timeLimit = System.currentTimeMillis() + timeout;
     	while (System.currentTimeMillis() < timeLimit) {
