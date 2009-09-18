@@ -29,6 +29,7 @@ package de.anomic.kelondro.text;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -39,10 +40,8 @@ import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.search.QueryParams;
+import de.anomic.search.RankingProcess;
 import de.anomic.search.RankingProfile;
-import de.anomic.search.ResultEntry;
-import de.anomic.search.SearchEvent;
-import de.anomic.search.SearchEventCache;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
 
@@ -154,16 +153,30 @@ public class DocumentIndex extends Segment {
      * @param pos
      * @param count
      * @return a list of files that contain the given string
-     */
-    public File[] find(String querystring, int pos, int count) {
+     */    
+    public ArrayList<File> find(String querystring, int pos, int count) {
         QueryParams query = new QueryParams(querystring, 100, textRankingDefault, null);
-        SearchEvent se = SearchEventCache.getEvent(query, this, null, null, null, false);
-        File[] result = new File[count];
-        ResultEntry re;
-        for (int i = 0; i < count; i++) {
-            re = se.oneResult(pos + i);
-            result[i] = (re == null) ? null : re.url().getLocalFile();
+        ArrayList<URLMetadataRow> result = findMetadata(query, this);
+        ArrayList<File> files = new ArrayList<File>();
+        for (URLMetadataRow row : result) {
+            files.add(row.metadata().url().getLocalFile());
+            count--;
+            if (count == 0) break;
         }
+        return files;
+    }
+    
+    public static final ArrayList<URLMetadataRow> findMetadata(
+            final QueryParams query,
+            final Segment indexSegment) {
+        
+        RankingProcess rankedCache = new RankingProcess(indexSegment, query, 1000, 2);
+        rankedCache.run();
+        
+        ArrayList<URLMetadataRow> result = new ArrayList<URLMetadataRow>();
+        URLMetadataRow r;
+        while ((r = rankedCache.takeURL(false, 1)) != null) result.add(r);
+        
         return result;
     }
     
@@ -172,7 +185,7 @@ public class DocumentIndex extends Segment {
      * @param querystring
      * @return a list of files that contain the word
      */
-    public File[] find(String querystring) {
+    public ArrayList<File> find(String querystring) {
         return find(querystring, 0, 20);
     }
     
@@ -208,7 +221,7 @@ public class DocumentIndex extends Segment {
                 for (int i = 2; i < args.length; i++) query += args[i];
                 query.trim();
                 DocumentIndex di = new DocumentIndex(segmentPath);
-                File[] results = di.find(query);
+                ArrayList<File> results = di.find(query);
                 for (File f: results) {
                     if (f != null) System.out.println(f.toString());
                 }
