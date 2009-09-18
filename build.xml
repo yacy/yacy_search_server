@@ -218,6 +218,13 @@
       <classpath refid="project.class.path" />
       <compilerarg value="-Xlint"/>
     </javac>
+  	
+  	<!-- make the jacycore jar -->
+    <jar destfile="${lib}/yacycore.jar" basedir="${build}/">
+      <manifest>
+        <attribute name="Main-Class" value="yacy"/>
+      </manifest>
+    </jar>
 
   </target>
 
@@ -241,7 +248,7 @@
   <target name="all" depends="compile">
   </target>
 
-  <target name="copyMain4Dist" depends="build-jar">
+  <target name="copyMain4Dist" depends="compile">
   	<!-- copy all libs -->
   	    <copy todir="${release_main}/lib">
   	      <fileset dir="${lib}" 
@@ -694,15 +701,6 @@
                   match="yacy \(.*\) unstable; urgency=low"
                   replace="yacy (*auto-svn-version*) unstable; urgency=low" />
   </target>
-
-  <target name="build-jar" depends="compile-core">
-    <jar destfile="${lib}/yacycore.jar" basedir="${build}/">
-      <manifest>
-        <attribute name="Main-Class" value="yacy"/>
-      </manifest>
-    </jar>
-  </target>
-
 	
   <target name="sign" depends="readBuildProperties" description="sign current release file in RELEASE/ with $privateKey">
     <java classname="de.anomic.tools.CryptoLib" failonerror="true">
