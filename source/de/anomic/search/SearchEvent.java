@@ -165,7 +165,7 @@ public final class SearchEvent {
                 for (Map.Entry<byte[], ReferenceContainer<WordReference>> entry : this.rankedCache.searchContainerMap().entrySet()) {
                     wordhash = entry.getKey();
                     final ReferenceContainer container = entry.getValue();
-                    assert (container.getTermHash().equals(wordhash));
+                    assert (Base64Order.enhancedCoder.equal(container.getTermHash(), wordhash)) : "container.getTermHash() = " + new String(container.getTermHash()) + ", wordhash = " + new String(wordhash);
                     if (container.size() > maxcount) {
                         IAmaxcounthash = wordhash;
                         maxcount = container.size();
