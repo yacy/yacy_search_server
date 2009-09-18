@@ -695,7 +695,7 @@
                   replace="yacy (*auto-svn-version*) unstable; urgency=low" />
   </target>
 
-  <target name="build-jar" depends="compile">
+  <target name="build-jar" depends="compile-core">
     <jar destfile="${lib}/yacycore.jar" basedir="${build}/">
       <manifest>
         <attribute name="Main-Class" value="yacy"/>

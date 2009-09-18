@@ -74,7 +74,7 @@ public class DocumentIndex extends Segment {
         this(new Log("DocumentIndex"), segmentPath);
     }
 	
-    private class Worker extends Thread {
+    class Worker extends Thread {
         public void run() {
             File f;
             try {
