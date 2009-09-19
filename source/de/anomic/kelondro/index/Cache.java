@@ -154,21 +154,24 @@ public class Cache implements ObjectIndex {
         return true;
     }
     
+    /**
+     * checks for space in the hit cache
+     * @return true if it is allowed to write into this cache
+     */
     private boolean checkHitSpace() {
         // returns true if it is allowed to write into this cache
+        if (readHitCache == null) return false;
     	long available = MemoryControl.available();
     	if (available - 2 * 1024 * 1024 < readHitCache.memoryNeededForGrow()) {
-    		if (readHitCache != null) {
-                readHitCache.clear();
-            }
-    		return false;
+    		readHitCache.clear();
     	}
-        return true;
+    	available = MemoryControl.available();
+        return (available - 2 * 1024 * 1024 > readHitCache.memoryNeededForGrow());
     }
     
     public synchronized void clearCache() {
-        readMissCache.clear();
-        readHitCache.clear();
+        if (readMissCache != null) readMissCache.clear();
+        if (readHitCache != null) readHitCache.clear();
     }
     
     public synchronized void close() {
@@ -235,7 +238,7 @@ public class Cache implements ObjectIndex {
             return null;
         }
         
-        if ((checkHitSpace()) && (readHitCache != null)) {
+        if (checkHitSpace()) {
             final Row.Entry dummy = readHitCache.replace(entry);
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
@@ -254,9 +257,9 @@ public class Cache implements ObjectIndex {
         if (readMissCache != null) {
             if (readMissCache.remove(key) != null) {
                 this.hasnotHit++;
-                // the entry does not exist before
-                index.put(row); // write to backend
-                if (readHitCache != null) {
+                // the entry did not exist before
+                index.put(row); // write to back-end
+                if (checkHitSpace()) {
                     final Row.Entry dummy = readHitCache.replace(row); // learn that entry
                     if (dummy == null) this.writeUnique++; else this.writeDouble++;
                 }
@@ -264,9 +267,9 @@ public class Cache implements ObjectIndex {
             }
         }
         
+        // write to the back-end
         index.put(row);
-        if (readHitCache != null) {
-            // learn from situation
+        if (checkHitSpace()) {
             final Row.Entry dummy = readHitCache.replace(row); // overwrite old entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
@@ -286,7 +289,7 @@ public class Cache implements ObjectIndex {
                 this.hasnotHit++;
                 // the entry does not exist before
                 index.put(row); // write to backend
-                if (readHitCache != null) {
+                if (checkHitSpace()) {
                     final Row.Entry dummy = readHitCache.replace(row); // learn that entry
                     if (dummy == null) this.writeUnique++; else this.writeDouble++;
                 }
@@ -296,22 +299,9 @@ public class Cache implements ObjectIndex {
         
         Row.Entry entry;
         
-        if (readHitCache != null) {
-            entry = readHitCache.get(key);
-            if (entry != null) {
-                // since we know that the entry was in the read cache, it cannot be in any write cache
-                    // write directly to backend index
-                    index.put(row);
-                    // learn from situation
-                    final Row.Entry dummy = readHitCache.replace(row); // overwrite old entry
-                    if (dummy == null) this.writeUnique++; else this.writeDouble++;
-                    return entry;
-            }
-        }
-
-        // the worst case: we must write to the back-end directly
+        // write to the back-end
         entry = index.replace(row);
-        if (readHitCache != null) {
+        if (checkHitSpace()) {
             final Row.Entry dummy = readHitCache.replace(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
@@ -332,7 +322,7 @@ public class Cache implements ObjectIndex {
             this.hasnotDelete++;
             // the entry does not exist before
             index.addUnique(row); // write to backend
-            if (readHitCache != null) {
+            if (checkHitSpace()) {
                 final Row.Entry dummy = readHitCache.replace(row); // learn that entry
                 if (dummy == null) this.writeUnique++; else this.writeDouble++;
             }
@@ -341,7 +331,7 @@ public class Cache implements ObjectIndex {
         
         // the worst case: we must write to the back-end directly
         index.addUnique(row);
-        if (readHitCache != null) {
+        if (checkHitSpace()) {
             final Row.Entry dummy = readHitCache.replace(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
@@ -367,7 +357,7 @@ public class Cache implements ObjectIndex {
 
         // the worst case: we must write to the backend directly
         index.addUnique(row);
-        if (readHitCache != null) {
+        if (checkHitSpace()) {
             final Row.Entry dummy = readHitCache.replace(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
         }
