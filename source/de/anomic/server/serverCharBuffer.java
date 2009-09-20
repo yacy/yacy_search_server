@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Properties;
 
@@ -266,6 +267,18 @@ public final class serverCharBuffer extends Writer {
         final char[] tmp = new char[end - start];
         System.arraycopy(buffer, offset + start, tmp, 0, end - start);
         return tmp;
+    }
+    
+    public byte[] getBytes(String charset) throws UnsupportedEncodingException {
+        return new String(buffer, offset, length).getBytes(charset);
+    }
+    
+    public byte[] getBytes() {
+        try {
+            return getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
     }
 
     public serverCharBuffer trim(final int start) {

@@ -324,9 +324,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     
     public byte[] getText(final String charSet) {
         try {
-            return content.toString().getBytes(charSet);
+            return content.getBytes(charSet);
         } catch (final UnsupportedEncodingException e) {
-            return content.toString().getBytes();
+            return content.getBytes();
         }
     }
 

@@ -104,7 +104,7 @@ public class yacysearchtrailer {
             prop.put("nav-authors_element", authorNavigator.size());
         }
 
-        // attach always the topics
+        // topics navigator
         ArrayList<NavigatorEntry> topicNavigator = theSearch.getTopicNavigator(10);
         if (topicNavigator == null || topicNavigator.size() == 0) {
             topicNavigator = new ArrayList<NavigatorEntry>(); 
@@ -130,6 +130,17 @@ public class yacysearchtrailer {
                 }
             }
             prop.put("nav-topics_element", i);
+        }
+        
+        // about box
+        String aboutBody = env.getConfig("about.body", "");
+        String aboutHeadline = env.getConfig("about.headline", "");
+        if (aboutBody.length() == 0 && aboutHeadline.length() == 0) {
+            prop.put("nav-about", 0);
+        } else {
+            prop.put("nav-about", 1);
+            prop.put("nav-about_headline", aboutHeadline);
+            prop.put("nav-about_body", aboutBody);
         }
         
         serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + "bottomline", 0, 0), false);

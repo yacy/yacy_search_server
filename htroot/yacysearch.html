@@ -56,6 +56,7 @@ $(function() {
 	$("#sidebar2").accordion('activate', false);
 	$("#sidebar3").accordion({});
 	$("#sidebar3").accordion('activate', false);
+    $("#sidebarAbout").accordion({});
 	$("#search").focus();
 });
 //]]>
@@ -128,9 +129,15 @@ document.getElementById("Enter").value = "search again";
 	<p>Searching the web with this peer is disabled for unauthorized users. Please <a href="Status.html?login=">log in</a> as administrator to use the search function</p>
 #(/num-results)#
 
+<!-- the search results -->
+<script type="text/javascript">
+var progressbar = new Progressbar(#[results]#, document.getElementById("results"));
+</script>
+<div style="float:left; width:70%;">
+
 <!-- show openstreetmap tiles if geoinfo was found -->
 #(geoinfo)#
-	::
+    ::
   <div class="searchresults">
   <h4 class="linktitle">
   <img src="http://www.openstreetmap.org/favicon.ico" class="favicon" style="width:16px; height:16px;" alt="" />
@@ -150,11 +157,6 @@ document.getElementById("Enter").value = "search again";
   </div>
 #(/geoinfo)#
 
-<!-- the search results -->
-<script type="text/javascript">
-var progressbar = new Progressbar(#[results]#, document.getElementById("results"));
-</script>
-<div style="float:left; width:70%;">
 <!-- linklist begin -->
 #(resultTable)#::<table width="100%"><tr class="TableHeader"><td width="30%">Media</td><td width="70%">URL</tr>#(/resultTable)#
 #{results}#
