@@ -163,6 +163,11 @@ form.search.small h2 {
   /*border-top:1px #000 dashed;*/
 }
 
+.searchresults h4 a {
+  font-size:1.1em;
+  text-decoration:underline;
+}
+
 .searchresults .url a {
   color:#008000;
 }

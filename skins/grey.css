@@ -160,7 +160,12 @@ div.ProgressBarFill {
 /* Searchresults */
 
 .searchresults {
-  border-top:1px #000 dashed;
+  /*border-top:1px #000 dashed;*/
+}
+
+.searchresults h4 a {
+  font-size:1.1em;
+  text-decoration:underline;
 }
 
 .searchresults .url a {
