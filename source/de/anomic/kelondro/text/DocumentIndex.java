@@ -52,7 +52,7 @@ import de.anomic.yacy.logging.Log;
  */
 public class DocumentIndex extends Segment {
 	
-    private RankingProfile textRankingDefault = new RankingProfile(QueryParams.CONTENTDOM_TEXT);
+    private static final RankingProfile textRankingDefault = new RankingProfile(QueryParams.CONTENTDOM_TEXT);
     //private Bitfield zeroConstraint = new Bitfield(4);
     
     File poison = new File(".");
@@ -155,8 +155,7 @@ public class DocumentIndex extends Segment {
      * @return a list of files that contain the given string
      */    
     public ArrayList<File> find(String querystring, int pos, int count) {
-        QueryParams query = new QueryParams(querystring, 100, textRankingDefault, null);
-        ArrayList<URLMetadataRow> result = findMetadata(query, this);
+        ArrayList<URLMetadataRow> result = findMetadata(querystring, this);
         ArrayList<File> files = new ArrayList<File>();
         for (URLMetadataRow row : result) {
             files.add(row.metadata().url().getLocalFile());
@@ -164,6 +163,13 @@ public class DocumentIndex extends Segment {
             if (count == 0) break;
         }
         return files;
+    }
+
+    public static final ArrayList<URLMetadataRow> findMetadata(
+            final String querystring,
+            final Segment indexSegment) {
+        QueryParams query = new QueryParams(querystring, 100, textRankingDefault, null);
+        return findMetadata(query, indexSegment);
     }
     
     public static final ArrayList<URLMetadataRow> findMetadata(
@@ -189,13 +195,25 @@ public class DocumentIndex extends Segment {
         return find(querystring, 0, 20);
     }
     
+    /**
+     * close the index.
+     * This terminates all worker threads and then closes the segment.
+     */
     public void close() {
-        super.close();
+        // send termination signal to worker threads
         for (int i = 0; i < this.worker.length; i++) {
             try {
                 this.queue.put(poison);
             } catch (InterruptedException e) {}
         }
+        // wait for termination
+        for (int i = 0; i < this.worker.length; i++) {
+            try {
+                this.worker[i].join();
+            } catch (InterruptedException e) {}
+        }
+        // close the segment
+        super.close();
     }
     
     public static void main(String[] args) {
