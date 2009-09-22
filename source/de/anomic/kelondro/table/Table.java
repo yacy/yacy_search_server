@@ -243,7 +243,7 @@ public class Table implements ObjectIndex {
         return MemoryControl.available() < minmemremaining;
     }
     
-    public static long tableSize(final File tablefile, final int recordsize) {
+    public static long tableSize(final File tablefile, final int recordsize) throws IOException {
         // returns number of records in table
         return Records.tableSize(tablefile, recordsize);
     }
@@ -277,7 +277,7 @@ public class Table implements ObjectIndex {
         return this.table != null;
     }
     
-    public static int staticRAMIndexNeed(final File f, final Row rowdef) {
+    public static int staticRAMIndexNeed(final File f, final Row rowdef) throws IOException {
         return (int) (((long)(rowdef.primaryKeyLength + 4)) * tableSize(f, rowdef.objectsize) * RowCollection.growfactor100 / 100L);
     }
     

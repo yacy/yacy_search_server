@@ -34,8 +34,9 @@ import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 
 /**
- * The EcoFS is a flat file with records of fixed length. The file does not contain
- * any meta information and the first record starts right at file position 0
+ * The Records data structure is a flat file with records of fixed length.
+ * The file does not contain any meta information and the first record starts
+ * right at file position 0.
  * The access rules are in such a way that a minimum of IO operations are necessary
  * Two caches provide a mirror to content in the file: a read cache and a write buffer
  * The read cache contains a number of entries from the file; a mirror that moves
@@ -126,10 +127,10 @@ public class Records {
      * @param recordsize
      * @return number of records in table
      */
-    public static long tableSize(final File tablefile, final long recordsize) {
+    public static long tableSize(final File tablefile, final long recordsize) throws IOException {
         if (!tablefile.exists()) return 0;
         final long size = tablefile.length();
-        assert size % recordsize == 0;
+        if (size % recordsize != 0) throw new IOException("wrong file size: file = " + tablefile + ", size = " + size + ", recordsize = " + recordsize);
         return size / recordsize;
     }
     

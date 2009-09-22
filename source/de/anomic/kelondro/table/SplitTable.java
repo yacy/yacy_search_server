@@ -162,10 +162,14 @@ public class SplitTable implements ObjectIndex {
                     maxtime = time;
                 }
                 
-                ram = Table.staticRAMIndexNeed(f, rowdef);
-                if (ram > 0) {
-                    t.put(tablefile[i], Long.valueOf(ram));
-                    sum += ram;
+                try {
+                    ram = Table.staticRAMIndexNeed(f, rowdef);
+                    if (ram > 0) {
+                        t.put(tablefile[i], Long.valueOf(ram));
+                        sum += ram;
+                    }
+                } catch (IOException e) {
+                    Log.logWarning("SplitTable", "file " + f.toString() + " appears to be corrupted: " + e.getMessage());
                 }
             }
         }
