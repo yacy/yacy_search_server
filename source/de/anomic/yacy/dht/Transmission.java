@@ -108,7 +108,6 @@ public class Transmission {
             super();
             this.primaryTarget = primaryTarget;
             this.containers = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, payloadrow, Segment.wordOrder);
-            this.containers.initWriteMode();
             this.references = new HashMap<String, URLMetadataRow>();
             this.badReferences = new HashSet<String>();
             this.targets    = targets;

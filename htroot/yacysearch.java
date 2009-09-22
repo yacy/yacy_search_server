@@ -77,7 +77,10 @@ public class yacysearch {
         
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
         int display = (post == null) ? 0 : post.getInt("display", 0);
-        if ((display == 1) && (!authenticated)) display = 0;
+        if (!authenticated) display = 2;
+        // display == 0: shop top menu
+        // display == 1: show top and left menu
+        // display == 2: do not show any menu
         final boolean browserPopUpTrigger = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
         if (browserPopUpTrigger) {
             final String  browserPopUpPage = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_PAGE, "ConfigBasic.html");

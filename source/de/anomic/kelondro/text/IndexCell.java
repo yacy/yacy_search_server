@@ -81,7 +81,6 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         
         this.array = new ReferenceContainerArray<ReferenceType>(cellPath, factory, termOrder, payloadrow, merger);
         this.ram = new ReferenceContainerCache<ReferenceType>(factory, payloadrow, termOrder);
-        this.ram.initWriteMode();
         this.maxRamEntries = maxRamEntries;
         this.merger = merger;
         this.lastCleanup = System.currentTimeMillis();
@@ -295,18 +294,18 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     }
 
     public int[] sizes() {
-    	int[] as = this.array.sizes();
-    	int[] asr = new int[as.length + 1];
-    	System.arraycopy(as, 0, asr, 0, as.length);
-    	asr[as.length] = this.ram.size();
-    	return asr;
+        int[] as = this.array.sizes();
+        int[] asr = new int[as.length + 1];
+        System.arraycopy(as, 0, asr, 0, as.length);
+        asr[as.length] = this.ram.size();
+        return asr;
     }
     
     public int sizesMax() {
-    	int m = 0;
-    	int[] s = sizes();
-    	for (int i = 0; i < s.length; i++) if (s[i] > m) m = s[i];
-    	return m;
+        int m = 0;
+        int[] s = sizes();
+        for (int i = 0; i < s.length; i++) if (s[i] > m) m = s[i];
+        return m;
     }
 
     public int minMem() {
@@ -323,29 +322,30 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      */
     
     private void cleanCache() {
-    	this.countCache.clear();
-    	
+        this.countCache.clear();
+        
         // dump the cache if necessary
-    	if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false))) synchronized (this) {
-	        if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false))) {
-	        	// dump the ram
-				File dumpFile = this.array.newContainerBLOBFile();
-				//this.ram.dump(dumpFile, true);
-				//this.array.mountBLOBContainer(dumpFile);
-				merger.dump(this.ram, dumpFile, array);
-				// get a fresh ram cache
-				this.ram = new ReferenceContainerCache<ReferenceType>(factory, this.array.rowdef(), this.array.ordering());
-				this.ram.initWriteMode();
-	        }
-    	}
-    	
+        if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false))) synchronized (this) {
+            if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false))) {
+                // dump the ram
+                File dumpFile = this.array.newContainerBLOBFile();
+                // a critical point: when the ram is handed to the dump job,
+                // dont write into it any more. Use a fresh one instead
+                ReferenceContainerCache<ReferenceType> ramdump = this.ram;
+                // get a fresh ram cache
+                this.ram = new ReferenceContainerCache<ReferenceType>(factory, this.array.rowdef(), this.array.ordering());
+                // dump the buffer
+                merger.dump(ramdump, dumpFile, array);
+            }
+        }
+        
         // clean-up the cache
-    	if (this.array.entries() > 50 || (this.lastCleanup + cleanupCycle < System.currentTimeMillis())) synchronized (this) {
-	        if (this.array.entries() > 50 || (this.lastCleanup + cleanupCycle < System.currentTimeMillis())) {
-	        	//System.out.println("----cleanup check");
-	        	this.array.shrink(this.targetFileSize, this.maxFileSize);
-	        	this.lastCleanup = System.currentTimeMillis();
-        	}
+        if (this.array.entries() > 50 || (this.lastCleanup + cleanupCycle < System.currentTimeMillis())) synchronized (this) {
+            if (this.array.entries() > 50 || (this.lastCleanup + cleanupCycle < System.currentTimeMillis())) {
+                //System.out.println("----cleanup check");
+                this.array.shrink(this.targetFileSize, this.maxFileSize);
+                this.lastCleanup = System.currentTimeMillis();
+            }
         }
     }
     

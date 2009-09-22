@@ -48,18 +48,9 @@ import de.anomic.yacy.logging.Log;
 
 public final class ReferenceContainerCache<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType>, IndexReader<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
 
-    public class ContainerOrder implements Comparator<ReferenceContainer<ReferenceType>> {
-        public int compare(ReferenceContainer<ReferenceType> arg0, ReferenceContainer<ReferenceType> arg1) {
-        	if (arg0 == arg1) return 0;
-        	if (arg0 == null) return -1;
-        	if (arg1 == null) return 1;
-            return termOrder.compare(arg0.getTermHash(), arg1.getTermHash());
-        }
-    }
-    
     private   final Row payloadrow;
     protected final ByteOrder termOrder;
-    private   final ContainerOrder containerOrder;
+    private   final ContainerOrder<ReferenceType> containerOrder;
     protected Map<ByteArray, ReferenceContainer<ReferenceType>> cache;
     
     /**
@@ -73,8 +64,8 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         super(factory);
         this.payloadrow = payloadrow;
         this.termOrder = termOrder;
-        this.containerOrder = new ContainerOrder();
-        this.cache = null;
+        this.containerOrder = new ContainerOrder<ReferenceType>(this.termOrder);
+        this.cache = new ConcurrentHashMap<ByteArray, ReferenceContainer<ReferenceType>>();
     }
     
     public Row rowdef() {
@@ -83,19 +74,10 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     
     public void clear() {
         if (cache != null) cache.clear();
-        initWriteMode();
     }
     
     public void close() {
     	this.cache = null;
-    }
-    
-    /**
-     * initializes the heap in read/write mode without reading of a dump first
-     * another dump reading afterwards is not possible
-     */
-    public void initWriteMode() {
-        this.cache = new ConcurrentHashMap<ByteArray, ReferenceContainer<ReferenceType>>();
     }
     
     public void dump(final File heapFile, int writeBuffer) {
@@ -160,18 +142,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         Arrays.sort(cachecopy, this.containerOrder);
         return cachecopy;
     }
-    /*
-    public SortedMap<byte[], ReferenceContainer<ReferenceType>> sortedClone() {
-        SortedMap<byte[], ReferenceContainer<ReferenceType>> cachecopy;
-        synchronized (cache) {
-            cachecopy = new TreeMap<byte[], ReferenceContainer<ReferenceType>>(this.termOrder);
-            for (final Map.Entry<ByteArray, ReferenceContainer<ReferenceType>> entry: cache.entrySet()) {
-                cachecopy.put(entry.getKey().asBytes(), entry.getValue());
-            }
-        }
-        return cachecopy;
-    }
-    */
+    
     public int size() {
         return (this.cache == null) ? 0 : this.cache.size();
     }
@@ -345,8 +316,8 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * @return the indexContainer if one exist, null otherwise
      */
     public ReferenceContainer<ReferenceType> get(final byte[] key, Set<String> urlselection) {
-        if (urlselection == null) return this.cache.get(new ByteArray(key));
         ReferenceContainer<ReferenceType> c = this.cache.get(new ByteArray(key));
+        if (urlselection == null) return c;
         if (c == null) return null;
         // because this is all in RAM, we must clone the entries (flat)
         ReferenceContainer<ReferenceType> c1 = new ReferenceContainer<ReferenceType>(factory, c.getTermHash(), c.row(), c.size());
@@ -471,31 +442,6 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             }
         }
     }
-    
-    /*
-    public void add(final byte[] termHash, final ReferenceType newEntry) {
-        assert this.cache != null;
-        ByteArray tha = new ByteArray(termHash);
-        
-        // first access the cache without synchronization
-        ReferenceContainer<ReferenceType> container = cache.remove(tha);
-        if (container == null) container = new ReferenceContainer<ReferenceType>(factory, termHash, this.payloadrow, 1);
-        container.put(newEntry);
-        
-        // then try to replace the entry that should be empty,
-        // but it can be possible that another thread has written something in between
-        ReferenceContainer<ReferenceType> containerNew = cache.put(tha, container);
-        if (containerNew == null) return;
-        container = containerNew;
-        
-        // finally use synchronization: ensure that the entry is written exclusively
-        synchronized (cache) {
-            containerNew = cache.get(tha);
-            if (containerNew != null) container.putAllRecent(containerNew);
-        	cache.put(tha, container);
-        }
-    }
-    */
 
     public int minMem() {
         return 0;
@@ -505,4 +451,17 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return this.termOrder;
     }
  
+    public static class ContainerOrder<ReferenceType extends Reference> implements Comparator<ReferenceContainer<ReferenceType>> {
+        private ByteOrder o;
+        public ContainerOrder(ByteOrder order) {
+            this.o = order;
+        }
+        public int compare(ReferenceContainer<ReferenceType> arg0, ReferenceContainer<ReferenceType> arg1) {
+            if (arg0 == arg1) return 0;
+            if (arg0 == null) return -1;
+            if (arg1 == null) return 1;
+            return o.compare(arg0.getTermHash(), arg1.getTermHash());
+        }
+    }
+
 }

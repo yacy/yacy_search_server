@@ -44,7 +44,7 @@ public class wikiBoard {
     public  static final int keyLength = 64;
     private static final String dateFormat = "yyyyMMddHHmmss";
 
-    private static final SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
+    protected static final SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
 
     static {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
