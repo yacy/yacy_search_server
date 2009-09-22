@@ -142,16 +142,19 @@ public class Cache implements ObjectIndex {
     }
 
     
+    /**
+     * checks for space in the miss cache
+     * @return true if it is allowed to write into this cache
+     */
     private boolean checkMissSpace() {
         // returns true if it is allowed to write into this cache
-    	long available = MemoryControl.available();
-    	if (available - 2 * 1024 * 1024 < readMissCache.memoryNeededForGrow()) {
-    		if (readMissCache != null) {
-    			readMissCache.clear();
-            }
-    		return false;
-    	}
-        return true;
+        if (readMissCache == null) return false;
+        long available = MemoryControl.available();
+        if (available - 2 * 1024 * 1024 < readMissCache.memoryNeededForGrow()) {
+            readMissCache.clear();
+        }
+        available = MemoryControl.available();
+        return (available - 2 * 1024 * 1024 > readMissCache.memoryNeededForGrow());
     }
     
     /**
@@ -161,11 +164,11 @@ public class Cache implements ObjectIndex {
     private boolean checkHitSpace() {
         // returns true if it is allowed to write into this cache
         if (readHitCache == null) return false;
-    	long available = MemoryControl.available();
-    	if (available - 2 * 1024 * 1024 < readHitCache.memoryNeededForGrow()) {
-    		readHitCache.clear();
-    	}
-    	available = MemoryControl.available();
+        long available = MemoryControl.available();
+        if (available - 2 * 1024 * 1024 < readHitCache.memoryNeededForGrow()) {
+            readHitCache.clear();
+        }
+        available = MemoryControl.available();
         return (available - 2 * 1024 * 1024 > readHitCache.memoryNeededForGrow());
     }
     
@@ -231,7 +234,7 @@ public class Cache implements ObjectIndex {
         entry = index.get(key);
         // learn from result
         if (entry == null) {
-            if ((checkMissSpace()) && (readMissCache != null)) {
+            if (checkMissSpace()) {
                 final Row.Entry dummy = readMissCache.replace(readMissCache.row().newEntry(key));
                 if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
             }
@@ -377,7 +380,7 @@ public class Cache implements ObjectIndex {
         checkMissSpace();
         
         // add entry to miss-cache
-        if (readMissCache != null) {
+        if (checkMissSpace()) {
             // set the miss cache; if there was already an entry we know that the return value must be null
             final Row.Entry dummy = readMissCache.replace(readMissCache.row().newEntry(key));
             if (dummy == null) {
@@ -409,7 +412,7 @@ public class Cache implements ObjectIndex {
         final Row.Entry entry = index.removeOne();
         if (entry == null) return null;
         final byte[] key = entry.getPrimaryKeyBytes();
-        if (readMissCache != null) {
+        if (checkMissSpace()) {
             final Row.Entry dummy = readMissCache.replace(readMissCache.row().newEntry(key));
             if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
         }
@@ -444,10 +447,10 @@ public class Cache implements ObjectIndex {
         return index.filename();
     }
 
-	public void clear() throws IOException {
-		this.index.clear();
-		init();
-	}
+    public void clear() throws IOException {
+        this.index.clear();
+        init();
+    }
 
     public void deleteOnExit() {
         this.index.deleteOnExit();
