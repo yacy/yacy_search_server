@@ -88,6 +88,7 @@ public final class HTTPLoader {
         }
         
         final String host = request.url().getHost();
+        if (host == null || host.length() < 2) throw new IOException("host is not well-formed: '" + host + "'");
         final String path = request.url().getFile();
         int port = request.url().getPort();
         final boolean ssl = request.url().getProtocol().equals("https");
