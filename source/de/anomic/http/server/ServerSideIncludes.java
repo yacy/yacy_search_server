@@ -1,13 +1,13 @@
-// httpSSI.java
+// ServerSideIncludes.java
 // -----------------------------
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 26.06.2007 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 

@@ -1,4 +1,4 @@
-//severMiniLogFormatter.java 
+//ProxyLogFormatter.java 
 //-------------------------------------
 //part of YACY
 //(C) by Michael Peter Christen; mc@yacy.net
@@ -6,8 +6,8 @@
 //Frankfurt, Germany, 2004
 //
 //This file ist contributed by Martin Thelian
-//last major change: $LastChangedDate: 2008-12-04 12:54:16 +0000 (Do, 04 Dez 2008) $ by $LastChangedBy: orbiter $
-//Revision: $LastChangedRevision: 5379 $
+//last change: $LastChangedDate$ by $LastChangedBy$
+//Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -36,17 +36,18 @@ public final class ProxyLogFormatter extends SimpleFormatter {
           super();
       }        
       
+    @Override
       public synchronized String format(final LogRecord record) {
           
-          final StringBuilder buffer = this.buffer;
-          buffer.setLength(0);
+          final StringBuilder sb = this.buffer;
+          sb.setLength(0);
 
-          buffer.append(formatMessage(record));
+          sb.append(formatMessage(record));
           
           // adding the stack trace if available
-          buffer.append(System.getProperty("line.separator"));
+          sb.append(System.getProperty("line.separator"));
           
           
-          return buffer.toString();
+          return sb.toString();
       }
 }

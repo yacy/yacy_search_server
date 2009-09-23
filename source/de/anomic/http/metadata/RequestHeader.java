@@ -4,8 +4,8 @@
 // first published on http://yacy.net
 // Frankfurt, Germany, 22.08.2008
 //
-// last major change: $LastChangedDate: 2008-08-20 09:54:56 +0200 (Mi, 20 Aug 2008) $ by $LastChangedBy: danielr $
-// Revision: $LastChangedRevision: 5063 $
+// last major change: $LastChangedDate$ by $LastChangedBy$
+// Revision: $LastChangedRevision$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

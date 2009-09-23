@@ -1,4 +1,4 @@
-// httpdProxyHandler.java
+// HTTPDProxyHandler.java
 // (C) 2004 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 2004 on http://yacy.net
 //
@@ -1327,6 +1327,7 @@ public final class HTTPDProxyHandler {
             this.socket = socket;
         }
         
+        @Override
         public void run() {
             final byte[] buffer = new byte[512];
             int len;

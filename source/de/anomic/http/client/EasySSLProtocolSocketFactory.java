@@ -30,7 +30,7 @@
 
 /* CHANGES to original file
  * ========================
- * 2008-04-07 danielr: changed package from org.apache.commons.httpclient.contrib.ssl 
+ * 2008-04-07 danielr: changed package from org.apache.commons.httpclient.contrib.ssl
  */
 package de.anomic.http.client;
 

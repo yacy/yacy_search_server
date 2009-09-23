@@ -1,4 +1,4 @@
-// httpd.java
+// HTTPDemon.java
 // -----------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -133,7 +133,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     
     // for authentication
     private boolean use_proxyAccounts = false;
-	private boolean proxyAccounts_init = false; // is use_proxyAccounts set?
+    private boolean proxyAccounts_init = false; // is use_proxyAccounts set?
     private String serverAccountBase64MD5;
     private String clientIP;
     private boolean allowProxy;
@@ -722,7 +722,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         final String path = this.prop.getProperty(HeaderFramework.CONNECTION_PROP_URL);
         final String args = this.prop.getProperty(HeaderFramework.CONNECTION_PROP_ARGS, "");
         switchboard.track(this.userAddress.getHostName(), (args.length() > 0) ? path + "?" + args : path);
-        
+
         // reseting the empty request counter
         this.emptyRequestCount = 0;
         
@@ -1144,9 +1144,6 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             // set rewrite values
             final serverObjects tp = new serverObjects();
 
-//            tp.put("host", serverCore.publicIP().getHostAddress());
-//            tp.put("port", switchboard.getConfig("port", "8080"));
-
             final String clientIP = conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
             // check if ip is local ip address
@@ -1160,15 +1157,6 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             } else {
                 tp.put("host", serverDomains.myPublicIP());
                 tp.put("port", Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8080"))));
-            }
-
-            // if peer has public address it will be used
-            if (getAlternativeResolver() != null) {
-                tp.put("extAddress", getAlternativeResolver().myIP() + ":" + getAlternativeResolver().myPort());
-            }
-            // otherwise the local ip address will be used
-            else {
-                tp.put("extAddress", tp.get("host", "127.0.0.1") + ":" + tp.get("port", "8080"));
             }
 
             tp.put("peerName", (getAlternativeResolver() == null) ? "" : getAlternativeResolver().myName());

@@ -1,4 +1,4 @@
-//httpTemplate.java 
+//TemplateEngine.java 
 //-------------------------------------
 //(C) by Michael Peter Christen; mc@yacy.net
 //first published on http://www.anomic.de

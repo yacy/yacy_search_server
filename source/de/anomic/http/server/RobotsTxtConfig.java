@@ -1,4 +1,4 @@
-// httpdRobotsTxtConfig.java 
+// RobotsTxtConfig.java 
 // ---------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -8,9 +8,9 @@
 //
 // This file is contributed by Franz Brausze
 //
-// $LastChangedDate: $
-// $LastChangedRevision: $
-// $LastChangedBy: $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -89,6 +89,7 @@ public final class RobotsTxtConfig {
         return new RobotsTxtConfig(cfg.split(","));
     }
     
+    @Override
     public String toString() {
         if (this.allDisallowed) return ALL;
         final StringBuilder sb = new StringBuilder();

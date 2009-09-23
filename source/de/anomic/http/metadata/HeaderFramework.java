@@ -62,7 +62,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
     
     static final String DEFAULT_CHARSET = "ISO-8859-1";
 	
-	/* =============================================================
+    /* =============================================================
      * Constants defining http versions
      * ============================================================= */
     public static final String HTTP_VERSION_0_9 = "HTTP/0.9";
@@ -245,6 +245,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
 
 
     // we override the put method to make use of the reverseMappingCache
+    @Override
     public String put(final String key, final String value) {
         final String upperK = key.toUpperCase();
         
@@ -311,6 +312,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         }
     }
 
+    @Override
     public String toString() {
         return super.toString();
     }

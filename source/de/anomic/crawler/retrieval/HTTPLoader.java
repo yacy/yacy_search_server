@@ -1,13 +1,13 @@
-//plasmaCrawlWorker.java 
+//HTTPLoader.java 
 //------------------------
 //part of YaCy
 //(C) by Michael Peter Christen; mc@yacy.net
 //first published on http://www.anomic.de
 //Frankfurt, Germany, 2006
 //
-// $LastChangedDate: 2006-08-12 16:28:14 +0200 (Sa, 12 Aug 2006) $
-// $LastChangedRevision: 2397 $
-// $LastChangedBy: theli $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by

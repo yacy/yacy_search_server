@@ -1,4 +1,4 @@
-// CrawlerWorker.java 
+// FTPLoader.java 
 // -------------------------------------
 // part of YACY
 // (C) by Michael Peter Christen; mc@yacy.net
