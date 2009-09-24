@@ -39,6 +39,8 @@ import de.anomic.yacy.yacyURL;
 import org.apache.poi.hdgf.extractor.VisioTextExtractor;
 import org.apache.poi.hpsf.SummaryInformation;
 
+import de.anomic.yacy.logging.Log;
+
 public class vsdParser extends AbstractParser implements Idiom {
 
     /**
@@ -91,7 +93,7 @@ public class vsdParser extends AbstractParser implements Idiom {
             	contents = extractor.getText();
                 summary = extractor.getSummaryInformation();
             } catch (Exception e) {
-            	e.printStackTrace();
+            	Log.logWarning("vsdParser", e.getMessage());
             }
 
             String author = null;

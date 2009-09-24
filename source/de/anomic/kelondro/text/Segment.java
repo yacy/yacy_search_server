@@ -188,8 +188,6 @@ public class Segment {
             wordCount++;
         }
         
-        
-        
         return wordCount;
     }
 

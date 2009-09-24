@@ -124,7 +124,7 @@ public class DocumentIndex extends Segment {
      */
     public void addAll(File start) {
         assert (start != null);
-        assert (start.canRead());
+        assert (start.canRead()) : start.toString();
         if (!start.isDirectory()) {
             try {
                 this.queue.put(start);
@@ -192,7 +192,7 @@ public class DocumentIndex extends Segment {
      * @return a list of files that contain the word
      */
     public ArrayList<File> find(String querystring) {
-        return find(querystring, 0, 20);
+        return find(querystring, 0, 100);
     }
     
     /**

@@ -50,6 +50,7 @@ import de.anomic.document.Document;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacyURL;
+import de.anomic.yacy.logging.Log;
 
 public class pdfParser extends AbstractParser implements Idiom {
 
@@ -134,8 +135,11 @@ public class pdfParser extends AbstractParser implements Idiom {
             } else {
                 writer = new serverCharBuffer(); 
             }
-
-            stripper.writeText(theDocument, writer );
+            try {
+                stripper.writeText(theDocument, writer ); // may throw a NPE
+            } catch (Exception e) {
+                Log.logWarning("pdfParser", e.getMessage());
+            }
             theDocument.close(); theDocument = null;            
             writer.close();
 

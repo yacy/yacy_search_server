@@ -78,17 +78,23 @@ public class migration {
         if(file.exists())
             delete(file);
     }
+    
+    /*
+     * copy skins from the release to DATA/SKINS.
+     */
     public static void installSkins(final Switchboard sb){
         final File skinsPath = sb.getConfigPath("skinPath", "DATA/SKINS");
         final File defaultSkinsPath = new File(sb.getRootPath(), "skins");
-        if(defaultSkinsPath.exists()){
+        if (defaultSkinsPath.exists()) {
             final List<String> skinFiles = listManager.getDirListing(defaultSkinsPath.getAbsolutePath());
             mkdirs(skinsPath);
-            for(String skinFile : skinFiles){
-                if(skinFile.endsWith(".css")){
-                    try{
-                        FileUtils.copy(new File(defaultSkinsPath, skinFile), new File(skinsPath, skinFile));
-                    }catch(final IOException e){}
+            for (String skinFile : skinFiles){
+                if (skinFile.endsWith(".css")){
+                    File from = new File(defaultSkinsPath, skinFile);
+                    File to = new File(skinsPath, skinFile);
+                    if (from.lastModified() > to.lastModified()) try {
+                        FileUtils.copy(from, to);
+                    } catch (final IOException e) {}
                 }
             }
         }
