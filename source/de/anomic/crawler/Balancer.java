@@ -390,7 +390,7 @@ public class Balancer {
             	rest = rest + 3000 * loops;
             	loops = 0;
             }
-            try {synchronized(this) { this.wait(rest); }} catch (final InterruptedException e) {}
+            if (rest > 0) {try {synchronized(this) { this.wait(rest); }} catch (final InterruptedException e) {}}
             for (int i = 0; i < loops; i++) {
             	Log.logInfo("BALANCER", "waiting for " + crawlEntry.url().getHost() + ": " + ((loops - i) * 3) + " seconds remaining...");
                 try {synchronized(this) { this.wait(3000); }} catch (final InterruptedException e) {}
