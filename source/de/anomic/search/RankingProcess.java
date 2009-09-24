@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
 import de.anomic.document.Condenser;
 import de.anomic.document.Word;
@@ -184,7 +185,9 @@ public final class RankingProcess extends Thread {
 
         // apply all constraints
         try {
-			while ((iEntry = decodedEntries.take()) != WordReferenceVars.poison) {
+			while (true) {
+			    iEntry = decodedEntries.poll(1, TimeUnit.SECONDS);
+			    if (iEntry == null || iEntry == WordReferenceVars.poison) break;
 			    assert (iEntry.metadataHash().length() == index.row().primaryKeyLength);
 			    //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
 

@@ -43,9 +43,9 @@ import de.anomic.search.RankingProcess;
 import de.anomic.yacy.yacyURL;
 
 public class ReferenceOrder {
-	
+    
     protected int maxdomcount;
-	protected WordReferenceVars min, max;
+    protected WordReferenceVars min, max;
     protected final ScoreCluster<String> doms; // collected for "authority" heuristic 
     private   final RankingProfile ranking;
     private   String language;
@@ -60,22 +60,22 @@ public class ReferenceOrder {
     }
     
     public class Normalizer extends Thread {
-    	
-    	private ReferenceContainer<WordReference> container;
-    	private BlockingQueue<WordReferenceVars> decodedEntries;
-    	
+        
+        private ReferenceContainer<WordReference> container;
+        private BlockingQueue<WordReferenceVars> decodedEntries;
+        
         public Normalizer(final ReferenceContainer<WordReference> container) {
-        	// normalize ranking: find minimum and maximum of separate ranking criteria
+            // normalize ranking: find minimum and maximum of separate ranking criteria
             assert (container != null);
             this.container = container;
             this.decodedEntries = new LinkedBlockingQueue<WordReferenceVars>();
-    	}
+        }
         
         public void run() {
-        	BlockingQueue<WordReferenceVars> vars = WordReferenceVars.transform(container);
+            BlockingQueue<WordReferenceVars> vars = WordReferenceVars.transform(container);
             
             WordReferenceVars entryMin = null;
-        	WordReferenceVars entryMax = null;
+            WordReferenceVars entryMax = null;
             HashMap<String, Integer> doms0 = new HashMap<String, Integer>();
             Integer int1 = 1;
             
@@ -83,50 +83,55 @@ public class ReferenceOrder {
             String dom;
             Integer count;
             try {
-    			while ((iEntry = vars.take()) != WordReferenceVars.poison) {
-    			    decodedEntries.put(iEntry);
-    			    // find min/max
-    			    if (entryMin == null) entryMin = iEntry.clone(); else entryMin.min(iEntry);
-    			    if (entryMax == null) entryMax = iEntry.clone(); else entryMax.max(iEntry);
-    			    // update domcount
-    			    dom = iEntry.metadataHash().substring(6);
-    			    count = doms0.get(dom);
-    			    if (count == null) {
-    			    	doms0.put(dom, int1);
-    			    } else {
-    			    	doms0.put(dom, Integer.valueOf(count.intValue() + 1));
-    			    }
-    			}
-    		} catch (InterruptedException e) {}
-    		
-            if (min == null) min = entryMin.clone(); else min.min(entryMin);
-            if (max == null) max = entryMax.clone(); else max.max(entryMax);
-            Map.Entry<String, Integer> entry;
-            final Iterator<Map.Entry<String, Integer>> di = doms0.entrySet().iterator();
-            while (di.hasNext()) {
-            	entry = di.next();
-            	doms.addScore(entry.getKey(), (entry.getValue()).intValue());
+                while ((iEntry = vars.take()) != WordReferenceVars.poison) {
+                    decodedEntries.put(iEntry);
+                    // find min/max
+                    if (entryMin == null) entryMin = iEntry.clone(); else entryMin.min(iEntry);
+                    if (entryMax == null) entryMax = iEntry.clone(); else entryMax.max(iEntry);
+                    // update domcount
+                    dom = iEntry.metadataHash().substring(6);
+                    count = doms0.get(dom);
+                    if (count == null) {
+                        doms0.put(dom, int1);
+                    } else {
+                        doms0.put(dom, Integer.valueOf(count.intValue() + 1));
+                    }
+                }
+
+                if (min == null) min = entryMin.clone(); else min.min(entryMin);
+                if (max == null) max = entryMax.clone(); else max.max(entryMax);
+                Map.Entry<String, Integer> entry;
+                final Iterator<Map.Entry<String, Integer>> di = doms0.entrySet().iterator();
+                while (di.hasNext()) {
+                    entry = di.next();
+                    doms.addScore(entry.getKey(), (entry.getValue()).intValue());
+                }
+                    
+                if (doms.size() > 0) maxdomcount = doms.getMaxScore();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                try {
+                    decodedEntries.put(WordReferenceVars.poison);
+                } catch (InterruptedException e) {}
             }
-                
-            if (doms.size() > 0) maxdomcount = doms.getMaxScore();
-            try {
-				decodedEntries.put(WordReferenceVars.poison);
-			} catch (InterruptedException e) {}
         }
         
         public BlockingQueue<WordReferenceVars> decoded() {
-        	return this.decodedEntries;
+            return this.decodedEntries;
         }
     }
     
     public BlockingQueue<WordReferenceVars> normalizeWith(final ReferenceContainer<WordReference> container) {
-    	Normalizer n = new Normalizer(container);
-    	n.start();
-    	return n.decoded();
+        Normalizer n = new Normalizer(container);
+        n.start();
+        return n.decoded();
     }
     
     public int authority(final String urlHash) {
-    	return (doms.getScore(urlHash.substring(6)) << 8) / (1 + this.maxdomcount);
+        return (doms.getScore(urlHash.substring(6)) << 8) / (1 + this.maxdomcount);
     }
 
     public long cardinal(final WordReferenceVars t) {
