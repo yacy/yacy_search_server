@@ -6,9 +6,9 @@
 // Frankfurt, Germany, 2005
 // This File is contributed by Alexander Schier
 //
-// $LastChangedDate: 2005-09-13 00:20:37 +0200 (Di, 13 Sep 2005) $
-// $LastChangedRevision: 715 $
-// $LastChangedBy: borg-0300 $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

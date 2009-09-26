@@ -9,6 +9,10 @@
 // last change: 29.12.2004
 // extended by Michael Christen, 4.7.2008
 //
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
+//
 // LICENSE
 // 
 // This program is free software; you can redistribute it and/or modify

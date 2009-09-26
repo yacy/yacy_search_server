@@ -5,6 +5,10 @@
 // first published on http://yacy.net
 // Frankfurt, Germany, 29.5.2009
 //
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
+//
 // LICENSE
 // 
 // This program is free software; you can redistribute it and/or modify

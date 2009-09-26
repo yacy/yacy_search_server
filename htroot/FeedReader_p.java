@@ -4,8 +4,9 @@
 //
 // (C) 2007 Alexander Schier
 //
-// last change: $LastChangedDate:  $ by $LastChangedBy: $
-// $LastChangedRevision: $
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

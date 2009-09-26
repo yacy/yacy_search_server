@@ -7,9 +7,9 @@
 //
 // This File is contributed by Marc Nause
 //
-// $LastChangedDate: 2007-10-09 23:07:00 +0200 (Mi, 09 Okt 2007) $
-// $LastChangedRevision: 4154 $
-// $LastChangedBy: low012 $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

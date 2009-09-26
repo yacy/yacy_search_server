@@ -3,6 +3,10 @@
 // (C) 2009 by Michael Peter Christen; mc@yacy.net
 // first published 25.09.2009 on http://yacy.net
 //
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
+//
 // LICENSE
 // 
 // This program is free software; you can redistribute it and/or modify

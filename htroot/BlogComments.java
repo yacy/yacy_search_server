@@ -7,7 +7,10 @@
 //
 // This File is contributed by Jan Sandbrink
 // Contains contributions from Marc Nause [MN]
-// last change: 06.05.2006
+//
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

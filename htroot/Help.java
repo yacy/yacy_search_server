@@ -1,3 +1,9 @@
+//
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
+//
+
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

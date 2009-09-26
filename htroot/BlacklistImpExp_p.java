@@ -7,9 +7,9 @@
 //
 // This File is contributed by Alexander Schier
 //
-// $LastChangedDate: 2008-10-30 01:03:14 +0100 (Do, 30 Okt 2008) $
-// $LastChangedRevision: 5309 $
-// $LastChangedBy: low012 $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

@@ -6,7 +6,10 @@
 //Frankfurt, Germany, 2004
 //
 //This File is contributed by Alexander Schier
-//last major change: 30.09.2005
+//
+//$LastChangedDate$
+//$LastChangedRevision$
+//$LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by

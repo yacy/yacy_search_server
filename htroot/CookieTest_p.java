@@ -5,9 +5,9 @@
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
 //
-// $LastChangedDate: 2005-12-07 01:36:05 +0100 $
-// $LastChangedRevision: 1177 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
