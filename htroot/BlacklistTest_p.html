@@ -14,10 +14,11 @@
     <fieldset>
       <legend>Test list:</legend>
       <form action="BlacklistTest_p.html" method="post" enctype="multipart/form-data">
-        <input type="text" name="testurl" size="50" value="http://" />&nbsp;
+        <input type="text" name="testurl" size="50" value="#[url]#" />&nbsp;
         <input type="submit" name="testList" value="Test" />
         
         #(testlist)#::
+          <br /><br />
           <div>
             The tested URL was #[url]#<br>
             It is blocked for the following cases:<br>
@@ -30,6 +31,9 @@
               #(listedinsurftips)#::<li>Surftips</li>#(/listedinsurftips)#
             </ul>
           </div>
+          ::
+          <br /><br />
+          <div>The tested URL was not valid.</div>
         #(/testlist)#
       </form>
     </fieldset>

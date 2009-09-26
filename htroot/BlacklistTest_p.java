@@ -55,12 +55,16 @@ public class BlacklistTest_p {
         if(post != null && post.containsKey("testList")) {
             prop.put("testlist", "1");
             String urlstring = post.get("testurl", "");
-            if(!urlstring.startsWith("http://")) urlstring = "http://"+urlstring;
+            if(!urlstring.startsWith("http://") &&
+                    !urlstring.startsWith("https://")&&
+                    !urlstring.startsWith("ftp://")
+                    ) urlstring = "http://"+urlstring;
             yacyURL testurl = null;
             try {
                 testurl = new yacyURL(urlstring, null);
             } catch (final MalformedURLException e) { testurl = null; }
             if(testurl != null) {
+                prop.putHTML("url",testurl.toString());
                 prop.putHTML("testlist_url",testurl.toString());
                 if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, testurl))
                         prop.put("testlist_listedincrawler", "1");
@@ -75,7 +79,12 @@ public class BlacklistTest_p {
                 if(Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS, testurl))
                         prop.put("testlist_listedinsurftips", "1");
             }
-            else prop.put("testlist_url","not valid");
+            else {
+                prop.putHTML("url",urlstring);
+                prop.put("testlist", "2");
+            }
+        } else {
+            prop.putHTML("url", "http://");
         }
         return prop;
     }
