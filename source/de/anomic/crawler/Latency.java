@@ -111,7 +111,7 @@ public class Latency {
     public static long waitingRemainingGuessed(String hosthash, final long minimumLocalDelta, final long minimumGlobalDelta) {
         assert hosthash.length() == 12 || hosthash.length() == 6;
         Host host = Latency.host((hosthash.length() == 6) ? hosthash : hosthash.substring(6));
-        if (host == null) return 0;
+        if (host == null) return Long.MIN_VALUE;
         
         // the time since last access to the domain is the basis of the remaining calculation
         final long timeSinceLastAccess = System.currentTimeMillis() - host.lastacc();
@@ -150,14 +150,14 @@ public class Latency {
      */
     public static long waitingRemaining(yacyURL url, final long minimumLocalDelta, final long minimumGlobalDelta) {
 
-        // find the minimum waiting time based on the network domain (local or global)
-        final boolean local = url.isLocal();
-        long waiting = (local) ? minimumLocalDelta : minimumGlobalDelta;
-        
         // first check if the domain was _ever_ accessed before
         String hosthash = url.hash().substring(6);
         Host host = host(hosthash);
-        if (host == null) return 0; // no delay if host is new
+        if (host == null) return Long.MIN_VALUE; // no delay if host is new
+        
+        // find the minimum waiting time based on the network domain (local or global)
+        final boolean local = url.isLocal();
+        long waiting = (local) ? minimumLocalDelta : minimumGlobalDelta;
         
         // the time since last access to the domain is the basis of the remaining calculation
         final long timeSinceLastAccess = (host == null) ? 0 : System.currentTimeMillis() - host.lastacc();
@@ -185,6 +185,45 @@ public class Latency {
         // return time that is remaining
         //System.out.println("Latency: " + (waiting - timeSinceLastAccess));
         return Math.max(0, waiting - timeSinceLastAccess);
+    }
+    
+    
+    public static String waitingRemainingExplain(yacyURL url, final long minimumLocalDelta, final long minimumGlobalDelta) {
+        
+        // first check if the domain was _ever_ accessed before
+        String hosthash = url.hash().substring(6);
+        Host host = host(hosthash);
+        if (host == null) return "host " + hosthash + "/" + url.getHost() + " never accessed before -> 0"; // no delay if host is new
+        
+        StringBuilder s = new StringBuilder(50);
+        
+        // find the minimum waiting time based on the network domain (local or global)
+        final boolean local = url.isLocal();
+        long waiting = (local) ? minimumLocalDelta : minimumGlobalDelta;
+        s.append("minimumDelta = ").append(waiting);
+        
+        // the time since last access to the domain is the basis of the remaining calculation
+        final long timeSinceLastAccess = (host == null) ? 0 : System.currentTimeMillis() - host.lastacc();
+        s.append(", timeSinceLastAccess = ").append(timeSinceLastAccess);
+        
+        // for CGI accesses, we double the minimum time
+        // mostly there is a database access in the background
+        // which creates a lot of unwanted IO on target site
+        if (url.isCGI()) s.append(", isCGI = true -> double");
+
+        // if we have accessed the domain many times, get slower (the flux factor)
+        if (!local && host != null) s.append(", flux = ").append(host.flux(waiting));
+        
+        // find the delay as given by robots.txt on target site
+        long robotsDelay = (local) ? 0 : Switchboard.getSwitchboard().robots.crawlDelayMillis(url);
+        s.append(", robots.delay = ").append(robotsDelay);
+        
+        // use the access latency as rule how fast we can access the server
+        // this applies also to localhost, but differently, because it is not necessary to
+        // consider so many external accesses
+        if (host != null) s.append(", host.average = ").append(host.average());
+        
+        return s.toString();
     }
     
     public static final class Host {

@@ -212,7 +212,7 @@ public class CrawlQueues {
         
         String queueCheck = crawlIsPossible(NoticedURL.STACK_TYPE_CORE, "Core");
         if (queueCheck != null) {
-            if (log.isFine()) log.logFine("omitting de-queue/local: " + queueCheck);
+            if (log.isFinest()) log.logFine("omitting de-queue/local: " + queueCheck);
             return false;
         }
         
