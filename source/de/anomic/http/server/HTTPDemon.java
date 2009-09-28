@@ -721,7 +721,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // track the request
         final String path = this.prop.getProperty(HeaderFramework.CONNECTION_PROP_URL);
         final String args = this.prop.getProperty(HeaderFramework.CONNECTION_PROP_ARGS, "");
-        switchboard.track(this.userAddress.getHostName(), (args.length() > 0) ? path + "?" + args : path);
+        switchboard.track(this.userAddress.getHostAddress(), (args.length() > 0) ? path + "?" + args : path);
 
         // reseting the empty request counter
         this.emptyRequestCount = 0;

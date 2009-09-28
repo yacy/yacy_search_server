@@ -853,12 +853,10 @@ public class yacySeed implements Cloneable {
     }
 
     public final String toString() {
-        synchronized (this.dna) {
-            this.dna.put(yacySeed.HASH, this.hash);                         // set hash into seed code structure
-            final String s = serverCodings.map2string(this.dna, ",", true); // generate string representation
-            this.dna.remove(yacySeed.HASH);                                 // reconstruct original: hash is stored external
-            return s;
-        }
+        HashMap<String, String> copymap = new HashMap<String, String>();
+        copymap.putAll(this.dna);
+        copymap.put(yacySeed.HASH, this.hash);                // set hash into seed code structure
+        return serverCodings.map2string(this.dna, ",", true); // generate string representation
     }
 
     public final String genSeedStr(final String key) {
@@ -870,7 +868,7 @@ public class yacySeed implements Cloneable {
         if (b.length() < z.length()) return b; else return z;
     }
 
-    public final synchronized String genSeedStr(final char method, final String key) {
+    public final String genSeedStr(final char method, final String key) {
         return crypt.simpleEncode(this.toString(), key, method);
     }
 
