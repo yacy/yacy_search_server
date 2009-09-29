@@ -149,9 +149,13 @@ public class ArrayStack implements BLOB {
         deletions = false;
         for (int i = 0; i < files.length; i++) {
             if (files[i].length() >= 19 && files[i].endsWith(".blob")) {
-               try {
+               File f = new File(heapLocation, files[i]);
+               if (f.length() == 0) {
+                   f.delete();
+                   deletions = true;
+               } else try {
                    d = DateFormatter.parseShortSecond(files[i].substring(0, 14));
-                   new File(heapLocation, files[i]).renameTo(newBLOB(d));
+                   f.renameTo(newBLOB(d));
                    deletions = true;
                } catch (ParseException e) {continue;}
             }
@@ -647,6 +651,20 @@ public class ArrayStack implements BLOB {
             if (l >= 0) return l;
         }
         return -1;
+    }
+    
+    /**
+     * retrieve the sizes of all BLOB
+     * @param key
+     * @return the size of the BLOB or -1 if the BLOB does not exist
+     * @throws IOException
+     */
+    public synchronized long lengthAdd(byte[] key) throws IOException {
+        long l = 0;
+        for (blobItem bi: blobs) {
+            l += bi.blob.length(key);
+        }
+        return l;
     }
     
     /**
