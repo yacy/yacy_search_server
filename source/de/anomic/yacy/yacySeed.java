@@ -856,7 +856,7 @@ public class yacySeed implements Cloneable {
         HashMap<String, String> copymap = new HashMap<String, String>();
         copymap.putAll(this.dna);
         copymap.put(yacySeed.HASH, this.hash);                // set hash into seed code structure
-        return serverCodings.map2string(this.dna, ",", true); // generate string representation
+        return serverCodings.map2string(copymap, ",", true); // generate string representation
     }
 
     public final String genSeedStr(final String key) {
