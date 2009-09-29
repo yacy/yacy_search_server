@@ -64,11 +64,19 @@ public final class MetadataRepository implements Iterable<byte[]> {
     private   ArrayList<hostStat> statsDump;
     
     public MetadataRepository(
-    		final File path,
+            final File path,
+            final boolean useTailCache,
+            final boolean exceed134217727) {
+        this(path, "urls", useTailCache, exceed134217727);
+    }
+
+    public MetadataRepository(
+            final File path,
+            final String tablename,
             final boolean useTailCache,
             final boolean exceed134217727) {
         this.location = path;        
-        this.urlIndexFile = new Cache(new SplitTable(this.location, "urls", URLMetadataRow.rowdef, useTailCache, exceed134217727));
+        this.urlIndexFile = new Cache(new SplitTable(this.location, tablename, URLMetadataRow.rowdef, useTailCache, exceed134217727));
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
     }
@@ -120,17 +128,13 @@ public final class MetadataRepository implements Iterable<byte[]> {
         // Check if there is a more recent Entry already in the DB
         URLMetadataRow oldEntry;
         try {
-            if (exists(entry.hash())) {
-                Row.Entry oe = urlIndexFile.get(entry.hash().getBytes());
-                oldEntry = (oe == null) ? null : new URLMetadataRow(oe, null, 0);
-            } else {
-                oldEntry = null;
-            }
+            Row.Entry oe = (urlIndexFile == null) ? null : urlIndexFile.get(entry.hash().getBytes());
+            oldEntry = (oe == null) ? null : new URLMetadataRow(oe, null, 0);
         } catch (final Exception e) {
             e.printStackTrace();
             oldEntry = null;
         }
-        if ((oldEntry != null) && (entry.isOlder(oldEntry))) {
+        if (oldEntry != null && entry.isOlder(oldEntry)) {
             // the fetched oldEntry is better, so return its properties instead of the new ones
             // this.urlHash = oldEntry.urlHash; // unnecessary, should be the same
             // this.url = oldEntry.url; // unnecessary, should be the same
