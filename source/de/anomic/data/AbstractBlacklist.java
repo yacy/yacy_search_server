@@ -1,13 +1,13 @@
-// indexAbstractReference.java
+// AbstractBlacklist.java
 // first published on http://www.yacy.net
 // (C) 2007 by Bjoern Krombholz
 // last major change: 12. August 2006 (theli) ?
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2009-01-30 23:44:20 +0100 (Fr, 30 Jan 2009) $
-// $LastChangedRevision: 5543 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -41,9 +41,18 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import de.anomic.kelondro.util.SetTools;
+import de.anomic.search.SearchEventCache;
 import de.anomic.yacy.yacyURL;
 
 public abstract class AbstractBlacklist implements Blacklist {
+
+    public static final int ERR_TWO_WILDCARDS_IN_HOST = 1;
+    public static final int ERR_SUBDOMAIN_XOR_WILDCARD = 2;
+    public static final int ERR_PATH_REGEX = 3;
+    public static final int ERR_WILDCARD_BEGIN_OR_END = 4;
+    public static final int ERR_HOST_WRONG_CHARS = 5;
+    public static final int ERR_DOUBLE_OCCURANCE = 6;
+    public static final int ERR_HOST_REGEX = 7;
 
     protected static final HashSet<String> BLACKLIST_TYPES = new HashSet<String>(Arrays.asList(new String[]{
             Blacklist.BLACKLIST_CRAWLER,
@@ -117,6 +126,9 @@ public abstract class AbstractBlacklist implements Blacklist {
         for(final Set<String> entry: this.cachedUrlHashs.values()) {
             entry.clear();
         }
+
+        // clean up all search events in case that an old blacklist entry denied previously returned results, but does not anymore
+        SearchEventCache.cleanupEvents(true);
     }
 
     public int size() {
@@ -178,6 +190,8 @@ public abstract class AbstractBlacklist implements Blacklist {
                     }
                 }
             }
+            // clean up all search events in case that a (new) blacklist entry denies previously returned results
+            SearchEventCache.cleanupEvents(true);
         }
     }
     
@@ -191,6 +205,9 @@ public abstract class AbstractBlacklist implements Blacklist {
     public void removeAll(final String blacklistType, final String host) {
         getBlacklistMap(blacklistType,true).remove(host);
         getBlacklistMap(blacklistType,false).remove(host);
+
+        // clean up all search events in case that an old blacklist entry denied previously returned results, but does not anymore
+        SearchEventCache.cleanupEvents(true);
     }
     
     public void remove(final String blacklistType, final String host, final String path) {
@@ -209,7 +226,10 @@ public abstract class AbstractBlacklist implements Blacklist {
             if (hostList.size() == 0)
                 blacklistMapNotMatch.remove(host);
         }
-}   
+
+        // clean up all search events in case that an old blacklist entry denied previously returned results, but does not anymore
+        SearchEventCache.cleanupEvents(true);
+    }
 
     public void add(final String blacklistType, String host, String path) {
         if (host == null) throw new NullPointerException();
@@ -227,6 +247,9 @@ public abstract class AbstractBlacklist implements Blacklist {
         ArrayList<String> hostList = blacklistMap.get(host.toLowerCase());
         if (hostList == null) blacklistMap.put(host.toLowerCase(), (hostList = new ArrayList<String>()));
         hostList.add(path);
+
+        // clean up all search events in case that a (new) blacklist entry denies previously returned results
+        SearchEventCache.cleanupEvents(true);
     }
 
     public int blacklistCacheSize() {
@@ -273,6 +296,7 @@ public abstract class AbstractBlacklist implements Blacklist {
         }        
         return true;  
     }
+    
     public static boolean isMatchable (final String host) {
         try {
             if(Pattern.matches("^[a-z0-9.-]*$", host)) // simple Domain (yacy.net or www.yacy.net)

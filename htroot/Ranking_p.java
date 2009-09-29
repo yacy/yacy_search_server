@@ -5,9 +5,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2007-07-19 22:11:48 +0000 (Do, 19 Jul 2007) $
-// $LastChangedRevision: 3995 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -44,38 +44,38 @@ public class Ranking_p {
 	
 	private static final HashMap<String, String> rankingParameters = new HashMap<String, String>();
 	static {
-		rankingParameters.put(RankingProfile.APP_DC_CREATOR, "Appearance In Author");
-		rankingParameters.put(RankingProfile.APP_DC_TITLE, "Appearance In Title");
-		rankingParameters.put(RankingProfile.APPEMPH, "Appearance In Emphasized Text");
-		rankingParameters.put(RankingProfile.APP_DC_DESCRIPTION, "Appearance In Reference/Anchor Name");
-		rankingParameters.put(RankingProfile.APP_DC_SUBJECT, "Appearance In Tags");
-		rankingParameters.put(RankingProfile.APPURL, "Appearance In URL");
-		rankingParameters.put(RankingProfile.AUTHORITY, "Authority of Domain");
-		rankingParameters.put(RankingProfile.CATHASAPP, "Category App, Appearance");
-		rankingParameters.put(RankingProfile.CATHASAUDIO, "Category Audio Appearance");
-		rankingParameters.put(RankingProfile.CATHASIMAGE, "Category Image Appearance");
-		rankingParameters.put(RankingProfile.CATHASVIDEO, "Category Video Appearance");
-		rankingParameters.put(RankingProfile.CATINDEXOF, "Category Index Page");
-		rankingParameters.put(RankingProfile.DATE, "Date");
-		rankingParameters.put(RankingProfile.DESCRCOMPINTOPLIST, "Description Comp. Appears In Toplist");
-		rankingParameters.put(RankingProfile.DOMLENGTH, "Domain Length");
-		rankingParameters.put(RankingProfile.HITCOUNT, "Hit Count");
-		rankingParameters.put(RankingProfile.LLOCAL, "Links To Local Domain");
-		rankingParameters.put(RankingProfile.LOTHER, "Links To Other Domain");
-		rankingParameters.put(RankingProfile.PHRASESINTEXT, "Phrases In Text");
-		rankingParameters.put(RankingProfile.POSINTEXT, "Position In Text");
-		rankingParameters.put(RankingProfile.POSOFPHRASE, "Position Of Phrase");
-		rankingParameters.put(RankingProfile.POSINPHRASE, "Position In Phrase");
-		rankingParameters.put(RankingProfile.PREFER, "Application Of Prefer Pattern");
-		rankingParameters.put(RankingProfile.TERMFREQUENCY, "Term Frequency");
-        rankingParameters.put(RankingProfile.URLCOMPINTOPLIST, "URL Component Appears In Toplist");
-		rankingParameters.put(RankingProfile.URLCOMPS, "URL Components");
-		rankingParameters.put(RankingProfile.URLLENGTH, "URL Length");
-		rankingParameters.put(RankingProfile.WORDDISTANCE, "Word Distance");
-		rankingParameters.put(RankingProfile.WORDSINTEXT, "Words In Text");
-		rankingParameters.put(RankingProfile.WORDSINTITLE, "Words In Title");
-		rankingParameters.put(RankingProfile.YBR, "YaCy Block Rank");
-		rankingParameters.put(RankingProfile.LANGUAGE, "Preferred Language");
+            rankingParameters.put(RankingProfile.APP_DC_CREATOR, "Appearance In Author");
+            rankingParameters.put(RankingProfile.APP_DC_TITLE, "Appearance In Title");
+            rankingParameters.put(RankingProfile.APPEMPH, "Appearance In Emphasized Text");
+            rankingParameters.put(RankingProfile.APP_DC_DESCRIPTION, "Appearance In Reference/Anchor Name");
+            rankingParameters.put(RankingProfile.APP_DC_SUBJECT, "Appearance In Tags");
+            rankingParameters.put(RankingProfile.APPURL, "Appearance In URL");
+            rankingParameters.put(RankingProfile.AUTHORITY, "Authority of Domain");
+            rankingParameters.put(RankingProfile.CATHASAPP, "Category App, Appearance");
+            rankingParameters.put(RankingProfile.CATHASAUDIO, "Category Audio Appearance");
+            rankingParameters.put(RankingProfile.CATHASIMAGE, "Category Image Appearance");
+            rankingParameters.put(RankingProfile.CATHASVIDEO, "Category Video Appearance");
+            rankingParameters.put(RankingProfile.CATINDEXOF, "Category Index Page");
+            rankingParameters.put(RankingProfile.DATE, "Date");
+            rankingParameters.put(RankingProfile.DESCRCOMPINTOPLIST, "Description Comp. Appears In Toplist");
+            rankingParameters.put(RankingProfile.DOMLENGTH, "Domain Length");
+            rankingParameters.put(RankingProfile.HITCOUNT, "Hit Count");
+            rankingParameters.put(RankingProfile.LLOCAL, "Links To Local Domain");
+            rankingParameters.put(RankingProfile.LOTHER, "Links To Other Domain");
+            rankingParameters.put(RankingProfile.PHRASESINTEXT, "Phrases In Text");
+            rankingParameters.put(RankingProfile.POSINTEXT, "Position In Text");
+            rankingParameters.put(RankingProfile.POSOFPHRASE, "Position Of Phrase");
+            rankingParameters.put(RankingProfile.POSINPHRASE, "Position In Phrase");
+            rankingParameters.put(RankingProfile.PREFER, "Application Of Prefer Pattern");
+            rankingParameters.put(RankingProfile.TERMFREQUENCY, "Term Frequency");
+            rankingParameters.put(RankingProfile.URLCOMPINTOPLIST, "URL Component Appears In Toplist");
+            rankingParameters.put(RankingProfile.URLCOMPS, "URL Components");
+            rankingParameters.put(RankingProfile.URLLENGTH, "URL Length");
+            rankingParameters.put(RankingProfile.WORDDISTANCE, "Word Distance");
+            rankingParameters.put(RankingProfile.WORDSINTEXT, "Words In Text");
+            rankingParameters.put(RankingProfile.WORDSINTITLE, "Words In Title");
+            rankingParameters.put(RankingProfile.YBR, "YaCy Block Rank");
+            rankingParameters.put(RankingProfile.LANGUAGE, "Preferred Language");
 	}
 
     private static serverObjects defaultValues() {
@@ -108,24 +108,24 @@ public class Ranking_p {
     	String key;
     	int i, j = 0;
     	for (final Entry<String, String> entry: map.entrySet()) {
-    		key = entry.getKey();
-    		prop.put("attr" + attrExtension + "_" + j + "_name", rankingParameters.get(key.substring(prefix.length())));
-    		prop.put("attr" + attrExtension + "_" + j + "_nameorg", key);
-    		prop.put("attr" + attrExtension + "_" + j + "_select", maxRankingRange);
-    		for (i=0; i<maxRankingRange; i++) {
-    			prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_nameorg", key);
-    			prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_value", i);
-    			try {
-					prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_checked",
-							(i == Integer.valueOf(entry.getValue()).intValue()) ? "1" : "0");
-				} catch (final NumberFormatException e) {
-					prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_checked", "0");
-				}
-    		}
-    		prop.put("attr" + attrExtension + "_" + j + "_value",
-    				Integer.valueOf(map.get(key)).intValue());
-    		j++;
-    	}
+            key = entry.getKey();
+            prop.put("attr" + attrExtension + "_" + j + "_name", rankingParameters.get(key.substring(prefix.length())));
+            prop.put("attr" + attrExtension + "_" + j + "_nameorg", key);
+            prop.put("attr" + attrExtension + "_" + j + "_select", maxRankingRange);
+            for (i=0; i<maxRankingRange; i++) {
+                prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_nameorg", key);
+                prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_value", i);
+                try {
+                    prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_checked",
+                            (i == Integer.valueOf(entry.getValue()).intValue()) ? "1" : "0");
+                } catch (final NumberFormatException e) {
+                    prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_checked", "0");
+                }
+            }
+            prop.put("attr" + attrExtension + "_" + j + "_value",
+                    Integer.valueOf(map.get(key)).intValue());
+            j++;
+        }
     }
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {

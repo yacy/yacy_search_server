@@ -15,8 +15,12 @@
       <fieldset class="selectList"><legend>Check list</legend>
         <div style="display:inline;">
           <select name="listNames" size="1">#{blacklists}# 
-            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>#{/blacklists}# 
+            <option value="#[name]#"#(selected)#:: selected="selected"#(/selected)#>#[name]#</option>#{/blacklists}#
           </select>
+            <br /><br />
+            <input type="checkbox" name="allowRegex" #(checked)#:: checked="checked"#(/checked)# />
+                   Allow regular expressions in host part of blacklist entries.
+            <br /><br />
           <input type="submit" name="list" value="Check" />
         </div>::
         <p class="error">The blacklist-cleaner only works for the following blacklist-engines up to now:</p>
@@ -40,11 +44,13 @@
           <dt>
             <label for="select#[entry]#" class="error">
               #(error)#Two wildcards in host-part
+              ::<!-- no error, should never be visible -->
               ::Either subdomain <u>or</u> wildcard
               ::Path is invalid Regex
               ::Wildcard not on begin or end
               ::Host contains illegal chars
               ::Double
+              ::Host is invalid Regex
               #(/error)#
             </label>
             <input type="checkbox" name="select#[entry]#" id="select#[entry]#" checked="checked" />

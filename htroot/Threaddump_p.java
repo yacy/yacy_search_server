@@ -7,9 +7,9 @@
 //
 // This File is contributed by Alexander Fieger
 //
-// $LastChangedDate: 2008-01-22 12:51:43 +0100 (Di, 22 Jan 2008) $
-// $LastChangedRevision: 4374 $
-// $LastChangedBy: low012 $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

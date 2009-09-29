@@ -4,9 +4,9 @@
 // first published 04.05.2009 on http://yacy.net
 // Frankfurt, Germany
 //
-// $LastChangedDate: 2009-04-16 17:29:00 +0200 (Do, 16 Apr 2009) $
-// $LastChangedRevision: 5812 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

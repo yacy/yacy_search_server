@@ -8,9 +8,9 @@
 //
 // This File is contributed by Franz Brausze
 //
-// $LastChangedDate: 2007-01-17 12:00:00 +0100 (Di, 17 Jan 2007) $
-// $LastChangedRevision: 3216 $
-// $LastChangedBy: karlchenofhell $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

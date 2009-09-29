@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2008-08-20 09:54:56 +0200 (Mi, 20 Aug 2008) $
-// $LastChangedRevision: 5063 $
-// $LastChangedBy: danielr $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -29,6 +29,7 @@ package de.anomic.data;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -117,4 +118,77 @@ public class DefaultBlacklist extends AbstractBlacklist implements Blacklist {
         }
         return matched;
     }
+
+    public int checkError(String element, Map<String, String> properties) {
+
+        boolean allowRegex = true;
+        int slashPos;
+        String host, path;
+
+        if (properties != null) {
+            allowRegex = properties.get("allowRegex").equalsIgnoreCase("true") ? true : false;
+        }
+
+        if ((slashPos = element.indexOf("/")) == -1) {
+            host = element;
+            path = ".*";
+        } else {
+            host = element.substring(0, slashPos);
+            path = element.substring(slashPos + 1);
+        }
+
+        if (!allowRegex || !isValidRegex(host)) {
+            final int i = host.indexOf("*");
+
+            // check whether host begins illegally
+            if (!host.matches("([A-Za-z0-9_-]+|\\*)(\\.([A-Za-z0-9_-]+|\\*))*")) {
+                if (i == 0 && host.length() > 1 && host.charAt(1) != '.') {
+                    return ERR_SUBDOMAIN_XOR_WILDCARD;
+                }
+                return ERR_HOST_WRONG_CHARS;
+            }
+
+            // in host-part only full sub-domains may be wildcards
+            if (host.length() > 0 && i > -1) {
+                if (!(i == 0 || i == host.length() - 1)) {
+                    return  ERR_WILDCARD_BEGIN_OR_END;
+                }
+
+                if (i == host.length() - 1 && host.length() > 1 && host.charAt(i - 1) != '.') {
+                    return ERR_SUBDOMAIN_XOR_WILDCARD;
+                }
+            }
+
+            // check for double-occurences of "*" in host
+            if (host.indexOf("*", i + 1) > -1) {
+                return ERR_TWO_WILDCARDS_IN_HOST;
+            }
+        } else if (allowRegex && !isValidRegex(host)) {
+            return ERR_HOST_REGEX;
+        }
+
+        // check for errors on regex-compiling path
+        if (!isValidRegex(path) && !path.equals("*")) {
+            return ERR_PATH_REGEX;
+        }
+
+        return 0;
+    }
+
+    /**
+     * Checks if a given expression is a valid regular expression.
+     * @param expression The expression to be checked.
+     * @return True if the expression is a valid regular expression, else false.
+     */
+    private static boolean isValidRegex(String expression) {
+        boolean ret = true;
+        try {
+            Pattern.compile(expression);
+        } catch (final PatternSyntaxException e) {
+
+            ret = false;
+        }
+        return ret;
+    }
+
 }

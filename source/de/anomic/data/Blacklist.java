@@ -1,12 +1,12 @@
-// indexReferenceBlacklist.java
+// Blacklist.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 26.03.2008 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -29,6 +29,7 @@ package de.anomic.data;
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
 
 import de.anomic.yacy.yacyURL;
 
@@ -93,6 +94,8 @@ public interface Blacklist {
     
     public boolean isListed(String blacklistType, yacyURL url);
     
-    public boolean isListed(String blacklistType, String hostlow, String path);  
-    
+    public boolean isListed(String blacklistType, String hostlow, String path);
+
+    public int checkError(String entry, Map<String, String> properties);
+
 }

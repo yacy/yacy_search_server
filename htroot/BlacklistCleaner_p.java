@@ -37,13 +37,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import de.anomic.data.AbstractBlacklist;
 import de.anomic.data.Blacklist;
@@ -54,6 +52,7 @@ import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.logging.Log;
+import java.util.Set;
 
 public class BlacklistCleaner_p {
     
@@ -61,14 +60,7 @@ public class BlacklistCleaner_p {
     private static final String DISABLED = "disabled_";
     private static final String BLACKLISTS = "blacklists_";
     private static final String ENTRIES = "entries_";
-    
-    private static final int ERR_TWO_WILDCARDS_IN_HOST = 0;
-    private static final int ERR_SUBDOMAIN_XOR_WILDCARD = 1;
-    private static final int ERR_PATH_REGEX = 2;
-    private static final int ERR_WILDCARD_BEGIN_OR_END = 3;
-    private static final int ERR_HOST_WRONG_CHARS = 4;
-    private static final int ERR_DOUBLE_OCCURANCE = 5;
-    
+        
     private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
     
     public static final Class<?>[] supportedBLEngines = {
@@ -82,61 +74,75 @@ public class BlacklistCleaner_p {
         listManager.switchboard = (Switchboard) env;
         listManager.listsPath = new File(env.getRootPath(), env.getConfig("listManager.listsPath", "DATA/LISTS"));
         String blacklistToUse = null;
-        
+
         // getting the list of supported blacklist types
         final String supportedBlacklistTypesStr = AbstractBlacklist.BLACKLIST_TYPES_STRING;
         final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(","); 
-        
-        if (post == null) {
-            prop.put("results", "0");
-            putBlacklists(prop, listManager.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
-            return prop;
-        }
-        
-        if (post.containsKey("listNames")) {
-            blacklistToUse = post.get("listNames"); 
-            if (blacklistToUse.length() == 0 || !listManager.listSetContains("listManager.listsPath", blacklistToUse))
-                prop.put("results", "2");
-        }
-        
-        putBlacklists(prop, listManager.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
-        
-        if (blacklistToUse != null) {
-            prop.put("results", "1");
-            
-            if (post.containsKey("delete")) {
-                prop.put(RESULTS + "modified", "1");
-                prop.put(RESULTS + "modified_delCount", removeEntries(blacklistToUse, supportedBlacklistTypes, getByPrefix(post, "select", true, true)));
-            } else if (post.containsKey("alter")) {
-                prop.put(RESULTS + "modified", "2");
-                prop.put(RESULTS + "modified_alterCount", alterEntries(blacklistToUse, supportedBlacklistTypes, getByPrefix(post, "select", true, false), getByPrefix(post, "entry", false, false)));
-            }
-            
-            // list illegal entries
-            final HashMap<String, Integer> ies = getIllegalEntries(blacklistToUse, Switchboard.urlBlacklist);
-            prop.put(RESULTS + "blList", blacklistToUse);
-            prop.put(RESULTS + "entries", ies.size());
-            prop.putHTML(RESULTS + "blEngine", Switchboard.urlBlacklist.getEngineInfo());
-            prop.put(RESULTS + "disabled", (ies.size() == 0) ? "1" : "0");
-            if (ies.size() > 0) {
-                prop.put(RESULTS + DISABLED + "entries", ies.size());
-                int i = 0;
-                String s;
-                for (Entry<String, Integer> entry: ies.entrySet()) {
-                    s = entry.getKey();
-                    prop.put(RESULTS + DISABLED + ENTRIES + i + "_error", entry.getValue().longValue());
-                    prop.putHTML(RESULTS + DISABLED + ENTRIES + i + "_entry", s);
-                    i++;
+
+        prop.put(DISABLED+"checked", "1");
+
+        if (post != null) {
+
+            final boolean allowRegex = post.get("allowRegex", "off").equalsIgnoreCase("on") ? true: false;
+            prop.put(DISABLED+"checked", (allowRegex) ? "1" : "0");
+
+            if (post.containsKey("listNames")) {
+                blacklistToUse = post.get("listNames");
+                if (blacklistToUse.length() == 0 || !listManager.listSetContains("listManager.listsPath", blacklistToUse)) {
+                    prop.put("results", "2");
+
                 }
             }
+
+            putBlacklists(prop, listManager.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
+
+            if (blacklistToUse != null) {
+                prop.put("results", "1");
+
+                if (post.containsKey("delete")) {
+                    prop.put(RESULTS + "modified", "1");
+                    prop.put(RESULTS + "modified_delCount", removeEntries(blacklistToUse, supportedBlacklistTypes, getKeysByPrefix(post, "select", true)));
+                } else if (post.containsKey("alter")) {
+                    prop.put(RESULTS + "modified", "2");
+                    prop.put(RESULTS + "modified_alterCount", alterEntries(blacklistToUse, supportedBlacklistTypes, getKeysByPrefix(post, "select", false), getValuesByPrefix(post, "entry", false)));
+                }
+
+                // list illegal entries
+                final Map<String, Integer> illegalEntries = getIllegalEntries(blacklistToUse, Switchboard.urlBlacklist, allowRegex);
+                prop.put(RESULTS + "blList", blacklistToUse);
+                prop.put(RESULTS + "entries", illegalEntries.size());
+                prop.putHTML(RESULTS + "blEngine", Switchboard.urlBlacklist.getEngineInfo());
+                prop.put(RESULTS + "disabled", (illegalEntries.size() == 0) ? "1" : "0");
+                if (illegalEntries.size() > 0) {
+                    prop.put(RESULTS + DISABLED + "entries", illegalEntries.size());
+                    int i = 0;
+                    String key;
+                    for (Entry<String, Integer> entry : illegalEntries.entrySet()) {
+                        key = entry.getKey();
+                        prop.put(RESULTS + DISABLED + ENTRIES + i + "_error", entry.getValue().longValue());
+                        prop.putHTML(RESULTS + DISABLED + ENTRIES + i + "_entry", key);
+                        i++;
+                    }
+                }
+            }
+        } else {
+            prop.put("results", "0");
+            putBlacklists(prop, listManager.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
         }
         
         return prop;
     }
-    
+
+    /**
+     * Adds a list of blacklist to the server objects properties which are used to
+     * display the blacklist in the HTML page belonging to this servlet.
+     * @param prop Server objects properties object.
+     * @param lists List of blacklists.
+     * @param selected Element in list of blacklists which will be preselected in HTML.
+     */
     private static void putBlacklists(final serverObjects prop, final List<String> lists, final String selected) {
         boolean supported = false;
-        for (int i=0; i<supportedBLEngines.length && !supported; i++) {
+        for (int i=0; i < supportedBLEngines.length && !supported; i++) {
             supported |= (Switchboard.urlBlacklist.getClass() == supportedBLEngines[i]);
         }
         
@@ -155,13 +161,48 @@ public class BlacklistCleaner_p {
             }
         } else {
             prop.put("disabled", "1");
-            for (int i=0; i<supportedBLEngines.length; i++) {
+            for (int i = 0; i < supportedBLEngines.length; i++) {
                 prop.putHTML(DISABLED + "engines_" + i + "_name", supportedBLEngines[i].getName());
             }
             prop.put(DISABLED + "engines", supportedBLEngines.length);
         }
     }
-    
+
+    /**
+     * Retrieves all keys with a certain prefix from the data which has been sent and returns them as an array. This
+     * method is only a wrapper for {@link getByPrefix(de.anomic.server.serverObjects, java.lang.String, boolean, boolean)}
+     * which has been created to make it easier to understand the code.
+     * @param post All POST values.
+     * @param prefix Prefix by which the input is filtered.
+     * @param filterDoubles Set true if only unique results shall be returned, else false.
+     * @return Keys which have been posted.
+     */
+    private static String[] getKeysByPrefix(final serverObjects post, final String prefix, final boolean filterDoubles) {
+        return getByPrefix(post, prefix, true, filterDoubles);
+    }
+
+    /**
+     * Retrieves all values with a certain prefix from the data which has been sent and returns them as an array. This
+     * method is only a wrapper for {@link getByPrefix(de.anomic.server.serverObjects, java.lang.String, boolean, boolean)}.
+     * @param post All POST values.
+     * @param prefix Prefix by which the input is filtered.
+     * @param filterDoubles Set true if only unique results shall be returned, else false.
+     * @return Values which have been posted.
+     */
+    private static String[] getValuesByPrefix(final serverObjects post, final String prefix, final boolean filterDoubles) {
+        return getByPrefix(post, prefix, false, filterDoubles);
+    }
+
+    /**
+     * Method which does all the work for {@link getKeysByPrefix(de.anomic.server.serverObjects, java.lang.String prefix, boolean)}
+     * and {@link getValuesByPrefix(de.anomic.server.serverObjects, java.lang.String prefix, boolean)} which
+     * have been crested to make it easier to understand the code.
+     * @param post
+     * @param prefix
+     * @param useKeys
+     * @param useHashSet
+     * @return
+     */
     private static String[] getByPrefix(final serverObjects post, final String prefix, final boolean useKeys, final boolean useHashSet) {
         Collection<String> r;
         if (useHashSet) {
@@ -169,20 +210,15 @@ public class BlacklistCleaner_p {
         } else {
             r = new ArrayList<String>();
         }
-        
-        String s;
+
         if (useKeys) {
-            final Iterator<String> it =  post.keySet().iterator();
-            while (it.hasNext()) {
-                if ((s = it.next()).indexOf(prefix) == 0) {
-                    r.add(s.substring(prefix.length()));
+            for (String entry : post.keySet()) {
+                if (entry.indexOf(prefix) == 0) {
+                    r.add(entry.substring(prefix.length()));
                 }
             }
         } else {
-            final Iterator<Map.Entry<String, String>> it = post.entrySet().iterator();
-            Map.Entry<String, String> entry;
-            while (it.hasNext()) {
-                entry = it.next();
+            for (Map.Entry<String, String> entry : post.entrySet()) {
                 if (entry.getKey().indexOf(prefix) == 0) {
                     r.add(entry.getValue());
                 }
@@ -191,79 +227,56 @@ public class BlacklistCleaner_p {
         
         return r.toArray(new String[r.size()]);
     }
-    
-    private static HashMap<String, Integer>/* entry, error-code */ getIllegalEntries(final String blacklistToUse, final Blacklist blEngine) {
-        final HashMap<String, Integer> r = new HashMap<String, Integer>();
-        final HashSet<String> ok = new HashSet<String>();
+
+    /**
+     * Finds illegal entries in black list.
+     * @param blacklistToUse The blacklist to be checked.
+     * @param blEngine The blacklist engine which is used to check
+     * @param allowRegex Set to true to allow regular expressions in host part of blacklist entry.
+     * @return A map which contains all entries whoch have been identified as being
+     * illegal by the blacklistEngine with the entry as key and an error code as
+     * value.
+     */
+    private static Map<String, Integer> getIllegalEntries(final String blacklistToUse, final Blacklist blEngine, final boolean allowRegex) {
+        final Map<String, Integer> illegalEntries = new HashMap<String, Integer>();
+        final Set<String> legalEntries = new HashSet<String>();
         
-        final ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
-        final Iterator<String> it = list.iterator();
-        String s, host, path;
-        
-        if (blEngine instanceof DefaultBlacklist) {
-            int slashPos;
-            while (it.hasNext()) {
-                s = (it.next()).trim();
+        final List<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
+        final Map<String, String> properties= new HashMap<String, String>();
+        properties.put("allowRegex", String.valueOf(allowRegex));
+                
+        if (blEngine instanceof AbstractBlacklist) {
+
+            int err = 0;
+
+            for (String element : list) {
+                element = element.trim();
                 
                 // check for double-occurance
-                if (ok.contains(s)) {
-                    r.put(s, Integer.valueOf(ERR_DOUBLE_OCCURANCE));
+                if (legalEntries.contains(element)) {
+                    illegalEntries.put(element, Integer.valueOf(AbstractBlacklist.ERR_DOUBLE_OCCURANCE));
                     continue;
                 }
-                ok.add(s);
-                
-                if ((slashPos = s.indexOf("/")) == -1) {
-                    host = s;
-                    path = ".*";
-                } else {
-                    host = s.substring(0, slashPos);
-                    path = s.substring(slashPos + 1);
-                }
-                
-                final int i = host.indexOf("*");
-                
-                // check whether host begins illegally
-                if (!host.matches("([A-Za-z0-9_-]+|\\*)(\\.([A-Za-z0-9_-]+|\\*))*")) {
-                    if (i == 0 && host.length() > 1 && host.charAt(1) != '.') {
-                        r.put(s, Integer.valueOf(ERR_SUBDOMAIN_XOR_WILDCARD));
-                        continue;
-                    }
-                    r.put(s, Integer.valueOf(ERR_HOST_WRONG_CHARS));
-                    continue;
-                }
-                
-                // in host-part only full sub-domains may be wildcards
-                if (host.length() > 0 && i > -1) {
-                    if (!(i == 0 || i == host.length() - 1)) {
-                        r.put(s, Integer.valueOf(ERR_WILDCARD_BEGIN_OR_END));
-                        continue;
-                    }
-                    
-                    if (i == host.length() - 1 && host.length() > 1 && host.charAt(i - 1) != '.') {
-                        r.put(s, Integer.valueOf(ERR_SUBDOMAIN_XOR_WILDCARD));
-                        continue;
-                    }
-                }
-                
-                // check for double-occurences of "*" in host
-                if (host.indexOf("*", i + 1) > -1) {
-                    r.put(s, Integer.valueOf(ERR_TWO_WILDCARDS_IN_HOST));
-                    continue;
-                }
-                
-                // check for errors on regex-compiling path
-                try {
-                    Pattern.compile(path);
-                } catch (final PatternSyntaxException e) {
-                    r.put(s, Integer.valueOf(ERR_PATH_REGEX));
-                    continue;
+                legalEntries.add(element);
+
+                err = blEngine.checkError(element, properties);
+
+                if (err > 0) {
+                    illegalEntries.put(element, err);
                 }
             }
         }
 
-        return r;
+        return illegalEntries;
     }
-    
+
+    /**
+     * Removes existing entries from a blacklist.
+     * @param blacklistToUse The blacklist which contains the
+     * @param supportedBlacklistTypes Types of blacklists which the entry is to changed in.
+     * @param entries Array of entries to be deleted.
+     * @return Length of the list of entries to be removed.
+     */
     private static int removeEntries(final String blacklistToUse, final String[] supportedBlacklistTypes, final String[] entries) {
         // load blacklist data from file
         final ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
@@ -309,28 +322,36 @@ public class BlacklistCleaner_p {
         }
         return entries.length;
     }
-    
+
+    /**
+     * Changes existing entry in a blacklist.
+     * @param blacklistToUse The blacklist which contains the entry.
+     * @param supportedBlacklistTypes Types of blacklists which the entry is to changed in.
+     * @param oldEntry Entry to be changed.
+     * @param newEntry Changed entry.
+     * @return The length of the new entry.
+     */
     private static int alterEntries(
             final String blacklistToUse,
             final String[] supportedBlacklistTypes,
-            final String[] oldE,
-            final String[] newE) {
-        removeEntries(blacklistToUse, supportedBlacklistTypes, oldE);
+            final String[] oldEntry,
+            final String[] newEntry) {
+        removeEntries(blacklistToUse, supportedBlacklistTypes, oldEntry);
         PrintWriter pw = null;
         try {
             pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklistToUse), true));
             String host, path;
-            for (int i=0, pos; i<newE.length; i++) {
-                pos = newE[i].indexOf("/");
+            for (int i=0, pos; i<newEntry.length; i++) {
+                pos = newEntry[i].indexOf("/");
                 if (pos < 0) {
-                    host = newE[i];
+                    host = newEntry[i];
                     path = ".*";
                 } else {
-                    host = newE[i].substring(0, pos);
-                    path = newE[i].substring(pos + 1);
+                    host = newEntry[i].substring(0, pos);
+                    path = newEntry[i].substring(pos + 1);
                 }
                 pw.println(host + "/" + path);
-                for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
+                for (int blTypes = 0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                     if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists",blacklistToUse)) {
                         Switchboard.urlBlacklist.add(
                                 supportedBlacklistTypes[blTypes],
@@ -343,6 +364,6 @@ public class BlacklistCleaner_p {
         } catch (final IOException e) {
             Log.logSevere("BLACKLIST-CLEANER", "error on writing altered entries to blacklist", e);
         }
-        return newE.length;
+        return newEntry.length;
     }
 }
