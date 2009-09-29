@@ -141,11 +141,11 @@ public class MapView {
         assert newMap != null;
         key = normalizeKey(key);
         assert blob != null;
+        String s = map2string(newMap, "W" + DateFormatter.formatShortSecond() + " ");
+        assert s != null;
         synchronized (this) {
             // write entry
-        	String s = map2string(newMap, "W" + DateFormatter.formatShortSecond() + " ");
-        	assert s != null;
-            blob.put(key.getBytes("UTF-8"), s.getBytes("UTF-8"));
+        	blob.put(key.getBytes("UTF-8"), s.getBytes("UTF-8"));
     
             // write map to cache
             cache.put(key, newMap);
@@ -213,10 +213,7 @@ public class MapView {
         synchronized (this) {
             Map<String, String> map = cache.get(key);
             if (map != null) return map;
-    
-            // load map
-            if (!(blob.has(key.getBytes()))) return null;
-            
+
             // read object
             final byte[] b = blob.get(key.getBytes());
             if (b == null) return null;
