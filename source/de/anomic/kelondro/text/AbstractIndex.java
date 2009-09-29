@@ -122,6 +122,46 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         return containers;
     }
     
+    /**
+     * collect containers for given word hashes and join them as they are retrieved.
+     * This collection stops if a single container does not contain any references or the current result
+     * of the container join results in an empty container.
+     * In any fail case only a empty result container is returned.
+     * @param wordHashes
+     * @param urlselection
+     * @param maxDistance the maximum distance that the words in the result may have
+     * @return ReferenceContainer the join result
+     */
+    public ReferenceContainer<ReferenceType> searchJoin(final TreeSet<byte[]> wordHashes, final Set<String> urlselection, int maxDistance) {
+        // first check if there is any entry that has no match; this uses only operations in ram
+        for (byte[] wordHash: wordHashes) {
+            if (!this.has(wordHash)) return ReferenceContainer.emptyContainer(factory, null, 0);
+        }
+        
+        // retrieve entities that belong to the hashes
+        ReferenceContainer<ReferenceType> resultContainer = null;
+        ReferenceContainer<ReferenceType> singleContainer;
+        for (byte[] wordHash: wordHashes) {
+            // retrieve index
+            try {
+                singleContainer = this.get(wordHash, urlselection);
+            } catch (IOException e) {
+                e.printStackTrace();
+                continue;
+            }
+        
+            // check result
+            if ((singleContainer == null || singleContainer.size() == 0)) return ReferenceContainer.emptyContainer(factory, null, 0);
+            if (resultContainer == null) resultContainer = singleContainer; else {
+                resultContainer = ReferenceContainer.joinConstructive(factory, resultContainer, singleContainer, maxDistance);
+            }
+            
+            // finish if the result is empty
+            if (resultContainer.size() == 0) return resultContainer;
+        }
+        return resultContainer;
+    }
+    
     public TermSearch<ReferenceType> query(
             final TreeSet<byte[]> queryHashes,
             final TreeSet<byte[]> excludeHashes,
