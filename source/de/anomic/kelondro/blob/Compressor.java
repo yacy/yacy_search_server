@@ -40,6 +40,7 @@ import java.util.zip.GZIPOutputStream;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.util.ByteArray;
+import de.anomic.yacy.logging.Log;
 
 public class Compressor implements BLOB {
 
@@ -82,7 +83,7 @@ public class Compressor implements BLOB {
         try {
             flushAll();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logSevere("Compressor", "", e);
         }
         this.backend.close(writeIDX);
     }
@@ -108,7 +109,7 @@ public class Compressor implements BLOB {
             baos.close();
             return baos.toByteArray();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logSevere("Compressor", "", e);
             return null;
         }
     }

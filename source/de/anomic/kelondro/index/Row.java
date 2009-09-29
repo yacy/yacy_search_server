@@ -418,7 +418,7 @@ public final class Row {
                 try {
                     setCol(column, (cell == null) ? null : cell.getBytes(encoding));
                 } catch (final UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    Log.logSevere("Row", "", e);
                 }
         }
         
@@ -429,7 +429,7 @@ public final class Row {
                 try {
                     setCol(nick, cell.getBytes(encoding));
                 } catch (final UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    Log.logSevere("Row", "", e);
                 }
         }
         

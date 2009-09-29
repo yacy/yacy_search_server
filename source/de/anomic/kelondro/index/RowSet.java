@@ -405,15 +405,13 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         try {
         	c0.sort();
         } catch (Exception e) {
-        	Log.logSevere("RowSet", "collection corrupted. cleaned. " + e.getMessage());
-        	e.printStackTrace();
+        	Log.logSevere("RowSet", "collection corrupted. cleaned. " + e.getMessage(), e);
         	c0.clear();
         }
         try {
         	c1.sort();
         } catch (Exception e) {
-        	Log.logSevere("RowSet", "collection corrupted. cleaned. " + e.getMessage());
-        	e.printStackTrace();
+        	Log.logSevere("RowSet", "collection corrupted. cleaned. " + e.getMessage(), e);
         	c1.clear();
         }
         int c0i = 0, c1i = 0;

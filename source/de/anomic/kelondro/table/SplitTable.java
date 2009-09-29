@@ -156,7 +156,7 @@ public class SplitTable implements ObjectIndex {
                 try {
                     d = DateFormatter.parseShortMilliSecond(tablefile[i].substring(prefix.length() + 1, prefix.length() + 18));
                 } catch (ParseException e) {
-                    e.printStackTrace();
+                    Log.logSevere("SplitTable", "", e);
                     continue;
                 }
                 time = d.getTime();
@@ -296,7 +296,7 @@ public class SplitTable implements ObjectIndex {
         try {
             d = DateFormatter.parseShortMilliSecond(name.substring(prefix.length() + 1, prefix.length() + 18)).getTime();
         } catch (ParseException e) {
-            e.printStackTrace();
+            Log.logSevere("SplitTable", "", e);
             d = 0;
         }
         if (d + this.fileAgeLimit < System.currentTimeMillis() || new File(this.path, name).length() >= this.fileSizeLimit) {
@@ -397,7 +397,7 @@ public class SplitTable implements ObjectIndex {
                 try {
                     order = orderQueue.take();
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Log.logSevere("SplitTable", "", e);
                     continue;
                 }
                 if (order == poisonDiscoverOrder) break;
@@ -409,7 +409,7 @@ public class SplitTable implements ObjectIndex {
                         order.challenge.commitNoDiscovery();
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.logSevere("SplitTable", "", e);
                     order.challenge.commitNoDiscovery();
                 }
             }
@@ -428,7 +428,7 @@ public class SplitTable implements ObjectIndex {
                 try {
                     this.orderQueue.put(new DiscoverOrder(challenge, i.next()));
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Log.logSevere("SplitTable", "", e);
                 }
             }
         }        
@@ -502,7 +502,7 @@ public class SplitTable implements ObjectIndex {
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (final ExecutionException e) {
-        	e.printStackTrace();
+        	Log.logSevere("SplitTable", "", e);
             throw new RuntimeException(e.getCause());
         }
         return null;
@@ -582,7 +582,7 @@ public class SplitTable implements ObjectIndex {
             try {
                 this.orderQueue.put(poisonDiscoverOrder);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logSevere("SplitTable", "", e);
             }
         }
         

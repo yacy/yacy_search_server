@@ -554,9 +554,9 @@ public class RowCollection implements Iterable<Row.Entry> {
                 sort2.get();
                 sort3.get();
             } catch (final InterruptedException e) {
-                e.printStackTrace();
+                Log.logSevere("RowCollection", "", e);
             } catch (final ExecutionException e) {
-                e.printStackTrace();
+                Log.logSevere("RowCollection", "", e);
             }
         } else {
         	qsort(0, p, 0, swapspace);
@@ -589,9 +589,9 @@ public class RowCollection implements Iterable<Row.Entry> {
             try {
                 part.get();
             } catch (final InterruptedException e) {
-                e.printStackTrace();
+                Log.logSevere("RowCollection", "", e);
             } catch (final ExecutionException e) {
-                e.printStackTrace();
+                Log.logSevere("RowCollection", "", e);
             }
         } else {
             qsort(0, p, 0, swapspace);

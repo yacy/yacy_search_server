@@ -108,7 +108,7 @@ public class Table implements ObjectIndex {
                 fos = new FileOutputStream(tablefile);
             } catch (final FileNotFoundException e) {
                 // should not happen
-                e.printStackTrace();
+                Log.logSevere("Table", "", e);
             }
             if (fos != null) try { fos.close(); } catch (final IOException e) {}
         }
@@ -227,10 +227,10 @@ public class Table implements ObjectIndex {
             }
         } catch (final FileNotFoundException e) {
             // should never happen
-            e.printStackTrace();
+            Log.logSevere("Table", "", e);
             throw new kelondroException(e.getMessage());
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logSevere("Table", "", e);
             throw new kelondroException(e.getMessage());
         }
         
@@ -390,8 +390,7 @@ public class Table implements ObjectIndex {
         try {
             assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Log.logSevere("Table", "", e);
         }
         assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
         return index.has(key);
@@ -603,7 +602,7 @@ public class Table implements ObjectIndex {
             fos = new FileOutputStream(f);
         } catch (final FileNotFoundException e) {
             // should not happen
-            e.printStackTrace();
+            Log.logSevere("Table", "", e);
         }
         if (fos != null) try { fos.close(); } catch (final IOException e) {}
         
@@ -613,7 +612,7 @@ public class Table implements ObjectIndex {
             this.file = new BufferedRecords(new Records(f, rowdef.objectsize), this.buffersize);
         } catch (final FileNotFoundException e) {
             // should never happen
-            e.printStackTrace();
+            Log.logSevere("Table", "", e);
         }
         
         // initialize index and copy table
@@ -644,7 +643,7 @@ public class Table implements ObjectIndex {
             try {
                 return new rowIteratorNoOrder();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logSevere("Table", "", e);
                 return null;
             }
         }
@@ -701,7 +700,7 @@ public class Table implements ObjectIndex {
                 try {
                     file.get(this.c, b, 0);
                 } catch (final IOException e) {
-                    e.printStackTrace();
+                    Log.logSevere("Table", "", e);
                     return null;
                 }
             } else {

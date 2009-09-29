@@ -544,7 +544,7 @@ public class ArrayStack implements BLOB {
         } catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (final ExecutionException e) {
-        	e.printStackTrace();
+            Log.logSevere("ArrayStack", "", e);
             throw new RuntimeException(e.getCause());
         }
         //System.out.println("*DEBUG SplitTable fail.time = " + (System.currentTimeMillis() - start) + " ms");
@@ -610,7 +610,7 @@ public class ArrayStack implements BLOB {
                     this.next = b.get(key);
                     if (this.next != null) return;
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.logSevere("ArrayStack", "", e);
                     this.next = null;
                     return;
                 }
@@ -768,7 +768,6 @@ public class ArrayStack implements BLOB {
             Log.logSevere("ArrayStack", "cannot close writing: " + e.getMessage(), e);
             FileUtils.deletedelete(tmpFile);
             FileUtils.deletedelete(newFile);
-            e.printStackTrace();
             return null;
         }
     }
