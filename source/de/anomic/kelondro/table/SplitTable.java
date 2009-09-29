@@ -338,22 +338,23 @@ public class SplitTable implements ObjectIndex {
             this.responseCounter = 0;
             this.finishCounter = finishCounter;
             this.readyCheck = new Semaphore(0);
+            this.discovery = null;
         }
         public byte[] getKey() {
             return this.key;
         }
-        public void commitDiscovery() {
+        public synchronized void commitNoDiscovery() {
             this.responseCounter++;
             if (this.responseCounter >= this.finishCounter) this.readyCheck.release();
         }
-        public void commitDiscovery(ObjectIndex discovery) {
+        public synchronized void commitDiscovery(ObjectIndex discovery) {
             this.responseCounter++;
             this.discovery = discovery;
             this.readyCheck.release();
         }
-        public ObjectIndex discover() {
+        public ObjectIndex discover(long timeout) {
             try {
-                this.readyCheck.acquire();
+                this.readyCheck.tryAcquire(1, timeout, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {}
             return this.discovery;
         }
@@ -392,37 +393,47 @@ public class SplitTable implements ObjectIndex {
         }
         public void run() {
             DiscoverOrder order;
-            try {
-                while ((order = orderQueue.take()) != poisonDiscoverOrder) {
-                    // check if in the given objectIndex is the key as given in the order
+            while (true) {
+                try {
+                    order = orderQueue.take();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                    continue;
+                }
+                if (order == poisonDiscoverOrder) break;
+                // check if in the given objectIndex is the key as given in the order
+                try {
                     if (order.objectIndex.has(order.challenge.getKey())) {
                         order.challenge.commitDiscovery(order.objectIndex);
                     } else {
-                        order.challenge.commitDiscovery();
+                        order.challenge.commitNoDiscovery();
                     }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    order.challenge.commitNoDiscovery();
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
             }
         }
     }
 
     private ObjectIndex keeperOf(final byte[] key) {
-        int tableCount = this.tables.size();
-        Challenge challenge = new Challenge(key, tableCount);
-        
-        // submit discover orders to the processing units
-        final Iterator<ObjectIndex> i = tables.values().iterator();
-        while (i.hasNext()) {
-            try {
-                this.orderQueue.put(new DiscoverOrder(challenge, i.next()));
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        Challenge challenge = null;
+        synchronized (tables) {
+            int tableCount = this.tables.size();
+            challenge = new Challenge(key, tableCount);
+            
+            // submit discover orders to the processing units
+            final Iterator<ObjectIndex> i = tables.values().iterator();
+            while (i.hasNext()) {
+                try {
+                    this.orderQueue.put(new DiscoverOrder(challenge, i.next()));
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        }
-        
+        }        
         // wait for a result
-        ObjectIndex result = challenge.discover();
+        ObjectIndex result = challenge.discover(10000);
         //System.out.println("result of discovery: file = " + ((result == null) ? "null" : result.filename()));
         return result;
     }
