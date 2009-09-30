@@ -90,8 +90,7 @@ public class DCEntry extends TreeMap<String, String> {
     dc_coverage
     dc_rights
          */
-    
-    public Date date() {
+    public Date getDate() {
         String d = this.get("docdatetime");
         if (d == null) d = this.get("dc:date");
         if (d == null) return null;
@@ -103,7 +102,7 @@ public class DCEntry extends TreeMap<String, String> {
         }
     }
     
-    public yacyURL url() {
+    public yacyURL getIdentifier() {
         String u = this.get("url");
         if (u == null) u = this.get("dc:identifier");
         if (u == null) return null;
@@ -115,14 +114,38 @@ public class DCEntry extends TreeMap<String, String> {
         }
     }
     
-    public String language() {
+    public String getLanguage() {
         String l = this.get("language");
         if (l == null) l = this.get("dc:language");
-        if (l == null) return url().language();
+        if (l == null) return getIdentifier().language();
         return l;
     }
     
-    public String title() {
+    public String getType() {
+        String t = this.get("dc:type");
+        if (t == null) return "";
+        return t;
+    }
+    
+    public String getFormat() {
+        String t = this.get("dc:format");
+        if (t == null) return "";
+        return t;
+    }
+    
+    public String getSource() {
+        String t = this.get("dc:source");
+        if (t == null) return "";
+        return t;
+    }
+    
+    public String getRights() {
+        String t = this.get("dc:rights");
+        if (t == null) return "";
+        return t;
+    }
+    
+    public String getTitle() {
         String t = this.get("title");
         if (t == null) t = this.get("dc:title");
         t = stripCDATA(t);
@@ -130,7 +153,14 @@ public class DCEntry extends TreeMap<String, String> {
         return t;
     }
     
-    public String author() {
+    public String getPublisher() {
+        String t = this.get("dc:publisher");
+        t = stripCDATA(t);
+        if (t == null) return "";
+        return t;
+    }
+    
+    public String getCreator() {
         String t = this.get("author");
         if (t == null) t = this.get("dc:creator");
         t = stripCDATA(t);
@@ -138,7 +168,7 @@ public class DCEntry extends TreeMap<String, String> {
         return t;
     }
     
-    public String body() {
+    public String getDescription() {
         String t = this.get("body");
         if (t == null) t = this.get("dc:description");
         t = stripCDATA(t);
@@ -146,7 +176,7 @@ public class DCEntry extends TreeMap<String, String> {
         return t;
     }
     
-    public String[] categories() {
+    public String[] getSubject() {
         String t = this.get("categories");
         if (t == null) this.get("dc:subject");
         t = stripCDATA(t);
@@ -164,20 +194,20 @@ public class DCEntry extends TreeMap<String, String> {
     
     public Document document() {
         HashSet<String> languages = new HashSet<String>();
-        languages.add(language());
+        languages.add(getLanguage());
         
         try {
             return new Document(
-                url(),
+                getIdentifier(),
                 "text/html",
                 "UTF-8",
                 languages,
-                categories(),
-                title(),
-                author(),
+                getSubject(),
+                getTitle(),
+                getCreator(),
                 null,
                 "",
-                body().getBytes("UTF-8"),
+                getDescription().getBytes("UTF-8"),
                 null,
                 null);
         } catch (UnsupportedEncodingException e) {
@@ -189,7 +219,7 @@ public class DCEntry extends TreeMap<String, String> {
     public void writeXML(OutputStreamWriter os) throws IOException {
         Document doc = document();
         if (doc != null) {
-            doc.writeXML(os, this.date());
+            doc.writeXML(os, this.getDate());
         }
     }
 }

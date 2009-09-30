@@ -136,7 +136,13 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
         } else if (tag.startsWith("dc:")) {
             final String value = buffer.toString().trim();
             if (this.elementName != null) {
-                this.surrogate.put(this.elementName, value);
+                value.replaceAll(";", ",");
+                String oldcontent = this.surrogate.get(this.elementName);
+                if (oldcontent == null) {
+                    this.surrogate.put(this.elementName, value);
+                } else {
+                    this.surrogate.put(this.elementName, oldcontent + ";" + value);
+                }
             }
             this.buffer.setLength(0);
             this.parsingValue = false;
@@ -169,12 +175,12 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
             DCEntry s;
             System.out.println("1");
             while ((s = sr.take()) != DCEntry.poison) {
-                System.out.println("Title: " + s.title());
-                System.out.println("Date: " + s.date());
-                System.out.println("URL: " + s.url());
-                System.out.println("Language: " + s.language());
-                System.out.println("Body: " + s.body());
-                System.out.println("Categories: " + s.categories());
+                System.out.println("Title: " + s.getTitle());
+                System.out.println("Date: " + s.getDate());
+                System.out.println("URL: " + s.getIdentifier());
+                System.out.println("Language: " + s.getLanguage());
+                System.out.println("Body: " + s.getDescription());
+                System.out.println("Categories: " + s.getSubject());
             }
             System.out.println("2");
         } catch (IOException e) {

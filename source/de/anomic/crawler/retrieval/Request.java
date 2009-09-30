@@ -78,6 +78,14 @@ public class Request extends serverProcessorJob {
     private String   statusMessage;
     private int      initialHash;   // to provide a object hash that does not change even if the url changes because of redirection
     
+    /**
+     * convenience method for 'full' request object
+     * @param url
+     * @param referrerhash
+     */
+    public Request(final yacyURL url, final String referrerhash) {
+        this(null, url, referrerhash, null, null, null, null, 0, 0, 0);
+    }
     
     /**
      * A Request Entry is a object that is created to provide

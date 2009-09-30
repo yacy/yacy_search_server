@@ -96,6 +96,13 @@ public final class LoaderDispatcher {
         return load(request(url, forText, global), forText, cacheStratgy);
     }
     
+    /**
+     * generate a request object
+     * @param url the target url
+     * @param forText shows that this was a for-text crawling request
+     * @param global shows that this was a global crawling request
+     * @return the request object
+     */
     public Request request(
             final yacyURL url,
             final boolean forText,

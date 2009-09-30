@@ -220,4 +220,101 @@ public final class HTTPLoader {
         return response;
     }
     
+    public static Response load(final Request request) throws IOException {
+        return load(request, 3);
+    }
+    
+    private static Response load(final Request request, int retryCount) throws IOException {
+
+        if (retryCount < 0) {
+            throw new IOException("Redirection counter exceeded for URL " + request.url().toString() + ". Processing aborted.");
+        }
+        
+        final String host = request.url().getHost();
+        if (host == null || host.length() < 2) throw new IOException("host is not well-formed: '" + host + "'");
+        final String path = request.url().getFile();
+        int port = request.url().getPort();
+        final boolean ssl = request.url().getProtocol().equals("https");
+        if (port < 0) port = (ssl) ? 443 : 80;
+        
+        // check if url is in blacklist
+        final String hostlow = host.toLowerCase();
+        if (Switchboard.urlBlacklist != null && Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, hostlow, path)) {
+            throw new IOException("CRAWLER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
+        }
+        
+        // take a file from the net
+        Response response = null;
+        
+        // create a request header
+        final RequestHeader requestHeader = new RequestHeader();
+        requestHeader.put(HeaderFramework.USER_AGENT, crawlerUserAgent);
+        requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE, DEFAULT_LANGUAGE);
+        requestHeader.put(HeaderFramework.ACCEPT_CHARSET, DEFAULT_CHARSET);
+        requestHeader.put(HeaderFramework.ACCEPT_ENCODING, DEFAULT_ENCODING);
+
+        // HTTP-Client
+        final Client client = new Client(20000, requestHeader);
+        
+        ResponseContainer res = null;
+        try {
+            // send request
+            res = client.GET(request.url().toString(), Long.MAX_VALUE);
+            // FIXME: 30*-handling (bottom) is never reached
+            // we always get the final content because httpClient.followRedirects = true
+
+            if (res.getStatusCode() == 200 || res.getStatusCode() == 203) {
+                // the transfer is ok
+                
+                // we write the new cache entry to file system directly
+                res.setAccountingName("CRAWLER");
+                final byte[] responseBody = res.getData();
+
+                // create a new cache entry
+                response = new Response(
+                        request,
+                        requestHeader,
+                        res.getResponseHeader(), 
+                        res.getStatusLine(),
+                        null,
+                        responseBody
+                );
+
+                return response;
+            } else if (res.getStatusLine().startsWith("30")) {
+                if (res.getResponseHeader().containsKey(HeaderFramework.LOCATION)) {
+                    // getting redirection URL
+                    String redirectionUrlString = res.getResponseHeader().get(HeaderFramework.LOCATION);
+                    redirectionUrlString = redirectionUrlString.trim();
+
+                    if (redirectionUrlString.length() == 0) {
+                        throw new IOException("CRAWLER Redirection of URL=" + request.url().toString() + " aborted. Location header is empty.");
+                    }
+                    
+                    // normalizing URL
+                    final yacyURL redirectionUrl = yacyURL.newURL(request.url(), redirectionUrlString);
+
+                    
+                    // if we are already doing a shutdown we don't need to retry crawling
+                    if (Thread.currentThread().isInterrupted()) {
+                        throw new IOException("CRAWLER Retry of URL=" + request.url().toString() + " aborted because of server shutdown.");
+                    }
+                    
+                    // retry crawling with new url
+                    request.redirectURL(redirectionUrl);
+                    return load(request, retryCount - 1);
+                }
+            } else {
+                // if the response has not the right response type then reject file
+                throw new IOException("REJECTED WRONG STATUS TYPE '" + res.getStatusLine() + "' for URL " + request.url().toString());
+            }
+        } finally {
+            if(res != null) {
+                // release connection
+                res.closeStream();
+            }
+        }
+        return response;
+    }
+    
 }

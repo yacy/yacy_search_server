@@ -1206,9 +1206,9 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
                 // check if url is in accepted domain
                 assert surrogate != null;
                 assert crawlStacker != null;
-                final String urlRejectReason = crawlStacker.urlInAcceptedDomain(surrogate.url());
+                final String urlRejectReason = crawlStacker.urlInAcceptedDomain(surrogate.getIdentifier());
                 if (urlRejectReason != null) {
-                    if (this.log.isFine()) this.log.logInfo("Rejected URL '" + surrogate.url() + "': " + urlRejectReason);
+                    if (this.log.isFine()) this.log.logInfo("Rejected URL '" + surrogate.getIdentifier() + "': " + urlRejectReason);
                     continue;
                 }
                 
@@ -1216,7 +1216,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
                 Document document = surrogate.document();
                 Request request = new Request(
                         peers.mySeed().hash, 
-                        surrogate.url(), 
+                        surrogate.getIdentifier(), 
                         null, 
                         "", 
                         new Date(),

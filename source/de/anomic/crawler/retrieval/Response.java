@@ -274,7 +274,7 @@ public class Response {
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable
         // in caches
-        if (this.url().isPOST() && !this.profile.crawlingQ()) {
+        if (this.url().isPOST() && this.profile != null && !this.profile.crawlingQ()) {
             return "dynamic_post";
         }
         
