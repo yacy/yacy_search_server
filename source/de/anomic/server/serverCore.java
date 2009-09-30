@@ -336,11 +336,11 @@ public final class serverCore extends serverAbstractBusyThread implements server
             
             if (this.busySessions.size() >= this.maxBusySessions) {
                 // immediately close connection if too much sessions are still running
-                this.log.logWarning("* connections (" + this.busySessions.size() + ") exceeding limit (" + this.maxBusySessions + ")" /*+ ", closing new incoming connection from "+ controlSocket.getRemoteSocketAddress()*/);
-                /*
+                this.log.logWarning("* connections (" + this.busySessions.size() + ") exceeding limit (" + this.maxBusySessions + ")" + ", closing new incoming connection from "+ controlSocket.getRemoteSocketAddress());
+                
                 controlSocket.close();
                 return false;
-                */
+                
             }
             
             final String cIP = clientAddress(controlSocket);
