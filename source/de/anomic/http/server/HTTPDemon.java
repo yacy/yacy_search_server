@@ -209,7 +209,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
 
         // check if we want to allow this socket to connect us
         if (!(this.allowProxy || this.allowServer || this.allowYaCyHop)) {
-            final String errorMsg = "CONNECTION FROM " + this.userAddress.getHostName() + " [" + this.clientIP + "] FORBIDDEN";
+            final String errorMsg = "CONNECTION FROM " + this.clientIP + " FORBIDDEN";
             log.logWarning(errorMsg);
             throw new IOException(errorMsg);
         }

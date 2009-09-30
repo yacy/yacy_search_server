@@ -34,7 +34,7 @@ import java.util.TreeSet;
 public class TermSearch <ReferenceType extends Reference> {
 
     private ReferenceContainer<ReferenceType> joinResult;
-    HashMap<byte[], ReferenceContainer<ReferenceType>> inclusionContainers, exclusionContainers;
+    HashMap<byte[], ReferenceContainer<ReferenceType>> inclusionContainers;
     
     public TermSearch(
             Index<ReferenceType> base,
@@ -53,7 +53,7 @@ public class TermSearch <ReferenceType extends Reference> {
             (inclusionContainers.size() < queryHashes.size()))
             inclusionContainers = new HashMap<byte[], ReferenceContainer<ReferenceType>>(0); // prevent that only a subset is returned
         
-        this.exclusionContainers =
+        HashMap<byte[], ReferenceContainer<ReferenceType>> exclusionContainers =
             (inclusionContainers.size() == 0) ?
                 new HashMap<byte[], ReferenceContainer<ReferenceType>>(0) :
                 base.searchConjunction(excludeHashes, urlselection);
@@ -72,10 +72,6 @@ public class TermSearch <ReferenceType extends Reference> {
     
     public HashMap<byte[], ReferenceContainer<ReferenceType>> inclusion() {
         return this.inclusionContainers;
-    }
-    
-    public HashMap<byte[], ReferenceContainer<ReferenceType>> exclusion() {
-        return this.exclusionContainers;
     }
     
 }

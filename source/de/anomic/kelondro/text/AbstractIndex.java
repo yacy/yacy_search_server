@@ -82,7 +82,8 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
     // methods to search in the index
     
     /**
-     * collect containers for given word hashes. This collection stops if a single container does not contain any references.
+     * collect containers for given word hashes.
+     * This collection stops if a single container does not contain any references.
      * In that case only a empty result is returned.
      * @param wordHashes
      * @param urlselection
@@ -124,8 +125,8 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
     
     /**
      * collect containers for given word hashes and join them as they are retrieved.
-     * This collection stops if a single container does not contain any references or the current result
-     * of the container join results in an empty container.
+     * This collection stops if a single container does not contain any references
+     * or the current result of the container join results in an empty container.
      * In any fail case only a empty result container is returned.
      * @param wordHashes
      * @param urlselection
@@ -133,7 +134,8 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
      * @return ReferenceContainer the join result
      */
     public ReferenceContainer<ReferenceType> searchJoin(final TreeSet<byte[]> wordHashes, final Set<String> urlselection, int maxDistance) {
-        // first check if there is any entry that has no match; this uses only operations in ram
+        // first check if there is any entry that has no match;
+        // this uses only operations in ram
         for (byte[] wordHash: wordHashes) {
             if (!this.has(wordHash)) return ReferenceContainer.emptyContainer(factory, null, 0);
         }

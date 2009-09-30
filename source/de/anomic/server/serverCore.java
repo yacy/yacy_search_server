@@ -138,30 +138,33 @@ public final class serverCore extends serverAbstractBusyThread implements server
     public final void terminateOldSessions(long minage) {
         if (System.currentTimeMillis() - lastAutoTermination < 30000) return;
         this.lastAutoTermination = System.currentTimeMillis();
+        //if (serverCore.sessionThreadGroup.activeCount() < maxBusySessions - 10) return; // don't panic
+        final Thread[] threadList = new Thread[this.getJobCount()];
+        serverCore.sessionThreadGroup.enumerate(threadList);
         
-        int threadCount = serverCore.sessionThreadGroup.activeCount();
-        if (threadCount < maxBusySessions - 10) return; // don't panic
-        final Thread[] threadList = new Thread[this.getJobCount()];     
-        threadCount = serverCore.sessionThreadGroup.enumerate(threadList);
-        for (int threadIdx = 0; threadIdx < threadCount; threadIdx++ )  {                        
-            final Thread t = threadList[threadIdx];
-            if (t != null && t instanceof Session && t.isAlive() && ((Session) t).getTime() > minage) {
-                this.log.logInfo("check for " + t.getName() + ": " + ((Session) t).getTime() + " ms alive, stopping thread");
-                
-                // trying to stop session
-                ((Session) t).setStopped(true);
-                try { Thread.sleep(100); } catch (final InterruptedException ex) {}
-                
-                // trying to interrupt session
-                if (t.isAlive()) {
-                    t.interrupt();
-                    try {Thread.sleep(10);} catch (final InterruptedException ex) {}
-                } 
-                
-                // trying to close socket
-                if (t.isAlive()) {
-                    ((Session) t).close();
-                }
+        for (Thread t: threadList) {
+            if (t == null) continue;
+            if (!(t instanceof Session)) continue;
+            if (!t.isAlive()) continue;
+            Session s = (Session) t;
+            if (s.getTime() < minage) continue;
+            
+            // stop thread
+            this.log.logInfo("check for " + t.getName() + ": " + ((Session) t).getTime() + " ms alive, stopping thread");
+            
+            // trying to stop session
+            s.setStopped(true);
+            try { Thread.sleep(100); } catch (final InterruptedException ex) {}
+            
+            // trying to interrupt session
+            if (t.isAlive()) {
+                t.interrupt();
+                try {Thread.sleep(10);} catch (final InterruptedException ex) {}
+            } 
+            
+            // trying to close socket
+            if (t.isAlive()) {
+                s.close();
             }
         }
     }
@@ -330,12 +333,14 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 terminateOldSessions(30000);
             }
             
+            /*
             if (this.busySessions.size() >= this.maxBusySessions) {
                 // immediately close connection if too much sessions are still running
                 this.log.logWarning("* connections (" + this.busySessions.size() + ") exceeding limit (" + this.maxBusySessions + "), closing new incoming connection from "+ controlSocket.getRemoteSocketAddress());
                 controlSocket.close();
                 return false;
             }
+            */
             
             final String cIP = clientAddress(controlSocket);
             //System.out.println("server bfHosts=" + bfHost.toString());
@@ -642,13 +647,13 @@ public final class serverCore extends serverAbstractBusyThread implements server
                     }
                 } catch (final IOException e) {
                     e.printStackTrace();
+                } finally {
+                    if (busySessions != null) {
+                        busySessions.remove(this);
+                        if (serverCore.this.log.isFinest()) serverCore.this.log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + " " + this.request);
+                    }
+                    this.controlSocket = null;
                 }
-                if (busySessions != null)
-                {
-                    busySessions.remove(this);
-                    if(serverCore.this.log.isFinest()) serverCore.this.log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + " " + this.request);
-                }
-                this.controlSocket = null;
             }
             
         }

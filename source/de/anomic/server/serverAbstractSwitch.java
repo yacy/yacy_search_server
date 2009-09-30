@@ -24,6 +24,7 @@ package de.anomic.server;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -31,6 +32,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import de.anomic.kelondro.util.FileUtils;
+import de.anomic.server.serverCore.Session;
 import de.anomic.yacy.logging.Log;
 
 public abstract class serverAbstractSwitch implements serverSwitch {
@@ -405,6 +407,61 @@ public abstract class serverAbstractSwitch implements serverSwitch {
             while (e.hasNext()) {
                 ((serverThread) workerThreads.get(e.next())).terminate(true);
                 e.remove();
+            }
+        }
+    }
+    
+    public String[] sessionsOlderThan(String threadName, long timeout) {
+        ArrayList<String> list = new ArrayList<String>();
+        final serverThread st = getThread(threadName);
+        final Thread[] threadList = new Thread[((serverCore) st).getJobCount()];
+        serverCore.sessionThreadGroup.enumerate(threadList);
+        
+        for (Thread t: threadList) {
+            if (t == null) continue;
+            if (!(t instanceof serverCore.Session)) continue;
+            if (!t.isAlive()) continue;
+            if (t == null) continue;
+            final Session s = (Session) t;
+            if (s.getTime() > timeout) {
+                list.add(s.getName());
+            }
+        }
+        return (String[]) list.toArray();
+    }
+    
+    public void closeSessions(String threadName, String sessionName) {
+        if (sessionName == null) return;
+        final serverThread st = getThread(threadName);
+        final Thread[] threadList = new Thread[((serverCore) st).getJobCount()];
+        serverCore.sessionThreadGroup.enumerate(threadList);
+        
+        for (Thread t: threadList) {
+            if (
+                (t != null) && 
+                (t instanceof serverCore.Session) && 
+                (t.isAlive()) &&
+                (t.getName().equals(sessionName))
+            ) {
+                // try to stop session
+                ((Session)t).setStopped(true);
+                try { Thread.sleep(100); } catch (final InterruptedException ex) {}
+                
+                // try to interrupt session
+                if (t.isAlive()) {
+                    t.interrupt();
+                    try { Thread.sleep(100); } catch (final InterruptedException ex) {}
+                } 
+                
+                // try to close socket
+                if (t.isAlive()) {
+                    ((Session)t).close();
+                }
+                
+                // wait for session to finish
+                if (t.isAlive()) {
+                    try { t.join(500); } catch (final InterruptedException ex) {}
+                }
             }
         }
     }

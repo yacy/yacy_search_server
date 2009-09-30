@@ -57,7 +57,7 @@ public final class Connections_p {
          
         
         // get the virtualHost string
-        final String virtualHost = sb.getConfig("fileHost","localhost");
+        final String virtualHost = sb.getConfig("fileHost", "localhost");
         
         
         // server sessions
@@ -65,9 +65,9 @@ public final class Connections_p {
         final serverThread httpd = sb.getThread("10_httpd");
         
         /* waiting for all threads to finish */
-        int threadCount  = serverCore.sessionThreadGroup.activeCount();    
+        int count  = serverCore.sessionThreadGroup.activeCount();    
         final Thread[] threadList = new Thread[((serverCore) httpd).getJobCount()];     
-        threadCount = serverCore.sessionThreadGroup.enumerate(threadList);
+        count = serverCore.sessionThreadGroup.enumerate(threadList);
         
         // determines if name lookup should be done or not 
         boolean doNameLookup = false;
@@ -76,39 +76,8 @@ public final class Connections_p {
                 doNameLookup = true;
             }
             if (post.containsKey("closeServerSession")) {
-                final String sessionName = post.get("closeServerSession",null);
-                if (sessionName != null) {
-                    for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {                        
-                        final Thread currentThread = threadList[currentThreadIdx];
-                        if (
-                                (currentThread != null) && 
-                                (currentThread instanceof serverCore.Session) && 
-                                (currentThread.isAlive()) &&
-                                (currentThread.getName().equals(sessionName))
-                        ){
-                            // trying to gracefull stop session
-                            ((Session)currentThread).setStopped(true);
-                            try { Thread.sleep(100); } catch (final InterruptedException ex) {}
-                            
-                            // trying to interrupt session
-                            if (currentThread.isAlive()) {
-                                currentThread.interrupt();
-                                try { Thread.sleep(100); } catch (final InterruptedException ex) {}
-                            } 
-                            
-                            // trying to close socket
-                            if (currentThread.isAlive()) {
-                                ((Session)currentThread).close();
-                            }
-                            
-                            // waiting for session to finish
-                            if (currentThread.isAlive()) {
-                                try { currentThread.join(500); } catch (final InterruptedException ex) {}
-                            }
-                            break;
-                        }
-                    }
-                }
+                final String sessionName = post.get("closeServerSession", null);
+                sb.closeSessions("10_httpd", sessionName);
                 prop.put("LOCATION","");
                 return prop;                
             }
@@ -116,31 +85,31 @@ public final class Connections_p {
         
         int idx = 0, numActiveRunning = 0, numActivePending = 0;
         boolean dark = true;
-        for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-            final Thread currentThread = threadList[currentThreadIdx];
-            if ((currentThread != null) && (currentThread instanceof serverCore.Session) && (currentThread.isAlive())) {
+        for ( int currentThreadIdx = 0; currentThreadIdx < count; currentThreadIdx++ )  {
+            final Thread t = threadList[currentThreadIdx];
+            if ((t != null) && (t instanceof serverCore.Session) && (t.isAlive())) {
                 // getting the session object
-                final Session currentSession = ((Session) currentThread);
+                final Session s = ((Session) t);
                 
                 // getting the session runtime
-                final long sessionTime = currentSession.getTime();
+                final long sessionTime = s.getTime();
                 
                 // getting the request command line
                 boolean blockingRequest = false;
-                String commandLine = currentSession.getCommandLine();
+                String commandLine = s.getCommandLine();
                 if (commandLine == null) blockingRequest = true;                
-                final int commandCount = currentSession.getCommandCount();
+                final int commandCount = s.getCommandCount();
                 
                 // getting the source ip address and port
-                final InetAddress userAddress = currentSession.getUserAddress();
-                final int userPort = currentSession.getUserPort();
+                final InetAddress userAddress = s.getUserAddress();
+                final int userPort = s.getUserPort();
                 if (userAddress == null) continue;
                 
-                final boolean isSSL = currentSession.isSSL();
+                final boolean isSSL = s.isSSL();
                 
                 String dest = null;
                 String prot = null;
-                final serverHandler cmdObj = currentSession.getCommandObj();
+                final serverHandler cmdObj = s.getCommandObj();
                 if (cmdObj instanceof HTTPDemon) {
                     prot = isSSL ? "https":"http";
                     
@@ -172,12 +141,12 @@ public final class Connections_p {
                 prop.put("list_" + idx + "_dark", dark ? "1" : "0");
                 dark=!dark;
                 try {
-                    prop.put("list_" + idx + "_serverSessionID",URLEncoder.encode(currentSession.getName(),"UTF8"));
+                    prop.put("list_" + idx + "_serverSessionID",URLEncoder.encode(s.getName(),"UTF8"));
                 } catch (final UnsupportedEncodingException e) {
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                prop.putHTML("list_" + idx + "_sessionName", currentSession.getName());
+                prop.putHTML("list_" + idx + "_sessionName", s.getName());
                 prop.put("list_" + idx + "_proto", prot);
                 if (sessionTime > 1000*60) {
                     prop.put("list_" + idx + "_ms", "0");
@@ -206,7 +175,6 @@ public final class Connections_p {
         prop.putNum("numMax", ((serverCore)httpd).getMaxSessionCount());
         prop.putNum("numActiveRunning", numActiveRunning);
         prop.putNum("numActivePending", numActivePending);
-        
         
         // client sessions
         final Set<ConnectionInfo> allConnections = ConnectionInfo.getAllConnections();
