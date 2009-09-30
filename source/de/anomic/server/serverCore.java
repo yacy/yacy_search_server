@@ -328,19 +328,20 @@ public final class serverCore extends serverAbstractBusyThread implements server
             
             announceThreadBlockRelease();
             
-
-            if (this.busySessions.size() >= this.maxBusySessions) {
+            int pp = this.busySessions.size();
+            if (pp >= this.maxBusySessions) {
                 terminateOldSessions(30000);
+                this.log.logInfo("termination of old sessions: before = " + pp + ", after = " + this.busySessions.size());
             }
             
-            /*
             if (this.busySessions.size() >= this.maxBusySessions) {
                 // immediately close connection if too much sessions are still running
-                this.log.logWarning("* connections (" + this.busySessions.size() + ") exceeding limit (" + this.maxBusySessions + "), closing new incoming connection from "+ controlSocket.getRemoteSocketAddress());
+                this.log.logWarning("* connections (" + this.busySessions.size() + ") exceeding limit (" + this.maxBusySessions + ")" /*+ ", closing new incoming connection from "+ controlSocket.getRemoteSocketAddress()*/);
+                /*
                 controlSocket.close();
                 return false;
+                */
             }
-            */
             
             final String cIP = clientAddress(controlSocket);
             //System.out.println("server bfHosts=" + bfHost.toString());
