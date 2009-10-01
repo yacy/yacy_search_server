@@ -79,7 +79,12 @@ public class ymageOSM {
             return null;
         }
         //System.out.println("*** DEBUG: fetching OSM tile: " + tileURL.toNormalform(true, true));
-        InputStream tileStream = Cache.getContentStream(tileURL);
+        InputStream tileStream = null;
+        try {
+            tileStream = Cache.getContentStream(tileURL);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
         if (tileStream == null) {
             // download resource using the crawler and keep resource in memory if possible
             Response entry = null;

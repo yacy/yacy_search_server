@@ -1582,10 +1582,24 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         
         // PARSE CONTENT
         final long parsingStartTime = System.currentTimeMillis();
-
+        byte[] b = null;
+        try {
+            // fetch the document
+            b = Cache.getContent(entry.url());
+            if (b == null) {
+                this.log.logWarning("the resource '" + entry.url() + "' is missing in the cache.");
+                addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.name(), "missing");
+                return null;
+            }
+        } catch (IOException e) {
+            this.log.logWarning("Unable fetch the resource '" + entry.url() + "'. from the cache: " + e.getMessage());
+            addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.name(), e.getMessage());
+            return null;
+        }
+        
         try {
             // parse the document
-            document = Parser.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), Cache.getContent(entry.url()));
+            document = Parser.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), b);
             assert(document != null) : "Unexpected error. Parser returned null.";
         } catch (final ParserException e) {
             this.log.logWarning("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());

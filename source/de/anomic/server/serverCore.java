@@ -853,10 +853,10 @@ public final class serverCore extends serverAbstractBusyThread implements server
             if (bufferSize == 0 && b == -1) return null;
             return readLineBuffer.getBytes();
         } catch (final ClosedByInterruptException e) {
-            if (logerr) Log.logSevere("SERVER", "receive interrupted - timeout");
+            if (logerr) Log.logWarning("SERVER", "receive interrupted");
             return null;            
         } catch (final IOException e) {
-            if (logerr) Log.logSevere("SERVER", "receive interrupted - exception 2 = " + e.getMessage());
+            if (logerr) Log.logWarning("SERVER", "receive closed by IOException: " + e.getMessage());
             return null;
         } finally {
         	try {

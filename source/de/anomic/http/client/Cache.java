@@ -38,6 +38,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -111,32 +112,55 @@ public final class Cache {
         fileDB.close(true);
     }
     
-    public static void store(yacyURL url, final ResponseHeader responseHeader, byte[] file) {
-        if (responseHeader != null && file != null) try {
-            // store the response header into the header database
-            final HashMap<String, String> hm = new HashMap<String, String>();
-            hm.putAll(responseHeader);
-            hm.put("@@URL", url.toNormalform(true, false));
+    public static void store(yacyURL url, final ResponseHeader responseHeader, byte[] file) throws IOException {
+        if (responseHeader == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: responseHeader == null");
+        if (file == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: file == null");
+        
+        // store the response header into the header database
+        final HashMap<String, String> hm = new HashMap<String, String>();
+        hm.putAll(responseHeader);
+        hm.put("@@URL", url.toNormalform(true, false));
+        try {
             responseHeaderDB.put(url.hash(), hm);
-            fileDB.put(url.hash().getBytes("UTF-8"), file);
-            if (log.isFine()) log.logFine("stored in cache: " + url.toNormalform(true, false));
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IOException("Cache.store: cannot write to headerDB: " + e.getMessage());
         }
+        
+        // store the file
+        try {
+            fileDB.put(url.hash().getBytes("UTF-8"), file);
+        } catch (UnsupportedEncodingException e) {
+            throw new IOException("Cache.store: cannot write to fileDB (1): " + e.getMessage());
+        } catch (IOException e) {
+            throw new IOException("Cache.store: cannot write to fileDB (2): " + e.getMessage());
+        }
+        if (log.isFine()) log.logFine("stored in cache: " + url.toNormalform(true, false));
     }
     
     /**
      * check if the responseHeaderDB and the fileDB has an entry for the given url
      * @param url the url of the resource
-     * @return true if the content of the url is in the cache, false othervise
+     * @return true if the content of the url is in the cache, false otherwise
      */
     public static boolean has(final yacyURL url) {
+        boolean headerExists;
         try {
-            return responseHeaderDB.has(url.hash()) && fileDB.has(url.hash().getBytes());
-        } catch (IOException e) {
-            e.printStackTrace();
+            headerExists = responseHeaderDB.has(url.hash());
+        } catch (IOException e1) {
+            try {
+                fileDB.remove(url.hash().getBytes());
+            } catch (IOException e) {}
             return false;
         }
+        boolean fileExists = fileDB.has(url.hash().getBytes());
+        if (headerExists && fileExists) return true;
+        if (headerExists) try {
+            responseHeaderDB.remove(url.hash());
+        } catch (IOException e) {}
+        if (fileExists) try {
+            fileDB.remove(url.hash().getBytes());
+        } catch (IOException e) {}
+        return false;
     }
     
     /**
@@ -168,8 +192,9 @@ public final class Cache {
      * @return the resource content as {@link InputStream}. In no data
      * is available or the cached file is not readable, <code>null</code>
      * is returned.
+     * @throws IOException 
      */
-    public static InputStream getContentStream(final yacyURL url) {
+    public static InputStream getContentStream(final yacyURL url) throws IOException {
         // load the url as resource from the cache
         byte[] b = getContent(url);
         if (b == null) return null;
@@ -182,12 +207,13 @@ public final class Cache {
      * @return the resource content as byte[]. In no data
      * is available or the cached file is not readable, <code>null</code>
      * is returned.
+     * @throws IOException 
      */
-    public static byte[] getContent(final yacyURL url) {
+    public static byte[] getContent(final yacyURL url) throws IOException {
         // load the url as resource from the cache
         try {
             return fileDB.get(url.hash().getBytes("UTF-8"));
-        } catch (IOException e) {
+        } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             return null;
         }

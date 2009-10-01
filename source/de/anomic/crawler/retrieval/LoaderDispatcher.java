@@ -152,7 +152,13 @@ public final class LoaderDispatcher {
             // now see if there is a cache entry
         
             ResponseHeader cachedResponse = (request.url().isLocal()) ? null : Cache.getResponseHeader(request.url());
-            byte[] content = (cachedResponse == null) ? null : Cache.getContent(request.url());
+            byte[] content = null;
+            try {
+                content = (cachedResponse == null) ? null : Cache.getContent(request.url());
+            } catch (IOException e) {
+                e.printStackTrace();
+                content = null;
+            }
             if (cachedResponse != null && content != null) {
                 // yes we have the content
                 
@@ -221,11 +227,15 @@ public final class LoaderDispatcher {
         if (protocol.equals("ftp")) response = ftpLoader.load(request);
         if (response != null) {
             // we got something. Now check if we want to store that to the cache
-            String storeError = response.shallStoreCache();
+            String storeError = response.shallStoreCacheForCrawler();
             if (storeError == null) {
-                Cache.store(request.url(), response.getResponseHeader(), response.getContent());
+                try {
+                    Cache.store(request.url(), response.getResponseHeader(), response.getContent());
+                } catch (IOException e) {
+                    log.logWarning("cannot write " + response.url() + " to Cache (3): " + e.getMessage(), e);
+                }
             } else {
-                if (Cache.log.isFine()) Cache.log.logFine("no storage of url " + request.url() + ": " + storeError);
+                log.logWarning("cannot write " + response.url() + " to Cache (4): " + storeError);
             }
             return response;
         }

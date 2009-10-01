@@ -25,6 +25,7 @@
 //javac -classpath .:../Classes Status.java
 //if the shell's current path is HTROOT
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
@@ -145,7 +146,12 @@ public class ViewFile {
         ResponseHeader responseHeader = null;
         String resMime = null;
         // trying to load the resource body
-        resource = Cache.getContentStream(url);
+        try {
+            resource = Cache.getContentStream(url);
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            resource = null;
+        }
         resourceLength = Cache.getResourceContentLength(url);
         responseHeader = Cache.getResponseHeader(url);
 
@@ -162,7 +168,12 @@ public class ViewFile {
             }
 
             if (entry != null) {
-                resource = Cache.getContentStream(url);
+                try {
+                    resource = Cache.getContentStream(url);
+                } catch (IOException e1) {
+                    e1.printStackTrace();
+                    resource = null;
+                }
                 resourceLength = Cache.getResourceContentLength(url);
             }
 

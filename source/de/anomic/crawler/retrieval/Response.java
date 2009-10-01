@@ -253,23 +253,17 @@ public class Response {
      * @return NULL if the answer is TRUE, in case of FALSE, the reason as
      *         String is returned
      */
-    public String shallStoreCache() {
+    public String shallStoreCacheForProxy() {
 
+        String crawlerReason = shallStoreCacheForCrawler();
+        if (crawlerReason != null) return crawlerReason;
+        
         // check profile (disabled: we will check this in the plasmaSwitchboard)
         // if (!this.profile.storeHTCache()) { return "storage_not_wanted"; }
 
         // decide upon header information if a specific file should be stored to
         // the cache or not
         // if the storage was requested by prefetching, the request map is null
-
-        // check storage size: all files will be handled in RAM before storage, so they must not exceed
-        // a given size, which we consider as 1MB
-        if (this.size() > 10 * 1024L * 1024L) return "too_large_for_caching_" + this.size();
-        
-        // check status code
-        if (!validResponseStatus()) {
-            return "bad_status_" + this.responseStatus.substring(0, 3);
-        }
 
         // -CGI access in request
         // CGI access makes the page very individual, and therefore not usable
@@ -286,20 +280,7 @@ public class Response {
             return "local_URL_no_cache_needed";
         }
         
-        if (requestHeader != null) {
-            // -authorization cases in request
-            // authorization makes pages very individual, and therefore we cannot use the
-            // content in the cache
-            if (requestHeader.containsKey(RequestHeader.AUTHORIZATION)) { return "personalized"; }
-            // -ranges in request and response
-            // we do not cache partial content
-            if (requestHeader.containsKey(HeaderFramework.RANGE)) { return "partial"; }
-        }
-        
         if (responseHeader != null) {
-            // -ranges in request and response
-            // we do not cache partial content            
-            if (responseHeader.containsKey(HeaderFramework.CONTENT_RANGE)) { return "partial"; }
 
             // -if-modified-since in request
             // we do not care about if-modified-since, because this case only occurres if the
@@ -348,6 +329,33 @@ public class Response {
         return null;
     }
 
+    public String shallStoreCacheForCrawler() {
+        // check storage size: all files will be handled in RAM before storage, so they must not exceed
+        // a given size, which we consider as 1MB
+        if (this.size() > 10 * 1024L * 1024L) return "too_large_for_caching_" + this.size();
+        
+        // check status code
+        if (!validResponseStatus()) {
+            return "bad_status_" + this.responseStatus.substring(0, 3);
+        }
+
+        if (requestHeader != null) {
+            // -authorization cases in request
+            // authorization makes pages very individual, and therefore we cannot use the
+            // content in the cache
+            if (requestHeader.containsKey(RequestHeader.AUTHORIZATION)) { return "personalized"; }
+            // -ranges in request and response
+            // we do not cache partial content
+            if (requestHeader.containsKey(HeaderFramework.RANGE)) { return "partial_request"; }
+        }
+        
+        if (responseHeader != null) {
+            // -ranges in request and response
+            // we do not cache partial content            
+            if (responseHeader.containsKey(HeaderFramework.CONTENT_RANGE)) { return "partial_response"; }
+        }
+        return null;
+    }
     
     /**
      * decide upon header information if a specific file should be taken from

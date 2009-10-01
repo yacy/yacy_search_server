@@ -117,7 +117,7 @@ public final class HTTPDProxyHandler {
 
     //private Properties connectionProperties = null;
     // creating a logger
-    private static final Log theLogger = new Log("PROXY");
+    private static final Log log = new Log("PROXY");
     
     private static boolean doAccessLogging = false; 
 	/**
@@ -126,7 +126,7 @@ public final class HTTPDProxyHandler {
     static {
         // Doing logger initialization
         try {
-            theLogger.logInfo("Configuring proxy access logging ...");            
+            log.logInfo("Configuring proxy access logging ...");            
             
             // getting the logging manager
             final LogManager manager = LogManager.getLogManager();
@@ -158,15 +158,15 @@ public final class HTTPDProxyHandler {
                 proxyLogger.addHandler(txtLog);     
                 
                 doAccessLogging = true; 
-                theLogger.logInfo("Proxy access logging configuration done." + 
+                log.logInfo("Proxy access logging configuration done." + 
                                   "\n\tFilename: " + pattern + 
                                   "\n\tLimit: " + limitStr + 
                                   "\n\tCount: " + countStr);
             } else {
-                theLogger.logInfo("Proxy access logging is deactivated.");
+                log.logInfo("Proxy access logging is deactivated.");
             }
         } catch (final Exception e) { 
-            theLogger.logSevere("Unable to configure proxy access logging.",e);        
+            log.logSevere("Unable to configure proxy access logging.",e);        
         }
         
         sb = Switchboard.getSwitchboard();
@@ -192,7 +192,7 @@ public final class HTTPDProxyHandler {
         final String f = sb.getConfig("proxyYellowList", null);
         if (f != null) {
             yellowList = FileUtils.loadList(new File(f)); 
-            theLogger.logConfig("loaded yellow-list from file " + f + ", " + yellowList.size() + " entries");
+            log.logConfig("loaded yellow-list from file " + f + ", " + yellowList.size() + " entries");
         } else {
             yellowList = new HashSet<String>();
         }
@@ -307,8 +307,8 @@ public final class HTTPDProxyHandler {
             yacyURL url = null;
             try {
                 url = HeaderFramework.getRequestURL(conProp);
-                if (theLogger.isFine()) theLogger.logFine(reqID +" GET "+ url);
-                if (theLogger.isFinest()) theLogger.logFinest(reqID +"    header: "+ requestHeader);
+                if (log.isFine()) log.logFine(reqID +" GET "+ url);
+                if (log.isFinest()) log.logFinest(reqID +"    header: "+ requestHeader);
 
                 //redirector
                 if (redirectorEnabled){
@@ -322,7 +322,7 @@ public final class HTTPDProxyHandler {
                             url = new yacyURL(newUrl, null);
                         } catch(final MalformedURLException e){}//just keep the old one
                     }
-                    if (theLogger.isFinest()) theLogger.logFinest(reqID +"    using redirector to "+ url);
+                    if (log.isFinest()) log.logFinest(reqID +"    using redirector to "+ url);
                     conProp.setProperty(HeaderFramework.CONNECTION_PROP_HOST, url.getHost()+":"+url.getPort());
                     conProp.setProperty(HeaderFramework.CONNECTION_PROP_PATH, url.getPath());
                     requestHeader.put(HeaderFramework.HOST, url.getHost()+":"+url.getPort());
@@ -331,7 +331,7 @@ public final class HTTPDProxyHandler {
             } catch (final MalformedURLException e) {
                 final String errorMsg = "ERROR: internal error with url generation: host=" +
                                   host + ", port=" + port + ", path=" + path + ", args=" + args;
-                theLogger.logSevere(errorMsg);
+                log.logSevere(errorMsg);
                 HTTPDemon.sendRespondError(conProp,countedRespond,4,501,null,errorMsg,e);
                 return;
             }
@@ -349,7 +349,7 @@ public final class HTTPDProxyHandler {
             final String hostlow = host.toLowerCase();
             if (args != null) { path = path + "?" + args; }
             if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_PROXY, hostlow, path)) {
-                theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
+                log.logInfo("AGIS blocking of host '" + hostlow + "'");
                 HTTPDemon.sendRespondError(conProp,countedRespond,4,403,null,
                         "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
                 return;
@@ -383,7 +383,7 @@ public final class HTTPDProxyHandler {
             // in two of these cases we trigger a scheduler to handle newly arrived files:
             // case 1 and case 3
             if (cachedResponseHeader == null) {
-                if (theLogger.isFinest()) theLogger.logFinest(reqID + " page not in cache: fulfill request from web");
+                if (log.isFinest()) log.logFinest(reqID + " page not in cache: fulfill request from web");
                     fulfillRequestFromWeb(conProp, url, requestHeader, cachedResponseHeader, countedRespond);
             } else {
             	final Request request = new Request(
@@ -406,10 +406,10 @@ public final class HTTPDProxyHandler {
                 );
                 byte[] cacheContent = Cache.getContent(url);
                 if (cacheContent != null && response.isFreshForProxy()) {
-                    if (theLogger.isFinest()) theLogger.logFinest(reqID + " fulfill request from cache");
+                    if (log.isFinest()) log.logFinest(reqID + " fulfill request from cache");
                     fulfillRequestFromCache(conProp, url, requestHeader, cachedResponseHeader, cacheContent, countedRespond);
                 } else {
-                    if (theLogger.isFinest()) theLogger.logFinest(reqID + " fulfill request from web");
+                    if (log.isFinest()) log.logFinest(reqID + " fulfill request from web");
                     fulfillRequestFromWeb(conProp, url, requestHeader, cachedResponseHeader, countedRespond);
                 }
             }
@@ -423,7 +423,7 @@ public final class HTTPDProxyHandler {
                 } else if (!conProp.containsKey(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
                     final String errorMsg = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage(); 
                     HTTPDemon.sendRespondError(conProp,countedRespond,4,501,null,errorMsg,e);
-                    theLogger.logSevere(errorMsg);
+                    log.logSevere(errorMsg);
                 } else {
                     forceConnectionClose(conProp);                    
                 }
@@ -484,7 +484,7 @@ public final class HTTPDProxyHandler {
             // send request
             try {
                 res = client.GET(getUrl);
-                if (theLogger.isFinest()) theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
+                if (log.isFinest()) log.logFinest(reqID +"    response status: "+ res.getStatusLine());
                 conProp.put(HeaderFramework.CONNECTION_PROP_CLIENT_REQUEST_HEADER, requestHeader);
 
                 final ResponseHeader responseHeader = res.getResponseHeader();
@@ -528,7 +528,7 @@ public final class HTTPDProxyHandler {
                     responseHeader.put(HeaderFramework.TRANSFER_ENCODING, "chunked");
                 }
 
-                if (theLogger.isFinest()) theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
+                if (log.isFinest()) log.logFinest(reqID +"    sending response header: "+ responseHeader);
                 HTTPDemon.sendRespondHeader(
                         conProp,
                         respond,
@@ -547,7 +547,7 @@ public final class HTTPDProxyHandler {
                             res.getStatusLine(),
                             sb.crawler.defaultProxyProfile
                     );
-                    final String storeError = response.shallStoreCache();
+                    final String storeError = response.shallStoreCacheForProxy();
                     final boolean storeHTCache = response.profile().storeHTCache();
                     final String supportError = Parser.supports(response.url(), response.getMimeType());
                     if (
@@ -575,13 +575,17 @@ public final class HTTPDProxyHandler {
                         } else {
                             cacheArray = null;
                         }
-                        if (theLogger.isFine()) theLogger.logFine(reqID +" writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
+                        if (log.isFine()) log.logFine(reqID +" writeContent of " + url + " produced cacheArray = " + ((cacheArray == null) ? "null" : ("size=" + cacheArray.length)));
 
                         if (sizeBeforeDelete == -1) {
                             // totally fresh file
                             response.setContent(cacheArray);
-                            Cache.store(response.url(), response.getResponseHeader(), cacheArray);
-                            sb.toIndexer(response);
+                            try {
+                                Cache.store(response.url(), response.getResponseHeader(), cacheArray);
+                                sb.toIndexer(response);
+                            } catch (IOException e) {
+                                log.logWarning("cannot write " + response.url() + " to Cache (1): " + e.getMessage(), e);
+                            }
                             conProp.setProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE, "TCP_MISS");
                         } else if (cacheArray != null && sizeBeforeDelete == cacheArray.length) {
                             // before we came here we deleted a cache entry
@@ -591,13 +595,17 @@ public final class HTTPDProxyHandler {
                         } else {
                             // before we came here we deleted a cache entry
                             response.setContent(cacheArray);
-                            Cache.store(response.url(), response.getResponseHeader(), cacheArray);
-                            sb.toIndexer(response);
+                            try {
+                                Cache.store(response.url(), response.getResponseHeader(), cacheArray);
+                                sb.toIndexer(response);
+                            } catch (IOException e) {
+                                log.logWarning("cannot write " + response.url() + " to Cache (2): " + e.getMessage(), e);
+                            }
                             conProp.setProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE, "TCP_REFRESH_MISS");
                         }
                     } else {
                         // no caching
-                        if (theLogger.isFine()) theLogger.logFine(reqID +" "+ url.toString() + " not cached." +
+                        if (log.isFine()) log.logFine(reqID +" "+ url.toString() + " not cached." +
                                 " StoreError=" + ((storeError==null)?"None":storeError) +
                                 " StoreHTCache=" + storeHTCache +
                                 " SupportError=" + supportError);
@@ -687,7 +695,7 @@ public final class HTTPDProxyHandler {
             if (requestHeader.containsKey(RequestHeader.IF_MODIFIED_SINCE)) {
                 // conditional request: freshness of cache for that condition was already
                 // checked within shallUseCache(). Now send only a 304 response
-                theLogger.logInfo("CACHE HIT/304 " + url.toString());
+                log.logInfo("CACHE HIT/304 " + url.toString());
                 conProp.setProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_REFRESH_HIT");
                 
                 // setting the content length header to 0
@@ -698,7 +706,7 @@ public final class HTTPDProxyHandler {
                 //respondHeader(respond, "304 OK", cachedResponseHeader); // respond with 'not modified'
             } else {
                 // unconditional request: send content of cache
-                theLogger.logInfo("CACHE HIT/203 " + url.toString());
+                log.logInfo("CACHE HIT/203 " + url.toString());
                 conProp.setProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE,"TCP_HIT");
                 
                 // setting the content header to the proper length
@@ -722,7 +730,7 @@ public final class HTTPDProxyHandler {
             // this happens if the client stops loading the file
             // we do nothing here                            
             if (conProp.containsKey(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
-                theLogger.logWarning("Error while trying to send cached message body.");
+                log.logWarning("Error while trying to send cached message body.");
                 conProp.setProperty(HeaderFramework.CONNECTION_PROP_PERSISTENT,"close");
             } else {
                 HTTPDemon.sendRespondError(conProp,respond,4,503,"socket error: " + e.getMessage(),"socket error: " + e.getMessage(), e);
@@ -766,12 +774,12 @@ public final class HTTPDProxyHandler {
             } catch (final MalformedURLException e) {
                 final String errorMsg = "ERROR: internal error with url generation: host=" +
                                   host + ", port=" + port + ", path=" + path + ", args=" + args;
-                theLogger.logSevere(errorMsg);
+                log.logSevere(errorMsg);
                 HTTPDemon.sendRespondError(conProp,respond,4,501,null,errorMsg,e);
                 return;
             } 
-            if (theLogger.isFine()) theLogger.logFine(reqID +" HEAD "+ url);
-            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    header: "+ requestHeader);
+            if (log.isFine()) log.logFine(reqID +" HEAD "+ url);
+            if (log.isFinest()) log.logFinest(reqID +"    header: "+ requestHeader);
             
             // check the blacklist, inspired by [AS]: respond a 404 for all AGIS (all you get is shit) servers
             final String hostlow = host.toLowerCase();
@@ -782,7 +790,7 @@ public final class HTTPDProxyHandler {
             if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_PROXY, hostlow, remotePath)) {
                 HTTPDemon.sendRespondError(conProp,respond,4,403,null,
                         "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
-                theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
+                log.logInfo("AGIS blocking of host '" + hostlow + "'");
                 return;
             }                   
             
@@ -802,14 +810,14 @@ public final class HTTPDProxyHandler {
             // generate request-url
             final String connectHost = hostPart(host, port, yAddress);
             final String getUrl = "http://"+ connectHost + remotePath;
-            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    using url: "+ getUrl);
+            if (log.isFinest()) log.logFinest(reqID +"    using url: "+ getUrl);
             
             final Client client = setupHttpClient(requestHeader, connectHost);
             
             // send request
             try {
             res = client.HEAD(getUrl);
-            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
+            if (log.isFinest()) log.logFinest(reqID +"    response status: "+ res.getStatusLine());
             
             // determine if it's an internal error of the httpc
             final ResponseHeader responseHeader = res.getResponseHeader();
@@ -820,7 +828,7 @@ public final class HTTPDProxyHandler {
             prepareResponseHeader(responseHeader, res.getHttpVer());
 
             // sending the server respond back to the client
-            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
+            if (log.isFinest()) log.logFinest(reqID +"    sending response header: "+ responseHeader);
             HTTPDemon.sendRespondHeader(conProp,respond,httpVer,res.getStatusCode(),res.getStatusLine().substring(4),responseHeader);
             respond.flush();
             } finally {
@@ -869,12 +877,12 @@ public final class HTTPDProxyHandler {
             } catch (final MalformedURLException e) {
                 final String errorMsg = "ERROR: internal error with url generation: host=" +
                                   host + ", port=" + port + ", path=" + path + ", args=" + args;
-                theLogger.logSevere(errorMsg);
+                log.logSevere(errorMsg);
                 HTTPDemon.sendRespondError(conProp,countedRespond,4,501,null,errorMsg,e);
                 return;
             }                             
-            if (theLogger.isFine()) theLogger.logFine(reqID +" POST "+ url);
-            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    header: "+ requestHeader);
+            if (log.isFine()) log.logFine(reqID +" POST "+ url);
+            if (log.isFinest()) log.logFinest(reqID +"    header: "+ requestHeader);
             
             prepareRequestHeader(conProp, requestHeader, host.toLowerCase());
             
@@ -893,13 +901,13 @@ public final class HTTPDProxyHandler {
             
             final String connectHost = hostPart(host, port, yAddress);
             final String getUrl = "http://"+ connectHost + remotePath;
-            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    using url: "+ getUrl);
+            if (log.isFinest()) log.logFinest(reqID +"    using url: "+ getUrl);
             
             final Client client = setupHttpClient(requestHeader, connectHost);
             
             // check input
             if(body == null) {
-                theLogger.logSevere("no body to POST!");
+                log.logSevere("no body to POST!");
             }
             // from old httpc:
             // "if there is a body to the call, we would have a CONTENT-LENGTH tag in the requestHeader"
@@ -925,7 +933,7 @@ public final class HTTPDProxyHandler {
             try {
             // sending the request
             res = client.POST(getUrl, body);
-            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    response status: "+ res.getStatusLine());
+            if (log.isFinest()) log.logFinest(reqID +"    response status: "+ res.getStatusLine());
             
             final ResponseHeader responseHeader = res.getResponseHeader();
             // determine if it's an internal error of the httpc
@@ -943,7 +951,7 @@ public final class HTTPDProxyHandler {
             }
             
             // sending response headers
-            if (theLogger.isFinest()) theLogger.logFinest(reqID +"    sending response header: "+ responseHeader);
+            if (log.isFinest()) log.logFinest(reqID +"    sending response header: "+ responseHeader);
             HTTPDemon.sendRespondHeader(conProp,
                                     countedRespond,
                                     httpVer,
@@ -1230,7 +1238,7 @@ public final class HTTPDProxyHandler {
         if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_PROXY, hostlow, path)) {
             HTTPDemon.sendRespondError(conProp,clientOut,4,403,null,
                     "URL '" + hostlow + "' blocked by yacy proxy (blacklisted)",null);
-            theLogger.logInfo("AGIS blocking of host '" + hostlow + "'");
+            log.logInfo("AGIS blocking of host '" + hostlow + "'");
             forceConnectionClose(conProp);
             return;
         }
@@ -1249,7 +1257,7 @@ public final class HTTPDProxyHandler {
             try {
                 response = remoteProxy.CONNECT(host, port);
                 // outputs a logline to the serverlog with the current status
-                theLogger.logInfo("CONNECT-RESPONSE: status=" + response.getStatusLine() + ", header=" + response.getResponseHeader().toString());
+                log.logInfo("CONNECT-RESPONSE: status=" + response.getStatusLine() + ", header=" + response.getResponseHeader().toString());
                 // (response.getStatusLine().charAt(0) == '2') || (response.getStatusLine().charAt(0) == '3')
                 final boolean success = response.getStatusCode() >= 200 && response.getStatusCode() <= 399;
                 if (success) {
@@ -1289,7 +1297,7 @@ public final class HTTPDProxyHandler {
                 "Proxy-agent: YACY" + serverCore.CRLF_STRING +
                 serverCore.CRLF_STRING).getBytes());
         
-        theLogger.logInfo("SSL connection to " + host + ":" + port + " established.");
+        log.logInfo("SSL connection to " + host + ":" + port + " established.");
         
         // start stream passing with mediate processes
         final Mediate cs = new Mediate(sslSocket, clientIn, promiscuousOut);
@@ -1398,7 +1406,7 @@ public final class HTTPDProxyHandler {
                 final String exceptionMsg = e.getMessage();
                 if ((exceptionMsg != null) && (exceptionMsg.indexOf("Corrupt GZIP trailer") >= 0)) {
                     // just do nothing, we leave it this way
-                    if (theLogger.isFine()) theLogger.logFine("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")");
+                    if (log.isFine()) log.logFine("ignoring bad gzip trail for URL " + url + " (" + e.getMessage() + ")");
                     forceConnectionClose(conProp);
                 } else if ((exceptionMsg != null) && (exceptionMsg.indexOf("Connection reset")>= 0)) {
                     errorMessage = "Connection reset";
@@ -1436,12 +1444,12 @@ public final class HTTPDProxyHandler {
                 }
             } else {
                 if (unknownError) {
-                    theLogger.logSevere("Unknown Error while processing request '" + 
+                    log.logSevere("Unknown Error while processing request '" + 
                             conProp.getProperty(HeaderFramework.CONNECTION_PROP_REQUESTLINE,"unknown") + "':" +
                             "\n" + Thread.currentThread().getName() + 
                             "\n" + errorMessage,e);
                 } else {
-                    theLogger.logWarning("Error while processing request '" + 
+                    log.logWarning("Error while processing request '" + 
                             conProp.getProperty(HeaderFramework.CONNECTION_PROP_REQUESTLINE,"unknown") + "':" +
                             "\n" + Thread.currentThread().getName() + 
                             "\n" + errorMessage);                        
