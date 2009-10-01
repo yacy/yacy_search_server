@@ -459,6 +459,15 @@ When you allow access from the YaCy network, your data is recognized using keywo
 Please describe your search portal with some keywords \(comma-separated\)==Bitte beschreiben Sie Ihr Suchportal mit einigen Schl&uuml;sselw&ouml;rtern (kommagetrennt)
 "Save"=="Speichern"
 
+#File: ConfigParser.html
+#---------------------------
+Content Parser Settings==Inhalt Parser Einstellungen
+With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==Mit diesen Einstellungen k&ouml;nnen Sie das Parsen zus&auml;tzlicher Dateitypen basierend auf ihren MIME-Typen erm&ouml;glichen.
+For a detailed description of the various MIME-types take a look at==F&uuml;r eine detailierte Beschreibung der verschiedenen MIME-Typen k&ouml;nnen Sie einen Blick auf
+http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a> werfen.
+"Submit"=="Speichern"
+#-----------------------------
+
 #File: ConfigProfile_p.html
 #---------------------------
 Your Personal Profile==Ihr pers&ouml;nliches Profil
