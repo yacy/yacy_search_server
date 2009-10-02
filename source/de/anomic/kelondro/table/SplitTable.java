@@ -376,6 +376,18 @@ public class SplitTable implements ObjectIndex {
             this.challenge = challenge;
             this.objectIndex = objectIndex;
         }
+        public void executeOrder() {
+            try {
+                if (this.objectIndex.has(this.challenge.getKey())) {
+                    this.challenge.commitDiscovery(this.objectIndex);
+                } else {
+                    this.challenge.commitNoDiscovery();
+                }
+            } catch (Exception e) {
+                Log.logSevere("SplitTable", "", e);
+                this.challenge.commitNoDiscovery();
+            }
+        }
     }
     private static final DiscoverOrder poisonDiscoverOrder = new DiscoverOrder();
     
@@ -402,16 +414,7 @@ public class SplitTable implements ObjectIndex {
                 }
                 if (order == poisonDiscoverOrder) break;
                 // check if in the given objectIndex is the key as given in the order
-                try {
-                    if (order.objectIndex.has(order.challenge.getKey())) {
-                        order.challenge.commitDiscovery(order.objectIndex);
-                    } else {
-                        order.challenge.commitNoDiscovery();
-                    }
-                } catch (Exception e) {
-                    Log.logSevere("SplitTable", "", e);
-                    order.challenge.commitNoDiscovery();
-                }
+                order.executeOrder();
             }
         }
     }
@@ -424,14 +427,19 @@ public class SplitTable implements ObjectIndex {
             
             // submit discover orders to the processing units
             final Iterator<ObjectIndex> i = tables.values().iterator();
+            DiscoverOrder order;
+            boolean offered;
             while (i.hasNext()) {
-                try {
-                    this.orderQueue.put(new DiscoverOrder(challenge, i.next()));
-                } catch (InterruptedException e) {
-                    Log.logSevere("SplitTable", "", e);
+                order = new DiscoverOrder(challenge, i.next());
+                offered = this.orderQueue.offer(order);
+                if (!offered) {
+                    // for some reason the queue did not accept the order
+                    // so we execute the order here
+                    order.executeOrder();
+                    Log.logWarning("SplitTable", "executed a challenge order without concurrency. queue size = " + this.orderQueue.size());
                 }
             }
-        }        
+        }
         // wait for a result
         ObjectIndex result = challenge.discover(10000);
         //System.out.println("result of discovery: file = " + ((result == null) ? "null" : result.filename()));
