@@ -28,9 +28,9 @@
 
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.data.Blacklist;
@@ -129,13 +129,11 @@ public final class transferRWI {
             final long startProcess = System.currentTimeMillis();
 
             // decode request
-            final List<String> v = FileUtils.strings(indexes, null);
+            System.out.println("STRINGS " + new String(indexes));
+            Iterator<String> it = FileUtils.strings(indexes);
 
             // free memory
             indexes = null;
-            
-            // the value-vector should now have the same length as entryc
-            if (v.size() != entryc) sb.getLog().logSevere("ERROR WITH ENTRY COUNTER: v=" + v.size() + ", entryc=" + entryc);
 
             // now parse the Strings in the value-vector and write index entries
             String estring;
@@ -145,14 +143,13 @@ public final class transferRWI {
             WordReferenceRow iEntry;
             final HashSet<String> unknownURL = new HashSet<String>();
             final HashSet<String> knownURL = new HashSet<String>();
-            final String[] wordhashes = new String[v.size()];
+            final ArrayList<String> wordhashes = new ArrayList<String>();
             int received = 0;
             int blocked = 0;
             int receivedURL = 0;
-            final Iterator<String> i = v.iterator();
-            while (i.hasNext()) {
+            while (it.hasNext()) {
                 serverCore.checkInterruption();
-                estring = i.next();
+                estring = it.next();
                 
                 // check if RWI entry is well-formed
                 p = estring.indexOf("{");
@@ -161,7 +158,7 @@ public final class transferRWI {
                     continue;
                 }
                 wordHash = estring.substring(0, p);
-                wordhashes[received] = wordHash;
+                wordhashes.add(wordHash);
                 iEntry = new WordReferenceRow(estring.substring(p));
                 urlHash = iEntry.metadataHash();
                 
@@ -207,18 +204,20 @@ public final class transferRWI {
             sb.peers.mySeed().incRI(received);
 
             // finally compose the unknownURL hash list
-            final Iterator<String> it = unknownURL.iterator();  
+            it = unknownURL.iterator();  
             unknownURLs.ensureCapacity(unknownURL.size() * 25);
             while (it.hasNext()) {
                 unknownURLs.append(",").append(it.next());
             }
             if (unknownURLs.length() > 0) { unknownURLs.delete(0, 1); }
-            if ((wordhashes.length == 0) || (received == 0)) {
+            if ((wordhashes.size() == 0) || (received == 0)) {
                 sb.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs");
             } else {
-                final long avdist = (FlatWordPartitionScheme.std.dhtDistance(wordhashes[0].getBytes(), null, sb.peers.mySeed()) + FlatWordPartitionScheme.std.dhtDistance(wordhashes[received - 1].getBytes(), null, sb.peers.mySeed())) / 2;
-                sb.getLog().logInfo("Received " + received + " Entries " + wordc + " Words [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + "/" + receivedURL + " URLs, blocked " + blocked + " RWIs");
-                RSSFeed.channels(RSSFeed.INDEXRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs [" + wordhashes[0] + " .. " + wordhashes[received - 1] + "]/" + avdist + " from " + otherPeerName + ", requesting " + unknownURL.size() + " URLs, blocked " + blocked, "", ""));
+                String firstHash = wordhashes.get(0);
+                String lastHash = wordhashes.get(wordhashes.size() - 1);
+                final long avdist = (FlatWordPartitionScheme.std.dhtDistance(firstHash.getBytes(), null, sb.peers.mySeed()) + FlatWordPartitionScheme.std.dhtDistance(lastHash.getBytes(), null, sb.peers.mySeed())) / 2;
+                sb.getLog().logInfo("Received " + received + " Entries " + wordc + " Words [" + firstHash + " .. " + lastHash + "]/" + avdist + " from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + "/" + receivedURL + " URLs, blocked " + blocked + " RWIs");
+                RSSFeed.channels(RSSFeed.INDEXRECEIVE).addMessage(new RSSMessage("Received " + received + " RWIs [" + firstHash + " .. " + lastHash + "]/" + avdist + " from " + otherPeerName + ", requesting " + unknownURL.size() + " URLs, blocked " + blocked, "", ""));
             }
             result = "ok";
             

@@ -353,6 +353,7 @@ public class SplitTable implements ObjectIndex {
             this.readyCheck.release();
         }
         public ObjectIndex discover(long timeout) {
+            if (this.discovery != null) return this.discovery;
             try {
                 this.readyCheck.tryAcquire(1, timeout, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {}
@@ -441,7 +442,7 @@ public class SplitTable implements ObjectIndex {
             }
         }
         // wait for a result
-        ObjectIndex result = challenge.discover(10000);
+        ObjectIndex result = challenge.discover(1000);
         //System.out.println("result of discovery: file = " + ((result == null) ? "null" : result.filename()));
         return result;
     }

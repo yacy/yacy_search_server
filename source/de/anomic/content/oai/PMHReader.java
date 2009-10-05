@@ -135,7 +135,7 @@ ListSets
 http://an.oa.org/OAI-script?verb=ListSets
 http://purl.org/alcme/etdcat/servlet/OAIHandler?verb=ListSets
 
-urn identifier können über den resolver der d-nb aufgelöst werden:
+urn identifier koennen ueber den resolver der d-nb aufgeloest werden:
 http://nbn-resolving.de/urn:nbn:de:bsz:960-opus-1860
 
 <?xml version="1.0" encoding="UTF-8"?>
@@ -185,42 +185,6 @@ http://nbn-resolving.de/urn:nbn:de:bsz:960-opus-1860
       <dc:source>Australian Academic &amp; Research Libraries, 37 (1), S. 55-60</dc:source>
       <dc:language>eng</dc:language>
       <dc:rights>http://creativecommons.org/licenses/by/2.0/de/deed.de</dc:rights>
-     </oai_dc:dc>
-   </metadata>
-  </record>
-  <record>
-   <header>
-    <identifier>oai:opus.bsz-bw.de-fhhv:52</identifier>
-    <datestamp>2008-10-30T11:24:12Z</datestamp>
-    <setSpec>ddc:360</setSpec>
-    <setSpec>pub-type:20</setSpec>
-    <setSpec>has-source-swb:false</setSpec>
-   </header>
-   <metadata>
-     <oai_dc:dc
-       xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
-       xmlns:dc="http://purl.org/dc/elements/1.1/"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:schemaLocation="http://www.openarchives.org/OAI/2.0/oai_dc/
-       http://www.openarchives.org/OAI/2.0/oai_dc.xsd">
-      <dc:title>Akademisierung von Pflege</dc:title>
-      <dc:creator>Oelke, Uta-Karola</dc:creator>
-      <dc:subject>Pflege</dc:subject>
-      <dc:subject>Pflegewissenschaft</dc:subject>
-      <dc:subject>Akademisierung</dc:subject>
-      <dc:subject>Ausbildung</dc:subject>
-      <dc:subject>&quot;Social services; association&quot;</dc:subject>
-      <dc:description>Die Arbeit bietet einen Überblick über pflegebezogene Studiengänge und diskutiert die Akademisierung von Pflege.</dc:description>
-      <dc:publisher>Fachhochschule Hannover</dc:publisher>
-      <dc:publisher>Fakultät V - Diakonie, Gesundheit und Soziales. Fakultät V - Diakonie, Gesundheit und Soziales</dc:publisher>
-      <dc:contributor>Werner-Schule vom DRK</dc:contributor>
-      <dc:date>1994</dc:date>
-      <dc:type>TechReport</dc:type>
-      <dc:format>application/pdf</dc:format>
-      <dc:identifier>urn:nbn:de:bsz:960-opus-520</dc:identifier>
-      <dc:identifier>http://opus.bsz-bw.de/fhhv/volltexte/2008/52/</dc:identifier>
-      <dc:language>ger</dc:language>
-      <dc:rights>/fhhv/doku/urheberrecht.php?la=de</dc:rights>
      </oai_dc:dc>
    </metadata>
   </record>

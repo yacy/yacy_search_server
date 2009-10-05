@@ -133,7 +133,9 @@ public class Segment {
         } catch (final IOException e) {
             e.printStackTrace();
         }
-        Switchboard.getSwitchboard().peers.mySeed().resetCounters();
+        if (Switchboard.getSwitchboard() != null &&
+            Switchboard.getSwitchboard().peers != null &&
+            Switchboard.getSwitchboard().peers.mySeed() != null) Switchboard.getSwitchboard().peers.mySeed().resetCounters();
     }
     
     public File getLocation() {

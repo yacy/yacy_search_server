@@ -550,8 +550,9 @@ public final class yacySeedDB implements AlternativeDomainNames {
         if (s != null) try { seedPotentialDB.put(hash, seed.getMap()); return;} catch (final IOException e) {}
     }
     
-    public yacySeed lookupByName(final String peerName) {
+    public yacySeed lookupByName(String peerName) {
         // reads a seed by searching by name
+        if (peerName.endsWith(".yacy")) peerName = peerName.substring(0, peerName.length() - 5);
 
         // local peer?
         if (peerName.equals("localpeer")) {
@@ -772,7 +773,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             
             // test download
             if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Trying to download seed-file '" + seedURL + "'.");
-            final ArrayList<String> check = downloadSeedFile(seedURL);
+            final Iterator<String> check = downloadSeedFile(seedURL);
             
             // Comparing if local copy and uploaded copy are equal
             final String errorMsg = checkCache(uv, check);
@@ -793,7 +794,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         return log;
     }
     
-    private ArrayList<String> downloadSeedFile(final yacyURL seedURL) throws IOException {
+    private Iterator<String> downloadSeedFile(final yacyURL seedURL) throws IOException {
         // Configure http headers
         final RequestHeader reqHeader = new RequestHeader();
         reqHeader.put(HeaderFramework.PRAGMA, "no-cache");
@@ -826,25 +827,23 @@ public final class yacySeedDB implements AlternativeDomainNames {
             content = FileUtils.uncompressGZipArray(content);
 
             // convert it into an array
-            return FileUtils.strings(content,"UTF-8");
+            return FileUtils.strings(content);
         } catch (final Exception e) {
         	throw new IOException("Unable to download seed file '" + seedURL + "'. " + e.getMessage());
         }
     }
 
-    private String checkCache(final ArrayList<String> uv, final ArrayList<String> check) {                
-        if ((check == null) || (uv == null) || (uv.size() != check.size())) {
-            if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Local and uploades seed-list " +
-                               "contains varying numbers of entries." +
-                               "\n\tLocal seed-list:  " + ((uv == null) ? "null" : Integer.toString(uv.size())) + " entries" + 
-                               "\n\tRemote seed-list: " + ((check == null) ? "null" : Integer.toString(check.size())) + " enties");
-            return "Entry count is different: uv.size() = " + ((uv == null) ? "null" : Integer.toString(uv.size())) + ", check = " + ((check == null) ? "null" : Integer.toString(check.size()));
-        } 
+    private String checkCache(final ArrayList<String> uv, final Iterator<String> check) {                
+        if ((check == null) || (uv == null)) {
+            if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Local and uploades seed-list are different");
+            return "Entry count is different: uv.size() = " + ((uv == null) ? "null" : Integer.toString(uv.size()));
+        }
         	
         if (Log.isFine("YACY")) Log.logFine("YACY", "SaveSeedList: Comparing local and uploades seed-list entries ...");
-        int i;
-        for (i = 0; i < uv.size(); i++) {
-        	if (!((uv.get(i)).equals(check.get(i)))) return "Element at position " + i + " is different.";
+        int i = 0;
+        while (check.hasNext() && i < uv.size()) {
+        	if (!((uv.get(i)).equals(check.next()))) return "Element at position " + i + " is different.";
+        	i++;
         }
         
         // no difference found

@@ -114,11 +114,20 @@ public class CrawlProfileEditor_p {
         entry selentry;
         while (it.hasNext()) {
             selentry = it.next();
-            if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE) ||
-                    selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY) ||
-                    selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE) /*||
-                    selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_TEXT) ||
-                    selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_MEDIA)*/)
+            if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY) ||
+                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_REMOTE) ||
+                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA) ||
+                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_MEDIA_RECRAWL_CYCLE) ||
+                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT) ||
+                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_GLOBAL_TEXT_RECRAWL_CYCLE) ||
+                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA) ||
+                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_MEDIA_RECRAWL_CYCLE) ||
+                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT) ||
+                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SNIPPET_LOCAL_TEXT_RECRAWL_CYCLE) ||
+                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE) ||
+                selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE) ||
+                selentry.name().equals(CrawlSwitchboard.DBFILE_ACTIVE_CRAWL_PROFILES) ||
+                selentry.name().equals(CrawlSwitchboard.DBFILE_PASSIVE_CRAWL_PROFILES))
                 continue;
             prop.put("profiles_" + count + "_name", selentry.name());
             prop.put("profiles_" + count + "_handle", selentry.handle());

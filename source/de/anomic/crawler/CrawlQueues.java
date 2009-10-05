@@ -212,7 +212,7 @@ public class CrawlQueues {
         
         String queueCheck = crawlIsPossible(NoticedURL.STACK_TYPE_CORE, "Core");
         if (queueCheck != null) {
-            if (log.isFinest()) log.logFine("omitting de-queue/local: " + queueCheck);
+            if (log.isFinest()) log.logFinest("omitting de-queue/local: " + queueCheck);
             return false;
         }
         
@@ -486,7 +486,7 @@ public class CrawlQueues {
         // or there is no global crawl on the stack
         String queueCheck = crawlIsPossible(NoticedURL.STACK_TYPE_REMOTE, "Global");
         if (queueCheck != null) {
-            if (log.isFine()) log.logFine("omitting de-queue/remote: " + queueCheck);
+            if (log.isFinest()) log.logFinest("omitting de-queue/remote: " + queueCheck);
             return false;
         }
 

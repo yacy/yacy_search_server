@@ -135,7 +135,7 @@ public class DocumentIndex extends Segment {
         File w;
         for (String t: s) {
             w = new File(start, t);
-            if (w.canRead() && ! w.isHidden()) {
+            if (w.canRead() && !w.isHidden()) {
                 if (w.isDirectory()) {
                     addAll(w);
                 } else {

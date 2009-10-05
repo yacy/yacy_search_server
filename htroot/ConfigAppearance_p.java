@@ -34,7 +34,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -91,19 +90,18 @@ public class ConfigAppearance_p {
             if (post.containsKey("install_button")) {
                 // load skin from URL
                 final String url = post.get("url");
-                ArrayList<String> skinVector;
+                Iterator<String> it;
                 try {
                     final yacyURL u = new yacyURL(url, null);
                     final RequestHeader reqHeader = new RequestHeader();
                     reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
-                    skinVector = FileUtils.strings(Client.wget(u.toString(), reqHeader, 10000), "UTF-8");
+                    it = FileUtils.strings(Client.wget(u.toString(), reqHeader, 10000));
                 } catch (final IOException e) {
                     prop.put("status", "1");// unable to get URL
                     prop.put("status_url", url);
                     return prop;
                 }
                 try {
-                    final Iterator<String> it = skinVector.iterator();
                     final File skinFile = new File(skinPath, url.substring(url.lastIndexOf("/"), url.length()));
                     final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(skinFile)));
 

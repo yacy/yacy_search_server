@@ -21,7 +21,6 @@
 
 package de.anomic.tools;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
@@ -29,7 +28,6 @@ import de.anomic.http.client.Client;
 import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class loaderThreads {
@@ -59,10 +57,6 @@ public class loaderThreads {
         this.threads = new Hashtable<String, Thread>();
         this.completed = 0;
         this.failed = 0;
-    }
-    
-    public void newPropLoaderThread(final String name, final yacyURL url) {
-        newThread(name, url, new propLoader());
     }
     
     public void newThread(final String name, final yacyURL url, final loaderProcess process) {
@@ -166,56 +160,5 @@ public class loaderThreads {
         }
         
     }
-    
-    public static class propLoader extends loaderCore implements loaderProcess {
-        
-        public propLoader() {
-            this.status = STATUS_READY;
-        }
-        
-        public synchronized void feed(final byte[] v) {
-            this.status = STATUS_RUNNING;
-            this.completion = 1;
-            int line = 0;
-            String s, key, value;
-            int p;
-            final ArrayList<String> lines = FileUtils.strings(v, "UTF-8");
-            try {
-                while ((this.run) && (line < lines.size())) {
-                    // parse line and construct a property
-                    s = lines.get(line);
-                    if ((s != null) && ((p = s.indexOf('=')) > 0)) {
-                        key = s.substring(0, p).trim();
-                        value = s.substring(p + 1).trim();
-                        if (key.length() > 0) result.put(key, value);
-                    }
-                    // update thread information
-                    line++;
-                    this.completion = 100 * line / lines.size();
-                }
-                if (line == lines.size()) {
-                    this.status = STATUS_COMPLETED;
-                } else {
-                    this.status = STATUS_ABORTED;
-                }
-                return;
-            } catch (final Exception e) {
-                this.status = STATUS_FAILED;
-                this.error = e;
-                return;
-            }
-        }
-    }
-    
-    /*
-    public static void main(String[] args) {
-        httpdProxyHandler.setRemoteProxyConfig(httpRemoteProxyConfig.init("192.168.1.122", 3128));
-        loaderThreads loader = new loaderThreads();
-        try {
-            loader.newPropLoaderThread("load1", new yacyURL("http://www.anomic.de/superseed.txt", null));
-        } catch (MalformedURLException e) {
-            
-        }
-    }
-    */
+
 }

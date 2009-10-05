@@ -113,7 +113,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
     
     public final static boolean punctuation(final char c) {
-        return (c == '.') || (c == '!') || (c == '?');
+        return c == '.' || c == '!' || c == '?';
     }
     
     public void scrapeText(final char[] newtext, final String insideTag) {

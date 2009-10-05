@@ -36,6 +36,7 @@ import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
@@ -104,7 +105,7 @@ public class sharedBlacklist_p {
             }
             prop.put("page_blackLists", blacklistCount);
             
-            List<String> otherBlacklist = null;
+            Iterator<String> otherBlacklist = null;
             ListAccumulator otherBlacklists = null;
             
             if (post.containsKey("hash")) {
@@ -147,7 +148,7 @@ public class sharedBlacklist_p {
                         // get List
                         yacyURL u = new yacyURL(downloadURLOld, null);
 
-                        otherBlacklist = FileUtils.strings(Client.wget(u.toString(), reqHeader, 1000), "UTF-8");
+                        otherBlacklist = FileUtils.strings(Client.wget(u.toString(), reqHeader, 1000));
                     } catch (final Exception e) {
                         prop.put("status", STATUS_PEER_UNKNOWN);
                         prop.putHTML("status_name", Hash);
@@ -166,7 +167,7 @@ public class sharedBlacklist_p {
                     final yacyURL u = new yacyURL(downloadURL, null);
                     final RequestHeader reqHeader = new RequestHeader();
                     reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
-                    otherBlacklist = FileUtils.strings(Client.wget(u.toString(), reqHeader, 10000), "UTF-8"); //get List
+                    otherBlacklist = FileUtils.strings(Client.wget(u.toString(), reqHeader, 10000)); //get List
                 } catch (final Exception e) {
                     prop.put("status", STATUS_URL_PROBLEM);
                     prop.putHTML("status_address",downloadURL);
@@ -203,7 +204,7 @@ public class sharedBlacklist_p {
 
                     if (fileString != null) {
                         try {
-                            otherBlacklist = FileUtils.strings(fileString.getBytes("UTF-8"), "UTF-8");
+                            otherBlacklist = FileUtils.strings(fileString.getBytes("UTF-8"));
                         } catch (IOException ex) {
                             prop.put("status", STATUS_FILE_ERROR);
                         }
@@ -278,13 +279,9 @@ public class sharedBlacklist_p {
                 // loading the current blacklist content
                 final HashSet<String> Blacklist = new HashSet<String>(listManager.getListArray(new File(listManager.listsPath, selectedBlacklistName)));
                 
-                // sort the loaded blacklist
-                final String[] sortedlist = otherBlacklist.toArray(new String[otherBlacklist.size()]);
-                Arrays.sort(sortedlist);
-                
                 int count = 0;
-                for(int i = 0; i < sortedlist.length; i++){
-                    final String tmp = sortedlist[i];
+                while (otherBlacklist.hasNext()) {
+                    final String tmp = otherBlacklist.next();
                     if( !Blacklist.contains(tmp) && (!tmp.equals("")) ){
                         //newBlacklist.add(tmp);
                         prop.put("page_urllist_" + count + "_dark", count % 2 == 0 ? "0" : "1");

@@ -1954,7 +1954,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
             return "no DHT distribution: disabled by network.unit.dht";
         }
         if (getConfig(SwitchboardConstants.INDEX_DIST_ALLOW, "false").equalsIgnoreCase("false")) {
-            return "no DHT distribution: not enabled (ser setting)";
+            return "no DHT distribution: not enabled (per setting)";
         }
         if (indexSegment.urlMetadata().size() < 10) {
             return "no DHT distribution: loadedURL.size() = " + indexSegment.urlMetadata().size();
@@ -2090,7 +2090,6 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         yacySeed           ys;
         String             seedListFileURL;
         yacyURL            url;
-        ArrayList<String>  seedList;
         Iterator<String>   enu;
         int                lc;
         final int          sc = peers.sizeConnected();
@@ -2133,8 +2132,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
                     } else {
                         ssc++;
                         final byte[] content = Client.wget(url.toString(), reqHeader, (int) getConfigLong("bootstrapLoadTimeout", 20000));
-                        seedList = FileUtils.strings(content, "UTF-8");
-                        enu = seedList.iterator();
+                        enu = FileUtils.strings(content);
                         lc = 0;
                         while (enu.hasNext()) {
                             ys = yacySeed.genRemoteSeed(enu.next(), null, false);
@@ -2199,7 +2197,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
             // sending request
             final RequestHeader reqHeader = new RequestHeader();
             reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
-            final HashMap<String, String> result = FileUtils.table(Client.wget(url.toString(), reqHeader, 10000), "UTF-8");
+            final HashMap<String, String> result = FileUtils.table(Client.wget(url.toString(), reqHeader, 10000));
             if (result == null) return new HashMap<String, String>();
             return result;
         } catch (final Exception e) {

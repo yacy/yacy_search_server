@@ -89,6 +89,7 @@ import de.anomic.http.io.ChunkedOutputStream;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
+import de.anomic.http.server.servlets.transferURL;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
@@ -1173,6 +1174,17 @@ public final class HTTPDFileHandler {
     }
     
     public static final Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
+        // debug functions: for special servlets call them without reflection to get better stack trace results
+        if (targetClass.getName().equals("transferURL.class")) {
+            try {
+                return transferURL.respond(request, args, switchboard);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.logSevere("HTTPFileHandler", "fail of transferURL", e);
+                throw new InvocationTargetException(e);
+            }
+        }
+        
         Object result;
         if (safeServletsMode) synchronized (switchboard) {
             result = rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});

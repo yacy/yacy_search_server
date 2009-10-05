@@ -67,7 +67,7 @@ public class LanguageStatisticsHolder extends Vector<LanguageStatistics> {
         
         final File folder = new File(directory);
         if (!folder.exists()) {
-            Log.logSevere("LanguageStatistics", "the language statistics folder " + directory + " cannot be found");
+            Log.logWarning("LanguageStatistics", "the language statistics folder " + directory + " cannot be found");
             return;
         }
         final FilenameFilter filter = new LanguageFilenameFilter();

@@ -122,10 +122,13 @@ public final class Parser {
         }
     }
 
-    public static Document parseSource(final yacyURL location,
-            final String mimeType, final String charset,
-            final byte[] sourceArray) throws InterruptedException,
-            ParserException {
+    public static Document parseSource(
+            final yacyURL location,
+            final String mimeType,
+            final String charset,
+            final byte[] sourceArray
+        ) throws InterruptedException, ParserException {
+        
         ByteArrayInputStream byteIn = null;
         try {
             if (log.isFine()) log.logFine("Parsing '" + location + "' from byte-array");
@@ -158,7 +161,7 @@ public final class Parser {
         BufferedInputStream sourceStream = null;
         try {
             if (log.isFine()) log.logFine("Parsing '" + location + "' from file");
-            if (!(sourceFile.exists() && sourceFile.canRead() && sourceFile.length() > 0)) {
+            if (!sourceFile.exists() || !sourceFile.canRead() || sourceFile.length() == 0) {
                 final String errorMsg = sourceFile.exists() ? "Empty resource file." : "No resource content available (2).";
                 log.logInfo("Unable to parse '" + location + "'. " + errorMsg);
                 throw new ParserException(errorMsg, location);

@@ -128,7 +128,7 @@ public final class yacyClient {
             final long start = System.currentTimeMillis();
             final byte[] content = wput("http://" + address + "/yacy/hello.html", yacySeed.b64Hash2hexHash(otherHash) + ".yacyh", post, 30000, false);
             yacyCore.log.logInfo("yacyClient.publishMySeed thread '" + Thread.currentThread().getName() + "' contacted peer at " + address + ", received " + ((content == null) ? "null" : content.length) + " bytes, time = " + (System.currentTimeMillis() - start) + " milliseconds");
-            result = FileUtils.table(content, "UTF-8");
+            result = FileUtils.table(content);
             break;
         } catch (final Exception e) {
             if (Thread.currentThread().isInterrupted()) {
@@ -315,7 +315,7 @@ public final class yacyClient {
         // send request
         try {
             final byte[] content = postToFile(target, "query.html", post, 10000);
-            final HashMap<String, String> result = FileUtils.table(content, "UTF-8");
+            final HashMap<String, String> result = FileUtils.table(content);
             
             if (result == null || result.size() == 0) { return null; }
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
@@ -337,7 +337,7 @@ public final class yacyClient {
         // send request
         try {
             final byte[] content = postToFile(target, "query.html", post, 5000);
-            final HashMap<String, String> result = FileUtils.table(content, "UTF-8");
+            final HashMap<String, String> result = FileUtils.table(content);
             
             if (result == null || result.size() == 0) { return -1; }
             return Integer.parseInt(result.get("response"));
@@ -360,7 +360,7 @@ public final class yacyClient {
         // send request
         try {
             final byte[] content = postToFile(target, "query.html", post, 5000);
-            final HashMap<String, String> result = FileUtils.table(content, "UTF-8");
+            final HashMap<String, String> result = FileUtils.table(content);
             
             if ((result == null) || (result.size() == 0)) return -1;
             final String resp = result.get("response");
@@ -484,7 +484,7 @@ public final class yacyClient {
         // send request
         HashMap<String, String> result = null;
         try {
-          	result = FileUtils.table(wput("http://" + target.getClusterAddress() + "/yacy/search.html", target.getHexHash() + ".yacyh", post, 60000), "UTF-8");
+          	result = FileUtils.table(wput("http://" + target.getClusterAddress() + "/yacy/search.html", target.getHexHash() + ".yacyh", post, 60000));
         } catch (final IOException e) {
             yacyCore.log.logInfo("SEARCH failed, Peer: " + target.hash + ":" + target.getName() + " (" + e.getMessage() + "), score=" + target.selectscore);
             //yacyCore.peerActions.peerDeparture(target, "search request to peer created io exception: " + e.getMessage());
@@ -682,7 +682,7 @@ public final class yacyClient {
         // send request
         try {
             final byte[] content = postToFile(seedDB, targetHash, "message.html", post, 5000); 
-            final HashMap<String, String> result = FileUtils.table(content, "UTF-8");
+            final HashMap<String, String> result = FileUtils.table(content);
             return result;
         } catch (final Exception e) {
             // most probably a network time-out exception
@@ -709,7 +709,7 @@ public final class yacyClient {
         // send request
         try {
             final byte[] content = postToFile(seedDB, targetHash, "message.html", post, 20000);
-            final HashMap<String, String> result = FileUtils.table(content, "UTF-8");
+            final HashMap<String, String> result = FileUtils.table(content);
             return result;
         } catch (final Exception e) {
             yacyCore.log.logSevere("yacyClient.postMessage error:" + e.getMessage());
@@ -745,7 +745,7 @@ public final class yacyClient {
         // send request
         try {
             final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, post, 10000);
-            final HashMap<String, String> result = FileUtils.table(content, "UTF-8");
+            final HashMap<String, String> result = FileUtils.table(content);
             return result;
         } catch (final Exception e) {
             // most probably a network time-out exception
@@ -769,7 +769,7 @@ public final class yacyClient {
         // send request
         try {
             final byte[] content = wput("http://" + targetAddress + "/yacy/transfer.html", targetAddress, post, 20000);
-            final HashMap<String, String> result = FileUtils.table(content, "UTF-8");
+            final HashMap<String, String> result = FileUtils.table(content);
             return result;
         } catch (final Exception e) {
             yacyCore.log.logSevere("yacyClient.postMessage error:" + e.getMessage());
@@ -844,7 +844,7 @@ public final class yacyClient {
         // send request
         try {
             final byte[] content = wput("http://" + address + "/yacy/crawlReceipt.html", target.getHexHash() + ".yacyh", post, 10000);
-            return FileUtils.table(content, "UTF-8");
+            return FileUtils.table(content);
         } catch (final Exception e) {
             // most probably a network time-out exception
             yacyCore.log.logSevere("yacyClient.crawlReceipt error:" + e.getMessage());
@@ -994,7 +994,7 @@ public final class yacyClient {
         post.add(new DefaultCharsetStringPart("indexes", entrypost.toString()));  
         try {
             final byte[] content = wput("http://" + address + "/yacy/transferRWI.html", targetSeed.getHexHash() + ".yacyh", post, timeout, gzipBody);
-            final ArrayList<String> v = FileUtils.strings(content, "UTF-8");
+            final Iterator<String> v = FileUtils.strings(content);
             // this should return a list of urlhashes that are unknown
             
             final HashMap<String, String> result = FileUtils.table(v);
@@ -1037,7 +1037,7 @@ public final class yacyClient {
         post.add(new DefaultCharsetStringPart("urlc", Integer.toString(urlc)));
         try {
             final byte[] content = wput("http://" + address + "/yacy/transferURL.html", targetSeed.getHexHash() + ".yacyh", post, timeout, gzipBody);
-            final ArrayList<String> v = FileUtils.strings(content, "UTF-8");
+            final Iterator<String> v = FileUtils.strings(content);
             
             final HashMap<String, String> result = FileUtils.table(v);
             // return the transfered url data in bytes (for debugging only)
@@ -1059,7 +1059,7 @@ public final class yacyClient {
         if (address == null) { address = "localhost:8080"; }
         try {
             final byte[] content = wput("http://" + address + "/yacy/profile.html", targetSeed.getHexHash() + ".yacyh", post, 5000);
-            return FileUtils.table(content, "UTF-8");
+            return FileUtils.table(content);
         } catch (final Exception e) {
             yacyCore.log.logSevere("yacyClient.getProfile error:" + e.getMessage());
             return null;
@@ -1098,7 +1098,7 @@ public final class yacyClient {
                                                       "&query=" + new String(wordhashe) +
                                                       "&network.unit.name=" + Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, yacySeed.DFLT_NETWORK_UNIT),
                                                       reqHeader, 10000, target.getHexHash() + ".yacyh");            
-            final HashMap<String, String> result = FileUtils.table(content, "UTF-8");
+            final HashMap<String, String> result = FileUtils.table(content);
             System.out.println("Result=" + result.toString());
         } catch (final Exception e) {
             e.printStackTrace();

@@ -29,8 +29,8 @@ package de.anomic.kelondro.text.metadataPrototype;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.Properties;
 
 import de.anomic.crawler.retrieval.Request;
@@ -361,14 +361,14 @@ public class URLMetadataRow implements Metadata {
         // avoid double computation of metadata elements
         if (this.comp != null) return this.comp;
         // parse elements from comp string;
-        final ArrayList<String> cl = FileUtils.strings(this.entry.getCol("comp", null), "UTF-8");
+        final Iterator<String> cl = FileUtils.strings(this.entry.getCol("comp", null));
         this.comp = new Components(
-                (cl.size() > 0) ? (cl.get(0)).trim() : "",
+                (cl.hasNext()) ? cl.next() : "",
                 hash(),
-                (cl.size() > 1) ? (cl.get(1)).trim() : "",
-                (cl.size() > 2) ? (cl.get(2)).trim() : "",
-                (cl.size() > 3) ? (cl.get(3)).trim() : "",
-                (cl.size() > 4) ? (cl.get(4)).trim() : "");
+                (cl.hasNext()) ? cl.next() : "",
+                (cl.hasNext()) ? cl.next() : "",
+                (cl.hasNext()) ? cl.next() : "",
+                (cl.hasNext()) ? cl.next() : "");
         return this.comp;
     }
     

@@ -42,7 +42,6 @@ import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -50,7 +49,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
-import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
@@ -388,7 +386,7 @@ public final class FileUtils {
         // load props
         try {
             final byte[] b = read(f);
-            return table(strings(b, "UTF-8"));
+            return table(strings(b));
         } catch (final IOException e2) {
             System.err.println("ERROR: " + f.toString() + " not found in settings path");
             return null;
@@ -490,21 +488,20 @@ public final class FileUtils {
     }
 
 
-    public static HashMap<String, String> table(final Vector<String> list) {
-    	final Enumeration<String> i = list.elements();
+    public static HashMap<String, String> table(Iterator<String> li) {
     	int pos;
     	String line;
-    	final HashMap<String, String> props = new HashMap<String, String>(list.size());
-    	while (i.hasMoreElements()) {
-    		line = (i.nextElement()).trim();
+    	final HashMap<String, String> props = new HashMap<String, String>();
+    	while (li.hasNext()) {
+    		line = li.next();
     		pos = line.indexOf("=");
     		if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
     	}
     	return props;
 	}
     
-    public static HashMap<String, String> table(final byte[] a, final String encoding) {
-        return table(strings(a, encoding));
+    public static HashMap<String, String> table(final byte[] a) {
+        return table(strings(a));
     }
     
     /**
@@ -535,60 +532,69 @@ public final class FileUtils {
         return props;
     }
 
-    public static ArrayList<String> strings(final byte[] a) {
-        return strings(a, null);
+    public static Iterator<String> strings(byte[] a) {
+        try {
+            return new StringsIterator(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(a), "UTF-8")));
+        } catch (UnsupportedEncodingException e) {
+            return null;
+        }
     }
     
-    public static ArrayList<String> strings(final byte[] a, final String encoding) {
-        if (a == null) return new ArrayList<String>();
-        int s = 0;
-        int e;
-        final ArrayList<String> v = new ArrayList<String>();
-        byte b;
-        while (s < a.length) {
-            // find eol
-            e = s;
-            while (e < a.length) {
-                b = a[e];
-                if ((b == 10) || (b == 13) || (b == 0)) break;
-                e++;
-            }
-            
-            // read line
-            if (encoding == null) {
-                v.add(new String(a, s, e - s));
-            } else try {
-                v.add(new String(a, s, e - s, encoding));
-            } catch (final UnsupportedEncodingException xcptn) {
-                return v;
-            }
-            
-            // eat up additional eol bytes
-            s = e + 1;
-            while (s < a.length) {
-                b = a[s];
-                if ((b != 10) && (b != 13)) break;
-                s++;
-            }
-        }
-        return v;
-    }
-    public static ArrayList<String> strings(final Reader reader) {
-        if (reader == null) return new ArrayList<String>();
-        BufferedReader bufreader = new BufferedReader(reader);
+    /*
+    public static ArrayList<String> strings(byte[] a) {
         final ArrayList<String> list = new ArrayList<String>();
-        String line = null;
-        try {
-	    while ((line = bufreader.readLine()) != null) {
-	        list.add(line);
-	    }
-	} catch (IOException e) {
-	    e.printStackTrace();
-	    return null;
-	}
+        Iterator<String> i = new StringsIterator(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(a))));
+        while (i.hasNext()) list.add(i.next());
         return list;
     }
-   
+    
+    public static ArrayList<String> strings(byte[] a) {
+        final ArrayList<String> list = new ArrayList<String>();
+        BufferedReader bufreader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(a)));
+        String line = null;
+        try {
+            while ((line = bufreader.readLine()) != null) {
+                line = line.trim();
+                if (line.length() > 0) list.add(line);
+            }
+        } catch (IOException e) {
+            Log.logWarning("FileUtils", "failed strings: " + e.getMessage(), e);
+            return list;
+        }
+        return list;
+    }
+     */
+    
+    public static class StringsIterator implements Iterator<String> {
+        private BufferedReader reader;
+        private String nextLine;
+        public StringsIterator(final BufferedReader reader) {
+            this.reader = reader;
+            this.nextLine = null;
+            next();
+        }
+        public boolean hasNext() {
+            return nextLine != null;
+        }
+
+        public String next() {
+            String line = nextLine;
+            try {
+                while ((nextLine = reader.readLine()) != null) {
+                    nextLine = nextLine.trim();
+                    if (nextLine.length() > 0) break;
+                }
+            } catch (IOException e) {
+                nextLine = null;
+            }
+            return line;
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+        
+    }
     
     /**
      * @param from
