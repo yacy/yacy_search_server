@@ -35,6 +35,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -453,13 +454,13 @@ public final class Condenser {
     public final static boolean invisible(final char c) {
     	final int type = Character.getType(c);
     	if (
-			(type == Character.LOWERCASE_LETTER)
-			|| (type == Character.DECIMAL_DIGIT_NUMBER)
-			|| (type == Character.UPPERCASE_LETTER)
-			|| (type == Character.MODIFIER_LETTER)
-			|| (type == Character.OTHER_LETTER)
-			|| (type == Character.TITLECASE_LETTER)
-			|| (ContentScraper.punctuation(c))) {
+			   type == Character.LOWERCASE_LETTER
+			|| type == Character.DECIMAL_DIGIT_NUMBER
+			|| type == Character.UPPERCASE_LETTER
+			|| type == Character.MODIFIER_LETTER
+			|| type == Character.OTHER_LETTER
+			|| type == Character.TITLECASE_LETTER
+			|| ContentScraper.punctuation(c)) {
     		return false;
     	}
     	return true;
@@ -528,84 +529,18 @@ public final class Condenser {
         }
 
     }
-
-    /*
-    private static class unsievedWordsEnum implements Enumeration<StringBuilder> {
-        // returns an enumeration of StringBuilder Objects
-        StringBuilder buffer = null;
-        sentencesFromInputStreamEnum e;
-        StringBuilder s;
-        int off;
-
-        public unsievedWordsEnum(final InputStream is) throws UnsupportedEncodingException {
-            e = new sentencesFromInputStreamEnum(is);
-            s = new StringBuilder(0);
-            off = 0;
-            buffer = nextElement0();
-        }
-
-        public void pre(final boolean x) {
-            e.pre(x);
-        }
-        
-        private StringBuilder nextElement0() {
-            StringBuilder r;
-            StringBuilder sb;
-            char c;
-            while (s.length() - off <= 0) {
-                if (e.hasNext()) {
-                    r = e.next();
-                    if (r == null) return null;
-                    r = trim(r);
-                    sb = new StringBuilder(r.length() * 2);
-                    for (int i = 0; i < r.length(); i++) {
-                        c = r.charAt(i);
-                        if (invisible(c)) sb = sb.append(' '); // TODO: Bugfix needed for UTF-8
-                        else if (htmlFilterContentScraper.punctuation(c)) sb = sb.append(' ').append(c).append(' ');
-                        else sb = sb.append(c);
-                    }
-                    s = trim(sb);
-                    off = 0;
-                    //System.out.println("PARSING-LINE '" + r + "'->'" + s + "'");
-                } else {
-                    return null;
-                }
-            }
-            final int p = s.indexOf(" ", off);
-            if (p < 0) {
-                r = new StringBuilder(s.substring(off));
-                s = new StringBuilder(0);
-                off = 0;
-                return r;
-            }
-            r = trim(new StringBuilder(s.substring(off, p)));
-            off = p + 1;
-            while (off < s.length() && s.charAt(off) <= ' ') off++;
-            return r;
-        }
-
-        public boolean hasMoreElements() {
-            return buffer != null;
-        }
-
-        public StringBuilder nextElement() {
-            final StringBuilder r = buffer;
-            buffer = nextElement0();
-            return r;
-        }
-
-    }
-     */
     
     private static class unsievedWordsEnum implements Enumeration<StringBuilder> {
         // returns an enumeration of StringBuilder Objects
         StringBuilder buffer = null;
         sentencesFromInputStreamEnum e;
-        StringBuilder s;
+        ArrayList<StringBuilder> s;
+        int sIndex;
 
         public unsievedWordsEnum(final InputStream is) throws UnsupportedEncodingException {
             e = new sentencesFromInputStreamEnum(is);
-            s = new StringBuilder(20);
+            s = new ArrayList<StringBuilder>();
+            sIndex = 0;
             buffer = nextElement0();
         }
 
@@ -617,32 +552,31 @@ public final class Condenser {
             StringBuilder r;
             StringBuilder sb;
             char c;
-            while (s.length() == 0) {
-                if (e.hasNext()) {
-                    r = e.next();
-                    if (r == null) return null;
-                    r = trim(r);
-                    sb = new StringBuilder(r.length() * 2);
-                    for (int i = 0; i < r.length(); i++) {
-                        c = r.charAt(i);
-                        if (invisible(c)) sb = sb.append(' '); // TODO: Bugfix needed for UTF-8
-                        else if (ContentScraper.punctuation(c)) sb = sb.append(' ').append(c).append(' ');
-                        else sb = sb.append(c);
+            if (sIndex >= s.size()) {
+                sIndex = 0;
+                s.clear();
+            }
+            while (s.size() == 0) {
+                if (!e.hasNext()) return null;
+                r = e.next();
+                if (r == null) return null;
+                r = trim(r);
+                sb = new StringBuilder(20);
+                for (int i = 0; i < r.length(); i++) {
+                    c = r.charAt(i);
+                    if (invisible(c)) {
+                        if (sb.length() > 0) {s.add(sb); sb = new StringBuilder(20);}
+                    } else if (ContentScraper.punctuation(c)) {
+                        if (sb.length() > 0) {s.add(sb); sb = new StringBuilder(1);}
+                        sb.append(c);
+                        s.add(sb);
+                        sb = new StringBuilder(20);
+                    } else {
+                        sb = sb.append(c);
                     }
-                    s = trim(sb); 
-                    //System.out.println("PARSING-LINE '" + r + "'->'" + s + "'");
-                } else {
-                    return null;
                 }
             }
-            final int p = s.indexOf(" ");
-            if (p < 0) {
-                r = s;
-                s = new StringBuilder();
-                return r;
-            }
-            r = trim(new StringBuilder(s.substring(0, p)));
-            s = trim(s.delete(0, p + 1));
+            r = s.get(sIndex++);
             return r;
         }
 
