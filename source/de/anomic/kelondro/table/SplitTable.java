@@ -83,7 +83,7 @@ public class SplitTable implements ObjectIndex {
     private boolean useTailCache;
     private boolean exceed134217727;
     private BlockingQueue<DiscoverOrder> orderQueue;
-    private int   discoverThreads;
+    private Discovery[] discoveryThreads;
     
     public SplitTable(
             final File path, 
@@ -111,9 +111,10 @@ public class SplitTable implements ObjectIndex {
         this.exceed134217727 = exceed134217727;
         this.entryOrder = new Row.EntryComparator(rowdef.objectOrder);
         this.orderQueue = new LinkedBlockingQueue<DiscoverOrder>();
-        this.discoverThreads = Runtime.getRuntime().availableProcessors() + 1;
-        for (int i = 0; i < this.discoverThreads; i++) {
-            new Discovery(this.orderQueue).start();
+        this.discoveryThreads = new Discovery[Runtime.getRuntime().availableProcessors() + 1];
+        for (int i = 0; i < this.discoveryThreads.length; i++) {
+            this.discoveryThreads[i] = new Discovery(this.orderQueue);
+            this.discoveryThreads[i].start();
         }
         init();
     }
@@ -417,10 +418,26 @@ public class SplitTable implements ObjectIndex {
                 // check if in the given objectIndex is the key as given in the order
                 order.executeOrder();
             }
+            Log.logInfo("SplitTable.Discovery", "terminated discovery thread " + this.getName());
         }
+    }
+    
+    private boolean discoveriesAlive() {
+        for (int i = 0; i < this.discoveryThreads.length; i++) {
+            if (!this.discoveryThreads[i].isAlive()) return false;
+        }
+        return true;
     }
 
     private ObjectIndex keeperOf(final byte[] key) {
+        if (!discoveriesAlive()) {
+            synchronized (tables) {
+                for (ObjectIndex oi: tables.values()) {
+                    if (oi.has(key)) return oi;
+                }
+                return null;
+            }
+        }
         Challenge challenge = null;
         synchronized (tables) {
             int tableCount = this.tables.size();
@@ -587,7 +604,7 @@ public class SplitTable implements ObjectIndex {
     
     public synchronized void close() {
         // stop discover threads
-        if (this.orderQueue != null) for (int i = 0; i < this.discoverThreads; i++) {
+        if (this.orderQueue != null) for (int i = 0; i < this.discoveryThreads.length; i++) {
             try {
                 this.orderQueue.put(poisonDiscoverOrder);
             } catch (InterruptedException e) {

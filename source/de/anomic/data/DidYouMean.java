@@ -97,7 +97,7 @@ public class DidYouMean {
 	 * @return
 	 */
 	public SortedSet<String> getSuggestions(final String word, long timeout, int preSortSelection) {
-	    if (word.indexOf(' ') > 0) return getSuggestions(word.split(" "), timeout, preSortSelection);
+	    if (word.indexOf(' ') > 0) return getSuggestions(word.split(" "), timeout, preSortSelection, this.index);
 	    long startTime = System.currentTimeMillis();
 	    SortedSet<String> preSorted = getSuggestions(word, timeout);
 	    long timelimit = 2 * System.currentTimeMillis() - startTime + timeout;
@@ -123,11 +123,10 @@ public class DidYouMean {
 	 * @return
 	 */
     @SuppressWarnings("unchecked")
-    public SortedSet<String> getSuggestions(final String[] words, long timeout, int preSortSelection) {
+    public static SortedSet<String> getSuggestions(final String[] words, long timeout, int preSortSelection, final IndexCell<WordReference> index) {
         SortedSet<String>[] s = new SortedSet[words.length];
         for (int i = 0; i < words.length; i++) {
-            s[i] = getSuggestions(words[i], timeout / words.length, preSortSelection);
-            this.reset();
+            s[i] = new DidYouMean(index).getSuggestions(words[i], timeout / words.length, preSortSelection);
         }
         // make all permutations
         SortedSet<String> result = new TreeSet<String>();
