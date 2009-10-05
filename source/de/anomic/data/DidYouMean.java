@@ -3,6 +3,7 @@ package de.anomic.data;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -40,7 +41,7 @@ public class DidYouMean {
 	protected LinkedBlockingQueue<String> guessGen, guessLib;
 	protected long timeLimit;
 	protected boolean createGen; // keeps the value 'true' as long as no entry in guessLib is written
-	protected final Set<String> resultSet;
+	protected final SortedSet<String> resultSet;
     
 	
 	/**
@@ -55,6 +56,12 @@ public class DidYouMean {
 		this.guessGen = new LinkedBlockingQueue<String>();
 		this.guessLib = new LinkedBlockingQueue<String>();
 		this.createGen = true;
+	}
+	
+	public void reset() {
+	    this.resultSet.clear();
+	    this.guessGen.clear();
+	    this.guessLib.clear();
 	}
 	
 	/**
@@ -89,12 +96,13 @@ public class DidYouMean {
 	 * @param preSortSelection the number of words that participate in the IO-intensive sort
 	 * @return
 	 */
-	public Set<String> getSuggestions(final String word, long timeout, int preSortSelection) {
+	public SortedSet<String> getSuggestions(final String word, long timeout, int preSortSelection) {
+	    if (word.indexOf(' ') > 0) return getSuggestions(word.split(" "), timeout, preSortSelection);
 	    long startTime = System.currentTimeMillis();
-	    Set<String> preSorted = getSuggestions(word, timeout);
+	    SortedSet<String> preSorted = getSuggestions(word, timeout);
 	    long timelimit = 2 * System.currentTimeMillis() - startTime + timeout;
         if (System.currentTimeMillis() > timelimit) return preSorted;
-        Set<String> countSorted = Collections.synchronizedSortedSet(new TreeSet<String>(new indexSizeComparator()));
+        SortedSet<String> countSorted = Collections.synchronizedSortedSet(new TreeSet<String>(new indexSizeComparator()));
         int wc = index.count(Word.word2hash(word)); // all counts must be greater than this
         int c0;
         for (String s: preSorted) {
@@ -108,12 +116,41 @@ public class DidYouMean {
 	}
 	
 	/**
+	 * return a string that is a suggestion list for the list of given words
+	 * @param words
+	 * @param timeout
+	 * @param preSortSelection
+	 * @return
+	 */
+    @SuppressWarnings("unchecked")
+    public SortedSet<String> getSuggestions(final String[] words, long timeout, int preSortSelection) {
+        SortedSet<String>[] s = new SortedSet[words.length];
+        for (int i = 0; i < words.length; i++) {
+            s[i] = getSuggestions(words[i], timeout / words.length, preSortSelection);
+            this.reset();
+        }
+        // make all permutations
+        SortedSet<String> result = new TreeSet<String>();
+        StringBuilder sb;
+        for (int i = 0; i < words.length; i++) {
+            if (s[i].size() == 0) continue;
+            sb = new StringBuilder(20);
+            for (int j = 0; j < words.length; j++) {
+                if (j > 0) sb.append(' ');
+                if (i == j) sb.append(s[j].first()); else sb.append(words[j]);
+            }
+            result.add(sb.toString());
+        }
+        return result;
+    }
+    
+	/**
 	 * This method triggers the producer and consumer threads of the DidYouMean object.
 	 * @param word a String with a single word
 	 * @param timeout execution time in ms.
 	 * @return a Set&lt;String&gt; with word variations contained in term index.
 	 */
-	public Set<String> getSuggestions(final String word, long timeout) {
+	public SortedSet<String> getSuggestions(final String word, long timeout) {
 		long startTime = System.currentTimeMillis();
 		this.timeLimit = startTime + timeout;
 		this.word = word.toLowerCase();
