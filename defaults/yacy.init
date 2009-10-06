@@ -570,7 +570,7 @@ filterOutStopwordsFromTopwords=true
 40_peerseedcycle_busysleep=1200000
 40_peerseedcycle_memprereq=4194304
 50_localcrawl_idlesleep=2000
-50_localcrawl_busysleep=30
+50_localcrawl_busysleep=20
 50_localcrawl_memprereq=12582912
 50_localcrawl_isPaused=false
 60_remotecrawlloader_idlesleep=60000
@@ -694,7 +694,7 @@ crawler.http.maxFileSize=1048576
 crawler.ftp.maxFileSize=1048576
 
 # maximum number of crawler threads
-crawler.MaxActiveThreads = 50
+crawler.MaxActiveThreads = 200
 
 # maximum size of indexing queue
 indexer.slots = 100

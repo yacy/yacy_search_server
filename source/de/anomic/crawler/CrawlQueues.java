@@ -212,12 +212,12 @@ public class CrawlQueues {
         
         String queueCheck = crawlIsPossible(NoticedURL.STACK_TYPE_CORE, "Core");
         if (queueCheck != null) {
-            if (log.isFinest()) log.logFinest("omitting de-queue/local: " + queueCheck);
+            log.logInfo("omitting de-queue/local: " + queueCheck);
             return false;
         }
         
         if (isPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
-            if (log.isFinest()) log.logFinest("omitting de-queue/local: paused");
+            log.logInfo("omitting de-queue/local: paused");
             return false;
         }
         
@@ -569,9 +569,9 @@ public class CrawlQueues {
                             result = "no content (possibly caused by cache policy)";
                         } else {
                             request.setStatus("loaded", serverProcessorJob.STATUS_RUNNING);
-                            final boolean stored = sb.toIndexer(response);
-                            request.setStatus("enqueued-" + ((stored) ? "ok" : "fail"), serverProcessorJob.STATUS_FINISHED);
-                            result = (stored) ? null : "not enqueued to indexer";
+                            final String storedFailMessage = sb.toIndexer(response);
+                            request.setStatus("enqueued-" + ((storedFailMessage == null) ? "ok" : "fail"), serverProcessorJob.STATUS_FINISHED);
+                            result = (storedFailMessage == null) ? null : "not enqueued to indexer: " + storedFailMessage;
                         }
                     } catch (IOException e) {
                         request.setStatus("error", serverProcessorJob.STATUS_FINISHED);

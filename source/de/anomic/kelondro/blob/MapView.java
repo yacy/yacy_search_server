@@ -181,10 +181,11 @@ public class MapView {
         assert key != null;
         if (cache == null) return false; // case may appear during shutdown
         key = normalizeKey(key);
+        boolean h = false;
         synchronized (this) {
-            if (this.cache.containsKey(key)) return true;
-            return this.blob.has(key.getBytes());
+            h = this.cache.containsKey(key) || this.blob.has(key.getBytes());
         }
+        return h;
     }
 
     /**
@@ -199,6 +200,7 @@ public class MapView {
     }
     
     private String normalizeKey(String key) {
+        if (blob == null) return key;
     	if (key.length() > blob.keylength()) key = key.substring(0, blob.keylength());
         while (key.length() < blob.keylength()) key += fillchar;
         return key;

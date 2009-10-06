@@ -86,9 +86,15 @@ public class IODispatcher extends Thread {
         } else {
             DumpJob<? extends Reference> job = (DumpJob<? extends Reference>)new DumpJob(cache, file, array);
             try {
-                this.dumpQueue.put(job);
-                this.controlQueue.release();
-                Log.logInfo("IODispatcher", "appended dump job for file " + file.getName());
+                // check if the dispatcher is running
+                if (this.isAlive()) {
+                    this.dumpQueue.put(job);
+                    this.controlQueue.release();
+                    Log.logInfo("IODispatcher", "appended dump job for file " + file.getName());
+                } else {
+                    job.dump();
+                    Log.logWarning("IODispatcher", "dispatcher is not alive, just dumped file " + file.getName());
+                }
             } catch (InterruptedException e) {
                 e.printStackTrace();
                 cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
@@ -111,9 +117,14 @@ public class IODispatcher extends Thread {
         } else {
             MergeJob job = new MergeJob(f1, f2, factory, array, payloadrow, newFile);
             try {
-                this.mergeQueue.put(job);
-                this.controlQueue.release();
-                Log.logInfo("IODispatcher", "appended merge job of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
+                if (this.isAlive()) {
+                    this.mergeQueue.put(job);
+                    this.controlQueue.release();
+                    Log.logInfo("IODispatcher", "appended merge job of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
+                } else {
+                    job.merge();
+                    Log.logWarning("IODispatcher", "dispatcher not running, merged files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
+                }
             } catch (InterruptedException e) {
                 Log.logWarning("IODispatcher", "interrupted: " + e.getMessage(), e);
                 try {

@@ -1128,17 +1128,22 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
     }
     
-    public boolean toIndexer(final Response response) {
+    /**
+     * pass a response to the indexer
+     * @param response
+     * @return null if successful, an error message othervise
+     */
+    public String toIndexer(final Response response) {
         assert response != null;
         
         // get next queue entry and start a queue processing
         if (response == null) {
             if (this.log.isFine()) log.logFine("deQueue: queue entry is null");
-            return false;
+            return "queue entry is null";
         }
         if (response.profile() == null) {
             if (this.log.isFine()) log.logFine("deQueue: profile is null");
-            return false;
+            return "profile is null";
         }
         
         // check if the document should be indexed based on proxy/crawler rules
@@ -1176,17 +1181,17 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
             if (log.isFine()) log.logFine("deQueue: not indexed any word in URL " + response.url() + "; cause: " + noIndexReason);
             addURLtoErrorDB(response.url(), (referrerURL == null) ? "" : referrerURL.hash(), response.initiator(), response.name(), noIndexReason);
             // finish this entry
-            return false;
+            return "not indexed any word in URL " + response.url() + "; cause: " + noIndexReason;
         }
 
         // put document into the concurrent processing queue
         if (log.isFinest()) log.logFinest("deQueue: passing to indexing queue: " + response.url().toNormalform(true, false));
         try {
             this.indexingDocumentProcessor.enQueue(new indexingQueueEntry(response, null, null));
-            return true;
+            return null;
         } catch (InterruptedException e) {
             e.printStackTrace();
-            return false;
+            return "interrupted: " + e.getMessage();
         }
     }
     

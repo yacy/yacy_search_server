@@ -65,6 +65,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     private final long                                   targetFileSize, maxFileSize;
     private final int                                    writeBufferSize;
     private final SimpleARC<ByteArray, Integer>          countCache;
+    private       boolean                                cleanerRunning = false;
     
     public IndexCell(
             final File cellPath,
@@ -340,14 +341,18 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         }
         
         // clean-up the cache
-        if (this.array.entries() > 50 || (this.lastCleanup + cleanupCycle < System.currentTimeMillis())) synchronized (this) {
-            if (this.array.entries() > 50 || (this.lastCleanup + cleanupCycle < System.currentTimeMillis())) {
+        if (!this.cleanerRunning && (this.array.entries() > 50 || this.lastCleanup + cleanupCycle < System.currentTimeMillis())) synchronized (this) {
+            if (this.array.entries() > 50 || (this.lastCleanup + cleanupCycle < System.currentTimeMillis())) try {
+                this.cleanerRunning = true;
                 //System.out.println("----cleanup check");
                 this.array.shrink(this.targetFileSize, this.maxFileSize);
                 this.lastCleanup = System.currentTimeMillis();
+            } finally {
+                this.cleanerRunning = false;
             }
         }
     }
+    
     
     public File newContainerBLOBFile() {
         // for migration of cache files
