@@ -535,10 +535,13 @@ public class RowCollection implements Iterable<Row.Entry> {
         }
         final byte[] swapspace = new byte[this.rowdef.objectsize];
         final int p = partition(0, this.chunkcount, this.sortBound, swapspace);
-        if ((sortingthreadexecutor != null) &&
-            (!sortingthreadexecutor.isShutdown()) &&
-            (serverProcessor.useCPU > 1) && 
-            (this.chunkcount > 8000)) {
+        if (sortingthreadexecutor != null &&
+            !sortingthreadexecutor.isShutdown() &&
+            serverProcessor.useCPU > 1 && 
+            this.chunkcount > 8000 &&
+            p > isortlimit * 5 &&
+            this.chunkcount - p > isortlimit * 5
+            ) {
         	// sort this using multi-threading
             final Future<Integer> part0 = partitionthreadexecutor.submit(new partitionthread(this, 0, p, 0));
             final Future<Integer> part1 = partitionthreadexecutor.submit(new partitionthread(this, p, this.chunkcount, p));
