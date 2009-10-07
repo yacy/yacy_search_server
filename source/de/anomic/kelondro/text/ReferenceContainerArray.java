@@ -196,21 +196,21 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * @throws IOException 
      */
     public ReferenceContainer<ReferenceType> get(final byte[] termHash) throws IOException {
-        long timeout = System.currentTimeMillis() + 1000;
+        long timeout = System.currentTimeMillis() + 3000;
         Iterator<byte[]> entries = this.array.getAll(termHash).iterator();
     	if (entries == null || !entries.hasNext()) return null;
     	byte[] a = entries.next();
     	int k = 1;
     	ReferenceContainer<ReferenceType> c = new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(a, payloadrow));
     	if (System.currentTimeMillis() > timeout) {
-    	    Log.logWarning("ReferenceContainerArray", "timout in index retrieval (1): " + k + " tables searched. timeout = 1000");
+    	    Log.logWarning("ReferenceContainerArray", "timout in index retrieval (1): " + k + " tables searched. timeout = 3000");
     	    return c;
     	}
     	while (entries.hasNext()) {
     		c = c.merge(new ReferenceContainer<ReferenceType>(this.factory, termHash, RowSet.importRowSet(entries.next(), payloadrow)));
     		k++;
     		if (System.currentTimeMillis() > timeout) {
-    		    Log.logWarning("ReferenceContainerArray", "timout in index retrieval (2): " + k + " tables searched. timeout = 1000");
+    		    Log.logWarning("ReferenceContainerArray", "timout in index retrieval (2): " + k + " tables searched. timeout = 3000");
                 return c;
             }
     	}
