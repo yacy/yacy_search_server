@@ -29,8 +29,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.BufferedIndex;
@@ -80,7 +80,7 @@ public class Dispatcher {
     
     // a cloud is a cache for the objects that wait to be transmitted
     // the String-key is the primary target as contained in the Entry
-    private TreeMap<byte[], Transmission.Chunk> transmissionCloud;
+    private Map<byte[], Transmission.Chunk> transmissionCloud;
     
     // the backend is used to store the remaining indexContainers in case that the object is closed
     private BufferedIndex<WordReference> backend;
@@ -104,7 +104,7 @@ public class Dispatcher {
             final boolean gzipBody, 
             final int timeout
             ) {
-        this.transmissionCloud = new TreeMap<byte[], Transmission.Chunk>(Base64Order.enhancedCoder);
+        this.transmissionCloud = new LinkedHashMap<byte[], Transmission.Chunk>();
         this.backend = backend;
         this.seeds = seeds;
         this.log = new Log("INDEX-TRANSFER-DISPATCHER");
