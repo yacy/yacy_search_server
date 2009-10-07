@@ -81,13 +81,15 @@ public class diskUsage {
     //private static final int WINDOWS_XP = 18;
     //private static final int WINDOWS_SERVER = 19;
     //private static final int WINDOWS_VISTA = 20;
+    //private static final int WINDOWS_7 = 21;
     
     // don't change order of names!
+    // (look above)
     private static final String[] OSname =   {
                          "aix", "bs2000", "bsd", "haiku", "hp-ux", "tru64", "irix", "linux", "mac os x", "minix",
                          "solaris", "sunos", "unicos",
                          "windows 95", "windows 98", "windows me",
-                         "windows nt", "windows 2000", "windows xp", "windows server", "windows vista"};
+                         "windows nt", "windows 2000", "windows xp", "windows server", "windows vista", "windows 7"};
     
     //////////////////
     //  public API  //
