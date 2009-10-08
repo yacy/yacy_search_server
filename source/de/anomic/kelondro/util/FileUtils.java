@@ -533,6 +533,7 @@ public final class FileUtils {
     }
 
     public static Iterator<String> strings(byte[] a) {
+        if (a == null) return new ArrayList<String>().iterator();
         try {
             return new StringsIterator(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(a), "UTF-8")));
         } catch (UnsupportedEncodingException e) {

@@ -235,7 +235,6 @@ public final class serverCore extends serverAbstractBusyThread implements server
                 this.log.logInfo("Trying to bind server to port " + bindPort+ " with "+ extendedPort + "as seedPort.");
                 this.socket.bind(/*bindAddress = */generateSocketAddress(bindPort));
             }
-            
             // updating the port information
             //yacyCore.seedDB.mySeed.put(yacySeed.PORT,Integer.toString(bindAddress.getPort()));    
             //yacyCore.seedDB.mySeed().put(yacySeed.PORT, extendedPort);

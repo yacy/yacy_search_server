@@ -786,7 +786,9 @@ public class yacyURL implements Serializable {
 
     public final String hash() {
         // in case that the object was initialized without a known url hash, compute it now
-        if (this.hash == null) this.hash = urlHashComputation();
+        synchronized (this) {
+            if (this.hash == null) this.hash = urlHashComputation();
+        }
         return this.hash;
     }
 

@@ -1656,7 +1656,6 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
             }
             final long stackEndTime = System.currentTimeMillis();
             if (log.isInfo()) log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + entry.url().toNormalform(false, true) +
-                    ", NEW CRAWL STACK SIZE IS " + crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE) +
                     ", STACKING TIME = " + (stackEndTime-stackStartTime) +
                     ", PARSING TIME = " + (parsingEndTime-parsingStartTime));
         }
