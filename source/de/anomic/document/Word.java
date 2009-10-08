@@ -42,7 +42,7 @@ import de.anomic.yacy.yacySeedDB;
 
 public class Word {
 
-    public static final int hashCacheSize = Math.max(2000, Math.min(100000, (int) (MemoryControl.available() / 20000L)));
+    public static final int hashCacheSize = Math.max(2048, Math.min(100000, (int) (MemoryControl.available() / 20000L)));
     private static final ARC<String, byte[]> hashCache = new ConcurrentARC<String, byte[]>(hashCacheSize, Runtime.getRuntime().availableProcessors());
     
     // object carries statistics for words and sentences
@@ -86,13 +86,11 @@ public class Word {
     	String wordlc = word.toLowerCase(Locale.ENGLISH);
     	byte[] h = hashCache.get(wordlc);
         if (h != null) return h;
-        synchronized(hashCache) {
-        	h = hashCache.get(wordlc); // we must test that again because another thread may have written the value in between
-            if (h != null) return h;
-            h = Base64Order.enhancedCoder.encodeSubstring(Digest.encodeMD5Raw(wordlc), yacySeedDB.commonHashLength);
-            assert h[2] != '@';
-            hashCache.put(wordlc, h); // prevent expensive MD5 computation and encoding
-        }
+    	h = hashCache.get(wordlc); // we must test that again because another thread may have written the value in between
+        if (h != null) return h;
+        h = Base64Order.enhancedCoder.encodeSubstring(Digest.encodeMD5Raw(wordlc), yacySeedDB.commonHashLength);
+        assert h[2] != '@';
+        hashCache.put(wordlc, h); // prevent expensive MD5 computation and encoding
         return h;
     }
     
