@@ -43,7 +43,7 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
     private static final int MODE_PRESCAN_FINISHED = 1;
     private int mode = 1;
     
-    private static final long preBufferSize = 2048;
+    private static final long preBufferSize = 4096;
     private long preRead = 0;
     private final BufferedInputStream bufferedIn;
 
