@@ -191,20 +191,34 @@ public class Dispatcher {
             containers.add(container);
         }
         // then remove the container from the backend
-        HashSet<String> urlHashes = new HashSet<String>();
-        Iterator<WordReference> it;
-        for (ReferenceContainer<WordReference> c: containers) {
-            urlHashes.clear();
-            it = c.entries();
-            while (it.hasNext()) {
-                urlHashes.add(it.next().metadataHash());
+        final ArrayList<ReferenceContainer<WordReference>> rc;
+        if (ram) {
+            // selection was only from ram, so we have to carefully remove only the selected entries
+            HashSet<String> urlHashes = new HashSet<String>();
+            Iterator<WordReference> it;
+            for (ReferenceContainer<WordReference> c: containers) {
+                urlHashes.clear();
+                it = c.entries();
+                while (it.hasNext()) {
+                    urlHashes.add(it.next().metadataHash());
+                }
+                if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + c.getTermHashAsString() + "'");
+                if (urlHashes.size() > 0) this.backend.remove(c.getTermHash(), urlHashes);
             }
-            if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + c.getTermHashAsString() + "'");
-            if (urlHashes.size() > 0) this.backend.remove(c.getTermHash(), urlHashes);
+            rc = containers;
+        } else {
+            // selection was from whole index, so we can just delete the whole container
+            // but to avoid race conditions return the results from the deletes
+            rc = new ArrayList<ReferenceContainer<WordReference>>(containers.size());
+            for (ReferenceContainer<WordReference> c: containers) {
+                container = this.backend.delete(c.getTermHash());
+                if (this.log.isFine()) this.log.logFine("selected " + container.size() + " urls for word '" + c.getTermHashAsString() + "'");
+                if (container.size() != 0) rc.add(container);
+            }
         }
         
         // finished. The caller must take care of the containers and must put them back if not needed
-        return containers;
+        return rc;
     }
 
     /**

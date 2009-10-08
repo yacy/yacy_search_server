@@ -126,7 +126,11 @@ public class Transmission {
             ArrayList<String> notFound = new ArrayList<String>();
             while (i.hasNext()) {
                 WordReference e = i.next();
-                if (references.containsKey(e.metadataHash()) || badReferences.contains(e.metadataHash())) continue;
+                if (references.containsKey(e.metadataHash())) continue;
+                if (badReferences.contains(e.metadataHash())) {
+                    notFound.add(e.metadataHash());
+                    continue;
+                }
                 URLMetadataRow r = repository.load(e.metadataHash(), null, 0);
                 if (r == null) {
                     notFound.add(e.metadataHash());
