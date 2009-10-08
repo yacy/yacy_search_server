@@ -223,9 +223,20 @@ public class Transmission {
             }
             this.miss++;
             // write information that peer does not receive index transmissions
-            target.setFlagAcceptRemoteIndex(false);
-            seeds.update(target.hash, target);
             log.logInfo("Transfer failed of chunk to target " + target.hash + "/" + target.getName() + ": " + error);
+            // get possibly newer target Info
+            yacySeed newTarget = seeds.get(target.hash);
+            if (newTarget != null) {
+                String oldAddress = target.getPublicAddress();
+                if ((oldAddress != null) && (oldAddress.equals(newTarget.getPublicAddress()))) {
+                    newTarget.setFlagAcceptRemoteIndex(false);
+                    seeds.update(newTarget.hash, newTarget);
+                } else {
+                    // we tried an old Address. Don't change anything
+                }
+            } else {
+                // target not in DB anymore. ???
+            }
             return false;
         }
         
