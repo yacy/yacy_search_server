@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.CloneableIterator;
 
 import de.anomic.data.Blacklist;
 import de.anomic.document.parser.html.CharacterCoding;
@@ -49,7 +50,6 @@ import de.anomic.kelondro.index.Cache;
 import de.anomic.kelondro.index.HandleSet;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.ObjectIndex;
-import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.table.SplitTable;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;

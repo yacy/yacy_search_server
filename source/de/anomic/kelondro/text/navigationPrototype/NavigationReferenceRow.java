@@ -26,10 +26,10 @@
 
 package de.anomic.kelondro.text.navigationPrototype;
 
+import net.yacy.kelondro.order.Base64Order;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.Entry;
-import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.AbstractReference;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.yacy.yacySeedDB;

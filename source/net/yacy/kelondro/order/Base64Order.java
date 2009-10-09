@@ -25,7 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-package de.anomic.kelondro.order;
+package net.yacy.kelondro.order;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Comparator;

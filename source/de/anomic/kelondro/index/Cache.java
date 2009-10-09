@@ -36,7 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.CloneableIterator;
+
 import de.anomic.kelondro.util.MemoryControl;
 
 public class Cache implements ObjectIndex {

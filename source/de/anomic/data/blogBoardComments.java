@@ -42,6 +42,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.NaturalOrder;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -51,8 +53,6 @@ import org.xml.sax.SAXException;
 import de.anomic.data.wiki.wikiBoard;
 import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapView;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.NaturalOrder;
 
 public class blogBoardComments {
     

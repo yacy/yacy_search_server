@@ -27,10 +27,11 @@
 import java.io.File;
 import java.io.IOException;
 
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Digest;
+
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.search.blockrank.CRDistribution;

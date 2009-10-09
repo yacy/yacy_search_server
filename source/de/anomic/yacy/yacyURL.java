@@ -35,8 +35,9 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.Digest;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Digest;
+
 import de.anomic.server.serverDomains;
 import de.anomic.tools.Punycode;
 import de.anomic.tools.Punycode.PunycodeException;

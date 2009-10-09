@@ -35,13 +35,13 @@ import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.RotateIterator;
 
 import de.anomic.kelondro.index.HandleMap;
 import de.anomic.kelondro.io.random.CachedFileWriter;
 import de.anomic.kelondro.io.random.Writer;
-import de.anomic.kelondro.order.ByteOrder;
-import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 

@@ -32,8 +32,9 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import net.yacy.kelondro.order.Bitfield;
+
 import de.anomic.document.Condenser;
-import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;

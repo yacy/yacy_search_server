@@ -34,6 +34,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Bitfield;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.crawler.retrieval.LoaderDispatcher;
@@ -46,7 +47,6 @@ import de.anomic.document.Document;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;

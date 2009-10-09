@@ -36,6 +36,7 @@ import java.util.Map.Entry;
 import java.util.zip.GZIPOutputStream;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 
 import org.apache.commons.httpclient.ConnectMethod;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
@@ -65,7 +66,6 @@ import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
 import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.kelondro.order.Base64Order;
 import de.anomic.yacy.yacyURL;
 
 /**

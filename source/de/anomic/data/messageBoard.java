@@ -31,10 +31,11 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TimeZone;
 
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.NaturalOrder;
+
 import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapView;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.NaturalOrder;
 
 public class messageBoard {
     

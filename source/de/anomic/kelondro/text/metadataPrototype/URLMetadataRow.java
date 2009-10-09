@@ -33,12 +33,13 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Properties;
 
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.order.Digest;
+import net.yacy.kelondro.order.NaturalOrder;
+
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.order.Digest;
-import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.text.Metadata;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;

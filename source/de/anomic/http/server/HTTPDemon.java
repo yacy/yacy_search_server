@@ -51,6 +51,8 @@ import java.util.Map.Entry;
 import java.util.zip.GZIPInputStream;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Digest;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -67,8 +69,6 @@ import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;

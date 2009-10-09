@@ -50,9 +50,10 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.kelondro.order.Base64Order;
+
 import de.anomic.kelondro.index.HandleSet;
 import de.anomic.kelondro.index.HandleMap;
-import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.ReferenceContainerArray;
 import de.anomic.kelondro.text.Segment;

@@ -26,10 +26,11 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.MergeIterator;
+import net.yacy.kelondro.order.StackIterator;
+
 import de.anomic.kelondro.index.Row.Entry;
-import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.MergeIterator;
-import de.anomic.kelondro.order.StackIterator;
 
 public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
 

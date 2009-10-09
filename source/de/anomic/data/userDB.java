@@ -35,13 +35,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.Digest;
+import net.yacy.kelondro.order.NaturalOrder;
+
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapView;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.Digest;
-import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 

@@ -46,9 +46,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.ByteOrder;
-import de.anomic.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.kelondro.order.CloneableIterator;
+
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
 

@@ -39,6 +39,8 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.NaturalOrder;
 
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.HandleMap;
@@ -49,8 +51,6 @@ import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.io.records.BufferedRecords;
 import de.anomic.kelondro.io.records.Records;
-import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;

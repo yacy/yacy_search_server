@@ -34,7 +34,8 @@ package de.anomic.kelondro.index;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import de.anomic.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.CloneableIterator;
+
 
 public interface ObjectIndex {
 

@@ -34,10 +34,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.ByteOrder;
+
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.ByteBuffer;
 

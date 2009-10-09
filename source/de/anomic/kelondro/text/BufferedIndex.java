@@ -30,7 +30,8 @@ package de.anomic.kelondro.text;
 import java.io.IOException;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.CloneableIterator;
+
 
 /*
  * an IndexPackage is an integration of different index types, i.e.

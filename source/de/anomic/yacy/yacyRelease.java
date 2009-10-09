@@ -45,6 +45,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.HTTPLoader;
@@ -53,7 +54,6 @@ import de.anomic.http.client.Client;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
-import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCharBuffer;

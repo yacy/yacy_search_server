@@ -36,12 +36,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.kelondro.order.CloneableIterator;
 
 import de.anomic.kelondro.blob.HeapReader;
 import de.anomic.kelondro.blob.HeapWriter;
-import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.util.ByteArray;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.index.Row;

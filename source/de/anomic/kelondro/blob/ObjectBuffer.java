@@ -56,7 +56,7 @@
 
 package de.anomic.kelondro.blob;
 
-import de.anomic.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.order.NaturalOrder;
 
 public class ObjectBuffer {
 

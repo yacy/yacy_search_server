@@ -36,13 +36,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import net.yacy.kelondro.order.Bitfield;
+
 import de.anomic.data.AbstractBlacklist;
 import de.anomic.data.Blacklist;
 import de.anomic.data.listManager;
 import de.anomic.document.Condenser;
 import de.anomic.document.Word;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerCache;

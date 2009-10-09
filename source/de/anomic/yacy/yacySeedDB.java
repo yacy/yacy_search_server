@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.client.Client;
@@ -50,7 +51,6 @@ import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.AlternativeDomainNames;
 import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapDataMining;
-import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCore;

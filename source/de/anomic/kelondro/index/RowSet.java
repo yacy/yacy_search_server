@@ -28,10 +28,10 @@ import java.util.Iterator;
 import java.util.Random;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.NaturalOrder;
 
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.NaturalOrder;
 
 public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.Entry> {
 

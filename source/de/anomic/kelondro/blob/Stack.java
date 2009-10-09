@@ -28,7 +28,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import de.anomic.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.order.NaturalOrder;
+
 
 public class Stack {
 

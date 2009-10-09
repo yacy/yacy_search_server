@@ -28,7 +28,8 @@ package de.anomic.kelondro.text;
 
 import java.util.Set;
 
-import de.anomic.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.CloneableIterator;
+
 
 public interface IndexReader<ReferenceType extends Reference> {
 

@@ -26,8 +26,8 @@
 
 package de.anomic.kelondro.text;
 
-import de.anomic.kelondro.order.AbstractOrder;
-import de.anomic.kelondro.order.Order;
+import net.yacy.kelondro.order.AbstractOrder;
+import net.yacy.kelondro.order.Order;
 
 public class ReferenceContainerOrder<ReferenceType extends Reference> extends AbstractOrder<ReferenceContainer<ReferenceType>> implements Order<ReferenceContainer<ReferenceType>>, Cloneable {
 

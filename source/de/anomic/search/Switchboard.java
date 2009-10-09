@@ -112,6 +112,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Digest;
+import net.yacy.kelondro.order.NaturalOrder;
 
 import de.anomic.content.DCEntry;
 import de.anomic.content.RSSMessage;
@@ -159,12 +162,9 @@ import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.RobotsTxtConfig;
-import de.anomic.kelondro.order.Digest;
-import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;

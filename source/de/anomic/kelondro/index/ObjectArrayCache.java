@@ -29,7 +29,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Random;
 
-import de.anomic.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.order.NaturalOrder;
+
 
 public class ObjectArrayCache {
 

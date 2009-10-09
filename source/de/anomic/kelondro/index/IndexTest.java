@@ -32,7 +32,8 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Base64Order;
+
 import de.anomic.kelondro.util.ByteArray;
 import de.anomic.kelondro.util.MemoryControl;
 

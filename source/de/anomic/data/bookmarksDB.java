@@ -56,6 +56,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.NaturalOrder;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -70,8 +72,6 @@ import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.TransformerWriter;
 import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapView;
-import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.kelondroException;

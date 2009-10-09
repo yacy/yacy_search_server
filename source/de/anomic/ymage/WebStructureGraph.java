@@ -38,11 +38,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.MicroDate;
 
 import de.anomic.document.Condenser;
 import de.anomic.document.Document;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;

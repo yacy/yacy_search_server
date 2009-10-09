@@ -30,9 +30,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
+import net.yacy.kelondro.order.Bitfield;
+
 import de.anomic.document.Condenser;
 import de.anomic.document.Word;
-import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;

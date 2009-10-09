@@ -33,8 +33,9 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.order.ByteOrder;
-import de.anomic.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.kelondro.order.CloneableIterator;
+
 
 public interface Index <ReferenceType extends Reference> {
     

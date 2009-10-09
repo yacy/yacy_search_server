@@ -44,6 +44,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
@@ -56,7 +57,6 @@ import de.anomic.http.server.HTTPDemon;
 import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapDataMining;
 import de.anomic.kelondro.index.RowCollection;
-import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.MetadataRepository;

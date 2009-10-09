@@ -31,10 +31,11 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import net.yacy.kelondro.order.Digest;
+
 import org.apache.commons.httpclient.methods.multipart.Part;
 
 import de.anomic.http.client.DefaultCharsetStringPart;
-import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;

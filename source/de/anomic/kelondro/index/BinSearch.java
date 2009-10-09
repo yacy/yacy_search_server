@@ -26,8 +26,8 @@
 
 package de.anomic.kelondro.index;
 
-import de.anomic.kelondro.order.ByteOrder;
-import de.anomic.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.kelondro.order.NaturalOrder;
 
 
 public class BinSearch {

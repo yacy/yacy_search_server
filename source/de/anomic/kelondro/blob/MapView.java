@@ -36,11 +36,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.order.RotateIterator;
+
 import de.anomic.kelondro.index.ARC;
 import de.anomic.kelondro.index.ConcurrentARC;
-import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;

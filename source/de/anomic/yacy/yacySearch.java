@@ -32,10 +32,10 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Bitfield;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.data.Blacklist;
-import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.search.QueryParams;

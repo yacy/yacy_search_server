@@ -34,8 +34,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
 
-import de.anomic.kelondro.order.ByteOrder;
-import de.anomic.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.kelondro.order.CloneableIterator;
+
 
 public class HandleSet implements Iterable<byte[]> {
     

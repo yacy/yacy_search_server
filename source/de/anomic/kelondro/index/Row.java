@@ -37,13 +37,13 @@ import java.util.StringTokenizer;
 import java.util.concurrent.ArrayBlockingQueue;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.AbstractOrder;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.order.Order;
 
-import de.anomic.kelondro.order.AbstractOrder;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.order.ByteOrder;
-import de.anomic.kelondro.order.NaturalOrder;
-import de.anomic.kelondro.order.Order;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.kelondroException;
 

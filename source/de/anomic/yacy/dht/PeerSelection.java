@@ -30,11 +30,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Digest;
 
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacySeed;

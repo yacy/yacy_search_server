@@ -28,9 +28,10 @@ package de.anomic.kelondro.text;
 
 import java.util.Date;
 
+import net.yacy.kelondro.order.Bitfield;
+
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.Reference;
 
 public interface Metadata {

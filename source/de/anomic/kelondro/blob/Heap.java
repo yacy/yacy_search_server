@@ -32,10 +32,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.NaturalOrder;
+
 import de.anomic.kelondro.io.random.AbstractWriter;
-import de.anomic.kelondro.order.ByteOrder;
-import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.NaturalOrder;
 
 public final class Heap extends HeapModifier implements BLOB {
 

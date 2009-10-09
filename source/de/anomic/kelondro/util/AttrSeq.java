@@ -43,10 +43,11 @@ import java.util.TreeSet;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.kelondro.order.Base64Order;
+
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowCollection;
-import de.anomic.kelondro.order.Base64Order;
 
 public class AttrSeq {
     

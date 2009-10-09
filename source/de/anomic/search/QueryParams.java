@@ -30,13 +30,14 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.order.NaturalOrder;
+
 import de.anomic.document.Condenser;
 import de.anomic.document.Word;
 import de.anomic.document.parser.html.AbstractScraper;
 import de.anomic.document.parser.html.CharacterCoding;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;

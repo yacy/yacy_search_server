@@ -26,13 +26,13 @@
 
 package de.anomic.kelondro.text.referencePrototype;
 
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.order.MicroDate;
 import de.anomic.document.Word;
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.Row.Entry;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.text.AbstractReference;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.yacy.yacySeedDB;

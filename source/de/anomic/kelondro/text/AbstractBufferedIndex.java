@@ -31,7 +31,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.order.Order;
+import net.yacy.kelondro.order.Order;
+
 
 public abstract class AbstractBufferedIndex<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements BufferedIndex<ReferenceType> {
 

@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.ByteOrder;
 
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.Blacklist;
@@ -42,8 +44,6 @@ import de.anomic.document.Condenser;
 import de.anomic.document.Word;
 import de.anomic.document.Document;
 import de.anomic.document.parser.html.ContentScraper;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.navigationPrototype.NavigationReference;
 import de.anomic.kelondro.text.navigationPrototype.NavigationReferenceFactory;

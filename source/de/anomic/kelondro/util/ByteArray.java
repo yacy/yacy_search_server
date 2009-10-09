@@ -26,7 +26,8 @@ package de.anomic.kelondro.util;
 
 import java.util.HashMap;
 
-import de.anomic.kelondro.order.ByteOrder;
+import net.yacy.kelondro.order.ByteOrder;
+
 
 /**
  * this class is a experimental replacement of byte[].

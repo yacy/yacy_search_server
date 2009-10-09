@@ -32,13 +32,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.Digest;
+import net.yacy.kelondro.order.NaturalOrder;
 
 import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapView;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.order.Digest;
-import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.yacy.yacySeedDB;

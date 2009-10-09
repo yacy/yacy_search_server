@@ -38,10 +38,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.kelondro.order.NaturalOrder;
 
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.ByteOrder;
-import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.NamePrefixThreadFactory;
 import de.anomic.kelondro.util.kelondroException;

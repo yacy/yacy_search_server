@@ -34,8 +34,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.Digest;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Digest;
+
 import de.anomic.kelondro.util.AttrSeq;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.RankingProcess;

@@ -2,8 +2,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.Digest;
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Digest;
+
 
 // migration.java
 // -----------------------

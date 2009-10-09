@@ -30,9 +30,10 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Iterator;
 
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.RotateIterator;
+
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.RotateIterator;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;

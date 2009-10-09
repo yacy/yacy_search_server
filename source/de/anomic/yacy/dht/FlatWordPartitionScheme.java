@@ -25,7 +25,7 @@
 
 package de.anomic.yacy.dht;
 
-import de.anomic.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Base64Order;
 import de.anomic.yacy.yacySeed;
 
 /**

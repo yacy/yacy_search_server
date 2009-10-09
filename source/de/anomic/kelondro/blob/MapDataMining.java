@@ -34,7 +34,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.CloneableIterator;
+
 import de.anomic.kelondro.util.ScoreCluster;
 
 public class MapDataMining extends MapView {

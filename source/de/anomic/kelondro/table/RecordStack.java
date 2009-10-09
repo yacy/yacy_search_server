@@ -35,9 +35,9 @@ import java.util.Iterator;
 import java.util.StringTokenizer;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.NaturalOrder;
 
 import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 

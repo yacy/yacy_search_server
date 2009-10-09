@@ -38,6 +38,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
+import net.yacy.kelondro.order.Base64Order;
+
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
@@ -46,7 +48,6 @@ import de.anomic.document.Document;
 import de.anomic.http.client.Client;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.order.Base64Order;
 import de.anomic.yacy.yacyURL;
 
 /**

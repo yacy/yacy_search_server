@@ -30,9 +30,10 @@ import java.util.ArrayList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.order.MicroDate;
+
 import de.anomic.kelondro.index.Row.Entry;
-import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.text.AbstractReference;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;

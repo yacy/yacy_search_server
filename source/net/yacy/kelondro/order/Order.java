@@ -1,4 +1,4 @@
-// kelondroAbstractOrder.java
+// kelondroOrder.java
 // -----------------------
 // part of The Kelondro Database
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -24,39 +24,32 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.order;
+package net.yacy.kelondro.order;
 
+import java.util.Comparator;
 
+public interface Order<A> extends Comparator<A> {
 
-public abstract class AbstractOrder<A> implements Order<A> {
+    public boolean wellformed(A a); // returns true if and only if a has only characters that belong to the implemented order
+    
+    public Order<A> clone();
+    
+    public void direction(boolean ascending); // the ordering direction can be changed at any time
+    
+    public String signature(); // returns a signature String so that different orderings have different signatures
+    
+    public long partition(A key, int forkes);
 
-    protected A zero = null;
-    protected boolean asc = true;
-    
-    abstract public Order<A> clone();
+    public long cardinal(A key); // returns a cardinal number in the range of 0 .. Long.MAX_VALUE
 
-    public A zero() {
-    	return zero;
-    }
+    public int compare(A a, A b);
     
-    public void direction(final boolean ascending) {
-        asc = ascending;
-    }
+    public boolean equal(A a, A b);
     
-    public long partition(final A key, final int forks) {
-        final long d = (Long.MAX_VALUE / forks) + ((Long.MAX_VALUE % forks) + 1) / forks;
-        return cardinal(key) / d;
-    }
+    public A zero(); // returns the zero point of the Ordering; null if not defined
+
+    public void rotate(A zero); // defines that the ordering rotates, and sets the zero point for the rotation
     
-    public void rotate(final A newzero) {
-        this.zero = newzero;
-    }
-    
-    public boolean equals(final Order<A> otherOrder) {
-        if (otherOrder == null) return false;
-        final String thisSig = this.signature();
-        final String otherSig = otherOrder.signature();
-        if ((thisSig == null) || (otherSig == null)) return false;
-        return thisSig.equals(otherSig);
-    }
+    public boolean equals(Order<A> o); // used to compare different order objects; they may define the same ordering
+
 }

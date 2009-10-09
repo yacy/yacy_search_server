@@ -35,12 +35,13 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Digest;
+
 import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.HTTPDProxyHandler;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;

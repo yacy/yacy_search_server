@@ -33,7 +33,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.order.Order;
+import net.yacy.kelondro.order.Order;
+
 
 public abstract class AbstractIndex <ReferenceType extends Reference> implements Index<ReferenceType> {
     

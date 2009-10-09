@@ -55,6 +55,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.order.Digest;
+
 import org.apache.commons.httpclient.methods.multipart.ByteArrayPartSource;
 import org.apache.commons.httpclient.methods.multipart.Part;
 
@@ -71,9 +75,6 @@ import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
-import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.order.Bitfield;
-import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerCache;
