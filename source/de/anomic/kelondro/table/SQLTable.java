@@ -36,13 +36,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import net.yacy.kelondro.index.ObjectIndex;
+import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.RowCollection;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
 
-import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.index.RowCollection;
-import de.anomic.kelondro.index.ObjectIndex;
 
 /*
  * Commands to create a database using mysql:

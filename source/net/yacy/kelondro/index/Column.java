@@ -1,4 +1,4 @@
-// kelondroColumn.java
+// Column.java
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 24.05.2006 on http://www.anomic.de
 //
@@ -25,7 +25,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.index;
+package net.yacy.kelondro.index;
 
 import de.anomic.kelondro.util.kelondroException;
 

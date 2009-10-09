@@ -51,9 +51,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
 
+import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.order.NaturalOrder;
 
-import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.server.serverCodings;
 

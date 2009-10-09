@@ -50,10 +50,10 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import net.yacy.kelondro.index.Column;
+import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.order.NaturalOrder;
 
-import de.anomic.kelondro.index.Column;
-import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.table.RecordStack;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;

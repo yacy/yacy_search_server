@@ -30,11 +30,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.Digest;
 
-import de.anomic.kelondro.index.HandleMap;
 import de.anomic.kelondro.util.FileUtils;
 
 public final class HeapWriter  {

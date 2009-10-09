@@ -26,7 +26,7 @@
 
 package de.anomic.kelondro.text.referencePrototype;
 
-import de.anomic.kelondro.index.Row.Entry;
+import net.yacy.kelondro.index.Row.Entry;
 import de.anomic.kelondro.text.ReferenceFactory;
 
 public class WordReferenceFactory implements ReferenceFactory<WordReference> {

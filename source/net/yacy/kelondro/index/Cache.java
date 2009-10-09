@@ -1,4 +1,4 @@
-// kelondro.blob.Cache.java
+// Cache.java
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 26.10.2006 on http://www.anomic.de
 //
@@ -25,7 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-package de.anomic.kelondro.index;
+package net.yacy.kelondro.index;
 
 import java.io.IOException;
 import java.util.ArrayList;

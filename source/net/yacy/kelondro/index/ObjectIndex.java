@@ -1,4 +1,4 @@
-// kelondroIndex.java
+// ObjectIndex.java
 // ------------------
 // part of the Kelondro Database
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -29,7 +29,7 @@
    kelondroTree and kelondroHashtable
  */
 
-package de.anomic.kelondro.index;
+package net.yacy.kelondro.index;
 
 import java.io.IOException;
 import java.util.ArrayList;

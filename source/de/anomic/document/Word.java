@@ -32,12 +32,12 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.index.ARC;
+import net.yacy.kelondro.index.ConcurrentARC;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.Digest;
 
-import de.anomic.kelondro.index.ARC;
-import de.anomic.kelondro.index.ConcurrentARC;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.yacy.yacySeedDB;
 

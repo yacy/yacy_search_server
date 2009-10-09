@@ -30,10 +30,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
+import net.yacy.kelondro.index.ObjectIndex;
+import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.order.NaturalOrder;
 
-import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.index.ObjectIndex;
 
 public class Relations {
 

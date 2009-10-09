@@ -54,10 +54,10 @@ import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.logging.Log;
 
-import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.index.RowSet;
 
 public final class FileUtils {
 

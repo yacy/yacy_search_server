@@ -25,7 +25,12 @@
 
 package de.anomic.yacy.dht;
 
+import java.util.Random;
+import java.util.TreeMap;
+
+import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.order.Base64Order;
+import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.yacy.yacySeed;
 
 /**
@@ -91,6 +96,52 @@ public class FlatWordPartitionScheme implements PartitionScheme {
         String s = new String(Base64Order.enhancedCoder.uncardinal(l));
         while (s.length() < 12) s += "A";
         return s.getBytes();
+    }
+    
+
+    public static void main(String[] args) {
+        int count = (args.length == 0) ? 1000000 : Integer.parseInt(args[0]);
+        System.out.println("Starting test with " + count + " objects");
+        System.out.println("expected  memory: " + (count * 16) + " bytes");
+        System.out.println("available memory: " + MemoryControl.available());
+        Random r = new Random(0);
+        long start = System.currentTimeMillis();
+
+        System.gc(); // for resource measurement
+        long a = MemoryControl.available();
+        HandleMap idx = new HandleMap(12, Base64Order.enhancedCoder, 4, 0, 150000);
+        for (int i = 0; i < count; i++) {
+            idx.inc(FlatWordPartitionScheme.positionToHash(r.nextInt(count)));
+        }
+        long timek = ((long) count) * 1000L / (System.currentTimeMillis() - start);
+        System.out.println("Result HandleMap: " + timek + " inc per second");
+        System.gc();
+        long memk = a - MemoryControl.available();
+        System.out.println("Used Memory: " + memk + " bytes");
+        System.out.println("x " + idx.get(FlatWordPartitionScheme.positionToHash(0)));
+        idx = null;
+        
+        r = new Random(0);
+        start = System.currentTimeMillis();
+        byte[] hash;
+        Integer d;
+        System.gc(); // for resource measurement
+        a = MemoryControl.available();
+        TreeMap<byte[], Integer> hm = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
+        for (int i = 0; i < count; i++) {
+            hash = FlatWordPartitionScheme.positionToHash(r.nextInt(count));
+            d = hm.get(hash);
+            if (d == null) hm.put(hash, 1); else hm.put(hash, d + 1);
+        }
+        long timej =  ((long) count) * 1000L / (System.currentTimeMillis() - start);
+        System.out.println("Result   TreeMap: " + timej + " inc per second");
+        System.gc();
+        long memj = a - MemoryControl.available();
+        System.out.println("Used Memory: " + memj + " bytes");
+        System.out.println("x " + hm.get(FlatWordPartitionScheme.positionToHash(0)));
+        System.out.println("Geschwindigkeitsfaktor j/k: " + ((float) (10 * timej / timek) / 10.0) + " - je kleiner desto besser fuer kelondro");
+        System.out.println("Speicherplatzfaktor    j/k: " + ((float) (10 * memj / memk) / 10.0) + " - je groesser desto besser fuer kelondro");
+        System.exit(0);
     }
 
 }

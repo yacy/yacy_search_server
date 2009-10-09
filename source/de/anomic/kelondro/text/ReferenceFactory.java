@@ -26,7 +26,7 @@
 
 package de.anomic.kelondro.text;
 
-import de.anomic.kelondro.index.Row;
+import net.yacy.kelondro.index.Row;
 
 public interface ReferenceFactory<ReferenceType extends Reference> {
 

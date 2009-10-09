@@ -35,6 +35,8 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.yacy.kelondro.index.ARC;
+import net.yacy.kelondro.index.ConcurrentARC;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
@@ -46,8 +48,6 @@ import de.anomic.document.Word;
 import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.client.Cache;
 import de.anomic.http.metadata.ResponseHeader;
-import de.anomic.kelondro.index.ARC;
-import de.anomic.kelondro.index.ConcurrentARC;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.SetTools;

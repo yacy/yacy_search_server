@@ -30,11 +30,11 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
 
+import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.NaturalOrder;
 
-import de.anomic.kelondro.index.Row;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;

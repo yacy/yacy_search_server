@@ -26,11 +26,11 @@
 
 package de.anomic.kelondro.text.citationPrototype;
 
+import net.yacy.kelondro.index.Column;
+import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.MicroDate;
-import de.anomic.kelondro.index.Column;
-import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.yacy.yacySeedDB;
 

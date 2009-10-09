@@ -29,8 +29,9 @@ import java.io.File;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.kelondro.index.Cache;
+
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.index.Cache;
 import de.anomic.kelondro.table.Table;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.FileUtils;

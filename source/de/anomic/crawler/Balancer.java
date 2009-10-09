@@ -33,13 +33,13 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import net.yacy.kelondro.index.ObjectIndex;
+import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.client.Cache;
-import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.table.Table;
 
 public class Balancer {

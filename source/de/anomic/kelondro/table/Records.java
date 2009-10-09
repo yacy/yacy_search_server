@@ -38,13 +38,13 @@ import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import net.yacy.kelondro.index.Column;
+import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.Row.EntryIndex;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.NaturalOrder;
 
-import de.anomic.kelondro.index.Column;
-import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.index.Row.EntryIndex;
 import de.anomic.kelondro.io.chunks.IOChunksInterface;
 import de.anomic.kelondro.io.chunks.RandomAccessIOChunks;
 import de.anomic.kelondro.io.random.CachedFileWriter;

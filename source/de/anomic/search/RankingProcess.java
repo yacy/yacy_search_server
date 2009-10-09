@@ -41,12 +41,12 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.kelondro.index.BinSearch;
 import net.yacy.kelondro.order.Digest;
 
 import de.anomic.document.Condenser;
 import de.anomic.document.Word;
 import de.anomic.document.parser.html.ContentScraper;
-import de.anomic.kelondro.index.BinSearch;
 import de.anomic.kelondro.text.Reference;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceOrder;

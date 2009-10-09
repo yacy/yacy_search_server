@@ -31,12 +31,12 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.NaturalOrder;
 
 import de.anomic.data.Blacklist;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.index.Row.Entry;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.search.Switchboard;

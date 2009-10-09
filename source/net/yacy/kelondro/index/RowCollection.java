@@ -1,4 +1,4 @@
-// kelondroRowCollection.java
+// RowCollection.java
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 12.01.2006 on http://www.anomic.de
 //
@@ -22,7 +22,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.index;
+package net.yacy.kelondro.index;
 
 import java.io.File;
 import java.io.IOException;
@@ -46,16 +46,16 @@ import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.NamePrefixThreadFactory;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.server.serverProcessor;
 
 public class RowCollection implements Iterable<Row.Entry> {
 
     public  static final long growfactor100 = 140L;
     private static final int isortlimit = 20;
-    static final Integer dummy = 0;
+    private static       int availableCPU = Runtime.getRuntime().availableProcessors();
     
-    public static final ExecutorService sortingthreadexecutor = (serverProcessor.useCPU > 1) ? Executors.newCachedThreadPool(new NamePrefixThreadFactory("sorting")) : null;
-    public static final ExecutorService partitionthreadexecutor = (serverProcessor.useCPU > 1) ? Executors.newCachedThreadPool(new NamePrefixThreadFactory("partition")) : null;
+    
+    public static final ExecutorService sortingthreadexecutor = (availableCPU > 1) ? Executors.newCachedThreadPool(new NamePrefixThreadFactory("sorting")) : null;
+    public static final ExecutorService partitionthreadexecutor = (availableCPU > 1) ? Executors.newCachedThreadPool(new NamePrefixThreadFactory("partition")) : null;
     
     protected byte[] chunkcache;
     protected int    chunkcount;
@@ -538,7 +538,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         final int p = partition(0, this.chunkcount, this.sortBound, swapspace);
         if (sortingthreadexecutor != null &&
             !sortingthreadexecutor.isShutdown() &&
-            serverProcessor.useCPU > 1 && 
+            availableCPU > 1 && 
             this.chunkcount > 8000 &&
             p > isortlimit * 5 &&
             this.chunkcount - p > isortlimit * 5
@@ -583,7 +583,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         final int p = partition(0, this.chunkcount, this.sortBound, swapspace);
         if ((sortingthreadexecutor != null) &&
             (!sortingthreadexecutor.isShutdown()) &&
-            (serverProcessor.useCPU > 1) && 
+            (availableCPU > 1) && 
             (this.chunkcount > 4000)) {
             // sort this using multi-threading
             final Future<Object> part = sortingthreadexecutor.submit(new qsortthread(this, 0, p, 0));
@@ -994,11 +994,11 @@ public class RowCollection implements Iterable<Row.Entry> {
     	}
     	final long t2 = System.nanoTime();
     	System.out.println("copy c -> d: " + (t2 - t1) + " nanoseconds, " + d(testsize, (t2 - t1)) + " entries/nanoseconds");
-    	serverProcessor.useCPU = 1;
+    	availableCPU = 1;
     	c.sort();
     	final long t3 = System.nanoTime();
     	System.out.println("sort c (1) : " + (t3 - t2) + " nanoseconds, " + d(testsize, (t3 - t2)) + " entries/nanoseconds");
-    	serverProcessor.useCPU = 2;
+    	availableCPU = 2;
     	d.sort();
     	final long t4 = System.nanoTime();
     	System.out.println("sort d (2) : " + (t4 - t3) + " nanoseconds, " + d(testsize, (t4 - t3)) + " entries/nanoseconds");

@@ -31,14 +31,14 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.kelondro.index.ARC;
+import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.SimpleARC;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.Order;
 
-import de.anomic.kelondro.index.ARC;
-import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.index.SimpleARC;
 import de.anomic.kelondro.util.ByteArray;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.server.serverProfiling;

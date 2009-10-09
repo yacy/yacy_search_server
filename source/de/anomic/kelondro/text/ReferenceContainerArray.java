@@ -29,15 +29,15 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 
+import net.yacy.kelondro.index.HandleMap;
+import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 
 import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.ArrayStack;
-import de.anomic.kelondro.index.HandleMap;
-import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.index.RowSet;
 
 public final class ReferenceContainerArray<ReferenceType extends Reference> {
 

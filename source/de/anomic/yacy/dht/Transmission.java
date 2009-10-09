@@ -30,9 +30,9 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
 
-import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerCache;
 import de.anomic.kelondro.text.Segment;

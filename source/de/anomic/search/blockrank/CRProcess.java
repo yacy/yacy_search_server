@@ -30,14 +30,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import net.yacy.kelondro.index.ObjectIndex;
+import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MicroDate;
 
-import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.index.RowSet;
-import de.anomic.kelondro.index.ObjectIndex;
 import de.anomic.kelondro.table.Table;
 import de.anomic.kelondro.text.IndexCell;
 import de.anomic.kelondro.text.ReferenceContainer;
