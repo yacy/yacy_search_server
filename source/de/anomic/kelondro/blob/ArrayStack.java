@@ -47,6 +47,8 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
@@ -59,7 +61,6 @@ import de.anomic.kelondro.text.ReferenceContainerCache.blobFileEntries;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.NamePrefixThreadFactory;
-import de.anomic.yacy.logging.Log;
 
 public class ArrayStack implements BLOB {
 

@@ -33,7 +33,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import de.anomic.yacy.logging.Log;
+import net.yacy.kelondro.logging.Log;
+
 
 /**
  * This class can store statistical data of a language.

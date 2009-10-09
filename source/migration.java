@@ -22,6 +22,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.data.listManager;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.kelondro.order.Base64Order;
@@ -29,7 +31,6 @@ import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
-import de.anomic.yacy.logging.Log;
 
 public class migration {
     //SVN constants

@@ -36,6 +36,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.client.Client;
 import de.anomic.http.metadata.HeaderFramework;
@@ -49,7 +51,6 @@ import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public class RobotsTxt {
     

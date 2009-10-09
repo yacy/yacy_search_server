@@ -36,6 +36,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
@@ -52,7 +54,6 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 
 public class Bookmarks {

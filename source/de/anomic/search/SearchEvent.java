@@ -33,6 +33,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.crawler.ResultURLs;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.ReferenceContainer;
@@ -45,7 +47,6 @@ import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
-import de.anomic.yacy.logging.Log;
 import de.anomic.ymage.ProfilingGraph;
 
 public final class SearchEvent {

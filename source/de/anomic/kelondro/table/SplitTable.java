@@ -43,6 +43,8 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.kelondro.blob.ArrayStack;
 import de.anomic.kelondro.index.Cache;
 import de.anomic.kelondro.index.Column;
@@ -58,7 +60,6 @@ import de.anomic.kelondro.order.StackIterator;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.NamePrefixThreadFactory;
-import de.anomic.yacy.logging.Log;
 
 public class SplitTable implements ObjectIndex {
 

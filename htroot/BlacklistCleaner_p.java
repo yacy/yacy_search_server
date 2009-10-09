@@ -51,8 +51,9 @@ import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.logging.Log;
 import java.util.Set;
+
+import net.yacy.kelondro.logging.Log;
 
 public class BlacklistCleaner_p {
     

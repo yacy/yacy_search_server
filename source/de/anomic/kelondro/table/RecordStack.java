@@ -34,11 +34,12 @@ import java.io.RandomAccessFile;
 import java.util.Iterator;
 import java.util.StringTokenizer;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.yacy.logging.Log;
 
 public final class RecordStack extends Records {
 

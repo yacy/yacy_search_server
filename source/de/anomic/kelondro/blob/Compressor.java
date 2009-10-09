@@ -37,10 +37,11 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.util.ByteArray;
-import de.anomic.yacy.logging.Log;
 
 public class Compressor implements BLOB {
 

@@ -32,10 +32,11 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.kelondro.logging.Log;
+
 import org.apache.tools.tar.TarEntry;
 import org.apache.tools.tar.TarInputStream;
 
-import de.anomic.yacy.logging.Log;
 
 public class tarTools {
 	

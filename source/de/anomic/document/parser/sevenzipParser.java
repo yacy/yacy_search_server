@@ -35,6 +35,8 @@ import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.kelondro.logging.Log;
+
 import SevenZip.ArchiveExtractCallback;
 import SevenZip.IInStream;
 import SevenZip.MyRandomAccessFile;
@@ -49,7 +51,6 @@ import de.anomic.document.Document;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCachedFileOutputStream;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public class sevenzipParser extends AbstractParser implements Idiom {
     

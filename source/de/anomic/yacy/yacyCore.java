@@ -48,6 +48,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.content.RSSMessage;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.kelondro.util.DateFormatter;
@@ -55,7 +57,6 @@ import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;
 import de.anomic.yacy.dht.PeerSelection;
-import de.anomic.yacy.logging.Log;
 import de.anomic.yacy.seedUpload.yacySeedUploadFile;
 import de.anomic.yacy.seedUpload.yacySeedUploadFtp;
 import de.anomic.yacy.seedUpload.yacySeedUploadScp;

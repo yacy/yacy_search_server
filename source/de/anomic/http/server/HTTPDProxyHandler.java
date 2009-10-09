@@ -71,6 +71,8 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
@@ -96,7 +98,6 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public final class HTTPDProxyHandler {
     

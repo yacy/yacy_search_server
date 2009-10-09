@@ -30,7 +30,8 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import de.anomic.yacy.logging.Log;
+import net.yacy.kelondro.logging.Log;
+
 
 /**
  * Information about a connection

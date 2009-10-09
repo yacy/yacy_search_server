@@ -111,6 +111,8 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.content.DCEntry;
 import de.anomic.content.RSSMessage;
 import de.anomic.content.file.SurrogateReader;
@@ -195,7 +197,6 @@ import de.anomic.yacy.yacyUpdateLocation;
 import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.dht.Dispatcher;
 import de.anomic.yacy.dht.PeerSelection;
-import de.anomic.yacy.logging.Log;
 import de.anomic.ymage.WebStructureGraph;
 
 public final class Switchboard extends serverSwitch {

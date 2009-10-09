@@ -30,8 +30,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.yacy.logging.Log;
 
 public class NoticedURL {
     

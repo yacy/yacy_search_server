@@ -28,11 +28,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.SortedMap;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.kelondro.io.random.CachedFileWriter;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.yacy.logging.Log;
 
 public class HeapModifier extends HeapReader implements BLOB {
  

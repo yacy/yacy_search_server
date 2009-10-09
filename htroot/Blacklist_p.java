@@ -39,6 +39,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.data.AbstractBlacklist;
 import de.anomic.data.Blacklist;
 import de.anomic.data.listManager;
@@ -47,7 +49,6 @@ import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public class Blacklist_p {
     private final static String EDIT             = "edit_";

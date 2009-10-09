@@ -34,13 +34,14 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import net.yacy.kelondro.logging.Log;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.kelondro.util.ByteBuffer;
-import de.anomic.yacy.logging.Log;
 
 public class RSSReader extends DefaultHandler {
     

@@ -24,8 +24,8 @@
 
 package de.anomic.server;
 
+import net.yacy.kelondro.logging.Log;
 import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.yacy.logging.Log;
 
 public abstract class serverAbstractBlockingThread<J extends serverProcessorJob> extends serverAbstractThread implements serverBlockingThread<J> {
 

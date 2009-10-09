@@ -31,6 +31,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.crawler.ResultURLs;
 import de.anomic.data.Blacklist;
 import de.anomic.kelondro.order.Bitfield;
@@ -40,7 +42,6 @@ import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.RankingProcess;
 import de.anomic.yacy.dht.PeerSelection;
-import de.anomic.yacy.logging.Log;
 
 public class yacySearch extends Thread {
 

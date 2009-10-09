@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.crawler.Latency;
 import de.anomic.document.Parser;
 import de.anomic.http.metadata.HeaderFramework;
@@ -42,7 +44,6 @@ import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.net.ftpc;
 import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public class FTPLoader {
 

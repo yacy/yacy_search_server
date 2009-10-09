@@ -29,10 +29,11 @@
 import java.util.HashSet;
 import java.util.Hashtable;
 
+import net.yacy.kelondro.logging.LogParser;
+
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.logging.LogParser;
 
 public class LogStatistics_p {
     

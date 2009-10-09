@@ -34,6 +34,8 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.data.messageBoard;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
@@ -45,7 +47,6 @@ import de.anomic.tools.crypt;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.logging.Log;
 
 public final class message {
 

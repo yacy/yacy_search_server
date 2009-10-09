@@ -36,10 +36,11 @@ import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.yacy.yacyURL;
+import net.yacy.kelondro.logging.Log;
+
 import org.apache.poi.hdgf.extractor.VisioTextExtractor;
 import org.apache.poi.hpsf.SummaryInformation;
 
-import de.anomic.yacy.logging.Log;
 
 public class vsdParser extends AbstractParser implements Idiom {
 

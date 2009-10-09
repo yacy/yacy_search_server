@@ -26,6 +26,8 @@
 
 package de.anomic.tools;
 
+import net.yacy.kelondro.logging.Log;
+
 import org.apache.tools.bzip2.CBZip2InputStream;
 
 import java.io.BufferedInputStream;
@@ -63,7 +65,6 @@ import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 /*
  * this class provides data structures to read a mediawiki dump file in xml format

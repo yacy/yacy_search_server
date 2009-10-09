@@ -29,6 +29,8 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.util.FileUtils;
@@ -36,7 +38,6 @@ import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 import de.anomic.ymage.ymageImageParser;
 
 public class ViewImage {

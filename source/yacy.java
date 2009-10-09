@@ -43,6 +43,8 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import net.yacy.kelondro.logging.Log;
+
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
 import de.anomic.data.translator;
@@ -79,7 +81,6 @@ import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyBuildProperties;
 import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.yacyVersion;
-import de.anomic.yacy.logging.Log;
 
 /**
 * This is the main class of YaCy. Several threads are started from here:

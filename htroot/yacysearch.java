@@ -33,6 +33,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.content.RSSMessage;
 import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.data.DidYouMean;
@@ -66,7 +68,6 @@ import de.anomic.tools.Formatter;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 import de.anomic.ymage.ProfilingGraph;
 
 public class yacysearch {

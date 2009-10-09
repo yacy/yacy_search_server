@@ -28,6 +28,8 @@ package de.anomic.crawler.retrieval;
 import java.io.IOException;
 import java.util.Date;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.crawler.Latency;
 import de.anomic.data.Blacklist;
 import de.anomic.document.Parser;
@@ -38,7 +40,6 @@ import de.anomic.http.metadata.ResponseContainer;
 import de.anomic.kelondro.text.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public final class HTTPLoader {
 

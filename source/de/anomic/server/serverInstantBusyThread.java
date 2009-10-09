@@ -25,7 +25,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.TreeMap;
 
-import de.anomic.yacy.logging.Log;
+import net.yacy.kelondro.logging.Log;
+
 
 public final class serverInstantBusyThread extends serverAbstractBusyThread implements serverBusyThread {
     

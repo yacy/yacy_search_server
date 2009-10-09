@@ -30,6 +30,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
@@ -39,7 +41,6 @@ import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public class CrawlResults {
 

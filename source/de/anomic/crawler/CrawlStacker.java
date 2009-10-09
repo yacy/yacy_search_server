@@ -31,6 +31,8 @@ package de.anomic.crawler;
 import java.net.UnknownHostException;
 import java.util.Date;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.data.Blacklist;
 import de.anomic.kelondro.text.Segment;
@@ -40,7 +42,6 @@ import de.anomic.server.serverDomains;
 import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public final class CrawlStacker {
 

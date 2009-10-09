@@ -7,10 +7,11 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.document.Word;
 import de.anomic.kelondro.text.IndexCell;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
-import de.anomic.yacy.logging.Log;
 
 /**
  * People make mistakes when they type words.  

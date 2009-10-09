@@ -38,6 +38,8 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.kelondro.index.Column;
 import de.anomic.kelondro.index.HandleMap;
 import de.anomic.kelondro.index.Row;
@@ -52,7 +54,6 @@ import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;
-import de.anomic.yacy.logging.Log;
 
 /*
  * The EcoIndex builds upon the EcoFS and tries to reduce the number of IO requests that the

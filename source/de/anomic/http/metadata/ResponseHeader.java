@@ -30,7 +30,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.anomic.yacy.logging.Log;
+import net.yacy.kelondro.logging.Log;
+
 
 public class ResponseHeader extends HeaderFramework {
 

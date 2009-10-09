@@ -39,6 +39,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.client.Client;
 import de.anomic.http.metadata.HeaderFramework;
@@ -56,7 +58,6 @@ import de.anomic.server.serverDomains;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.dht.PartitionScheme;
 import de.anomic.yacy.dht.VerticalWordPartitionScheme;
-import de.anomic.yacy.logging.Log;
 
 public final class yacySeedDB implements AlternativeDomainNames {
   

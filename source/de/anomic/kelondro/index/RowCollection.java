@@ -37,6 +37,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.NaturalOrder;
@@ -45,7 +47,6 @@ import de.anomic.kelondro.util.NamePrefixThreadFactory;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverProcessor;
-import de.anomic.yacy.logging.Log;
 
 public class RowCollection implements Iterable<Row.Entry> {
 

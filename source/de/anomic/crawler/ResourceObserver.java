@@ -28,10 +28,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.tools.diskUsage;
-import de.anomic.yacy.logging.Log;
 
 public final class ResourceObserver {
     // Unknown for now

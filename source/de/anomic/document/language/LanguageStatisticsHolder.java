@@ -28,7 +28,8 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.util.Vector;
 
-import de.anomic.yacy.logging.Log;
+import net.yacy.kelondro.logging.Log;
+
 
 /**
  * This class loads and provides several language statistics to the system.

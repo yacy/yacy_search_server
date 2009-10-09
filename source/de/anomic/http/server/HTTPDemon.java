@@ -50,6 +50,8 @@ import java.util.StringTokenizer;
 import java.util.Map.Entry;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.kelondro.logging.Log;
+
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
 import org.apache.commons.fileupload.FileUpload;
@@ -79,7 +81,6 @@ import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 
 /**

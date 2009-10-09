@@ -38,6 +38,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.data.Blacklist;
 import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.client.Client;
@@ -53,7 +55,6 @@ import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public final class MetadataRepository implements Iterable<byte[]> {
 

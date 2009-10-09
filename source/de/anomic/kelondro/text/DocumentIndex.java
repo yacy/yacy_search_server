@@ -34,6 +34,8 @@ import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.document.Condenser;
 import de.anomic.document.Document;
 import de.anomic.document.Parser;
@@ -43,7 +45,6 @@ import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProcess;
 import de.anomic.search.RankingProfile;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 /**
  * convenience class to access the yacycore library from outside of yacy to put files into the index

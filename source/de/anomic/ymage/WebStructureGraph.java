@@ -37,6 +37,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.document.Condenser;
 import de.anomic.document.Document;
 import de.anomic.kelondro.order.Base64Order;
@@ -44,7 +46,6 @@ import de.anomic.kelondro.order.MicroDate;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public class WebStructureGraph {
 

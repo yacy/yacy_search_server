@@ -2,7 +2,8 @@ package de.anomic.crawler;
 
 import java.util.Vector;
 
-import de.anomic.yacy.logging.Log;
+import net.yacy.kelondro.logging.Log;
+
 
 public class ImporterManager {
 

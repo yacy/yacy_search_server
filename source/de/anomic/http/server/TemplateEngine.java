@@ -60,9 +60,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.FileUtils;
-import de.anomic.yacy.logging.Log;
 
 /**
  * A template engine, which substitutes patterns in strings<br>

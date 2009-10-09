@@ -34,6 +34,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.Blacklist;
 import de.anomic.document.Condenser;
@@ -51,7 +53,6 @@ import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.search.Switchboard;
 import de.anomic.tools.iso639;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public class Segment {
 

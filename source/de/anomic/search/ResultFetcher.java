@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.document.Condenser;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
@@ -41,7 +43,6 @@ import de.anomic.search.RankingProcess.NavigatorEntry;
 import de.anomic.search.MediaSnippet;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.logging.Log;
 import de.anomic.ymage.ProfilingGraph;
 
 public class ResultFetcher {

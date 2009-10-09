@@ -33,11 +33,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.kelondro.logging.GuiHandler;
+import net.yacy.kelondro.logging.LogalizerHandler;
+
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.logging.GuiHandler;
-import de.anomic.yacy.logging.LogalizerHandler;
 
 public class ViewLog_p {
     

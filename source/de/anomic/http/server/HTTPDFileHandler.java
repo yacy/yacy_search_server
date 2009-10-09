@@ -81,6 +81,8 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.document.Classification;
 import de.anomic.document.parser.htmlParser;
 import de.anomic.document.parser.html.ContentScraper;
@@ -103,7 +105,6 @@ import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 import de.anomic.yacy.yacyBuildProperties;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 import de.anomic.ymage.ymageMatrix;
 
 public final class HTTPDFileHandler {

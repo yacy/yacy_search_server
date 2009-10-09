@@ -39,6 +39,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.document.parser.bzipParser;
 import de.anomic.document.parser.docParser;
 import de.anomic.document.parser.gzipParser;
@@ -58,7 +60,6 @@ import de.anomic.document.parser.vsdParser;
 import de.anomic.document.parser.xlsParser;
 import de.anomic.document.parser.zipParser;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public final class Parser {
 

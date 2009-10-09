@@ -34,7 +34,8 @@ package de.anomic.server;
 
 import java.nio.channels.ClosedByInterruptException;
 
-import de.anomic.yacy.logging.Log;
+import net.yacy.kelondro.logging.Log;
+
 
 public abstract class serverAbstractThread extends Thread implements serverThread {
 

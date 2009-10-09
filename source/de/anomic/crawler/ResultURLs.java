@@ -39,12 +39,13 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public final class ResultURLs {
 

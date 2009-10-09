@@ -24,7 +24,7 @@
 
 package de.anomic.server;
 
-import de.anomic.yacy.logging.Log;
+import net.yacy.kelondro.logging.Log;
 
 public interface serverThread {
     

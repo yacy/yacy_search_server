@@ -32,12 +32,13 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.document.Condenser;
 import de.anomic.document.Document;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public final class Segments implements Iterable<Segment> {
     

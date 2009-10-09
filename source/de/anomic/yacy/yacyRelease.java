@@ -44,6 +44,8 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.document.parser.html.ContentScraper;
@@ -60,7 +62,6 @@ import de.anomic.server.serverSystem;
 import de.anomic.tools.CryptoLib;
 import de.anomic.tools.SignatureOutputStream;
 import de.anomic.tools.tarTools;
-import de.anomic.yacy.logging.Log;
 import de.anomic.yacy.yacyBuildProperties;
 
 public final class yacyRelease extends yacyVersion {

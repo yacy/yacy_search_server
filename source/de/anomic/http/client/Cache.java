@@ -42,6 +42,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.kelondro.blob.ArrayStack;
 import de.anomic.kelondro.blob.Compressor;
@@ -50,7 +52,6 @@ import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public final class Cache {
     

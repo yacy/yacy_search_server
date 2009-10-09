@@ -29,10 +29,11 @@ import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Semaphore;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.kelondro.blob.ArrayStack;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.yacy.logging.Log;
 
 /**
  * this is a concurrent merger that can merge single files that are queued for merging.

@@ -48,9 +48,10 @@ import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.Formatter;
-import de.anomic.yacy.logging.Log;
 
 /**
  * Wordlist based translator

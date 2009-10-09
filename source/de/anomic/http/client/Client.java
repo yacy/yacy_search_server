@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.kelondro.logging.Log;
+
 import org.apache.commons.httpclient.ConnectMethod;
 import org.apache.commons.httpclient.DefaultHttpMethodRetryHandler;
 import org.apache.commons.httpclient.Header;
@@ -65,7 +67,6 @@ import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 /**
  * HttpClient implementation which uses Jakarta Commons HttpClient 3.x {@link http://hc.apache.org/httpclient-3.x/}

@@ -36,6 +36,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.document.Document;
 import de.anomic.document.ParserException;
@@ -47,7 +49,6 @@ import de.anomic.kelondro.text.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public final class LoaderDispatcher {
 

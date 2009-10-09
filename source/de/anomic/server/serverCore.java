@@ -56,9 +56,10 @@ import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.tools.PKCS12Tool;
-import de.anomic.yacy.logging.Log;
 
 public final class serverCore extends serverAbstractBusyThread implements serverBusyThread {
 

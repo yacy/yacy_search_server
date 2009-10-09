@@ -36,6 +36,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.content.RSSMessage;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
@@ -51,7 +53,6 @@ import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.dht.PeerSelection;
-import de.anomic.yacy.logging.Log;
 
 public class CrawlQueues {
 

@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.kelondro.blob.BLOB;
 import de.anomic.kelondro.blob.ArrayStack;
 import de.anomic.kelondro.index.HandleMap;
@@ -36,7 +38,6 @@ import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
 import de.anomic.kelondro.order.ByteOrder;
 import de.anomic.kelondro.order.CloneableIterator;
-import de.anomic.yacy.logging.Log;
 
 public final class ReferenceContainerArray<ReferenceType extends Reference> {
 

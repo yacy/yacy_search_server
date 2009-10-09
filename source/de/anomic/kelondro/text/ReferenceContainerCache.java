@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.kelondro.blob.HeapReader;
 import de.anomic.kelondro.blob.HeapWriter;
 import de.anomic.kelondro.order.CloneableIterator;
@@ -44,7 +46,6 @@ import de.anomic.kelondro.util.ByteArray;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.RowSet;
-import de.anomic.yacy.logging.Log;
 
 public final class ReferenceContainerCache<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType>, IndexReader<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
 

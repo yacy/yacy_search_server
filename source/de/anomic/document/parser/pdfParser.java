@@ -36,6 +36,8 @@ import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.kelondro.logging.Log;
+
 import org.pdfbox.pdfparser.PDFParser;
 import org.pdfbox.pdmodel.PDDocument;
 import org.pdfbox.pdmodel.PDDocumentInformation;
@@ -50,7 +52,6 @@ import de.anomic.document.Document;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacyURL;
-import de.anomic.yacy.logging.Log;
 
 public class pdfParser extends AbstractParser implements Idiom {
 

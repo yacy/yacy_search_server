@@ -32,6 +32,8 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.Segment;
@@ -41,7 +43,6 @@ import de.anomic.kelondro.util.ByteArray;
 import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.logging.Log;
 
 public class Dispatcher {
 

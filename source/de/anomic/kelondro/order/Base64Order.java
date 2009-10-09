@@ -30,7 +30,8 @@ package de.anomic.kelondro.order;
 import java.io.UnsupportedEncodingException;
 import java.util.Comparator;
 
-import de.anomic.yacy.logging.Log;
+import net.yacy.kelondro.logging.Log;
+
 
 public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable {
 

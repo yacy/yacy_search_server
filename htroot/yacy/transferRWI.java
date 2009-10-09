@@ -32,6 +32,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.content.RSSMessage;
 import de.anomic.data.Blacklist;
 import de.anomic.document.parser.xml.RSSFeed;
@@ -48,7 +50,6 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
-import de.anomic.yacy.logging.Log;
 
 public final class transferRWI {
 
