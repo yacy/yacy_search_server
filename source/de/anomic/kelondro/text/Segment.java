@@ -82,6 +82,9 @@ public class Segment {
             final boolean useTailCache,
             final boolean exceed134217727) throws IOException {
         
+        migrateTextIndex(segmentPath, segmentPath);
+        migrateTextMetadata(segmentPath, segmentPath);
+        
         log.logInfo("Initializing Segment '" + segmentPath + "', word hash cache size is " + Word.hashCacheSize + ".");
 
         this.log = log;
@@ -89,8 +92,10 @@ public class Segment {
         
         this.merger = new IODispatcher(1, 1, writeBufferSize);
         this.merger.start();
+        
         this.termIndex = new IndexCell<WordReference>(
-                new File(segmentPath, "RICELL"),
+                segmentPath,
+                "text.index",
                 wordReferenceFactory,
                 wordOrder,
                 WordReferenceRow.urlEntryRow,
@@ -111,11 +116,35 @@ public class Segment {
                 this.merger,
                 writeBufferSize);
         */
-        File metadatadir = new File(segmentPath, "METADATA");
-        if (!metadatadir.exists()) metadatadir.mkdirs();
-        
+
         // create LURL-db
-        urlMetadata = new MetadataRepository(metadatadir, useTailCache, exceed134217727);
+        urlMetadata = new MetadataRepository(segmentPath, "text.urlmd", useTailCache, exceed134217727);
+    }
+    
+    public static void migrateTextIndex(File oldSegmentPath, File newSegmentPath) {
+        File oldCellPath = new File(oldSegmentPath, "RICELL");
+        if (!oldCellPath.exists()) return;
+        String[] oldIndexFiles = oldCellPath.list();
+        for (String oldIndexFile: oldIndexFiles) {
+            if (oldIndexFile.startsWith("index.")) {
+                File newFile = new File(newSegmentPath, "text.index." + oldIndexFile.substring(6));
+                new File(oldCellPath, oldIndexFile).renameTo(newFile);
+            }
+        }
+        oldCellPath.delete();
+    }
+    
+    public static void migrateTextMetadata(File oldSegmentPath, File newSegmentPath) {
+        File oldMetadataPath = new File(oldSegmentPath, "METADATA");
+        if (!oldMetadataPath.exists()) return;
+        String[] oldMetadataFiles = oldMetadataPath.list();
+        for (String oldMetadataFile: oldMetadataFiles) {
+            if (oldMetadataFile.startsWith("urls.")) {
+                File newFile = new File(newSegmentPath, "text.urlmd." + oldMetadataFile.substring(5));
+                new File(oldMetadataPath, oldMetadataFile).renameTo(newFile);
+            }
+        }
+        oldMetadataPath.delete();
     }
     
     public MetadataRepository urlMetadata() {
@@ -430,6 +459,14 @@ public class Segment {
                     }
                 }
             }
+        }
+        
+        public int rwisize() {
+            return termIndex().sizesMax();
+        }
+        
+        public int urlsize() {
+            return urlMetadata().size();
         }
     }
 }

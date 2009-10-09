@@ -73,7 +73,7 @@ public class sharedBlacklist_p {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
 
-        // getting the name of the destination blacklist
+        // get the name of the destination blacklist
         String selectedBlacklistName = "";
         if( post != null && post.containsKey("currentBlacklist") ){
             selectedBlacklistName = post.get("currentBlacklist");
@@ -113,7 +113,7 @@ public class sharedBlacklist_p {
                  * Import blacklist from other peer 
                  * ====================================================== */
                 
-                // getting the source peer hash
+                // get the source peer hash
                 final String Hash = post.get("hash");
                 
                 // generate the download URL

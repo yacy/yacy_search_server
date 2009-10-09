@@ -31,6 +31,7 @@ import java.util.Iterator;
 import java.util.Locale;
 
 import de.anomic.http.metadata.RequestHeader;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -104,7 +105,7 @@ public class CrawlResults {
             final String hash = post.get("hash", null);
             if (hash != null) {
                 // delete from database
-                sb.indexSegment.urlMetadata().remove(hash);
+                sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).remove(hash);
             }
         }
         
@@ -114,7 +115,7 @@ public class CrawlResults {
             if (hashpart != null) {
                 // delete all urls for this domain from database
                 try {
-                    sb.indexSegment.urlMetadata().deleteDomain(hashpart);
+                    sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).deleteDomain(hashpart);
                     sb.crawlResults.deleteDomain(tabletype, domain, hashpart);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -178,7 +179,7 @@ public class CrawlResults {
                 executorHash = sb.crawlResults.getExecutorHash(tabletype, i);
                 urlHash = sb.crawlResults.getUrlHash(tabletype, i);
                 try {
-                    urle = sb.indexSegment.urlMetadata().load(urlHash, null, 0);
+                    urle = sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(urlHash, null, 0);
                     if(urle == null) {
                         Log.logWarning("PLASMA", "CrawlResults: URL not in index for crawl result "+ i +" with hash "+ urlHash);
                         urlstr = null;

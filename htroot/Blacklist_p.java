@@ -64,11 +64,11 @@ public class Blacklist_p {
         listManager.switchboard = (Switchboard) env;
         listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
         
-        // getting the list of supported blacklist types
+        // get the list of supported blacklist types
         final String supportedBlacklistTypesStr = AbstractBlacklist.BLACKLIST_TYPES_STRING;
         final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
         
-        // loading all blacklist files located in the directory
+        // load all blacklist files located in the directory
         List<String> dirlist = listManager.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER);
         
         String blacklistToUse = null;

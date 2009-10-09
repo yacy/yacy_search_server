@@ -60,7 +60,7 @@ public class ByteArray {
         return buffer[pos];
     }
     
-    public static boolean equals(final byte[] buffer, final byte[] pattern) {
+    public static boolean startsWith(final byte[] buffer, final byte[] pattern) {
         // compares two byte arrays: true, if pattern appears completely at offset position
         if (buffer == null && pattern == null) return true;
         if (buffer == null || pattern == null) return false;

@@ -256,6 +256,7 @@ public class CRProcess {
             newacc = new Table(new File(path, CRG_accname), CRG_accrow, 0, 0, true, false);
             newseq = new IndexCell<WordReference>(
                                     path,
+                                    "index",
                                     Segment.wordReferenceFactory,
                                     Base64Order.enhancedCoder,
                                     CRG_colrow,
@@ -390,9 +391,9 @@ public class CRProcess {
     public static int genrcix(final File cr_path_in, final File rci_path_out) throws IOException {
         //kelondroFlexTable       acc = new kelondroFlexTable(cr_path_in, CRG_accname, kelondroBase64Order.enhancedCoder, 128 * 1024 * 1024, -1, CRG_accrow, true);
         final IndexCell<WordReference> seq = new IndexCell<WordReference>(
-                                cr_path_in, Segment.wordReferenceFactory, Base64Order.enhancedCoder, CRG_colrow, 10000, 1000000000L, 20, null, 1000000);
+                                cr_path_in, "index", Segment.wordReferenceFactory, Base64Order.enhancedCoder, CRG_colrow, 10000, 1000000000L, 20, null, 1000000);
         final IndexCell<WordReference> rci = new IndexCell<WordReference>(
-                                rci_path_out, Segment.wordReferenceFactory, Base64Order.enhancedCoder, RCI_coli, 10000, 1000000000L, 20, null, 1000000);
+                                rci_path_out, "index", Segment.wordReferenceFactory, Base64Order.enhancedCoder, RCI_coli, 10000, 1000000000L, 20, null, 1000000);
         
         // loop over all referees
         int count = 0;

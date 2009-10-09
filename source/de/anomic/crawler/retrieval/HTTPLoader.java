@@ -35,6 +35,7 @@ import de.anomic.http.client.Client;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.logging.Log;
@@ -118,7 +119,7 @@ public final class HTTPLoader {
         final RequestHeader requestHeader = new RequestHeader();
         requestHeader.put(HeaderFramework.USER_AGENT, crawlerUserAgent);
         yacyURL refererURL = null;
-        if (request.referrerhash() != null) refererURL = sb.getURL(request.referrerhash());
+        if (request.referrerhash() != null) refererURL = sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
         if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true, true));
         requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE, sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));
         requestHeader.put(HeaderFramework.ACCEPT_CHARSET, sb.getConfig("crawler.http.acceptCharset", DEFAULT_CHARSET));
@@ -196,7 +197,7 @@ public final class HTTPLoader {
                     final String urlhash = redirectionUrl.hash();
                     
                     // check if the url was already indexed
-                    final String dbname = sb.urlExists(urlhash);
+                    final String dbname = sb.urlExists(Segments.Process.LOCALCRAWLING, urlhash);
                     if (dbname != null) {
                         sb.crawlQueues.errorURL.newEntry(request, sb.peers.mySeed().hash, new Date(), 1, "redirection to double content");
                         throw new IOException("CRAWLER Redirection of URL=" + request.url().toString() + " ignored. The url appears already in db " + dbname);

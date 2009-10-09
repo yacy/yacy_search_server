@@ -30,6 +30,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import de.anomic.http.metadata.RequestHeader;
+import de.anomic.kelondro.text.Segment;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -52,15 +54,28 @@ public class PerformanceQueues_p {
         performanceProfiles.put("defaults/performance_dht.profile", "prefer DHT");
     }
     
-    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch sb) {
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        final Switchboard switchboard = (Switchboard) sb;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        File defaultSettingsFile = new File(switchboard.getRootPath(), "defaults/yacy.init");
+        File defaultSettingsFile = new File(sb.getRootPath(), "defaults/yacy.init");
+        
+        // get segment
+        Segment indexSegment = null;
+        if (post != null && post.containsKey("segment")) {
+            String segmentName = post.get("segment");
+            if (sb.indexSegments.segmentExist(segmentName)) {
+                indexSegment = sb.indexSegments.segment(segmentName);
+            }
+        } else {
+            // take default segment
+            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
+        }
+        
         if(post != null) {
         	if(post.containsKey("defaultFile")){
 	            // TODO check file-path!
-	            final File value = new File(switchboard.getRootPath(), post.get("defaultFile", "defaults/yacy.init"));
+	            final File value = new File(sb.getRootPath(), post.get("defaultFile", "defaults/yacy.init"));
 	            // check if value is readable file
 	            if(value.exists() && value.isFile() && value.canRead()) {
 	                defaultSettingsFile = value;
@@ -77,7 +92,7 @@ public class PerformanceQueues_p {
             }
         }
         final Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : FileUtils.loadMap(defaultSettingsFile);
-        Iterator<String> threads = switchboard.threadNames();
+        Iterator<String> threads = sb.threadNames();
         String threadName;
         serverBusyThread thread;
         
@@ -88,7 +103,7 @@ public class PerformanceQueues_p {
         long blocktime_total = 0, sleeptime_total = 0, exectime_total = 0;
         while (threads.hasNext()) {
             threadName = threads.next();
-            thread = switchboard.getThread(threadName);
+            thread = sb.getThread(threadName);
             blocktime_total += thread.getBlockTime();
             sleeptime_total += thread.getSleepTime();
             exectime_total += thread.getExecTime();
@@ -101,7 +116,7 @@ public class PerformanceQueues_p {
         long blocktime, sleeptime, exectime;
         long idlesleep, busysleep, memuse, memprereq;
         int queuesize;
-        threads = switchboard.threadNames();
+        threads = sb.threadNames();
         int c = 0;
         long idleCycles, busyCycles, memshortageCycles;
         // set profile?
@@ -110,13 +125,13 @@ public class PerformanceQueues_p {
         final boolean setDelay = (post != null) && (post.containsKey("submitdelay"));
         // save used settings file to config
         if (setProfile && post != null){
-        	switchboard.setConfig("performanceProfile", post.get("defaultFile", "defaults/yacy.init"));
-        	switchboard.setConfig("performanceSpeed", post.getInt("profileSpeed", 100));
+        	sb.setConfig("performanceProfile", post.get("defaultFile", "defaults/yacy.init"));
+        	sb.setConfig("performanceSpeed", post.getInt("profileSpeed", 100));
         }
         
         while (threads.hasNext()) {
             threadName = threads.next();
-            thread = switchboard.getThread(threadName);
+            thread = sb.getThread(threadName);
             
             // set values to templates
             prop.put("table_" + c + "_threadname", threadName);
@@ -154,21 +169,21 @@ public class PerformanceQueues_p {
             prop.putNum("table_" + c + "_memusepercycle", (busyCycles == 0) ? -1 : memuse / busyCycles / 1024);
             
             // load with old values
-            idlesleep = switchboard.getConfigLong(threadName + "_idlesleep" , 1000);
-            busysleep = switchboard.getConfigLong(threadName + "_busysleep",   100);
-            memprereq = switchboard.getConfigLong(threadName + "_memprereq",     0);
+            idlesleep = sb.getConfigLong(threadName + "_idlesleep" , 1000);
+            busysleep = sb.getConfigLong(threadName + "_busysleep",   100);
+            memprereq = sb.getConfigLong(threadName + "_memprereq",     0);
             if (setDelay && post != null) {
                 // load with new values
                 idlesleep = post.getLong(threadName + "_idlesleep", idlesleep);
                 busysleep = post.getLong(threadName + "_busysleep", busysleep);
                 memprereq = post.getLong(threadName + "_memprereq", memprereq) * 1024;
-                if (memprereq == 0) memprereq = switchboard.getConfigLong(threadName + "_memprereq", 0);
+                if (memprereq == 0) memprereq = sb.getConfigLong(threadName + "_memprereq", 0);
                     
                 // check values to prevent short-cut loops
                 if (idlesleep < 1000) idlesleep = 1000;
                 if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
                 
-                onTheFlyReconfiguration(switchboard, threadName, idlesleep, busysleep, memprereq);
+                onTheFlyReconfiguration(sb, threadName, idlesleep, busysleep, memprereq);
             } if (setProfile) {
                 if (threadName.equals(SwitchboardConstants.PEER_PING)
                 		|| threadName.equals(SwitchboardConstants.SEED_UPLOAD)
@@ -177,7 +192,7 @@ public class PerformanceQueues_p {
                 		) { /* do not change any values */ }
                 else if (threadName.equals(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER)
                 		|| threadName.equals(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
-                	switchboard.setRemotecrawlPPM(Math.max(1, (int) (switchboard.getConfigLong("network.unit.remotecrawl.speed", 60) / multiplier)));
+                	sb.setRemotecrawlPPM(Math.max(1, (int) (sb.getConfigLong("network.unit.remotecrawl.speed", 60) / multiplier)));
                 }
                 else {
                     // load with new values
@@ -190,7 +205,7 @@ public class PerformanceQueues_p {
                     if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
                     //if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && (busysleep < 50)) busysleep = 50;
                     
-                	onTheFlyReconfiguration(switchboard, threadName, idlesleep, busysleep, memprereq);
+                	onTheFlyReconfiguration(sb, threadName, idlesleep, busysleep, memprereq);
                 }
             }
             prop.put("table_" + c + "_idlesleep", idlesleep);
@@ -199,14 +214,14 @@ public class PerformanceQueues_p {
             // disallow setting of memprereq for indexer to prevent db from throwing OOMs
             prop.put("table_" + c + "_disabled", /*(threadName.endsWith("_indexing")) ? 1 :*/ "0");
             prop.put("table_" + c + "_recommendation", threadName.endsWith("_indexing") ? "1" : "0");
-            prop.putNum("table_" + c + "_recommendation_value", threadName.endsWith("_indexing") ? (switchboard.indexSegment.termIndex().minMem() / 1024) : 0);
+            prop.putNum("table_" + c + "_recommendation_value", threadName.endsWith("_indexing") ? (indexSegment.termIndex().minMem() / 1024) : 0);
             c++;
         }
         prop.put("table", c);
         
         // performance profiles
         c = 0;
-        final String usedfile = switchboard.getConfig("performanceProfile", "defaults/yacy.init");
+        final String usedfile = sb.getConfig("performanceProfile", "defaults/yacy.init");
         for(final String filename: performanceProfiles.keySet()) {
             prop.put("profile_" + c + "_filename", filename);
             prop.put("profile_" + c + "_description", performanceProfiles.get(filename));
@@ -217,7 +232,7 @@ public class PerformanceQueues_p {
         
         c = 0;
         final int[] speedValues = {200,150,100,50,25,10};
-        final int usedspeed = Integer.parseInt(switchboard.getConfig("performanceSpeed", "100"));
+        final int usedspeed = Integer.parseInt(sb.getConfig("performanceSpeed", "100"));
         for(final int speed: speedValues){
         	prop.put("speed_" + c + "_value", speed);
         	prop.put("speed_" + c + "_label", speed + " %");
@@ -228,8 +243,8 @@ public class PerformanceQueues_p {
         
         if ((post != null) && (post.containsKey("cacheSizeSubmit"))) {
             final int wordCacheMaxCount = post.getInt("wordCacheMaxCount", 20000);
-            switchboard.setConfig(SwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
-            switchboard.indexSegment.termIndex().setBufferMaxWordCount(wordCacheMaxCount);
+            sb.setConfig(SwitchboardConstants.WORDCACHE_MAX_COUNT, Integer.toString(wordCacheMaxCount));
+            indexSegment.termIndex().setBufferMaxWordCount(wordCacheMaxCount);
         }
         
         if ((post != null) && (post.containsKey("poolConfig"))) {
@@ -237,17 +252,17 @@ public class PerformanceQueues_p {
             /* 
              * configuring the crawler pool 
              */
-            // getting the current crawler pool configuration
+            // get the current crawler pool configuration
             int maxBusy = Integer.parseInt(post.get("Crawler Pool_maxActive","8"));
             
             // storing the new values into configfile
-            switchboard.setConfig(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX,maxBusy);
+            sb.setConfig(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX,maxBusy);
             //switchboard.setConfig("crawler.MinIdleThreads",minIdle);
             
             /* 
              * configuring the http pool 
              */
-            final serverThread httpd = switchboard.getThread("10_httpd");
+            final serverThread httpd = sb.getThread("10_httpd");
             try {
                 maxBusy = Integer.parseInt(post.get("httpd Session Pool_maxActive","8"));
             } catch (final NumberFormatException e) {
@@ -257,61 +272,61 @@ public class PerformanceQueues_p {
             ((serverCore)httpd).setMaxSessionCount(maxBusy);    
             
             // storing the new values into configfile
-            switchboard.setConfig("httpdMaxBusySessions",maxBusy);
+            sb.setConfig("httpdMaxBusySessions",maxBusy);
 
         }        
         
         if ((post != null) && (post.containsKey("PrioritySubmit"))) {
-        	switchboard.setConfig("javastart_priority",post.get("YaCyPriority","0"));
+        	sb.setConfig("javastart_priority",post.get("YaCyPriority","0"));
         }
         
         if ((post != null) && (post.containsKey("onlineCautionSubmit"))) {
-            switchboard.setConfig(SwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseProxy", 30000)));
-            switchboard.setConfig(SwitchboardConstants.LOCALSEACH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseLocalsearch", 30000)));
-            switchboard.setConfig(SwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseRemotesearch", 30000)));
+            sb.setConfig(SwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseProxy", 30000)));
+            sb.setConfig(SwitchboardConstants.LOCALSEACH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseLocalsearch", 30000)));
+            sb.setConfig(SwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, Integer.toString(post.getInt("crawlPauseRemotesearch", 30000)));
         }
         
         if ((post != null) && (post.containsKey("minimumDeltaSubmit"))) {
-            final long minimumLocalDelta = post.getLong("minimumLocalDelta", switchboard.crawlQueues.noticeURL.getMinimumLocalDelta());
-            final long minimumGlobalDelta = post.getLong("minimumGlobalDelta", switchboard.crawlQueues.noticeURL.getMinimumGlobalDelta());
-            switchboard.setConfig("minimumLocalDelta", minimumLocalDelta);
-            switchboard.setConfig("minimumGlobalDelta", minimumGlobalDelta);
-            switchboard.crawlQueues.noticeURL.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
+            final long minimumLocalDelta = post.getLong("minimumLocalDelta", sb.crawlQueues.noticeURL.getMinimumLocalDelta());
+            final long minimumGlobalDelta = post.getLong("minimumGlobalDelta", sb.crawlQueues.noticeURL.getMinimumGlobalDelta());
+            sb.setConfig("minimumLocalDelta", minimumLocalDelta);
+            sb.setConfig("minimumGlobalDelta", minimumGlobalDelta);
+            sb.crawlQueues.noticeURL.setMinimumDelta(minimumLocalDelta, minimumGlobalDelta);
         }
         
         // delta settings
-        prop.put("minimumLocalDelta", switchboard.crawlQueues.noticeURL.getMinimumLocalDelta());
-        prop.put("minimumGlobalDelta", switchboard.crawlQueues.noticeURL.getMinimumGlobalDelta());
+        prop.put("minimumLocalDelta", sb.crawlQueues.noticeURL.getMinimumLocalDelta());
+        prop.put("minimumGlobalDelta", sb.crawlQueues.noticeURL.getMinimumGlobalDelta());
         
         // table cache settings
-        prop.putNum("urlCacheSize", switchboard.indexSegment.urlMetadata().writeCacheSize());  
-        prop.putNum("wordCacheSize", switchboard.indexSegment.termIndex().getBufferSize());
-        prop.putNum("wordCacheSizeKBytes", switchboard.indexSegment.termIndex().getBufferSizeBytes()/1024);
-        prop.putNum("maxURLinCache", switchboard.indexSegment.termIndex().getBufferMaxReferences());
-        prop.putNum("maxAgeOfCache", switchboard.indexSegment.termIndex().getBufferMaxAge() / 1000 / 60); // minutes
-        prop.putNum("minAgeOfCache", switchboard.indexSegment.termIndex().getBufferMinAge() / 1000 / 60); // minutes
-        prop.putNum("maxWaitingWordFlush", switchboard.getConfigLong("maxWaitingWordFlush", 180));
-        prop.put("wordCacheMaxCount", switchboard.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000));
-        prop.put("crawlPauseProxy", switchboard.getConfigLong(SwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, 30000));
-        prop.put("crawlPauseLocalsearch", switchboard.getConfigLong(SwitchboardConstants.LOCALSEACH_ONLINE_CAUTION_DELAY, 30000));
-        prop.put("crawlPauseRemotesearch", switchboard.getConfigLong(SwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, 30000));
-        prop.putNum("crawlPauseProxyCurrent", (System.currentTimeMillis() - switchboard.proxyLastAccess) / 1000);
-        prop.putNum("crawlPauseLocalsearchCurrent", (System.currentTimeMillis() - switchboard.localSearchLastAccess) / 1000);
-        prop.putNum("crawlPauseRemotesearchCurrent", (System.currentTimeMillis() - switchboard.remoteSearchLastAccess) / 1000);
+        prop.putNum("urlCacheSize", indexSegment.urlMetadata().writeCacheSize());  
+        prop.putNum("wordCacheSize", indexSegment.termIndex().getBufferSize());
+        prop.putNum("wordCacheSizeKBytes", indexSegment.termIndex().getBufferSizeBytes()/1024);
+        prop.putNum("maxURLinCache", indexSegment.termIndex().getBufferMaxReferences());
+        prop.putNum("maxAgeOfCache", indexSegment.termIndex().getBufferMaxAge() / 1000 / 60); // minutes
+        prop.putNum("minAgeOfCache", indexSegment.termIndex().getBufferMinAge() / 1000 / 60); // minutes
+        prop.putNum("maxWaitingWordFlush", sb.getConfigLong("maxWaitingWordFlush", 180));
+        prop.put("wordCacheMaxCount", sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000));
+        prop.put("crawlPauseProxy", sb.getConfigLong(SwitchboardConstants.PROXY_ONLINE_CAUTION_DELAY, 30000));
+        prop.put("crawlPauseLocalsearch", sb.getConfigLong(SwitchboardConstants.LOCALSEACH_ONLINE_CAUTION_DELAY, 30000));
+        prop.put("crawlPauseRemotesearch", sb.getConfigLong(SwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, 30000));
+        prop.putNum("crawlPauseProxyCurrent", (System.currentTimeMillis() - sb.proxyLastAccess) / 1000);
+        prop.putNum("crawlPauseLocalsearchCurrent", (System.currentTimeMillis() - sb.localSearchLastAccess) / 1000);
+        prop.putNum("crawlPauseRemotesearchCurrent", (System.currentTimeMillis() - sb.remoteSearchLastAccess) / 1000);
         
         // table thread pool settings
         prop.put("pool_0_name","Crawler Pool");
-        prop.put("pool_0_maxActive", switchboard.getConfigLong("crawler.MaxActiveThreads", 0));
-        prop.put("pool_0_numActive",switchboard.crawlQueues.size());
+        prop.put("pool_0_maxActive", sb.getConfigLong("crawler.MaxActiveThreads", 0));
+        prop.put("pool_0_numActive",sb.crawlQueues.size());
         
-        final serverThread httpd = switchboard.getThread("10_httpd");
+        final serverThread httpd = sb.getThread("10_httpd");
         prop.put("pool_1_name", "httpd Session Pool");
         prop.put("pool_1_maxActive", ((serverCore)httpd).getMaxSessionCount());
         prop.put("pool_1_numActive", ((serverCore)httpd).getJobCount());
         
         prop.put("pool", "2");
         
-        final long curr_prio = switchboard.getConfigLong("javastart_priority",0);
+        final long curr_prio = sb.getConfigLong("javastart_priority",0);
         prop.put("priority_normal",(curr_prio==0) ? "1" : "0");
         prop.put("priority_below",(curr_prio==10) ? "1" : "0");
         prop.put("priority_low",(curr_prio==20) ? "1" : "0");

@@ -35,6 +35,8 @@ import java.util.Date;
 import de.anomic.crawler.Importer;
 import de.anomic.crawler.NoticeURLImporter;
 import de.anomic.http.metadata.RequestHeader;
+import de.anomic.kelondro.text.Segment;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.search.Switchboard;
@@ -45,10 +47,22 @@ public final class IndexImport_p {
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        final Switchboard switchboard = (Switchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         
         int activeCount = 0;
+    
+        // get segment
+        Segment indexSegment = null;
+        if (post != null && post.containsKey("segment")) {
+            String segmentName = post.get("segment");
+            if (sb.indexSegments.segmentExist(segmentName)) {
+                indexSegment = sb.indexSegments.segment(segmentName);
+            }
+        } else {
+            // take default segment
+            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
+        }
         
         if (post != null) {
             if (post.containsKey("startIndexDbImport")) {
@@ -56,13 +70,13 @@ public final class IndexImport_p {
                     final boolean startImport = true;                    
                     if (startImport) {
                         final Importer importerThread = new NoticeURLImporter(
-                                switchboard.queuesRoot,
-                                switchboard.crawlQueues,
-                                switchboard.crawler.profilesActiveCrawls,
-                                switchboard.dbImportManager);
+                                sb.queuesRoot,
+                                sb.crawlQueues,
+                                sb.crawler.profilesActiveCrawls,
+                                sb.dbImportManager);
 
                         if (importerThread != null) {
-                            importerThread.setJobID(switchboard.dbImportManager.generateUniqueJobID());
+                            importerThread.setJobID(sb.dbImportManager.generateUniqueJobID());
                             importerThread.startIt();                            
                         }
                         prop.put("LOCATION","");
@@ -80,7 +94,7 @@ public final class IndexImport_p {
                     errorOut.close();
                 }
             } else if (post.containsKey("clearFinishedJobList")) {
-                switchboard.dbImportManager.finishedJobs.clear();
+                sb.dbImportManager.finishedJobs.clear();
                 prop.put("LOCATION", "");
                 return prop;
             } else if (
@@ -88,9 +102,9 @@ public final class IndexImport_p {
                     (post.containsKey("pauseIndexDbImport")) ||
                     (post.containsKey("continueIndexDbImport"))
             ) {
-                // getting the job nr of the thread
+                // get the job nr of the thread
                 final String jobID = post.get("jobNr");
-                final Importer importer = switchboard.dbImportManager.getImporterByID(Integer.valueOf(jobID).intValue());
+                final Importer importer = sb.dbImportManager.getImporterByID(Integer.valueOf(jobID).intValue());
                 if (importer != null) {
                     if (post.containsKey("stopIndexDbImport")) {
                         try {
@@ -110,13 +124,13 @@ public final class IndexImport_p {
             }
         }
         
-        prop.putNum("wcount", switchboard.indexSegment.termIndex().sizesMax());
-        prop.putNum("ucount", switchboard.indexSegment.urlMetadata().size());
+        prop.putNum("wcount", indexSegment.termIndex().sizesMax());
+        prop.putNum("ucount", indexSegment.urlMetadata().size());
         
         /*
          * Loop over all currently running jobs
          */
-        final Importer[] importThreads = switchboard.dbImportManager.getRunningImporter();
+        final Importer[] importThreads = sb.dbImportManager.getRunningImporter();
         activeCount = importThreads.length;
         
         for (int i=0; i < activeCount; i++) {
@@ -154,7 +168,7 @@ public final class IndexImport_p {
         /*
          * Loop over all finished jobs 
          */
-        final Importer[] finishedJobs = switchboard.dbImportManager.getFinishedImporter();
+        final Importer[] finishedJobs = sb.dbImportManager.getFinishedImporter();
         for (int i=0; i<finishedJobs.length; i++) {
             final Importer currThread = finishedJobs[i];
             final String error = currThread.getError();

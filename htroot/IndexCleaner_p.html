@@ -40,6 +40,11 @@
     #(/rwidb)#
     <p>
       URL-DB-Cleaner - Clean up the database by deletion of blacklisted urls:<br />
+          <select name="selectSegment" size="1">
+            #{segments}#
+            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+            #{/segments}#
+          </select>
       <a href="IndexCleaner_p.html?action=ustart">Start/Resume</a>
       <a href="IndexCleaner_p.html?action=ustop">Stop</a>
       <a href="IndexCleaner_p.html?action=upause">Pause</a>

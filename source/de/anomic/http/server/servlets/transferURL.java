@@ -1,6 +1,5 @@
 // this is a temporary 1-to-1 copy of the transferURL servlet
 
-
 package de.anomic.http.server.servlets;
 
 import java.io.IOException;
@@ -10,6 +9,7 @@ import de.anomic.content.RSSMessage;
 import de.anomic.data.Blacklist;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.metadata.RequestHeader;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.search.Switchboard;
@@ -20,32 +20,32 @@ import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
 
-public final class transferURL {
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+public final class transferURL {
+ 
  public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws InterruptedException {
      final long start = System.currentTimeMillis();
      long freshdate = 0;
@@ -81,7 +81,7 @@ public final class transferURL {
      } else {
          int received = 0;
          int blocked = 0;
-         final int sizeBefore = sb.indexSegment.urlMetadata().size();
+         final int sizeBefore = sb.indexSegments.urlMetadata(Segments.Process.DHTIN).size();
          // read the urls from the other properties and store
          String urls;
          URLMetadataRow lEntry;
@@ -139,7 +139,7 @@ public final class transferURL {
              // write entry to database
              yacyCore.log.logInfo("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.metadata().url().toNormalform(true, false));
              try {
-                 sb.indexSegment.urlMetadata().store(lEntry);
+                 sb.indexSegments.urlMetadata(Segments.Process.DHTIN).store(lEntry);
                  sb.crawlResults.stack(lEntry, iam, iam, 3);
                  if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: received URL '" + metadata.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                  received++;
@@ -151,7 +151,7 @@ public final class transferURL {
          sb.peers.mySeed().incRU(received);
 
          // return rewrite properties
-         final int more = sb.indexSegment.urlMetadata().size() - sizeBefore;
+         final int more = sb.indexSegments.urlMetadata(Segments.Process.DHTIN).size() - sizeBefore;
          doublevalues = Integer.toString(received - more);
          yacyCore.log.logInfo("Received " + received + " URLs from peer " + otherPeerName + " in " + (System.currentTimeMillis() - start) + " ms, blocked " + blocked + " URLs");
          RSSFeed.channels(RSSFeed.INDEXRECEIVE).addMessage(new RSSMessage("Received " + received + " URLs from peer " + otherPeerName + ", blocked " + blocked, "", ""));

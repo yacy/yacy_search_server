@@ -160,6 +160,7 @@ import de.anomic.http.server.RobotsTxtConfig;
 import de.anomic.kelondro.order.Digest;
 import de.anomic.kelondro.order.NaturalOrder;
 import de.anomic.kelondro.text.Segment;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.util.DateFormatter;
@@ -231,7 +232,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
     public  File                           surrogatesInPath;
     public  File                           surrogatesOutPath;
     public  Map<String, String>            rankingPermissions;
-    public  Segment                        indexSegment;
+    public  Segments                       indexSegments;
     public  LoaderDispatcher               loader;
     public  CrawlSwitchboard               crawler;
     public  CrawlQueues                    crawlQueues;
@@ -363,9 +364,12 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
 	                partitionExponent,
 	                this.useTailCache,
 	                this.exceed134217727);
-	        indexSegment = new Segment(
+            File oldSingleSegment = new File(new File(indexPath, networkName), "TEXT");
+            File newSegmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
+	        Segments.migrateOld(oldSingleSegment, newSegmentsPath, getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default"));
+	        indexSegments = new Segments(
                     log,
-                    new File(new File(indexPath, networkName), "TEXT"),
+                    newSegmentsPath,
                     wordCacheMaxCount,
                     fileSizeMax,
                     this.useTailCache,
@@ -377,8 +381,20 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
 	                this.queuesRoot);
 		} catch (IOException e1) {
 			e1.printStackTrace();
-			indexSegment = null;
+			indexSegments = null;
 		}
+		
+		// set the default segment names
+		indexSegments.setSegment(Segments.Process.RECEIPTS,       getConfig(SwitchboardConstants.SEGMENT_RECEIPTS, "default"));
+		indexSegments.setSegment(Segments.Process.QUERIES,        getConfig(SwitchboardConstants.SEGMENT_QUERIES, "default"));
+		indexSegments.setSegment(Segments.Process.DHTIN,          getConfig(SwitchboardConstants.SEGMENT_DHTIN, "default"));
+		indexSegments.setSegment(Segments.Process.DHTOUT,         getConfig(SwitchboardConstants.SEGMENT_DHTOUT, "default"));
+		indexSegments.setSegment(Segments.Process.PROXY,          getConfig(SwitchboardConstants.SEGMENT_PROXY, "default"));
+		indexSegments.setSegment(Segments.Process.LOCALCRAWLING,  getConfig(SwitchboardConstants.SEGMENT_LOCALCRAWLING, "default"));
+		indexSegments.setSegment(Segments.Process.REMOTECRAWLING, getConfig(SwitchboardConstants.SEGMENT_REMOTECRAWLING, "default"));
+		indexSegments.setSegment(Segments.Process.PUBLIC,         getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default"));
+		
+		// init crawl results monitor cache
         crawlResults = new ResultURLs();
         
         // start yacy core
@@ -389,8 +405,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         
         // init a DHT transmission dispatcher
         this.dhtDispatcher = new Dispatcher(
-                indexSegment.termIndex(),
-                indexSegment.urlMetadata(),
+                indexSegments.segment(Segments.Process.LOCALCRAWLING),
                 peers,
                 true, 
                 30000);
@@ -583,7 +598,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         this.crawlStacker = new CrawlStacker(
                 this.crawlQueues,
                 this.crawler,
-                this.indexSegment,
+                this.indexSegments.segment(Segments.Process.LOCALCRAWLING),
                 this.peers,
                 "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0,
                 "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0);
@@ -794,8 +809,8 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         // switch the networks
         synchronized (this) {            
             // shut down
-            synchronized (this.indexSegment) {
-                this.indexSegment.close();
+            synchronized (this.indexSegments) {
+                this.indexSegments.close();
             }
             this.crawlStacker.announceClose();
             this.crawlStacker.close();
@@ -832,9 +847,9 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
                     this.useTailCache,
                     this.exceed134217727);
             try {
-                indexSegment = new Segment(
+                indexSegments = new Segments(
                         log,
-                        new File(new File(indexPrimaryPath, networkName), "TEXT"),
+                        new File(new File(indexPrimaryPath, networkName), "SEGMENTS"),
                         wordCacheMaxCount,
                         fileSizeMax,
                         this.useTailCache,
@@ -868,11 +883,10 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
                     this.getConfigLong("minimumLocalDelta", this.crawlQueues.noticeURL.getMinimumLocalDelta()),
                     this.getConfigLong("minimumGlobalDelta", this.crawlQueues.noticeURL.getMinimumGlobalDelta()));
 
-            // we need a new stacker, because this uses network-specific attributes to sort out urls (local, global)
             this.crawlStacker = new CrawlStacker(
                     this.crawlQueues,
                     this.crawler,
-                    this.indexSegment,
+                    this.indexSegments.segment(Segments.Process.LOCALCRAWLING),
                     this.peers,
                     "local.any".indexOf(getConfig("network.unit.domain", "global")) >= 0,
                     "global.any".indexOf(getConfig("network.unit.domain", "global")) >= 0);
@@ -1007,26 +1021,32 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
     	}
     }
 
-    public String urlExists(final String hash) {
+    public String urlExists(Segments.Process process, final String hash) {
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,
         // if it not exists, null is returned
-        if (indexSegment.urlMetadata().exists(hash)) return "loaded";
+        if (indexSegments.urlMetadata(process).exists(hash)) return "loaded";
         return this.crawlQueues.urlExists(hash);
     }
     
-    public void urlRemove(final String hash) {
-        indexSegment.urlMetadata().remove(hash);
+    public void urlRemove(Segment segment, final String hash) {
+        segment.urlMetadata().remove(hash);
         crawlResults.remove(hash);
         crawlQueues.urlRemove(hash);
     }
     
-    public yacyURL getURL(final String urlhash) {
+    public void urlRemove(Segments.Process process, final String hash) {
+        indexSegments.urlMetadata(process).remove(hash);
+        crawlResults.remove(hash);
+        crawlQueues.urlRemove(hash);
+    }
+    
+    public yacyURL getURL(Segments.Process process, final String urlhash) {
         if (urlhash == null) return null;
         if (urlhash.length() == 0) return null;
         final yacyURL ne = crawlQueues.getURL(urlhash);
         if (ne != null) return ne;
-        final URLMetadataRow le = indexSegment.urlMetadata().load(urlhash, null, 0);
+        final URLMetadataRow le = indexSegments.urlMetadata(process).load(urlhash, null, 0);
         if (le != null) return le.metadata().url();
         return null;
     }
@@ -1120,7 +1140,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         crawlQueues.close();
         crawler.close();
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 3: sending termination signal to database manager (stand by...)");
-        indexSegment.close();
+        indexSegments.close();
         peers.close();
         Cache.close();
         UPnP.deletePortMapping();
@@ -1187,7 +1207,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         // put document into the concurrent processing queue
         if (log.isFinest()) log.logFinest("deQueue: passing to indexing queue: " + response.url().toNormalform(true, false));
         try {
-            this.indexingDocumentProcessor.enQueue(new indexingQueueEntry(response, null, null));
+            this.indexingDocumentProcessor.enQueue(new indexingQueueEntry(Segments.Process.LOCALCRAWLING, response, null, null));
             return null;
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -1232,7 +1252,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
                         0        
                 );
                 response = new Response(request, null, null, "200", this.crawler.defaultSurrogateProfile);
-                indexingQueueEntry queueEntry = new indexingQueueEntry(response, document, null);
+                indexingQueueEntry queueEntry = new indexingQueueEntry(Segments.Process.LOCALCRAWLING, response, document, null);
                 
                 // place the queue entry into the concurrent process of the condenser (document analysis)
                 try {
@@ -1300,14 +1320,17 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
     }
     
     public static class indexingQueueEntry extends serverProcessorJob {
+        public Segments.Process process;
         public Response queueEntry;
         public Document document;
         public Condenser condenser;
         public indexingQueueEntry(
+                final Segments.Process process,
                 final Response queueEntry,
                 final Document document,
                 final Condenser condenser) {
             super();
+            this.process = process;
             this.queueEntry = queueEntry;
             this.document = document;
             this.condenser = condenser;
@@ -1330,7 +1353,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
             
             // clear caches if necessary
             if (!MemoryControl.request(8000000L, false)) {
-                indexSegment.urlMetadata().clearCache();
+                for (Segment indexSegment: this.indexSegments) indexSegment.urlMetadata().clearCache();
                 SearchEventCache.cleanupEvents(true);
             }
             
@@ -1569,7 +1592,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         if (document == null) {
             return null;
         }
-        return new indexingQueueEntry(in.queueEntry, document, null);
+        return new indexingQueueEntry(in.process, in.queueEntry, document, null);
     }
     
     private Document parseDocument(Response entry) throws InterruptedException {
@@ -1679,7 +1702,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
             final CrawlProfile.entry profile = in.queueEntry.profile();
             ResultImages.registerImages(in.document, (profile == null) ? true : !profile.remoteIndexing());
             
-            return new indexingQueueEntry(in.queueEntry, in.document, condenser);
+            return new indexingQueueEntry(in.process, in.queueEntry, in.document, condenser);
         } catch (final UnsupportedEncodingException e) {
             return null;
         }
@@ -1693,11 +1716,11 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
    
     public void storeDocumentIndex(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_INDEXSTORAGE);
-        storeDocumentIndex(in.queueEntry, in.document, in.condenser);
+        storeDocumentIndex(in.process, in.queueEntry, in.document, in.condenser);
         in.queueEntry.updateStatus(Response.QUEUE_STATE_FINISHED);
     }
     
-    private void storeDocumentIndex(final Response queueEntry, final Document document, final Condenser condenser) {
+    private void storeDocumentIndex(Segments.Process process, final Response queueEntry, final Document document, final Condenser condenser) {
         
         // CREATE INDEX
         final String dc_title = document.dc_title();
@@ -1710,7 +1733,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         // STORE URL TO LOADED-URL-DB
         URLMetadataRow newEntry = null;
         try {
-            newEntry = indexSegment.storeDocument(
+            newEntry = indexSegments.segment(process).storeDocument(
                     queueEntry.url(),
                     referrerURL,
                     queueEntry.lastModified(),
@@ -1726,10 +1749,10 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         
         // update url result list statistics
         crawlResults.stack(
-                newEntry,                      // loaded url db entry
-                queueEntry.initiator(),        // initiator peer hash
+                newEntry,                 // loaded url db entry
+                queueEntry.initiator(),   // initiator peer hash
                 this.peers.mySeed().hash, // executor peer hash
-                processCase                    // process case
+                processCase               // process case
         );
         
         // STORE WORD INDEX
@@ -1801,11 +1824,11 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
     }
     
     // method for index deletion
-    public int removeAllUrlReferences(final yacyURL url, final boolean fetchOnline) {
-        return removeAllUrlReferences(url.hash(), fetchOnline);
+    public int removeAllUrlReferences(Segment indexSegment, final yacyURL url, final boolean fetchOnline) {
+        return removeAllUrlReferences(indexSegment, url.hash(), fetchOnline);
     }
     
-    public int removeAllUrlReferences(final String urlhash, final boolean fetchOnline) {
+    public int removeAllUrlReferences(Segment indexSegment, final String urlhash, final boolean fetchOnline) {
         // find all the words in a specific resource and remove the url reference from every word index
         // finally, delete the url entry
         
@@ -1937,7 +1960,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
     	return accessSet.tailSet(Long.valueOf(System.currentTimeMillis() - timeInterval)).size();
     }
     
-    public String dhtShallTransfer() {
+    public String dhtShallTransfer(String segment) {
         String cautionCause = onlineCaution();
     	if (cautionCause != null) {
             return "online caution for " + cautionCause + ", dht transmission";
@@ -1960,6 +1983,7 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         if (getConfig(SwitchboardConstants.INDEX_DIST_ALLOW, "false").equalsIgnoreCase("false")) {
             return "no DHT distribution: not enabled (per setting)";
         }
+        Segment indexSegment = this.indexSegments.segment(segment);
         if (indexSegment.urlMetadata().size() < 10) {
             return "no DHT distribution: loadedURL.size() = " + indexSegment.urlMetadata().size();
         }
@@ -1974,9 +1998,13 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         }
         return null; // this means; yes, please do dht transfer
     }
-    
+
     public boolean dhtTransferJob() {
-    	final String rejectReason = dhtShallTransfer();
+        return dhtTransferJob(getConfig(SwitchboardConstants.SEGMENT_DHTOUT, "default"));
+    }
+    
+    public boolean dhtTransferJob(String segment) {
+    	final String rejectReason = dhtShallTransfer(segment);
         if (rejectReason != null) {
             if (this.log.isFine()) log.logFine(rejectReason);
             return false;
@@ -2073,10 +2101,10 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         peers.mySeed().put(yacySeed.RSPEED, Double.toString(totalQPM /*Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f)*/ ));
         
         peers.mySeed().put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        peers.mySeed().put(yacySeed.LCOUNT, Integer.toString(indexSegment.urlMetadata().size())); // the number of links that the peer has stored (LURL's)
+        peers.mySeed().put(yacySeed.LCOUNT, Integer.toString(indexSegments.URLCount())); // the number of links that the peer has stored (LURL's)
         peers.mySeed().put(yacySeed.NCOUNT, Integer.toString(crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
         peers.mySeed().put(yacySeed.RCOUNT, Integer.toString(crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
-        peers.mySeed().put(yacySeed.ICOUNT, Integer.toString(indexSegment.termIndex().sizesMax())); // the minimum number of words that the peer has indexed (as it says)
+        peers.mySeed().put(yacySeed.ICOUNT, Integer.toString(indexSegments.RWICount())); // the minimum number of words that the peer has indexed (as it says)
         peers.mySeed().put(yacySeed.SCOUNT, Integer.toString(peers.sizeConnected())); // the number of seeds that the peer has stored
         peers.mySeed().put(yacySeed.CCOUNT, Double.toString(((int) ((peers.sizeConnected() + peers.sizeDisconnected() + peers.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
         peers.mySeed().put(yacySeed.VERSION, yacyBuildProperties.getLongVersion());

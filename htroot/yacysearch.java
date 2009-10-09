@@ -45,6 +45,8 @@ import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.order.Bitfield;
+import de.anomic.kelondro.text.Segment;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
@@ -96,11 +98,23 @@ public class yacysearch {
         boolean fetchSnippets = (post != null && post.get("verify", "false").equals("true"));
         final serverObjects prop = new serverObjects();
 
+        // get segment
+        Segment indexSegment = null;
+        if (post != null && post.containsKey("segment")) {
+            String segmentName = post.get("segment");
+            if (sb.indexSegments.segmentExist(segmentName)) {
+                indexSegment = sb.indexSegments.segment(segmentName);
+            }
+        } else {
+            // take default segment
+            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
+        }
+        
         //final boolean rss = (post == null) ? false : post.get("rss", "false").equals("true");
         prop.put("promoteSearchPageGreeting", promoteSearchPageGreeting);
         prop.put("promoteSearchPageGreeting.homepage", sb.getConfig(SwitchboardConstants.GREETING_HOMEPAGE, ""));
         prop.put("promoteSearchPageGreeting.smallImage", sb.getConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));
-        if ((post == null) || (env == null) || (!searchAllowed)) {
+        if (post == null || indexSegment == null || env == null || !searchAllowed) {
             // we create empty entries for template strings
             prop.put("searchagain", "0");
             prop.put("display", display);
@@ -235,7 +249,7 @@ public class yacysearch {
             
             // check available memory and clean up if necessary
             if (!MemoryControl.request(8000000L, false)) {
-                sb.indexSegment.urlMetadata().clearCache();
+                indexSegment.urlMetadata().clearCache();
                 SearchEventCache.cleanupEvents(true);
             }
             
@@ -374,7 +388,7 @@ public class yacysearch {
                 
                 // delete the index entry locally
                 final String delHash = post.get("deleteref", ""); // urlhash
-                sb.indexSegment.termIndex().remove(Word.words2hashes(query[0]), delHash);
+                indexSegment.termIndex().remove(Word.words2hashes(query[0]), delHash);
 
                 // make new news message with negative voting
                 final HashMap<String, String> map = new HashMap<String, String>();
@@ -393,7 +407,7 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                final URLMetadataRow urlentry = sb.indexSegment.urlMetadata().load(recommendHash, null, 0);
+                final URLMetadataRow urlentry = indexSegment.urlMetadata().load(recommendHash, null, 0);
                 if (urlentry != null) {
                     final URLMetadataRow.Components metadata = urlentry.metadata();
                     Document document;
@@ -462,7 +476,7 @@ public class yacysearch {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
-            final SearchEvent theSearch = SearchEventCache.getEvent(theQuery, sb.indexSegment, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
+            final SearchEvent theSearch = SearchEventCache.getEvent(theQuery, indexSegment, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
             
             // generate result object
             //serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + (System.currentTimeMillis() - timestamp) + " ms");
@@ -490,7 +504,7 @@ public class yacysearch {
             }
             prop.put("meanCount", meanMax);
             if (meanMax > 0) {
-                DidYouMean didYouMean = new DidYouMean(sb.indexSegment.termIndex());
+                DidYouMean didYouMean = new DidYouMean(indexSegment.termIndex());
             	Iterator<String> meanIt = didYouMean.getSuggestions(querystring, 300, 10).iterator();
                 int meanCount = 0;
                 String suggestion;

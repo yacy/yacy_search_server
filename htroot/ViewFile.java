@@ -45,6 +45,8 @@ import de.anomic.http.client.Client;
 import de.anomic.http.client.Cache;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
+import de.anomic.kelondro.text.Segment;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
@@ -72,6 +74,18 @@ public class ViewFile {
         
         final int display = (post == null) ? 0 : post.getInt("display", 0);
         
+        // get segment
+        Segment indexSegment = null;
+        if (post != null && post.containsKey("segment")) {
+            String segmentName = post.get("segment");
+            if (sb.indexSegments.segmentExist(segmentName)) {
+                indexSegment = sb.indexSegments.segment(segmentName);
+            }
+        } else {
+            // take default segment
+            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
+        }
+        
         prop.put("display", display);
         prop.put("error_display", display);
 
@@ -90,12 +104,12 @@ public class ViewFile {
         int size = 0;
         boolean pre = false;
         
-        // getting the url hash from which the content should be loaded
+        // get the url hash from which the content should be loaded
         final String urlHash = post.get("urlHash","");
         if (urlHash.length() > 0) {
-            // getting the urlEntry that belongs to the url hash
+            // get the urlEntry that belongs to the url hash
             URLMetadataRow urlEntry = null;
-            urlEntry = sb.indexSegment.urlMetadata().load(urlHash, null, 0);
+            urlEntry = indexSegment.urlMetadata().load(urlHash, null, 0);
             if (urlEntry == null) {
                 prop.put("error", "2");
                 prop.put("viewMode",VIEW_MODE_NO_TEXT);

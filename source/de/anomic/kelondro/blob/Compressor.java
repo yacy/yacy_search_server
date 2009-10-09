@@ -126,7 +126,7 @@ public class Compressor implements BLOB {
     private byte[] decompress(byte[] b) {
         // use a magic in the head of the bytes to identify compression type
         if (b == null) return null;
-        if (ByteArray.equals(b, gzipMagic)) {
+        if (ByteArray.startsWith(b, gzipMagic)) {
             //System.out.print("\\"); // DEBUG
             cdr--;
             ByteArrayInputStream bais = new ByteArrayInputStream(b);
@@ -150,7 +150,7 @@ public class Compressor implements BLOB {
                 e.printStackTrace();
                 return null;
             }
-        } else if (ByteArray.equals(b, plainMagic)) {
+        } else if (ByteArray.startsWith(b, plainMagic)) {
             //System.out.print("-"); // DEBUG
             byte[] r = new byte[b.length - 2];
             System.arraycopy(b, 2, r, 0, b.length - 2);

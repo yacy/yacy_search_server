@@ -38,6 +38,8 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
+import de.anomic.kelondro.text.Segment;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -58,11 +60,23 @@ public class QuickCrawlLink_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
         
+        // get segment
+        Segment indexSegment = null;
+        if (post != null && post.containsKey("segment")) {
+            String segmentName = post.get("segment");
+            if (sb.indexSegments.segmentExist(segmentName)) {
+                indexSegment = sb.indexSegments.segment(segmentName);
+            }
+        } else {
+            // take default segment
+            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
+        }
+        
         if (post == null) {
             // send back usage example
             prop.put("mode", "0");
             
-            // getting the http host header
+            // get the http host header
             final String hostSocket = header.get(HeaderFramework.CONNECTION_PROP_HOST);
             
             //String host = hostSocket;
@@ -80,7 +94,7 @@ public class QuickCrawlLink_p {
         }
         prop.put("mode", "1");
         
-        // getting the URL
+        // get the URL
         String crawlingStart = post.get("url",null);
         try {
             crawlingStart = URLDecoder.decode(crawlingStart, "UTF-8");
@@ -89,10 +103,10 @@ public class QuickCrawlLink_p {
             e1.printStackTrace();
         }
         
-        // getting the browser title
+        // get the browser title
         final String title = post.get("title",null);
         
-        // getting other parameters if set
+        // get other parameters if set
         final String crawlingMustMatch  = post.get("mustmatch", CrawlProfile.MATCH_ALL);
         final String crawlingMustNotMatch  = post.get("mustnotmatch", CrawlProfile.MATCH_BAD_URL);
         final int CrawlingDepth      = Integer.parseInt(post.get("crawlingDepth", "0"));        
@@ -123,7 +137,7 @@ public class QuickCrawlLink_p {
             }
                     
             final String urlhash = crawlingStartURL.hash();
-            sb.indexSegment.urlMetadata().remove(urlhash);
+            indexSegment.urlMetadata().remove(urlhash);
             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
             sb.crawlQueues.errorURL.remove(urlhash);
             

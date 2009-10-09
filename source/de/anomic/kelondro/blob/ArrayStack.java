@@ -450,6 +450,7 @@ public class ArrayStack implements BLOB {
      * @return the number of entries in each blob
      */
     public synchronized int[] sizes() {
+        if (blobs == null) return new int[0];
         int[] s = new int[blobs.size()];
         int c = 0;
         for (blobItem bi: blobs) s[c++] = bi.blob.size();

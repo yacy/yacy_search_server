@@ -122,7 +122,7 @@ public class DocumentIndex extends Segment {
      * If the given file is a path to a directory, the complete sub-tree is indexed
      * @param start
      */
-    public void addAll(File start) {
+    public void addConcurrent(File start) {
         assert (start != null);
         assert (start.canRead()) : start.toString();
         if (!start.isDirectory()) {
@@ -137,7 +137,7 @@ public class DocumentIndex extends Segment {
             w = new File(start, t);
             if (w.canRead() && !w.isHidden()) {
                 if (w.isDirectory()) {
-                    addAll(w);
+                    addConcurrent(w);
                 } else {
                     try {
                         this.queue.put(w);
@@ -232,7 +232,7 @@ public class DocumentIndex extends Segment {
             if (args[1].equals("add")) {
                 File f = new File(args[2]);
                 DocumentIndex di = new DocumentIndex(segmentPath);
-                di.addAll(f);
+                di.addConcurrent(f);
                 di.close();
             } else {
                 String query = "";

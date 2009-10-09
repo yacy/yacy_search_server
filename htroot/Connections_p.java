@@ -88,19 +88,19 @@ public final class Connections_p {
         for ( int currentThreadIdx = 0; currentThreadIdx < count; currentThreadIdx++ )  {
             final Thread t = threadList[currentThreadIdx];
             if ((t != null) && (t instanceof serverCore.Session) && (t.isAlive())) {
-                // getting the session object
+                // get the session object
                 final Session s = ((Session) t);
                 
-                // getting the session runtime
+                // get the session runtime
                 final long sessionTime = s.getTime();
                 
-                // getting the request command line
+                // getthe request command line
                 boolean blockingRequest = false;
                 String commandLine = s.getCommandLine();
                 if (commandLine == null) blockingRequest = true;                
                 final int commandCount = s.getCommandCount();
                 
-                // getting the source ip address and port
+                // get the source ip address and port
                 final InetAddress userAddress = s.getUserAddress();
                 final int userPort = s.getUserPort();
                 if (userAddress == null) continue;
@@ -113,13 +113,13 @@ public final class Connections_p {
                 if (cmdObj instanceof HTTPDemon) {
                     prot = isSSL ? "https":"http";
                     
-                    // getting the http command object
+                    // get the http command object
                     final HTTPDemon currentHttpd =  (HTTPDemon)cmdObj;
                     
-                    // getting the connection properties of this session
+                    // get the connection properties of this session
                     final Properties conProp = (Properties) currentHttpd.getConProp().clone();
                     
-                    // getting the destination host
+                    // get the destination host
                     dest = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HOST);
                     if (dest==null)continue;
                 }            

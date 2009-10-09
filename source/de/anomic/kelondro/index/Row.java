@@ -380,11 +380,11 @@ public final class Row {
             final Object[] ref = nickref.get(nickname);
             if (ref == null) return;
             final Column col = (Column) ref[0];
-            setCol(col.encoder, ((Integer) ref[1]).intValue(), col.cellwidth, cell);
+            setCol(((Integer) ref[1]).intValue(), col.cellwidth, cell);
         }
         
         public final void setCol(final int column, final byte[] cell) {
-            setCol(row[column].encoder, colstart[column], row[column].cellwidth, cell);
+            setCol(colstart[column], row[column].cellwidth, cell);
         }
         
         public final void setCol(final int column, final char[] cell) {
@@ -393,7 +393,7 @@ public final class Row {
             for (int i = cell.length; i < row[column].cellwidth; i++) rowinstance[offset + clstrt + i] = 0;
         }
         
-        private final void setCol(final int encoding, final int clstrt, int length, final byte[] cell) {
+        private final void setCol(final int clstrt, int length, final byte[] cell) {
             if (cell == null) {
                 while (length-- > 0) rowinstance[offset + clstrt + length] = 0;
             } else {
@@ -409,6 +409,10 @@ public final class Row {
         
         public final void setCol(final int column, final byte c) {
             rowinstance[offset + colstart[column]] = c;
+        }
+        
+        public final void setCol(final int column, final String cell) {
+            setCol(column, cell.getBytes());
         }
         
         public final void setCol(final int column, final String cell, final String encoding) {

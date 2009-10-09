@@ -71,6 +71,59 @@ public class PMHReader {
         } catch (InterruptedException e) {}
     }
     
+    public static StringBuilder escape(final String s) {
+        final int len = s.length();
+        final StringBuilder sbuf = new StringBuilder(len + 10);
+        for (int i = 0; i < len; i++) {
+            final int ch = s.charAt(i);
+            if ('A' <= ch && ch <= 'Z') {           // 'A'..'Z'
+                sbuf.append((char)ch);
+            } else if ('a' <= ch && ch <= 'z') {    // 'a'..'z'
+                sbuf.append((char)ch);
+            } else if ('0' <= ch && ch <= '9') {    // '0'..'9'
+                sbuf.append((char)ch);
+            } else if (ch == ' ') {                 // space
+                sbuf.append("%20");
+            } else if (ch == '&' || ch == ':'       // unreserved
+                    || ch == '-' || ch == '_'
+                    || ch == '.' || ch == '!'
+                    || ch == '~' || ch == '*'
+                    || ch == '\'' || ch == '('
+                    || ch == ')' || ch == ';') {
+                sbuf.append((char)ch);
+            }
+        }
+        return sbuf;
+    }
+
+    public static String unescape(final String s) {
+        final int l  = s.length();
+        final StringBuilder sbuf = new StringBuilder(l);
+        int ch = -1;
+        int b, sumb = 0;
+        for (int i = 0, more = -1; i < l; i++) {
+            /* Get next byte b from URL segment s */
+            switch (ch = s.charAt(i)) {
+                case '%':
+                    if (i + 2 < l) {
+                        ch = s.charAt(++i);
+                        int hb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase((char) ch) - 'a') & 0xF;
+                        ch = s.charAt(++i);
+                        int lb = (Character.isDigit ((char) ch) ? ch - '0' : 10 + Character.toLowerCase ((char) ch) - 'a') & 0xF;
+                        b = (hb << 4) | lb;
+                    } else {
+                        b = ch;
+                    }
+                    break;
+                case '+':
+                    b = ' ';
+                    break;
+                default:
+                    b = ch;
+            }
+        }
+        return sbuf.toString();
+    }
     public static void main(String[] args) {
         // get one server with
         // http://roar.eprints.org/index.php?action=csv

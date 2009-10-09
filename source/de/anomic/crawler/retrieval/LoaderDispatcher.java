@@ -43,6 +43,7 @@ import de.anomic.http.client.Cache;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.yacy.yacyURL;
@@ -167,7 +168,7 @@ public final class LoaderDispatcher {
                 final RequestHeader requestHeader = new RequestHeader();
                 requestHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
                 yacyURL refererURL = null;
-                if (request.referrerhash() != null) refererURL = sb.getURL(request.referrerhash());
+                if (request.referrerhash() != null) refererURL = sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
                 if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true, true));
                 Response response = new Response(
                         request,

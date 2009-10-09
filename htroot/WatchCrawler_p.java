@@ -45,6 +45,8 @@ import de.anomic.data.listManager;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.TransformerWriter;
 import de.anomic.http.metadata.RequestHeader;
+import de.anomic.kelondro.text.Segment;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -85,6 +87,18 @@ public class WatchCrawler_p {
         prop.put("remoteCrawlState", "");
         prop.put("list-remote", 0);
         prop.put("forwardToCrawlStart", "0");
+        
+        // get segment
+        Segment indexSegment = null;
+        if (post != null && post.containsKey("segment")) {
+            String segmentName = post.get("segment");
+            if (sb.indexSegments.segmentExist(segmentName)) {
+                indexSegment = sb.indexSegments.segment(segmentName);
+            }
+        } else {
+            // take default segment
+            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
+        }
         
         prop.put("info", "0");
         if (post != null) {
@@ -216,7 +230,7 @@ public class WatchCrawler_p {
                             // first delete old entry, if exists
                             final yacyURL url = new yacyURL(crawlingStart, null);
                             final String urlhash = url.hash();
-                            sb.indexSegment.urlMetadata().remove(urlhash);
+                            indexSegment.urlMetadata().remove(urlhash);
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             sb.crawlQueues.errorURL.remove(urlhash);
                             

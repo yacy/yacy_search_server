@@ -345,7 +345,7 @@ public class SettingsAck_p {
         }
         
         if (post.containsKey("seedSettings")) {
-            // getting the currently used uploading method
+            // get the currently used uploading method
             final String oldSeedUploadMethod = env.getConfig("seedUploadMethod","none");
             final String newSeedUploadMethod = post.get("seedUploadMethod");
             final String oldSeedURLStr = sb.peers.mySeed().get(yacySeed.SEEDLIST, "");
@@ -385,7 +385,7 @@ public class SettingsAck_p {
         final HashMap<String, String> uploaders = yacyCore.getSeedUploadMethods();
         final Iterator<String> uploaderKeys = uploaders.keySet().iterator();
         while (uploaderKeys.hasNext()) {
-            // getting the uploader module name
+            // get the uploader module name
             final String uploaderName = uploaderKeys.next();
             
             
@@ -452,7 +452,7 @@ public class SettingsAck_p {
         // Crawler settings
         if (post.containsKey("crawlerSettings")) {
             
-            // getting Crawler Timeout
+            // get Crawler Timeout
             String timeoutStr = post.get("crawler.clientTimeout");
             if (timeoutStr==null||timeoutStr.length()==0) timeoutStr = "10000";
             
@@ -467,7 +467,7 @@ public class SettingsAck_p {
                 return prop;
             }
             
-            // getting maximum http file size
+            // get maximum http file size
             String maxSizeStr = post.get("crawler.http.maxFileSize");
             if (maxSizeStr==null||maxSizeStr.length()==0) timeoutStr = "-1";
             
@@ -484,7 +484,7 @@ public class SettingsAck_p {
                 return prop;
             }
             
-            // getting maximum ftp file size
+            // get maximum ftp file size
             maxSizeStr = post.get("crawler.ftp.maxFileSize");
             if (maxSizeStr==null||maxSizeStr.length()==0) timeoutStr = "-1";
             

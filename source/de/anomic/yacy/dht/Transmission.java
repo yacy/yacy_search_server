@@ -31,10 +31,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import de.anomic.kelondro.index.Row;
-import de.anomic.kelondro.text.Index;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceContainerCache;
-import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
@@ -47,23 +45,20 @@ import de.anomic.yacy.logging.Log;
 public class Transmission {
 
     protected Log log;
-    protected MetadataRepository repository;
+    protected Segment segment;
     protected yacySeedDB seeds;
     protected boolean gzipBody4Transfer;
     protected int timeout4Transfer;
-    protected Index<WordReference> backend;
     
     public Transmission(
             Log log,
-            MetadataRepository repository, 
+            Segment segment, 
             yacySeedDB seeds,
-            Index<WordReference> backend,
             boolean gzipBody4Transfer,
             int timeout4Transfer) {
         this.log = log;
-        this.repository = repository;
+        this.segment = segment;
         this.seeds = seeds;
-        this.backend = backend;
         this.gzipBody4Transfer = gzipBody4Transfer;
         this.timeout4Transfer = timeout4Transfer;
     }
@@ -131,7 +126,7 @@ public class Transmission {
                     notFound.add(e.metadataHash());
                     continue;
                 }
-                URLMetadataRow r = repository.load(e.metadataHash(), null, 0);
+                URLMetadataRow r = segment.urlMetadata().load(e.metadataHash(), null, 0);
                 if (r == null) {
                     notFound.add(e.metadataHash());
                     badReferences.add(e.metadataHash());
@@ -251,7 +246,7 @@ public class Transmission {
         }
 
         public void restore() {
-            for (ReferenceContainer<WordReference> ic : this) try { backend.add(ic); } catch (IOException e) {}
+            for (ReferenceContainer<WordReference> ic : this) try { segment.termIndex().add(ic); } catch (IOException e) {}
         }
     }
 }

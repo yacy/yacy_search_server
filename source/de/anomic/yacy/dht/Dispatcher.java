@@ -33,9 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import de.anomic.kelondro.order.Base64Order;
-import de.anomic.kelondro.text.BufferedIndex;
 import de.anomic.kelondro.text.ReferenceContainer;
-import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
@@ -83,8 +81,8 @@ public class Dispatcher {
     // the String-key is the primary target as contained in the Entry
     private Map<ByteArray, Transmission.Chunk> transmissionCloud;
     
-    // the backend is used to store the remaining indexContainers in case that the object is closed
-    private BufferedIndex<WordReference> backend;
+    // the segment backend is used to store the remaining indexContainers in case that the object is closed
+    private Segment segment;
     
     // the seed database
     private yacySeedDB seeds;
@@ -99,21 +97,19 @@ public class Dispatcher {
     private Transmission transmission;
     
     public Dispatcher(
-            final BufferedIndex<WordReference> backend,
-            final MetadataRepository repository,
+            final Segment segment,
             final yacySeedDB seeds,
             final boolean gzipBody, 
             final int timeout
             ) {
         this.transmissionCloud = new LinkedHashMap<ByteArray, Transmission.Chunk>();
-        this.backend = backend;
+        this.segment = segment;
         this.seeds = seeds;
         this.log = new Log("INDEX-TRANSFER-DISPATCHER");
         this.transmission = new Transmission(
             log,
-            repository, 
+            segment,
             seeds,
-            backend,
             gzipBody,
             timeout);
         //this.selectedContainerCache = null;
@@ -171,7 +167,7 @@ public class Dispatcher {
         
         final ArrayList<ReferenceContainer<WordReference>> containers = new ArrayList<ReferenceContainer<WordReference>>(maxContainerCount);
         
-        final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = this.backend.references(hash, true, ram);
+        final Iterator<ReferenceContainer<WordReference>> indexContainerIterator = this.segment.termIndex().references(hash, true, ram);
         ReferenceContainer<WordReference> container;
         int refcount = 0;
 
@@ -204,7 +200,7 @@ public class Dispatcher {
                     urlHashes.add(it.next().metadataHash());
                 }
                 if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + c.getTermHashAsString() + "'");
-                if (urlHashes.size() > 0) this.backend.remove(c.getTermHash(), urlHashes);
+                if (urlHashes.size() > 0) this.segment.termIndex().remove(c.getTermHash(), urlHashes);
             }
             rc = containers;
         } else {
@@ -212,7 +208,7 @@ public class Dispatcher {
             // but to avoid race conditions return the results from the deletes
             rc = new ArrayList<ReferenceContainer<WordReference>>(containers.size());
             for (ReferenceContainer<WordReference> c: containers) {
-                container = this.backend.delete(c.getTermHash());
+                container = this.segment.termIndex().delete(c.getTermHash());
                 if (this.log.isFine()) this.log.logFine("selected " + container.size() + " urls for word '" + c.getTermHashAsString() + "'");
                 if (container.size() != 0) rc.add(container);
             }
@@ -405,7 +401,7 @@ public class Dispatcher {
         if (indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.announceShutdown();
         if (this.transmissionCloud != null) {
         	for (Map.Entry<ByteArray, Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
-        		for (ReferenceContainer<WordReference> i : e.getValue()) try {this.backend.add(i);} catch (IOException e1) {}
+        		for (ReferenceContainer<WordReference> i : e.getValue()) try {this.segment.termIndex().add(i);} catch (IOException e1) {}
         	}
         	this.transmissionCloud.clear();
         }

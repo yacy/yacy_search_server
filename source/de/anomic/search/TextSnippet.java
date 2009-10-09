@@ -46,6 +46,7 @@ import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.kelondro.index.ARC;
 import de.anomic.kelondro.index.ConcurrentARC;
 import de.anomic.kelondro.order.Base64Order;
+import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.yacy.yacySearch;
@@ -571,7 +572,7 @@ public class TextSnippet {
         }
     }
     
-    public static String failConsequences(final TextSnippet snippet, final String eventID) throws IOException {
+    public static String failConsequences(Segment indexSegment, final TextSnippet snippet, final String eventID) throws IOException {
         // problems with snippet fetch
         final String urlHash = snippet.getUrl().hash();
         final String querystring = SetTools.setToString(snippet.getRemainingHashes(), ' ');
@@ -580,18 +581,17 @@ public class TextSnippet {
             (snippet.getErrorCode() == ERROR_PARSER_FAILED) ||
             (snippet.getErrorCode() == ERROR_PARSER_NO_LINES)) {
             log.logInfo("error: '" + snippet.getError() + "', remove url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
-            Switchboard.getSwitchboard().indexSegment.urlMetadata().remove(urlHash);
+            indexSegment.urlMetadata().remove(urlHash);
             final SearchEvent event = SearchEventCache.getEvent(eventID);
-            assert Switchboard.getSwitchboard() != null;
-            assert Switchboard.getSwitchboard().indexSegment != null;
+            assert indexSegment != null;
             assert event != null : "eventID = " + eventID;
             assert event.getQuery() != null;
-            Switchboard.getSwitchboard().indexSegment.termIndex().remove(event.getQuery().queryHashes, urlHash);
+            indexSegment.termIndex().remove(event.getQuery().queryHashes, urlHash);
             event.remove(urlHash);
         }
         if (snippet.getErrorCode() == ERROR_NO_MATCH) {
             log.logInfo("error: '" + snippet.getError() + "', remove words '" + querystring + "' for url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
-            Switchboard.getSwitchboard().indexSegment.termIndex().remove(snippet.getRemainingHashes(), urlHash);
+            indexSegment.termIndex().remove(snippet.getRemainingHashes(), urlHash);
             SearchEventCache.getEvent(eventID).remove(urlHash);
         }
         return snippet.getError();

@@ -30,6 +30,7 @@ import java.util.Date;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.metadata.RequestHeader;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.search.Switchboard;
@@ -75,7 +76,7 @@ public class urls {
                 if (entry == null) break;
                 
                 // find referrer, if there is one
-                referrer = sb.getURL(entry.referrerhash());
+                referrer = sb.getURL(Segments.Process.PUBLIC, entry.referrerhash());
                 
                 // place url to notice-url db
                 sb.crawlQueues.delegatedURL.push(
@@ -112,10 +113,10 @@ public class urls {
         	URLMetadataRow.Components metadata;
             yacyURL referrer;
             for (int i = 0; i < count; i++) {
-                entry = sb.indexSegment.urlMetadata().load(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);
+                entry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);
                 if (entry == null) continue;
                 // find referrer, if there is one
-                referrer = sb.getURL(entry.referrerHash());
+                referrer = sb.getURL(Segments.Process.PUBLIC, entry.referrerHash());
                 // create RSS entry
                 metadata = entry.metadata();
                 prop.put("item_" + c + "_title", metadata.dc_title());

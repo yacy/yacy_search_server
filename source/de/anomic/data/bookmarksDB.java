@@ -70,6 +70,7 @@ import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.order.CloneableIterator;
 import de.anomic.kelondro.order.NaturalOrder;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.FileUtils;
@@ -255,7 +256,7 @@ public class bookmarksDB {
 	    			Pattern.compile(newcrawlingMustMatch);	    			
                     
                     String urlhash = crawlingStartURL.hash();
-                    sb.indexSegment.urlMetadata().remove(urlhash);
+                    sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).remove(urlhash);
                     sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                     sb.crawlQueues.errorURL.remove(urlhash);
 	               

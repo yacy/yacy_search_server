@@ -6,6 +6,8 @@ import java.util.Locale;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.metadata.RequestHeader;
+import de.anomic.kelondro.text.Segment;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -28,16 +30,22 @@ public class queues_p {
         final Switchboard sb = (Switchboard) env;
         //wikiCode wikiTransformer = new wikiCode(switchboard);
         final serverObjects prop = new serverObjects();
-        if (post == null || !post.containsKey("html"))
+        Segment segment = null;
+        if (post == null || !post.containsKey("html")) {
             prop.setLocalized(false);
+            if (post.containsKey("segment") && sb.verifyAuthentication(header, false)) {
+                segment = sb.indexSegments.segment(post.get("segment"));
+            }
+        }
+        if (segment == null) segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         prop.put("rejected", "0");
         //int showRejectedCount = 10;
         
         yacySeed initiator;
         
         // index size
-        prop.putNum("urlpublictextSize", sb.indexSegment.urlMetadata().size());
-        prop.putNum("rwipublictextSize", sb.indexSegment.termIndex().sizesMax());
+        prop.putNum("urlpublictextSize", segment.urlMetadata().size());
+        prop.putNum("rwipublictextSize", segment.termIndex().sizesMax());
 
         // loader queue
         prop.put("loaderSize", Integer.toString(sb.crawlQueues.size()));        

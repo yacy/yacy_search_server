@@ -46,6 +46,7 @@ import de.anomic.http.io.ByteCountInputStream;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.search.Switchboard;
@@ -258,10 +259,10 @@ public class SitemapParser extends DefaultHandler {
 
             // check if the url is known and needs to be recrawled
             if (this.lastMod != null) {
-                final String dbocc = this.sb.urlExists(nexturlhash);
+                final String dbocc = this.sb.urlExists(Segments.Process.LOCALCRAWLING, nexturlhash);
                 if ((dbocc != null) && (dbocc.equalsIgnoreCase("loaded"))) {
                     // the url was already loaded. we need to check the date
-                    final URLMetadataRow oldEntry = this.sb.indexSegment.urlMetadata().load(nexturlhash, null, 0);
+                    final URLMetadataRow oldEntry = this.sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(nexturlhash, null, 0);
                     if (oldEntry != null) {
                         final Date modDate = oldEntry.moddate();
                         // check if modDate is null

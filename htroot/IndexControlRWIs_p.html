@@ -12,6 +12,15 @@
     <form action="IndexControlRWIs_p.html" method="post" enctype="multipart/form-data">
     <fieldset><legend>RWI Retrieval (= search for a single word)</legend>
       <dl>
+        <dt class="TableCellDark">Select Segment:</dt>
+        <dd>
+          <select name="selectSegment" size="1">
+            #{segments}#
+            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+            #{/segments}#
+          </select>
+        </dd>
+        
         <dt class="TableCellDark">Retrieve by Word:</dt>
         <dd><input type="text" name="keystring" value="#[keystring]#" size="40" maxlength="80" />
             <input type="submit" name="keystringsearch" value="Show URL Entries for Word" />

@@ -37,6 +37,7 @@ import de.anomic.document.Parser;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.net.ftpc;
 import de.anomic.search.Switchboard;
@@ -108,7 +109,7 @@ public class FTPLoader {
                 if (file.length() == 0) {
                     // directory -> get list of files
                     RequestHeader requestHeader = new RequestHeader();
-                    if (request.referrerhash() != null) requestHeader.put(RequestHeader.REFERER, sb.getURL(request.referrerhash()).toNormalform(true, false));
+                    if (request.referrerhash() != null) requestHeader.put(RequestHeader.REFERER, sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash()).toNormalform(true, false));
                     
                     byte[] dirList = generateDirlist(ftpClient, request, path);
 
@@ -242,7 +243,7 @@ public class FTPLoader {
                 
                 // create a cache entry
                 RequestHeader requestHeader = new RequestHeader();
-                if (request.referrerhash() != null) requestHeader.put(RequestHeader.REFERER, sb.getURL(request.referrerhash()).toNormalform(true, false));
+                if (request.referrerhash() != null) requestHeader.put(RequestHeader.REFERER, sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash()).toNormalform(true, false));
                 ResponseHeader responseHeader = new ResponseHeader();
                 responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(fileDate));
                 responseHeader.put(HeaderFramework.CONTENT_TYPE, mimeType);

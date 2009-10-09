@@ -29,6 +29,8 @@
 //import java.io.*;
 //import de.anomic.tools.*;
 import de.anomic.http.metadata.RequestHeader;
+import de.anomic.kelondro.text.Segment;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -38,38 +40,41 @@ public class IndexShare_p {
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
     	// return variable that accumulates replacements
-        final Switchboard switchboard = (Switchboard) env;
+        final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
-        if(switchboard == null) {
-            prop.put("linkfreq", "30");
-            prop.put("wordfreq", "10");
-            prop.put("dtable", "");
-            prop.put("rtable", "");
-            prop.putNum("wcount", 0);
-            prop.putNum("ucount", 0);
-            return prop; // be save
+        // get segment
+        Segment indexSegment = null;
+        if (post != null && post.containsKey("segment")) {
+            String segmentName = post.get("segment");
+            if (sb.indexSegments.segmentExist(segmentName)) {
+                indexSegment = sb.indexSegments.segment(segmentName);
+            }
+        } else {
+            // take default segment
+            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
         }
+        
         if (post == null) {
-            prop.put("linkfreq", switchboard.getConfigLong("defaultLinkReceiveFrequency",30));
-            prop.put("wordfreq", switchboard.getConfigLong("defaultWordReceiveFrequency",10));
+            prop.put("linkfreq", sb.getConfigLong("defaultLinkReceiveFrequency",30));
+            prop.put("wordfreq", sb.getConfigLong("defaultWordReceiveFrequency",10));
             prop.put("dtable", "");
             prop.put("rtable", "");
-            prop.putNum("wcount", switchboard.indexSegment.termIndex().sizesMax());
-            prop.putNum("ucount", switchboard.indexSegment.urlMetadata().size());
+            prop.putNum("wcount", indexSegment.termIndex().sizesMax());
+            prop.putNum("ucount", indexSegment.urlMetadata().size());
             return prop; // be save
         }
         
         if (post.containsKey("indexsharesetting")) {
-            switchboard.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, (post.containsKey("distribute")) ? "true" : "false");
-            switchboard.setConfig("allowReceiveIndex", (post.containsKey("receive")) ? "true" : "false");
-            switchboard.setConfig("defaultLinkReceiveFrequency", post.get("linkfreq", "30"));
-            switchboard.setConfig("defaultWordReceiveFrequency", post.get("wordfreq", "10"));
+            sb.setConfig(SwitchboardConstants.INDEX_DIST_ALLOW, (post.containsKey("distribute")) ? "true" : "false");
+            sb.setConfig("allowReceiveIndex", (post.containsKey("receive")) ? "true" : "false");
+            sb.setConfig("defaultLinkReceiveFrequency", post.get("linkfreq", "30"));
+            sb.setConfig("defaultWordReceiveFrequency", post.get("wordfreq", "10"));
         }
 
         // insert constants
-        prop.putNum("wcount", switchboard.indexSegment.termIndex().sizesMax());
-        prop.putNum("ucount", switchboard.indexSegment.urlMetadata().size());
+        prop.putNum("wcount", indexSegment.termIndex().sizesMax());
+        prop.putNum("ucount", indexSegment.urlMetadata().size());
         
         // return rewrite properties
         return prop;

@@ -43,6 +43,7 @@ import de.anomic.data.userDB;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.document.Document;
 import de.anomic.http.metadata.RequestHeader;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.search.Switchboard;
@@ -183,7 +184,7 @@ public class Bookmarks {
                     final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        final URLMetadataRow urlentry = sb.indexSegment.urlMetadata().load(urlHash, null, 0);
+                        final URLMetadataRow urlentry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(urlHash, null, 0);
                         Document document = null;
                         if (urlentry != null) {
                             final URLMetadataRow.Components metadata = urlentry.metadata();

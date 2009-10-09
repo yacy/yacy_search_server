@@ -437,4 +437,16 @@ public final class SwitchboardConstants {
 	public static final String TRAY_ICON_FORCED		 = "trayIcon.force";
 	public static final String TRAY_LABEL			 = "tray.label";
 	public static final String BROWSERINTEGRATION	 = "browserintegration";
+	
+	/**
+	 * Segments
+	 */
+	public static final String SEGMENT_RECEIPTS      = "segment.process.receipts_tmp";
+	public static final String SEGMENT_QUERIES       = "segment.process.queries_tmp";
+	public static final String SEGMENT_DHTIN         = "segment.process.dhtin_tmp";
+	public static final String SEGMENT_DHTOUT        = "segment.process.dhtout_tmp";
+	public static final String SEGMENT_PROXY         = "segment.process.proxy_tmp";
+	public static final String SEGMENT_LOCALCRAWLING = "segment.process.localcrawling_tmp";
+	public static final String SEGMENT_REMOTECRAWLING= "segment.process.remotecrawling_tmp";
+	public static final String SEGMENT_PUBLIC        = "segment.process.public_tmp";
 }

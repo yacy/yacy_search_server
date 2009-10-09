@@ -57,6 +57,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      */
     public ReferenceContainerArray(
     		final File heapLocation,
+    		final String prefix,
     		final ReferenceFactory<ReferenceType> factory,
     		final ByteOrder termOrder,
     		final Row payloadrow,
@@ -65,7 +66,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         this.payloadrow = payloadrow;
         this.array = new ArrayStack(
             heapLocation,
-            "index",
+            prefix,
             payloadrow.primaryKeyLength,
             termOrder,
             0);
@@ -215,6 +216,18 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             }
     	}
     	return c;
+    }
+    
+    /**
+     * calculate an upper limit for a ranking number of the container size
+     * the returned number is not a counter. It can only be used to compare the
+     * ReferenceContainer, that may be produced as a result of get()
+     * @param termHash
+     * @return a ranking number
+     * @throws IOException
+     */
+    public long lenghtRankingUpperLimit(final byte[] termHash) throws IOException {
+        return this.array.lengthAdd(termHash);
     }
     
     /**

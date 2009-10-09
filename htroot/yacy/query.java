@@ -31,6 +31,7 @@ import java.io.IOException;
 
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -85,7 +86,7 @@ public final class query {
         if (obj.equals("rwiurlcount")) try {
             // the total number of different urls in the rwi is returned
             // <env> shall contain a word hash, the number of assigned lurls to this hash is returned
-            prop.put("response", sb.indexSegment.termIndex().get(env.getBytes(), null).size());
+            prop.put("response", sb.indexSegments.termIndex(Segments.Process.PUBLIC).get(env.getBytes(), null).size());
             return prop;
         } catch (IOException e) {
             e.printStackTrace();
@@ -93,13 +94,13 @@ public final class query {
 
         if (obj.equals("rwicount")) {
             // return the total number of available word indexes
-            prop.put("response", sb.indexSegment.termIndex().sizesMax());
+            prop.put("response", sb.indexSegments.termIndex(Segments.Process.PUBLIC).sizesMax());
             return prop;
         }
 
         if (obj.equals("lurlcount")) {
             // return the number of all available l-url's
-            prop.put("response", sb.indexSegment.urlMetadata().size());
+            prop.put("response", sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).size());
             return prop;
         }
 

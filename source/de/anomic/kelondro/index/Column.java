@@ -173,7 +173,7 @@ public class Column {
                 else if (this.celltype == celltype_boolean)   this.encoder = encoder_bytes;
                 else if (this.celltype == celltype_binary)    this.encoder = encoder_bytes;
                 else if (this.celltype == celltype_string)    this.encoder = encoder_bytes;
-                else throw new kelondroException("kelondroColumn - encoder missing for cell " + this.nickname);
+                else throw new kelondroException("kelondroColumn - encoder missing for cell '" + this.nickname + "'");
             }
         } else {
             if (this.celltype == celltype_cardinal) throw new kelondroException("kelondroColumn - encoder missing for cell " + this.nickname);

@@ -55,6 +55,7 @@ import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProcess;
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
+import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -69,10 +70,20 @@ public class IndexControlRWIs_p {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
 
+        // set default values
         prop.putHTML("keystring", "");
         prop.put("keyhash", "");
         prop.put("result", "");
-
+        String segmentName = sb.getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default");
+        int i = 0;
+        for (String s: sb.indexSegments.segmentNames()) {
+            prop.put("segments_" + i + "_name", s);
+            prop.put("segments_" + i + "_selected", (segmentName.equals(s)) ? 1 : 0);
+            i++;
+        }
+        Segment segment = sb.indexSegments.segment(segmentName);
+        prop.put("segments", i);
+        
         // switch off all optional forms/lists
         prop.put("searchresult", 0);
         prop.put("keyhashsimilar", 0);
@@ -83,6 +94,16 @@ public class IndexControlRWIs_p {
         
         if (post != null) {
             // default values
+            segmentName = post.get("segment", segmentName).trim();
+            i= 0;
+            for (String s: sb.indexSegments.segmentNames()) {
+                prop.put("segments_" + i + "_name", s);
+                prop.put("segments_" + i + "_selected", (segmentName.equals(s)) ? 1 : 0);
+                i++;
+            }
+            prop.put("segments", i);
+            segment = sb.indexSegments.segment(segmentName);
+            
             final String keystring = post.get("keystring", "").trim();
             byte[] keyhash = post.get("keyhash", "").trim().getBytes();
             prop.putHTML("keystring", keystring);
@@ -96,7 +117,7 @@ public class IndexControlRWIs_p {
             if (post.containsKey("keystringsearch")) {
                 keyhash = Word.word2hash(keystring);
                 prop.put("keyhash", keyhash);
-                final RankingProcess ranking = genSearchresult(prop, sb, keyhash, null);
+                final RankingProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
                 if (ranking.filteredCount() == 0) {
                     prop.put("searchresult", 1);
                     prop.putHTML("searchresult_word", keystring);
@@ -107,7 +128,7 @@ public class IndexControlRWIs_p {
                 if (keystring.length() == 0 || !new String(Word.word2hash(keystring)).equals(new String(keyhash))) {
                     prop.put("keystring", "&lt;not possible to compute word from hash&gt;");
                 }
-                final RankingProcess ranking = genSearchresult(prop, sb, keyhash, null);
+                final RankingProcess ranking = genSearchresult(prop, sb, segment, keyhash, null);
                 if (ranking.filteredCount() == 0) {
                     prop.put("searchresult", 2);
                     prop.putHTML("searchresult_wordhash", new String(keyhash));
@@ -116,7 +137,7 @@ public class IndexControlRWIs_p {
             
             // delete everything
             if (post.containsKey("deletecomplete") && post.containsKey("confirmDelete")) {
-                sb.indexSegment.clear();
+                segment.clear();
                 sb.crawlQueues.clear();
                 sb.crawlStacker.clear();
                 try {
@@ -132,9 +153,9 @@ public class IndexControlRWIs_p {
                 if (delurl || delurlref) {
                     // generate an urlx array
                     ReferenceContainer<WordReference> index = null;
-                    index = sb.indexSegment.termIndex().get(keyhash, null);
+                    index = segment.termIndex().get(keyhash, null);
                     final Iterator<WordReference> en = index.entries();
-                    int i = 0;
+                    i = 0;
                     urlx = new String[index.size()];
                     while (en.hasNext()) {
                         urlx[i++] = en.next().metadataHash();
@@ -142,14 +163,14 @@ public class IndexControlRWIs_p {
                     index = null;
                 }
                 if (delurlref) {
-                    for (int i = 0; i < urlx.length; i++) sb.removeAllUrlReferences(urlx[i], true);
+                    for (i = 0; i < urlx.length; i++) sb.removeAllUrlReferences(segment, urlx[i], true);
                 }
                 if (delurl || delurlref) {
-                    for (int i = 0; i < urlx.length; i++) {
-                        sb.urlRemove(urlx[i]);
+                    for (i = 0; i < urlx.length; i++) {
+                        sb.urlRemove(segment, urlx[i]);
                     }
                 }
-                sb.indexSegment.termIndex().delete(keyhash);
+                segment.termIndex().delete(keyhash);
                 post.remove("keyhashdeleteall");
                 post.put("urllist", "generated");
             } catch (IOException e) {
@@ -159,16 +180,16 @@ public class IndexControlRWIs_p {
             // delete selected URLs
             if (post.containsKey("keyhashdelete")) try {
                 if (delurlref) {
-                    for (int i = 0; i < urlx.length; i++) sb.removeAllUrlReferences(urlx[i], true);
+                    for (i = 0; i < urlx.length; i++) sb.removeAllUrlReferences(segment, urlx[i], true);
                 }
                 if (delurl || delurlref) {
-                    for (int i = 0; i < urlx.length; i++) {
-                        sb.urlRemove(urlx[i]);
+                    for (i = 0; i < urlx.length; i++) {
+                        sb.urlRemove(segment, urlx[i]);
                     }
                 }
                 final Set<String> urlHashes = new HashSet<String>();
-                for (int i = 0; i < urlx.length; i++) urlHashes.add(urlx[i]);
-                sb.indexSegment.termIndex().remove(keyhash, urlHashes);
+                for (i = 0; i < urlx.length; i++) urlHashes.add(urlx[i]);
+                segment.termIndex().remove(keyhash, urlHashes);
                 // this shall lead to a presentation of the list; so handle that the remaining program
                 // thinks that it was called for a list presentation
                 post.remove("keyhashdelete");
@@ -183,7 +204,7 @@ public class IndexControlRWIs_p {
                 }
                 final Bitfield flags = compileFlags(post);
                 final int count = (post.get("lines", "all").equals("all")) ? -1 : post.getInt("lines", -1);
-                final RankingProcess ranking = genSearchresult(prop, sb, keyhash, flags);
+                final RankingProcess ranking = genSearchresult(prop, sb, segment, keyhash, flags);
                 genURLList(prop, keyhash, keystring, ranking, flags, count);
             }
 
@@ -212,7 +233,7 @@ public class IndexControlRWIs_p {
                 // prepare index
                 ReferenceContainer<WordReference> index;
                 final long starttime = System.currentTimeMillis();
-                index = sb.indexSegment.termIndex().get(keyhash, null);
+                index = segment.termIndex().get(keyhash, null);
                 // built urlCache
                 final Iterator<WordReference> urlIter = index.entries();
                 final HashMap<String, URLMetadataRow> knownURLs = new HashMap<String, URLMetadataRow>();
@@ -221,7 +242,7 @@ public class IndexControlRWIs_p {
                 URLMetadataRow lurl;
                 while (urlIter.hasNext()) {
                     iEntry = urlIter.next();
-                    lurl = sb.indexSegment.urlMetadata().load(iEntry.metadataHash(), null, 0);
+                    lurl = segment.urlMetadata().load(iEntry.metadataHash(), null, 0);
                     if (lurl == null) {
                         unknownURLEntries.add(iEntry.metadataHash());
                         urlIter.remove();
@@ -251,9 +272,9 @@ public class IndexControlRWIs_p {
     
             // generate list
             if (post.containsKey("keyhashsimilar")) try {
-                final Iterator<ReferenceContainer<WordReference>> containerIt = sb.indexSegment.termIndex().references(keyhash, true, 256, false).iterator();
+                final Iterator<ReferenceContainer<WordReference>> containerIt = segment.termIndex().references(keyhash, true, 256, false).iterator();
                     ReferenceContainer<WordReference> container;
-                    int i = 0;
+                    i = 0;
                     int rows = 0, cols = 0;
                     prop.put("keyhashsimilar", "1");
                     while (containerIt.hasNext() && i < 256) {
@@ -283,10 +304,10 @@ public class IndexControlRWIs_p {
                         final String[] supportedBlacklistTypes = env.getConfig("BlackLists.types", "").split(",");
                         pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
                         yacyURL url;
-                        for (int i=0; i<urlx.length; i++) {
+                        for (i = 0; i < urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final URLMetadataRow e = sb.indexSegment.urlMetadata().load(urlx[i], null, 0);
-                            sb.indexSegment.urlMetadata().remove(urlx[i]);
+                            final URLMetadataRow e = segment.urlMetadata().load(urlx[i], null, 0);
+                            segment.urlMetadata().remove(urlx[i]);
                             if (e != null) {
                                 url = e.metadata().url();
                                 pw.println(url.getHost() + "/" + url.getFile());
@@ -311,10 +332,10 @@ public class IndexControlRWIs_p {
                         final String[] supportedBlacklistTypes = AbstractBlacklist.BLACKLIST_TYPES_STRING.split(",");
                         pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
                         yacyURL url;
-                        for (int i=0; i<urlx.length; i++) {
+                        for (i = 0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final URLMetadataRow e = sb.indexSegment.urlMetadata().load(urlx[i], null, 0);
-                            sb.indexSegment.urlMetadata().remove(urlx[i]);
+                            final URLMetadataRow e = segment.urlMetadata().load(urlx[i], null, 0);
+                            segment.urlMetadata().remove(urlx[i]);
                             if (e != null) {
                                 url = e.metadata().url();
                                 pw.println(url.getHost() + "/.*");
@@ -332,7 +353,7 @@ public class IndexControlRWIs_p {
                     }
                 }
                 try {
-                    sb.indexSegment.termIndex().remove(keyhash, urlHashes);
+                    segment.termIndex().remove(keyhash, urlHashes);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -343,7 +364,7 @@ public class IndexControlRWIs_p {
         
 
         // insert constants
-        prop.putNum("wcount", sb.indexSegment.termIndex().sizesMax());
+        prop.putNum("wcount", segment.termIndex().sizesMax());
         // return rewrite properties
         return prop;
     }
@@ -477,9 +498,9 @@ public class IndexControlRWIs_p {
         prop.put("searchresult_hosts", hc);
     }
 
-    public static RankingProcess genSearchresult(final serverObjects prop, final Switchboard sb, final byte[] keyhash, final Bitfield filter) {
+    public static RankingProcess genSearchresult(final serverObjects prop, final Switchboard sb, Segment segment, final byte[] keyhash, final Bitfield filter) {
         final QueryParams query = new QueryParams(new String(keyhash), -1, sb.getRanking(), filter);
-        final RankingProcess ranked = new RankingProcess(sb.indexSegment, query, Integer.MAX_VALUE, 1);
+        final RankingProcess ranked = new RankingProcess(segment, query, Integer.MAX_VALUE, 1);
         ranked.run();
         
         if (ranked.filteredCount() == 0) {

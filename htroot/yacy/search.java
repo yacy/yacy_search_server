@@ -41,6 +41,7 @@ import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.order.Base64Order;
 import de.anomic.kelondro.order.Bitfield;
 import de.anomic.kelondro.text.ReferenceContainer;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.SortStack;
 import de.anomic.net.natLib;
@@ -216,7 +217,7 @@ public final class search {
 
             final long timer = System.currentTimeMillis();
             //final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
-            final HashMap<byte[], ReferenceContainer<WordReference>> incc = sb.indexSegment.termIndex().searchConjunction(theQuery.queryHashes, QueryParams.hashes2StringSet(urls));
+            final HashMap<byte[], ReferenceContainer<WordReference>> incc = sb.indexSegments.termIndex(Segments.Process.PUBLIC).searchConjunction(theQuery.queryHashes, QueryParams.hashes2StringSet(urls));
             
             serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.COLLECTION, incc.size(), System.currentTimeMillis() - timer), false);
             if (incc != null) {
@@ -269,7 +270,7 @@ public final class search {
             RSSFeed.channels(RSSFeed.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.queryHashes), ""));
             
             // make event
-            theSearch = SearchEventCache.getEvent(theQuery, sb.indexSegment, sb.peers, sb.crawlResults, null, true); 
+            theSearch = SearchEventCache.getEvent(theQuery, sb.indexSegments.segment(Segments.Process.PUBLIC), sb.peers, sb.crawlResults, null, true);
             
             // set statistic details of search result and find best result index set
             if (theSearch.getRankingResult().getLocalResourceSize() == 0) {

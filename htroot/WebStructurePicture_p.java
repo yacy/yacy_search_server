@@ -93,7 +93,7 @@ public class WebStructurePicture_p {
             try {
                 hash = (new yacyURL("http://" + host, null)).hash().substring(6);
             } catch (final MalformedURLException e) {e.printStackTrace();}
-            assert (sb.webStructure.outgoingReferences(hash) != null);
+            //assert (sb.webStructure.outgoingReferences(hash) != null);
             
             // recursively find domains, up to a specific depth
             final ymageGraph graph = new ymageGraph();

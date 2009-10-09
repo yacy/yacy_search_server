@@ -31,6 +31,7 @@ import java.io.IOException;
 
 import de.anomic.crawler.ZURL;
 import de.anomic.http.metadata.RequestHeader;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -136,7 +137,7 @@ public final class crawlReceipt {
         
         if (result.equals("fill")) try {
             // put new entry into database
-            sb.indexSegment.urlMetadata().store(entry);
+            sb.indexSegments.urlMetadata(Segments.Process.RECEIPTS).store(entry);
             sb.crawlResults.stack(entry, youare, iam, 1);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
             log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + entry.hash() + ":" + metadata.url().toNormalform(false, true));

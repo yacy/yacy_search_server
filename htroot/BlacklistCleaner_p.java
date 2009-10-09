@@ -75,7 +75,7 @@ public class BlacklistCleaner_p {
         listManager.listsPath = new File(env.getRootPath(), env.getConfig("listManager.listsPath", "DATA/LISTS"));
         String blacklistToUse = null;
 
-        // getting the list of supported blacklist types
+        // get the list of supported blacklist types
         final String supportedBlacklistTypesStr = AbstractBlacklist.BLACKLIST_TYPES_STRING;
         final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(","); 
 
@@ -290,7 +290,7 @@ public class BlacklistCleaner_p {
             
             if (list != null){
                 
-                // getting rid of escape characters which make it impossible to
+                // get rid of escape characters which make it impossible to
                 // properly use contains()
                 if (s.contains("\\\\")) {
                     s = s.replaceAll(Pattern.quote("\\\\"), Matcher.quoteReplacement("\\"));

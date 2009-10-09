@@ -226,7 +226,7 @@ public class ResultFetcher {
                 registerFailure(page.hash(), "no text snippet for URL " + metadata.url());
                 if (!peers.mySeed().isVirgin())
                     try {
-                        TextSnippet.failConsequences(snippet, query.id(false));
+                        TextSnippet.failConsequences(this.indexSegment, snippet, query.id(false));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

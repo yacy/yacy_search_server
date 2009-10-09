@@ -156,7 +156,7 @@ public class URLMetadataRow implements Metadata {
             final int lapp) {
         // create new entry
         this.entry = rowdef.newEntry();
-        this.entry.setCol(col_hash, url.hash(), null);
+        this.entry.setCol(col_hash, url.hash());
         this.entry.setCol(col_comp, encodeComp(url, dc_title, dc_creator, dc_subject, ETag));
         encodeDate(col_mod, mod);
         encodeDate(col_load, load);
@@ -191,11 +191,17 @@ public class URLMetadataRow implements Metadata {
 
     private void encodeDate(final int col, final Date d) {
         // calculates the number of days since 1.1.1970 and returns this as 4-byte array
-        this.entry.setCol(col, NaturalOrder.encodeLong(d.getTime() / 86400000, 4));
+        // 86400000 is the number of milliseconds in one day
+        this.entry.setCol(col, NaturalOrder.encodeLong(d.getTime() / 86400000L, 4));
     }
 
     private Date decodeDate(final int col) {
-        return new Date(86400000 * this.entry.getColLong(col));
+        long t = this.entry.getColLong(col);
+        /*if (t < 14600) */return new Date(86400000L * t); // time was stored as number of days since epoch
+        /*
+        if (t < 350400) return new Date(3600000L * t); // hours since epoch
+        if (t < 21024000) return new Date(60000L * t); // minutes since epoch
+        */
     }
     
     public static byte[] encodeComp(final yacyURL url, final String dc_title, final String dc_creator, final String dc_subject, final String ETag) {

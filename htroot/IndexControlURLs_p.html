@@ -13,6 +13,15 @@
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">
     <fieldset><legend>URL Retrieval</legend>
       <dl>
+        <dt class="TableCellDark">Select Segment:</dt>
+        <dd>
+          <select name="selectSegment" size="1">
+            #{segments}#
+            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+            #{/segments}#
+          </select>
+        </dd>
+        
         <dt class="TableCellDark">Retrieve by URL:</dt>
         <dd><input type="text" name="urlstring" value="#[urlstring]#" size="40" maxlength="250" />
             <input type="submit" name="urlstringsearch" value="Show Details for URL" />

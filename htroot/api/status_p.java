@@ -3,6 +3,8 @@
 import de.anomic.http.io.ByteCountInputStream;
 import de.anomic.http.io.ByteCountOutputStream;
 import de.anomic.http.metadata.RequestHeader;
+import de.anomic.kelondro.text.Segment;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -17,14 +19,21 @@ public class status_p {
         // return variable that accumulates replacements
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        if (post == null || !post.containsKey("html"))
+        Segment segment = null;
+        if (post == null || !post.containsKey("html")) {
             prop.setLocalized(false);
+            if (post.containsKey("segment") && sb.verifyAuthentication(header, false)) {
+                segment = sb.indexSegments.segment(post.get("segment"));
+            }
+        }
+        if (segment == null) segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
+        
         prop.put("rejected", "0");
         sb.updateMySeed();
         final int cacheMaxSize = (int) sb.getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 10000);
         prop.putNum("ppm", sb.currentPPM());
         prop.putNum("qpm", sb.peers.mySeed().getQPM());
-        prop.put("wordCacheSize", Integer.toString(sb.indexSegment.termIndex().getBufferSize()));
+        prop.put("wordCacheSize", Integer.toString(segment.termIndex().getBufferSize()));
         prop.put("wordCacheMaxSize", Integer.toString(cacheMaxSize));
 		//
 		// memory usage and system attributes

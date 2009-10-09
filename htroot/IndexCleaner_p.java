@@ -27,6 +27,7 @@
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.Segment;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -39,11 +40,23 @@ public class IndexCleaner_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
         prop.put("title", "DbCleanup_p");
+        
+        // get segment
+        Segment indexSegment = null;
+        if (post != null && post.containsKey("segment")) {
+            String segmentName = post.get("segment");
+            if (sb.indexSegments.segmentExist(segmentName)) {
+                indexSegment = sb.indexSegments.segment(segmentName);
+            }
+        } else {
+            // take default segment
+            indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
+        }
+        
         if (post!=null) {
-            //prop.putHTML("bla", "post!=null");
             if (post.get("action").equals("ustart")) {
                 if (urldbCleanerThread==null || !urldbCleanerThread.isAlive()) {
-                    urldbCleanerThread = sb.indexSegment.urlMetadata().getBlacklistCleaner(Switchboard.urlBlacklist);
+                    urldbCleanerThread = indexSegment.urlMetadata().getBlacklistCleaner(Switchboard.urlBlacklist);
                     urldbCleanerThread.start();
                 }
                 else {
@@ -58,7 +71,7 @@ public class IndexCleaner_p {
             }
             else if (post.get("action").equals("rstart")) {
                 if (indexCleanerThread==null || !indexCleanerThread.isAlive()) {
-                    indexCleanerThread = sb.indexSegment.getReferenceCleaner(post.get("wordHash","AAAAAAAAAAAA").getBytes());
+                    indexCleanerThread = indexSegment.getReferenceCleaner(post.get("wordHash","AAAAAAAAAAAA").getBytes());
                     indexCleanerThread.start();
                 }
                 else {
@@ -74,10 +87,9 @@ public class IndexCleaner_p {
             prop.put("LOCATION","");
             return prop;
         }
-        //prop.put("bla", "post==null");
         if (urldbCleanerThread!=null) {
             prop.put("urldb", "1");
-            prop.putNum("urldb_percentUrls", ((double)urldbCleanerThread.totalSearchedUrls/sb.indexSegment.urlMetadata().size())*100);
+            prop.putNum("urldb_percentUrls", ((double)urldbCleanerThread.totalSearchedUrls/indexSegment.urlMetadata().size())*100);
             prop.putNum("urldb_blacklisted", urldbCleanerThread.blacklistedUrls);
             prop.putNum("urldb_total", urldbCleanerThread.totalSearchedUrls);
             prop.putHTML("urldb_lastBlacklistedUrl", urldbCleanerThread.lastBlacklistedUrl);
@@ -94,7 +106,7 @@ public class IndexCleaner_p {
             prop.put("rwidb_threadAlive", indexCleanerThread.isAlive() + "");
             prop.put("rwidb_threadToString", indexCleanerThread.toString());
             prop.putNum("rwidb_RWIcountstart", indexCleanerThread.rwiCountAtStart);
-            prop.putNum("rwidb_RWIcountnow", sb.indexSegment.termIndex().sizesMax());
+            prop.putNum("rwidb_RWIcountnow", indexCleanerThread.rwisize());
             prop.put("rwidb_wordHashNow", (indexCleanerThread.wordHashNow == null) ? "NULL" : new String(indexCleanerThread.wordHashNow));
             prop.put("rwidb_lastWordHash", (indexCleanerThread.lastWordHash == null) ? "null" : new String(indexCleanerThread.lastWordHash));
             prop.putNum("rwidb_lastDeletionCounter", indexCleanerThread.lastDeletionCounter);

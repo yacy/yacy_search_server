@@ -328,14 +328,14 @@ public class BlogComments {
         try {
             if (!Boolean.valueOf(sb.getConfig("msgForwardingEnabled","false")).booleanValue()) return;
 
-            // getting the recipient address
+            // get the recipient address
             final String sendMailTo = sb.getConfig("msgForwardingTo","root@localhost").trim();
 
-            // getting the sendmail configuration
+            // get the sendmail configuration
             final String sendMailStr = sb.getConfig("msgForwardingCmd","/usr/bin/sendmail")+" "+sendMailTo;
             final String[] sendMail = sendMailStr.trim().split(" ");
 
-            // building the message text
+            // build the message text
             final StringBuilder emailTxt = new StringBuilder();
             emailTxt.append("To: ")
             .append(sendMailTo)

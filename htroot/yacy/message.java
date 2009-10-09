@@ -167,10 +167,10 @@ public final class message {
         try {
             if (!Boolean.valueOf(sb.getConfig("msgForwardingEnabled","false")).booleanValue()) return;
 
-            // getting the recipient address
+            // get the recipient address
             final String sendMailTo = sb.getConfig("msgForwardingTo","root@localhost").trim();
 			
-            // getting the sendmail configuration
+            // get the sendmail configuration
             final String sendMailStr = sb.getConfig("msgForwardingCmd","/usr/bin/sendmail")+" "+sendMailTo;
             final String[] sendMail = sendMailStr.trim().split(" ");
 

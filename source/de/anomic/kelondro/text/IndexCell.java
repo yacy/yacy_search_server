@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import de.anomic.kelondro.index.ARC;
 import de.anomic.kelondro.index.Row;
 import de.anomic.kelondro.index.SimpleARC;
 import de.anomic.kelondro.order.ByteOrder;
@@ -64,11 +65,12 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     private       long                                   lastCleanup;
     private final long                                   targetFileSize, maxFileSize;
     private final int                                    writeBufferSize;
-    private final SimpleARC<ByteArray, Integer>          countCache;
+    private final ARC<ByteArray, Integer>                countCache;
     private       boolean                                cleanerRunning = false;
     
     public IndexCell(
             final File cellPath,
+            final String prefix,
             final ReferenceFactory<ReferenceType> factory,
             final ByteOrder termOrder,
             final Row payloadrow,
@@ -80,7 +82,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             ) throws IOException {
         super(factory);
         
-        this.array = new ReferenceContainerArray<ReferenceType>(cellPath, factory, termOrder, payloadrow, merger);
+        this.array = new ReferenceContainerArray<ReferenceType>(cellPath, prefix, factory, termOrder, payloadrow, merger);
         this.ram = new ReferenceContainerCache<ReferenceType>(factory, payloadrow, termOrder);
         this.maxRamEntries = maxRamEntries;
         this.merger = merger;

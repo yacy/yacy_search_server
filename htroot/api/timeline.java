@@ -32,6 +32,7 @@ import de.anomic.document.Word;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.Segment;
+import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.TermSearch;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.DateFormatter;
@@ -51,6 +52,13 @@ public final class timeline {
         final serverObjects prop = new serverObjects();
         if ((post == null) || (env == null)) return prop;
         final boolean authenticated = sb.adminAuthenticated(header) >= 2;
+        
+        Segment segment = null;
+        if (post.containsKey("segment") && authenticated) {
+            segment = sb.indexSegments.segment(post.get("segment"));
+        } else {
+            segment = sb.indexSegments.segment(Segments.Process.PUBLIC);
+        }
         
         final String  querystring = post.get("query", "");  // a string of word hashes that shall be searched and combined
         final int     count  = Math.min((authenticated) ? 1000 : 10, post.getInt("maximumRecords", 1000)); // SRU syntax
@@ -80,7 +88,7 @@ public final class timeline {
         //yacyCore.log.logInfo("INIT TIMELINE SEARCH: " + plasmaSearchQuery.anonymizedQueryHashes(query[0]) + " - " + count + " links");
         
         // get the index container with the result vector
-        final TermSearch<WordReference> search = sb.indexSegment.termIndex().query(
+        final TermSearch<WordReference> search = segment.termIndex().query(
                 q,
                 Word.words2hashes(query[1]),
                 null,
