@@ -169,17 +169,15 @@ import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.SetTools;
 import de.anomic.net.UPnP;
 import de.anomic.search.blockrank.CRDistribution;
-import de.anomic.server.serverAbstractSwitch;
+import de.anomic.server.serverSwitch;
 import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverInstantBusyThread;
-import de.anomic.server.serverObjects;
 import de.anomic.server.serverProcessor;
 import de.anomic.server.serverProcessorJob;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSemaphore;
-import de.anomic.server.serverSwitch;
 import de.anomic.server.serverSystem;
 import de.anomic.server.serverThread;
 import de.anomic.tools.crypt;
@@ -200,7 +198,7 @@ import de.anomic.yacy.dht.PeerSelection;
 import de.anomic.yacy.logging.Log;
 import de.anomic.ymage.WebStructureGraph;
 
-public final class Switchboard extends serverAbstractSwitch implements serverSwitch {
+public final class Switchboard extends serverSwitch {
     
     // load slots
     public  static int  xstackCrawlSlots     = 2000;
@@ -244,18 +242,18 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
     public  blogBoardComments              blogCommentDB;
     public  RobotsTxt                      robots;
     public  boolean                        rankingOn;
-    public  CRDistribution      rankingOwnDistribution;
-    public  CRDistribution      rankingOtherDistribution;
+    public  CRDistribution                 rankingOwnDistribution;
+    public  CRDistribution                 rankingOtherDistribution;
     public  HashMap<String, Object[]>      outgoingCookies, incomingCookies;
     public  volatile long                  proxyLastAccess, localSearchLastAccess, remoteSearchLastAccess;
     public  yacyCore                       yc;
     public  ResourceObserver               observer;
     public  userDB                         userDB;
     public  bookmarksDB                    bookmarksDB;
-    public  WebStructureGraph             webStructure;
+    public  WebStructureGraph              webStructure;
     public  ImporterManager                dbImportManager;
-    public  ArrayList<QueryParams>   localSearches; // array of search result properties as HashMaps
-    public  ArrayList<QueryParams>   remoteSearches; // array of search result properties as HashMaps
+    public  ArrayList<QueryParams>         localSearches; // array of search result properties as HashMaps
+    public  ArrayList<QueryParams>         remoteSearches; // array of search result properties as HashMaps
     public  ConcurrentHashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
     public  long                           indexedPages = 0;
     public  double                         requestedQueries = 0d;
@@ -352,37 +350,32 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         this.queuesRoot = new File(new File(indexPath, networkName), "QUEUES");
         this.networkRoot.mkdirs();
         this.queuesRoot.mkdirs();
-        try {
-			final File mySeedFile = new File(networkRoot, yacySeedDB.DBFILE_OWN_SEED);
-	        peers = new yacySeedDB(
-	                networkRoot,
-	                "seed.new.heap",
-	                "seed.old.heap",
-	                "seed.pot.heap",
-	                mySeedFile,
-	                redundancy,
-	                partitionExponent,
-	                this.useTailCache,
-	                this.exceed134217727);
-            File oldSingleSegment = new File(new File(indexPath, networkName), "TEXT");
-            File newSegmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
-	        Segments.migrateOld(oldSingleSegment, newSegmentsPath, getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default"));
-	        indexSegments = new Segments(
-                    log,
-                    newSegmentsPath,
-                    wordCacheMaxCount,
-                    fileSizeMax,
-                    this.useTailCache,
-                    this.exceed134217727);
-	        crawler = new CrawlSwitchboard(
-	                peers,
-	                networkName,
-	                log,
-	                this.queuesRoot);
-		} catch (IOException e1) {
-			e1.printStackTrace();
-			indexSegments = null;
-		}
+		final File mySeedFile = new File(networkRoot, yacySeedDB.DBFILE_OWN_SEED);
+        peers = new yacySeedDB(
+                networkRoot,
+                "seed.new.heap",
+                "seed.old.heap",
+                "seed.pot.heap",
+                mySeedFile,
+                redundancy,
+                partitionExponent,
+                this.useTailCache,
+                this.exceed134217727);
+        File oldSingleSegment = new File(new File(indexPath, networkName), "TEXT");
+        File newSegmentsPath = new File(new File(indexPath, networkName), "SEGMENTS");
+        Segments.migrateOld(oldSingleSegment, newSegmentsPath, getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default"));
+        indexSegments = new Segments(
+                log,
+                newSegmentsPath,
+                wordCacheMaxCount,
+                fileSizeMax,
+                this.useTailCache,
+                this.exceed134217727);
+        crawler = new CrawlSwitchboard(
+                peers,
+                networkName,
+                log,
+                this.queuesRoot);
 		
 		// set the default segment names
 		indexSegments.setSegment(Segments.Process.RECEIPTS,       getConfig(SwitchboardConstants.SEGMENT_RECEIPTS, "default"));
@@ -846,17 +839,13 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
                     partitionExponent,
                     this.useTailCache,
                     this.exceed134217727);
-            try {
-                indexSegments = new Segments(
-                        log,
-                        new File(new File(indexPrimaryPath, networkName), "SEGMENTS"),
-                        wordCacheMaxCount,
-                        fileSizeMax,
-                        this.useTailCache,
-                        this.exceed134217727);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            indexSegments = new Segments(
+                    log,
+                    new File(new File(indexPrimaryPath, networkName), "SEGMENTS"),
+                    wordCacheMaxCount,
+                    fileSizeMax,
+                    this.useTailCache,
+                    this.exceed134217727);
             
             // startup
             crawler = new CrawlSwitchboard(
@@ -1815,12 +1804,6 @@ public final class Switchboard extends serverAbstractSwitch implements serverSwi
         	e.printStackTrace();
         	return DateFormatter822.format(new Date());
         }
-    }
-    
-    
-    public serverObjects action(final String actionName, final serverObjects actionInput) {
-        // perform an action. (not used)    
-        return null;
     }
     
     // method for index deletion

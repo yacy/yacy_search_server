@@ -76,7 +76,7 @@ public final class Segments implements Iterable<Segment> {
             final int entityCacheMaxSize,
             final long maxFileSize,
             final boolean useTailCache,
-            final boolean exceed134217727) throws IOException {
+            final boolean exceed134217727) {
         this.log = log;
         this.segmentsPath = segmentsPath;
         this.entityCacheMaxSize = entityCacheMaxSize;
@@ -215,7 +215,7 @@ public final class Segments implements Iterable<Segment> {
          );
     }
     
-    public synchronized Segment.ReferenceCleaner getReferenceCleaner(final String segmentName, final byte[] startHash) throws IOException {
+    public synchronized Segment.ReferenceCleaner getReferenceCleaner(final String segmentName, final byte[] startHash) {
         return segment(segmentName).getReferenceCleaner(startHash);
     }
 
