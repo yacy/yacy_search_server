@@ -25,7 +25,7 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
-package de.anomic.kelondro.blob;
+package net.yacy.kelondro.blob;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

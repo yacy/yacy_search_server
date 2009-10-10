@@ -35,13 +35,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.kelondro.blob.HeapWriter;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 
-import de.anomic.kelondro.blob.HeapWriter;
 import de.anomic.kelondro.util.ByteArray;
 import de.anomic.kelondro.util.FileUtils;
 

@@ -54,7 +54,7 @@
 // A re-distribution must contain the intact and unchanged copyright statement.
 
 
-package de.anomic.kelondro.blob;
+package net.yacy.kelondro.blob;
 
 import net.yacy.kelondro.order.NaturalOrder;
 

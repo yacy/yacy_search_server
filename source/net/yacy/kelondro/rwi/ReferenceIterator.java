@@ -31,10 +31,10 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.kelondro.blob.HeapReader;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.order.CloneableIterator;
-import de.anomic.kelondro.blob.HeapReader;
 
 /**
  * iterator of BLOBHeap files: is used to import heap dumps into a write-enabled index heap

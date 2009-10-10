@@ -43,6 +43,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.ObjectIndex;
@@ -56,7 +57,6 @@ import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.order.Order;
 import net.yacy.kelondro.order.StackIterator;
 
-import de.anomic.kelondro.blob.ArrayStack;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.NamePrefixThreadFactory;

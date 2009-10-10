@@ -36,6 +36,8 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.kelondro.blob.Heap;
+import net.yacy.kelondro.blob.MapView;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 
@@ -44,8 +46,6 @@ import de.anomic.http.client.Client;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
-import de.anomic.kelondro.blob.Heap;
-import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.kelondroException;

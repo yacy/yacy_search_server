@@ -39,6 +39,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.yacy.kelondro.blob.Heap;
+import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
@@ -49,8 +51,6 @@ import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.AlternativeDomainNames;
-import de.anomic.kelondro.blob.Heap;
-import de.anomic.kelondro.blob.MapDataMining;
 import de.anomic.kelondro.util.kelondroException;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCore;

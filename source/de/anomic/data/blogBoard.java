@@ -42,6 +42,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import net.yacy.kelondro.blob.Heap;
+import net.yacy.kelondro.blob.MapView;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -52,8 +54,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.anomic.data.wiki.wikiBoard;
-import de.anomic.kelondro.blob.Heap;
-import de.anomic.kelondro.blob.MapView;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.kelondroException;
 

@@ -29,10 +29,10 @@ import java.io.IOException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Semaphore;
 
+import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
 
-import de.anomic.kelondro.blob.ArrayStack;
 import de.anomic.kelondro.util.MemoryControl;
 
 /**
