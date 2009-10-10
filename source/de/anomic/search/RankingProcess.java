@@ -46,6 +46,8 @@ import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.SortStack;
 
 import de.anomic.document.Condenser;
 import de.anomic.document.Word;
@@ -55,8 +57,6 @@ import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
-import de.anomic.kelondro.util.SortStack;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.ProfilingGraph;

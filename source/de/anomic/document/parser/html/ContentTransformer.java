@@ -34,8 +34,9 @@ import java.util.Locale;
 import java.util.Properties;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.util.ByteBuffer;
+
 import de.anomic.http.server.TemplateEngine;
-import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.server.serverCharBuffer;
 
 public class ContentTransformer extends AbstractTransformer implements Transformer {

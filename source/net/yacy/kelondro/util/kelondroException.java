@@ -1,11 +1,16 @@
-// kelondroOutOfLimitsException.java
-// ---------------------------------
-// part of The Kelondro Database
-// (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2006
-// created: 17.01.2006
+// kelondroException.java
+// -----------------------
+// (C) 2005 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 12.04.2005 on http://yacy.net
 //
+// This is a part of YaCy, a peer-to-peer based web search engine
+//
+// $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
+// $LastChangedRevision: 1986 $
+// $LastChangedBy: orbiter $
+//
+// LICENSE
+// 
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation; either version 2 of the License, or
@@ -20,22 +25,23 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.util;
+package net.yacy.kelondro.util;
 
-public class kelondroOutOfLimitsException extends java.lang.RuntimeException {
+public class kelondroException extends java.lang.RuntimeException {
     
-    private static final long serialVersionUID = 1L;
 
-    public kelondroOutOfLimitsException() {
+	private static final long serialVersionUID = 1L;
+
+	public kelondroException() {
         super("unspecific-error");
     }
     
-    public kelondroOutOfLimitsException(final int expectedLimit, final int actualSize) {
-        super("Object size is " + actualSize + "; it exceeds the size limit " + expectedLimit);
+    public kelondroException(final String message) {
+        super(message);
     }
     
-    public kelondroOutOfLimitsException(final int actualSize) {
-        super("Object size is " + actualSize + "; must not be negative");
+    public kelondroException(final String database, final String message) {
+        super(message + " in db '" + database + "'");
     }
-    
+
 }

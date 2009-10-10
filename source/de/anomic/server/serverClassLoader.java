@@ -25,7 +25,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-import de.anomic.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.FileUtils;
+
 
 public final class serverClassLoader extends ClassLoader {
     /**

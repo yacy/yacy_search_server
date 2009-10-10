@@ -31,8 +31,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import net.yacy.kelondro.util.DateFormatter;
+
 import de.anomic.http.server.HTTPDemon;
-import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.server.serverCore;
 
 public class RequestHeader extends HeaderFramework {

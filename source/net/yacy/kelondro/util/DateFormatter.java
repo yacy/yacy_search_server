@@ -22,7 +22,7 @@
 
 // this class is needed to replace the slow java built-in date method by a faster version
 
-package de.anomic.kelondro.util;
+package net.yacy.kelondro.util;
 
 import java.text.DateFormat;
 import java.text.ParseException;

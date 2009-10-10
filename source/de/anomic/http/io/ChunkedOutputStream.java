@@ -29,8 +29,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import de.anomic.kelondro.util.ByteBuffer;
-import de.anomic.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.server.serverCore;
 
 public final class ChunkedOutputStream extends FilterOutputStream {

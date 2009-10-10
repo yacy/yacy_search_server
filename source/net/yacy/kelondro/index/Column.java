@@ -27,7 +27,7 @@
 
 package net.yacy.kelondro.index;
 
-import de.anomic.kelondro.util.kelondroException;
+import net.yacy.kelondro.util.kelondroException;
 
 public class Column {
 

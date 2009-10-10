@@ -30,7 +30,8 @@ package de.anomic.yacy;
 
 import java.io.File;
 
-import de.anomic.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.search.Switchboard;
 
 public class yacyAccessible {

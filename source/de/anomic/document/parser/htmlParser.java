@@ -34,6 +34,8 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Document;
 import de.anomic.document.Idiom;
@@ -41,7 +43,6 @@ import de.anomic.document.ParserException;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.ScraperInputStream;
 import de.anomic.document.parser.html.TransformerWriter;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class htmlParser extends AbstractParser implements Idiom {

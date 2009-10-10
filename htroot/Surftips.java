@@ -34,11 +34,11 @@ import java.util.Iterator;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.ScoreCluster;
 
 import de.anomic.data.Blacklist;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

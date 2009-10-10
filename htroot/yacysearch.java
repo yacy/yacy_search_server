@@ -35,6 +35,9 @@ import java.util.TreeSet;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.util.Formatter;
+import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.SetTools;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.crawler.retrieval.LoaderDispatcher;
@@ -50,8 +53,6 @@ import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.kelondro.util.SetTools;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.SearchEvent;
@@ -64,7 +65,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.iso639;
-import de.anomic.tools.Formatter;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacyURL;

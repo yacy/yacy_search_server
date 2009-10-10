@@ -40,16 +40,16 @@ import net.yacy.kelondro.blob.Heap;
 import net.yacy.kelondro.blob.MapView;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.kelondroException;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.client.Client;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
-import de.anomic.kelondro.util.ByteBuffer;
-import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.kelondro.util.kelondroException;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class RobotsTxt {

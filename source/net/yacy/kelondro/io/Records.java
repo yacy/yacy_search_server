@@ -30,8 +30,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import de.anomic.kelondro.util.FileUtils;
-import de.anomic.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
+
 
 /**
  * The Records data structure is a flat file with records of fixed length.

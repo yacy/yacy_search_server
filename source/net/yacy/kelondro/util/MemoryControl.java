@@ -23,10 +23,9 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.util;
+package net.yacy.kelondro.util;
 
 import net.yacy.kelondro.logging.Log;
-import de.anomic.tools.Formatter;
 
 /**
  * Use this to get information about memory usage or try to free some memory

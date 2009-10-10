@@ -48,12 +48,12 @@ import java.util.TreeSet;
 
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.util.SetTools;
 
 import de.anomic.document.language.Identificator;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.ImageEntry;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
-import de.anomic.kelondro.util.SetTools;
 import de.anomic.yacy.yacyURL;
 
 public final class Condenser {

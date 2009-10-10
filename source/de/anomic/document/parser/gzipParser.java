@@ -34,12 +34,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class gzipParser extends AbstractParser implements Idiom {

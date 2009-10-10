@@ -33,6 +33,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.data.Blacklist;
@@ -40,7 +41,6 @@ import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;

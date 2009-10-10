@@ -40,8 +40,8 @@ import java.util.zip.GZIPOutputStream;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.util.ByteArray;
 
-import de.anomic.kelondro.util.ByteArray;
 
 public class Compressor implements BLOB {
 

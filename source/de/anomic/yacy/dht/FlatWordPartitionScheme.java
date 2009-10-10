@@ -30,7 +30,7 @@ import java.util.TreeMap;
 
 import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.order.Base64Order;
-import de.anomic.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.MemoryControl;
 import de.anomic.yacy.yacySeed;
 
 /**

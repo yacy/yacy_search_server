@@ -49,9 +49,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.Formatter;
 
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.Formatter;
 
 /**
  * Wordlist based translator

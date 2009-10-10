@@ -39,14 +39,14 @@ import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MicroDate;
 import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.table.Table;
+import net.yacy.kelondro.util.AttrSeq;
+import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
 
-import de.anomic.kelondro.table.Table;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
-import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.kelondro.util.AttrSeq;
-import de.anomic.kelondro.util.FileUtils;
 
 public class CRProcess {
     

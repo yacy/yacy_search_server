@@ -41,9 +41,9 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.util.ByteArray;
+import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.kelondro.util.ByteArray;
-import de.anomic.kelondro.util.FileUtils;
 
 public final class ReferenceContainerCache<ReferenceType extends Reference> extends AbstractIndex<ReferenceType> implements Index<ReferenceType>, IndexReader<ReferenceType>, Iterable<ReferenceContainer<ReferenceType>> {
 

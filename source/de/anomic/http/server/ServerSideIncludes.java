@@ -31,10 +31,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Properties;
 
+import net.yacy.kelondro.util.ByteBuffer;
+
 import de.anomic.http.io.ChunkedOutputStream;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.util.ByteBuffer;
 
 public class ServerSideIncludes {
 

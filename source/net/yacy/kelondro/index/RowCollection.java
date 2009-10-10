@@ -41,11 +41,11 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.NamePrefixThreadFactory;
+import net.yacy.kelondro.util.kelondroException;
 
-import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.kelondro.util.NamePrefixThreadFactory;
-import de.anomic.kelondro.util.kelondroException;
-import de.anomic.kelondro.util.FileUtils;
 
 public class RowCollection implements Iterable<Row.Entry> {
 

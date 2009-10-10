@@ -44,16 +44,16 @@ import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.table.SplitTable;
+import net.yacy.kelondro.util.ScoreCluster;
 
 import de.anomic.data.Blacklist;
 import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.client.Client;
 import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.metadata.ResponseContainer;
-import de.anomic.kelondro.table.SplitTable;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
-import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.yacy.yacyURL;
 
 public final class MetadataRepository implements Iterable<byte[]> {

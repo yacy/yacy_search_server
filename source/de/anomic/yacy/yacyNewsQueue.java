@@ -53,10 +53,10 @@ import java.util.Iterator;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.table.RecordStack;
+import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.kelondro.table.RecordStack;
-import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.kelondro.util.FileUtils;
 
 public class yacyNewsQueue {
 

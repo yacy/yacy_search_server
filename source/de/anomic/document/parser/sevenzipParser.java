@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.FileUtils;
 
 import SevenZip.ArchiveExtractCallback;
 import SevenZip.IInStream;
@@ -48,7 +49,6 @@ import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCachedFileOutputStream;
 import de.anomic.yacy.yacyURL;
 

@@ -25,7 +25,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-import de.anomic.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.MemoryControl;
+
 
 public class CachedFileReader extends AbstractReader implements Reader {
 

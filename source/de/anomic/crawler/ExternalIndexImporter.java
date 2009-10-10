@@ -6,11 +6,11 @@ import java.util.TreeSet;
 
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
-import de.anomic.kelondro.util.DateFormatter;
 
 public class ExternalIndexImporter extends AbstractImporter implements Importer {
 	

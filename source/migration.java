@@ -25,10 +25,10 @@ import java.util.List;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
+import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.data.listManager;
 import de.anomic.http.server.HTTPDemon;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 

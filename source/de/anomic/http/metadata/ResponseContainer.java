@@ -30,12 +30,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.kelondro.util.FileUtils;
+
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpMethod;
 
 import de.anomic.http.client.ConnectionInfo;
 import de.anomic.http.io.ByteCountInputStream;
-import de.anomic.kelondro.util.FileUtils;
 
 /**
  * container for http-response data

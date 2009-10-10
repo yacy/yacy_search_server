@@ -27,7 +27,8 @@ package de.anomic.yacy.seedUpload;
 
 import java.io.File;
 
-import de.anomic.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacySeedUploader;

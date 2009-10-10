@@ -29,10 +29,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.Formatter;
+
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverBusyThread;
@@ -41,7 +43,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverSystem;
 import de.anomic.server.serverThread;
-import de.anomic.tools.Formatter;
 
 public class PerformanceQueues_p {
     /**

@@ -41,9 +41,9 @@ import java.util.List;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.util.ScoreCluster;
 
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.yacyURL;
 

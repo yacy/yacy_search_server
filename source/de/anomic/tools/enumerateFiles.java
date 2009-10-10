@@ -26,7 +26,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.FileUtils;
+
 
 public class enumerateFiles implements Enumeration<File> {
     

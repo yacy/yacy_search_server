@@ -24,7 +24,7 @@
   This class extends the kelondroRecords and adds a stack structure
 */
 
-package de.anomic.kelondro.table;
+package net.yacy.kelondro.table;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -37,9 +37,9 @@ import java.util.StringTokenizer;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.kelondroException;
 
-import de.anomic.kelondro.util.FileUtils;
-import de.anomic.kelondro.util.kelondroException;
 
 public final class RecordStack extends Records {
 

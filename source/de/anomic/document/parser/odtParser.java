@@ -42,6 +42,8 @@ import java.util.zip.ZipFile;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
@@ -53,7 +55,6 @@ import de.anomic.document.parser.xml.ODMetaHandler;
 import de.anomic.http.client.Client;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacyURL;
 

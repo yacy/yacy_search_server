@@ -29,10 +29,11 @@
 
 import java.io.IOException;
 
+import net.yacy.kelondro.util.DateFormatter;
+
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

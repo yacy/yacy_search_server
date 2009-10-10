@@ -30,7 +30,8 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import de.anomic.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.FileUtils;
+
 
 public class ImportDump {
 

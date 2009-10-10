@@ -34,12 +34,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.util.ScoreCluster;
 
 import de.anomic.document.Condenser;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
-import de.anomic.kelondro.util.ScoreCluster;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.RankingProcess;
 import de.anomic.yacy.yacyURL;

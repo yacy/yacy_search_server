@@ -2,6 +2,8 @@ package de.anomic.kelondro.util;
 
 import java.util.Date;
 
+import net.yacy.kelondro.util.DateFormatter;
+
 import junit.framework.TestCase;
 
 public class DateFormatterTest extends TestCase {

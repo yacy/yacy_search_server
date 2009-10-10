@@ -27,6 +27,7 @@
 package de.anomic.tools;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.ByteBuffer;
 
 import org.apache.tools.bzip2.CBZip2InputStream;
 
@@ -63,7 +64,6 @@ import de.anomic.data.wiki.wikiParser;
 import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
-import de.anomic.kelondro.util.ByteBuffer;
 import de.anomic.yacy.yacyURL;
 
 /*

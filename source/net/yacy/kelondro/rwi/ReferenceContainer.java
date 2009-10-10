@@ -38,8 +38,8 @@ import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.kelondro.util.ByteBuffer;
 
-import de.anomic.kelondro.util.ByteBuffer;
 
 /**
  * A ReferenceContainer is a set of ReferenceRows entries for a specific term.

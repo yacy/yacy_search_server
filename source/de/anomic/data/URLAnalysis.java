@@ -54,13 +54,13 @@ import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainerArray;
+import net.yacy.kelondro.util.MemoryControl;
 
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.MetadataRepository.Export;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
-import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.yacy.yacyURL;
 
 public class URLAnalysis {

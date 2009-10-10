@@ -37,10 +37,10 @@ import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.table.Table;
 
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.client.Cache;
-import de.anomic.kelondro.table.Table;
 
 public class Balancer {
     

@@ -41,6 +41,9 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
@@ -48,8 +51,6 @@ import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.ImageEntry;
-import de.anomic.kelondro.util.ByteBuffer;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class zipParser extends AbstractParser implements Idiom {

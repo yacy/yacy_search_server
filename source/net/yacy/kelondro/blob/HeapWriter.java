@@ -34,8 +34,8 @@ import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.Digest;
+import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.kelondro.util.FileUtils;
 
 public final class HeapWriter  {
 

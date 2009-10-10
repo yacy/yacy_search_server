@@ -30,7 +30,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import de.anomic.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.FileUtils;
+
 
 
 /**

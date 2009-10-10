@@ -47,6 +47,8 @@ import net.yacy.kelondro.blob.MapView;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.kelondroException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -54,8 +56,6 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.anomic.data.wiki.wikiBoard;
-import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.kelondro.util.kelondroException;
 
 public class blogBoard {
     

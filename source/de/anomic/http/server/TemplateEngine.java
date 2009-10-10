@@ -61,9 +61,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.kelondro.util.ByteBuffer;
-import de.anomic.kelondro.util.FileUtils;
 
 /**
  * A template engine, which substitutes patterns in strings<br>

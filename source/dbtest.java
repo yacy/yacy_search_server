@@ -19,11 +19,11 @@ import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.table.SQLTable;
+import net.yacy.kelondro.table.SplitTable;
+import net.yacy.kelondro.table.Table;
+import net.yacy.kelondro.util.MemoryControl;
 
-import de.anomic.kelondro.table.Table;
-import de.anomic.kelondro.table.SQLTable;
-import de.anomic.kelondro.table.SplitTable;
-import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.server.serverInstantBusyThread;
 import de.anomic.ymage.ymageChart;
 

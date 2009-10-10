@@ -33,9 +33,9 @@ import java.util.Random;
 import java.util.TreeMap;
 
 import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.util.ByteArray;
+import net.yacy.kelondro.util.MemoryControl;
 
-import de.anomic.kelondro.util.ByteArray;
-import de.anomic.kelondro.util.MemoryControl;
 
 /**
  * this is a speed test for performance tuning of b64 and hashing functions

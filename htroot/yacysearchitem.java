@@ -30,6 +30,8 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.util.Formatter;
+
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.MediaSnippet;
@@ -45,7 +47,6 @@ import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
-import de.anomic.tools.Formatter;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;

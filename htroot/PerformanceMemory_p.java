@@ -30,16 +30,16 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.kelondro.index.Cache;
+import net.yacy.kelondro.table.Table;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.Formatter;
+import net.yacy.kelondro.util.MemoryControl;
 
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.table.Table;
-import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.Formatter;
 
 public class PerformanceMemory_p {
     

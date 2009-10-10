@@ -29,8 +29,9 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

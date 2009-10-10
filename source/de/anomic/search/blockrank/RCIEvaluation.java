@@ -36,9 +36,9 @@ import java.util.TreeSet;
 
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
+import net.yacy.kelondro.util.AttrSeq;
+import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.kelondro.util.AttrSeq;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.RankingProcess;
 import de.anomic.yacy.yacyURL;
 

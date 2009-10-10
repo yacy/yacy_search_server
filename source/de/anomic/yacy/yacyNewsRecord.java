@@ -53,8 +53,8 @@ import java.util.Map.Entry;
 
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.util.DateFormatter;
 
-import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.server.serverCodings;
 
 public class yacyNewsRecord {

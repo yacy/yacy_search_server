@@ -58,9 +58,9 @@ import java.util.TreeSet;
 
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
+import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.document.Word;
-import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.net.natLib;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverDomains;

@@ -18,7 +18,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.tools;
+package net.yacy.kelondro.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -31,16 +31,14 @@ import java.util.concurrent.Semaphore;
 import net.yacy.kelondro.logging.Log;
 
 
-public class consoleInterface extends Thread
-{
+public class ConsoleInterface extends Thread {
     private final InputStream stream;
     private final List<String> output = new ArrayList<String>();
     private final Semaphore dataIsRead = new Semaphore(1);
     private final Log log;
     
 
-    public consoleInterface(final InputStream stream, final Log log)
-    {
+    public ConsoleInterface(final InputStream stream, final Log log) {
         this.log = log;
         this.stream = stream;
         // block reading {@see getOutput()}
@@ -86,7 +84,7 @@ public class consoleInterface extends Thread
      * 
      * @return lines of text in stream
      */
-    public List<String> getOutput(){
+    public List<String> getOutput() {
         // wait that data is ready
         try {
             dataIsRead.acquire();
@@ -106,14 +104,14 @@ public class consoleInterface extends Thread
 	public static List<String> getConsoleOutput(final List<String> processArgs, Log log) throws IOException {
 	    final ProcessBuilder processBuilder = new ProcessBuilder(processArgs);
 	    Process process = null;
-	    consoleInterface inputStream = null;
-	    consoleInterface errorStream = null;
+	    ConsoleInterface inputStream = null;
+	    ConsoleInterface errorStream = null;
 	
 	    try {
 	        process = processBuilder.start();
 	
-	        inputStream = new consoleInterface(process.getInputStream(), log);
-	        errorStream = new consoleInterface(process.getErrorStream(), log);
+	        inputStream = new ConsoleInterface(process.getInputStream(), log);
+	        errorStream = new ConsoleInterface(process.getErrorStream(), log);
 	
 	        inputStream.start();
 	        errorStream.start();

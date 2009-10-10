@@ -34,8 +34,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
-import de.anomic.kelondro.util.NamePrefixThreadFactory;
 
 public class serverProcessor<J extends serverProcessorJob> {
 

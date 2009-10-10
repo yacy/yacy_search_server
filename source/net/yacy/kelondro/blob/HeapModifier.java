@@ -31,9 +31,9 @@ import java.util.SortedMap;
 import net.yacy.kelondro.io.CachedFileWriter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
 
-import de.anomic.kelondro.util.FileUtils;
-import de.anomic.kelondro.util.MemoryControl;
 
 public class HeapModifier extends HeapReader implements BLOB {
  

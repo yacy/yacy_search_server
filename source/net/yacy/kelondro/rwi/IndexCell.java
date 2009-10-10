@@ -38,9 +38,9 @@ import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.Order;
+import net.yacy.kelondro.util.ByteArray;
+import net.yacy.kelondro.util.MemoryControl;
 
-import de.anomic.kelondro.util.ByteArray;
-import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.server.serverProfiling;
 
 /*

@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.document.Condenser;
 import de.anomic.document.ParserException;
@@ -48,7 +50,6 @@ import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

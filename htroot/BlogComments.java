@@ -39,6 +39,7 @@ import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
@@ -47,7 +48,6 @@ import de.anomic.data.userDB;
 import de.anomic.data.blogBoard.BlogEntry;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

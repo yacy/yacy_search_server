@@ -31,8 +31,8 @@ import java.util.Random;
 import java.util.StringTokenizer;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;

@@ -28,9 +28,10 @@
 import java.io.File;
 import java.util.HashSet;
 
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.server.HTTPDemon;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverBusyThread;

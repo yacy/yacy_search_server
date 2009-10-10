@@ -52,10 +52,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.Formatter;
+
 import de.anomic.document.parser.html.CharacterCoding;
-import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.search.Switchboard;
-import de.anomic.tools.Formatter;
 
 public class serverObjects extends HashMap<String, String> implements Cloneable {
 

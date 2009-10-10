@@ -29,10 +29,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.DiskSpace;
 
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
-import de.anomic.tools.diskUsage;
 
 public final class ResourceObserver {
     // Unknown for now
@@ -82,10 +82,10 @@ public final class ResourceObserver {
             } catch (final IOException e) {}
         }
         
-        diskUsage.init(pathsToCheck);
+        DiskSpace.init(pathsToCheck);
         
-        if (!diskUsage.isUsable())
-            log.logWarning("Disk usage returned: " + diskUsage.getErrorMessage());
+        if (!DiskSpace.isUsable())
+            log.logWarning("Disk usage returned: " + DiskSpace.getErrorMessage());
         
         checkDiskUsageCount = 0;
         checkMemoryUsageCount = 0;
@@ -136,10 +136,10 @@ public final class ResourceObserver {
             }
         }
         else {
-            if (diskUsage.isUsable())
+            if (DiskSpace.isUsable())
                 log.logInfo("run completed; everything in order");
             else
-                log.logInfo("The observer is out of order: " + diskUsage.getErrorMessage());
+                log.logInfo("The observer is out of order: " + DiskSpace.getErrorMessage());
         }
     }
     
@@ -175,10 +175,10 @@ public final class ResourceObserver {
     private int checkDisks() {
         int ret = HIGH;   
     
-        if (!diskUsage.isUsable ())
+        if (!DiskSpace.isUsable ())
             return HIGH;
         
-        final HashMap<String, long[]> usage = diskUsage.getDiskUsage();
+        final HashMap<String, long[]> usage = DiskSpace.getDiskUsage();
         long[] val;
         for (final Map.Entry<String, long[]> entry: usage.entrySet()) {
             val = entry.getValue();

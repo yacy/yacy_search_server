@@ -48,12 +48,13 @@ import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.client.Client;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacyURL;
+import net.yacy.kelondro.util.FileUtils;
+
 import org.xml.sax.SAXException;
 
 public class sharedBlacklist_p {

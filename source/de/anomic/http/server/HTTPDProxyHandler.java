@@ -72,6 +72,8 @@ import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
@@ -90,8 +92,6 @@ import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
 import de.anomic.http.metadata.ResponseHeader;
-import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;

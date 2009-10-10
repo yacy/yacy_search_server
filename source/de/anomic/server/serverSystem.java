@@ -34,9 +34,9 @@ import java.util.Properties;
 import java.util.Vector;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.ConsoleInterface;
 
-import de.anomic.kelondro.util.FileUtils;
-import de.anomic.tools.consoleInterface;
 
 public final class serverSystem {
 
@@ -240,7 +240,7 @@ public final class serverSystem {
         processArgs.add("-Xms4m");
         processArgs.add("-Xmx" + Integer.toString(mem) + "m");
         try {
-    		line = consoleInterface.getLastLineConsoleOutput(processArgs, new Log("MEMCHECK"));
+    		line = ConsoleInterface.getLastLineConsoleOutput(processArgs, new Log("MEMCHECK"));
 		} catch (final IOException e) {
 			return false;
 		}

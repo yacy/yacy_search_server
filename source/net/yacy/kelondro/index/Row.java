@@ -43,9 +43,9 @@ import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.order.Order;
+import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.kelondroException;
 
-import de.anomic.kelondro.util.ByteBuffer;
-import de.anomic.kelondro.util.kelondroException;
 
 public final class Row {
    

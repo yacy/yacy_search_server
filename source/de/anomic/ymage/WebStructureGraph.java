@@ -40,11 +40,11 @@ import java.util.TreeSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.MicroDate;
+import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.document.Condenser;
 import de.anomic.document.Document;
-import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class WebStructureGraph {

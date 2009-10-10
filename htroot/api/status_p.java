@@ -1,11 +1,11 @@
 
 
+import net.yacy.kelondro.util.MemoryControl;
 import de.anomic.http.io.ByteCountInputStream;
 import de.anomic.http.io.ByteCountOutputStream;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;

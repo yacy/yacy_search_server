@@ -33,6 +33,8 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.kelondro.util.FileUtils;
+
 import org.apache.tools.bzip2.CBZip2InputStream;
 
 import de.anomic.document.AbstractParser;
@@ -40,7 +42,6 @@ import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.yacy.yacyURL;
 
 public class bzipParser extends AbstractParser implements Idiom {

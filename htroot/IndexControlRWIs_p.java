@@ -40,6 +40,7 @@ import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
+import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.data.AbstractBlacklist;
 import de.anomic.data.Blacklist;
@@ -51,7 +52,6 @@ import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
-import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProcess;
 import de.anomic.search.SearchEventCache;

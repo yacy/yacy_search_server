@@ -41,9 +41,9 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.RotateIterator;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
 
-import de.anomic.kelondro.util.FileUtils;
-import de.anomic.kelondro.util.MemoryControl;
 
 public class HeapReader {
 

@@ -27,7 +27,7 @@
 // value[0]   = the total space of the volume, on windows not used
 // value[1]   = the free space of the volume
 
-package de.anomic.tools;
+package net.yacy.kelondro.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,10 +35,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+
 import net.yacy.kelondro.logging.Log;
 
 
-public class diskUsage {
+public class DiskSpace {
     
     private static Log log = new Log("DISK USAGE");
     
@@ -231,7 +232,7 @@ public class diskUsage {
         if (usedOS != TRU64 && usedOS != HAIKU)
             processArgs.add("-l");
 
-        final List<String> lines = consoleInterface.getConsoleOutput(processArgs, log);
+        final List<String> lines = ConsoleInterface.getConsoleOutput(processArgs, log);
         return lines;
     }
 
@@ -319,7 +320,7 @@ public class diskUsage {
             processArgs.add("\"" + yacyUsedVolumes.get(i) + "\"");
 
             try {
-                final List<String> lines = consoleInterface.getConsoleOutput(processArgs, log);
+                final List<String> lines = ConsoleInterface.getConsoleOutput(processArgs, log);
 
                 String line = "";
                 for (int l = lines.size() - 1; l >= 0; l--) {

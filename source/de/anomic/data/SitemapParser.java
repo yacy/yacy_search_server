@@ -35,6 +35,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.DateFormatter;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -50,7 +51,6 @@ import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
 import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacyURL;
 

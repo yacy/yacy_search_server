@@ -50,8 +50,9 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import net.yacy.kelondro.util.DateFormatter;
+
 import de.anomic.http.server.HTTPDemon;
-import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.yacy.yacyURL;
 
 

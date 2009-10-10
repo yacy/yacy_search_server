@@ -31,7 +31,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import de.anomic.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.MemoryControl;
+
 
 public class serverProfiling extends Thread {
     

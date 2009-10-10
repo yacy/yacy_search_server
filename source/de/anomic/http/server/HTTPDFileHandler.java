@@ -82,6 +82,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPOutputStream;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
 
 import de.anomic.document.Classification;
 import de.anomic.document.parser.htmlParser;
@@ -92,10 +96,6 @@ import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.http.server.servlets.transferURL;
-import de.anomic.kelondro.util.ByteBuffer;
-import de.anomic.kelondro.util.DateFormatter;
-import de.anomic.kelondro.util.FileUtils;
-import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverClassLoader;

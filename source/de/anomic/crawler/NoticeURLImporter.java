@@ -6,7 +6,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import de.anomic.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.crawler.retrieval.Request;
 

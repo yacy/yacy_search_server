@@ -36,6 +36,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.SitemapImporter;
 import de.anomic.crawler.ZURL;
@@ -47,7 +49,6 @@ import de.anomic.document.parser.html.TransformerWriter;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;

@@ -36,8 +36,9 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.TreeMap;
 
+import net.yacy.kelondro.util.DateFormatter;
+
 import de.anomic.document.Document;
-import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.yacy.yacyURL;
 
 public class DCEntry extends TreeMap<String, String> {

@@ -32,8 +32,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCore.Session;
 
 public class serverSwitch {

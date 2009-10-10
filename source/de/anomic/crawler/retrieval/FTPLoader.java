@@ -33,6 +33,7 @@ import java.io.PrintStream;
 import java.util.Date;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.crawler.Latency;
 import de.anomic.document.Parser;
@@ -40,7 +41,6 @@ import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.net.ftpc;
 import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacyURL;

@@ -22,7 +22,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.table;
+package net.yacy.kelondro.table;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -50,10 +50,10 @@ import net.yacy.kelondro.io.Records;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.kelondroException;
 
-import de.anomic.kelondro.util.FileUtils;
-import de.anomic.kelondro.util.MemoryControl;
-import de.anomic.kelondro.util.kelondroException;
 
 /*
  * The EcoIndex builds upon the EcoFS and tries to reduce the number of IO requests that the

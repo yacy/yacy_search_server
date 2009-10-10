@@ -38,6 +38,9 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.content.RSSMessage;
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
@@ -49,8 +52,6 @@ import de.anomic.document.parser.html.ImageEntry;
 import de.anomic.document.parser.html.TransformerWriter;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.document.parser.xml.RSSReader;
-import de.anomic.kelondro.util.ByteBuffer;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacyURL;
 

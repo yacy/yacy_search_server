@@ -35,10 +35,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.kelondro.util.DateFormatter;
+
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.client.Client;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCodings;

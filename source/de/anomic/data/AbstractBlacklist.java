@@ -40,7 +40,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import de.anomic.kelondro.util.SetTools;
+import net.yacy.kelondro.util.SetTools;
+
 import de.anomic.search.SearchEventCache;
 import de.anomic.yacy.yacyURL;
 

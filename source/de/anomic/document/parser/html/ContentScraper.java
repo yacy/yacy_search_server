@@ -43,10 +43,11 @@ import java.util.Properties;
 
 import javax.swing.event.EventListenerList;
 
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.document.parser.htmlParser;
-import de.anomic.kelondro.util.FileUtils;
 import de.anomic.server.serverCharBuffer;
 import de.anomic.yacy.yacyURL;
 import de.anomic.tools.iso639;

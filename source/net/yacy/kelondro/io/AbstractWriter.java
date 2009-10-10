@@ -32,7 +32,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import de.anomic.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.ByteBuffer;
+
 
 public abstract class AbstractWriter extends AbstractReader implements Writer {
 
