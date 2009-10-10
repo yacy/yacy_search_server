@@ -45,12 +45,12 @@ import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowCollection;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.index.Row.Entry;
+import net.yacy.kelondro.io.BufferedRecords;
+import net.yacy.kelondro.io.Records;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
 
-import de.anomic.kelondro.io.records.BufferedRecords;
-import de.anomic.kelondro.io.records.Records;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.MemoryControl;
 import de.anomic.kelondro.util.kelondroException;

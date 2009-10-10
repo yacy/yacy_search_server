@@ -1,10 +1,10 @@
-// kelondroAbstractIOChunks.java 
+// RandomAccessIO.java 
 // -----------------------
 // part of The Kelondro Database
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2005
-// created: 11.12.2005
+// created: 11.12.2004
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -20,26 +20,47 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.io.chunks;
+package net.yacy.kelondro.io;
 
 import java.io.IOException;
 
 
 
-public abstract class AbstractIOChunks implements IOChunksInterface {
+public final class RandomAccessIO {
 
-    // logging support
+    protected Writer ra;
+    
+    public RandomAccessIO(final Writer ra, final String name) {
+        this.name = name;
+        this.ra = ra;
+    }
+    
+    public Writer getRA() {
+    	return this.ra;
+    }
+
+    public synchronized long length() throws IOException {
+        return ra.length();
+    }
+
+    public synchronized void readFully(long pos, final byte[] b, int off, int len) throws IOException {
+        if (len == 0) return;
+        this.ra.seek(pos);
+        this.ra.readFully(b, off, len);
+    }
+
+    public synchronized void write(final long pos, final byte[] b, final int off, final int len) throws IOException {
+        if (len == 0) return;
+        this.ra.seek(pos);
+        this.ra.write(b, off, len);
+    }
+
+ // logging support
     protected String name = null;
     public String name() {
         return name;
     }
     
-    // pseudo-native methods:
-    abstract public long length() throws IOException;
-    abstract public void write(long pos, byte[] b, int off, int len) throws IOException;
-    abstract public void close() throws IOException;
-    abstract public void readFully(long pos, final byte[] b, int off, int len) throws IOException;
-
     public synchronized byte readByte(final long pos) throws IOException {
         final byte[] b = new byte[1];
         this.readFully(pos, b, 0, 1);
@@ -100,24 +121,37 @@ public abstract class AbstractIOChunks implements IOChunksInterface {
     
     public synchronized void writeSpace(long pos, int spaceCount) throws IOException {
         if (spaceCount < 512) {
-        	write(pos, space(spaceCount));
-        	return;
+            write(pos, space(spaceCount));
+            return;
         }
         byte[] b = space(512);
         while (spaceCount > b.length) {
-        	write(pos, b);
-        	pos += b.length;
-        	spaceCount -= b.length;
+            write(pos, b);
+            pos += b.length;
+            spaceCount -= b.length;
         }
         if (spaceCount > 0) {
-        	write(pos, space(spaceCount));
+            write(pos, space(spaceCount));
         }
     }
     
     private byte[] space(int count) {
-    	byte[] s = new byte[count];
-    	while (count-- > 0) s[count] = 0;
-    	return s;
+        byte[] s = new byte[count];
+        while (count-- > 0) s[count] = 0;
+        return s;
+    }
+    
+    public synchronized void close() throws IOException {
+        if (this.ra != null) this.ra.close();
+        this.ra = null;
     }
 
+    protected void finalize() throws Throwable {
+        if (this.ra != null) this.close();
+        super.finalize();
+    }
+
+    public void deleteOnExit() {
+        this.ra.deleteOnExit();
+    }
 }

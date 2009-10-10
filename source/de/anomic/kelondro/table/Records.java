@@ -41,14 +41,13 @@ import java.util.logging.Logger;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.EntryIndex;
+import net.yacy.kelondro.io.CachedFileWriter;
+import net.yacy.kelondro.io.RandomAccessIO;
+import net.yacy.kelondro.io.Writer;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.NaturalOrder;
 
-import de.anomic.kelondro.io.chunks.IOChunksInterface;
-import de.anomic.kelondro.io.chunks.RandomAccessIOChunks;
-import de.anomic.kelondro.io.random.CachedFileWriter;
-import de.anomic.kelondro.io.random.Writer;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.kelondroException;
 
@@ -79,8 +78,8 @@ public class Records {
     // POS_NODES : (USEDC + FREEC) * (overhead + sum(all: COLWIDTHS)) : Node Objects
 
     // values that are only present at run-time
-    public String           filename;     // the database's file name
-    protected IOChunksInterface entryFile;    // the database file
+    public String              filename;     // the database's file name
+    protected RandomAccessIO   entryFile;    // the database file
     protected int              overhead;     // OHBYTEC + 4 * OHHANDLEC = size of additional control bytes
     protected int              headchunksize;// overheadsize + key element column size
     protected int              tailchunksize;// sum(all: COLWIDTHS) minus the size of the key element colum
@@ -153,7 +152,6 @@ public class Records {
             if (finalwrite) synchronized (entryFile) {
                 assert this.USEDC >= 0 : "this.USEDC = " + this.USEDC;
                 entryFile.writeInt(POS_USEDC, this.USEDC);
-                entryFile.commit();
             }
         }
         
@@ -161,7 +159,6 @@ public class Records {
             synchronized (entryFile) {
                 entryFile.writeInt(POS_FREEC, FREEC);
                 entryFile.writeInt(POS_FREEH, FREEH.index);
-                entryFile.commit();
                 checkConsistency();
             }
         }
@@ -177,7 +174,6 @@ public class Records {
                 	this.FREEC = 0;
                 	entryFile.writeInt(POS_FREEC, FREEC);
                     entryFile.writeInt(POS_FREEH, FREEH.index);
-                    entryFile.commit();
                 } else {
                 	this.FREEH = new Handle(freeh);
                 	this.FREEC = entryFile.readInt(POS_FREEC);
@@ -321,7 +317,6 @@ public class Records {
                             USAGE.FREEH = h;
                             assert ((USAGE.FREEH.index == Handle.NUL) && (USAGE.FREEC == 0)) || seekpos(USAGE.FREEH) < entryFile.length() : "allocateRecord: USAGE.FREEH.index = " + USAGE.FREEH.index;
                             USAGE.writefree();
-                            entryFile.commit();
                         }
                         assert (index <= USAGE.allCount());
                 
@@ -330,7 +325,6 @@ public class Records {
                             entryFile.write(seekpos(index), bulkchunk, offset, recordsize); // write chunk and occupy space
                             USAGE.USEDC++;
                             USAGE.writeused(false);
-                            entryFile.commit();
                         }
                     }
                 }
@@ -353,7 +347,7 @@ public class Records {
         if (!(file.exists())) return 0;
         try {
             final Writer ra = new CachedFileWriter(new File(file.getCanonicalPath()));
-            final IOChunksInterface entryFile = new RandomAccessIOChunks(ra, ra.name());
+            final RandomAccessIO entryFile = new RandomAccessIO(ra, ra.name());
 
             final int used = entryFile.readInt(POS_USEDC); // works only if consistency with file size is given
             entryFile.close();
@@ -425,7 +419,7 @@ public class Records {
     private void initNewFile(final Writer ra, final int FHandles, final int txtProps) throws IOException {
 
         // create new Chunked IO
-        this.entryFile = new RandomAccessIOChunks(ra, ra.name());
+        this.entryFile = new RandomAccessIO(ra, ra.name());
         
         // store dynamic run-time data
         this.overhead = this.OHBYTEC + 4 * this.OHHANDLEC;
@@ -477,8 +471,6 @@ public class Records {
         for (int i = 0; i < this.TXTPROPS.length; i++) {
             entryFile.write(POS_TXTPROPS + TXTPROPW * i, ea);
         }
-        
-        this.entryFile.commit();
     }
     
     public void setDescription(final byte[] description) throws IOException {
@@ -525,7 +517,7 @@ public class Records {
         /*if (useBuffer) {
             this.entryFile = new BufferedIOChunks(ra, ra.name(), 1024*1024, 30000 + random.nextLong() % 30000);
         } else {*/
-            this.entryFile = new RandomAccessIOChunks(ra, ra.name());
+            this.entryFile = new RandomAccessIO(ra, ra.name());
         //}
 
         // read dynamic variables that are back-ups of stored values in file;
@@ -1205,29 +1197,23 @@ public class Records {
 
         public synchronized void commit() throws IOException {
             // this must be called after all write operations to the node are finished
-
-            // place the data to the file
-
-            final boolean doCommit = this.ohChanged || this.bodyChanged;
             
             // save head
             synchronized (entryFile) {
-            if (this.ohChanged) {
-                //System.out.println("WRITEH(" + filename + ", " + seekpos(this.handle) + ", " + this.headChunk.length + ")");
-                assert (ohChunk == null) || (ohChunk.length == overhead);
-                entryFile.write(seekpos(this.handle), (this.ohChunk == null) ? new byte[overhead] : this.ohChunk);
-                this.ohChanged = false;
-            }
-
-            // save tail
-            if ((this.bodyChunk != null) && (this.bodyChanged)) {
-                //System.out.println("WRITET(" + filename + ", " + (seekpos(this.handle) + headchunksize) + ", " + this.tailChunk.length + ")");
-                assert (this.bodyChunk == null) || (this.bodyChunk.length == ROW.objectsize);
-                entryFile.write(seekpos(this.handle) + overhead, (this.bodyChunk == null) ? new byte[ROW.objectsize] : this.bodyChunk);
-                this.bodyChanged = false;
-            }
-            
-            if (doCommit) entryFile.commit();
+                if (this.ohChanged) {
+                    //System.out.println("WRITEH(" + filename + ", " + seekpos(this.handle) + ", " + this.headChunk.length + ")");
+                    assert (ohChunk == null) || (ohChunk.length == overhead);
+                    entryFile.write(seekpos(this.handle), (this.ohChunk == null) ? new byte[overhead] : this.ohChunk);
+                    this.ohChanged = false;
+                }
+    
+                // save tail
+                if ((this.bodyChunk != null) && (this.bodyChanged)) {
+                    //System.out.println("WRITET(" + filename + ", " + (seekpos(this.handle) + headchunksize) + ", " + this.tailChunk.length + ")");
+                    assert (this.bodyChunk == null) || (this.bodyChunk.length == ROW.objectsize);
+                    entryFile.write(seekpos(this.handle) + overhead, (this.bodyChunk == null) ? new byte[ROW.objectsize] : this.bodyChunk);
+                    this.bodyChanged = false;
+                }
             }
         }
         
