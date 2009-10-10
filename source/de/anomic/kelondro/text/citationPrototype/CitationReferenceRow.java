@@ -31,7 +31,7 @@ import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.MicroDate;
-import de.anomic.kelondro.text.Reference;
+import net.yacy.kelondro.rwi.Reference;
 import de.anomic.yacy.yacySeedDB;
 
 public final class CitationReferenceRow implements Reference /*, Cloneable*/ {

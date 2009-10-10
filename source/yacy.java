@@ -46,6 +46,8 @@ import java.util.zip.ZipOutputStream;
 import net.yacy.kelondro.index.RowCollection;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.rwi.Reference;
+import net.yacy.kelondro.rwi.ReferenceContainer;
 
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
@@ -57,8 +59,6 @@ import de.anomic.http.metadata.ResponseContainer;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.kelondro.blob.Heap;
 import de.anomic.kelondro.blob.MapDataMining;
-import de.anomic.kelondro.text.Reference;
-import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.MetadataRepository;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
@@ -183,11 +183,11 @@ public final class yacy {
 			f = new File(homePath, "DATA/LOG/");
             mkdirsIfNeseccary(f);
 			f = new File(homePath, "DATA/LOG/yacy.logging");
-			if (!f.exists()) try {
+			//if (!f.exists()) try {
 			    FileUtils.copy(new File(homePath, "yacy.logging"), f);
-            } catch (final IOException e){
-                System.out.println("could not copy yacy.logging");
-            }
+            //} catch (final IOException e){
+            //    System.out.println("could not copy yacy.logging");
+            //}
             try{
                 Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));
             } catch (final IOException e) {

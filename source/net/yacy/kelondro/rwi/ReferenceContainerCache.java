@@ -1,12 +1,12 @@
-// indexContainerCache.java
+// ReferenceContainerCache.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 30.03.2008 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2009-10-10 01:32:08 +0200 (Sa, 10 Okt 2009) $
+// $LastChangedRevision: 6393 $
+// $LastChangedBy: orbiter $
 //
 // LICENSE
 // 
@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.text;
+package net.yacy.kelondro.rwi;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,13 +36,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.index.Row;
-import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 
-import de.anomic.kelondro.blob.HeapReader;
 import de.anomic.kelondro.blob.HeapWriter;
 import de.anomic.kelondro.util.ByteArray;
 import de.anomic.kelondro.util.FileUtils;
@@ -148,67 +146,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return (this.cache == null) ? 0 : this.cache.size();
     }
     
-    /**
-     * static iterator of BLOBHeap files: is used to import heap dumps into a write-enabled index heap
-     */
-    public static class blobFileEntries <ReferenceType extends Reference> implements CloneableIterator<ReferenceContainer<ReferenceType>>, Iterable<ReferenceContainer<ReferenceType>> {
-        HeapReader.entries blobs;
-        Row payloadrow;
-        File blobFile;
-        ReferenceFactory<ReferenceType> factory;
-        
-        public blobFileEntries(final File blobFile, ReferenceFactory<ReferenceType> factory, final Row payloadrow) throws IOException {
-            this.blobs = new HeapReader.entries(blobFile, payloadrow.primaryKeyLength);
-            this.payloadrow = payloadrow;
-            this.blobFile = blobFile;
-            this.factory = factory;
-        }
-        
-        public boolean hasNext() {
-            if (blobs == null) return false;
-            if (blobs.hasNext()) return true;
-            close();
-            return false;
-        }
-
-        /**
-         * return an index container
-         * because they may get very large, it is wise to deallocate some memory before calling next()
-         */
-        public ReferenceContainer<ReferenceType> next() {
-            Map.Entry<String, byte[]> entry = blobs.next();
-            byte[] payload = entry.getValue();
-            return new ReferenceContainer<ReferenceType>(factory, entry.getKey().getBytes(), RowSet.importRowSet(payload, payloadrow));
-        }
-        
-        public void remove() {
-            throw new UnsupportedOperationException("heap dumps are read-only");
-        }
-
-        public Iterator<ReferenceContainer<ReferenceType>> iterator() {
-            return this;
-        }
-        
-        public void close() {
-            if (blobs != null) this.blobs.close();
-            blobs = null;
-        }
-        
-        protected void finalize() {
-            this.close();
-        }
-
-        public CloneableIterator<ReferenceContainer<ReferenceType>> clone(Object modifier) {
-            if (blobs != null) this.blobs.close();
-            blobs = null;
-            try {
-                return new blobFileEntries<ReferenceType>(this.blobFile, factory, this.payloadrow);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return null;
-            }
-        }
-    }
+    
 
     public int maxReferences() {
         // iterate to find the max score
@@ -321,7 +259,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         if (urlselection == null) return c;
         if (c == null) return null;
         // because this is all in RAM, we must clone the entries (flat)
-        ReferenceContainer<ReferenceType> c1 = new ReferenceContainer<ReferenceType>(factory, c.getTermHash(), c.row(), c.size());
+        ReferenceContainer<ReferenceType> c1 = new ReferenceContainer<ReferenceType>(factory, c.getTermHash(), c.size());
         Iterator<ReferenceType> e = c.entries();
         ReferenceType ee;
         while (e.hasNext()) {
@@ -421,7 +359,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         
         // first access the cache without synchronization
         ReferenceContainer<ReferenceType> container = cache.remove(tha);
-        if (container == null) container = new ReferenceContainer<ReferenceType>(factory, termHash, this.payloadrow, 1);
+        if (container == null) container = new ReferenceContainer<ReferenceType>(factory, termHash, 1);
         container.put(newEntry);
         
         // synchronization: check if the entry is still empty and set new value

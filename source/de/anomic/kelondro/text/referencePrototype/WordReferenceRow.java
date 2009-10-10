@@ -32,9 +32,9 @@ import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.MicroDate;
+import net.yacy.kelondro.rwi.AbstractReference;
+import net.yacy.kelondro.rwi.Reference;
 import de.anomic.document.Word;
-import de.anomic.kelondro.text.AbstractReference;
-import de.anomic.kelondro.text.Reference;
 import de.anomic.yacy.yacySeedDB;
 
 /**

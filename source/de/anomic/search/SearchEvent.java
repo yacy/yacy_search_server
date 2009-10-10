@@ -35,9 +35,9 @@ import java.util.TreeSet;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.rwi.ReferenceContainer;
 
 import de.anomic.crawler.ResultURLs;
-import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.MemoryControl;

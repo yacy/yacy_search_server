@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.rwi.IndexCell;
 
 import de.anomic.document.Condenser;
 import de.anomic.document.Document;

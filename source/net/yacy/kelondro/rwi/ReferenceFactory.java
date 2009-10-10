@@ -24,11 +24,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.text;
+package net.yacy.kelondro.rwi;
 
 import net.yacy.kelondro.index.Row;
 
 public interface ReferenceFactory<ReferenceType extends Reference> {
+    
+    public Row getRow();
 
     public ReferenceType produceSlow(Row.Entry e);
     

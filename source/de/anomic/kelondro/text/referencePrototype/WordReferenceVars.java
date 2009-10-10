@@ -33,10 +33,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.MicroDate;
+import net.yacy.kelondro.rwi.AbstractReference;
+import net.yacy.kelondro.rwi.Reference;
+import net.yacy.kelondro.rwi.ReferenceContainer;
 
-import de.anomic.kelondro.text.AbstractReference;
-import de.anomic.kelondro.text.Reference;
-import de.anomic.kelondro.text.ReferenceContainer;
 
 public class WordReferenceVars extends AbstractReference implements WordReference, Reference, Cloneable {
 

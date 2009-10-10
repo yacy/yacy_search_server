@@ -2,9 +2,9 @@
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 20.03.2009 on http://yacy.net
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2009-10-10 01:32:08 +0200 (Sa, 10 Okt 2009) $
+// $LastChangedRevision: 6393 $
+// $LastChangedBy: orbiter $
 //
 // LICENSE
 // 
@@ -22,7 +22,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.text;
+package net.yacy.kelondro.rwi;
 
 import java.io.File;
 import java.io.IOException;

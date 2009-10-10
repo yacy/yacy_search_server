@@ -30,8 +30,8 @@ import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.Base64Order;
-import de.anomic.kelondro.text.AbstractReference;
-import de.anomic.kelondro.text.Reference;
+import net.yacy.kelondro.rwi.AbstractReference;
+import net.yacy.kelondro.rwi.Reference;
 import de.anomic.yacy.yacySeedDB;
 
 public final class NavigationReferenceRow extends AbstractReference implements NavigationReference, Cloneable {

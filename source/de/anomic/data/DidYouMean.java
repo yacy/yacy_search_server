@@ -8,9 +8,9 @@ import java.util.TreeSet;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.rwi.IndexCell;
 
 import de.anomic.document.Word;
-import de.anomic.kelondro.text.IndexCell;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 
 /**

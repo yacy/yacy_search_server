@@ -32,9 +32,9 @@ import java.util.Iterator;
 
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.rwi.ReferenceContainerCache;
 
-import de.anomic.kelondro.text.ReferenceContainer;
-import de.anomic.kelondro.text.ReferenceContainerCache;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;

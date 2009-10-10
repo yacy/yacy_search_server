@@ -26,8 +26,9 @@
 
 package de.anomic.kelondro.text.referencePrototype;
 
+import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
-import de.anomic.kelondro.text.ReferenceFactory;
+import net.yacy.kelondro.rwi.ReferenceFactory;
 
 public class WordReferenceFactory implements ReferenceFactory<WordReference> {
 
@@ -38,6 +39,10 @@ public class WordReferenceFactory implements ReferenceFactory<WordReference> {
     public WordReference produceFast(WordReference r) {
         if (r instanceof WordReferenceVars) return r;
         return new WordReferenceVars(r);
+    }
+
+    public Row getRow() {
+        return WordReferenceRow.urlEntryRow;
     }
 
 }

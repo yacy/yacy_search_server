@@ -25,11 +25,12 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.text;
+package net.yacy.kelondro.rwi;
 
 import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
+
 
 public class TermSearch <ReferenceType extends Reference> {
 

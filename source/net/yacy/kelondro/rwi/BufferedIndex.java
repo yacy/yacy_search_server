@@ -25,7 +25,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.text;
+package net.yacy.kelondro.rwi;
 
 import java.io.IOException;
 import java.util.TreeSet;
@@ -34,7 +34,7 @@ import net.yacy.kelondro.order.CloneableIterator;
 
 
 /*
- * an IndexPackage is an integration of different index types, i.e.
+ * a BufferedIndex is an integration of different index types, i.e.
  * - ReferenceContainerArray
  * - ReferenceContainerCache
  * - IndexCache (which is a wrapper of a ReferenceContainerCache)

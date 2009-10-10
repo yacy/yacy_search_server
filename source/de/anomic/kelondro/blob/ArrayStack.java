@@ -1,4 +1,4 @@
-// kelondroBLOBArray.java
+// ArrayStack.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 19.08.2008 on http://yacy.net
 //
@@ -53,11 +53,11 @@ import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.NaturalOrder;
+import net.yacy.kelondro.rwi.Reference;
+import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.rwi.ReferenceFactory;
+import net.yacy.kelondro.rwi.ReferenceIterator;
 
-import de.anomic.kelondro.text.Reference;
-import de.anomic.kelondro.text.ReferenceContainer;
-import de.anomic.kelondro.text.ReferenceFactory;
-import de.anomic.kelondro.text.ReferenceContainerCache.blobFileEntries;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.kelondro.util.FileUtils;
 import de.anomic.kelondro.util.NamePrefixThreadFactory;
@@ -739,8 +739,8 @@ public class ArrayStack implements BLOB {
     private static <ReferenceType extends Reference> File mergeWorker(ReferenceFactory<ReferenceType> factory, int keylength, ByteOrder order, File f1, File f2, Row payloadrow, File newFile, int writeBuffer) throws IOException {
         // iterate both files and write a new one
         
-        CloneableIterator<ReferenceContainer<ReferenceType>> i1 = new blobFileEntries<ReferenceType>(f1, factory, payloadrow);
-        CloneableIterator<ReferenceContainer<ReferenceType>> i2 = new blobFileEntries<ReferenceType>(f2, factory, payloadrow);
+        CloneableIterator<ReferenceContainer<ReferenceType>> i1 = new ReferenceIterator<ReferenceType>(f1, factory, payloadrow);
+        CloneableIterator<ReferenceContainer<ReferenceType>> i2 = new ReferenceIterator<ReferenceType>(f2, factory, payloadrow);
         if (!i1.hasNext()) {
             if (i2.hasNext()) {
                 FileUtils.deletedelete(f1);

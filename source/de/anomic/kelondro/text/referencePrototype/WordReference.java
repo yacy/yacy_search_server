@@ -27,7 +27,7 @@
 package de.anomic.kelondro.text.referencePrototype;
 
 import net.yacy.kelondro.order.Bitfield;
-import de.anomic.kelondro.text.Reference;
+import net.yacy.kelondro.rwi.Reference;
 
 public interface WordReference extends Reference {
 

@@ -37,6 +37,10 @@ import java.util.TreeSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.kelondro.rwi.IODispatcher;
+import net.yacy.kelondro.rwi.IndexCell;
+import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.rwi.ReferenceFactory;
 
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.Blacklist;

@@ -43,15 +43,15 @@ import java.util.concurrent.TimeUnit;
 
 import net.yacy.kelondro.index.BinSearch;
 import net.yacy.kelondro.order.Digest;
+import net.yacy.kelondro.rwi.Reference;
+import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.rwi.TermSearch;
 
 import de.anomic.document.Condenser;
 import de.anomic.document.Word;
 import de.anomic.document.parser.html.ContentScraper;
-import de.anomic.kelondro.text.Reference;
-import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.ReferenceOrder;
 import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.TermSearch;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;

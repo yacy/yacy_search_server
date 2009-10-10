@@ -34,8 +34,8 @@ import java.util.Map;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.rwi.ReferenceContainer;
 
-import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
@@ -240,7 +240,7 @@ public class Dispatcher {
         for (ReferenceContainer container: containers) {
             // init the new partitions
             for (int j = 0; j < partitionBuffer.length; j++) {
-                partitionBuffer[j] = new ReferenceContainer(Segment.wordReferenceFactory, container.getTermHash(), container.row(), container.size() / partitionCount);
+                partitionBuffer[j] = new ReferenceContainer(Segment.wordReferenceFactory, container.getTermHash(), container.size() / partitionCount);
             }
 
             // split the container

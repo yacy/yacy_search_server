@@ -4,8 +4,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
-import de.anomic.kelondro.text.Reference;
-import de.anomic.kelondro.text.ReferenceContainer;
+import net.yacy.kelondro.rwi.Reference;
+import net.yacy.kelondro.rwi.ReferenceContainer;
+
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;

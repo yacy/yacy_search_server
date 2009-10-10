@@ -2,9 +2,9 @@
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 04.01.2009 on http://yacy.net
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2009-10-10 01:32:08 +0200 (Sa, 10 Okt 2009) $
+// $LastChangedRevision: 6393 $
+// $LastChangedBy: orbiter $
 //
 // LICENSE
 // 
@@ -22,7 +22,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.text;
+package net.yacy.kelondro.rwi;
 
 import java.io.File;
 import java.io.IOException;
@@ -321,7 +321,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             if (f.length() < 22 || !f.startsWith("index") || !f.endsWith(".blob")) continue;
             File fl = new File(heapLocation, f);
             System.out.println("CELL REFERENCE COLLECTION opening blob " + fl);
-            CloneableIterator<ReferenceContainer<ReferenceType>>  ei = new ReferenceContainerCache.blobFileEntries<ReferenceType>(fl, factory, payloadrow);
+            CloneableIterator<ReferenceContainer<ReferenceType>>  ei = new ReferenceIterator<ReferenceType>(fl, factory, payloadrow);
         
             ReferenceContainer<ReferenceType> container;
             final long start = System.currentTimeMillis();

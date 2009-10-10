@@ -26,8 +26,9 @@
 
 package de.anomic.kelondro.text.navigationPrototype;
 
+import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
-import de.anomic.kelondro.text.ReferenceFactory;
+import net.yacy.kelondro.rwi.ReferenceFactory;
 
 public class NavigationReferenceFactory implements ReferenceFactory<NavigationReference> {
 
@@ -38,6 +39,10 @@ public class NavigationReferenceFactory implements ReferenceFactory<NavigationRe
     public NavigationReference produceFast(NavigationReference r) {
         if (r instanceof NavigationReferenceVars) return r;
         return new NavigationReferenceVars(r);
+    }
+    
+    public Row getRow() {
+        return NavigationReferenceRow.navEntryRow;
     }
 
 }

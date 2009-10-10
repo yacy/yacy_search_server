@@ -30,9 +30,9 @@ import java.util.Date;
 
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.rwi.Reference;
 
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.kelondro.text.Reference;
 
 public interface Metadata {
 

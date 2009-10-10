@@ -27,7 +27,7 @@
 package de.anomic.kelondro.text.navigationPrototype;
 
 import net.yacy.kelondro.index.Row.Entry;
-import de.anomic.kelondro.text.Reference;
+import net.yacy.kelondro.rwi.Reference;
 
 public interface NavigationReference extends Reference {
 

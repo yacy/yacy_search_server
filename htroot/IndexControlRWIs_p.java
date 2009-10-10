@@ -37,6 +37,9 @@ import java.util.List;
 import java.util.Set;
 
 import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.rwi.Reference;
+import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.rwi.ReferenceContainerCache;
 
 import de.anomic.data.AbstractBlacklist;
 import de.anomic.data.Blacklist;
@@ -44,9 +47,6 @@ import de.anomic.data.listManager;
 import de.anomic.document.Condenser;
 import de.anomic.document.Word;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.Reference;
-import de.anomic.kelondro.text.ReferenceContainer;
-import de.anomic.kelondro.text.ReferenceContainerCache;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.kelondro.text.referencePrototype.WordReference;

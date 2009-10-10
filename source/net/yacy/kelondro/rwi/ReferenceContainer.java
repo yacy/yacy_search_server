@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2009-10-10 01:32:08 +0200 (Sa, 10 Okt 2009) $
+// $LastChangedRevision: 6393 $
+// $LastChangedBy: orbiter $
 //
 // LICENSE
 // 
@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.text;
+package net.yacy.kelondro.rwi;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -39,7 +39,6 @@ import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
 
-import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.kelondro.util.ByteBuffer;
 
 /**
@@ -61,8 +60,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         this.termHash = termHash;
     }
     
-    public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final Row rowdef, final int objectCount) {
-        super(rowdef, objectCount);
+    public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final int objectCount) {
+        super(factory.getRow(), objectCount);
         assert termHash == null || (termHash[2] != '@' && termHash.length == this.rowdef.primaryKeyLength);
         this.termHash = termHash;
         this.factory = factory;
@@ -70,14 +69,14 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     }
     
     public ReferenceContainer<ReferenceType> topLevelClone() {
-        final ReferenceContainer<ReferenceType> newContainer = new ReferenceContainer<ReferenceType>(this.factory, this.termHash, this.rowdef, this.size());
+        final ReferenceContainer<ReferenceType> newContainer = new ReferenceContainer<ReferenceType>(this.factory, this.termHash, this.size());
         newContainer.addAllUnique(this);
         return newContainer;
     }
     
     public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> emptyContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final int elementCount) {
-    	assert termHash == null || (termHash[2] != '@' && termHash.length == WordReferenceRow.urlEntryRow.primaryKeyLength);
-        return new ReferenceContainer<ReferenceType>(factory, termHash, WordReferenceRow.urlEntryRow, elementCount);
+    	assert termHash == null || (termHash[2] != '@' && termHash.length == factory.getRow().primaryKeyLength);
+        return new ReferenceContainer<ReferenceType>(factory, termHash, elementCount);
     }
 
     public void setWordHash(final byte[] newTermHash) {
@@ -111,7 +110,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         final Row.Entry r = super.replace(entry.toKelondroEntry());
         if (r == null) return null;
-        return new WordReferenceRow(r);
+        return factory.produceSlow(r);
     }
     
     public void put(final Reference entry) {
@@ -126,7 +125,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         if (oldEntryRow == null) {
             return true;
         }
-        final Reference oldEntry = new WordReferenceRow(oldEntryRow);
+        final Reference oldEntry = factory.produceSlow(oldEntryRow);
         if (entry.isOlder(oldEntry)) { // A more recent Entry is already in this container
             this.replace(oldEntry.toKelondroEntry()); // put it back
             return false;
@@ -351,7 +350,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         assert small.rowdef.equals(large.rowdef) : "small = " + small.rowdef.toString() + "; large = " + large.rowdef.toString();
         final int keylength = small.rowdef.width(0);
         assert (keylength == large.rowdef.width(0));
-        final ReferenceContainer<ReferenceType> conj = new ReferenceContainer<ReferenceType>(factory, null, small.rowdef, 0); // start with empty search result
+        final ReferenceContainer<ReferenceType> conj = new ReferenceContainer<ReferenceType>(factory, null, 0); // start with empty search result
         final Iterator<ReferenceType> se = small.entries();
         ReferenceType ie1;
         ReferenceType ie2;
@@ -380,7 +379,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         assert i1.rowdef.equals(i2.rowdef) : "i1 = " + i1.rowdef.toString() + "; i2 = " + i2.rowdef.toString();
         final int keylength = i1.rowdef.width(0);
         assert (keylength == i2.rowdef.width(0));
-        final ReferenceContainer<ReferenceType> conj = new ReferenceContainer<ReferenceType>(factory, null, i1.rowdef, 0); // start with empty search result
+        final ReferenceContainer<ReferenceType> conj = new ReferenceContainer<ReferenceType>(factory, null, 0); // start with empty search result
         if (!((i1.rowdef.getOrdering().signature().equals(i2.rowdef.getOrdering().signature())))) return conj; // ordering must be equal
         ByteOrder ordering = i1.rowdef.getOrdering();
         final Iterator<ReferenceType> e1 = i1.entries();

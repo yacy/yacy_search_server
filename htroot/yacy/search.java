@@ -36,12 +36,12 @@ import java.util.TreeSet;
 
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.rwi.ReferenceContainer;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.Segments;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.SortStack;

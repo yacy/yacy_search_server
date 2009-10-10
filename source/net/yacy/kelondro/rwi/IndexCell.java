@@ -4,9 +4,9 @@
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2009-10-10 01:32:08 +0200 (Sa, 10 Okt 2009) $
+// $LastChangedRevision: 6393 $
+// $LastChangedBy: orbiter $
 //
 // LICENSE
 // 
@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.text;
+package net.yacy.kelondro.rwi;
 
 import java.io.File;
 import java.io.IOException;
@@ -242,7 +242,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     public CloneableIterator<ReferenceContainer<ReferenceType>> references(byte[] starttermHash, boolean rot) {
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.ram.rowdef().getOrdering().clone());
-        containerOrder.rotate(new ReferenceContainer<ReferenceType>(factory, starttermHash, this.ram.rowdef(), 0));
+        containerOrder.rotate(new ReferenceContainer<ReferenceType>(factory, starttermHash, 0));
         return new MergeIterator<ReferenceContainer<ReferenceType>>(
             this.ram.references(starttermHash, rot),
             new MergeIterator<ReferenceContainer<ReferenceType>>(
@@ -258,7 +258,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     public CloneableIterator<ReferenceContainer<ReferenceType>> references(byte[] startTermHash, boolean rot, boolean ram) {
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.ram.rowdef().getOrdering().clone());
-        containerOrder.rotate(new ReferenceContainer<ReferenceType>(factory, startTermHash, this.ram.rowdef(), 0));
+        containerOrder.rotate(new ReferenceContainer<ReferenceType>(factory, startTermHash, 0));
         if (ram) {
             return this.ram.references(startTermHash, rot);
         }

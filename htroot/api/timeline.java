@@ -28,12 +28,13 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.rwi.TermSearch;
+
 import de.anomic.document.Word;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.ReferenceContainer;
 import de.anomic.kelondro.text.Segment;
 import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.text.TermSearch;
 import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.kelondro.util.DateFormatter;
 import de.anomic.search.QueryParams;

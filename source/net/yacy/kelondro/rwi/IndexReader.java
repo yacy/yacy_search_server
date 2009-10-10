@@ -1,12 +1,12 @@
-// Reference.java
-// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 03.04.2009 on http://yacy.net
+// IndexReader.java
+// (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 2.4.2008 on http://yacy.net
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
-// $LastChangedDate$
-// $LastChangedRevision$
-// $LastChangedBy$
+// $LastChangedDate: 2009-10-10 01:22:22 +0200 (Sa, 10 Okt 2009) $
+// $LastChangedRevision: 6392 $
+// $LastChangedBy: orbiter $
 //
 // LICENSE
 // 
@@ -24,36 +24,19 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.kelondro.text;
+package net.yacy.kelondro.rwi;
 
-import net.yacy.kelondro.index.Row.Entry;
+import java.util.Set;
 
-public interface Reference {
+import net.yacy.kelondro.order.CloneableIterator;
 
-    public String toPropertyForm();
-    
-    public Entry toKelondroEntry();
 
-    public String metadataHash();
+public interface IndexReader<ReferenceType extends Reference> {
 
-    public long lastModified();
+    public int size();
+    public boolean has(byte[] wordHash); // should only be used if in case that true is returned the getContainer is NOT called
+    public ReferenceContainer<ReferenceType> get(byte[] wordHash, Set<String> urlselection); 
+    public CloneableIterator<ReferenceContainer<ReferenceType>> references(byte[] startWordHash, boolean rot);
+    public void close();
     
-    public String toString();
- 
-    public boolean isOlder(Reference other);
-
-    public int hashCode();
-    
-    public void join(final Reference oe);
-    
-    public int positions();
-    
-    public int maxposition();
-    
-    public int minposition();
-    
-    public int position(int p);
-    
-    public int distance();
-        
 }
