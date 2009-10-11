@@ -5,7 +5,7 @@ import java.util.Locale;
 
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;

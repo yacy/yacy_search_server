@@ -30,15 +30,15 @@
 import java.net.InetAddress;
 import java.util.Date;
 
+import net.yacy.kelondro.io.ByteCountInputStream;
+import net.yacy.kelondro.io.ByteCountOutputStream;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 
-import de.anomic.http.io.ByteCountInputStream;
-import de.anomic.http.io.ByteCountOutputStream;
-import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.server.HTTPDemon;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;

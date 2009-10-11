@@ -33,7 +33,7 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.ZURL;
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;

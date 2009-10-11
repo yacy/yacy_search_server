@@ -32,7 +32,7 @@ import java.io.IOException;
 
 import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;

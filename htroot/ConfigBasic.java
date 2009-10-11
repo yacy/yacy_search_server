@@ -34,10 +34,10 @@ import java.util.regex.Pattern;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 
 import de.anomic.data.translator;
-import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.HTTPDFileHandler;
+import de.anomic.http.server.HeaderFramework;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.net.UPnP;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;

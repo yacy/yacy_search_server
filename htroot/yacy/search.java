@@ -44,8 +44,8 @@ import net.yacy.kelondro.util.ISO639;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.document.parser.xml.RSSFeed;
-import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.HeaderFramework;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.net.natLib;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;

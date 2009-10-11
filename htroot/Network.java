@@ -36,13 +36,13 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.MapTools;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.client.Client;
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -419,7 +419,7 @@ public class Network {
                             if (seed.getFlagAcceptRemoteIndex()) {
                                 prop.put(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", "");
                             } else {
-                                final String peertags = serverCodings.set2string(seed.getPeerTags(), ",", false);
+                                final String peertags = MapTools.set2string(seed.getPeerTags(), ",", false);
                                 prop.putHTML(STR_TABLE_LIST + conCount + "_dhtreceive_peertags", ((peertags == null) || (peertags.length() == 0)) ? "no tags given" : ("tags = " + peertags));
                             }
                             prop.putHTML(STR_TABLE_LIST + conCount + "_version", yacyVersion.combined2prettyVersion(seed.get(yacySeed.VERSION, "0.1"), shortname));

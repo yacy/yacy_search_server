@@ -27,7 +27,7 @@
 // javac -classpath .:../classes WikiHelp.java
 // if the shell's current path is HTROOT
 
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

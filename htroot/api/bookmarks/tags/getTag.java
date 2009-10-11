@@ -3,7 +3,7 @@ import java.util.Iterator;
 
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.bookmarksDB.Tag;
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

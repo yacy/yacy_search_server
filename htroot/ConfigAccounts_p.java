@@ -37,8 +37,8 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 
 import de.anomic.data.userDB;
-import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.server.HTTPDemon;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

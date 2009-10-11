@@ -29,13 +29,13 @@ import java.io.File;
 import java.util.HashSet;
 
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MapTools;
 import net.yacy.kelondro.workflow.BusyThread;
 
-import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.server.HTTPDemon;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -138,7 +138,7 @@ public class ConfigNetwork_p {
                 }
                     
                 if (post.containsKey("peertags")) {
-                    sb.peers.mySeed().setPeerTags(serverCodings.string2set(normalizedList(post.get("peertags")), ","));
+                    sb.peers.mySeed().setPeerTags(MapTools.string2set(normalizedList(post.get("peertags")), ","));
                 }
                 
                 sb.setConfig("cluster.mode", post.get("cluster.mode", "publicpeer"));
@@ -197,7 +197,7 @@ public class ConfigNetwork_p {
         prop.put("indexReceiveChecked", (indexReceive) ? "1" : "0");
         prop.put("indexReceiveBlockBlacklistChecked.on", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "1" : "0");
         prop.put("indexReceiveBlockBlacklistChecked.off", (sb.getConfig("indexReceiveBlockBlacklist", "true").equals("true")) ? "0" : "1");
-        prop.putHTML("peertags", serverCodings.set2string(sb.peers.mySeed().getPeerTags(), ",", false));
+        prop.putHTML("peertags", MapTools.set2string(sb.peers.mySeed().getPeerTags(), ",", false));
 
         // set seed information directly
         sb.peers.mySeed().setFlagAcceptRemoteCrawl(sb.getConfigBool("crawlResponse", false));

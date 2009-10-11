@@ -51,7 +51,7 @@ import de.anomic.data.AbstractBlacklist;
 import de.anomic.data.Blacklist;
 import de.anomic.data.listManager;
 import de.anomic.document.Condenser;
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProcess;
 import de.anomic.search.SearchEventCache;

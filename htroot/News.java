@@ -31,7 +31,7 @@ import java.util.Map.Entry;
 
 import net.yacy.kelondro.util.DateFormatter;
 
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

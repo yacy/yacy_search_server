@@ -35,7 +35,7 @@ import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.text.SimpleDateFormat;
 
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.net.natLib;
 import de.anomic.search.QueryParams;
 import de.anomic.search.Switchboard;

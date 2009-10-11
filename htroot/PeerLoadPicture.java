@@ -5,7 +5,7 @@ import java.util.Iterator;
 
 import net.yacy.kelondro.workflow.BusyThread;
 
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

@@ -35,7 +35,7 @@ import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.ISO639;
 
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.search.QueryParams;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;

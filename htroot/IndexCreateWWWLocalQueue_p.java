@@ -38,7 +38,7 @@ import java.util.regex.PatternSyntaxException;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.NoticedURL;
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.crawler.CrawlSwitchboard;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.search.Switchboard;

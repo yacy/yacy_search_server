@@ -38,8 +38,8 @@ import net.yacy.kelondro.data.meta.DigestURI;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.HeaderFramework;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;

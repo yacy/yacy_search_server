@@ -27,7 +27,7 @@
 
 import de.anomic.document.Idiom;
 import de.anomic.document.Parser;
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;

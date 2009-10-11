@@ -23,7 +23,7 @@ import java.util.Iterator;
 
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 

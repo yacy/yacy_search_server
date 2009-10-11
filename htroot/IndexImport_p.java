@@ -37,7 +37,7 @@ import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.crawler.Importer;
 import de.anomic.crawler.NoticeURLImporter;
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;

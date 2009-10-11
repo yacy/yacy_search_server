@@ -36,7 +36,7 @@ import java.util.regex.PatternSyntaxException;
 import net.yacy.kelondro.logging.GuiHandler;
 import net.yacy.kelondro.logging.LogalizerHandler;
 
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
