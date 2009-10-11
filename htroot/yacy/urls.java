@@ -27,18 +27,18 @@
 import java.io.IOException;
 import java.util.Date;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.crawler.NoticedURL;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNetwork;
-import de.anomic.yacy.yacyURL;
 
 public class urls {
     
@@ -65,7 +65,7 @@ public class urls {
             long timeout = System.currentTimeMillis() + maxTime;
             int c = 0;
             Request entry;
-            yacyURL referrer;
+            DigestURI referrer;
             while ((maxCount > 0) &&
                    (System.currentTimeMillis() < timeout) &&
                    (sb.crawlQueues.noticeURL.stackSize(stackType) > 0)) {
@@ -110,9 +110,9 @@ public class urls {
             if (urlhashes.length() % 12 != 0) return prop;
             final int count = urlhashes.length() / 12;
         	int c = 0;
-        	URLMetadataRow entry;
-        	URLMetadataRow.Components metadata;
-            yacyURL referrer;
+        	URIMetadataRow entry;
+        	URIMetadataRow.Components metadata;
+            DigestURI referrer;
             for (int i = 0; i < count; i++) {
                 entry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);
                 if (entry == null) continue;

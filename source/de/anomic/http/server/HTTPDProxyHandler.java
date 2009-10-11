@@ -71,8 +71,10 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
@@ -95,9 +97,7 @@ import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
-import de.anomic.yacy.yacyURL;
 
 public final class HTTPDProxyHandler {
     
@@ -305,7 +305,7 @@ public final class HTTPDProxyHandler {
             int pos=0;
             int port=0;
 
-            yacyURL url = null;
+            DigestURI url = null;
             try {
                 url = HeaderFramework.getRequestURL(conProp);
                 if (log.isFine()) log.logFine(reqID +" GET "+ url);
@@ -320,7 +320,7 @@ public final class HTTPDProxyHandler {
                     final String newUrl = redirectorReader.readLine();
                     if (!newUrl.equals("")) {
                         try {
-                            url = new yacyURL(newUrl, null);
+                            url = new DigestURI(newUrl, null);
                         } catch(final MalformedURLException e){}//just keep the old one
                     }
                     if (log.isFinest()) log.logFinest(reqID +"    using redirector to "+ url);
@@ -441,7 +441,7 @@ public final class HTTPDProxyHandler {
         }
     }
     
-    private static void fulfillRequestFromWeb(final Properties conProp, final yacyURL url, final RequestHeader requestHeader, final ResponseHeader cachedResponseHeader, final OutputStream respond) {
+    private static void fulfillRequestFromWeb(final Properties conProp, final DigestURI url, final RequestHeader requestHeader, final ResponseHeader cachedResponseHeader, final OutputStream respond) {
         
         final GZIPOutputStream gzippedOut = null; 
        
@@ -662,7 +662,7 @@ public final class HTTPDProxyHandler {
 
     private static void fulfillRequestFromCache(
             final Properties conProp, 
-            final yacyURL url,
+            final DigestURI url,
             final RequestHeader requestHeader, 
             final ResponseHeader cachedResponseHeader,
             final byte[] cacheEntry,
@@ -745,7 +745,7 @@ public final class HTTPDProxyHandler {
     public static void doHead(final Properties conProp, final RequestHeader requestHeader, OutputStream respond) {
         
         ResponseContainer res = null;
-        yacyURL url = null;
+        DigestURI url = null;
         try {
             final int reqID = requestHeader.hashCode();
             // remembering the starting time of the request
@@ -771,7 +771,7 @@ public final class HTTPDProxyHandler {
             }
             
             try {
-                url = new yacyURL("http", host, port, (args == null) ? path : path + "?" + args);
+                url = new DigestURI("http", host, port, (args == null) ? path : path + "?" + args);
             } catch (final MalformedURLException e) {
                 final String errorMsg = "ERROR: internal error with url generation: host=" +
                                   host + ", port=" + port + ", path=" + path + ", args=" + args;
@@ -847,7 +847,7 @@ public final class HTTPDProxyHandler {
         assert conProp != null : "precondition violated: conProp != null";
         assert requestHeader != null : "precondition violated: requestHeader != null";
         assert body != null : "precondition violated: body != null";
-        yacyURL url = null;
+        DigestURI url = null;
         ByteCountOutputStream countedRespond = null;
         try {
             final int reqID = requestHeader.hashCode();
@@ -874,7 +874,7 @@ public final class HTTPDProxyHandler {
             }
             
             try {
-                url = new yacyURL("http", host, port, (args == null) ? path : path + "?" + args);
+                url = new DigestURI("http", host, port, (args == null) ? path : path + "?" + args);
             } catch (final MalformedURLException e) {
                 final String errorMsg = "ERROR: internal error with url generation: host=" +
                                   host + ", port=" + port + ", path=" + path + ", args=" + args;
@@ -1364,7 +1364,7 @@ public final class HTTPDProxyHandler {
         }
     }
     
-    private static void handleProxyException(final Exception e, final Properties conProp, final OutputStream respond, final yacyURL url) {
+    private static void handleProxyException(final Exception e, final Properties conProp, final OutputStream respond, final DigestURI url) {
         // this may happen if 
         // - the targeted host does not exist 
         // - anything with the remote server was wrong.
@@ -1519,16 +1519,16 @@ public final class HTTPDProxyHandler {
         String testHostName = null;
         if (!orgHostName.startsWith("www.")) {
             testHostName = "www." + orgHostName;
-            final InetAddress addr = serverDomains.dnsResolve(testHostName);
+            final InetAddress addr = Domains.dnsResolve(testHostName);
             if (addr != null) testHostNames.add(testHostName);
         } else if (orgHostName.startsWith("www.")) {
             testHostName = orgHostName.substring(4);
-            final InetAddress addr = serverDomains.dnsResolve(testHostName);
+            final InetAddress addr = Domains.dnsResolve(testHostName);
             if (addr != null) if (addr != null) testHostNames.add(testHostName);                      
         } 
         if (orgHostName.length()>4 && orgHostName.startsWith("www") && (orgHostName.charAt(3) != '.')) {
             testHostName = orgHostName.substring(0,3) + "." + orgHostName.substring(3);
-            final InetAddress addr = serverDomains.dnsResolve(testHostName);
+            final InetAddress addr = Domains.dnsResolve(testHostName);
             if (addr != null) if (addr != null) testHostNames.add(testHostName);                             
         }
         
@@ -1538,7 +1538,7 @@ public final class HTTPDProxyHandler {
             while (iter.hasNext()) {
                 final String topLevelDomain = iter.next();
                 testHostName = orgHostName.substring(0,pos) + "." + topLevelDomain;
-                final InetAddress addr = serverDomains.dnsResolve(testHostName);
+                final InetAddress addr = Domains.dnsResolve(testHostName);
                 if (addr != null) if (addr != null) testHostNames.add(testHostName);                        
             }
         }

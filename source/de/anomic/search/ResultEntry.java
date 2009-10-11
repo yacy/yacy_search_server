@@ -30,23 +30,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.Reference;
 
 import de.anomic.document.Condenser;
-import de.anomic.document.Word;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.yacyURL;
 
 public class ResultEntry {
     
     // payload objects
-    private final URLMetadataRow urlentry;
-    private final URLMetadataRow.Components urlcomps; // buffer for components
+    private final URIMetadataRow urlentry;
+    private final URIMetadataRow.Components urlcomps; // buffer for components
     private String alternative_urlstring;
     private String alternative_urlname;
     private final TextSnippet textSnippet;
@@ -55,7 +54,7 @@ public class ResultEntry {
     // statistic objects
     public long dbRetrievalTime, snippetComputationTime;
     
-    public ResultEntry(final URLMetadataRow urlentry,
+    public ResultEntry(final URIMetadataRow urlentry,
                        final Segment indexSegment,
                        yacySeedDB peers,
                        final TextSnippet textSnippet,
@@ -104,7 +103,7 @@ public class ResultEntry {
     public String hash() {
         return urlentry.hash();
     }
-    public yacyURL url() {
+    public DigestURI url() {
         return urlcomps.url();
     }
     public Bitfield flags() {
@@ -114,7 +113,7 @@ public class ResultEntry {
         return (alternative_urlstring == null) ? urlcomps.url().toNormalform(false, true) : alternative_urlstring;
     }
     public String urlname() {
-        return (alternative_urlname == null) ? yacyURL.unescape(urlcomps.url().toNormalform(false, true)) : alternative_urlname;
+        return (alternative_urlname == null) ? DigestURI.unescape(urlcomps.url().toNormalform(false, true)) : alternative_urlname;
     }
     public String title() {
         return urlcomps.dc_title();

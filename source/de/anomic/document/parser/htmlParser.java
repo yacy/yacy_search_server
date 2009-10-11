@@ -34,6 +34,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.document.AbstractParser;
@@ -43,7 +44,6 @@ import de.anomic.document.ParserException;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.ScraperInputStream;
 import de.anomic.document.parser.html.TransformerWriter;
-import de.anomic.yacy.yacyURL;
 
 public class htmlParser extends AbstractParser implements Idiom {
 
@@ -81,7 +81,7 @@ public class htmlParser extends AbstractParser implements Idiom {
     
     @Override
     public Document parse(
-            final yacyURL location, 
+            final DigestURI location, 
             final String mimeType, 
             final String documentCharset, 
             final InputStream sourceStream) throws ParserException, InterruptedException {
@@ -133,7 +133,7 @@ public class htmlParser extends AbstractParser implements Idiom {
         return transformScraper(location, mimeType, documentCharset, scraper);
     }
 
-    private static Document transformScraper(final yacyURL location, final String mimeType, final String charSet, final ContentScraper scraper) {
+    private static Document transformScraper(final DigestURI location, final String mimeType, final String charSet, final ContentScraper scraper) {
         final String[] sections = new String[scraper.getHeadlines(1).length + scraper.getHeadlines(2).length + scraper.getHeadlines(3).length + scraper.getHeadlines(4).length];
         int p = 0;
         for (int i = 1; i <= 4; i++) for (int j = 0; j < scraper.getHeadlines(i).length; j++) sections[p++] = scraper.getHeadlines(i)[j];

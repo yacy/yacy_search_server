@@ -33,12 +33,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import pt.tumba.parser.swf.SWF2HTML;
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
-import de.anomic.yacy.yacyURL;
 
 public class swfParser extends AbstractParser implements Idiom {
 
@@ -72,7 +73,7 @@ public class swfParser extends AbstractParser implements Idiom {
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */
-    public Document parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
 
         try {
             final SWF2HTML swf2html = new SWF2HTML();
@@ -96,7 +97,7 @@ public class swfParser extends AbstractParser implements Idiom {
             final String[] sections =  null;
             final String abstrct = null;
             //TreeSet images = null;
-            final HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
+            final HashMap<DigestURI, String> anchors = new HashMap<DigestURI, String>();
             int urls = 0;
             int urlStart = -1;
             int urlEnd = 0;
@@ -113,7 +114,7 @@ public class swfParser extends AbstractParser implements Idiom {
                 urlEnd = contents.indexOf(linebreak,urlStart);
                 url = contents.substring(urlStart,urlEnd);
                 urlnr = (Integer.valueOf(++urls)).toString();
-                anchors.put(new yacyURL(url, null), urlnr);
+                anchors.put(new DigestURI(url, null), urlnr);
                 contents = contents.substring(0,urlStart)+contents.substring(urlEnd);
             }
 

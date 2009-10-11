@@ -41,6 +41,11 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.BinSearch;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.rwi.Reference;
@@ -50,15 +55,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.SortStack;
 
 import de.anomic.document.Condenser;
-import de.anomic.document.Word;
-import de.anomic.document.parser.html.ContentScraper;
-import de.anomic.kelondro.text.ReferenceOrder;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.text.referencePrototype.WordReference;
-import de.anomic.kelondro.text.referencePrototype.WordReferenceVars;
 import de.anomic.server.serverProfiling;
-import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.ProfilingGraph;
 
 public final class RankingProcess extends Thread {
@@ -209,7 +206,7 @@ public final class RankingProcess extends Thread {
 			    }
 
 			    // check tld domain
-			    if (!yacyURL.matchesAnyDomDomain(iEntry.metadataHash(), this.query.zonecode)) {
+			    if (!DigestURI.matchesAnyDomDomain(iEntry.metadataHash(), this.query.zonecode)) {
 			        // filter out all tld that do not match with wanted tld domain
 			        continue;
 			    }
@@ -221,7 +218,7 @@ public final class RankingProcess extends Thread {
 			    }
 			    
 			    // count domZones
-			    this.domZones[yacyURL.domDomain(iEntry.metadataHash())]++;
+			    this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
 			    
 			    // get statistics for host navigator
 			    if (nav_hosts) {
@@ -362,7 +359,7 @@ public final class RankingProcess extends Thread {
         return bestEntry;
     }
     
-    public URLMetadataRow takeURL(final boolean skipDoubleDom, final int timeout) {
+    public URIMetadataRow takeURL(final boolean skipDoubleDom, final int timeout) {
         // returns from the current RWI list the best URL entry and removes this entry from the list
     	long timeLimit = System.currentTimeMillis() + timeout;
     	while (System.currentTimeMillis() < timeLimit) {
@@ -372,14 +369,14 @@ public final class RankingProcess extends Thread {
             	try {Thread.sleep(50);} catch (final InterruptedException e1) {}
             	continue;
             }
-            final URLMetadataRow page = indexSegment.urlMetadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
+            final URIMetadataRow page = indexSegment.urlMetadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
             if (page == null) {
             	misses.add(obrwi.element.metadataHash());
             	continue;
             }
             
             // prepare values for constraint check
-            final URLMetadataRow.Components metadata = page.metadata();
+            final URIMetadataRow.Components metadata = page.metadata();
             
             // check url constraints
             if (metadata.url() == null) {
@@ -557,8 +554,8 @@ public final class RankingProcess extends Thread {
         Arrays.sort(hsa, hscomp);
         int rc = Math.min(count, hsa.length);
         ArrayList<NavigatorEntry> result = new ArrayList<NavigatorEntry>();
-        URLMetadataRow mr;
-        yacyURL url;
+        URIMetadataRow mr;
+        DigestURI url;
         String hostname;
         for (int i = 0; i < rc; i++) {
             mr = indexSegment.urlMetadata().load(hsa[i].hashsample, null, 0);
@@ -623,7 +620,7 @@ public final class RankingProcess extends Thread {
         // take out relevant information for reference computation
         if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;
         //final String[] urlcomps = htmlFilterContentScraper.urlComps(resultEntry.url().toNormalform(true, true)); // word components of the url
-        final String[] descrcomps = resultEntry.title().toLowerCase().split(ContentScraper.splitrex); // words in the description
+        final String[] descrcomps = resultEntry.title().toLowerCase().split(DigestURI.splitrex); // words in the description
         
         // add references
         //addTopic(urlcomps);
@@ -723,8 +720,8 @@ public final class RankingProcess extends Thread {
         
         // apply 'common-sense' heuristic using references
         final String urlstring = rentry.url().toNormalform(true, true);
-        final String[] urlcomps = ContentScraper.urlComps(urlstring);
-        final String[] descrcomps = rentry.title().toLowerCase().split(ContentScraper.splitrex);
+        final String[] urlcomps = DigestURI.urlComps(urlstring);
+        final String[] descrcomps = rentry.title().toLowerCase().split(DigestURI.splitrex);
         for (int j = 0; j < urlcomps.length; j++) {
             if (topwords.contains(urlcomps[j])) r += Math.max(1, 256 - urlstring.length()) << query.ranking.coeff_urlcompintoplist;
         }

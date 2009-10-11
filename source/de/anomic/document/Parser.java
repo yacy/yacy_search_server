@@ -39,6 +39,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.document.parser.bzipParser;
@@ -59,7 +60,6 @@ import de.anomic.document.parser.vcfParser;
 import de.anomic.document.parser.vsdParser;
 import de.anomic.document.parser.xlsParser;
 import de.anomic.document.parser.zipParser;
-import de.anomic.yacy.yacyURL;
 
 public final class Parser {
 
@@ -124,7 +124,7 @@ public final class Parser {
     }
 
     public static Document parseSource(
-            final yacyURL location,
+            final DigestURI location,
             final String mimeType,
             final String charset,
             final byte[] sourceArray
@@ -153,7 +153,7 @@ public final class Parser {
     }
 
     public static Document parseSource(
-            final yacyURL location,
+            final DigestURI location,
             final String mimeType,
             final String charset,
             final File sourceFile
@@ -182,7 +182,7 @@ public final class Parser {
     }
 
     public static Document parseSource(
-            final yacyURL location,
+            final DigestURI location,
             String mimeType,
             final String charset,
             final long contentLength,
@@ -226,7 +226,7 @@ public final class Parser {
      * @param mimeType
      * @return returns null if the content is supportet. If the content is not supported, return a error string.
      */
-    public static String supports(final yacyURL url, String mimeType) {
+    public static String supports(final DigestURI url, String mimeType) {
         try {
             // try to get a parser. If this works, we don't need the parser itself, we just return null to show that everything is ok.
             idiomParser(url, mimeType);
@@ -237,7 +237,7 @@ public final class Parser {
         }
     }
     
-    private static Idiom idiomParser(final yacyURL url, String mimeType) throws ParserException {
+    private static Idiom idiomParser(final DigestURI url, String mimeType) throws ParserException {
         // check mime type
         if (mimeType != null) {
             mimeType = normalizeMimeType(mimeType);
@@ -269,7 +269,7 @@ public final class Parser {
         return null;
     }
     
-    public static String supportsExtension(final yacyURL url) {
+    public static String supportsExtension(final DigestURI url) {
         String ext = url.getFileExtension();
         if (ext == null || ext.length() == 0) return null;
         if (denyExtension.contains(ext)) return "file extension '" + ext + "' is denied";
@@ -281,7 +281,7 @@ public final class Parser {
         return null;
     }
     
-    public static String mimeOf(yacyURL url) {
+    public static String mimeOf(DigestURI url) {
         return mimeOf(url.getFileExtension());
     }
     

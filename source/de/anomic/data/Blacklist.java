@@ -31,7 +31,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 
-import de.anomic.yacy.yacyURL;
+import net.yacy.kelondro.data.meta.DigestURI;
+
 
 public interface Blacklist {
 
@@ -92,7 +93,7 @@ public interface Blacklist {
 
     public boolean hashInBlacklistedCache(String blacklistType, String urlHash);
     
-    public boolean isListed(String blacklistType, yacyURL url);
+    public boolean isListed(String blacklistType, DigestURI url);
     
     public boolean isListed(String blacklistType, String hostlow, String path);
 

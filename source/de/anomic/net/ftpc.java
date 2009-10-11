@@ -66,7 +66,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.anomic.server.serverDomains;
+import de.anomic.server.serverSwitch;
 
 public class ftpc {
 
@@ -2121,7 +2121,7 @@ public class ftpc {
 
         // save ip address in high byte order
         // byte[] Bytes = LocalIp.getAddress();
-        final byte[] Bytes = serverDomains.myPublicIP().getBytes();
+        final byte[] Bytes = serverSwitch.myPublicLocalIP().getHostAddress().getBytes();
 
         // bytes greater than 127 should not be printed as negative
         final short[] Shorts = new short[4];

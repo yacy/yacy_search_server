@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
@@ -66,7 +67,6 @@ import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
 import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.yacy.yacyURL;
 
 /**
  * HttpClient implementation which uses Jakarta Commons HttpClient 3.x {@link http://hc.apache.org/httpclient-3.x/}
@@ -461,19 +461,19 @@ public class Client {
             }
         } catch (final IllegalThreadStateException e) {
         	// cleanUp statistics
-            yacyURL url = new yacyURL(method.getURI().toString(), null);
+            DigestURI url = new DigestURI(method.getURI().toString(), null);
             if (url.hash() != null) Latency.slowdown(url.hash().substring(6), url.getHost());
             ConnectionInfo.removeConnection(generateConInfo(method));
             throw e;
         } catch (final IOException e) {
             // cleanUp statistics
-            yacyURL url = new yacyURL(method.getURI().toString(), null);
+            DigestURI url = new DigestURI(method.getURI().toString(), null);
             if (url.hash() != null) Latency.slowdown(url.hash().substring(6), url.getHost());
             ConnectionInfo.removeConnection(generateConInfo(method));
             throw e;
         } catch (final IllegalStateException e) {
             // cleanUp statistics
-            yacyURL url = new yacyURL(method.getURI().toString(), null);
+            DigestURI url = new DigestURI(method.getURI().toString(), null);
             if (url.hash() != null) Latency.slowdown(url.hash().substring(6), url.getHost());
             ConnectionInfo.removeConnection(generateConInfo(method));
             throw new IOException(e.getMessage());

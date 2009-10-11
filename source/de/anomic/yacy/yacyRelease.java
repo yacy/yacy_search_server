@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.FileUtils;
@@ -72,17 +73,17 @@ public final class yacyRelease extends yacyVersion {
     private static HashMap<yacyUpdateLocation, DevAndMainVersions> latestReleases = new HashMap<yacyUpdateLocation, DevAndMainVersions>();
     public  final static ArrayList<yacyUpdateLocation> latestReleaseLocations = new ArrayList<yacyUpdateLocation>(); // will be initialized with value in defaults/yacy.network.freeworld.unit
     
-    private yacyURL url;
+    private DigestURI url;
     private File releaseFile;
     
     private PublicKey publicKey;
     
-    public yacyRelease(final yacyURL url) {
+    public yacyRelease(final DigestURI url) {
         super(url.getFileName());
         this.url = url;
     }
     
-    public yacyRelease(final yacyURL url, PublicKey publicKey) {
+    public yacyRelease(final DigestURI url, PublicKey publicKey) {
         this(url);
         this.publicKey = publicKey;
     }
@@ -92,7 +93,7 @@ public final class yacyRelease extends yacyVersion {
     this.releaseFile = releaseFile;
     }
 
-    public yacyURL getUrl() {
+    public DigestURI getUrl() {
     return url;
     }
     
@@ -239,10 +240,10 @@ public final class yacyRelease extends yacyVersion {
         }
         
         // analyse links in scraper resource, and find link to latest release in it
-        final Map<yacyURL, String> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
+        final Map<DigestURI, String> anchors = scraper.getAnchors(); // a url (String) / name (String) relation
         final TreeSet<yacyRelease> mainReleases = new TreeSet<yacyRelease>();
         final TreeSet<yacyRelease> devReleases = new TreeSet<yacyRelease>();
-        for(yacyURL url : anchors.keySet()) {
+        for(DigestURI url : anchors.keySet()) {
             try {
                 yacyRelease release = new yacyRelease(url, location.getPublicKey());
                 //System.out.println("r " + release.toAnchor());

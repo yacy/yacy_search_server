@@ -30,6 +30,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import de.anomic.content.DCEntry;
 import de.anomic.content.file.SurrogateReader;
 import de.anomic.crawler.CrawlProfile;
@@ -37,7 +39,6 @@ import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.yacy.yacyURL;
 
 public class PMHReader {
 
@@ -47,12 +48,12 @@ public class PMHReader {
         this.loader = loader;
     }
     
-    public void load(yacyURL source) throws IOException {
+    public void load(DigestURI source) throws IOException {
         Response response = this.loader.load(source, true, true, CrawlProfile.CACHE_STRATEGY_NOCACHE);
         load(response);
     }
     
-    public static void load0(yacyURL source) throws IOException {
+    public static void load0(DigestURI source) throws IOException {
         Response response = HTTPLoader.load(new Request(source, null));
         load(response);
     }
@@ -130,7 +131,7 @@ public class PMHReader {
         // list records from oai-pmh like
         // http://opus.bsz-bw.de/fhhv/oai2/oai2.php?verb=ListRecords&metadataPrefix=oai_dc
         try {
-            load0(new yacyURL(args[0], null));
+            load0(new DigestURI(args[0], null));
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (IOException e) {

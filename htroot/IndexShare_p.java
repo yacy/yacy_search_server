@@ -29,8 +29,8 @@
 //import java.io.*;
 //import de.anomic.tools.*;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.Segments;
+import de.anomic.search.Segment;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;

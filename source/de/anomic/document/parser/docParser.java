@@ -36,7 +36,8 @@ import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
-import de.anomic.yacy.yacyURL;
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import org.apache.poi.hwpf.extractor.WordExtractor;
 
 public class docParser extends AbstractParser implements Idiom {
@@ -64,7 +65,7 @@ public class docParser extends AbstractParser implements Idiom {
 		super("Word Document Parser");
 	}
 
-	public Document parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+	public Document parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
 
         final WordExtractor extractor;
 

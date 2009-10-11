@@ -31,23 +31,23 @@ package de.anomic.crawler;
 import java.net.UnknownHostException;
 import java.util.Date;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.Domains;
+import net.yacy.kelondro.workflow.WorkflowProcessor;
 
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.data.Blacklist;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;
-import de.anomic.server.serverDomains;
-import de.anomic.server.serverProcessor;
 import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.yacyURL;
 
 public final class CrawlStacker {
 
     private Log log = new Log("STACKCRAWL");
 
-    private serverProcessor<Request>  fastQueue, slowQueue;
+    private WorkflowProcessor<Request>  fastQueue, slowQueue;
     private long                      dnsHit, dnsMiss;
     private CrawlQueues               nextQueue;
     private CrawlSwitchboard          crawler;
@@ -73,8 +73,8 @@ public final class CrawlStacker {
         this.acceptLocalURLs = acceptLocalURLs;
         this.acceptGlobalURLs = acceptGlobalURLs;
 
-        this.fastQueue = new serverProcessor<Request>("CrawlStackerFast", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, "job", 10000, null, 2);
-        this.slowQueue = new serverProcessor<Request>("CrawlStackerSlow", "This is like CrawlStackerFast, but does additionaly a DNS lookup. The CrawlStackerFast does not need this because it can use the DNS cache.", new String[]{"Balancer"}, this, "job",  1000, null, 5);
+        this.fastQueue = new WorkflowProcessor<Request>("CrawlStackerFast", "This process checks new urls before they are enqueued into the balancer (proper, double-check, correct domain, filter)", new String[]{"Balancer"}, this, "job", 10000, null, 2);
+        this.slowQueue = new WorkflowProcessor<Request>("CrawlStackerSlow", "This is like CrawlStackerFast, but does additionaly a DNS lookup. The CrawlStackerFast does not need this because it can use the DNS cache.", new String[]{"Balancer"}, this, "job",  1000, null, 5);
 
         this.log.logInfo("STACKCRAWL thread initialized.");
     }
@@ -110,7 +110,7 @@ public final class CrawlStacker {
         // returns true when the host was known in the dns cache.
         // If not, the host is stacked on the fetch stack and false is returned
         try {
-            if (serverDomains.dnsResolveFromCache(host) != null) return true; // found entry
+            if (Domains.dnsResolveFromCache(host) != null) return true; // found entry
         } catch (final UnknownHostException e) {
             // we know that this is unknown
             return false;
@@ -233,7 +233,7 @@ public final class CrawlStacker {
             return "post url not allowed";
         }
 
-        final yacyURL referrerURL = (entry.referrerhash() == null) ? null : nextQueue.getURL(entry.referrerhash());
+        final DigestURI referrerURL = (entry.referrerhash() == null) ? null : nextQueue.getURL(entry.referrerhash());
 
         // add domain to profile domain list
         if ((profile.domFilterDepth() != Integer.MAX_VALUE) || (profile.domMaxPages() != Integer.MAX_VALUE)) {
@@ -256,7 +256,7 @@ public final class CrawlStacker {
 
         // check if the url is double registered
         final String dbocc = nextQueue.urlExists(entry.url().hash()); // returns the name of the queue if entry exists
-        URLMetadataRow oldEntry = null;
+        URIMetadataRow oldEntry = null;
         if (dbocc != null || (oldEntry = indexSegment.urlMetadata().load(entry.url().hash(), null, 0)) != null) {
             final boolean recrawl = (oldEntry != null) && (profile.recrawlIfOlder() > oldEntry.loaddate().getTime());
             // do double-check
@@ -332,7 +332,7 @@ public final class CrawlStacker {
      * @param url
      * @return null if the url can be accepted, a string containing a rejection reason if the url cannot be accepted
      */
-    public String urlInAcceptedDomain(final yacyURL url) {
+    public String urlInAcceptedDomain(final DigestURI url) {
         // returns true if the url can be accepted accoring to network.unit.domain
         if (url == null) return "url is null";
         final String host = url.getHost();
@@ -354,7 +354,7 @@ public final class CrawlStacker {
         if (this.acceptGlobalURLs && this.acceptLocalURLs) return null; // fast shortcut to avoid dnsResolve
         // check if this is a local address and we are allowed to index local pages:
         //boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
-        final boolean local = yacyURL.isLocal(urlhash);
+        final boolean local = DigestURI.isLocal(urlhash);
         //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
         if ((this.acceptGlobalURLs && !local) || (this.acceptLocalURLs && local)) return null;
         return (local) ?

@@ -58,10 +58,12 @@ import javax.net.ssl.SSLSocketFactory;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.workflow.AbstractBusyThread;
+import net.yacy.kelondro.workflow.BusyThread;
 
 import de.anomic.tools.PKCS12Tool;
 
-public final class serverCore extends serverAbstractBusyThread implements serverBusyThread {
+public final class serverCore extends AbstractBusyThread implements BusyThread {
 
     // special ASCII codes used for protocol handling
     /**
@@ -306,7 +308,7 @@ public final class serverCore extends serverAbstractBusyThread implements server
     }
     
     public void open() {
-        this.log.logConfig("* server started on " + serverDomains.myPublicLocalIP() + ":" + this.extendedPort);
+        this.log.logConfig("* server started on " + serverSwitch.myPublicLocalIP() + ":" + this.extendedPort);
     }
     
     public void freemem() {

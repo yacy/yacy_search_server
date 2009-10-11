@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -37,7 +38,6 @@ import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.ymageImageParser;
 
 public class ViewImage {
@@ -64,9 +64,9 @@ public class ViewImage {
         final String urlLicense = post.get("code", "");
         final boolean auth = (header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "")).equals("localhost") || sb.verifyAuthentication(header, true); // handle access rights
         
-        yacyURL url = null;
+        DigestURI url = null;
         if ((urlString.length() > 0) && (auth)) try {
-            url = new yacyURL(urlString, null);
+            url = new DigestURI(urlString, null);
         } catch (final MalformedURLException e1) {
             url = null;
         }

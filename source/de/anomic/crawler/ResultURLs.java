@@ -39,13 +39,14 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.util.ScoreCluster;
 
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.yacyURL;
 
 public final class ResultURLs {
 
@@ -83,7 +84,7 @@ public final class ResultURLs {
         gcrawlResultDomains = new ScoreCluster<String>();
     }
 
-    public synchronized void stack(final URLMetadataRow e, final String initiatorHash, final String executorHash, final int stackType) {
+    public synchronized void stack(final URIMetadataRow e, final String initiatorHash, final String executorHash, final int stackType) {
         assert initiatorHash != null;
         assert executorHash != null;
         if (e == null) { return; }
@@ -152,15 +153,15 @@ public final class ResultURLs {
     public synchronized String getHashNo(final int stack, final int pos, final int index) {
         final String result = getResultStackAt(stack, pos);
         if(result != null) {
-            if(result.length() < yacySeedDB.commonHashLength * 3) {
+            if(result.length() < Word.commonHashLength * 3) {
                 Log.logSevere("ResultURLs", "unexpected error: result of stack is too short: "+ result.length());
-                if(result.length() <= yacySeedDB.commonHashLength * 2) {
+                if(result.length() <= Word.commonHashLength * 2) {
                     return null;
                 }
                 // return what is there
-                return result.substring(yacySeedDB.commonHashLength * 2);
+                return result.substring(Word.commonHashLength * 2);
             }
-            return result.substring(yacySeedDB.commonHashLength * index, yacySeedDB.commonHashLength * (index + 1));
+            return result.substring(Word.commonHashLength * index, Word.commonHashLength * (index + 1));
         } else if(isValidStack(stack)) {
             Log.logSevere("ResultURLs", "unexpected error: result of stack is null: "+ stack +","+ pos);
         }
@@ -305,8 +306,8 @@ public final class ResultURLs {
     public static void main(final String[] args) {
         final ResultURLs results = new ResultURLs();
         try {
-            final yacyURL url = new yacyURL("http", "www.yacy.net", 80, "/");
-            final URLMetadataRow urlRef = new URLMetadataRow(url, "YaCy Homepage", "", "", "", new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), "de", 0, 0, 0, 0, 0, 0);
+            final DigestURI url = new DigestURI("http", "www.yacy.net", 80, "/");
+            final URIMetadataRow urlRef = new URIMetadataRow(url, "YaCy Homepage", "", "", "", new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), "de", 0, 0, 0, 0, 0, 0);
             int stackNo = 1;
             System.out.println("valid test:\n=======");
             // add

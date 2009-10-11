@@ -30,9 +30,10 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import de.anomic.document.Document;
 import de.anomic.document.parser.html.ImageEntry;
-import de.anomic.yacy.yacyURL;
 
 public class ResultImages {
 
@@ -142,8 +143,8 @@ public class ResultImages {
     
     public static class OriginEntry {
         public ImageEntry imageEntry;
-        public yacyURL baseURL;
-        public OriginEntry(final ImageEntry imageEntry, final yacyURL baseURL) {
+        public DigestURI baseURL;
+        public OriginEntry(final ImageEntry imageEntry, final DigestURI baseURL) {
             this.imageEntry = imageEntry;
             this.baseURL = baseURL;
         }

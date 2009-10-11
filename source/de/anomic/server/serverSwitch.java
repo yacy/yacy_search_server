@@ -24,6 +24,7 @@ package de.anomic.server;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -33,6 +34,8 @@ import java.util.TreeMap;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.workflow.BusyThread;
+import net.yacy.kelondro.workflow.WorkflowThread;
 
 import de.anomic.server.serverCore.Session;
 
@@ -48,7 +51,7 @@ public class serverSwitch {
     private         Map<String, String>                  configProps;
     private   final Map<String, String>                  configRemoved;
     private   final HashMap<InetAddress, String>         authorization;
-    private   final TreeMap<String, serverBusyThread>    workerThreads;
+    private   final TreeMap<String, BusyThread>    workerThreads;
     private   final TreeMap<String, serverSwitchAction>  switchActions;
     private   final serverAccessTracker                  accessTracker;
     
@@ -131,7 +134,7 @@ public class serverSwitch {
         authorization = new HashMap<InetAddress, String>();
 
         // init thread control
-        workerThreads = new TreeMap<String, serverBusyThread>();
+        workerThreads = new TreeMap<String, BusyThread>();
 
         // init switch actions
         switchActions = new TreeMap<String, serverSwitchAction>();
@@ -145,6 +148,76 @@ public class serverSwitch {
             (int) getConfigLong("server.maxTrackingCount", 1000),
             (int) getConfigLong("server.maxTrackingHostCount", 100)
         );        
+    }
+    
+    public String myPublicIP() {
+        // if a static IP was configured, we have to return it here ...
+        final String staticIP = getConfig("staticIP", "");
+        if ((!staticIP.equals(""))) {
+            return staticIP;
+        }
+
+        // otherwise we return the real IP address of this host
+        final InetAddress pLIP = myPublicLocalIP();
+        if (pLIP != null) return pLIP.getHostAddress();
+        return null;
+    }
+
+    public static InetAddress myPublicLocalIP() {
+        try {
+            String hostName;
+            try {
+                hostName = InetAddress.getLocalHost().getHostName();
+            } catch (final java.net.UnknownHostException e) {
+                hostName = "localhost"; // hopin' nothing serious happened only the hostname changed while running yacy
+                System.err.println("ERROR: (internal) " + e.getMessage());
+            }
+            // list all addresses
+            final InetAddress[] ia = InetAddress.getAllByName(hostName);
+            // for (int i = 0; i < ia.length; i++) System.out.println("IP: " +
+            // ia[i].getHostAddress()); // DEBUG
+            if (ia.length == 0) {
+                try {
+                    return InetAddress.getLocalHost();
+                } catch (final UnknownHostException e) {
+                    try {
+                        return InetAddress.getByName("127.0.0.1");
+                    } catch (final UnknownHostException ee) {
+                        return null;
+                    }
+                }
+            }
+            if (ia.length == 1) {
+                // only one network connection available
+                return ia[0];
+            }
+            // we have more addresses, find an address that is not local
+            int b0, b1;
+            for (int i = 0; i < ia.length; i++) {
+                b0 = 0Xff & ia[i].getAddress()[0];
+                b1 = 0Xff & ia[i].getAddress()[1];
+                if ((b0 != 10) && // class A reserved
+                        (b0 != 127) && // loopback
+                        ((b0 != 172) || (b1 < 16) || (b1 > 31)) && // class B reserved
+                        ((b0 != 192) || (b1 != 168)) && // class C reserved
+                        (ia[i].getHostAddress().indexOf(":") < 0))
+                    return ia[i];
+            }
+            // there is only a local address, we filter out the possibly
+            // returned loopback address 127.0.0.1
+            for (int i = 0; i < ia.length; i++) {
+                if (((0Xff & ia[i].getAddress()[0]) != 127) && (ia[i].getHostAddress().indexOf(":") < 0)) return ia[i];
+            }
+            // if all fails, give back whatever we have
+            for (int i = 0; i < ia.length; i++) {
+                if (ia[i].getHostAddress().indexOf(":") < 0) return ia[i];
+            }
+            return ia[0];
+        } catch (final java.net.UnknownHostException e) {
+            System.err.println("ERROR: (internal) " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
     }
     
     // a logger for this switchboard
@@ -321,7 +394,7 @@ public class serverSwitch {
             final String threadShortDescription,
             final String threadLongDescription,
             final String threadMonitorURL,
-            final serverBusyThread newThread,
+            final BusyThread newThread,
             final long startupDelay) {
         deployThread(threadName, threadShortDescription, threadLongDescription, threadMonitorURL,
                      newThread, startupDelay,
@@ -335,7 +408,7 @@ public class serverSwitch {
             final String threadShortDescription,
             final String threadLongDescription,
             final String threadMonitorURL,
-            final serverBusyThread newThread,
+            final BusyThread newThread,
             final long startupDelay,
             final long initialIdleSleep,
             final long initialBusySleep,
@@ -371,12 +444,12 @@ public class serverSwitch {
         if (workerThreads.containsKey(threadName)) newThread.start();
     }
 
-    public serverBusyThread getThread(final String threadName) {
+    public BusyThread getThread(final String threadName) {
         return workerThreads.get(threadName);
     }
     
     public void setThreadPerformance(final String threadName, final long idleMillis, final long busyMillis, final long memprereqBytes) {
-        final serverBusyThread thread = workerThreads.get(threadName);
+        final BusyThread thread = workerThreads.get(threadName);
         if (thread != null) {
             thread.setIdleSleep(idleMillis);
             thread.setBusySleep(busyMillis);
@@ -386,7 +459,7 @@ public class serverSwitch {
     
     public synchronized void terminateThread(final String threadName, final boolean waitFor) {
         if (workerThreads.containsKey(threadName)) {
-            ((serverThread) workerThreads.get(threadName)).terminate(waitFor);
+            ((WorkflowThread) workerThreads.get(threadName)).terminate(waitFor);
             workerThreads.remove(threadName);
         }
     }
@@ -401,12 +474,12 @@ public class serverSwitch {
     public synchronized void terminateAllThreads(final boolean waitFor) {
         Iterator<String> e = workerThreads.keySet().iterator();
         while (e.hasNext()) {
-            ((serverThread) workerThreads.get(e.next())).terminate(false);
+            ((WorkflowThread) workerThreads.get(e.next())).terminate(false);
         }
         if (waitFor) {
             e = workerThreads.keySet().iterator();
             while (e.hasNext()) {
-                ((serverThread) workerThreads.get(e.next())).terminate(true);
+                ((WorkflowThread) workerThreads.get(e.next())).terminate(true);
                 e.remove();
             }
         }
@@ -414,7 +487,7 @@ public class serverSwitch {
     
     public String[] sessionsOlderThan(String threadName, long timeout) {
         ArrayList<String> list = new ArrayList<String>();
-        final serverThread st = getThread(threadName);
+        final WorkflowThread st = getThread(threadName);
         final Thread[] threadList = new Thread[((serverCore) st).getJobCount()];
         serverCore.sessionThreadGroup.enumerate(threadList);
         
@@ -433,7 +506,7 @@ public class serverSwitch {
     
     public void closeSessions(String threadName, String sessionName) {
         if (sessionName == null) return;
-        final serverThread st = getThread(threadName);
+        final WorkflowThread st = getThread(threadName);
         final Thread[] threadList = new Thread[((serverCore) st).getJobCount()];
         serverCore.sessionThreadGroup.enumerate(threadList);
         

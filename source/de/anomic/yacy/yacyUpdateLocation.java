@@ -29,21 +29,23 @@ package de.anomic.yacy;
 
 import java.security.PublicKey;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 
 /**
  * Holds a update location with url and public key
  *
  */
 public class yacyUpdateLocation {
-    private yacyURL locationURL;
+    private DigestURI locationURL;
     private PublicKey publicKey;
 
-    public yacyUpdateLocation(yacyURL locationURL, PublicKey publicKey) {
+    public yacyUpdateLocation(DigestURI locationURL, PublicKey publicKey) {
 	this.locationURL = locationURL;
 	this.publicKey = publicKey;
     }
 
-    public yacyURL getLocationURL() {
+    public DigestURI getLocationURL() {
 	return this.locationURL;
     }
     public PublicKey getPublicKey() {

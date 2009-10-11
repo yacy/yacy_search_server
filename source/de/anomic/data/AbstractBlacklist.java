@@ -40,10 +40,10 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.SetTools;
 
 import de.anomic.search.SearchEventCache;
-import de.anomic.yacy.yacyURL;
 
 public abstract class AbstractBlacklist implements Blacklist {
 
@@ -285,7 +285,7 @@ public abstract class AbstractBlacklist implements Blacklist {
         return ret;
     }
 
-    public boolean isListed(final String blacklistType, final yacyURL url) {
+    public boolean isListed(final String blacklistType, final DigestURI url) {
 
         final Set<String> urlHashCache = getCacheUrlHashsSet(blacklistType);        
         if (!urlHashCache.contains(url.hash())) {

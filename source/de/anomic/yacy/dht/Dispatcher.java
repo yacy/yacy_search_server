@@ -32,15 +32,15 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.ByteArray;
+import net.yacy.kelondro.workflow.WorkflowProcessor;
 
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.referencePrototype.WordReference;
-import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
-import de.anomic.server.serverProcessor;
+import de.anomic.search.Segment;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 
@@ -92,7 +92,7 @@ public class Dispatcher {
     private Log log;
     
     // transmission process
-    private serverProcessor<Transmission.Chunk> indexingTransmissionProcessor;
+    private WorkflowProcessor<Transmission.Chunk> indexingTransmissionProcessor;
    
     // transmission object
     private Transmission transmission;
@@ -116,8 +116,8 @@ public class Dispatcher {
         //this.selectedContainerCache = null;
         //this.splittedContainerCache = null;
         
-        int concurrentSender = Math.min(25, Math.max(10, serverProcessor.useCPU * 2 + 1));
-        indexingTransmissionProcessor = new serverProcessor<Transmission.Chunk>(
+        int concurrentSender = Math.min(25, Math.max(10, WorkflowProcessor.useCPU * 2 + 1));
+        indexingTransmissionProcessor = new WorkflowProcessor<Transmission.Chunk>(
                 "storeDocumentIndex",
                 "This is the RWI transmission process",
                 new String[]{"RWI/Cache/Collections"},

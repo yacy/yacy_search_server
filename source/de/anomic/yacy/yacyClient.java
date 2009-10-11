@@ -55,6 +55,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.Digest;
@@ -70,7 +73,6 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.data.Blacklist;
-import de.anomic.document.Word;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.document.parser.xml.RSSReader;
 import de.anomic.http.client.DefaultCharsetFilePart;
@@ -80,16 +82,13 @@ import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.RankingProcess;
+import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.search.TextSnippet;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDomains;
 import de.anomic.tools.crypt;
 
 public final class yacyClient {
@@ -167,7 +166,7 @@ public final class yacyClient {
         // set my own seed according to new information
         // we overwrite our own IP number only
         if (serverCore.useStaticIP) {
-            mySeed.setIP(serverDomains.myPublicIP());
+            mySeed.setIP(Switchboard.getSwitchboard().myPublicIP());
         } else {
             final String myIP = result.get("yourip");
             final String properIP = yacySeed.isProperIP(myIP);
@@ -532,23 +531,23 @@ public final class yacyClient {
 		// System.out.println("***result count " + results);
 
 		// create containers
-		final int words = wordhashes.length() / yacySeedDB.commonHashLength;
+		final int words = wordhashes.length() / Word.commonHashLength;
 		assert words > 0 : "wordhashes = " + wordhashes;
 		final ReferenceContainer<WordReference>[] container = new ReferenceContainer[words];
 		for (int i = 0; i < words; i++) {
-			container[i] = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhashes.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength).getBytes(), count);
+			container[i] = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhashes.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes(), count);
 		}
 
 		// insert results to containers
-		URLMetadataRow urlEntry;
+		URIMetadataRow urlEntry;
 		final String[] urls = new String[results];
 		for (int n = 0; n < results; n++) {
 			// get one single search result
-			urlEntry = URLMetadataRow.importEntry(result.get("resource" + n));
+			urlEntry = URIMetadataRow.importEntry(result.get("resource" + n));
 			if (urlEntry == null) continue;
 			assert (urlEntry.hash().length() == 12) : "urlEntry.hash() = " + urlEntry.hash();
 			if (urlEntry.hash().length() != 12) continue; // bad url hash
-			final URLMetadataRow.Components metadata = urlEntry.metadata();
+			final URIMetadataRow.Components metadata = urlEntry.metadata();
 			if (blacklist.isListed(Blacklist.BLACKLIST_SEARCH, metadata.url())) {
 				yacyCore.log.logInfo("remote search (client): filtered blacklisted url " + metadata.url() + " from peer " + target.getName());
 				continue; // block with backlist
@@ -803,7 +802,7 @@ public final class yacyClient {
         return "wrong protocol: " + protocol;
     }
 
-    public static HashMap<String, String> crawlReceipt(final yacySeed mySeed, final yacySeed target, final String process, final String result, final String reason, final URLMetadataRow entry, final String wordhashes) {
+    public static HashMap<String, String> crawlReceipt(final yacySeed mySeed, final yacySeed target, final String process, final String result, final String reason, final URIMetadataRow entry, final String wordhashes) {
         assert (target != null);
         assert (mySeed != null);
         assert (mySeed != target);
@@ -866,7 +865,7 @@ public final class yacyClient {
     public static String transferIndex(
             final yacySeed targetSeed,
             final ReferenceContainerCache<WordReference> indexes,
-            final HashMap<String, URLMetadataRow> urlCache,
+            final HashMap<String, URIMetadataRow> urlCache,
             final boolean gzipBody,
             final int timeout) {
         
@@ -918,7 +917,7 @@ public final class yacyClient {
             if (uhs.length == 0) { return null; } // all url's known
             
             // extract the urlCache from the result
-            final URLMetadataRow[] urls = new URLMetadataRow[uhs.length];
+            final URIMetadataRow[] urls = new URIMetadataRow[uhs.length];
             for (int i = 0; i < uhs.length; i++) {
                 urls[i] = urlCache.get(uhs[i]);
                 if (urls[i] == null) {
@@ -1008,7 +1007,7 @@ public final class yacyClient {
         }
     }
 
-    private static HashMap<String, String> transferURL(final yacySeed targetSeed, final URLMetadataRow[] urls, boolean gzipBody, final int timeout) {
+    private static HashMap<String, String> transferURL(final yacySeed targetSeed, final URIMetadataRow[] urls, boolean gzipBody, final int timeout) {
         // this post a message to the remote message board
         final String address = targetSeed.getPublicAddress();
         if (address == null) { return null; }

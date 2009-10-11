@@ -31,6 +31,8 @@
 import java.io.File;
 import java.util.regex.Pattern;
 
+import net.yacy.kelondro.workflow.InstantBusyThread;
+
 import de.anomic.data.translator;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
@@ -40,8 +42,6 @@ import de.anomic.net.UPnP;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDomains;
-import de.anomic.server.serverInstantBusyThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
@@ -73,7 +73,7 @@ public class ConfigBasic {
         
         //boolean doPeerPing = false;
         if ((sb.peers.mySeed().isVirgin()) || (sb.peers.mySeed().isJunior())) {
-            serverInstantBusyThread.oneTimeJob(sb.yc, "peerPing", null, 0);
+            InstantBusyThread.oneTimeJob(sb.yc, "peerPing", null, 0);
             //doPeerPing = true;
         }
         
@@ -127,7 +127,7 @@ public class ConfigBasic {
                 final int idx = host.indexOf(":");
                 if (idx != -1) host = host.substring(0,idx);
             } else {
-                host = serverDomains.myPublicLocalIP().getHostAddress();
+                host = serverSwitch.myPublicLocalIP().getHostAddress();
             }
             
             prop.put("reconnect", "1");

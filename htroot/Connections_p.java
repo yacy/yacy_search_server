@@ -34,6 +34,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.workflow.WorkflowThread;
 
 import de.anomic.http.client.ConnectionInfo;
 import de.anomic.http.client.Client;
@@ -45,7 +46,6 @@ import de.anomic.server.serverCore;
 import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverThread;
 import de.anomic.server.serverCore.Session;
 import de.anomic.yacy.yacySeed;
 
@@ -63,7 +63,7 @@ public final class Connections_p {
         
         // server sessions
         // get the serverCore thread
-        final serverThread httpd = sb.getThread("10_httpd");
+        final WorkflowThread httpd = sb.getThread("10_httpd");
         
         /* waiting for all threads to finish */
         int count  = serverCore.sessionThreadGroup.activeCount();    

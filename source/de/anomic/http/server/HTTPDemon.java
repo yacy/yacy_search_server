@@ -50,11 +50,13 @@ import java.util.StringTokenizer;
 import java.util.Map.Entry;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -76,11 +78,9 @@ import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDomains;
 import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyURL;
 
 
 /**
@@ -1137,7 +1137,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             
             String urlString;
             try {
-                urlString = (new yacyURL((method.equals(HeaderFramework.METHOD_CONNECT)?"https":"http"), host, port, (args == null) ? path : path + "?" + args)).toString();
+                urlString = (new DigestURI((method.equals(HeaderFramework.METHOD_CONNECT)?"https":"http"), host, port, (args == null) ? path : path + "?" + args)).toString();
             } catch (final MalformedURLException e) {
                 urlString = "invalid URL";
             }
@@ -1148,15 +1148,15 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             final String clientIP = conProp.getProperty(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
 
             // check if ip is local ip address
-            final InetAddress hostAddress = serverDomains.dnsResolve(clientIP);
+            final InetAddress hostAddress = Domains.dnsResolve(clientIP);
             if (hostAddress == null) {
-                tp.put("host", serverDomains.myPublicLocalIP().getHostAddress());
+                tp.put("host", serverSwitch.myPublicLocalIP().getHostAddress());
                 tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8080")));
             } else if (hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress()) {
-                tp.put("host", serverDomains.myPublicLocalIP().getHostAddress());
+                tp.put("host", serverSwitch.myPublicLocalIP().getHostAddress());
                 tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8080")));
             } else {
-                tp.put("host", serverDomains.myPublicIP());
+                tp.put("host", switchboard.myPublicIP());
                 tp.put("port", Integer.toString(serverCore.getPortNr(switchboard.getConfig("port", "8080"))));
             }
 
@@ -1429,8 +1429,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         if (getAlternativeResolver() == null) return false;
         
         // resolve ip addresses
-        final InetAddress seedInetAddress = serverDomains.dnsResolve(getAlternativeResolver().myIP());
-        final InetAddress hostInetAddress = serverDomains.dnsResolve(hostName);
+        final InetAddress seedInetAddress = Domains.dnsResolve(getAlternativeResolver().myIP());
+        final InetAddress hostInetAddress = Domains.dnsResolve(hostName);
         if (seedInetAddress == null || hostInetAddress == null) return false;
         
         // if it's equal, the hostname points to this seed
@@ -1443,7 +1443,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         boolean isThisHostIP = false;
         try {
 //             final InetAddress clientAddress = InetAddress.getByName(hostName);
-            final InetAddress clientAddress = serverDomains.dnsResolve(hostName);
+            final InetAddress clientAddress = Domains.dnsResolve(hostName);
             if (clientAddress == null) return false;
             
             if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;

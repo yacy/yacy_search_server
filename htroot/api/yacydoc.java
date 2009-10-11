@@ -27,15 +27,16 @@
 
 import java.net.MalformedURLException;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
+
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.search.Segment;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.yacyURL;
 
 public class yacydoc {
     
@@ -72,21 +73,21 @@ public class yacydoc {
 
         if (urlstring.length() > 0 && urlhash.length() == 0) {
             try {
-                urlhash = (new yacyURL(urlstring, null)).hash();
+                urlhash = (new DigestURI(urlstring, null)).hash();
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
         }
         if (urlhash == null || urlhash.length() == 0) return prop;
         
-        final URLMetadataRow entry = segment.urlMetadata().load(urlhash, null, 0);
+        final URIMetadataRow entry = segment.urlMetadata().load(urlhash, null, 0);
         if (entry == null) return prop;
 
-        final URLMetadataRow.Components metadata = entry.metadata();
+        final URIMetadataRow.Components metadata = entry.metadata();
         if (metadata.url() == null) {
             return prop;
         }
-        final URLMetadataRow le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : segment.urlMetadata().load(entry.referrerHash(), null, 0);
+        final URIMetadataRow le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != Word.commonHashLength)) ? null : segment.urlMetadata().load(entry.referrerHash(), null, 0);
         
         prop.putXML("dc_title", metadata.dc_title());
         prop.putXML("dc_creator", metadata.dc_creator());

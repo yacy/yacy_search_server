@@ -81,6 +81,7 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.DateFormatter;
@@ -104,7 +105,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 import de.anomic.yacy.yacyBuildProperties;
-import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.ymageMatrix;
 
 public final class HTTPDFileHandler {
@@ -868,7 +868,7 @@ public final class HTTPDFileHandler {
                                 // save position
                                 fis.mark(1000);
                                 // scrape document to look up charset
-                                final ScraperInputStream htmlFilter = new ScraperInputStream(fis,"UTF-8",new yacyURL("http://localhost", null),null,false);
+                                final ScraperInputStream htmlFilter = new ScraperInputStream(fis,"UTF-8",new DigestURI("http://localhost", null),null,false);
                                 final String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
                                 if(charset != null)
                                     mimeType = mimeType + "; charset="+charset;

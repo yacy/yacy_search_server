@@ -50,10 +50,10 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.Vector;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.http.server.HTTPDemon;
-import de.anomic.yacy.yacyURL;
 
 
 public class HeaderFramework extends TreeMap<String, String> implements Map<String, String> {
@@ -462,7 +462,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         theHeader.append("\r\n");                
     }    
     
-    public static yacyURL getRequestURL(final Properties conProp) throws MalformedURLException {
+    public static DigestURI getRequestURL(final Properties conProp) throws MalformedURLException {
         String host =    conProp.getProperty(HeaderFramework.CONNECTION_PROP_HOST);
         final String path =    conProp.getProperty(HeaderFramework.CONNECTION_PROP_PATH);     // always starts with leading '/'
         final String args =    conProp.getProperty(HeaderFramework.CONNECTION_PROP_ARGS);     // may be null if no args were given
@@ -476,7 +476,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             host = host.substring(0, pos);
         }
         
-        final yacyURL url = new yacyURL("http", host, port, (args == null) ? path : path + "?" + args);
+        final DigestURI url = new DigestURI("http", host, port, (args == null) ? path : path + "?" + args);
         return url;
     }
 

@@ -36,6 +36,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 
@@ -46,14 +48,12 @@ import de.anomic.data.userDB;
 import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.document.Document;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
-import de.anomic.yacy.yacyURL;
 
 
 public class Bookmarks {
@@ -185,10 +185,10 @@ public class Bookmarks {
                     final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        final URLMetadataRow urlentry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(urlHash, null, 0);
+                        final URIMetadataRow urlentry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(urlHash, null, 0);
                         Document document = null;
                         if (urlentry != null) {
-                            final URLMetadataRow.Components metadata = urlentry.metadata();
+                            final URIMetadataRow.Components metadata = urlentry.metadata();
                             document = LoaderDispatcher.retrieveDocument(metadata.url(), true, 5000, true, false);
                             prop.put("mode_edit", "0"); // create mode
                             prop.put("mode_url", metadata.url().toNormalform(false, true));
@@ -233,7 +233,7 @@ public class Bookmarks {
     			Log.logInfo("BOOKMARKS", "I try to import bookmarks from HTML-file");
     			try {
     				final File file=new File(post.get("htmlfile"));    			
-    				sb.bookmarksDB.importFromBookmarks(new yacyURL(file) , post.get("htmlfile$file"), tags, isPublic);
+    				sb.bookmarksDB.importFromBookmarks(new DigestURI(file) , post.get("htmlfile$file"), tags, isPublic);
     			} catch (final MalformedURLException e) {}
     			Log.logInfo("BOOKMARKS", "success!!");
     		}else if(post.containsKey("xmlfile")){

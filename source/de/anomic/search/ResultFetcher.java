@@ -31,14 +31,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.kelondro.util.SortStack;
 import net.yacy.kelondro.util.SortStore;
 
 import de.anomic.document.Condenser;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.search.RankingProcess.NavigatorEntry;
 import de.anomic.search.MediaSnippet;
 import de.anomic.server.serverProfiling;
@@ -147,7 +146,7 @@ public class ResultFetcher {
         public void run() {
 
             // start fetching urls and snippets
-            URLMetadataRow page;
+            URIMetadataRow page;
             final int fetchAhead = snippetMode == 0 ? 0 : 10;
             boolean nav_topics = query.navigators.equals("all") || query.navigators.indexOf("topics") >= 0;
             try {
@@ -190,7 +189,7 @@ public class ResultFetcher {
         }
     }
     
-    protected ResultEntry fetchSnippet(final URLMetadataRow page, final int snippetMode) {
+    protected ResultEntry fetchSnippet(final URIMetadataRow page, final int snippetMode) {
         // Snippet Fetching can has 3 modes:
         // 0 - do not fetch snippets
         // 1 - fetch snippets offline only
@@ -200,7 +199,7 @@ public class ResultFetcher {
         // find the url entry
 
         long startTime = System.currentTimeMillis();
-        final URLMetadataRow.Components metadata = page.metadata();
+        final URIMetadataRow.Components metadata = page.metadata();
         final long dbRetrievalTime = System.currentTimeMillis() - startTime;
         
         if (snippetMode == 0) {

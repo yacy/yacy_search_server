@@ -30,20 +30,20 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Iterator;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.RotateIterator;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.MetadataRepository;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.search.MetadataRepository;
+import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.yacyURL;
 
 public class IndexControlURLs_p {
     
@@ -143,7 +143,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashdelete")) {
-            final URLMetadataRow entry = segment.urlMetadata().load(urlhash, null, 0);
+            final URIMetadataRow entry = segment.urlMetadata().load(urlhash, null, 0);
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
@@ -158,7 +158,7 @@ public class IndexControlURLs_p {
 
         if (post.containsKey("urldelete")) {
             try {
-                urlhash = (new yacyURL(urlstring, null)).hash();
+                urlhash = (new DigestURI(urlstring, null)).hash();
             } catch (final MalformedURLException e) {
                 urlhash = null;
             }
@@ -174,10 +174,10 @@ public class IndexControlURLs_p {
 
         if (post.containsKey("urlstringsearch")) {
             try {
-                final yacyURL url = new yacyURL(urlstring, null);
+                final DigestURI url = new DigestURI(urlstring, null);
                 urlhash = url.hash();
                 prop.put("urlhash", urlhash);
-                final URLMetadataRow entry = segment.urlMetadata().load(urlhash, null, 0);
+                final URIMetadataRow entry = segment.urlMetadata().load(urlhash, null, 0);
                 if (entry == null) {
                     prop.putHTML("urlstring", "unknown url: " + urlstring);
                     prop.put("urlhash", "");
@@ -194,7 +194,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashsearch")) {
-            final URLMetadataRow entry = segment.urlMetadata().load(urlhash, null, 0);
+            final URIMetadataRow entry = segment.urlMetadata().load(urlhash, null, 0);
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash);
             } else {
@@ -209,9 +209,9 @@ public class IndexControlURLs_p {
         // generate list
         if (post.containsKey("urlhashsimilar")) {
             try {
-                final Iterator<URLMetadataRow> entryIt = new RotateIterator<URLMetadataRow>(segment.urlMetadata().entries(true, urlhash), new String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), segment.termIndex().sizesMax()); 
+                final Iterator<URIMetadataRow> entryIt = new RotateIterator<URIMetadataRow>(segment.urlMetadata().entries(true, urlhash), new String(Base64Order.zero((urlhash == null ? 0 : urlhash.length()))), segment.termIndex().sizesMax()); 
                 final StringBuilder result = new StringBuilder("Sequential List of URL-Hashes:<br />");
-                URLMetadataRow entry;
+                URIMetadataRow entry;
                 i = 0;
                 int rows = 0, cols = 0;
                 prop.put("urlhashsimilar", "1");
@@ -313,15 +313,15 @@ public class IndexControlURLs_p {
         return prop;
     }
     
-    private static serverObjects genUrlProfile(final Segment segment, final URLMetadataRow entry, final String urlhash) {
+    private static serverObjects genUrlProfile(final Segment segment, final URIMetadataRow entry, final String urlhash) {
         final serverObjects prop = new serverObjects();
         if (entry == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;
         }
-        final URLMetadataRow.Components metadata = entry.metadata();
-        final URLMetadataRow le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != yacySeedDB.commonHashLength)) ? null : segment.urlMetadata().load(entry.referrerHash(), null, 0);
+        final URIMetadataRow.Components metadata = entry.metadata();
+        final URIMetadataRow le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != Word.commonHashLength)) ? null : segment.urlMetadata().load(entry.referrerHash(), null, 0);
         if (metadata.url() == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);

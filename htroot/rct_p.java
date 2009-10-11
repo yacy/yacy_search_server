@@ -30,6 +30,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.Iterator;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.content.RSSMessage;
@@ -41,7 +42,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.dht.PeerSelection;
 
 public class rct_p {
@@ -61,9 +61,9 @@ public class rct_p {
                         //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
                         
                         // put url on remote crawl stack
-                        yacyURL url;
+                        DigestURI url;
                         try {
-                            url = new yacyURL(item.getLink(), null);
+                            url = new DigestURI(item.getLink(), null);
                         } catch (final MalformedURLException e) {
                             url = null;
                         }
@@ -73,7 +73,7 @@ public class rct_p {
                         } catch (final ParseException e) {
                             loaddate = new Date();
                         }
-                        final yacyURL referrer = null; // referrer needed!
+                        final DigestURI referrer = null; // referrer needed!
                         final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(url);
                         if (urlRejectReason == null) {
                             // stack url
@@ -108,7 +108,7 @@ public class rct_p {
      * @param url
      * @return
      */
-    private static String urlToString(final yacyURL url) {
+    private static String urlToString(final DigestURI url) {
         return (url == null ? "null" : url.toNormalform(true, false));
     }
     

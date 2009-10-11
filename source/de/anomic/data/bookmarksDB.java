@@ -57,12 +57,16 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.kelondro.blob.Heap;
 import net.yacy.kelondro.blob.MapView;
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
+import net.yacy.kelondro.workflow.BusyThread;
+import net.yacy.kelondro.workflow.InstantBusyThread;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -72,16 +76,12 @@ import org.xml.sax.SAXException;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.document.Word;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.TransformerWriter;
-import de.anomic.kelondro.text.Segments;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
-import de.anomic.server.serverBusyThread;
-import de.anomic.server.serverInstantBusyThread;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
-import de.anomic.yacy.yacyURL;
 
 public class bookmarksDB {
 	// ------------------------------------
@@ -104,7 +104,7 @@ public class bookmarksDB {
     MapView datesTable;
     
     // autoReCrawl    
-    private serverBusyThread autoReCrawl;
+    private BusyThread autoReCrawl;
     
 	// ------------------------------------
 	// bookmarksDB's class constructor
@@ -133,7 +133,7 @@ public class bookmarksDB {
 
         // autoReCrawl
         Switchboard sb = Switchboard.getSwitchboard();
-        this.autoReCrawl = new serverInstantBusyThread(this, "autoReCrawl", null, null);
+        this.autoReCrawl = new InstantBusyThread(this, "autoReCrawl", null, null);
         long sleepTime = Long.parseLong(sb.getConfig("autoReCrawl_idlesleep" , SLEEP_TIME));
         sb.deployThread("autoReCrawl", "autoReCrawl Scheduler", "simple scheduler for automatic re-crawls of bookmarked urls", null, autoReCrawl, 120000,
                 sleepTime, sleepTime, Long.parseLong(sb.getConfig("autoReCrawl_memprereq" , "-1"))
@@ -241,7 +241,7 @@ public class bookmarksDB {
 	    			String crawlingStart = bm.getUrl();                    
 	    			String newcrawlingMustMatch = crawlingfilter;
 	    			
-                    yacyURL crawlingStartURL = new yacyURL(crawlingStart, null);
+                    DigestURI crawlingStartURL = new DigestURI(crawlingStart, null);
                     
                     // set the crawling filter                    
                     if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = ".*"; // avoid that all urls are filtered out if bad value was submitted
@@ -768,7 +768,7 @@ public class bookmarksDB {
 	// bookmarksDB's Import/Export functions
 	// --------------------------------------
     
-    public int importFromBookmarks(final yacyURL baseURL, final String input, final String tag, final boolean importPublic){
+    public int importFromBookmarks(final DigestURI baseURL, final String input, final String tag, final boolean importPublic){
 		try {
 			// convert string to input stream
 			final ByteArrayInputStream byteIn = new ByteArrayInputStream(input.getBytes("UTF-8"));
@@ -781,13 +781,13 @@ public class bookmarksDB {
 		}        	
     }
     
-    public int importFromBookmarks(final yacyURL baseURL, final InputStreamReader input, final String tag, final boolean importPublic){
+    public int importFromBookmarks(final DigestURI baseURL, final InputStreamReader input, final String tag, final boolean importPublic){
     	  	
     	int importCount = 0;
     	
-    	Map<yacyURL, String> links = new HashMap<yacyURL, String>();
+    	Map<DigestURI, String> links = new HashMap<DigestURI, String>();
     	String title;
-    	yacyURL url;
+    	DigestURI url;
     	Bookmark bm;
     	final Set<String> tags=listManager.string2set(tag); //this allow multiple default tags
     	try {
@@ -799,7 +799,7 @@ public class bookmarksDB {
     		writer.close();
     		links = scraper.getAnchors();    		
     	} catch (final IOException e) { Log.logWarning("BOOKMARKS", "error during load of links: "+ e.getClass() +" "+ e.getMessage());}
-    	for (Entry<yacyURL, String> link: links.entrySet()) {
+    	for (Entry<DigestURI, String> link: links.entrySet()) {
     		url= link.getKey();
     		title=link.getValue();
     		Log.logInfo("BOOKMARKS", "links.get(url)");
@@ -1102,7 +1102,7 @@ public class bookmarksDB {
                 url="http://"+url;
             }
             try {
-                this.urlHash=(new yacyURL(url, null)).hash();
+                this.urlHash=(new DigestURI(url, null)).hash();
             } catch (final MalformedURLException e) {
                 this.urlHash = null;
             }
@@ -1122,7 +1122,7 @@ public class bookmarksDB {
             removeBookmark(this.urlHash); //prevent empty tags
         }
         
-        public Bookmark(final String urlHash, final yacyURL url) {
+        public Bookmark(final String urlHash, final DigestURI url) {
             entry = new HashMap<String, String>();
             this.urlHash=urlHash;
             entry.put(BOOKMARK_URL, url.toNormalform(false, true));
@@ -1139,7 +1139,7 @@ public class bookmarksDB {
         }
 
         public Bookmark(final Map<String, String> map) throws MalformedURLException {
-            this((new yacyURL(map.get(BOOKMARK_URL), null)).hash(), map);
+            this((new DigestURI(map.get(BOOKMARK_URL), null)).hash(), map);
         }
         
         Map<String, String> toMap() {

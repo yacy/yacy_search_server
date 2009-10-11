@@ -43,6 +43,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -52,12 +53,11 @@ import de.anomic.http.client.Cache;
 import de.anomic.http.client.Client;
 import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.server.serverCachedFileOutputStream;
-import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.WebStructureGraph;
 
 public class Document {
     
-    private final yacyURL source;               // the source url
+    private final DigestURI source;               // the source url
     private final String mimeType;              // mimeType as taken from http header
     private final String charset;               // the charset of the document
     private final List<String> keywords;        // most resources provide a keyword field
@@ -66,23 +66,23 @@ public class Document {
     private final List<String>  sections;       // if present: more titles/headlines appearing in the document
     private final StringBuilder description;    // an abstract, if present: short content description
     private Object text;                  // the clear text, all that is visible
-    private final Map<yacyURL, String> anchors; // all links embedded as clickeable entities (anchor tags)
+    private final Map<DigestURI, String> anchors; // all links embedded as clickeable entities (anchor tags)
     private final HashMap<String, ImageEntry> images; // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
     // The EntityDescription appear either as visible text in anchors or as alternative
     // text in image tags.
-    private Map<yacyURL, String> hyperlinks, audiolinks, videolinks, applinks;
+    private Map<DigestURI, String> hyperlinks, audiolinks, videolinks, applinks;
     private Map<String, String> emaillinks;
-    private yacyURL favicon;
+    private DigestURI favicon;
     private boolean resorted;
     private InputStream textStream;
     private int inboundLinks, outboundLinks; // counters for inbound and outbound links, are counted after calling notifyWebStructure
     private Set<String> languages;
     
-    protected Document(final yacyURL location, final String mimeType, final String charset, final Set<String> languages,
+    protected Document(final DigestURI location, final String mimeType, final String charset, final Set<String> languages,
                     final String[] keywords, final String title, final String author,
                     final String[] sections, final String abstrct,
-                    final Object text, final Map<yacyURL, String> anchors, final HashMap<String, ImageEntry> images) {
+                    final Object text, final Map<DigestURI, String> anchors, final HashMap<String, ImageEntry> images) {
         this.source = location;
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
         this.charset = charset;
@@ -91,7 +91,7 @@ public class Document {
         this.creator = (author == null) ? new StringBuilder(0) : new StringBuilder(author);
         this.sections = (sections == null) ? new LinkedList<String>() : Arrays.asList(sections);
         this.description = (abstrct == null) ? new StringBuilder(0) : new StringBuilder(abstrct);
-        this.anchors = (anchors == null) ? new HashMap<yacyURL, String>(0) : anchors;
+        this.anchors = (anchors == null) ? new HashMap<DigestURI, String>(0) : anchors;
         this.images =  (images == null) ? new HashMap<String, ImageEntry>() : images;
         this.hyperlinks = null;
         this.audiolinks = null;
@@ -113,28 +113,28 @@ public class Document {
         }
     }
     
-    public Document(final yacyURL location, final String mimeType, final String charset, final Set<String> languages) {
+    public Document(final DigestURI location, final String mimeType, final String charset, final Set<String> languages) {
         this(location, mimeType, charset, languages, null, null, null, null, null, (Object)null, null, null);
     }
     
-    public Document(final yacyURL location, final String mimeType, final String charset, final Set<String> languages,
+    public Document(final DigestURI location, final String mimeType, final String charset, final Set<String> languages,
                     final String[] keywords, final String title, final String author,
                     final String[] sections, final String abstrct,
-                    final byte[] text, final Map<yacyURL, String> anchors, final HashMap<String, ImageEntry> images) {
+                    final byte[] text, final Map<DigestURI, String> anchors, final HashMap<String, ImageEntry> images) {
         this(location, mimeType, charset, languages, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
-    public Document(final yacyURL location, final String mimeType, final String charset, final Set<String> languages,
+    public Document(final DigestURI location, final String mimeType, final String charset, final Set<String> languages,
             final String[] keywords, final String title, final String author,
             final String[] sections, final String abstrct,
-            final File text, final Map<yacyURL, String> anchors, final HashMap<String, ImageEntry> images) {
+            final File text, final Map<DigestURI, String> anchors, final HashMap<String, ImageEntry> images) {
         this(location, mimeType, charset, languages, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
-    public Document(final yacyURL location, final String mimeType, final String charset, final Set<String> languages,
+    public Document(final DigestURI location, final String mimeType, final String charset, final Set<String> languages,
             final String[] keywords, final String title, final String author,
             final String[] sections, final String abstrct,
-            final serverCachedFileOutputStream text, final Map<yacyURL, String> anchors, final HashMap<String, ImageEntry> images) {
+            final serverCachedFileOutputStream text, final Map<DigestURI, String> anchors, final HashMap<String, ImageEntry> images) {
         this(location, mimeType, charset, languages, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
 
@@ -225,7 +225,7 @@ dc_rights
         return this.source.toNormalform(true, false);
     }
     
-    public yacyURL dc_source() {
+    public DigestURI dc_source() {
         return this.source;
     }
     
@@ -304,7 +304,7 @@ dc_rights
         return this.keywords;
     }
     
-    public Map<yacyURL, String> getAnchors() {
+    public Map<DigestURI, String> getAnchors() {
         // returns all links embedded as anchors (clickeable entities)
         // this is a url(String)/text(String) map
         return anchors;
@@ -313,18 +313,18 @@ dc_rights
     
     // the next three methods provide a calculated view on the getAnchors/getImages:
     
-    public Map<yacyURL, String> getHyperlinks() {
+    public Map<DigestURI, String> getHyperlinks() {
         // this is a subset of the getAnchor-set: only links to other hyperrefs
         if (!resorted) resortLinks();
         return hyperlinks;
     }
     
-    public Map<yacyURL, String> getAudiolinks() {
+    public Map<DigestURI, String> getAudiolinks() {
         if (!resorted) resortLinks();
         return this.audiolinks;
     }
     
-    public Map<yacyURL, String> getVideolinks() {
+    public Map<DigestURI, String> getVideolinks() {
         if (!resorted) resortLinks();
         return this.videolinks;
     }
@@ -336,7 +336,7 @@ dc_rights
         return images;
     }
     
-    public Map<yacyURL, String> getApplinks() {
+    public Map<DigestURI, String> getApplinks() {
         if (!resorted) resortLinks();
         return this.applinks;
     }
@@ -351,18 +351,18 @@ dc_rights
         if (this.resorted) return;
         
         // extract hyperlinks, medialinks and emaillinks from anchorlinks
-        yacyURL url;
+        DigestURI url;
         String u;
         int extpos, qpos;
         String ext = null;
-        final Iterator<Map.Entry<yacyURL, String>> i = anchors.entrySet().iterator();
-        hyperlinks = new HashMap<yacyURL, String>();
-        videolinks = new HashMap<yacyURL, String>();
-        audiolinks = new HashMap<yacyURL, String>();
-        applinks   = new HashMap<yacyURL, String>();
+        final Iterator<Map.Entry<DigestURI, String>> i = anchors.entrySet().iterator();
+        hyperlinks = new HashMap<DigestURI, String>();
+        videolinks = new HashMap<DigestURI, String>();
+        audiolinks = new HashMap<DigestURI, String>();
+        applinks   = new HashMap<DigestURI, String>();
         emaillinks = new HashMap<String, String>();
         final HashMap<String, ImageEntry> collectedImages = new HashMap<String, ImageEntry>(); // this is a set that is collected now and joined later to the imagelinks
-        Map.Entry<yacyURL, String> entry;
+        Map.Entry<DigestURI, String> entry;
         while (i.hasNext()) {
             entry = i.next();
             url = entry.getKey();
@@ -418,21 +418,21 @@ dc_rights
         this.resorted = true;
     }
     
-    public static Map<yacyURL, String> allSubpaths(final Collection<?> links) {
+    public static Map<DigestURI, String> allSubpaths(final Collection<?> links) {
         // links is either a Set of Strings (urls) or a Set of
         // htmlFilterImageEntries
         final HashSet<String> h = new HashSet<String>();
         Iterator<?> i = links.iterator();
         Object o;
-        yacyURL url;
+        DigestURI url;
         String u;
         int pos;
         int l;
         while (i.hasNext())
             try {
                 o = i.next();
-                if (o instanceof yacyURL) url = (yacyURL) o;
-                else if (o instanceof String) url = new yacyURL((String) o, null);
+                if (o instanceof DigestURI) url = (DigestURI) o;
+                else if (o instanceof String) url = new DigestURI((String) o, null);
                 else if (o instanceof ImageEntry) url = ((ImageEntry) o).url();
                 else {
                     assert false;
@@ -453,11 +453,11 @@ dc_rights
             } catch (final MalformedURLException e) { }
         // now convert the strings to yacyURLs
         i = h.iterator();
-        final HashMap<yacyURL, String> v = new HashMap<yacyURL, String>();
+        final HashMap<DigestURI, String> v = new HashMap<DigestURI, String>();
         while (i.hasNext()) {
             u = (String) i.next();
             try {
-                url = new yacyURL(u, null);
+                url = new DigestURI(u, null);
                 v.put(url, "sub");
             } catch (final MalformedURLException e) {
             }
@@ -465,23 +465,23 @@ dc_rights
         return v;
     }
     
-    public static Map<yacyURL, String> allReflinks(final Collection<?> links) {
+    public static Map<DigestURI, String> allReflinks(final Collection<?> links) {
         // links is either a Set of Strings (with urls) or
         // htmlFilterImageEntries
         // we find all links that are part of a reference inside a url
-        final HashMap<yacyURL, String> v = new HashMap<yacyURL, String>();
+        final HashMap<DigestURI, String> v = new HashMap<DigestURI, String>();
         final Iterator<?> i = links.iterator();
         Object o;
-        yacyURL url;
+        DigestURI url;
         String u;
         int pos;
         loop: while (i.hasNext())
             try {
                 o = i.next();
-                if (o instanceof yacyURL)
-                    url = (yacyURL) o;
+                if (o instanceof DigestURI)
+                    url = (DigestURI) o;
                 else if (o instanceof String)
-                    url = new yacyURL((String) o, null);
+                    url = new DigestURI((String) o, null);
                 else if (o instanceof ImageEntry)
                     url = ((ImageEntry) o).url();
                 else {
@@ -494,7 +494,7 @@ dc_rights
                     u = u.substring(pos);
                     while ((pos = u.toLowerCase().indexOf("http://", 7)) > 0)
                         u = u.substring(pos);
-                    url = new yacyURL(u, null);
+                    url = new DigestURI(u, null);
                     if (!(v.containsKey(url)))
                         v.put(url, "ref");
                     continue loop;
@@ -504,7 +504,7 @@ dc_rights
                     u = "http:/" + u.substring(pos);
                     while ((pos = u.toLowerCase().indexOf("/www.", 7)) > 0)
                         u = "http:/" + u.substring(pos);
-                    url = new yacyURL(u, null);
+                    url = new DigestURI(u, null);
                     if (!(v.containsKey(url)))
                         v.put(url, "ref");
                     continue loop;
@@ -538,14 +538,14 @@ dc_rights
     /**
      * @return the {@link URL} to the favicon that belongs to the document
      */
-    public yacyURL getFavicon() {
+    public DigestURI getFavicon() {
     	return this.favicon;
     }
     
     /**
      * @param faviconURL the {@link URL} to the favicon that belongs to the document
      */
-    public void setFavicon(final yacyURL faviconURL) {
+    public void setFavicon(final DigestURI faviconURL) {
     	this.favicon = faviconURL;
     }
     
@@ -619,7 +619,7 @@ dc_rights
      * @return the extracted data
      * @throws ParserException
      */
-    public static Document parseDocument(final yacyURL url, final long contentLength, final InputStream resourceStream, ResponseHeader responseHeader) throws ParserException {
+    public static Document parseDocument(final DigestURI url, final long contentLength, final InputStream resourceStream, ResponseHeader responseHeader) throws ParserException {
         try {
             if (resourceStream == null) return null;
 
@@ -661,7 +661,7 @@ dc_rights
         }
     }
     
-    public static Document parseDocument(final yacyURL url, final long contentLength, final InputStream resourceStream) throws ParserException {
+    public static Document parseDocument(final DigestURI url, final long contentLength, final InputStream resourceStream) throws ParserException {
         return parseDocument(url, contentLength, resourceStream, null);
     }
     

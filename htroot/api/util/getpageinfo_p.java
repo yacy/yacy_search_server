@@ -3,13 +3,14 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Set;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyURL;
 
 public class getpageinfo_p {
     
@@ -40,9 +41,9 @@ public class getpageinfo_p {
                 url = "http://" + url;
             }
             if (actions.indexOf("title")>=0) {
-                yacyURL u = null;
+                DigestURI u = null;
                 try {
-                    u = new yacyURL(url, null);
+                    u = new DigestURI(url, null);
                 } catch (final MalformedURLException e) {
                     // fail, do nothing
                 }
@@ -84,13 +85,13 @@ public class getpageinfo_p {
             }
             if(actions.indexOf("robots")>=0){
                 try {
-                    final yacyURL theURL = new yacyURL(url, null);
+                    final DigestURI theURL = new DigestURI(url, null);
                     
                 	// determine if crawling of the current URL is allowed
                 	prop.put("robots-allowed", sb.robots.isDisallowed(theURL) ? "0" : "1");
                     
                     // get the sitemap URL of the domain
-                    final yacyURL sitemapURL = sb.robots.getSitemapURL(theURL);
+                    final DigestURI sitemapURL = sb.robots.getSitemapURL(theURL);
                     prop.putXML("sitemap", (sitemapURL==null)?"":sitemapURL.toString());
                 } catch (final MalformedURLException e) {}
             }

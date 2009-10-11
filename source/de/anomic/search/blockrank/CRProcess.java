@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
@@ -45,8 +46,7 @@ import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.referencePrototype.WordReference;
+import de.anomic.search.Segment;
 
 public class CRProcess {
     

@@ -24,10 +24,10 @@
 
 package de.anomic.document;
 
-import de.anomic.yacy.yacyURL;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 public class ParserException extends Exception {
-    private yacyURL url = null;
+    private DigestURI url = null;
     
 	private static final long serialVersionUID = 1L;
 
@@ -35,12 +35,12 @@ public class ParserException extends Exception {
         super();
     }
 
-    public ParserException(final String message, final yacyURL url) {
+    public ParserException(final String message, final DigestURI url) {
         super(message + "; url = " + url.toNormalform(true, false));
         this.url = url;
     }
     
-    public yacyURL getURL() {
+    public DigestURI getURL() {
         return this.url;
     }
 }

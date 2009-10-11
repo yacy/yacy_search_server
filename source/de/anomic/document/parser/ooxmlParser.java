@@ -42,6 +42,7 @@ import java.util.zip.ZipFile;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
@@ -56,7 +57,6 @@ import de.anomic.http.client.Client;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.server.serverCharBuffer;
-import de.anomic.yacy.yacyURL;
 
 public class ooxmlParser extends AbstractParser implements Idiom {
 
@@ -96,7 +96,7 @@ public class ooxmlParser extends AbstractParser implements Idiom {
     }
     
     @Override
-    public Document parse(final yacyURL location, final String mimeType, final String charset, final File dest) throws ParserException, InterruptedException {
+    public Document parse(final DigestURI location, final String mimeType, final String charset, final File dest) throws ParserException, InterruptedException {
         
         Writer writer = null;
         File writerFile = null;
@@ -223,7 +223,7 @@ public class ooxmlParser extends AbstractParser implements Idiom {
         }
     }
     
-    public Document parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         File dest = null;
         try {
             // creating a tempfile
@@ -256,7 +256,7 @@ public class ooxmlParser extends AbstractParser implements Idiom {
             if (args.length != 1) return;
             
             // getting the content URL
-            final yacyURL contentUrl = new yacyURL(args[0], null);
+            final DigestURI contentUrl = new DigestURI(args[0], null);
             
             // creating a new parser
             final odtParser testParser = new odtParser();

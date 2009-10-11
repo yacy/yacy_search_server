@@ -36,13 +36,13 @@ import java.util.Random;
 
 import javax.imageio.ImageIO;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.Cache;
 import de.anomic.search.Switchboard;
-import de.anomic.yacy.yacyURL;
 
 public class ymageOSM {
     
@@ -73,9 +73,9 @@ public class ymageOSM {
     }
     
     public static BufferedImage getSingleTile(final tileCoordinates tile) {
-        yacyURL tileURL;
+        DigestURI tileURL;
         try {
-            tileURL = new yacyURL(tile.url(), null);
+            tileURL = new DigestURI(tile.url(), null);
         } catch (final MalformedURLException e) {
             return null;
         }

@@ -44,8 +44,9 @@ import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.Properties;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import de.anomic.server.serverCharBuffer;
-import de.anomic.yacy.yacyURL;
 
 public final class TransformerWriter extends Writer {
 
@@ -586,7 +587,7 @@ public final class TransformerWriter extends Writer {
         System.exit(0);
         final char[] buffer = new char[512];
         try {
-            final ContentScraper scraper = new ContentScraper(new yacyURL("http://localhost:8080", null));
+            final ContentScraper scraper = new ContentScraper(new DigestURI("http://localhost:8080", null));
             final Transformer transformer = new ContentTransformer();            
             final Reader is = new FileReader(args[0]);
             final FileOutputStream fos = new FileOutputStream(new File(args[0] + ".out"));

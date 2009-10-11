@@ -37,13 +37,13 @@ import java.io.InputStreamReader;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
-import de.anomic.yacy.yacyURL;
 
 public class psParser extends AbstractParser implements Idiom {
 
@@ -104,7 +104,7 @@ public class psParser extends AbstractParser implements Idiom {
     
     
     @Override
-    public Document parse(final yacyURL location, final String mimeType, final String charset, final File sourceFile) throws ParserException, InterruptedException {
+    public Document parse(final DigestURI location, final String mimeType, final String charset, final File sourceFile) throws ParserException, InterruptedException {
         
     	File outputFile = null;
         try { 
@@ -275,7 +275,7 @@ public class psParser extends AbstractParser implements Idiom {
     	super.reset();
     }
 
-    public Document parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         
         File tempFile = null;
         try {

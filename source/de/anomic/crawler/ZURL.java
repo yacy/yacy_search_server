@@ -32,6 +32,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedList;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
@@ -41,8 +43,6 @@ import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.yacyURL;
 
 public class ZURL {
     
@@ -50,8 +50,8 @@ public class ZURL {
     private static final int maxStackSize    = 300;
     
     public final static Row rowdef = new Row(
-            "String urlhash-"   + yacySeedDB.commonHashLength + ", " + // the url's hash
-            "String executor-"  + yacySeedDB.commonHashLength + ", " + // the crawling executor
+            "String urlhash-"   + Word.commonHashLength + ", " + // the url's hash
+            "String executor-"  + Word.commonHashLength + ", " + // the crawling executor
             "Cardinal workdate-8 {b256}, " +                           // the time when the url was last time tried to load
             "Cardinal workcount-4 {b256}, " +                          // number of load retries
             "String anycause-132, " +                                   // string describing load failure
@@ -223,7 +223,7 @@ public class ZURL {
             }
         }
 
-        public yacyURL url() {
+        public DigestURI url() {
             return this.bentry.url();
         }
         

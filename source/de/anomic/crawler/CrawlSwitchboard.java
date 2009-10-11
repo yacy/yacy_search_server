@@ -30,11 +30,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 
-import de.anomic.document.Word;
 import de.anomic.yacy.yacySeedDB;
 
 public final class CrawlSwitchboard {

@@ -34,13 +34,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.AttrSeq;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.search.RankingProcess;
-import de.anomic.yacy.yacyURL;
 
 public class RCIEvaluation {
     
@@ -160,8 +160,8 @@ public class RCIEvaluation {
             dom = i.next();
             if (dom.startsWith("www.")) dom = dom.substring(4);
             try {
-                dommap.put((new yacyURL("http://" + dom, null)).hash().substring(6), dom);
-                dommap.put((new yacyURL("http://www." + dom, null)).hash().substring(6), "www." + dom);
+                dommap.put((new DigestURI("http://" + dom, null)).hash().substring(6), dom);
+                dommap.put((new DigestURI("http://www." + dom, null)).hash().substring(6), "www." + dom);
             } catch (final MalformedURLException e) {}
         }
         return dommap;

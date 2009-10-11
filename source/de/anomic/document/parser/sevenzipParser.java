@@ -35,6 +35,7 @@ import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -50,7 +51,6 @@ import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.server.serverCachedFileOutputStream;
-import de.anomic.yacy.yacyURL;
 
 public class sevenzipParser extends AbstractParser implements Idiom {
     
@@ -69,7 +69,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
         super("7zip Archive Parser");
     }
     
-    public Document parse(final yacyURL location, final String mimeType, final String charset,
+    public Document parse(final DigestURI location, final String mimeType, final String charset,
             final IInStream source, final long maxRamSize) throws ParserException, InterruptedException {
         final Document doc = new Document(location, mimeType, charset, null);
         Handler archive;
@@ -100,13 +100,13 @@ public class sevenzipParser extends AbstractParser implements Idiom {
     }
     
     @Override
-    public Document parse(final yacyURL location, final String mimeType, final String charset,
+    public Document parse(final DigestURI location, final String mimeType, final String charset,
             final byte[] source) throws ParserException, InterruptedException {
         return parse(location, mimeType, charset, new ByteArrayIInStream(source), Idiom.MAX_KEEP_IN_MEMORY_SIZE - source.length);
     }
     
     @Override
-    public Document parse(final yacyURL location, final String mimeType, final String charset,
+    public Document parse(final DigestURI location, final String mimeType, final String charset,
             final File sourceFile) throws ParserException, InterruptedException {
         try {
             return parse(location, mimeType, charset, new MyRandomAccessFile(sourceFile, "r"), Idiom.MAX_KEEP_IN_MEMORY_SIZE);
@@ -115,7 +115,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
         }
     }
     
-    public Document parse(final yacyURL location, final String mimeType, final String charset,
+    public Document parse(final DigestURI location, final String mimeType, final String charset,
             final InputStream source) throws ParserException, InterruptedException {
         try {
             final serverCachedFileOutputStream cfos = new serverCachedFileOutputStream(Idiom.MAX_KEEP_IN_MEMORY_SIZE);
@@ -195,7 +195,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
                      Document theDoc;
                      // workaround for relative links in file, normally '#' shall be used behind the location, see
                      // below for reversion of the effects
-                     final yacyURL url = yacyURL.newURL(doc.dc_source(), this.prefix + "/" + super.filePath);
+                     final DigestURI url = DigestURI.newURL(doc.dc_source(), this.prefix + "/" + super.filePath);
                      final String mime = Parser.mimeOf(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
                      if (this.cfos.isFallback()) {
                          theDoc = Parser.parseSource(url, mime, null, this.cfos.getContentFile());

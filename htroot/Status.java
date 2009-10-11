@@ -33,6 +33,7 @@ import java.util.Date;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.workflow.WorkflowProcessor;
 
 import de.anomic.http.io.ByteCountInputStream;
 import de.anomic.http.io.ByteCountOutputStream;
@@ -41,9 +42,7 @@ import de.anomic.http.server.HTTPDemon;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
-import de.anomic.server.serverProcessor;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyBuildProperties;
 import de.anomic.yacy.yacySeed;
@@ -162,7 +161,7 @@ public class Status {
         } else {
             prop.put("extPortFormat", "0");
         }
-        InetAddress hostIP = serverDomains.myPublicLocalIP();
+        InetAddress hostIP = serverSwitch.myPublicLocalIP();
         prop.put("host", hostIP!=null ? hostIP.getHostAddress() : "Unkown IP");
         
         // ssl support
@@ -274,7 +273,7 @@ public class Status {
         prop.put("freeMemory", Formatter.bytesToString(MemoryControl.free()));
         prop.put("totalMemory", Formatter.bytesToString(MemoryControl.total()));
         prop.put("maxMemory", Formatter.bytesToString(MemoryControl.maxMemory));
-        prop.put("processors", serverProcessor.availableCPU);
+        prop.put("processors", WorkflowProcessor.availableCPU);
 
         // proxy traffic
         //prop.put("trafficIn",bytesToString(httpdByteCountInputStream.getGlobalCount()));

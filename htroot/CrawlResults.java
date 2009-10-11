@@ -30,17 +30,17 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyURL;
 
 public class CrawlResults {
 
@@ -171,8 +171,8 @@ public class CrawlResults {
             String urlHash, initiatorHash, executorHash;
             String urlstr, urltxt;
             yacySeed initiatorSeed, executorSeed;
-            URLMetadataRow urle;
-            URLMetadataRow.Components metadata;
+            URIMetadataRow urle;
+            URIMetadataRow.Components metadata;
 
             int i, cnt = 0;
             for (i = sb.crawlResults.getStackSize(tabletype) - 1; i >= (sb.crawlResults.getStackSize(tabletype) - lines); i--) {
@@ -268,7 +268,7 @@ public class CrawlResults {
                 prop.put("table_domains_" + cnt + "_feedbackpage", "CrawlResults.html");
                 prop.put("table_domains_" + cnt + "_tabletype", tabletype);
                 prop.put("table_domains_" + cnt + "_domain", domain);
-                prop.put("table_domains_" + cnt + "_hashpart", yacyURL.hosthash6(domain));
+                prop.put("table_domains_" + cnt + "_hashpart", DigestURI.hosthash6(domain));
                 prop.put("table_domains_" + cnt + "_count", sb.crawlResults.domainCount(tabletype, domain));
                 dark = !dark;
                 cnt++;

@@ -28,6 +28,7 @@ package de.anomic.crawler.retrieval;
 
 import java.util.Date;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.crawler.CrawlProfile;
@@ -37,7 +38,6 @@ import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.search.SwitchboardConstants;
-import de.anomic.yacy.yacyURL;
 
 public class Response {
     
@@ -64,7 +64,7 @@ public class Response {
     private        int                status;          // tracker indexing status, see status defs below
     
     // doctype calculation
-    public static char docType(final yacyURL url) {
+    public static char docType(final DigestURI url) {
         final String path = url.getPath().toLowerCase();
         // serverLog.logFinest("PLASMA", "docType URL=" + path);
         char doctype = DT_UNKNOWN;
@@ -185,7 +185,7 @@ public class Response {
         return this.request.name();
     }
 
-    public yacyURL url() {
+    public DigestURI url() {
         return this.request.url();
     }
     
@@ -731,10 +731,10 @@ public class Response {
         return responseHeader.getCharacterEncoding();      
     }
     
-    public yacyURL referrerURL() {
+    public DigestURI referrerURL() {
         if (requestHeader == null) return null;
         try {
-            return new yacyURL(requestHeader.get(RequestHeader.REFERER, ""), null);
+            return new DigestURI(requestHeader.get(RequestHeader.REFERER, ""), null);
         } catch (final Exception e) {
             return null;
         }
@@ -745,7 +745,7 @@ public class Response {
         String u = requestHeader.get(RequestHeader.REFERER, "");
         if (u == null || u.length() == 0) return null;
         try {
-            return new yacyURL(u, null).hash();
+            return new DigestURI(u, null).hash();
         } catch (final Exception e) {
             return null;
         }

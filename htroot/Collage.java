@@ -24,13 +24,14 @@
 
 import java.util.Random;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import de.anomic.crawler.ResultImages;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyURL;
 
 public class Collage {
     private static           int fifoMax  = 20;
@@ -89,8 +90,8 @@ public class Collage {
             final int yOffset = embed ? 0 : 70;
             for (int i = 0; i < fifoSize; i++) {
              
-                final yacyURL baseURL = origins[i].baseURL;
-                final yacyURL imageURL = origins[i].imageEntry.url();
+                final DigestURI baseURL = origins[i].baseURL;
+                final DigestURI imageURL = origins[i].imageEntry.url();
                 
                 // check if this loads a page from localhost, which must be prevented to protect the server
                 // against attacks to the administration interface when localhost access is granted

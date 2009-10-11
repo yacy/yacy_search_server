@@ -28,6 +28,7 @@ package de.anomic.crawler.retrieval;
 import java.io.IOException;
 import java.util.Date;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.Latency;
@@ -37,9 +38,8 @@ import de.anomic.http.client.Client;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
-import de.anomic.kelondro.text.Segments;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
-import de.anomic.yacy.yacyURL;
 
 public final class HTTPLoader {
 
@@ -119,7 +119,7 @@ public final class HTTPLoader {
         // create a request header
         final RequestHeader requestHeader = new RequestHeader();
         requestHeader.put(HeaderFramework.USER_AGENT, crawlerUserAgent);
-        yacyURL refererURL = null;
+        DigestURI refererURL = null;
         if (request.referrerhash() != null) refererURL = sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
         if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true, true));
         requestHeader.put(HeaderFramework.ACCEPT_LANGUAGE, sb.getConfig("crawler.http.acceptLanguage", DEFAULT_LANGUAGE));
@@ -182,7 +182,7 @@ public final class HTTPLoader {
                     }
                     
                     // normalizing URL
-                    final yacyURL redirectionUrl = yacyURL.newURL(request.url(), redirectionUrlString);
+                    final DigestURI redirectionUrl = DigestURI.newURL(request.url(), redirectionUrlString);
 
                     // restart crawling with new url
                     this.log.logInfo("CRAWLER Redirection detected ('" + res.getStatusLine() + "') for URL " + request.url().toString());
@@ -294,7 +294,7 @@ public final class HTTPLoader {
                     }
                     
                     // normalizing URL
-                    final yacyURL redirectionUrl = yacyURL.newURL(request.url(), redirectionUrlString);
+                    final DigestURI redirectionUrl = DigestURI.newURL(request.url(), redirectionUrlString);
 
                     
                     // if we are already doing a shutdown we don't need to retry crawling

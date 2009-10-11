@@ -48,6 +48,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 
@@ -616,7 +617,7 @@ public class yacyCore {
             }
 
             // ensure that the seed file url is configured properly
-            yacyURL seedURL;
+            DigestURI seedURL;
             try {
                 final String seedURLStr = sb.peers.mySeed().get(yacySeed.SEEDLIST, "");
                 if (seedURLStr.length() == 0) { throw new MalformedURLException("The seed-file url must not be empty."); }
@@ -626,7 +627,7 @@ public class yacyCore {
                 )) {
                     throw new MalformedURLException("Unsupported protocol.");
                 }
-                seedURL = new yacyURL(seedURLStr, null);
+                seedURL = new DigestURI(seedURLStr, null);
             } catch (final MalformedURLException e) {
                 final String errorMsg = "Malformed seed file URL '" + sb.peers.mySeed().get(yacySeed.SEEDLIST, "") + "'. " + e.getMessage();
                 log.logWarning("SaveSeedList: " + errorMsg);

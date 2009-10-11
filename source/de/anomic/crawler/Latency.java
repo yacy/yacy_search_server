@@ -27,8 +27,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import de.anomic.search.Switchboard;
-import de.anomic.yacy.yacyURL;
 
 public class Latency {
 
@@ -117,7 +118,7 @@ public class Latency {
         final long timeSinceLastAccess = System.currentTimeMillis() - host.lastacc();
         
         // find the minimum waiting time based on the network domain (local or global)
-        final boolean local = yacyURL.isLocal(hosthash);
+        final boolean local = DigestURI.isLocal(hosthash);
         long waiting = (local) ? minimumLocalDelta : minimumGlobalDelta;
         
         // if we have accessed the domain many times, get slower (the flux factor)
@@ -148,7 +149,7 @@ public class Latency {
      * @param minimumGlobalDelta
      * @return the remaining waiting time in milliseconds
      */
-    public static long waitingRemaining(yacyURL url, final long minimumLocalDelta, final long minimumGlobalDelta) {
+    public static long waitingRemaining(DigestURI url, final long minimumLocalDelta, final long minimumGlobalDelta) {
 
         // first check if the domain was _ever_ accessed before
         String hosthash = url.hash().substring(6);
@@ -188,7 +189,7 @@ public class Latency {
     }
     
     
-    public static String waitingRemainingExplain(yacyURL url, final long minimumLocalDelta, final long minimumGlobalDelta) {
+    public static String waitingRemainingExplain(DigestURI url, final long minimumLocalDelta, final long minimumGlobalDelta) {
         
         // first check if the domain was _ever_ accessed before
         String hosthash = url.hash().substring(6);

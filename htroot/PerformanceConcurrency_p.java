@@ -21,9 +21,10 @@
 
 import java.util.Iterator;
 
+import net.yacy.kelondro.workflow.WorkflowProcessor;
+
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.server.serverObjects;
-import de.anomic.server.serverProcessor;
 import de.anomic.server.serverSwitch;
 
 public class PerformanceConcurrency_p {
@@ -34,8 +35,8 @@ public class PerformanceConcurrency_p {
 
         // calculate totals
         long blocktime_total = 0, exectime_total = 0, passontime_total = 0;
-        Iterator<serverProcessor<?>> threads = serverProcessor.processes();
-        serverProcessor<?> p;
+        Iterator<WorkflowProcessor<?>> threads = WorkflowProcessor.processes();
+        WorkflowProcessor<?> p;
         while (threads.hasNext()) {
             p = threads.next();
             blocktime_total += p.getBlockTime();
@@ -48,7 +49,7 @@ public class PerformanceConcurrency_p {
         
         // set templates for latest news from the threads
         long blocktime, exectime, passontime;
-        threads = serverProcessor.processes();
+        threads = WorkflowProcessor.processes();
         int c = 0;
         long cycles;
         while (threads.hasNext()) {

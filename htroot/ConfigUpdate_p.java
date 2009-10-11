@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.http.metadata.RequestHeader;
@@ -37,7 +38,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverSystem;
 import de.anomic.yacy.yacyBuildProperties;
-import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.yacyVersion;
 
@@ -78,7 +78,7 @@ public class ConfigUpdate_p {
                 final String release = post.get("releasedownload", "");
                 if (release.length() > 0) {
                     try {
-                	yacyRelease versionToDownload = new yacyRelease(new yacyURL(release, null));
+                	yacyRelease versionToDownload = new yacyRelease(new DigestURI(release, null));
                 	
                 	// replace this version with version which contains public key
                 	yacyRelease.DevAndMainVersions allReleases = yacyRelease.allReleases(false, false);

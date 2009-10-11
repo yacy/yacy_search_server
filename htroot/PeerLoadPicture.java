@@ -3,9 +3,10 @@ import java.awt.Image;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import net.yacy.kelondro.workflow.BusyThread;
+
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.SwitchboardConstants;
-import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.ymage.NetworkGraph;
@@ -34,7 +35,7 @@ public class PeerLoadPicture {
         
         final Iterator<String> threads = env.threadNames();
         String threadname;
-        serverBusyThread thread;
+        BusyThread thread;
         
         long busy_time = 0;
         

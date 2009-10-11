@@ -26,6 +26,7 @@
 
 package de.anomic.tools;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 
@@ -64,7 +65,6 @@ import de.anomic.data.wiki.wikiParser;
 import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
-import de.anomic.yacy.yacyURL;
 
 /*
  * this class provides data structures to read a mediawiki dump file in xml format
@@ -466,7 +466,7 @@ public class mediawikiIndex extends Thread {
         public String title;
         String source;
         String html;
-        yacyURL url;
+        DigestURI url;
         Document document;
         public wikiparserrecord(String title, StringBuilder sb) {
             this.title = title;
@@ -482,7 +482,7 @@ public class mediawikiIndex extends Thread {
         }
         public void genDocument() throws InterruptedException, ParserException {
             try {
-				url = new yacyURL(urlStub + title, null);
+				url = new DigestURI(urlStub + title, null);
 				document = Parser.parseSource(url, "text/html", "utf-8", html.getBytes("UTF-8"));
 				// the wiki parser is not able to find the proper title in the source text, so it must be set here
 				document.setTitle(title);

@@ -46,12 +46,12 @@ import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.blob.Compressor;
 import net.yacy.kelondro.blob.Heap;
 import net.yacy.kelondro.blob.MapView;
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
 import de.anomic.http.metadata.ResponseHeader;
-import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.yacyURL;
 
 public final class Cache {
     
@@ -82,7 +82,7 @@ public final class Cache {
         final File dbfile = new File(cachePath, RESPONSE_HEADER_DB_NAME);
         Heap blob = null;
         try {
-            blob = new Heap(dbfile, yacySeedDB.commonHashLength, Base64Order.enhancedCoder, 1024 * 1024);
+            blob = new Heap(dbfile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 1024);
         } catch (final IOException e) {
             e.printStackTrace();
         }
@@ -113,7 +113,7 @@ public final class Cache {
         fileDB.close(true);
     }
     
-    public static void store(yacyURL url, final ResponseHeader responseHeader, byte[] file) throws IOException {
+    public static void store(DigestURI url, final ResponseHeader responseHeader, byte[] file) throws IOException {
         if (responseHeader == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: responseHeader == null");
         if (file == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: file == null");
         
@@ -143,7 +143,7 @@ public final class Cache {
      * @param url the url of the resource
      * @return true if the content of the url is in the cache, false otherwise
      */
-    public static boolean has(final yacyURL url) {
+    public static boolean has(final DigestURI url) {
         boolean headerExists;
         try {
             headerExists = responseHeaderDB.has(url.hash());
@@ -173,7 +173,7 @@ public final class Cache {
      * @throws <b>UnsupportedProtocolException</b> if the protocol is not supported and therefore the
      * info object couldn't be created
      */
-    public static ResponseHeader getResponseHeader(final yacyURL url) {    
+    public static ResponseHeader getResponseHeader(final DigestURI url) {    
         
         // loading data from database
         Map<String, String> hdb;
@@ -195,7 +195,7 @@ public final class Cache {
      * is returned.
      * @throws IOException 
      */
-    public static InputStream getContentStream(final yacyURL url) throws IOException {
+    public static InputStream getContentStream(final DigestURI url) throws IOException {
         // load the url as resource from the cache
         byte[] b = getContent(url);
         if (b == null) return null;
@@ -210,7 +210,7 @@ public final class Cache {
      * is returned.
      * @throws IOException 
      */
-    public static byte[] getContent(final yacyURL url) throws IOException {
+    public static byte[] getContent(final DigestURI url) throws IOException {
         // load the url as resource from the cache
         try {
             return fileDB.get(url.hash().getBytes("UTF-8"));
@@ -228,7 +228,7 @@ public final class Cache {
      * @param url
      * @return the size of the cached content
      */
-    public static long getResourceContentLength(final yacyURL url) {
+    public static long getResourceContentLength(final DigestURI url) {
         // first try to get the length from the response header,
         // this is less costly than loading the content from its gzipped cache
         ResponseHeader responseHeader = getResponseHeader(url);
@@ -251,7 +251,7 @@ public final class Cache {
      * @param url
      * @throws IOException
      */
-    public static void delete(yacyURL url) throws IOException {
+    public static void delete(DigestURI url) throws IOException {
         responseHeaderDB.remove(url.hash());
         fileDB.remove(url.hash().getBytes("UTF-8"));
     }

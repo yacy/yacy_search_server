@@ -35,6 +35,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.retrieval.Response;
@@ -47,13 +49,11 @@ import de.anomic.http.client.Client;
 import de.anomic.http.client.Cache;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.search.Segment;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyURL;
 
 public class ViewFile {
 
@@ -99,7 +99,7 @@ public class ViewFile {
         final String viewMode = post.get("viewMode","sentences");
         prop.put("error_vMode-" + viewMode, "1");
         
-        yacyURL url = null;
+        DigestURI url = null;
         String descr = "";
         final int wordCount = 0;
         int size = 0;
@@ -109,7 +109,7 @@ public class ViewFile {
         final String urlHash = post.get("urlHash","");
         if (urlHash.length() > 0) {
             // get the urlEntry that belongs to the url hash
-            URLMetadataRow urlEntry = null;
+            URIMetadataRow urlEntry = null;
             urlEntry = indexSegment.urlMetadata().load(urlHash, null, 0);
             if (urlEntry == null) {
                 prop.put("error", "2");
@@ -118,7 +118,7 @@ public class ViewFile {
             }            
             
                 // getting the url that belongs to the entry
-            final URLMetadataRow.Components metadata = urlEntry.metadata();
+            final URIMetadataRow.Components metadata = urlEntry.metadata();
             if ((metadata == null) || (metadata.url() == null)) {
                 prop.put("error", "3");
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
@@ -144,7 +144,7 @@ public class ViewFile {
             }
 
             // define an url by post parameter
-            url = new yacyURL(urlString, null);
+            url = new DigestURI(urlString, null);
             pre = post.get("pre", "false").equals("true");
         } catch (final MalformedURLException e) {}
         
@@ -414,9 +414,9 @@ public class ViewFile {
         return message;
     }
     
-    private static int putMediaInfo(final serverObjects prop, final String[] wordArray, int c, final Map<yacyURL, String> media, final String name, boolean dark) {
-        final Iterator<Map.Entry<yacyURL, String>> mi = media.entrySet().iterator();
-        Map.Entry<yacyURL, String> entry;
+    private static int putMediaInfo(final serverObjects prop, final String[] wordArray, int c, final Map<DigestURI, String> media, final String name, boolean dark) {
+        final Iterator<Map.Entry<DigestURI, String>> mi = media.entrySet().iterator();
+        Map.Entry<DigestURI, String> entry;
         int i = 0;
         while (mi.hasNext()) {
             entry = mi.next();

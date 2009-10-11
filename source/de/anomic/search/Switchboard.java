@@ -111,14 +111,23 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
+import net.yacy.kelondro.workflow.BusyThread;
+import net.yacy.kelondro.workflow.InstantBusyThread;
+import net.yacy.kelondro.workflow.WorkflowJob;
+import net.yacy.kelondro.workflow.WorkflowProcessor;
+import net.yacy.kelondro.workflow.WorkflowThread;
 
 import de.anomic.content.DCEntry;
 import de.anomic.content.RSSMessage;
@@ -155,7 +164,6 @@ import de.anomic.data.wiki.wikiParser;
 import de.anomic.document.Condenser;
 import de.anomic.document.Parser;
 import de.anomic.document.ParserException;
-import de.anomic.document.Word;
 import de.anomic.document.Document;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.client.Client;
@@ -166,22 +174,13 @@ import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.RobotsTxtConfig;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.net.UPnP;
 import de.anomic.search.blockrank.CRDistribution;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDomains;
-import de.anomic.server.serverInstantBusyThread;
-import de.anomic.server.serverProcessor;
-import de.anomic.server.serverProcessorJob;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSemaphore;
 import de.anomic.server.serverSystem;
-import de.anomic.server.serverThread;
 import de.anomic.tools.crypt;
 import de.anomic.tools.CryptoLib;
 import de.anomic.yacy.yacyBuildProperties;
@@ -192,7 +191,6 @@ import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.Tray;
 import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyUpdateLocation;
 import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.dht.Dispatcher;
@@ -266,10 +264,10 @@ public final class Switchboard extends serverSwitch {
     public  List<String>                   trail;
     public  yacySeedDB                     peers;
     
-    public serverProcessor<indexingQueueEntry> indexingDocumentProcessor;
-    public serverProcessor<indexingQueueEntry> indexingCondensementProcessor;
-    public serverProcessor<indexingQueueEntry> indexingAnalysisProcessor;
-    public serverProcessor<indexingQueueEntry> indexingStorageProcessor;
+    public WorkflowProcessor<indexingQueueEntry> indexingDocumentProcessor;
+    public WorkflowProcessor<indexingQueueEntry> indexingCondensementProcessor;
+    public WorkflowProcessor<indexingQueueEntry> indexingAnalysisProcessor;
+    public WorkflowProcessor<indexingQueueEntry> indexingStorageProcessor;
     
     public RobotsTxtConfig robotstxtConfig = null;
     public boolean useTailCache;
@@ -296,7 +294,7 @@ public final class Switchboard extends serverSwitch {
         
         // UPnP port mapping
         if (getConfigBool(SwitchboardConstants.UPNP_ENABLED, false))
-        	serverInstantBusyThread.oneTimeJob(UPnP.class, "addPortMapping", UPnP.log, 0);
+        	InstantBusyThread.oneTimeJob(UPnP.class, "addPortMapping", UPnP.log, 0);
         
         // init TrayIcon if possible
         Tray.init(this);
@@ -394,7 +392,7 @@ public final class Switchboard extends serverSwitch {
         // start yacy core
         log.logConfig("Starting YaCy Protocol Core");
         this.yc = new yacyCore(this);
-        serverInstantBusyThread.oneTimeJob(this, "loadSeedLists", yacyCore.log, 0);
+        InstantBusyThread.oneTimeJob(this, "loadSeedLists", yacyCore.log, 0);
         //final long startedSeedListAquisition = System.currentTimeMillis();
         
         // init a DHT transmission dispatcher
@@ -576,7 +574,7 @@ public final class Switchboard extends serverSwitch {
         rankingOtherDistribution = new CRDistribution(log, peers, new File(rankingPath, getConfig(SwitchboardConstants.RANKING_DIST_1_PATH, CRDistribution.CR_OTHER)), (int) getConfigLong(SwitchboardConstants.RANKING_DIST_1_METHOD, CRDistribution.METHOD_MIXEDSENIOR), (int) getConfigLong(SwitchboardConstants.RANKING_DIST_1_METHOD, 30), getConfig(SwitchboardConstants.RANKING_DIST_1_TARGET, "kaskelix.de:8080,yacy.dyndns.org:8000"));
 
         // init nameCacheNoCachingList
-        serverDomains.setNoCachingPatterns(getConfig(SwitchboardConstants.HTTPC_NAME_CACHE_CACHING_PATTERNS_NO,""));
+        Domains.setNoCachingPatterns(getConfig(SwitchboardConstants.HTTPC_NAME_CACHE_CACHING_PATTERNS_NO,""));
         
         // generate snippets cache
         log.logConfig("Initializing Snippet Cache");
@@ -586,7 +584,7 @@ public final class Switchboard extends serverSwitch {
         wikiParser = new wikiCode(this.peers.mySeed().getClusterAddress());
         
         // initializing the resourceObserver
-        serverInstantBusyThread.oneTimeJob(ResourceObserver.class, "initThread", ResourceObserver.log, 0);
+        InstantBusyThread.oneTimeJob(ResourceObserver.class, "initThread", ResourceObserver.log, 0);
         
         // initializing the stackCrawlThread
         this.crawlStacker = new CrawlStacker(
@@ -605,48 +603,48 @@ public final class Switchboard extends serverSwitch {
         this.clusterhashes = this.peers.clusterHashes(getConfig("cluster.peers.yacydomain", ""));
         
         // deploy blocking threads
-        int indexerThreads = Math.max(1, serverProcessor.useCPU / 2);
-        this.indexingStorageProcessor      = new serverProcessor<indexingQueueEntry>(
+        int indexerThreads = Math.max(1, WorkflowProcessor.useCPU / 2);
+        this.indexingStorageProcessor      = new WorkflowProcessor<indexingQueueEntry>(
                 "storeDocumentIndex",
                 "This is the sequencing step of the indexing queue: no concurrency is wanted here, because the access of the indexer works better if it is not concurrent. Files are written as streams, councurrency would destroy IO performance. In this process the words are written to the RWI cache, which flushes if it is full.",
                 new String[]{"RWI/Cache/Collections"},
-                this, "storeDocumentIndex", serverProcessor.useCPU + 40, null, indexerThreads);
-        this.indexingAnalysisProcessor     = new serverProcessor<indexingQueueEntry>(
+                this, "storeDocumentIndex", WorkflowProcessor.useCPU + 40, null, indexerThreads);
+        this.indexingAnalysisProcessor     = new WorkflowProcessor<indexingQueueEntry>(
                 "webStructureAnalysis",
                 "This just stores the link structure of the document into a web structure database.",
                 new String[]{"storeDocumentIndex"},
-                this, "webStructureAnalysis", serverProcessor.useCPU + 20, indexingStorageProcessor, serverProcessor.useCPU + 1);
-        this.indexingCondensementProcessor = new serverProcessor<indexingQueueEntry>(
+                this, "webStructureAnalysis", WorkflowProcessor.useCPU + 20, indexingStorageProcessor, WorkflowProcessor.useCPU + 1);
+        this.indexingCondensementProcessor = new WorkflowProcessor<indexingQueueEntry>(
                 "condenseDocument",
                 "This does a structural analysis of plain texts: markup of headlines, slicing into phrases (i.e. sentences), markup with position, counting of words, calculation of term frequency.",
                 new String[]{"webStructureAnalysis"},
-                this, "condenseDocument", serverProcessor.useCPU + 10, indexingAnalysisProcessor, serverProcessor.useCPU + 1);
-        this.indexingDocumentProcessor     = new serverProcessor<indexingQueueEntry>(
+                this, "condenseDocument", WorkflowProcessor.useCPU + 10, indexingAnalysisProcessor, WorkflowProcessor.useCPU + 1);
+        this.indexingDocumentProcessor     = new WorkflowProcessor<indexingQueueEntry>(
                 "parseDocument",
                 "This does the parsing of the newly loaded documents from the web. The result is not only a plain text document, but also a list of URLs that are embedded into the document. The urls are handed over to the CrawlStacker. This process has two child process queues!",
                 new String[]{"condenseDocument", "CrawlStacker"},
-                this, "parseDocument", 2 * serverProcessor.useCPU + 1, indexingCondensementProcessor, 2 * serverProcessor.useCPU + 1);
+                this, "parseDocument", 2 * WorkflowProcessor.useCPU + 1, indexingCondensementProcessor, 2 * WorkflowProcessor.useCPU + 1);
         
         // deploy busy threads
         log.logConfig("Starting Threads");
         MemoryControl.gc(10000, "plasmaSwitchboard, help for profiler"); // help for profiler - thq
         
         deployThread(SwitchboardConstants.CLEANUP, "Cleanup", "simple cleaning process for monitoring information", null,
-                     new serverInstantBusyThread(this, SwitchboardConstants.CLEANUP_METHOD_START, SwitchboardConstants.CLEANUP_METHOD_JOBCOUNT, SwitchboardConstants.CLEANUP_METHOD_FREEMEM), 600000); // all 5 Minutes, wait 10 minutes until first run
+                     new InstantBusyThread(this, SwitchboardConstants.CLEANUP_METHOD_START, SwitchboardConstants.CLEANUP_METHOD_JOBCOUNT, SwitchboardConstants.CLEANUP_METHOD_FREEMEM), 600000); // all 5 Minutes, wait 10 minutes until first run
         deployThread(SwitchboardConstants.SURROGATES, "Surrogates", "A thread that polls the SURROGATES path and puts all Documents in one surroagte file into the indexing queue.", null,
-                     new serverInstantBusyThread(this, SwitchboardConstants.SURROGATES_METHOD_START, SwitchboardConstants.SURROGATES_METHOD_JOBCOUNT, SwitchboardConstants.SURROGATES_METHOD_FREEMEM), 10000);
+                     new InstantBusyThread(this, SwitchboardConstants.SURROGATES_METHOD_START, SwitchboardConstants.SURROGATES_METHOD_JOBCOUNT, SwitchboardConstants.SURROGATES_METHOD_FREEMEM), 10000);
         deployThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
-                     new serverInstantBusyThread(crawlQueues, SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START, SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT, SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM), 30000);
+                     new InstantBusyThread(crawlQueues, SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START, SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT, SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM), 30000);
         deployThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER, "Remote Crawl URL Loader", "thread that loads remote crawl lists from other peers", "",
-                     new serverInstantBusyThread(crawlQueues, SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_START, SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT, SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_FREEMEM), 30000); // error here?
+                     new InstantBusyThread(crawlQueues, SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_START, SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT, SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_FREEMEM), 30000); // error here?
         deployThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, "Local Crawl", "thread that performes a single crawl step from the local crawl queue", "/IndexCreateWWWLocalQueue_p.html",
-                     new serverInstantBusyThread(crawlQueues, SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_START, SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT, SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM), 10000);
+                     new InstantBusyThread(crawlQueues, SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_START, SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT, SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM), 10000);
         deployThread(SwitchboardConstants.SEED_UPLOAD, "Seed-List Upload", "task that a principal peer performes to generate and upload a seed-list to a ftp account", null,
-                     new serverInstantBusyThread(yc, SwitchboardConstants.SEED_UPLOAD_METHOD_START, SwitchboardConstants.SEED_UPLOAD_METHOD_JOBCOUNT, SwitchboardConstants.SEED_UPLOAD_METHOD_FREEMEM), 180000);
+                     new InstantBusyThread(yc, SwitchboardConstants.SEED_UPLOAD_METHOD_START, SwitchboardConstants.SEED_UPLOAD_METHOD_JOBCOUNT, SwitchboardConstants.SEED_UPLOAD_METHOD_FREEMEM), 180000);
         deployThread(SwitchboardConstants.PEER_PING, "YaCy Core", "this is the p2p-control and peer-ping task", null,
-                     new serverInstantBusyThread(yc, SwitchboardConstants.PEER_PING_METHOD_START, SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT, SwitchboardConstants.PEER_PING_METHOD_FREEMEM), 2000);
+                     new InstantBusyThread(yc, SwitchboardConstants.PEER_PING_METHOD_START, SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT, SwitchboardConstants.PEER_PING_METHOD_FREEMEM), 2000);
         deployThread(SwitchboardConstants.INDEX_DIST, "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
-            new serverInstantBusyThread(this, SwitchboardConstants.INDEX_DIST_METHOD_START, SwitchboardConstants.INDEX_DIST_METHOD_JOBCOUNT, SwitchboardConstants.INDEX_DIST_METHOD_FREEMEM), 5000,
+            new InstantBusyThread(this, SwitchboardConstants.INDEX_DIST_METHOD_START, SwitchboardConstants.INDEX_DIST_METHOD_JOBCOUNT, SwitchboardConstants.INDEX_DIST_METHOD_FREEMEM), 5000,
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_IDLESLEEP , "5000")),
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_BUSYSLEEP , "0")),
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_MEMPREREQ , "1000000")));
@@ -704,7 +702,7 @@ public final class Switchboard extends serverSwitch {
         Map<String, String> initProps;
         if (networkUnitDefinition.startsWith("http://")) {
             try {
-            	setConfig(Switchboard.loadHashMap(new yacyURL(networkUnitDefinition, null)));
+            	setConfig(Switchboard.loadHashMap(new DigestURI(networkUnitDefinition, null)));
             } catch (final MalformedURLException e) { }
         } else {
             final File networkUnitDefinitionFile = (networkUnitDefinition.startsWith("/")) ? new File(networkUnitDefinition) : new File(getRootPath(), networkUnitDefinition);
@@ -715,7 +713,7 @@ public final class Switchboard extends serverSwitch {
         }
         if (networkGroupDefinition.startsWith("http://")) {
             try {
-            	setConfig(Switchboard.loadHashMap(new yacyURL(networkGroupDefinition, null)));
+            	setConfig(Switchboard.loadHashMap(new DigestURI(networkGroupDefinition, null)));
             } catch (final MalformedURLException e) { }
         } else {
             final File networkGroupDefinitionFile = new File(getRootPath(), networkGroupDefinition);
@@ -733,10 +731,10 @@ public final class Switchboard extends serverSwitch {
 	    while (true) {
 		String location = getConfig("network.unit.update.location" + i, "");
 		if (location.length() == 0) break;
-		yacyURL locationURL;
+		DigestURI locationURL;
 		try {
 		    // try to parse url
-		    locationURL = new yacyURL(location, null);
+		    locationURL = new DigestURI(location, null);
 		} catch (final MalformedURLException e) {
 		    break;
 		}
@@ -764,8 +762,8 @@ public final class Switchboard extends serverSwitch {
         licensedURLs = new URLLicense(8);
         
         // set white/blacklists
-        this.networkWhitelist = serverDomains.makePatterns(getConfig(SwitchboardConstants.NETWORK_WHITELIST, ""));
-        this.networkBlacklist = serverDomains.makePatterns(getConfig(SwitchboardConstants.NETWORK_BLACKLIST, ""));
+        this.networkWhitelist = Domains.makePatterns(getConfig(SwitchboardConstants.NETWORK_WHITELIST, ""));
+        this.networkBlacklist = Domains.makePatterns(getConfig(SwitchboardConstants.NETWORK_BLACKLIST, ""));
         
         /*
         // in intranet and portal network set robinson mode
@@ -1031,12 +1029,12 @@ public final class Switchboard extends serverSwitch {
         crawlQueues.urlRemove(hash);
     }
     
-    public yacyURL getURL(Segments.Process process, final String urlhash) {
+    public DigestURI getURL(Segments.Process process, final String urlhash) {
         if (urlhash == null) return null;
         if (urlhash.length() == 0) return null;
-        final yacyURL ne = crawlQueues.getURL(urlhash);
+        final DigestURI ne = crawlQueues.getURL(urlhash);
         if (ne != null) return ne;
-        final URLMetadataRow le = indexSegments.urlMetadata(process).load(urlhash, null, 0);
+        final URIMetadataRow le = indexSegments.urlMetadata(process).load(urlhash, null, 0);
         if (le != null) return le.metadata().url();
         return null;
     }
@@ -1187,7 +1185,7 @@ public final class Switchboard extends serverSwitch {
         // in the noIndexReason is set, indexing is not allowed
         if (noIndexReason != null) {
             // log cause and close queue
-            final yacyURL referrerURL = response.referrerURL();
+            final DigestURI referrerURL = response.referrerURL();
             if (log.isFine()) log.logFine("deQueue: not indexed any word in URL " + response.url() + "; cause: " + noIndexReason);
             addURLtoErrorDB(response.url(), (referrerURL == null) ? "" : referrerURL.hash(), response.initiator(), response.name(), noIndexReason);
             // finish this entry
@@ -1309,7 +1307,7 @@ public final class Switchboard extends serverSwitch {
         return false;
     }
     
-    public static class indexingQueueEntry extends serverProcessorJob {
+    public static class indexingQueueEntry extends WorkflowJob {
         public Segments.Process process;
         public Response queueEntry;
         public Document document;
@@ -1640,10 +1638,10 @@ public final class Switchboard extends serverSwitch {
                 ((processCase == SwitchboardConstants.PROCESSCASE_4_PROXY_LOAD) || (processCase == SwitchboardConstants.PROCESSCASE_5_LOCAL_CRAWLING)) &&
                 ((entry.profile() == null) || (entry.depth() < entry.profile().depth()))
         ) {
-            final Map<yacyURL, String> hl = document.getHyperlinks();
-            final Iterator<Map.Entry<yacyURL, String>> i = hl.entrySet().iterator();
-            yacyURL nextUrl;
-            Map.Entry<yacyURL, String> nextEntry;
+            final Map<DigestURI, String> hl = document.getHyperlinks();
+            final Iterator<Map.Entry<DigestURI, String>> i = hl.entrySet().iterator();
+            DigestURI nextUrl;
+            Map.Entry<DigestURI, String> nextEntry;
             while (i.hasNext()) {
                 // check for interruption
                 checkInterruption();
@@ -1714,14 +1712,14 @@ public final class Switchboard extends serverSwitch {
         
         // CREATE INDEX
         final String dc_title = document.dc_title();
-        final yacyURL referrerURL = queueEntry.referrerURL();
+        final DigestURI referrerURL = queueEntry.referrerURL();
         final int processCase = queueEntry.processCase(peers.mySeed().hash);
 
         // remove stopwords                        
         log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + queueEntry.url());
 
         // STORE URL TO LOADED-URL-DB
-        URLMetadataRow newEntry = null;
+        URIMetadataRow newEntry = null;
         try {
             newEntry = indexSegments.segment(process).storeDocument(
                     queueEntry.url(),
@@ -1778,9 +1776,9 @@ public final class Switchboard extends serverSwitch {
     
     public class receiptSending implements Runnable {
         yacySeed initiatorPeer;
-        URLMetadataRow reference;
+        URIMetadataRow reference;
         
-        public receiptSending(final yacySeed initiatorPeer, final URLMetadataRow reference) {
+        public receiptSending(final yacySeed initiatorPeer, final URIMetadataRow reference) {
             this.initiatorPeer = initiatorPeer;
             this.reference = reference;
         }
@@ -1808,7 +1806,7 @@ public final class Switchboard extends serverSwitch {
     }
     
     // method for index deletion
-    public int removeAllUrlReferences(Segment indexSegment, final yacyURL url, final boolean fetchOnline) {
+    public int removeAllUrlReferences(Segment indexSegment, final DigestURI url, final boolean fetchOnline) {
         return removeAllUrlReferences(indexSegment, url.hash(), fetchOnline);
     }
     
@@ -1818,9 +1816,9 @@ public final class Switchboard extends serverSwitch {
         
         if (urlhash == null) return 0;
         // determine the url string
-        final URLMetadataRow entry = indexSegment.urlMetadata().load(urlhash, null, 0);
+        final URIMetadataRow entry = indexSegment.urlMetadata().load(urlhash, null, 0);
         if (entry == null) return 0;
-        final URLMetadataRow.Components metadata = entry.metadata();
+        final URIMetadataRow.Components metadata = entry.metadata();
         if (metadata.url() == null) return 0;
         
         InputStream resourceContent = null;
@@ -1921,7 +1919,7 @@ public final class Switchboard extends serverSwitch {
         if (wantedPPM >= 6000) wantedPPM = 6000;
         final int newBusySleep = 60000 / wantedPPM; // for wantedPPM = 10: 6000; for wantedPPM = 1000: 60
 
-        serverBusyThread thread;
+        BusyThread thread;
         
         thread = getThread(SwitchboardConstants.INDEX_DIST);
         if (thread != null) {
@@ -2038,7 +2036,7 @@ public final class Switchboard extends serverSwitch {
     }
 
     private void addURLtoErrorDB(
-            final yacyURL url, 
+            final DigestURI url, 
             final String referrerHash, 
             final String initiator, 
             final String name, 
@@ -2070,10 +2068,18 @@ public final class Switchboard extends serverSwitch {
         return serverProfiling.countEvents("indexed", 20000) * 3;
     }
     
+    public String makeDefaultPeerName() {
+        String name = myPublicIP() + "-" + yacyCore.speedKey  + "dpn" + serverSystem.infoKey() + (System.currentTimeMillis() & 99);
+        name = name.replace('.', '-');
+        name = name.replace('_', '-');
+        name = name.replace(':', '-');
+        return name;
+    }
+    
     public void updateMySeed() {
         if (getConfig("peerName", "anomic").equals("anomic")) {
             // generate new peer name
-            setConfig("peerName", yacySeed.makeDefaultPeerName());
+            setConfig("peerName", makeDefaultPeerName());
         }
         peers.mySeed().put(yacySeed.NAME, getConfig("peerName", "nameless"));
         peers.mySeed().put(yacySeed.PORT, Integer.toString(serverCore.getPortNr(getConfig("port", "8080"))));
@@ -2105,7 +2111,7 @@ public final class Switchboard extends serverSwitch {
         
         yacySeed           ys;
         String             seedListFileURL;
-        yacyURL            url;
+        DigestURI            url;
         Iterator<String>   enu;
         int                lc;
         final int          sc = peers.sizeConnected();
@@ -2131,7 +2137,7 @@ public final class Switchboard extends serverSwitch {
                     reqHeader.put(HeaderFramework.CACHE_CONTROL, "no-cache");
                     reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
                     
-                    url = new yacyURL(seedListFileURL, null);
+                    url = new DigestURI(seedListFileURL, null);
                     final long start = System.currentTimeMillis();
                     header = Client.whead(url.toString(), reqHeader); 
                     final long loadtime = System.currentTimeMillis() - start;
@@ -2177,7 +2183,7 @@ public final class Switchboard extends serverSwitch {
     
     public void checkInterruption() throws InterruptedException {
         final Thread curThread = Thread.currentThread();
-        if ((curThread instanceof serverThread) && ((serverThread)curThread).shutdownInProgress()) throw new InterruptedException("Shutdown in progress ...");
+        if ((curThread instanceof WorkflowThread) && ((WorkflowThread)curThread).shutdownInProgress()) throw new InterruptedException("Shutdown in progress ...");
         else if (this.terminate || curThread.isInterrupted()) throw new InterruptedException("Shutdown in progress ...");
     }
 
@@ -2208,7 +2214,7 @@ public final class Switchboard extends serverSwitch {
      * @param url
      * @return
      */
-    public static Map<String, String> loadHashMap(final yacyURL url) {
+    public static Map<String, String> loadHashMap(final DigestURI url) {
         try {
             // sending request
             final RequestHeader reqHeader = new RequestHeader();

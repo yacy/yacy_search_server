@@ -33,10 +33,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.workflow.WorkflowThread;
 
-import de.anomic.server.serverThread;
-import de.anomic.yacy.yacyURL;
 
 /**
  * New classes implementing the {@link de.anomic.document.Idiom} interface
@@ -85,7 +85,7 @@ public abstract class AbstractParser implements Idiom {
      */
     public static final void checkInterruption() throws InterruptedException {
         final Thread currentThread = Thread.currentThread();
-        if ((currentThread instanceof serverThread) && ((serverThread)currentThread).shutdownInProgress()) throw new InterruptedException("Shutdown in progress ...");
+        if ((currentThread instanceof WorkflowThread) && ((WorkflowThread)currentThread).shutdownInProgress()) throw new InterruptedException("Shutdown in progress ...");
         if (currentThread.isInterrupted()) throw new InterruptedException("Shutdown in progress ...");    
     }
     
@@ -108,7 +108,7 @@ public abstract class AbstractParser implements Idiom {
         return tempFile;
     }
     
-    public int parseDir(final yacyURL location, final String prefix, final File dir, final Document doc)
+    public int parseDir(final DigestURI location, final String prefix, final File dir, final Document doc)
             throws ParserException, InterruptedException, IOException {
         if (!dir.isDirectory())
             throw new ParserException("tried to parse ordinary file " + dir + " as directory", location);
@@ -122,7 +122,7 @@ public abstract class AbstractParser implements Idiom {
             if (file.isDirectory()) {
                 result += parseDir(location, prefix, file, doc);
             } else try {
-                final yacyURL url = yacyURL.newURL(location, "/" + prefix + "/"
+                final DigestURI url = DigestURI.newURL(location, "/" + prefix + "/"
                         // XXX: workaround for relative paths within document
                         + file.getPath().substring(file.getPath().indexOf(File.separatorChar) + 1)
                         + "/" + file.getName());
@@ -151,7 +151,7 @@ public abstract class AbstractParser implements Idiom {
 	 * @see de.anomic.document.Idiom#parse(de.anomic.net.URL, java.lang.String, byte[])
 	 */
 	public Document parse(
-            final yacyURL location, 
+            final DigestURI location, 
             final String mimeType,
             final String charset,
             final byte[] source
@@ -186,7 +186,7 @@ public abstract class AbstractParser implements Idiom {
 	 * @see de.anomic.document.Idiom#parse(de.anomic.net.URL, java.lang.String, java.io.File)
 	 */
 	public Document parse(
-            final yacyURL location, 
+            final DigestURI location, 
             final String mimeType,
             final String charset,
 			final File sourceFile
@@ -220,7 +220,7 @@ public abstract class AbstractParser implements Idiom {
      * 
      * @see de.anomic.document.Idiom#parse(de.anomic.net.URL, java.lang.String, java.io.InputStream)
      */
-    public abstract Document parse(yacyURL location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException;
+    public abstract Document parse(DigestURI location, String mimeType, String charset, InputStream source) throws ParserException, InterruptedException;
     
     /**
      * Return the name of the parser

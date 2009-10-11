@@ -51,6 +51,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Map.Entry;
 
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.DateFormatter;
@@ -61,7 +62,7 @@ public class yacyNewsRecord {
 
     public static final int maxNewsRecordLength  = 512;
     public static final int categoryStringLength = 8;
-    public static final int idLength = DateFormatter.PATTERN_SHORT_SECOND.length() + yacySeedDB.commonHashLength;
+    public static final int idLength = DateFormatter.PATTERN_SHORT_SECOND.length() + Word.commonHashLength;
 
     private final String originator;  // hash of originating peer
     private final Date   created;     // Date when news was created by originator

@@ -4,13 +4,13 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.DateFormatter;
 
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.text.referencePrototype.WordReference;
+import de.anomic.search.Segment;
 
 public class ExternalIndexImporter extends AbstractImporter implements Importer {
 	
@@ -141,7 +141,7 @@ public class ExternalIndexImporter extends AbstractImporter implements Importer 
                             // we need to import the url
 
                             // getting the url entry
-                            final URLMetadataRow urlEntry = this.importWordIndex.urlMetadata().load(urlHash, null, 0);
+                            final URIMetadataRow urlEntry = this.importWordIndex.urlMetadata().load(urlHash, null, 0);
                             if (urlEntry != null) {
 
                                 /* write it into the home url db */

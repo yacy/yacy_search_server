@@ -38,6 +38,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -53,7 +54,6 @@ import de.anomic.document.parser.html.TransformerWriter;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.document.parser.xml.RSSReader;
 import de.anomic.server.serverCharBuffer;
-import de.anomic.yacy.yacyURL;
 
 public class rssParser extends AbstractParser implements Idiom {
 
@@ -77,11 +77,11 @@ public class rssParser extends AbstractParser implements Idiom {
 		super("Rich Site Summary/Atom Feed Parser"); 
 	}
 
-	public Document parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+	public Document parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
 
         try {
             final LinkedList<String> feedSections = new LinkedList<String>();
-            final HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
+            final HashMap<DigestURI, String> anchors = new HashMap<DigestURI, String>();
             final HashMap<String, ImageEntry> images  = new HashMap<String, ImageEntry>();
             final ByteBuffer text = new ByteBuffer();
             final serverCharBuffer authors = new serverCharBuffer();
@@ -101,7 +101,7 @@ public class rssParser extends AbstractParser implements Idiom {
             final String feedDescription = feed.getChannel().getDescription();
             
             if (feed.getImage() != null) {
-                final yacyURL imgURL = new yacyURL(feed.getImage(), null);
+                final DigestURI imgURL = new DigestURI(feed.getImage(), null);
                 images.put(imgURL.hash(), new ImageEntry(imgURL, feedTitle, -1, -1));
             }            
             
@@ -111,7 +111,7 @@ public class rssParser extends AbstractParser implements Idiom {
                     checkInterruption();
                     
         			final String itemTitle = item.getTitle();
-                    final yacyURL    itemURL   = new yacyURL(item.getLink(), null);
+                    final DigestURI    itemURL   = new DigestURI(item.getLink(), null);
         			final String itemDescr = item.getDescription();
         			final String itemCreator = item.getCreator();
         			if (itemCreator != null && itemCreator.length() > 0) authors.append(",").append(itemCreator);
@@ -134,7 +134,7 @@ public class rssParser extends AbstractParser implements Idiom {
                             feedSections.add(itemHeadline);
                         }
                         
-                        final Map<yacyURL, String> itemLinks = scraper.getAnchors();
+                        final Map<DigestURI, String> itemLinks = scraper.getAnchors();
                         if ((itemLinks != null) && (itemLinks.size() > 0)) {
                             anchors.putAll(itemLinks);
                         }

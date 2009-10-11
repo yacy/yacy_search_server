@@ -29,12 +29,12 @@ import java.io.File;
 import java.util.HashSet;
 
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.workflow.BusyThread;
 
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
-import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCodings;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -152,14 +152,14 @@ public class ConfigNetwork_p {
                 final long newBusySleep = Math.max(100, 60000 / newppm);
                 
                 // propagate to crawler
-                final serverBusyThread rct = sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+                final BusyThread rct = sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
                 sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, newBusySleep);
                 sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP, newBusySleep * 3);
                 rct.setBusySleep(newBusySleep);
                 rct.setIdleSleep(newBusySleep * 3);
                 
                 // propagate to loader
-                final serverBusyThread rcl = sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER);
+                final BusyThread rcl = sb.getThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER);
                 sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, newBusySleep * 5);
                 sb.setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_IDLESLEEP, newBusySleep * 10);
                 rcl.setBusySleep(newBusySleep * 5);

@@ -31,7 +31,6 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import de.anomic.crawler.ResultURLs;
-import de.anomic.kelondro.text.Segment;
 import de.anomic.yacy.yacySeedDB;
 
 public class SearchEventCache {

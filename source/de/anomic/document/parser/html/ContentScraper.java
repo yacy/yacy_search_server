@@ -43,14 +43,14 @@ import java.util.Properties;
 
 import javax.swing.event.EventListenerList;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.ISO639;
 
 import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.document.parser.htmlParser;
 import de.anomic.server.serverCharBuffer;
-import de.anomic.yacy.yacyURL;
-import de.anomic.tools.iso639;
 
 public class ContentScraper extends AbstractScraper implements Scraper {
 
@@ -78,7 +78,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
 
     // class variables: collectors for links
-    private HashMap<yacyURL, String> anchors;
+    private HashMap<DigestURI, String> anchors;
     private HashMap<String, ImageEntry> images; // urlhash/image relation
     private final HashMap<String, String> metas;
     private String title;
@@ -88,22 +88,22 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     private final EventListenerList htmlFilterEventListeners;
     
     /**
-     * {@link yacyURL} to the favicon that belongs to the document
+     * {@link DigestURI} to the favicon that belongs to the document
      */
-    private yacyURL favicon;
+    private DigestURI favicon;
     
     /**
-     * The document root {@link yacyURL} 
+     * The document root {@link DigestURI} 
      */
-    private yacyURL root;
+    private DigestURI root;
 
     @SuppressWarnings("unchecked")
-    public ContentScraper(final yacyURL root) {
+    public ContentScraper(final DigestURI root) {
         // the root value here will not be used to load the resource.
         // it is only the reference for relative links
         super(linkTags0, linkTags1);
         this.root = root;
-        this.anchors = new HashMap<yacyURL, String>();
+        this.anchors = new HashMap<DigestURI, String>();
         this.images = new HashMap<String, ImageEntry>();
         this.metas = new HashMap<String, String>();
         this.title = "";
@@ -132,16 +132,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (b.length() != 0) content.append(b).append(32);
     }
 
-    public static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';
-    public static String[] urlComps(String normalizedURL) {
-        final int p = normalizedURL.indexOf("//");
-        if (p > 0) normalizedURL = normalizedURL.substring(p + 2);
-        return normalizedURL.toLowerCase().split(splitrex); // word components of the url
-    }
-    
-    private yacyURL absolutePath(final String relativePath) {
+    private DigestURI absolutePath(final String relativePath) {
         try {
-            return yacyURL.newURL(root, relativePath);
+            return DigestURI.newURL(root, relativePath);
         } catch (final Exception e) {
             return null;
         }
@@ -155,7 +148,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 if (width > 15 && height > 15) {
                     final float ratio = (float) Math.min(width, height) / Math.max(width, height);
                     if (ratio > 0.4) {
-                        final yacyURL url = absolutePath(tagopts.getProperty("src", ""));
+                        final DigestURI url = absolutePath(tagopts.getProperty("src", ""));
                         final ImageEntry ie = new ImageEntry(url, tagopts.getProperty("alt", ""), width, height);
                         addImage(images, ie);
                     }
@@ -168,7 +161,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             } catch (final NumberFormatException e) {}
         }
         if (tagname.equalsIgnoreCase("base")) try {
-            root = new yacyURL(tagopts.getProperty("href", ""), null);
+            root = new DigestURI(tagopts.getProperty("href", ""), null);
         } catch (final MalformedURLException e) {}
         if (tagname.equalsIgnoreCase("frame")) {
             anchors.put(absolutePath(tagopts.getProperty("src", "")), tagopts.getProperty("name",""));
@@ -191,7 +184,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (href.length() > 0) anchors.put(absolutePath(href), areatitle);
         }
         if (tagname.equalsIgnoreCase("link")) {
-            final yacyURL newLink = absolutePath(tagopts.getProperty("href", ""));
+            final DigestURI newLink = absolutePath(tagopts.getProperty("href", ""));
 
             if (newLink != null) {
                 final String type = tagopts.getProperty("rel", "");
@@ -226,7 +219,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
         if ((tagname.equalsIgnoreCase("a")) && (text.length < 2048)) {
             final String href = tagopts.getProperty("href", "");
-            yacyURL url;
+            DigestURI url;
             if ((href.length() > 0) && ((url = absolutePath(href)) != null)) {
                 final String f = url.getFile();
                 final int p = f.lastIndexOf('.');
@@ -331,7 +324,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         }
     }
 
-    public Map<yacyURL, String> getAnchors() {
+    public Map<DigestURI, String> getAnchors() {
         // returns a url (String) / name (String) relation
         return anchors;
     }
@@ -346,9 +339,9 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
     
     /**
-     * @return the {@link yacyURL} to the favicon that belongs to the document
+     * @return the {@link DigestURI} to the favicon that belongs to the document
      */    
-    public yacyURL getFavicon() {
+    public DigestURI getFavicon() {
         return this.favicon;
     }
 
@@ -393,7 +386,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             cl[i] = cl[i].toLowerCase();
             p = cl[i].indexOf('-');
             if (p > 0) cl[i] = cl[i].substring(0, p);
-            if (iso639.exists(cl[i])) hs.add(cl[i]);
+            if (ISO639.exists(cl[i])) hs.add(cl[i]);
         }
         if (hs.size() == 0) return null;
         return hs;
@@ -404,7 +397,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (s == null) s = metas.get("dc.description");
         if (s == null) s = "";
         if (s.length() == 0) {
-            return getTitle().toLowerCase().split(splitrex);
+            return getTitle().toLowerCase().split(DigestURI.splitrex);
         }
         if (s.contains(",")) return s.split(" |,");
         if (s.contains(";")) return s.split(" |;");
@@ -498,18 +491,18 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (page == null) throw new IOException("no content in file " + file.toString());
         
         // scrape document to look up charset
-        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page),"UTF-8",new yacyURL("http://localhost", null),null,false);
+        final ScraperInputStream htmlFilter = new ScraperInputStream(new ByteArrayInputStream(page),"UTF-8",new DigestURI("http://localhost", null),null,false);
         final String charset = htmlParser.patchCharsetEncoding(htmlFilter.detectCharset());
         
         // scrape content
-        final ContentScraper scraper = new ContentScraper(new yacyURL("http://localhost", null));
+        final ContentScraper scraper = new ContentScraper(new DigestURI("http://localhost", null));
         final Writer writer = new TransformerWriter(null, null, scraper, null, false);
         FileUtils.copy(new ByteArrayInputStream(page), writer, Charset.forName(charset));
         
         return scraper;
     }
     
-    public static ContentScraper parseResource(final LoaderDispatcher loader, final yacyURL location, int cachePolicy) throws IOException {
+    public static ContentScraper parseResource(final LoaderDispatcher loader, final DigestURI location, int cachePolicy) throws IOException {
         // load page
         Response r = loader.load(location, true, false, cachePolicy);
         byte[] page = (r == null) ? null : r.getContent();

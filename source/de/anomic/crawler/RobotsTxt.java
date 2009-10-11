@@ -38,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.blob.Heap;
 import net.yacy.kelondro.blob.MapView;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.ByteBuffer;
@@ -50,7 +51,6 @@ import de.anomic.http.client.Client;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
-import de.anomic.yacy.yacyURL;
 
 public class RobotsTxt {
     
@@ -153,9 +153,9 @@ public class RobotsTxt {
                 }
                 
                 // generating the proper url to download the robots txt
-                yacyURL robotsURL = null;
+                DigestURI robotsURL = null;
                 try {                 
-                    robotsURL = new yacyURL("http://" + urlHostPort + "/robots.txt", null);
+                    robotsURL = new DigestURI("http://" + urlHostPort + "/robots.txt", null);
                 } catch (final MalformedURLException e) {
                     log.logSevere("Unable to generate robots.txt URL for host:port '" + urlHostPort + "'.");
                     robotsURL = null;
@@ -228,7 +228,7 @@ public class RobotsTxt {
         return robotsTxt4Host;
     }
     
-    public long crawlDelayMillis(final yacyURL theURL) {
+    public long crawlDelayMillis(final DigestURI theURL) {
         final String urlHostPort = getHostPort(theURL);
         final RobotsEntry robotsEntry = getEntry(urlHostPort, true);
         return robotsEntry.getCrawlDelayMillis();
@@ -268,7 +268,7 @@ public class RobotsTxt {
     public static final int DOWNLOAD_ETAG = 2;
     public static final int DOWNLOAD_MODDATE = 3;
     
-    private static final String getHostPort(final yacyURL theURL) {
+    private static final String getHostPort(final DigestURI theURL) {
         String urlHostPort = null;
         final int port = getPort(theURL);
         urlHostPort = theURL.getHost() + ":" + port;
@@ -277,7 +277,7 @@ public class RobotsTxt {
         return urlHostPort;
     }
     
-    private static final int getPort(final yacyURL theURL) {
+    private static final int getPort(final DigestURI theURL) {
         int port = theURL.getPort();
         if (port == -1) {
             if (theURL.getProtocol().equalsIgnoreCase("http")) {
@@ -290,9 +290,9 @@ public class RobotsTxt {
         return port;
     }
    
-    public yacyURL getSitemapURL(final yacyURL theURL) {
+    public DigestURI getSitemapURL(final DigestURI theURL) {
         if (theURL == null) throw new IllegalArgumentException(); 
-        yacyURL sitemapURL = null;
+        DigestURI sitemapURL = null;
         
         // generating the hostname:poart string needed to do a DB lookup
         final String urlHostPort = getHostPort(theURL);
@@ -300,13 +300,13 @@ public class RobotsTxt {
                        
         try {
             final String sitemapUrlStr = robotsTxt4Host.getSitemap();
-            if (sitemapUrlStr != null) sitemapURL = new yacyURL(sitemapUrlStr, null);
+            if (sitemapUrlStr != null) sitemapURL = new DigestURI(sitemapUrlStr, null);
         } catch (final MalformedURLException e) {/* ignore this */}
         
         return sitemapURL;
     }
     
-    public Long getCrawlDelayMillis(final yacyURL theURL) {
+    public Long getCrawlDelayMillis(final DigestURI theURL) {
         if (theURL == null) throw new IllegalArgumentException(); 
         Long crawlDelay = null;
         
@@ -321,7 +321,7 @@ public class RobotsTxt {
         return crawlDelay;
     }
     
-    public boolean isDisallowed(final yacyURL nexturl) {
+    public boolean isDisallowed(final DigestURI nexturl) {
         if (nexturl == null) throw new IllegalArgumentException();               
         
         // generating the hostname:port string needed to do a DB lookup
@@ -331,7 +331,7 @@ public class RobotsTxt {
         return robotsTxt4Host.isDisallowed(nexturl.getFile());
     }
     
-    private static Object[] downloadRobotsTxt(final yacyURL robotsURL, int redirectionCount, final RobotsEntry entry) throws Exception {
+    private static Object[] downloadRobotsTxt(final DigestURI robotsURL, int redirectionCount, final RobotsEntry entry) throws Exception {
         
         if (redirectionCount < 0) return new Object[]{Boolean.FALSE,null,null};
         redirectionCount--;
@@ -350,7 +350,7 @@ public class RobotsTxt {
         reqHeaders.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
         
         // adding referer
-        reqHeaders.put(RequestHeader.REFERER, (yacyURL.newURL(robotsURL,"/")).toNormalform(true, true));
+        reqHeaders.put(RequestHeader.REFERER, (DigestURI.newURL(robotsURL,"/")).toNormalform(true, true));
         
         if (entry != null) {
             oldEtag = entry.getETag();
@@ -413,7 +413,7 @@ public class RobotsTxt {
                     redirectionUrlString = redirectionUrlString.trim();
                     
                     // generating the new URL object
-                    final yacyURL redirectionUrl = yacyURL.newURL(robotsURL, redirectionUrlString);      
+                    final DigestURI redirectionUrl = DigestURI.newURL(robotsURL, redirectionUrlString);      
                     
                     // following the redirection
                     if (log.isFinest()) log.logFinest("Redirection detected for robots.txt with URL '" + robotsURL + "'." + 

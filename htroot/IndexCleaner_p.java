@@ -25,9 +25,9 @@
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.MetadataRepository;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.Segments;
+import de.anomic.search.MetadataRepository;
+import de.anomic.search.Segment;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;

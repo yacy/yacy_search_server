@@ -32,11 +32,12 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.kelondro.util.Domains;
+
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
@@ -74,7 +75,7 @@ public final class hello {
         try {count = (countStr == null) ? 0 : Integer.parseInt(countStr);} catch (final NumberFormatException e) {count = 0;}
 //      final Date remoteTime = yacyCore.parseUniversalDate(post.get(MYTIME)); // read remote time
         final String clientip = header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>"); // read an artificial header addendum
-        final InetAddress ias = serverDomains.dnsResolve(clientip);
+        final InetAddress ias = Domains.dnsResolve(clientip);
         if (ias == null) {
             prop.put("message", "cannot resolve your IP from your reported location " + clientip);
             return prop;

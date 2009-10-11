@@ -29,12 +29,12 @@
 
 import java.io.IOException;
 
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.ZURL;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -114,14 +114,14 @@ public final class crawlReceipt {
     	}
         
         // generating a new loaded URL entry
-        final URLMetadataRow entry = URLMetadataRow.importEntry(propStr);
+        final URIMetadataRow entry = URIMetadataRow.importEntry(propStr);
         if (entry == null) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");
             return prop;
         }
         
-        final URLMetadataRow.Components metadata = entry.metadata();
+        final URIMetadataRow.Components metadata = entry.metadata();
         if (metadata.url() == null) {
             log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");

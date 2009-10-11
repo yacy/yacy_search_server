@@ -31,6 +31,8 @@ import java.io.InputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
 import org.apache.poi.hssf.eventusermodel.HSSFListener;
 import org.apache.poi.hssf.eventusermodel.HSSFRequest;
@@ -44,7 +46,6 @@ import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
-import de.anomic.yacy.yacyURL;
 
 public class xlsParser extends AbstractParser implements Idiom, HSSFListener {
 
@@ -82,7 +83,7 @@ public class xlsParser extends AbstractParser implements Idiom, HSSFListener {
      * parses the source documents and returns a plasmaParserDocument containing
      * all extracted information about the parsed document
      */ 
-    public Document parse(final yacyURL location, final String mimeType,
+    public Document parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source) throws ParserException,
             InterruptedException {
         try {

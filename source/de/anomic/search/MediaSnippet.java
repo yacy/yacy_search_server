@@ -29,20 +29,20 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.document.Document;
 import de.anomic.document.parser.html.ImageEntry;
-import de.anomic.yacy.yacyURL;
 
 public class MediaSnippet {
     public int type;
-    public yacyURL href, source;
+    public DigestURI href, source;
     public String name, attr;
     public int ranking;
 
-    public MediaSnippet(final int type, final yacyURL href, final String name, final String attr, final int ranking, final yacyURL source) {
+    public MediaSnippet(final int type, final DigestURI href, final String name, final String attr, final int ranking, final DigestURI source) {
         this.type = type;
         this.href = href;
         this.source = source; // the web page where the media resource appeared
@@ -58,7 +58,7 @@ public class MediaSnippet {
         return href.hashCode();
     }
     
-    public static ArrayList<MediaSnippet> retrieveMediaSnippets(final yacyURL url, final TreeSet<byte[]> queryhashes, final int mediatype, final boolean fetchOnline, final int timeout, final boolean reindexing) {
+    public static ArrayList<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final TreeSet<byte[]> queryhashes, final int mediatype, final boolean fetchOnline, final int timeout, final boolean reindexing) {
         if (queryhashes.size() == 0) {
             Log.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();
@@ -78,15 +78,15 @@ public class MediaSnippet {
     public static ArrayList<MediaSnippet> computeMediaSnippets(final Document document, final TreeSet<byte[]> queryhashes, final int mediatype) {
         
         if (document == null) return new ArrayList<MediaSnippet>();
-        Map<yacyURL, String> media = null;
+        Map<DigestURI, String> media = null;
         if (mediatype == QueryParams.CONTENTDOM_AUDIO) media = document.getAudiolinks();
         else if (mediatype == QueryParams.CONTENTDOM_VIDEO) media = document.getVideolinks();
         else if (mediatype == QueryParams.CONTENTDOM_APP) media = document.getApplinks();
         if (media == null) return null;
         
-        final Iterator<Map.Entry<yacyURL, String>> i = media.entrySet().iterator();
-        Map.Entry<yacyURL, String> entry;
-        yacyURL url;
+        final Iterator<Map.Entry<DigestURI, String>> i = media.entrySet().iterator();
+        Map.Entry<DigestURI, String> entry;
+        DigestURI url;
         String desc;
         TreeSet<byte[]> s;
         final ArrayList<MediaSnippet> result = new ArrayList<MediaSnippet>();
@@ -116,7 +116,7 @@ public class MediaSnippet {
         
         final Iterator<ImageEntry> i = images.iterator();
         ImageEntry ientry;
-        yacyURL url;
+        DigestURI url;
         String desc;
         TreeSet<byte[]> s;
         final ArrayList<MediaSnippet> result = new ArrayList<MediaSnippet>();

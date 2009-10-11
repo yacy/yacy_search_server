@@ -35,7 +35,8 @@ import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Properties;
 
-import de.anomic.yacy.yacyURL;
+import net.yacy.kelondro.data.meta.DigestURI;
+
 
 public class ScraperInputStream extends InputStream implements ScraperListener {
     
@@ -57,7 +58,7 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
     public ScraperInputStream(
             final InputStream inStream,
             final String inputStreamCharset,
-            final yacyURL rooturl,
+            final DigestURI rooturl,
             final Transformer transformer,
             final boolean passbyIfBinarySuspect
     ) {

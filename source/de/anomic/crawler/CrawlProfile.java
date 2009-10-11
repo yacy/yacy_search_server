@@ -33,6 +33,8 @@ import java.util.regex.Pattern;
 
 import net.yacy.kelondro.blob.Heap;
 import net.yacy.kelondro.blob.MapView;
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.CloneableIterator;
@@ -40,9 +42,6 @@ import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
-
-import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.yacyURL;
 
 public class CrawlProfile {
     
@@ -58,7 +57,7 @@ public class CrawlProfile {
     public CrawlProfile(final File file) throws IOException {
         this.profileTableFile = file;
         profileTableFile.getParentFile().mkdirs();
-        final Heap dyn = new Heap(profileTableFile, yacySeedDB.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
+        final Heap dyn = new Heap(profileTableFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
         profileTable = new MapView(dyn, 500, '_');
         profileIterator pi = new profileIterator(true);
         entry e;
@@ -75,7 +74,7 @@ public class CrawlProfile {
         profileTableFile.getParentFile().mkdirs();
         Heap dyn = null;
         try {
-            dyn = new Heap(profileTableFile, yacySeedDB.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
+            dyn = new Heap(profileTableFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -169,7 +168,7 @@ public class CrawlProfile {
     }
     
     public entry newEntry( final String name,
-                           final yacyURL startURL,
+                           final DigestURI startURL,
                            final String mustmatch, final String mustnotmatch,
                            final int generalDepth,
                            final long recrawlIfOlder /*date*/, final int domFilterDepth,  final int domMaxPages,
@@ -291,7 +290,7 @@ public class CrawlProfile {
         private Pattern mustmatch = null, mustnotmatch = null;
         
         
-        public entry(final String name, final yacyURL startURL,
+        public entry(final String name, final DigestURI startURL,
                      final String mustmatch,
                      final String mustnotmatch,
                      final int depth,
@@ -304,7 +303,7 @@ public class CrawlProfile {
                      final boolean xsstopw, final boolean xdstopw, final boolean xpstopw,
                      final int cacheStrategy) {
             if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
-            final String handle = (startURL == null) ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, yacySeedDB.commonHashLength) : startURL.hash();
+            final String handle = (startURL == null) ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, Word.commonHashLength) : startURL.hash();
             mem = new HashMap<String, String>();
             mem.put(HANDLE,           handle);
             mem.put(NAME,             name);

@@ -23,12 +23,13 @@ package de.anomic.tools;
 
 import java.util.Hashtable;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.client.Client;
 import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.yacy.yacyURL;
 
 public class loaderThreads {
     
@@ -59,7 +60,7 @@ public class loaderThreads {
         this.failed = 0;
     }
     
-    public void newThread(final String name, final yacyURL url, final loaderProcess process) {
+    public void newThread(final String name, final DigestURI url, final loaderProcess process) {
         final Thread t = new loaderThread(url, process);
         threads.put(name, t);
         t.start();
@@ -102,13 +103,13 @@ public class loaderThreads {
     }
 
     protected class loaderThread extends Thread {
-        private final yacyURL url;
+        private final DigestURI url;
         private Exception error;
         private final loaderProcess process;
         private byte[] page;
         private boolean loaded;
         
-        public loaderThread(final yacyURL url, final loaderProcess process) {
+        public loaderThread(final DigestURI url, final loaderProcess process) {
             this.url = url;
             this.process = process;
             this.error = null;

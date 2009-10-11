@@ -25,6 +25,8 @@
 import java.io.IOException;
 import java.net.MalformedURLException;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import de.anomic.content.RSSMessage;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.document.parser.xml.RSSReader;
@@ -32,7 +34,6 @@ import de.anomic.http.metadata.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
-import de.anomic.yacy.yacyURL;
 
 // test url:
 // http://localhost:8080/FeedReader_p.html?url=http://www.tagesthemen.de/xml/rss2
@@ -44,9 +45,9 @@ public class FeedReader_p {
         
         prop.put("page", "0");
         if (post != null) {
-            yacyURL url;
+            DigestURI url;
             try {
-                url = new yacyURL(post.get("url"), null);
+                url = new DigestURI(post.get("url"), null);
             } catch (final MalformedURLException e) {
                 prop.put("page", "2");
                 return prop;

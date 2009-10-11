@@ -32,13 +32,14 @@
 import java.io.File;
 import java.net.MalformedURLException;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import de.anomic.data.Blacklist;
 import de.anomic.data.listManager;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyURL;
 
 public class BlacklistTest_p {
 
@@ -59,9 +60,9 @@ public class BlacklistTest_p {
                     !urlstring.startsWith("https://")&&
                     !urlstring.startsWith("ftp://")
                     ) urlstring = "http://"+urlstring;
-            yacyURL testurl = null;
+            DigestURI testurl = null;
             try {
-                testurl = new yacyURL(urlstring, null);
+                testurl = new DigestURI(urlstring, null);
             } catch (final MalformedURLException e) { testurl = null; }
             if(testurl != null) {
                 prop.putHTML("url",testurl.toString());

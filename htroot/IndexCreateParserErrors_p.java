@@ -23,13 +23,13 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import de.anomic.crawler.ZURL;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyURL;
 
 public class IndexCreateParserErrors_p {
     
@@ -67,7 +67,7 @@ public class IndexCreateParserErrors_p {
                 prop.put("rejected_only-latest", "0");
             }
             dark = true;
-            yacyURL url; 
+            DigestURI url; 
             String initiatorHash, executorHash;
             ZURL.Entry entry;
             yacySeed initiatorSeed, executorSeed;

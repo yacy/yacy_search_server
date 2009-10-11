@@ -1,6 +1,8 @@
 package de.anomic.document;
 
 //import static org.junit.Assert.*;
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import org.junit.Test;
 
 import java.io.File;
@@ -10,7 +12,6 @@ import java.io.InputStreamReader;
 
 import de.anomic.document.Document;
 import de.anomic.document.Parser;
-import de.anomic.yacy.yacyURL;
 
 public class ParserTest {
 
@@ -32,7 +33,7 @@ public class ParserTest {
 			String filename = "test/parsertest/" + testFiles[i][0];
 			File file = new File(filename);
 			String mimetype = testFiles[i][1];
-			yacyURL url = new yacyURL("http://localhost/"+filename);
+			DigestURI url = new DigestURI("http://localhost/"+filename);
 
 			Document doc = Parser.parseSource(url, mimetype, null, file.length(), new FileInputStream(file));
 			Reader content = new InputStreamReader(doc.getText(), doc.getCharset());

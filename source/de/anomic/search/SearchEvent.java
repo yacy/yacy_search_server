@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -40,8 +41,6 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
 
 import de.anomic.crawler.ResultURLs;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.search.RankingProcess.NavigatorEntry;
 import de.anomic.server.serverProfiling;
 import de.anomic.yacy.yacySearch;

@@ -50,6 +50,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import de.anomic.data.Blacklist;
 import de.anomic.search.Switchboard;
 
@@ -326,13 +328,13 @@ public class yacyNewsPool {
         if (record.created().getTime() == 0) return;
         final Map<String, String> attributes = record.attributes();
         if (attributes.containsKey("url")){
-            if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_NEWS, new yacyURL(attributes.get("url"), null))){
+            if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_NEWS, new DigestURI(attributes.get("url"), null))){
                 System.out.println("DEBUG: ignored news-entry url blacklisted: " + attributes.get("url"));
                 return;
             }
         }
         if (attributes.containsKey("startURL")){
-            if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_NEWS, new yacyURL(attributes.get("startURL"), null))){
+            if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_NEWS, new DigestURI(attributes.get("startURL"), null))){
                 System.out.println("DEBUG: ignored news-entry url blacklisted: " + attributes.get("startURL"));
                 return;
             }

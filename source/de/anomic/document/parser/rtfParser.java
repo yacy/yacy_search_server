@@ -34,11 +34,12 @@ import java.util.Set;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.rtf.RTFEditorKit;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
-import de.anomic.yacy.yacyURL;
 
 public class rtfParser extends AbstractParser implements Idiom {
 
@@ -61,7 +62,7 @@ public class rtfParser extends AbstractParser implements Idiom {
 		super("Rich Text Format Parser");  
 	}
 
-	public Document parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+	public Document parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
 
         
 		try {	

@@ -34,6 +34,8 @@ import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 
@@ -49,10 +51,8 @@ import de.anomic.http.io.ByteCountInputStream;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
-import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
-import de.anomic.yacy.yacyURL;
 
 /**
  * Class to parse a sitemap file.<br>
@@ -122,7 +122,7 @@ public class SitemapParser extends DefaultHandler {
     /**
      * The location of the sitemap file
      */
-    private yacyURL siteMapURL = null;
+    private DigestURI siteMapURL = null;
 
     /**
      * The next URL to enqueue
@@ -135,7 +135,7 @@ public class SitemapParser extends DefaultHandler {
     private Date lastMod = null;
     private final Switchboard sb;
     
-    public SitemapParser(final Switchboard sb, final yacyURL sitemap, final CrawlProfile.entry theCrawlingProfile) {
+    public SitemapParser(final Switchboard sb, final DigestURI sitemap, final CrawlProfile.entry theCrawlingProfile) {
         assert sitemap != null;
         this.sb = sb;
         this.siteMapURL = sitemap;
@@ -251,9 +251,9 @@ public class SitemapParser extends DefaultHandler {
 
             // get the url hash
             String nexturlhash = null;
-            yacyURL url = null;
+            DigestURI url = null;
             try {
-                url = new yacyURL(this.nextURL, null);
+                url = new DigestURI(this.nextURL, null);
                 nexturlhash = url.hash();
             } catch (final MalformedURLException e1) {
             }
@@ -263,7 +263,7 @@ public class SitemapParser extends DefaultHandler {
                 final String dbocc = this.sb.urlExists(Segments.Process.LOCALCRAWLING, nexturlhash);
                 if ((dbocc != null) && (dbocc.equalsIgnoreCase("loaded"))) {
                     // the url was already loaded. we need to check the date
-                    final URLMetadataRow oldEntry = this.sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(nexturlhash, null, 0);
+                    final URIMetadataRow oldEntry = this.sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(nexturlhash, null, 0);
                     if (oldEntry != null) {
                         final Date modDate = oldEntry.moddate();
                         // check if modDate is null
@@ -309,7 +309,7 @@ public class SitemapParser extends DefaultHandler {
         }
     }
 
-    private CrawlProfile.entry createProfile(final String domainName, final yacyURL sitemapURL) {
+    private CrawlProfile.entry createProfile(final String domainName, final DigestURI sitemapURL) {
         return this.sb.crawler.profilesActiveCrawls.newEntry(
                 domainName, sitemapURL,
                 // crawling Filter

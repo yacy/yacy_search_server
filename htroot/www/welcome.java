@@ -36,7 +36,6 @@ import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
@@ -55,9 +54,9 @@ public class welcome {
         prop.putHTML("peername", env.getConfig("peerName", "<nameless>"));
         prop.putHTML("peerdomain", env.getConfig("peerName", "<nameless>").toLowerCase());
         prop.putHTML("peeraddress", sb.peers.mySeed().getPublicAddress());
-        prop.put("hostname", serverDomains.myPublicIP());
+        prop.put("hostname", env.myPublicIP());
         try{
-            prop.put("hostip", InetAddress.getByName(serverDomains.myPublicIP()).getHostAddress());
+            prop.put("hostip", InetAddress.getByName(env.myPublicIP()).getHostAddress());
         }catch(final UnknownHostException e){
             prop.put("hostip", "Unknown Host Exception");
         }       

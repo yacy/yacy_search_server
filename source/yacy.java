@@ -45,6 +45,10 @@ import java.util.zip.ZipOutputStream;
 
 import net.yacy.kelondro.blob.Heap;
 import net.yacy.kelondro.blob.MapDataMining;
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.RowCollection;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -59,15 +63,12 @@ import net.yacy.kelondro.util.ScoreCluster;
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
 import de.anomic.data.translator;
-import de.anomic.document.Word;
 import de.anomic.http.client.Client;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseContainer;
 import de.anomic.http.server.HTTPDemon;
-import de.anomic.kelondro.text.MetadataRepository;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.text.referencePrototype.WordReference;
+import de.anomic.search.MetadataRepository;
+import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
@@ -77,7 +78,6 @@ import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.Tray;
-import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.yacyBuildProperties;
 import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.yacyVersion;
@@ -407,7 +407,7 @@ public final class yacy {
                     server.close();
                     if (server.isAlive()) try {
                         // TODO only send request, don't read response (cause server is already down resulting in error)
-                        final yacyURL u = new yacyURL((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port), null);
+                        final DigestURI u = new DigestURI((server.withSSL()?"https":"http")+"://localhost:" + serverCore.getPortNr(port), null);
                         Client.wget(u.toString(), null, 10000); // kick server
                         Log.logConfig("SHUTDOWN", "sent termination signal to server socket");
                     } catch (final IOException ee) {
@@ -617,7 +617,7 @@ public final class yacy {
         final ScoreCluster<byte[]> hs = new ScoreCluster<byte[]>();
         while (ef.hasMoreElements()) {
             f = ef.nextElement();
-            h = f.getName().substring(0, yacySeedDB.commonHashLength).getBytes();
+            h = f.getName().substring(0, Word.commonHashLength).getBytes();
             hs.addScore(h, (int) f.length());
         }
 
@@ -682,7 +682,7 @@ public final class yacy {
                         iEntry = wordIdxEntries.next();
                         final String urlHash = iEntry.metadataHash();                    
                         if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
-                            final URLMetadataRow urlEntry = currentUrlDB.load(urlHash, null, 0);                       
+                            final URIMetadataRow urlEntry = currentUrlDB.load(urlHash, null, 0);                       
                             urlCounter++;
                             minimizedUrlDB.store(urlEntry);
                             if (urlCounter % 500 == 0) {
@@ -920,19 +920,19 @@ public final class yacy {
             final String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
             for (int i=0; i < dbFileNames.length; i++) {
                 final File dbFile = new File(yacyDBPath,dbFileNames[i]);
-                final MapDataMining db = new MapDataMining(new Heap(dbFile, yacySeedDB.commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null, null);
+                final MapDataMining db = new MapDataMining(new Heap(dbFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null, null);
                 
                 MapDataMining.mapIterator it;
                 it = db.maps(true, false);
                 while (it.hasNext()) {
                     final Map<String, String> dna = it.next();
                     String peerHash = dna.get("key");
-                    if (peerHash.length() < yacySeedDB.commonHashLength) {
+                    if (peerHash.length() < Word.commonHashLength) {
                         final String peerName = dna.get("Name");
                         final String peerIP = dna.get("IP");
                         final String peerPort = dna.get("Port");
                         
-                        while (peerHash.length() < yacySeedDB.commonHashLength) { peerHash = peerHash + "_"; }                        
+                        while (peerHash.length() < Word.commonHashLength) { peerHash = peerHash + "_"; }                        
                         System.err.println("Invalid Peer-Hash found in '" + dbFileNames[i] + "': " + peerName + ":" +  peerHash + ", http://" + peerIP + ":" + peerPort);
                     }
                 }

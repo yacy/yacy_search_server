@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.CrawlProfile;
@@ -47,15 +48,14 @@ import de.anomic.data.listManager;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.TransformerWriter;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.Segments;
+import de.anomic.search.Segment;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
-import de.anomic.yacy.yacyURL;
 
 public class WatchCrawler_p {
 	public static final String CRAWLING_MODE_URL = "url";
@@ -148,8 +148,8 @@ public class WatchCrawler_p {
                     if (pos == -1) crawlingStart = "http://" + crawlingStart;
 
                     // normalizing URL
-                    yacyURL crawlingStartURL = null;
-                    try {crawlingStartURL = new yacyURL(crawlingStart, null);} catch (final MalformedURLException e1) {}
+                    DigestURI crawlingStartURL = null;
+                    try {crawlingStartURL = new DigestURI(crawlingStart, null);} catch (final MalformedURLException e1) {}
                     crawlingStart = (crawlingStartURL == null) ? null : crawlingStartURL.toNormalform(true, true);
                     
                     // set the crawling filter
@@ -229,7 +229,7 @@ public class WatchCrawler_p {
                             
                             // stack request
                             // first delete old entry, if exists
-                            final yacyURL url = new yacyURL(crawlingStart, null);
+                            final DigestURI url = new DigestURI(crawlingStart, null);
                             final String urlhash = url.hash();
                             indexSegment.urlMetadata().remove(urlhash);
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
@@ -347,17 +347,17 @@ public class WatchCrawler_p {
                                 final String fileString = post.get("crawlingFile$file");
                                 
                                 // parsing the bookmark file and fetching the headline and contained links
-                                final ContentScraper scraper = new ContentScraper(new yacyURL(file));
+                                final ContentScraper scraper = new ContentScraper(new DigestURI(file));
                                 //OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
                                 final Writer writer = new TransformerWriter(null,null,scraper,null,false);
                                 FileUtils.copy(fileString, writer);
                                 writer.close();
                                 
                                 //String headline = scraper.getHeadline();
-                                final Map<yacyURL, String> hyperlinks = scraper.getAnchors();
+                                final Map<DigestURI, String> hyperlinks = scraper.getAnchors();
                                 
                                 // creating a crawler profile
-                                final yacyURL crawlURL = new yacyURL("file://" + file.toString(), null);
+                                final DigestURI crawlURL = new DigestURI("file://" + file.toString(), null);
                                 final CrawlProfile.entry profile = sb.crawler.profilesActiveCrawls.newEntry(
                                         fileName, crawlURL,
                                         newcrawlingMustMatch,
@@ -379,10 +379,10 @@ public class WatchCrawler_p {
                                 sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                                 
                                 // loop through the contained links
-                                final Iterator<Map.Entry<yacyURL, String>> linkiterator = hyperlinks.entrySet().iterator();
-                                yacyURL nexturl;
+                                final Iterator<Map.Entry<DigestURI, String>> linkiterator = hyperlinks.entrySet().iterator();
+                                DigestURI nexturl;
                                 while (linkiterator.hasNext()) {
-                                    final Map.Entry<yacyURL, String> e = linkiterator.next();
+                                    final Map.Entry<DigestURI, String> e = linkiterator.next();
                                     nexturl = e.getKey();
                                     if (nexturl == null) continue;
                                     
@@ -420,7 +420,7 @@ public class WatchCrawler_p {
                     	try {
                     		// getting the sitemap URL
                     		sitemapURLStr = post.get("sitemapURL","");
-                    		final yacyURL sitemapURL = new yacyURL(sitemapURLStr, null);
+                    		final DigestURI sitemapURL = new DigestURI(sitemapURLStr, null);
                             
                     		// create a new profile
                     		final CrawlProfile.entry pe = sb.crawler.profilesActiveCrawls.newEntry(
@@ -436,7 +436,7 @@ public class WatchCrawler_p {
                     				cachePolicy);
                     		
                     		// create a new sitemap importer
-                    		final SitemapImporter importerThread = new SitemapImporter(sb, sb.dbImportManager, new yacyURL(sitemapURLStr, null), pe);
+                    		final SitemapImporter importerThread = new SitemapImporter(sb, sb.dbImportManager, new DigestURI(sitemapURLStr, null), pe);
                     		if (importerThread != null) {
                     		    importerThread.setJobID(sb.dbImportManager.generateUniqueJobID());
                     			importerThread.startIt();

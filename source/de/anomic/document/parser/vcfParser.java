@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.order.Base64Order;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
@@ -48,7 +49,6 @@ import de.anomic.document.Document;
 import de.anomic.http.client.Client;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.yacy.yacyURL;
 
 /**
  * Vcard specification: http://www.imc.org/pdi/vcard-21.txt
@@ -86,13 +86,13 @@ public class vcfParser extends AbstractParser implements Idiom {
         return SUPPORTED_EXTENSIONS;
     }
     
-    public Document parse(final yacyURL url, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document parse(final DigestURI url, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         
         try {
             final StringBuilder parsedTitle = new StringBuilder();
             final StringBuilder parsedDataText = new StringBuilder();
             final HashMap<String, String> parsedData = new HashMap<String, String>();
-            final HashMap<yacyURL, String> anchors = new HashMap<yacyURL, String>();
+            final HashMap<DigestURI, String> anchors = new HashMap<DigestURI, String>();
             final LinkedList<String> parsedNames = new LinkedList<String>();
             
             boolean useLastLine = false;
@@ -201,7 +201,7 @@ public class vcfParser extends AbstractParser implements Idiom {
                         parsedData.clear();
                     } else if (key.toUpperCase().startsWith("URL")) {
                         try {
-                            final yacyURL newURL = new yacyURL(value, null);
+                            final DigestURI newURL = new DigestURI(value, null);
                             anchors.put(newURL, newURL.toString());   
                             //parsedData.put(key,value);
                         } catch (final MalformedURLException ex) {/* ignore this */}                                                
@@ -281,7 +281,7 @@ public class vcfParser extends AbstractParser implements Idiom {
     
     public static void main(final String[] args) {
         try {
-            final yacyURL contentUrl = new yacyURL(args[0], null);
+            final DigestURI contentUrl = new DigestURI(args[0], null);
             
             final vcfParser testParser = new vcfParser();
             final RequestHeader reqHeader = new RequestHeader();

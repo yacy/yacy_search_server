@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 
@@ -40,10 +41,9 @@ import de.anomic.document.Parser;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
-import de.anomic.kelondro.text.Segments;
 import de.anomic.net.ftpc;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
-import de.anomic.yacy.yacyURL;
 
 public class FTPLoader {
 
@@ -66,7 +66,7 @@ public class FTPLoader {
     public Response load(final Request request) throws IOException {
         
         long start = System.currentTimeMillis();
-        final yacyURL entryUrl = request.url();
+        final DigestURI entryUrl = request.url();
         final String fullPath = getPath(entryUrl);
 
         // the return value
@@ -169,7 +169,7 @@ public class FTPLoader {
      * @param port
      * @return success
      */
-    private boolean openConnection(final ftpc ftpClient, final yacyURL entryUrl) {
+    private boolean openConnection(final ftpc ftpClient, final DigestURI entryUrl) {
         // get username and password
         final String userInfo = entryUrl.getUserInfo();
         String userName = "anonymous", userPwd = "anonymous";
@@ -216,7 +216,7 @@ public class FTPLoader {
      */
     private Response getFile(final ftpc ftpClient, final Request request) throws Exception {
         // determine the mimetype of the resource
-        final yacyURL entryUrl = request.url();
+        final DigestURI entryUrl = request.url();
         final String mimeType = Parser.mimeOf(entryUrl);
         final String path = getPath(entryUrl);
 
@@ -270,8 +270,8 @@ public class FTPLoader {
      * @param entryUrl
      * @return
      */
-    private String getPath(final yacyURL entryUrl) {
-        return yacyURL.unescape(entryUrl.getPath()).replace("\"", "\"\"");
+    private String getPath(final DigestURI entryUrl) {
+        return DigestURI.unescape(entryUrl.getPath()).replace("\"", "\"\"");
     }
 
     /**
@@ -282,7 +282,7 @@ public class FTPLoader {
      */
     private byte[] generateDirlist(final ftpc ftpClient, final Request entry, final String path) {
         // getting the dirlist
-        final yacyURL entryUrl = entry.url();
+        final DigestURI entryUrl = entry.url();
 
         // generate the dirlist
         final StringBuilder dirList = ftpClient.dirhtml(path);

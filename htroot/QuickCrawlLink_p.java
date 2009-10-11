@@ -34,16 +34,17 @@ import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.util.Date;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.Segments;
+import de.anomic.search.Segment;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyURL;
 
 public class QuickCrawlLink_p {
     
@@ -124,12 +125,12 @@ public class QuickCrawlLink_p {
         
         if (crawlingStart != null) {
             crawlingStart = crawlingStart.trim();
-            try {crawlingStart = new yacyURL(crawlingStart, null).toNormalform(true, true);} catch (final MalformedURLException e1) {}
+            try {crawlingStart = new DigestURI(crawlingStart, null).toNormalform(true, true);} catch (final MalformedURLException e1) {}
             
             // check if url is proper
-            yacyURL crawlingStartURL = null;
+            DigestURI crawlingStartURL = null;
             try {
-                crawlingStartURL = new yacyURL(crawlingStart, null);
+                crawlingStartURL = new DigestURI(crawlingStart, null);
             } catch (final MalformedURLException e) {
                 prop.put("mode_status", "1");
                 prop.put("mode_code", "1");

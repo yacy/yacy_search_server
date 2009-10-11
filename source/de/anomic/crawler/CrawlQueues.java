@@ -36,10 +36,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.workflow.WorkflowJob;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.crawler.retrieval.Request;
@@ -48,10 +50,8 @@ import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.client.Client;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
-import de.anomic.server.serverProcessorJob;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.dht.PeerSelection;
 
 public class CrawlQueues {
@@ -158,7 +158,7 @@ public class CrawlQueues {
         errorURL.remove(hash);
     }
     
-    public yacyURL getURL(final String urlhash) {
+    public DigestURI getURL(final String urlhash) {
         assert urlhash != null;
         if (urlhash == null || urlhash.length() == 0) return null;
         ZURL.Entry ee = delegatedURL.getEntry(urlhash);
@@ -259,7 +259,7 @@ public class CrawlQueues {
         if (profile != null) {
 
             // check if the protocol is supported
-            final yacyURL url = urlEntry.url();
+            final DigestURI url = urlEntry.url();
             final String urlProtocol = url.getProtocol();
             if (sb.loader.isSupportedProtocol(urlProtocol)) {
 
@@ -420,19 +420,19 @@ public class CrawlQueues {
         }
         
         // parse the rss
-        yacyURL url, referrer;
+        DigestURI url, referrer;
         Date loaddate;
         for (final RSSMessage item: feed) {
             //System.out.println("URL=" + item.getLink() + ", desc=" + item.getDescription() + ", pubDate=" + item.getPubDate());
             
             // put url on remote crawl stack
             try {
-                url = new yacyURL(item.getLink(), null);
+                url = new DigestURI(item.getLink(), null);
             } catch (final MalformedURLException e) {
                 url = null;
             }
             try {
-                referrer = new yacyURL(item.getReferrer(), null);
+                referrer = new DigestURI(item.getReferrer(), null);
             } catch (final MalformedURLException e) {
                 referrer = null;
             }
@@ -468,7 +468,7 @@ public class CrawlQueues {
      * @param url
      * @return
      */
-    private String urlToString(final yacyURL url) {
+    private String urlToString(final DigestURI url) {
         return (url == null ? "null" : url.toNormalform(true, false));
     }
     
@@ -527,7 +527,7 @@ public class CrawlQueues {
         public crawlWorker(final Request entry) {
             this.start = System.currentTimeMillis();
             this.request = entry;
-            this.request.setStatus("worker-initialized", serverProcessorJob.STATUS_INITIATED);
+            this.request.setStatus("worker-initialized", WorkflowJob.STATUS_INITIATED);
             this.code = Integer.valueOf(entry.hashCode());
             if (!workers.containsKey(code)) {
                 workers.put(code, this);
@@ -542,7 +542,7 @@ public class CrawlQueues {
         public void run() {
             try {
                 // checking robots.txt for http(s) resources
-                this.request.setStatus("worker-checkingrobots", serverProcessorJob.STATUS_STARTED);
+                this.request.setStatus("worker-checkingrobots", WorkflowJob.STATUS_STARTED);
                 if ((request.url().getProtocol().equals("http") || request.url().getProtocol().equals("https")) && sb.robots.isDisallowed(request.url())) {
                     if (log.isFine()) log.logFine("Crawling of URL '" + request.url().toString() + "' disallowed by robots.txt.");
                     final ZURL.Entry eentry = errorURL.newEntry(
@@ -553,29 +553,29 @@ public class CrawlQueues {
                             "denied by robots.txt");
                     eentry.store();
                     errorURL.push(eentry);
-                    this.request.setStatus("worker-disallowed", serverProcessorJob.STATUS_FINISHED);
+                    this.request.setStatus("worker-disallowed", WorkflowJob.STATUS_FINISHED);
                 } else {
                     // starting a load from the internet
-                    this.request.setStatus("worker-loading", serverProcessorJob.STATUS_RUNNING);
+                    this.request.setStatus("worker-loading", WorkflowJob.STATUS_RUNNING);
                     String result = null;
                     
                     // load a resource and push queue entry to switchboard queue
                     // returns null if everything went fine, a fail reason string if a problem occurred
                     try {
-                        request.setStatus("loading", serverProcessorJob.STATUS_RUNNING);
+                        request.setStatus("loading", WorkflowJob.STATUS_RUNNING);
                         Response response = sb.loader.load(request, true);
                         if (response == null) {
-                            request.setStatus("error", serverProcessorJob.STATUS_FINISHED);
+                            request.setStatus("error", WorkflowJob.STATUS_FINISHED);
                             if (log.isFine()) log.logFine("problem loading " + request.url().toString() + ": no content (possibly caused by cache policy)");
                             result = "no content (possibly caused by cache policy)";
                         } else {
-                            request.setStatus("loaded", serverProcessorJob.STATUS_RUNNING);
+                            request.setStatus("loaded", WorkflowJob.STATUS_RUNNING);
                             final String storedFailMessage = sb.toIndexer(response);
-                            request.setStatus("enqueued-" + ((storedFailMessage == null) ? "ok" : "fail"), serverProcessorJob.STATUS_FINISHED);
+                            request.setStatus("enqueued-" + ((storedFailMessage == null) ? "ok" : "fail"), WorkflowJob.STATUS_FINISHED);
                             result = (storedFailMessage == null) ? null : "not enqueued to indexer: " + storedFailMessage;
                         }
                     } catch (IOException e) {
-                        request.setStatus("error", serverProcessorJob.STATUS_FINISHED);
+                        request.setStatus("error", WorkflowJob.STATUS_FINISHED);
                         if (log.isFine()) log.logFine("problem loading " + request.url().toString() + ": " + e.getMessage());
                         result = "load error - " + e.getMessage();
                     }
@@ -589,9 +589,9 @@ public class CrawlQueues {
                                 "cannot load: " + result);
                         eentry.store();
                         errorURL.push(eentry);
-                        this.request.setStatus("worker-error", serverProcessorJob.STATUS_FINISHED);
+                        this.request.setStatus("worker-error", WorkflowJob.STATUS_FINISHED);
                     } else {
-                        this.request.setStatus("worker-processed", serverProcessorJob.STATUS_FINISHED);
+                        this.request.setStatus("worker-processed", WorkflowJob.STATUS_FINISHED);
                     }
                 }
             } catch (final Exception e) {
@@ -605,7 +605,7 @@ public class CrawlQueues {
                 errorURL.push(eentry);
                 e.printStackTrace();
                 Client.initConnectionManager();
-                this.request.setStatus("worker-exception", serverProcessorJob.STATUS_FINISHED);
+                this.request.setStatus("worker-exception", WorkflowJob.STATUS_FINISHED);
             } finally {
                 crawlWorker w = workers.remove(code);
                 assert w != null;

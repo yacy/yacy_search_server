@@ -37,10 +37,10 @@ import net.yacy.kelondro.util.ScoreCluster;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.data.Blacklist;
-import de.anomic.kelondro.text.Segment;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.RankingProcess;
+import de.anomic.search.Segment;
 import de.anomic.yacy.dht.PeerSelection;
 
 public class yacySearch extends Thread {

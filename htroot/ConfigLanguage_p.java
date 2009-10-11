@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
@@ -48,7 +49,6 @@ import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyURL;
 
 
 public class ConfigLanguage_p {
@@ -82,7 +82,7 @@ public class ConfigLanguage_p {
                 final String url = post.get("url");
                 Iterator<String> it;
                 try{
-                    final yacyURL u = new yacyURL(url, null);
+                    final DigestURI u = new DigestURI(url, null);
                     final RequestHeader reqHeader = new RequestHeader();
                     reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
                     it = FileUtils.strings(Client.wget(u.toString(), reqHeader, 10000));

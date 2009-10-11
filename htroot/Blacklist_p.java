@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.data.AbstractBlacklist;
@@ -48,7 +49,6 @@ import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyURL;
 
 public class Blacklist_p {
     private final static String EDIT             = "edit_";
@@ -85,9 +85,9 @@ public class Blacklist_p {
             	prop.put("testlist", "1");
             	String urlstring = post.get("testurl", "");
             	if(!urlstring.startsWith("http://")) urlstring = "http://"+urlstring;
-                yacyURL testurl = null;
+                DigestURI testurl = null;
 				try {
-					testurl = new yacyURL(urlstring, null);
+					testurl = new DigestURI(urlstring, null);
 				} catch (final MalformedURLException e) { testurl = null; }
 				if(testurl != null) {
 					prop.putHTML("testlist_url",testurl.toString());

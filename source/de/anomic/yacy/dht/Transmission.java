@@ -30,15 +30,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
+import net.yacy.kelondro.workflow.WorkflowJob;
 
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.text.referencePrototype.WordReference;
-import de.anomic.server.serverProcessorJob;
+import de.anomic.search.Segment;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
@@ -71,7 +71,7 @@ public class Transmission {
         return new Chunk(primaryTarget, targets, payloadrow);
     }
     
-    public class Chunk extends serverProcessorJob implements Iterable<ReferenceContainer<WordReference>> {
+    public class Chunk extends WorkflowJob implements Iterable<ReferenceContainer<WordReference>> {
         /**
          * a dispatcher entry contains
          * - the primary target, which is a word hash, as marker for the entry
@@ -84,7 +84,7 @@ public class Transmission {
          */
         private byte[]                          primaryTarget;
         private ReferenceContainerCache<WordReference> containers;
-        private HashMap<String, URLMetadataRow> references;
+        private HashMap<String, URIMetadataRow> references;
         private HashSet<String>                 badReferences;
         private ArrayList<yacySeed>             targets;
         private int                             hit, miss;
@@ -104,7 +104,7 @@ public class Transmission {
             super();
             this.primaryTarget = primaryTarget;
             this.containers = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, payloadrow, Segment.wordOrder);
-            this.references = new HashMap<String, URLMetadataRow>();
+            this.references = new HashMap<String, URIMetadataRow>();
             this.badReferences = new HashSet<String>();
             this.targets    = targets;
             this.hit = 0;
@@ -127,7 +127,7 @@ public class Transmission {
                     notFound.add(e.metadataHash());
                     continue;
                 }
-                URLMetadataRow r = segment.urlMetadata().load(e.metadataHash(), null, 0);
+                URIMetadataRow r = segment.urlMetadata().load(e.metadataHash(), null, 0);
                 if (r == null) {
                     notFound.add(e.metadataHash());
                     badReferences.add(e.metadataHash());

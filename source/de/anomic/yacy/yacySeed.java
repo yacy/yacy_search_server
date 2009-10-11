@@ -56,15 +56,13 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.DateFormatter;
 
-import de.anomic.document.Word;
 import de.anomic.net.natLib;
 import de.anomic.server.serverCodings;
-import de.anomic.server.serverDomains;
-import de.anomic.server.serverSystem;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
@@ -236,25 +234,6 @@ public class yacySeed implements Cloneable {
         this.dna.put(yacySeed.URL_IN, yacySeed.ZERO);    // received URLs
 
         this.available = 0;
-    }
-
-    /**
-     * Generate a default peer name assembled of the following fragments in order:
-     * <ul>
-     *   <li>the public IP (may be an IPv4- or IPv6-IP) obtained by {@link serverCore#myPublicIP()} followed by a minus sign (<code>-</code>)</li>
-     *   <li>a pseudo-random value, the {@link yacyCore#speedKey}</li>
-     *   <li>the string '<code>dpn</code>' which assumingly stands for Default Peer Name</li>
-     *   <li>shortened OS information, the {@link serverSystem#infoKey()}</li>
-     *   <li>another pseudo-random value derived from the {@link System#currentTimeMillis()}-method modulo 99</li>
-     * </ul> 
-     * @return a default peer name following the above pattern whereas dots, underscores and colons are replaced by minus signs
-     */
-    public static String makeDefaultPeerName() {
-        String name = serverDomains.myPublicIP() + "-" + yacyCore.speedKey  + "dpn" + serverSystem.infoKey() + (System.currentTimeMillis() & 99);
-        name = name.replace('.', '-');
-        name = name.replace('_', '-');
-        name = name.replace(':', '-');
-        return name;
     }
     
     /**
@@ -807,7 +786,7 @@ public class yacySeed implements Cloneable {
         
         // check hash
         if (this.hash == null) return "hash is null";
-        if (this.hash.length() != yacySeedDB.commonHashLength) return "wrong hash length (" + this.hash.length() + ")";
+        if (this.hash.length() != Word.commonHashLength) return "wrong hash length (" + this.hash.length() + ")";
 
         // name
         final String peerName = this.dna.get(yacySeed.NAME);

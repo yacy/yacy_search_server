@@ -52,7 +52,7 @@ import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyURL;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import org.xml.sax.SAXException;
@@ -147,7 +147,7 @@ public class sharedBlacklist_p {
                         reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
                         
                         // get List
-                        yacyURL u = new yacyURL(downloadURLOld, null);
+                        DigestURI u = new DigestURI(downloadURLOld, null);
 
                         otherBlacklist = FileUtils.strings(Client.wget(u.toString(), reqHeader, 1000));
                     } catch (final Exception e) {
@@ -165,7 +165,7 @@ public class sharedBlacklist_p {
                 prop.putHTML("page_source", downloadURL);
 
                 try {
-                    final yacyURL u = new yacyURL(downloadURL, null);
+                    final DigestURI u = new DigestURI(downloadURL, null);
                     final RequestHeader reqHeader = new RequestHeader();
                     reqHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.yacyUserAgent);
                     otherBlacklist = FileUtils.strings(Client.wget(u.toString(), reqHeader, 10000)); //get List

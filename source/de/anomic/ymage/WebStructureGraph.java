@@ -37,6 +37,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.MicroDate;
@@ -45,7 +46,6 @@ import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.document.Condenser;
 import de.anomic.document.Document;
-import de.anomic.yacy.yacyURL;
 
 public class WebStructureGraph {
 
@@ -94,11 +94,11 @@ public class WebStructureGraph {
     }
     
     public Integer[] /*(outlinksSame, outlinksOther)*/ generateCitationReference(final Document document, final Condenser condenser, final Date docDate) {
-        final yacyURL url = document.dc_source();
+        final DigestURI url = document.dc_source();
         
         // generate citation reference
-        final Map<yacyURL, String> hl = document.getHyperlinks();
-        final Iterator<yacyURL> it = hl.keySet().iterator();
+        final Map<DigestURI, String> hl = document.getHyperlinks();
+        final Iterator<DigestURI> it = hl.keySet().iterator();
         String nexturlhash;
         final StringBuilder cpg = new StringBuilder(12 * (hl.size() + 1) + 1);
         final StringBuilder cpl = new StringBuilder(12 * (hl.size() + 1) + 1);
@@ -353,7 +353,7 @@ public class WebStructureGraph {
         return null;
     }
     
-    private void learn(final yacyURL url, final StringBuilder reference /*string of b64(12digits)-hashes*/) {
+    private void learn(final DigestURI url, final StringBuilder reference /*string of b64(12digits)-hashes*/) {
         final String domhash = url.hash().substring(6);
 
         // parse the new reference string and join it with the stored references

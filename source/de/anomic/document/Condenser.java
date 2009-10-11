@@ -46,6 +46,9 @@ import java.util.Properties;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.util.SetTools;
@@ -53,8 +56,6 @@ import net.yacy.kelondro.util.SetTools;
 import de.anomic.document.language.Identificator;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.ImageEntry;
-import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
-import de.anomic.yacy.yacyURL;
 
 public final class Condenser {
 
@@ -122,7 +123,7 @@ public final class Condenser {
         this.languageIdentificator = new Identificator();
         
         
-        Map.Entry<yacyURL, String> entry;
+        Map.Entry<DigestURI, String> entry;
         if (indexText) {
             createCondensement(document.getText());        
             // the phrase counter:
@@ -173,7 +174,7 @@ public final class Condenser {
         if (indexMedia) {
             // add anchor descriptions: here, we also add the url components
             // audio
-            Iterator<Map.Entry<yacyURL, String>> i = document.getAudiolinks().entrySet().iterator();
+            Iterator<Map.Entry<DigestURI, String>> i = document.getAudiolinks().entrySet().iterator();
             while (i.hasNext()) {
                 entry = i.next();
                 insertTextToWords(entry.getKey().toNormalform(false, false), 99, flag_cat_hasaudio, RESULT_FLAGS, false);

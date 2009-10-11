@@ -36,10 +36,10 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.TreeMap;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.document.Document;
-import de.anomic.yacy.yacyURL;
 
 public class DCEntry extends TreeMap<String, String> {
     
@@ -58,7 +58,7 @@ public class DCEntry extends TreeMap<String, String> {
     }
     
     public DCEntry(
-            yacyURL url,
+            DigestURI url,
             Date date,
             String title,
             String author,
@@ -103,12 +103,12 @@ public class DCEntry extends TreeMap<String, String> {
         }
     }
     
-    public yacyURL getIdentifier() {
+    public DigestURI getIdentifier() {
         String u = this.get("url");
         if (u == null) u = this.get("dc:identifier");
         if (u == null) return null;
         try {
-            return new yacyURL(u, null);
+            return new DigestURI(u, null);
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return null;

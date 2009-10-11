@@ -29,7 +29,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.Set;
 
-import de.anomic.yacy.yacyURL;
+import net.yacy.kelondro.data.meta.DigestURI;
+
 
 /**
  * This interface defines a list of methods that needs to be implemented
@@ -53,7 +54,7 @@ public interface Idiom {
      *  
      * @throws ParserException if the content could not be parsed properly 
      */
-    public Document parse(yacyURL location, String mimeType, String charset, byte[] source)
+    public Document parse(DigestURI location, String mimeType, String charset, byte[] source)
     throws ParserException, InterruptedException;
     
     /**
@@ -67,7 +68,7 @@ public interface Idiom {
      *  
      * @throws ParserException if the content could not be parsed properly 
      */    
-    public Document parse(yacyURL location, String mimeType, String charset, File sourceFile)
+    public Document parse(DigestURI location, String mimeType, String charset, File sourceFile)
     throws ParserException, InterruptedException;
     
     /**
@@ -81,7 +82,7 @@ public interface Idiom {
      *  
      * @throws ParserException if the content could not be parsed properly 
      */    
-    public Document parse(yacyURL location, String mimeType, String charset, InputStream source) 
+    public Document parse(DigestURI location, String mimeType, String charset, InputStream source) 
     throws ParserException, InterruptedException;
             
     /**

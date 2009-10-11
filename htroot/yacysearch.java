@@ -33,11 +33,16 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
+import net.yacy.kelondro.util.ISO639;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.crawler.retrieval.LoaderDispatcher;
@@ -45,29 +50,24 @@ import de.anomic.data.DidYouMean;
 import de.anomic.data.LibraryProvider;
 import de.anomic.data.Location;
 import de.anomic.document.Condenser;
-import de.anomic.document.Word;
 import de.anomic.document.Document;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.SearchEvent;
 import de.anomic.search.SearchEventCache;
+import de.anomic.search.Segment;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.iso639;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
-import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.ProfilingGraph;
 
 public class yacysearch {
@@ -210,12 +210,12 @@ public class yacysearch {
         TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);
         if (trackerHandles == null) trackerHandles = new TreeSet<Long>();
         boolean block = false;
-        if (serverDomains.matchesList(client, sb.networkBlacklist)) {
+        if (Domains.matchesList(client, sb.networkBlacklist)) {
         	global = false;
             fetchSnippets = false;
             block = true;
             Log.logWarning("LOCAL_SEARCH", "ACCECC CONTROL: BLACKLISTED CLIENT FROM " + client + " gets no permission to search");
-        } else if (serverDomains.matchesList(client, sb.networkWhitelist)) {
+        } else if (Domains.matchesList(client, sb.networkWhitelist)) {
         	Log.logInfo("LOCAL_SEARCH", "ACCECC CONTROL: WHITELISTED CLIENT FROM " + client + " gets no search restrictions");
         } else if (global || fetchSnippets) {
             // in case that we do a global search or we want to fetch snippets, we check for DoS cases
@@ -312,7 +312,7 @@ public class yacysearch {
                 querystring = querystring.replace("site:" + domain, "");
                 while(domain.startsWith(".")) domain = domain.substring(1);
                 while(domain.endsWith(".")) domain = domain.substring(0, domain.length() - 1);
-                sitehash = yacyURL.domhash(domain);
+                sitehash = DigestURI.domhash(domain);
             }
             int authori = querystring.indexOf("author:");
         	String authorhash = null;
@@ -358,11 +358,11 @@ public class yacysearch {
             // if no one is given, use the user agent or the system language as default
             String language = (post == null) ? lr : post.get("lr", lr);
             if (language.startsWith("lang_")) language = language.substring(5);
-            if (!iso639.exists(language)) {
+            if (!ISO639.exists(language)) {
                 // find out language of the user by reading of the user-agent string
                 String agent = header.get(HeaderFramework.ACCEPT_LANGUAGE);
                 if (agent == null) agent = System.getProperty("user.language");
-                language = (agent == null) ? "en" : iso639.userAgentLanguageDetection(agent);
+                language = (agent == null) ? "en" : ISO639.userAgentLanguageDetection(agent);
                 if (language == null) language = "en";
             }
             
@@ -408,9 +408,9 @@ public class yacysearch {
                     return prop;
                 }
                 final String recommendHash = post.get("recommendref", ""); // urlhash
-                final URLMetadataRow urlentry = indexSegment.urlMetadata().load(recommendHash, null, 0);
+                final URIMetadataRow urlentry = indexSegment.urlMetadata().load(recommendHash, null, 0);
                 if (urlentry != null) {
-                    final URLMetadataRow.Components metadata = urlentry.metadata();
+                    final URIMetadataRow.Components metadata = urlentry.metadata();
                     Document document;
                     document = LoaderDispatcher.retrieveDocument(metadata.url(), true, 5000, true, false);
                     if (document != null) {
@@ -456,7 +456,7 @@ public class yacysearch {
                     true,
                     sitehash,
                     authorhash,
-                    yacyURL.TLD_any_zone_filter,
+                    DigestURI.TLD_any_zone_filter,
                     client,
                     authenticated);
             serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.INITIALIZATION, 0, 0), false);

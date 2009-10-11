@@ -1,15 +1,15 @@
 
 
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.workflow.WorkflowProcessor;
 import de.anomic.http.io.ByteCountInputStream;
 import de.anomic.http.io.ByteCountOutputStream;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.Segments;
+import de.anomic.search.Segment;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
-import de.anomic.server.serverProcessor;
 import de.anomic.server.serverSwitch;
 
 public class status_p {
@@ -40,7 +40,7 @@ public class status_p {
         prop.putNum("freeMemory", MemoryControl.free());
         prop.putNum("totalMemory", MemoryControl.total());
         prop.putNum("maxMemory", MemoryControl.maxMemory);
-        prop.putNum("processors", serverProcessor.availableCPU);
+        prop.putNum("processors", WorkflowProcessor.availableCPU);
 
 		// proxy traffic
 		prop.put("trafficIn", ByteCountInputStream.getGlobalCount());

@@ -30,7 +30,8 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import de.anomic.yacy.yacyURL;
+import net.yacy.kelondro.data.meta.DigestURI;
+
 
 public class URLLicense {
 
@@ -40,20 +41,20 @@ public class URLLicense {
     private static final long minCheck = 5000;
     
     private final Random random;
-    private final ConcurrentHashMap<String, yacyURL> permissions;
+    private final ConcurrentHashMap<String, DigestURI> permissions;
     private final ConcurrentLinkedQueue<String> aging;
     private long lastCheck;
     private int keylen;
     
     public URLLicense(final int keylen) {
-        this.permissions = new ConcurrentHashMap<String, yacyURL>();
+        this.permissions = new ConcurrentHashMap<String, DigestURI>();
         this.aging = new ConcurrentLinkedQueue<String>();
         this.lastCheck = System.currentTimeMillis();
         this.random = new Random(System.currentTimeMillis());
         this.keylen = keylen;
     }
     
-    public String aquireLicense(final yacyURL url) {
+    public String aquireLicense(final DigestURI url) {
         // generate license key
         String license = "";
         if (url == null) return license;
@@ -75,8 +76,8 @@ public class URLLicense {
         return license;
     }
     
-    public yacyURL releaseLicense(final String license) {
-        yacyURL url = null;
+    public DigestURI releaseLicense(final String license) {
+        DigestURI url = null;
         url = permissions.remove(license);
         return url;
     }

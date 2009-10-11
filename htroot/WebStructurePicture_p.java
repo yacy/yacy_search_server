@@ -31,13 +31,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.order.Base64Order;
 
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.WebStructureGraph;
 import de.anomic.ymage.ymageGraph;
 import de.anomic.ymage.ymageMatrix;
@@ -92,7 +92,7 @@ public class WebStructurePicture_p {
             // find start hash
             String hash = null;
             try {
-                hash = (new yacyURL("http://" + host, null)).hash().substring(6);
+                hash = (new DigestURI("http://" + host, null)).hash().substring(6);
             } catch (final MalformedURLException e) {e.printStackTrace();}
             //assert (sb.webStructure.outgoingReferences(hash) != null);
             

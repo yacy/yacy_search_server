@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -47,7 +48,6 @@ import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyURL;
 
 public class Supporter {
 
@@ -126,7 +126,7 @@ public class Supporter {
                 
                 url = row.getColString(0, null);
                 try {
-                    if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS ,new yacyURL(url, urlhash))) continue;
+                    if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS ,new DigestURI(url, urlhash))) continue;
                 } catch(final MalformedURLException e) {continue;}
                 title = row.getColString(1,"UTF-8");
                 description = row.getColString(2,"UTF-8");
@@ -242,13 +242,13 @@ public class Supporter {
             // add/subtract votes and write record
             if (entry != null) {
                 try {
-                    urlhash = (new yacyURL(url, null)).hash();
+                    urlhash = (new DigestURI(url, null)).hash();
                 } catch (final MalformedURLException e) {
                     urlhash = null;
                 }
                 if (urlhash == null)
                     try {
-                        urlhash = (new yacyURL("http://" + url, null)).hash();
+                        urlhash = (new DigestURI("http://" + url, null)).hash();
                     } catch (final MalformedURLException e) {
                         urlhash = null;
                     }

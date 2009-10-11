@@ -50,18 +50,18 @@ import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainerArray;
 import net.yacy.kelondro.util.MemoryControl;
 
-import de.anomic.kelondro.text.MetadataRepository;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.MetadataRepository.Export;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
-import de.anomic.yacy.yacyURL;
+import de.anomic.search.MetadataRepository;
+import de.anomic.search.Segment;
+import de.anomic.search.MetadataRepository.Export;
 
 public class URLAnalysis {
 
@@ -69,10 +69,10 @@ public class URLAnalysis {
      * processes to analyse URL lists
      */
 
-    public static yacyURL poison = null;
+    public static DigestURI poison = null;
     static {
         try {
-            poison = new yacyURL("http://poison.org/poison", null);
+            poison = new DigestURI("http://poison.org/poison", null);
         } catch (MalformedURLException e) {
             poison = null;
         }
@@ -80,17 +80,17 @@ public class URLAnalysis {
     
     public static class splitter extends Thread {
         
-        ArrayBlockingQueue<yacyURL> in;
+        ArrayBlockingQueue<DigestURI> in;
         ConcurrentHashMap<String, Integer> out;
 
-        public splitter(ArrayBlockingQueue<yacyURL> in, ConcurrentHashMap<String, Integer> out) {
+        public splitter(ArrayBlockingQueue<DigestURI> in, ConcurrentHashMap<String, Integer> out) {
             this.in = in;
             this.out = out;
         }
         
         public void run() {
             try {
-                yacyURL url;
+                DigestURI url;
                 Pattern p = Pattern.compile("~|\\(|\\)|\\+|-|@|:|%|\\.|;|_");
                 while (true) {
                     try {
@@ -148,7 +148,7 @@ public class URLAnalysis {
         long cleanuplimit = Math.max(50 * 1024 * 1024, MemoryControl.available() / 8);
 
         // start threads
-        ArrayBlockingQueue<yacyURL> in = new ArrayBlockingQueue<yacyURL>(1000);
+        ArrayBlockingQueue<DigestURI> in = new ArrayBlockingQueue<DigestURI>(1000);
         ConcurrentHashMap<String, Integer> out = new ConcurrentHashMap<String, Integer>();
         for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) new splitter(in, out).start();
         splitter spl = new splitter(in, out);
@@ -172,7 +172,7 @@ public class URLAnalysis {
                 line = line.trim();
                 if (line.length() > 0) {
                     try {
-                        yacyURL url = new yacyURL(line, null);
+                        DigestURI url = new DigestURI(line, null);
                         in.put(url);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -274,7 +274,7 @@ public class URLAnalysis {
                 line = line.trim();
                 if (line.length() > 0) {
                     try {
-                        yacyURL url = new yacyURL(line, null);
+                        DigestURI url = new DigestURI(line, null);
                         hosts.add(url.getHost());
                     } catch (MalformedURLException e) {
                         continue;
@@ -364,7 +364,7 @@ public class URLAnalysis {
                 line = line.trim();
                 if (line.length() > 0) {
                     try {
-                        yacyURL url = new yacyURL(line, null);
+                        DigestURI url = new DigestURI(line, null);
                         urls.add(url.toNormalform(true, true));
                     } catch (MalformedURLException e) {
                         continue;
@@ -412,9 +412,9 @@ public class URLAnalysis {
 
     public static int diffurlcol(String metadataPath, String statisticFile, String diffFile) throws IOException {
         System.out.println("INDEX DIFF URL-COL startup");
-        HandleMap idx = new HandleMap(URLMetadataRow.rowdef.primaryKeyLength, URLMetadataRow.rowdef.objectOrder, 4, new File(statisticFile), 0);
+        HandleMap idx = new HandleMap(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 4, new File(statisticFile), 0);
         MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
-        HandleSet hs = new HandleSet(URLMetadataRow.rowdef.primaryKeyLength, URLMetadataRow.rowdef.objectOrder, 0, 1000000);
+        HandleSet hs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0, 1000000);
         System.out.println("INDEX DIFF URL-COL loaded dump, starting diff");
         long start = System.currentTimeMillis();
         long update = start - 7000;
@@ -441,7 +441,7 @@ public class URLAnalysis {
         // format: 0=text, 1=html, 2=rss/xml
         System.out.println("URL EXPORT startup");
         MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
-        HandleSet hs = (diffFile == null) ? null : new HandleSet(URLMetadataRow.rowdef.primaryKeyLength, URLMetadataRow.rowdef.objectOrder, new File(diffFile), 0);
+        HandleSet hs = (diffFile == null) ? null : new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, new File(diffFile), 0);
         System.out.println("URL EXPORT loaded dump, starting export");
         Export e = mr.export(new File(export), ".*", hs, format, false);
         try {
@@ -456,7 +456,7 @@ public class URLAnalysis {
         System.out.println("URL DELETE startup");
         MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
         int mrSize = mr.size();
-        HandleSet hs = new HandleSet(URLMetadataRow.rowdef.primaryKeyLength, URLMetadataRow.rowdef.objectOrder, new File(diffFile), 0);
+        HandleSet hs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, new File(diffFile), 0);
         System.out.println("URL DELETE loaded dump, starting deletion of " + hs.size() + " entries from " + mrSize);
         for (byte[] refhash: hs) {
             mr.remove(new String(refhash));

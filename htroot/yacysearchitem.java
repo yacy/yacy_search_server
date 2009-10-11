@@ -30,6 +30,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.Formatter;
 
 import de.anomic.http.metadata.HeaderFramework;
@@ -49,7 +50,6 @@ import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.ProfilingGraph;
 
 
@@ -103,9 +103,9 @@ public class yacysearchitem {
 
             
             final int port=result.url().getPort();
-            yacyURL faviconURL = null;
+            DigestURI faviconURL = null;
             if (!result.url().isLocal()) try {
-                faviconURL = new yacyURL(result.url().getProtocol() + "://" + result.url().getHost() + ((port != -1) ? (":" + String.valueOf(port)) : "") + "/favicon.ico", null);
+                faviconURL = new DigestURI(result.url().getProtocol() + "://" + result.url().getHost() + ((port != -1) ? (":" + String.valueOf(port)) : "") + "/favicon.ico", null);
             } catch (final MalformedURLException e1) {
                 faviconURL = null;
             }
@@ -138,14 +138,14 @@ public class yacysearchitem {
             prop.put("content_nl", (item == 0) ? 0 : 1);
             
             final TreeSet<String>[] query = theQuery.queryWords();
-            yacyURL wordURL = null;
+            DigestURI wordURL = null;
             try {
                 prop.putHTML("content_words", URLEncoder.encode(query[0].toString(),"UTF-8"));
             } catch (final UnsupportedEncodingException e) {}
             prop.putHTML("content_former", theQuery.queryString);
-            prop.put("content_rankingprops", result.word().toPropertyForm() + ", domLengthEstimated=" + yacyURL.domLengthEstimation(result.hash()) +
-                    ((yacyURL.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
-                    (((wordURL = yacyURL.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
+            prop.put("content_rankingprops", result.word().toPropertyForm() + ", domLengthEstimated=" + DigestURI.domLengthEstimation(result.hash()) +
+                    ((DigestURI.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
+                    (((wordURL = DigestURI.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
             final TextSnippet snippet = result.textSnippet();
             final String desc = (snippet == null) ? "" : snippet.getLineMarked(theQuery.fullqueryHashes);
             prop.put("content_description", desc);

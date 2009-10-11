@@ -31,13 +31,13 @@ import java.util.Map;
 
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.table.Table;
+import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.Switchboard;
-import de.anomic.server.serverDomains;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -160,9 +160,9 @@ public class PerformanceMemory_p {
         prop.putNum("objectMissCacheTotalMem", totalmissmem / (1024 * 1024d));
         
         // other caching structures
-        long amount = serverDomains.nameCacheHitSize();
+        long amount = Domains.nameCacheHitSize();
         prop.putNum("namecache.hit", amount);
-        amount = serverDomains.nameCacheNoCachingListSize();
+        amount = Domains.nameCacheNoCachingListSize();
         prop.putNum("namecache.noCache", amount);
         amount = Switchboard.urlBlacklist.blacklistCacheSize();
         prop.putNum("blacklistcache.size", amount);

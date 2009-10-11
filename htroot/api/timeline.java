@@ -28,20 +28,20 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.ISO639;
 
-import de.anomic.document.Word;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.search.QueryParams;
+import de.anomic.search.Segment;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.iso639;
 import de.anomic.yacy.yacyCore;
 
 public final class timeline {
@@ -65,11 +65,11 @@ public final class timeline {
         final int     count  = Math.min((authenticated) ? 1000 : 10, post.getInt("maximumRecords", 1000)); // SRU syntax
         final int     maxdist= post.getInt("maxdist", Integer.MAX_VALUE);
         String  language = post.get("language", "");
-        if (!iso639.exists(language)) {
+        if (!ISO639.exists(language)) {
             // take language from the user agent
             String agent = header.get("User-Agent");
             if (agent == null) agent = System.getProperty("user.language");
-            language = (agent == null) ? "en" : iso639.userAgentLanguageDetection(agent);
+            language = (agent == null) ? "en" : ISO639.userAgentLanguageDetection(agent);
             if (language == null) language = "en";
         }
         final TreeSet<String>[] query = QueryParams.cleanQuery(querystring); // converts also umlaute

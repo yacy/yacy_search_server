@@ -26,11 +26,12 @@ import java.net.MalformedURLException;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.WebStructureGraph;
 
 public class webstructure {
@@ -43,10 +44,10 @@ public class webstructure {
         prop.put("out", 0);
         prop.put("in", 0);
         if (about != null) {
-            yacyURL url = null;
+            DigestURI url = null;
             if (about.length() > 6) {
                 try {
-                    url = new yacyURL(about, null);
+                    url = new DigestURI(about, null);
                     about = url.hash().substring(6);
                 } catch (MalformedURLException e) {
                     about = null;

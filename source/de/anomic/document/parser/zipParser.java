@@ -41,6 +41,7 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -51,7 +52,6 @@ import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.ImageEntry;
-import de.anomic.yacy.yacyURL;
 
 public class zipParser extends AbstractParser implements Idiom {
 
@@ -84,7 +84,7 @@ public class zipParser extends AbstractParser implements Idiom {
         return SUPPORTED_EXTENSIONS;
     }
     
-    public Document parse(final yacyURL location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
+    public Document parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         
         long docTextLength = 0;
         OutputStream docText = null;
@@ -102,7 +102,7 @@ public class zipParser extends AbstractParser implements Idiom {
             final StringBuilder docLongTitle = new StringBuilder();   
             final LinkedList<String> docSections = new LinkedList<String>();
             final StringBuilder docAbstrct = new StringBuilder();
-            final Map<yacyURL, String> docAnchors = new HashMap<yacyURL, String>();
+            final Map<DigestURI, String> docAnchors = new HashMap<DigestURI, String>();
             final HashMap<String, ImageEntry> docImages = new HashMap<String, ImageEntry>();
             
             // looping through the contained files
@@ -136,7 +136,7 @@ public class zipParser extends AbstractParser implements Idiom {
                     FileUtils.copy(zippedContent,subDocTempFile,entry.getSize());                    
                     
                     // parsing the zip file entry
-                    subDoc = Parser.parseSource(yacyURL.newURL(location,"#" + entryName),entryMime,null, subDocTempFile);
+                    subDoc = Parser.parseSource(DigestURI.newURL(location,"#" + entryName),entryMime,null, subDocTempFile);
                 } catch (final ParserException e) {
                     this.theLogger.logInfo("Unable to parse zip file entry '" + entryName + "'. " + e.getMessage());
                 } finally {

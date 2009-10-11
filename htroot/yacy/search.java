@@ -34,22 +34,24 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.SortStack;
+import net.yacy.kelondro.util.ISO639;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.Segments;
-import de.anomic.kelondro.text.referencePrototype.WordReference;
 import de.anomic.net.natLib;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.SearchEvent;
 import de.anomic.search.SearchEventCache;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.search.ResultEntry;
 import de.anomic.search.RankingProcess.NavigatorEntry;
@@ -58,11 +60,9 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
-import de.anomic.tools.iso639;
 import de.anomic.yacy.yacyCore;
 import de.anomic.yacy.yacyNetwork;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyURL;
 import de.anomic.ymage.ProfilingGraph;
 
 public final class search {
@@ -96,11 +96,11 @@ public final class search {
         String  sitehash = post.get("sitehash", ""); if (sitehash.length() == 0) sitehash = null;
         String  authorhash = post.get("authorhash", ""); if (authorhash.length() == 0) authorhash = null;
         String  language = post.get("language", "");
-        if (language == null || language.length() == 0 || !iso639.exists(language)) {
+        if (language == null || language.length() == 0 || !ISO639.exists(language)) {
             // take language from the user agent
             String agent = header.get("User-Agent");
             if (agent == null) agent = System.getProperty("user.language");
-            language = (agent == null) ? "en" : iso639.userAgentLanguageDetection(agent);
+            language = (agent == null) ? "en" : ISO639.userAgentLanguageDetection(agent);
             if (language == null) language = "en";
         }
         final int     partitions = post.getInt("partitions", 30);
@@ -210,7 +210,7 @@ public final class search {
                     false,
                     sitehash, 
                     authorhash,
-                    yacyURL.TLD_any_zone_filter,
+                    DigestURI.TLD_any_zone_filter,
                     client,
                     false);
             theQuery.domType = QueryParams.SEARCHDOM_LOCAL;
@@ -263,7 +263,7 @@ public final class search {
                     false,
                     sitehash,
                     authorhash,
-                    yacyURL.TLD_any_zone_filter,
+                    DigestURI.TLD_any_zone_filter,
                     client, 
                     false);
             theQuery.domType = QueryParams.SEARCHDOM_LOCAL;

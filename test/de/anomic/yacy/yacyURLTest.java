@@ -2,6 +2,8 @@ package de.anomic.yacy;
 
 import java.net.MalformedURLException;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import junit.framework.TestCase;
 
 public class yacyURLTest extends TestCase {
@@ -21,7 +23,7 @@ public class yacyURLTest extends TestCase {
 				new String[]{"/home/..test/../hallo/../","/home/"}
 		};		
 		
-		yacyURL urlObj = new yacyURL("http://yacy.net");
+		DigestURI urlObj = new DigestURI("http://yacy.net");
 		for (int i=0; i < testStrings.length; i++) {
 			// desired conversion result
 			System.out.print("testResolveBackpath: " + testStrings[i][0]);
@@ -51,7 +53,7 @@ public class yacyURLTest extends TestCase {
 			String shouldBe = testStrings[i][1];
 			
 			// conversion result
-			String resolvedURL = (new yacyURL(testStrings[i][0])).toString();
+			String resolvedURL = (new DigestURI(testStrings[i][0])).toString();
 			
 			// test if equal
 			assertEquals(shouldBe,resolvedURL);

@@ -30,18 +30,17 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.SetTools;
 
 import de.anomic.document.Condenser;
-import de.anomic.document.Word;
 import de.anomic.document.parser.html.AbstractScraper;
 import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacySeedDB;
-import de.anomic.yacy.yacyURL;
 
 public final class QueryParams {
     
@@ -120,7 +119,7 @@ public final class QueryParams {
         this.urlMask = ".*";
         this.targetlang = "en";
         this.domType = SEARCHDOM_LOCAL;
-        this.zonecode = yacyURL.TLD_any_zone_filter;
+        this.zonecode = DigestURI.TLD_any_zone_filter;
         this.domMaxTargets = 0;
         this.constraint = constraint;
         this.allofconstraint = false;
@@ -224,8 +223,8 @@ public final class QueryParams {
     public static TreeSet<byte[]> hashes2Set(final String query) {
         if (query == null) return new TreeSet<byte[]>(Base64Order.enhancedCoder);
         final TreeSet<byte[]> keyhashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
-        for (int i = 0; i < (query.length() / yacySeedDB.commonHashLength); i++) {
-            keyhashes.add(query.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength).getBytes());
+        for (int i = 0; i < (query.length() / Word.commonHashLength); i++) {
+            keyhashes.add(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes());
         }
         return keyhashes;
     }
@@ -233,19 +232,19 @@ public final class QueryParams {
     public static HashSet<String> hashes2StringSet(final String query) {
         if (query == null) return new HashSet<String>();
         final HashSet<String> keyhashes = new HashSet<String>();
-        for (int i = 0; i < (query.length() / yacySeedDB.commonHashLength); i++) {
-            keyhashes.add(query.substring(i * yacySeedDB.commonHashLength, (i + 1) * yacySeedDB.commonHashLength));
+        for (int i = 0; i < (query.length() / Word.commonHashLength); i++) {
+            keyhashes.add(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength));
         }
         return keyhashes;
     }
     
     public static String hashSet2hashString(final TreeSet<byte[]> hashes) {
-        final byte[] bb = new byte[hashes.size() * yacySeedDB.commonHashLength];
+        final byte[] bb = new byte[hashes.size() * Word.commonHashLength];
         int p = 0;
         for (byte[] b : hashes) {
-        	assert b.length == yacySeedDB.commonHashLength : "hash = " + new String(b);
-        	System.arraycopy(b, 0, bb, p, yacySeedDB.commonHashLength);
-        	p += yacySeedDB.commonHashLength;
+        	assert b.length == Word.commonHashLength : "hash = " + new String(b);
+        	System.arraycopy(b, 0, bb, p, Word.commonHashLength);
+        	p += Word.commonHashLength;
         }
         return new String(bb);
     }
@@ -253,7 +252,7 @@ public final class QueryParams {
     public static String anonymizedQueryHashes(final TreeSet<byte[]> hashes) {
         // create a more anonymized representation of a query hashes for logging
         final Iterator<byte[]> i = hashes.iterator();
-        final StringBuilder sb = new StringBuilder(hashes.size() * (yacySeedDB.commonHashLength + 2) + 2);
+        final StringBuilder sb = new StringBuilder(hashes.size() * (Word.commonHashLength + 2) + 2);
         sb.append("[");
         byte[] hash;
         if (i.hasNext()) {

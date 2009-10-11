@@ -25,17 +25,17 @@
 
 package de.anomic.crawler;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import de.anomic.data.SitemapParser;
 import de.anomic.search.Switchboard;
-import de.anomic.yacy.yacyURL;
 
 public class SitemapImporter extends AbstractImporter implements Importer {
 
 	private SitemapParser parser = null;
-	private yacyURL sitemapURL = null;
+	private DigestURI sitemapURL = null;
 	private final ImporterManager superviser;
 	
-	public SitemapImporter(final Switchboard sb, final ImporterManager importManager, final yacyURL sitemapURL, final CrawlProfile.entry profileEntry) throws ImporterException {
+	public SitemapImporter(final Switchboard sb, final ImporterManager importManager, final DigestURI sitemapURL, final CrawlProfile.entry profileEntry) throws ImporterException {
 		super("sitemap");
 		this.superviser = importManager;
         try {

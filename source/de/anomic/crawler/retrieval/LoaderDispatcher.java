@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.CrawlProfile;
@@ -45,10 +46,9 @@ import de.anomic.http.client.Cache;
 import de.anomic.http.metadata.HeaderFramework;
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.http.metadata.ResponseHeader;
-import de.anomic.kelondro.text.Segments;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
-import de.anomic.yacy.yacyURL;
 
 public final class LoaderDispatcher {
 
@@ -82,7 +82,7 @@ public final class LoaderDispatcher {
     }
     
     public Response load(
-            final yacyURL url,
+            final DigestURI url,
             final boolean forText,
             final boolean global
                     ) throws IOException {
@@ -90,7 +90,7 @@ public final class LoaderDispatcher {
     }
     
     public Response load(
-            final yacyURL url,
+            final DigestURI url,
             final boolean forText,
             final boolean global,
             int cacheStratgy
@@ -106,7 +106,7 @@ public final class LoaderDispatcher {
      * @return the request object
      */
     public Request request(
-            final yacyURL url,
+            final DigestURI url,
             final boolean forText,
             final boolean global
                     ) {
@@ -168,7 +168,7 @@ public final class LoaderDispatcher {
                 // in case that we want to return the cached content in the next step
                 final RequestHeader requestHeader = new RequestHeader();
                 requestHeader.put(HeaderFramework.USER_AGENT, HTTPLoader.crawlerUserAgent);
-                yacyURL refererURL = null;
+                DigestURI refererURL = null;
                 if (request.referrerhash() != null) refererURL = sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
                 if (refererURL != null) requestHeader.put(RequestHeader.REFERER, refererURL.toNormalform(true, true));
                 Response response = new Response(
@@ -258,7 +258,7 @@ public final class LoaderDispatcher {
      * </table>
      * @throws IOException 
      */
-    public Object[] getResource(final yacyURL url, final boolean fetchOnline, final int socketTimeout, final boolean forText, final boolean reindexing) throws IOException {
+    public Object[] getResource(final DigestURI url, final boolean fetchOnline, final int socketTimeout, final boolean forText, final boolean reindexing) throws IOException {
         // load the url as resource from the web
         long contentLength = -1;
             
@@ -302,7 +302,7 @@ public final class LoaderDispatcher {
      * @param global the domain of the search. If global == true then the content is re-indexed
      * @return the parsed document as {@link Document}
      */
-    public static Document retrieveDocument(final yacyURL url, final boolean fetchOnline, final int timeout, final boolean forText, final boolean global) {
+    public static Document retrieveDocument(final DigestURI url, final boolean fetchOnline, final int timeout, final boolean forText, final boolean global) {
 
         // load resource
         long resContentLength = 0;

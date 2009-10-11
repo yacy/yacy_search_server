@@ -36,6 +36,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -46,22 +51,17 @@ import de.anomic.data.AbstractBlacklist;
 import de.anomic.data.Blacklist;
 import de.anomic.data.listManager;
 import de.anomic.document.Condenser;
-import de.anomic.document.Word;
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
-import de.anomic.kelondro.text.referencePrototype.WordReference;
-import de.anomic.kelondro.text.referencePrototype.WordReferenceRow;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProcess;
 import de.anomic.search.SearchEventCache;
+import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeed;
-import de.anomic.yacy.yacyURL;
 import de.anomic.yacy.dht.PeerSelection;
 
 public class IndexControlRWIs_p {
@@ -237,10 +237,10 @@ public class IndexControlRWIs_p {
                 index = segment.termIndex().get(keyhash, null);
                 // built urlCache
                 final Iterator<WordReference> urlIter = index.entries();
-                final HashMap<String, URLMetadataRow> knownURLs = new HashMap<String, URLMetadataRow>();
+                final HashMap<String, URIMetadataRow> knownURLs = new HashMap<String, URIMetadataRow>();
                 final HashSet<String> unknownURLEntries = new HashSet<String>();
                 Reference iEntry;
-                URLMetadataRow lurl;
+                URIMetadataRow lurl;
                 while (urlIter.hasNext()) {
                     iEntry = urlIter.next();
                     lurl = segment.urlMetadata().load(iEntry.metadataHash(), null, 0);
@@ -304,10 +304,10 @@ public class IndexControlRWIs_p {
                     try {
                         final String[] supportedBlacklistTypes = env.getConfig("BlackLists.types", "").split(",");
                         pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
-                        yacyURL url;
+                        DigestURI url;
                         for (i = 0; i < urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final URLMetadataRow e = segment.urlMetadata().load(urlx[i], null, 0);
+                            final URIMetadataRow e = segment.urlMetadata().load(urlx[i], null, 0);
                             segment.urlMetadata().remove(urlx[i]);
                             if (e != null) {
                                 url = e.metadata().url();
@@ -332,10 +332,10 @@ public class IndexControlRWIs_p {
                     try {
                         final String[] supportedBlacklistTypes = AbstractBlacklist.BLACKLIST_TYPES_STRING.split(",");
                         pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
-                        yacyURL url;
+                        DigestURI url;
                         for (i = 0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final URLMetadataRow e = segment.urlMetadata().load(urlx[i], null, 0);
+                            final URIMetadataRow e = segment.urlMetadata().load(urlx[i], null, 0);
                             segment.urlMetadata().remove(urlx[i]);
                             if (e != null) {
                                 url = e.metadata().url();
@@ -384,8 +384,8 @@ public class IndexControlRWIs_p {
             prop.put("genUrlList_flags", (flags == null) ? "" : flags.exportB64());
             prop.put("genUrlList_lines", maxlines);
             int i = 0;
-            yacyURL url;
-            URLMetadataRow entry;
+            DigestURI url;
+            URIMetadataRow entry;
             String us;
             long rn = -1;
             while ((ranked.size() > 0) && ((entry = ranked.takeURL(false, 60000)) != null)) {
@@ -402,7 +402,7 @@ public class IndexControlRWIs_p {
                 prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlString", us);
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlStringShort", (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20,  40) + "...") : ((us.length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ranking", (entry.ranking() - rn));
-                prop.putNum("genUrlList_urlList_"+i+"_urlExists_domlength", yacyURL.domLengthEstimation(entry.hash()));
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_domlength", DigestURI.domLengthEstimation(entry.hash()));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ybr", RankingProcess.ybr(entry.hash()));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_tf", 1000.0 * entry.word().termFrequency());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_authority", (ranked.getOrder() == null) ? -1 : ranked.getOrder().authority(entry.hash()));
@@ -431,7 +431,7 @@ public class IndexControlRWIs_p {
                         ((entry.word().flags().get(WordReferenceRow.flag_app_dc_subject)) ? "appears in subject, " : "") +
                         ((entry.word().flags().get(WordReferenceRow.flag_app_dc_description)) ? "appears in description, " : "") +
                         ((entry.word().flags().get(WordReferenceRow.flag_app_emphasized)) ? "appears emphasized, " : "") +
-                        ((yacyURL.probablyRootURL(entry.word().metadataHash())) ? "probably root url" : "")
+                        ((DigestURI.probablyRootURL(entry.word().metadataHash())) ? "probably root url" : "")
                 );
                 if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, url)) {
                     prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxChecked", "1");

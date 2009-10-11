@@ -35,6 +35,9 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.ARC;
 import net.yacy.kelondro.index.ConcurrentARC;
 import net.yacy.kelondro.logging.Log;
@@ -45,14 +48,10 @@ import de.anomic.crawler.retrieval.Response;
 import de.anomic.document.Condenser;
 import de.anomic.document.Document;
 import de.anomic.document.ParserException;
-import de.anomic.document.Word;
 import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.client.Cache;
 import de.anomic.http.metadata.ResponseHeader;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.metadataPrototype.URLMetadataRow;
 import de.anomic.yacy.yacySearch;
-import de.anomic.yacy.yacyURL;
 
 public class TextSnippet {
 
@@ -71,14 +70,14 @@ public class TextSnippet {
     public static final int ERROR_NO_MATCH = 16;
     
     private static final ARC<String, String> snippetsCache = new ConcurrentARC<String, String>(maxCache, Math.max(10, Runtime.getRuntime().availableProcessors()));
-    private static final ARC<String, yacyURL> faviconCache = new ConcurrentARC<String, yacyURL>(maxCache, Math.max(10, Runtime.getRuntime().availableProcessors()));
+    private static final ARC<String, DigestURI> faviconCache = new ConcurrentARC<String, DigestURI>(maxCache, Math.max(10, Runtime.getRuntime().availableProcessors()));
     
-    private final yacyURL url;
+    private final DigestURI url;
     private String line;
     private final String error;
     private final int errorCode;
     private TreeSet<byte[]> remaingHashes;
-    private final yacyURL favicon;
+    private final DigestURI favicon;
     
     private static Log             log = null;
     private static Switchboard     sb = null;
@@ -92,7 +91,7 @@ public class TextSnippet {
         sb = switchboard;
     }
     
-    public static boolean existsInCache(final yacyURL url, final TreeSet<byte[]> queryhashes) {
+    public static boolean existsInCache(final DigestURI url, final TreeSet<byte[]> queryhashes) {
         final String hashes = yacySearch.set2string(queryhashes);
         return retrieveFromCache(hashes, url.hash()) != null;
     }
@@ -153,11 +152,11 @@ public class TextSnippet {
      */
     private final static Pattern p01 = Pattern.compile("(.*?)(\\<b\\>.+?\\</b\\>)(.*)"); // marked words are in <b>-tags
     
-    public TextSnippet(final yacyURL url, final String line, final int errorCode, final TreeSet<byte[]> remaingHashes, final String errortext) {
+    public TextSnippet(final DigestURI url, final String line, final int errorCode, final TreeSet<byte[]> remaingHashes, final String errortext) {
         this(url,line,errorCode,remaingHashes,errortext,null);
     }
     
-    public TextSnippet(final yacyURL url, final String line, final int errorCode, final TreeSet<byte[]> remaingHashes, final String errortext, final yacyURL favicon) {
+    public TextSnippet(final DigestURI url, final String line, final int errorCode, final TreeSet<byte[]> remaingHashes, final String errortext, final DigestURI favicon) {
         this.url = url;
         this.line = line;
         this.errorCode = errorCode;
@@ -165,10 +164,10 @@ public class TextSnippet {
         this.remaingHashes = remaingHashes;
         this.favicon = favicon;
     }
-    public yacyURL getUrl() {
+    public DigestURI getUrl() {
         return this.url;
     }
-    public yacyURL getFavicon() {
+    public DigestURI getFavicon() {
         return this.favicon;
     }
     public boolean exists() {
@@ -302,9 +301,9 @@ public class TextSnippet {
     }
     
     @SuppressWarnings("unchecked")
-    public static TextSnippet retrieveTextSnippet(final URLMetadataRow.Components comp, final TreeSet<byte[]> queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int maxDocLen, final boolean reindexing) {
+    public static TextSnippet retrieveTextSnippet(final URIMetadataRow.Components comp, final TreeSet<byte[]> queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int maxDocLen, final boolean reindexing) {
         // heise = "0OQUNU3JSs05"
-        final yacyURL url = comp.url();
+        final DigestURI url = comp.url();
         if (queryhashes.size() == 0) {
             //System.out.println("found no queryhashes for URL retrieve " + url);
             return new TextSnippet(url, null, ERROR_NO_HASH_GIVEN, queryhashes, "no query hashes given");
@@ -400,7 +399,7 @@ public class TextSnippet {
         /* ===========================================================================
          * COMPUTE SNIPPET
          * =========================================================================== */    
-        final yacyURL resFavicon = document.getFavicon();
+        final DigestURI resFavicon = document.getFavicon();
         if (resFavicon != null) faviconCache.put(url.hash(), resFavicon);
         // we have found a parseable non-empty file: use the lines
 

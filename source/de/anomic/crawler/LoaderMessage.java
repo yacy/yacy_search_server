@@ -23,14 +23,14 @@
 
 package de.anomic.crawler;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.server.serverSemaphore;
-import de.anomic.yacy.yacyURL;
 
 public final class LoaderMessage {
     public final int crawlingPriority;
     
-    public final yacyURL url;
+    public final DigestURI url;
     public final String name;
     public final String referer;
     public final String initiator;
@@ -46,7 +46,7 @@ public final class LoaderMessage {
     
     // loadParallel(URL url, String referer, String initiator, int depth, plasmaCrawlProfile.entry profile) {
     public LoaderMessage(
-            final yacyURL url,
+            final DigestURI url,
             final String name,                       // the name of the url, from anchor tag <a>name</a>
             final String referer, 
             final String initiator, 

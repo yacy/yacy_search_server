@@ -1,11 +1,12 @@
 
 import java.net.MalformedURLException;
 
+import net.yacy.kelondro.data.meta.DigestURI;
+
 import de.anomic.http.metadata.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyURL;
 
 public class delete_p {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
@@ -22,7 +23,7 @@ public class delete_p {
         			return prop;
     		} 
         	try {
-                if( post.containsKey("url") && switchboard.bookmarksDB.removeBookmark((new yacyURL(post.get("url", "nourl"), null)).hash())) {
+                if( post.containsKey("url") && switchboard.bookmarksDB.removeBookmark((new DigestURI(post.get("url", "nourl"), null)).hash())) {
                 	prop.put("result", "1");
                 }else if(post.containsKey("urlhash") && switchboard.bookmarksDB.removeBookmark(post.get("urlhash", "nohash"))){
                 	prop.put("result", "1");

@@ -31,18 +31,18 @@ import java.util.Map;
 
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
+import net.yacy.kelondro.workflow.BusyThread;
+import net.yacy.kelondro.workflow.WorkflowThread;
 
 import de.anomic.http.metadata.RequestHeader;
-import de.anomic.kelondro.text.Segment;
-import de.anomic.kelondro.text.Segments;
+import de.anomic.search.Segment;
+import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
-import de.anomic.server.serverBusyThread;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverSystem;
-import de.anomic.server.serverThread;
 
 public class PerformanceQueues_p {
     /**
@@ -95,7 +95,7 @@ public class PerformanceQueues_p {
         final Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : FileUtils.loadMap(defaultSettingsFile);
         Iterator<String> threads = sb.threadNames();
         String threadName;
-        serverBusyThread thread;
+        BusyThread thread;
         
         final boolean xml = (header.get("PATH")).endsWith(".xml");
         prop.setLocalized(!xml);
@@ -263,7 +263,7 @@ public class PerformanceQueues_p {
             /* 
              * configuring the http pool 
              */
-            final serverThread httpd = sb.getThread("10_httpd");
+            final WorkflowThread httpd = sb.getThread("10_httpd");
             try {
                 maxBusy = Integer.parseInt(post.get("httpd Session Pool_maxActive","8"));
             } catch (final NumberFormatException e) {
@@ -320,7 +320,7 @@ public class PerformanceQueues_p {
         prop.put("pool_0_maxActive", sb.getConfigLong("crawler.MaxActiveThreads", 0));
         prop.put("pool_0_numActive",sb.crawlQueues.size());
         
-        final serverThread httpd = sb.getThread("10_httpd");
+        final WorkflowThread httpd = sb.getThread("10_httpd");
         prop.put("pool_1_name", "httpd Session Pool");
         prop.put("pool_1_maxActive", ((serverCore)httpd).getMaxSessionCount());
         prop.put("pool_1_numActive", ((serverCore)httpd).getJobCount());

@@ -24,22 +24,22 @@
 
 package de.anomic.document.parser.html;
 
-import de.anomic.yacy.yacyURL;
+import net.yacy.kelondro.data.meta.DigestURI;
 
 public class ImageEntry implements Comparable<ImageEntry> {
 
-    private final yacyURL url;
+    private final DigestURI url;
     private final String alt;
     private final int width, height;
 
-    public ImageEntry(final yacyURL url, final String alt, final int width, final int height) {
+    public ImageEntry(final DigestURI url, final String alt, final int width, final int height) {
         this.url = url;
         this.alt = alt;
         this.width = width;
         this.height = height;
     }
 
-    public yacyURL url() {
+    public DigestURI url() {
         return this.url;
     }
     
