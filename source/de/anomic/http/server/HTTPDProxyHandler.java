@@ -72,6 +72,7 @@ import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.io.ByteCountOutputStream;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.Domains;
@@ -88,12 +89,6 @@ import de.anomic.http.client.MultiOutputStream;
 import de.anomic.http.client.Client;
 import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.client.Cache;
-import de.anomic.http.io.ChunkedOutputStream;
-import de.anomic.http.io.ByteCountOutputStream;
-import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.http.metadata.RequestHeader;
-import de.anomic.http.metadata.ResponseContainer;
-import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
@@ -283,7 +278,7 @@ public final class HTTPDProxyHandler {
      * @param conProp a collection of properties about the connection, like URL
      * @param requestHeader The header lines of the connection from the request
      * @param respond the OutputStream to the client
-     * @see de.anomic.http.httpdHandler#doGet(java.util.Properties, de.anomic.http.metadata.HeaderFramework, java.io.OutputStream)
+     * @see de.anomic.http.httpdHandler#doGet(java.util.Properties, de.anomic.http.server.HeaderFramework, java.io.OutputStream)
      */
     public static void doGet(final Properties conProp, final RequestHeader requestHeader, final OutputStream respond) {
         ByteCountOutputStream countedRespond = null;

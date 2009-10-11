@@ -60,9 +60,9 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.MapTools;
 
 import de.anomic.net.natLib;
-import de.anomic.server.serverCodings;
 import de.anomic.tools.bitfield;
 import de.anomic.tools.crypt;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
@@ -563,17 +563,17 @@ public class yacySeed implements Cloneable {
     }
 
     public void setPeerTags(final Set<String> keys) {
-        dna.put(PEERTAGS, serverCodings.set2string(keys, "|", false));
+        dna.put(PEERTAGS, MapTools.set2string(keys, "|", false));
     }
 
     public Set<String> getPeerTags() {
-        return serverCodings.string2set(get(PEERTAGS, "*"), "|");
+        return MapTools.string2set(get(PEERTAGS, "*"), "|");
     }
 
     public boolean matchPeerTags(final TreeSet<byte[]> searchHashes) {
         final String peertags = get(PEERTAGS, "");
         if (peertags.equals("*")) return true;
-        final Set<String> tags = serverCodings.string2set(peertags, "|");
+        final Set<String> tags = MapTools.string2set(peertags, "|");
         final Iterator<String> i = tags.iterator();
         while (i.hasNext()) {
         	if (searchHashes.contains(Word.word2hash(i.next()))) return true;
@@ -765,7 +765,7 @@ public class yacySeed implements Cloneable {
         if (seed == null) { return null; }
         
         // extract hash
-        final HashMap<String, String> dna = serverCodings.string2map(seed, ",");
+        final HashMap<String, String> dna = MapTools.string2map(seed, ",");
         final String hash = dna.remove(yacySeed.HASH);
         if (hash == null) return null;
         final yacySeed resultSeed = new yacySeed(hash, dna);
@@ -836,7 +836,7 @@ public class yacySeed implements Cloneable {
         HashMap<String, String> copymap = new HashMap<String, String>();
         copymap.putAll(this.dna);
         copymap.put(yacySeed.HASH, this.hash);                // set hash into seed code structure
-        return serverCodings.map2string(copymap, ",", true); // generate string representation
+        return MapTools.map2string(copymap, ",", true); // generate string representation
     }
 
     public final String genSeedStr(final String key) {

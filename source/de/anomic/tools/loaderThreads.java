@@ -28,8 +28,8 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.client.Client;
 import de.anomic.http.client.RemoteProxyConfig;
-import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.HeaderFramework;
+import de.anomic.http.server.RequestHeader;
 
 public class loaderThreads {
     

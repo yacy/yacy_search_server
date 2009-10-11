@@ -21,7 +21,7 @@
 // Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  US
 package de.anomic.server;
 
-import de.anomic.http.metadata.ResponseHeader;
+import de.anomic.http.server.ResponseHeader;
 
 public class servletProperties extends serverObjects {
 

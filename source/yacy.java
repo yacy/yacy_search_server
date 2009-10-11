@@ -64,9 +64,9 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
 import de.anomic.data.translator;
 import de.anomic.http.client.Client;
-import de.anomic.http.metadata.RequestHeader;
-import de.anomic.http.metadata.ResponseContainer;
 import de.anomic.http.server.HTTPDemon;
+import de.anomic.http.server.RequestHeader;
+import de.anomic.http.server.ResponseContainer;
 import de.anomic.search.MetadataRepository;
 import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;

@@ -50,7 +50,7 @@ import de.anomic.document.Document;
 import de.anomic.document.ParserException;
 import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.client.Cache;
-import de.anomic.http.metadata.ResponseHeader;
+import de.anomic.http.server.ResponseHeader;
 import de.anomic.yacy.yacySearch;
 
 public class TextSnippet {

@@ -43,11 +43,11 @@ import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
+import net.yacy.kelondro.util.MapTools;
 
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.search.QueryParams;
 import de.anomic.server.serverCharBuffer;
-import de.anomic.server.serverCodings;
 import de.anomic.tools.crypt;
 
 public class URIMetadataRow implements URIMetadata {
@@ -295,7 +295,7 @@ public class URIMetadataRow implements URIMetadata {
             return null;
         }
         try {
-            return new URIMetadataRow(serverCodings.s2p(propStr.substring(1, propStr.length() - 1)));
+            return new URIMetadataRow(MapTools.s2p(propStr.substring(1, propStr.length() - 1)));
         } catch (final kelondroException e) {
                 // wrong format
                 return null;

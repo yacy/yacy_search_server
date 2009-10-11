@@ -63,10 +63,10 @@ import org.apache.commons.httpclient.protocol.Protocol;
 import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 
 import de.anomic.crawler.Latency;
-import de.anomic.http.metadata.RequestHeader;
-import de.anomic.http.metadata.ResponseContainer;
-import de.anomic.http.metadata.ResponseHeader;
-import de.anomic.http.metadata.HeaderFramework;
+import de.anomic.http.server.HeaderFramework;
+import de.anomic.http.server.RequestHeader;
+import de.anomic.http.server.ResponseContainer;
+import de.anomic.http.server.ResponseHeader;
 
 /**
  * HttpClient implementation which uses Jakarta Commons HttpClient 3.x {@link http://hc.apache.org/httpclient-3.x/}

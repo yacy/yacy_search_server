@@ -22,7 +22,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.http.io;
+package de.anomic.http.server;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -32,7 +32,6 @@ import java.io.InputStreamReader;
 
 import net.yacy.kelondro.util.ByteBuffer;
 
-import de.anomic.http.metadata.RequestHeader;
 
 /**
  * Some parts of this class code was copied from <a href="http://www.devdaily.com/java/jwarehouse/commons-httpclient-2.0/src/java/org/apache/commons/httpclient/ChunkedInputStream.shtml">Apache httpclient Project.</a>

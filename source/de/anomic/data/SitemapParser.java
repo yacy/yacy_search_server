@@ -36,6 +36,7 @@ import javax.xml.parsers.SAXParserFactory;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.io.ByteCountInputStream;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 
@@ -47,10 +48,9 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.client.Client;
-import de.anomic.http.io.ByteCountInputStream;
-import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.http.metadata.RequestHeader;
-import de.anomic.http.metadata.ResponseContainer;
+import de.anomic.http.server.HeaderFramework;
+import de.anomic.http.server.RequestHeader;
+import de.anomic.http.server.ResponseContainer;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 

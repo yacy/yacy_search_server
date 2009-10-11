@@ -33,7 +33,7 @@
    instance of this class.
 */
 
-package de.anomic.http.metadata;
+package de.anomic.http.server;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -53,7 +53,6 @@ import java.util.Vector;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
 
-import de.anomic.http.server.HTTPDemon;
 
 
 public class HeaderFramework extends TreeMap<String, String> implements Map<String, String> {

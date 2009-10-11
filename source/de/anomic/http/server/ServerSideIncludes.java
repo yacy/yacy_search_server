@@ -33,9 +33,6 @@ import java.util.Properties;
 
 import net.yacy.kelondro.util.ByteBuffer;
 
-import de.anomic.http.io.ChunkedOutputStream;
-import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.http.metadata.RequestHeader;
 
 public class ServerSideIncludes {
 

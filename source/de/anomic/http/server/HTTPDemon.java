@@ -59,6 +59,7 @@ import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.MapTools;
 
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileItemFactory;
@@ -72,11 +73,7 @@ import org.apache.commons.httpclient.ContentLengthInputStream;
 
 import de.anomic.data.userDB;
 import de.anomic.document.parser.html.CharacterCoding;
-import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.http.metadata.RequestHeader;
-import de.anomic.http.metadata.ResponseHeader;
 import de.anomic.search.Switchboard;
-import de.anomic.server.serverCodings;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverHandler;
 import de.anomic.server.serverObjects;
@@ -95,7 +92,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     /**
      * <p><code>public static final String <strong>ADMIN_ACCOUNT_B64MD5</strong> = "adminAccountBase64MD5"</code></p>
      * <p>Name of the setting holding the authentification hash for the static <code>admin</code>-account. It is calculated
-     * by first encoding <code>username:password</code> as Base64 and hashing it using {@link serverCodings#encodeMD5Hex(String)}.</p>
+     * by first encoding <code>username:password</code> as Base64 and hashing it using {@link MapTools#encodeMD5Hex(String)}.</p>
      */
     public static final String ADMIN_ACCOUNT_B64MD5 = "adminAccountBase64MD5";
     

@@ -54,7 +54,7 @@ import de.anomic.data.Blacklist;
 import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.client.Client;
 import de.anomic.http.client.RemoteProxyConfig;
-import de.anomic.http.metadata.ResponseContainer;
+import de.anomic.http.server.ResponseContainer;
 
 public final class MetadataRepository implements Iterable<byte[]> {
 

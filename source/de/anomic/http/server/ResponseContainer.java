@@ -24,19 +24,19 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 
-package de.anomic.http.metadata;
+package de.anomic.http.server;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.kelondro.io.ByteCountInputStream;
 import net.yacy.kelondro.util.FileUtils;
 
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpMethod;
 
 import de.anomic.http.client.ConnectionInfo;
-import de.anomic.http.io.ByteCountInputStream;
 
 /**
  * container for http-response data

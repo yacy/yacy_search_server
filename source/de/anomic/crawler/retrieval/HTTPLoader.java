@@ -35,9 +35,9 @@ import de.anomic.crawler.Latency;
 import de.anomic.data.Blacklist;
 import de.anomic.document.Parser;
 import de.anomic.http.client.Client;
-import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.http.metadata.RequestHeader;
-import de.anomic.http.metadata.ResponseContainer;
+import de.anomic.http.server.HeaderFramework;
+import de.anomic.http.server.RequestHeader;
+import de.anomic.http.server.ResponseContainer;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 

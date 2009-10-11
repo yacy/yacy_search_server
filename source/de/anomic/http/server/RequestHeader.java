@@ -21,7 +21,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.http.metadata;
+package de.anomic.http.server;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -33,7 +33,6 @@ import java.util.Properties;
 
 import net.yacy.kelondro.util.DateFormatter;
 
-import de.anomic.http.server.HTTPDemon;
 import de.anomic.server.serverCore;
 
 public class RequestHeader extends HeaderFramework {

@@ -48,9 +48,9 @@ import net.yacy.kelondro.util.kelondroException;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.client.Client;
-import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.http.metadata.RequestHeader;
-import de.anomic.http.metadata.ResponseContainer;
+import de.anomic.http.server.HeaderFramework;
+import de.anomic.http.server.RequestHeader;
+import de.anomic.http.server.ResponseContainer;
 
 public class RobotsTxt {
     

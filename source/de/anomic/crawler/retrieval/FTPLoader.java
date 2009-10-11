@@ -38,9 +38,9 @@ import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.crawler.Latency;
 import de.anomic.document.Parser;
-import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.http.metadata.RequestHeader;
-import de.anomic.http.metadata.ResponseHeader;
+import de.anomic.http.server.HeaderFramework;
+import de.anomic.http.server.RequestHeader;
+import de.anomic.http.server.ResponseHeader;
 import de.anomic.net.ftpc;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;

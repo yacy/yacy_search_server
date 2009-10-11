@@ -44,7 +44,7 @@ import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.RequestHeader;
 
 public final class userDB {
     

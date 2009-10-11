@@ -47,8 +47,8 @@ import de.anomic.document.Idiom;
 import de.anomic.document.ParserException;
 import de.anomic.document.Document;
 import de.anomic.http.client.Client;
-import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.HeaderFramework;
+import de.anomic.http.server.RequestHeader;
 
 /**
  * Vcard specification: http://www.imc.org/pdi/vcard-21.txt

@@ -29,10 +29,10 @@ import java.util.HashMap;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.MapTools;
 
 import de.anomic.content.RSSMessage;
 import de.anomic.document.parser.xml.RSSFeed;
-import de.anomic.server.serverCodings;
 
 public class yacyPeerActions {
    
@@ -231,8 +231,8 @@ public class yacyPeerActions {
         final yacyNewsRecord record = yacyNewsRecord.newRecord(decodedString);
         if (record != null) {
             //System.out.println("### news arrival from peer " + peer.getName() + ", decoded=" + decodedString + ", record=" + recordString + ", news=" + record.toString());
-            final String cre1 = serverCodings.string2map(decodedString, ",").get("cre");
-            final String cre2 = serverCodings.string2map(record.toString(), ",").get("cre");
+            final String cre1 = MapTools.string2map(decodedString, ",").get("cre");
+            final String cre2 = MapTools.string2map(record.toString(), ",").get("cre");
             if ((cre1 == null) || (cre2 == null) || (!(cre1.equals(cre2)))) {
                 System.out.println("### ERROR - cre are not equal: cre1=" + cre1 + ", cre2=" + cre2);
                 return;

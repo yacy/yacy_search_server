@@ -56,8 +56,8 @@ import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
+import net.yacy.kelondro.util.MapTools;
 
-import de.anomic.server.serverCodings;
 
 public class yacyNewsDB {
 
@@ -148,7 +148,7 @@ public class yacyNewsDB {
             b.getColString(1, "UTF-8"),
             (b.empty(2)) ? null : DateFormatter.parseShortSecond(b.getColString(2, null), DateFormatter.UTCDiffString()),
             (int) b.getColLong(3),
-            serverCodings.string2map(b.getColString(4, "UTF-8"), ",")
+            MapTools.string2map(b.getColString(4, "UTF-8"), ",")
         );
     }
 

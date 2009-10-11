@@ -51,7 +51,7 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
-import de.anomic.http.metadata.ResponseHeader;
+import de.anomic.http.server.ResponseHeader;
 
 public final class Cache {
     

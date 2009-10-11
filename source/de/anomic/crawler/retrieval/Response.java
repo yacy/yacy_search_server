@@ -34,9 +34,9 @@ import net.yacy.kelondro.util.DateFormatter;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.document.Classification;
 import de.anomic.document.Parser;
-import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.http.metadata.RequestHeader;
-import de.anomic.http.metadata.ResponseHeader;
+import de.anomic.http.server.HeaderFramework;
+import de.anomic.http.server.RequestHeader;
+import de.anomic.http.server.ResponseHeader;
 import de.anomic.search.SwitchboardConstants;
 
 public class Response {

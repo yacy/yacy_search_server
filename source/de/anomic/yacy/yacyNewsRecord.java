@@ -55,8 +55,8 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.MapTools;
 
-import de.anomic.server.serverCodings;
 
 public class yacyNewsRecord {
 
@@ -130,7 +130,7 @@ public class yacyNewsRecord {
     }
     
     public yacyNewsRecord(final String newsString) {
-        this.attributes = serverCodings.string2map(newsString, ",");
+        this.attributes = MapTools.string2map(newsString, ",");
         if (attributes.toString().length() > attributesMaxLength) throw new IllegalArgumentException("attributes length (" + attributes.toString().length() + ") exceeds maximum (" + attributesMaxLength + ")");
         this.category = (attributes.containsKey("cat")) ? attributes.get("cat") : "";
         if (category.length() > categoryStringLength) throw new IllegalArgumentException("category length (" + category.length() + ") exceeds maximum (" + categoryStringLength + ")");

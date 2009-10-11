@@ -54,8 +54,8 @@ import de.anomic.document.Document;
 import de.anomic.document.parser.xml.ODContentHandler;
 import de.anomic.document.parser.xml.ODMetaHandler;
 import de.anomic.http.client.Client;
-import de.anomic.http.metadata.HeaderFramework;
-import de.anomic.http.metadata.RequestHeader;
+import de.anomic.http.server.HeaderFramework;
+import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverCharBuffer;
 
 public class odtParser extends AbstractParser implements Idiom {

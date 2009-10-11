@@ -23,7 +23,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.server;
+package net.yacy.kelondro.util;
 
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
@@ -36,7 +36,7 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
-public final class serverCodings {
+public final class MapTools {
 
     public static Properties s2p(final String s) {
         final Properties p = new Properties();

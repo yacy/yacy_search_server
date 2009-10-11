@@ -51,7 +51,7 @@ import de.anomic.document.parser.html.ContentScraper;
 import de.anomic.document.parser.html.ImageEntry;
 import de.anomic.http.client.Cache;
 import de.anomic.http.client.Client;
-import de.anomic.http.metadata.ResponseHeader;
+import de.anomic.http.server.ResponseHeader;
 import de.anomic.server.serverCachedFileOutputStream;
 import de.anomic.ymage.WebStructureGraph;
 
