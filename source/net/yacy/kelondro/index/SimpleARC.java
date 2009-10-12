@@ -37,14 +37,14 @@ import java.util.Map;
  * at the same size.
  */
 
-public class SimpleARC<K, V> implements ARC<K, V> {
+public final class SimpleARC<K, V> implements ARC<K, V> {
 
     public    final static boolean accessOrder = false; // if false, then a insertion-order is used
     
-    protected int cacheSize;
-    private   Map<K, V> levelA, levelB;
+    protected final int cacheSize;
+    private   final Map<K, V> levelA, levelB;
     
-    public SimpleARC(int cacheSize) {
+    public SimpleARC(final int cacheSize) {
         this.cacheSize = cacheSize / 2;
         this.levelA = new LinkedHashMap<K, V>(cacheSize, 0.1f, accessOrder) {
             private static final long serialVersionUID = 1L;
@@ -65,7 +65,7 @@ public class SimpleARC<K, V> implements ARC<K, V> {
      * @param s
      * @param v
      */
-    public synchronized void put(K s, V v) {
+    public final synchronized void put(K s, V v) {
         if (this.levelB.containsKey(s)) {
         	this.levelB.put(s, v);
             assert (this.levelB.size() <= cacheSize); // the cache should shrink automatically
@@ -80,7 +80,7 @@ public class SimpleARC<K, V> implements ARC<K, V> {
      * @param s
      * @return the value
      */
-    public synchronized V get(K s) {
+    public final synchronized V get(K s) {
         V v = this.levelB.get(s);
         if (v != null) return v;
         v = this.levelA.remove(s);
@@ -97,7 +97,7 @@ public class SimpleARC<K, V> implements ARC<K, V> {
      * @param s
      * @return
      */
-    public synchronized boolean containsKey(K s) {
+    public final synchronized boolean containsKey(K s) {
         if (this.levelB.containsKey(s)) return true;
         return this.levelA.containsKey(s);
     }
@@ -107,7 +107,7 @@ public class SimpleARC<K, V> implements ARC<K, V> {
      * @param s
      * @return the old value
      */
-    public synchronized V remove(K s) {
+    public final synchronized V remove(K s) {
         V r = this.levelB.remove(s);
         if (r != null) return r;
         return this.levelA.remove(s);
@@ -116,7 +116,7 @@ public class SimpleARC<K, V> implements ARC<K, V> {
     /**
      * clear the cache
      */
-    public synchronized void clear() {
+    public final synchronized void clear() {
         this.levelA.clear();
         this.levelB.clear();
     }

@@ -62,7 +62,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         assert rowdef.objectOrder != null;
     }
     
-    public static RowSet importRowSet(byte[] b, final Row rowdef) {
+    public final static RowSet importRowSet(byte[] b, final Row rowdef) {
     	assert b.length >= exportOverheadSize : "b.length = " + b.length;
     	if (b.length < exportOverheadSize) return new RowSet(rowdef, 0);
         final int size = (int) NaturalOrder.decodeLong(b, 0, 4);
@@ -82,18 +82,18 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
 		super.reset();
 	}
    
-    public synchronized boolean has(final byte[] key) {
+    public final synchronized boolean has(final byte[] key) {
         final int index = find(key, 0, key.length);
         return index >= 0;
     }
     
-    public synchronized Row.Entry get(final byte[] key) {
+    public final synchronized Row.Entry get(final byte[] key) {
         final int index = find(key, 0, key.length);
         if (index < 0) return null;
         return get(index, true);
     }
     
-    public synchronized void put(final Row.Entry entry) {
+    public final synchronized void put(final Row.Entry entry) {
         assert (entry != null);
         assert (entry.getPrimaryKeyBytes() != null);
         // when reaching a specific amount of un-sorted entries, re-sort all
@@ -110,7 +110,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         }
     }
 
-    public synchronized Row.Entry replace(final Row.Entry entry) {
+    public final synchronized Row.Entry replace(final Row.Entry entry) {
         assert (entry != null);
         assert (entry.getPrimaryKeyBytes() != null);
         int index = -1;
@@ -131,7 +131,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return oldentry;
     }
 
-    public synchronized long inc(byte[] key, int col, long add, Row.Entry initrow) {
+    public final synchronized long inc(byte[] key, int col, long add, Row.Entry initrow) {
         final int index = find(key, 0, key.length);
         if (index >= 0) {
             // the entry existed before
@@ -150,7 +150,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         }
     }
 
-    private Row.Entry remove(final byte[] a, final int start, final int length) {
+    private final Row.Entry remove(final byte[] a, final int start, final int length) {
         final int index = find(a, start, length);
         if (index < 0) {
             return null;
@@ -179,7 +179,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return entry;
     }
 
-    private int find(final byte[] a, final int astart, final int alength) {
+    private final int find(final byte[] a, final int astart, final int alength) {
         // returns the chunknumber; -1 if not found
         
         if (rowdef.objectOrder == null) return iterativeSearch(a, astart, alength, 0, this.chunkcount);
@@ -206,7 +206,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         }        
     }
     
-    private int iterativeSearch(final byte[] key, final int astart, final int alength, final int leftBorder, final int rightBound) {
+    private final int iterativeSearch(final byte[] key, final int astart, final int alength, final int leftBorder, final int rightBound) {
         // returns the chunknumber        
         for (int i = leftBorder; i < rightBound; i++) {
             if (match(key, astart, alength, i)) return i;
@@ -214,7 +214,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return -1;
     }
     
-    private int binarySearch(final byte[] key, final int astart, final int alength) {
+    private final int binarySearch(final byte[] key, final int astart, final int alength) {
         // returns the exact position of the key if the key exists,
         // or -1 if the key does not exist
         assert (rowdef.objectOrder != null);
@@ -231,7 +231,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return -1;
     }
 
-    protected int binaryPosition(final byte[] key, final int astart, final int alength) {
+    protected final int binaryPosition(final byte[] key, final int astart, final int alength) {
         // returns the exact position of the key if the key exists,
         // or a position of an entry that is greater than the key if the
         // key does not exist
@@ -249,16 +249,16 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return l;
     }
     
-    public synchronized Iterator<byte[]> keys() {
+    public final synchronized Iterator<byte[]> keys() {
         sort();
         return super.keys(true);
     }
     
-    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
+    public final synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
         return new keyIterator(up, firstKey);
     }
     
-    public class keyIterator implements CloneableIterator<byte[]> {
+    public final class keyIterator implements CloneableIterator<byte[]> {
 
         private final boolean up;
         private final byte[] first;
@@ -279,11 +279,11 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
             }
         }
         
-		public keyIterator clone(final Object second) {
+		public final keyIterator clone(final Object second) {
             return new keyIterator(up, (byte[]) second);
         }
         
-        public boolean hasNext() {
+        public final boolean hasNext() {
         	if (p < 0) return false;
         	if (p >= size()) return false;
             if (up) {
@@ -293,32 +293,32 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
             }
         }
 
-        public byte[] next() {
+        public final byte[] next() {
             final byte[] key = getKey(p);
             if (up) p++; else p--;
             return key;
         }
         
-        public void remove() {
+        public final void remove() {
             throw new UnsupportedOperationException();
         }
     }
     
-    public synchronized Iterator<Row.Entry> iterator() {
+    public final synchronized Iterator<Row.Entry> iterator() {
         // iterates kelondroRow.Entry - type entries
         sort();
         return super.iterator();
     }
     
-    public synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) {
+    public final synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) {
         return new rowIterator(up, firstKey);
     }
     
-    public synchronized CloneableIterator<Row.Entry> rows() {
+    public final synchronized CloneableIterator<Row.Entry> rows() {
         return new rowIterator(true, null);
     }
     
-    public class rowIterator implements CloneableIterator<Row.Entry> {
+    public final class rowIterator implements CloneableIterator<Row.Entry> {
 
         private final boolean up;
         private final byte[] first;
@@ -339,11 +339,11 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
             }
         }
         
-		public rowIterator clone(final Object second) {
+		public final rowIterator clone(final Object second) {
             return new rowIterator(up, (byte[]) second);
         }
         
-        public boolean hasNext() {
+        public final boolean hasNext() {
         	if (p < 0) return false;
         	if (p >= size()) return false;
             if (up) {
@@ -353,13 +353,13 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
             }
         }
 
-        public Row.Entry next() {
+        public final Row.Entry next() {
             final Row.Entry entry = get(p, true);
             if (up) p++; else p--;
             return entry;
         }
         
-        public void remove() {
+        public final void remove() {
             throw new UnsupportedOperationException();
         }
     }
@@ -372,7 +372,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
      * @param c
      * @return
      */
-    public RowSet merge(RowSet c) {
+    public final RowSet merge(RowSet c) {
         assert c != null;
         /*
         if (this.isSorted() && this.size() >= c.size()) {
@@ -400,7 +400,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
      * @param c
      * @return
      */
-    protected static RowSet mergeEnum(RowCollection c0, RowCollection c1) {
+    protected final static RowSet mergeEnum(RowCollection c0, RowCollection c1) {
         assert c0.rowdef == c1.rowdef : c0.rowdef.toString() + " != " + c1.rowdef.toString();
         RowSet r = new RowSet(c0.rowdef, c0.size() + c1.size());
         try {

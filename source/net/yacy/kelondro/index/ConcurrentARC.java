@@ -34,11 +34,10 @@ package net.yacy.kelondro.index;
  * at the same size.
  */
 
-public class ConcurrentARC<K, V> implements ARC<K, V> {
+public final class ConcurrentARC<K, V> implements ARC<K, V> {
 
-    protected int cacheSize;
     private int mask;
-    private ARC<K, V> arc[];
+    private final ARC<K, V> arc[];
     
     @SuppressWarnings("unchecked")
 	public ConcurrentARC(final int cacheSize, int partitions) {
@@ -54,7 +53,7 @@ public class ConcurrentARC<K, V> implements ARC<K, V> {
      * @param s
      * @param v
      */
-    public void put(K s, V v) {
+    public final void put(K s, V v) {
     	this.arc[s.hashCode() & mask].put(s, v);
     }
     
@@ -63,7 +62,7 @@ public class ConcurrentARC<K, V> implements ARC<K, V> {
      * @param s
      * @return the value
      */
-    public V get(K s) {
+    public final V get(K s) {
     	return this.arc[s.hashCode() & mask].get(s);
     }
     
@@ -72,7 +71,7 @@ public class ConcurrentARC<K, V> implements ARC<K, V> {
      * @param s
      * @return
      */
-    public boolean containsKey(K s) {
+    public final boolean containsKey(K s) {
     	return this.arc[s.hashCode() & mask].containsKey(s);
     }
     
@@ -81,14 +80,14 @@ public class ConcurrentARC<K, V> implements ARC<K, V> {
      * @param s
      * @return the old value
      */
-    public V remove(K s) {
+    public final V remove(K s) {
     	return this.arc[s.hashCode() & mask].remove(s);
     }
     
     /**
      * clear the cache
      */
-    public void clear() {
+    public final void clear() {
     	for (ARC<K, V> a: this.arc) a.clear();
     }
 }

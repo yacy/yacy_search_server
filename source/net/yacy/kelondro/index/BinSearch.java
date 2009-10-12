@@ -30,7 +30,7 @@ import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.NaturalOrder;
 
 
-public class BinSearch {
+public final class BinSearch {
     
     private final byte[] chunks;
     private final int    chunksize;
@@ -43,11 +43,11 @@ public class BinSearch {
         this.count = chunks.length / chunksize;
     }
     
-    public boolean contains(final byte[] t) {
+    public final boolean contains(final byte[] t) {
         return contains(t, 0, this.count);
     }
 
-    private synchronized boolean contains(final byte[] t, final int beginPos, final int endPos) {
+    private final synchronized boolean contains(final byte[] t, final int beginPos, final int endPos) {
         // the endPos is exclusive, beginPos is inclusive
         // this method is synchronized to make the use of the buffer possible
         assert t.length == this.chunksize;
@@ -61,11 +61,11 @@ public class BinSearch {
         return false;
     }
     
-    public int size() {
+    public final int size() {
         return count;
     }
     
-    public byte[] get(final int element) {
+    public final byte[] get(final int element) {
         final byte[] a = new byte[chunksize];
         System.arraycopy(this.chunks, element * this.chunksize, a, 0, chunksize);
         return a;

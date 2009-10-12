@@ -57,12 +57,12 @@ public class RowCollection implements Iterable<Row.Entry> {
     public static final ExecutorService sortingthreadexecutor = (availableCPU > 1) ? Executors.newCachedThreadPool(new NamePrefixThreadFactory("sorting")) : null;
     public static final ExecutorService partitionthreadexecutor = (availableCPU > 1) ? Executors.newCachedThreadPool(new NamePrefixThreadFactory("partition")) : null;
     
-    protected byte[] chunkcache;
-    protected int    chunkcount;
-    protected long   lastTimeWrote;    
-    public Row       rowdef;
-    protected int    sortBound;
-
+    public    final Row    rowdef;
+    protected       byte[] chunkcache;
+    protected       int    chunkcount;
+    protected       int    sortBound;
+    protected       long   lastTimeWrote;
+    
     private static final int exp_chunkcount  = 0;
     private static final int exp_last_read   = 1;
     private static final int exp_last_wrote  = 2;

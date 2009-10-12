@@ -32,7 +32,7 @@ import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.StackIterator;
 
 
-public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
+public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
 
     private final int      objectCount;
     private final Row      rowdef;
@@ -47,15 +47,15 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         this.objectCount = objectCount / arraySize;
     }
     
-    private int indexFor(byte[] key) {
+    private final int indexFor(byte[] key) {
         return (int) (this.rowdef.objectOrder.cardinal(key) % ((long) array.length));
     }
     
-    private int indexFor(Entry row) {
+    private final int indexFor(Entry row) {
         return (int) (this.rowdef.objectOrder.cardinal(row.bytes(), 0, row.getPrimaryKeyLength()) % ((long) array.length));
     }
     
-    private RowSet accessArray(int i) {
+    private final RowSet accessArray(int i) {
         RowSet r = this.array[i];
         if (r == null) synchronized (this.array) {
             r = new RowSet(this.rowdef, this.objectCount);
@@ -64,17 +64,17 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return r;
     }
     
-    public void addUnique(Entry row) {
+    public final void addUnique(Entry row) {
         int i = indexFor(row);
         if (i < 0) return;
         accessArray(i).addUnique(row);
     }
 
-    public void addUnique(List<Entry> rows) {
+    public final void addUnique(List<Entry> rows) {
         for (Entry row: rows) addUnique(row);
     }
 
-    public void clear() {
+    public final void clear() {
         synchronized (this.array) {
             for (int i = 0; i < this.array.length; i++) {
                 if (this.array[i] != null) this.array[i].clear();
@@ -83,20 +83,20 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         }
     }
 
-    public void close() {
+    public final void close() {
         clear();
     }
 
-    public void deleteOnExit() {
+    public final void deleteOnExit() {
         // no nothing here
     }
 
-    public String filename() {
+    public final String filename() {
         // we don't have a file name
         return null;
     }
 
-    public Entry get(byte[] key) {
+    public final Entry get(byte[] key) {
         int i = indexFor(key);
         if (i < 0) return null;
         RowSet r = this.array[i];
@@ -104,7 +104,7 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return r.get(key);
     }
 
-    public boolean has(byte[] key) {
+    public final boolean has(byte[] key) {
         int i = indexFor(key);
         if (i < 0) return false;
         RowSet r = this.array[i];
@@ -112,7 +112,7 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return r.has(key);
     }
 
-    public CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) {
+    public final CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) {
         synchronized (this.array) {
             Collection<CloneableIterator<byte[]>> col = new ArrayList<CloneableIterator<byte[]>>();
             for (int i = 0; i < this.array.length; i++) {
@@ -125,19 +125,19 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         }            
     }
 
-    public void put(Entry row) {
+    public final void put(Entry row) {
         int i = indexFor(row);
         if (i < 0) return;
         accessArray(i).put(row);
     }
 
-    public Entry remove(byte[] key) {
+    public final Entry remove(byte[] key) {
         int i = indexFor(key);
         if (i < 0) return null;
         return accessArray(i).remove(key);
     }
 
-    public ArrayList<RowCollection> removeDoubles() {
+    public final ArrayList<RowCollection> removeDoubles() {
         ArrayList<RowCollection> col = new ArrayList<RowCollection>();
         synchronized (this.array) {
             for (int i = 0; i < this.array.length; i++) {
@@ -150,7 +150,7 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return col;
     }
 
-    public Entry removeOne() {
+    public final Entry removeOne() {
         synchronized (this.array) {
             for (int i = 0; i < this.array.length; i++) {
                 if (this.array[i] != null) {
@@ -163,17 +163,17 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return null;
     }
 
-    public Entry replace(Entry row) {
+    public final Entry replace(Entry row) {
         int i = indexFor(row);
         if (i < 0) return null;
         return accessArray(i).replace(row);
     }
 
-    public Row row() {
+    public final Row row() {
         return this.rowdef;
     }
 
-    public CloneableIterator<Entry> rows(boolean up, byte[] firstKey) {
+    public final CloneableIterator<Entry> rows(boolean up, byte[] firstKey) {
         synchronized (this.array) {
             Collection<CloneableIterator<Entry>> col = new ArrayList<CloneableIterator<Entry>>();
             for (int i = 0; i < this.array.length; i++) {
@@ -186,11 +186,11 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         }
     }
 
-    public CloneableIterator<Entry> rows() {
+    public final CloneableIterator<Entry> rows() {
         return rows(true, null);
     }
 
-    public int size() {
+    public final int size() {
         int c = 0;
         synchronized (this.array) {
             for (int i = 0; i < this.array.length; i++) {
@@ -202,11 +202,11 @@ public class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return c;
     }
 
-    public Iterator<Entry> iterator() {
+    public final Iterator<Entry> iterator() {
         return this.rows(true, null);
     }
 
-    public long inc(byte[] key, int col, long add, Entry initrow) {
+    public final long inc(byte[] key, int col, long add, Entry initrow) {
         int i = indexFor(key);
         if (i < 0) return -1;
         return accessArray(i).inc(key, col, add, initrow);

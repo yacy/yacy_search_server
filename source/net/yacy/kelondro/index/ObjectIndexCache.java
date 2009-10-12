@@ -34,7 +34,7 @@ import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.StackIterator;
 
 
-public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
+public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
     
     private final Row rowdef;
     private RowSet index0;
@@ -53,13 +53,13 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
 		reset(0);
 	}
     
-	public synchronized void reset(final int initialspace) {
+	public final synchronized void reset(final int initialspace) {
 	    this.index0 = null; // first flush RAM to make room
 	    this.index0 = new RowSet(rowdef, initialspace);
         this.index1 = null; // to show that this is the initialization phase
 	}
     
-    public Row row() {
+    public final Row row() {
         return index0.row();
     }
     
@@ -73,7 +73,7 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
         }
     }
     
-    public synchronized byte[] smallestKey() {
+    public final synchronized byte[] smallestKey() {
         byte[] b0 = index0.smallestKey();
         if (b0 == null) return null;
         if (index1 == null) return b0;
@@ -82,7 +82,7 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
         return b1;
     }
     
-    public synchronized byte[] largestKey() {
+    public final synchronized byte[] largestKey() {
         byte[] b0 = index0.largestKey();
         if (b0 == null) return null;
         if (index1 == null) return b0;
@@ -91,7 +91,7 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
         return b1;
     }
     
-    public synchronized Row.Entry get(final byte[] key) {
+    public final synchronized Row.Entry get(final byte[] key) {
         assert (key != null);
         finishInitialization();
         assert index0.isSorted();
@@ -100,7 +100,7 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
         return index1.get(key);
     }
 
-	public synchronized boolean has(final byte[] key) {
+	public final synchronized boolean has(final byte[] key) {
 		assert (key != null);
         finishInitialization();
         assert index0.isSorted();
@@ -108,7 +108,7 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
         return index1.has(key);
 	}
     
-	public synchronized Row.Entry replace(final Row.Entry entry) {
+	public final synchronized Row.Entry replace(final Row.Entry entry) {
         assert (entry != null);
         finishInitialization();
         // if the new entry is within the initialization part, just overwrite it
@@ -122,7 +122,7 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
         return index1.replace(entry);
     }
    
-	public synchronized void put(final Row.Entry entry) {
+	public final synchronized void put(final Row.Entry entry) {
         assert (entry != null);
         if (entry == null) return;
         finishInitialization();
@@ -137,7 +137,7 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
         index1.put(entry);
     }
    
-    public synchronized void addUnique(final Row.Entry entry) {
+    public final synchronized void addUnique(final Row.Entry entry) {
     	assert (entry != null);
     	if (entry == null) return;
         if (index1 == null) {
@@ -149,12 +149,12 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
         index1.addUnique(entry);
     }
 
-	public void addUnique(final List<Entry> rows) {
+	public final void addUnique(final List<Entry> rows) {
 		final Iterator<Entry> i = rows.iterator();
 		while (i.hasNext()) addUnique(i.next());
 	}
 	
-	public synchronized long inc(final byte[] key, int col, long add, Row.Entry initrow) {
+	public final synchronized long inc(final byte[] key, int col, long add, Row.Entry initrow) {
         assert (key != null);
         finishInitialization();
         assert index0.isSorted();
@@ -163,7 +163,7 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
         return index1.inc(key, col, add, initrow);
     }    
     
-    public synchronized ArrayList<RowCollection> removeDoubles() {
+    public final synchronized ArrayList<RowCollection> removeDoubles() {
 	    // finish initialization phase explicitely
         index0.sort();
 	    if (index1 == null) {
@@ -175,7 +175,7 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
         return d0;
 	}
 	
-    public synchronized Row.Entry remove(final byte[] key) {
+    public final synchronized Row.Entry remove(final byte[] key) {
         finishInitialization();
         // if the new entry is within the initialization part, just delete it
         final Row.Entry indexentry = index0.remove(key);
@@ -189,7 +189,7 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
         return removed;
     }
 
-    public synchronized Row.Entry removeOne() {
+    public final synchronized Row.Entry removeOne() {
         if ((index1 != null) && (index1.size() != 0)) {
             return index1.removeOne();
         }
@@ -199,7 +199,7 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
         return null;
     }
     
-    public synchronized int size() {
+    public final synchronized int size() {
         if ((index0 != null) && (index1 == null)) {
             return index0.size();
         }
@@ -210,7 +210,7 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
         return index0.size() + index1.size();
     }
     
-    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
+    public final synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
         // returns the key-iterator of the underlying kelondroIndex
         if (index1 == null) {
             // finish initialization phase
@@ -239,7 +239,7 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
                 true);
     }
 
-    public synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) {
+    public final synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) {
         // returns the row-iterator of the underlying kelondroIndex
         if (index1 == null) {
             // finish initialization phase
@@ -269,11 +269,11 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
                 true);
     }
     
-    public Iterator<Entry> iterator() {
+    public final Iterator<Entry> iterator() {
         return rows();
     }
     
-    public synchronized CloneableIterator<Row.Entry> rows() {
+    public final synchronized CloneableIterator<Row.Entry> rows() {
         // returns the row-iterator of the underlying kelondroIndex
         if (index1 == null) {
             // finish initialization phase
@@ -294,16 +294,16 @@ public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
         return new StackIterator<Row.Entry>(index0.rows(), index1.rows());
     }
     
-    public synchronized void close() {
+    public final synchronized void close() {
         if (index0 != null) index0.close();
         if (index1 != null) index1.close();
     }
 
-	public String filename() {
+	public final String filename() {
 		return null; // this does not have a file name
 	}
 	
-	public void deleteOnExit() {
+	public final void deleteOnExit() {
         // do nothing, there is no file
     }
 

@@ -38,7 +38,7 @@ import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 
 
-public class HandleSet implements Iterable<byte[]> {
+public final class HandleSet implements Iterable<byte[]> {
     
     private final Row rowdef;
     private ObjectIndex index;
@@ -77,7 +77,7 @@ public class HandleSet implements Iterable<byte[]> {
      * @return the number of written entries
      * @throws IOException
      */
-    public int dump(File file) throws IOException {
+    public final int dump(File file) throws IOException {
         // we must use an iterator from the combined index, because we need the entries sorted
         // otherwise we could just write the byte[] from the in kelondroRowSet which would make
         // everything much faster, but this is not an option here.
@@ -93,20 +93,20 @@ public class HandleSet implements Iterable<byte[]> {
         return c;
     }
     
-    public Row row() {
+    public final Row row() {
         return index.row();
     }
     
-    public void clear() throws IOException {
+    public final void clear() throws IOException {
         this.index.clear();
     }
     
-    public synchronized boolean has(final byte[] key) {
+    public final synchronized boolean has(final byte[] key) {
         assert (key != null);
         return index.has(key);
     }
     
-    public synchronized int put(final byte[] key) throws IOException {
+    public final synchronized int put(final byte[] key) throws IOException {
         assert (key != null);
         final Row.Entry newentry = index.row().newEntry();
         newentry.setCol(0, key);
@@ -115,31 +115,31 @@ public class HandleSet implements Iterable<byte[]> {
         return (int) oldentry.getColLong(1);
     }
     
-    public synchronized void putUnique(final byte[] key) throws IOException {
+    public final synchronized void putUnique(final byte[] key) throws IOException {
         assert (key != null);
         final Row.Entry newentry = this.rowdef.newEntry();
         newentry.setCol(0, key);
         index.addUnique(newentry);
     }
     
-    public synchronized int remove(final byte[] key) throws IOException {
+    public final synchronized int remove(final byte[] key) throws IOException {
         assert (key != null);
         final Row.Entry indexentry = index.remove(key);
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
     }
 
-    public synchronized int removeone() throws IOException {
+    public final synchronized int removeone() throws IOException {
         final Row.Entry indexentry = index.removeOne();
         if (indexentry == null) return -1;
         return (int) indexentry.getColLong(1);
     }
     
-    public synchronized int size() {
+    public final synchronized int size() {
         return index.size();
     }
     
-    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
+    public final synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
         try {
             return index.keys(up, firstKey);
         } catch (IOException e) {
@@ -148,11 +148,11 @@ public class HandleSet implements Iterable<byte[]> {
         }
     }
     
-    public Iterator<byte[]> iterator() {
+    public final Iterator<byte[]> iterator() {
         return keys(true, null);
     }
     
-    public synchronized void close() {
+    public final synchronized void close() {
         index.close();
         index = null;
     }

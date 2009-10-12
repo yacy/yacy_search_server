@@ -41,7 +41,7 @@ import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.util.MemoryControl;
 
 
-public class Cache implements ObjectIndex, Iterable<Row.Entry> {
+public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
 
     // this is a combined read cache and write buffer
     // we maintain four tables:
@@ -91,15 +91,15 @@ public class Cache implements ObjectIndex, Iterable<Row.Entry> {
         return index.row().objectsize;
     }
     
-    public int writeBufferSize() {
+    public final int writeBufferSize() {
         return 0;
     }
     
-    public static long getMemStopGrow() {
+    public final static long getMemStopGrow() {
         return memStopGrow ;
     }
     
-    public static long getMemStartShrink() {
+    public final static long getMemStartShrink() {
         return memStartShrink ;
     }
     
@@ -148,7 +148,7 @@ public class Cache implements ObjectIndex, Iterable<Row.Entry> {
      * checks for space in the miss cache
      * @return true if it is allowed to write into this cache
      */
-    private boolean checkMissSpace() {
+    private final boolean checkMissSpace() {
         // returns true if it is allowed to write into this cache
         if (readMissCache == null) return false;
         long available = MemoryControl.available();
@@ -163,7 +163,7 @@ public class Cache implements ObjectIndex, Iterable<Row.Entry> {
      * checks for space in the hit cache
      * @return true if it is allowed to write into this cache
      */
-    private boolean checkHitSpace() {
+    private final boolean checkHitSpace() {
         // returns true if it is allowed to write into this cache
         if (readHitCache == null) return false;
         long available = MemoryControl.available();
@@ -174,18 +174,18 @@ public class Cache implements ObjectIndex, Iterable<Row.Entry> {
         return (available - 2 * 1024 * 1024 > readHitCache.memoryNeededForGrow());
     }
     
-    public synchronized void clearCache() {
+    public final synchronized void clearCache() {
         if (readMissCache != null) readMissCache.clear();
         if (readHitCache != null) readHitCache.clear();
     }
     
-    public synchronized void close() {
+    public final synchronized void close() {
         index.close();
         readHitCache = null;
         readMissCache = null;
     }
 
-    public synchronized boolean has(final byte[] key) {
+    public final synchronized boolean has(final byte[] key) {
         // first look into the miss cache
         if (readMissCache != null) {
             if (readMissCache.get(key) == null) {
@@ -209,7 +209,7 @@ public class Cache implements ObjectIndex, Iterable<Row.Entry> {
         return index.has(key);
     }
     
-    public synchronized Row.Entry get(final byte[] key) throws IOException {
+    public final synchronized Row.Entry get(final byte[] key) throws IOException {
         // first look into the miss cache
         if (readMissCache != null) {
             if (readMissCache.get(key) == null) {
@@ -250,7 +250,7 @@ public class Cache implements ObjectIndex, Iterable<Row.Entry> {
         return entry;
     }
 
-    public synchronized void put(final Row.Entry row) throws IOException {
+    public final synchronized void put(final Row.Entry row) throws IOException {
         assert (row != null);
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
@@ -280,7 +280,7 @@ public class Cache implements ObjectIndex, Iterable<Row.Entry> {
         }
     }
     
-    public synchronized Row.Entry replace(final Row.Entry row) throws IOException {
+    public final synchronized Row.Entry replace(final Row.Entry row) throws IOException {
         assert (row != null);
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
@@ -313,7 +313,7 @@ public class Cache implements ObjectIndex, Iterable<Row.Entry> {
         return entry;
     }
 
-    public synchronized void addUnique(final Row.Entry row) throws IOException {
+    public final synchronized void addUnique(final Row.Entry row) throws IOException {
         assert (row != null);
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
@@ -342,7 +342,7 @@ public class Cache implements ObjectIndex, Iterable<Row.Entry> {
         }
     }
 
-    public synchronized void addUnique(final Row.Entry row, final Date entryDate) throws IOException {
+    public final synchronized void addUnique(final Row.Entry row, final Date entryDate) throws IOException {
         if (entryDate == null) {
             addUnique(row);
             return;
@@ -368,17 +368,17 @@ public class Cache implements ObjectIndex, Iterable<Row.Entry> {
         }
     }
     
-    public synchronized void addUnique(final List<Row.Entry> rows) throws IOException {
+    public final synchronized void addUnique(final List<Row.Entry> rows) throws IOException {
         final Iterator<Row.Entry> i = rows.iterator();
         while (i.hasNext()) addUnique(i.next());
     }
 
-    public synchronized ArrayList<RowCollection> removeDoubles() throws IOException {
+    public final synchronized ArrayList<RowCollection> removeDoubles() throws IOException {
         return index.removeDoubles();
         // todo: remove reported entries from the cache!!!
     }
     
-    public synchronized Row.Entry remove(final byte[] key) throws IOException {
+    public final synchronized Row.Entry remove(final byte[] key) throws IOException {
         checkMissSpace();
         
         // add entry to miss-cache
@@ -407,7 +407,7 @@ public class Cache implements ObjectIndex, Iterable<Row.Entry> {
         return index.remove(key);
     }
 
-    public synchronized Row.Entry removeOne() throws IOException {
+    public final synchronized Row.Entry removeOne() throws IOException {
         
         checkMissSpace();
         
@@ -425,19 +425,19 @@ public class Cache implements ObjectIndex, Iterable<Row.Entry> {
         return entry;
     }
 
-    public synchronized Row row() {
+    public final synchronized Row row() {
         return index.row();
     }
 
-    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
+    public final synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         return index.keys(up, firstKey);
     }
 
-    public synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
+    public final synchronized CloneableIterator<Row.Entry> rows(final boolean up, final byte[] firstKey) throws IOException {
         return index.rows(up, firstKey);
     }
 
-    public Iterator<Entry> iterator() {
+    public final Iterator<Entry> iterator() {
         try {
             return rows();
         } catch (IOException e) {
@@ -445,24 +445,24 @@ public class Cache implements ObjectIndex, Iterable<Row.Entry> {
         }
     }
     
-    public synchronized CloneableIterator<Row.Entry> rows() throws IOException {
+    public final synchronized CloneableIterator<Row.Entry> rows() throws IOException {
         return index.rows();
     }
 
-    public int size() {
+    public final int size() {
         return index.size();
     }
 
-    public String filename() {
+    public final String filename() {
         return index.filename();
     }
 
-    public void clear() throws IOException {
+    public final void clear() throws IOException {
         this.index.clear();
         init();
     }
 
-    public void deleteOnExit() {
+    public final void deleteOnExit() {
         this.index.deleteOnExit();
     }
 

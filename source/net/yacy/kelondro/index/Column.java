@@ -29,7 +29,7 @@ package net.yacy.kelondro.index;
 
 import net.yacy.kelondro.util.kelondroException;
 
-public class Column {
+public final class Column {
 
     public static final int celltype_undefined  = 0;
     public static final int celltype_boolean    = 1;
@@ -192,7 +192,7 @@ public class Column {
         }
     }
 
-    public String toString() {
+    public final String toString() {
         final StringBuilder s = new StringBuilder();
         switch (celltype) {
         case celltype_undefined:
@@ -245,7 +245,7 @@ public class Column {
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
-	public int hashCode() {
+	public final int hashCode() {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + celltype;
@@ -260,7 +260,7 @@ public class Column {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
+	public final boolean equals(Object obj) {
 		if (this == obj)
 			return true;
 		if (obj == null)

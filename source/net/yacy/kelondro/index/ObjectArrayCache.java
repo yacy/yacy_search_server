@@ -32,7 +32,7 @@ import java.util.Random;
 import net.yacy.kelondro.order.NaturalOrder;
 
 
-public class ObjectArrayCache {
+public final class ObjectArrayCache {
 
 	// we use two indexes: one for initialization, and one for data aquired during runtime
 	// this has a gread advantage, if the setup-data is large. Then a re-organisation of
@@ -43,7 +43,7 @@ public class ObjectArrayCache {
 	
     private final Row rowdef;
     private final RowSet index0;
-    private RowSet index1;
+    private       RowSet index1;
     //private final kelondroOrder<kelondroRow.Entry> entryOrder;
     
     public ObjectArrayCache(final int payloadSize, final int initSize) {
@@ -53,17 +53,17 @@ public class ObjectArrayCache {
         //this.entryOrder = new kelondroRow.EntryComparator(rowdef.objectOrder);
     }
     
-    public long memoryNeededForGrow() {
+    public final long memoryNeededForGrow() {
         if (index1 == null) 
             return index0.memoryNeededForGrow();
         return index1.memoryNeededForGrow();
     }
     
-    public Row row() {
+    public final Row row() {
         return index0.row();
     }
     
-    public byte[] getb(final int ii) {
+    public final byte[] getb(final int ii) {
         assert ii >= 0 : "i = " + ii;
     	final byte[] key = NaturalOrder.encodeLong(ii, 4);
         if (index0 != null) {
@@ -82,7 +82,7 @@ public class ObjectArrayCache {
         return indexentry.getColBytes(1);
     }
     
-    public byte[] putb(final int ii, final byte[] value) {
+    public final byte[] putb(final int ii, final byte[] value) {
         assert ii >= 0 : "i = " + ii;
         assert value != null;
         final byte[] key = NaturalOrder.encodeLong(ii, 4);
@@ -114,7 +114,7 @@ public class ObjectArrayCache {
         return oldentry.getColBytes(1);
     }
 
-    public void addb(final int ii, final byte[] value) {
+    public final void addb(final int ii, final byte[] value) {
     	assert index1 == null; // valid only in init-phase
         assert ii >= 0 : "i = " + ii;
         assert value != null;
@@ -124,7 +124,7 @@ public class ObjectArrayCache {
         index0.addUnique(newentry);
     }
     
-    public byte[] removeb(final int ii) {
+    public final byte[] removeb(final int ii) {
         assert ii >= 0 : "i = " + ii;
         
         final byte[] key = NaturalOrder.encodeLong(ii, 4);
@@ -149,7 +149,7 @@ public class ObjectArrayCache {
         return indexentry.getColBytes(1);
     }
     
-    public byte[] removeoneb() {
+    public final byte[] removeoneb() {
         if ((index1 != null) && (index1.size() != 0)) {
             final Row.Entry indexentry = index1.removeOne();
             assert (indexentry != null);
@@ -167,7 +167,7 @@ public class ObjectArrayCache {
         return null;
     }
     
-    public int size() {
+    public final int size() {
         if ((index0 != null) && (index1 == null)) {
             //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
             return index0.size();
@@ -181,7 +181,7 @@ public class ObjectArrayCache {
         return index0.size() + index1.size();
     }
     
-    public Iterator<Row.Entry> rows() {
+    public final Iterator<Row.Entry> rows() {
         if (index0 != null) {
             if (index1 == null) {
                 // finish initialization phase
@@ -196,7 +196,7 @@ public class ObjectArrayCache {
         }
     }
     
-    public void flush() {
+    public final void flush() {
         if (index0 != null) {
             index0.sort();
             index0.trim(true);
