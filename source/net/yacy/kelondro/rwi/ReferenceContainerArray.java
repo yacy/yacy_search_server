@@ -318,7 +318,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         HandleMap references = new HandleMap(payloadrow.primaryKeyLength, termOrder, 4, 0, 1000000);
         String[] files = heapLocation.list();
         for (String f: files) {
-            if (f.length() < 22 || !f.startsWith("index") || !f.endsWith(".blob")) continue;
+            if (f.length() < 22 || !f.startsWith("text.index") || !f.endsWith(".blob")) continue;
             File fl = new File(heapLocation, f);
             System.out.println("CELL REFERENCE COLLECTION opening blob " + fl);
             CloneableIterator<ReferenceContainer<ReferenceType>>  ei = new ReferenceIterator<ReferenceType>(fl, factory, payloadrow);

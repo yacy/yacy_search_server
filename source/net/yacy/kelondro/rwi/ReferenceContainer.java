@@ -215,13 +215,10 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     static {
         Method meth = null;
         try {
-            final Class<?> c = Class.forName("net.yacy.kelondro.rwi.ReferenceContainer");
+            final Class<?> c = net.yacy.kelondro.rwi.ReferenceContainer.class;
             meth = c.getMethod("mergeUnique", new Class[]{Object.class, Object.class});
         } catch (final SecurityException e) {
             System.out.println("Error while initializing containerMerge.SecurityException: " + e.getMessage());
-            meth = null;
-        } catch (final ClassNotFoundException e) {
-            System.out.println("Error while initializing containerMerge.ClassNotFoundException: " + e.getMessage());
             meth = null;
         } catch (final NoSuchMethodException e) {
             System.out.println("Error while initializing containerMerge.NoSuchMethodException: " + e.getMessage());
