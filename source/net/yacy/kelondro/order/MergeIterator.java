@@ -149,7 +149,7 @@ public class MergeIterator<E> implements CloneableIterator<E> {
     static {
         Method meth = null;
         try {
-            final Class<?> c = Class.forName("de.anomic.kelondro.order.MergeIterator");
+            final Class<?> c = Class.forName("net.yacy.kelondro.order.MergeIterator");
             meth = c.getMethod("mergeEqualByReplace", new Class[]{Object.class, Object.class});
         } catch (final SecurityException e) {
             System.out.println("Error while initializing simpleMerge (1): " + e.getMessage());
