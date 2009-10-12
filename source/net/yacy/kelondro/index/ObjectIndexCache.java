@@ -34,7 +34,7 @@ import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.StackIterator;
 
 
-public class ObjectIndexCache implements ObjectIndex {
+public class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> {
     
     private final Row rowdef;
     private RowSet index0;
@@ -267,6 +267,10 @@ public class ObjectIndexCache implements ObjectIndex {
                 entryComparator,
                 MergeIterator.simpleMerge,
                 true);
+    }
+    
+    public Iterator<Entry> iterator() {
+        return rows();
     }
     
     public synchronized CloneableIterator<Row.Entry> rows() {

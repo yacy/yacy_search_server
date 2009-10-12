@@ -221,12 +221,11 @@ public class Records {
     /**
      * write buffer to end of file 
      */
-    private void flushBuffer() {
+    public void flushBuffer() {
         try {
             raf.seek(raf.length());
             raf.write(this.buffer, 0, this.recordsize * this.buffercount);
         } catch (final IOException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
         this.buffercount = 0;

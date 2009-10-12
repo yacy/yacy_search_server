@@ -26,7 +26,6 @@ package net.yacy.kelondro.io;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -52,15 +51,23 @@ public class BufferedRecords {
         this.buffer = new TreeMap<Long, byte[]>();
     }
 
-    private void flushBuffer() throws IOException {
+    /**
+     * flush the buffer: this shall be called before any file-based iterations
+     * on data structures on rescords are made
+     * @throws IOException
+     */
+    public synchronized void flushBuffer() throws IOException {
+        this.flushBuffer0();
+        efs.flushBuffer();
+    }
+    
+    private void flushBuffer0() throws IOException {
         if (efs == null) return;
-        final Iterator<Map.Entry<Long, byte[]>> i = buffer.entrySet().iterator();
-        Map.Entry<Long, byte[]> entry;
-        while (i.hasNext()) {
-            entry = i.next();
+        for (Map.Entry<Long, byte[]> entry: buffer.entrySet()) {
             efs.put(entry.getKey().intValue(), entry.getValue(), 0);
         }
         buffer.clear();
+        efs.flushBuffer();
     }
     
     public synchronized long size() throws IOException {
@@ -73,7 +80,7 @@ public class BufferedRecords {
 
     public synchronized void close() {
         try {
-            flushBuffer();
+            flushBuffer0();
         } catch (final IOException e) {
             e.printStackTrace();
         }
@@ -106,7 +113,7 @@ public class BufferedRecords {
             final byte[] bb = new byte[efs.recordsize];
             System.arraycopy(b, start, bb, 0, efs.recordsize);
             buffer.put(Long.valueOf(index), bb);
-            if (buffer.size() > this.maxEntries) flushBuffer();
+            if (buffer.size() > this.maxEntries) flushBuffer0();
        }
     }
     

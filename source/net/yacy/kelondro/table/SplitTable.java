@@ -50,6 +50,7 @@ import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.ObjectIndexCache;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowCollection;
+import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
@@ -61,7 +62,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.NamePrefixThreadFactory;
 
 
-public class SplitTable implements ObjectIndex {
+public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
 
     // this is a set of kelondro tables
     // the set is divided into tables with different entry date
@@ -592,6 +593,14 @@ public class SplitTable implements ObjectIndex {
             c.add(i.next().rows(up, firstKey));
         }
         return MergeIterator.cascade(c, entryOrder, MergeIterator.simpleMerge, up);
+    }
+    
+    public Iterator<Entry> iterator() {
+        try {
+            return rows();
+        } catch (IOException e) {
+            return null;
+        }
     }
     
     public synchronized CloneableIterator<Row.Entry> rows() throws IOException {

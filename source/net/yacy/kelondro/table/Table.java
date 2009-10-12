@@ -65,7 +65,7 @@ import net.yacy.kelondro.util.kelondroException;
  * The content cache can also be deleted during run-time, if the available RAM gets too low.
  */
 
-public class Table implements ObjectIndex {
+public class Table implements ObjectIndex, Iterable<Row.Entry> {
 
     // static tracker objects
     private static TreeMap<String, Table> tableTracker = new TreeMap<String, Table>();
@@ -628,8 +628,17 @@ public class Table implements ObjectIndex {
     public synchronized int size() {
         return index.size();
     }
+    
+    public Iterator<Entry> iterator() {
+        try {
+            return rows();
+        } catch (IOException e) {
+            return null;
+        }
+    }
 
     public synchronized CloneableIterator<Entry> rows() throws IOException {
+        this.file.flushBuffer();
         return new rowIteratorNoOrder();
     }
 
@@ -747,10 +756,10 @@ public class Table implements ObjectIndex {
         return result;
     }
 
-    private static ObjectIndex testTable(final File f, final String testentities, final boolean useTailCache, final boolean exceed134217727) throws IOException {
+    private static Table testTable(final File f, final String testentities, final boolean useTailCache, final boolean exceed134217727) throws IOException {
         if (f.exists()) FileUtils.deletedelete(f);
         final Row rowdef = new Row("byte[] a-4, byte[] b-4", NaturalOrder.naturalOrder);
-        final ObjectIndex tt = new Table(f, rowdef, 100, 0, useTailCache, exceed134217727);
+        final Table tt = new Table(f, rowdef, 100, 0, useTailCache, exceed134217727);
         byte[] b;
         final Row.Entry row = rowdef.newEntry();
         for (int i = 0; i < testentities.length(); i++) {
@@ -762,19 +771,13 @@ public class Table implements ObjectIndex {
         return tt;
     }
     
-    private static int countElements(final ObjectIndex t) {
+    private static int countElements(final Table t) {
         int count = 0;
-        try {
-            final Iterator<Row.Entry> iter = t.rows();
-            Row.Entry row;
-            while (iter.hasNext()) {
-                count++;
-                row = iter.next();
-                if (row == null) System.out.println("ERROR! null element found");
-                // else System.out.println("counted element: " + new                                                    
-                // String(n.getKey()));                                                                                 
-            }
-        } catch (final IOException e) {
+        for (Row.Entry row: t) {
+            count++;
+            if (row == null) System.out.println("ERROR! null element found");
+            // else System.out.println("counted element: " + new                                                    
+            // String(n.getKey()));                                                                                 
         }
         return count;
     }
@@ -783,14 +786,16 @@ public class Table implements ObjectIndex {
         System.out.println("starting big test with " + elements + " elements:");
         final long start = System.currentTimeMillis();
         final String[] s = permutations(elements);
-        ObjectIndex tt;
+        Table tt;
+        int count;
         try {
             for (int i = 0; i < s.length; i++) {
                 System.out.println("*** probing tree " + i + " for permutation " + s[i]);
                 // generate tree and delete elements
                 tt = testTable(testFile, s[i], useTailCache, exceed134217727);
-                if (countElements(tt) != tt.size()) {
-                    System.out.println("wrong size for " + s[i]);
+                count = countElements(tt);
+                if (count != tt.size()) {
+                    System.out.println("wrong size for " + s[i] + ": count = " + count + ", size() = " + tt.size());
                 }
                 tt.close();
                 for (int j = 0; j < s.length; j++) {
@@ -798,8 +803,9 @@ public class Table implements ObjectIndex {
                     // delete by permutation j
                     for (int elt = 0; elt < s[j].length(); elt++) {
                         tt.remove(testWord(s[j].charAt(elt)));
-                        if (countElements(tt) != tt.size()) {
-                            System.out.println("ERROR! wrong size for probe tree " + s[i] + "; probe delete " + s[j] + "; position " + elt);
+                        count = countElements(tt);
+                        if (count != tt.size()) {
+                            System.out.println("ERROR! wrong size for probe tree " + s[i] + "; probe delete " + s[j] + "; position " + elt + "; count = " + count + ", size() = " + tt.size());
                         }
                     }
                     tt.close();

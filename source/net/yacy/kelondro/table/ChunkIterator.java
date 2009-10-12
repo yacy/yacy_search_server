@@ -26,6 +26,7 @@ package net.yacy.kelondro.table;
 
 import java.io.BufferedInputStream;
 import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -40,6 +41,7 @@ public class ChunkIterator implements Iterator<byte[]> {
      * create a ChunkIterator
      * a ChunkIterator uses a BufferedInputStream to iterate through the file
      * and is therefore a fast option to get all elements in the file as a sequence
+     * ATTENTION: before calling this class ensure that all file buffers are flushed
      * @param file: the file
      * @param recordsize: the size of the elements in the file
      * @param chunksize: the size of the chunks that are returned by next(). remaining bytes until the lenght of recordsize are skipped
@@ -79,7 +81,11 @@ public class ChunkIterator implements Iterator<byte[]> {
                 r += s;
             }
             return chunk;
+        } catch (final EOFException e) {
+            // no real exception, this is the normal termination
+            return null;
         } catch (final IOException e) {
+            e.printStackTrace();
             return null;
         }
     }

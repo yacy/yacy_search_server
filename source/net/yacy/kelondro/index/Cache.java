@@ -36,11 +36,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.util.MemoryControl;
 
 
-public class Cache implements ObjectIndex {
+public class Cache implements ObjectIndex, Iterable<Row.Entry> {
 
     // this is a combined read cache and write buffer
     // we maintain four tables:
@@ -436,6 +437,14 @@ public class Cache implements ObjectIndex {
         return index.rows(up, firstKey);
     }
 
+    public Iterator<Entry> iterator() {
+        try {
+            return rows();
+        } catch (IOException e) {
+            return null;
+        }
+    }
+    
     public synchronized CloneableIterator<Row.Entry> rows() throws IOException {
         return index.rows();
     }
