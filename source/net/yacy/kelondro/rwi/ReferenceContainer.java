@@ -215,7 +215,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     static {
         Method meth = null;
         try {
-            final Class<?> c = Class.forName("de.anomic.kelondro.text.ReferenceContainer");
+            final Class<?> c = Class.forName("net.yacy.kelondro.text.ReferenceContainer");
             meth = c.getMethod("mergeUnique", new Class[]{Object.class, Object.class});
         } catch (final SecurityException e) {
             System.out.println("Error while initializing containerMerge.SecurityException: " + e.getMessage());
