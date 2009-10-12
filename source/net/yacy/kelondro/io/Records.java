@@ -51,7 +51,7 @@ import net.yacy.kelondro.util.MemoryControl;
  * All access to the file is made with byte[] that are generated outside of this class
  * This class only references byte[] that are handed over to methods of this class.
  */
-public class Records {
+public final class Records {
     
     private RandomAccessFile raf;
     private final File tablefile;
@@ -63,9 +63,11 @@ public class Records {
     /**
      * number of entries in buffer
      */
-    private int cachecount, buffercount;
-    private byte[] cache, buffer;
-    final byte[] zero;
+    private int cachecount;
+    private int buffercount;
+    private byte[] cache;
+    private byte[] buffer;
+    private final byte[] zero;
     
     /**
      * stay below hard disc cache (is that necessary?)
@@ -115,8 +117,8 @@ public class Records {
             //System.out.println("newmem nachher: cachesize = " + cachesize + ", buffersize = " + buffersize);
         }
         
-        cache = new byte[cachesize];
-        buffer = new byte[buffersize];
+        this.cache = new byte[cachesize];
+        this.buffer = new byte[buffersize];
         this.buffercount = 0;
         
         // first-time read of cache
@@ -128,7 +130,7 @@ public class Records {
      * @param recordsize
      * @return number of records in table
      */
-    public static long tableSize(final File tablefile, final long recordsize) throws IOException {
+    public final static long tableSize(final File tablefile, final long recordsize) throws IOException {
         if (!tablefile.exists()) return 0;
         final long size = tablefile.length();
         if (size % recordsize != 0) throw new IOException("wrong file size: file = " + tablefile + ", size = " + size + ", recordsize = " + recordsize);
@@ -139,11 +141,11 @@ public class Records {
      * @return the number of records in file plus number of records in buffer
      * @throws IOException
      */
-    public synchronized long size() throws IOException {
+    public final synchronized long size() throws IOException {
         return filesize() + this.buffercount;
     }
     
-    public File filename() {
+    public final File filename() {
         return this.tablefile;
     }
     
@@ -151,7 +153,7 @@ public class Records {
      * @return records in file
      * @throws IOException
      */
-    private long filesize() throws IOException {
+    private final long filesize() throws IOException {
         return raf.length() / recordsize;
     }
 
@@ -161,7 +163,7 @@ public class Records {
      * @param index
      * @return the index offset inside the cache or -1 if the index is not in the cache 
      */
-    private int inCache(final long index) {
+    private final int inCache(final long index) {
         if ((index >= this.cacheindex) && (index < this.cacheindex + this.cachecount)) {
             return (int) (index - this.cacheindex);
         }
@@ -175,7 +177,7 @@ public class Records {
      * @return the index offset inside the buffer or -1 if the index is not in the buffer 
      * @throws IOException
      */
-    private int inBuffer(final long index) throws IOException {
+    private final int inBuffer(final long index) throws IOException {
         final long fs = filesize();
         if ((index >= fs) && (index < fs + this.buffercount)) {
             return (int) (index - fs);
@@ -192,7 +194,7 @@ public class Records {
      * @param index
      * @throws IOException
      */
-    private void fillCache(long index) throws IOException {
+    private final void fillCache(long index) throws IOException {
     	//System.out.println("*** DEBUG FillCache " + this.tablefile.getName() + " at index " + index);
         // first check if the index is inside the current cache
         assert inCache(index) < 0;
@@ -221,7 +223,7 @@ public class Records {
     /**
      * write buffer to end of file 
      */
-    public void flushBuffer() {
+    public final void flushBuffer() {
         try {
             raf.seek(raf.length());
             raf.write(this.buffer, 0, this.recordsize * this.buffercount);
@@ -231,18 +233,18 @@ public class Records {
         this.buffercount = 0;
     }
     
-    public synchronized void close() {
+    public final synchronized void close() {
         flushBuffer();
         
         // then close the file
-        try {
+        if (raf != null) try {
             raf.close();
         } catch (final IOException e) {
             e.printStackTrace();
         }
-        raf = null;
-        buffer = null;
-        cache = null;
+        this.raf = null;
+        this.buffer = null;
+        this.cache = null;
     }
 
     /**
@@ -251,7 +253,7 @@ public class Records {
      * @param start offset in b to store data
      * @throws IOException
      */
-    public synchronized void get(final long index, final byte[] b, final int start) throws IOException {
+    public final synchronized void get(final long index, final byte[] b, final int start) throws IOException {
         assert b.length - start >= this.recordsize;
         if (index >= size()) throw new IndexOutOfBoundsException("kelondroEcoFS.get(" + index + ") outside bounds (" + this.size() + ")");
         // check if index is inside of cache
@@ -276,7 +278,7 @@ public class Records {
         assert false;
     }
 
-    public synchronized void put(final long index, final byte[] b, final int start) throws IOException {
+    public final synchronized void put(final long index, final byte[] b, final int start) throws IOException {
         assert b.length - start >= this.recordsize;
         final long s = filesize() + this.buffercount;
         if (index > s) throw new IndexOutOfBoundsException("kelondroEcoFS.put(" + index + ") outside bounds (" + this.size() + ")");
@@ -327,7 +329,7 @@ public class Records {
         }
     }
 
-    public synchronized void add(final byte[] b, final int start) throws IOException {
+    public final synchronized void add(final byte[] b, final int start) throws IOException {
         // index == size() == filesize() + (long) this.buffercount
         
         assert b.length - start >= this.recordsize;
@@ -356,14 +358,14 @@ public class Records {
         assert this.buffercount <= this.buffer.length / this.recordsize;
     }
     
-    private boolean isClean(final byte[] b, final int offset, final int length) {
+    private final boolean isClean(final byte[] b, final int offset, final int length) {
         for (int i = 0; i < length; i++) {
             if (b[i + offset] != 0) return false;
         }
         return true;
     }
     
-    private boolean isClean(final long index) throws IOException {
+    private final boolean isClean(final long index) throws IOException {
          assert index < size();
          // check if index is inside of cache
          int p = inCache(index);
@@ -402,7 +404,7 @@ public class Records {
      * @param start offset in record to start reading
      * @throws IOException
      */
-    public synchronized void clean(final long index, final byte[] b, final int start) throws IOException {
+    public final synchronized void clean(final long index, final byte[] b, final int start) throws IOException {
         assert b.length - start >= this.recordsize;
         final long s = size();
         if (index >= s) throw new IndexOutOfBoundsException("kelondroEcoFS.clean(" + index + ") outside bounds (" + s + ")");
@@ -445,7 +447,7 @@ public class Records {
      * @param index
      * @throws IOException
      */
-    public synchronized void clean(final long index) throws IOException {
+    public final synchronized void clean(final long index) throws IOException {
         final long s = size();
         if (index >= s) throw new IndexOutOfBoundsException("kelondroEcoFS.clean(" + index + ") outside bounds (" + s + ")");
         if (index == s - 1) {
@@ -479,7 +481,7 @@ public class Records {
      * @param start
      * @throws IOException
      */
-    public synchronized void cleanLast(final byte[] b, final int start) throws IOException {
+    public final synchronized void cleanLast(final byte[] b, final int start) throws IOException {
         cleanLast0(b, start);
         long i;
         while (((i = size()) > 0) && (isClean(i - 1))) {
@@ -498,7 +500,7 @@ public class Records {
      * @param start
      * @throws IOException
      */
-    private synchronized void cleanLast0(final byte[] b, final int start) throws IOException {
+    private final synchronized void cleanLast0(final byte[] b, final int start) throws IOException {
         assert b.length - start >= this.recordsize;
         // check if index is inside of cache
         final long s = this.size();
@@ -534,7 +536,7 @@ public class Records {
      * @see clean(long, byte[], int)
      * @throws IOException
      */
-    public synchronized void cleanLast() throws IOException {
+    public final synchronized void cleanLast() throws IOException {
         cleanLast0();
         long i;
         while (((i = size()) > 0) && (isClean(i - 1))) {
@@ -544,7 +546,7 @@ public class Records {
         }
     }
     
-    private synchronized void cleanLast0() throws IOException {
+    private final synchronized void cleanLast0() throws IOException {
 
         // check if index is inside of cache
         final long s = this.size();
@@ -568,7 +570,7 @@ public class Records {
         this.raf.setLength((s - 1) * this.recordsize);
     }
     
-    public void deleteOnExit() {
+    public final void deleteOnExit() {
         this.tablefile.deleteOnExit();
     }
 

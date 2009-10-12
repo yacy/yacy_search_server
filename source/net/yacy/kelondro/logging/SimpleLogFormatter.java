@@ -34,7 +34,7 @@ import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
 
-public class SimpleLogFormatter extends SimpleFormatter {
+public final class SimpleLogFormatter extends SimpleFormatter {
 
 
       private final Date date = new Date();      
@@ -50,7 +50,7 @@ public class SimpleLogFormatter extends SimpleFormatter {
           super();
       }        
       
-      public synchronized String format(final LogRecord record) {
+      public final synchronized String format(final LogRecord record) {
           
           final StringBuffer buffer = this.buffer;
           buffer.setLength(0);

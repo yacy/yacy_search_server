@@ -61,51 +61,51 @@ public final class Log {
         //this.theLogger.setLevel(Level.FINEST); // set a default level
     }
 
-    public void setLevel(final Level newLevel) {
+    public final void setLevel(final Level newLevel) {
         this.theLogger.setLevel(newLevel);
     }
     
-    public void logSevere(final String message) {
+    public final void logSevere(final String message) {
         enQueueLog(this.theLogger, Level.SEVERE, message);
     }
     
-    public void logSevere(final String message, final Throwable thrown) {
+    public final void logSevere(final String message, final Throwable thrown) {
         enQueueLog(this.theLogger, Level.SEVERE, message, thrown);
     }
     
-    public boolean isSevere() {
+    public final boolean isSevere() {
         return this.theLogger.isLoggable(Level.SEVERE);
     }
 
-    public void logWarning(final String message) {
+    public final void logWarning(final String message) {
         enQueueLog(this.theLogger, Level.WARNING, message);
     }
     
-    public void logWarning(final String message, final Throwable thrown) {
+    public final void logWarning(final String message, final Throwable thrown) {
         enQueueLog(this.theLogger, Level.WARNING, message, thrown);
     }
     
-    public boolean isWarning() {
+    public final boolean isWarning() {
         return this.theLogger.isLoggable(Level.WARNING);
     }
     
-    public void logConfig(final String message) {
+    public final void logConfig(final String message) {
         enQueueLog(this.theLogger, Level.CONFIG, message);
     }
     
-    public void logConfig(final String message, final Throwable thrown) {
+    public final void logConfig(final String message, final Throwable thrown) {
         enQueueLog(this.theLogger, Level.CONFIG, message, thrown);
     }
     
-    public boolean isConfig() {
+    public final boolean isConfig() {
         return this.theLogger.isLoggable(Level.CONFIG);
     }
 
-    public void logInfo(final String message) {
+    public final void logInfo(final String message) {
         enQueueLog(this.theLogger, Level.INFO, message);
     }
     
-    public void logInfo(final String message, final Throwable thrown) {
+    public final void logInfo(final String message, final Throwable thrown) {
         enQueueLog(this.theLogger, Level.INFO, message, thrown);
     }
     
@@ -113,104 +113,104 @@ public final class Log {
         return this.theLogger.isLoggable(Level.INFO);
     }
 
-    public void logFine(final String message) {
+    public final void logFine(final String message) {
         enQueueLog(this.theLogger, Level.FINE, message);
     }
     
-    public void logFine(final String message, final Throwable thrown) {
+    public final void logFine(final String message, final Throwable thrown) {
         enQueueLog(this.theLogger, Level.FINE, message, thrown);
     }
     
-    public boolean isFine() {
+    public final boolean isFine() {
         return this.theLogger.isLoggable(Level.FINE);
     }
 
-    public void logFiner(final String message) {
+    public final void logFiner(final String message) {
         enQueueLog(this.theLogger, Level.FINER, message);
     }
     
-    public void logFiner(final String message, final Throwable thrown) {
+    public final void logFiner(final String message, final Throwable thrown) {
         enQueueLog(this.theLogger, Level.FINER, message, thrown);
     }
     
-    public boolean isFiner() { 
+    public final boolean isFiner() { 
        return this.theLogger.isLoggable(Level.FINER);
     }
     
-    public void logFinest(final String message) {
+    public final void logFinest(final String message) {
         enQueueLog(this.theLogger, Level.FINEST, message);
     }
     
-    public void logFinest(final String message, final Throwable thrown) {
+    public final void logFinest(final String message, final Throwable thrown) {
         enQueueLog(this.theLogger, Level.FINEST, message, thrown);
     }
     
-    public boolean isFinest() {
+    public final boolean isFinest() {
         return this.theLogger.isLoggable(Level.FINEST);
     }
     
-    public boolean isLoggable(final Level level) {
+    public final boolean isLoggable(final Level level) {
         return this.theLogger.isLoggable(level);
     }
     
     
     // static log messages
-    public static void logSevere(final String appName, final String message) {
+    public final static void logSevere(final String appName, final String message) {
         enQueueLog(appName, Level.SEVERE, message);
     }
-    public static void logSevere(final String appName, final String message, final Throwable thrown) {
+    public final static void logSevere(final String appName, final String message, final Throwable thrown) {
         enQueueLog(appName, Level.SEVERE, message, thrown);
     }
     
-    public static void logWarning(final String appName, final String message) {
+    public final static void logWarning(final String appName, final String message) {
         enQueueLog(appName, Level.WARNING, message);
     }
-    public static void logWarning(final String appName, final String message, final Throwable thrown) {
+    public final static void logWarning(final String appName, final String message, final Throwable thrown) {
         enQueueLog(appName, Level.WARNING, message, thrown);
     }
     
-    public static void logConfig(final String appName, final String message) {
+    public final static void logConfig(final String appName, final String message) {
         enQueueLog(appName, Level.CONFIG, message);
     }
-    public static void logConfig(final String appName, final String message, final Throwable thrown) {
+    public final static void logConfig(final String appName, final String message, final Throwable thrown) {
         enQueueLog(appName, Level.CONFIG, message, thrown);
     }    
     
-    public static void logInfo(final String appName, final String message) {
+    public final static void logInfo(final String appName, final String message) {
         enQueueLog(appName, Level.INFO, message);
     }
-    public static void logInfo(final String appName, final String message, final Throwable thrown) {
+    public final static void logInfo(final String appName, final String message, final Throwable thrown) {
         enQueueLog(appName, Level.INFO, message, thrown);
     }
     
-    public static void logFine(final String appName, final String message) {
+    public final static void logFine(final String appName, final String message) {
         enQueueLog(appName, Level.FINE, message);
     }
-    public static void logFine(final String appName, final String message, final Throwable thrown) {
+    public final static void logFine(final String appName, final String message, final Throwable thrown) {
         enQueueLog(appName, Level.FINE, message, thrown);
     }
-    public static boolean isFine(final String appName) {
+    public final static boolean isFine(final String appName) {
         return Logger.getLogger(appName).isLoggable(Level.FINE);
     } 
     
-    public static void logFiner(final String appName, final String message) {
+    public final static void logFiner(final String appName, final String message) {
         enQueueLog(appName, Level.FINER, message);
     }
-    public static void logFiner(final String appName, final String message, final Throwable thrown) {
+    public final static void logFiner(final String appName, final String message, final Throwable thrown) {
         enQueueLog(appName, Level.FINER, message, thrown);
     }
     
-    public static void logFinest(final String appName, final String message) {
+    public final static void logFinest(final String appName, final String message) {
         enQueueLog(appName, Level.FINEST, message);
     }
-    public static void logFinest(final String appName, final String message, final Throwable thrown) {
+    public final static void logFinest(final String appName, final String message, final Throwable thrown) {
         enQueueLog(appName, Level.FINEST, message, thrown);
     }    
-    public static boolean isFinest(final String appName) {
+    public final static boolean isFinest(final String appName) {
         return Logger.getLogger(appName).isLoggable(Level.FINEST);
     }
     
-    private static void enQueueLog(Logger logger, Level level, String message, final Throwable thrown) {
+    private final static void enQueueLog(Logger logger, Level level, String message, final Throwable thrown) {
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
             logger.log(level, message, thrown);
         } else {
@@ -222,7 +222,7 @@ public final class Log {
         }
     }
     
-    private static void enQueueLog(Logger logger, Level level, String message) {
+    private final static void enQueueLog(Logger logger, Level level, String message) {
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
             logger.log(level, message);
         } else {
@@ -234,7 +234,7 @@ public final class Log {
         }
     }
     
-    private static void enQueueLog(String loggername, Level level, String message, final Throwable thrown) {
+    private final static void enQueueLog(String loggername, Level level, String message, final Throwable thrown) {
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
             Logger.getLogger(loggername).log(level, message, thrown);
         } else {
@@ -246,7 +246,7 @@ public final class Log {
         }
     }
     
-    private static void enQueueLog(String loggername, Level level, String message) {
+    private final static void enQueueLog(String loggername, Level level, String message) {
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
             Logger.getLogger(loggername).log(level, message);
         } else {
@@ -258,7 +258,7 @@ public final class Log {
         }
     }
     
-    protected static class logEntry {
+    protected final static class logEntry {
         public final Logger logger;
         public final String loggername;
         public final Level level;
@@ -301,11 +301,11 @@ public final class Log {
         }
     }
     
-    protected static logEntry poison = new logEntry();
-    protected static BlockingQueue<logEntry> logQueue = new LinkedBlockingQueue<logEntry>();
+    protected final static logEntry poison = new logEntry();
+    protected final static BlockingQueue<logEntry> logQueue = new LinkedBlockingQueue<logEntry>();
     private   static logRunner logRunnerThread = null;
     
-    protected static class logRunner extends Thread {
+    protected final static class logRunner extends Thread {
         public logRunner() {
         	super("Log Runner");
         }
@@ -337,7 +337,7 @@ public final class Log {
         }
     }
     
-    public static final void configureLogging(final File homePath, final File loggingConfigFile) throws SecurityException, FileNotFoundException, IOException {
+    public final static void configureLogging(final File homePath, final File loggingConfigFile) throws SecurityException, FileNotFoundException, IOException {
         FileInputStream fileIn = null;
         try {
             System.out.println("STARTUP: Trying to load logging configuration from file " + loggingConfigFile.toString());
@@ -369,7 +369,7 @@ public final class Log {
         }
     }
     
-    public static void shutdown() {
+    public final static void shutdown() {
         if (logRunnerThread == null || !logRunnerThread.isAlive()) return;
         try {
             logQueue.put(poison);
@@ -378,7 +378,7 @@ public final class Log {
         }
     }
     
-    public static final String format(final String s, int n, final int fillChar) {
+    public final static String format(final String s, int n, final int fillChar) {
         final int l = s.length();
         if (l >= n) return s;
         final StringBuilder sb = new StringBuilder(l + n);
@@ -386,11 +386,11 @@ public final class Log {
         return sb.toString();
     }
     
-    public static final boolean allZero(final byte[] a) {
+    public final static boolean allZero(final byte[] a) {
         return allZero(a, 0, a.length);
     }
     
-    public static final boolean allZero(final byte[] a, final int astart, final int alength) {
+    public final static boolean allZero(final byte[] a, final int astart, final int alength) {
         for (int i = 0; i < alength; i++) if (a[astart + i] != 0) return false;
         return true;
     }

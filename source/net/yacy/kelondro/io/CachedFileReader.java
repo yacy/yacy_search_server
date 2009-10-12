@@ -28,9 +28,9 @@ import java.io.RandomAccessFile;
 import net.yacy.kelondro.util.MemoryControl;
 
 
-public class CachedFileReader extends AbstractReader implements Reader {
+public final class CachedFileReader extends AbstractReader implements Reader {
 
-    private RandomAccessFile RAFile;
+    private final RandomAccessFile RAFile;
     private byte[] cache;
     private int cachelen;
 
@@ -48,15 +48,15 @@ public class CachedFileReader extends AbstractReader implements Reader {
         this.cachelen = 0;
     }
     
-    public synchronized long available() throws IOException {
+    public final synchronized long available() throws IOException {
         return this.length() - RAFile.getFilePointer();
     }
 
-    public synchronized long length() throws IOException {
+    public final synchronized long length() throws IOException {
         return this.RAFile.length();
     }
 
-    public synchronized final void readFully(final byte[] b, final int off, int len) throws IOException {
+    public final synchronized void readFully(final byte[] b, final int off, int len) throws IOException {
         long seek = RAFile.getFilePointer();
         if (cache != null  && cachelen - seek >= len) {
             // read from cache
@@ -69,11 +69,11 @@ public class CachedFileReader extends AbstractReader implements Reader {
         return;
     }
 
-    public synchronized void seek(final long pos) throws IOException {
+    public final synchronized void seek(final long pos) throws IOException {
         RAFile.seek(pos);
     }
     
-    public synchronized void close() {
+    public final synchronized void close() {
         if (RAFile != null) try {
             try{RAFile.getChannel().close();} catch (IOException e) {}
             RAFile.close();
@@ -81,7 +81,6 @@ public class CachedFileReader extends AbstractReader implements Reader {
             e.printStackTrace();
         }
         this.cache = null;
-        this.RAFile = null;
     }
 
     protected void finalize() throws Throwable {

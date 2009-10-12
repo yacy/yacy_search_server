@@ -29,16 +29,16 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
 
-public class ByteCountOutputStream extends BufferedOutputStream {
+public final class ByteCountOutputStream extends BufferedOutputStream {
     
-    private static final Object syncObject = new Object();
+    private final static Object syncObject = new Object();
     private static long globalByteCount = 0;    
-    private boolean finished = false;    
+    private final static HashMap<String, Long> byteCountInfo = new HashMap<String, Long>(2);
     
-    private static final HashMap<String, Long> byteCountInfo = new HashMap<String, Long>(2);
     protected long byteCount;
     protected String byteCountAccountName = null; 
-
+    private boolean finished = false;    
+    
     /**
      * Constructor of this class
      * @param outputStream the {@link OutputStream} to write to
@@ -63,19 +63,19 @@ public class ByteCountOutputStream extends BufferedOutputStream {
     }    
 
     /** @see java.io.OutputStream#write(byte[]) */
-    public void write(final byte[] b) throws IOException {
+    public final void write(final byte[] b) throws IOException {
         super.write(b);
         this.byteCount += b.length;
     }
 
     /** @see java.io.OutputStream#write(byte[], int, int) */
-    public synchronized void write(final byte[] b, final int off, final int len) throws IOException {        
+    public final synchronized void write(final byte[] b, final int off, final int len) throws IOException {        
         super.write(b, off, len);
         this.byteCount += len;
     }
 
     /** @see java.io.OutputStream#write(int) */
-    public synchronized void write(final int b) throws IOException {
+    public final synchronized void write(final int b) throws IOException {
         super.write(b);
         this.byteCount++;
     }
@@ -84,7 +84,7 @@ public class ByteCountOutputStream extends BufferedOutputStream {
      * The number of bytes that have passed through this stream.
      * @return the number of bytes accumulated
      */
-    public long getCount() {
+    public final long getCount() {
         return this.byteCount;
     }
     
@@ -92,13 +92,13 @@ public class ByteCountOutputStream extends BufferedOutputStream {
         return this.byteCountAccountName;
     }    
     
-    public static long getGlobalCount() {
+    public final static long getGlobalCount() {
         synchronized (syncObject) {
             return globalByteCount;
         }
     }
     
-    public static long getAccountCount(final String accountName) {
+    public final static long getAccountCount(final String accountName) {
         synchronized (syncObject) {
             if (byteCountInfo.containsKey(accountName)) {
                 return (byteCountInfo.get(accountName)).longValue();
@@ -107,14 +107,14 @@ public class ByteCountOutputStream extends BufferedOutputStream {
         }
     }    
     
-    public static void resetCount() {
+    public final static void resetCount() {
         synchronized (syncObject) {
             globalByteCount = 0;
             byteCountInfo.clear();
         }
     }    
     
-    public void finish() {
+    public final void finish() {
         if (this.finished) return;
         
         this.finished = true;
@@ -132,7 +132,7 @@ public class ByteCountOutputStream extends BufferedOutputStream {
         }            
     }
     
-    protected void finalize() throws Throwable {
+    protected final void finalize() throws Throwable {
         if (!this.finished) 
             finish();
         super.finalize();

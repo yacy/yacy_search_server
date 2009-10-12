@@ -52,7 +52,7 @@ public class GuiHandler extends Handler {
     /**
      * Get any configuration properties set
      */
-    private void configure() {
+    private final void configure() {
         final LogManager manager = LogManager.getLogManager();
         final String className = getClass().getName();
         
@@ -69,7 +69,7 @@ public class GuiHandler extends Handler {
         this.size = parseSize(sizeString);
     }    
     
-    private int parseSize(final String sizeString) {
+    private final int parseSize(final String sizeString) {
         int newSize = DEFAULT_SIZE;
         try {
             newSize = Integer.parseInt(sizeString);
@@ -79,7 +79,7 @@ public class GuiHandler extends Handler {
         return newSize;
     }
     
-    private Filter makeFilter(final String name) {
+    private final Filter makeFilter(final String name) {
         if (name == null) return null;
         
         Filter f = null;
@@ -92,7 +92,7 @@ public class GuiHandler extends Handler {
         return f;
     }    
     
-    private Formatter makeFormatter(final String name) {
+    private final Formatter makeFormatter(final String name) {
         if (name == null) return null;
         
         Formatter f = null;
@@ -106,17 +106,17 @@ public class GuiHandler extends Handler {
     }
     
     // Initialize.  Size is a count of LogRecords.
-    private void init() {
+    private final void init() {
         this.buffer = new LogRecord[this.size];
         this.start = 0;
         this.count = 0;
     }
     
-    public int getSize() {
+    public final int getSize() {
     	return this.size;
     }
     
-    public void publish(final LogRecord record) {
+    public final void publish(final LogRecord record) {
         if (!isLoggable(record)) return;
         
         // write it to the buffer
@@ -130,12 +130,12 @@ public class GuiHandler extends Handler {
         flush();
     }
     
-    public synchronized LogRecord[] getLogArray() {
+    public final synchronized LogRecord[] getLogArray() {
     	return this.getLogArray(null);
     }
 
 
-    public synchronized LogRecord[] getLogArray(final Long sequenceNumberStart) {
+    public final synchronized LogRecord[] getLogArray(final Long sequenceNumberStart) {
         final ArrayList<LogRecord> tempBuffer = new ArrayList<LogRecord>(this.count);
         
         for (int i = 0; i < this.count; i++) {
@@ -149,7 +149,7 @@ public class GuiHandler extends Handler {
         return tempBuffer.toArray(new LogRecord[tempBuffer.size()]);
     }    
     
-    public synchronized String getLog(final boolean reversed, int lineCount) { 
+    public final synchronized String getLog(final boolean reversed, int lineCount) { 
         
         if ((lineCount > this.count)||(lineCount < 0)) lineCount = this.count;
         
@@ -175,7 +175,7 @@ public class GuiHandler extends Handler {
         }
     }
     
-    public synchronized String[] getLogLines(final boolean reversed, int lineCount) { 
+    public final synchronized String[] getLogLines(final boolean reversed, int lineCount) { 
         
         if ((lineCount > this.count)||(lineCount < 0)) lineCount = this.count;
         
@@ -202,12 +202,10 @@ public class GuiHandler extends Handler {
     }    
     
     public void flush() {
-        // TODO Auto-generated method stub
         
     }
 
     public void close() throws SecurityException {
-        // TODO Auto-generated method stub
         
     }
 

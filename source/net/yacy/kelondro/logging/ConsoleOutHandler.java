@@ -38,12 +38,12 @@ public final class ConsoleOutHandler extends StreamHandler {
         setOutputStream(System.out);        
     }
     
-    public synchronized void publish(final LogRecord record) {
+    public final synchronized void publish(final LogRecord record) {
         super.publish(record);
         flush();
     }
     
-    public synchronized void close() {
+    public final synchronized void close() {
         flush();
     }
 }

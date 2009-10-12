@@ -31,7 +31,7 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 
 
-public class LogalizerHandler extends Handler {
+public final class LogalizerHandler extends Handler {
 
     public static boolean enabled=false;
     public static boolean debug=false;
@@ -46,7 +46,7 @@ public class LogalizerHandler extends Handler {
         if(manager.getProperty(className + ".debug").equalsIgnoreCase("true")) debug = true;
     }
     
-    public void publish(final LogRecord record) {
+    public final void publish(final LogRecord record) {
         if (enabled) {
             final LogParser temp = new LogParser();
             if (temp != null) try {
@@ -58,13 +58,13 @@ public class LogalizerHandler extends Handler {
         flush();
     }
     
-    public Hashtable<String, Object> getParserResults(final LogParser parsername) {
+    public final Hashtable<String, Object> getParserResults(final LogParser parsername) {
         return (parsername == null) ? null : parsername.getResults();
     }
     
-    public void close() throws SecurityException {
+    public final void close() throws SecurityException {
     }
 
-    public void flush() {
+    public final void flush() {
     }
 }

@@ -31,10 +31,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 
-public class ByteCountInputStream extends FilterInputStream {
+public final class ByteCountInputStream extends FilterInputStream {
     
-    private static final Object syncObject = new Object();
-    private static final HashMap<String, Long> byteCountInfo = new HashMap<String, Long>(2);
+    private final static Object syncObject = new Object();
+    private final static HashMap<String, Long> byteCountInfo = new HashMap<String, Long>(2);
     private static long globalByteCount = 0;
     
     private boolean finished = false;
@@ -42,7 +42,7 @@ public class ByteCountInputStream extends FilterInputStream {
     private String byteCountAccountName = null; 
 
     protected ByteCountInputStream(final InputStream inputStream) {
-        this(inputStream,null);
+        this(inputStream, null);
     }
     
     /**
@@ -64,13 +64,13 @@ public class ByteCountInputStream extends FilterInputStream {
         this.byteCountAccountName = accountName;
     }  
     
-    public int read(final byte[] b) throws IOException {
+    public final int read(final byte[] b) throws IOException {
         final int readCount = super.read(b);
         if (readCount > 0) this.byteCount += readCount;
         return readCount;
     }
 
-    public int read(final byte[] b, final int off, final int len) throws IOException {
+    public final int read(final byte[] b, final int off, final int len) throws IOException {
         try {
         final int readCount = super.read(b, off, len);
         if (readCount > 0) this.byteCount += readCount;
@@ -80,32 +80,32 @@ public class ByteCountInputStream extends FilterInputStream {
         }
     }
 
-    public int read() throws IOException {
+    public final int read() throws IOException {
         this.byteCount++;
         return super.read();
     }
     
-    public long skip(final long len) throws IOException {
+    public final long skip(final long len) throws IOException {
         final long skipCount = super.skip(len);
         if (skipCount > 0) this.byteCount += skipCount; 
         return skipCount;
     }
 
-    public long getCount() {
+    public final long getCount() {
         return this.byteCount;
     }
     
-    public String getAccountName() {
+    public final String getAccountName() {
         return this.byteCountAccountName;
     }
     
-    public static long getGlobalCount() {
+    public final static long getGlobalCount() {
         synchronized (syncObject) {
             return globalByteCount;
         }
     }
     
-    public static long getAccountCount(final String accountName) {
+    public final static long getAccountCount(final String accountName) {
         synchronized (syncObject) {
             if (byteCountInfo.containsKey(accountName)) {
                 return (byteCountInfo.get(accountName)).longValue();
@@ -114,12 +114,12 @@ public class ByteCountInputStream extends FilterInputStream {
         }
     }
     
-    public void close() throws IOException {
+    public final void close() throws IOException {
         super.close();
         this.finish();
     }
     
-    public void finish() {
+    public final void finish() {
         if (this.finished) return;
         
         this.finished = true;
@@ -137,14 +137,14 @@ public class ByteCountInputStream extends FilterInputStream {
         }        
     }
     
-    public static void resetCount() {
+    public final static void resetCount() {
         synchronized (syncObject) {
             globalByteCount = 0;
             byteCountInfo.clear();
         }
     }
     
-    protected void finalize() throws Throwable {
+    protected final void finalize() throws Throwable {
         if (!this.finished) 
             finish();
         super.finalize();

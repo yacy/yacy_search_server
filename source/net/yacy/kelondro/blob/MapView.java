@@ -141,7 +141,6 @@ public class MapView {
         assert key.length() > 0;
         assert newMap != null;
         key = normalizeKey(key);
-        assert blob != null;
         String s = map2string(newMap, "W" + DateFormatter.formatShortSecond() + " ");
         assert s != null;
         synchronized (this) {

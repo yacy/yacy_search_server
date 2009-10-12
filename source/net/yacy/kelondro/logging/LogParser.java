@@ -31,7 +31,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
-public class LogParser {
+public final class LogParser {
     
     /** the version of the LogParser - <strong>Double</strong>*/
     public static final String PARSER_VERSION           = "version";
@@ -191,7 +191,7 @@ public class LogParser {
     private Matcher m;
     //RegExp for advancedParser
     //private Pattern adv1 = Pattern.compile("\\*Indexed (\\d*) words in URL [\\w:.&?/%-=]* \\[[\\w-_]{12}\\]\\n\\tDescription: ([\\w- ]*)\\n\\tMimeType: ([\\w-_/]*) \\| Size: (\\d*) bytes \\| Anchors: (\\d*)\\n\\tStackingTime: (\\d*) ms \\| ParsingTime: (\\d*) ms \\| IndexingTime: (\\d*) ms \\| StorageTime: (\\d*) ms");
-    private static Pattern adv1 = Pattern.compile(
+    private final static Pattern adv1 = Pattern.compile(
             "\\*Indexed (\\d+) words in URL [\\w:.&/%-~;$\u00A7@=]* \\[[\\w_-]{12}\\]\\r?\\n?" + 
             "\\tDescription: +([\\w-\\.,:!='\"|/+@\\(\\) \\t]*)\\r?\\n?" +
             "\\tMimeType: ([\\w_~/-]*) \\| Charset: ([\\w-]*) \\| Size: (\\d+) bytes \\| Anchors: (\\d+)\\r?\\n?" +
@@ -241,7 +241,7 @@ public class LogParser {
     private long totalParserTime = 0;
     private int totalParserRuns = 0;
     
-    public int parse(final String logLevel, final String logLine) {
+    public final int parse(final String logLevel, final String logLine) {
         final long start = System.currentTimeMillis();
         if (logLevel.equals("INFO")){
             m = i1.matcher (logLine);
@@ -433,7 +433,7 @@ public class LogParser {
         return -1;
     }
 
-    public Hashtable<String, Object> getResults() {
+    public final Hashtable<String, Object> getResults() {
         final Hashtable<String, Object> results = new Hashtable<String, Object>();
         results.put(PARSER_VERSION          , Double.valueOf(parserVersion));
         results.put(URLS_RECEIVED           , Integer.valueOf(urlSum));
@@ -481,15 +481,15 @@ public class LogParser {
         return results;
     }
     
-    public String getParserType() {
+    public final String getParserType() {
         return parserType;
     }
 
-    public double getParserVersion() {
+    public final double getParserVersion() {
         return parserVersion;
     }
 
-    public void printResults() {
+    public final void printResults() {
         if(rankingDistributionCount == 0) rankingDistributionCount = 1;
         if(DHTSelectionWordsTimeCount == 0) DHTSelectionWordsTimeCount = 1;
         if(indexedSites != 0) indexedSites++;

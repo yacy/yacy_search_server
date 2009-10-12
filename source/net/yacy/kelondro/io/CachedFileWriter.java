@@ -27,8 +27,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
-
-
 public final class CachedFileWriter extends AbstractWriter implements Writer {
 
     private RandomAccessFile RAFile;
@@ -45,23 +43,23 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
         this.cachelen = 0;
     }	
     
-    public synchronized long length() throws IOException {
+    public final synchronized long length() throws IOException {
         checkReopen();
         return this.RAFile.length();
     }
     
-    public synchronized void setLength(long length) throws IOException {
+    public final synchronized void setLength(long length) throws IOException {
         checkReopen();
         cachelen = 0;
         RAFile.setLength(length);
     }
     
-    public synchronized long available() throws IOException {
+    public final synchronized long available() throws IOException {
         checkReopen();
         return this.length() - RAFile.getFilePointer();
     }
 
-    public synchronized final void readFully(final byte[] b, final int off, int len) throws IOException {
+    public final synchronized void readFully(final byte[] b, final int off, int len) throws IOException {
         checkReopen();
         long seek = RAFile.getFilePointer();
         if (cache != null && cachestart <= seek && cachelen - seek + cachestart >= len) {
@@ -97,7 +95,7 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
         
     }
 
-    public synchronized void write(final byte[] b, final int off, final int len) throws IOException {
+    public final synchronized void write(final byte[] b, final int off, final int len) throws IOException {
         checkReopen();
         //assert len > 0;
         // write to file
@@ -127,12 +125,12 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
         RAFile.write(b, off, len);
     }
 
-    public synchronized void seek(final long pos) throws IOException {
+    public final synchronized void seek(final long pos) throws IOException {
         checkReopen();
         RAFile.seek(pos);
     }
 
-    public synchronized void close() {
+    public final synchronized void close() {
         if (RAFile != null) try {
             try{RAFile.getChannel().close();} catch (IOException e) {}
             //System.out.println("***DEBUG*** closed file " + this.file + ", FD is " + ((RAFile.getFD().valid()) ? "VALID" : "VOID") + ", channel is " + ((RAFile.getChannel().isOpen()) ? "OPEN" : "CLOSE"));
@@ -145,7 +143,7 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
         this.RAFile = null;
     }
     
-    private void checkReopen() {
+    private final void checkReopen() {
         if (this.RAFile != null) return;
         // re-open the file
         try {
@@ -158,7 +156,7 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
         this.cachelen = 0;
     }
 
-    protected void finalize() throws Throwable {
+    protected final void finalize() throws Throwable {
         this.close();
         super.finalize();
     }

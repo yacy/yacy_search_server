@@ -53,7 +53,7 @@ public final class ConsoleOutErrHandler extends Handler {
     /**
      * Get any configuration properties set
      */
-    private void configure() {
+    private final void configure() {
         final LogManager manager = LogManager.getLogManager();
         final String className = getClass().getName();
         
@@ -84,7 +84,7 @@ public final class ConsoleOutErrHandler extends Handler {
         
     }    
     
-    private Level parseLevel(final String levelName) {
+    private final Level parseLevel(final String levelName) {
         try {
             return (levelName == null) ? Level.INFO : Level.parse(levelName);
         } catch (final Exception e) {
@@ -92,7 +92,7 @@ public final class ConsoleOutErrHandler extends Handler {
         }
     }
     
-    private Filter makeFilter(final String name) {
+    private final Filter makeFilter(final String name) {
         if (name == null) return null;
         
         Filter f = null;
@@ -107,7 +107,7 @@ public final class ConsoleOutErrHandler extends Handler {
         return f;
     }    
     
-    private Formatter makeFormatter(final String name) {
+    private final Formatter makeFormatter(final String name) {
         if (name == null) return null;
         
         Formatter f = null;
@@ -121,7 +121,7 @@ public final class ConsoleOutErrHandler extends Handler {
     }    
     
     
-    public void publish(final LogRecord record) {
+    public final void publish(final LogRecord record) {
         if (!isLoggable(record)) return;
         
         if (this.ignoreCtrlChr) {
@@ -171,7 +171,7 @@ public final class ConsoleOutErrHandler extends Handler {
         }
     }
 
-    public void setFilter(final Filter newFilter) throws SecurityException {
+    public final void setFilter(final Filter newFilter) throws SecurityException {
         super.setFilter(newFilter);
         if (newFilter == null) return;
         try {
