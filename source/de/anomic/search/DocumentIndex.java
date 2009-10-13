@@ -31,8 +31,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -57,10 +57,10 @@ public class DocumentIndex extends Segment {
     BlockingQueue<File> queue;
     Worker[] worker;
     
-    public DocumentIndex(Log log, final File segmentPath) throws IOException {
-        super(log, segmentPath, 100000, targetFileSize * 4 - 1, false, false);
+    public DocumentIndex(Log log, final File segmentPath, int cachesize) throws IOException {
+        super(log, segmentPath, cachesize, targetFileSize * 4 - 1, false, false);
         int cores = Runtime.getRuntime().availableProcessors() + 1;
-        this.queue = new ArrayBlockingQueue<File>(cores * 2);
+        this.queue = new LinkedBlockingQueue<File>(cores * 300);
         this.worker = new Worker[cores];
         for (int i = 0; i < cores; i++) {
             this.worker[i] = new Worker();
@@ -68,8 +68,8 @@ public class DocumentIndex extends Segment {
         }
     }
     
-    public DocumentIndex(final File segmentPath) throws IOException {
-        this(new Log("DocumentIndex"), segmentPath);
+    public DocumentIndex(final File segmentPath, int cachesize) throws IOException {
+        this(new Log("DocumentIndex"), segmentPath, cachesize);
     }
 	
     class Worker extends Thread {
@@ -229,14 +229,14 @@ public class DocumentIndex extends Segment {
         try {
             if (args[1].equals("add")) {
                 File f = new File(args[2]);
-                DocumentIndex di = new DocumentIndex(segmentPath);
+                DocumentIndex di = new DocumentIndex(segmentPath, 100000);
                 di.addConcurrent(f);
                 di.close();
             } else {
                 String query = "";
                 for (int i = 2; i < args.length; i++) query += args[i];
                 query.trim();
-                DocumentIndex di = new DocumentIndex(segmentPath);
+                DocumentIndex di = new DocumentIndex(segmentPath, 100000);
                 ArrayList<File> results = di.find(query);
                 for (File f: results) {
                     if (f != null) System.out.println(f.toString());
