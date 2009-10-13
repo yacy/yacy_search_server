@@ -4,8 +4,8 @@
 //
 //(C) 2006 by Martin Thelian
 //
-//last change: $LastChangedDate: 2006-05-12 16:35:56 +0200 (Fr, 12 Mai 2006) $ by $LastChangedBy: theli $
-//Revision: $LastChangedRevision: 2086 $
+//last change: $LastChangedDate$ by $LastChangedBy$
+//Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by

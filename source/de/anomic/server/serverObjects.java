@@ -5,9 +5,9 @@
 //Frankfurt, Germany, 2004
 //(C) changes by Bjoern 'fuchs' Krombholz
 //
-// $LastChangedDate:  $
-// $LastChangedRevision:  $
-// $LastChangedBy:  $
+// $LastChangedDate$
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -84,6 +84,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
      * @return The value that was added to the map. 
      * @see java.util.Hashtable#put(K, V)
      */
+    @Override
     public String put(final String key, final String value) {
         if (key == null) {
             // this does nothing
@@ -287,8 +288,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     
     public boolean hasValue(final String key) {
         final String s = super.get(key);
-        if (s == null) return false;
-        if (s == "") return false;
+        if (s == null || s.length() < 1) return false;
         return true;
     }
 
@@ -347,6 +347,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         this.localized = loc;
     }
 
+    @Override
     public Object clone() {
         return super.clone();
     }

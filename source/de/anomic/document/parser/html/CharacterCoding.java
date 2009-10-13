@@ -30,6 +30,7 @@ public class CharacterCoding {
 
     private static final char amp_unicode = "\u0026".charAt(0);
     private static final String amp_html = "&amp;";
+    private static final String space_html = "&nbsp;";
     
     private static final String[] mapping4xml = {
         "\"","&quot;",      //quotation mark
@@ -253,6 +254,10 @@ public class CharacterCoding {
                 sb.append(amp_unicode);
                 continue;
             }
+            if (s.equals(space_html)) {
+                sb.append(" ");
+                continue;
+            }
             if ((r = html2unicode4xml.get(s)) != null) {
                 sb.append(r.charValue());
                 continue;
@@ -288,5 +293,9 @@ public class CharacterCoding {
         final String text2 = "encodeUnicode2xml: & \" < >";
         System.out.println(text2);
         System.out.println(unicode2xml(text2, true));
+
+        final String text3 = "space&nbsp;t&auml;st";
+        System.out.println(text3);
+        System.out.println(html2unicode(text3));
     }
 }
