@@ -51,7 +51,6 @@ public class pptParser extends AbstractParser implements Idiom {
     public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
         SUPPORTED_EXTENSIONS.add("ppt");
-        SUPPORTED_EXTENSIONS.add("pptx");
         SUPPORTED_EXTENSIONS.add("pps");
         SUPPORTED_MIME_TYPES.add("application/mspowerpoint");
         SUPPORTED_MIME_TYPES.add("application/powerpoint");

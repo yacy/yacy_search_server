@@ -84,7 +84,7 @@ public class swfParser extends AbstractParser implements Idiom {
                 // seen in log
                 return null;
             } catch (IOException e) {
-                e.printStackTrace();
+                // seems to happen quite often
                 return null;
             } catch (Exception e) {
             	// we have seen a lot of OOM errors in the parser...
