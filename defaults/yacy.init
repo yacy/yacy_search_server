@@ -220,7 +220,7 @@ locale.language=default
 fileHost = localpeer
 
 # specify the path to the MIME matching file table
-mimeConfig = httpd.mime
+mimeTable = defaults/httpd.mime
 
 # a path to the file cache, used for the internal proxy and as crawl buffer
 # This will be used if the server is addressed as a proxy

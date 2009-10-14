@@ -389,7 +389,7 @@ public final class FileUtils {
             final byte[] b = read(f);
             return table(strings(b));
         } catch (final IOException e2) {
-            System.err.println("ERROR: " + f.toString() + " not found in settings path");
+            Log.logSevere("FileUtils", f.toString() + " not found", e2);
             return null;
         }
     }

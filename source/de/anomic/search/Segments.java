@@ -41,7 +41,7 @@ import net.yacy.kelondro.rwi.IndexCell;
 import de.anomic.document.Condenser;
 import de.anomic.document.Document;
 
-public final class Segments implements Iterable<Segment> {
+public class Segments implements Iterable<Segment> {
     
     /**
      * process enumeration type

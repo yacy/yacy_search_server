@@ -144,7 +144,7 @@ public final class HTTPDFileHandler {
 
             if (mimeTable.size() == 0) {
                 // load the mime table
-                final String mimeTablePath = theSwitchboard.getConfig("mimeConfig","");
+                final String mimeTablePath = theSwitchboard.getConfig("mimeTable","");
                 BufferedInputStream mimeTableInputStream = null;
                 try {
                     Log.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);

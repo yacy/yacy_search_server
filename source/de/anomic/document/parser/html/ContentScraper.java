@@ -376,6 +376,8 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
     
     public HashSet<String> getContentLanguages() {
+        // i.e. <meta name="DC.language" content="en" scheme="DCTERMS.RFC3066">
+        // or <meta http-equiv="content-language" content="en">
         String s = metas.get("content-language");
         if (s == null) s = metas.get("dc.language");
         if (s == null) return null;

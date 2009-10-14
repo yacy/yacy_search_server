@@ -32,6 +32,8 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 
+import net.yacy.kelondro.logging.Log;
+
 public class Classification {
 
     private static final HashSet<String> mediaExtSet = new HashSet<String>();
@@ -45,10 +47,12 @@ public class Classification {
     static {
     	// load a list of extensions from file
         BufferedInputStream bufferedIn = null;
+        File mimeFile = new File("defaults/httpd.mime");
+        if (!mimeFile.exists()) mimeFile = new File("config/mime.properties");
         try {
-            ext2mime.load(bufferedIn = new BufferedInputStream(new FileInputStream(new File("httpd.mime"))));
+            ext2mime.load(bufferedIn = new BufferedInputStream(new FileInputStream(mimeFile)));
         } catch (final IOException e) {
-            System.err.println("ERROR: httpd.mime not found in settings path");
+            Log.logSevere("Classification", "httpd.mime not found in " + mimeFile.toString(), e);
         } finally {
             if (bufferedIn != null) try {
                 bufferedIn.close();

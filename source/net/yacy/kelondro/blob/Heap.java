@@ -248,7 +248,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * close the BLOB table
      */
     public synchronized void close(boolean writeIDX) {
-    	if (file != null) {
+    	if (file != null && buffer != null) {
             try {
                 flushBuffer();
             } catch (IOException e) {

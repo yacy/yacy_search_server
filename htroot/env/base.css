@@ -834,6 +834,12 @@ div#api {
   z-index: 100;
 }
 
+div#yacylivesearch {
+  float:right;
+  margin-right: 90px;
+  margin-top: -27px;
+}
+
 div#api span {
   display: none;
 }
