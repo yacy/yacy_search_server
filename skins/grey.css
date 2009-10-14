@@ -26,7 +26,6 @@ a:visited{
 a.MenuItemLink, ul.SubMenu em, .MenuItemLink lock {
   background-color: #d0d0d0;
   color: black;
-
 }
 
 a:hover.MenuItemLink {
@@ -146,7 +145,6 @@ a.bookmarkAction {
 .ProgressBar {
   border: #CAD5E3 solid 1px;
 }
-
 div.ProgressBarFill {
   background-color:#71D500;
 }
@@ -158,6 +156,10 @@ div.ProgressBarFill {
 }
 
 /* Searchresults */
+
+form.search.small h2 {
+  border-bottom:1px solid #CAD5E3;
+}
 
 .searchresults {
   /*border-top:1px #000 dashed;*/
@@ -176,6 +178,10 @@ div.ProgressBarFill {
   color:#999999;
 }
 
+.snippetLoaded strong {
+  background:#dddddd;
+}
+
 .snippetError {
   color:red;
 }
@@ -185,7 +191,7 @@ div.ProgressBarFill {
 .searchHighlight3	{ font-weight: bold; color: #0F0; }
 .searchHighlight4	{ font-weight: bold; color: #0FF; }
 .searchHighlight5	{ font-weight: bold; color: #C90; }
-
+.searchHighlight6	{ font-weight: bold; color: #C9F; }
 
 /* other */
 
@@ -232,6 +238,11 @@ fieldset {
   background-color:#d0d0d0;
   border:1px solid #5f5f5f;
 }
+
+/* input, select, textarea, button {
+  color: black;
+  background-color: white;
+} */
 
 legend {
   background-color:#5f5f5f;

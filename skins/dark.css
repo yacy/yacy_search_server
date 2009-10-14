@@ -1,8 +1,12 @@
-/* Skin */
-body				{ color: #777; background-color: #000; }
+/* Skin dark */
+
+body	{
+    background-color: #000;
+    color: #777;
+}
 
 a:link, a:visited	{ color: #888; }
-a:hover				{ color: #999; }
+a:hover			{ color: #999; }
 
 
 /* Menu */
