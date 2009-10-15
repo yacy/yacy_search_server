@@ -24,16 +24,16 @@
 	<classpathentry kind="lib" path="lib/bcmail-jdk14-139.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk14-139.jar"/>
 	<classpathentry kind="lib" path="lib/commons-codec-1.3.jar"/>
-	<classpathentry kind="lib" path="lib/FontBox-0.1.0-dev.jar"/>
 	<classpathentry kind="lib" path="lib/J7Zip-modified.jar"/>
 	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.7.jar"/>
 	<classpathentry kind="lib" path="lib/jsch-0.1.21.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.9.jar"/>
-	<classpathentry kind="lib" path="lib/PDFBox-0.7.3.jar"/>
 	<classpathentry kind="lib" path="lib/webcat-0.1-swf.jar"/>
 	<classpathentry kind="lib" path="lib/activation.jar"/>
 	<classpathentry kind="lib" path="lib/commons-jxpath-1.3.jar"/>
 	<classpathentry kind="lib" path="libt/junit.jar"/>
+	<classpathentry kind="lib" path="lib/pdfbox-0.8.0-incubating.jar"/>
+	<classpathentry kind="lib" path="lib/fontbox-0.8.0-incubating.jar"/>
 	<classpathentry kind="lib" path="lib/poi-3.5-FINAL-20090928.jar"/>
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.5-FINAL-20090928.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>

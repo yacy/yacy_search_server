@@ -36,16 +36,16 @@ import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.pdfbox.pdfparser.PDFParser;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDDocumentInformation;
+import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
+import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
+import org.apache.pdfbox.util.PDFTextStripper;
+
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
-
-import org.pdfbox.pdfparser.PDFParser;
-import org.pdfbox.pdmodel.PDDocument;
-import org.pdfbox.pdmodel.PDDocumentInformation;
-import org.pdfbox.pdmodel.encryption.AccessPermission;
-import org.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
-import org.pdfbox.util.PDFTextStripper;
 
 import de.anomic.document.AbstractParser;
 import de.anomic.document.Idiom;
