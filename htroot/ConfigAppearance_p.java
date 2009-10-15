@@ -65,17 +65,6 @@ public class ConfigAppearance_p {
             return prop;
         }
 
-        // if there are no skins, use the current style as default
-        // normally only invoked at first start of YaCy
-        if (skinFiles.size() == 0) {
-            try {
-                FileUtils.copy(new File(env.getRootPath(), "htroot/env/style.css"), new File(skinPath, "default.css"));
-                env.setConfig("currentSkin", "default");
-            } catch (final IOException e) {
-                e.printStackTrace();
-            }
-        }
-
         if (post != null) {
             if (post.containsKey("use_button") && post.get("skin") != null) {
                 // change skin

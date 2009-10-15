@@ -841,7 +841,7 @@ externalRedirector=
 
 svnRevision=0
 
-currentSkin=default
+currentSkin=pdblue
 
 # flag to show if pages shall be usable for non-admin users
 # this can be applied to the Surftips.html and yacysearch.html page
