@@ -77,12 +77,20 @@ public class DocumentIndex extends Segment {
     class Worker extends Thread {
         public void run() {
             File f;
+            URIMetadataRow resultRow;
             try {
                 while ((f = queue.take()) != poison) try {
-                    add(f);
-                    if (callback != null) callback.commitIndex(f);
+                    resultRow = add(f);
+                    if (callback != null) {
+                        if (resultRow == null) {
+                            callback.fail(f, "result is null");
+                        } else {
+                            callback.commit(f, resultRow);
+                        }
+                    }
                 } catch (IOException e) {
                     if (e.getMessage().indexOf("cannot parse") < 0) e.printStackTrace();
+                    callback.fail(f, e.getMessage());
                 }
             } catch (InterruptedException e) {}
         }
@@ -229,7 +237,8 @@ public class DocumentIndex extends Segment {
     }
     
     public interface CallbackListener {
-        public void commitIndex(File f);
+        public void commit(File f, URIMetadataRow resultRow);
+        public void fail(File f, String failReason);
     }
     
     public static void main(String[] args) {
@@ -245,8 +254,11 @@ public class DocumentIndex extends Segment {
         File segmentPath = new File(args[0]);
         System.out.println("using index files at " + segmentPath.getAbsolutePath());
         CallbackListener callback = new CallbackListener() {
-            public void commitIndex(File f) {
+            public void commit(File f, URIMetadataRow resultRow) {
                 System.out.println("indexed: " + f.toString());
+            }
+            public void fail(File f, String failReason) {
+                System.out.println("not indexed " + f.toString() + ": " + failReason);
             }
         };
         try {

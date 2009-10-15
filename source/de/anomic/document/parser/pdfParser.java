@@ -109,7 +109,6 @@ public class pdfParser extends AbstractParser implements Idiom {
             checkInterruption();
             
             // creating a text stripper
-            synchronized (SUPPORTED_MIME_TYPES) {
             final PDFTextStripper stripper = new PDFTextStripper();
             theDocument = parser.getPDDocument();
             
@@ -182,7 +181,6 @@ public class pdfParser extends AbstractParser implements Idiom {
             }
             
             return theDoc;
-            }
         }
         catch (final Exception e) {       
             if (e instanceof InterruptedException) throw (InterruptedException) e;
