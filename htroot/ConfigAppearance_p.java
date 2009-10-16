@@ -48,6 +48,7 @@ import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import java.util.Collections;
 
 public class ConfigAppearance_p {
 
@@ -111,7 +112,8 @@ public class ConfigAppearance_p {
         }
 
         // reread skins
-        skinFiles = listManager.getDirListing(skinPath);
+        skinFiles = listManager.getDirListing(skinPath);  // co
+        Collections.sort(skinFiles);
         int count = 0;
         for (String skinFile : skinFiles) {
             if (skinFile.endsWith(".css")) {

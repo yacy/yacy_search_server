@@ -49,6 +49,7 @@ import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import java.util.Collections;
 
 
 public class ConfigLanguage_p {
@@ -111,6 +112,7 @@ public class ConfigLanguage_p {
 
         //reread language files
         langFiles = listManager.getDirListing(langPath);
+        Collections.sort(langFiles);
         final HashMap<String, String> langNames = translator.langMap(env);
         String langKey, langName;
 
