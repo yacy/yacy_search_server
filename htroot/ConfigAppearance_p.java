@@ -112,7 +112,7 @@ public class ConfigAppearance_p {
         }
 
         // reread skins
-        skinFiles = listManager.getDirListing(skinPath);  // co
+        skinFiles = listManager.getDirListing(skinPath);
         Collections.sort(skinFiles);
         int count = 0;
         for (String skinFile : skinFiles) {
