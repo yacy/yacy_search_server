@@ -52,7 +52,9 @@ import java.util.Collections;
 
 public class ConfigAppearance_p {
 
-	public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    private final static String SKIN_FILENAME_FILTER = "^.*\\.css$";
+
+    public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
         final String skinPath = new File(env.getRootPath(), env.getConfig("skinPath", "DATA/SKINS")).toString();
@@ -61,26 +63,42 @@ public class ConfigAppearance_p {
         prop.put("currentskin", "");
         prop.put("status", "0"); // nothing
 
-        List<String> skinFiles = listManager.getDirListing(skinPath);
+        List<String> skinFiles = listManager.getDirListing(skinPath, SKIN_FILENAME_FILTER);
         if (skinFiles == null) {
             return prop;
         }
 
         if (post != null) {
-            if (post.containsKey("use_button") && post.get("skin") != null) {
-                // change skin
-                changeSkin(sb, skinPath, post.get("skin"));
+            String selectedSkin = post.get("skin");
 
+            if (post.containsKey("use_button") && selectedSkin != null) {
+                /* Only change skin if filename is contained in list of filesnames
+                 * read from the skin directory. This is very important to prevent
+                 * directory traversal attacks!
+                 */
+                if (skinFiles.contains(selectedSkin)) {
+                    changeSkin(sb, skinPath, selectedSkin);
+                }
+                
             }
+
             if (post.containsKey("delete_button")) {
-                // delete skin
-                final File skinfile = new File(skinPath, post.get("skin"));
-                FileUtils.deletedelete(skinfile);
+
+                /* Only delete file if filename is contained in list of filesname
+                 * read from the skin directory. This is very important to prevent
+                 * directory traversal attacks!
+                 */
+                if (skinFiles.contains(selectedSkin)) {
+                    final File skinfile = new File(skinPath, selectedSkin);
+                    FileUtils.deletedelete(skinfile);
+                }
 
             }
             if (post.containsKey("install_button")) {
                 // load skin from URL
                 final String url = post.get("url");
+                final File skinFile = new File(skinPath, url.substring(url.lastIndexOf("/"), url.length()));
+
                 Iterator<String> it;
                 try {
                     final DigestURI u = new DigestURI(url, null);
@@ -93,7 +111,6 @@ public class ConfigAppearance_p {
                     return prop;
                 }
                 try {
-                    final File skinFile = new File(skinPath, url.substring(url.lastIndexOf("/"), url.length()));
                     final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(skinFile)));
 
                     while (it.hasNext()) {
@@ -112,7 +129,7 @@ public class ConfigAppearance_p {
         }
 
         // reread skins
-        skinFiles = listManager.getDirListing(skinPath);
+        skinFiles = listManager.getDirListing(skinPath, SKIN_FILENAME_FILTER);
         Collections.sort(skinFiles);
         int count = 0;
         for (String skinFile : skinFiles) {

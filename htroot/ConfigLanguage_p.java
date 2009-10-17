@@ -54,8 +54,10 @@ import java.util.Collections;
 
 public class ConfigLanguage_p {
 
+    private final static String LANG_FILENAME_FILTER = "^.*\\.lng$";
+
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        //listManager.switchboard = (plasmaSwitchboard) env;
+
         final serverObjects prop = new serverObjects();
         final String langPath = env.getConfigPath("locale.work", "DATA/LOCALE/locales").getAbsolutePath();
 
@@ -63,20 +65,35 @@ public class ConfigLanguage_p {
         //prop.put("currentlang", ""); //is done by Translationtemplate
         prop.put("status", "0");//nothing
 
-        List<String> langFiles = listManager.getDirListing(langPath);
+        List<String> langFiles = listManager.getDirListing(langPath, LANG_FILENAME_FILTER);
         if(langFiles == null){
             return prop;
         }
 
         if (post != null){
+            String selectedLanguage = post.get("language");
+
             //change language
-            if(post.containsKey("use_button") && post.get("language") != null){
-                translator.changeLang(env, langPath, post.get("language"));
+            if(post.containsKey("use_button") && selectedLanguage != null){
+                /* Only change language if filename is contained in list of filesnames
+                 * read from the language directory. This is very important to prevent
+                 * directory traversal attacks!
+                 */
+                if (langFiles.contains(selectedLanguage)) {
+                    translator.changeLang(env, langPath, selectedLanguage);
+                }
 
                 //delete language file
             }else if(post.containsKey("delete")){
-                final File langfile= new File(langPath, post.get("language"));
-                FileUtils.deletedelete(langfile);
+
+                /* Only delete file if filename is contained in list of filesnames
+                 * read from the language directory. This is very important to prevent
+                 * directory traversal attacks!
+                 */
+                if (langFiles.contains(selectedLanguage)) {
+                    final File langfile= new File(langPath, selectedLanguage);
+                    FileUtils.deletedelete(langfile);
+                }
 
                 //load language file from URL
             } else if (post.containsKey("url")){
@@ -111,7 +128,7 @@ public class ConfigLanguage_p {
         }
 
         //reread language files
-        langFiles = listManager.getDirListing(langPath);
+        langFiles = listManager.getDirListing(langPath, LANG_FILENAME_FILTER);
         Collections.sort(langFiles);
         final HashMap<String, String> langNames = translator.langMap(env);
         String langKey, langName;
@@ -123,20 +140,18 @@ public class ConfigLanguage_p {
 
         int count = 0;
         for(String langFile : langFiles){
-            if(langFile.endsWith(".lng")){
-                //+1 because of the virtual entry "default" at top
-                langKey = langFile.substring(0, langFile.length() -4);
-                langName = langNames.get(langKey);
-                prop.put("langlist_" + (count + 1) + "_file", langFile);
-                prop.put("langlist_" + (count + 1) + "_name", ((langName == null) ? langKey : langName));
-                if(env.getConfig("locale.language", "default").equals(langKey)) {
-                    prop.put("langlist_" + (count + 1) + "_selected", "selected=\"selected\"");
-                    prop.put("langlist_0_selected", " "); // reset Default
-                } else {
-                    prop.put("langlist_" + (count + 1) + "_selected", " ");
-                }
-                count++;
+            //+1 because of the virtual entry "default" at top
+            langKey = langFile.substring(0, langFile.length() -4);
+            langName = langNames.get(langKey);
+            prop.put("langlist_" + (count + 1) + "_file", langFile);
+            prop.put("langlist_" + (count + 1) + "_name", ((langName == null) ? langKey : langName));
+            if(env.getConfig("locale.language", "default").equals(langKey)) {
+                prop.put("langlist_" + (count + 1) + "_selected", "selected=\"selected\"");
+                prop.put("langlist_0_selected", " "); // reset Default
+            } else {
+                prop.put("langlist_" + (count + 1) + "_selected", " ");
             }
+            count++;
         }
         prop.put("langlist", (count + 1));
 

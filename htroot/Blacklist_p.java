@@ -166,9 +166,9 @@ public class Blacklist_p {
                     return prop;
                 }                   
                 
-                final File BlackListFile = new File(listManager.listsPath, blacklistToUse);
-                if(!BlackListFile.delete()) {
-                    Log.logWarning("Blacklist", "file "+ BlackListFile +" could not be deleted!");
+                final File blackListFile = new File(listManager.listsPath, blacklistToUse);
+                if(!blackListFile.delete()) {
+                    Log.logWarning("Blacklist", "file "+ blackListFile +" could not be deleted!");
                 }
 
                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
