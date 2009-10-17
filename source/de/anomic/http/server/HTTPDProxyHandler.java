@@ -129,7 +129,7 @@ public final class HTTPDProxyHandler {
             final String className = HTTPDProxyHandler.class.getName();
             
             // determining if proxy access logging is enabled
-            final String enabled = manager.getProperty("de.anomic.http.httpdProxyHandler.logging.enabled");
+            final String enabled = manager.getProperty(className + ".logging.enabled");
             if ("true".equalsIgnoreCase(enabled)) {
                 
                 // reading out some needed configuration properties
