@@ -97,7 +97,6 @@ public class ConfigAppearance_p {
             if (post.containsKey("install_button")) {
                 // load skin from URL
                 final String url = post.get("url");
-                final File skinFile = new File(skinPath, url.substring(url.lastIndexOf("/"), url.length()));
 
                 Iterator<String> it;
                 try {
@@ -111,6 +110,7 @@ public class ConfigAppearance_p {
                     return prop;
                 }
                 try {
+                    final File skinFile = new File(skinPath, url.substring(url.lastIndexOf("/"), url.length()));
                     final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(skinFile)));
 
                     while (it.hasNext()) {
