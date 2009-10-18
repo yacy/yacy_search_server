@@ -171,7 +171,7 @@ CLASSPATH=""
 for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 CLASSPATH=".:htroot:$CLASSPATH"
 
-cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH yacy";
+cmdline="$JAVA $JAVA_ARGS -Djava.awt.headless=true -classpath $CLASSPATH net.yacy.yacy";
 if [ $DEBUG -eq 1 ] #debug
 then
 	cmdline=$cmdline

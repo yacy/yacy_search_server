@@ -1,3 +1,4 @@
+package net.yacy;
 // migration.java
 // -----------------------
 // (C) by Alexander Schier

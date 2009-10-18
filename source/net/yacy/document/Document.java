@@ -133,7 +133,15 @@ public class Document {
             final CachedFileOutputStream text, final Map<DigestURI, String> anchors, final HashMap<String, ImageEntry> images) {
         this(location, mimeType, charset, languages, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
-
+    
+    public void setInboundLinks(int il) {
+        this.inboundLinks = il;
+    }
+    
+    public void setOutboundLinks(int ol) {
+        this.outboundLinks = ol;
+    }
+    
     /**
      * compute a set of languages that this document contains
      * the language is not computed using a statistical analysis of the content, only from given metadata that came with the document

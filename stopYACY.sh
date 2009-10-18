@@ -17,7 +17,7 @@ then
 	for N in lib/*.jar; do CLASSPATH="$CLASSPATH$N:"; done	
 	for N in libx/*.jar; do CLASSPATH="$CLASSPATH$N:"; done
 
-	java -classpath classes:htroot:$CLASSPATH yacy -shutdown
+	java -classpath classes:htroot:$CLASSPATH net.yacy.yacy -shutdown
 
 	echo "Please wait until the YaCy daemon process terminates"
 	echo "You can monitor this with 'tail -f DATA/LOG/yacy00.log' and 'fuser log/yacy00.log'"

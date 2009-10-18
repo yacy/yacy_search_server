@@ -8,7 +8,7 @@ For %%X in (libx\*.jar) Do Call %0 CPGEN %%X
 
 Rem Starting yacy
 Echo Generated Classpath:%CLASSPATH%
-javaw -classpath %CLASSPATH% yacy
+javaw -classpath %CLASSPATH% net.yacy.yacy
 Echo You can close the console safely
 
 GoTo :END

@@ -9,7 +9,7 @@ For %%X in (libx/*.jar) Do Call %0 CPGEN libx\%%X
 
 Rem Stopping yacy
 Echo Generated Classpath:%CLASSPATH%
-java -classpath %CLASSPATH% yacy -shutdown
+java -classpath %CLASSPATH% net.yacy.yacy -shutdown
 
 GoTo :END
 

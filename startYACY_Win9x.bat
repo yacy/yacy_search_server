@@ -9,7 +9,7 @@ For %%X in (libx\*.jar) Do Call %0 CPGEN %%X
 
 Rem Starting yacy
 Echo Generated Classpath:%CLASSPATH%
-java -classpath %CLASSPATH% yacy
+java -classpath %CLASSPATH% net.yacy.yacy
 
 GoTo :END
 

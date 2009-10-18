@@ -55,6 +55,7 @@ public class CrawlProfile {
     private final File profileTableFile;
     
     public CrawlProfile(final File file) throws IOException {
+        //System.out.println("loading crawl profile from " + file);
         this.profileTableFile = file;
         profileTableFile.getParentFile().mkdirs();
         final Heap dyn = new Heap(profileTableFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
@@ -63,6 +64,7 @@ public class CrawlProfile {
         entry e;
         while (pi.hasNext()) {
         	e = pi.next();
+        	if (e == null) continue;
         	Log.logInfo("CrawlProfiles", "loaded Profile " + e.handle() + ": " + e.name());
         }
     }

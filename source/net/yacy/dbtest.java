@@ -1,3 +1,4 @@
+package net.yacy;
 // test application
 // shall be used to compare the kelondroDB with other databases
 // with relevance to yacy-specific use cases

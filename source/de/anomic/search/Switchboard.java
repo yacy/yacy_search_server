@@ -1696,6 +1696,14 @@ public final class Switchboard extends serverSwitch {
         }
     }
     
+    public indexingQueueEntry webStructureAnalysis(final indexingQueueEntry in) {
+        in.queueEntry.updateStatus(Response.QUEUE_STATE_STRUCTUREANALYSIS);
+        final Integer[] ioLinks = webStructure.generateCitationReference(in.document, in.condenser, in.queueEntry.lastModified()); // [outlinksSame, outlinksOther]
+        in.document.setInboundLinks(ioLinks[0].intValue());
+        in.document.setOutboundLinks(ioLinks[1].intValue());
+        return in;
+    }
+    
     public void storeDocumentIndex(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_INDEXSTORAGE);
         storeDocumentIndex(in.process, in.queueEntry, in.document, in.condenser);
