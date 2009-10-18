@@ -25,8 +25,8 @@
 // javac -classpath .:../Classes Settings_p.java
 // if the shell's current path is HTROOT
 
-import de.anomic.document.Idiom;
-import de.anomic.document.Parser;
+import net.yacy.document.Idiom;
+import net.yacy.document.Parser;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;

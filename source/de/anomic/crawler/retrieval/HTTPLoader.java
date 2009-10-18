@@ -28,12 +28,12 @@ package de.anomic.crawler.retrieval;
 import java.io.IOException;
 import java.util.Date;
 
+import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.Latency;
 import de.anomic.data.Blacklist;
-import de.anomic.document.Parser;
 import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;

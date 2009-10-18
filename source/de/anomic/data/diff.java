@@ -30,7 +30,8 @@ package de.anomic.data;
 
 import java.util.ArrayList;
 
-import de.anomic.document.parser.html.CharacterCoding;
+import net.yacy.document.parser.html.CharacterCoding;
+
 
 /**
  * This class provides a diff-functionality.

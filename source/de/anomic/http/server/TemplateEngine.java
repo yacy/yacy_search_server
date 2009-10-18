@@ -56,10 +56,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
+
+import net.yacy.document.parser.html.ContentTransformer;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
@@ -122,83 +122,6 @@ import net.yacy.kelondro.util.FileUtils;
  */
 public final class TemplateEngine {
 
-    public  final static byte hash = (byte)'#';
-
-    public  final static byte[] dpdpa = "::".getBytes();
-
-    private final static byte lbr  = (byte)'[';
-    private final static byte rbr  = (byte)']';
-    private final static byte[] pOpen  = {hash, lbr};
-    private final static byte[] pClose = {rbr, hash};
-
-    private final static byte lcbr  = (byte)'{';
-    private final static byte rcbr  = (byte)'}';
-    private final static byte[] mOpen  = {hash, lcbr};
-    private final static byte[] mClose = {rcbr, hash};
-
-    private final static byte lrbr  = (byte)'(';
-    private final static byte rrbr  = (byte)')';
-    private final static byte[] aOpen  = {hash, lrbr};
-    private final static byte[] aClose = {rrbr, hash};
-
-    private final static byte ps  = (byte)'%';
-    private final static byte[] iOpen  = {hash, ps};
-    private final static byte[] iClose = {ps, hash};
-
-    private final static byte[] slash = {(byte)'/'};
-    
-    private final static Object[] meta_quotation = new Object[] {
-        new Object[] {pOpen, pClose},
-        new Object[] {mOpen, mClose},
-        new Object[] {aOpen, aClose},
-        new Object[] {iOpen, iClose}
-    };
-
-    public final static ByteBuffer[] splitQuotations(final ByteBuffer text) {
-        final List<ByteBuffer> l = splitQuotation(text, 0);
-        final ByteBuffer[] sbbs = new ByteBuffer[l.size()];
-        for (int i = 0; i < l.size(); i++) sbbs[i] = l.get(i);
-        return sbbs;
-    }
-
-    private final static List<ByteBuffer> splitQuotation(ByteBuffer text, int qoff) {
-        final ArrayList<ByteBuffer> l = new ArrayList<ByteBuffer>();
-        if (qoff >= meta_quotation.length) {
-            if (text.length() > 0) l.add(text);
-            return l;
-        }
-        int p = -1, q;
-        final byte[] left = (byte[]) ((Object[]) meta_quotation[qoff])[0];
-        final byte[] right = (byte[]) ((Object[]) meta_quotation[qoff])[1];
-        qoff++;
-        while ((text.length() > 0) && ((p = text.indexOf(left)) >= 0)) {
-            q = text.indexOf(right, p + 1);
-            if (q >= 0) {
-                // found a pattern
-                l.addAll(splitQuotation(new ByteBuffer(text.getBytes(0, p)), qoff));
-                l.add(new ByteBuffer(text.getBytes(p, q + right.length - p)));
-                text = new ByteBuffer(text.getBytes(q + right.length));
-            } else {
-                // found only pattern start, no closing parantesis (a syntax error that is silently accepted here)
-                l.addAll(splitQuotation(new ByteBuffer(text.getBytes(0, p)), qoff));
-                l.addAll(splitQuotation(new ByteBuffer(text.getBytes(p)), qoff));
-                text.clear();
-            }
-        }
-
-        // find double-points
-        while ((text.length() > 0) && ((p = text.indexOf(dpdpa)) >= 0)) {
-            l.addAll(splitQuotation(new ByteBuffer(text.getBytes(0, p)), qoff));
-            l.add(new ByteBuffer(dpdpa));
-            l.addAll(splitQuotation(new ByteBuffer(text.getBytes(p + 2)), qoff));
-            text.clear();
-        }
-
-        // add remaining
-        if (text.length() > 0) l.addAll(splitQuotation(text, qoff));
-        return l;
-    }
-
     /**
      * transfer until a specified pattern is found; everything but the pattern is transfered so far
      * the function returns true, if the pattern is found
@@ -254,13 +177,13 @@ public final class TemplateEngine {
         byte[] replacement;
         int bb;
         final ByteBuffer structure = new ByteBuffer();
-        while (transferUntil(pis, out, hash)) {
+        while (transferUntil(pis, out, ContentTransformer.hashChar)) {
             bb = pis.read();
             keyStream.reset();
             
             // #{
-            if ((bb & 0xFF) == lcbr) { //multi
-                if (transferUntil(pis, keyStream, mClose)) { //close tag
+            if ((bb & 0xFF) == ContentTransformer.lcbr) { //multi
+                if (transferUntil(pis, keyStream, ContentTransformer.mClose)) { //close tag
                     //multi_key =  "_" + keyStream.toString(); //for _Key
                     bb = pis.read();
                     if ((bb & 0xFF) != 10){ //kill newline
@@ -270,7 +193,7 @@ public final class TemplateEngine {
                     keyStream.reset(); //reset stream
 
                     //this needs multi_key without prefix
-                    if (transferUntil(pis, keyStream, appendBytes(mOpen,slash,multi_key,mClose))){
+                    if (transferUntil(pis, keyStream, appendBytes(ContentTransformer.mOpen, ContentTransformer.slashChar, multi_key, ContentTransformer.mClose))){
                         bb = pis.read();
                         if((bb & 0xFF) != 10){ //kill newline
                             pis.unread(bb);
@@ -305,11 +228,11 @@ public final class TemplateEngine {
                 }
                 
             // #(
-            } else if ((bb & 0xFF) == lrbr) { //alternative
+            } else if ((bb & 0xFF) == ContentTransformer.lrbr) { //alternative
                 int others=0;
                 final ByteBuffer text= new ByteBuffer();
                 
-                transferUntil(pis, keyStream, aClose);
+                transferUntil(pis, keyStream, ContentTransformer.aClose);
                 key = keyStream.toByteArray(); //Caution: Key does not contain prefix
 
                 keyStream.reset(); //clear
@@ -341,7 +264,7 @@ public final class TemplateEngine {
                         return structure.getBytes();
                     }
                     keyStream.reset();
-                    transferUntil(pis, keyStream, dpdpa);
+                    transferUntil(pis, keyStream, ContentTransformer.dpdpa);
                     pis2 = new PushbackInputStream(new ByteArrayInputStream(keyStream.toByteArray()));
                     structure.append(writeTemplate(pis2, out, pattern, dflt, newPrefix(prefix,key)));
                     transferUntil(pis, keyStream, appendBytes("#(/".getBytes(),key,")#".getBytes("UTF-8"),null));
@@ -351,13 +274,13 @@ public final class TemplateEngine {
                 } else {
                     while(!found){
                         bb=pis.read(); // performance problem? trace always points to this line
-                        if ((bb & 0xFF) == hash){
+                        if ((bb & 0xFF) == ContentTransformer.hashChar){
                             bb=pis.read();
-                            if ((bb & 0xFF) == lrbr){
-                                transferUntil(pis, keyStream, aClose);
+                            if ((bb & 0xFF) == ContentTransformer.lrbr){
+                                transferUntil(pis, keyStream, ContentTransformer.aClose);
 
                                 //reached the end. output last string.                                
-                                if (java.util.Arrays.equals(keyStream.toByteArray(),appendBytes(slash, key, null,null))) {
+                                if (java.util.Arrays.equals(keyStream.toByteArray(),appendBytes(ContentTransformer.slashChar, key, null,null))) {
                                     pis2 = new PushbackInputStream(new ByteArrayInputStream(text.getBytes()));
                                     //this maybe the wrong, but its the last
                                     structure.append('<').append(key).append(" type=\"alternative\" which=\"".getBytes()).append(Integer.toString(whichPattern).getBytes()).append("\" found=\"0\">\n".getBytes());
@@ -366,16 +289,16 @@ public final class TemplateEngine {
                                     found=true;
                                 }else if(others >0 && keyStream.toString().startsWith("/")){ //close nested
                                     others--;
-                                    text.append(aOpen).append(keyStream.toByteArray()).append(")#".getBytes());
+                                    text.append(ContentTransformer.aOpen).append(keyStream.toByteArray()).append(")#".getBytes());
                                 } else { //nested
                                     others++;
-                                    text.append(aOpen).append(keyStream.toByteArray()).append(")#".getBytes());
+                                    text.append(ContentTransformer.aOpen).append(keyStream.toByteArray()).append(")#".getBytes());
                                 }
                                 keyStream.reset(); //reset stream
                                 continue;
                             } //is not #(
                             pis.unread(bb);//is processed in next loop
-                            bb = (hash);//will be added to text this loop
+                            bb = (ContentTransformer.hashChar);//will be added to text this loop
                             //text += "#";
                         }else if ((bb & 0xFF) == ':' && others==0){//ignore :: in nested Expressions
                             bb=pis.read();
@@ -407,8 +330,8 @@ public final class TemplateEngine {
                 }//if(byName) (else branch)
                 
             // #[
-            } else if ((bb & 0xFF) == lbr) { //normal
-                if (transferUntil(pis, keyStream, pClose)) {
+            } else if ((bb & 0xFF) == ContentTransformer.lbr) { //normal
+                if (transferUntil(pis, keyStream, ContentTransformer.pClose)) {
                     // pattern detected, write replacement
                     key = keyStream.toByteArray();
                     final String patternKey = getPatternKey(prefix, key);
@@ -425,13 +348,13 @@ public final class TemplateEngine {
                 }
                 
             // #%
-            } else if ((bb & 0xFF) == ps) { //include
+            } else if ((bb & 0xFF) == ContentTransformer.pcChar) { //include
                 final ByteBuffer include = new ByteBuffer();                
                 keyStream.reset(); //reset stream
-                if(transferUntil(pis, keyStream, iClose)){
+                if(transferUntil(pis, keyStream, ContentTransformer.iClose)){
                     byte[] filename = keyStream.toByteArray();
                     //if(filename.startsWith( Character.toString((char)lbr) ) && filename.endsWith( Character.toString((char)rbr) )){ //simple pattern for filename
-                    if((filename[0] == lbr) && (filename[filename.length-1] == rbr)){ //simple pattern for filename
+                    if((filename[0] == ContentTransformer.lbr) && (filename[filename.length-1] == ContentTransformer.rbr)){ //simple pattern for filename
                         final byte[] newFilename = new byte[filename.length-2];
                         System.arraycopy(filename, 1, newFilename, 0, newFilename.length);
                         final String patternkey = getPatternKey(prefix, newFilename);
@@ -462,7 +385,7 @@ public final class TemplateEngine {
                 
             // # - no special character. This is simply a '#' without meaning
             } else { //no match, but a single hash (output # + bb)
-                out.write(hash);
+                out.write(ContentTransformer.hashChar);
                 out.write(bb);
             }
         }

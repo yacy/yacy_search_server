@@ -3,10 +3,11 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Set;
 
+import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.document.parser.html.ContentScraper;
+import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -49,11 +50,11 @@ public class getpageinfo_p {
                 }
                 ContentScraper scraper = null;
                 if (u != null) try {
-                    scraper = ContentScraper.parseResource(sb.loader, u, CrawlProfile.CACHE_STRATEGY_IFFRESH);
+                    scraper = LoaderDispatcher.parseResource(sb.loader, u, CrawlProfile.CACHE_STRATEGY_IFFRESH);
                 } catch (final IOException e) {
                     // try again, try harder
                     try {
-                        scraper = ContentScraper.parseResource(sb.loader, u, CrawlProfile.CACHE_STRATEGY_IFEXIST);
+                        scraper = LoaderDispatcher.parseResource(sb.loader, u, CrawlProfile.CACHE_STRATEGY_IFEXIST);
                     } catch (final IOException ee) {
                         // now thats a fail, do nothing                            
                     }

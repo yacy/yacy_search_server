@@ -43,6 +43,13 @@ public class ymageGraph {
     // a ymageGraph is a set of points and borders between the points
     // to reference the points, they must all have a nickname
 
+    public  static final long color_back = 0xFFFFFF;
+    public  static final long color_text = 0x888888;
+    private static final long color_dot = 0x11BB11;
+    private static final long color_line = 0x222222;
+    private static final long color_lineend = 0x333333;
+    
+    
     HashMap<String, coordinate> points;
     HashSet<String> borders;
     double leftmost, rightmost, topmost, bottommost;
@@ -123,12 +130,6 @@ public class ymageGraph {
             System.out.println("border(" + j.next() + ")");
         }
     }
-    
-    public  static final long color_back = 0xFFFFFF;
-    public  static final long color_text = 0xAAAAAA;
-    private static final long color_dot = 0x11CC11;
-    private static final long color_line = 0x333333;
-    private static final long color_lineend = 0x666666;
     
     public ymageMatrix draw(final int width, final int height, final int leftborder, final int rightborder, final int topborder, final int bottomborder) {
         final ymageMatrix image = new ymageMatrix(width, height, ymageMatrix.MODE_SUB, color_back);

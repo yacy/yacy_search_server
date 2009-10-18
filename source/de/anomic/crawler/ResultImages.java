@@ -30,10 +30,10 @@ import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import net.yacy.document.Document;
+import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 
-import de.anomic.document.Document;
-import de.anomic.document.parser.html.ImageEntry;
 
 public class ResultImages {
 

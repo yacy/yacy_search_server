@@ -31,13 +31,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeSet;
 
+import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.kelondro.util.SortStack;
 import net.yacy.kelondro.util.SortStore;
 
-import de.anomic.document.Condenser;
 import de.anomic.search.RankingProcess.NavigatorEntry;
 import de.anomic.search.MediaSnippet;
 import de.anomic.server.serverProfiling;

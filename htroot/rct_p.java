@@ -30,12 +30,12 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.Iterator;
 
+import net.yacy.document.content.RSSMessage;
+import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
 
-import de.anomic.content.RSSMessage;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;

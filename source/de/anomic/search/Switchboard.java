@@ -111,6 +111,14 @@ import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
+import net.yacy.document.Condenser;
+import net.yacy.document.Document;
+import net.yacy.document.Parser;
+import net.yacy.document.ParserException;
+import net.yacy.document.content.DCEntry;
+import net.yacy.document.content.RSSMessage;
+import net.yacy.document.content.file.SurrogateReader;
+import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -129,9 +137,6 @@ import net.yacy.kelondro.workflow.WorkflowJob;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.kelondro.workflow.WorkflowThread;
 
-import de.anomic.content.DCEntry;
-import de.anomic.content.RSSMessage;
-import de.anomic.content.file.SurrogateReader;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlQueues;
 import de.anomic.crawler.CrawlStacker;
@@ -161,11 +166,6 @@ import de.anomic.data.userDB;
 import de.anomic.data.wiki.wikiBoard;
 import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
-import de.anomic.document.Condenser;
-import de.anomic.document.Parser;
-import de.anomic.document.ParserException;
-import de.anomic.document.Document;
-import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.client.Client;
 import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.client.Cache;
@@ -1696,12 +1696,6 @@ public final class Switchboard extends serverSwitch {
         }
     }
     
-    public indexingQueueEntry webStructureAnalysis(final indexingQueueEntry in) {
-        in.queueEntry.updateStatus(Response.QUEUE_STATE_STRUCTUREANALYSIS);
-        in.document.notifyWebStructure(webStructure, in.condenser, in.queueEntry.lastModified());
-        return in;
-    }
-   
     public void storeDocumentIndex(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_INDEXSTORAGE);
         storeDocumentIndex(in.process, in.queueEntry, in.document, in.condenser);
@@ -1839,7 +1833,7 @@ public final class Switchboard extends serverSwitch {
                 final Long resourceContentLength = (Long) resource[1];
                 
                 // parse the resource
-                final Document document = Document.parseDocument(metadata.url(), resourceContentLength.longValue(), resourceContent);
+                final Document document = LoaderDispatcher.parseDocument(metadata.url(), resourceContentLength.longValue(), resourceContent);
                 
                 // get the word set
                 Set<String> words = null;

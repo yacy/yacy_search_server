@@ -55,6 +55,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.yacy.document.parser.xml.RSSFeed;
+import net.yacy.document.parser.xml.RSSReader;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
@@ -73,8 +75,6 @@ import org.apache.commons.httpclient.methods.multipart.Part;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.data.Blacklist;
-import de.anomic.document.parser.xml.RSSFeed;
-import de.anomic.document.parser.xml.RSSReader;
 import de.anomic.http.client.DefaultCharsetFilePart;
 import de.anomic.http.client.DefaultCharsetStringPart;
 import de.anomic.http.client.Client;

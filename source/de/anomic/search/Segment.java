@@ -34,6 +34,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import net.yacy.document.Condenser;
+import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.navigation.NavigationReference;
@@ -53,8 +55,6 @@ import net.yacy.kelondro.util.ISO639;
 
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.Blacklist;
-import de.anomic.document.Condenser;
-import de.anomic.document.Document;
 
 public class Segment {
 

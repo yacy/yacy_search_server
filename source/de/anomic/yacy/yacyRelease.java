@@ -44,20 +44,21 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.document.parser.html.ContentScraper;
+import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.http.server.ResponseContainer;
 import de.anomic.search.Switchboard;
-import de.anomic.server.serverCharBuffer;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSystem;
 import de.anomic.tools.CryptoLib;
@@ -234,7 +235,7 @@ public final class yacyRelease extends yacyVersion {
         // returns the version info if successful, null otherwise
         ContentScraper scraper;
         try {
-            scraper = ContentScraper.parseResource(Switchboard.getSwitchboard().loader, location.getLocationURL(), CrawlProfile.CACHE_STRATEGY_NOCACHE);
+            scraper = LoaderDispatcher.parseResource(Switchboard.getSwitchboard().loader, location.getLocationURL(), CrawlProfile.CACHE_STRATEGY_NOCACHE);
         } catch (final IOException e) {
             return null;
         }
@@ -359,8 +360,8 @@ public final class yacyRelease extends yacyVersion {
     public boolean checkSignature() {
     if(releaseFile != null) {
         try {
-        serverCharBuffer signBuffer;
-        signBuffer = new serverCharBuffer(getSignatureFile());
+        CharBuffer signBuffer;
+        signBuffer = new CharBuffer(getSignatureFile());
         byte[] signByteBuffer = Base64Order.standardCoder.decode(signBuffer.toString().trim());
         CryptoLib cl = new CryptoLib();
         for(yacyUpdateLocation updateLocation : latestReleaseLocations) {

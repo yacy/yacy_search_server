@@ -224,6 +224,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             System.out.println("Error while initializing containerMerge.NoSuchMethodException: " + e.getMessage());
             meth = null;
         }
+        assert meth != null;
         containerMergeMethod = meth;
     }
 

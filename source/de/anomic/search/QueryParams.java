@@ -30,6 +30,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import net.yacy.document.Condenser;
+import net.yacy.document.parser.html.AbstractScraper;
+import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.order.Base64Order;
@@ -37,9 +40,6 @@ import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.SetTools;
 
-import de.anomic.document.Condenser;
-import de.anomic.document.parser.html.AbstractScraper;
-import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.yacy.yacySeed;
 
 public final class QueryParams {

@@ -3,10 +3,10 @@
 import java.util.Date;
 import java.util.Iterator;
 
+import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.data.bookmarksDB;
-import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;

@@ -2,6 +2,8 @@ package de.anomic.document.parser;
 
 import java.nio.charset.Charset;
 
+import net.yacy.document.parser.htmlParser;
+
 import junit.framework.TestCase;
 
 public class htmlParserTest extends TestCase {

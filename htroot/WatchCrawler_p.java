@@ -36,6 +36,8 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -45,8 +47,6 @@ import de.anomic.crawler.ZURL;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
-import de.anomic.document.parser.html.ContentScraper;
-import de.anomic.document.parser.html.TransformerWriter;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;

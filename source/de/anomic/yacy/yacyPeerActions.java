@@ -27,12 +27,12 @@ package de.anomic.yacy;
 import java.io.IOException;
 import java.util.HashMap;
 
+import net.yacy.document.content.RSSMessage;
+import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.MapTools;
 
-import de.anomic.content.RSSMessage;
-import de.anomic.document.parser.xml.RSSFeed;
 
 public class yacyPeerActions {
    

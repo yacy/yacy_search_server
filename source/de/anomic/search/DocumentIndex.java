@@ -34,14 +34,14 @@ import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import net.yacy.document.Condenser;
+import net.yacy.document.Document;
+import net.yacy.document.Parser;
+import net.yacy.document.ParserException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 
-import de.anomic.document.Condenser;
-import de.anomic.document.Document;
-import de.anomic.document.Parser;
-import de.anomic.document.ParserException;
 
 /**
  * convenience class to access the yacycore library from outside of yacy to put files into the index

@@ -26,6 +26,9 @@
 
 package de.anomic.tools;
 
+import net.yacy.document.Document;
+import net.yacy.document.Parser;
+import net.yacy.document.ParserException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
@@ -62,9 +65,6 @@ import java.util.concurrent.TimeoutException;
 
 import de.anomic.data.wiki.wikiCode;
 import de.anomic.data.wiki.wikiParser;
-import de.anomic.document.Parser;
-import de.anomic.document.ParserException;
-import de.anomic.document.Document;
 
 /*
  * this class provides data structures to read a mediawiki dump file in xml format

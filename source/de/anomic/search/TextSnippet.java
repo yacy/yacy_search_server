@@ -35,6 +35,10 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.yacy.document.Condenser;
+import net.yacy.document.Document;
+import net.yacy.document.ParserException;
+import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -44,11 +48,8 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.SetTools;
 
+import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.document.Condenser;
-import de.anomic.document.Document;
-import de.anomic.document.ParserException;
-import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.client.Cache;
 import de.anomic.http.server.ResponseHeader;
 import de.anomic.yacy.yacySearch;
@@ -387,7 +388,7 @@ public class TextSnippet {
          * =========================================================================== */
         Document document = null;
         try {
-             document = Document.parseDocument(url, resContentLength, resContent, responseHeader);
+             document = LoaderDispatcher.parseDocument(url, resContentLength, resContent, responseHeader);
         } catch (final ParserException e) {
             return new TextSnippet(url, null, ERROR_PARSER_FAILED, queryhashes, e.getMessage()); // cannot be parsed
         } finally {

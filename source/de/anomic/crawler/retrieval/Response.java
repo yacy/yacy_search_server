@@ -28,12 +28,12 @@ package de.anomic.crawler.retrieval;
 
 import java.util.Date;
 
+import net.yacy.document.Classification;
+import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.document.Classification;
-import de.anomic.document.Parser;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.http.server.ResponseHeader;

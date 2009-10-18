@@ -55,6 +55,8 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.blob.Heap;
 import net.yacy.kelondro.blob.MapView;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -76,8 +78,6 @@ import org.xml.sax.SAXException;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.document.parser.html.ContentScraper;
-import de.anomic.document.parser.html.TransformerWriter;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacyNewsPool;

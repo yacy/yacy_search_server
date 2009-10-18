@@ -36,6 +36,7 @@ import java.util.Properties;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.Digest;
@@ -47,7 +48,6 @@ import net.yacy.kelondro.util.MapTools;
 
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.search.QueryParams;
-import de.anomic.server.serverCharBuffer;
 import de.anomic.tools.crypt;
 
 public class URIMetadataRow implements URIMetadata {
@@ -204,7 +204,7 @@ public class URIMetadataRow implements URIMetadata {
     }
     
     public static byte[] encodeComp(final DigestURI url, final String dc_title, final String dc_creator, final String dc_subject, final String ETag) {
-        final serverCharBuffer s = new serverCharBuffer(200);
+        final CharBuffer s = new CharBuffer(200);
         s.append(url.toNormalform(false, true)).append(10);
         s.append(dc_title).append(10);
         s.append(dc_creator).append(10);

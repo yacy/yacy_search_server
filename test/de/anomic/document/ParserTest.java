@@ -2,6 +2,8 @@ package de.anomic.document;
 
 import static org.junit.Assert.*;
 import static org.junit.matchers.JUnitMatchers.*;
+import net.yacy.document.Document;
+import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.junit.Test;
@@ -11,13 +13,11 @@ import java.io.FileInputStream;
 import java.io.Reader;
 import java.io.InputStreamReader;
 
-import de.anomic.document.Document;
-import de.anomic.document.Parser;
 
 public class ParserTest {
 
 	@Test public void testParsers() throws java.io.FileNotFoundException, java.lang.InterruptedException,
-		de.anomic.document.ParserException, java.net.MalformedURLException,
+		net.yacy.document.ParserException, java.net.MalformedURLException,
 	       java.io.UnsupportedEncodingException, java.io.IOException	{
 		String[][] testFiles = new String[][] {
 			// meaning:  filename in test/parsertest, mimetype, title, creator, description, 

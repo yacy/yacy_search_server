@@ -33,6 +33,10 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.document.Condenser;
+import net.yacy.document.Document;
+import net.yacy.document.content.RSSMessage;
+import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
@@ -44,14 +48,10 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.kelondro.util.ISO639;
 
-import de.anomic.content.RSSMessage;
 import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.data.DidYouMean;
 import de.anomic.data.LibraryProvider;
 import de.anomic.data.Location;
-import de.anomic.document.Condenser;
-import de.anomic.document.Document;
-import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.QueryParams;

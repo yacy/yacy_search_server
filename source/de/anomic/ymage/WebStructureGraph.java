@@ -37,6 +37,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.document.Condenser;
+import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -44,8 +46,6 @@ import net.yacy.kelondro.order.MicroDate;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.document.Condenser;
-import de.anomic.document.Document;
 
 public class WebStructureGraph {
 
@@ -58,7 +58,7 @@ public class WebStructureGraph {
     private final Log    log;
     private final File         rankingPath, structureFile;
     private final String       crlFile, crgFile;
-    TreeMap<String, String> structure_old, structure_new; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
+    private TreeMap<String, String> structure_old, structure_new; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
     
     public WebStructureGraph(final Log log, final File rankingPath, final String crlFile, final String crgFile, final File structureFile) {
         this.log = log;

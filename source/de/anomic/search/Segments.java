@@ -32,14 +32,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import net.yacy.document.Condenser;
+import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.IndexCell;
 
-import de.anomic.document.Condenser;
-import de.anomic.document.Document;
 
 public class Segments implements Iterable<Segment> {
     

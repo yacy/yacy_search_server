@@ -29,12 +29,12 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import net.yacy.document.Document;
+import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.retrieval.LoaderDispatcher;
-import de.anomic.document.Document;
-import de.anomic.document.parser.html.ImageEntry;
 
 public class MediaSnippet {
     public int type;

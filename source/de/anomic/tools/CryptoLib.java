@@ -46,9 +46,9 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.order.Base64Order;
 
-import de.anomic.server.serverCharBuffer;
 
 /**
  * Tool functions to sign and verify files and generate keys
@@ -141,7 +141,7 @@ public class CryptoLib {
 
 	    } else if(args[0].equals("--sign") && args.length==3) {
 		CryptoLib cl = new CryptoLib();
-		serverCharBuffer privKeyBuffer = new serverCharBuffer(new File(args[1]));
+		CharBuffer privKeyBuffer = new CharBuffer(new File(args[1]));
 		byte[] privKeyByteBuffer = Base64Order.standardCoder.decode(privKeyBuffer.toString());
 		PrivateKey privKey = cl.getPrivateKeyFromBytes(privKeyByteBuffer);
 
@@ -153,13 +153,13 @@ public class CryptoLib {
 		signFile.close();
 	    } else if(args[0].equals("--verify") && args.length==3) {
 		CryptoLib cl = new CryptoLib();
-		serverCharBuffer pubKeyBuffer = new serverCharBuffer(new File(args[1]));
+		CharBuffer pubKeyBuffer = new CharBuffer(new File(args[1]));
 		byte[] pubKeyByteBuffer = Base64Order.standardCoder.decode(pubKeyBuffer.toString().trim());
 		PublicKey pubKey = cl.getPublicKeyFromBytes(pubKeyByteBuffer);
 
 		FileInputStream dataStream = new FileInputStream(args[2]);
 
-		serverCharBuffer signBuffer = new serverCharBuffer(new File(args[2] + ".sig"));
+		CharBuffer signBuffer = new CharBuffer(new File(args[2] + ".sig"));
 		byte[] signByteBuffer = Base64Order.standardCoder.decode(signBuffer.toString().trim());
 		if(cl.verifySignature(pubKey, dataStream, signByteBuffer)) {
 		    System.out.println("Signature OK!");

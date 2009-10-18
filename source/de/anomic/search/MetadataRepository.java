@@ -38,6 +38,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReference;
@@ -51,7 +52,6 @@ import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.ScoreCluster;
 
 import de.anomic.data.Blacklist;
-import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.client.Client;
 import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.server.ResponseContainer;

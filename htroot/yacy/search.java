@@ -34,6 +34,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import net.yacy.document.content.RSSMessage;
+import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.order.Base64Order;
@@ -42,8 +44,6 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.SortStack;
 import net.yacy.kelondro.util.ISO639;
 
-import de.anomic.content.RSSMessage;
-import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.net.natLib;

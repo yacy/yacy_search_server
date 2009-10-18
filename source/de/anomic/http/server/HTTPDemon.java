@@ -50,6 +50,7 @@ import java.util.StringTokenizer;
 import java.util.Map.Entry;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -72,7 +73,6 @@ import org.apache.commons.httpclient.ChunkedInputStream;
 import org.apache.commons.httpclient.ContentLengthInputStream;
 
 import de.anomic.data.userDB;
-import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverHandler;

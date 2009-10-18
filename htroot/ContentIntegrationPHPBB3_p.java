@@ -24,11 +24,11 @@
 
 import java.io.File;
 
+import net.yacy.document.content.dao.Dao;
+import net.yacy.document.content.dao.ImportDump;
+import net.yacy.document.content.dao.PhpBB3Dao;
 import net.yacy.kelondro.util.DateFormatter;
 
-import de.anomic.content.dao.Dao;
-import de.anomic.content.dao.ImportDump;
-import de.anomic.content.dao.PhpBB3Dao;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;

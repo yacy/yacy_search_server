@@ -37,10 +37,10 @@ import java.util.Map.Entry;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 
-import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;

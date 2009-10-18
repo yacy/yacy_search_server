@@ -59,6 +59,7 @@ public class MergeIterator<E> implements CloneableIterator<E> {
     public MergeIterator<E> clone(final Object modifier) {
         assert a != null;
         assert b != null;
+        assert merger != null;
         return new MergeIterator<E>(a.clone(modifier), b.clone(modifier), comp, merger, up);
     }
     
@@ -142,6 +143,7 @@ public class MergeIterator<E> implements CloneableIterator<E> {
         if (!(iiterators.hasNext())) return null;
         final CloneableIterator<A> one = iiterators.next();
         if (!(iiterators.hasNext())) return one;
+        assert merger != null;
         return new MergeIterator<A>(one, cascade(iiterators, c, merger, up), c, merger, up);
     }
     
@@ -158,6 +160,7 @@ public class MergeIterator<E> implements CloneableIterator<E> {
             System.out.println("Error while initializing simpleMerge (3): " + e.getMessage());
             meth = null;
         }
+        assert meth != null;
         simpleMerge = meth; 
     }
     

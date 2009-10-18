@@ -30,10 +30,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
+import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.document.parser.html.CharacterCoding;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;

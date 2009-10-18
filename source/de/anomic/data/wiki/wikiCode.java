@@ -32,7 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import de.anomic.document.parser.html.CharacterCoding;
+import net.yacy.document.parser.html.CharacterCoding;
+
 import de.anomic.server.serverCore;
 
 /** This class provides methods to handle texts that have been posted in the yacyWiki or other

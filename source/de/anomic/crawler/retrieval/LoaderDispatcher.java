@@ -29,6 +29,7 @@ package de.anomic.crawler.retrieval;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Writer;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
@@ -36,13 +37,17 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.document.Document;
+import net.yacy.document.Parser;
+import net.yacy.document.ParserException;
+import net.yacy.document.parser.html.ContentScraper;
+import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.document.Document;
-import de.anomic.document.ParserException;
 import de.anomic.http.client.Cache;
+import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.http.server.ResponseHeader;
@@ -352,7 +357,7 @@ public final class LoaderDispatcher {
         // parse resource
         Document document = null;
         try {
-            document = Document.parseDocument(url, resContentLength, resContent, responseHeader);            
+            document = parseDocument(url, resContentLength, resContent, responseHeader);            
         } catch (final ParserException e) {
             Log.logFine("snippet fetch", "parser error " + e.getMessage() + " for url " + url);
             return null;
@@ -362,6 +367,75 @@ public final class LoaderDispatcher {
         return document;
     }
     
+    /**
+     * Parse the resource
+     * @param url the URL of the resource
+     * @param contentLength the contentLength of the resource
+     * @param resourceStream the resource body as stream
+     * @param docInfo metadata about the resource
+     * @return the extracted data
+     * @throws ParserException
+     */
+    public static Document parseDocument(final DigestURI url, final long contentLength, final InputStream resourceStream, ResponseHeader responseHeader) throws ParserException {
+        try {
+            if (resourceStream == null) return null;
+
+            // STEP 1: if no resource metadata is available, try to load it from cache 
+            if (responseHeader == null) {
+                // try to get the header from the htcache directory
+                try {                    
+                    responseHeader = Cache.getResponseHeader(url);
+                } catch (final Exception e) {
+                    // ignore this. resource info loading failed
+                }   
+            }
+            
+            // STEP 2: if the metadata is still null try to download it from web
+            if ((responseHeader == null) && (url.getProtocol().startsWith("http"))) {
+                // TODO: we need a better solution here
+                // e.g. encapsulate this in the crawlLoader class
+                
+                // getting URL mimeType
+                try {
+                    responseHeader = Client.whead(url.toString());
+                } catch (final Exception e) {
+                    // ingore this. http header download failed
+                } 
+            }
+
+            // STEP 3: if the metadata is still null try to guess the mimeType of the resource
+            String supportError = Parser.supports(url, responseHeader == null ? null : responseHeader.mime());
+            if (supportError != null) {
+                return null;
+            }
+            if (responseHeader == null) {
+                return Parser.parseSource(url, null, null, contentLength, resourceStream);
+            }
+            return Parser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), contentLength, resourceStream);
+        } catch (final InterruptedException e) {
+            // interruption of thread detected
+            return null;
+        }
+    }
+    
+    public static Document parseDocument(final DigestURI url, final long contentLength, final InputStream resourceStream) throws ParserException {
+        return parseDocument(url, contentLength, resourceStream, null);
+    }
+    
+
+    public static ContentScraper parseResource(final LoaderDispatcher loader, final DigestURI location, int cachePolicy) throws IOException {
+        // load page
+        Response r = loader.load(location, true, false, cachePolicy);
+        byte[] page = (r == null) ? null : r.getContent();
+        if (page == null) throw new IOException("no response from url " + location.toString());
+        
+        // scrape content
+        final ContentScraper scraper = new ContentScraper(location);
+        final Writer writer = new TransformerWriter(null, null, scraper, null, false);
+        writer.write(new String(page, "UTF-8"));
+        
+        return scraper;
+    }
 
     public synchronized void cleanupAccessTimeTable(long timeout) {
     	final Iterator<Map.Entry<String, Long>> i = accessTime.entrySet().iterator();

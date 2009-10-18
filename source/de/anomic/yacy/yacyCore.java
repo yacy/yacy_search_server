@@ -48,12 +48,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import net.yacy.document.content.RSSMessage;
+import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 
-import de.anomic.content.RSSMessage;
-import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverSemaphore;

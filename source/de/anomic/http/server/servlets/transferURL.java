@@ -5,12 +5,12 @@ package de.anomic.http.server.servlets;
 import java.io.IOException;
 import java.text.ParseException;
 
+import net.yacy.document.content.RSSMessage;
+import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.util.DateFormatter;
 
-import de.anomic.content.RSSMessage;
 import de.anomic.data.Blacklist;
-import de.anomic.document.parser.xml.RSSFeed;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;

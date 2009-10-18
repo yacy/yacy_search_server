@@ -32,12 +32,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
+import net.yacy.document.Parser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.crawler.Latency;
-import de.anomic.document.Parser;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.http.server.ResponseHeader;
