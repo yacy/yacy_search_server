@@ -392,7 +392,7 @@
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${htroot}"/>
-	<pathelement location="${libt}/junit.jar" />
+	<pathelement location="${libt}/junit-4.7.jar" />
         <fileset dir="${lib}" includes="**/*.jar" />
       </classpath>
       <compilerarg value="-Xlint"/>
@@ -411,7 +411,7 @@
         <pathelement location="${test}"/>
         <pathelement location="${build}"/>
         <pathelement location="${htroot}"/>
-	<pathelement location="${libt}/junit.jar" />
+	<pathelement location="${libt}/junit-4.7.jar" />
         <fileset dir="${lib}" includes="**/*.jar" />
       </classpath>
     </junit>
