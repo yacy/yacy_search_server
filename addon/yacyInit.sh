@@ -69,7 +69,7 @@ case "$1" in
 	start-stop-daemon --start --background --make-pidfile --chuid $USER\
 		--pidfile $PID_FILE --chdir $DAEMON_DIR --startas $JAVA\
 		--nicelevel $NICE_VAL\
-		-- $JAVA_ARGS -classpath $CLASSPATH yacy $DAEMON_DIR
+		-- $JAVA_ARGS -classpath $CLASSPATH net.yacy.yacy $DAEMON_DIR
 	echo "$NAME."
 	;;
 	

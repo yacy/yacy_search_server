@@ -176,7 +176,7 @@ ifdef(`Fedora', `
 ifdef(`ArchLinux', `
 		stat_busy "Starting YaCy Daemon"
 ')dnl
-	ARGS="$JAVA_ARGS -classpath $CLASSPATH yacy"
+	ARGS="$JAVA_ARGS -classpath $CLASSPATH net.yacy.yacy"
 define(`START_YACY_WITH_START_STOP_DAEMON',`
 	/sbin/start-stop-daemon --start --background --make-pidfile --chuid $USER\
 		--pidfile $PID_FILE --chdir $YACY_HOME --startas $JAVA\
@@ -248,7 +248,7 @@ ifdef(`ArchLinux', `
 		stat_busy "Stopping YaCy Daemon"
 ')dnl
 		cd $YACY_HOME
-		cmdline="$JAVA $JAVA_ARGS -cp $CLASSPATH yacy -shutdown"
+		cmdline="$JAVA $JAVA_ARGS -cp $CLASSPATH net.yacy.yacy -shutdown"
 		if [ "$(whoami)" != "$USER" ]; then
 			sudo -u yacy $cmdline &>/dev/null & 
 		else
