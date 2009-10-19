@@ -53,10 +53,10 @@ import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.MemoryTracker;
 import net.yacy.kelondro.util.SortStack;
 
-import de.anomic.server.serverProfiling;
-import de.anomic.ymage.ProfilingGraph;
+import de.anomic.yacy.graphics.ProfilingGraph;
 
 public final class RankingProcess extends Thread {
     
@@ -134,7 +134,7 @@ public final class RankingProcess extends Thread {
                     query.maxDistance);
             this.localSearchInclusion = search.inclusion();
             final ReferenceContainer<WordReference> index = search.joined();
-            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
+            MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
             if (index.size() == 0) {
                 return;
             }
@@ -171,7 +171,7 @@ public final class RankingProcess extends Thread {
         
         // normalize entries
         final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
-        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
+        MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
         
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
@@ -265,7 +265,7 @@ public final class RankingProcess extends Thread {
 		}
 
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
-        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
+        MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false);
     }
     
     /**

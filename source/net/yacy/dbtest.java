@@ -25,8 +25,8 @@ import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.workflow.InstantBusyThread;
+import net.yacy.visualization.ChartPlotter;
 
-import de.anomic.ymage.ymageChart;
 
 public class dbtest {
 
@@ -515,7 +515,7 @@ public class dbtest {
 
 final class memprofiler extends Thread {
     
-    ymageChart memChart;
+    ChartPlotter memChart;
     boolean run;
     File outputFile;
     long start;
@@ -523,11 +523,11 @@ final class memprofiler extends Thread {
     public memprofiler(final int width, final int height, final int expectedTimeSeconds, final File outputFile) {
         this.outputFile = outputFile;
         final int expectedKilobytes = 20 * 1024;//(Runtime.getRuntime().totalMemory() / 1024);
-        memChart = new ymageChart(width, height, "FFFFFF", "000000", "000000", 50, 20, 20, 20, "MEMORY CHART FROM EXECUTION AT " + new Date(), null);
+        memChart = new ChartPlotter(width, height, "FFFFFF", "000000", "000000", 50, 20, 20, 20, "MEMORY CHART FROM EXECUTION AT " + new Date(), null);
         final int timescale = 10; // steps with each 10 seconds
         final int memscale = 1024;
-        memChart.declareDimension(ymageChart.DIMENSION_BOTTOM, timescale, (width - 40) * timescale / expectedTimeSeconds, 0, "FFFFFF", "555555", "SECONDS");
-        memChart.declareDimension(ymageChart.DIMENSION_LEFT, memscale, (height - 40) * memscale / expectedKilobytes, 0, "FFFFFF", "555555", "KILOBYTES");
+        memChart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, timescale, (width - 40) * timescale / expectedTimeSeconds, 0, "FFFFFF", "555555", "SECONDS");
+        memChart.declareDimension(ChartPlotter.DIMENSION_LEFT, memscale, (height - 40) * memscale / expectedKilobytes, 0, "FFFFFF", "555555", "KILOBYTES");
         run = true;
         start = System.currentTimeMillis();
     }
@@ -540,7 +540,7 @@ final class memprofiler extends Thread {
                 memChart.setColor("FF0000");
                 seconds1 = (int) ((System.currentTimeMillis() - start) / 1000);
                 kilobytes1 = (int) (MemoryControl.used() / 1024);
-                memChart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, seconds0, kilobytes0, seconds1, kilobytes1);
+                memChart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_LEFT, seconds0, kilobytes0, seconds1, kilobytes1);
                 seconds0 = seconds1;
                 kilobytes0 = kilobytes1;
                 try {Thread.sleep(100);} catch (final InterruptedException e) {}

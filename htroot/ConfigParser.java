@@ -26,7 +26,7 @@
 // if the shell's current path is HTROOT
 
 import net.yacy.document.Idiom;
-import net.yacy.document.Parser;
+import net.yacy.document.TextParser;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -52,23 +52,23 @@ public class ConfigParser {
             if (post.containsKey("parserSettings")) {
                 post.remove("parserSettings");
                 
-                for (Idiom parser: Parser.idioms()) {
+                for (Idiom parser: TextParser.idioms()) {
                     for (String mimeType: parser.supportedMimeTypes()) {
-                        Parser.grantMime(mimeType, post.get("mimename_" + mimeType, "").equals("on"));
+                        TextParser.grantMime(mimeType, post.get("mimename_" + mimeType, "").equals("on"));
                     }
                 }
-                env.setConfig(SwitchboardConstants.PARSER_MIME_DENY, Parser.getDenyMime());
+                env.setConfig(SwitchboardConstants.PARSER_MIME_DENY, TextParser.getDenyMime());
             }
         }
         
         int i = 0;        
-        for (Idiom parser: Parser.idioms()) {
+        for (Idiom parser: TextParser.idioms()) {
             prop.put("parser_" + i + "_name", parser.getName());
             
             int mimeIdx = 0;
             for (String mimeType: parser.supportedMimeTypes()) {
                 prop.put("parser_" + i + "_mime_" + mimeIdx + "_mimetype", mimeType);
-                prop.put("parser_" + i + "_mime_" + mimeIdx + "_status", (Parser.supportsMime(mimeType) == null) ? 1 : 0);
+                prop.put("parser_" + i + "_mime_" + mimeIdx + "_status", (TextParser.supportsMime(mimeType) == null) ? 1 : 0);
                 mimeIdx++;
             }
             prop.put("parser_" + i + "_mime", mimeIdx);

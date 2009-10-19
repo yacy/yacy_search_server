@@ -33,7 +33,7 @@
 // - removed unused variables
 // - replaced old java classes by new one
 
-package de.anomic.ymage;
+package net.yacy.visualization;
 
 import java.awt.Canvas;
 import java.awt.Image;
@@ -56,6 +56,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+
 
 /**
  *  <p>This class can be used to write an animated GIF file by combining several
@@ -1136,8 +1137,8 @@ public class AnimGifEncoder {
     public static void main(final String[] args) {
         System.setProperty("java.awt.headless", "true");
         
-        final ymageMatrix m = new ymageMatrix(200, 300, ymageMatrix.MODE_SUB, "FFFFFF");
-        ymageMatrix.demoPaint(m);
+        final RasterPlotter m = new RasterPlotter(200, 300, RasterPlotter.MODE_SUB, "FFFFFF");
+        RasterPlotter.demoPaint(m);
         final File file = new File("/Users/admin/Desktop/testimage.gif");
         
         OutputStream os;

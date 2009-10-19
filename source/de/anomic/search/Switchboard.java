@@ -109,11 +109,12 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 import java.util.regex.Pattern;
 
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
-import net.yacy.document.Parser;
+import net.yacy.document.TextParser;
 import net.yacy.document.ParserException;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.RSSMessage;
@@ -130,7 +131,9 @@ import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.MemoryTracker;
 import net.yacy.kelondro.util.SetTools;
+import net.yacy.kelondro.util.OS;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.kelondro.workflow.WorkflowJob;
@@ -178,9 +181,6 @@ import de.anomic.net.UPnP;
 import de.anomic.search.blockrank.CRDistribution;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverProfiling;
-import de.anomic.server.serverSemaphore;
-import de.anomic.server.serverSystem;
 import de.anomic.tools.crypt;
 import de.anomic.tools.CryptoLib;
 import de.anomic.yacy.yacyBuildProperties;
@@ -195,7 +195,7 @@ import de.anomic.yacy.yacyUpdateLocation;
 import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.dht.Dispatcher;
 import de.anomic.yacy.dht.PeerSelection;
-import de.anomic.ymage.WebStructureGraph;
+import de.anomic.yacy.graphics.WebStructureGraph;
 
 public final class Switchboard extends serverSwitch {
     
@@ -273,7 +273,7 @@ public final class Switchboard extends serverSwitch {
     public boolean useTailCache;
     public boolean exceed134217727;
     
-    private final serverSemaphore shutdownSync = new serverSemaphore(0);
+    private final Semaphore shutdownSync = new Semaphore(0);
     private boolean terminate = false;
     
     //private Object  crawlingPausedSync = new Object();
@@ -285,7 +285,7 @@ public final class Switchboard extends serverSwitch {
     
     public Switchboard(final File rootPath, final String initPath, final String configPath, final boolean applyPro) throws IOException {
         super(rootPath, initPath, configPath, applyPro);
-        serverProfiling.startSystemProfiling();
+        MemoryTracker.startSystemProfiling();
         sb=this;
         
         // set loglevel and log
@@ -342,7 +342,7 @@ public final class Switchboard extends serverSwitch {
         // start indexing management
         log.logConfig("Starting Indexing Management");
         final String networkName = getConfig(SwitchboardConstants.NETWORK_NAME, "");
-        final long fileSizeMax = (serverSystem.isWindows) ? sb.getConfigLong("filesize.max.win", (long) Integer.MAX_VALUE) : sb.getConfigLong("filesize.max.other", (long) Integer.MAX_VALUE);
+        final long fileSizeMax = (OS.isWindows) ? sb.getConfigLong("filesize.max.win", (long) Integer.MAX_VALUE) : sb.getConfigLong("filesize.max.other", (long) Integer.MAX_VALUE);
         final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
         final int partitionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
         this.networkRoot = new File(new File(indexPath, networkName), "NETWORK");
@@ -512,7 +512,7 @@ public final class Switchboard extends serverSwitch {
         
         // define a realtime parsable mimetype list
         log.logConfig("Parser: Initializing Mime Type deny list");
-        Parser.setDenyMime(getConfig(SwitchboardConstants.PARSER_MIME_DENY, null));
+        TextParser.setDenyMime(getConfig(SwitchboardConstants.PARSER_MIME_DENY, null));
         
         // start a loader
         log.logConfig("Starting Crawl Loader");
@@ -816,7 +816,7 @@ public final class Switchboard extends serverSwitch {
             overwriteNetworkDefinition();
             final File indexPrimaryPath = getConfigPath(SwitchboardConstants.INDEX_PRIMARY_PATH, SwitchboardConstants.INDEX_PATH_DEFAULT);
             final int wordCacheMaxCount = (int) getConfigLong(SwitchboardConstants.WORDCACHE_MAX_COUNT, 20000);
-            final long fileSizeMax = (serverSystem.isWindows) ? sb.getConfigLong("filesize.max.win", (long) Integer.MAX_VALUE) : sb.getConfigLong("filesize.max.other", (long) Integer.MAX_VALUE);
+            final long fileSizeMax = (OS.isWindows) ? sb.getConfigLong("filesize.max.win", (long) Integer.MAX_VALUE) : sb.getConfigLong("filesize.max.other", (long) Integer.MAX_VALUE);
             final int redundancy = (int) sb.getConfigLong("network.unit.dhtredundancy.senior", 1);
             final int partitionExponent = (int) sb.getConfigLong("network.unit.dht.partitionExponent", 0);
             final String networkName = getConfig(SwitchboardConstants.NETWORK_NAME, "");
@@ -1099,7 +1099,7 @@ public final class Switchboard extends serverSwitch {
     
     public void close() {
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 1: sending termination signal to managed threads:");
-        serverProfiling.stopSystemProfiling();
+        MemoryTracker.stopSystemProfiling();
         terminateAllThreads(true);
         log.logConfig("SWITCHBOARD SHUTDOWN STEP 2: sending termination signal to threaded indexing");
         // closing all still running db importer jobs
@@ -1166,7 +1166,7 @@ public final class Switchboard extends serverSwitch {
 
         // check if the parser supports the mime type
         if (noIndexReason == null) {
-            noIndexReason = Parser.supports(response.url(), response.getMimeType());
+            noIndexReason = TextParser.supports(response.url(), response.getMimeType());
         }
 
         
@@ -1615,7 +1615,7 @@ public final class Switchboard extends serverSwitch {
         
         try {
             // parse the document
-            document = Parser.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), b);
+            document = TextParser.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), b);
             assert(document != null) : "Unexpected error. Parser returned null.";
         } catch (final ParserException e) {
             this.log.logWarning("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());
@@ -1759,10 +1759,10 @@ public final class Switchboard extends serverSwitch {
         if (System.currentTimeMillis() - lastPPMUpdate > 20000) {
             // we don't want to do this too often
             updateMySeed();
-            serverProfiling.update("ppm", Long.valueOf(currentPPM()), true);
+            MemoryTracker.update("ppm", Long.valueOf(currentPPM()), true);
             lastPPMUpdate = System.currentTimeMillis();
         }
-        serverProfiling.update("indexed", queueEntry.url().toNormalform(true, false), false);
+        MemoryTracker.update("indexed", queueEntry.url().toNormalform(true, false), false);
         
         // if this was performed for a remote crawl request, notify requester
         if ((processCase == SwitchboardConstants.PROCESSCASE_6_GLOBAL_CRAWLING) && (queueEntry.initiator() != null)) {
@@ -2067,11 +2067,11 @@ public final class Switchboard extends serverSwitch {
     }
     
     public int currentPPM() {
-        return serverProfiling.countEvents("indexed", 20000) * 3;
+        return MemoryTracker.countEvents("indexed", 20000) * 3;
     }
     
     public String makeDefaultPeerName() {
-        String name = myPublicIP() + "-" + yacyCore.speedKey  + "dpn" + serverSystem.infoKey() + (System.currentTimeMillis() & 99);
+        String name = myPublicIP() + "-" + yacyCore.speedKey  + "dpn" + OS.infoKey() + (System.currentTimeMillis() & 99);
         name = name.replace('.', '-');
         name = name.replace('_', '-');
         name = name.replace(':', '-');
@@ -2196,7 +2196,7 @@ public final class Switchboard extends serverSwitch {
     
     public void terminate() {
         this.terminate = true;
-        this.shutdownSync.V();
+        this.shutdownSync.release();
     }
     
     public boolean isTerminated() {
@@ -2204,7 +2204,7 @@ public final class Switchboard extends serverSwitch {
     }
     
     public boolean waitForShutdown() throws InterruptedException {
-        this.shutdownSync.P();
+        this.shutdownSync.acquire();
         return this.terminate;
     }
 

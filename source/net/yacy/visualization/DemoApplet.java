@@ -1,11 +1,12 @@
-package de.anomic.ymage;
+package net.yacy.visualization;
 
 import java.applet.Applet;
 import java.awt.Dimension;
 import java.awt.Graphics;
 
 
-public class ymageDemoApplet extends Applet implements Runnable {
+
+public class DemoApplet extends Applet implements Runnable {
     // can be run in eclipse with
     // Run -> Run As -> Java Applet
     
@@ -16,7 +17,7 @@ public class ymageDemoApplet extends Applet implements Runnable {
     int delay;
     Thread animator;
     Dimension offDimension;
-    ymageMatrix offGraphics;
+    RasterPlotter offGraphics;
 
     public void init() {
         final String str = getParameter("fps");
@@ -47,7 +48,7 @@ public class ymageDemoApplet extends Applet implements Runnable {
 
     public void update(final Graphics g) {
         final Dimension d = getSize();
-        offGraphics = new ymageMatrix(d.width, d.height, ymageMatrix.MODE_REPLACE, "FFFFFF");
+        offGraphics = new RasterPlotter(d.width, d.height, RasterPlotter.MODE_REPLACE, "FFFFFF");
         paintFrame(offGraphics);
         g.drawImage(offGraphics.getImage(), 0, 0, null);
     }
@@ -58,11 +59,11 @@ public class ymageDemoApplet extends Applet implements Runnable {
         }
     }
 
-    public void paintFrame(final ymageMatrix m) {
-        ymageMatrix.demoPaint(m);
+    public void paintFrame(final RasterPlotter m) {
+        RasterPlotter.demoPaint(m);
         final int y = (int) (System.currentTimeMillis() / 10 % 300);
-        m.setColor(ymageMatrix.GREY);
-        ymageToolPrint.print(m, 0, y, 0, "Hello World", -1);
+        m.setColor(RasterPlotter.GREY);
+        PrintTool.print(m, 0, y, 0, "Hello World", -1);
     }
     
 }

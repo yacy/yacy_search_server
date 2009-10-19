@@ -24,12 +24,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.ymage;
+package net.yacy.visualization;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+
 
 /* this class is a container for graph coordinates and it can draw such coordinates into a graph
  * all coordinates are given in a artificial coordinate system, in the range from
@@ -38,7 +39,7 @@ import java.util.Map;
  * 0,0 is the center of the graph
  */
 
-public class ymageGraph {
+public class GraphPlotter {
 
     // a ymageGraph is a set of points and borders between the points
     // to reference the points, they must all have a nickname
@@ -54,7 +55,7 @@ public class ymageGraph {
     HashSet<String> borders;
     double leftmost, rightmost, topmost, bottommost;
     
-    public ymageGraph() {
+    public GraphPlotter() {
         points = new HashMap<String, coordinate>();
         borders = new HashSet<String>();
         leftmost = 1.0;
@@ -131,8 +132,8 @@ public class ymageGraph {
         }
     }
     
-    public ymageMatrix draw(final int width, final int height, final int leftborder, final int rightborder, final int topborder, final int bottomborder) {
-        final ymageMatrix image = new ymageMatrix(width, height, ymageMatrix.MODE_SUB, color_back);
+    public RasterPlotter draw(final int width, final int height, final int leftborder, final int rightborder, final int topborder, final int bottomborder) {
+        final RasterPlotter image = new RasterPlotter(width, height, RasterPlotter.MODE_SUB, color_back);
         final double xfactor = ((rightmost - leftmost) == 0.0) ? 0.0 : (width - leftborder - rightborder) / (rightmost - leftmost);
         final double yfactor = ((topmost - bottommost) == 0.0) ? 0.0 : (height - topborder - bottomborder) / (topmost - bottommost);
         
@@ -151,7 +152,7 @@ public class ymageGraph {
             image.setColor(color_dot);
             image.dot(x, y, 6, true);
             image.setColor(color_text);
-            ymageToolPrint.print(image, x, y + 10, 0, name.toUpperCase(), 0);
+            PrintTool.print(image, x, y + 10, 0, name.toUpperCase(), 0);
         }
         
         // draw lines

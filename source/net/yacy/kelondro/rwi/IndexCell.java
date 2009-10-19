@@ -40,8 +40,8 @@ import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.Order;
 import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.MemoryTracker;
 
-import de.anomic.server.serverProfiling;
 
 /*
  * an index cell is a part of the horizontal index in the new segment-oriented index
@@ -108,7 +108,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     public void add(ReferenceContainer<ReferenceType> newEntries) throws IOException {
         this.ram.add(newEntries);
         if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < System.currentTimeMillis()) {
-            serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
+            MemoryTracker.update("wordcache", Long.valueOf(this.ram.size()), true);
             cleanCache();
         }
     }
@@ -116,7 +116,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     public void add(byte[] termHash, ReferenceType entry) throws IOException {
         this.ram.add(termHash, entry);
         if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < System.currentTimeMillis()) {
-            serverProfiling.update("wordcache", Long.valueOf(this.ram.size()), true);
+            MemoryTracker.update("wordcache", Long.valueOf(this.ram.size()), true);
             cleanCache();
         }
     }

@@ -1,4 +1,4 @@
-// serverSystem.java 
+// OS.java 
 // -------------------------------------------
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
@@ -19,7 +19,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.server;
+package net.yacy.kelondro.util;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -33,12 +33,12 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
+import de.anomic.server.serverCore;
+
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.ConsoleInterface;
 
 
-public final class serverSystem {
+public final class OS {
 
 	// constants for system identification
 	public static final int systemMacOSC  =  0; // 'classic' Mac OS 7.6.1/8.*/9.*

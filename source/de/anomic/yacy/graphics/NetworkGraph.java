@@ -26,7 +26,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.ymage;
+package de.anomic.yacy.graphics;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -34,6 +34,9 @@ import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.util.Date;
 import java.util.Iterator;
+
+import net.yacy.visualization.PrintTool;
+import net.yacy.visualization.RasterPlotter;
 
 import de.anomic.search.QueryParams;
 import de.anomic.search.SearchEvent;
@@ -100,17 +103,17 @@ public class NetworkGraph {
     
     private static final int    LEGEND_BOX_SIZE = 10;
     
-    private static ymageMatrix   networkPicture = null;
+    private static RasterPlotter   networkPicture = null;
     private static long          networkPictureDate = 0;
     
     private static BufferedImage peerloadPicture = null;
     private static long          peerloadPictureDate = 0;
 
-    private static ymageMatrix   bannerPicture = null;      // [MN]
+    private static RasterPlotter   bannerPicture = null;      // [MN]
     private static BufferedImage logo = null;               // [MN]
     private static long          bannerPictureDate = 0;     // [MN]
 
-    public static ymageMatrix getSearchEventPicture(final yacySeedDB seedDB, final String eventID) {
+    public static RasterPlotter getSearchEventPicture(final yacySeedDB seedDB, final String eventID) {
         final SearchEvent event = SearchEventCache.getEvent(eventID);
         if (event == null) return null;
         final yacySearch[] primarySearches = event.getPrimarySearchThreads();
@@ -118,7 +121,7 @@ public class NetworkGraph {
         if (primarySearches == null) return null; // this was a local search and there are no threads
 
         // get a copy of a recent network picture
-        final ymageMatrix eventPicture = getNetworkPicture(seedDB, 120000, Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), Switchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"), COL_BACKGROUND);
+        final RasterPlotter eventPicture = getNetworkPicture(seedDB, 120000, Switchboard.getSwitchboard().getConfig(SwitchboardConstants.NETWORK_NAME, "unspecified"), Switchboard.getSwitchboard().getConfig("network.unit.description", "unspecified"), COL_BACKGROUND);
         //if (eventPicture instanceof ymageMatrix) eventPicture = (ymageMatrix) eventPicture; //new ymageMatrix((ymageMatrix) eventPicture);
         // TODO: fix cloning of ymageMatrix pictures
         
@@ -131,7 +134,7 @@ public class NetworkGraph {
 
         // draw in the primary search peers
         for (int j = 0; j < primarySearches.length; j++) {
-            eventPicture.setColor((primarySearches[j].isAlive()) ? ymageMatrix.RED : ymageMatrix.GREEN);
+            eventPicture.setColor((primarySearches[j].isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
             angle = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(primarySearches[j].target().hash.getBytes(), null)) / ((double) Long.MAX_VALUE)));
             eventPicture.arcLine(cx, cy, cr - 20, cr, angle);
         }
@@ -139,7 +142,7 @@ public class NetworkGraph {
         // draw in the secondary search peers
         if (secondarySearches != null) {
             for (int j = 0; j < secondarySearches.length; j++) {
-                eventPicture.setColor((secondarySearches[j].isAlive()) ? ymageMatrix.RED : ymageMatrix.GREEN);
+                eventPicture.setColor((secondarySearches[j].isAlive()) ? RasterPlotter.RED : RasterPlotter.GREEN);
                 angle = (int) (360.0 * (((double) FlatWordPartitionScheme.std.dhtPosition(secondarySearches[j].target().hash.getBytes(), null)) / ((double) Long.MAX_VALUE)));
                 eventPicture.arcLine(cx, cy, cr - 10, cr, angle - 1);
                 eventPicture.arcLine(cx, cy, cr - 10, cr, angle + 1);
@@ -149,7 +152,7 @@ public class NetworkGraph {
         // draw in the search target
         final QueryParams query = event.getQuery();
         final Iterator<byte[]> i = query.queryHashes.iterator();
-        eventPicture.setColor(ymageMatrix.GREY);
+        eventPicture.setColor(RasterPlotter.GREY);
         while (i.hasNext()) {
             long[] positions = seedDB.scheme.dhtPositions(i.next());
             for (int j = 0; j < positions.length; j++) {
@@ -161,11 +164,11 @@ public class NetworkGraph {
         return eventPicture;
     }
 
-    public static ymageMatrix getNetworkPicture(final yacySeedDB seedDB, final long maxAge, final String networkName, final String networkTitle, final String bgcolor) {
+    public static RasterPlotter getNetworkPicture(final yacySeedDB seedDB, final long maxAge, final String networkName, final String networkTitle, final String bgcolor) {
         return getNetworkPicture(seedDB, maxAge, 640, 480, 300, 300, 1000, true, networkName, networkTitle, bgcolor);
     }
 
-    public static ymageMatrix getNetworkPicture(final yacySeedDB seedDB, final long maxAge, final int width, final int height, final int passiveLimit, final int potentialLimit, final int maxCount, final boolean corona, final String networkName, final String networkTitle, final String bgcolor) {
+    public static RasterPlotter getNetworkPicture(final yacySeedDB seedDB, final long maxAge, final int width, final int height, final int passiveLimit, final int potentialLimit, final int maxCount, final boolean corona, final String networkName, final String networkTitle, final String bgcolor) {
         if ((networkPicture == null) || ((System.currentTimeMillis() - networkPictureDate) > maxAge)) {
             drawNetworkPicture(seedDB, width, height, passiveLimit, potentialLimit, maxCount, corona, networkName, networkTitle, bgcolor);
         }
@@ -180,7 +183,7 @@ public class NetworkGraph {
         int outerradius = innerradius + innerradius * seedDB.sizeConnected() / 100;
         if (outerradius > innerradius * 2) outerradius = innerradius * 2;
 
-        networkPicture = new ymageMatrix(width, height, (bgcolor.equals("000000")) ? ymageMatrix.MODE_ADD : ymageMatrix.MODE_SUB, bgcolor);
+        networkPicture = new RasterPlotter(width, height, (bgcolor.equals("000000")) ? RasterPlotter.MODE_ADD : RasterPlotter.MODE_SUB, bgcolor);
 
         // draw network circle
         networkPicture.setColor(COL_DHTCIRCLE);
@@ -239,16 +242,16 @@ public class NetworkGraph {
 
         // draw description
         networkPicture.setColor(COL_HEADLINE);
-        ymageToolPrint.print(networkPicture, 2, 8, 0, "YACY NETWORK '" + networkName.toUpperCase() + "'", -1);
-        ymageToolPrint.print(networkPicture, 2, 16, 0, networkTitle.toUpperCase(), -1);
-        ymageToolPrint.print(networkPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
-        ymageToolPrint.print(networkPicture, width - 2, 16, 0, "DRAWING OF " + totalCount + " SELECTED PEERS", 1);
+        PrintTool.print(networkPicture, 2, 8, 0, "YACY NETWORK '" + networkName.toUpperCase() + "'", -1);
+        PrintTool.print(networkPicture, 2, 16, 0, networkTitle.toUpperCase(), -1);
+        PrintTool.print(networkPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
+        PrintTool.print(networkPicture, width - 2, 16, 0, "DRAWING OF " + totalCount + " SELECTED PEERS", 1);
         
         // set timestamp
         networkPictureDate = System.currentTimeMillis();
     }
 
-    private static void drawNetworkPicturePeer(final ymageMatrix img, final int x, final int y, final int innerradius, final int outerradius, final yacySeed seed, final String colorDot, final String colorLine, final String colorText, final boolean corona) {
+    private static void drawNetworkPicturePeer(final RasterPlotter img, final int x, final int y, final int innerradius, final int outerradius, final yacySeed seed, final String colorDot, final String colorLine, final String colorText, final boolean corona) {
         final String name = seed.getName().toUpperCase() /*+ ":" + seed.hash + ":" + (((double) ((int) (100 * (((double) yacySeed.dhtPosition(seed.hash)) / ((double) yacySeed.maxDHTDistance))))) / 100.0)*/;
         if (name.length() < shortestName) shortestName = name.length();
         if (name.length() > longestName) longestName = name.length();
@@ -266,7 +269,7 @@ public class NetworkGraph {
         img.arcLine(x, y, innerradius + 18, innerradius + linelength, angle);
         // draw text
         img.setColor(colorText);
-        ymageToolPrint.arcPrint(img, x, y, innerradius + linelength, angle, name);
+        PrintTool.arcPrint(img, x, y, innerradius + linelength, angle, name);
 
         // draw corona around dot for crawling activity
         int ppm20 = seed.getPPM() / 20;
@@ -341,7 +344,7 @@ public class NetworkGraph {
     }
 
     //[MN]
-    public static ymageMatrix getBannerPicture(final long maxAge, final int width, final int height, final String bgcolor, final String textcolor, final String bordercolor, final String name, final long links, final long words, final String type, final int ppm, final String network, final int peers, final long nlinks, final long nwords, final double nqph, final long nppm) {
+    public static RasterPlotter getBannerPicture(final long maxAge, final int width, final int height, final String bgcolor, final String textcolor, final String bordercolor, final String name, final long links, final long words, final String type, final int ppm, final String network, final int peers, final long nlinks, final long nwords, final double nqph, final long nppm) {
         if ((bannerPicture == null) || ((System.currentTimeMillis() - bannerPictureDate) > maxAge)) {
             drawBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, peers, nlinks, nwords, nqph, nppm, logo);
         }
@@ -349,7 +352,7 @@ public class NetworkGraph {
     }    
     
     //[MN]
-    public static ymageMatrix getBannerPicture(final long maxAge, final int width, final int height, final String bgcolor, final String textcolor, final String bordercolor, final String name, final long links, final long words, final String type, final int ppm, final String network, final int peers, final long nlinks, final long nwords, final double nqph, final long nppm, final BufferedImage newLogo) {
+    public static RasterPlotter getBannerPicture(final long maxAge, final int width, final int height, final String bgcolor, final String textcolor, final String bordercolor, final String name, final long links, final long words, final String type, final int ppm, final String network, final int peers, final long nlinks, final long nwords, final double nqph, final long nppm, final BufferedImage newLogo) {
         if ((bannerPicture == null) || ((System.currentTimeMillis() - bannerPictureDate) > maxAge)) {
             drawBannerPicture(width, height, bgcolor, textcolor, bordercolor, name, links, words, type, ppm, network, peers, nlinks, nwords, nqph, nppm, newLogo);
         }
@@ -361,26 +364,26 @@ public class NetworkGraph {
 
         final int exprlength = 19;
         logo = newLogo;
-        bannerPicture = new ymageMatrix(width, height, ymageMatrix.MODE_REPLACE, bgcolor);
+        bannerPicture = new RasterPlotter(width, height, RasterPlotter.MODE_REPLACE, bgcolor);
 
         // draw description
         bannerPicture.setColor(textcolor);
-        ymageToolPrint.print(bannerPicture, 100, 12, 0, "PEER:  " + addTrailingBlanks(name, exprlength), -1);
-        ymageToolPrint.print(bannerPicture, 100, 22, 0, "LINKS: " + addBlanksAndDots(links, exprlength), -1);
-        ymageToolPrint.print(bannerPicture, 100, 32, 0, "WORDS: " + addBlanksAndDots(words, exprlength), -1);
-        ymageToolPrint.print(bannerPicture, 100, 42, 0, "TYPE:  " + addTrailingBlanks(type, exprlength), -1);
-        ymageToolPrint.print(bannerPicture, 100, 52, 0, "SPEED: " + addTrailingBlanks(ppm + " PAGES/MINUTE", exprlength), -1);
+        PrintTool.print(bannerPicture, 100, 12, 0, "PEER:  " + addTrailingBlanks(name, exprlength), -1);
+        PrintTool.print(bannerPicture, 100, 22, 0, "LINKS: " + addBlanksAndDots(links, exprlength), -1);
+        PrintTool.print(bannerPicture, 100, 32, 0, "WORDS: " + addBlanksAndDots(words, exprlength), -1);
+        PrintTool.print(bannerPicture, 100, 42, 0, "TYPE:  " + addTrailingBlanks(type, exprlength), -1);
+        PrintTool.print(bannerPicture, 100, 52, 0, "SPEED: " + addTrailingBlanks(ppm + " PAGES/MINUTE", exprlength), -1);
 
-        ymageToolPrint.print(bannerPicture, 285, 12, 0, "NETWORK: " + addTrailingBlanks(network + " [" + peers + "]", exprlength), -1);
-        ymageToolPrint.print(bannerPicture, 285, 22, 0, "LINKS:   " + addBlanksAndDots(nlinks, exprlength), -1);
-        ymageToolPrint.print(bannerPicture, 285, 32, 0, "WORDS:   " + addBlanksAndDots(nwords, exprlength), -1);
-        ymageToolPrint.print(bannerPicture, 285, 42, 0, "QUERIES: " + addTrailingBlanks(nqph + " QUERIES/HOUR", exprlength), -1);
-        ymageToolPrint.print(bannerPicture, 285, 52, 0, "SPEED:   " + addTrailingBlanks(nppm + " PAGES/MINUTE", exprlength), -1);
+        PrintTool.print(bannerPicture, 285, 12, 0, "NETWORK: " + addTrailingBlanks(network + " [" + peers + "]", exprlength), -1);
+        PrintTool.print(bannerPicture, 285, 22, 0, "LINKS:   " + addBlanksAndDots(nlinks, exprlength), -1);
+        PrintTool.print(bannerPicture, 285, 32, 0, "WORDS:   " + addBlanksAndDots(nwords, exprlength), -1);
+        PrintTool.print(bannerPicture, 285, 42, 0, "QUERIES: " + addTrailingBlanks(nqph + " QUERIES/HOUR", exprlength), -1);
+        PrintTool.print(bannerPicture, 285, 52, 0, "SPEED:   " + addTrailingBlanks(nppm + " PAGES/MINUTE", exprlength), -1);
 
         if (logo != null) {
             final int x = (100/2 - logo.getWidth()/2);
             final int y = (height/2 - logo.getHeight()/2);
-            bannerPicture.insertBitmap(logo, x, y, 0, 0, ymageMatrix.FILTER_ANTIALIASING);
+            bannerPicture.insertBitmap(logo, x, y, 0, 0, RasterPlotter.FILTER_ANTIALIASING);
         }
 
         if (!bordercolor.equals("")) {

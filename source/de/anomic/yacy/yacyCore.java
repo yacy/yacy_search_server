@@ -47,6 +47,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 import net.yacy.document.content.RSSMessage;
 import net.yacy.document.parser.xml.RSSFeed;
@@ -56,7 +57,6 @@ import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverSemaphore;
 import de.anomic.yacy.dht.PeerSelection;
 import de.anomic.yacy.seedUpload.yacySeedUploadFile;
 import de.anomic.yacy.seedUpload.yacySeedUploadFtp;
@@ -215,15 +215,15 @@ public class yacyCore {
     protected class publishThread extends Thread {
         int added;
         private final yacySeed seed;
-        private final serverSemaphore sync;
+        private final Semaphore sync;
         private final List<Thread> syncList;
 
         public publishThread(final ThreadGroup tg, final yacySeed seed,
-                             final serverSemaphore sync, final List<Thread> syncList) throws InterruptedException {
+                             final Semaphore sync, final List<Thread> syncList) throws InterruptedException {
             super(tg, "PublishSeed_" + seed.getName());
 
             this.sync = sync;
-            this.sync.P();
+            this.sync.acquire();
             this.syncList = syncList;
 
             this.seed = seed;
@@ -276,7 +276,7 @@ public class yacyCore {
                 log.logSevere("publishThread: error with target seed " + seed.toString() + ": " + e.getMessage(), e);
             } finally {
                 this.syncList.add(this);
-                this.sync.V();
+                this.sync.release();
             }
         }
     }
@@ -366,14 +366,14 @@ public class yacyCore {
             // holding a reference to all started threads
             int contactedSeedCount = 0;
             final List<Thread> syncList = Collections.synchronizedList(new LinkedList<Thread>()); // memory for threads
-            final serverSemaphore sync = new serverSemaphore(attempts);
+            final Semaphore sync = new Semaphore(attempts);
 
             // going through the peer list and starting a new publisher thread for each peer
             int i = 0;
             while (si.hasNext()) {
                 seed = si.next();
                 if (seed == null) {
-                    sync.P();
+                    sync.acquire();
                     continue;
                 }
                 i++;
@@ -384,7 +384,7 @@ public class yacyCore {
                 if ((address == null) || (seederror != null)) {
                     // we don't like that address, delete it
                     sb.peers.peerActions.peerDeparture(seed, "peer ping to peer resulted in address = " + address + "; seederror = " + seederror);
-                    sync.P();
+                    sync.acquire();
                 } else {
                     // starting a new publisher thread
                     contactedSeedCount++;
@@ -396,7 +396,7 @@ public class yacyCore {
             for (int j = 0; j < contactedSeedCount; j++) {
 
                 // waiting for the next thread to finish
-                sync.P();
+                sync.acquire();
 
                 // if this is true something is wrong ...
                 if (syncList.isEmpty()) {

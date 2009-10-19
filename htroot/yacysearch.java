@@ -36,6 +36,7 @@ import java.util.TreeSet;
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
 import net.yacy.document.content.RSSMessage;
+import net.yacy.document.geolocalization.Location;
 import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -45,13 +46,13 @@ import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.MemoryTracker;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.kelondro.util.ISO639;
 
 import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.data.DidYouMean;
 import de.anomic.data.LibraryProvider;
-import de.anomic.data.Location;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.QueryParams;
@@ -64,11 +65,10 @@ import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
-import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
-import de.anomic.ymage.ProfilingGraph;
+import de.anomic.yacy.graphics.ProfilingGraph;
 
 public class yacysearch {
 
@@ -459,7 +459,7 @@ public class yacysearch {
                     DigestURI.TLD_any_zone_filter,
                     client,
                     authenticated);
-            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.INITIALIZATION, 0, 0), false);
+            MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.INITIALIZATION, 0, 0), false);
             
             // tell all threads to do nothing for a specific time
             sb.intermissionAllThreads(10000);

@@ -71,7 +71,7 @@ import java.util.logging.LogManager;
 import java.util.logging.Logger;
 import java.util.zip.GZIPOutputStream;
 
-import net.yacy.document.Parser;
+import net.yacy.document.TextParser;
 import net.yacy.document.parser.html.ContentTransformer;
 import net.yacy.document.parser.html.Transformer;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -545,7 +545,7 @@ public final class HTTPDProxyHandler {
                     );
                     final String storeError = response.shallStoreCacheForProxy();
                     final boolean storeHTCache = response.profile().storeHTCache();
-                    final String supportError = Parser.supports(response.url(), response.getMimeType());
+                    final String supportError = TextParser.supports(response.url(), response.getMimeType());
                     if (
                             /*
                              * Now we store the response into the htcache directory if

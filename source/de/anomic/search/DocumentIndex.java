@@ -36,7 +36,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
-import net.yacy.document.Parser;
+import net.yacy.document.TextParser;
 import net.yacy.document.ParserException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -120,7 +120,7 @@ public class DocumentIndex extends Segment {
     	DigestURI url = new DigestURI("file:" + file.getAbsolutePath());
     	Document document;
         try {
-            document = Parser.parseSource(url, null, null, file);
+            document = TextParser.parseSource(url, null, null, file);
         } catch (InterruptedException e) {
             throw new IOException("cannot parse " + file.toString() + ": " + e.getMessage());
         } catch (ParserException e) {

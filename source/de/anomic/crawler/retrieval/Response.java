@@ -29,7 +29,7 @@ package de.anomic.crawler.retrieval;
 import java.util.Date;
 
 import net.yacy.document.Classification;
-import net.yacy.document.Parser;
+import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
 
@@ -557,7 +557,7 @@ public class Response {
             if (Classification.isPictureMime(mimeType)) {
                 return "Media_Content_(Picture)";
             }
-            String parserError = Parser.supportsMime(mimeType);
+            String parserError = TextParser.supportsMime(mimeType);
             if (parserError != null) {
                 return "Media_Content, no parser: " + parserError;
             }
@@ -675,7 +675,7 @@ public class Response {
         if (responseHeader != null) {
             final String mimeType = responseHeader.mime();
             if (Classification.isPictureMime(mimeType)) { return "Media_Content_(Picture)"; }
-            String parserError = Parser.supportsMime(mimeType);
+            String parserError = TextParser.supportsMime(mimeType);
             if (parserError != null) { return "Media_Content, parser error: " + parserError; }
         }
         if (Classification.isMediaExtension(url().getFileExtension())) { return "Media_Content_(forbidden)"; }

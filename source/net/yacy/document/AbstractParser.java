@@ -126,7 +126,7 @@ public abstract class AbstractParser implements Idiom {
                         // XXX: workaround for relative paths within document
                         + file.getPath().substring(file.getPath().indexOf(File.separatorChar) + 1)
                         + "/" + file.getName());
-                final Document subdoc = Parser.parseSource(url, Parser.mimeOf(url), null, file);
+                final Document subdoc = TextParser.parseSource(url, TextParser.mimeOf(url), null, file);
                 // TODO: change anchors back to use '#' after archive name
                 doc.addSubDocument(subdoc);
                 subdoc.close();

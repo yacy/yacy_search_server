@@ -31,6 +31,7 @@ import java.util.Map;
 
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
+import net.yacy.kelondro.util.OS;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowThread;
 
@@ -42,7 +43,6 @@ import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverSystem;
 
 public class PerformanceQueues_p {
     /**
@@ -85,7 +85,7 @@ public class PerformanceQueues_p {
             if (post.containsKey("Xmx")) {
                 int xmx = 120; // default maximum heap size
                 try { xmx = Integer.valueOf(post.get("Xmx", "120")).intValue(); } catch (final NumberFormatException e){}
-                if (!(serverSystem.isWin32 && xmx >= 2000)){
+                if (!(OS.isWin32 && xmx >= 2000)){
 	                sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
 	                sb.setConfig("javastart_Xms", "Xms" + xmx + "m");
 	                prop.put("setStartupCommit", "1");

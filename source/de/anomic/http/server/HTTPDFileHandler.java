@@ -91,6 +91,7 @@ import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.visualization.RasterPlotter;
 
 import de.anomic.http.server.servlets.transferURL;
 import de.anomic.search.Switchboard;
@@ -101,7 +102,6 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.servletProperties;
 import de.anomic.yacy.yacyBuildProperties;
-import de.anomic.ymage.ymageMatrix;
 
 public final class HTTPDFileHandler {
     
@@ -532,13 +532,13 @@ public final class HTTPDFileHandler {
                     // error with image generation; send file-not-found
                     HTTPDemon.sendRespondError(conProp, out, 3, 404, "File not Found", null, null);
                 } else {
-                    if (img instanceof ymageMatrix) {
-                        final ymageMatrix yp = (ymageMatrix) img;
+                    if (img instanceof RasterPlotter) {
+                        final RasterPlotter yp = (RasterPlotter) img;
                         // send an image to client
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
                         final String mimeType = mimeTable.getProperty(targetExt, "text/html");
-                        final ByteBuffer result = ymageMatrix.exportImage(yp.getImage(), targetExt);
+                        final ByteBuffer result = RasterPlotter.exportImage(yp.getImage(), targetExt);
 
                         // write the array to the client
                         HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length(), targetDate, null, null, null, null, nocache);
@@ -558,7 +558,7 @@ public final class HTTPDFileHandler {
                         int height = i.getHeight(null); if (height < 0) height = 96; // bad hack
                         final BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
                         bi.createGraphics().drawImage(i, 0, 0, width, height, null); 
-                        final ByteBuffer result = ymageMatrix.exportImage(bi, targetExt);
+                        final ByteBuffer result = RasterPlotter.exportImage(bi, targetExt);
 
                         // write the array to the client
                         HTTPDemon.sendRespondHeader(conProp, out, httpVersion, 200, null, mimeType, result.length(), targetDate, null, null, null, null, nocache);

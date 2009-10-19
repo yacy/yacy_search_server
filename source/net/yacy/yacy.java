@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.Semaphore;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -61,6 +62,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.ScoreCluster;
+import net.yacy.kelondro.util.OS;
 
 import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 
@@ -74,8 +76,6 @@ import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverSemaphore;
-import de.anomic.server.serverSystem;
 import de.anomic.tools.enumerateFiles;
 import de.anomic.yacy.yacyClient;
 import de.anomic.yacy.yacySeedDB;
@@ -147,7 +147,7 @@ public final class yacy {
      * Semaphore needed by {@link yacy#waitForFinishedStartup()} to block 
      * until startup has finished
      */
-    private static serverSemaphore startupFinishedSync = new serverSemaphore(0);
+    private static Semaphore startupFinishedSync = new Semaphore(0);
 
     /**
     * Starts up the whole application. Sets up all datastructures and starts
@@ -200,7 +200,7 @@ public final class yacy {
             Log.logConfig("STARTUP", "Operation system: " + System.getProperty("os.name","unknown"));
             Log.logConfig("STARTUP", "Application root-path: " + homePath);
             Log.logConfig("STARTUP", "Time zone: UTC" + DateFormatter.UTCDiffString() + "; UTC+0000 is " + System.currentTimeMillis());
-            Log.logConfig("STARTUP", "Maximum file system path length: " + serverSystem.maxPathLength);
+            Log.logConfig("STARTUP", "Maximum file system path length: " + OS.maxPathLength);
             
             f = new File(homePath, "DATA/yacy.running");
             if (f.exists()) {                // another instance running? VM crash? User will have to care about this
@@ -229,7 +229,6 @@ public final class yacy {
             
             // hardcoded, forced, temporary value-migration
             sb.setConfig("htTemplatePath", "htroot/env/templates");
-            sb.setConfig("parseableExt", "html,htm,txt,php,shtml,asp");
 
             int oldRev;
 	    try {
@@ -327,7 +326,7 @@ public final class yacy {
                         //boolean properPW = (sb.getConfig("adminAccount", "").length() == 0) && (sb.getConfig(httpd.ADMIN_ACCOUNT_B64MD5, "").length() > 0);
                         //if (!properPW) browserPopUpPage = "ConfigBasic.html";
                         final String  browserPopUpApplication = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_APPLICATION, "firefox");
-                        serverSystem.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage, browserPopUpApplication);
+                        OS.openBrowser((server.withSSL()?"https":"http") + "://localhost:" + serverCore.getPortNr(port) + "/" + browserPopUpPage, browserPopUpApplication);
                     }
                     
                     // unlock yacyTray browser popup
@@ -393,7 +392,7 @@ public final class yacy {
                     //} catch (ConcurrentModificationException e) {}
                     
                     // signal finished startup
-                    startupFinishedSync.V();
+                    startupFinishedSync.release();
                         
                     // wait for server shutdown
                     try {
@@ -435,7 +434,7 @@ public final class yacy {
         } catch (final Exception ee) {
             Log.logSevere("STARTUP", "FATAL ERROR: " + ee.getMessage(),ee);
         } finally {
-        	startupFinishedSync.V();
+        	startupFinishedSync.release();
         }
         Log.logConfig("SHUTDOWN", "goodbye. (this is the last line)");
         Log.shutdown();

@@ -39,6 +39,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.document.geolocalization.OpenGeoDB;
+
 public class LibraryProvider {
 
     private static final String path_to_source_dictionaries = "source";

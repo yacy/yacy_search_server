@@ -1,26 +1,30 @@
-package de.anomic.ymage;
+package net.yacy.document;
 
 import java.awt.Container;
 import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Toolkit;
 
+import net.yacy.document.parser.images.bmpParser;
+import net.yacy.document.parser.images.icoParser;
 
-public class ymageImageParser {
+
+
+public class ImageParser {
 
     public static final Image parse(final String filename, final byte[] source) {
         final MediaTracker mediaTracker = new MediaTracker(new Container()); 
         Image image;
-        if (((filename.endsWith(".ico")) || (filename.endsWith(".bmp"))) && (ymageBMPParser.isBMP(source))) {
+        if (((filename.endsWith(".ico")) || (filename.endsWith(".bmp"))) && (bmpParser.isBMP(source))) {
             // parse image with BMP parser
-            ymageBMPParser bmpparser;
-            bmpparser = new ymageBMPParser(source);
+            bmpParser bmpparser;
+            bmpparser = new bmpParser(source);
             image = bmpparser.getImage();
             if (image == null) return null;
-        } else if ((filename.endsWith(".ico")) && (ymageICOParser.isICO(source))) {
+        } else if ((filename.endsWith(".ico")) && (icoParser.isICO(source))) {
             // parse image with ICO parser
-            ymageICOParser icoparser;
-            icoparser = new ymageICOParser(source);
+            icoParser icoparser;
+            icoparser = new icoParser(source);
             image = icoparser.getImage(0);
             if (image == null) return null;
         } else {

@@ -27,15 +27,16 @@
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import net.yacy.kelondro.util.MemoryTracker;
+
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.QueryParams;
 import de.anomic.search.SearchEvent;
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.RankingProcess.NavigatorEntry;
 import de.anomic.server.serverObjects;
-import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
-import de.anomic.ymage.ProfilingGraph;
+import de.anomic.yacy.graphics.ProfilingGraph;
 
 
 public class yacysearchtrailer {
@@ -145,7 +146,7 @@ public class yacysearchtrailer {
             prop.put("nav-about_body", aboutBody);
         }
         
-        serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + "bottomline", 0, 0), false);
+        MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + "bottomline", 0, 0), false);
         
         return prop;
     }

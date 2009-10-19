@@ -22,7 +22,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.ymage;
+package net.yacy.document.parser.images;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -32,7 +32,7 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class ymageBMPParser {
+public class bmpParser {
 
     // this is a implementation of http://de.wikipedia.org/wiki/Windows_Bitmap
     
@@ -55,7 +55,7 @@ public class ymageBMPParser {
         return (source != null) && (source.length >= 2) && (source[0] == 'B') && (source[1] == 'M');
     }
     
-    public ymageBMPParser(final byte[] source) {
+    public bmpParser(final byte[] source) {
 
         // read info-header
         final int bfOffBits  = DWORD(source, FILEHEADER_offset + 10);
@@ -262,7 +262,7 @@ public class ymageBMPParser {
             e.printStackTrace();
         }
         
-        final ymageBMPParser parser = new ymageBMPParser(file);
+        final bmpParser parser = new bmpParser(file);
         
         try {
             ImageIO.write(parser.getImage(), "PNG", out);

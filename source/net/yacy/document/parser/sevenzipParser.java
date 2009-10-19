@@ -38,7 +38,7 @@ import java.util.Set;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
-import net.yacy.document.Parser;
+import net.yacy.document.TextParser;
 import net.yacy.document.ParserException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CachedFileOutputStream;
@@ -196,11 +196,11 @@ public class sevenzipParser extends AbstractParser implements Idiom {
                      // workaround for relative links in file, normally '#' shall be used behind the location, see
                      // below for reversion of the effects
                      final DigestURI url = DigestURI.newURL(doc.dc_source(), this.prefix + "/" + super.filePath);
-                     final String mime = Parser.mimeOf(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
+                     final String mime = TextParser.mimeOf(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
                      if (this.cfos.isFallback()) {
-                         theDoc = Parser.parseSource(url, mime, null, this.cfos.getContentFile());
+                         theDoc = TextParser.parseSource(url, mime, null, this.cfos.getContentFile());
                      } else {
-                         theDoc = Parser.parseSource(url, mime, null, this.cfos.getContentBAOS());
+                         theDoc = TextParser.parseSource(url, mime, null, this.cfos.getContentBAOS());
                      }
                      
                      this.doc.addSubDocument(theDoc);

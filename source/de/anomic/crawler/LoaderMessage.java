@@ -23,9 +23,10 @@
 
 package de.anomic.crawler;
 
+import java.util.concurrent.Semaphore;
+
 import net.yacy.kelondro.data.meta.DigestURI;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.server.serverSemaphore;
 
 public final class LoaderMessage {
     public final int crawlingPriority;
@@ -40,7 +41,7 @@ public final class LoaderMessage {
     public final int timeout;
     public final boolean keepInMemory;
     
-    private serverSemaphore resultSync  = null;
+    private Semaphore resultSync  = null;
     private Response result;
     private String errorMessage;
     
@@ -68,7 +69,7 @@ public final class LoaderMessage {
         this.timeout = timeout;
         this.keepInMemory = keepInMemory;
         
-        this.resultSync  = new serverSemaphore(0);
+        this.resultSync  = new Semaphore(0);
         this.result = null;
     } 
     
@@ -85,19 +86,19 @@ public final class LoaderMessage {
         this.result = theResult;
         
         // notify blocking result readers
-        this.resultSync.V();        
+        this.resultSync.release();        
     }
     
     public Response waitForResult() throws InterruptedException {
         Response theResult = null;
         
-        this.resultSync.P();
+        this.resultSync.acquire();
         /* =====> CRITICAL SECTION <======== */
         
             theResult = this.result;
         
         /* =====> CRITICAL SECTION <======== */         
-        this.resultSync.V();
+        this.resultSync.release();
         
         return theResult;                
     }

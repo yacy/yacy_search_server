@@ -32,6 +32,7 @@ import java.util.TreeSet;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.Formatter;
+import net.yacy.kelondro.util.MemoryTracker;
 
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
@@ -44,13 +45,12 @@ import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.search.TextSnippet;
 import de.anomic.server.serverObjects;
-import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
 import de.anomic.tools.crypt;
 import de.anomic.tools.nxTools;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacySeed;
-import de.anomic.ymage.ProfilingGraph;
+import de.anomic.yacy.graphics.ProfilingGraph;
 
 
 public class yacysearchitem {
@@ -151,7 +151,7 @@ public class yacysearchitem {
             prop.put("content_description", desc);
             prop.putXML("content_description-xml", desc);
             prop.putJSON("content_description-json", desc);
-            serverProfiling.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + item, 0, 0), false);
+            MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + item, 0, 0), false);
             
             return prop;
         }

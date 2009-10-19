@@ -3,7 +3,7 @@ package de.anomic.document;
 import static org.junit.Assert.*;
 import static org.junit.matchers.JUnitMatchers.*;
 import net.yacy.document.Document;
-import net.yacy.document.Parser;
+import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.junit.Test;
@@ -37,7 +37,7 @@ public class ParserTest {
 			String mimetype = testFiles[i][1];
 			DigestURI url = new DigestURI("http://localhost/"+filename);
 
-			Document doc = Parser.parseSource(url, mimetype, null, file.length(), new FileInputStream(file));
+			Document doc = TextParser.parseSource(url, mimetype, null, file.length(), new FileInputStream(file));
 			Reader content = new InputStreamReader(doc.getText(), doc.getCharset());
 			StringBuilder str = new StringBuilder();
 			int c;

@@ -33,21 +33,21 @@ import java.util.Map;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.order.Base64Order;
+import net.yacy.visualization.PrintTool;
+import net.yacy.visualization.RasterPlotter;
+import net.yacy.visualization.GraphPlotter;
 
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.ymage.WebStructureGraph;
-import de.anomic.ymage.ymageGraph;
-import de.anomic.ymage.ymageMatrix;
-import de.anomic.ymage.ymageToolPrint;
+import de.anomic.yacy.graphics.WebStructureGraph;
 
 public class WebStructurePicture_p {
     
     private static final double maxlongd = Long.MAX_VALUE;
     
-    public static ymageMatrix respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         
         int width = 768;
@@ -82,12 +82,12 @@ public class WebStructurePicture_p {
             // find domain with most references
             host = sb.webStructure.hostWithMaxReferences();
         }
-        ymageMatrix graphPicture;
+        RasterPlotter graphPicture;
         if (host == null) {
             // probably no information available
-            graphPicture = new ymageMatrix(width, height, ymageMatrix.MODE_SUB, ymageGraph.color_back);
-            ymageToolPrint.print(graphPicture, width / 2, height / 2, 0, "NO WEB STRUCTURE DATA AVAILABLE.", 0);
-            ymageToolPrint.print(graphPicture, width / 2, height / 2 + 16, 0, "START A WEB CRAWL TO OBTAIN STRUCTURE DATA.", 0);
+            graphPicture = new RasterPlotter(width, height, RasterPlotter.MODE_SUB, GraphPlotter.color_back);
+            PrintTool.print(graphPicture, width / 2, height / 2, 0, "NO WEB STRUCTURE DATA AVAILABLE.", 0);
+            PrintTool.print(graphPicture, width / 2, height / 2 + 16, 0, "START A WEB CRAWL TO OBTAIN STRUCTURE DATA.", 0);
         } else {
             // find start hash
             String hash = null;
@@ -97,26 +97,26 @@ public class WebStructurePicture_p {
             //assert (sb.webStructure.outgoingReferences(hash) != null);
             
             // recursively find domains, up to a specific depth
-            final ymageGraph graph = new ymageGraph();
+            final GraphPlotter graph = new GraphPlotter();
             if (host != null) place(graph, sb.webStructure, hash, host, nodes, timeout, 0.0, 0.0, 0, depth);
             //graph.print();
             
             graphPicture = graph.draw(width, height, 40, 40, 16, 16);
         }
         // print headline
-        graphPicture.setColor(ymageGraph.color_text);
-        ymageToolPrint.print(graphPicture, 2, 8, 0, "YACY WEB-STRUCTURE ANALYSIS", -1);
-        if (host != null) ymageToolPrint.print(graphPicture, 2, 16, 0, "LINK ENVIRONMENT OF DOMAIN " + host.toUpperCase(), -1);
-        ymageToolPrint.print(graphPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
+        graphPicture.setColor(GraphPlotter.color_text);
+        PrintTool.print(graphPicture, 2, 8, 0, "YACY WEB-STRUCTURE ANALYSIS", -1);
+        if (host != null) PrintTool.print(graphPicture, 2, 16, 0, "LINK ENVIRONMENT OF DOMAIN " + host.toUpperCase(), -1);
+        PrintTool.print(graphPicture, width - 2, 8, 0, "SNAPSHOT FROM " + new Date().toString().toUpperCase(), 1);
 
         return graphPicture;
         
     }
     
-    private static final int place(final ymageGraph graph, final WebStructureGraph structure, final String centerhash, final String centerhost, int maxnodes, final long timeout, final double x, final double y, int nextlayer, final int maxlayer) {
+    private static final int place(final GraphPlotter graph, final WebStructureGraph structure, final String centerhash, final String centerhost, int maxnodes, final long timeout, final double x, final double y, int nextlayer, final int maxlayer) {
         // returns the number of nodes that had been placed
         assert centerhost != null;
-        ymageGraph.coordinate center = graph.getPoint(centerhost);
+        GraphPlotter.coordinate center = graph.getPoint(centerhost);
         int mynodes = 0;
         if (center == null) {
         	/*center =*/ graph.addPoint(centerhost, x, y, nextlayer);
@@ -164,7 +164,7 @@ public class WebStructurePicture_p {
             target = j.next();
             targethash = target[0];
             targethost = target[1];
-            final ymageGraph.coordinate c = graph.getPoint(targethost);
+            final GraphPlotter.coordinate c = graph.getPoint(targethost);
             assert c != null;
             nextnodes = ((maxnodes <= 0) || (System.currentTimeMillis() >= timeout)) ? 0 : place(graph, structure, targethash, targethost, maxnodes, timeout, c.x, c.y, nextlayer, maxlayer);
             mynodes += nextnodes;

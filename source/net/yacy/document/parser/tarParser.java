@@ -43,7 +43,7 @@ import java.util.zip.GZIPInputStream;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
-import net.yacy.document.Parser;
+import net.yacy.document.TextParser;
 import net.yacy.document.ParserException;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
@@ -135,7 +135,7 @@ public class tarParser extends AbstractParser implements Idiom {
                 final String entryExt = (idx > -1) ? entryName.substring(idx+1) : "";
                 
                 // trying to determine the mimeType per file extension   
-                final String entryMime = Parser.mimeOf(entryExt);
+                final String entryMime = TextParser.mimeOf(entryExt);
                 
                 // getting the entry content
                 File subDocTempFile = null;
@@ -150,7 +150,7 @@ public class tarParser extends AbstractParser implements Idiom {
                     checkInterruption();
                     
                     // parsing the content                    
-                    subDoc = Parser.parseSource(DigestURI.newURL(location,"#" + entryName),entryMime,null,subDocTempFile);
+                    subDoc = TextParser.parseSource(DigestURI.newURL(location,"#" + entryName),entryMime,null,subDocTempFile);
                 } catch (final ParserException e) {
                     this.theLogger.logInfo("Unable to parse tar file entry '" + entryName + "'. " + e.getMessage());
                 } finally {

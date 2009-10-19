@@ -24,18 +24,18 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import net.yacy.visualization.RasterPlotter;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.ymage.NetworkGraph;
-import de.anomic.ymage.ymageMatrix;
+import de.anomic.yacy.graphics.NetworkGraph;
 
 /** draw a picture of the yacy network */
 public class NetworkPicture {
     
-    public static ymageMatrix respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
+    public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         
         int width = 768;

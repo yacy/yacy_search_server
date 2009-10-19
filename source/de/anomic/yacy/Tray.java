@@ -37,9 +37,10 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
+import net.yacy.kelondro.util.OS;
+
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
-import de.anomic.server.serverSystem;
 
 
 public final class Tray {
@@ -61,7 +62,7 @@ public final class Tray {
 		trayLabel = sb.getConfig(SwitchboardConstants.TRAY_LABEL, "YaCy");
 		try {
 			final boolean trayIcon = sb.getConfigBool(SwitchboardConstants.TRAY_ICON_ENABLED, false);
-			if (trayIcon && (serverSystem.isWindows || sb.getConfigBool(SwitchboardConstants.TRAY_ICON_FORCED, false))) {
+			if (trayIcon && (OS.isWindows || sb.getConfigBool(SwitchboardConstants.TRAY_ICON_FORCED, false))) {
 				System.setProperty("java.awt.headless", "false");
 
 				if(nativeTrayIcon.isSupported()) {
@@ -156,7 +157,7 @@ public final class Tray {
 	protected static void openBrowser(final String browserPopUpPage){
 		if(isIntegrated) return;
 		// no need for https, because we are on localhost
-		serverSystem.openBrowser("http://localhost:" + sb.getConfig("port", "8080") + "/" + browserPopUpPage);
+		OS.openBrowser("http://localhost:" + sb.getConfig("port", "8080") + "/" + browserPopUpPage);
 	}
 	
 	public static void removeTray(){

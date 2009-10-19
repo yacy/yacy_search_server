@@ -37,7 +37,7 @@ import java.util.zip.GZIPInputStream;
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
-import net.yacy.document.Parser;
+import net.yacy.document.TextParser;
 import net.yacy.document.ParserException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
@@ -100,7 +100,7 @@ public class gzipParser extends AbstractParser implements Idiom {
             checkInterruption();
             
             // creating a new parser class to parse the unzipped content
-            return Parser.parseSource(location,null,null,tempFile);
+            return TextParser.parseSource(location,null,null,tempFile);
         } catch (final Exception e) {    
             if (e instanceof InterruptedException) throw (InterruptedException) e;
             if (e instanceof ParserException) throw (ParserException) e;

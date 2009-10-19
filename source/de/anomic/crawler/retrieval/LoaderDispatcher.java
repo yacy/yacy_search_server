@@ -38,7 +38,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.document.Document;
-import net.yacy.document.Parser;
+import net.yacy.document.TextParser;
 import net.yacy.document.ParserException;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
@@ -404,14 +404,14 @@ public final class LoaderDispatcher {
             }
 
             // STEP 3: if the metadata is still null try to guess the mimeType of the resource
-            String supportError = Parser.supports(url, responseHeader == null ? null : responseHeader.mime());
+            String supportError = TextParser.supports(url, responseHeader == null ? null : responseHeader.mime());
             if (supportError != null) {
                 return null;
             }
             if (responseHeader == null) {
-                return Parser.parseSource(url, null, null, contentLength, resourceStream);
+                return TextParser.parseSource(url, null, null, contentLength, resourceStream);
             }
-            return Parser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), contentLength, resourceStream);
+            return TextParser.parseSource(url, responseHeader.mime(), responseHeader.getCharacterEncoding(), contentLength, resourceStream);
         } catch (final InterruptedException e) {
             // interruption of thread detected
             return null;

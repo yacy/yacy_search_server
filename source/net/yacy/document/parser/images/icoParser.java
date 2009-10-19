@@ -22,7 +22,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.ymage;
+package net.yacy.document.parser.images;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -32,35 +32,36 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class ymageICOParser {
+
+public class icoParser {
 
     // this is a implementation of http://msdn2.microsoft.com/en-us/library/ms997538(d=printer).aspx
     
     public static final int ICONDIRENTRY_size = 16;
     
     private final int idCount;
-    ymageBMPParser.INFOHEADER[] infoheaders;
-    ymageBMPParser.IMAGEMAP[] imagemaps;
+    bmpParser.INFOHEADER[] infoheaders;
+    bmpParser.IMAGEMAP[] imagemaps;
     
     public static final boolean isICO(final byte[] source) {
         // check the file magic
         return (source != null) && (source.length >= 4) && (source[0] == 0) && (source[1] == 0) && (source[2] == 1) && (source[3] == 0);
     }
     
-    public ymageICOParser(final byte[] source) {
+    public icoParser(final byte[] source) {
         // read info-header
-        idCount = ymageBMPParser.WORD(source, 4);
+        idCount = bmpParser.WORD(source, 4);
 
         // read the icon directory entry and the image entries
         final ICONDIRENTRY[] icondirentries = new ICONDIRENTRY[idCount];
-        infoheaders = new ymageBMPParser.INFOHEADER[idCount];
-        final ymageBMPParser.COLORTABLE[] colortables = new ymageBMPParser.COLORTABLE[idCount];
-        imagemaps = new ymageBMPParser.IMAGEMAP[idCount];
+        infoheaders = new bmpParser.INFOHEADER[idCount];
+        final bmpParser.COLORTABLE[] colortables = new bmpParser.COLORTABLE[idCount];
+        imagemaps = new bmpParser.IMAGEMAP[idCount];
         for (int i = 0; i < idCount; i++) {
             icondirentries[i] = new ICONDIRENTRY(source, 6 + i * ICONDIRENTRY_size);
-            infoheaders[i] = new ymageBMPParser.INFOHEADER(source, icondirentries[i].dwImageOffset);
-            colortables[i] = new ymageBMPParser.COLORTABLE(source, icondirentries[i].dwImageOffset + ymageBMPParser.INFOHEADER_size, infoheaders[i]);
-            imagemaps[i] = new ymageBMPParser.IMAGEMAP(source, icondirentries[i].dwImageOffset + ymageBMPParser.INFOHEADER_size + colortables[i].colorbytes, icondirentries[i].bWidth, icondirentries[i].bHeight, infoheaders[i].biCompression, infoheaders[i].biBitCount, colortables[i]);
+            infoheaders[i] = new bmpParser.INFOHEADER(source, icondirentries[i].dwImageOffset);
+            colortables[i] = new bmpParser.COLORTABLE(source, icondirentries[i].dwImageOffset + bmpParser.INFOHEADER_size, infoheaders[i]);
+            imagemaps[i] = new bmpParser.IMAGEMAP(source, icondirentries[i].dwImageOffset + bmpParser.INFOHEADER_size + colortables[i].colorbytes, icondirentries[i].bWidth, icondirentries[i].bHeight, infoheaders[i].biCompression, infoheaders[i].biBitCount, colortables[i]);
         }
     }
     
@@ -71,14 +72,14 @@ public class ymageICOParser {
         
         public ICONDIRENTRY(final byte[] s, final int offset) {
             // read info-header
-            bWidth        = ymageBMPParser.BYTE(s, offset + 0);
-            bHeight       = ymageBMPParser.BYTE(s, offset + 1);
-            bColorCount   = ymageBMPParser.BYTE(s, offset + 2);
-            bReserved     = ymageBMPParser.BYTE(s, offset + 3);
-            wPlanes       = ymageBMPParser.WORD(s, offset + 4);
-            wBitCount     = ymageBMPParser.WORD(s, offset + 6);
-            dwBytesInRes  = ymageBMPParser.DWORD(s, offset + 8);
-            dwImageOffset = ymageBMPParser.DWORD(s, offset + 12);
+            bWidth        = bmpParser.BYTE(s, offset + 0);
+            bHeight       = bmpParser.BYTE(s, offset + 1);
+            bColorCount   = bmpParser.BYTE(s, offset + 2);
+            bReserved     = bmpParser.BYTE(s, offset + 3);
+            wPlanes       = bmpParser.WORD(s, offset + 4);
+            wBitCount     = bmpParser.WORD(s, offset + 6);
+            dwBytesInRes  = bmpParser.DWORD(s, offset + 8);
+            dwImageOffset = bmpParser.DWORD(s, offset + 12);
         }
     }
     
@@ -109,7 +110,7 @@ public class ymageICOParser {
             e.printStackTrace();
         }
         
-        final ymageICOParser parser = new ymageICOParser(file);
+        final icoParser parser = new icoParser(file);
         
         try {
             ImageIO.write(parser.getImage(0), "PNG", out);

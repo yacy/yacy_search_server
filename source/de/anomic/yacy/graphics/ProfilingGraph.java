@@ -24,24 +24,28 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.ymage;
+package de.anomic.yacy.graphics;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 
-import de.anomic.server.serverProfiling;
-import de.anomic.server.serverProfiling.Event;
+
+import net.yacy.kelondro.util.MemoryTracker;
+import net.yacy.kelondro.util.MemoryTracker.Event;
+import net.yacy.visualization.RasterPlotter;
+import net.yacy.visualization.ChartPlotter;
+
 
 public class ProfilingGraph {
     
-    private static ymageChart bufferChart = null;
+    private static ChartPlotter bufferChart = null;
     
     public static long maxPayload(final String eventname, final long min) {
-    	final ArrayList<Event> list = serverProfiling.history(eventname);
+    	final ArrayList<Event> list = MemoryTracker.history(eventname);
     	if (list == null) return min;
         long max = min, l;
         synchronized (list) {
-            for (serverProfiling.Event event: list) {
+            for (MemoryTracker.Event event: list) {
                 l = ((Long) event.payload).longValue();
                 if (l > max) max = l;
             }
@@ -49,7 +53,7 @@ public class ProfilingGraph {
         return max;
     }
     
-    public static ymageMatrix performanceGraph(final int width, final int height, final String subline) {        
+    public static RasterPlotter performanceGraph(final int width, final int height, final String subline) {        
         // find maximum values for automatic graph dimension adoption
         final int maxppm = (int) maxPayload("ppm", 25);
         final int maxwords = (int) maxPayload("wordcache", 12000);
@@ -68,12 +72,12 @@ public class ProfilingGraph {
         final int vspace = height - topborder - bottomborder;
         final int hspace = width - leftborder - rightborder;
         final int maxtime = 600;
-        ymageChart chart = new ymageChart(width, height, "FFFFFF", "000000", "AAAAAA", leftborder, rightborder, topborder, bottomborder, "YACY PEER PERFORMANCE: MAIN MEMORY, WORD CACHE AND PAGES/MINUTE (PPM)", subline);
-        chart.declareDimension(ymageChart.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, "000000", "CCCCCC", "TIME/SECONDS");
-        chart.declareDimension(ymageChart.DIMENSION_LEFT, leftscale, vspace * leftscale / maxwords, 0, "008800", null , "INDEXING, WORDS IN CACHE");
-        chart.declareDimension(ymageChart.DIMENSION_RIGHT, rightscale, vspace * rightscale / maxmbytes, 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");
-        chart.declareDimension(ymageChart.DIMENSION_ANOT0, anotscale, vspace * anotscale / maxppm, 0, "008800", null , "PPM [PAGES/MINUTE]");
-        chart.declareDimension(ymageChart.DIMENSION_ANOT1, vspace / 6, vspace / 6, 0, "888800", null , "URL");
+        ChartPlotter chart = new ChartPlotter(width, height, "FFFFFF", "000000", "AAAAAA", leftborder, rightborder, topborder, bottomborder, "YACY PEER PERFORMANCE: MAIN MEMORY, WORD CACHE AND PAGES/MINUTE (PPM)", subline);
+        chart.declareDimension(ChartPlotter.DIMENSION_BOTTOM, bottomscale, hspace / (maxtime / bottomscale), -maxtime, "000000", "CCCCCC", "TIME/SECONDS");
+        chart.declareDimension(ChartPlotter.DIMENSION_LEFT, leftscale, vspace * leftscale / maxwords, 0, "008800", null , "INDEXING, WORDS IN CACHE");
+        chart.declareDimension(ChartPlotter.DIMENSION_RIGHT, rightscale, vspace * rightscale / maxmbytes, 0, "0000FF", "CCCCCC", "MEMORY/MEGABYTE");
+        chart.declareDimension(ChartPlotter.DIMENSION_ANOT0, anotscale, vspace * anotscale / maxppm, 0, "008800", null , "PPM [PAGES/MINUTE]");
+        chart.declareDimension(ChartPlotter.DIMENSION_ANOT1, vspace / 6, vspace / 6, 0, "888800", null , "URL");
         
         // draw chart
         long time;
@@ -98,47 +102,47 @@ public class ProfilingGraph {
             }
             */
             // draw memory
-            ArrayList<Event> events = serverProfiling.history("memory");
+            ArrayList<Event> events = MemoryTracker.history("memory");
             x0 = 1; y0 = 0;
-            if (events != null) synchronized (events) {for (serverProfiling.Event event: events) {
+            if (events != null) synchronized (events) {for (MemoryTracker.Event event: events) {
                 time = event.time - now;
                 bytes = ((Long) event.payload).longValue();
                 x1 = (int) (time/1000);
                 y1 = (int) (bytes / 1024 / 1024);
                 chart.setColor("AAAAFF");
-                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x1, y1, 2, null, 0);
+                chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x1, y1, 2, null, 0);
                 chart.setColor("0000FF");
-                if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_RIGHT, x0, y0, x1, y1);
+                if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x0, y0, x1, y1);
                 x0 = x1; y0 = y1;
             }}
             
             // draw wordcache
-            events = serverProfiling.history("wordcache");
+            events = MemoryTracker.history("wordcache");
             x0 = 1; y0 = 0;
-            if (events != null) synchronized (events) {for (serverProfiling.Event event: events) {
+            if (events != null) synchronized (events) {for (MemoryTracker.Event event: events) {
                 time = event.time - now;
                 words = (int) ((Long) event.payload).longValue();
                 x1 = (int) (time/1000);
                 y1 = words;
                 chart.setColor("228822");
-                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x1, y1, 2, null, 315);
+                chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_LEFT, x1, y1, 2, null, 315);
                 chart.setColor("008800");
-                if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_LEFT, x0, y0, x1, y1);
+                if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_LEFT, x0, y0, x1, y1);
                 x0 = x1; y0 = y1;
             }}
             
             // draw ppm
-            events = serverProfiling.history("ppm");
+            events = MemoryTracker.history("ppm");
             x0 = 1; y0 = 0;
-            if (events != null) synchronized (events) {for (serverProfiling.Event event: events) {
+            if (events != null) synchronized (events) {for (MemoryTracker.Event event: events) {
                 time = event.time - now;
                 ppm = (int) ((Long) event.payload).longValue();
                 x1 = (int) (time/1000);
                 y1 = ppm;
                 chart.setColor("AA8888");
-                if (x0 < 0) chart.chartLine(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_ANOT0, x0, y0, x1, y1);
+                if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT0, x0, y0, x1, y1);
                 chart.setColor("AA2222");
-                chart.chartDot(ymageChart.DIMENSION_BOTTOM, ymageChart.DIMENSION_ANOT0, x1, y1, 2, ppm + " PPM", 0);
+                chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT0, x1, y1, 2, ppm + " PPM", 0);
                 x0 = x1; y0 = y1;
             }}
             

@@ -28,7 +28,7 @@ package de.anomic.crawler.retrieval;
 import java.io.IOException;
 import java.util.Date;
 
-import net.yacy.document.Parser;
+import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
@@ -98,7 +98,7 @@ public final class HTTPLoader {
         
         // if not the right file type then reject file
         if (acceptOnlyParseable) {
-            String supportError = Parser.supportsExtension(request.url());
+            String supportError = TextParser.supportsExtension(request.url());
             if (supportError != null) {
                 sb.crawlQueues.errorURL.newEntry(request, sb.peers.mySeed().hash, new Date(), 1, supportError);
                 throw new IOException("REJECTED WRONG EXTENSION TYPE: " + supportError);
@@ -141,7 +141,7 @@ public final class HTTPLoader {
                 
                 if (acceptOnlyParseable) {
                 	// if the response has not the right file type then reject file
-                    String supportError = Parser.supports(request.url(), res.getResponseHeader().mime());
+                    String supportError = TextParser.supports(request.url(), res.getResponseHeader().mime());
                     if (supportError != null) {
                     	sb.crawlQueues.errorURL.newEntry(request, sb.peers.mySeed().hash, new Date(), 1, supportError);
                     	throw new IOException("REJECTED WRONG MIME TYPE: " + supportError);

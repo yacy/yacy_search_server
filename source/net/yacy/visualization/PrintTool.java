@@ -24,9 +24,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.ymage;
+package net.yacy.visualization;
 
-public class ymageToolPrint {
+
+public class PrintTool {
 
     
     private static long[] font = new long[]{
@@ -44,7 +45,7 @@ public class ymageToolPrint {
     	0x0000000EC2E0ECL,0x0000000EC2E030L,0x0000000FF2E3FCL,0x000F0B8B80B80FL,0x00300C0300C030L,0x03C0B80B8B83C0L,0x0000B83BB0B800L,0x03FFC0F03C0FFFL
     };
 
-    private static void print(final ymageMatrix matrix, int x, int y, final int angle, final char letter) {
+    private static void print(final RasterPlotter matrix, int x, int y, final int angle, final char letter) {
         final int index = letter - 0x20;
         if (index >= font.length) return;
         long character = font[index];
@@ -84,7 +85,7 @@ public class ymageToolPrint {
         }
     }
     
-    public static void print(final ymageMatrix matrix, final int x, final int y, final int angle, final String message, final int align) {
+    public static void print(final RasterPlotter matrix, final int x, final int y, final int angle, final String message, final int align) {
         // align = -1 : left
         // align =  1 : right
         // align =  0 : center
@@ -109,7 +110,7 @@ public class ymageToolPrint {
     
     
     private static final int arcDist = 8;
-    public static void arcPrint(final ymageMatrix matrix, final int cx, final int cy, final int radius, final int angle, final String message) {
+    public static void arcPrint(final RasterPlotter matrix, final int cx, final int cy, final int radius, final int angle, final String message) {
         final int x = cx + (int) ((radius + 1) * Math.cos(Math.PI * angle / 180));
         final int y = cy - (int) ((radius + 1) * Math.sin(Math.PI * angle / 180));
         int yp = y + 3;

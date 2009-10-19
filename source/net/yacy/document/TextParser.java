@@ -57,11 +57,12 @@ import net.yacy.document.parser.vcfParser;
 import net.yacy.document.parser.vsdParser;
 import net.yacy.document.parser.xlsParser;
 import net.yacy.document.parser.zipParser;
+import net.yacy.document.parser.images.genericImageParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 
-public final class Parser {
+public final class TextParser {
 
     private static final Log log = new Log("PARSER");
     
@@ -82,6 +83,7 @@ public final class Parser {
         initParser(new docParser());
         initParser(new gzipParser());
         initParser(new htmlParser());
+        initParser(new genericImageParser());
         initParser(new odtParser());
         initParser(new ooxmlParser());
         initParser(new pdfParser());

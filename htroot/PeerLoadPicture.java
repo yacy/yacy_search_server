@@ -9,8 +9,8 @@ import de.anomic.http.server.RequestHeader;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.ymage.NetworkGraph;
-import de.anomic.ymage.NetworkGraph.CircleThreadPiece;
+import de.anomic.yacy.graphics.NetworkGraph;
+import de.anomic.yacy.graphics.NetworkGraph.CircleThreadPiece;
 
 public class PeerLoadPicture {
     

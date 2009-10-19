@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Date;
 
-import net.yacy.document.Parser;
+import net.yacy.document.TextParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
@@ -217,13 +217,13 @@ public class FTPLoader {
     private Response getFile(final ftpc ftpClient, final Request request) throws Exception {
         // determine the mimetype of the resource
         final DigestURI entryUrl = request.url();
-        final String mimeType = Parser.mimeOf(entryUrl);
+        final String mimeType = TextParser.mimeOf(entryUrl);
         final String path = getPath(entryUrl);
 
         // if the mimetype and file extension is supported we start to download
         // the file
         Response response = null;
-        String supportError = Parser.supports(entryUrl, mimeType);
+        String supportError = TextParser.supports(entryUrl, mimeType);
         if (supportError != null) {
             // reject file
             log.logInfo("PARSER REJECTED URL " + request.url().toString() + ": " + supportError);

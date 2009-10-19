@@ -29,6 +29,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.HashMap;
 
+import net.yacy.document.ImageParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
@@ -38,7 +39,6 @@ import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.ymage.ymageImageParser;
 
 public class ViewImage {
 
@@ -124,7 +124,7 @@ public class ViewImage {
             }
 
             // read image
-            final Image image = ymageImageParser.parse(urlString, imgb);
+            final Image image = ImageParser.parse(urlString, imgb);
 
             if (image == null || (auth && (width == 0 || height == 0) && maxwidth == 0 && maxheight == 0)) return image;
 

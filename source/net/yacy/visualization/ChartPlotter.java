@@ -19,7 +19,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.ymage;
+package net.yacy.visualization;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,7 +27,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
-public class ymageChart extends ymageMatrix {
+
+public class ChartPlotter extends RasterPlotter {
     
     public static final int DIMENSION_RIGHT  = 0;
     public static final int DIMENSION_TOP    = 1;
@@ -49,10 +50,10 @@ public class ymageChart extends ymageMatrix {
     //String name;
     //String backgroundColor, foregroundColor;
     
-    public ymageChart(final int width, final int height, final String backgroundColor, final String foregroundColor, final String lightColor,
+    public ChartPlotter(final int width, final int height, final String backgroundColor, final String foregroundColor, final String lightColor,
                       final int leftborder, final int rightborder, final int topborder, final int bottomborder,
                       final String name, final String subline) {
-        super(width, height, ymageMatrix.MODE_REPLACE, backgroundColor);
+        super(width, height, RasterPlotter.MODE_REPLACE, backgroundColor);
         this.leftborder = leftborder;
         this.rightborder = rightborder;
         this.topborder = topborder;
@@ -62,11 +63,11 @@ public class ymageChart extends ymageMatrix {
         //this.foregroundColor = foregroundColor;
         if (name != null) {
             this.setColor(foregroundColor);
-            ymageToolPrint.print(this, width / 2 - name.length() * 3, 6, 0, name, -1);
+            PrintTool.print(this, width / 2 - name.length() * 3, 6, 0, name, -1);
         }
         if (subline != null) {
             this.setColor(lightColor);
-            ymageToolPrint.print(this, width / 2 - subline.length() * 3, 14, 0, subline, -1);
+            PrintTool.print(this, width / 2 - subline.length() * 3, 14, 0, subline, -1);
         }
     }
     
@@ -90,7 +91,7 @@ public class ymageChart extends ymageMatrix {
         final int y = (coord_y - offsets[dimension_y]) * pixels[dimension_y] / scales[dimension_y];
         if (dotsize == 1) plot(leftborder + x, height - bottomborder - y);
                       else dot(leftborder + x, height - bottomborder - y, dotsize, true);
-        if (anot != null) ymageToolPrint.print(this, leftborder + x + dotsize + 2 + ((anotAngle == 315) ? -9 : 0), height - bottomborder - y + ((anotAngle == 315) ? -3 : 0), anotAngle, anot, (anotAngle == 0) ? -1 : ((anotAngle == 315) ? 1 : 0));
+        if (anot != null) PrintTool.print(this, leftborder + x + dotsize + 2 + ((anotAngle == 315) ? -9 : 0), height - bottomborder - y + ((anotAngle == 315) ? -3 : 0), anotAngle, anot, (anotAngle == 0) ? -1 : ((anotAngle == 315) ? 1 : 0));
     }
     
     public void chartLine(final int dimension_x, final int dimension_y, final int coord_x1, final int coord_y1, final int coord_x2, final int coord_y2) {
@@ -112,12 +113,12 @@ public class ymageChart extends ymageMatrix {
             }
             setColor(colorNaming);
             line(x, y - 3, x, y + 3);
-            ymageToolPrint.print(this, x, (top) ? y - 3 : y + 9, 0, Integer.toString(s), -1);
+            PrintTool.print(this, x, (top) ? y - 3 : y + 9, 0, Integer.toString(s), -1);
             x += pixelperscale;
             s += scale;
         }
         setColor(colorNaming);
-        ymageToolPrint.print(this, width - rightborder, (top) ? y - 9 : y + 15, 0, name, 1);
+        PrintTool.print(this, width - rightborder, (top) ? y - 9 : y + 15, 0, name, 1);
         line(leftborder - 4, y, width - rightborder + 4, y);
     }
     
@@ -136,12 +137,12 @@ public class ymageChart extends ymageMatrix {
             line(x - 3, y, x + 3, y);
             s1 = (s >= 1000000 && s % 10000 == 0) ? Integer.toString(s / 1000000) + "M" : (s >= 1000 && s % 1000 == 0) ? Integer.toString(s / 1000) + "K" : Integer.toString(s);
             if (s1.length() > s1max) s1max = s1.length();
-            ymageToolPrint.print(this, (left) ? leftborder - 4 : width - rightborder + 4, y, 0, s1, (left) ? 1 : -1);
+            PrintTool.print(this, (left) ? leftborder - 4 : width - rightborder + 4, y, 0, s1, (left) ? 1 : -1);
             y -= pixelperscale;
             s += scale;
         }
         setColor(colorNaming);
-        ymageToolPrint.print(this, (left) ? x - s1max * 6 - 6 : x + s1max * 6 + 9, topborder, 90, name, 1);
+        PrintTool.print(this, (left) ? x - s1max * 6 - 6 : x + s1max * 6 + 9, topborder, 90, name, 1);
         line(x, topborder - 4, x, height - bottomborder + 4);
     }
    
@@ -152,7 +153,7 @@ public class ymageChart extends ymageMatrix {
         final String scale = "CCCCCC";
         final String green = "008800";
         final String blue = "0000FF";
-        final ymageChart ip = new ymageChart(660, 240, bg, fg, fg, 30, 30, 20, 20, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY", "");
+        final ChartPlotter ip = new ChartPlotter(660, 240, bg, fg, fg, 30, 30, 20, 20, "PEER PERFORMANCE GRAPH: PAGES/MINUTE and USED MEMORY", "");
         ip.declareDimension(DIMENSION_BOTTOM, 60, 60, -600, fg, scale, "TIME/SECONDS");
         //ip.declareDimension(DIMENSION_TOP, 10, 40, "000000", null, "count");
         ip.declareDimension(DIMENSION_LEFT, 50, 40, 0, green, scale , "PPM [PAGES/MINUTE]");

@@ -28,11 +28,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 
+import net.yacy.kelondro.util.MemoryTracker;
+
 import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverObjects;
-import de.anomic.server.serverProfiling;
 import de.anomic.server.serverSwitch;
-import de.anomic.ymage.ProfilingGraph;
+import de.anomic.yacy.graphics.ProfilingGraph;
 
 public class PerformanceSearch_p {
     
@@ -40,13 +41,13 @@ public class PerformanceSearch_p {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         
-        final ArrayList<serverProfiling.Event> events = serverProfiling.history("SEARCH");
+        final ArrayList<MemoryTracker.Event> events = MemoryTracker.history("SEARCH");
         int c = 0;
-        serverProfiling.Event event;
+        MemoryTracker.Event event;
         ProfilingGraph.searchEvent search;
         long lastt = 0;
         if (events != null) synchronized (events) {
-            Iterator<serverProfiling.Event> i = events.iterator();
+            Iterator<MemoryTracker.Event> i = events.iterator();
             while (i.hasNext()) {
                 event = i.next();
                 search = (ProfilingGraph.searchEvent) event.payload;

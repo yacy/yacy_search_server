@@ -31,7 +31,7 @@
  are not available in awt.
  */
 
-package de.anomic.ymage;
+package net.yacy.visualization;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
@@ -48,7 +48,7 @@ import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.MemoryControl;
 
 
-public class ymageMatrix {
+public class RasterPlotter {
     
     // colors regarding RGB Color Model
     public static final long RED    = 0xFF0000;
@@ -71,11 +71,11 @@ public class ymageMatrix {
     private final   long           backgroundCol;
     private final   byte           defaultMode;
     
-    public ymageMatrix(final int width, final int height, final byte drawMode, final String backgroundColor) {
+    public RasterPlotter(final int width, final int height, final byte drawMode, final String backgroundColor) {
         this(width, height, drawMode, Long.parseLong(backgroundColor, 16));
     }
     
-    public ymageMatrix(final int width, final int height, final byte drawMode, final long backgroundColor) {
+    public RasterPlotter(final int width, final int height, final byte drawMode, final long backgroundColor) {
         if (!(MemoryControl.request(1024 * 1024 + 3 * width * height, false))) throw new RuntimeException("ymage: not enough memory (" + MemoryControl.available() + ") available");
         this.width = width;
         this.height = height;
@@ -270,14 +270,14 @@ public class ymageMatrix {
 
     public void dot(final int x, final int y, final int radius, final boolean filled) {
         if (filled) {
-            for (int r = radius; r >= 0; r--) ymageToolCircle.circle(this, x, y, r);
+            for (int r = radius; r >= 0; r--) CircleTool.circle(this, x, y, r);
         } else {
-            ymageToolCircle.circle(this, x, y, radius);
+            CircleTool.circle(this, x, y, radius);
         }
     }
     
     public void arc(final int x, final int y, final int innerRadius, final int outerRadius, final int fromArc, final int toArc) {
-        for (int r = innerRadius; r <= outerRadius; r++) ymageToolCircle.circle(this, x, y, r, fromArc, toArc);
+        for (int r = innerRadius; r <= outerRadius; r++) CircleTool.circle(this, x, y, r, fromArc, toArc);
     }
 
     public void arcLine(final int cx, final int cy, final int innerRadius, final int outerRadius, final int angle) {
@@ -610,18 +610,18 @@ public class ymageMatrix {
         
     }
     
-    public static void demoPaint(final ymageMatrix m) {
+    public static void demoPaint(final RasterPlotter m) {
         m.setColor(GREY);
-        m.line(0,  70, 100,  70); ymageToolPrint.print(m, 0,  65, 0, "Grey", -1);
+        m.line(0,  70, 100,  70); PrintTool.print(m, 0,  65, 0, "Grey", -1);
         m.line(65, 0,   65, 300);
         m.setColor(RED);
-        m.line(0,  90, 100,  90); ymageToolPrint.print(m, 0,  85, 0, "Red", -1);
+        m.line(0,  90, 100,  90); PrintTool.print(m, 0,  85, 0, "Red", -1);
         m.line(70, 0,   70, 300);
         m.setColor(GREEN);
-        m.line(0, 110, 100, 110); ymageToolPrint.print(m, 0, 105, 0, "Green", -1);
+        m.line(0, 110, 100, 110); PrintTool.print(m, 0, 105, 0, "Green", -1);
         m.line(75, 0,   75, 300);
         m.setColor(BLUE);
-        m.line(0, 130, 100, 130); ymageToolPrint.print(m, 0, 125, 0, "Blue", -1);
+        m.line(0, 130, 100, 130); PrintTool.print(m, 0, 125, 0, "Blue", -1);
         m.line(80, 0,   80, 300);
     }
 /*
@@ -717,7 +717,7 @@ public class ymageMatrix {
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");
         
-        final ymageMatrix m = new ymageMatrix(200, 300, MODE_SUB, "FFFFFF");
+        final RasterPlotter m = new RasterPlotter(200, 300, MODE_SUB, "FFFFFF");
         demoPaint(m);
         final File file = new File("/Users/admin/Desktop/testimage.png");
         try {

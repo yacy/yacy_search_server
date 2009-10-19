@@ -50,6 +50,7 @@ import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.OS;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.HTTPLoader;
@@ -60,7 +61,6 @@ import de.anomic.http.server.RequestHeader;
 import de.anomic.http.server.ResponseContainer;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
-import de.anomic.server.serverSystem;
 import de.anomic.tools.CryptoLib;
 import de.anomic.tools.SignatureOutputStream;
 import de.anomic.tools.tarTools;
@@ -390,7 +390,7 @@ public final class yacyRelease extends yacyVersion {
             final Switchboard sb = Switchboard.getSwitchboard();
             final String apphome = sb.getRootPath().toString();
             
-            if (serverSystem.isWindows) {
+            if (OS.isWindows) {
                 final File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole".replace("/", File.separator));
                 String starterFile = "startYACY_debug.bat";
                 if (startType.exists()) starterFile = "startYACY.bat"; // startType noconsole
@@ -412,9 +412,9 @@ public final class yacyRelease extends yacyVersion {
                         "cd \"" + apphome + "\"" + serverCore.LF_STRING +
                         "start /MIN CMD /C " + starterFile + serverCore.LF_STRING;
                     final File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.bat".replace("/", File.separator));
-                    serverSystem.deployScript(scriptFile, script);
+                    OS.deployScript(scriptFile, script);
                     Log.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
-                    serverSystem.execAsynchronous(scriptFile);
+                    OS.execAsynchronous(scriptFile);
                     Log.logInfo("RESTART", "script is running");
                     sb.terminate(5000);
                 } catch (final IOException e) {
@@ -442,14 +442,14 @@ public final class yacyRelease extends yacyVersion {
                         "#!/bin/sh" + serverCore.LF_STRING +
                         yacyBuildProperties.getRestartCmd() + " >/var/lib/yacy/RELEASE/log" + serverCore.LF_STRING;
                     final File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.sh");
-                    serverSystem.deployScript(scriptFile, script);
+                    OS.deployScript(scriptFile, script);
                     Log.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
-                    serverSystem.execAsynchronous(scriptFile);
+                    OS.execAsynchronous(scriptFile);
                     Log.logInfo("RESTART", "script is running");
                 } catch (final IOException e) {
                     Log.logSevere("RESTART", "restart failed", e);
                 }
-            } else if (serverSystem.canExecUnix) {
+            } else if (OS.canExecUnix) {
                 // start a re-start daemon
                 try {
                     Log.logInfo("RESTART", "INITIATED");
@@ -462,9 +462,9 @@ public final class yacyRelease extends yacyVersion {
                         "cd ../../" + serverCore.LF_STRING +
                         "nohup ./startYACY.sh > /dev/null" + serverCore.LF_STRING;
                     final File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/restart.sh");
-                    serverSystem.deployScript(scriptFile, script);
+                    OS.deployScript(scriptFile, script);
                     Log.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
-                    serverSystem.execAsynchronous(scriptFile);
+                    OS.execAsynchronous(scriptFile);
                     Log.logInfo("RESTART", "script is running");
                     sb.terminate(5000);
                 } catch (final IOException e) {
@@ -493,7 +493,7 @@ public final class yacyRelease extends yacyVersion {
             }
             String script = null;
             String scriptFileName = null;
-            if (serverSystem.isWindows) {
+            if (OS.isWindows) {
                 final File startType = new File(sb.getRootPath(), "DATA/yacy.noconsole".replace("/", File.separator));
                 String starterFile = "startYACY_debug.bat";
                 if (startType.exists()) starterFile = "startYACY.bat"; // startType noconsole
@@ -562,9 +562,9 @@ public final class yacyRelease extends yacyVersion {
                 scriptFileName = "update.sh";
             }
             final File scriptFile = new File(sb.getRootPath(), "DATA/RELEASE/".replace("/", File.separator) + scriptFileName); 
-            serverSystem.deployScript(scriptFile, script);
+            OS.deployScript(scriptFile, script);
             Log.logInfo("UPDATE", "wrote update-script to " + scriptFile.getAbsolutePath());
-            serverSystem.execAsynchronous(scriptFile);
+            OS.execAsynchronous(scriptFile);
             Log.logInfo("UPDATE", "script is running");
             sb.setConfig("update.time.deploy", System.currentTimeMillis());
             sb.terminate(5000);

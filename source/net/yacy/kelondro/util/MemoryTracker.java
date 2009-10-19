@@ -1,4 +1,4 @@
-// serverProfiling.java
+// MemoryTracker.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 17.11.2007 on http://yacy.net
 //
@@ -24,24 +24,23 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.server;
+package net.yacy.kelondro.util;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.kelondro.util.MemoryControl;
 
 
-public class serverProfiling extends Thread {
+public class MemoryTracker extends Thread {
     
     private static final Map<String, ArrayList<Event>> historyMaps = new ConcurrentHashMap<String, ArrayList<Event>>();
     private static final Map<String, Long> eventAccess = new ConcurrentHashMap<String, Long>(); // value: last time when this was accessed
-    private static serverProfiling systemProfiler = null;
+    private static MemoryTracker systemProfiler = null;
     
     public static void startSystemProfiling() {
-    	systemProfiler = new serverProfiling(1500);
+    	systemProfiler = new MemoryTracker(1500);
     	systemProfiler.start();
     }
     
@@ -52,7 +51,7 @@ public class serverProfiling extends Thread {
     private final long delaytime;
     private boolean running;
     
-    public serverProfiling(final long time) {
+    public MemoryTracker(final long time) {
     	this.delaytime = time;
     	running = true;
     }

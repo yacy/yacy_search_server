@@ -21,15 +21,16 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.ymage;
+package net.yacy.visualization;
 
 import java.util.Random;
 
 import javax.imageio.ImageIO;
 
-public class ymageCaptcha extends ymageMatrix {
 
-    public ymageCaptcha(final int width, final int height, final byte displayMode, final String code) {
+public class Captcha extends RasterPlotter {
+
+    public Captcha(final int width, final int height, final byte displayMode, final String code) {
         super(width, height, displayMode, "FFFFFF");
         this.create(code);
     }
@@ -53,7 +54,7 @@ public class ymageCaptcha extends ymageMatrix {
         for(int i=0;i<chars;i++){
             y = random.nextInt(height/2) + (height/4);
             setColor(((random.nextInt(128)+64)<<16) + ((random.nextInt(128)+64)<<8) + random.nextInt(128)+64);
-            ymageToolPrint.print(this, widthPerChar*i+random.nextInt(widthPerChar/2) , y , 0, code.substring(i,i+1), -1);
+            PrintTool.print(this, widthPerChar*i+random.nextInt(widthPerChar/2) , y , 0, code.substring(i,i+1), -1);
         }
 
         //adding some noise
@@ -82,7 +83,7 @@ public class ymageCaptcha extends ymageMatrix {
         // go into headless awt mode
         System.setProperty("java.awt.headless", "true");
 
-        final ymageCaptcha m = new ymageCaptcha(200, 70, ymageMatrix.MODE_REPLACE, args[1]);
+        final Captcha m = new Captcha(200, 70, RasterPlotter.MODE_REPLACE, args[1]);
         try {
             ImageIO.write(m.getImage(), "png", new java.io.File(args[0]));
         } catch (final java.io.IOException e) {

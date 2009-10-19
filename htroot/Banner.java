@@ -31,19 +31,20 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import net.yacy.visualization.RasterPlotter;
+
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacySeed;
-import de.anomic.ymage.NetworkGraph;
-import de.anomic.ymage.ymageMatrix;
+import de.anomic.yacy.graphics.NetworkGraph;
 
 /** draw a banner with information about the peer */
 public class Banner {
 
-    public static ymageMatrix respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
+    public static RasterPlotter respond(final RequestHeader header, final serverObjects post, final serverSwitch env) throws IOException {
         final Switchboard sb = (Switchboard) env;
         final String IMAGE = "htroot/env/grafics/yacy.gif";
         int width = 468;

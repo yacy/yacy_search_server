@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 
+import net.yacy.document.ImageParser;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
@@ -38,7 +39,6 @@ import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.ymage.ymageImageParser;
 
 public class cytag {
     
@@ -74,7 +74,7 @@ public class cytag {
         if (imgb == null) return null;
         
         // read image
-        final Image image = ymageImageParser.parse("cytag.png", imgb);
+        final Image image = ImageParser.parse("cytag.png", imgb);
 
         return image;
     }

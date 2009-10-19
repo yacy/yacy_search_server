@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.ymage;
+package de.anomic.yacy.graphics;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -38,17 +38,18 @@ import javax.imageio.ImageIO;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.visualization.RasterPlotter;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.Cache;
 import de.anomic.search.Switchboard;
 
-public class ymageOSM {
+public class OSMTile {
     
     // helper methods to load map images from openstreetmap.org
     
-    public static ymageMatrix getCombinedTiles(final tileCoordinates t11) {
+    public static RasterPlotter getCombinedTiles(final tileCoordinates t11) {
         tileCoordinates t00, t10, t20, t01, t21, t02, t12, t22;
         t00 = new tileCoordinates(t11.xtile - 1, t11.ytile - 1, t11.zoom);
         t10 = new tileCoordinates(t11.xtile    , t11.ytile - 1, t11.zoom);
@@ -58,7 +59,7 @@ public class ymageOSM {
         t02 = new tileCoordinates(t11.xtile - 1, t11.ytile + 1, t11.zoom);
         t12 = new tileCoordinates(t11.xtile    , t11.ytile + 1, t11.zoom);
         t22 = new tileCoordinates(t11.xtile + 1, t11.ytile + 1, t11.zoom);
-        final ymageMatrix m = new ymageMatrix(768, 768, ymageMatrix.MODE_REPLACE, "FFFFFF");
+        final RasterPlotter m = new RasterPlotter(768, 768, RasterPlotter.MODE_REPLACE, "FFFFFF");
         BufferedImage bi;
         bi = getSingleTile(t00); if (bi != null) m.insertBitmap(getSingleTile(t00),   0,   0);
         bi = getSingleTile(t10); if (bi != null) m.insertBitmap(getSingleTile(t10), 256,   0);

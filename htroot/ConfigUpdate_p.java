@@ -31,12 +31,12 @@ import java.util.TreeSet;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.OS;
 
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.server.serverSystem;
 import de.anomic.yacy.yacyBuildProperties;
 import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.yacyVersion;
@@ -52,7 +52,7 @@ public class ConfigUpdate_p {
         if (yacyBuildProperties.isPkgManager()) {
             prop.put("candeploy", "2");
             return prop;
-        } else if (serverSystem.canExecUnix || serverSystem.isWindows) {
+        } else if (OS.canExecUnix || OS.isWindows) {
             // we can deploy a new system with (i.e.)
             // cd DATA/RELEASE;tar xfz $1;cp -Rf yacy/* ../../;rm -Rf yacy
             prop.put("candeploy", "1");

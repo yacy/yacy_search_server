@@ -24,12 +24,13 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.ymage;
+package net.yacy.visualization;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class ymageToolCircle {    
+
+public class CircleTool {    
 
     private static int[][] circles = new int[0][];
 
@@ -96,7 +97,7 @@ public class ymageToolCircle {
         return circles[radius - 1];
     }
     
-    public static void circle(final ymageMatrix matrix, final int xc, final int yc, final int radius) {
+    public static void circle(final RasterPlotter matrix, final int xc, final int yc, final int radius) {
         if (radius == 0) {
             matrix.plot(xc, yc);
         } else {
@@ -113,7 +114,7 @@ public class ymageToolCircle {
         }
     }
     
-    public static void circle(final ymageMatrix matrix, final int xc, final int yc, final int radius, final int fromArc, final int toArc) {
+    public static void circle(final RasterPlotter matrix, final int xc, final int yc, final int radius, final int fromArc, final int toArc) {
         // draws only a part of a circle
         // arc is given in degree
         if (radius == 0) {
