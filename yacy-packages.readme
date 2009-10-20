@@ -1,0 +1,69 @@
+The YaCy Search Application is build on a set of packages
+for efficient IO, visualization, parsing and text structure analysis
+and some application-specific classes for the distributed full-text index
+and servlets for the user interfaces and protocol implementation.
+
+Packages:
+
+
+net.yacy.kelondro
+-----------------
+depends on commons-logging
+The core class for efficient IO:
+- record-based stream writing
+- blob-based stream writing
+- large-scale full-ram indexes for up to 100 Million references
+  to object entries in record-streams and blob-streams
+- logging, resource observation, work-flow control and utilities
+
+net.yacy.visualization
+----------------------
+has NO dependencies
+The core class for image drawing that is used in visialization servlets.
+This package contains system-independent drawing class that provide
+a unique way to draw graphs and charts and write on these images with
+a tiny 5x5 font.
+
+net.yacy.document
+-----------------
+has many dependencies, kelondro and text parser classes
+The core package for document parsing and content analysis.
+Provides classes for text and image parsing, metadata generation
+using dublin core metadata records. Text contents can be processed
+with language detection and annotated with analysis metadata
+like geolocalization information (more to come).
+
+net.yacy.repository
+-------------------
+depends on yacy.kelondro, yacy.document, commons-httpclient
+The core package for document retrieval and data access connectors.
+Contains a web crawler, a OAI-PMH client and a document cache.
+The document cache is integrated in a http client infrastructure
+to provide a transparent access to documents that may either live
+externally in the WWW or inside the repository cache. The cache stores
+http header information and the full document data and is stored
+as a kelondro blob array. The integrated crawler provides support for
+robots.txt crawler steering methods and is implemented in such a way
+that target hosts are balanced when the crawler retrieves pages from
+the WWW.
+
+
+net.sbbi.upnp
+-------------
+has NO dependencies, a "homeless" package (see explanation below).
+provides upnp functions for the YaCy p2p network bootstraping
+
+org.apache.tools.tar
+--------------------
+has NO dependencies, a "homeless" package (see explanation below).
+provides un-tar functions for the net.yacy.document
+
+
+^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v^v
+
+"homeless" packages (see reference above)
+YaCy contains 'homeless' packages that have not the necessary maintenance
+sufficient enough for a linux release packagement. It was integrated
+in the YaCy package structure because it is needed in the YaCy search
+application, but cannot be found in a public available deban/fedora package.
+
