@@ -47,9 +47,8 @@ import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.repository.Blacklist;
 
-import de.anomic.data.AbstractBlacklist;
-import de.anomic.data.Blacklist;
 import de.anomic.data.listManager;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.QueryParams;
@@ -320,6 +319,7 @@ public class IndexControlRWIs_p {
                                                 url.getFile());
                                     }                
                                 }
+                                SearchEventCache.cleanupEvents(true);
                             }
                         }
                         pw.close();
@@ -330,7 +330,7 @@ public class IndexControlRWIs_p {
                 if (post.containsKey("blacklistdomains")) {
                     PrintWriter pw;
                     try {
-                        final String[] supportedBlacklistTypes = AbstractBlacklist.BLACKLIST_TYPES_STRING.split(",");
+                        final String[] supportedBlacklistTypes = Blacklist.BLACKLIST_TYPES_STRING.split(",");
                         pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
                         DigestURI url;
                         for (i = 0; i<urlx.length; i++) {

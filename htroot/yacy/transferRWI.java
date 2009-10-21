@@ -37,8 +37,8 @@ import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.repository.Blacklist;
 
-import de.anomic.data.Blacklist;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;

@@ -37,8 +37,8 @@ import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.ScoreCluster;
+import net.yacy.repository.Blacklist;
 
-import de.anomic.data.Blacklist;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;

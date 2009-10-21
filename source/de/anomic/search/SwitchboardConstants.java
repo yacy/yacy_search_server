@@ -385,17 +385,6 @@ public final class SwitchboardConstants {
     public static final String WORK_PATH                = "workPath";
     public static final String WORK_PATH_DEFAULT        = "DATA/WORK";
 
-    // we must distinguish the following cases: resource-load was initiated by
-    // 1) global crawling: the index is extern, not here (not possible here)
-    // 2) result of search queries, some indexes are here (not possible here)
-    // 3) result of index transfer, some of them are here (not possible here)
-    // 4) proxy-load (initiator is "------------")
-    // 5) local prefetch/crawling (initiator is own seedHash)
-    // 6) local fetching for global crawling (other known or unknown initiator)
-    public static final int PROCESSCASE_0_UNKNOWN = 0;
-    public static final int PROCESSCASE_4_PROXY_LOAD = 4;
-    public static final int PROCESSCASE_5_LOCAL_CRAWLING = 5;
-    public static final int PROCESSCASE_6_GLOBAL_CRAWLING = 6;
     /*
      * Some constants
      */

@@ -139,6 +139,7 @@ import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.kelondro.workflow.WorkflowJob;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.kelondro.workflow.WorkflowThread;
+import net.yacy.repository.Blacklist;
 import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
@@ -153,11 +154,10 @@ import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.RobotsTxt;
 import de.anomic.crawler.ZURL;
 import de.anomic.crawler.CrawlProfile.entry;
+import de.anomic.crawler.retrieval.EventOrigin;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.data.Blacklist;
-import de.anomic.data.DefaultBlacklist;
 import de.anomic.data.LibraryProvider;
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
@@ -429,7 +429,7 @@ public final class Switchboard extends serverSwitch {
         // load blacklist
         this.log.logConfig("Loading blacklist ...");
         final File blacklistsPath = getConfigPath(SwitchboardConstants.LISTS_PATH, SwitchboardConstants.LISTS_PATH_DEFAULT);
-        urlBlacklist = new DefaultBlacklist(blacklistsPath);
+        urlBlacklist = new Blacklist(blacklistsPath);
         listManager.switchboard = this;
         listManager.listsPath = blacklistsPath;        
         listManager.reloadBlacklists();
@@ -1156,7 +1156,7 @@ public final class Switchboard extends serverSwitch {
         
         // check if the document should be indexed based on proxy/crawler rules
         String noIndexReason = "unspecified indexing error";
-        if (response.processCase(peers.mySeed().hash) == SwitchboardConstants.PROCESSCASE_4_PROXY_LOAD) {
+        if (response.processCase(peers.mySeed().hash) == EventOrigin.PROXY_LOAD) {
             // proxy-load
             noIndexReason = response.shallIndexCacheForProxy();
         } else {
@@ -1329,8 +1329,8 @@ public final class Switchboard extends serverSwitch {
         int c = 0;
         if ((crawlQueues.delegatedURL.stackSize() > 1000)) c++;
         if ((crawlQueues.errorURL.stackSize() > 1000)) c++;
-        for (int i = 1; i <= 6; i++) {
-            if (crawlResults.getStackSize(i) > 1000) c++;
+        for (EventOrigin origin: EventOrigin.values()) {
+            if (crawlResults.getStackSize(origin) > 1000) c++;
         }
         return c;
     }
@@ -1410,11 +1410,11 @@ public final class Switchboard extends serverSwitch {
             }
             
             // clean up loadedURL stack
-            for (int i = 1; i <= 6; i++) {
+            for (EventOrigin origin: EventOrigin.values()) {
                 checkInterruption();
-                if (crawlResults.getStackSize(i) > 1000) {
-                    if (this.log.isFine()) log.logFine("Cleaning Loaded-URLs report stack, " + crawlResults.getStackSize(i) + " entries on stack " + i);
-                    crawlResults.clearStack(i);
+                if (crawlResults.getStackSize(origin) > 1000) {
+                    if (this.log.isFine()) log.logFine("Cleaning Loaded-URLs report stack, " + crawlResults.getStackSize(origin) + " entries on stack " + origin.getCode());
+                    crawlResults.clearStack(origin);
                     hasDoneSomething = true;
                 }
             }
@@ -1585,7 +1585,7 @@ public final class Switchboard extends serverSwitch {
     
     private Document parseDocument(Response entry) throws InterruptedException {
         Document document = null;
-        final int processCase = entry.processCase(peers.mySeed().hash);
+        final EventOrigin processCase = entry.processCase(peers.mySeed().hash);
         
         if (this.log.isFine()) log.logFine("processResourceStack processCase=" + processCase +
                 ", depth=" + entry.depth() +
@@ -1635,7 +1635,7 @@ public final class Switchboard extends serverSwitch {
         // put anchors on crawl stack
         final long stackStartTime = System.currentTimeMillis();
         if (
-                ((processCase == SwitchboardConstants.PROCESSCASE_4_PROXY_LOAD) || (processCase == SwitchboardConstants.PROCESSCASE_5_LOCAL_CRAWLING)) &&
+                ((processCase == EventOrigin.PROXY_LOAD) || (processCase == EventOrigin.LOCAL_CRAWLING)) &&
                 ((entry.profile() == null) || (entry.depth() < entry.profile().depth()))
         ) {
             final Map<DigestURI, String> hl = document.getHyperlinks();
@@ -1715,7 +1715,7 @@ public final class Switchboard extends serverSwitch {
         // CREATE INDEX
         final String dc_title = document.dc_title();
         final DigestURI referrerURL = queueEntry.referrerURL();
-        final int processCase = queueEntry.processCase(peers.mySeed().hash);
+        final EventOrigin processCase = queueEntry.processCase(peers.mySeed().hash);
 
         // remove stopwords                        
         log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + queueEntry.url());
@@ -1765,7 +1765,7 @@ public final class Switchboard extends serverSwitch {
         MemoryTracker.update("indexed", queueEntry.url().toNormalform(true, false), false);
         
         // if this was performed for a remote crawl request, notify requester
-        if ((processCase == SwitchboardConstants.PROCESSCASE_6_GLOBAL_CRAWLING) && (queueEntry.initiator() != null)) {
+        if ((processCase == EventOrigin.GLOBAL_CRAWLING) && (queueEntry.initiator() != null)) {
             final yacySeed initiatorPeer = peers.get(queueEntry.initiator());
             if (initiatorPeer != null) {
                 log.logInfo("Sending crawl receipt for '" + queueEntry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
@@ -1841,7 +1841,7 @@ public final class Switchboard extends serverSwitch {
                 final Long resourceContentLength = (Long) resource[1];
                 
                 // parse the resource
-                final Document document = LoaderDispatcher.parseDocument(metadata.url(), resourceContentLength.longValue(), resourceContent);
+                final Document document = LoaderDispatcher.parseDocument(metadata.url(), resourceContentLength.longValue(), resourceContent, null);
                 
                 // get the word set
                 Set<String> words = null;

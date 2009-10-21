@@ -80,11 +80,11 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.repository.Blacklist;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.data.Blacklist;
 import de.anomic.http.client.MultiOutputStream;
 import de.anomic.http.client.Client;
 import de.anomic.http.client.RemoteProxyConfig;

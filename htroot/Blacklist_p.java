@@ -41,11 +41,11 @@ import java.util.List;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.repository.Blacklist;
 
-import de.anomic.data.AbstractBlacklist;
-import de.anomic.data.Blacklist;
 import de.anomic.data.listManager;
 import de.anomic.http.server.RequestHeader;
+import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -66,7 +66,7 @@ public class Blacklist_p {
         listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
         
         // get the list of supported blacklist types
-        final String supportedBlacklistTypesStr = AbstractBlacklist.BLACKLIST_TYPES_STRING;
+        final String supportedBlacklistTypesStr = Blacklist.BLACKLIST_TYPES_STRING;
         final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
         
         // load all blacklist files located in the directory
@@ -560,6 +560,7 @@ public class Blacklist_p {
                     Switchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes], newEntry.substring(0, pos), newEntry.substring(pos + 1));
                 }
             }
+            SearchEventCache.cleanupEvents(true);
         }
 
         return null;
@@ -610,6 +611,7 @@ public class Blacklist_p {
                 Switchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],oldEntry.substring(0, pos), oldEntry.substring(pos + 1));
             }
         }
+        SearchEventCache.cleanupEvents(true);
         
         return null;
     }

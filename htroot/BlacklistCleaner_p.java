@@ -43,17 +43,16 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.anomic.data.AbstractBlacklist;
-import de.anomic.data.Blacklist;
-import de.anomic.data.DefaultBlacklist;
 import de.anomic.data.listManager;
 import de.anomic.http.server.RequestHeader;
+import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import java.util.Set;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.repository.Blacklist;
 
 public class BlacklistCleaner_p {
     
@@ -65,7 +64,7 @@ public class BlacklistCleaner_p {
     private final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
     
     public static final Class<?>[] supportedBLEngines = {
-        DefaultBlacklist.class
+        Blacklist.class
     };
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
@@ -77,7 +76,7 @@ public class BlacklistCleaner_p {
         String blacklistToUse = null;
 
         // get the list of supported blacklist types
-        final String supportedBlacklistTypesStr = AbstractBlacklist.BLACKLIST_TYPES_STRING;
+        final String supportedBlacklistTypesStr = Blacklist.BLACKLIST_TYPES_STRING;
         final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(","); 
 
         prop.put(DISABLED+"checked", "1");
@@ -245,26 +244,23 @@ public class BlacklistCleaner_p {
         final List<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
         final Map<String, String> properties= new HashMap<String, String>();
         properties.put("allowRegex", String.valueOf(allowRegex));
-                
-        if (blEngine instanceof AbstractBlacklist) {
 
-            int err = 0;
+        int err = 0;
 
-            for (String element : list) {
-                element = element.trim();
-                
-                // check for double-occurance
-                if (legalEntries.contains(element)) {
-                    illegalEntries.put(element, Integer.valueOf(AbstractBlacklist.ERR_DOUBLE_OCCURANCE));
-                    continue;
-                }
-                legalEntries.add(element);
+        for (String element : list) {
+            element = element.trim();
+            
+            // check for double-occurance
+            if (legalEntries.contains(element)) {
+                illegalEntries.put(element, Integer.valueOf(Blacklist.ERR_DOUBLE_OCCURANCE));
+                continue;
+            }
+            legalEntries.add(element);
 
-                err = blEngine.checkError(element, properties);
+            err = blEngine.checkError(element, properties);
 
-                if (err > 0) {
-                    illegalEntries.put(element, err);
-                }
+            if (err > 0) {
+                illegalEntries.put(element, err);
             }
         }
 
@@ -309,14 +305,14 @@ public class BlacklistCleaner_p {
                     final String host = (s.indexOf("/") == -1) ? s : s.substring(0, s.indexOf("/"));
                     final String path = (s.indexOf("/") == -1) ? ".*" : s.substring(s.indexOf("/") + 1);
                     try {
-                    Switchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes],
-                            host,path);
+                    Switchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes], host, path);
                     } catch (final RuntimeException e) {
                         //System.err.println(e.getMessage() + ": " + host + "/" + path);
                         Log.logSevere("BLACKLIST-CLEANER", e.getMessage() + ": " + host + "/" + path);
                     }
                 }                
-            }    
+            }
+            SearchEventCache.cleanupEvents(true);
         }
         if (listChanged){
             listManager.writeList(new File(listManager.listsPath, blacklistToUse), list.toArray(new String[list.size()]));
@@ -360,6 +356,7 @@ public class BlacklistCleaner_p {
                                 path);
                     }
                 }
+                SearchEventCache.cleanupEvents(true);
             }
             pw.close();
         } catch (final IOException e) {

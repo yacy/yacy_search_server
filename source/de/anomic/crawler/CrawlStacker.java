@@ -36,9 +36,9 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
+import net.yacy.repository.Blacklist;
 
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.data.Blacklist;
 import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacySeedDB;

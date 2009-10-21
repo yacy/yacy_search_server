@@ -2,7 +2,8 @@
 import java.io.File;
 import java.util.List;
 
-import de.anomic.data.AbstractBlacklist;
+import net.yacy.repository.Blacklist;
+
 import de.anomic.data.listManager;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverObjects;
@@ -34,7 +35,7 @@ public class blacklists_p {
                         prop.put("lists_" + blacklistCount + "_shared", "0");
                     }
 
-                    final String[] types = AbstractBlacklist.BLACKLIST_TYPES_STRING.split(",");
+                    final String[] types = Blacklist.BLACKLIST_TYPES_STRING.split(",");
                     for (int j=0; j<types.length; j++) {
                         prop.putXML("lists_" + blacklistCount + "_types_" + j + "_name", types[j]);
                         prop.put("lists_" + blacklistCount + "_types_" + j + "_value",

@@ -42,7 +42,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import de.anomic.data.Blacklist.blacklistFile;
+import net.yacy.repository.Blacklist;
+import net.yacy.repository.BlacklistFile;
+
+import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverCore;
 
@@ -391,12 +394,12 @@ public class listManager {
      * Load or reload all active Blacklists
      */
     public static void reloadBlacklists(){
-        final String supportedBlacklistTypesStr = AbstractBlacklist.BLACKLIST_TYPES_STRING;
+        final String supportedBlacklistTypesStr = Blacklist.BLACKLIST_TYPES_STRING;
         final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
         
-        final ArrayList<blacklistFile> blacklistFiles = new ArrayList<blacklistFile>(supportedBlacklistTypes.length);
+        final ArrayList<BlacklistFile> blacklistFiles = new ArrayList<BlacklistFile>(supportedBlacklistTypes.length);
         for (int i=0; i < supportedBlacklistTypes.length; i++) {
-            final blacklistFile blFile = new blacklistFile(
+            final BlacklistFile blFile = new BlacklistFile(
                     switchboard.getConfig(
                     supportedBlacklistTypes[i] + ".BlackLists", switchboard.getConfig("BlackLists.DefaultList", "url.default.black")),
                     supportedBlacklistTypes[i]);
@@ -405,8 +408,9 @@ public class listManager {
         
         Switchboard.urlBlacklist.clear();
         Switchboard.urlBlacklist.loadList(
-                blacklistFiles.toArray(new blacklistFile[blacklistFiles.size()]),
+                blacklistFiles.toArray(new BlacklistFile[blacklistFiles.size()]),
                 "/");
+        SearchEventCache.cleanupEvents(true);
 
 //       switchboard.urlBlacklist.clear();
 //       if (f != "") switchboard.urlBlacklist.loadLists("black", f, "/");

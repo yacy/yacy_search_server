@@ -267,7 +267,7 @@ public class ViewFile {
             // parsing the resource content
             Document document = null;
             try {
-                document = LoaderDispatcher.parseDocument(url, resourceLength, resource);
+                document = LoaderDispatcher.parseDocument(url, resourceLength, resource, null);
                 if (document == null) {
                     prop.put("error", "5");
                     prop.put("error_errorText", "Unknown error");

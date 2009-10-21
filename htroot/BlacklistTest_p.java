@@ -33,8 +33,8 @@ import java.io.File;
 import java.net.MalformedURLException;
 
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.repository.Blacklist;
 
-import de.anomic.data.Blacklist;
 import de.anomic.data.listManager;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;

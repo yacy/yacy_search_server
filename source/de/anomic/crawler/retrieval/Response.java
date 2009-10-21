@@ -37,7 +37,6 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.http.server.ResponseHeader;
-import de.anomic.search.SwitchboardConstants;
 
 public class Response {
     
@@ -770,7 +769,7 @@ public class Response {
           (requestHeader.get(HeaderFramework.X_YACY_INDEX_CONTROL)).toUpperCase().equals("NO-INDEX");
     }
     
-    public int processCase(String mySeedHash) {
+    public EventOrigin processCase(String mySeedHash) {
         // we must distinguish the following cases: resource-load was initiated by
         // 1) global crawling: the index is extern, not here (not possible here)
         // 2) result of search queries, some indexes are here (not possible here)
@@ -778,17 +777,17 @@ public class Response {
         // 4) proxy-load (initiator is "------------")
         // 5) local prefetch/crawling (initiator is own seedHash)
         // 6) local fetching for global crawling (other known or unknwon initiator)
-        int processCase = SwitchboardConstants.PROCESSCASE_0_UNKNOWN;
+        EventOrigin processCase = EventOrigin.UNKNOWN;
         // FIXME the equals seems to be incorrect: String.equals(boolean)
         if ((initiator() == null) || initiator().length() == 0 || initiator().equals("------------")) {
             // proxy-load
-            processCase = SwitchboardConstants.PROCESSCASE_4_PROXY_LOAD;
+            processCase = EventOrigin.PROXY_LOAD;
         } else if (initiator().equals(mySeedHash)) {
             // normal crawling
-            processCase = SwitchboardConstants.PROCESSCASE_5_LOCAL_CRAWLING;
+            processCase = EventOrigin.LOCAL_CRAWLING;
         } else {
             // this was done for remote peer (a global crawl)
-            processCase = SwitchboardConstants.PROCESSCASE_6_GLOBAL_CRAWLING;
+            processCase = EventOrigin.GLOBAL_CRAWLING;
         }
         return processCase;
     }

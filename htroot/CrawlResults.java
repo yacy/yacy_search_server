@@ -34,6 +34,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 
+import de.anomic.crawler.retrieval.EventOrigin;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
@@ -63,20 +64,24 @@ public class CrawlResults {
         }
 
         // find process number
-        int tabletype;
+        EventOrigin tabletype;
         try {
-            tabletype = Integer.parseInt(post.get("process", "0"));
+            tabletype = EventOrigin.getEvent(Integer.parseInt(post.get("process", "0")));
         } catch (final NumberFormatException e) {
-            tabletype = 0;
+            tabletype = EventOrigin.UNKNOWN;
         }
 
-        if ((post != null) && (post.containsKey("autoforward")) && (tabletype == 5) && (sb.crawlResults.getStackSize(5) == 0)) {
+        if (
+            post != null &&
+            post.containsKey("autoforward") &&
+            tabletype == EventOrigin.LOCAL_CRAWLING &&
+            sb.crawlResults.getStackSize(EventOrigin.LOCAL_CRAWLING) == 0) {
             // the main menu does a request to the local crawler page, but in case this table is empty, the overview page is shown
-            tabletype = 0;
+            tabletype = EventOrigin.UNKNOWN;
         }
         
         // check if authorization is needed and/or given
-        if (((tabletype > 0) && (tabletype < 6)) ||
+        if (tabletype != EventOrigin.UNKNOWN ||
             (post != null && (post.containsKey("clearlist") ||
             post.containsKey("deleteentry")))) {
             final String authorization = (header.get(RequestHeader.AUTHORIZATION, "xxxxxx"));
@@ -143,7 +148,7 @@ public class CrawlResults {
         } // end != null
 
         // create table
-        if (tabletype == 0) {
+        if (tabletype == EventOrigin.UNKNOWN) {
             prop.put("table", "2");
         } else if (sb.crawlResults.getStackSize(tabletype) == 0 && sb.crawlResults.getDomainListSize(tabletype) == 0) {
             prop.put("table", "0");
@@ -159,7 +164,7 @@ public class CrawlResults {
             prop.put("table_size_all", sb.crawlResults.getStackSize(tabletype));
             
             prop.putHTML("table_feedbackpage", "CrawlResults.html");
-            prop.put("table_tabletype", tabletype);
+            prop.put("table_tabletype", tabletype.getCode());
             prop.put("table_showInit", (showInit) ? "1" : "0");
             prop.put("table_showExec", (showExec) ? "1" : "0");
             prop.put("table_showDate", (showDate) ? "1" : "0");
@@ -196,7 +201,7 @@ public class CrawlResults {
 
                     prop.put("table_indexed_" + cnt + "_dark", (dark) ? "1" : "0");
                     prop.put("table_indexed_" + cnt + "_feedbackpage", "CrawlResults.html");
-                    prop.put("table_indexed_" + cnt + "_tabletype", tabletype);
+                    prop.put("table_indexed_" + cnt + "_tabletype", tabletype.getCode());
                     prop.put("table_indexed_" + cnt + "_urlhash", urlHash);
 
                     if (showInit) {
@@ -266,7 +271,7 @@ public class CrawlResults {
                 if (domain == null) break;
                 prop.put("table_domains_" + cnt + "_dark", (dark) ? "1" : "0");
                 prop.put("table_domains_" + cnt + "_feedbackpage", "CrawlResults.html");
-                prop.put("table_domains_" + cnt + "_tabletype", tabletype);
+                prop.put("table_domains_" + cnt + "_tabletype", tabletype.getCode());
                 prop.put("table_domains_" + cnt + "_domain", domain);
                 prop.put("table_domains_" + cnt + "_hashpart", DigestURI.hosthash6(domain));
                 prop.put("table_domains_" + cnt + "_count", sb.crawlResults.domainCount(tabletype, domain));
@@ -275,7 +280,7 @@ public class CrawlResults {
             }
             prop.put("table_domains", cnt);
         }
-        prop.put("process", tabletype);
+        prop.put("process", tabletype.getCode());
         // return rewrite properties
         return prop;
     }

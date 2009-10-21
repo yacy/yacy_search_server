@@ -421,11 +421,6 @@ public final class LoaderDispatcher {
             return null;
         }
     }
-    
-    public static Document parseDocument(final DigestURI url, final long contentLength, final InputStream resourceStream) throws ParserException {
-        return parseDocument(url, contentLength, resourceStream, null);
-    }
-    
 
     public static ContentScraper parseResource(final LoaderDispatcher loader, final DigestURI location, int cachePolicy) throws IOException {
         // load page

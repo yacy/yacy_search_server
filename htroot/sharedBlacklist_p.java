@@ -40,13 +40,13 @@ import java.util.Iterator;
 import java.util.List;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.data.AbstractBlacklist;
 import de.anomic.data.listManager;
 import de.anomic.data.list.ListAccumulator;
 import de.anomic.data.list.XMLBlacklistImporter;
 import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
+import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -54,6 +54,7 @@ import de.anomic.yacy.yacySeed;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.repository.Blacklist;
 
 import org.xml.sax.SAXException;
 
@@ -249,7 +250,7 @@ public class sharedBlacklist_p {
 
                             count++;
                             if (Switchboard.urlBlacklist != null) {
-                                final String supportedBlacklistTypesStr = AbstractBlacklist.BLACKLIST_TYPES_STRING;
+                                final String supportedBlacklistTypesStr = Blacklist.BLACKLIST_TYPES_STRING;
                                 final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");  
 
                                 for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
@@ -257,6 +258,7 @@ public class sharedBlacklist_p {
                                         Switchboard.urlBlacklist.add(supportedBlacklistTypes[blTypes],newItem.substring(0, pos), newItem.substring(pos + 1));
                                     }
                                 }
+                                SearchEventCache.cleanupEvents(true);
                             }
                         }
                     }

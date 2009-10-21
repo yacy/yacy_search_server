@@ -51,8 +51,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.repository.Blacklist;
 
-import de.anomic.data.Blacklist;
 import de.anomic.search.Switchboard;
 
 public class yacyNewsPool {

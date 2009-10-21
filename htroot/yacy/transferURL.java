@@ -33,8 +33,9 @@ import net.yacy.document.content.RSSMessage;
 import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.repository.Blacklist;
 
-import de.anomic.data.Blacklist;
+import de.anomic.crawler.retrieval.EventOrigin;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
@@ -141,7 +142,7 @@ public final class transferURL {
                 yacyCore.log.logInfo("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.metadata().url().toNormalform(true, false));
                 try {
                     sb.indexSegments.urlMetadata(Segments.Process.DHTIN).store(lEntry);
-                    sb.crawlResults.stack(lEntry, iam, iam, 3);
+                    sb.crawlResults.stack(lEntry, iam, iam, EventOrigin.DHT_TRANSFER);
                     if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: received URL '" + metadata.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                     received++;
                 } catch (final IOException e) {

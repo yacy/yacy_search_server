@@ -68,13 +68,14 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.repository.Blacklist;
 
 import org.apache.commons.httpclient.methods.multipart.ByteArrayPartSource;
 import org.apache.commons.httpclient.methods.multipart.Part;
 
 import de.anomic.crawler.ResultURLs;
+import de.anomic.crawler.retrieval.EventOrigin;
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.data.Blacklist;
 import de.anomic.http.client.DefaultCharsetFilePart;
 import de.anomic.http.client.DefaultCharsetStringPart;
 import de.anomic.http.client.Client;
@@ -576,7 +577,7 @@ public final class yacyClient {
 			// passed all checks, store url
 			try {
 			    indexSegment.urlMetadata().store(urlEntry);
-				crawlResults.stack(urlEntry, mySeed.hash, target.hash, 2);
+				crawlResults.stack(urlEntry, mySeed.hash, target.hash, EventOrigin.QUERIES);
 			} catch (final IOException e) {
 				yacyCore.log.logSevere("could not store search result", e);
 				continue; // db-error

@@ -50,8 +50,8 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.ScoreCluster;
+import net.yacy.repository.Blacklist;
 
-import de.anomic.data.Blacklist;
 import de.anomic.http.client.Client;
 import de.anomic.http.client.RemoteProxyConfig;
 import de.anomic.http.server.ResponseContainer;

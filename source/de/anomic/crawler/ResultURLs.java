@@ -35,9 +35,11 @@ package de.anomic.crawler;
 
 import java.net.MalformedURLException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -46,6 +48,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.util.ScoreCluster;
 
+import de.anomic.crawler.retrieval.EventOrigin;
 import de.anomic.yacy.yacySeedDB;
 
 public final class ResultURLs {
@@ -53,38 +56,20 @@ public final class ResultURLs {
     // result stacks;
     // these have all entries of form
     // strings: urlHash + initiatorHash + ExecutorHash
-    private final LinkedList<String> externResultStack; // 1 - remote index: retrieved by other peer
-    private final LinkedList<String> searchResultStack; // 2 - partly remote/local index: result of search queries
-    private final LinkedList<String> transfResultStack; // 3 - partly remote/local index: result of index transfer
-    private final LinkedList<String> proxyResultStack;  // 4 - local index: result of proxy fetch/prefetch
-    private final LinkedList<String> lcrawlResultStack; // 5 - local index: result of local crawling
-    private final LinkedList<String> gcrawlResultStack; // 6 - local index: triggered external
-
-    private final ScoreCluster<String> externResultDomains;
-    private final ScoreCluster<String> searchResultDomains;
-    private final ScoreCluster<String> transfResultDomains;
-    private final ScoreCluster<String> proxyResultDomains;
-    private final ScoreCluster<String> lcrawlResultDomains;
-    private final ScoreCluster<String> gcrawlResultDomains;
+    private final Map<EventOrigin, LinkedList<String>> resultStacks;
+    private final Map<EventOrigin, ScoreCluster<String>> resultDomains;
 
     public ResultURLs() {
         // init result stacks
-        externResultStack = new LinkedList<String>();
-        searchResultStack = new LinkedList<String>();
-        transfResultStack = new LinkedList<String>();
-        proxyResultStack  = new LinkedList<String>();
-        lcrawlResultStack = new LinkedList<String>();
-        gcrawlResultStack = new LinkedList<String>();
-        // init result domain statistics
-        externResultDomains = new ScoreCluster<String>();
-        searchResultDomains = new ScoreCluster<String>();
-        transfResultDomains = new ScoreCluster<String>();
-        proxyResultDomains = new ScoreCluster<String>();
-        lcrawlResultDomains = new ScoreCluster<String>();
-        gcrawlResultDomains = new ScoreCluster<String>();
+        resultStacks = new HashMap<EventOrigin, LinkedList<String>>();
+        resultDomains = new HashMap<EventOrigin, ScoreCluster<String>>();
+        for (EventOrigin origin: EventOrigin.values()) {
+            resultStacks.put(origin, new LinkedList<String>());
+            resultDomains.put(origin, new ScoreCluster<String>());
+        }
     }
 
-    public synchronized void stack(final URIMetadataRow e, final String initiatorHash, final String executorHash, final int stackType) {
+    public synchronized void stack(final URIMetadataRow e, final String initiatorHash, final String executorHash, final EventOrigin stackType) {
         assert initiatorHash != null;
         assert executorHash != null;
         if (e == null) { return; }
@@ -108,27 +93,27 @@ public final class ResultURLs {
         }
     }
     
-    public synchronized int getStackSize(final int stack) {
+    public synchronized int getStackSize(final EventOrigin stack) {
         final List<String> resultStack = getStack(stack);
         if (resultStack == null) return 0;
         return resultStack.size();
     }
     
-    public synchronized int getDomainListSize(final int stack) {
+    public synchronized int getDomainListSize(final EventOrigin stack) {
         final ScoreCluster<String> domains = getDomains(stack);
         if (domains == null) return 0;
         return domains.size();
     }
 
-    public synchronized String getUrlHash(final int stack, final int pos) {
+    public synchronized String getUrlHash(final EventOrigin stack, final int pos) {
         return getHashNo(stack, pos, 0);
     }
 
-    public synchronized String getInitiatorHash(final int stack, final int pos) {
+    public synchronized String getInitiatorHash(final EventOrigin stack, final int pos) {
         return getHashNo(stack, pos, 1);
     }
 
-    public synchronized String getExecutorHash(final int stack, final int pos) {
+    public synchronized String getExecutorHash(final EventOrigin stack, final int pos) {
         return getHashNo(stack, pos, 2);
     }
     
@@ -150,7 +135,7 @@ public final class ResultURLs {
      * @param index starting at 0
      * @return
      */
-    public synchronized String getHashNo(final int stack, final int pos, final int index) {
+    public synchronized String getHashNo(final EventOrigin stack, final int pos, final int index) {
         final String result = getResultStackAt(stack, pos);
         if(result != null) {
             if(result.length() < Word.commonHashLength * 3) {
@@ -175,7 +160,7 @@ public final class ResultURLs {
      * @param pos
      * @return null if either stack or element do not exist
      */
-    private String getResultStackAt(final int stack, final int pos) {
+    private String getResultStackAt(final EventOrigin stack, final int pos) {
         assert pos >= 0 : "precondition violated: " + pos + " >= 0";
         
         final List<String> resultStack = getStack(stack);
@@ -196,12 +181,12 @@ public final class ResultURLs {
      * iterate all domains in the result domain statistic
      * @return iterator of domains in reverse order (downwards)
      */
-    public Iterator<String> domains(final int stack) {
+    public Iterator<String> domains(final EventOrigin stack) {
         assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
         return getDomains(stack).scores(false);
     }
     
-    public int deleteDomain(final int stack, String host, String hosthash) {
+    public int deleteDomain(final EventOrigin stack, String host, String hosthash) {
         assert hosthash.length() == 6;
         int i = 0;
         while (i < getStackSize(stack)) {
@@ -218,41 +203,23 @@ public final class ResultURLs {
      * @param domain name
      * @return the number of occurrences of the domain in the stack statistics
      */
-    public int domainCount(final int stack, String domain) {
+    public int domainCount(final EventOrigin stack, String domain) {
         assert domain != null : "domain = null";
         assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
         return getDomains(stack).getScore(domain);
     }
     
     /**
-     * returns the stack indentified by the id <em>stack</em>
+     * returns the stack identified by the id <em>stack</em>
      * 
      * @param stack id of resultStack
      * @return null if stack does not exist (id is unknown or stack is null (which should not occur and an error is logged))
      */
-    private List<String> getStack(final int stack) {
-        switch (stack) {
-            case 1: return externResultStack;
-            case 2: return searchResultStack;
-            case 3: return transfResultStack;
-            case 4: return proxyResultStack;
-            case 5: return lcrawlResultStack;
-            case 6: return gcrawlResultStack;
-            default:
-                return null;
-        }
+    private List<String> getStack(final EventOrigin stack) {
+        return resultStacks.get(stack);
     }
-    private ScoreCluster<String> getDomains(final int stack) {
-        switch (stack) {
-            case 1: return externResultDomains;
-            case 2: return searchResultDomains;
-            case 3: return transfResultDomains;
-            case 4: return proxyResultDomains;
-            case 5: return lcrawlResultDomains;
-            case 6: return gcrawlResultDomains;
-            default:
-                return null;
-        }
+    private ScoreCluster<String> getDomains(final EventOrigin stack) {
+        return resultDomains.get(stack);
     }
     
     /**
@@ -261,11 +228,11 @@ public final class ResultURLs {
      * @param stack
      * @return
      */
-    private boolean isValidStack(final int stack) {
+    private boolean isValidStack(final EventOrigin stack) {
         return getStack(stack) != null;
     }
 
-    public synchronized boolean removeStack(final int stack, final int pos) {
+    public synchronized boolean removeStack(final EventOrigin stack, final int pos) {
         final List<String> resultStack = getStack(stack);
         if (resultStack == null) {
             return false;
@@ -273,7 +240,7 @@ public final class ResultURLs {
         return resultStack.remove(pos) != null;
     }
 
-    public synchronized void clearStack(final int stack) {
+    public synchronized void clearStack(final EventOrigin stack) {
         final List<String> resultStack = getStack(stack);
         if (resultStack != null) resultStack.clear();
         final ScoreCluster<String> resultDomains = getDomains(stack);
@@ -287,11 +254,11 @@ public final class ResultURLs {
     public synchronized boolean remove(final String urlHash) {
         if (urlHash == null) return false;
         String hash;
-        for (int stack = 1; stack <= 6; stack++) {
-            for (int i = getStackSize(stack) - 1; i >= 0; i--) {
-                hash = getUrlHash(stack, i);
+        for (EventOrigin origin: EventOrigin.values()) {
+            for (int i = getStackSize(origin) - 1; i >= 0; i--) {
+                hash = getUrlHash(origin, i);
                 if (hash != null && hash.equals(urlHash)) {
-                    removeStack(stack, i);
+                    removeStack(origin, i);
                     return true;
                 }
             }
@@ -308,7 +275,7 @@ public final class ResultURLs {
         try {
             final DigestURI url = new DigestURI("http", "www.yacy.net", 80, "/");
             final URIMetadataRow urlRef = new URIMetadataRow(url, "YaCy Homepage", "", "", "", new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), "de", 0, 0, 0, 0, 0, 0);
-            int stackNo = 1;
+            EventOrigin stackNo = EventOrigin.LOCAL_CRAWLING;
             System.out.println("valid test:\n=======");
             // add
             results.stack(urlRef, urlRef.hash(), url.hash(), stackNo);
@@ -324,29 +291,6 @@ public final class ResultURLs {
             System.out.println("url hash:\t"+ results.getUrlHash(stackNo, 1));
             System.out.println("executor hash:\t"+ results.getExecutorHash(stackNo, 1));
             System.out.println("initiator hash:\t"+ results.getInitiatorHash(stackNo, 1));
-            stackNo = 42;
-            System.out.println("size of stack:\t"+ results.getStackSize(stackNo));
-            // get
-            System.out.println("url hash:\t"+ results.getUrlHash(stackNo, 0));
-            System.out.println("executor hash:\t"+ results.getExecutorHash(stackNo, 0));
-            System.out.println("initiator hash:\t"+ results.getInitiatorHash(stackNo, 0));
-            
-            // benchmark
-            final long start = System.currentTimeMillis();
-            for(int i = 0; i < 1000000; i++) {
-                stackNo = i % 6;
-                // add
-                results.stack(urlRef, urlRef.hash(), url.hash(), stackNo);
-                // size
-                results.getStackSize(stackNo);
-                // get
-                for(int j = 0; j < 10; j++) {
-                    results.getUrlHash(stackNo, i / 6);
-                    results.getExecutorHash(stackNo, i / 6);
-                    results.getInitiatorHash(stackNo, i / 6);
-                }
-            }
-            System.out.println("benschmark: "+ (System.currentTimeMillis() - start) + " ms");
         } catch (final MalformedURLException e) {
             e.printStackTrace();
         }

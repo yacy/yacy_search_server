@@ -52,9 +52,9 @@ import net.yacy.kelondro.rwi.IndexCell;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.ISO639;
+import net.yacy.repository.Blacklist;
 
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.data.Blacklist;
 
 public class Segment {
 
