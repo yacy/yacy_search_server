@@ -49,8 +49,8 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.MemoryTracker;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.kelondro.util.ISO639;
+import net.yacy.repository.LoaderDispatcher;
 
-import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.data.DidYouMean;
 import de.anomic.data.LibraryProvider;
 import de.anomic.http.server.HeaderFramework;

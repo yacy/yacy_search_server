@@ -33,9 +33,9 @@ import java.net.MalformedURLException;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.file.SurrogateReader;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 

@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.crawler.retrieval;
+package net.yacy.repository;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -46,6 +46,10 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.retrieval.FTPLoader;
+import de.anomic.crawler.retrieval.HTTPLoader;
+import de.anomic.crawler.retrieval.Request;
+import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.Cache;
 import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;

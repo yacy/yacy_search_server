@@ -41,8 +41,8 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.repository.LoaderDispatcher;
 
-import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.userDB;

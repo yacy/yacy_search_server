@@ -5,9 +5,9 @@ import java.util.Set;
 
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;

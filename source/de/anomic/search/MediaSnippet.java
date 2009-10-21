@@ -33,8 +33,8 @@ import net.yacy.document.Document;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.repository.LoaderDispatcher;
 
-import de.anomic.crawler.retrieval.LoaderDispatcher;
 
 public class MediaSnippet {
     public int type;

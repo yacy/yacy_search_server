@@ -139,6 +139,7 @@ import net.yacy.kelondro.workflow.InstantBusyThread;
 import net.yacy.kelondro.workflow.WorkflowJob;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.kelondro.workflow.WorkflowThread;
+import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlQueues;
@@ -154,7 +155,6 @@ import de.anomic.crawler.ZURL;
 import de.anomic.crawler.CrawlProfile.entry;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.Blacklist;
 import de.anomic.data.DefaultBlacklist;
@@ -1618,7 +1618,7 @@ public final class Switchboard extends serverSwitch {
             document = TextParser.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), b);
             assert(document != null) : "Unexpected error. Parser returned null.";
         } catch (final ParserException e) {
-            this.log.logWarning("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage());
+            this.log.logWarning("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage(), e);
             addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.name(), e.getMessage());
             if (document != null) {
                 document.close();

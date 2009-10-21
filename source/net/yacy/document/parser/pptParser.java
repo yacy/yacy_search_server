@@ -40,7 +40,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 
 import org.apache.poi.hslf.extractor.PowerPointExtractor;
 
-
 public class pptParser extends AbstractParser implements Idiom {
 
     /**
@@ -112,7 +111,8 @@ public class pptParser extends AbstractParser implements Idiom {
 
             /*
              * an unexpected error occurred, log it and throw a ParserException
-             */            
+             */
+            e.printStackTrace();
             final String errorMsg = "Unable to parse the ppt document '" + location + "':" + e.getMessage();
             this.theLogger.logSevere(errorMsg);            
             throw new ParserException(errorMsg, location);

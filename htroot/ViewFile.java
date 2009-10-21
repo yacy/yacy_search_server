@@ -43,8 +43,8 @@ import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.repository.LoaderDispatcher;
 
-import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.Client;
 import de.anomic.http.client.Cache;

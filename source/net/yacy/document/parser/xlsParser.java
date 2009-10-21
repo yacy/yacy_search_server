@@ -130,7 +130,8 @@ public class xlsParser extends AbstractParser implements Idiom, HSSFListener {
 
             /*
              * an unexpected error occurred, log it and throw a ParserException
-             */            
+             */
+            e.printStackTrace();
             final String errorMsg = "Unable to parse the xls document '" + location + "':" + e.getMessage();
             this.theLogger.logSevere(errorMsg);
             throw new ParserException(errorMsg, location);

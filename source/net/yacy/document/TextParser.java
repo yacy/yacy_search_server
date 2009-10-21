@@ -32,7 +32,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
@@ -72,8 +74,9 @@ public final class TextParser {
         insensitiveCollator.setStrength(Collator.SECONDARY);
         insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
     }
-    
+
     private static final Map<String, Idiom> mime2parser = new TreeMap<String, Idiom>(insensitiveCollator);
+    private static final Map<String, Idiom> ext2parser = new TreeMap<String, Idiom>(insensitiveCollator);
     private static final Map<String, String> ext2mime = new TreeMap<String, String>(insensitiveCollator);
     private static final Set<String> denyMime = new TreeSet<String>(insensitiveCollator);
     private static final Set<String> denyExtension = new TreeSet<String>(insensitiveCollator);
@@ -123,6 +126,15 @@ public final class TextParser {
             if (s != null) log.logSevere("parser for extension '" + ext + "' was set to mime '" + s + "', overwriting with new mime '" + prototypeMime + "'.");
             ext2mime.put(ext, prototypeMime);
         }
+        
+        for (String ext: parser.supportedExtensions()) {
+            // process the extensions
+            Idiom p0 = ext2parser.get(ext);
+            if (p0 != null) log.logSevere("parser for extension '" + ext + "' was set to '" + p0.getName() + "', overwriting with new parser '" + parser.getName() + "'.");
+            ext2parser.put(ext, parser);
+            Log.logInfo("PARSER", "Parser for extension '" + ext + "': " + parser.getName());
+        }
+       
     }
 
     public static Document parseSource(
@@ -190,36 +202,37 @@ public final class TextParser {
             final long contentLength,
             final InputStream sourceStream
         ) throws InterruptedException, ParserException {
-        try {
-            if (log.isFine()) log.logFine("Parsing '" + location + "' from stream");
-            mimeType = normalizeMimeType(mimeType);
-            final String fileExt = location.getFileExtension();
-            final String documentCharset = htmlParser.patchCharsetEncoding(charset);
-            Idiom parser = idiomParser(location, mimeType);
-            
-            if (parser == null) {
-                final String errorMsg = "No parser available to parse extension '" + location.getFileExtension() + "' or mimetype '" + mimeType + "'";
-                log.logInfo("Unable to parse '" + location + "'. " + errorMsg);
-                throw new ParserException(errorMsg, location);
-            }
-            
-            if (log.isFine()) log.logInfo("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "'.");
-            parser.setContentLength(contentLength);
-            Document doc = parser.parse(location, mimeType, documentCharset, sourceStream);
-
-            if (doc == null) {
-                final String errorMsg = "Parsing content with file extension '" + location.getFileExtension() + "' and mimetype '" + mimeType + "' failed: document == null";
-                log.logWarning("Unable to parse '" + location + "'. " + errorMsg);
-                throw new ParserException(errorMsg, location);
-            }
-            return doc;
-        } catch (final Exception e) {
-            if (e instanceof InterruptedException) throw (InterruptedException) e;
-            if (e instanceof ParserException) throw (ParserException) e;
-            final String errorMsg = "Unexpected exception. " + e.getMessage();
-            log.logSevere("Unable to parse '" + location + "'. " + errorMsg, e);
+        if (log.isFine()) log.logFine("Parsing '" + location + "' from stream");
+        mimeType = normalizeMimeType(mimeType);
+        final String fileExt = location.getFileExtension();
+        final String documentCharset = htmlParser.patchCharsetEncoding(charset);
+        List<Idiom> idioms = idiomParser(location, mimeType);
+        
+        if (idioms.size() == 0) {
+            final String errorMsg = "No parser available to parse extension '" + location.getFileExtension() + "' or mimetype '" + mimeType + "'";
+            log.logInfo("Unable to parse '" + location + "'. " + errorMsg);
             throw new ParserException(errorMsg, location);
         }
+        
+        if (log.isFine()) log.logInfo("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "'.");
+        
+        Document doc = null;
+        for (Idiom parser: idioms) {
+            parser.setContentLength(contentLength);
+            try {
+                doc = parser.parse(location, mimeType, documentCharset, sourceStream);
+            } catch (ParserException e) {
+                log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);
+            }
+            if (doc != null) break;
+        }
+        
+        if (doc == null) {
+            final String errorMsg = "Parsing content with file extension '" + location.getFileExtension() + "' and mimetype '" + mimeType + "' failed.";
+            log.logWarning("Unable to parse '" + location + "'. " + errorMsg);
+            throw new ParserException(errorMsg, location);
+        }
+        return doc;
     }
     
     /**
@@ -239,28 +252,46 @@ public final class TextParser {
         }
     }
     
-    private static Idiom idiomParser(final DigestURI url, String mimeType) throws ParserException {
-        // check mime type
-        if (mimeType != null) {
-            mimeType = normalizeMimeType(mimeType);
-            if (denyMime.contains(mimeType)) throw new ParserException("mime type '" + mimeType + "' is denied", url);
-        } else {
-            mimeType = normalizeMimeType(mimeType);
-        }
-        
-        Idiom idiom = mime2parser.get(mimeType);
-        if (idiom != null) return idiom;
+    /**
+     * find a parser for a given url and mime type
+     * because mime types returned by web severs are sometimes wrong, we also compute the mime type again
+     * from the extension that can be extracted from the url path. That means that there are 3 criteria
+     * that can be used to select a parser:
+     * - the given extension
+     * - the given mime type
+     * - the mime type computed from the extension
+     * @param url the given url
+     * @param mimeType the given mime type
+     * @return a list of Idiom parsers that may be appropriate for the given criteria
+     * @throws ParserException
+     */
+    private static List<Idiom> idiomParser(final DigestURI url, String mimeType1) throws ParserException {
+        List<Idiom> idioms = new ArrayList<Idiom>(2);
         
         // check extension
         String ext = url.getFileExtension();
-        if (ext == null || ext.length() == 0) throw new ParserException("no file extension", url);
-        if (denyExtension.contains(ext)) throw new ParserException("file extension '" + ext + "' is denied", url);
-        mimeType = ext2mime.get(ext);
-        if (mimeType == null) throw new ParserException("no parser available", url);
-        idiom = mime2parser.get(mimeType);
-        assert idiom != null;
-        if (idiom == null) throw new ParserException("no parser available (internal error!)", url);
-        return idiom;
+        Idiom idiom;
+        if (ext != null && ext.length() > 0) {
+            if (denyExtension.contains(ext)) throw new ParserException("file extension '" + ext + "' is denied", url);
+            idiom = ext2parser.get(ext);
+            if (idiom != null) idioms.add(idiom);
+        }
+        
+        // check given mime type
+        if (mimeType1 != null) {
+            mimeType1 = normalizeMimeType(mimeType1);
+            if (denyMime.contains(mimeType1)) throw new ParserException("mime type '" + mimeType1 + "' is denied", url);
+            idiom = mime2parser.get(mimeType1);
+            if (idiom != null && !idioms.contains(idiom)) idioms.add(idiom);
+        }
+        
+        // check mime type computed from extension
+        String mimeType2 = ext2mime.get(ext);
+        if (mimeType2 == null || denyMime.contains(mimeType2)) return idioms; // in this case we are a bit more lazy
+        idiom = mime2parser.get(mimeType2);
+        if (idiom != null && !idioms.contains(idiom)) idioms.add(idiom);
+        
+        return idioms;
     }
     
     public static String supportsMime(String mimeType) {

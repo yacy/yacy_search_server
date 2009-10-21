@@ -47,8 +47,8 @@ import net.yacy.kelondro.index.ConcurrentARC;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.SetTools;
+import net.yacy.repository.LoaderDispatcher;
 
-import de.anomic.crawler.retrieval.LoaderDispatcher;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.http.client.Cache;
 import de.anomic.http.server.ResponseHeader;
