@@ -327,6 +327,10 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         return anchors;
     }
 
+    /**
+     * get all images
+     * @return a map of <urlhash, ImageEntry>
+     */
     public HashMap<String, ImageEntry> getImages() {
         // this resturns a String(absolute url)/htmlFilterImageEntry - relation
         return images;

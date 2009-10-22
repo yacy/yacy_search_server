@@ -163,7 +163,7 @@ public class IndexControlRWIs_p {
                     index = null;
                 }
                 if (delurlref) {
-                    for (i = 0; i < urlx.length; i++) sb.removeAllUrlReferences(segment, urlx[i], true);
+                    for (i = 0; i < urlx.length; i++) segment.removeAllUrlReferences(urlx[i], sb.loader, true);
                 }
                 if (delurl || delurlref) {
                     for (i = 0; i < urlx.length; i++) {
@@ -180,7 +180,7 @@ public class IndexControlRWIs_p {
             // delete selected URLs
             if (post.containsKey("keyhashdelete")) try {
                 if (delurlref) {
-                    for (i = 0; i < urlx.length; i++) sb.removeAllUrlReferences(segment, urlx[i], true);
+                    for (i = 0; i < urlx.length; i++) segment.removeAllUrlReferences(urlx[i], sb.loader, true);
                 }
                 if (delurl || delurlref) {
                     for (i = 0; i < urlx.length; i++) {

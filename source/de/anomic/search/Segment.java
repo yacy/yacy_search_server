@@ -28,14 +28,18 @@ package de.anomic.search;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.document.Condenser;
 import net.yacy.document.Document;
+import net.yacy.document.ParserException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.navigation.NavigationReference;
@@ -53,6 +57,7 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceFactory;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.repository.Blacklist;
+import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.retrieval.Response;
 
@@ -348,6 +353,70 @@ public class Segment {
         // finished
         return newEntry;
     }
+    
+
+    // method for index deletion
+    public int removeAllUrlReferences(final DigestURI url, LoaderDispatcher loader, final boolean fetchOnline) {
+        return removeAllUrlReferences(url.hash(), loader, fetchOnline);
+    }
+    
+    public int removeAllUrlReferences(final String urlhash, LoaderDispatcher loader, final boolean fetchOnline) {
+        // find all the words in a specific resource and remove the url reference from every word index
+        // finally, delete the url entry
+        
+        if (urlhash == null) return 0;
+        // determine the url string
+        final URIMetadataRow entry = urlMetadata().load(urlhash, null, 0);
+        if (entry == null) return 0;
+        final URIMetadataRow.Components metadata = entry.metadata();
+        if (metadata.url() == null) return 0;
+        
+        InputStream resourceContent = null;
+        try {
+            // get the resource content
+            Object[] resource = null;
+            try {
+                resource = loader.getResource(metadata.url(), fetchOnline, 10000, true, false);
+            } catch (IOException e) {
+                Log.logWarning("removeAllUrlReferences", "cannot load: " + e.getMessage());
+            }
+            if (resource == null) {
+                // delete just the url entry
+                urlMetadata().remove(urlhash);
+                return 0;
+            } else {
+                resourceContent = (InputStream) resource[0];
+                final Long resourceContentLength = (Long) resource[1];
+                
+                // parse the resource
+                final Document document = LoaderDispatcher.parseDocument(metadata.url(), resourceContentLength.longValue(), resourceContent, null);
+                
+                // get the word set
+                Set<String> words = null;
+                try {
+                    words = new Condenser(document, true, true).words().keySet();
+                } catch (final UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                
+                // delete all word references
+                int count = 0;
+                if (words != null) count = termIndex().remove(Word.words2hashes(words), urlhash);
+                
+                // finally delete the url entry itself
+                urlMetadata().remove(urlhash);
+                return count;
+            }
+        } catch (final ParserException e) {
+            return 0;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return 0;
+        } finally {
+            if (resourceContent != null) try { resourceContent.close(); } catch (final Exception e) {/* ignore this */}
+        }
+    }
+
     
     //  The Cleaner class was provided as "UrldbCleaner" by Hydrox
     public synchronized ReferenceCleaner getReferenceCleaner(final byte[] startHash) {

@@ -89,7 +89,6 @@ import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.security.NoSuchAlgorithmException;
@@ -105,7 +104,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -119,6 +117,7 @@ import net.yacy.document.ParserException;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.RSSMessage;
 import net.yacy.document.content.file.SurrogateReader;
+import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -1169,7 +1168,6 @@ public final class Switchboard extends serverSwitch {
             noIndexReason = TextParser.supports(response.url(), response.getMimeType());
         }
 
-        
         // check X-YACY-Index-Control
         // With the X-YACY-Index-Control header set to "no-index" a client could disallow
         // yacy to index the response returned as answer to a request
@@ -1583,43 +1581,43 @@ public final class Switchboard extends serverSwitch {
         return new indexingQueueEntry(in.process, in.queueEntry, document, null);
     }
     
-    private Document parseDocument(Response entry) throws InterruptedException {
+    private Document parseDocument(Response response) throws InterruptedException {
         Document document = null;
-        final EventOrigin processCase = entry.processCase(peers.mySeed().hash);
+        final EventOrigin processCase = response.processCase(peers.mySeed().hash);
         
         if (this.log.isFine()) log.logFine("processResourceStack processCase=" + processCase +
-                ", depth=" + entry.depth() +
-                ", maxDepth=" + ((entry.profile() == null) ? "null" : Integer.toString(entry.profile().depth())) +
-                ", must-match=" + ((entry.profile() == null) ? "null" : entry.profile().mustMatchPattern().toString()) +
-                ", must-not-match=" + ((entry.profile() == null) ? "null" : entry.profile().mustNotMatchPattern().toString()) +
-                ", initiatorHash=" + entry.initiator() +
+                ", depth=" + response.depth() +
+                ", maxDepth=" + ((response.profile() == null) ? "null" : Integer.toString(response.profile().depth())) +
+                ", must-match=" + ((response.profile() == null) ? "null" : response.profile().mustMatchPattern().toString()) +
+                ", must-not-match=" + ((response.profile() == null) ? "null" : response.profile().mustNotMatchPattern().toString()) +
+                ", initiatorHash=" + response.initiator() +
                 //", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
-                ", url=" + entry.url()); // DEBUG
+                ", url=" + response.url()); // DEBUG
         
         // PARSE CONTENT
         final long parsingStartTime = System.currentTimeMillis();
         byte[] b = null;
         try {
             // fetch the document
-            b = Cache.getContent(entry.url());
+            b = Cache.getContent(response.url());
             if (b == null) {
-                this.log.logWarning("the resource '" + entry.url() + "' is missing in the cache.");
-                addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.name(), "missing");
+                this.log.logWarning("the resource '" + response.url() + "' is missing in the cache.");
+                addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), "missing");
                 return null;
             }
         } catch (IOException e) {
-            this.log.logWarning("Unable fetch the resource '" + entry.url() + "'. from the cache: " + e.getMessage());
-            addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.name(), e.getMessage());
+            this.log.logWarning("Unable fetch the resource '" + response.url() + "'. from the cache: " + e.getMessage());
+            addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), e.getMessage());
             return null;
         }
         
         try {
             // parse the document
-            document = TextParser.parseSource(entry.url(), entry.getMimeType(), entry.getCharacterEncoding(), b);
+            document = TextParser.parseSource(response.url(), response.getMimeType(), response.getCharacterEncoding(), b);
             assert(document != null) : "Unexpected error. Parser returned null.";
         } catch (final ParserException e) {
-            this.log.logWarning("Unable to parse the resource '" + entry.url() + "'. " + e.getMessage(), e);
-            addURLtoErrorDB(entry.url(), entry.referrerHash(), entry.initiator(), entry.name(), e.getMessage());
+            this.log.logWarning("Unable to parse the resource '" + response.url() + "'. " + e.getMessage(), e);
+            addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), e.getMessage());
             if (document != null) {
                 document.close();
                 document = null;
@@ -1630,43 +1628,48 @@ public final class Switchboard extends serverSwitch {
         final long parsingEndTime = System.currentTimeMillis();            
         
         // get the document date
-        final Date docDate = entry.lastModified();
+        final Date docDate = response.lastModified();
         
         // put anchors on crawl stack
         final long stackStartTime = System.currentTimeMillis();
         if (
                 ((processCase == EventOrigin.PROXY_LOAD) || (processCase == EventOrigin.LOCAL_CRAWLING)) &&
-                ((entry.profile() == null) || (entry.depth() < entry.profile().depth()))
+                ((response.profile() == null) || (response.depth() < response.profile().depth()))
         ) {
+            // get the hyperlinks
             final Map<DigestURI, String> hl = document.getHyperlinks();
-            final Iterator<Map.Entry<DigestURI, String>> i = hl.entrySet().iterator();
+            
+            // add all images also to the crawl stack
+            for (ImageEntry imageReference : document.getImages().values()) {
+                hl.put(imageReference.url(), imageReference.alt());
+            }
+            
+            // insert those hyperlinks to the crawler
             DigestURI nextUrl;
-            Map.Entry<DigestURI, String> nextEntry;
-            while (i.hasNext()) {
+            for (Map.Entry<DigestURI, String> nextEntry : hl.entrySet()) {
                 // check for interruption
                 checkInterruption();
                 
-                // fetching the next hyperlink
-                nextEntry = i.next();
+                // process the next hyperlink
                 nextUrl = nextEntry.getKey();
                 String u = nextUrl.toNormalform(true, true);
                 if (!(u.startsWith("http") || u.startsWith("ftp"))) continue;
                 // enqueue the hyperlink into the pre-notice-url db
                 crawlStacker.enqueueEntry(new Request(
-                        entry.initiator(),
+                        response.initiator(),
                         nextUrl,
-                        entry.url().hash(),
+                        response.url().hash(),
                         nextEntry.getValue(),
                         null,
                         docDate,
-                        entry.profile().handle(),
-                        entry.depth() + 1,
+                        response.profile().handle(),
+                        response.depth() + 1,
                         0,
                         0
                         ));
             }
             final long stackEndTime = System.currentTimeMillis();
-            if (log.isInfo()) log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + entry.url().toNormalform(false, true) +
+            if (log.isInfo()) log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + response.url().toNormalform(false, true) +
                     ", STACKING TIME = " + (stackEndTime-stackStartTime) +
                     ", PARSING TIME = " + (parsingEndTime-parsingStartTime));
         }
@@ -1807,68 +1810,6 @@ public final class Switchboard extends serverSwitch {
         }
     }
     
-    // method for index deletion
-    public int removeAllUrlReferences(Segment indexSegment, final DigestURI url, final boolean fetchOnline) {
-        return removeAllUrlReferences(indexSegment, url.hash(), fetchOnline);
-    }
-    
-    public int removeAllUrlReferences(Segment indexSegment, final String urlhash, final boolean fetchOnline) {
-        // find all the words in a specific resource and remove the url reference from every word index
-        // finally, delete the url entry
-        
-        if (urlhash == null) return 0;
-        // determine the url string
-        final URIMetadataRow entry = indexSegment.urlMetadata().load(urlhash, null, 0);
-        if (entry == null) return 0;
-        final URIMetadataRow.Components metadata = entry.metadata();
-        if (metadata.url() == null) return 0;
-        
-        InputStream resourceContent = null;
-        try {
-            // get the resource content
-            Object[] resource = null;
-            try {
-                resource = loader.getResource(metadata.url(), fetchOnline, 10000, true, false);
-            } catch (IOException e) {
-                Log.logWarning("removeAllUrlReferences", "cannot load: " + e.getMessage());
-            }
-            if (resource == null) {
-                // delete just the url entry
-                indexSegment.urlMetadata().remove(urlhash);
-                return 0;
-            } else {
-                resourceContent = (InputStream) resource[0];
-                final Long resourceContentLength = (Long) resource[1];
-                
-                // parse the resource
-                final Document document = LoaderDispatcher.parseDocument(metadata.url(), resourceContentLength.longValue(), resourceContent, null);
-                
-                // get the word set
-                Set<String> words = null;
-                try {
-                    words = new Condenser(document, true, true).words().keySet();
-                } catch (final UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-                
-                // delete all word references
-                int count = 0;
-                if (words != null) count = indexSegment.termIndex().remove(Word.words2hashes(words), urlhash);
-                
-                // finally delete the url entry itself
-                indexSegment.urlMetadata().remove(urlhash);
-                return count;
-            }
-        } catch (final ParserException e) {
-            return 0;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return 0;
-        } finally {
-            if (resourceContent != null) try { resourceContent.close(); } catch (final Exception e) {/* ignore this */}
-        }
-    }
-
     public int adminAuthenticated(final RequestHeader requestHeader) {
         
         // authorization for localhost, only if flag is set to grant localhost access as admin

@@ -670,14 +670,16 @@ public class Response {
         // -ranges in request
         // we checked that in shallStoreCache
 
-        // a picture cannot be indexed
+        // check if pictures can be indexed
         if (responseHeader != null) {
             final String mimeType = responseHeader.mime();
-            if (Classification.isPictureMime(mimeType)) { return "Media_Content_(Picture)"; }
             String parserError = TextParser.supportsMime(mimeType);
             if (parserError != null) { return "Media_Content, parser error: " + parserError; }
         }
-        if (Classification.isMediaExtension(url().getFileExtension())) { return "Media_Content_(forbidden)"; }
+        if (Classification.isMediaExtension(url().getFileExtension()) &&
+           !Classification.isImageExtension((url().getFileExtension()))) {
+            return "Media_Content_(forbidden)";
+        }
 
         // -if-modified-since in request
         // if the page is fresh at the very moment we can index it

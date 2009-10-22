@@ -239,13 +239,13 @@ public final class TextParser {
      * check if the parser supports the given content.
      * @param url
      * @param mimeType
-     * @return returns null if the content is supportet. If the content is not supported, return a error string.
+     * @return returns null if the content is supported. If the content is not supported, return a error string.
      */
     public static String supports(final DigestURI url, String mimeType) {
         try {
             // try to get a parser. If this works, we don't need the parser itself, we just return null to show that everything is ok.
-            idiomParser(url, mimeType);
-            return null;
+            List<Idiom> idioms = idiomParser(url, mimeType);
+            return (idioms == null || idioms.size() == 0) ? "no parser found" : null;
         } catch (ParserException e) {
             // in case that a parser is not available, return a error string describing the problem.
             return e.getMessage();

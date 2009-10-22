@@ -40,20 +40,13 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
 import org.apache.poi.hssf.eventusermodel.HSSFListener;
 import org.apache.poi.hssf.eventusermodel.HSSFRequest;
-import org.apache.poi.hssf.record.LabelSSTRecord;
 import org.apache.poi.hssf.record.NumberRecord;
 import org.apache.poi.hssf.record.Record;
 import org.apache.poi.hssf.record.SSTRecord;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 
-public class xlsParser extends AbstractParser implements Idiom, HSSFListener {
-
-    //StringBuilder for parsed text
-    private StringBuilder sbFoundStrings = null;
-    
-    //sstrecord needed for event parsing
-    private SSTRecord sstrec;
+public class xlsParser extends AbstractParser implements Idiom {
     
     /**
      * a list of mime types that are supported by this parser class
@@ -85,59 +78,7 @@ public class xlsParser extends AbstractParser implements Idiom, HSSFListener {
     public Document parse(final DigestURI location, final String mimeType,
             final String charset, final InputStream source) throws ParserException,
             InterruptedException {
-        try {
-            //generate new StringBuilder for parsing
-            sbFoundStrings = new StringBuilder();
-            
-            //create a new org.apache.poi.poifs.filesystem.Filesystem
-            final POIFSFileSystem poifs = new POIFSFileSystem(source);
-            //get the Workbook (excel part) stream in a InputStream
-            final InputStream din = poifs.createDocumentInputStream("Workbook");
-            //construct out HSSFRequest object
-            final HSSFRequest req = new HSSFRequest();
-            //lazy listen for ALL records with the listener shown above
-            req.addListenerForAllRecords(this);
-            //create our event factory
-            final HSSFEventFactory factory = new HSSFEventFactory();
-            //process our events based on the document input stream
-            factory.processEvents(req, din);
-            //close our document input stream (don't want to leak these!)
-            din.close();
-            
-            //now the parsed strings are in the StringBuilder, now convert them to a String
-            final String contents = sbFoundStrings.toString().trim();
-            
-            /*
-             * create the plasmaParserDocument for the database
-             * and set shortText and bodyText properly
-             */
-            final Document theDoc = new Document(
-                    location,
-                    mimeType,
-                    "UTF-8",
-                    null,
-                    null,
-                    location.getFile(),
-                    "", // TODO: AUTHOR
-                    null,
-                    null,
-                    contents.getBytes("UTF-8"),
-                    null,
-                    null);
-            return theDoc;
-        } catch (final Exception e) { 
-            if (e instanceof InterruptedException) throw (InterruptedException) e;
-
-            /*
-             * an unexpected error occurred, log it and throw a ParserException
-             */
-            e.printStackTrace();
-            final String errorMsg = "Unable to parse the xls document '" + location + "':" + e.getMessage();
-            this.theLogger.logSevere(errorMsg);
-            throw new ParserException(errorMsg, location);
-        } finally {
-            sbFoundStrings = null;
-        }
+        return new XLSHSSFListener().parse(location, mimeType, charset, source);
     }
     
     public Set<String> supportedMimeTypes() {
@@ -153,34 +94,107 @@ public class xlsParser extends AbstractParser implements Idiom, HSSFListener {
         //nothing to do
         super.reset();
     }
+    
+    
+    public class XLSHSSFListener implements HSSFListener {
 
-    public void processRecord(final Record record) {
-        switch (record.getSid()){
-            case NumberRecord.sid: {
-                final NumberRecord numrec = (NumberRecord) record;
-                sbFoundStrings.append(numrec.getValue());
-                break;
-            }
-            //unique string records
-            case SSTRecord.sid: {
-                sstrec = (SSTRecord)record;
-                for (int k = 0; k < sstrec.getNumUniqueStrings(); k++){
-                    sbFoundStrings.append( sstrec.getString(k) );
-                    
-                    //add line seperator
-                    sbFoundStrings.append( "\n" );
-                }
-                break;
-            }
-            
-            case LabelSSTRecord.sid: {
-                final LabelSSTRecord lsrec = (LabelSSTRecord)record;
-                sbFoundStrings.append( sstrec.getString(lsrec.getSSTIndex()) );
-                break;
+        //StringBuilder for parsed text
+        private final StringBuilder sbFoundStrings;
+        
+
+        public XLSHSSFListener() {
+            this.sbFoundStrings = new StringBuilder(100);
+        }
+
+        /*
+         * parses the source documents and returns a Document containing
+         * all extracted information about the parsed document
+         */ 
+        public Document parse(final DigestURI location, final String mimeType,
+                final String charset, final InputStream source) throws ParserException,
+                InterruptedException {
+            try {
+                
+                //create a new org.apache.poi.poifs.filesystem.Filesystem
+                final POIFSFileSystem poifs = new POIFSFileSystem(source);
+                //get the Workbook (excel part) stream in a InputStream
+                final InputStream din = poifs.createDocumentInputStream("Workbook");
+                //construct out HSSFRequest object
+                final HSSFRequest req = new HSSFRequest();
+                //lazy listen for ALL records with the listener shown above
+                req.addListenerForAllRecords(this);
+                //create our event factory
+                final HSSFEventFactory factory = new HSSFEventFactory();
+                //process our events based on the document input stream
+                factory.processEvents(req, din);
+                //close our document input stream (don't want to leak these!)
+                din.close();
+                
+                //now the parsed strings are in the StringBuilder, now convert them to a String
+                final String contents = sbFoundStrings.toString().trim();
+                
+                /*
+                 * create the plasmaParserDocument for the database
+                 * and set shortText and bodyText properly
+                 */
+                final Document theDoc = new Document(
+                        location,
+                        mimeType,
+                        "UTF-8",
+                        null,
+                        null,
+                        location.getFile(),
+                        "", // TODO: AUTHOR
+                        null,
+                        null,
+                        contents.getBytes("UTF-8"),
+                        null,
+                        null);
+                return theDoc;
+            } catch (final Exception e) { 
+                if (e instanceof InterruptedException) throw (InterruptedException) e;
+
+                /*
+                 * an unexpected error occurred, log it and throw a ParserException
+                 */
+                e.printStackTrace();
+                final String errorMsg = "Unable to parse the xls document '" + location + "':" + e.getMessage();
+                theLogger.logSevere(errorMsg);
+                throw new ParserException(errorMsg, location);
             }
         }
-        
-        //add line seperator
-        sbFoundStrings.append( "\n" );
+
+        public void processRecord(final Record record) {
+            SSTRecord sstrec = null;
+            switch (record.getSid()){
+                case NumberRecord.sid: {
+                    final NumberRecord numrec = (NumberRecord) record;
+                    sbFoundStrings.append(numrec.getValue());
+                    break;
+                }
+                //unique string records
+                case SSTRecord.sid: {
+                    sstrec = (SSTRecord) record;
+                    for (int k = 0; k < sstrec.getNumUniqueStrings(); k++){
+                        sbFoundStrings.append( sstrec.getString(k) );
+                        
+                        //add line seperator
+                        sbFoundStrings.append( "\n" );
+                    }
+                    break;
+                }
+                /*
+                case LabelSSTRecord.sid: {
+                    final LabelSSTRecord lsrec = (LabelSSTRecord)record;
+                    sbFoundStrings.append( sstrec.getString(lsrec.getSSTIndex()) );
+                    break;
+                }
+                */
+            }
+            
+            //add line seperator
+            sbFoundStrings.append( "\n" );
+        }
     }
+    
 }

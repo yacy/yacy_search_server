@@ -81,25 +81,26 @@ public class genericImageParser extends AbstractParser implements Idiom {
             throw new ParserException(e.getMessage(), location);
         }
         
+        /*
         // scan the image
         int height = image.getHeight();
         int width = image.getWidth();
         Raster raster = image.getData();
         int[] pixel = raster.getPixel(0, 0, (int[])null);
-        long[] average = new long[]{0, 0, 0};
+        long[] average = new long[pixel.length];
+        for (int i = 0; i < average.length; i++) average[i] = 0L;
         int pc = 0;
         for (int x = width / 4; x < 3 * width / 4; x = x + 2) {
             for (int y = height / 4; y < 3 * height / 4; y = y + 2) {
                 pixel = raster.getPixel(x, y, pixel);
-                average[0] += pixel[0];
-                average[1] += pixel[1];
-                average[2] += pixel[2];
+                for (int i = 0; i < average.length; i++) average[i] += pixel[i];
                 pc++;
             }
         }
-        
+        */
         // get image properties
         String [] propNames = image.getPropertyNames();
+        if (propNames == null) propNames = new String[0];
         StringBuilder sb = new StringBuilder(propNames.length * 80);
         for (String propName: propNames) {
             sb.append(propName).append(" = ").append(image.getProperty(propName)).append(" .\n");

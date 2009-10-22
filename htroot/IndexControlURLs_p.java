@@ -136,7 +136,7 @@ public class IndexControlURLs_p {
         prop.put("result", " ");
 
         if (post.containsKey("urlhashdeleteall")) {
-            i = sb.removeAllUrlReferences(segment, urlhash, true);
+            i = segment.removeAllUrlReferences(urlhash, sb.loader, true);
             prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
             prop.put("lurlexport", 0);
             prop.put("reload", 0);
