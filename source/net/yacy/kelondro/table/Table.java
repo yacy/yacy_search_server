@@ -268,9 +268,9 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         final HashMap<String, String> map = new HashMap<String, String>();
         map.put("tableSize", Integer.toString(index.size()));
         map.put("tableKeyChunkSize", Integer.toString(index.row().objectsize));
-        map.put("tableKeyMem", Integer.toString((int) (((long) index.row().objectsize) * ((long) index.size()) * RowCollection.growfactor100 / 100L)));
+        map.put("tableKeyMem", Integer.toString(index.row().objectsize * index.size()));
         map.put("tableValueChunkSize", (table == null) ? "0" : Integer.toString(table.row().objectsize));
-        map.put("tableValueMem", (table == null) ? "0" : Integer.toString((int) (((long) table.row().objectsize) * ((long) table.size()) * RowCollection.growfactor100 / 100L)));
+        map.put("tableValueMem", (table == null) ? "0" : Integer.toString(table.row().objectsize * table.size()));
         return map;
     }
     
@@ -279,7 +279,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
     }
     
     public static int staticRAMIndexNeed(final File f, final Row rowdef) throws IOException {
-        return (int) (((long)(rowdef.primaryKeyLength + 4)) * tableSize(f, rowdef.objectsize) * RowCollection.growfactor100 / 100L);
+        return (int) (((long)(rowdef.primaryKeyLength + 4)) * tableSize(f, rowdef.objectsize) * RowCollection.growfactorLarge100 / 100L);
     }
     
     public synchronized void addUnique(final Entry row) throws IOException {

@@ -49,7 +49,8 @@ import net.yacy.kelondro.util.kelondroException;
 
 public class RowCollection implements Iterable<Row.Entry> {
 
-    public  static final long growfactor100 = 140L;
+    public  static final long growfactorLarge100 = 140L;
+    public  static final long growfactorSmall100 = 120L;
     private static final int isortlimit = 20;
     private static       int availableCPU = Runtime.getRuntime().availableProcessors();
     
@@ -202,13 +203,25 @@ public class RowCollection implements Iterable<Row.Entry> {
         return this.rowdef;
     }
     
-    protected final void ensureSize(final int elements) {
+    protected final long neededSpaceForEnsuredSize(final int elements, boolean forcegc) {
         assert elements > 0 : "elements = " + elements;
         final long needed = elements * rowdef.objectsize;
-        if (chunkcache.length >= needed) return;
+        if (chunkcache.length >= needed) return 0;
         assert needed > 0 : "needed = " + needed;
-        assert needed * growfactor100 / 100L > 0 : "elements = " + elements + ", new = " + (needed * growfactor100 / 100L);
-        byte[] newChunkcache = new byte[(int) (needed * growfactor100 / 100L)]; // increase space
+        long allocram = needed * growfactorLarge100 / 100L;
+        assert allocram > 0 : "elements = " + elements + ", new = " + allocram;
+        if (MemoryControl.request(allocram, false)) return allocram;
+        allocram = needed * growfactorSmall100 / 100L;
+        assert allocram > 0 : "elements = " + elements + ", new = " + allocram;
+        if (MemoryControl.request(allocram, forcegc)) return allocram;
+        return needed;
+    }
+    
+    protected final void ensureSize(final int elements) {
+        long allocram = neededSpaceForEnsuredSize(elements, true);
+        if (allocram == 0) return;
+        assert allocram > chunkcache.length : "wrong alloc computation: allocram = " + allocram + ", chunkcache.length = " + chunkcache.length;
+        byte[] newChunkcache = new byte[(int) allocram]; // increase space
         System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
         chunkcache = newChunkcache;
     }
@@ -220,13 +233,13 @@ public class RowCollection implements Iterable<Row.Entry> {
      * @return
      */
     public final long memoryNeededForGrow() {
-        return (((long) (chunkcount + 1)) * ((long) rowdef.objectsize)) * growfactor100 / 100L;
+        return neededSpaceForEnsuredSize(chunkcount + 1, false);
     }
     
     public synchronized void trim(final boolean plusGrowFactor) {
         if (chunkcache.length == 0) return;
-        int needed = chunkcount * rowdef.objectsize;
-        if (plusGrowFactor) needed = (int) (((long) needed) * growfactor100 / 100L);
+        long needed = chunkcount * rowdef.objectsize;
+        if (plusGrowFactor) needed = neededSpaceForEnsuredSize(chunkcount, false);
         if (needed >= chunkcache.length)
             return; // in case that the growfactor causes that the cache would
                     // grow instead of shrink, simply ignore the growfactor
@@ -234,7 +247,7 @@ public class RowCollection implements Iterable<Row.Entry> {
             return; // if the swap buffer is not available, we must give up.
                     // This is not critical. Otherwise we provoke a serious
                     // problem with OOM
-        byte[] newChunkcache = new byte[needed];
+        byte[] newChunkcache = new byte[(int) needed];
         System.arraycopy(chunkcache, 0, newChunkcache, 0, Math.min(
                 chunkcache.length, newChunkcache.length));
         chunkcache = newChunkcache;

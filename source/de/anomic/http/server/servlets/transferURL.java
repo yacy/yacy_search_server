@@ -137,11 +137,11 @@ public final class transferURL {
                  blocked++;
                  continue;
              }
-             
+
              // write entry to database
              yacyCore.log.logInfo("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.metadata().url().toNormalform(true, false));
              try {
-                 sb.indexSegments.urlMetadata(Segments.Process.DHTIN).store(lEntry);
+                 sb.indexSegments.urlMetadata(Segments.Process.DHTIN).store(lEntry); // OOM here!
                  sb.crawlResults.stack(lEntry, iam, iam, EventOrigin.DHT_TRANSFER);
                  if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: received URL '" + metadata.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                  received++;

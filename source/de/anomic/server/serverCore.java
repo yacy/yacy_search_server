@@ -540,7 +540,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             // closing the socket to the client
             if (this.controlSocket != null) try {
                 this.controlSocket.close();
-                serverCore.this.log.logInfo("Closing main socket of thread '" + this.getName() + "'");
+                log.logInfo("Closing main socket of thread '" + this.getName() + "'");
                 //this.controlSocket = null;
             } catch (final Exception e) {}
         }
@@ -558,7 +558,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     	}
     
     	public void log(final boolean outgoing, final String request) {
-    	    if (serverCore.this.log.isFine()) serverCore.this.log.logFine(this.userAddress.getHostAddress() + "/" + this.identity + " " +
+    	    if (log.isFine()) log.logFine(this.userAddress.getHostAddress() + "/" + this.identity + " " +
     		     "[" + ((busySessions == null)? -1 : busySessions.size()) + ", " + this.commandCounter +
     		     ((outgoing) ? "] > " : "] < ") +
     		     request);
@@ -570,7 +570,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     	}
     
     	public byte[] readLine() {
-    	    return receive(this.in, serverCore.this.commandMaxLength, true);
+    	    return receive(this.in, commandMaxLength, true);
     	}
     
         /**
@@ -653,7 +653,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                 } finally {
                     if (busySessions != null) {
                         busySessions.remove(this);
-                        if (serverCore.this.log.isFinest()) serverCore.this.log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + " " + this.request);
+                        if (log.isFinest()) log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + " " + this.request);
                     }
                     this.controlSocket = null;
                 }
@@ -664,7 +664,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         protected void finalize() {
             if (busySessions != null && busySessions.contains(this)) {
                 busySessions.remove(this);
-                if(serverCore.this.log.isFinest()) serverCore.this.log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + this.request);
+                if(log.isFinest()) log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + this.request);
             }
             this.close();
         }
@@ -708,7 +708,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                             
                             if (this.request == null) break;
                             if (reqProtocol.equals("HTTP")) {
-                                this.commandObj = serverCore.this.handlerPrototype.clone();
+                                this.commandObj = handlerPrototype.clone();
                             }
                             
                             // initializing the session
@@ -772,8 +772,8 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                     } catch (final NoSuchMethodException e) {
                         log.logSevere("command execution, method exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
                         if (!this.userAddress.isSiteLocalAddress()) {
-                            if (serverCore.this.denyHost != null) {
-                                serverCore.this.denyHost.put((""+this.userAddress.getHostAddress()), "deny"); // block client: hacker attempt
+                            if (denyHost != null) {
+                                denyHost.put((""+this.userAddress.getHostAddress()), "deny"); // block client: hacker attempt
                             }
                         }
                         break;
