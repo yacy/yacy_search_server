@@ -79,8 +79,8 @@ server.maxTrackingHostCount = 100
 # the file size of database files can be limited. Larger files can be used to get a
 # better IO performance and to use less RAM; however, if the size must be limited
 # because of limitations of the file system, the maximum size can be set here
-filesize.max.win   =  2147483647
-filesize.max.other = 34359738367
+filesize.max.win   = 2147483647
+filesize.max.other = 8589934591
 
 # Network Definition
 # There can be separate YaCy networks, and managed sub-groups of the general network.
