@@ -41,6 +41,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.imageio.ImageIO;
 
@@ -64,7 +65,8 @@ public class RasterPlotter {
     public static final byte FILTER_BLUR = 1;
     public static final byte FILTER_INVERT = 2;
     
-    protected int            width, height;
+    protected final int            width, height;
+    private final   int[]          cc;
     private final   BufferedImage  image;
     private final   WritableRaster grid;
     private final   int[]          defaultCol;
@@ -77,6 +79,7 @@ public class RasterPlotter {
     
     public RasterPlotter(final int width, final int height, final byte drawMode, final long backgroundColor) {
         if (!(MemoryControl.request(1024 * 1024 + 3 * width * height, false))) throw new RuntimeException("ymage: not enough memory (" + MemoryControl.available() + ") available");
+        this.cc = new int[3];
         this.width = width;
         this.height = height;
         this.backgroundCol = backgroundColor;
@@ -149,9 +152,7 @@ public class RasterPlotter {
     public void plot(final int x, final int y) {
     	plot (x, y, 100);
     }
-    
-    private final int[] cc = new int[3];
-    
+
     public void plot(final int x, final int y, final int intensity) {
         if ((x < 0) || (x >= width)) return;
         if ((y < 0) || (y >= height)) return;
@@ -197,8 +198,20 @@ public class RasterPlotter {
         }
     }
     
-    public void line(int Ax, int Ay, final int Bx, final int By) {
+    
+    public void line(final int Ax, final int Ay, final int Bx, final int By) {
+        if (this.defaultMode == MODE_REPLACE) {
+            List<int[]> points = linex(Ax * 2, Ay * 2, Bx * 2, By * 2);
+            for (int[] point: points) plot(point[0] / 2, point[1] / 2, 100);
+        } else {
+            List<int[]> points = linex(Ax * 2, Ay * 2, Bx * 2, By * 2);
+            for (int[] point: points) plot(point[0] / 2, point[1] / 2, 50);
+        }
+    }
+    
+    private List<int[]> linex(int Ax, int Ay, final int Bx, final int By) {
         // Bresenham's line drawing algorithm
+        ArrayList<int[]> points = new ArrayList<int[]>();
         int dX = Math.abs(Bx-Ax);
         int dY = Math.abs(By-Ay);
         int Xincr, Yincr;
@@ -209,7 +222,7 @@ public class RasterPlotter {
             final int dPru = dPr - (dX<<1);
             int P    = dPr - dX;
             for (; dX>=0; dX--) {
-                plot(Ax, Ay);
+                points.add(new int[]{Ax, Ay});
                 if (P > 0) {
                     Ax+=Xincr;
                     Ay+=Yincr;
@@ -224,7 +237,7 @@ public class RasterPlotter {
             final int dPru = dPr - (dY<<1);
             int P    = dPr - dY;
             for (; dY>=0; dY--) {
-                plot(Ax, Ay);
+                points.add(new int[]{Ax, Ay});
                 if (P > 0) {
                     Ax+=Xincr;
                     Ay+=Yincr;
@@ -235,6 +248,7 @@ public class RasterPlotter {
                 }
             }
         }
+        return points;
     }
     
     public void lineDot(final int x0, final int y0, final int x1, final int y1, final int radius, final int distance, final long lineColor, final long dotColor) {
