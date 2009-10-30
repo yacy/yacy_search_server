@@ -25,11 +25,12 @@
 import java.io.File;
 import java.net.MalformedURLException;
 
+import net.yacy.document.importer.MediawikiImporter;
+
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.mediawikiIndex;
 
 public class IndexImportWikimedia_p {
 
@@ -37,17 +38,17 @@ public class IndexImportWikimedia_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
-        if (mediawikiIndex.job != null && mediawikiIndex.job.isAlive()) {
+        if (MediawikiImporter.job != null && MediawikiImporter.job.isAlive()) {
             // one import is running, no option to insert anything
             prop.put("import", 1);
             prop.put("import_thread", "running");
-            prop.put("import_dump", mediawikiIndex.job.sourcefile.getName());
-            prop.put("import_count", mediawikiIndex.job.count);
-            prop.put("import_speed", mediawikiIndex.job.speed());
-            prop.put("import_runningHours", (mediawikiIndex.job.runningTime() / 60) / 60);
-            prop.put("import_runningMinutes", (mediawikiIndex.job.runningTime() / 60) % 60);
-            prop.put("import_remainingHours", (mediawikiIndex.job.remainingTime() / 60) / 60);
-            prop.put("import_remainingMinutes", (mediawikiIndex.job.remainingTime() / 60) % 60);
+            prop.put("import_dump", MediawikiImporter.job.source());
+            prop.put("import_count", MediawikiImporter.job.count());
+            prop.put("import_speed", MediawikiImporter.job.speed());
+            prop.put("import_runningHours", (MediawikiImporter.job.runningTime() / 60) / 60);
+            prop.put("import_runningMinutes", (MediawikiImporter.job.runningTime() / 60) % 60);
+            prop.put("import_remainingHours", (MediawikiImporter.job.remainingTime() / 60) / 60);
+            prop.put("import_remainingMinutes", (MediawikiImporter.job.remainingTime() / 60) % 60);
         } else {
             prop.put("import", 0);
             if (post == null) {
@@ -64,11 +65,11 @@ public class IndexImportWikimedia_p {
                     }
                     String lang = name.substring(0, 2);
                     try {
-                        mediawikiIndex.job = new mediawikiIndex(sourcefile, sb.surrogatesInPath, "http://" + lang + ".wikipedia.org/wiki/");
-                        mediawikiIndex.job.start();
+                        MediawikiImporter.job = new MediawikiImporter(sourcefile, sb.surrogatesInPath, "http://" + lang + ".wikipedia.org/wiki/");
+                        MediawikiImporter.job.start();
                         prop.put("import", 1);
                         prop.put("import_thread", "started");
-                        prop.put("import_dump", mediawikiIndex.job.sourcefile.getName());
+                        prop.put("import_dump", MediawikiImporter.job.source());
                         prop.put("import_count", 0);
                         prop.put("import_speed", 0);
                         prop.put("import_runningHours", 0);

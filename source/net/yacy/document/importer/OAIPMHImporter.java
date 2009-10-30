@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.crawler;
+package net.yacy.document.importer;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -35,21 +35,56 @@ import net.yacy.document.content.file.SurrogateReader;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.LoaderDispatcher;
 
+import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 
-public class PMHReader {
+public class OAIPMHImporter extends Thread implements Importer {
 
-    LoaderDispatcher loader;
+    public static Importer job; // if started from a servlet, this object is used to store the thread
     
-    public PMHReader(LoaderDispatcher loader) {
+    private LoaderDispatcher loader;
+    private DigestURI source;
+    private int count;
+    private long startTime;
+    
+    public OAIPMHImporter(LoaderDispatcher loader, DigestURI source) {
         this.loader = loader;
+        this.source = source;
+        this.count = 0;
+        this.startTime = System.currentTimeMillis();
+    }
+
+
+    public int count() {
+        return this.count;
+    }
+
+    public long remainingTime() {
+        return Long.MAX_VALUE; // we don't know
+    }
+
+    public long runningTime() {
+        return System.currentTimeMillis() - this.startTime;
+    }
+
+    public String source() {
+        return source.toNormalform(true, false);
+    }
+
+    public int speed() {
+        return (int) (1000L * ((long) count()) / runningTime());
     }
     
-    public void load(DigestURI source) throws IOException {
-        Response response = this.loader.load(source, true, true, CrawlProfile.CACHE_STRATEGY_NOCACHE);
-        load(response);
+    public void run() {
+        Response response;
+        try {
+            response = this.loader.load(source, true, true, CrawlProfile.CACHE_STRATEGY_NOCACHE);
+            load(response);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     public static void load0(DigestURI source) throws IOException {

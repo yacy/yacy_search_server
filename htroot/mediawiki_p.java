@@ -27,11 +27,12 @@
 import java.io.File;
 import java.io.IOException;
 
+import net.yacy.document.importer.MediawikiImporter;
+
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.tools.mediawikiIndex;
 
 public class mediawiki_p {
     
@@ -53,12 +54,12 @@ public class mediawiki_p {
         
         File dumpFile = new File(sb.getRootPath(), "DATA/HTCACHE/mediawiki/" + dump);
         if (!dumpFile.exists()) return post;
-        mediawikiIndex.checkIndex(dumpFile);
-        mediawikiIndex.wikisourcerecord w = mediawikiIndex.find(title.replaceAll(" ", "_"), mediawikiIndex.idxFromWikimediaXML(dumpFile));
+        MediawikiImporter.checkIndex(dumpFile);
+        MediawikiImporter.wikisourcerecord w = MediawikiImporter.find(title.replaceAll(" ", "_"), MediawikiImporter.idxFromWikimediaXML(dumpFile));
         if (w == null) {
             return post;
         }
-        String page = new String(mediawikiIndex.read(dumpFile, w.start, (int) (w.end - w.start)), "UTF-8");
+        String page = new String(MediawikiImporter.read(dumpFile, w.start, (int) (w.end - w.start)), "UTF-8");
         int p = page.indexOf("<text");
         if (p < 0) return prop;
         p = page.indexOf('>', p);

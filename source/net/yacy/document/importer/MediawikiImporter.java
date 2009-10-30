@@ -24,7 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package de.anomic.tools;
+package net.yacy.document.importer;
 
 import net.yacy.document.Document;
 import net.yacy.document.TextParser;
@@ -71,7 +71,7 @@ import de.anomic.data.wiki.wikiParser;
  * as referenced with xmlns="http://www.mediawiki.org/xml/export-0.3/"
  */
 
-public class mediawikiIndex extends Thread {
+public class MediawikiImporter extends Thread implements Importer {
 
     private static final String textstart = "<text";
     private static final String textend = "</text>";
@@ -79,6 +79,9 @@ public class mediawikiIndex extends Thread {
     private static final String pageend = "</page>";
     private static final byte[] pagestartb = pagestart.getBytes();
     private static final byte[] pageendb = pageend.getBytes();
+    private static final int    docspermbinxmlbz2 = 800;  // documents per megabyte in a xml.bz2 wikimedia dump
+    
+    public static Importer job; // if started from a servlet, this object is used to store the thread
     
     protected wikiParser wparser;
     protected String urlStub;
@@ -89,11 +92,8 @@ public class mediawikiIndex extends Thread {
     private   long docsize;
     private   int approxdocs;
     
-    private static final int docspermbinxmlbz2 = 800;  // documents per megabyte in a xml.bz2 wikimedia dump
     
-    public static mediawikiIndex job; // if started from a servlet, this object is used to store the thread
-    
-    public mediawikiIndex(File sourcefile, File targetdir, String baseURL) throws MalformedURLException {
+    public MediawikiImporter(File sourcefile, File targetdir, String baseURL) throws MalformedURLException {
     	this.sourcefile = sourcefile;
     	this.docsize = sourcefile.length();
     	this.approxdocs = (int) (this.docsize * (long) docspermbinxmlbz2 / 1024L / 1024L);
@@ -102,6 +102,14 @@ public class mediawikiIndex extends Thread {
         this.wparser = new wikiCode(new URL(baseURL).getHost());
         this.count = 0;
         this.start = 0;
+    }
+    
+    public int count() {
+        return this.count;
+    }
+    
+    public String source() {
+        return this.sourcefile.getAbsolutePath();
     }
     
     /**
@@ -738,7 +746,7 @@ public class mediawikiIndex extends Thread {
             String urlStub = s[3]; // i.e. http://de.wikipedia.org/wiki/
             //String language = urlStub.substring(7,9);
             try {
-                mediawikiIndex mi = new mediawikiIndex(sourcefile, targetdir, urlStub);
+                MediawikiImporter mi = new MediawikiImporter(sourcefile, targetdir, urlStub);
                 mi.start();
                 mi.join();
             } catch (InterruptedException e) {

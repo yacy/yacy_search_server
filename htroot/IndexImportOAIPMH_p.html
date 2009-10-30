@@ -1,0 +1,37 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': OAI-PMH Import</title>
+    #%env/templates/metas.template%#
+    #(import)#::<meta http-equiv="REFRESH" content="10" />#(/import)#
+  </head>
+  <body id="IndexImportOAIPMH">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIntegration.template%#
+    <h2>OAI-PMH Import</h2>
+    
+    #(import)#
+    <p>#(status)#No import thread is running, you can start a new thread here::Bad input data: #[message]# #(/status)#</p>
+    <form action="IndexImportOAIPMH_p.html" method="get">
+        <fieldset>
+          <legend>OAI-PMH Import: set a OAI-PMH URL</legend>
+          <input name="oaipmhurl" type="text" value="" size="80" />
+          <input name="submit" type="submit" value="Import from a OAI-PMH source" />
+        </fieldset>
+    </form>
+    ::
+    <form><fieldset><legend>Import Process</legend>
+      <dl>
+        <dt>Thread:</dt><dd>#[thread]#</dd>
+        <dt>Source:</dt><dd>#[source]#</dd>
+        <dt>Processed:</dt><dd>#[count]# Wiki Entries</dd>
+        <dt>Speed:</dt><dd>#[speed]# articles per second</dd>
+        <dt>Running Time:</dt><dd>#[runningHours]# hours, #[runningMinutes]# minutes</dd>
+        <dt>Remaining Time:</dt><dd>#[remainingHours]# hours, #[remainingMinutes]# minutes</dd>
+      </dl>    
+    </fieldset></form>
+    #(/import)#
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>
