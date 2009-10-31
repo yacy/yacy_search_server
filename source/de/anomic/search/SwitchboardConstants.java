@@ -385,6 +385,14 @@ public final class SwitchboardConstants {
     public static final String WORK_PATH                = "workPath";
     public static final String WORK_PATH_DEFAULT        = "DATA/WORK";
 
+    
+    /**
+     * ResourceObserver
+     */
+    public static final String DISK_FREE = "disk.free";
+    public static final String DISK_FREE_HARDLIMIT = "disk.free.hardlimit";
+    
+    
     /*
      * Some constants
      */

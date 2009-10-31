@@ -161,7 +161,14 @@ public final class ResourceObserver {
      * @return amount of space (MiB) that should be kept free
      */
     public long getMinFreeDiskSpace () {
-        return sb.getConfigLong("disk.free", 3000) /* MiB */ * 1024L * 1024L;
+        return sb.getConfigLong(SwitchboardConstants.DISK_FREE, 3000) /* MiB */ * 1024L * 1024L;
+    }
+    
+    /**
+     * @return amount of space (MiB) that should at least be kept free
+     */
+    public long getMinFreeDiskSpace_hardlimit () {
+        return sb.getConfigLong(SwitchboardConstants.DISK_FREE_HARDLIMIT, 100) /* MiB */ * 1024L * 1024L;
     }
     
     /**
@@ -187,7 +194,7 @@ public final class ResourceObserver {
                 log.logWarning("Volume " + entry.getKey() + ": free space (" + (val[1] / 1024 / 1024) + " MB) is too low (< " + (getMinFreeDiskSpace() / 1024 / 1024) + " MB)");
                 ret = MEDIUM;
             }
-            if (val[1] < Math.min(getMinFreeDiskSpace() / 5L, 100L)) {
+            if (val[1] < Math.max(getMinFreeDiskSpace() / 5L, getMinFreeDiskSpace_hardlimit())) {
             	ret = LOW;
             }
         }
