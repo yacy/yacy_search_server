@@ -22,7 +22,6 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.io.File;
 import java.net.MalformedURLException;
 
 import net.yacy.document.importer.OAIPMHImporter;
@@ -55,16 +54,16 @@ public class IndexImportOAIPMH_p {
             if (post == null) {
                 prop.put("import_status", 0);
             } else {
-                if (post.containsKey("file")) {
+                if (post.containsKey("oaipmhurl")) {
                     String oaipmhurl = post.get("oaipmhurl");
                     DigestURI url = null;
                     try {
                         url = new DigestURI(oaipmhurl, null);
                         OAIPMHImporter.job = new OAIPMHImporter(sb.loader, url);
                         OAIPMHImporter.job.start();
-                        prop.put("import", 1);
+                        prop.put("import", 0);
                         prop.put("import_thread", "started");
-                        prop.put("import_dump", OAIPMHImporter.job.source());
+                        prop.put("import_source", OAIPMHImporter.job.source());
                         prop.put("import_count", 0);
                         prop.put("import_speed", 0);
                         prop.put("import_runningHours", 0);

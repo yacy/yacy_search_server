@@ -43,7 +43,6 @@ import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.SitemapImporter;
-import de.anomic.crawler.ZURL;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
@@ -300,7 +299,7 @@ public class WatchCrawler_p {
                                 prop.putHTML("info_crawlingURL", (post.get("crawlingURL")));
                                 prop.putHTML("info_reasonString", reasonString);
                                 
-                                final ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
+                                sb.crawlQueues.errorURL.push(
                                         new Request(
                                                 sb.peers.mySeed().hash, 
                                                 crawlingStartURL, 
@@ -316,9 +315,6 @@ public class WatchCrawler_p {
                                         new Date(),
                                         1,
                                         reasonString);
-                                
-                                ee.store();
-                                sb.crawlQueues.errorURL.push(ee);
                             }
                         } catch (final PatternSyntaxException e) {
                             prop.put("info", "4"); //crawlfilter does not match url

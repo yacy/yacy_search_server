@@ -30,7 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.LinkedList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
@@ -44,10 +44,10 @@ import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.retrieval.Request;
 
-public class ZURL {
+public class ZURL implements Iterable<ZURL.Entry> {
     
-    private static final int EcoFSBufferSize = 200;
-    private static final int maxStackSize    = 300;
+    private static final int EcoFSBufferSize = 2000;
+    private static final int maxStackSize    = 1000;
     
     public final static Row rowdef = new Row(
             "String urlhash-"   + Word.commonHashLength + ", " + // the url's hash
@@ -60,8 +60,8 @@ public class ZURL {
     );
 
     // the class object
-    protected final ObjectIndex urlIndex;
-    private final LinkedList<String> stack;
+    private final ObjectIndex urlIndex;
+    private final ConcurrentLinkedQueue<String> stack;
     
     public ZURL(
     		final File cachePath,
@@ -79,13 +79,13 @@ public class ZURL {
         }
         this.urlIndex = new Table(f, rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727);
         //urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, 0, true);
-        this.stack = new LinkedList<String>();
+        this.stack = new ConcurrentLinkedQueue<String>();
     }
     
     public ZURL() {
         // creates a new ZUR in RAM
         this.urlIndex = new RowSet(rowdef, 0);
-        this.stack = new LinkedList<String>();
+        this.stack = new ConcurrentLinkedQueue<String>();
     }
     
     public int size() {
@@ -102,18 +102,6 @@ public class ZURL {
         if (urlIndex != null) urlIndex.close();
     }
 
-    public synchronized Entry newEntry(
-            final Request bentry,
-            final String executor,
-            final Date workdate,
-            final int workcount,
-            String anycause) {
-        assert executor != null;
-        assert executor.length() > 0;
-        if (anycause == null) anycause = "unknown";
-        return new Entry(bentry, executor, workdate, workcount, anycause);
-    }
-
     public boolean remove(final String hash) {
         if (hash == null) return false;
         //System.out.println("*** DEBUG ZURL " + this.urlIndex.filename() + " remove " + hash);
@@ -125,22 +113,45 @@ public class ZURL {
         }
     }
     
-    public synchronized void push(final Entry e) {
-        stack.add(e.hash());
-        while (stack.size() > maxStackSize) stack.removeFirst();
+    public void push(
+            final Request bentry,
+            final String executor,
+            final Date workdate,
+            final int workcount,
+            String anycause) {
+        assert executor != null;
+        assert executor.length() > 0;
+        if (anycause == null) anycause = "unknown";
+        Entry entry = new Entry(bentry, executor, workdate, workcount, anycause);
+        entry.store();
+        stack.add(entry.hash());
+        while (stack.size() > maxStackSize) stack.poll();
     }
     
-    public Entry top(final int pos) {
-        String urlhash;
-        synchronized (stack) {
-            if (pos >= stack.size()) return null;
-            urlhash = stack.get(pos);
+    public Iterator<ZURL.Entry> iterator() {
+        return new EntryIterator();
+    }
+    
+    private class EntryIterator implements Iterator<ZURL.Entry> {
+        private Iterator<String> hi;
+        public EntryIterator() {
+            this.hi = stack.iterator();
         }
-        if (urlhash == null) return null;
-        return getEntry(urlhash);
+        public boolean hasNext() {
+            return hi.hasNext();
+        }
+
+        public ZURL.Entry next() {
+            return getEntry(hi.next());
+        }
+
+        public void remove() {
+            hi.remove();
+        }
+        
     }
    
-    public synchronized Entry getEntry(final String urlhash) {
+    public ZURL.Entry getEntry(final String urlhash) {
         try {
             if (urlIndex == null) return null;
             //System.out.println("*** DEBUG ZURL " + this.urlIndex.filename() + " get " + urlhash);
@@ -174,7 +185,7 @@ public class ZURL {
         private final String   anycause;  // string describing reason for load fail
         private boolean  stored;
 
-        public Entry(
+        private Entry(
                 final Request bentry,
                 final String executor,
                 final Date workdate,
@@ -191,7 +202,7 @@ public class ZURL {
             stored = false;
         }
 
-        public Entry(final Row.Entry entry) throws IOException {
+        private Entry(final Row.Entry entry) throws IOException {
             assert (entry != null);
             this.executor = entry.getColString(1, "UTF-8");
             this.workdate = new Date(entry.getColLong(2));
@@ -203,7 +214,7 @@ public class ZURL {
             return;
         }
         
-        public void store() {
+        protected void store() {
             // stores the values from the object variables into the database
             if (this.stored) return;
             if (this.bentry == null) return;
@@ -289,5 +300,6 @@ public class ZURL {
         // enumerates entry elements
         return new kiter(up, firstHash);
     }
+
 }
 

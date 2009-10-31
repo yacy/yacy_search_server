@@ -144,7 +144,7 @@ public class FTPLoader {
         if (berr.size() > 0 || response == null) {
             // some error logging
             final String detail = (berr.size() > 0) ? "\n    Errorlog: " + berr.toString() : "";
-            sb.crawlQueues.errorURL.newEntry(request, sb.peers.mySeed().hash, new Date(), 1, "server download" + detail);
+            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash, new Date(), 1, "server download" + detail);
             throw new IOException("FTPLoader: Unable to download URL " + request.url().toString() + detail);
         }
         
@@ -227,7 +227,7 @@ public class FTPLoader {
         if (supportError != null) {
             // reject file
             log.logInfo("PARSER REJECTED URL " + request.url().toString() + ": " + supportError);
-            sb.crawlQueues.errorURL.newEntry(request, this.sb.peers.mySeed().hash, new Date(), 1, supportError);
+            sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash, new Date(), 1, supportError);
             throw new Exception(supportError);
         } else {
             // abort the download if content is too long
@@ -257,7 +257,7 @@ public class FTPLoader {
                         b);
             } else {
                 log.logInfo("REJECTED TOO BIG FILE with size " + size + " Bytes for URL " + request.url().toString());
-                sb.crawlQueues.errorURL.newEntry(request, this.sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");
+                sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");
                 throw new Exception("file size exceeds limit");
             }
         }

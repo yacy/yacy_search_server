@@ -32,7 +32,6 @@ import java.io.IOException;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 
-import de.anomic.crawler.ZURL;
 import de.anomic.crawler.retrieval.EventOrigin;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segments;
@@ -154,14 +153,12 @@ public final class crawlReceipt {
         }
 
         sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work is transformed into an error case
-        final ZURL.Entry ee = sb.crawlQueues.errorURL.newEntry(
+        sb.crawlQueues.errorURL.push(
                 entry.toBalancerEntry(iam),
                 youare,
                 null,
                 0,
                 result + ":" + reason);
-        ee.store();
-        sb.crawlQueues.errorURL.push(ee);
         //switchboard.noticeURL.remove(receivedUrlhash);
         prop.put("delay", "3600");
         return prop;

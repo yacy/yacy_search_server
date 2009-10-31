@@ -77,7 +77,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
             final boolean useTailCache,
             final boolean exceed134217727) {
         this.location = path;        
-        this.urlIndexFile = new Cache(new SplitTable(this.location, tablename, URIMetadataRow.rowdef, useTailCache, exceed134217727));
+        this.urlIndexFile = new Cache(new SplitTable(this.location, tablename, URIMetadataRow.rowdef, useTailCache, exceed134217727), 20000000, 20000000);
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
     }

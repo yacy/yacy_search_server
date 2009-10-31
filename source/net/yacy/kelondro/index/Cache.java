@@ -63,9 +63,19 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
     private       Row         keyrow;
     private       int         readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
     private       int         hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble, hasnotDelete;
+    private       int         hitLimit, missLimit;
     
-    public Cache(final ObjectIndex backupIndex) {
+    /**
+     * create a ObjectIndex cache. The cache may either limited by a number of entries in the hit/miss cache
+     * or the cache size can only be limited by the available RAM
+     * @param backupIndex the ObjectIndex that is cached
+     * @param hitLimit a limit of cache hit entries. If given as value <= 0, then only the RAM limits the size
+     * @param missLimit a limit of cache miss entries. If given as value <= 0, then only the RAM limits the size
+     */
+    public Cache(final ObjectIndex backupIndex, int hitLimit, int missLimit) {
         this.index = backupIndex;
+        this.hitLimit = hitLimit;
+        this.missLimit = missLimit;
         init();
         objectTracker.put(backupIndex.filename(), this);
     }
@@ -101,6 +111,14 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
     
     public final static long getMemStartShrink() {
         return memStartShrink ;
+    }
+    
+    public final int getHitLimit() {
+        return this.hitLimit;
+    }
+    
+    public final int getMissLimit() {
+        return this.missLimit;
     }
     
     public static final Iterator<String> filenames() {
@@ -151,6 +169,11 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
     private final boolean checkMissSpace() {
         // returns true if it is allowed to write into this cache
         if (readMissCache == null) return false;
+        
+        // check given limitation
+        if (this.missLimit > 0 && this.readMissCache.size() >= this.missLimit) return false;
+        
+        // check memory
         long available = MemoryControl.available();
         if (available - 2 * 1024 * 1024 < readMissCache.memoryNeededForGrow()) {
             readMissCache.clear();
@@ -166,6 +189,11 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
     private final boolean checkHitSpace() {
         // returns true if it is allowed to write into this cache
         if (readHitCache == null) return false;
+        
+        // check given limitation
+        if (this.hitLimit > 0 && this.readHitCache.size() >= this.hitLimit) return false;
+        
+        // check memory
         long available = MemoryControl.available();
         if (available - 2 * 1024 * 1024 < readHitCache.memoryNeededForGrow()) {
             readHitCache.clear();

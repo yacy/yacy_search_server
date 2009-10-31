@@ -22,7 +22,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-package net.yacy.document.content.file;
+package net.yacy.document.content;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -36,7 +36,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
-import net.yacy.document.content.DCEntry;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;

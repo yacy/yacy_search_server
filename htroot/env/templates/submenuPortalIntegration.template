@@ -6,6 +6,5 @@
     <li><a href="/ConfigSearchBox.html" class="MenuItemLink">Search Box Anywhere</a></li>
     <li><a href="/ConfigWikiSearch.html" class="MenuItemLink">Search Integration for Wikis</a></li>
     <li><a href="/ConfigPHPBB3Search.html" class="MenuItemLink">Search Integration for phpBB3</a></li>
-    <li><a href="/IndexImportWikimedia_p.html" class="MenuItemLink lock">Wikimedia Dump Import</a></li>
   </ul>
 </div>

@@ -31,8 +31,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 
 import net.yacy.document.content.DCEntry;
-import net.yacy.document.content.file.SurrogateReader;
+import net.yacy.document.content.SurrogateReader;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.CrawlProfile;
@@ -93,6 +94,7 @@ public class OAIPMHImporter extends Thread implements Importer {
     }
     
     private static void load(Response response) throws IOException {
+        //FileUtils.copy(source, dest)
         byte[] b = response.getContent();
         SurrogateReader sr = new SurrogateReader(new ByteArrayInputStream(b), 100);
         Thread srt = new Thread(sr);
@@ -104,6 +106,10 @@ public class OAIPMHImporter extends Thread implements Importer {
         try {
             srt.join();
         } catch (InterruptedException e) {}
+        ResumptionTokenReader rtr = new ResumptionTokenReader(new ByteArrayInputStream(b));
+        ResumptionToken token = rtr.getToken();
+        System.out.println("TOKEN: " + token.toString());
+        
     }
     
     public static StringBuilder escape(final String s) {

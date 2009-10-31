@@ -116,7 +116,7 @@ import net.yacy.document.TextParser;
 import net.yacy.document.ParserException;
 import net.yacy.document.content.DCEntry;
 import net.yacy.document.content.RSSMessage;
-import net.yacy.document.content.file.SurrogateReader;
+import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -151,7 +151,6 @@ import de.anomic.crawler.ResourceObserver;
 import de.anomic.crawler.ResultImages;
 import de.anomic.crawler.ResultURLs;
 import de.anomic.crawler.RobotsTxt;
-import de.anomic.crawler.ZURL;
 import de.anomic.crawler.CrawlProfile.entry;
 import de.anomic.crawler.retrieval.EventOrigin;
 import de.anomic.crawler.retrieval.HTTPLoader;
@@ -1998,13 +1997,7 @@ public final class Switchboard extends serverSwitch {
                 0, 
                 0, 
                 0);
-        final ZURL.Entry ee = crawlQueues.errorURL.newEntry(
-                bentry, initiator, new Date(),
-                0, failreason);
-        // store the entry
-        ee.store();
-        // push it onto the stack
-        crawlQueues.errorURL.push(ee);
+        crawlQueues.errorURL.push(bentry, initiator, new Date(), 0, failreason);
     }
     
     public int currentPPM() {

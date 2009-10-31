@@ -136,9 +136,7 @@ public final class CrawlStacker {
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null) {
-                final ZURL.Entry ee = nextQueue.errorURL.newEntry(entry, peers.mySeed().hash, new Date(), 1, rejectReason);
-                ee.store();
-                nextQueue.errorURL.push(ee);
+                nextQueue.errorURL.push(entry, peers.mySeed().hash, new Date(), 1, rejectReason);
             }
         } catch (final Exception e) {
             CrawlStacker.this.log.logWarning("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);

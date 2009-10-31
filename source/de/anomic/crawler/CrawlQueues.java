@@ -545,14 +545,12 @@ public class CrawlQueues {
                 this.request.setStatus("worker-checkingrobots", WorkflowJob.STATUS_STARTED);
                 if ((request.url().getProtocol().equals("http") || request.url().getProtocol().equals("https")) && sb.robots.isDisallowed(request.url())) {
                     if (log.isFine()) log.logFine("Crawling of URL '" + request.url().toString() + "' disallowed by robots.txt.");
-                    final ZURL.Entry eentry = errorURL.newEntry(
+                    errorURL.push(
                             this.request,
                             sb.peers.mySeed().hash,
                             new Date(),
                             1,
                             "denied by robots.txt");
-                    eentry.store();
-                    errorURL.push(eentry);
                     this.request.setStatus("worker-disallowed", WorkflowJob.STATUS_FINISHED);
                 } else {
                     // starting a load from the internet
@@ -581,28 +579,24 @@ public class CrawlQueues {
                     }
                     
                     if (result != null) {
-                        final ZURL.Entry eentry = errorURL.newEntry(
+                        errorURL.push(
                                 this.request,
                                 sb.peers.mySeed().hash,
                                 new Date(),
                                 1,
                                 "cannot load: " + result);
-                        eentry.store();
-                        errorURL.push(eentry);
                         this.request.setStatus("worker-error", WorkflowJob.STATUS_FINISHED);
                     } else {
                         this.request.setStatus("worker-processed", WorkflowJob.STATUS_FINISHED);
                     }
                 }
             } catch (final Exception e) {
-                final ZURL.Entry eentry = errorURL.newEntry(
+                errorURL.push(
                         this.request,
                         sb.peers.mySeed().hash,
                         new Date(),
                         1,
                         e.getMessage() + " - in worker");
-                eentry.store();
-                errorURL.push(eentry);
                 e.printStackTrace();
                 Client.initConnectionManager();
                 this.request.setStatus("worker-exception", WorkflowJob.STATUS_FINISHED);

@@ -7,7 +7,7 @@
   </head>
   <body id="IndexImportOAIPMH">
     #%env/templates/header.template%#
-    #%env/templates/submenuIntegration.template%#
+    #%env/templates/submenuContentIntegration.template%#
     <h2>OAI-PMH Import</h2>
     
     #(import)#
@@ -15,8 +15,8 @@
     <form action="IndexImportOAIPMH_p.html" method="get">
         <fieldset>
           <legend>OAI-PMH Import: set a OAI-PMH URL</legend>
-          <input name="oaipmhurl" type="text" value="" size="80" />
-          <input name="submit" type="submit" value="Import from a OAI-PMH source" />
+          <input name="oaipmhurl" type="text" value="http://opus.bsz-bw.de/fhhv/oai2/oai2.php?verb=ListRecords&metadataPrefix=oai_dc" size="100" />
+          <input name="submit" type="submit" value="Import OAI-PMH source" />
         </fieldset>
     </form>
     ::

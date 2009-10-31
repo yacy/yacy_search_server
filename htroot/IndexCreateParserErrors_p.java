@@ -69,11 +69,9 @@ public class IndexCreateParserErrors_p {
             dark = true;
             DigestURI url; 
             String initiatorHash, executorHash;
-            ZURL.Entry entry;
             yacySeed initiatorSeed, executorSeed;
             int j=0;
-            for (int i = sb.crawlQueues.errorURL.stackSize() - 1; i >= (sb.crawlQueues.errorURL.stackSize() - showRejectedCount); i--) {
-                    entry = sb.crawlQueues.errorURL.top(i);
+            for (ZURL.Entry entry: sb.crawlQueues.errorURL) {
                     if (entry == null) continue;
                     url = entry.url();
                     if (url == null) continue;

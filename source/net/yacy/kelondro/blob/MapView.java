@@ -145,10 +145,10 @@ public class MapView {
         assert s != null;
         synchronized (this) {
             // write entry
-        	blob.put(key.getBytes("UTF-8"), s.getBytes("UTF-8"));
+        	if (blob != null) blob.put(key.getBytes("UTF-8"), s.getBytes("UTF-8"));
     
             // write map to cache
-            cache.put(key, newMap);
+            if (cache != null) cache.put(key, newMap);
         }
     }
 

@@ -81,13 +81,11 @@ public class urls {
                 
                 // place url to notice-url db
                 sb.crawlQueues.delegatedURL.push(
-                        sb.crawlQueues.delegatedURL.newEntry(
                                 entry,
                                 sb.peers.mySeed().hash,
                                 new Date(),
                                 0,
-                                "client=____________")
-                );
+                                "client=____________");
                 
                 // create RSS entry
                 prop.put("item_" + c + "_title", "");
