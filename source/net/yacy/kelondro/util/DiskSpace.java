@@ -63,7 +63,7 @@ public class DiskSpace {
     //private static final int HP_UX = 4;                  // Hewlett-Packard
     private static final int TRU64 = 5;                  // Hewlett-Packard
     //private static final int IRIX = 6;                   // sgi
-    //private static final int LINUX = 7;                  // all kind of linux
+    private static final int LINUX = 7;                  // all kind of linux
     //private static final int MAC_OS_X = 8;               // Apple
     private static final int MINIX = 9;                  // don't know if there even is a JRE for minix...
     //private static final int SOLARIS = 10;               // SUN
@@ -225,7 +225,8 @@ public class DiskSpace {
         processArgs.add("-k");
         // Some systems need the additional -P parameter to return the data in Posix format.
         // Without it the mount point will be in the 7th and not in the 6th column
-        if (usedOS == AIX || usedOS == BS2000 || usedOS == MINIX || usedOS == UNICOS)
+        // On Linux, -P is used to have everything on one line, for lvm or based setup
+        if (usedOS == AIX || usedOS == BS2000 || usedOS == MINIX || usedOS == UNICOS || usedOS == LINUX)
             processArgs.add("-P");
         // Tru64 does not know the -l parameter
         // For haiku i didn't found online docs at all; so better exclude it
