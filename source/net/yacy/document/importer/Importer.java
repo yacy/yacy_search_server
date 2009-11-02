@@ -25,8 +25,8 @@ public interface Importer extends Runnable {
      * @return
      */
     public long remainingTime();
-    
-    
+
+    public String status();
     
     public boolean isAlive();
     

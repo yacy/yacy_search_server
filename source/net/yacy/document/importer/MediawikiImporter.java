@@ -112,6 +112,10 @@ public class MediawikiImporter extends Thread implements Importer {
         return this.sourcefile.getAbsolutePath();
     }
     
+    public String status() {
+        return "";
+    }
+    
     /**
      * return the number of articles per second
      * @return

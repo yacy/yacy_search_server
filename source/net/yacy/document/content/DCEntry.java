@@ -107,12 +107,32 @@ public class DCEntry extends TreeMap<String, String> {
         String u = this.get("url");
         if (u == null) u = this.get("dc:identifier");
         if (u == null) return null;
+        String[] urls = u.split(";");
+        if (urls.length > 1) {
+            // select one that fits
+            u = bestU(urls);
+        }
         try {
             return new DigestURI(u, null);
         } catch (MalformedURLException e) {
             e.printStackTrace();
             return null;
         }
+    }
+    
+    private String bestU(String[] urls) {
+        for (String uu: urls) {
+            if (uu.startsWith("http://")) return uu;
+        }
+        for (String uu: urls) {
+            if (uu.startsWith("ftp://")) return uu;
+        }
+        for (String uu: urls) {
+            //urn identifier koennen ueber den resolver der d-nb aufgeloest werden:
+            //http://nbn-resolving.de/urn:nbn:de:bsz:960-opus-1860
+            if (uu.startsWith("urn:")) return "http://nbn-resolving.de/" + uu;
+        }
+        return urls[0];
     }
     
     public String getLanguage() {

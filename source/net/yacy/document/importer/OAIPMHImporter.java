@@ -1,4 +1,4 @@
-// PMHReader
+// OAIPMHImporter
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 30.09.2009 on http://yacy.net
 //
@@ -27,6 +27,7 @@
 package net.yacy.document.importer;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 
@@ -40,26 +41,44 @@ import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
+import de.anomic.search.Switchboard;
+
+
+// get one server with
+// http://roar.eprints.org/index.php?action=csv
+// list records from oai-pmh like
+// http://opus.bsz-bw.de/fhhv/oai2/oai2.php?verb=ListRecords&metadataPrefix=oai_dc
+
 
 public class OAIPMHImporter extends Thread implements Importer {
 
-    public static Importer job; // if started from a servlet, this object is used to store the thread
+    public static OAIPMHImporter job; // if started from a servlet, this object is used to store the thread
     
     private LoaderDispatcher loader;
     private DigestURI source;
     private int count;
     private long startTime;
+    private ResumptionToken resumptionToken;
     
     public OAIPMHImporter(LoaderDispatcher loader, DigestURI source) {
         this.loader = loader;
         this.source = source;
         this.count = 0;
         this.startTime = System.currentTimeMillis();
+        this.resumptionToken = null;
     }
 
 
     public int count() {
         return this.count;
+    }
+    
+    public String status() {
+        return (this.resumptionToken == null) ? "" : this.resumptionToken.toString();
+    }
+    
+    public ResumptionToken getResumptionToken() {
+        return this.resumptionToken;
     }
 
     public long remainingTime() {
@@ -88,14 +107,21 @@ public class OAIPMHImporter extends Thread implements Importer {
         }
     }
     
-    public static void load0(DigestURI source) throws IOException {
+    public void load0(DigestURI source) throws IOException {
         Response response = HTTPLoader.load(new Request(source, null));
         load(response);
     }
     
-    private static void load(Response response) throws IOException {
-        //FileUtils.copy(source, dest)
+    private void load(Response response) throws IOException {
         byte[] b = response.getContent();
+        this.resumptionToken = new ResumptionToken(new ByteArrayInputStream(b));
+        String file = this.source.getHost() + "_" + System.currentTimeMillis();
+        File f0 = new File(Switchboard.getSwitchboard().surrogatesInPath, file + ".tmp");
+        File f1 = new File(Switchboard.getSwitchboard().surrogatesInPath, file + ".xml");
+        FileUtils.copy(b, f0);
+        f0.renameTo(f1);
+        
+        /*
         SurrogateReader sr = new SurrogateReader(new ByteArrayInputStream(b), 100);
         Thread srt = new Thread(sr);
         srt.start();
@@ -106,9 +132,8 @@ public class OAIPMHImporter extends Thread implements Importer {
         try {
             srt.join();
         } catch (InterruptedException e) {}
-        ResumptionTokenReader rtr = new ResumptionTokenReader(new ByteArrayInputStream(b));
-        ResumptionToken token = rtr.getToken();
-        System.out.println("TOKEN: " + token.toString());
+        */
+        System.out.println("TOKEN: " + resumptionToken.toString());
         
     }
     
@@ -165,20 +190,6 @@ public class OAIPMHImporter extends Thread implements Importer {
         }
         return sbuf.toString();
     }
-    public static void main(String[] args) {
-        // get one server with
-        // http://roar.eprints.org/index.php?action=csv
-        // list records from oai-pmh like
-        // http://opus.bsz-bw.de/fhhv/oai2/oai2.php?verb=ListRecords&metadataPrefix=oai_dc
-        try {
-            load0(new DigestURI(args[0], null));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    
 }
 /*
 

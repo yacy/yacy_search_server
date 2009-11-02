@@ -22,9 +22,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 
 import net.yacy.document.importer.OAIPMHImporter;
+import net.yacy.document.importer.ResumptionToken;
 import net.yacy.kelondro.data.meta.DigestURI;
 
 import de.anomic.http.server.RequestHeader;
@@ -38,6 +40,20 @@ public class IndexImportOAIPMH_p {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard) env;
 
+        prop.put("import_defaulturl", "");
+        if (OAIPMHImporter.job != null) {
+            // show result from finished import
+            try {
+                ResumptionToken rt = OAIPMHImporter.job.getResumptionToken();
+                if (rt != null) prop.put("import_defaulturl", rt.resumptionURL(new DigestURI(OAIPMHImporter.job.source(), null)).toNormalform(true, false));
+            } catch (MalformedURLException e) {
+                prop.put("import_defaulturl", e.getMessage());
+            } catch (IOException e) {
+                // reached end of resumption
+                prop.put("import_defaulturl", e.getMessage());
+            }
+        }
+        
         if (OAIPMHImporter.job != null && OAIPMHImporter.job.isAlive()) {
             // one import is running, no option to insert anything
             prop.put("import", 1);
@@ -49,35 +65,37 @@ public class IndexImportOAIPMH_p {
             prop.put("import_runningMinutes", (OAIPMHImporter.job.runningTime() / 60) % 60);
             prop.put("import_remainingHours", (OAIPMHImporter.job.remainingTime() / 60) / 60);
             prop.put("import_remainingMinutes", (OAIPMHImporter.job.remainingTime() / 60) % 60);
-        } else {
-            prop.put("import", 0);
-            if (post == null) {
-                prop.put("import_status", 0);
-            } else {
-                if (post.containsKey("oaipmhurl")) {
-                    String oaipmhurl = post.get("oaipmhurl");
-                    DigestURI url = null;
-                    try {
-                        url = new DigestURI(oaipmhurl, null);
-                        OAIPMHImporter.job = new OAIPMHImporter(sb.loader, url);
-                        OAIPMHImporter.job.start();
-                        prop.put("import", 0);
-                        prop.put("import_thread", "started");
-                        prop.put("import_source", OAIPMHImporter.job.source());
-                        prop.put("import_count", 0);
-                        prop.put("import_speed", 0);
-                        prop.put("import_runningHours", 0);
-                        prop.put("import_runningMinutes", 0);
-                        prop.put("import_remainingHours", 0);
-                        prop.put("import_remainingMinutes", 0);
-                    } catch (MalformedURLException e) {
-                        e.printStackTrace();
-                        prop.put("import", 0);
-                        prop.put("import_status", 1);
-                        prop.put("import_status_message", e.getMessage());
-                    }
-                }
-                return prop;
+            return prop;
+        }
+        
+        prop.put("import", 0);
+        if (post == null) {
+            prop.put("import_status", 0);
+            return prop;
+        }
+        
+        if (post.containsKey("oaipmhurl")) {
+            String oaipmhurl = post.get("oaipmhurl");
+            DigestURI url = null;
+            try {
+                url = new DigestURI(oaipmhurl, null);
+                OAIPMHImporter.job = new OAIPMHImporter(sb.loader, url);
+                OAIPMHImporter.job.start();
+                prop.put("import", 1);
+                prop.put("import_thread", "started");
+                prop.put("import_source", OAIPMHImporter.job.source());
+                prop.put("import_rt", OAIPMHImporter.job.status());
+                prop.put("import_count", 0);
+                prop.put("import_speed", 0);
+                prop.put("import_runningHours", 0);
+                prop.put("import_runningMinutes", 0);
+                prop.put("import_remainingHours", 0);
+                prop.put("import_remainingMinutes", 0);
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+                prop.put("import", 0);
+                prop.put("import_status", 1);
+                prop.put("import_status_message", e.getMessage());
             }
         }
         return prop;
