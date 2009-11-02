@@ -73,6 +73,7 @@ public class IndexImportOAIPMH_p {
         if (post != null) {
             if (post.containsKey("urlstartone")) {
                 String oaipmhurl = post.get("urlstartone");
+                if (oaipmhurl.indexOf("?") < 0) oaipmhurl = oaipmhurl + "?verb=ListRecords&metadataPrefix=oai_dc";
                 DigestURI url = null;
                 try {
                     url = new DigestURI(oaipmhurl, null);

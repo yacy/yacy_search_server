@@ -9,11 +9,12 @@
     #%env/templates/header.template%#
     #%env/templates/submenuContentIntegration.template%#
     <h2>OAI-PMH Import</h2>
+    <p>Results from the import can be monitored in the <a href="/CrawlResults.html?process=7">indexing results for surrogates</a></p>
     
     <form action="IndexImportOAIPMH_p.html" method="get">
         <fieldset>
           <legend>Single request import</legend>
-          This will submit only a single request as given here to a OAI-PMH server and imports records into the index
+          This will submit only a single request as given here to a OAI-PMH server and imports records into the index<br />
           <input name="urlstartone" type="text" value="#[defaulturl]#" size="100" />
           <input name="submit" type="submit" value="Import OAI-PMH source" />
         </fieldset>
@@ -36,7 +37,7 @@
     <form action="IndexImportOAIPMH_p.html" method="get">
         <fieldset>
           <legend>Import all Records from a server</legend>
-          Import all records that follow acording to resumption elements into index
+          Import all records that follow acording to resumption elements into index<br />
           <input name="urlstartall" type="text" value="" size="100" />
           <input name="submit" type="submit" value="Import OAI-PMH source" />
         </fieldset>
@@ -46,7 +47,7 @@
       <dl>
         <dt>Thread:</dt><dd>#[thread]#</dd>
         <dt>Source:</dt><dd>#[source]#</dd>
-        <dt>Processed Chunks:</dt><dd>#[chunkCount]# records</dd>
+        <dt>Processed Chunks:</dt><dd>#[chunkCount]#</dd>
         <dt>Imported Records:</dt><dd>#[recordsCount]# records</dd>
         <dt>Speed:</dt><dd>#[speed]# records per second</dd>
       </dl>    

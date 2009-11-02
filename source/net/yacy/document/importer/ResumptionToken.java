@@ -135,11 +135,9 @@ public class ResumptionToken  extends TreeMap<String, String> {
         if (expiration != null) {
             if (expiration.before(new Date())) throw new IOException("the resumption is expired at " + DateFormatter.formatISO8601(expiration) + " (now: " + DateFormatter.formatISO8601(new Date()));
             // the resumption token is still fresh
-            return new DigestURI(url + "verb=ListRecords&resumptionToken=" + token, null);
         }
-            
-        // may still be an encoded state
-        return new DigestURI(url + "verb=ListRecords&" + token, null);
+
+        return new DigestURI(url + "verb=ListRecords&resumptionToken=" + token, null);
     }
     
     /**

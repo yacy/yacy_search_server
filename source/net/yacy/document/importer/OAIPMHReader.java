@@ -59,7 +59,7 @@ public class OAIPMHReader {
         response = loader.load(source, false, true, CrawlProfile.CACHE_STRATEGY_NOCACHE);
         byte[] b = response.getContent();
         this.resumptionToken = new ResumptionToken(new ByteArrayInputStream(b));
-        String file = filePrefix + "_" + this.source.getHost() + "_" + DateFormatter.formatShortMilliSecond(new Date());
+        String file = filePrefix + "." + filename4source(source) + "." + DateFormatter.formatShortMilliSecond(new Date());
         File f0 = new File(targetDir, file + ".tmp");
         File f1 = new File(targetDir, file + ".xml");
         
@@ -79,6 +79,15 @@ public class OAIPMHReader {
             srt.join();
         } catch (InterruptedException e) {}
         */
+    }
+    
+    public static final String filename4source(DigestURI source) {
+        String s = ResumptionToken.truncatedURL(source);
+        if (s.endsWith("?")) s = s.substring(0, s.length() - 1);
+        if (s.endsWith("/")) s = s.substring(0, s.length() - 1);
+        if (s.startsWith("https://")) s = s.substring(8);
+        if (s.startsWith("http://")) s = s.substring(7);
+        return s.replace('.', '_').replace('/', '_').replace(':', '_');
     }
     
     public ResumptionToken getResumptionToken() {
