@@ -56,7 +56,8 @@ public class Segments implements Iterable<Segment> {
         PROXY,
         LOCALCRAWLING,
         REMOTECRAWLING,
-        PUBLIC;         // includes the index that can be retrieved by the yacy p2p api
+        PUBLIC,
+        SURROGATES;    // includes the index that can be retrieved by the yacy p2p api
 
         public String toString() {
             throw new UnsupportedOperationException("toString not allowed");
@@ -97,6 +98,7 @@ public class Segments implements Iterable<Segment> {
         this.process_assignment.put(Process.LOCALCRAWLING,  "default");
         this.process_assignment.put(Process.REMOTECRAWLING, "default");
         this.process_assignment.put(Process.PUBLIC,         "default");
+        this.process_assignment.put(Process.SURROGATES,     "default");
     }
     
     public void setSegment(Process process, String segmentName) {

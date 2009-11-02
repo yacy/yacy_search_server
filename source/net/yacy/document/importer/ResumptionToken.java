@@ -55,8 +55,11 @@ public class ResumptionToken  extends TreeMap<String, String> {
         insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
     }
     
+    int recordCounter;
+    
     public ResumptionToken(final InputStream stream) throws IOException {
         super((Collator) insensitiveCollator.clone());
+        this.recordCounter = 0;
         new Reader(stream);
     }
     
@@ -67,6 +70,7 @@ public class ResumptionToken  extends TreeMap<String, String> {
             String token
             ) {
         super((Collator) insensitiveCollator.clone());
+        this.recordCounter = 0;
         this.put("expirationDate", DateFormatter.formatISO8601(expirationDate));
         this.put("completeListSize", Integer.toString(completeListSize));
         this.put("cursor", Integer.toString(cursor));
@@ -80,10 +84,31 @@ public class ResumptionToken  extends TreeMap<String, String> {
             String token
             ) {
         super((Collator) insensitiveCollator.clone());
+        this.recordCounter = 0;
         this.put("expirationDate", expirationDate);
         this.put("completeListSize", Integer.toString(completeListSize));
         this.put("cursor", Integer.toString(cursor));
         this.put("token", token);
+    }
+    
+    /**
+     * truncate the given url at the '?'
+     * @param url
+     * @return a string containing the url up to and including the '?'
+     */
+    public static String truncatedURL(DigestURI url) {
+        String u = url.toNormalform(true, true);
+        int i = u.indexOf('?');
+        if (i > 0) u = u.substring(0, i + 1);
+        return u;
+    }
+    
+    /**
+     * while parsing the resumption token, also all records are counted
+     * @return the result from counting the records
+     */
+    public int getRecordCounter() {
+        return this.recordCounter;
     }
     
     /**
@@ -97,9 +122,7 @@ public class ResumptionToken  extends TreeMap<String, String> {
 
         String token = this.getToken();
         if (token == null || token.length() == 0) throw new IOException("end of resumption reached");
-        String url = givenURL.toNormalform(true, true);
-        int i = url.indexOf('?');
-        if (i > 0) url = url.substring(0, i + 1);
+        String url = truncatedURL(givenURL);
         
         // encoded state
         if (token.indexOf("from=") >= 0) {
@@ -225,6 +248,9 @@ public class ResumptionToken  extends TreeMap<String, String> {
          */
         
         public void startElement(final String uri, final String name, final String tag, final Attributes atts) throws SAXException {
+            if ("record".equals(tag)) {
+                recordCounter++;
+            }
             if ("resumptionToken".equals(tag)) {
                 this.parsingValue = true;
                 this.atts = atts;

@@ -1237,7 +1237,7 @@ public final class Switchboard extends serverSwitch {
                         0        
                 );
                 response = new Response(request, null, null, "200", this.crawler.defaultSurrogateProfile);
-                indexingQueueEntry queueEntry = new indexingQueueEntry(Segments.Process.LOCALCRAWLING, response, document, null);
+                indexingQueueEntry queueEntry = new indexingQueueEntry(Segments.Process.SURROGATES, response, document, null);
                 
                 // place the queue entry into the concurrent process of the condenser (document analysis)
                 try {
@@ -1717,9 +1717,10 @@ public final class Switchboard extends serverSwitch {
         // CREATE INDEX
         final String dc_title = document.dc_title();
         final DigestURI referrerURL = queueEntry.referrerURL();
-        final EventOrigin processCase = queueEntry.processCase(peers.mySeed().hash);
+        EventOrigin processCase = queueEntry.processCase(peers.mySeed().hash);
+        if (process == Segments.Process.SURROGATES) processCase = EventOrigin.SURROGATES;
 
-        // remove stopwords                        
+        // remove stopwords
         log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + queueEntry.url());
 
         // STORE URL TO LOADED-URL-DB

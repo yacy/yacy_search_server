@@ -93,7 +93,7 @@ public class Segment {
         migrateTextIndex(segmentPath, segmentPath);
         migrateTextMetadata(segmentPath, segmentPath);
         
-        log.logInfo("Initializing Segment '" + segmentPath + "', word hash cache size is " + Word.hashCacheSize + ".");
+        log.logInfo("Initializing Segment '" + segmentPath + ".");
 
         this.log = log;
         this.segmentPath = segmentPath;

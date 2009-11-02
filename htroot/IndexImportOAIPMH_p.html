@@ -10,12 +10,34 @@
     #%env/templates/submenuContentIntegration.template%#
     <h2>OAI-PMH Import</h2>
     
-    #(import)#
-    <p>#(status)#No import thread is running, you can start a new thread here::Bad input data: #[message]# #(/status)#</p>
     <form action="IndexImportOAIPMH_p.html" method="get">
         <fieldset>
-          <legend>OAI-PMH Import: set a OAI-PMH URL</legend>
-          <input name="oaipmhurl" type="text" value="#[defaulturl]#" size="100" />
+          <legend>Single request import</legend>
+          This will submit only a single request as given here to a OAI-PMH server and imports records into the index
+          <input name="urlstartone" type="text" value="#[defaulturl]#" size="100" />
+          <input name="submit" type="submit" value="Import OAI-PMH source" />
+        </fieldset>
+    </form>
+    #(import-one)#
+    ::
+    <form><fieldset><legend>Import Process</legend>
+      <dl>
+        <dt>Source:</dt><dd>#[source]#</dd>
+        <dt>Processed:</dt><dd>#[count]# records</dd>
+        <dt>ResumptionToken:</dt><dd>#[rt]#</dd>
+      </dl>    
+    </fieldset></form>
+    ::
+    Import failed: #[error]#
+    #(/import-one)#
+    
+    #(import-all)#
+    <p>#(status)#::Bad input data: #[message]# #(/status)#</p>
+    <form action="IndexImportOAIPMH_p.html" method="get">
+        <fieldset>
+          <legend>Import all Records from a server</legend>
+          Import all records that follow acording to resumption elements into index
+          <input name="urlstartall" type="text" value="" size="100" />
           <input name="submit" type="submit" value="Import OAI-PMH source" />
         </fieldset>
     </form>
@@ -24,14 +46,13 @@
       <dl>
         <dt>Thread:</dt><dd>#[thread]#</dd>
         <dt>Source:</dt><dd>#[source]#</dd>
-        <dt>ResumptionToken:</dt><dd>#[rt]#</dd>
-        <dt>Processed:</dt><dd>#[count]# Wiki Entries</dd>
-        <dt>Speed:</dt><dd>#[speed]# articles per second</dd>
+        <dt>Processed:</dt><dd>#[count]# records</dd>
+        <dt>Speed:</dt><dd>#[speed]# records per second</dd>
         <dt>Running Time:</dt><dd>#[runningHours]# hours, #[runningMinutes]# minutes</dd>
         <dt>Remaining Time:</dt><dd>#[remainingHours]# hours, #[remainingMinutes]# minutes</dd>
       </dl>    
     </fieldset></form>
-    #(/import)#
+    #(/import-all)#
     
     #%env/templates/footer.template%#
   </body>

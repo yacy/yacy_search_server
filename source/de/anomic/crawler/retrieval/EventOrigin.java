@@ -17,11 +17,12 @@ public enum EventOrigin {
     DHT_TRANSFER(3),
     PROXY_LOAD(4),
     LOCAL_CRAWLING(5),
-    GLOBAL_CRAWLING(6);
+    GLOBAL_CRAWLING(6),
+    SURROGATES(7);
     
     protected int code;
     private static final EventOrigin[] list = {
-        UNKNOWN, REMOTE_RECEIPTS, QUERIES, DHT_TRANSFER, PROXY_LOAD, LOCAL_CRAWLING, GLOBAL_CRAWLING};
+        UNKNOWN, REMOTE_RECEIPTS, QUERIES, DHT_TRANSFER, PROXY_LOAD, LOCAL_CRAWLING, GLOBAL_CRAWLING, SURROGATES};
     private EventOrigin(int code) {
         this.code = code;
     }

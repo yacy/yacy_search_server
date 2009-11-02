@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
@@ -72,7 +71,7 @@ public final class CrawlSwitchboard {
             final Log log,
             final File queuesRoot) {
         
-        log.logInfo("Initializing Word Index for the network '" + networkName + "', word hash cache size is " + Word.hashCacheSize + ".");
+        log.logInfo("Initializing Word Index for the network '" + networkName + "'.");
                         
         if (networkName == null || networkName.length() == 0) {
             log.logSevere("no network name given - shutting down");

@@ -16,6 +16,7 @@
         <li><a href="/CrawlResults.html?process=4" class="MenuItemLink lock">(4) Proxy Use</a></li>
         <li><a href="/CrawlResults.html?process=5" class="MenuItemLink lock">(5) Local Crawling</a></li>
         <li><a href="/CrawlResults.html?process=6" class="MenuItemLink">(6) Global Crawling</a></li>
+        <li><a href="/CrawlResults.html?process=7" class="MenuItemLink lock">(7) Surrogate Import</a></li>
       </ul>
     </div>
     
@@ -28,6 +29,7 @@
     <p>Case (6) is a monitor of the local receipt-generator, the opposed case of (1). It contains also an indexing result monitor but is not considered private
     since it shows crawl requests from other peers.
     </p>
+    <p>Case (7) occurs if surrogate files are imported</p>
     <p><img src="/env/grafics/indexmonitor.png" alt="An illustration how yacy works" /></p>
     <p>The image above illustrates the data flow initiated by web index acquisition.
     Some processes occur double to document the complex index migration structure.
@@ -70,6 +72,10 @@
     <p>These pages had been indexed by your peer, but the crawl was initiated by a remote peer.
     This is the 'mirror'-case of process (1).</p>
     <p><em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page</p>
+    ::
+    <h2>(7) Results from surrogates import</h2>
+    <p>These records had been imported from surrogate files in DATA/SURROGATES/in</p>
+    <p><em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method (i.e. wikimedia import, OAI-PMH retrieval)</p>
     #(/process)#
     
     
