@@ -28,6 +28,7 @@ package net.yacy.document.importer;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.TreeSet;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.repository.LoaderDispatcher;
@@ -41,21 +42,29 @@ import de.anomic.search.Switchboard;
 // http://opus.bsz-bw.de/fhhv/oai2/oai2.php?verb=ListRecords&metadataPrefix=oai_dc
 
 
-public class OAIPMHImporter extends Thread implements Importer {
+public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPMHImporter> {
 
-    public static OAIPMHImporter job; // if started from a servlet, this object is used to store the thread
+    private static int importerCounter = 0;
+    
+    public static TreeSet<OAIPMHImporter> startedJobs = new TreeSet<OAIPMHImporter>();
+    public static TreeSet<OAIPMHImporter> runningJobs = new TreeSet<OAIPMHImporter>();
+    public static TreeSet<OAIPMHImporter> finishedJobs = new TreeSet<OAIPMHImporter>();
     
     private LoaderDispatcher loader;
     private DigestURI source;
-    private int count;
-    private long startTime;
+    private int recordsCount, chunkCount;
+    private long startTime, finishTime;
     private ResumptionToken resumptionToken;
     private String message;
+    private int serialNumber;
     
     public OAIPMHImporter(LoaderDispatcher loader, DigestURI source) {
+        this.serialNumber = importerCounter++;
         this.loader = loader;
-        this.count = 0;
+        this.recordsCount = 0;
+        this.chunkCount = 0;
         this.startTime = System.currentTimeMillis();
+        this.finishTime = 0;
         this.resumptionToken = null;
         this.message = "import initialized";
         // fix start url
@@ -67,10 +76,15 @@ public class OAIPMHImporter extends Thread implements Importer {
             // this should never happen
             e.printStackTrace();
         }
+        startedJobs.add(this);
     }
 
     public int count() {
-        return this.count;
+        return this.recordsCount;
+    }
+    
+    public int chunkCount() {
+        return this.chunkCount;
     }
     
     public String status() {
@@ -82,11 +96,11 @@ public class OAIPMHImporter extends Thread implements Importer {
     }
 
     public long remainingTime() {
-        return Long.MAX_VALUE; // we don't know
+        return (this.isAlive()) ? Long.MAX_VALUE : 0; // we don't know
     }
 
     public long runningTime() {
-        return System.currentTimeMillis() - this.startTime;
+        return (this.isAlive()) ? System.currentTimeMillis() - this.startTime : this.finishTime - this.startTime;
     }
 
     public String source() {
@@ -98,10 +112,17 @@ public class OAIPMHImporter extends Thread implements Importer {
     }
     
     public void run() {
+        while (runningJobs.size() > 10) {
+            try {Thread.sleep(1000 + 1000 * System.currentTimeMillis() % 6);} catch (InterruptedException e) {}
+        }
+        startedJobs.remove(this);
+        runningJobs.add(this);
         this.message = "loading first part of records";
         while (true) {
             try {
                 OAIPMHReader reader = new OAIPMHReader(this.loader, this.source, Switchboard.getSwitchboard().surrogatesInPath, "oaipmh");
+                this.chunkCount++;
+                this.recordsCount += reader.getResumptionToken().getRecordCounter();
                 this.source = reader.getResumptionToken().resumptionURL(this.source);
                 if (this.source == null) {
                     this.message = "import terminated with source = null";
@@ -113,5 +134,26 @@ public class OAIPMHImporter extends Thread implements Importer {
                 break;
             }
         }
+        this.finishTime = System.currentTimeMillis();
+        runningJobs.remove(this);
+        finishedJobs.add(this);
+    }
+    
+    
+    // methods that are needed to put the object into a Hashtable or a Map:
+    
+    public int hashCode() {
+        return this.serialNumber;
+    }
+    
+    public boolean equals(OAIPMHImporter o) {
+        return this.compareTo(o) == 0;
+    }
+
+    // methods that are needed to put the object into a Tree:
+    public int compareTo(OAIPMHImporter o) {
+        if (this.serialNumber > o.serialNumber) return 1;
+        if (this.serialNumber < o.serialNumber) return -1;
+        return 0;
     }
 }

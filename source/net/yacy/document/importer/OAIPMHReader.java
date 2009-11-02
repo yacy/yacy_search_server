@@ -56,7 +56,7 @@ public class OAIPMHReader {
         
         // load the file from the net
         Response response;
-        response = loader.load(source, true, true, CrawlProfile.CACHE_STRATEGY_NOCACHE);
+        response = loader.load(source, false, true, CrawlProfile.CACHE_STRATEGY_NOCACHE);
         byte[] b = response.getContent();
         this.resumptionToken = new ResumptionToken(new ByteArrayInputStream(b));
         String file = filePrefix + "_" + this.source.getHost() + "_" + DateFormatter.formatShortMilliSecond(new Date());
