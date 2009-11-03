@@ -369,6 +369,13 @@ public class Digest {
             File f = new File(s[1]);
             System.out.println("fingerprint b64 (" + f.getName() + ") = " + fastFingerprintB64(f, true));
         }
+
+        // Takes a string as input.
+        // Please don't delete this without making sure that it is not needed by reconfigureYACY.sh anymore. (Low012)
+        if (s[0].equals("-strfhex") && s.length > 1) {
+            System.out.println(encodeMD5Hex(s[1]));
+        }
+
         System.out.println("time: " + (System.currentTimeMillis() - start) + " ms");
     }
 }
