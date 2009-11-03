@@ -15,7 +15,7 @@
       <fieldset>
         <legend>Single request import</legend>
         This will submit only a single request as given here to a OAI-PMH server and imports records into the index<br />
-        <input name="urlstartone" type="text" value="#[defaulturl]#" size="100" />
+        <input name="urlstartone" type="text" value="#[defaulturl]#" size="80" />
         <input name="submit" type="submit" value="Import OAI-PMH source" />
         #(import-one)#::
         <p><dl>
@@ -32,14 +32,15 @@
     <form action="IndexImportOAIPMH_p.html" method="post" enctype="multipart/form-data">
         <fieldset>
           <legend>Import all Records from a server</legend>
-          Import all records that follow acording to resumption elements into index<br />
-          <input name="urlstartall" type="text" value="" size="100" />
-          <input name="submit" type="submit" value="Import OAI-PMH source" />
+          Import all records that follow according to resumption elements into index<br />
+          <input name="urlstartall" type="text" value="" size="80" />
+          <input name="importroot" type="submit" value="import this source" />
+          or&nbsp;<input name="getlist" type="submit" value="import from a list" />
           #(status)#::<p>Import started!</p>::<p>Bad input data: #[message]# </p>#(/status)#
         </fieldset>
     </form>
     <iframe name="OAI-PMH Import List"
-       src="/IndexImportOAIPMHList_p.html"
+       src="/IndexImportOAIPMHList_p.html#(iframetype)#::?import=::?source=#(/iframetype)#"
        width="100%"
        height="340"
        frameborder="0"

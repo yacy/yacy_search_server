@@ -44,6 +44,7 @@ public class IndexImportOAIPMH_p {
         prop.put("import-one", 0);
         prop.put("status", 0);
         prop.put("defaulturl", "");
+        prop.put("iframetype", (OAIPMHImporter.runningJobs.size() + OAIPMHImporter.startedJobs.size() + OAIPMHImporter.finishedJobs.size() == 0) ? 0 : 1);
         
         if (post != null) {
             if (post.containsKey("urlstartone")) {
@@ -80,8 +81,8 @@ public class IndexImportOAIPMH_p {
                 }
             }
             
-            if (post.containsKey("urlstartall")) {
-                String oaipmhurl = post.get("urlstartall");
+            if (post.containsKey("importroot")) {
+                String oaipmhurl = post.get("urlstartall", "");
                 DigestURI url = null;
                 try {
                     url = new DigestURI(oaipmhurl, null);
@@ -93,6 +94,10 @@ public class IndexImportOAIPMH_p {
                     prop.put("status", 2);
                     prop.put("status_message", e.getMessage());
                 }
+            }
+            
+            if (post.containsKey("getlist")) {
+                prop.put("iframetype", 2);
             }
         }
         return prop;

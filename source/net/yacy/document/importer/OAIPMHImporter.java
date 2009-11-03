@@ -26,18 +26,32 @@
 
 package net.yacy.document.importer;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.util.List;
+import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
+import net.yacy.document.parser.csvParser;
 
+import de.anomic.crawler.CrawlProfile;
+import de.anomic.crawler.retrieval.Response;
 import de.anomic.search.Switchboard;
 
 
 // get one server with
 // http://roar.eprints.org/index.php?action=csv
+// or
+// http://www.openarchives.org/Register/BrowseSites
+// or
+// http://www.openarchives.org/Register/ListFriends
+//
 // list records from oai-pmh like
 // http://opus.bsz-bw.de/fhhv/oai2/oai2.php?verb=ListRecords&metadataPrefix=oai_dc
 
@@ -156,4 +170,40 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         if (this.serialNumber < o.serialNumber) return -1;
         return 0;
     }
+    
+    public static Set<String> getOAIServer(LoaderDispatcher loader) {
+        TreeSet<String> list = new TreeSet<String>();
+
+        // read roar
+        File roar = new File(Switchboard.getSwitchboard().getRootPath(), "DATA/SETTINGS/roar.csv");
+        DigestURI roarSource;
+        try {
+            roarSource = new DigestURI("http://roar.eprints.org/index.php?action=csv", null);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+            roarSource = null;
+        }
+        if (!roar.exists()) try {
+            // load the file from the net
+            Response response = loader.load(roarSource, false, true, CrawlProfile.CACHE_STRATEGY_NOCACHE);
+            byte[] b = response.getContent();
+            FileUtils.copy(b, roar);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (roar.exists()) {
+            csvParser parser = new csvParser();
+            try {
+                List<String[]> table = parser.getTable(roarSource, "", "UTF-8", new FileInputStream(roar));
+                for (String[] row: table) {
+                    list.add(row[2]);
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        return list;
+    }
+    
 }

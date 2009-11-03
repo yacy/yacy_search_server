@@ -42,6 +42,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.document.parser.bzipParser;
+import net.yacy.document.parser.csvParser;
 import net.yacy.document.parser.docParser;
 import net.yacy.document.parser.gzipParser;
 import net.yacy.document.parser.htmlParser;
@@ -83,6 +84,7 @@ public final class TextParser {
     
     static {
         initParser(new bzipParser());
+        initParser(new csvParser());
         initParser(new docParser());
         initParser(new gzipParser());
         initParser(new htmlParser());
