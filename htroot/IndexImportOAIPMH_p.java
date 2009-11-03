@@ -1,7 +1,7 @@
 // IndexImportOAIPMH.java
 // -------------------------
 // (C) 2009 by Michael Peter Christen; mc@yacy.net
-// first published 04.05.2009 on http://yacy.net
+// first published 30.10.2009 on http://yacy.net
 // Frankfurt, Germany
 //
 // $LastChangedDate: 2009-10-11 23:29:18 +0200 (So, 11 Okt 2009) $
@@ -24,7 +24,6 @@
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.util.NoSuchElementException;
 
 import net.yacy.document.importer.OAIPMHImporter;
 import net.yacy.document.importer.OAIPMHReader;
@@ -43,32 +42,8 @@ public class IndexImportOAIPMH_p {
         final Switchboard sb = (Switchboard) env;
 
         prop.put("import-one", 0);
-        prop.put("import-all", 0);
-        prop.put("import-all_status", 0);
+        prop.put("status", 0);
         prop.put("defaulturl", "");
-        
-        OAIPMHImporter job = null;
-        try {
-            job = OAIPMHImporter.runningJobs.first();
-        } catch (NoSuchElementException e0) {
-            try {
-                job = OAIPMHImporter.startedJobs.first();
-            } catch (NoSuchElementException e1) {
-                try {
-                    job = OAIPMHImporter.finishedJobs.first();
-                } catch (NoSuchElementException e2) {}
-            }
-        }
-        if (job != null) {
-            // one import is running, no option to insert anything
-            prop.put("import-all", 1);
-            prop.put("import-all_thread", (job.isAlive()) ? "running" : "finished");
-            prop.put("import-all_source", job.source());
-            prop.put("import-all_chunkCount", job.chunkCount());
-            prop.put("import-all_recordsCount", job.count());
-            prop.put("import-all_speed", job.speed());
-            return prop;
-        }
         
         if (post != null) {
             if (post.containsKey("urlstartone")) {
@@ -110,19 +85,13 @@ public class IndexImportOAIPMH_p {
                 DigestURI url = null;
                 try {
                     url = new DigestURI(oaipmhurl, null);
-                    job = new OAIPMHImporter(sb.loader, url);
+                    OAIPMHImporter job = new OAIPMHImporter(sb.loader, url);
                     job.start();
-                    prop.put("import-all", 1);
-                    prop.put("import-all_thread", "started");
-                    prop.put("import-all_source", job.source());
-                    prop.put("import-all_chunkCount", 0);
-                    prop.put("import-all_recordsCount", 0);
-                    prop.put("import-all_speed", 0);
+                    prop.put("status", 1);
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
-                    prop.put("import-all", 0);
-                    prop.put("import-all_status", 1);
-                    prop.put("import-all_status_message", e.getMessage());
+                    prop.put("status", 2);
+                    prop.put("status_message", e.getMessage());
                 }
             }
         }

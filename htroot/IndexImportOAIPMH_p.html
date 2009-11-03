@@ -11,49 +11,41 @@
     <h2>OAI-PMH Import</h2>
     <p>Results from the import can be monitored in the <a href="/CrawlResults.html?process=7">indexing results for surrogates</a></p>
     
-    <form action="IndexImportOAIPMH_p.html" method="get">
-        <fieldset>
-          <legend>Single request import</legend>
-          This will submit only a single request as given here to a OAI-PMH server and imports records into the index<br />
-          <input name="urlstartone" type="text" value="#[defaulturl]#" size="100" />
-          <input name="submit" type="submit" value="Import OAI-PMH source" />
+    <form action="IndexImportOAIPMH_p.html" method="post" enctype="multipart/form-data">
+      <fieldset>
+        <legend>Single request import</legend>
+        This will submit only a single request as given here to a OAI-PMH server and imports records into the index<br />
+        <input name="urlstartone" type="text" value="#[defaulturl]#" size="100" />
+        <input name="submit" type="submit" value="Import OAI-PMH source" />
+        #(import-one)#::
+        <p><dl>
+          <dt>Source:</dt><dd>#[source]#</dd>
+          <dt>Processed:</dt><dd>#[count]# records</dd>
+          <dt>ResumptionToken:</dt><dd>#[rt]#</dd>
+        </dl></p>
+        ::<p>Import failed: #[error]#</p>
+        #(/import-one)#
         </fieldset>
     </form>
-    #(import-one)#
-    ::
-    <form><fieldset><legend>Import Process</legend>
-      <dl>
-        <dt>Source:</dt><dd>#[source]#</dd>
-        <dt>Processed:</dt><dd>#[count]# records</dd>
-        <dt>ResumptionToken:</dt><dd>#[rt]#</dd>
-      </dl>    
-    </fieldset></form>
-    ::
-    Import failed: #[error]#
-    #(/import-one)#
     
-    #(import-all)#
-    <p>#(status)#::Bad input data: #[message]# #(/status)#</p>
-    <form action="IndexImportOAIPMH_p.html" method="get">
+    
+    <form action="IndexImportOAIPMH_p.html" method="post" enctype="multipart/form-data">
         <fieldset>
           <legend>Import all Records from a server</legend>
           Import all records that follow acording to resumption elements into index<br />
           <input name="urlstartall" type="text" value="" size="100" />
           <input name="submit" type="submit" value="Import OAI-PMH source" />
+          #(status)#::<p>Import started!</p>::<p>Bad input data: #[message]# </p>#(/status)#
         </fieldset>
     </form>
-    ::
-    <form><fieldset><legend>Import Process</legend>
-      <dl>
-        <dt>Thread:</dt><dd>#[thread]#</dd>
-        <dt>Source:</dt><dd>#[source]#</dd>
-        <dt>Processed Chunks:</dt><dd>#[chunkCount]#</dd>
-        <dt>Imported Records:</dt><dd>#[recordsCount]# records</dd>
-        <dt>Speed:</dt><dd>#[speed]# records per second</dd>
-      </dl>    
-    </fieldset></form>
-    #(/import-all)#
-    
+    <iframe name="OAI-PMH Import List"
+       src="/IndexImportOAIPMHList_p.html"
+       width="100%"
+       height="340"
+       frameborder="0"
+       scrolling="auto"
+       id="list">
+      </iframe>
     #%env/templates/footer.template%#
   </body>
 </html>

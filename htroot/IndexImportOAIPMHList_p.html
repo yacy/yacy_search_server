@@ -1,0 +1,29 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': OAI-PMH source import list</title>
+    #%env/templates/metas.template%#
+    <meta http-equiv="REFRESH" content="6" />
+  </head>
+  <body>
+    <h3>Import List</h3>
+    <table cellpadding="2" cellspacing="1" >
+      <tr class="TableHeader">
+        <td>Thread</td>
+        <td>Source</td>
+        <td>Processed<br />Chunks</td>
+        <td>Imported<br />Records</td>
+        <td>Speed<br />(records/second)</td>
+      </tr>
+      #{table}#
+      <tr class="TableCell#(dark)#Light::Dark#(/dark)#">
+        <td>#[thread]#</td>
+        <td>#[source]#</td>
+        <td>#[chunkCount]#</td>
+        <td>#[recordsCount]#</td>
+        <td>#[speed]#</td>
+      </tr>
+      #{/table}#
+    </table>
+  </body>
+</html>
