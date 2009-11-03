@@ -49,7 +49,7 @@ public class IndexImportOAIPMHList_p {
             int cnt = 0;
             for (String root: oaiRoots) {
                 prop.put("source_table_" + cnt + "_dark", (dark) ? "1" : "0");
-                prop.put("source_table_" + cnt + "_source", root);
+                prop.put("source_table_" + cnt + "_source", "<a href=\"/IndexImportOAIPMH_p.html?importroot=&urlstartall=" + root + "\" target=\"_top\">" + root+ "</a>");
                 dark = !dark;
                 cnt++;
             }

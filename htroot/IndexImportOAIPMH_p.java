@@ -44,8 +44,9 @@ public class IndexImportOAIPMH_p {
         prop.put("import-one", 0);
         prop.put("status", 0);
         prop.put("defaulturl", "");
-        prop.put("iframetype", (OAIPMHImporter.runningJobs.size() + OAIPMHImporter.startedJobs.size() + OAIPMHImporter.finishedJobs.size() == 0) ? 0 : 1);
-        
+        int jobcount = OAIPMHImporter.runningJobs.size() + OAIPMHImporter.startedJobs.size() + OAIPMHImporter.finishedJobs.size();
+        prop.put("iframetype", (jobcount == 0) ? 2 : 1);
+        prop.put("optiongetlist", (jobcount == 0) ? 0 : 1);
         if (post != null) {
             if (post.containsKey("urlstartone")) {
                 String oaipmhurl = post.get("urlstartone");
@@ -89,6 +90,8 @@ public class IndexImportOAIPMH_p {
                     OAIPMHImporter job = new OAIPMHImporter(sb.loader, url);
                     job.start();
                     prop.put("status", 1);
+                    prop.put("optiongetlist", 1);
+                    prop.put("iframetype", 1);
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
                     prop.put("status", 2);

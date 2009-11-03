@@ -134,6 +134,8 @@ public class csvParser extends AbstractParser implements Idiom {
                     if (cols.length >= colc.length && cols.length >= colt.length) separator = ";";
                     if (colt.length >= cols.length && colt.length >= colc.length) separator = "\t";
                 }
+                row = stripQuotes(row, '\"', separator.charAt(0), ' ');
+                row = stripQuotes(row, '\'', separator.charAt(0), ' ');
                 String[] cols = row.split(separator);
                 if (columns == -1) columns = cols.length;
                 //if (cols.length != columns) continue; // skip lines that have the wrong number of columns
@@ -144,6 +146,28 @@ public class csvParser extends AbstractParser implements Idiom {
         return rows;
     }
 
-    
+    /**
+     * remove quotes AND separator characters within the quotes
+     * to make it possible to split the line using the String.split method
+     * @param line
+     * @param quote
+     * @param separator
+     * @param replacement
+     * @return the line without the quotes
+     */
+    public static String stripQuotes(String line, char quote, char separator, char replacement) {
+        int p, q;
+        // find left quote
+        while ((p = line.indexOf(quote)) >= 0) {
+            q = line.indexOf(quote, p + 1);
+            if (q < 0) {
+                // there is only a single quote but no 'right' quote.
+                // This data is not well-formed. Just remove the quote and give up.
+                return line.substring(0, p) + line.substring(p + 1);
+            }
+            line = line.substring(0, p) + line.substring(p + 1, q).replace(separator, replacement) + line.substring(q + 1);
+        }
+        return line;
+    }
 
 }

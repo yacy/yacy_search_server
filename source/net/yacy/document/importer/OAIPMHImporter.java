@@ -196,7 +196,9 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
             try {
                 List<String[]> table = parser.getTable(roarSource, "", "UTF-8", new FileInputStream(roar));
                 for (String[] row: table) {
-                    list.add(row[2]);
+                    if (row.length > 2 && (row[2].startsWith("http://") || row[2].startsWith("https://"))) {
+                        list.add(row[2]);
+                    }
                 }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
