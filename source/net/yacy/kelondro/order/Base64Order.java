@@ -1,4 +1,4 @@
-// kelondroBase64Order.java
+// Base64Order.java
 // -----------------------
 // part of The Kelondro Database
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -7,8 +7,8 @@
 // created 03.01.2006
 //
 // $LastChangedDate: 2009-01-30 15:48:11 +0100 (Fr, 30 Jan 2009) $
-// $LastChangedRevision: 5539 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

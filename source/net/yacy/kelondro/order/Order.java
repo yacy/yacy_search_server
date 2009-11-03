@@ -1,4 +1,4 @@
-// kelondroOrder.java
+// Order.java
 // -----------------------
 // part of The Kelondro Database
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -7,8 +7,8 @@
 // created 29.12.2005
 //
 // $LastChangedDate: 2005-09-22 22:01:26 +0200 (Thu, 22 Sep 2005) $
-// $LastChangedRevision: 774 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

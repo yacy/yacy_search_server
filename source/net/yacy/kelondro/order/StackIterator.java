@@ -1,4 +1,4 @@
-// StartIterator.java
+// StackIterator.java
 // --------------------------
 // part of The Kelondro Database
 // (C) by Michael Peter Christen; mc@yacy.net

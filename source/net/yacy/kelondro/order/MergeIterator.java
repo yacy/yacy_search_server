@@ -1,4 +1,4 @@
-// kelondroMergeIterator.java
+// MergeIterator.java
 // --------------------------
 // part of The Kelondro Database
 // (C) by Michael Peter Christen; mc@yacy.net

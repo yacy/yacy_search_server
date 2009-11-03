@@ -1,10 +1,10 @@
-// kelondroBitfield.java
+// Bitfield.java
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 22.22.2006 on http://www.anomic.de
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -56,6 +56,7 @@ public class Bitfield implements Cloneable {
         }
     }
     
+    @Override
     public Bitfield clone() {
         final Bitfield theClone = new Bitfield(new byte[this.bb.length]);
         System.arraycopy(this.bb, 0, theClone.bb, 0, this.bb.length);
@@ -98,6 +99,7 @@ public class Bitfield implements Cloneable {
         return bb;
     }
     
+    @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder(length());
         for (int i = length() - 1; i >= 0; i--) sb.append((this.get(i)) ? '1' : '0');
