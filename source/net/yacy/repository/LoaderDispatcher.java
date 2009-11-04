@@ -27,6 +27,7 @@
 package net.yacy.repository;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -44,6 +45,7 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.FTPLoader;
@@ -93,8 +95,7 @@ public final class LoaderDispatcher {
     public Response load(
             final DigestURI url,
             final boolean forText,
-            final boolean global
-                    ) throws IOException {
+            final boolean global) throws IOException {
         return load(request(url, forText, global), forText);
     }
     
@@ -102,9 +103,26 @@ public final class LoaderDispatcher {
             final DigestURI url,
             final boolean forText,
             final boolean global,
-            int cacheStratgy
-    ) throws IOException {
+            int cacheStratgy) throws IOException {
         return load(request(url, forText, global), forText, cacheStratgy);
+    }
+    
+    public void load(final DigestURI url, int cacheStratgy, File targetFile) throws IOException {
+
+        byte[] b = load(url, cacheStratgy);
+        if (b == null) throw new IOException("load == null");
+        File tmp = new File(targetFile.getAbsolutePath() + ".tmp");
+        
+        // transaction-safe writing
+        File parent = targetFile.getParentFile();
+        if (!parent.exists()) parent.mkdirs();
+        FileUtils.copy(b, tmp);
+        tmp.renameTo(targetFile);
+    }
+    
+    public byte[] load(final DigestURI url, int cacheStratgy) throws IOException {
+        Response response = load(request(url, false, true), false, cacheStratgy);
+        return response.getContent();
     }
     
     /**

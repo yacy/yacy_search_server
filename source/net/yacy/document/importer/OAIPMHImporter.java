@@ -36,12 +36,10 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.document.parser.csvParser;
 
 import de.anomic.crawler.CrawlProfile;
-import de.anomic.crawler.retrieval.Response;
 import de.anomic.search.Switchboard;
 
 
@@ -58,7 +56,7 @@ import de.anomic.search.Switchboard;
 
 public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPMHImporter> {
 
-    private static int importerCounter = 0;
+    private static int importerCounter = Integer.MAX_VALUE;
     
     public static TreeSet<OAIPMHImporter> startedJobs = new TreeSet<OAIPMHImporter>();
     public static TreeSet<OAIPMHImporter> runningJobs = new TreeSet<OAIPMHImporter>();
@@ -73,7 +71,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     private int serialNumber;
     
     public OAIPMHImporter(LoaderDispatcher loader, DigestURI source) {
-        this.serialNumber = importerCounter++;
+        this.serialNumber = importerCounter--;
         this.loader = loader;
         this.recordsCount = 0;
         this.chunkCount = 0;
@@ -175,7 +173,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         TreeSet<String> list = new TreeSet<String>();
 
         // read roar
-        File roar = new File(Switchboard.getSwitchboard().getRootPath(), "DATA/SETTINGS/roar.csv");
+        File roar = new File(Switchboard.getSwitchboard().dictionariesPath, "harvesting/roar.csv");
         DigestURI roarSource;
         try {
             roarSource = new DigestURI("http://roar.eprints.org/index.php?action=csv", null);
@@ -185,9 +183,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         }
         if (!roar.exists()) try {
             // load the file from the net
-            Response response = loader.load(roarSource, false, true, CrawlProfile.CACHE_STRATEGY_NOCACHE);
-            byte[] b = response.getContent();
-            FileUtils.copy(b, roar);
+            loader.load(roarSource, CrawlProfile.CACHE_STRATEGY_NOCACHE, roar);
         } catch (IOException e) {
             e.printStackTrace();
         }
