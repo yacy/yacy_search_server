@@ -99,6 +99,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     static int sessionCounter = 0;
     
     // static variables
+    private static final long keepAliveTimeout = 60000; // time that a connection is kept alive if requested with a keepAlive statement
     public static final Boolean TERMINATE_CONNECTION = Boolean.FALSE;
     public static final Boolean RESUME_CONNECTION = Boolean.TRUE;
     
@@ -677,7 +678,13 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                 String reqCmd;
                 String reqProtocol = "HTTP";
                 final Object[] stringParameter = new String[1];
-                while ((this.in != null) && ((requestBytes = readLine()) != null)) {
+                long listenStart = System.currentTimeMillis();
+                long situationDependentKeepAliveTimeout = keepAliveTimeout;
+                while (this.in != null &&
+                       this.controlSocket != null &&
+                       this.controlSocket.isConnected() &&
+                       (this.commandCounter == 0 || System.currentTimeMillis() - listenStart < situationDependentKeepAliveTimeout) &&
+                       (requestBytes = readLine()) != null) {
                     this.setName("Session_" + this.userAddress.getHostAddress() + 
                             ":" + this.controlSocket.getPort() + 
                             "#" + this.commandCounter);
@@ -765,10 +772,12 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                         }
                         if (terminate) break;
                         
+                        
                     } catch (final InvocationTargetException e) {
                         log.logSevere("command execution, target exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
-                        // we extract a target exception and let the thread survive
+                        // we extract a target exception
                         writeLine(this.commandObj.error(e.getTargetException()));
+                        break;
                     } catch (final NoSuchMethodException e) {
                         log.logSevere("command execution, method exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
                         if (!this.userAddress.isSiteLocalAddress()) {
@@ -779,17 +788,23 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                         break;
                     } catch (final IllegalAccessException e) {
                         log.logSevere("command execution, illegal access exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
-                        // wrong parameters: this an only be an internal problem
+                        // wrong parameters: this can only be an internal problem
                         writeLine(this.commandObj.error(e));
+                        break;
                     } catch (final java.lang.ClassCastException e) {
                         log.logSevere("command execution, cast exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
                         // ??
                         writeLine(this.commandObj.error(e));
+                        break;
                     } catch (final Exception e) {
                         log.logSevere("command execution, generic exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
                         // whatever happens: the thread has to survive!
                         writeLine("UNKNOWN REASON:" + this.commandObj.error(e));
+                        break;
                     }
+                    // check if we should still keep this alive:
+                    // the more connections are alive, the shorter the keep alive timeout
+                    situationDependentKeepAliveTimeout = keepAliveTimeout / Math.max(1, sessionThreadGroup.activeCount() - 20);
                 } // end of while
             } catch (final IOException e) {
                 log.logSevere("command execution, IO exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
