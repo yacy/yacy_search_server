@@ -136,7 +136,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     private long lastAutoTermination;
     
     public final void terminateOldSessions(long minage) {
-        if (System.currentTimeMillis() - lastAutoTermination < 30000) return;
+        if (System.currentTimeMillis() - lastAutoTermination < 3000) return;
         this.lastAutoTermination = System.currentTimeMillis();
         //if (serverCore.sessionThreadGroup.activeCount() < maxBusySessions - 10) return; // don't panic
         final Thread[] threadList = new Thread[this.getJobCount()];
@@ -326,11 +326,13 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             
             announceThreadBlockRelease();
             
-            int pp;
+            int pp, trycount = 0;
             while ((pp = sessionThreadGroup.activeCount()) >= this.maxBusySessions) {
                 terminateOldSessions(3000);
                 this.log.logInfo("termination of old sessions: before = " + pp + ", after = " + sessionThreadGroup.activeCount());
                 if (sessionThreadGroup.activeCount() < this.maxBusySessions) break;
+                if (trycount++ > 5) break;
+                Thread.sleep(1000); // lets try again after a short break
             }
             
             if (sessionThreadGroup.activeCount() >= this.maxBusySessions) {
