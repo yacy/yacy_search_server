@@ -103,9 +103,6 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     public static final Boolean TERMINATE_CONNECTION = Boolean.FALSE;
     public static final Boolean RESUME_CONNECTION = Boolean.TRUE;
     
-    // Dummy value Object to use ConcurrentHashMap as HashSet
-    private static final Object PRESENT = new Object();
-    
     /**
      * for brute-force prevention
      */
@@ -136,7 +133,6 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     HashMap<String, String> denyHost;
     int commandMaxLength;
     private int maxBusySessions;
-    final ConcurrentHashMap<Session, Object> busySessions;
     private long lastAutoTermination;
     
     public final void terminateOldSessions(long minage) {
@@ -208,7 +204,6 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
 
         // init session parameter
         maxBusySessions = Math.max(1, Integer.valueOf(switchboard.getConfig("httpdMaxBusySessions","100")).intValue());
-        busySessions = new ConcurrentHashMap<Session, Object>();
         
         this.lastAutoTermination = System.currentTimeMillis();
         
@@ -321,8 +316,8 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         try {
             // prepare for new connection
             // idleThreadCheck();
-            this.switchboard.handleBusyState(this.busySessions.size());
-            if (this.log.isFinest()) this.log.logFinest("* waiting for connections, " + this.busySessions.size() + " sessions running");
+            this.switchboard.handleBusyState(sessionThreadGroup.activeCount());
+            if (this.log.isFinest()) this.log.logFinest("* waiting for connections, " + sessionThreadGroup.activeCount() + " sessions running");
             
             announceThreadBlockApply();
             
@@ -331,15 +326,16 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             
             announceThreadBlockRelease();
             
-            int pp = this.busySessions.size();
-            if (pp >= this.maxBusySessions) {
-                terminateOldSessions(30000);
-                this.log.logInfo("termination of old sessions: before = " + pp + ", after = " + this.busySessions.size());
+            int pp;
+            while ((pp = sessionThreadGroup.activeCount()) >= this.maxBusySessions) {
+                terminateOldSessions(3000);
+                this.log.logInfo("termination of old sessions: before = " + pp + ", after = " + sessionThreadGroup.activeCount());
+                if (sessionThreadGroup.activeCount() < this.maxBusySessions) break;
             }
             
-            if (this.busySessions.size() >= this.maxBusySessions) {
+            if (sessionThreadGroup.activeCount() >= this.maxBusySessions) {
                 // immediately close connection if too much sessions are still running
-                this.log.logWarning("* connections (" + this.busySessions.size() + ") exceeding limit (" + this.maxBusySessions + ")" + ", closing new incoming connection from "+ controlSocket.getRemoteSocketAddress());
+                this.log.logWarning("* connections (" + sessionThreadGroup.activeCount() + ") exceeding limit (" + this.maxBusySessions + ")" + ", closing new incoming connection from "+ controlSocket.getRemoteSocketAddress());
                 
                 controlSocket.close();
                 return false;
@@ -395,7 +391,8 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                 
                 // create session
                 final Session connection = new Session(sessionThreadGroup, controlSocket, this.timeout);
-                this.busySessions.put(connection, PRESENT);
+                //terminateOldSessions(60000);
+                connection.start();
             } else {
                 this.log.logWarning("ACCESS FROM " + cIP + " DENIED");
             }
@@ -417,7 +414,10 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         Thread.interrupted();
         
         // shut down all busySessions
-        for (final Session session: this.busySessions.keySet()) {
+        Thread[] busySessions = new Thread[sessionThreadGroup.activeCount()];
+        sessionThreadGroup.enumerate(busySessions);
+        for (final Thread session: busySessions) {
+            if (session == null) continue;
             try {
                 session.interrupt();
             } catch (final SecurityException e ) {
@@ -437,17 +437,17 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
 
         // close all sessions
         this.log.logInfo("Closing server sessions ...");
-        for (final Session s: this.busySessions.keySet()) {
+        for (final Thread s: busySessions) {
+            if (s == null) continue;
             s.interrupt();
-            s.close();
+            //s.close();
         }
-        this.busySessions.clear();
         
         this.log.logConfig("* terminated");
     }
     
     public int getJobCount() {
-        return this.busySessions.size();
+        return sessionThreadGroup.activeCount();
     }
     
     public int getMaxSessionCount() {
@@ -461,7 +461,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     // idle sensor: the thread is idle if there are no sessions running
     public boolean idle() {
         // idleThreadCheck();
-        return (this.busySessions.size() == 0);
+        return (sessionThreadGroup.activeCount() == 0);
     }
 
     public final class Session extends Thread {
@@ -492,16 +492,6 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             this.controlSocket = controlSocket;
             this.hashIndex = sessionCounter;
             sessionCounter++;
-
-            // close old sessions
-            terminateOldSessions(60000);
-            
-            if (!this.runningsession)  {
-               // this.setDaemon(true);
-               this.start();
-            }  else { 
-               this.notifyAll();
-            }          
         }
 
         public int hashCode() {
@@ -560,7 +550,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     
     	public void log(final boolean outgoing, final String request) {
     	    if (log.isFine()) log.logFine(this.userAddress.getHostAddress() + "/" + this.identity + " " +
-    		     "[" + ((busySessions == null)? -1 : busySessions.size()) + ", " + this.commandCounter +
+    		     "[" + sessionThreadGroup.activeCount() + ", " + this.commandCounter +
     		     ((outgoing) ? "] > " : "] < ") +
     		     request);
     	}
@@ -652,10 +642,6 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                 } catch (final IOException e) {
                     e.printStackTrace();
                 } finally {
-                    if (busySessions != null) {
-                        busySessions.remove(this);
-                        if (log.isFinest()) log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + " " + this.request);
-                    }
                     this.controlSocket = null;
                 }
             }
@@ -663,10 +649,6 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         }
         
         protected void finalize() {
-            if (busySessions != null && busySessions.contains(this)) {
-                busySessions.remove(this);
-                if(log.isFinest()) log.logFinest("* removed session "+ this.controlSocket.getRemoteSocketAddress() + this.request);
-            }
             this.close();
         }
         
@@ -678,12 +660,11 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                 String reqCmd;
                 String reqProtocol = "HTTP";
                 final Object[] stringParameter = new String[1];
-                long listenStart = System.currentTimeMillis();
                 long situationDependentKeepAliveTimeout = keepAliveTimeout;
                 while (this.in != null &&
                        this.controlSocket != null &&
                        this.controlSocket.isConnected() &&
-                       (this.commandCounter == 0 || System.currentTimeMillis() - listenStart < situationDependentKeepAliveTimeout) &&
+                       (this.commandCounter == 0 || System.currentTimeMillis() - this.start < situationDependentKeepAliveTimeout) &&
                        (requestBytes = readLine()) != null) {
                     this.setName("Session_" + this.userAddress.getHostAddress() + 
                             ":" + this.controlSocket.getPort() + 
