@@ -1049,14 +1049,14 @@ public final class HTTPDFileHandler {
                 } else {
                     if ((errorMsg != null) && 
                         (
-                           errorMsg.contains("Broken pipe") || 
+                           errorMsg.contains("Broken pipe") ||
                            errorMsg.contains("Connection reset") ||
+                           errorMsg.contains("Read timed out") ||
+                           errorMsg.contains("Connection timed out") ||
                            errorMsg.contains("Software caused connection abort")                           
                        )) {
                         // client closed the connection, so we just end silently
                         errorMessage.append("Client unexpectedly closed connection while processing query.");
-                    } else if ((errorMsg != null) && (errorMsg.startsWith("Connection timed out"))) {
-                        errorMessage.append("Connection timed out.");
                     } else {
                         errorMessage.append("Unexpected error while processing query.");
                         httpStatusCode = 500;

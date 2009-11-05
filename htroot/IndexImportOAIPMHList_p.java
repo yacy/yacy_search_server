@@ -67,7 +67,7 @@ public class IndexImportOAIPMHList_p {
             int cnt = 0;
             for (OAIPMHImporter job: jobs) {
                 prop.put("import_table_" + cnt + "_dark", (dark) ? "1" : "0");
-                prop.put("import_table_" + cnt + "_thread", (job.isAlive()) ? "<img src=\"/env/grafics/crawl.gif\" alt=\"running\" />" : "finished");
+                prop.put("import_table_" + cnt + "_thread", (job.isAlive()) ? "<img src=\"/env/grafics/loading.gif\" alt=\"running\" />" : "finished");
                 prop.put("import_table_" + cnt + "_source", job.source());
                 prop.put("import_table_" + cnt + "_chunkCount", job.chunkCount());
                 prop.put("import_table_" + cnt + "_recordsCount", job.count());

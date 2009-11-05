@@ -101,6 +101,7 @@ public class CrawlProfile {
         try {
             return new profileIterator(up);
         } catch (final IOException e) {
+            e.printStackTrace();
             return new HashSet<entry>().iterator();
         }
     }
@@ -117,6 +118,7 @@ public class CrawlProfile {
             try {
                 return handleIterator.hasNext();
             } catch (final kelondroException e) {
+                e.printStackTrace();
                 clear();
                 return false;
             }
@@ -126,6 +128,7 @@ public class CrawlProfile {
                 lastkey = new String(handleIterator.next());
                 return getEntry(lastkey);
             } catch (final kelondroException e) {
+                e.printStackTrace();
                 clear();
                 return null;
             }
@@ -134,6 +137,7 @@ public class CrawlProfile {
             if (lastkey != null) try {
                 removeEntry(lastkey);
             } catch (final kelondroException e) {
+                e.printStackTrace();
                 clear();
             }
         }
@@ -141,8 +145,10 @@ public class CrawlProfile {
    
     public void removeEntry(final String handle) {
         try {
-        profileTable.remove(handle);
-        } catch (final IOException e) {}
+            profileTable.remove(handle);
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
     }
     
     public entry newEntry(final Map<String, String> mem) {
@@ -218,6 +224,7 @@ public class CrawlProfile {
         try {
             return profileTable.has(handle);
         } catch (final IOException e) {
+            e.printStackTrace();
             return false;
         }
     }
@@ -227,6 +234,7 @@ public class CrawlProfile {
         try {
             m = profileTable.get(handle);
         } catch (final IOException e) {
+            e.printStackTrace();
             return null;
         }
         if (m == null) return null;
@@ -384,6 +392,7 @@ public class CrawlProfile {
             try {
                 return Integer.parseInt(r);
             } catch (final NumberFormatException e) {
+                e.printStackTrace();
                 return 0;
             }
         }
@@ -393,6 +402,7 @@ public class CrawlProfile {
             try {
                 return Integer.parseInt(r);
             } catch (final NumberFormatException e) {
+                e.printStackTrace();
                 return CACHE_STRATEGY_IFFRESH;
             }
         }
@@ -405,6 +415,7 @@ public class CrawlProfile {
                 final long l = Long.parseLong(r);
                 return (l < 0) ? 0L : l;
             } catch (final NumberFormatException e) {
+                e.printStackTrace();
                 return 0L;
             }
         }
@@ -419,6 +430,7 @@ public class CrawlProfile {
                 if (i < 0) return Integer.MAX_VALUE;
                 return i;
             } catch (final NumberFormatException e) {
+                e.printStackTrace();
                 return Integer.MAX_VALUE;
             }
         }
@@ -432,6 +444,7 @@ public class CrawlProfile {
                 if (i < 0) return Integer.MAX_VALUE;
                 return i;
             } catch (final NumberFormatException e) {
+                e.printStackTrace();
                 return Integer.MAX_VALUE;
             }
         }
@@ -529,7 +542,7 @@ public class CrawlProfile {
                 ey = domnamesi.next();
                 i++;
             }
-            if(domnamesi.hasNext()){
+            if (domnamesi.hasNext()) {
                 ey = domnamesi.next();
                 dp = ey.getValue();
                 domname = ey.getKey() + ((attr) ? ("/r=" + dp.referrer + ", d=" + dp.depth + ", c=" + dp.count) : " ");
