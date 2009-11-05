@@ -29,6 +29,7 @@ import net.yacy.document.content.RSSMessage;
 import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.document.parser.xml.RSSReader;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 
 import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverObjects;
@@ -79,7 +80,7 @@ public class FeedReader_p {
                 prop.put("page_items", feed.size());
                 prop.put("page", "1");
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
     

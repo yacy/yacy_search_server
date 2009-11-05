@@ -29,6 +29,7 @@
 
 import java.io.IOException;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.http.server.HeaderFramework;
@@ -90,7 +91,7 @@ public final class query {
             prop.put("response", sb.indexSegments.termIndex(Segments.Process.PUBLIC).get(env.getBytes(), null).size());
             return prop;
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
 
         if (obj.equals("rwicount")) {

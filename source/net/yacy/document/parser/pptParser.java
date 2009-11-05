@@ -37,6 +37,7 @@ import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 
 import org.apache.poi.hslf.extractor.PowerPointExtractor;
 
@@ -112,7 +113,7 @@ public class pptParser extends AbstractParser implements Idiom {
             /*
              * an unexpected error occurred, log it and throw a ParserException
              */
-            e.printStackTrace();
+            Log.logException(e);
             final String errorMsg = "Unable to parse the ppt document '" + location + "':" + e.getMessage();
             this.theLogger.logSevere(errorMsg);            
             throw new ParserException(errorMsg, location);

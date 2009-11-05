@@ -37,6 +37,7 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.table.Table;
@@ -159,7 +160,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             if (entry == null) return null;
             return new Entry(entry);
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
     }

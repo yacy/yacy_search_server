@@ -165,6 +165,9 @@ public final class Log {
     public final static void logWarning(final String appName, final String message) {
         enQueueLog(appName, Level.WARNING, message);
     }
+    public final static void logException(final Throwable thrown) {
+        enQueueLog("", Level.WARNING, thrown.getMessage(), thrown);
+    }
     public final static void logWarning(final String appName, final String message, final Throwable thrown) {
         enQueueLog(appName, Level.WARNING, message, thrown);
     }
@@ -331,7 +334,7 @@ public final class Log {
                     }
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             
         }

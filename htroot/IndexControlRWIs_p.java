@@ -42,6 +42,7 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -143,7 +144,7 @@ public class IndexControlRWIs_p {
                 try {
                     sb.robots.clear();
                 } catch (final IOException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                 }
                 post.remove("deletecomplete");
             }
@@ -174,7 +175,7 @@ public class IndexControlRWIs_p {
                 post.remove("keyhashdeleteall");
                 post.put("urllist", "generated");
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
     
             // delete selected URLs
@@ -195,7 +196,7 @@ public class IndexControlRWIs_p {
                 post.remove("keyhashdelete");
                 post.put("urllist", "generated");
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             
             if (post.containsKey("urllist")) {
@@ -267,7 +268,7 @@ public class IndexControlRWIs_p {
                 prop.put("result", (error == null) ? ("Successfully transferred " + knownURLs.size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds, " + unknownURLEntries + " URL not found") : "error: " + error);
                 index = null;
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
     
             // generate list
@@ -292,7 +293,7 @@ public class IndexControlRWIs_p {
                     prop.put("keyhashsimilar_rows", rows + 1);
                     prop.put("result", "");
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             
             if (post.containsKey("blacklist")) {
@@ -356,7 +357,7 @@ public class IndexControlRWIs_p {
                 try {
                     segment.termIndex().remove(keyhash, urlHashes);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                 }
             }
         

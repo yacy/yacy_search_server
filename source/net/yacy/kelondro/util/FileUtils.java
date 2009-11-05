@@ -649,7 +649,7 @@ public final class FileUtils {
         try {
             writeAndGZip("ein zwei drei, Zauberei".getBytes(), new File("zauberei.txt.gz"));
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 
@@ -771,7 +771,7 @@ public final class FileUtils {
             try {
                 p = path.getCanonicalPath();
             } catch (IOException e1) {
-                e1.printStackTrace();
+                Log.logException(e1);
             }
             if (System.getProperties().getProperty("os.name","").toLowerCase().startsWith("windows")) {
                 // deleting files on windows sometimes does not work with java
@@ -785,7 +785,7 @@ public final class FileUtils {
                         Log.logInfo("FileUtils", "deletedelete: " + new String(response));
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                 }                
             }
             if (path.exists()) Log.logSevere("FileUtils", "cannot delete file " + p);

@@ -46,6 +46,7 @@ import java.util.Properties;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
+import net.yacy.kelondro.logging.Log;
 
 
 public final class TransformerWriter extends Writer {
@@ -117,7 +118,7 @@ public final class TransformerWriter extends Writer {
             try {
 				bb.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+			    Log.logException(e);
 			}
             return result;
     }
@@ -137,7 +138,7 @@ public final class TransformerWriter extends Writer {
             try {
 				bb.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+			    Log.logException(e);
 			}
             return result;
     }
@@ -155,7 +156,7 @@ public final class TransformerWriter extends Writer {
             try {
 				bb.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+			    Log.logException(e);
 			}
             return result;
     }
@@ -168,7 +169,7 @@ public final class TransformerWriter extends Writer {
             try {
 				cb.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+			    Log.logException(e);
 			}
             return result;
     }
@@ -192,7 +193,7 @@ public final class TransformerWriter extends Writer {
             try {
 				bb.close();
 			} catch (IOException ex) {
-				ex.printStackTrace();
+			    Log.logException(ex);
 			}
             return result;
     }
@@ -218,7 +219,7 @@ public final class TransformerWriter extends Writer {
 						charBuffer.close();
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+					    Log.logException(e);
 					}
                 }
                 if ((transformer != null) && (transformer.isTag0(tag))) {
@@ -230,7 +231,7 @@ public final class TransformerWriter extends Writer {
                 		try {
 							scb.close();
 						} catch (IOException e) {
-							e.printStackTrace();
+						    Log.logException(e);
 						}
                 	}
                 } else if (((scraper != null) && (scraper.isTag1(tag))) ||
@@ -242,7 +243,7 @@ public final class TransformerWriter extends Writer {
                     try {
 						scb.close();
 					} catch (IOException e) {
-						e.printStackTrace();
+					    Log.logException(e);
 					}
                     filterCont = new CharBuffer();
                     return new char[0];
@@ -599,9 +600,9 @@ public final class TransformerWriter extends Writer {
             is.close();
             scraper.print();
         } catch (final MalformedURLException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 

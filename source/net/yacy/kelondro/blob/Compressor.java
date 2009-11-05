@@ -148,7 +148,7 @@ public class Compressor implements BLOB {
                 
                 return baos.toByteArray();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 return null;
             }
         } else if (ByteArray.startsWith(b, plainMagic)) {
@@ -193,7 +193,7 @@ public class Compressor implements BLOB {
         try {
             return this.backend.length() + this.bufferlength;
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return 0;
         }
     }

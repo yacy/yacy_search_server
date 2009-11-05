@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.document.parser.csvParser;
 
@@ -86,7 +87,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
             this.source = new DigestURI(url + "verb=ListRecords&metadataPrefix=oai_dc", null);
         } catch (MalformedURLException e) {
             // this should never happen
-            e.printStackTrace();
+            Log.logException(e);
         }
         startedJobs.add(this);
     }
@@ -178,14 +179,14 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         try {
             roarSource = new DigestURI("http://roar.eprints.org/index.php?action=csv", null);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Log.logException(e);
             roarSource = null;
         }
         if (!roar.exists()) try {
             // load the file from the net
             loader.load(roarSource, CrawlProfile.CACHE_STRATEGY_NOCACHE, roar);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         if (roar.exists()) {
             csvParser parser = new csvParser();
@@ -197,7 +198,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
                     }
                 }
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
         

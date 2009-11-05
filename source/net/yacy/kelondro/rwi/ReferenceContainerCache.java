@@ -88,7 +88,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         try {
             dump = new HeapWriter(tmpFile, heapFile, payloadrow.primaryKeyLength, Base64Order.enhancedCoder, writeBuffer);
         } catch (IOException e1) {
-            e1.printStackTrace();
+            Log.logException(e1);
             return;
         }
         final long startTime = System.currentTimeMillis();
@@ -113,7 +113,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                 try {
                     dump.add(wordHash, container.exportCollection());
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                 }
                 urlcount += container.size();
             }

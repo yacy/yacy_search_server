@@ -745,7 +745,7 @@ public final class Switchboard extends serverSwitch {
 			publicKey = cryptoLib.getPublicKeyFromBytes(publicKeyBytes);
 		    }
 		} catch (InvalidKeySpecException e) {
-		    e.printStackTrace();
+		    Log.logException(e);
 		}
 		yacyUpdateLocation updateLocation = new yacyUpdateLocation(locationURL, publicKey);
 		yacyRelease.latestReleaseLocations.add(updateLocation);
@@ -753,7 +753,7 @@ public final class Switchboard extends serverSwitch {
 	    }
 	} catch (NoSuchAlgorithmException e1) {
 	    // TODO Auto-generated catch block
-	    e1.printStackTrace();
+	    Log.logException(e1);
 	}
         
         // initiate url license object
@@ -1195,7 +1195,7 @@ public final class Switchboard extends serverSwitch {
             this.indexingDocumentProcessor.enQueue(new indexingQueueEntry(Segments.Process.LOCALCRAWLING, response, null, null));
             return null;
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return "interrupted: " + e.getMessage();
         }
     }
@@ -1243,12 +1243,12 @@ public final class Switchboard extends serverSwitch {
                 try {
                     indexingCondensementProcessor.enQueue(queueEntry);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                     break;
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } finally {
             moved = surrogateFile.renameTo(outfile);
         }
@@ -1805,7 +1805,7 @@ public final class Switchboard extends serverSwitch {
         try {
         	return DateFormatter822.format(date);
         } catch (Exception e) {
-        	e.printStackTrace();
+            Log.logException(e);
         	return DateFormatter822.format(new Date());
         }
     }
@@ -2179,7 +2179,7 @@ class delayedShutdown extends Thread {
         } catch (final InterruptedException e) {
             sb.getLog().logInfo("interrupted delayed shutdown");
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         this.sb.terminate();
     }

@@ -36,6 +36,7 @@ import java.util.Properties;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.io.CharBuffer;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 
 public class ContentTransformer extends AbstractTransformer implements Transformer {
@@ -130,7 +131,7 @@ public class ContentTransformer extends AbstractTransformer implements Transform
             try {
 				bb.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+			    Log.logException(e);
 			}
             return result;
     }

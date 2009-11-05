@@ -38,6 +38,7 @@ import java.util.Map;
 
 import net.yacy.kelondro.index.ARC;
 import net.yacy.kelondro.index.ConcurrentARC;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.order.RotateIterator;
@@ -77,7 +78,7 @@ public class MapView {
                 if (this.get(s) == null) System.out.println("*** DEBUG kelondroMap " + blob.name() + " KEY=" + s + " cannot be found.");
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         */
     }
@@ -352,7 +353,7 @@ public class MapView {
             // clean up
             map.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     

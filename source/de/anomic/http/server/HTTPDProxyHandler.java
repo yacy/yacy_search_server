@@ -1350,7 +1350,7 @@ public final class HTTPDProxyHandler {
             } catch (final IOException e) {
                 // do nothing
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
         
@@ -1423,7 +1423,7 @@ public final class HTTPDProxyHandler {
                      (exceptionMsg.indexOf("server has closed connection") >= 0)
                   )) { 
                     errorMessage = exceptionMsg;
-                    e.printStackTrace();
+                    Log.logException(e);
                 } else {
                     errorMessage = "Unexpected Error. " + e.getClass().getName() + ": " + e.getMessage();
                     unknownError = true;

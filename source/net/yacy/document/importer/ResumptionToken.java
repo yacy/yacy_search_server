@@ -42,6 +42,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 
 public class ResumptionToken  extends TreeMap<String, String> {
@@ -152,7 +153,7 @@ public class ResumptionToken  extends TreeMap<String, String> {
         try {
             return DateFormatter.parseISO8601(d);
         } catch (ParseException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return new Date();
         }
     }
@@ -224,17 +225,17 @@ public class ResumptionToken  extends TreeMap<String, String> {
                 this.saxParser = factory.newSAXParser();
                 this.saxParser.parse(this.stream, this);
             } catch (SAXException e) {
-                e.printStackTrace();
+                Log.logException(e);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             } catch (ParserConfigurationException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 throw new IOException(e.getMessage());
             } finally {
                 try {
                     this.stream.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                 }
             }
         }

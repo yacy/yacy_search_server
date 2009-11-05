@@ -84,7 +84,7 @@ public final class Cache {
         try {
             blob = new Heap(dbfile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 1024);
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         responseHeaderDB = new MapView(blob, 500, '_');
         try {
@@ -92,7 +92,7 @@ public final class Cache {
             fileDBunbuffered.setMaxSize(maxCacheSize);
             fileDB = new Compressor(fileDBunbuffered, 2 * 1024 * 1024);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 
@@ -215,7 +215,7 @@ public final class Cache {
         try {
             return fileDB.get(url.hash().getBytes("UTF-8"));
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
     }
@@ -241,7 +241,7 @@ public final class Cache {
         try {
             return fileDB.length(url.hash().getBytes("UTF-8"));
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return -1;
         }
     }

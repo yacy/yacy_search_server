@@ -108,12 +108,12 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
             this.terminate(false);
         } catch (final InvocationTargetException e) {
             final String targetException = e.getTargetException().getMessage();
-            e.printStackTrace();
-            e.getTargetException().printStackTrace();
+            Log.logException(e);
+            Log.logException(e.getTargetException());
             Log.logSevere("BUSYTHREAD", "Runtime Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
         } catch (final OutOfMemoryError e) {
             Log.logSevere("BUSYTHREAD", "OutOfMemory Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage());
-            e.printStackTrace();
+            Log.logException(e);
             freemem();
         }
         instantThreadCounter--;
@@ -135,12 +135,12 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
             this.terminate(false);
         } catch (final InvocationTargetException e) {
             final String targetException = e.getTargetException().getMessage();
-            if (targetException.indexOf("heap space") > 0) e.getTargetException().printStackTrace();
+            if (targetException.indexOf("heap space") > 0) Log.logException(e.getTargetException());
             Log.logSevere("BUSYTHREAD", "Runtime Error in serverInstantThread.freemem, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
-            e.getTargetException().printStackTrace();
+            Log.logException(e.getTargetException());
         } catch (final OutOfMemoryError e) {
             Log.logSevere("BUSYTHREAD", "OutOfMemory Error in serverInstantThread.freemem, thread '" + this.getName() + "': " + e.getMessage());
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     

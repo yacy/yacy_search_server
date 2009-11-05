@@ -32,6 +32,8 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import net.yacy.kelondro.logging.Log;
+
 public class bmpParser {
 
     // this is a implementation of http://de.wikipedia.org/wiki/Windows_Bitmap
@@ -257,9 +259,9 @@ public class bmpParser {
             fis = new FileInputStream(in);
             fis.read(file);
         } catch (final FileNotFoundException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         
         final bmpParser parser = new bmpParser(file);
@@ -267,7 +269,7 @@ public class bmpParser {
         try {
             ImageIO.write(parser.getImage(), "PNG", out);
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     

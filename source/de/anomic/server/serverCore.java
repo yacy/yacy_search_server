@@ -42,7 +42,6 @@ import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.net.SocketTimeoutException;
 import java.nio.channels.ClosedByInterruptException;
 import java.security.KeyStore;
 import java.util.ArrayList;
@@ -142,31 +141,24 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         if (System.currentTimeMillis() - lastAutoTermination < 3000) return;
         this.lastAutoTermination = System.currentTimeMillis();
         //if (serverCore.sessionThreadGroup.activeCount() < maxBusySessions - 10) return; // don't panic
-        final Thread[] threadList = new Thread[this.getJobCount()];
-        serverCore.sessionThreadGroup.enumerate(threadList);
         
-        for (Thread t: threadList) {
-            if (t == null) continue;
-            if (!(t instanceof Session)) continue;
-            if (!t.isAlive()) continue;
-            Session s = (Session) t;
+        for (Session s: getJobList()) {
+            if (!s.isAlive()) continue;
             if (s.getTime() < minage) continue;
             
             // stop thread
-            this.log.logInfo("check for " + t.getName() + ": " + ((Session) t).getTime() + " ms alive, stopping thread");
+            this.log.logInfo("check for " + s.getName() + ": " + s.getTime() + " ms alive, stopping thread");
             
             // trying to stop session
             s.setStopped(true);
             try { Thread.sleep(100); } catch (final InterruptedException ex) {}
             
             // trying to interrupt session
-            if (t.isAlive()) {
-                t.interrupt();
-                try {Thread.sleep(10);} catch (final InterruptedException ex) {}
-            } 
+            s.interrupt();
+            try {Thread.sleep(10);} catch (final InterruptedException ex) {}
             
             // trying to close socket
-            if (t.isAlive()) {
+            if (s.isAlive()) {
                 s.close();
             }
         }
@@ -419,16 +411,14 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         Thread.interrupted();
         
         // shut down all busySessions
-        Thread[] busySessions = new Thread[sessionThreadGroup.activeCount()];
-        sessionThreadGroup.enumerate(busySessions);
-        for (final Thread session: busySessions) {
+        for (final Session session: getJobList()) {
             if (session == null) continue;
             try {
                 session.interrupt();
             } catch (final SecurityException e ) {
-                e.printStackTrace();
+                Log.logException(e);
             } catch (final ConcurrentModificationException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
         
@@ -442,10 +432,9 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
 
         // close all sessions
         this.log.logInfo("Closing server sessions ...");
-        for (final Thread s: busySessions) {
-            if (s == null) continue;
-            s.interrupt();
-            //s.close();
+        for (final Session session: getJobList()) {
+            session.interrupt();
+            //session.close();
         }
         
         this.log.logConfig("* terminated");
@@ -457,6 +446,10 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         ArrayList<Session> l = new ArrayList<Session>();
         for (Thread t: threadList) {
             if (t == null) continue;
+            if (!(t instanceof Session)) {
+                log.logSevere("serverCore.getJobList - thread is not Session: " + t.getClass().getName());
+                continue;
+            }
             l.add((Session) t);
         }
         return l;
@@ -635,7 +628,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             } catch (final IOException e) {
                 System.err.println("ERROR: (internal) " + e);        
             } catch (final Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
             } finally {
                 try {
                     if ((this.controlSocket != null) && (! this.controlSocket.isClosed())) {
@@ -656,7 +649,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                         this.controlSocket.close();
                     }
                 } catch (final IOException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                 } finally {
                     this.controlSocket = null;
                 }
@@ -877,7 +870,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         	try {
 				readLineBuffer.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+			    Log.logException(e);
 			}
         }
     }
@@ -929,9 +922,9 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             try {
                 Thread.sleep(delay);
             } catch (final InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             } catch (final Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             
             // signaling restart

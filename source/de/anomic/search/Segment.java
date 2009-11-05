@@ -168,7 +168,7 @@ public class Segment {
             termIndex.clear();
             urlMetadata.clear();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         if (Switchboard.getSwitchboard() != null &&
             Switchboard.getSwitchboard().peers != null &&
@@ -222,7 +222,7 @@ public class Segment {
             try {
                 this.termIndex.add(Word.word2hash(word), ientry);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             wordCount++;
         }
@@ -396,7 +396,7 @@ public class Segment {
                 try {
                     words = new Condenser(document, true, true).words().keySet();
                 } catch (final UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                 }
                 
                 // delete all word references
@@ -410,7 +410,7 @@ public class Segment {
         } catch (final ParserException e) {
             return 0;
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return 0;
         } finally {
             if (resourceContent != null) try { resourceContent.close(); } catch (final Exception e) {/* ignore this */}
@@ -473,7 +473,7 @@ public class Segment {
                         lastDeletionCounter = urlHashs.size();
                         urlHashs.clear();
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Log.logException(e);
                     }
                     
                     if (!containerIterator.hasNext()) {
@@ -487,9 +487,9 @@ public class Segment {
                     }
                 }
             } catch (final IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             } catch (final Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread stopped");
         }

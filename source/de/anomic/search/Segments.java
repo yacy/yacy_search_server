@@ -145,7 +145,7 @@ public class Segments implements Iterable<Segment> {
                         this.useTailCache,
                         this.exceed134217727);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 return null;
             }
             this.segments.put(segmentName, segment);

@@ -33,6 +33,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Iterator;
 
+import net.yacy.kelondro.logging.Log;
+
 public class ChunkIterator implements Iterator<byte[]> {
 
     private final int chunksize;
@@ -85,7 +87,7 @@ public class ChunkIterator implements Iterator<byte[]> {
             // no real exception, this is the normal termination
             return null;
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
     }

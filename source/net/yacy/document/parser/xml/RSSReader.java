@@ -115,7 +115,7 @@ public class RSSReader extends DefaultHandler {
         try {
             reader = new RSSReader(bais);
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
             Log.logWarning("rssReader", "parse exception: " + e.getMessage(), e);
             return null;
         }

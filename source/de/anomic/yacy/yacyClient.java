@@ -60,6 +60,7 @@ import net.yacy.document.parser.xml.RSSReader;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.Digest;
@@ -399,7 +400,7 @@ public final class yacyClient {
                 yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (1), reader == null");
                 target.put(yacySeed.RCOUNT, "0");
                 seedDB.update(target.hash, target); // overwrite number of remote-available number to avoid that this peer is called again (until update is done by peer ping)
-                //e.printStackTrace();
+                //Log.logException(e);
                 return null;
             }
             final RSSFeed feed = reader.getFeed();
@@ -409,7 +410,7 @@ public final class yacyClient {
                 System.out.println("***DEBUG*** rss input = " + new String(result));
                 target.put(yacySeed.RCOUNT, "0");
                 seedDB.update(target.hash, target); // overwrite number of remote-available number to avoid that this peer is called again (until update is done by peer ping)
-                //e.printStackTrace();
+                //Log.logException(e);
                 return null;
             }
             return feed;
@@ -632,7 +633,7 @@ public final class yacyClient {
 						try {
 							ci = new ByteBuffer(entry.getValue().getBytes("UTF-8"));
 						} catch (UnsupportedEncodingException e) {
-							e.printStackTrace();
+						    Log.logException(e);
 							return null;
 						}
 						//System.out.println("DEBUG-ABSTRACTFETCH: for word hash " + wordhash + " received " + ci.toString());
@@ -647,7 +648,7 @@ public final class yacyClient {
         for (int m = 0; m < words; m++) try {
                 indexSegment.termIndex().add(container[m]);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         
         // generate statistics
@@ -1102,7 +1103,7 @@ public final class yacyClient {
             final HashMap<String, String> result = FileUtils.table(content);
             System.out.println("Result=" + result.toString());
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         System.exit(0);
         } else if(args.length == 1) {
@@ -1112,7 +1113,7 @@ public final class yacyClient {
             try {
                 url = new URL(args[0]);
             } catch (final MalformedURLException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             if(url == null) {
                 System.exit(1);
@@ -1131,7 +1132,7 @@ public final class yacyClient {
                 final byte[] response = wput(url.toString(), vhost, post, timeout, gzipBody);
                 System.out.println(new String(response));
             } catch (final IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
     }

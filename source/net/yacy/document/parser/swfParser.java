@@ -38,6 +38,7 @@ import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 
 import pt.tumba.parser.swf.SWF2HTML;
 
@@ -88,7 +89,7 @@ public class swfParser extends AbstractParser implements Idiom {
                 return null;
             } catch (Exception e) {
             	// we have seen a lot of OOM errors in the parser...
-            	e.printStackTrace();
+                Log.logException(e);
             	return null;
             }
             String url = null;

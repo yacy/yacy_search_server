@@ -35,6 +35,7 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.AttrSeq;
@@ -230,7 +231,7 @@ public class RCIEvaluation {
                 
             }
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     

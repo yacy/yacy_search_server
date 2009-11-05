@@ -33,6 +33,7 @@ import java.util.Iterator;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.RotateIterator;
 import net.yacy.kelondro.util.DateFormatter;
@@ -272,7 +273,7 @@ public class IndexControlURLs_p {
                 segment.urlMetadata().deleteDomain(hp);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                Log.logException(e);
             }
             // trigger the loading of the table
             post.put("statistics", "");
@@ -299,7 +300,7 @@ public class IndexControlURLs_p {
                     cnt++;
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             prop.put("statisticslines_domains", cnt);
             prop.put("statisticslines", 1);

@@ -147,7 +147,7 @@ public final class crawlReceipt {
             prop.put("delay", "10");
             return prop;
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             prop.put("delay", "3600");
             return prop;
         }

@@ -126,7 +126,7 @@ public class yacySearch extends Thread {
                 yacyCore.log.logInfo("REMOTE SEARCH - no answer from remote peer " + targetPeer.hash + ":" + targetPeer.getName());
             }
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         } finally {
         	containerCache.oneFeederTerminated();
         }

@@ -250,7 +250,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // is always (but not only) called if an IO-dependent exception occurrs.
         log.logSevere("Unexpected Error. " + e.getClass().getName(),e);
         final String message = e.getMessage();
-        if (message.indexOf("heap space") > 0) e.printStackTrace();
+        if (message.indexOf("heap space") > 0) Log.logException(e);
         return "501 Exception occurred: " + message;
     }
     
@@ -907,7 +907,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         try {
             items = upload.parseRequest(request);
         } catch (FileUploadException e) {
-            //e.printStackTrace();
+            //Log.logException(e);
             throw new IOException("FileUploadException " + e.getMessage());
         }
 
@@ -1222,8 +1222,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             }
             respond.flush();
         } finally {
-            if (fis != null) try { fis.close(); } catch (final Exception e) { e.printStackTrace(); }
-            if (o != null)   try { o.close();   } catch (final Exception e) { e.printStackTrace(); }
+            if (fis != null) try { fis.close(); } catch (final Exception e) { Log.logException(e); }
+            if (o != null)   try { o.close();   } catch (final Exception e) { Log.logException(e); }
         }     
     }
 

@@ -155,14 +155,14 @@ public final class CrawlStacker {
                 this.fastQueue.enQueue(entry);
                 this.dnsHit++;
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         } else {
             try {
                 this.slowQueue.enQueue(entry);
                 this.dnsMiss++;
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
     }

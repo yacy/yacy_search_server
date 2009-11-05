@@ -813,7 +813,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
             }
             System.out.println("FINISHED test after " + ((System.currentTimeMillis() - start) / 1000) + " seconds.");
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
             System.out.println("TERMINATED");
         }
     }
@@ -849,7 +849,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
             t.put(entry);
             t.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         */
     }

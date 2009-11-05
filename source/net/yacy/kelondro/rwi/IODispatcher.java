@@ -74,7 +74,7 @@ public class IODispatcher extends Thread {
             try {
                 termination.acquire();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
     }
@@ -97,7 +97,7 @@ public class IODispatcher extends Thread {
                     Log.logWarning("IODispatcher", "dispatcher is not alive, just dumped file " + file.getName());
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
             }
         }
@@ -153,10 +153,10 @@ public class IODispatcher extends Thread {
                         dumpJob.dump();
                     } catch (InterruptedException e) {
                         Log.logSevere("IODispatcher", "main run job was interrupted (1)", e);
-                        e.printStackTrace();
+                        Log.logException(e);
                     } catch (Exception e) {
                         Log.logSevere("IODispatcher", "main run job had errors (1), dump to " + f + " failed.", e);
-                    	e.printStackTrace();
+                        Log.logException(e);
                     }
                     continue loop;
                 }
@@ -172,10 +172,10 @@ public class IODispatcher extends Thread {
                         mergeJob.merge();
                     } catch (InterruptedException e) {
                         Log.logSevere("IODispatcher", "main run job was interrupted (2)", e);
-                        e.printStackTrace();
+                        Log.logException(e);
                     } catch (Exception e) {
                         Log.logSevere("IODispatcher", "main run job had errors (2), dump to " + f + " failed. Input files are " + f1 + " and " + f2, e);
-                    	e.printStackTrace();
+                        Log.logException(e);
                     }
                     continue loop;
                 }
@@ -190,12 +190,12 @@ public class IODispatcher extends Thread {
                 assert false : "this process statt should not be reached"; // this should never happen
             } catch (Exception e) {
                 Log.logSevere("IODispatcher", "main run job failed (X)", e);
-                e.printStackTrace();
+                Log.logException(e);
             }
             Log.logInfo("IODispatcher", "loop terminated");
         } catch (Exception e) {
             Log.logSevere("IODispatcher", "main run job failed (4)", e);
-            e.printStackTrace();
+            Log.logException(e);
         } finally {
             Log.logInfo("IODispatcher", "terminating run job");
             controlQueue = null;
@@ -219,7 +219,7 @@ public class IODispatcher extends Thread {
                 if (cache.size() > 0) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
                 array.mountBLOBFile(file);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
     }

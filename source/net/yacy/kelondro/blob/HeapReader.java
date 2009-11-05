@@ -132,7 +132,7 @@ public class HeapReader {
         try {
             this.index = new HandleMap(this.keylength, this.ordering, 8, fif, 1000000);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return false;
         }
 
@@ -147,7 +147,7 @@ public class HeapReader {
         try {
             this.free = new Gap(fgf);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return false;
         }
         // same with gap file
@@ -211,9 +211,9 @@ public class HeapReader {
         try {
             this.index = indexready.result();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (ExecutionException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         Log.logInfo("HeapReader", "finished index generation for " + heapFile.toString() + ", " + index.size() + " entries, " + free.size() + " gaps.");
         
@@ -400,7 +400,7 @@ public class HeapReader {
 			try {
 				file.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+			    Log.logException(e);
 			}
         file = null;
         if (writeIDX && index != null && free != null && (index.size() > 3 || free.size() > 3)) {
@@ -423,7 +423,7 @@ public class HeapReader {
                 index.close();
                 index = null;
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         } else {
             // this is small.. just free resources, do not write index
@@ -505,7 +505,7 @@ public class HeapReader {
             try {
                 return new entries(blobFile, keylen);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 return null;
             }
         }

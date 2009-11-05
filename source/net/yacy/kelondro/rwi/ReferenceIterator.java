@@ -34,6 +34,7 @@ import java.util.Map;
 import net.yacy.kelondro.blob.HeapReader;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 
 /**
@@ -92,7 +93,7 @@ public class ReferenceIterator <ReferenceType extends Reference> implements Clon
         try {
             return new ReferenceIterator<ReferenceType>(this.blobFile, factory, this.payloadrow);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
     }

@@ -35,6 +35,7 @@ import java.net.URLDecoder;
 import java.util.Date;
 
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Request;
@@ -99,9 +100,8 @@ public class QuickCrawlLink_p {
         String crawlingStart = post.get("url",null);
         try {
             crawlingStart = URLDecoder.decode(crawlingStart, "UTF-8");
-        } catch (final UnsupportedEncodingException e1) {
-            // TODO Auto-generated catch block
-            e1.printStackTrace();
+        } catch (final UnsupportedEncodingException e) {
+            Log.logException(e);
         }
         
         // get the browser title

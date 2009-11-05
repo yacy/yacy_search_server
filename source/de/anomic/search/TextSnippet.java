@@ -379,7 +379,7 @@ public class TextSnippet {
                 }
             }
         } catch (final Exception e) {
-            //e.printStackTrace();
+            //Log.logException(e);
             return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "error loading resource: " + e.getMessage());
         } 
         

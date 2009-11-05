@@ -45,6 +45,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -722,7 +723,7 @@ public class RasterPlotter {
     		return baos;
     	} catch (final IOException e) {
     		// should not happen
-    		e.printStackTrace();
+    	    Log.logException(e);
     		return null;
     	}
     }
@@ -746,12 +747,12 @@ public class RasterPlotter {
         try {
             p = Runtime.getRuntime().exec(new String[] {"/usr/bin/osascript", "-e", "open \"" + args[0] + "\""});
         } catch (java.io.IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         try {
             p.waitFor();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         */
     }

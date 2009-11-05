@@ -124,7 +124,7 @@ public class CrawlResults {
                     sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).deleteDomain(hashpart);
                     sb.crawlResults.deleteDomain(tabletype, domain, hashpart);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                 }
             }
         }

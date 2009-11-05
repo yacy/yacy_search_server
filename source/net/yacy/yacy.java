@@ -194,7 +194,7 @@ public final class yacy {
                 Log.configureLogging(homePath, new File(homePath, "DATA/LOG/yacy.logging"));
             } catch (final IOException e) {
                 System.out.println("could not find logging properties in homePath=" + homePath);
-                e.printStackTrace();
+                Log.logException(e);
             }
             Log.logConfig("STARTUP", "Java version: " + System.getProperty("java.version", "no-java-version"));
             Log.logConfig("STARTUP", "Operation system: " + System.getProperty("os.name","unknown"));
@@ -507,7 +507,7 @@ public final class yacy {
         		try {
 					fis.close();
 				} catch (IOException e) {
-					e.printStackTrace();
+				    Log.logException(e);
 				}
         	}
         }
@@ -940,7 +940,7 @@ public final class yacy {
                 db.close();
             }
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 

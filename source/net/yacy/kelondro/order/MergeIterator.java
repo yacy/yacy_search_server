@@ -29,6 +29,8 @@ import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 
+import net.yacy.kelondro.logging.Log;
+
 
 public class MergeIterator<E> implements CloneableIterator<E> {
     
@@ -103,13 +105,13 @@ public class MergeIterator<E> implements CloneableIterator<E> {
                 s = (E) this.merger.invoke(null, new Object[]{na, nb});
                 //System.out.println("RESULT IS " + s.toString());
             } catch (final IllegalArgumentException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 s = null;
             } catch (final IllegalAccessException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 s = null;
             } catch (final InvocationTargetException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 s = null;
             }
             nexta();

@@ -179,7 +179,7 @@ public class ResultFetcher {
                     //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
                 }
             } catch (final Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             Log.logInfo("SEARCH", "resultWorker thread " + id + " terminated");
         }
@@ -228,7 +228,7 @@ public class ResultFetcher {
                     try {
                         TextSnippet.failConsequences(this.indexSegment, snippet, query.id(false));
                     } catch (IOException e) {
-                        e.printStackTrace();
+                        Log.logException(e);
                     }
                 return null;
             }

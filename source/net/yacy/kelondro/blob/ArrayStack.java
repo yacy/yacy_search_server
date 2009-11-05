@@ -865,7 +865,7 @@ public class ArrayStack implements BLOB {
             heap.put("aaaaaaaaaaaX".getBytes(), "WXYZ".getBytes());
             heap.close(true);
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     

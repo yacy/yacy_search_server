@@ -215,7 +215,7 @@ public class serverSwitch {
             return ia[0];
         } catch (final java.net.UnknownHostException e) {
             System.err.println("ERROR: (internal) " + e.getMessage());
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
     }

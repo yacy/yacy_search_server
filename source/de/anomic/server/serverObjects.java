@@ -53,6 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.yacy.document.parser.html.CharacterCoding;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.Formatter;
 
@@ -107,7 +108,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         try {
 			return this.put(key, new String(value, "UTF-8"));
 		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
+		    Log.logException(e);
 			return null;
 		}
     }

@@ -402,7 +402,7 @@ public class bookmarksDB {
     		bookmarksTable.put(bookmark.getUrlHash(), bookmark.entry);
         } catch (final IOException e) {
         	// TODO Auto-generated catch block
-        	e.printStackTrace();
+            Log.logException(e);
         }
     }
     public String addBookmark(final Bookmark bookmark){
@@ -513,7 +513,7 @@ public class bookmarksDB {
         try {
             map = tagsTable.get(hash);
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
         if(map!=null){
@@ -585,7 +585,7 @@ public class bookmarksDB {
         try {
             return new tagIterator(up);
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return new HashSet<Tag>().iterator();
         }
     }
@@ -1309,7 +1309,7 @@ public class bookmarksDB {
             try {
                 return this.tagIter.hasNext();
             } catch (final Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
                 return false;
             }
         }
@@ -1322,7 +1322,7 @@ public class bookmarksDB {
                 Tag t = getTag(s);
                 return t;
             } catch (final Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
                 return null;
             }
         }

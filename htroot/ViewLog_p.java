@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.kelondro.logging.GuiHandler;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.logging.LogalizerHandler;
 
 import de.anomic.http.server.RequestHeader;
@@ -91,7 +92,7 @@ public class ViewLog_p {
         	final Pattern filterPattern = Pattern.compile(filter,Pattern.MULTILINE);
         	filterMatcher = filterPattern.matcher("");
         } catch (final PatternSyntaxException e) {
-        	e.printStackTrace();
+            Log.logException(e);
         }
         
 

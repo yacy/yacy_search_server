@@ -144,7 +144,7 @@ public class migration {
         try {
             sb.initBookmarks();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 
@@ -180,7 +180,7 @@ public class migration {
             try {
                 sb.initWiki();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
         
@@ -197,7 +197,7 @@ public class migration {
             try {
                 sb.initMessages();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
     }

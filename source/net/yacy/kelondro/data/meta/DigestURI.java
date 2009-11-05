@@ -35,6 +35,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.Domains;
@@ -62,7 +63,7 @@ public class DigestURI implements Serializable {
         try {
             url = new DigestURI(host, null);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
         return (url == null) ? null : url.hash().substring(6);
@@ -1035,7 +1036,7 @@ public class DigestURI implements Serializable {
         for (int i = 0; i < test.length; i++) {
             environment = test[i][0];
             url = test[i][1];
-            try {aURL = DigestURI.newURL(environment, url);} catch (final MalformedURLException e) {e.printStackTrace(); aURL = null;}
+            try {aURL = DigestURI.newURL(environment, url);} catch (final MalformedURLException e) {Log.logException(e); aURL = null;}
             if (aURL != null) System.out.println("normalized: " + aURL.toNormalform(true, true));
             if (environment == null) {
                 try {jURL = new java.net.URL(url);} catch (final MalformedURLException e) {jURL = null;}

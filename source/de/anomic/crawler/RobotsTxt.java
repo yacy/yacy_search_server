@@ -73,7 +73,7 @@ public class RobotsTxt {
         try {
             blob = new Heap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         robotsTable = new MapView(blob, 100, '_');
         syncObjects = new ConcurrentHashMap<String, DomSync>();
@@ -88,7 +88,7 @@ public class RobotsTxt {
         try {
             blob = new Heap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         robotsTable = new MapView(blob, 100, '_');
         syncObjects.clear();

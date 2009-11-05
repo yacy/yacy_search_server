@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 
@@ -143,7 +144,7 @@ public final class HandleSet implements Iterable<byte[]> {
         try {
             return index.keys(up, firstKey);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
     }

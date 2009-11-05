@@ -46,6 +46,7 @@ import java.util.zip.GZIPInputStream;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowCollection;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
 
@@ -457,7 +458,7 @@ public class AttrSeq {
                 transcode(new File(args[1]), new File(args[2]));
             }
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     

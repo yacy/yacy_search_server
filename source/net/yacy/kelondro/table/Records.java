@@ -740,7 +740,7 @@ public class Records {
             theLogger.fine("file '" + this.filename + "' closed.");
         } catch (final IOException e) {
             theLogger.severe("file '" + this.filename + "': failed to close.");
-            e.printStackTrace();
+            Log.logException(e);
         }
         this.entryFile = null;
     }

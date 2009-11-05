@@ -17,6 +17,7 @@ import net.yacy.kelondro.index.ObjectArrayCache;
 import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -129,7 +130,7 @@ public class dbtest {
                 if (getTable_reference() != null) getTable_reference().put(getTable_test().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
             } catch (final IOException e) {
                 System.err.println(e);
-                e.printStackTrace();
+                Log.logException(e);
                 System.exit(0);
             }
         }
@@ -148,7 +149,7 @@ public class dbtest {
                 if (getTable_reference() != null) getTable_reference().remove(entry.getKey());
             } catch (final IOException e) {
                 System.err.println(e);
-                e.printStackTrace();
+                Log.logException(e);
                 System.exit(0);
             }
         }
@@ -186,7 +187,7 @@ public class dbtest {
                 }
             } catch (final IOException e) {
                 System.err.println(e);
-                e.printStackTrace();
+                Log.logException(e);
                 System.exit(0);
             }
         }
@@ -508,7 +509,7 @@ public class dbtest {
                     ", total=" + (afterclose - startup));
             profiler.terminate();
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 }
@@ -546,14 +547,14 @@ final class memprofiler extends Thread {
                 try {Thread.sleep(100);} catch (final InterruptedException e) {}
             }
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         try {
             ImageIO.write(memChart.getImage(), "png", outputFile);
         } catch (final IOException e) {
             // do noting
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     

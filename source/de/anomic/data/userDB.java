@@ -37,6 +37,7 @@ import java.util.Random;
 
 import net.yacy.kelondro.blob.Heap;
 import net.yacy.kelondro.blob.MapView;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.Digest;
@@ -71,7 +72,7 @@ public final class userDB {
         try {
             userTable = new MapView(new Heap(userTableFile, 256, NaturalOrder.naturalOrder, 1024 * 64), 10, '_');
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     
@@ -393,7 +394,7 @@ public final class userDB {
             try {
                 this.setProperty(TRAFFIC_SIZE,"0");
             } catch (final IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             return 0;
         }
@@ -410,7 +411,7 @@ public final class userDB {
             try {
                 this.setProperty(TRAFFIC_SIZE,Long.toString(newTrafficSize));
             } catch (final IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             return newTrafficSize;
         }
@@ -469,7 +470,7 @@ public final class userDB {
             try {
                 userDB.this.userTable.put(getUserName(), this.mem); 
             } catch(final Exception e){
-                e.printStackTrace();
+                Log.logException(e);
             }
             return newTimeUsed;
         }

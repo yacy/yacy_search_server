@@ -27,6 +27,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.kelondro.logging.Log;
+
 public class serverAccessTracker {
 
     private long cleanupCycle = 60000; // 1 minute
@@ -81,7 +83,7 @@ public class serverAccessTracker {
         try {
             return access.tailMap(Long.valueOf(System.currentTimeMillis() - maxTrackingTime));
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return new TreeMap<Long, String>();
         }
     }

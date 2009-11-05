@@ -398,7 +398,7 @@ public class yacysearch {
                 map.put("refid", "");
                 sb.peers.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.peers.mySeed(), yacyNewsPool.CATEGORY_SURFTIPP_VOTE_ADD, map));
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
 
             // if a plus-button was hit, create new voting message
@@ -563,7 +563,7 @@ public class yacysearch {
                 }
             	if (sb.localSearchTracker.size() > 1000) sb.localSearchTracker.remove(sb.localSearchTracker.keys().nextElement());
             } catch (Exception e) {
-            	e.printStackTrace();
+                Log.logException(e);
             }
             
             final int totalcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();

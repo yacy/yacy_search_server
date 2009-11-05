@@ -132,7 +132,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
             Row.Entry oe = (urlIndexFile == null) ? null : urlIndexFile.get(entry.hash().getBytes());
             oldEntry = (oe == null) ? null : new URIMetadataRow(oe, null, 0);
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
             oldEntry = null;
         }
         if (oldEntry != null && entry.isOlder(oldEntry)) {
@@ -168,7 +168,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         try {
             return this.urlIndexFile.keys(up, firstKey);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
     }
@@ -382,10 +382,10 @@ public final class MetadataRepository implements Iterable<byte[]> {
                     run = false;
                 }
             } catch (final IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 run = false;
             } catch (final Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
                 run = false;
             }
             Log.logInfo("URLDBCLEANER", "UrldbCleaner-Thread stopped");
@@ -520,10 +520,10 @@ public final class MetadataRepository implements Iterable<byte[]> {
                 }
                 pw.close();
             } catch (final IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 this.failure = e.getMessage();
             } catch (final Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
                 this.failure = e.getMessage();
             }
             // terminate process

@@ -656,7 +656,7 @@ public class Client {
                 System.out.println(new String(wget(url, null, 10000)));
             }
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } finally {
             if (resp != null) {
                 // release connection

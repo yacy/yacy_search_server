@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.CrawlSwitchboard;
@@ -83,7 +84,7 @@ public class NoticeURLImporter extends AbstractImporter implements Importer {
             try {
                 this.importProfileDB = new CrawlProfile(profileDbFile);
             } catch (IOException e1) {
-                e1.printStackTrace();
+                Log.logException(e1);
                 this.importProfileDB = null;
             }
         }

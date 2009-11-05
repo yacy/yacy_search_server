@@ -119,7 +119,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
             final SAXParser saxParser = factory.newSAXParser();
             saxParser.parse(path, this);
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     
@@ -130,7 +130,7 @@ public class opensearchdescriptionReader extends DefaultHandler {
             final SAXParser saxParser = factory.newSAXParser();
             saxParser.parse(stream, this);
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     

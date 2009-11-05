@@ -46,7 +46,7 @@ public class ConsoleInterface extends Thread {
             dataIsRead.acquire();
         } catch (final InterruptedException e) {
             // this should never happen because this is a constructor
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 
@@ -75,7 +75,7 @@ public class ConsoleInterface extends Thread {
         } catch (final IOException ix) {
             log.logWarning("logpoint 6 " +  ix.getMessage());
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     

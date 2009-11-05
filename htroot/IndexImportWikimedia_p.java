@@ -26,6 +26,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 
 import net.yacy.document.importer.MediawikiImporter;
+import net.yacy.kelondro.logging.Log;
 
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
@@ -77,7 +78,7 @@ public class IndexImportWikimedia_p {
                         prop.put("import_remainingHours", 0);
                         prop.put("import_remainingMinutes", 0);
                     } catch (MalformedURLException e) {
-                        e.printStackTrace();
+                        Log.logException(e);
                         prop.put("import", 0);
                         prop.put("import_status", 1);
                         prop.put("import_status_message", e.getMessage());

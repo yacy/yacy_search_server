@@ -30,6 +30,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 
@@ -92,7 +93,7 @@ public final class Records {
                 fos = new FileOutputStream(tablefile);
             } catch (final FileNotFoundException e) {
                 // should not happen
-                e.printStackTrace();
+                Log.logException(e);
             }
             try { if (fos != null) fos.close(); } catch (final IOException e) {}
         }
@@ -102,7 +103,7 @@ public final class Records {
             raf = new RandomAccessFile(tablefile,"rw");
         } catch (final FileNotFoundException e) {
             // should never happen
-            e.printStackTrace();
+            Log.logException(e);
         }
         
         // initialize cache and buffer
@@ -228,7 +229,7 @@ public final class Records {
             raf.seek(raf.length());
             raf.write(this.buffer, 0, this.recordsize * this.buffercount);
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         this.buffercount = 0;
     }
@@ -240,7 +241,7 @@ public final class Records {
         if (raf != null) try {
             raf.close();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         this.raf = null;
         this.buffer = null;
@@ -621,7 +622,7 @@ public final class Records {
             
             t.close();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 

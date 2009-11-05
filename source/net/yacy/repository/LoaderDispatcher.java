@@ -185,7 +185,7 @@ public final class LoaderDispatcher {
             try {
                 content = (cachedResponse == null) ? null : Cache.getContent(request.url());
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 content = null;
             }
             if (cachedResponse != null && content != null) {

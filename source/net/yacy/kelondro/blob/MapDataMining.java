@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.util.ScoreCluster;
 
@@ -124,11 +125,11 @@ public class MapDataMining extends MapView {
                     try {
                         externalInitializer.invoke(externalHandler, new Object[]{mapname, map});
                     } catch (final IllegalArgumentException e) {
-                        e.printStackTrace();
+                        Log.logException(e);
                     } catch (final IllegalAccessException e) {
-                        e.printStackTrace();
+                        Log.logException(e);
                     } catch (final InvocationTargetException e) {
-                        e.printStackTrace();
+                        Log.logException(e);
                     }
                 }
             }

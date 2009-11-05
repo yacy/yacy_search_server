@@ -39,6 +39,7 @@ import java.util.regex.PatternSyntaxException;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.CrawlProfile;
@@ -325,7 +326,7 @@ public class WatchCrawler_p {
                             prop.put("info", "6");//Error with url
                             prop.putHTML("info_crawlingStart", crawlingStart);
                             prop.putHTML("info_error", e.getMessage());
-                            e.printStackTrace();
+                            Log.logException(e);
                         }
                         
                     } else if (crawlingMode.equals(CRAWLING_MODE_FILE)) {
@@ -407,7 +408,7 @@ public class WatchCrawler_p {
                                 prop.put("info", "7");//Error with file
                                 prop.putHTML("info_crawlingStart", fileName);
                                 prop.putHTML("info_error", e.getMessage());
-                                e.printStackTrace();
+                                Log.logException(e);
                             }
                             sb.continueCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
                         }
@@ -442,7 +443,7 @@ public class WatchCrawler_p {
                     		prop.put("info", "6");//Error with url
                     		prop.putHTML("info_crawlingStart", sitemapURLStr);
                     		prop.putHTML("info_error", e.getMessage());
-                    		e.printStackTrace();
+                    		Log.logException(e);
                     	}
                     }
                 }

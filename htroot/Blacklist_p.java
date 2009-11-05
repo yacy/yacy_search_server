@@ -542,7 +542,7 @@ public class Blacklist_p {
                 pw.println(newEntry);
                 pw.close();
             } catch (final IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             } finally {
                 if (pw != null) {
                     try {

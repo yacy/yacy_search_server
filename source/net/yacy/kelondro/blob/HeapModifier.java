@@ -223,7 +223,7 @@ public class HeapModifier extends HeapReader implements BLOB {
                 this.free.remove(seek);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 

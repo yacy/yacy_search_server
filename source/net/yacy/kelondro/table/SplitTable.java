@@ -412,13 +412,14 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
             while (true) {
                 try {
                     order = orderQueue.take();
+                    if (order == poisonDiscoverOrder) break;
+                    // check if in the given objectIndex is the key as given in the order
+                    order.executeOrder();
                 } catch (InterruptedException e) {
                     Log.logSevere("SplitTable", "", e);
-                    continue;
+                    //continue;
+                    break;
                 }
-                if (order == poisonDiscoverOrder) break;
-                // check if in the given objectIndex is the key as given in the order
-                order.executeOrder();
             }
             Log.logInfo("SplitTable.Discovery", "terminated discovery thread " + this.getName());
         }

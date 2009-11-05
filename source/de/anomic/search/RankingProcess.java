@@ -48,6 +48,7 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.BinSearch;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -141,7 +142,7 @@ public final class RankingProcess extends Thread {
             
             add(index, true, index.size());
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         oneFeederTerminated();
     }

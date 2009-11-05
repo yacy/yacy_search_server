@@ -157,7 +157,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 mySeed.save(myOwnSeedFile);
             } catch (final IOException ee) {
                 Log.logSevere("SEEDDB", "error saving mySeed.txt (1) to " + myOwnSeedFile.toString() + ": " + ee.getMessage(), ee);
-                ee.printStackTrace();
+                Log.logException(ee);
                 System.exit(-1);
             }
         } else {
@@ -168,7 +168,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 mySeed.save(myOwnSeedFile);
             } catch (final IOException ee) {
                 Log.logSevere("SEEDDB", "error saving mySeed.txt (2) to " + myOwnSeedFile.toString() + ": " + ee.getMessage(), ee);
-                ee.printStackTrace();
+                Log.logException(ee);
                 System.exit(-1);
             }
         }
@@ -249,7 +249,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             try {
                 return new MapDataMining(new Heap(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, null, this);
             } catch (IOException e1) {
-                e1.printStackTrace();
+                Log.logException(e1);
                 System.exit(-1);
                 return null;
             }
@@ -637,7 +637,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             }
             // delete bad peers
             final Iterator<String> i = badPeerHashes.iterator();
-            while (i.hasNext()) try {seedActiveDB.remove(i.next());} catch (final IOException e1) {e1.printStackTrace();}
+            while (i.hasNext()) try {seedActiveDB.remove(i.next());} catch (final IOException e1) {Log.logException(e1);}
             badPeerHashes.clear();
         }
         
@@ -666,7 +666,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             }
             // delete bad peers
             final Iterator<String> i = badPeerHashes.iterator();
-            while (i.hasNext()) try {seedActiveDB.remove(i.next());} catch (final IOException e1) {e1.printStackTrace();}
+            while (i.hasNext()) try {seedActiveDB.remove(i.next());} catch (final IOException e1) {Log.logException(e1);}
             badPeerHashes.clear();
         }
         
@@ -916,13 +916,13 @@ public final class yacySeedDB implements AlternativeDomainNames {
                     if (nextSeed.getVersion() >= this.minVersion) break;
                 }
             } catch (final IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 yacyCore.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
                 it = null;
             } catch (final kelondroException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 yacyCore.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
@@ -936,7 +936,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 it = database.maps(up, field);
                 nextSeed = internalNext();
             } catch (final kelondroException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 yacyCore.log.logSevere("ERROR seedLinEnum: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
@@ -960,7 +960,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                     return new yacySeed(hash, dna);
                 }
             } catch (final Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
                 yacyCore.log.logSevere("ERROR internalNext: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
                 if (database == seedActiveDB) seedActiveDB = resetSeedTable(seedActiveDB, seedActiveDBFile);
                 if (database == seedPassiveDB) seedPassiveDB = resetSeedTable(seedPassiveDB, seedPassiveDBFile);
@@ -976,7 +976,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 if (nextSeed == null) break;
                 if (nextSeed.getVersion() >= this.minVersion) break;
             }} catch (final kelondroException e) {
-            	e.printStackTrace();
+                Log.logException(e);
             	// eergency reset
             	yacyCore.log.logSevere("seed-db emergency reset", e);
             	try {
@@ -985,7 +985,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
 					return null;
 				} catch (final IOException e1) {
 					// no recovery possible
-					e1.printStackTrace();
+				    Log.logException(e1);
 					System.exit(-1);
 				}
             }

@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.http.server.RequestHeader;
@@ -64,7 +65,7 @@ public class News {
                         id = check.substring(4);
                         try {
                             sb.peers.newsPool.moveOff(tableID, id);
-                        } catch (final IOException ee) {ee.printStackTrace();}
+                        } catch (final IOException ee) {Log.logException(ee);}
                     }
                 }
             }
@@ -81,7 +82,7 @@ public class News {
                         sb.peers.newsPool.moveOffAll(tableID);
                     }
                 } catch (final IOException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                 }
             }
         }

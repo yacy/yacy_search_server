@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.kelondro.io.AbstractWriter;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -252,7 +253,7 @@ public final class Heap extends HeapModifier implements BLOB {
             try {
                 flushBuffer();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
     	this.buffer = null;
@@ -455,7 +456,7 @@ public final class Heap extends HeapModifier implements BLOB {
             heap.put("aaaaaaaaaaaX".getBytes(), "WXYZ".getBytes());
             heap.close(true);
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 
@@ -479,7 +480,7 @@ public final class Heap extends HeapModifier implements BLOB {
             heap.put("aaaaaaaaaaaX", map("aaaaaaaaaaad", "WXYZ"));
             heap.close();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     

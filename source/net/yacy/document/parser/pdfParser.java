@@ -192,7 +192,7 @@ public class pdfParser extends AbstractParser implements Idiom {
             // delete the file
             if (writerFile != null) FileUtils.deletedelete(writerFile);
             
-            e.printStackTrace();
+            Log.logException(e);
             throw new ParserException("Unexpected error while parsing pdf file. " + e.getMessage(),location); 
         } finally {
             if (theDocument != null) try { theDocument.close(); } catch (final Exception e) {/* ignore this */}
@@ -228,10 +228,10 @@ public class pdfParser extends AbstractParser implements Idiom {
                     
                 } catch (final ParserException e) {
                     System.err.println("Cannot parse file "+ pdfFile.getAbsolutePath());
-                    e.printStackTrace();
+                    Log.logException(e);
                 } catch (final InterruptedException e) {
                     System.err.println("Interrupted while parsing!");
-                    e.printStackTrace();
+                    Log.logException(e);
                 } catch (final NoClassDefFoundError e) {
                     System.err.println("class not found: " + e.getMessage());
                 }
@@ -249,7 +249,7 @@ public class pdfParser extends AbstractParser implements Idiom {
                         FileUtils.copy(document.getText(), new File("parsedPdf.txt"));
                     } catch (final IOException e) {
                         System.err.println("error saving parsed document");
-                        e.printStackTrace();
+                        Log.logException(e);
                     }
                 }
             } else {

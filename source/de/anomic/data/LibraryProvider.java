@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.document.geolocalization.OpenGeoDB;
+import net.yacy.kelondro.logging.Log;
 
 public class LibraryProvider {
 
@@ -108,7 +109,7 @@ public class LibraryProvider {
             try {
                 writeWords(derewoOutput, derewo);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
     }
@@ -129,7 +130,7 @@ public class LibraryProvider {
             }
             reader.close();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } finally {
             if (reader != null) try { reader.close(); } catch (final Exception e) {}
         }
@@ -178,7 +179,7 @@ public class LibraryProvider {
             }
             reader.close();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } finally {
             if (reader != null) try { reader.close(); } catch (final Exception e) {}
         }

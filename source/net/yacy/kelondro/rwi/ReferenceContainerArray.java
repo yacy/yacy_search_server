@@ -113,7 +113,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         try {
             return new heapCacheIterator(startWordHash, rot);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
     }
@@ -142,7 +142,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             try {
 				return new heapCacheIterator((byte[]) secondWordHash, rot);
 			} catch (IOException e) {
-				e.printStackTrace();
+			    Log.logException(e);
 				return null;
 			}
         }
@@ -165,7 +165,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
 	            iterator = array.keys(true, null);
 	            return get(iterator.next());
             } catch (IOException e) {
-				e.printStackTrace();
+                Log.logException(e);
 				return null;
 			}
         }

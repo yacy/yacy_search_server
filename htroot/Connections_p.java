@@ -33,6 +33,7 @@ import java.net.URLEncoder;
 import java.util.Properties;
 import java.util.Set;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.workflow.WorkflowThread;
 
@@ -138,7 +139,7 @@ public final class Connections_p {
                 prop.put("list_" + idx + "_serverSessionID",URLEncoder.encode(s.getName(),"UTF8"));
             } catch (final UnsupportedEncodingException e) {
                 // TODO Auto-generated catch block
-                e.printStackTrace();
+                Log.logException(e);
             }
             prop.putHTML("list_" + idx + "_sessionName", s.getName());
             prop.put("list_" + idx + "_proto", prot);

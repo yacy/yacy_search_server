@@ -6,6 +6,7 @@ import java.util.TreeSet;
 
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.DateFormatter;
@@ -216,7 +217,7 @@ public class ExternalIndexImporter extends AbstractImporter implements Importer 
             this.log.logInfo("Import word index contains " + this.importWordIndex.termIndex().sizesMax() + " words and " + this.importWordIndex.urlMetadata().size() + " URLs.");
         } catch (final Exception e) {
             this.log.logSevere("Database import failed.",e);
-            e.printStackTrace();
+            Log.logException(e);
             this.error = e.toString();
         } finally {
             this.log.logInfo("Import process finished.");

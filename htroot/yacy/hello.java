@@ -32,6 +32,7 @@ import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.Domains;
 
 import de.anomic.http.server.HeaderFramework;
@@ -208,7 +209,7 @@ public final class hello {
                             count++;
                         }
                     } catch (final ConcurrentModificationException e) {
-                        e.printStackTrace();
+                        Log.logException(e);
                     }
                 }
             }

@@ -225,7 +225,7 @@ public final class SearchEvent {
                    this.indexSegment.termIndex().remove(j.next(), this.results.failedURLs.keySet());
                }                    
            } catch (IOException e) {
-               e.printStackTrace();
+               Log.logException(e);
            }
            Log.logInfo("SearchEvents", "cleaning up event " + query.id(true) + ", removed " + rw + " URL references on " + removeWords.size() + " words");
        }

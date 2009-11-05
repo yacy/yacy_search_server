@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
 
@@ -84,10 +85,10 @@ public class ImportDump {
         	}
         	statement.executeBatch();
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.logException(e);
             throw e;
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             throw new SQLException(e.getMessage());
 		} finally {
             if (statement != null) try {statement.close();} catch (SQLException e) {}

@@ -47,6 +47,7 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CachedFileOutputStream;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -102,7 +103,7 @@ public class Document {
         if (text == null) try {
             this.text = new CachedFileOutputStream(Idiom.MAX_KEEP_IN_MEMORY_SIZE);
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             this.text = new StringBuilder();
         } else {
             this.text = text;
@@ -260,7 +261,7 @@ dc_rights
             }
             return this.textStream;
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         return null; 
     }
@@ -281,7 +282,7 @@ dc_rights
                 return ffbaos.getContentBAOS();
             }
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         return new byte[0];             
     }

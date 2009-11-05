@@ -36,6 +36,7 @@ import java.util.TreeMap;
 
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.util.ByteBuffer;
@@ -144,7 +145,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
                 try {
                     if (putRecent(i.next())) x++;
                 } catch (final ConcurrentModificationException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                 }
             }
         }

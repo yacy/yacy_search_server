@@ -49,6 +49,7 @@ import net.yacy.document.parser.xml.ODContentHandler;
 import net.yacy.document.parser.xml.ODMetaHandler;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
 
@@ -213,7 +214,7 @@ public class ooxmlParser extends AbstractParser implements Idiom {
             
             // delete the file
             if (writerFile != null) FileUtils.deletedelete(writerFile);
-            e.printStackTrace();
+            Log.logException(e);
             throw new ParserException("Unexpected error while parsing odt file. " + e.getMessage(),location); 
         }
     }

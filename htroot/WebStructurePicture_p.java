@@ -32,6 +32,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.visualization.PrintTool;
 import net.yacy.visualization.RasterPlotter;
@@ -93,7 +94,7 @@ public class WebStructurePicture_p {
             String hash = null;
             try {
                 hash = (new DigestURI("http://" + host, null)).hash().substring(6);
-            } catch (final MalformedURLException e) {e.printStackTrace();}
+            } catch (final MalformedURLException e) {Log.logException(e);}
             //assert (sb.webStructure.outgoingReferences(hash) != null);
             
             // recursively find domains, up to a specific depth

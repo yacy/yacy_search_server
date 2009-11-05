@@ -37,6 +37,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.ScoreCluster;
@@ -109,9 +110,9 @@ public class ReferenceOrder {
                     
                 if (doms.size() > 0) maxdomcount = doms.getMaxScore();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
             } finally {
                 try {
                     decodedEntries.put(WordReferenceVars.poison);

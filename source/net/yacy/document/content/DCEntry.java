@@ -38,6 +38,7 @@ import java.util.TreeMap;
 
 import net.yacy.document.Document;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 
 
@@ -98,7 +99,7 @@ public class DCEntry extends TreeMap<String, String> {
         try {
             return DateFormatter.parseISO8601(d);
         } catch (ParseException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return new Date();
         }
     }
@@ -115,7 +116,7 @@ public class DCEntry extends TreeMap<String, String> {
         try {
             return new DigestURI(u, null);
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
     }
@@ -232,7 +233,7 @@ public class DCEntry extends TreeMap<String, String> {
                 null,
                 null);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
     }

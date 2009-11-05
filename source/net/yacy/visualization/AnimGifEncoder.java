@@ -57,6 +57,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
+import net.yacy.kelondro.logging.Log;
+
 
 /**
  *  <p>This class can be used to write an animated GIF file by combining several
@@ -1150,9 +1152,9 @@ public class AnimGifEncoder {
             age.encode();
             os.close();
         } catch (final FileNotFoundException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 }

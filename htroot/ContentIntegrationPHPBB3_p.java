@@ -27,6 +27,7 @@ import java.io.File;
 import net.yacy.document.content.dao.Dao;
 import net.yacy.document.content.dao.ImportDump;
 import net.yacy.document.content.dao.PhpBB3Dao;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.http.server.RequestHeader;
@@ -87,7 +88,7 @@ public class ContentIntegrationPHPBB3_p {
                     prop.putHTML("check_last", db.latest().toString());
                     db.close();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                     prop.put("check", 2);
                     prop.put("check_error", e.getMessage());
                 }
@@ -111,7 +112,7 @@ public class ContentIntegrationPHPBB3_p {
                     prop.put("export_files", files);
                     db.close();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                     prop.put("export", 2);
                     prop.put("export_error", e.getMessage());
                 }
@@ -136,7 +137,7 @@ public class ContentIntegrationPHPBB3_p {
                 	prop.put("import", 1);
                     importer.close();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                     prop.put("import", 2);
                     prop.put("import_error", e.getMessage());
                 }

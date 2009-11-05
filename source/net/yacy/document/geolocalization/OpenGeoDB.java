@@ -44,6 +44,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.kelondro.logging.Log;
+
 
 /**
  * this class loads and parses database dumps from the OpenGeoDB project
@@ -148,7 +150,7 @@ public class OpenGeoDB {
             }
             reader.close();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } finally {
             if (reader != null) try { reader.close(); } catch (final Exception e) {}
         }

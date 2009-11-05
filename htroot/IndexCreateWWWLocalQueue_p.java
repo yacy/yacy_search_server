@@ -36,6 +36,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.NoticedURL;
 import de.anomic.http.server.RequestHeader;
@@ -138,7 +140,7 @@ public class IndexCreateWWWLocalQueue_p {
                             }
                         }
                     } catch (final PatternSyntaxException e) {
-                        e.printStackTrace();
+                        Log.logException(e);
                     }
                 }
                 

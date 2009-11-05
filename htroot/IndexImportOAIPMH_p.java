@@ -29,6 +29,7 @@ import net.yacy.document.importer.OAIPMHImporter;
 import net.yacy.document.importer.OAIPMHReader;
 import net.yacy.document.importer.ResumptionToken;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
@@ -72,11 +73,11 @@ public class IndexImportOAIPMH_p {
                         prop.put("defaulturl", e.getMessage());
                     }
                 } catch (MalformedURLException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                     prop.put("import-one", 2);
                     prop.put("import-one_error", e.getMessage());
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                     prop.put("import-one", 2);
                     prop.put("import-one_error", e.getMessage());
                 }
@@ -93,7 +94,7 @@ public class IndexImportOAIPMH_p {
                     prop.put("optiongetlist", 1);
                     prop.put("iframetype", 1);
                 } catch (MalformedURLException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                     prop.put("status", 2);
                     prop.put("status_message", e.getMessage());
                 }

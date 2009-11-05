@@ -41,6 +41,7 @@ import java.util.concurrent.BlockingQueue;
 
 import net.yacy.document.content.DCEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 
 
 public class PhpBB3Dao implements Dao {
@@ -79,7 +80,7 @@ public class PhpBB3Dao implements Dao {
             }
             return null;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         } finally {
             if (rs != null) try {rs.close();} catch (SQLException e) {}
@@ -98,7 +99,7 @@ public class PhpBB3Dao implements Dao {
             }
             return null;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         } finally {
             if (rs != null) try {rs.close();} catch (SQLException e) {}
@@ -151,12 +152,12 @@ public class PhpBB3Dao implements Dao {
                 try {
                     return parseResultSet(rs);
                 } catch (MalformedURLException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                 }
             }
             return null;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         } finally {
             if (rs != null) try {rs.close();} catch (SQLException e) {}
@@ -178,14 +179,14 @@ public class PhpBB3Dao implements Dao {
                         try {
                             queue.put(parseResultSet(rs));
                         } catch (MalformedURLException e) {
-                            e.printStackTrace();
+                            Log.logException(e);
                         }
                     }
                     queue.put(DCEntry.poison);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                 } finally {
                     if (rs != null) try {rs.close();} catch (SQLException e) {}
                     if (stmt != null) try {stmt.close();} catch (SQLException e) {}
@@ -243,7 +244,7 @@ public class PhpBB3Dao implements Dao {
             this.users.put(poster_id, nick);
             return nick;
         } catch (SQLException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return "";
         } finally {
             if (rs != null) try {rs.close();} catch (SQLException e) {}
@@ -292,13 +293,13 @@ public class PhpBB3Dao implements Dao {
             outputfiletmp.renameTo(outputfile);
             return fc + 1;
         } catch (MalformedURLException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         return 0;
     }
@@ -326,7 +327,7 @@ public class PhpBB3Dao implements Dao {
             File targetdir = new File("x").getParentFile();
             db.writeSurrogates(db.query(0, -1, 100), targetdir, "id0-current", 3000);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     

@@ -55,6 +55,7 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainerArray;
 import net.yacy.kelondro.util.MemoryControl;
@@ -99,11 +100,11 @@ public class URLAnalysis {
                         update(url.getHost().replaceAll("-", "\\.").split("\\."));
                         update(p.matcher(url.getPath()).replaceAll("/").split("/"));
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        Log.logException(e);
                     }
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
         
@@ -175,7 +176,7 @@ public class URLAnalysis {
                         DigestURI url = new DigestURI(line, null);
                         in.put(url);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        Log.logException(e);
                     } catch (MalformedURLException e) {
                         continue;
                     }
@@ -193,7 +194,7 @@ public class URLAnalysis {
             }
             reader.close();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } finally {
             if (reader != null) try { reader.close(); } catch (final Exception e) {}
         }
@@ -203,12 +204,12 @@ public class URLAnalysis {
         for (int i = 0; i < Runtime.getRuntime().availableProcessors() + 1; i++) try {
             in.put(poison);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         try {
             spl.join();
         } catch (InterruptedException e1) {
-            e1.printStackTrace();
+            Log.logException(e1);
         }
         
         // generate statistics
@@ -247,7 +248,7 @@ public class URLAnalysis {
             }
             os.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         
         System.out.println("finished");
@@ -288,7 +289,7 @@ public class URLAnalysis {
             }
             reader.close();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } finally {
             if (reader != null) try { reader.close(); } catch (final Exception e) {}
         }
@@ -335,7 +336,7 @@ public class URLAnalysis {
             }
             os.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
 
         System.out.println("finished writing results");
@@ -384,7 +385,7 @@ public class URLAnalysis {
             }
             reader.close();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } finally {
             if (reader != null) try { reader.close(); } catch (final Exception e) {}
         }
@@ -406,7 +407,7 @@ public class URLAnalysis {
             idx.dump(new File(statisticPath));
             System.out.println("INDEX REFERENCE COLLECTION finished dump, wrote " + idx.size() + " entries to " + statisticPath);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 
@@ -447,7 +448,7 @@ public class URLAnalysis {
         try {
             e.join();
         } catch (InterruptedException e1) {
-            e1.printStackTrace();
+            Log.logException(e1);
         }
         System.out.println("URL EXPORT finished export, wrote " + ((hs == null) ? mr.size() : hs.size()) + " entries");
     }
@@ -488,7 +489,7 @@ public class URLAnalysis {
             try {
                 diffurlcol(args[1], args[2], args[3]);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         } else if (args[0].equals("-export") && args.length >= 4) {
             // export a url-list file
@@ -499,7 +500,7 @@ public class URLAnalysis {
             try {
                 export(args[1], format, args[3], (args.length >= 5) ? args[4] : null);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         } else if (args[0].equals("-delete") && args.length >= 3) {
             // delete from URLs as given by urlreference diff dump
@@ -509,7 +510,7 @@ public class URLAnalysis {
             try {
                 delete(args[1], args[2]);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         } else {
     		System.out.println("usage:");

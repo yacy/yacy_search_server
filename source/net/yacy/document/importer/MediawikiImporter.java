@@ -193,7 +193,7 @@ public class MediawikiImporter extends Thread implements Importer {
                                 in.put(record);
                                 this.count++;
                             } catch (InterruptedException e1) {
-                                e1.printStackTrace();
+                                Log.logException(e1);
                             }
                             sb = new StringBuilder(200);
                             continue;
@@ -215,7 +215,7 @@ public class MediawikiImporter extends Thread implements Importer {
                         in.put(record);
                         this.count++;
                     } catch (InterruptedException e1) {
-                        e1.printStackTrace();
+                        Log.logException(e1);
                     }
                     sb = new StringBuilder(200);
                     continue;
@@ -246,19 +246,19 @@ public class MediawikiImporter extends Thread implements Importer {
                 }
                 out.put(poison);
                 writerResult.get(10000, TimeUnit.MILLISECONDS);
-            } catch (InterruptedException e1) {
-                e1.printStackTrace();
+            } catch (InterruptedException e) {
+                Log.logException(e);
             } catch (ExecutionException e) {
-                e.printStackTrace();
+                Log.logException(e);
             } catch (TimeoutException e) {
-                e.printStackTrace();
+                Log.logException(e);
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     
@@ -280,7 +280,7 @@ public class MediawikiImporter extends Thread implements Importer {
                 createIndex(this.wikimediaxml);
             } catch (final IOException e) {
             } catch (final Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
     }
@@ -321,10 +321,10 @@ public class MediawikiImporter extends Thread implements Importer {
             if (!consumerResult.isDone()) consumerResult.get();
             producerResult.get();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return;
         } catch (ExecutionException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return;
         }
         in.close();
@@ -349,7 +349,7 @@ public class MediawikiImporter extends Thread implements Importer {
             try {
                 entries.put(b);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
         
@@ -369,7 +369,7 @@ public class MediawikiImporter extends Thread implements Importer {
                     count++;
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             entries.clear();
             out.println("</index>");
@@ -396,7 +396,7 @@ public class MediawikiImporter extends Thread implements Importer {
             try {
                 entries.put(b);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
         
@@ -418,7 +418,7 @@ public class MediawikiImporter extends Thread implements Importer {
                     } catch (RuntimeException e) {}
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             entries.clear();
             return Integer.valueOf(count);
@@ -488,7 +488,7 @@ public class MediawikiImporter extends Thread implements Importer {
             try {
                 html = wparser.transform(source);
             } catch (Exception e) {
-            	e.printStackTrace();
+                Log.logException(e);
                 throw new IOException(e.getMessage());
             }
         }
@@ -499,10 +499,9 @@ public class MediawikiImporter extends Thread implements Importer {
 				// the wiki parser is not able to find the proper title in the source text, so it must be set here
 				document.setTitle(title);
 			} catch (UnsupportedEncodingException e) {
-				e.printStackTrace();
+			    Log.logException(e);
 			} catch (MalformedURLException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			    Log.logException(e1);
 			}
         }
         public void writeXML(OutputStreamWriter os) throws IOException {
@@ -550,7 +549,7 @@ public class MediawikiImporter extends Thread implements Importer {
             try {
                 is.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
     }
@@ -563,7 +562,7 @@ public class MediawikiImporter extends Thread implements Importer {
             raf.seek(start);
             raf.read(b);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         } finally {
             if (raf != null) try {
@@ -632,16 +631,16 @@ public class MediawikiImporter extends Thread implements Importer {
                         record.genDocument();
                         out.put(record);
                     } catch (RuntimeException e) {
-                        e.printStackTrace();
+                        Log.logException(e);
                     } catch (ParserException e) {
-                        e.printStackTrace();
+                        Log.logException(e);
                     } catch (IOException e) {
 						// TODO Auto-generated catch block
-						e.printStackTrace();
+                        Log.logException(e);
 					}
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             Log.logInfo("WIKITRANSLATION", "*** convertConsumer has terminated");
             return Integer.valueOf(0);
@@ -708,13 +707,13 @@ public class MediawikiImporter extends Thread implements Importer {
                     
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+                Log.logException(e);
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                Log.logException(e);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             } finally {
 	            try {
 					osw.write("</surrogates>\n");
@@ -722,7 +721,7 @@ public class MediawikiImporter extends Thread implements Importer {
 		            String finalfilename = targetstub + "." + fc + ".xml";
 		            new File(targetdir, outputfilename).renameTo(new File(targetdir, finalfilename));
 				} catch (IOException e) {
-					e.printStackTrace();
+				    Log.logException(e);
 				}
             }
             Log.logInfo("WIKITRANSLATION", "*** convertWriter has terminated");
@@ -754,9 +753,9 @@ public class MediawikiImporter extends Thread implements Importer {
                 mi.start();
                 mi.join();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
         
@@ -764,7 +763,7 @@ public class MediawikiImporter extends Thread implements Importer {
             try {
                 createIndex(new File(s[1]));
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
         
@@ -774,7 +773,7 @@ public class MediawikiImporter extends Thread implements Importer {
             try {
                 System.out.println(new String(read(new File(s[3]), start, len), "UTF-8"));
             } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
         
@@ -787,7 +786,7 @@ public class MediawikiImporter extends Thread implements Importer {
                     System.out.println(new String(read(new File(s[2]), w.start, (int) (w.end - w.start)), "UTF-8"));
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             
         }

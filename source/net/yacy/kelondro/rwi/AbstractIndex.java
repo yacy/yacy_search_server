@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Order;
 
 public abstract class AbstractIndex <ReferenceType extends Reference> implements Index<ReferenceType> {
@@ -111,7 +112,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
             try {
                 singleContainer = this.get(singleHash, urlselection);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 continue;
             }
         
@@ -148,7 +149,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
             try {
                 singleContainer = this.get(wordHash, urlselection);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 continue;
             }
         

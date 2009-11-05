@@ -37,6 +37,7 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.OS;
 
 import de.anomic.search.Switchboard;
@@ -235,7 +236,7 @@ class nativeTrayIcon {
 			this.SystemTray = getDefaultSystemTrayMethod.invoke(null, (Object[])null);
 
 		} catch (Throwable e) {
-			e.printStackTrace();
+		    Log.logException(e);
 			this.TrayIcon = null;
 		}
 	}
@@ -252,7 +253,7 @@ class nativeTrayIcon {
 			arglist1[0] = this.TrayIcon;
 			addMethod.invoke(this.SystemTray, arglist1);
 		} catch (Throwable e) {
-			e.printStackTrace();
+		    Log.logException(e);
 		}
 	}
 
@@ -268,7 +269,7 @@ class nativeTrayIcon {
 			arglist1[0] = this.TrayIcon;
 			removeMethod.invoke(this.SystemTray, arglist1);
 		} catch (Throwable e) {
-			e.printStackTrace();
+		    Log.logException(e);
 		}
 	}
 
@@ -288,7 +289,7 @@ class nativeTrayIcon {
 			arglist1[2] = null;
 			displayBalloonMessageMethod.invoke(this.TrayIcon, arglist1);
 		} catch (Throwable e) {
-			e.printStackTrace();
+		    Log.logException(e);
 		}
 	}
 }

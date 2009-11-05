@@ -42,6 +42,7 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
 
@@ -164,8 +165,8 @@ public class ViewFile {
         // trying to load the resource body
         try {
             resource = Cache.getContentStream(url);
-        } catch (IOException e1) {
-            e1.printStackTrace();
+        } catch (IOException e) {
+            Log.logException(e);
             resource = null;
         }
         resourceLength = Cache.getResourceContentLength(url);
@@ -186,8 +187,8 @@ public class ViewFile {
             if (entry != null) {
                 try {
                     resource = Cache.getContentStream(url);
-                } catch (IOException e1) {
-                    e1.printStackTrace();
+                } catch (IOException e) {
+                    Log.logException(e);
                     resource = null;
                 }
                 resourceLength = Cache.getResourceContentLength(url);

@@ -184,7 +184,7 @@ public final class transferRWI {
                 try {
                     sb.indexSegments.termIndex(Segments.Process.DHTIN).add(wordHash.getBytes(), iEntry);
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.logException(e);
                 }
                 serverCore.checkInterruption();
 

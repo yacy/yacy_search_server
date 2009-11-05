@@ -36,6 +36,7 @@ import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 
 import org.apache.poi.hssf.eventusermodel.HSSFEventFactory;
 import org.apache.poi.hssf.eventusermodel.HSSFListener;
@@ -157,7 +158,7 @@ public class xlsParser extends AbstractParser implements Idiom {
                 /*
                  * an unexpected error occurred, log it and throw a ParserException
                  */
-                e.printStackTrace();
+                Log.logException(e);
                 final String errorMsg = "Unable to parse the xls document '" + location + "':" + e.getMessage();
                 theLogger.logSevere(errorMsg);
                 throw new ParserException(errorMsg, location);

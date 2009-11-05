@@ -66,6 +66,8 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import net.yacy.kelondro.logging.Log;
+
 import de.anomic.server.serverSwitch;
 
 public class ftpc {
@@ -192,7 +194,7 @@ public class ftpc {
             }
         } catch (final Exception e) {
             errPrintln("Error - ftp exception: " + e);
-            e.printStackTrace(err);
+            Log.logException(e);
         }
     }
 
@@ -240,7 +242,7 @@ public class ftpc {
                         // the error was probably caused because there is no
                         // connection
                         errPrintln("not connected. no effect.");
-                        e.printStackTrace(err);
+                        Log.logException(e);
                     } else {
                         errPrintln("ftp internal exception: target exception " + e);
                     }
@@ -396,11 +398,11 @@ public class ftpc {
             final Throwable orig = e.getTargetException();
             if (orig.getMessage() != null) {
                 errPrintln("Exception from " + obj + ": " + orig.getMessage());
-                orig.printStackTrace(err);
+                Log.logException(orig);
             }
         } catch (final IllegalAccessException e) {
             errPrintln("Illegal access for " + obj + ": class is probably not declared as public");
-            e.printStackTrace(err);
+            Log.logException(e);
         } catch (final NullPointerException e) {
             errPrintln("main(String args[]) is not defined as static for " + obj);
             /*
@@ -411,7 +413,7 @@ public class ftpc {
              */
         } catch (final Exception e) {
             errPrintln("Exception caught: " + e);
-            e.printStackTrace(err);
+            Log.logException(e);
         }
 
         // set the classpath to its original definition
@@ -2691,9 +2693,9 @@ public class ftpc {
             fos.write(page.toString().getBytes());
             fos.close();
         } catch (final FileNotFoundException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 
@@ -2788,7 +2790,7 @@ public class ftpc {
             try {
                 put(host, localFile, remotePath, remoteName, account, password);
             } catch (final IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
     }
@@ -2860,7 +2862,7 @@ public class ftpc {
                     put(args[1], new File(args[2]), args[3], "", args[4], args[5]);
                 } catch (final IOException e) {
                     // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    Log.logException(e);
                 }
             } else {
                 printHelp();

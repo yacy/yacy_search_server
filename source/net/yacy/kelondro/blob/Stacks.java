@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.kelondro.logging.Log;
+
 public class Stacks {
 
     File stacksLocation;
@@ -59,7 +61,7 @@ public class Stacks {
                 si = new StackInstance(new File(this.stacksLocation, s));
                 this.stacks.put(si.name, si);
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
     }
@@ -106,7 +108,7 @@ public class Stacks {
                 this.stacks.put(stack, si);
                 return si.stack();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 return null;
             }
         }

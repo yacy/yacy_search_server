@@ -137,11 +137,11 @@ public class WorkflowProcessor<J extends WorkflowJob> {
                 final J out = (J) InstantBlockingThread.execMethod(this.environment, this.methodName).invoke(environment, new Object[]{in});
                 if ((out != null) && (output != null)) output.enQueue(out);
             } catch (final IllegalArgumentException e) {
-                e.printStackTrace();
+                Log.logException(e);
             } catch (final IllegalAccessException e) {
-                e.printStackTrace();
+                Log.logException(e);
             } catch (final InvocationTargetException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             return;
         }

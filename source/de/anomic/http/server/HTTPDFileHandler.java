@@ -524,8 +524,8 @@ public final class HTTPDFileHandler {
                     e.getTargetException().toString() + ":" +
                     e.getTargetException().getMessage() +
                     "; java.awt.graphicsenv='" + System.getProperty("java.awt.graphicsenv","") + "'");
-                    e.printStackTrace();
-                    e.getTargetException().printStackTrace();
+                    Log.logException(e);
+                    Log.logException(e.getTargetException());
                     targetClass = null;
                 }
                 if (img == null) {
@@ -952,7 +952,7 @@ public final class HTTPDFileHandler {
                             header.put(HeaderFramework.ETAG, targetMD5);
                         }
                     } catch (final IOException e) {
-                        e.printStackTrace();
+                        Log.logException(e);
                     }                        
                     
                     if (requestHeader.containsKey(HeaderFramework.RANGE)) {
@@ -1033,7 +1033,7 @@ public final class HTTPDFileHandler {
         } catch (final Exception e) {     
             try {
                 // doing some errorhandling ...
-                //e.printStackTrace();
+                //Log.logException(e);
                 int httpStatusCode = 400; 
                 final String httpStatusText = null; 
                 final StringBuilder errorMessage = new StringBuilder(2000); 
@@ -1176,7 +1176,7 @@ public final class HTTPDFileHandler {
             try {
                 return transferURL.respond(request, args, switchboard);
             } catch (Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
                 Log.logSevere("HTTPFileHandler", "fail of transferURL", e);
                 throw new InvocationTargetException(e);
             }

@@ -32,6 +32,7 @@ import java.util.HashMap;
 
 import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 
 
@@ -173,7 +174,7 @@ public class Relations {
             r.putRelation(table1, "abcdefg", "eineintrag");
             r.putRelation(table1, "abcdefg", "eineintrag");
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     

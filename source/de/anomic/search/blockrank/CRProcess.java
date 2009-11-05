@@ -34,6 +34,7 @@ import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.CloneableIterator;
@@ -322,7 +323,7 @@ public class CRProcess {
             FileUtils.moveAll(tmp_dir, bkp_dir);
         } catch (final IOException e) {
             // move previously processed files back
-            e.printStackTrace();
+            Log.logException(e);
             FileUtils.moveAll(tmp_dir, from_dir);
         }
         
@@ -530,7 +531,7 @@ public class CRProcess {
             }
             */
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     

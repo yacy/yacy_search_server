@@ -44,6 +44,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 
@@ -329,7 +330,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
             try {
                 cache.put(new entry(key, l));
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
         
@@ -342,7 +343,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
             try {
                 cache.put(poisonEntry);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
         
@@ -365,7 +366,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
                     map.putUnique(c.key, c.l);
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             if (sortAtEnd) {
                 map.index.finishInitialization();

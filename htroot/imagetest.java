@@ -24,6 +24,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.visualization.PrintTool;
 import net.yacy.visualization.RasterPlotter;
 import de.anomic.http.server.RequestHeader;
@@ -51,11 +52,11 @@ public class imagetest {
             Method m = g.getClass().getMethod(com, pType);
             Object result = m.invoke(g, pParam);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (InvocationTargetException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         
         WritableRaster r = bi.getRaster();

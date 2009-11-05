@@ -425,7 +425,7 @@ public final class TemplateEngine {
         try {
             newPrefix.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         return result;
     }
@@ -440,7 +440,7 @@ public final class TemplateEngine {
         try {
             newPrefix.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         return newPrefix.getBytes();
     }
@@ -456,7 +456,7 @@ public final class TemplateEngine {
             try {
                 patternKey.close();
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
     }
@@ -471,7 +471,7 @@ public final class TemplateEngine {
         try {
             byteArray.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         return result;
     }
@@ -485,7 +485,7 @@ public final class TemplateEngine {
             writeTemplate(new PushbackInputStream(i, 100), System.out, h, args[2].getBytes("UTF-8"));
             System.out.flush();
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 }

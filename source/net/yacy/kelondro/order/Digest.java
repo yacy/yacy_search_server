@@ -58,7 +58,7 @@ public class Digest {
 				digest.reset();
 				digestPool.add(digest);
 			} catch (NoSuchAlgorithmException e) {
-				e.printStackTrace();
+			    Log.logException(e);
 			}
 	}
 	
@@ -121,7 +121,7 @@ public class Digest {
         	try {
 				digest = MessageDigest.getInstance("MD5");
 			} catch (NoSuchAlgorithmException e1) {
-				e1.printStackTrace();
+			    Log.logException(e1);
 			}
 			digest.reset();
 			fromPool = false;
@@ -139,7 +139,7 @@ public class Digest {
 			try {
 				digestPool.put(digest);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
+			    Log.logException(e);
 			}
         return result;
     }
@@ -150,7 +150,7 @@ public class Digest {
             in = new FileInputStream(file);
         } catch (final java.io.FileNotFoundException e) {
             System.out.println("file not found:" + file.toString());
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
         
@@ -182,9 +182,9 @@ public class Digest {
         try {
             return md5result.get().digest();
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (ExecutionException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         return null;
     }
@@ -223,7 +223,7 @@ public class Digest {
             try {
                 filed.put(c);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
         
@@ -231,7 +231,7 @@ public class Digest {
             try {
                 return empty.take();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 return null;
             }
         }
@@ -246,7 +246,7 @@ public class Digest {
                     empty.put(c);
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
             return digest;
         }
@@ -269,7 +269,7 @@ public class Digest {
             assert b.length != 0 : "file = " + file.toString();
             return Base64Order.enhancedCoder.encode(b);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
     }
@@ -299,7 +299,7 @@ public class Digest {
         try {
             digest = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
         RandomAccessFile raf = new RandomAccessFile(file, "r");

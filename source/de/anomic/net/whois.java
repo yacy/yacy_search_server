@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
+import net.yacy.kelondro.logging.Log;
+
 public class whois {
 
     public static Properties Whois(final String dom) {
@@ -48,7 +50,7 @@ public class whois {
             br.close();
             return result;
         } catch (final IOException e) {
-            //e.printStackTrace();
+            //Log.logException(e);
             return null;
         }
     }

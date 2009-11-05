@@ -97,13 +97,13 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
             this.terminate(false);
         } catch (final InvocationTargetException e) {
             final String targetException = e.getTargetException().getMessage();
-            e.getTargetException().printStackTrace();
-            e.printStackTrace();
-            if ((targetException != null) && ((targetException.indexOf("heap space") > 0) || (targetException.indexOf("NullPointerException") > 0))) e.getTargetException().printStackTrace();
+            Log.logException(e.getTargetException());
+            Log.logException(e);
+            if ((targetException != null) && ((targetException.indexOf("heap space") > 0) || (targetException.indexOf("NullPointerException") > 0))) Log.logException(e.getTargetException());
             Log.logSevere("BLOCKINGTHREAD", "Runtime Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage() + "; target exception: " + targetException, e.getTargetException());
         } catch (final OutOfMemoryError e) {
             Log.logSevere("BLOCKINGTHREAD", "OutOfMemory Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage());
-            e.printStackTrace();
+            Log.logException(e);
         }
         instantThreadCounter--;
         jobs.remove(this.handle);

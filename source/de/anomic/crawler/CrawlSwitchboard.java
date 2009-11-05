@@ -92,12 +92,12 @@ public final class CrawlSwitchboard {
         try {
             this.profilesActiveCrawls = new CrawlProfile(profilesActiveFile);
         } catch (IOException e) {
-        	e.printStackTrace();
+            Log.logException(e);Log.logException(e);
             FileUtils.deletedelete(profilesActiveFile);
             try {
                 this.profilesActiveCrawls = new CrawlProfile(profilesActiveFile);
             } catch (IOException e1) {
-                e1.printStackTrace();
+                Log.logException(e1);
                 this.profilesActiveCrawls = null;
             }
         }
@@ -116,7 +116,7 @@ public final class CrawlSwitchboard {
             try {
                 this.profilesPassiveCrawls = new CrawlProfile(profilesPassiveFile);
             } catch (IOException e1) {
-                e1.printStackTrace();
+                Log.logException(e1);
                 this.profilesPassiveCrawls = null;
             }
         }
@@ -211,7 +211,7 @@ public final class CrawlSwitchboard {
         try {
             profilesActiveCrawls = new CrawlProfile(pdb);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         initActiveCrawlProfiles();
     }

@@ -105,7 +105,7 @@ public final class OS {
 			for (int i = 0; i < 4; i++) nullb[i] = 0;
 			macMRJOSNullObj = macMRJOSTypeConstructor.newInstance(new Object[] {new String(nullb)});
 		} catch (final Exception e) {
-			//e.printStackTrace();
+			//Log.logException(e);
 			macMRJFileUtils = null; macMRJOSType = null;
 		}
 
@@ -148,13 +148,13 @@ public final class OS {
 	public static void setMacFSType(final File f, final String t) {
 		if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
 			macSetFileType.invoke(null, new Object[] {f, getMacOSTS(t)});
-		} catch (final Exception e) {/*System.out.println(e.getMessage()); e.printStackTrace();*/}
+		} catch (final Exception e) {/*System.out.println(e.getMessage()); Log.logException(e);*/}
 	}
 
 	public static void setMacFSCreator(final File f, final String t) {
 		if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
 			macSetFileCreator.invoke(null, new Object[] {f, getMacOSTS(t)});
-		} catch (final Exception e) {/*System.out.println(e.getMessage()); e.printStackTrace();*/}
+		} catch (final Exception e) {/*System.out.println(e.getMessage()); Log.logException(e);*/}
 	}
 
 	public static boolean aquireMacFSType(final File f) {
@@ -290,7 +290,7 @@ public final class OS {
 			try {
 				err.close();
 			} catch (IOException e) {
-				e.printStackTrace();
+			    Log.logException(e);
 			}
 		}
 	}

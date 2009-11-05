@@ -89,7 +89,7 @@ public class DocumentIndex extends Segment {
                         }
                     }
                 } catch (IOException e) {
-                    if (e.getMessage().indexOf("cannot parse") < 0) e.printStackTrace();
+                    if (e.getMessage().indexOf("cannot parse") < 0) Log.logException(e);
                     callback.fail(f, e.getMessage());
                 }
             } catch (InterruptedException e) {}
@@ -279,7 +279,7 @@ public class DocumentIndex extends Segment {
                 di.close();
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         //System.exit(0);
     }

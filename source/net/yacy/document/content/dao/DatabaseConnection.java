@@ -30,6 +30,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import net.yacy.kelondro.logging.Log;
+
 public class DatabaseConnection {
 
 	private Connection connection;
@@ -61,7 +63,7 @@ public class DatabaseConnection {
     	try {
 			this.connection.setAutoCommit(b);
 		} catch (SQLException e) {
-			e.printStackTrace();
+		    Log.logException(e);
 		}
     }
     

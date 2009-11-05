@@ -70,14 +70,13 @@ public final class RecordStack extends Records {
             return new RecordStack(file, rowdef);
         } catch (final IOException e) {
         	Log.logSevere("Stack", "Stack file open failed, deleting stack file " + file.toString());
-        	e.printStackTrace();
+        	Log.logException(e);
             FileUtils.deletedelete(file);
             try {
                 return new RecordStack(file, rowdef);
             } catch (final IOException ee) {
                 System.out.println("kelondroStack: cannot open or create file " + file.toString());
-                e.printStackTrace();
-                ee.printStackTrace();
+                Log.logException(e);
                 return null;
             }
         }
@@ -89,7 +88,7 @@ public final class RecordStack extends Records {
             setHandle(root, null);
             setHandle(toor, null);
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 
@@ -119,7 +118,7 @@ public final class RecordStack extends Records {
                 nextHandle = new Node(nextHandle).getOHHandle((up) ? right : left);
                 return row().newEntry(new Node(lastHandle).getValueRow());
             } catch (final IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 throw new kelondroException(filename, "IO error at stackIterator.next(): " + e.getMessage());
             }
         }
@@ -128,7 +127,7 @@ public final class RecordStack extends Records {
         	try {
 				unlinkNode(new Node(lastHandle));
 			} catch (final IOException e) {
-				e.printStackTrace();
+			    Log.logException(e);
 			}
         }
     }
@@ -380,7 +379,7 @@ public final class RecordStack extends Records {
 	    else
 		System.out.println(new String(ret));
 	} catch (final Exception e) {
-	    e.printStackTrace();
+	    Log.logException(e);
 	}
     }
     
@@ -401,7 +400,7 @@ public final class RecordStack extends Records {
             s.close();
         } catch (IOException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
+            Log.logException(e);
         }
         */
     }

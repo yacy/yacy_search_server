@@ -292,7 +292,7 @@ public final class ResultURLs {
             System.out.println("executor hash:\t"+ results.getExecutorHash(stackNo, 1));
             System.out.println("initiator hash:\t"+ results.getInitiatorHash(stackNo, 1));
         } catch (final MalformedURLException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 

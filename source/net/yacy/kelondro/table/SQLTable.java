@@ -41,6 +41,7 @@ import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowCollection;
 import net.yacy.kelondro.index.Row.Entry;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -110,7 +111,7 @@ public class SQLTable implements ObjectIndex, Iterable<Row.Entry> {
         if (this.theDBConnection != null) try {
             this.theDBConnection.close();
         } catch (final SQLException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         this.theDBConnection = null;
     }
@@ -132,7 +133,7 @@ public class SQLTable implements ObjectIndex, Iterable<Row.Entry> {
             
             return size;
         } catch (final Exception e) {
-            e.printStackTrace();
+            Log.logException(e);
             return -1;
         }
     }
@@ -254,7 +255,7 @@ public class SQLTable implements ObjectIndex, Iterable<Row.Entry> {
         		try {
 					sqlStatement.close();
 				} catch (SQLException e) {
-					e.printStackTrace();
+				    Log.logException(e);
 				}
         	}
         }

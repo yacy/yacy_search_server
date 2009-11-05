@@ -8,6 +8,7 @@ import java.text.ParseException;
 import net.yacy.document.content.RSSMessage;
 import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.repository.Blacklist;
 
@@ -146,7 +147,7 @@ public final class transferURL {
                  if (yacyCore.log.isFine()) yacyCore.log.logFine("transferURL: received URL '" + metadata.url().toNormalform(false, true) + "' from peer " + otherPeerName);
                  received++;
              } catch (final IOException e) {
-                 e.printStackTrace();
+                 Log.logException(e);
              }
          }
 

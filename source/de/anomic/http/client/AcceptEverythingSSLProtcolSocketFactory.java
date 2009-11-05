@@ -12,6 +12,8 @@ import java.security.NoSuchAlgorithmException;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 
+import net.yacy.kelondro.logging.Log;
+
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
 import org.apache.commons.httpclient.protocol.SecureProtocolSocketFactory;
@@ -35,12 +37,12 @@ class AcceptEverythingSSLProtcolSocketFactory implements SecureProtocolSocketFac
             sslContext.init(null, new TrustManager[] { new AcceptEverythingTrustManager() }, null);
         } catch (final NoSuchAlgorithmException e) {
             // SSL should be supported
-            e.printStackTrace();
+            Log.logException(e);
         } catch (final KeyManagementException e) {
-            e.printStackTrace();
+            Log.logException(e);
         } catch (final KeyStoreException e) {
             // should never happen, because we don't use a keystore
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 

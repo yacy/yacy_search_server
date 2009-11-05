@@ -107,7 +107,7 @@ public class Balancer {
         try {
             urlFileIndex.clear();
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         domainStacks.clear();
         top.clear();
@@ -426,7 +426,7 @@ public class Balancer {
     	try {
 			fillDomainStacks(800);
 		} catch (IOException e) {
-			e.printStackTrace();
+		    Log.logException(e);
 		}
     	
     	// iterate over the domain stacks

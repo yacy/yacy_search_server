@@ -108,7 +108,7 @@ public class CrawlQueues {
             try {
                 w.join();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
         noticeURL.close();
@@ -128,12 +128,12 @@ public class CrawlQueues {
         try {
             errorURL.clear();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         try {
             delegatedURL.clear();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     
@@ -597,7 +597,7 @@ public class CrawlQueues {
                         new Date(),
                         1,
                         e.getMessage() + " - in worker");
-                e.printStackTrace();
+                Log.logException(e);
                 Client.initConnectionManager();
                 this.request.setStatus("worker-exception", WorkflowJob.STATUS_FINISHED);
             } finally {

@@ -27,7 +27,6 @@
 package net.yacy.document.parser.images;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;import java.util.HashMap;

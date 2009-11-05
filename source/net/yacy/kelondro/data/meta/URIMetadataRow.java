@@ -37,6 +37,7 @@ import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.io.CharBuffer;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.Digest;
@@ -341,7 +342,7 @@ public class URIMetadataRow implements URIMetadata {
             //          serverLog.logFailure("plasmaLURL.corePropList", e.getMessage());
             //          if (moddate == null) serverLog.logFailure("plasmaLURL.corePropList", "moddate=null");
             //          if (loaddate == null) serverLog.logFailure("plasmaLURL.corePropList", "loaddate=null");
-            e.printStackTrace();
+            Log.logException(e);
             return null;
         }
     }

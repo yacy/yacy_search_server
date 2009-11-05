@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
 
@@ -82,7 +83,7 @@ public final class BufferedRecords {
         try {
             flushBuffer0();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         if (efs != null) efs.close();
     }
@@ -189,7 +190,7 @@ public final class BufferedRecords {
             
             t.close();
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
 }

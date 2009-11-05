@@ -38,6 +38,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.zip.GZIPInputStream;
 
+import net.yacy.kelondro.logging.Log;
+
 /**
  * provide a completion library for the did-you-mean class
  *
@@ -71,7 +73,7 @@ public class DidYouMeanLibrary {
             if (f.endsWith(".words")) try {
                 importFile(new File(dictionaryPath, f));
             } catch (IOException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
     }

@@ -172,7 +172,7 @@ public class WebStructureGraph {
             FileUtils.writeAndGZip(crg.toString().getBytes(), file);
             if (this.log.isFine()) log.logFine("wrote citation reference dump " + file.toString());
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     
@@ -431,7 +431,7 @@ public class WebStructureGraph {
                 FileUtils.saveMap(this.structureFile, this.structure_old, "Web Structure Syntax: <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*");
             }
         } catch (final IOException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
     }
     

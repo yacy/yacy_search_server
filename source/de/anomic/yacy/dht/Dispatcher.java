@@ -365,7 +365,7 @@ public class Dispatcher {
         try {
             this.indexingTransmissionProcessor.enQueue(chunk);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         return true;
     }
@@ -387,7 +387,7 @@ public class Dispatcher {
             try {
                 if (this.indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.enQueue(chunk);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Log.logException(e);
                 return null;
             }
             return chunk;

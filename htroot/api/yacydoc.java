@@ -30,6 +30,7 @@ import java.net.MalformedURLException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.logging.Log;
 
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segment;
@@ -75,7 +76,7 @@ public class yacydoc {
             try {
                 urlhash = (new DigestURI(urlstring, null)).hash();
             } catch (MalformedURLException e) {
-                e.printStackTrace();
+                Log.logException(e);
             }
         }
         if (urlhash == null || urlhash.length() == 0) return prop;

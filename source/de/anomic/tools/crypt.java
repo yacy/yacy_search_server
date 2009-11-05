@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.Random;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
 
@@ -98,7 +99,7 @@ public class crypt {
             try {
                 return gzip.gunzipString(Base64Order.enhancedCoder.decode(encoded.substring(2)));
             } catch (final Exception e) {
-                e.printStackTrace();
+                Log.logException(e);
                 return null;
             }
         case 'p': {

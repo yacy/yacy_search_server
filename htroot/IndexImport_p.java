@@ -32,6 +32,7 @@
 import java.io.PrintStream;
 import java.util.Date;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.DateFormatter;
 
@@ -86,7 +87,7 @@ public final class IndexImport_p {
                 } catch (final Exception e) { 
                     final ByteBuffer errorMsg = new ByteBuffer(100);
                     final PrintStream errorOut = new PrintStream(errorMsg);
-                    e.printStackTrace(errorOut);
+                    Log.logException(e);
                     
                     prop.put("error", "3");
                     prop.putHTML("error_error_msg",e.toString());
@@ -112,7 +113,7 @@ public final class IndexImport_p {
                             importer.stopIt();
                         } catch (final InterruptedException e) {
                             // TODO Auto-generated catch block
-                            e.printStackTrace();
+                            Log.logException(e);
                         }                        
                     } else if (post.containsKey("pauseIndexDbImport")) {
                         importer.pauseIt();

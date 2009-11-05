@@ -76,7 +76,7 @@ public final class ConsoleOutErrHandler extends Handler {
             this.stdOutHandler.setEncoding(encoding);
             this.stdErrHandler.setEncoding(encoding);
         } catch (final UnsupportedEncodingException e) {
-            e.printStackTrace();
+            Log.logException(e);
         }
         
         final String ignoreCtrlChrStr = manager.getProperty(className + ".ignoreCtrlChr");
