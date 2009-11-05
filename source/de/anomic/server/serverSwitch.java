@@ -488,15 +488,9 @@ public class serverSwitch {
     public String[] sessionsOlderThan(String threadName, long timeout) {
         ArrayList<String> list = new ArrayList<String>();
         final WorkflowThread st = getThread(threadName);
-        final Thread[] threadList = new Thread[((serverCore) st).getJobCount()];
-        serverCore.sessionThreadGroup.enumerate(threadList);
         
-        for (Thread t: threadList) {
-            if (t == null) continue;
-            if (!(t instanceof serverCore.Session)) continue;
-            if (!t.isAlive()) continue;
-            if (t == null) continue;
-            final Session s = (Session) t;
+        for (Session s: ((serverCore) st).getJobList()) {
+            if (!s.isAlive()) continue;
             if (s.getTime() > timeout) {
                 list.add(s.getName());
             }
@@ -507,34 +501,28 @@ public class serverSwitch {
     public void closeSessions(String threadName, String sessionName) {
         if (sessionName == null) return;
         final WorkflowThread st = getThread(threadName);
-        final Thread[] threadList = new Thread[((serverCore) st).getJobCount()];
-        serverCore.sessionThreadGroup.enumerate(threadList);
         
-        for (Thread t: threadList) {
+        for (Session s: ((serverCore) st).getJobList()) {
             if (
-                (t != null) && 
-                (t instanceof serverCore.Session) && 
-                (t.isAlive()) &&
-                (t.getName().equals(sessionName))
+                (s.isAlive()) &&
+                (s.getName().equals(sessionName))
             ) {
                 // try to stop session
-                ((Session)t).setStopped(true);
+                s.setStopped(true);
                 try { Thread.sleep(100); } catch (final InterruptedException ex) {}
                 
                 // try to interrupt session
-                if (t.isAlive()) {
-                    t.interrupt();
-                    try { Thread.sleep(100); } catch (final InterruptedException ex) {}
-                } 
+                s.interrupt();
+                try { Thread.sleep(100); } catch (final InterruptedException ex) {}
                 
                 // try to close socket
-                if (t.isAlive()) {
-                    ((Session)t).close();
+                if (s.isAlive()) {
+                    s.close();
                 }
                 
                 // wait for session to finish
-                if (t.isAlive()) {
-                    try { t.join(500); } catch (final InterruptedException ex) {}
+                if (s.isAlive()) {
+                    try { s.join(500); } catch (final InterruptedException ex) {}
                 }
             }
         }

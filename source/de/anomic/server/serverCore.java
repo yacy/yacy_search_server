@@ -44,9 +44,11 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.nio.channels.ClosedByInterruptException;
 import java.security.KeyStore;
+import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.net.ssl.HandshakeCompletedEvent;
@@ -90,18 +92,18 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     public    static final String LF_STRING = new String(new byte[]{LF});
     public    static final Class<?>[] stringType = {"".getClass()}; //  set up some reflection
     public    static final long startupTime = System.currentTimeMillis();
-    public    static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
-    protected static final HashMap<String, Object> commandObjMethodCache = new HashMap<String, Object>(5);
+    private   static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
+    private   static final HashMap<String, Object> commandObjMethodCache = new HashMap<String, Object>(5);
     
     /**
      * will be increased with each session and is used to return a hash code
      */
-    static int sessionCounter = 0;
+    private static int sessionCounter = 0;
     
     // static variables
-    private static final long keepAliveTimeout = 60000; // time that a connection is kept alive if requested with a keepAlive statement
-    public static final Boolean TERMINATE_CONNECTION = Boolean.FALSE;
-    public static final Boolean RESUME_CONNECTION = Boolean.TRUE;
+    private  static final long keepAliveTimeout = 60000; // time that a connection is kept alive if requested with a keepAlive statement
+    public   static final Boolean TERMINATE_CONNECTION = Boolean.FALSE;
+    public   static final Boolean RESUME_CONNECTION = Boolean.TRUE;
     
     /**
      * for brute-force prevention
@@ -120,18 +122,18 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     /**
      * specifies if the server should try to do a restart
      */
-    public boolean forceRestart = false;
+    private boolean forceRestart = false;
     
     public static boolean useStaticIP = false;
     
     private SSLSocketFactory sslSocketFactory = null;
     private ServerSocket socket;           // listener
     private final int timeout;             // connection time-out of the socket
-    serverHandler handlerPrototype;        // the command class (a serverHandler) 
+    private serverHandler handlerPrototype;        // the command class (a serverHandler) 
 
     private final serverSwitch switchboard;   // the command class switchboard
-    HashMap<String, String> denyHost;
-    int commandMaxLength;
+    private HashMap<String, String> denyHost;
+    private int commandMaxLength;
     private int maxBusySessions;
     private long lastAutoTermination;
     
@@ -203,7 +205,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         this.sslSocketFactory = initSSLFactory();
 
         // init session parameter
-        maxBusySessions = Math.max(1, Integer.valueOf(switchboard.getConfig("httpdMaxBusySessions","100")).intValue());
+        this.maxBusySessions = Math.max(1, Integer.valueOf(switchboard.getConfig("httpdMaxBusySessions","100")).intValue());
         
         this.lastAutoTermination = System.currentTimeMillis();
         
@@ -446,6 +448,17 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         }
         
         this.log.logConfig("* terminated");
+    }
+    
+    public List<Session> getJobList() {
+        final Thread[] threadList = new Thread[sessionThreadGroup.activeCount()];     
+        serverCore.sessionThreadGroup.enumerate(threadList);
+        ArrayList<Session> l = new ArrayList<Session>();
+        for (Thread t: threadList) {
+            if (t == null) continue;
+            l.add((Session) t);
+        }
+        return l;
     }
     
     public int getJobCount() {
@@ -786,6 +799,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                         break;
                     }
                     // check if we should still keep this alive:
+                    if (sessionThreadGroup.activeCount() > maxBusySessions / 2) break;
                     // the more connections are alive, the shorter the keep alive timeout
                     situationDependentKeepAliveTimeout = keepAliveTimeout / Math.max(1, sessionThreadGroup.activeCount() - 20);
                 } // end of while

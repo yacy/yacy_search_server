@@ -65,11 +65,6 @@ public final class Connections_p {
         // get the serverCore thread
         final WorkflowThread httpd = sb.getThread("10_httpd");
         
-        /* waiting for all threads to finish */
-        int count  = serverCore.sessionThreadGroup.activeCount();    
-        final Thread[] threadList = new Thread[((serverCore) httpd).getJobCount()];     
-        count = serverCore.sessionThreadGroup.enumerate(threadList);
-        
         // determines if name lookup should be done or not 
         boolean doNameLookup = false;
         if (post != null) {  
@@ -84,92 +79,89 @@ public final class Connections_p {
             }
         }  
         
+        // waiting for all threads to finish
         int idx = 0, numActiveRunning = 0, numActivePending = 0;
         boolean dark = true;
-        for ( int currentThreadIdx = 0; currentThreadIdx < count; currentThreadIdx++ )  {
-            final Thread t = threadList[currentThreadIdx];
-            if ((t != null) && (t instanceof serverCore.Session) && (t.isAlive())) {
-                // get the session object
-                final Session s = ((Session) t);
+        for (Session s: ((serverCore) httpd).getJobList()) {
+            if (!s.isAlive()) continue;
+            
+            // get the session runtime
+            final long sessionTime = s.getTime();
+            
+            // getthe request command line
+            boolean blockingRequest = false;
+            String commandLine = s.getCommandLine();
+            if (commandLine == null) blockingRequest = true;                
+            final int commandCount = s.getCommandCount();
+            
+            // get the source ip address and port
+            final InetAddress userAddress = s.getUserAddress();
+            final int userPort = s.getUserPort();
+            if (userAddress == null) continue;
+            
+            final boolean isSSL = s.isSSL();
+            
+            String dest = null;
+            String prot = null;
+            final serverHandler cmdObj = s.getCommandObj();
+            if (cmdObj instanceof HTTPDemon) {
+                prot = isSSL ? "https":"http";
                 
-                // get the session runtime
-                final long sessionTime = s.getTime();
+                // get the http command object
+                final HTTPDemon currentHttpd =  (HTTPDemon)cmdObj;
                 
-                // getthe request command line
-                boolean blockingRequest = false;
-                String commandLine = s.getCommandLine();
-                if (commandLine == null) blockingRequest = true;                
-                final int commandCount = s.getCommandCount();
+                // get the connection properties of this session
+                final Properties conProp = (Properties) currentHttpd.getConProp().clone();
                 
-                // get the source ip address and port
-                final InetAddress userAddress = s.getUserAddress();
-                final int userPort = s.getUserPort();
-                if (userAddress == null) continue;
-                
-                final boolean isSSL = s.isSSL();
-                
-                String dest = null;
-                String prot = null;
-                final serverHandler cmdObj = s.getCommandObj();
-                if (cmdObj instanceof HTTPDemon) {
-                    prot = isSSL ? "https":"http";
-                    
-                    // get the http command object
-                    final HTTPDemon currentHttpd =  (HTTPDemon)cmdObj;
-                    
-                    // get the connection properties of this session
-                    final Properties conProp = (Properties) currentHttpd.getConProp().clone();
-                    
-                    // get the destination host
-                    dest = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HOST);
-                    if (dest==null)continue;
-                }            
-                
-                if ((dest != null) && (dest.equals(virtualHost))) dest = sb.peers.mySeed().getName() + ".yacy";
-                
-                // determining if the source is a yacy host
-                yacySeed seed = null;
-                if (doNameLookup) {
-                    seed = sb.peers.lookupByIP(userAddress,true,false,false);
-                    if (seed != null) {
-                        if ((seed.hash.equals(sb.peers.mySeed().hash)) && 
-                                (!seed.get(yacySeed.PORT,"").equals(Integer.toString(userPort)))) {
-                            seed = null;
-                        }
+                // get the destination host
+                dest = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HOST);
+                if (dest==null)continue;
+            }            
+            
+            if ((dest != null) && (dest.equals(virtualHost))) dest = sb.peers.mySeed().getName() + ".yacy";
+            
+            // determining if the source is a yacy host
+            yacySeed seed = null;
+            if (doNameLookup) {
+                seed = sb.peers.lookupByIP(userAddress,true,false,false);
+                if (seed != null) {
+                    if ((seed.hash.equals(sb.peers.mySeed().hash)) && 
+                            (!seed.get(yacySeed.PORT,"").equals(Integer.toString(userPort)))) {
+                        seed = null;
                     }
                 }
-                
-                prop.put("list_" + idx + "_dark", dark ? "1" : "0");
-                dark=!dark;
-                try {
-                    prop.put("list_" + idx + "_serverSessionID",URLEncoder.encode(s.getName(),"UTF8"));
-                } catch (final UnsupportedEncodingException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-                prop.putHTML("list_" + idx + "_sessionName", s.getName());
-                prop.put("list_" + idx + "_proto", prot);
-                if (sessionTime > 1000*60) {
-                    prop.put("list_" + idx + "_ms", "0");
-                    prop.put("list_" + idx + "_ms_duration",DateFormatter.formatInterval(sessionTime));
-                } else {
-                    prop.put("list_" + idx + "_ms", "1");
-                    prop.putNum("list_" + idx + "_ms_duration", sessionTime);
-                }
-                prop.putHTML("list_" + idx + "_source",(seed!=null)?seed.getName()+".yacy":userAddress.getHostAddress()+":"+userPort);
-                prop.putHTML("list_" + idx + "_dest",(dest==null)?"-":dest);
-                if (blockingRequest) {
-                    prop.put("list_" + idx + "_running", "0");
-                    prop.putNum("list_" + idx + "_running_reqNr", commandCount+1);
-                    numActivePending++;
-                } else {
-                    prop.put("list_" + idx + "_running", "1");
-                    prop.put("list_" + idx + "_running_command", commandLine==null ? "" :commandLine);
-                    numActiveRunning++;
-                }
-                prop.putNum("list_" + idx + "_used", commandCount);
-                idx++;                
             }
+            
+            prop.put("list_" + idx + "_dark", dark ? "1" : "0");
+            dark=!dark;
+            try {
+                prop.put("list_" + idx + "_serverSessionID",URLEncoder.encode(s.getName(),"UTF8"));
+            } catch (final UnsupportedEncodingException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            prop.putHTML("list_" + idx + "_sessionName", s.getName());
+            prop.put("list_" + idx + "_proto", prot);
+            if (sessionTime > 1000*60) {
+                prop.put("list_" + idx + "_ms", "0");
+                prop.put("list_" + idx + "_ms_duration",DateFormatter.formatInterval(sessionTime));
+            } else {
+                prop.put("list_" + idx + "_ms", "1");
+                prop.putNum("list_" + idx + "_ms_duration", sessionTime);
+            }
+            prop.putHTML("list_" + idx + "_source",(seed!=null)?seed.getName()+".yacy":userAddress.getHostAddress()+":"+userPort);
+            prop.putHTML("list_" + idx + "_dest",(dest==null)?"-":dest);
+            if (blockingRequest) {
+                prop.put("list_" + idx + "_running", "0");
+                prop.putNum("list_" + idx + "_running_reqNr", commandCount+1);
+                numActivePending++;
+            } else {
+                prop.put("list_" + idx + "_running", "1");
+                prop.put("list_" + idx + "_running_command", commandLine==null ? "" :commandLine);
+                numActiveRunning++;
+            }
+            prop.putNum("list_" + idx + "_used", commandCount);
+            idx++;
         }     
         prop.put("list", idx);
         
