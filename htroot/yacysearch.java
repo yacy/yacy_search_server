@@ -147,7 +147,7 @@ public class yacysearch {
             prop.put("num-results_itemsPerPage", 10);
             prop.put("geoinfo", "0");
             prop.put("rss_queryenc", "");
-            
+            prop.put("meanCount", 5);
             return prop;
         }
         
@@ -501,7 +501,9 @@ public class yacysearch {
             // check suggestions
             int meanMax = 0;
             if (post != null && post.containsKey("meanCount")) {
-            	meanMax = Integer.parseInt(post.get("meanCount"));            	
+            	try {
+            	    meanMax = Integer.parseInt(post.get("meanCount"));            	
+            	} catch (NumberFormatException e) {}
             }
             prop.put("meanCount", meanMax);
             if (meanMax > 0) {

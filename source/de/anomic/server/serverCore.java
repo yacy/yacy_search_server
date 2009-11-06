@@ -864,7 +864,8 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             if (logerr) Log.logWarning("SERVER", "receive interrupted");
             return null;            
         } catch (final IOException e) {
-            if (logerr) Log.logWarning("SERVER", "receive closed by IOException: " + e.getMessage());
+            String message = e.getMessage();
+            if (logerr && !message.equals("Socket closed") && !message.equals("Connection reset")) Log.logWarning("SERVER", "receive closed by IOException: " + e.getMessage());
             return null;
         } finally {
         	try {
