@@ -30,6 +30,7 @@ import java.util.Map;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DiskSpace;
+import net.yacy.kelondro.util.MemoryControl;
 
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -105,6 +106,8 @@ public final class ResourceObserver {
      * checks the resources and pauses crawls if necessary
      */
     public void resourceObserverJob() {
+    	MemoryControl.setDHTkbytes(sb.getConfigLong(SwitchboardConstants.MEMORY_ACCEPTDHT, 0));
+    	
         checkDiskUsageCount++;
         checkMemoryUsageCount++;
         int tmpDisksFree = HIGH;
@@ -121,15 +124,15 @@ public final class ResourceObserver {
         }
         
         if (tmpDisksFree < HIGH || tmpMemoryFree < HIGH) {
-            if (!sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
+            if (tmpDisksFree < HIGH && !sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
                 log.logInfo("pausing local crawls");
                 sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
             }
-            if (!sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
+            if (tmpDisksFree < HIGH && !sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
                 log.logInfo("pausing remote triggered crawls");
                 sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
             }
-            if (tmpDisksFree == LOW && sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false)) {
+            if ((tmpDisksFree == LOW || tmpMemoryFree < HIGH) && sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false)) {
             	log.logInfo("disabling index receive");
                 sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
                 sb.peers.mySeed().setFlagAcceptRemoteIndex(false);
@@ -176,7 +179,7 @@ public final class ResourceObserver {
      * @return <ul>
      * <li><code>HIGH</code> if disk space is available</li>
      * <li><code>MEDIUM</code> if low disk space is available</li>
-     * <li><code>LOW</code> if lower than 100MB or 1/5 disk space is available</li>
+     * <li><code>LOW</code> if lower than hardlimit or 1/5 disk space is available (the max)</li>
      * </ul>
      */
     private int checkDisks() {
@@ -202,6 +205,7 @@ public final class ResourceObserver {
     }
     
     private int checkMemory() {
+    	if(!MemoryControl.getDHTallowed()) return LOW;
         return HIGH;
     }
 }

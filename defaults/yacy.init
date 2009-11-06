@@ -899,6 +899,9 @@ disk.free = 3000
 # minimum for DHT or 1/5th of former, whatever is max
 disk.free.hardlimit = 1000
 
+# minimum memory to accept dht-in (KB)
+#memory.acceptDHT = 10000
+
 # setting if execution of CGI files is allowed or not
 cgi.allow = false
 cgi.suffixes = cgi,pl

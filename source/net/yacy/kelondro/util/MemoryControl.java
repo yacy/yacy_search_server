@@ -42,6 +42,9 @@ public class MemoryControl {
     private static int gcs_pos = 0;
 
     private static long lastGC = 0l;
+    
+    private static long DHTkbytes = 0;
+    private static boolean allowDHT = true;
 
     /**
      * Runs the garbage collector if last garbage collection is more than last millis ago
@@ -154,6 +157,7 @@ public class MemoryControl {
                     + " KB (requested/available/average: "
                     + (size >> 10) + " / " + (avail >> 10) + " / " + (avg >> 10) + " KB)");
             }
+            checkDHTrule(avail);
             return avail >= size;
         } else {
             if (log.isFine()) log.logFine("former GCs indicate to not be able to free enough memory (requested/available/average: "
@@ -168,6 +172,18 @@ public class MemoryControl {
      */
     public static long used() {
         return total() - free();
+    }
+        
+    public static boolean getDHTallowed() {
+    	return allowDHT;
+    }
+    
+    public static void setDHTkbytes(long kbytes) {
+    	DHTkbytes = kbytes;
+    }
+    
+    private static void checkDHTrule(long available) {
+        if ((available >> 10) < DHTkbytes) allowDHT = false;
     }
 
     /**
