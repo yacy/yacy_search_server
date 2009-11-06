@@ -32,14 +32,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.apache.pdfbox.exceptions.CryptographyException;
 import org.apache.pdfbox.pdfparser.PDFParser;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDDocumentInformation;
 import org.apache.pdfbox.pdmodel.encryption.AccessPermission;
+import org.apache.pdfbox.pdmodel.encryption.BadSecurityHandlerException;
 import org.apache.pdfbox.pdmodel.encryption.StandardDecryptionMaterial;
 import org.apache.pdfbox.util.PDFTextStripper;
 
@@ -88,46 +91,57 @@ public class pdfParser extends AbstractParser implements Idiom {
         PDDocument theDocument = null;
         Writer writer = null;
         File writerFile = null;
-        try {       
-            // reducing thread priority
-            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);                        
-            
-            // deactivating the logging for jMimeMagic
-//            Logger theLogger = Logger.getLogger("org.pdfbox");
-//            theLogger.setLevel(Level.INFO);            
-            
-            String docTitle = null, docSubject = null, docAuthor = null, docKeywordStr = null;
-            
-            // check for interruption
-            checkInterruption();
-            
-            // creating a pdf parser
-            final PDFParser parser = new PDFParser(source);
+        
+        String docTitle = null, docSubject = null, docAuthor = null, docKeywordStr = null;
+        
+        // check for interruption
+        checkInterruption();
+        
+        // creating a pdf parser
+        final PDFParser parser;
+        final PDFTextStripper stripper;
+        try {
+            Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+            parser = new PDFParser(source);
             parser.parse();
-                        
-            // check for interruption
             checkInterruption();
-            
-            // creating a text stripper
-            final PDFTextStripper stripper = new PDFTextStripper();
+            stripper = new PDFTextStripper();
             theDocument = parser.getPDDocument();
-            
-            if (theDocument.isEncrypted()) {
+        } catch (IOException e) {
+            Log.logException(e);
+            throw new ParserException(e.getMessage(), location);
+        } finally {
+            Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
+        }
+        
+        if (theDocument.isEncrypted()) {
+            try {
                 theDocument.openProtection(new StandardDecryptionMaterial(""));
-                final AccessPermission perm = theDocument.getCurrentAccessPermission();
-                if (perm == null || !perm.canExtractContent())
-                    throw new ParserException("Document is encrypted", location);
+            } catch (BadSecurityHandlerException e) {
+                Log.logException(e);
+                throw new ParserException("Document is encrypted (1): " + e.getMessage(), location);
+            } catch (IOException e) {
+                Log.logException(e);
+                throw new ParserException("Document is encrypted (2): " + e.getMessage(), location);
+            } catch (CryptographyException e) {
+                Log.logException(e);
+                throw new ParserException("Document is encrypted (3): " + e.getMessage(), location);
             }
-            
-            // extracting some metadata
-            final PDDocumentInformation theDocInfo = theDocument.getDocumentInformation();            
-            if (theDocInfo != null) {
-                docTitle = theDocInfo.getTitle();
-                docSubject = theDocInfo.getSubject();
-                docAuthor = theDocInfo.getAuthor();
-                docKeywordStr = theDocInfo.getKeywords();
-            }            
-            
+            final AccessPermission perm = theDocument.getCurrentAccessPermission();
+            if (perm == null || !perm.canExtractContent())
+                throw new ParserException("Document is encrypted and cannot decrypted", location);
+        }
+        
+        // extracting some metadata
+        final PDDocumentInformation theDocInfo = theDocument.getDocumentInformation();            
+        if (theDocInfo != null) {
+            docTitle = theDocInfo.getTitle();
+            docSubject = theDocInfo.getSubject();
+            docAuthor = theDocInfo.getAuthor();
+            docKeywordStr = theDocInfo.getKeywords();
+        }            
+        
+        try {
             // creating a writer for output
             if ((this.contentLength == -1) || (this.contentLength > Idiom.MAX_KEEP_IN_MEMORY_SIZE)) {
                 writerFile = File.createTempFile("pdfParser",".prt");
@@ -138,67 +152,64 @@ public class pdfParser extends AbstractParser implements Idiom {
             try {
                 stripper.writeText(theDocument, writer ); // may throw a NPE
             } catch (Exception e) {
+                Log.logException(e);
                 Log.logWarning("pdfParser", e.getMessage());
             }
             theDocument.close(); theDocument = null;            
             writer.close();
-
-            
-            String[] docKeywords = null;
-            if (docKeywordStr != null) docKeywords = docKeywordStr.split(" |,");
-            
-            Document theDoc = null;
-            
-            if (writer instanceof CharBuffer) {
-                final byte[] contentBytes = ((CharBuffer)writer).toString().getBytes("UTF-8");
-                theDoc = new Document(
-                        location,
-                        mimeType,
-                        "UTF-8",
-                        null,
-                        docKeywords,
-                        (docTitle == null) ? docSubject : docTitle,
-                        docAuthor,
-                        null,
-                        null,
-                        contentBytes,
-                        null,
-                        null);
-            } else {
-                theDoc = new Document(
-                        location,
-                        mimeType,
-                        "UTF-8",
-                        null,
-                        docKeywords,
-                        (docTitle == null) ? docSubject : docTitle,
-                        docAuthor,
-                        null,
-                        null,
-                        writerFile,
-                        null,
-                        null);                
-            }
-            
-            return theDoc;
-        }
-        catch (final Exception e) {       
-            if (e instanceof InterruptedException) throw (InterruptedException) e;
-            if (e instanceof ParserException) throw (ParserException) e;
-            
+        } catch (IOException e) {
+            Log.logException(e);
             // close the writer
-            if (writer != null) try { writer.close(); } catch (final Exception ex) {/* ignore this */}
+            if (writer != null) try { writer.close(); } catch (final Exception ex) {}
             
             // delete the file
             if (writerFile != null) FileUtils.deletedelete(writerFile);
-            
-            Log.logException(e);
-            throw new ParserException("Unexpected error while parsing pdf file. " + e.getMessage(),location); 
-        } finally {
-            if (theDocument != null) try { theDocument.close(); } catch (final Exception e) {/* ignore this */}
-            if (writer != null)      try { writer.close(); }      catch (final Exception e) {/* ignore this */}
-            Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
+            throw new ParserException(e.getMessage(), location);
         }
+            
+        String[] docKeywords = null;
+        if (docKeywordStr != null) docKeywords = docKeywordStr.split(" |,");
+        
+        Document theDoc = null;
+        
+        if (writer instanceof CharBuffer) {
+            byte[] contentBytes;
+            try {
+                contentBytes = ((CharBuffer) writer).toString().getBytes("UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                Log.logException(e);
+                throw new ParserException(e.getMessage(), location);
+            }
+            theDoc = new Document(
+                    location,
+                    mimeType,
+                    "UTF-8",
+                    null,
+                    docKeywords,
+                    (docTitle == null) ? docSubject : docTitle,
+                    docAuthor,
+                    null,
+                    null,
+                    contentBytes,
+                    null,
+                    null);
+        } else {
+            theDoc = new Document(
+                    location,
+                    mimeType,
+                    "UTF-8",
+                    null,
+                    docKeywords,
+                    (docTitle == null) ? docSubject : docTitle,
+                    docAuthor,
+                    null,
+                    null,
+                    writerFile,
+                    null,
+                    null);                
+        }
+        
+        return theDoc;
     }
     
     @Override
