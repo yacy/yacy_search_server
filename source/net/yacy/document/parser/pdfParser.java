@@ -88,24 +88,13 @@ public class pdfParser extends AbstractParser implements Idiom {
     
     public Document parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
         
-        PDDocument theDocument = null;
-        Writer writer = null;
-        File writerFile = null;
-        
-        String docTitle = null, docSubject = null, docAuthor = null, docKeywordStr = null;
-        
-        // check for interruption
-        checkInterruption();
-        
-        // creating a pdf parser
+        // create a pdf parser
+        final PDDocument theDocument;
         final PDFParser parser;
-        final PDFTextStripper stripper;
         try {
             Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
             parser = new PDFParser(source);
             parser.parse();
-            checkInterruption();
-            stripper = new PDFTextStripper();
             theDocument = parser.getPDDocument();
         } catch (IOException e) {
             Log.logException(e);
@@ -113,6 +102,8 @@ public class pdfParser extends AbstractParser implements Idiom {
         } finally {
             Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
         }
+
+        checkInterruption();
         
         if (theDocument.isEncrypted()) {
             try {
@@ -134,6 +125,7 @@ public class pdfParser extends AbstractParser implements Idiom {
         
         // extracting some metadata
         final PDDocumentInformation theDocInfo = theDocument.getDocumentInformation();            
+        String docTitle = null, docSubject = null, docAuthor = null, docKeywordStr = null;
         if (theDocInfo != null) {
             docTitle = theDocInfo.getTitle();
             docSubject = theDocInfo.getSubject();
@@ -141,6 +133,8 @@ public class pdfParser extends AbstractParser implements Idiom {
             docKeywordStr = theDocInfo.getKeywords();
         }            
         
+        Writer writer = null;
+        File writerFile = null;
         try {
             // creating a writer for output
             if ((this.contentLength == -1) || (this.contentLength > Idiom.MAX_KEEP_IN_MEMORY_SIZE)) {
@@ -149,13 +143,9 @@ public class pdfParser extends AbstractParser implements Idiom {
             } else {
                 writer = new CharBuffer(); 
             }
-            try {
-                stripper.writeText(theDocument, writer ); // may throw a NPE
-            } catch (Exception e) {
-                Log.logException(e);
-                Log.logWarning("pdfParser", e.getMessage());
-            }
-            theDocument.close(); theDocument = null;            
+            final PDFTextStripper stripper = new PDFTextStripper();
+            stripper.writeText(theDocument, writer); // may throw a NPE
+            theDocument.close();           
             writer.close();
         } catch (IOException e) {
             Log.logException(e);
