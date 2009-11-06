@@ -166,7 +166,7 @@ public final class Log {
         enQueueLog(appName, Level.WARNING, message);
     }
     public final static void logException(final Throwable thrown) {
-        enQueueLog("", Level.WARNING, thrown.getMessage(), thrown);
+        enQueueLog("StackTrace", Level.WARNING, thrown.getMessage(), thrown);
     }
     public final static void logWarning(final String appName, final String message, final Throwable thrown) {
         enQueueLog(appName, Level.WARNING, message, thrown);
