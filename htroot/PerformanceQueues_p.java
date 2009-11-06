@@ -318,7 +318,7 @@ public class PerformanceQueues_p {
         // table thread pool settings
         prop.put("pool_0_name","Crawler Pool");
         prop.put("pool_0_maxActive", sb.getConfigLong("crawler.MaxActiveThreads", 0));
-        prop.put("pool_0_numActive",sb.crawlQueues.size());
+        prop.put("pool_0_numActive",sb.crawlQueues.workerSize());
         
         final WorkflowThread httpd = sb.getThread("10_httpd");
         prop.put("pool_1_name", "httpd Session Pool");

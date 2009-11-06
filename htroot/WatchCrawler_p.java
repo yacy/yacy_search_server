@@ -108,7 +108,7 @@ public class WatchCrawler_p {
             if ((post.containsKey("autoforward")) &&
                 (sb.crawlQueues.coreCrawlJobSize() == 0) &&
                 (sb.crawlQueues.remoteTriggeredCrawlJobSize() == 0) &&
-                (sb.getActiveQueueSize() < 30)) {
+                (sb.getIndexingProcessorsQueueSize() < 30)) {
                 prop.put("forwardToCrawlStart", "1");
             }
             

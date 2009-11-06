@@ -42,7 +42,7 @@ public class IndexCreateLoaderQueue_p {
         final serverObjects prop = new serverObjects();
         
 
-        if (sb.crawlQueues.size() == 0) {
+        if (sb.crawlQueues.workerSize() == 0) {
             prop.put("loader-set", "0");
         } else {
             prop.put("loader-set", "1");

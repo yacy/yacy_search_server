@@ -661,7 +661,7 @@ public final class Switchboard extends serverSwitch {
         log.logConfig("Finished Switchboard Initialization");
     }
 
-    public int getActiveQueueSize() {
+    public int getIndexingProcessorsQueueSize() {
         return
             this.indexingDocumentProcessor.queueSize() + 
             this.indexingCondensementProcessor.queueSize() + 
@@ -1066,16 +1066,16 @@ public final class Switchboard extends serverSwitch {
     }
 
     /**
-     * {@link CrawlProfile Crawl Profiles} are saved independantly from the queues themselves
+     * {@link CrawlProfile Crawl Profiles} are saved independently from the queues themselves
      * and therefore have to be cleaned up from time to time. This method only performs the clean-up
      * if - and only if - the {@link IndexingStack switchboard},
      * {@link LoaderDispatcher loader} and {@link plasmaCrawlNURL local crawl} queues are all empty.
      * <p>
      *   Then it iterates through all existing {@link CrawlProfile crawl profiles} and removes
-     *   all profiles which are not hardcoded.
+     *   all profiles which are not hard-coded.
      * </p>
      * <p>
-     *   <i>If this method encounters DB-failures, the profile DB will be resetted and</i>
+     *   <i>If this method encounters DB-failures, the profile DB will be reseted and</i>
      *   <code>true</code><i> will be returned</i>
      * </p>
      * @see #CRAWL_PROFILE_PROXY hardcoded
@@ -1088,9 +1088,13 @@ public final class Switchboard extends serverSwitch {
      * shutdown procedure
      */
     public boolean cleanProfiles() throws InterruptedException {
-        if ((getActiveQueueSize() > 0) || (crawlQueues.size() > 0) ||
+        if (getIndexingProcessorsQueueSize() > 0 ||
+            crawlQueues.workerSize() > 0 ||
+            crawlQueues.coreCrawlJobSize() > 0 ||
+            crawlQueues.limitCrawlJobSize() > 0 ||
+            crawlQueues.remoteTriggeredCrawlJobSize() > 0 ||
             (crawlStacker != null && crawlStacker.size() > 0) ||
-            (crawlQueues.noticeURL.notEmpty())) 
+            crawlQueues.noticeURL.notEmpty())
             return false;
         return this.crawler.cleanProfiles();
     }
@@ -1916,10 +1920,10 @@ public final class Switchboard extends serverSwitch {
             return "no DHT distribution: not enough words - wordIndex.size() = " + indexSegment.termIndex().sizesMax();
         }
         if ((getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_CRAWLING, "false").equalsIgnoreCase("false")) && (crawlQueues.noticeURL.notEmptyLocal())) {
-            return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + getActiveQueueSize();
+            return "no DHT distribution: crawl in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + getIndexingProcessorsQueueSize();
         }
-        if ((getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "false").equalsIgnoreCase("false")) && (getActiveQueueSize() > 1)) {
-            return "no DHT distribution: indexing in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + getActiveQueueSize();
+        if ((getConfig(SwitchboardConstants.INDEX_DIST_ALLOW_WHILE_INDEXING, "false").equalsIgnoreCase("false")) && (getIndexingProcessorsQueueSize() > 1)) {
+            return "no DHT distribution: indexing in progress: noticeURL.stackSize() = " + crawlQueues.noticeURL.size() + ", sbQueue.size() = " + getIndexingProcessorsQueueSize();
         }
         return null; // this means; yes, please do dht transfer
     }

@@ -352,13 +352,13 @@ public class CrawlQueues {
             return false;
         }
         
-        if (this.size() >= sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
+        if (this.workers.size() >= sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
             // try a cleanup
             cleanup();
         }
         // check again
-        if (this.size() >= sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
-            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.size() + "), httpClients = " + Client.connectionCount());
+        if (this.workers.size() >= sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10)) {
+            if (this.log.isFine()) log.logFine("remoteCrawlLoaderJob: too many processes in loader queue, dismissed (" + "cacheLoader=" + this.workers.size() + "), httpClients = " + Client.connectionCount());
             return false;
         }
         
@@ -514,7 +514,8 @@ public class CrawlQueues {
         }
     }
     
-    public int size() {
+    
+    public int workerSize() {
         return workers.size();
     }
     

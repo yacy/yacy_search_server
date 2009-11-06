@@ -48,9 +48,9 @@ public class queues_p {
         prop.putNum("rwipublictextSize", segment.termIndex().sizesMax());
 
         // loader queue
-        prop.put("loaderSize", Integer.toString(sb.crawlQueues.size()));        
+        prop.put("loaderSize", Integer.toString(sb.crawlQueues.workerSize()));        
         prop.put("loaderMax", sb.getConfigLong(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, 10));
-        if (sb.crawlQueues.size() == 0) {
+        if (sb.crawlQueues.workerSize() == 0) {
             prop.put("list-loader", "0");
         } else {
             final Request[] w = sb.crawlQueues.activeWorkerEntries();

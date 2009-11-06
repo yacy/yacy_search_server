@@ -286,7 +286,7 @@ public class Status {
         prop.putNum("connectionsMax", httpd.getMaxSessionCount());
         
         // Queue information
-        final int loaderJobCount = sb.crawlQueues.size();
+        final int loaderJobCount = sb.crawlQueues.workerSize();
         final int loaderMaxCount = Integer.parseInt(sb.getConfig(SwitchboardConstants.CRAWLER_THREADS_ACTIVE_MAX, "10"));
         final int loaderPercent = (loaderMaxCount==0)?0:loaderJobCount*100/loaderMaxCount;
         prop.putNum("loaderQueueSize", loaderJobCount);
