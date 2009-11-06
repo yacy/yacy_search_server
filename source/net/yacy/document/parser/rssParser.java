@@ -88,17 +88,21 @@ public class rssParser extends AbstractParser implements Idiom {
             
             final RSSFeed feed = new RSSReader(source).getFeed();
             if (feed == null) throw new ParserException("no feed in document",location);
-            if (feed.getChannel() == null) throw new ParserException("no channel in document",location);
             
-            // getting the rss feed title and description
-            final String feedTitle = feed.getChannel().getTitle();
-
-            // getting feed creator
-			final String feedCreator = feed.getChannel().getAuthor();
-			if (feedCreator != null && feedCreator.length() > 0) authors.append(",").append(feedCreator);            
-            
-            // getting the feed description
-            final String feedDescription = feed.getChannel().getDescription();
+            String feedTitle = "";
+            String feedDescription = "";
+            if (feed.getChannel() != null) {//throw new ParserException("no channel in document",location);
+                
+                // get the rss feed title and description
+                feedTitle = feed.getChannel().getTitle();
+    
+                // get feed creator
+    			final String feedCreator = feed.getChannel().getAuthor();
+    			if (feedCreator != null && feedCreator.length() > 0) authors.append(",").append(feedCreator);            
+                
+                // get the feed description
+                feedDescription = feed.getChannel().getDescription();
+            }
             
             if (feed.getImage() != null) {
                 final DigestURI imgURL = new DigestURI(feed.getImage(), null);
