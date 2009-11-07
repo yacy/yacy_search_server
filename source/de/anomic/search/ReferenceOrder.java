@@ -84,6 +84,7 @@ public class ReferenceOrder {
             String dom;
             Integer count;
             try {
+                // calculate min and max for normalization
                 while ((iEntry = vars.take()) != WordReferenceVars.poison) {
                     decodedEntries.put(iEntry);
                     // find min/max
@@ -99,21 +100,21 @@ public class ReferenceOrder {
                     }
                 }
 
-                if (min == null) min = entryMin.clone(); else min.min(entryMin);
-                if (max == null) max = entryMax.clone(); else max.max(entryMax);
+                // update domain score
                 Map.Entry<String, Integer> entry;
                 final Iterator<Map.Entry<String, Integer>> di = doms0.entrySet().iterator();
                 while (di.hasNext()) {
                     entry = di.next();
                     doms.addScore(entry.getKey(), (entry.getValue()).intValue());
                 }
-                    
                 if (doms.size() > 0) maxdomcount = doms.getMaxScore();
             } catch (InterruptedException e) {
                 Log.logException(e);
             } catch (Exception e) {
                 Log.logException(e);
             } finally {
+                if (min == null) min = entryMin.clone(); else min.min(entryMin);
+                if (max == null) max = entryMax.clone(); else max.max(entryMax);
                 try {
                     decodedEntries.put(WordReferenceVars.poison);
                 } catch (InterruptedException e) {}
@@ -139,6 +140,10 @@ public class ReferenceOrder {
         //return Long.MAX_VALUE - preRanking(ranking, iEntry, this.entryMin, this.entryMax, this.searchWords);
         // the normalizedEntry must be a normalized indexEntry
         final Bitfield flags = t.flags();
+        assert min != null;
+        assert max != null;
+        assert t != null;
+        assert ranking != null;
         final long tf = ((max.termFrequency() == min.termFrequency()) ? 0 : (((int)(((t.termFrequency()-min.termFrequency())*256.0)/(max.termFrequency() - min.termFrequency())))) << ranking.coeff_termfrequency);
         //System.out.println("tf(" + t.urlHash + ") = " + Math.floor(1000 * t.termFrequency()) + ", min = " + Math.floor(1000 * min.termFrequency()) + ", max = " + Math.floor(1000 * max.termFrequency()) + ", tf-normed = " + tf);
         int maxmaxpos = max.maxposition();
