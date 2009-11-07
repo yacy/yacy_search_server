@@ -36,10 +36,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -84,8 +82,8 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     private long  fileSizeLimit;
     private boolean useTailCache;
     private boolean exceed134217727;
-    private BlockingQueue<DiscoverOrder> orderQueue;
-    private Discovery[] discoveryThreads;
+    //private BlockingQueue<DiscoverOrder> orderQueue;
+    //private Discovery[] discoveryThreads;
     
     public SplitTable(
             final File path, 
@@ -112,12 +110,14 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         this.useTailCache = useTailCache;
         this.exceed134217727 = exceed134217727;
         this.entryOrder = new Row.EntryComparator(rowdef.objectOrder);
+        /*
         this.orderQueue = new LinkedBlockingQueue<DiscoverOrder>();
         this.discoveryThreads = new Discovery[Runtime.getRuntime().availableProcessors() + 1];
         for (int i = 0; i < this.discoveryThreads.length; i++) {
             this.discoveryThreads[i] = new Discovery(this.orderQueue);
             this.discoveryThreads[i].start();
         }
+        */
         init();
     }
     
@@ -330,6 +330,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
      * challenge class for concurrent keeperOf implementation
      *
      */
+    /*
     private static final class Challenge {
         // the Challenge is a discover order entry
         private final byte[] key;
@@ -363,12 +364,14 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
             return this.discovery;
         }
     }
+    */
     
     /**
      * A DiscoverOrder is a class to order a check for a specific table
      * for the occurrences of a given key
      *
      */
+    /*
     private static final class DiscoverOrder {
         public Challenge challenge;
         public ObjectIndex objectIndex;
@@ -394,12 +397,14 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         }
     }
     private static final DiscoverOrder poisonDiscoverOrder = new DiscoverOrder();
+    */
     
     /**
      * the Discovery class is used to start some concurrent threads that check the database
      * table files for occurrences of key after a keeperOf was submitted
      *
      */
+    /*
     private static final class Discovery extends Thread {
         // the class discovers keeper locations in the splitted table
         BlockingQueue<DiscoverOrder> orderQueue;
@@ -431,16 +436,18 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         }
         return true;
     }
+    */
 
     private ObjectIndex keeperOf(final byte[] key) {
-        if (!discoveriesAlive()) {
-            synchronized (tables) {
+        //if (!discoveriesAlive()) {
+            //synchronized (tables) {
                 for (ObjectIndex oi: tables.values()) {
                     if (oi.has(key)) return oi;
                 }
                 return null;
-            }
-        }
+            //}
+        //}
+            /*
         Challenge challenge = null;
         synchronized (tables) {
             int tableCount = this.tables.size();
@@ -465,6 +472,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         ObjectIndex result = challenge.discover(1000);
         //System.out.println("result of discovery: file = " + ((result == null) ? "null" : result.filename()));
         return result;
+        */
     }
     
     /*
@@ -615,6 +623,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     
     public synchronized void close() {
         // stop discover threads
+        /*
         if (this.orderQueue != null) for (int i = 0; i < this.discoveryThreads.length; i++) {
             try {
                 this.orderQueue.put(poisonDiscoverOrder);
@@ -622,7 +631,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
                 Log.logSevere("SplitTable", "", e);
             }
         }
-        
+        */
         if (tables == null) return;
         this.executor.shutdown();
         try {
