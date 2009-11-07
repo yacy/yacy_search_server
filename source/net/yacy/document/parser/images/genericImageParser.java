@@ -79,6 +79,7 @@ public class genericImageParser extends AbstractParser implements Idiom {
         } catch (final IOException e) {
             throw new ParserException(e.getMessage(), location);
         }
+        if (image == null) throw new ParserException("ImageIO returned NULL", location);
         
         /*
         // scan the image
