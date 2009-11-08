@@ -43,7 +43,7 @@ public class BlacklistFile {
     
     
     /**
-     * Construct a unified array of file names from comma seperated file name
+     * Construct a unified array of file names from comma separated file name
      * list.
      * 
      * @return unified String array of file names

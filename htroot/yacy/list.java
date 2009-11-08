@@ -28,7 +28,8 @@
 
 import java.io.File;
 
-import de.anomic.data.listManager;
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
@@ -79,7 +80,7 @@ public final class list {
                     if (blackListName.equals("") || filenamesarray[i].equals(blackListName)) {
                         final String filename = filenamesarray[i];
                         final File fileObj = new File(listsPath,filename);
-                        out.append(listManager.getListString(fileObj, false)).append(serverCore.CRLF_STRING);
+                        out.append(FileUtils.getListString(fileObj, false)).append(serverCore.CRLF_STRING);
                     }
                 }
             }

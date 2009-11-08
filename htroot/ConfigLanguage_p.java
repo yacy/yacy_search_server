@@ -42,7 +42,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.data.listManager;
 import de.anomic.data.translator;
 import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
@@ -65,7 +64,7 @@ public class ConfigLanguage_p {
         //prop.put("currentlang", ""); //is done by Translationtemplate
         prop.put("status", "0");//nothing
 
-        List<String> langFiles = listManager.getDirListing(langPath, LANG_FILENAME_FILTER);
+        List<String> langFiles = FileUtils.getDirListing(langPath, LANG_FILENAME_FILTER);
         if(langFiles == null){
             return prop;
         }
@@ -128,7 +127,7 @@ public class ConfigLanguage_p {
         }
 
         //reread language files
-        langFiles = listManager.getDirListing(langPath, LANG_FILENAME_FILTER);
+        langFiles = FileUtils.getDirListing(langPath, LANG_FILENAME_FILTER);
         Collections.sort(langFiles);
         final HashMap<String, String> langNames = translator.langMap(env);
         String langKey, langName;

@@ -48,6 +48,7 @@ import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 
 import de.anomic.data.listManager;
@@ -451,7 +452,7 @@ public class IndexControlRWIs_p {
             prop.put("genUrlList_urlList", i);
             prop.putHTML("genUrlList_keyString", keystring);
             prop.put("genUrlList_count", i);
-            putBlacklists(prop, listManager.getDirListing(listManager.listsPath));
+            putBlacklists(prop, FileUtils.getDirListing(listManager.listsPath));
         }
     }
     

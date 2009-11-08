@@ -24,30 +24,21 @@
 
 package de.anomic.data;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
+import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 import net.yacy.repository.BlacklistFile;
 
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
-import de.anomic.server.serverCore;
 
 // The Naming of the functions is a bit strange...
 
@@ -118,199 +109,10 @@ public class listManager {
 
 //================general Lists==================
 
-    /**
-     * Read lines of a file into an ArrayList.
-     * 
-     * @param listFile the file
-     * @return the resulting array as an ArrayList
-     */
-    public static ArrayList<String> getListArray(final File listFile){
-        String line;
-        final ArrayList<String> list = new ArrayList<String>();
-        int count = 0;
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile),"UTF-8"));
-
-            while((line = br.readLine()) != null){
-                list.add(line);
-                count++;
-            }
-            br.close();
-        } catch(final IOException e) {
-            // list is empty
-        } finally {
-            if (br!=null) try { br.close(); } catch (final Exception e) {}
-        }
-        return list;
-    }
-
-    /**
-     * Write a String to a file (used for string representation of lists).
-     * 
-     * @param listFile the file to write to
-     * @param out the String to write
-     * @return returns <code>true</code> if successful, <code>false</code> otherwise
-     */
-    public static boolean writeList(final File listFile, final String out) {
-        BufferedWriter bw = null;
-        try {
-            bw = new BufferedWriter(new PrintWriter(new FileWriter(listFile)));
-            bw.write(out);
-            bw.close();
-            return true;
-        } catch(final IOException e) {
-            return false;
-        } finally {
-            if (bw!=null) try { bw.close(); } catch (final Exception e) {}
-        }
-    }
-
-    /**
-     * Write elements of an Array of Strings to a file (one element per line).
-     *  
-     * @param listFile the file to write to
-     * @param list the Array to write
-     * @return returns <code>true</code> if successful, <code>false</code> otherwise
-     */
-    public static boolean writeList(final File listFile, final String[] list){
-        final StringBuilder out = new StringBuilder();
-        for(int i=0;i < list.length; i++){
-            out
-            .append(list[i])
-            .append(serverCore.CRLF_STRING);
-        }
-        return writeList(listFile, new String(out)); //(File, String)
-    }
-
-    // same as below
     public static String getListString(final String filename, final boolean withcomments) {        
         final File listFile = new File(listsPath ,filename);
-        return getListString(listFile, withcomments);
+        return FileUtils.getListString(listFile, withcomments);
     }
-
-    /**
-     * Read lines of a text file into a String, optionally ignoring comments.
-     * 
-     * @param listFile the File to read from.
-     * @param withcomments If <code>false</code> ignore lines starting with '#'.
-     * @return String representation of the file content.
-     */
-    public static String getListString(final File listFile, final boolean withcomments){
-        final StringBuilder temp = new StringBuilder();
-        
-        BufferedReader br = null;        
-        try{
-            br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile)));
-            temp.ensureCapacity((int) listFile.length());
-            
-            // Read the List
-            String line = "";
-            while ((line = br.readLine()) != null) {
-                if ((!line.startsWith("#") || withcomments) || !line.equals("")) {
-                    //temp += line + serverCore.CRLF_STRING;
-                    temp.append(line)
-                        .append(serverCore.CRLF_STRING);
-                }
-            }
-            br.close();
-        } catch (final IOException e) {
-        } finally {
-            if (br!=null) try { br.close(); } catch (final Exception e) {}
-        }
-
-        return new String(temp);
-    }
-
-    /**
-     * Read content of a directory into a String array of file names.
-     * @param dirname The directory to get the file listing from. If it doesn't exist yet,
-     * it will be created.
-     * @return array of file names
-     */
-    public static List<String> getDirListing(final String dirname){
-        return getDirListing(dirname, null);
-    }
-    
-    /**
-     * Read content of a directory into a String array of file names.
-     * @param dirname The directory to get the file listing from. If it doesn't exist yet,
-     * it will be created.
-     * @param filter String which contains a regular expression which has to be matched by
-     * file names in order to appear in returned array. All file names will be returned if
-     * filter is null.
-     * @return array of file names
-     */
-    public static List<String> getDirListing(final String dirname, final String filter) {
-        return getDirListing(new File(dirname), filter);
-    }
-
-    /**
-     * Read content of a directory into a String array of file names.
-     * 
-     * @param dir The directory to get the file listing from. If it doesn't exist yet,
-     * it will be created.
-     * @return array of file names
-     */
-    public static List<String> getDirListing(final File dir){
-        return getDirListing(dir, null);
-    }
-    
-    /**
-     * Read content of a directory into a String array of file names.
-     * @param dir The directory to get the file listing from. If it doesn't exist yet,
-     * it will be created.
-     * @param filter String which contains a regular expression which has to be matched by
-     * file names in order to appear in returned array. All file names will be returned if
-     * filter is null.
-     * @return array of file names
-     */
-    public static List<String> getDirListing(final File dir, final String filter){
-        List<String> ret = new LinkedList<String>();
-        File[] fileList;
-        if (dir != null ) {
-            if (!dir.exists()) {
-                dir.mkdir();
-            }
-            fileList = dir.listFiles();
-            for (int i=0; i<= fileList.length-1; i++) {
-                if (filter == null || fileList[i].getName().matches(filter)) {
-                    ret.add(fileList[i].getName());
-                }
-            }
-            return ret;
-        }
-        return null;
-    }    
-
-    // same as below
-    public static ArrayList<File> getDirsRecursive(final File dir, final String notdir){
-        return getDirsRecursive(dir, notdir, true);
-    }
-    
-    /**
-     * Returns a List of all dirs and subdirs as File Objects
-     *
-     * Warning: untested
-     */
-    public static ArrayList<File> getDirsRecursive(final File dir, final String notdir, final boolean excludeDotfiles){
-        final File[] dirList = dir.listFiles();
-        final ArrayList<File> resultList = new ArrayList<File>();
-        ArrayList<File> recursive;
-        Iterator<File> iter;
-        for (int i=0;i<dirList.length;i++) {
-            if (dirList[i].isDirectory() && (!excludeDotfiles || !dirList[i].getName().startsWith(".")) && !dirList[i].getName().equals(notdir)) {
-                resultList.add(dirList[i]);
-                recursive = getDirsRecursive(dirList[i], notdir, excludeDotfiles);
-                iter=recursive.iterator();
-                while (iter.hasNext()) {
-                    resultList.add(iter.next());
-                }
-            }
-        }
-        return resultList;
-    }
-
     
 //================Helper functions for collection conversion==================
     

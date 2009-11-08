@@ -28,7 +28,6 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.FileUtils;
 
-import de.anomic.data.listManager;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -88,7 +87,7 @@ public class migration {
         final File skinsPath = sb.getConfigPath("skinPath", "DATA/SKINS");
         final File defaultSkinsPath = new File(sb.getRootPath(), "skins");
         if (defaultSkinsPath.exists()) {
-            final List<String> skinFiles = listManager.getDirListing(defaultSkinsPath.getAbsolutePath());
+            final List<String> skinFiles = FileUtils.getDirListing(defaultSkinsPath.getAbsolutePath());
             mkdirs(skinsPath);
             for (String skinFile : skinFiles){
                 if (skinFile.endsWith(".css")){

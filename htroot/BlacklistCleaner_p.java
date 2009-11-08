@@ -52,6 +52,7 @@ import de.anomic.server.serverSwitch;
 import java.util.Set;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 
 public class BlacklistCleaner_p {
@@ -94,7 +95,7 @@ public class BlacklistCleaner_p {
                 }
             }
 
-            putBlacklists(prop, listManager.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
+            putBlacklists(prop, FileUtils.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
 
             if (blacklistToUse != null) {
                 prop.put("results", "1");
@@ -127,7 +128,7 @@ public class BlacklistCleaner_p {
             }
         } else {
             prop.put("results", "0");
-            putBlacklists(prop, listManager.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
+            putBlacklists(prop, FileUtils.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER), blacklistToUse);
         }
         
         return prop;
@@ -241,7 +242,7 @@ public class BlacklistCleaner_p {
         final Map<String, Integer> illegalEntries = new HashMap<String, Integer>();
         final Set<String> legalEntries = new HashSet<String>();
         
-        final List<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
+        final List<String> list = FileUtils.getListArray(new File(listManager.listsPath, blacklistToUse));
         final Map<String, String> properties= new HashMap<String, String>();
         properties.put("allowRegex", String.valueOf(allowRegex));
 
@@ -276,7 +277,7 @@ public class BlacklistCleaner_p {
      */
     private static int removeEntries(final String blacklistToUse, final String[] supportedBlacklistTypes, final String[] entries) {
         // load blacklist data from file
-        final ArrayList<String> list = listManager.getListArray(new File(listManager.listsPath, blacklistToUse));
+        final ArrayList<String> list = FileUtils.getListArray(new File(listManager.listsPath, blacklistToUse));
         
         boolean listChanged = false;
         
@@ -315,7 +316,7 @@ public class BlacklistCleaner_p {
             SearchEventCache.cleanupEvents(true);
         }
         if (listChanged){
-            listManager.writeList(new File(listManager.listsPath, blacklistToUse), list.toArray(new String[list.size()]));
+            FileUtils.writeList(new File(listManager.listsPath, blacklistToUse), list.toArray(new String[list.size()]));
         }
         return entries.length;
     }

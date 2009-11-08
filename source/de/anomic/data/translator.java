@@ -49,6 +49,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
 
 import de.anomic.server.serverSwitch;
@@ -86,7 +87,7 @@ public class translator {
 		final Hashtable<String, Hashtable<String, String>> lists = new Hashtable<String, Hashtable<String, String>>(); //list of translationLists for different files.
 		Hashtable<String, String> translationList = new Hashtable<String, String>(); //current Translation Table
         
-		final ArrayList<String> list = listManager.getListArray(translationFile);
+		final ArrayList<String> list = FileUtils.getListArray(translationFile);
 		final Iterator<String> it = list.iterator();
 		String line = "";
 		String[] splitted;
@@ -204,7 +205,7 @@ public class translator {
 	}
 
     public static boolean translateFilesRecursive(final File sourceDir, final File destDir, final File translationFile, final String extensions, final String notdir){
-        final ArrayList<File> dirList=listManager.getDirsRecursive(sourceDir, notdir);
+        final ArrayList<File> dirList=FileUtils.getDirsRecursive(sourceDir, notdir);
         dirList.add(sourceDir);
         final Iterator<File> it=dirList.iterator();
         File file=null;

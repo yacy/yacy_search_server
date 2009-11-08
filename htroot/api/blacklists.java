@@ -2,6 +2,8 @@
 import java.io.File;
 import java.util.List;
 
+import net.yacy.kelondro.util.FileUtils;
+
 import de.anomic.data.listManager;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverObjects;
@@ -13,7 +15,7 @@ public class blacklists {
         final serverObjects prop = new serverObjects();
 
         listManager.listsPath = new File(listManager.switchboard.getRootPath(),listManager.switchboard.getConfig("listManager.listsPath", "DATA/LISTS"));
-        final List<String> dirlist = listManager.getDirListing(listManager.listsPath);
+        final List<String> dirlist = FileUtils.getDirListing(listManager.listsPath);
         int blacklistCount=0;
 
         final String blackListName = (post == null) ? "" : post.get("listname", "");
@@ -27,7 +29,7 @@ public class blacklists {
 
                     if (listManager.listSetContains("BlackLists.Shared", element)) {
 
-                        list = listManager.getListArray(new File(listManager.listsPath, element));
+                        list = FileUtils.getListArray(new File(listManager.listsPath, element));
 
                         count=0;
                         for (int j=0;j<list.size();++j){

@@ -34,14 +34,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.SetTools;
 
 public class Blacklist {
@@ -53,6 +54,8 @@ public class Blacklist {
     public static final String BLACKLIST_SEARCH   = "search";
     public static final String BLACKLIST_SURFTIPS = "surftips";
     public static final String BLACKLIST_NEWS     = "news";
+
+    public final static String BLACKLIST_FILENAME_FILTER = "^.*\\.black$";
     
     public static final int ERR_TWO_WILDCARDS_IN_HOST = 1;
     public static final int ERR_SUBDOMAIN_XOR_WILDCARD = 2;
@@ -98,9 +101,7 @@ public class Blacklist {
             this.cachedUrlHashs.put(blacklistType, Collections.synchronizedSet(new HashSet<String>()));
         }            
     }
-    
 
-    
     public void setRootPath(final File rootPath) {
         if (rootPath == null) 
             throw new NullPointerException("The blacklist root path must not be null.");
@@ -458,5 +459,26 @@ public class Blacklist {
         }
         return ret;
     }
+    
+    public static final String defaultBlacklist(final File listsPath) {
+        List<String> dirlist = FileUtils.getDirListing(listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);
+        if (dirlist.size() == 0) return null;
+        return dirlist.get(0);
+    }
 
+    /**
+     * Checks if a blacklist file contains a certain entry.
+     * @param blacklistToUse The blacklist.
+     * @param newEntry The Entry.
+     * @return True if file contains entry, else false.
+     */
+    public static boolean blacklistFileContains(final File listsPath, final String blacklistToUse, String newEntry) {
+        boolean ret = false;
+        final HashSet<String> Blacklist = new HashSet<String>(FileUtils.getListArray(new File(listsPath, blacklistToUse)));
+        if (Blacklist != null) {
+            ret = Blacklist.contains(newEntry);
+        }
+        return ret;
+    }
+    
 }

@@ -41,7 +41,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.data.listManager;
 import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
@@ -63,7 +62,7 @@ public class ConfigAppearance_p {
         prop.put("currentskin", "");
         prop.put("status", "0"); // nothing
 
-        List<String> skinFiles = listManager.getDirListing(skinPath, SKIN_FILENAME_FILTER);
+        List<String> skinFiles = FileUtils.getDirListing(skinPath, SKIN_FILENAME_FILTER);
         if (skinFiles == null) {
             return prop;
         }
@@ -129,7 +128,7 @@ public class ConfigAppearance_p {
         }
 
         // reread skins
-        skinFiles = listManager.getDirListing(skinPath, SKIN_FILENAME_FILTER);
+        skinFiles = FileUtils.getDirListing(skinPath, SKIN_FILENAME_FILTER);
         Collections.sort(skinFiles);
         int count = 0;
         for (String skinFile : skinFiles) {

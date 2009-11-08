@@ -94,7 +94,7 @@ public class sharedBlacklist_p {
         
             
             // loading all blacklist files located in the directory
-            final List<String> dirlist = listManager.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER);
+            final List<String> dirlist = FileUtils.getDirListing(listManager.listsPath, BLACKLIST_FILENAME_FILTER);
             
             // List BlackLists
             int blacklistCount = 0;
@@ -280,7 +280,7 @@ public class sharedBlacklist_p {
             // generate the html list
             if (otherBlacklist != null) {
                 // loading the current blacklist content
-                final HashSet<String> Blacklist = new HashSet<String>(listManager.getListArray(new File(listManager.listsPath, selectedBlacklistName)));
+                final HashSet<String> Blacklist = new HashSet<String>(FileUtils.getListArray(new File(listManager.listsPath, selectedBlacklistName)));
                 
                 int count = 0;
                 while (otherBlacklist.hasNext()) {
