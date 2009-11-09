@@ -571,7 +571,7 @@
 
      Note: format=b cannot be used with cpu=old|times
 -->
-    <java classname="yacy" fork="yes">
+    <java classname="net.yacy.yacy" fork="yes">
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${htroot}"/>
@@ -588,7 +588,7 @@
   <!-- run a single file (selected in NetBeans4) -->
   <target name="run-single" depends="compile" description="Run Single File">
     <fail unless="classname">Must set property 'classname'</fail>
-    <java classname="yacy" fork="yes">
+    <java classname="net.yacy.yacy" fork="yes">
       <classpath refid="run.classpath"/>
       <classpath>
         <pathelement location="${build}"/>
@@ -602,7 +602,7 @@
 
   <!-- run YaCy with remote debugging enabled on port 8000 -->
   <target name="debug" description="Debug YaCy">
-    <java classname="yacy" fork="yes">
+    <java classname="net.yacy.yacy" fork="yes">
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${htroot}"/>
@@ -619,7 +619,7 @@
 
   <!-- stop YaCy again -->
   <target name="stop" description="Stop YaCy">
-    <java classname="yacy" fork="yes">
+    <java classname="net.yacy.yacy" fork="yes">
       <classpath>
         <pathelement location="${build}"/>
         <pathelement location="${htroot}"/>
