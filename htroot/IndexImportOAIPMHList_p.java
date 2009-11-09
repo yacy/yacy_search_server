@@ -43,7 +43,7 @@ public class IndexImportOAIPMHList_p {
         prop.put("source", 0);
         
         if (post != null && post.containsKey("source")) {
-            Set<String> oaiRoots = OAIPMHImporter.getOAIServer(sb.loader);
+            Set<String> oaiRoots = OAIPMHImporter.getAllListedOAIServer(sb.loader);
             
             boolean dark = false;
             int cnt = 0;

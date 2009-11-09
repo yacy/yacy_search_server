@@ -180,8 +180,8 @@ public class yacysearch {
             originalUrlMask = ".*";
         }
 
-        String prefermask = (post == null ? "" : post.get("prefermaskfilter", ""));
-        if ((prefermask.length() > 0) && (prefermask.indexOf(".*") < 0)) prefermask = ".*" + prefermask + ".*";
+        String prefermask = (post == null) ? "" : post.get("prefermaskfilter", "");
+        if (prefermask.length() > 0 && prefermask.indexOf(".*") < 0) prefermask = ".*" + prefermask + ".*";
 
         Bitfield constraint = (post != null && post.containsKey("constraint") && post.get("constraint", "").length() > 0) ? new Bitfield(4, post.get("constraint", "______")) : null;
         if (indexof) {

@@ -216,35 +216,36 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
     public final synchronized boolean has(final byte[] key) {
         // first look into the miss cache
         if (readMissCache != null) {
-            if (readMissCache.get(key) == null) {
-                this.hasnotMiss++;
-            } else {
+            if (readMissCache.has(key)) {
                 this.hasnotHit++;
                 return false;
+            } else {
+                this.hasnotMiss++;
             }
         }
 
         // then try the hit cache and the buffers
         if (readHitCache != null) {
-            if (readHitCache.get(key) != null) {
+            if (readHitCache.has(key)) {
                 this.readHit++;
                 return true;
+            } else {
+                this.readMiss++;
             }
         }
         
         // finally ask the back-end index
-        this.readMiss++;
         return index.has(key);
     }
     
     public final synchronized Row.Entry get(final byte[] key) throws IOException {
         // first look into the miss cache
         if (readMissCache != null) {
-            if (readMissCache.get(key) == null) {
-                this.hasnotMiss++;
-            } else {
+            if (readMissCache.has(key)) {
                 this.hasnotHit++;
                 return null;
+            } else {
+                this.hasnotMiss++;
             }
         }
 

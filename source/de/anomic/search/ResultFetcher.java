@@ -29,10 +29,15 @@ package de.anomic.search;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.document.Condenser;
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.MemoryTracker;
 import net.yacy.kelondro.util.SetTools;
@@ -173,7 +178,12 @@ public class ResultFetcher {
                     
                     // place the result to the result vector
                     if (!result.exists(resultEntry)) {
-                        result.push(resultEntry, Long.valueOf(rankedCache.getOrder().cardinal(resultEntry.word())));
+                        
+                        // apply post-ranking
+                        long ranking = Long.valueOf(rankedCache.getOrder().cardinal(resultEntry.word()));
+                        ranking += postRanking(resultEntry, rankedCache.getTopics());
+                        
+                        result.push(resultEntry, ranking);
                         if (nav_topics) rankedCache.addTopics(resultEntry);
                     }
                     //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
@@ -355,5 +365,49 @@ public class ResultFetcher {
         }
         return this.result.list(this.result.size());
     }
-    
+
+    public long postRanking(
+            final ResultEntry rentry,
+            final Map<String, Integer> topwords) {
+
+        long r = 0;
+        
+        // for media search: prefer pages with many links
+        if (query.contentdom == QueryParams.CONTENTDOM_IMAGE) r += rentry.limage() << query.ranking.coeff_cathasimage;
+        if (query.contentdom == QueryParams.CONTENTDOM_AUDIO) r += rentry.laudio() << query.ranking.coeff_cathasaudio;
+        if (query.contentdom == QueryParams.CONTENTDOM_VIDEO) r += rentry.lvideo() << query.ranking.coeff_cathasvideo;
+        if (query.contentdom == QueryParams.CONTENTDOM_APP  ) r += rentry.lapp()   << query.ranking.coeff_cathasapp;
+        
+        // prefer hit with 'prefer' pattern
+        if (rentry.url().toNormalform(true, true).matches(query.prefer)) r += 256 << query.ranking.coeff_prefer;
+        if (rentry.title().matches(query.prefer)) r += 256 << query.ranking.coeff_prefer;
+        
+        // apply 'common-sense' heuristic using references
+        final String urlstring = rentry.url().toNormalform(true, true);
+        final String[] urlcomps = DigestURI.urlComps(urlstring);
+        final String[] descrcomps = rentry.title().toLowerCase().split(DigestURI.splitrex);
+        Integer tc;
+        for (int j = 0; j < urlcomps.length; j++) {
+            tc = topwords.get(urlcomps[j]);
+            if (tc != null) r += Math.max(1, tc.intValue()) << query.ranking.coeff_urlcompintoplist;
+        }
+        for (int j = 0; j < descrcomps.length; j++) {
+            tc = topwords.get(descrcomps[j]);
+            if (tc != null) r += Math.max(1, tc) << query.ranking.coeff_descrcompintoplist;
+        }
+        
+        // apply query-in-result matching
+        final Set<byte[]> urlcomph = Word.words2hashSet(urlcomps);
+        final Set<byte[]> descrcomph = Word.words2hashSet(descrcomps);
+        final Iterator<byte[]> shi = query.queryHashes.iterator();
+        byte[] queryhash;
+        while (shi.hasNext()) {
+            queryhash = shi.next();
+            if (urlcomph.contains(queryhash)) r += 256 << query.ranking.coeff_appurl;
+            if (descrcomph.contains(queryhash)) r += 256 << query.ranking.coeff_app_dc_title;
+        }
+        
+        return r;
+    }
+
 }

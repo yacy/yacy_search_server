@@ -31,12 +31,17 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.text.ParseException;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.repository.LoaderDispatcher;
 import net.yacy.document.parser.csvParser;
 
@@ -133,7 +138,7 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         this.message = "loading first part of records";
         while (true) {
             try {
-                OAIPMHReader reader = new OAIPMHReader(this.loader, this.source, Switchboard.getSwitchboard().surrogatesInPath, "oaipmh");
+                OAIPMHReader reader = new OAIPMHReader(this.loader, this.source, Switchboard.getSwitchboard().surrogatesInPath, filenamePrefix);
                 this.chunkCount++;
                 this.recordsCount += reader.getResumptionToken().getRecordCounter();
                 this.source = reader.getResumptionToken().resumptionURL(this.source);
@@ -170,7 +175,27 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         return 0;
     }
     
-    public static Set<String> getOAIServer(LoaderDispatcher loader) {
+    public static Set<String> getUnloadedOAIServer(
+            LoaderDispatcher loader,
+            File surrogatesIn,
+            File surrogatesOut,
+            long staleLimit) {
+        Set<String> plainList = getAllListedOAIServer(loader);
+        Map<String, Date> loaded = getLoadedOAIServer(surrogatesIn, surrogatesOut);
+        long limit = System.currentTimeMillis() - staleLimit;
+        for (Map.Entry<String, Date> a: loaded.entrySet()) {
+            if (a.getValue().getTime() > limit) plainList.remove(a.getKey());
+        }
+        return plainList;
+    }
+    
+    /**
+     * use the list server at http://roar.eprints.org/index.php?action=csv
+     * to produce a list of OAI-PMH sources
+     * @param loader
+     * @return the list of oai-pmh sources
+     */
+    public static Set<String> getAllListedOAIServer(LoaderDispatcher loader) {
         TreeSet<String> list = new TreeSet<String>();
 
         // read roar
@@ -204,5 +229,66 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         
         return list;
     }
+
+    /**
+     * get a map for already loaded oai-pmh servers and their latest access date
+     * @param surrogatesIn
+     * @param surrogatesOut
+     * @return a map where the key is the hostID of the servers and the value is the last access date
+     */
+    @SuppressWarnings("unchecked")
+    public static Map<String, Date> getLoadedOAIServer(File surrogatesIn, File surrogatesOut) {
+        Map<String, Date> map = getLoadedOAIServer(surrogatesOut);
+        map.putAll((Map<? extends String, ? extends Date>) getLoadedOAIServer(surrogatesIn).entrySet());
+        return map;
+    }
     
+    private static Map<String, Date> getLoadedOAIServer(File surrogates) {
+        HashMap<String, Date> map = new HashMap<String, Date>();
+        //oaipmh_opus.bsz-bw.de_20091102113118728.xml
+        for (String s: surrogates.list()) {
+            if (s.startsWith(filenamePrefix) && s.endsWith(".xml") && s.charAt(s.length() - 22) == filenameSeparationChar) {
+                try {
+                    Date fd = DateFormatter.parseShortMilliSecond(s.substring(s.length() - 21, s.length() - 4));
+                    String hostID = s.substring(7, s.length() - 22);
+                    Date md = map.get(hostID);
+                    if (md == null || fd.after(md)) map.put(hostID, fd);
+                } catch (ParseException e) {
+                    Log.logException(e);
+                }
+            }
+        }
+        return map;
+    }
+
+    public static final char hostReplacementChar = '_';
+    public static final char filenameSeparationChar = '.';
+    public static final String filenamePrefix = "oaipmh";
+
+    /**
+     * compute a host id that is also used in the getLoadedOAIServer method for the map key
+     * @param source
+     * @return a string that is a key for the given host
+     */
+    public static final String hostID(DigestURI source) {
+        String s = ResumptionToken.truncatedURL(source);
+        if (s.endsWith("?")) s = s.substring(0, s.length() - 1);
+        if (s.endsWith("/")) s = s.substring(0, s.length() - 1);
+        if (s.startsWith("https://")) s = s.substring(8);
+        if (s.startsWith("http://")) s = s.substring(7);
+        return s.replace('.', hostReplacementChar).replace('/', hostReplacementChar).replace(':', hostReplacementChar);
+    }
+    
+    /**
+     * get a file name for a source. the file name contains a prefix that is used to identify
+     * that source as part of the OAI-PMH import process and a host key to identify the source.
+     * also included is a date stamp within the file name
+     * @param source
+     * @return a file name for the given source. It will be different for each call for same hosts because it contains a date stamp
+     */
+    public static final String filename4Source(DigestURI source) {
+        return filenamePrefix + OAIPMHImporter.filenameSeparationChar +
+               OAIPMHImporter.hostID(source) + OAIPMHImporter.filenameSeparationChar +
+               DateFormatter.formatShortMilliSecond(new Date()) + ".xml";
+    }
 }
