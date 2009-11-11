@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -335,20 +336,27 @@ public final class RankingProcess extends Thread {
         }
         // no more entries in sorted RWI entries. Now take Elements from the doubleDomCache
         // find best entry from all caches
-        final Iterator<SortStack<WordReferenceVars>> i = this.doubleDomCache.values().iterator();
         SortStack<WordReferenceVars>.stackElement bestEntry = null;
         SortStack<WordReferenceVars>.stackElement o;
-        while (i.hasNext()) {
-            m = i.next();
-            if (m == null) continue;
-            if (m.size() == 0) continue;
-            if (bestEntry == null) {
-                bestEntry = m.top();
-                continue;
-            }
-            o = m.top();
-            if (o.weight.longValue() < bestEntry.weight.longValue()) {
-                bestEntry = o;
+        synchronized (this.doubleDomCache) {
+            final Iterator<SortStack<WordReferenceVars>> i = this.doubleDomCache.values().iterator();
+            while (i.hasNext()) {
+                try {
+                    m = i.next();
+                } catch (ConcurrentModificationException e) {
+                    Log.logException(e);
+                    break; // not the best solution...
+                }
+                if (m == null) continue;
+                if (m.size() == 0) continue;
+                if (bestEntry == null) {
+                    bestEntry = m.top();
+                    continue;
+                }
+                o = m.top();
+                if (o.weight.longValue() < bestEntry.weight.longValue()) {
+                    bestEntry = o;
+                }
             }
         }
         if (bestEntry == null) return null;
