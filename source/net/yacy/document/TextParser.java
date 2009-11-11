@@ -274,7 +274,7 @@ public final class TextParser {
         String ext = url.getFileExtension();
         Idiom idiom;
         if (ext != null && ext.length() > 0) {
-            if (denyExtension.contains(ext)) throw new ParserException("file extension '" + ext + "' is denied", url);
+            if (denyExtension.contains(ext)) throw new ParserException("file extension '" + ext + "' is denied (1)", url);
             idiom = ext2parser.get(ext);
             if (idiom != null) idioms.add(idiom);
         }
@@ -282,7 +282,7 @@ public final class TextParser {
         // check given mime type
         if (mimeType1 != null) {
             mimeType1 = normalizeMimeType(mimeType1);
-            if (denyMime.contains(mimeType1)) throw new ParserException("mime type '" + mimeType1 + "' is denied", url);
+            if (denyMime.contains(mimeType1)) throw new ParserException("mime type '" + mimeType1 + "' is denied (1)", url);
             idiom = mime2parser.get(mimeType1);
             if (idiom != null && !idioms.contains(idiom)) idioms.add(idiom);
         }
@@ -299,7 +299,7 @@ public final class TextParser {
     public static String supportsMime(String mimeType) {
         if (mimeType == null) return null;
         mimeType = normalizeMimeType(mimeType);
-        if (denyMime.contains(mimeType)) return "mime type '" + mimeType + "' is denied";
+        if (denyMime.contains(mimeType)) return "mime type '" + mimeType + "' is denied (2)";
         if (mime2parser.get(mimeType) == null) return "no parser for mime '" + mimeType + "' available";
         return null;
     }
@@ -307,7 +307,7 @@ public final class TextParser {
     public static String supportsExtension(final DigestURI url) {
         String ext = url.getFileExtension();
         if (ext == null || ext.length() == 0) return null;
-        if (denyExtension.contains(ext)) return "file extension '" + ext + "' is denied";
+        if (denyExtension.contains(ext)) return "file extension '" + ext + "' is denied (2)";
         String mimeType = ext2mime.get(ext);
         if (mimeType == null) return "no parser available";
         Idiom idiom = mime2parser.get(mimeType);
@@ -332,7 +332,11 @@ public final class TextParser {
     
     public static void setDenyMime(String denyList) {
         denyMime.clear();
-        for (String s: denyList.split(",")) denyMime.add(normalizeMimeType(s));
+        String n;
+        for (String s: denyList.split(",")) {
+            n = normalizeMimeType(s);
+            if (n != null && n.length() > 0) denyMime.add(n);
+        }
     }
     
     public static String getDenyMime() {
@@ -343,7 +347,9 @@ public final class TextParser {
     }
     
     public static void grantMime(String mime, boolean grant) {
-        if (grant) denyMime.remove(normalizeMimeType(mime)); else denyMime.add(normalizeMimeType(mime));
+        String n = normalizeMimeType(mime);
+        if (n == null || n.length() == 0) return;
+        if (grant) denyMime.remove(n); else denyMime.add(n);
     }
     
     public static void setDenyExtension(String denyList) {
