@@ -93,6 +93,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.visualization.RasterPlotter;
 
+import de.anomic.http.server.servlets.crawlReceipt;
 import de.anomic.http.server.servlets.transferURL;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -1178,6 +1179,15 @@ public final class HTTPDFileHandler {
             } catch (Exception e) {
                 Log.logException(e);
                 Log.logSevere("HTTPFileHandler", "fail of transferURL", e);
+                throw new InvocationTargetException(e);
+            }
+        }
+        if (targetClass.getName().equals("crawlReceipt.class")) {
+            try {
+                return crawlReceipt.respond(request, args, switchboard);
+            } catch (Exception e) {
+                Log.logException(e);
+                Log.logSevere("HTTPFileHandler", "fail of crawlReceipt", e);
                 throw new InvocationTargetException(e);
             }
         }
