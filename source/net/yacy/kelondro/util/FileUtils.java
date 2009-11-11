@@ -596,8 +596,8 @@ public final class FileUtils {
         }
     }
 
-    public static final byte LF = 10;
-    public static final byte CR = 13;
+    public static final char LF = (char) 10;
+    public static final char CR = (char) 13;
 
     /**
      * Read lines of a text file into a String, optionally ignoring comments.
