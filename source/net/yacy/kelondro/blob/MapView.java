@@ -142,11 +142,13 @@ public class MapView {
         assert key.length() > 0;
         assert newMap != null;
         key = normalizeKey(key);
+        byte[] keyb = key.getBytes("UTF-8");
         String s = map2string(newMap, "W" + DateFormatter.formatShortSecond() + " ");
         assert s != null;
+        byte[] sb = s.getBytes("UTF-8");
         synchronized (this) {
             // write entry
-        	if (blob != null) blob.put(key.getBytes("UTF-8"), s.getBytes("UTF-8"));
+        	if (blob != null) blob.put(keyb, sb);
     
             // write map to cache
             if (cache != null) cache.put(key, newMap);
@@ -162,13 +164,14 @@ public class MapView {
         // update elementCount
         if (key == null) return;
         key = normalizeKey(key);
+        byte[] keyb = key.getBytes("UTF-8");
         
         synchronized (this) {
             // remove from cache
             cache.remove(key);
     
             // remove from file
-            blob.remove(key.getBytes());
+            blob.remove(keyb);
         }
     }
     
@@ -182,9 +185,10 @@ public class MapView {
         assert key != null;
         if (cache == null) return false; // case may appear during shutdown
         key = normalizeKey(key);
-        boolean h = false;
+        byte[] keyb = key.getBytes("UTF-8");
+        boolean h;
         synchronized (this) {
-            h = this.cache.containsKey(key) || this.blob.has(key.getBytes());
+            h = this.cache.containsKey(key) || this.blob.has(keyb);
         }
         return h;
     }
@@ -212,23 +216,34 @@ public class MapView {
         assert key != null;
         if (cache == null) return null; // case may appear during shutdown
         key = normalizeKey(key);
+        byte[] keyb = key.getBytes("UTF-8");
         
-        synchronized (this) {
-            Map<String, String> map = cache.get(key);
-            if (map != null) return map;
-
-            // read object
-            final byte[] b = blob.get(key.getBytes());
-            if (b == null) return null;
-            map = bytes2map(b);
+        Map<String, String> map;
+        if (storeCache) {
+            synchronized (this) {
+                map = cache.get(key);
+                if (map != null) return map;
     
-            if (storeCache) {
+                // read object
+                final byte[] b = blob.get(keyb);
+                if (b == null) return null;
+                map = bytes2map(b);
+        
                 // write map to cache
                 cache.put(key, map);
             }
-    
+            
             // return value
             return map;
+        } else {
+            byte[] b;
+            synchronized (this) {
+                map = cache.get(key);
+                if (map != null) return map;
+                b = blob.get(keyb);
+            }
+            if (b == null) return null;
+            return bytes2map(b);
         }
     }
 
