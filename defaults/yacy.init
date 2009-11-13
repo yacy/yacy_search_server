@@ -900,7 +900,7 @@ disk.free = 3000
 disk.free.hardlimit = 1000
 
 # minimum memory to accept dht-in (KB)
-#memory.acceptDHT = 10000
+memory.acceptDHT = 50000
 
 # setting if execution of CGI files is allowed or not
 cgi.allow = false
