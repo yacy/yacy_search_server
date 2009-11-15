@@ -38,7 +38,12 @@ LOCKFILE="DATA/yacy.running"
 JAVA="`which java`"
 
 #
-# DEFINING SOME FUNCIONS WHICH WILL BE USED LATER
+# INITIALIZING VARIABLES
+#
+STATUS='No actions have been performed yet.'
+
+#
+# DEFINING SOME FUNCTIONS WHICH WILL BE USED LATER
 #
 
 # CHANGES THE ADMIN SETTINGS
@@ -55,12 +60,10 @@ change_admin_localhost()
     case $INPUT in
         y)
             replace_parameter 'adminAccountForLocalhost' 'true'
-            replace_parameter 'adminAccountBase64MD5' ''
-            confirm
+            STATUS = 'Admin access granted for all local users.'
             ;;
         n)
             replace_parameter 'adminAccountForLocalhost' 'false'
-            confirm
             change_admin_password
             ;;
         *)
@@ -95,7 +98,7 @@ change_admin_password()
         echo 'Entries did not match, please try again.'
         change_admin_password
     fi
-    confirm
+    STATUS='Admin password has been changed.'
 
 }
 
@@ -116,7 +119,7 @@ change_mem_settings()
             change_mem_settings
             ;;
     esac
-    confirm
+    STATUS="Memory settings have been changed. YaCy will be able to use $INPUT MB of RAM now."
 }
 
 # CHANGES THE PORT SETTINGS
@@ -141,7 +144,7 @@ change_port_settings()
             change_port_settings
             ;;
     esac
-    confirm
+    STATUS="Port settings have been changed. YaCy listens to port $INPUT now."
 }
 
 # CHECKS IF CONFIG FILE EXISTS, EXISTS IF IT DOESN'T
@@ -149,10 +152,9 @@ check_conf()
 {
     if [ ! -e "$CONFIGFILE" ]
     then
-        echo
-        echo "Config file does not exist. Please start YaCy at least once to create config file."
-        echo
-        exit 0
+        echo 'ERROR:'
+        echo 'Config file does not exist. Please start YaCy at least once to create config file.'
+        exit 1
     fi
 }
 
@@ -161,10 +163,9 @@ check_java()
 {
     if [ "$JAVA" == '' ]
     then
-        echo
-        echo "Java has not been detected. Please add java to your classpath."
-        echo
-        exit 0
+        echo 'ERROR:'
+        echo 'Java has not been detected. Please add a JRE to your classpath.'
+        exit 1
     fi
 }
 
@@ -178,15 +179,8 @@ check_lock()
         echo "Please stop YaCy before running this script."
         echo "If you are sure that YaCy is not running anymore,"
         echo "delete $LOCKFILE and start this script again."
-        echo
-        exit
+        exit 1
     fi
-}
-
-# WRITES A MESSAGE OF CONFIRMATION
-confirm()
-{
-    echo 'Changes have been written to the config file.'
 }
 
 # EXITS SRIPT AND PRINTS GOODBYE MESSAGE
@@ -195,18 +189,22 @@ goodbye()
     echo
     echo "Goodbye!"
     echo
-    exit
+    exit 0
 }
 
 # PRINTS THE MENU
 print_menu()
 {
+    clear
+    echo "*** YaCy commandline configuration tool ***"
     echo
     echo "Make your choice:"
     echo "[1] change memory settings"
     echo "[2] change admin password"
     echo "[3] change port"
     echo "[0] quit"
+    echo
+    echo "Status: $STATUS"
 }
 
 # REPLACES THE VALUE OF A PARAMETER (FIRST ARGUMENT) WITH A NEW ONE (SECOND ARGUMENT)
@@ -219,8 +217,6 @@ replace_parameter()
 #
 # MAIN PROGRAM
 #
-echo
-echo "*** YaCy commandline administration tool ***"
 
 check_lock
 
