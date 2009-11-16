@@ -522,19 +522,31 @@ public class Domains {
     public static String localHostName; 
     public static InetAddress[] localHostAddresses;
     static {
+        localHostName = "127.0.0.1";
         try {
-            localHostAddress = InetAddress.getByName("127.0.0.1");
+            localHostAddress = InetAddress.getByName(localHostName);
         } catch (UnknownHostException e1) {}
-        try {
-            localHostAddress = InetAddress.getLocalHost();
-            localHostName = localHostAddress.getHostName();
-        } catch (UnknownHostException e) {
-            localHostName = "localhost";
-        }
         try {
             localHostAddresses = InetAddress.getAllByName(localHostName);
         } catch (UnknownHostException e) {
             localHostAddresses = new InetAddress[0];
+        }
+        new localHostAddressLookup().start();
+    }
+    
+    public static class localHostAddressLookup extends Thread {
+        public void run() {
+            try {
+                localHostAddress = InetAddress.getLocalHost();
+                localHostName = localHostAddress.getHostName();
+            } catch (UnknownHostException e) {
+                localHostName = "127.0.0.1";
+            }
+            try {
+                localHostAddresses = InetAddress.getAllByName(localHostName);
+            } catch (UnknownHostException e) {
+                localHostAddresses = new InetAddress[0];
+            }
         }
     }
     
