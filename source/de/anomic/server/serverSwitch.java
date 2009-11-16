@@ -24,7 +24,6 @@ package de.anomic.server;
 import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -33,6 +32,7 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowThread;
@@ -158,66 +158,9 @@ public class serverSwitch {
         }
 
         // otherwise we return the real IP address of this host
-        final InetAddress pLIP = myPublicLocalIP();
+        final InetAddress pLIP = Domains.myPublicLocalIP();
         if (pLIP != null) return pLIP.getHostAddress();
         return null;
-    }
-
-    public static InetAddress myPublicLocalIP() {
-        try {
-            String hostName;
-            try {
-                hostName = InetAddress.getLocalHost().getHostName();
-            } catch (final java.net.UnknownHostException e) {
-                hostName = "localhost"; // hopin' nothing serious happened only the hostname changed while running yacy
-                System.err.println("ERROR: (internal) " + e.getMessage());
-            }
-            // list all addresses
-            final InetAddress[] ia = InetAddress.getAllByName(hostName);
-            // for (int i = 0; i < ia.length; i++) System.out.println("IP: " +
-            // ia[i].getHostAddress()); // DEBUG
-            if (ia.length == 0) {
-                try {
-                    return InetAddress.getLocalHost();
-                } catch (final UnknownHostException e) {
-                    try {
-                        return InetAddress.getByName("127.0.0.1");
-                    } catch (final UnknownHostException ee) {
-                        return null;
-                    }
-                }
-            }
-            if (ia.length == 1) {
-                // only one network connection available
-                return ia[0];
-            }
-            // we have more addresses, find an address that is not local
-            int b0, b1;
-            for (int i = 0; i < ia.length; i++) {
-                b0 = 0Xff & ia[i].getAddress()[0];
-                b1 = 0Xff & ia[i].getAddress()[1];
-                if ((b0 != 10) && // class A reserved
-                        (b0 != 127) && // loopback
-                        ((b0 != 172) || (b1 < 16) || (b1 > 31)) && // class B reserved
-                        ((b0 != 192) || (b1 != 168)) && // class C reserved
-                        (ia[i].getHostAddress().indexOf(":") < 0))
-                    return ia[i];
-            }
-            // there is only a local address, we filter out the possibly
-            // returned loopback address 127.0.0.1
-            for (int i = 0; i < ia.length; i++) {
-                if (((0Xff & ia[i].getAddress()[0]) != 127) && (ia[i].getHostAddress().indexOf(":") < 0)) return ia[i];
-            }
-            // if all fails, give back whatever we have
-            for (int i = 0; i < ia.length; i++) {
-                if (ia[i].getHostAddress().indexOf(":") < 0) return ia[i];
-            }
-            return ia[0];
-        } catch (final java.net.UnknownHostException e) {
-            System.err.println("ERROR: (internal) " + e.getMessage());
-            Log.logException(e);
-            return null;
-        }
     }
     
     // a logger for this switchboard

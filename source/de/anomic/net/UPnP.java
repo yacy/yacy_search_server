@@ -27,7 +27,6 @@
 package de.anomic.net;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -37,6 +36,7 @@ import net.sbbi.upnp.devices.UPNPRootDevice;
 import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.UPNPResponseException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.Domains;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 
@@ -72,7 +72,7 @@ public class UPnP {
 		boolean init = true;
 		try {
 			if (IGDs == null) IGDs = InternetGatewayDevice.getDevices(discoveryTimeout);
-			localHostIP = InetAddress.getLocalHost().getHostAddress();
+			localHostIP = Domains.localHostAddress.getHostAddress();
 		} catch (IOException e) {
 			init = false;
 		}

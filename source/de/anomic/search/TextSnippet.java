@@ -360,7 +360,7 @@ public class TextSnippet {
                         sb.toIndexer(entry);
                         
                         // read resource body (if it is there)
-                        final byte []resourceArray = entry.getContent();
+                        final byte[] resourceArray = entry.getContent();
                         if (resourceArray != null) {
                             resContent = new ByteArrayInputStream(resourceArray);
                             resContentLength = resourceArray.length;

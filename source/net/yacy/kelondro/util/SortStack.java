@@ -26,6 +26,7 @@
 
 package net.yacy.kelondro.util;
 
+import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -116,15 +117,23 @@ public class SortStack<E> {
     }
     
     public stackElement remove(final int hashcode) {
-        final Iterator<Map.Entry<Long, E>> i = this.onstack.entrySet().iterator();
         Map.Entry<Long, E> entry;
         stackElement se;
-        while (i.hasNext()) {
-            entry = i.next();
-            if (entry.getValue().hashCode() == hashcode) {
-                se = new stackElement(entry.getValue(), entry.getKey());
-                this.onstack.remove(se.weight);
-                return se;
+        int retry = 3;
+        retryloop : while (retry-- > 0) {
+            try {
+                final Iterator<Map.Entry<Long, E>> i = this.onstack.entrySet().iterator();
+                while (i.hasNext()) {
+                    entry = i.next();
+                    if (entry.getValue().hashCode() == hashcode) {
+                        se = new stackElement(entry.getValue(), entry.getKey());
+                        this.onstack.remove(se.weight);
+                        return se;
+                    }
+                }
+                break retryloop;
+            } catch (ConcurrentModificationException e) {
+                continue retryloop;
             }
         }
         return null;

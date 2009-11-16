@@ -600,7 +600,6 @@ public final class HTTPDFileHandler {
                 if (argsString != null) {
                     env.put("QUERY_STRING", argsString);
                 }
-                env.put("REMOTE_HOST", InetAddress.getByName(clientIP).getHostName());
                 env.put("REMOTE_ADDR", clientIP);
 //                env.put("AUTH_TYPE", "");         // TODO: implement
 //                env.put("REMOTE_USER", "");       // TODO: implement

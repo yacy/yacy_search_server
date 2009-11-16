@@ -67,8 +67,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.kelondro.logging.Log;
-
-import de.anomic.server.serverSwitch;
+import net.yacy.kelondro.util.Domains;
 
 public class ftpc {
 
@@ -2123,7 +2122,7 @@ public class ftpc {
 
         // save ip address in high byte order
         // byte[] Bytes = LocalIp.getAddress();
-        final byte[] Bytes = serverSwitch.myPublicLocalIP().getHostAddress().getBytes();
+        final byte[] Bytes = Domains.myPublicLocalIP().getHostAddress().getBytes();
 
         // bytes greater than 127 should not be printed as negative
         final short[] Shorts = new short[4];

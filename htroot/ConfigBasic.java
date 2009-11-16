@@ -31,6 +31,7 @@
 import java.io.File;
 import java.util.regex.Pattern;
 
+import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 
 import de.anomic.data.translator;
@@ -127,7 +128,7 @@ public class ConfigBasic {
                 final int idx = host.indexOf(":");
                 if (idx != -1) host = host.substring(0,idx);
             } else {
-                host = serverSwitch.myPublicLocalIP().getHostAddress();
+                host = Domains.myPublicLocalIP().getHostAddress();
             }
             
             prop.put("reconnect", "1");

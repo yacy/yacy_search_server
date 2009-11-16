@@ -60,6 +60,7 @@ import javax.net.ssl.SSLSocketFactory;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
+import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.workflow.AbstractBusyThread;
 import net.yacy.kelondro.workflow.BusyThread;
 
@@ -299,7 +300,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     }
     
     public void open() {
-        this.log.logConfig("* server started on " + serverSwitch.myPublicLocalIP() + ":" + this.extendedPort);
+        this.log.logConfig("* server started on " + Domains.myPublicLocalIP() + ":" + this.extendedPort);
     }
     
     public void freemem() {
@@ -1031,7 +1032,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         try {
             sslsock=(SSLSocket)this.sslSocketFactory.createSocket(
                     sock,
-                    sock.getInetAddress().getHostName(),
+                    sock.getInetAddress().getHostAddress(),
                     sock.getPort(),
                     true);
 

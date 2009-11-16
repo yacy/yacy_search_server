@@ -1147,10 +1147,10 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             // check if ip is local ip address
             final InetAddress hostAddress = Domains.dnsResolve(clientIP);
             if (hostAddress == null) {
-                tp.put("host", serverSwitch.myPublicLocalIP().getHostAddress());
+                tp.put("host", Domains.myPublicLocalIP().getHostAddress());
                 tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8080")));
             } else if (hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress()) {
-                tp.put("host", serverSwitch.myPublicLocalIP().getHostAddress());
+                tp.put("host", Domains.myPublicLocalIP().getHostAddress());
                 tp.put("port", serverCore.getPortNr(switchboard.getConfig("port", "8080")));
             } else {
                 tp.put("host", switchboard.myPublicIP());
@@ -1445,9 +1445,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             
             if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
             
-            final InetAddress[] localAddress = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
-            for (int i=0; i<localAddress.length; i++) {
-                if (localAddress[i].equals(clientAddress)) {
+            for (int i = 0; i < Domains.localHostAddresses.length; i++) {
+                if (Domains.localHostAddresses[i].equals(clientAddress)) {
                     isThisHostIP = true;
                     break;
                 }
@@ -1463,9 +1462,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         try {
             if (clientAddress.isAnyLocalAddress() || clientAddress.isLoopbackAddress()) return true;
             
-            final InetAddress[] localAddress = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
-            for (int i=0; i<localAddress.length; i++) {
-                if (localAddress[i].equals(clientAddress)) {
+            for (int i = 0; i < Domains.localHostAddresses.length; i++) {
+                if (Domains.localHostAddresses[i].equals(clientAddress)) {
                     isThisHostIP = true;
                     break;
                 }

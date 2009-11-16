@@ -40,7 +40,7 @@ public final class CachedFileWriter extends AbstractWriter implements Writer {
         this.name = file.getName();
         this.file = file;
         this.RAFile = new RandomAccessFile(this.file, "rw");
-        this.cache = new byte[8192];
+        this.cache = new byte[32768];
         this.cachestart = 0;
         this.cachelen = 0;
     }	

@@ -518,13 +518,60 @@ public class Domains {
          if (nameCacheMiss.size() > maxNameCacheMissSize) nameCacheMiss.clear();
     }
 
-    private static InetAddress[] localAddresses = null;
+    public static InetAddress localHostAddress;
+    public static String localHostName; 
+    public static InetAddress[] localHostAddresses;
     static {
         try {
-            localAddresses = InetAddress.getAllByName(InetAddress.getLocalHost().getHostName());
-        } catch (final UnknownHostException e) {
-            localAddresses = new InetAddress[0];
+            localHostAddress = InetAddress.getByName("127.0.0.1");
+        } catch (UnknownHostException e1) {}
+        try {
+            localHostAddress = InetAddress.getLocalHost();
+            localHostName = localHostAddress.getHostName();
+        } catch (UnknownHostException e) {
+            localHostName = "localhost";
         }
+        try {
+            localHostAddresses = InetAddress.getAllByName(localHostName);
+        } catch (UnknownHostException e) {
+            localHostAddresses = new InetAddress[0];
+        }
+    }
+    
+    public static InetAddress myPublicLocalIP() {
+        // list all addresses
+        final InetAddress[] ia = Domains.localHostAddresses;
+        // for (int i = 0; i < ia.length; i++) System.out.println("IP: " +
+        // ia[i].getHostAddress()); // DEBUG
+        if (ia.length == 0) {
+            return Domains.localHostAddress;
+        }
+        if (ia.length == 1) {
+            // only one network connection available
+            return ia[0];
+        }
+        // we have more addresses, find an address that is not local
+        int b0, b1;
+        for (int i = 0; i < ia.length; i++) {
+            b0 = 0Xff & ia[i].getAddress()[0];
+            b1 = 0Xff & ia[i].getAddress()[1];
+            if ((b0 != 10) && // class A reserved
+                    (b0 != 127) && // loopback
+                    ((b0 != 172) || (b1 < 16) || (b1 > 31)) && // class B reserved
+                    ((b0 != 192) || (b1 != 168)) && // class C reserved
+                    (ia[i].getHostAddress().indexOf(":") < 0))
+                return ia[i];
+        }
+        // there is only a local address, we filter out the possibly
+        // returned loopback address 127.0.0.1
+        for (int i = 0; i < ia.length; i++) {
+            if (((0Xff & ia[i].getAddress()[0]) != 127) && (ia[i].getHostAddress().indexOf(":") < 0)) return ia[i];
+        }
+        // if all fails, give back whatever we have
+        for (int i = 0; i < ia.length; i++) {
+            if (ia[i].getHostAddress().indexOf(":") < 0) return ia[i];
+        }
+        return ia[0];
     }
     
     public static int getDomainID(final String host) {
@@ -569,8 +616,8 @@ public class Domains {
 
         // finally check if there are other local IP adresses that are not in
         // the standard IP range
-        for (int i = 0; i < localAddresses.length; i++) {
-            if (localAddresses[i].equals(clientAddress)) return true;
+        for (int i = 0; i < localHostAddresses.length; i++) {
+            if (localHostAddresses[i].equals(clientAddress)) return true;
         }
 
         // the address must be a global address

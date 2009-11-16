@@ -33,6 +33,7 @@ import java.util.Date;
 import net.yacy.kelondro.io.ByteCountInputStream;
 import net.yacy.kelondro.io.ByteCountOutputStream;
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
@@ -161,7 +162,7 @@ public class Status {
         } else {
             prop.put("extPortFormat", "0");
         }
-        InetAddress hostIP = serverSwitch.myPublicLocalIP();
+        InetAddress hostIP = Domains.myPublicLocalIP();
         prop.put("host", hostIP!=null ? hostIP.getHostAddress() : "Unkown IP");
         
         // ssl support
