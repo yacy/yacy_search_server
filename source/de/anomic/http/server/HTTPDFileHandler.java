@@ -71,7 +71,6 @@ import java.io.UnsupportedEncodingException;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.util.Date;
 import java.util.HashMap;

@@ -99,6 +99,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     public static final int ERRORCASE_MESSAGE = 4;
     public static final int ERRORCASE_FILE = 5;
     private static File TMPDIR = new File(System.getProperty("java.io.tmpdir"));
+    private static FileItemFactory diskFileItemFactory = new DiskFileItemFactory(5 * 1024 * 1024, TMPDIR);
+    
     private static AlternativeDomainNames alternativeResolver = null;
     
     /**
@@ -901,8 +903,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
 
         // parse data in memory
-        FileItemFactory factory = new DiskFileItemFactory(1024 * 1024, TMPDIR);
-        FileUpload upload = new FileUpload(factory);
+        FileUpload upload = new FileUpload(diskFileItemFactory);
         List<FileItem> items;
         try {
             items = upload.parseRequest(request);
