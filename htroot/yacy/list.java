@@ -70,7 +70,7 @@ public final class list {
         }
         
         if (col.equals("black")) {
-            final StringBuilder out = new StringBuilder();
+            final StringBuilder out = new StringBuilder(10000);
 
             final String filenames=env.getConfig("BlackLists.Shared", "");
             final String[] filenamesarray = filenames.split(",");
