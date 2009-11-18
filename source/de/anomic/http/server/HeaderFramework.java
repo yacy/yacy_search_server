@@ -406,7 +406,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
             final int httpStatusCode, 
             final String httpStatusText) {
         // creating a new buffer to store the header as string
-        final StringBuilder theHeader = new StringBuilder();
+        final StringBuilder theHeader = new StringBuilder(180);
         
         // generating the header string
         this.toHeaderString(httpVersion,httpStatusCode,httpStatusText,theHeader);

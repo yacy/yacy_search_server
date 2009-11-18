@@ -28,6 +28,7 @@ package de.anomic.crawler;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -61,8 +62,8 @@ public class ZURL implements Iterable<ZURL.Entry> {
     );
 
     // the class object
-    private final ObjectIndex urlIndex;
-    private final ConcurrentLinkedQueue<String> stack;
+    protected final ObjectIndex urlIndex;
+    protected final ConcurrentLinkedQueue<String> stack;
     
     public ZURL(
     		final File cachePath,
@@ -133,6 +134,15 @@ public class ZURL implements Iterable<ZURL.Entry> {
         return new EntryIterator();
     }
     
+    public ArrayList<ZURL.Entry> list(int max) {
+        ArrayList<ZURL.Entry> l = new ArrayList<ZURL.Entry>();
+        for (ZURL.Entry entry: this) {
+            l.add(entry);
+            if (max-- <= 0) l.remove(0);
+        }
+        return l;
+    }
+    
     private class EntryIterator implements Iterator<ZURL.Entry> {
         private Iterator<String> hi;
         public EntryIterator() {
@@ -186,7 +196,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         private final String   anycause;  // string describing reason for load fail
         private boolean  stored;
 
-        private Entry(
+        protected Entry(
                 final Request bentry,
                 final String executor,
                 final Date workdate,
@@ -203,7 +213,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             stored = false;
         }
 
-        private Entry(final Row.Entry entry) throws IOException {
+        protected Entry(final Row.Entry entry) throws IOException {
             assert (entry != null);
             this.executor = entry.getColString(1, "UTF-8");
             this.workdate = new Date(entry.getColLong(2));

@@ -92,7 +92,7 @@ public final class transferRWI {
         // response values
         int pause = 0;
         String result = "ok";
-        final StringBuilder unknownURLs = new StringBuilder();
+        final StringBuilder unknownURLs = new StringBuilder(6000);
         
         if ((youare == null) || (!youare.equals(sb.peers.mySeed().hash))) {
         	sb.getLog().logInfo("Rejecting RWIs from peer " + otherPeerName + ". Wrong target. Wanted peer=" + youare + ", iam=" + sb.peers.mySeed().hash);

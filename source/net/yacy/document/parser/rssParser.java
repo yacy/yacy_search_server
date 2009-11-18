@@ -64,11 +64,10 @@ public class rssParser extends AbstractParser implements Idiom {
     public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
     public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
-        SUPPORTED_EXTENSIONS.add("xml");
         SUPPORTED_EXTENSIONS.add("rss");
-        SUPPORTED_EXTENSIONS.add("rdf");
+        SUPPORTED_EXTENSIONS.add("xml");
+        SUPPORTED_MIME_TYPES.add("XML");
         SUPPORTED_MIME_TYPES.add("text/rss");
-        SUPPORTED_MIME_TYPES.add("application/rdf+xml");
         SUPPORTED_MIME_TYPES.add("application/rss+xml");
         SUPPORTED_MIME_TYPES.add("application/atom+xml");
     }

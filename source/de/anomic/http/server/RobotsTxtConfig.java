@@ -92,7 +92,7 @@ public final class RobotsTxtConfig {
     @Override
     public String toString() {
         if (this.allDisallowed) return ALL;
-        final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder(200);
         if (this.blogDisallowed) sb.append(BLOG).append(",");
         if (this.bookmarksDisallowed) sb.append(BOOKMARKS).append(",");
         if (this.dirsDisallowed) sb.append(DIRS).append(",");

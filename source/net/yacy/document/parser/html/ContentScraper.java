@@ -58,6 +58,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
     // all these tags must be given in lowercase, because the tags from the files are compared in lowercase
     static {
+        linkTags0.add("html");      // scraped as tag 0 to get attached properties like 'lang'
         linkTags0.add("img");
         linkTags0.add("base");
         linkTags0.add("frame");

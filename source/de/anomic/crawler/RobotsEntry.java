@@ -109,7 +109,7 @@ public class RobotsEntry {
         if ((allowPathList != null)&&(allowPathList.size()>0)) {
             this.allowPathList.addAll(allowPathList);
             
-            final StringBuilder pathListStr = new StringBuilder();
+            final StringBuilder pathListStr = new StringBuilder(allowPathList.size() * 30);
             for (int i=0; i<allowPathList.size();i++) {
                 pathListStr.append(allowPathList.get(i))
                            .append(ROBOTS_DB_PATH_SEPARATOR);
@@ -120,7 +120,7 @@ public class RobotsEntry {
         if ((disallowPathList != null)&&(disallowPathList.size()>0)) {
             this.denyPathList.addAll(disallowPathList);
             
-            final StringBuilder pathListStr = new StringBuilder();
+            final StringBuilder pathListStr = new StringBuilder(disallowPathList.size() * 30);
             for (int i=0; i<disallowPathList.size();i++) {
                 pathListStr.append(disallowPathList.get(i))
                            .append(ROBOTS_DB_PATH_SEPARATOR);
@@ -130,7 +130,7 @@ public class RobotsEntry {
     }
     
     public String toString() {
-        final StringBuilder str = new StringBuilder();
+        final StringBuilder str = new StringBuilder(6000);
         str.append((this.hostName==null)?"null":this.hostName)
            .append(": ");
         

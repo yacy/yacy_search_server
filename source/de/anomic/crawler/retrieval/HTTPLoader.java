@@ -144,7 +144,7 @@ public final class HTTPLoader {
                     String supportError = TextParser.supports(request.url(), res.getResponseHeader().mime());
                     if (supportError != null) {
                     	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash, new Date(), 1, supportError);
-                    	throw new IOException("REJECTED WRONG MIME TYPE: " + supportError);
+                        throw new IOException("REJECTED WRONG MIME TYPE, mime = " + res.getResponseHeader().mime() + ": " + supportError);
                     }
                 }
                 

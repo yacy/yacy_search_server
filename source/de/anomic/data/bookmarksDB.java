@@ -595,10 +595,7 @@ public class bookmarksDB {
     }
     
     public Iterator<Tag> getTagIterator(final boolean priv, final int c) {
-    	Comparator<Tag> comp;    	
-    	if (c == SORT_SIZE) comp = new tagSizeComparator(); 
-    	else comp = new tagComparator();
-    	final TreeSet<Tag> set=new TreeSet<Tag>(comp);
+    	final TreeSet<Tag> set=new TreeSet<Tag>((c == SORT_SIZE) ? tagSizeComparator : tagComparator);
     	final Iterator<Tag> it = tagIterator(true);
     	Tag tag;
     	while(it.hasNext()){
@@ -614,10 +611,7 @@ public class bookmarksDB {
     	if (max==SHOW_ALL) 
     		return getTagIterator(priv, comp);    	
     	final Iterator<Tag> it = getTagIterator(priv, SORT_SIZE);
-    	Comparator<Tag> c;    	
-    	if (comp == SORT_SIZE) c = new tagSizeComparator();
-    	else c = new tagComparator();
-    	final TreeSet<Tag> set=new TreeSet<Tag>(c);
+    	final TreeSet<Tag> set=new TreeSet<Tag>((comp == SORT_SIZE) ? tagSizeComparator : tagComparator);
     	int count = 0;
     	while (it.hasNext() && count<=max) {
     		set.add(it.next());
@@ -631,10 +625,7 @@ public class bookmarksDB {
     }
     */
     public Iterator<Tag> getTagIterator(final String tagName, final boolean priv, final int comp){
-    	Comparator<Tag> c;    	
-    	if (comp == SORT_SIZE) c = new tagSizeComparator();
-    	else c = new tagComparator();
-    	final TreeSet<Tag> set=new TreeSet<Tag>(c);
+    	final TreeSet<Tag> set=new TreeSet<Tag>((comp == SORT_SIZE) ? tagSizeComparator : tagComparator);
     	Iterator<String> it=null;
     	final Iterator<String> bit=getBookmarksIterator(tagName, priv);
     	Bookmark bm;
@@ -657,11 +648,8 @@ public class bookmarksDB {
     public Iterator<Tag> getTagIterator(final String tagName, final boolean priv, final int comp, final int max){
     	if (max==SHOW_ALL) 
     		return getTagIterator(priv, comp);
-   		final Iterator<Tag> it = getTagIterator(tagName, priv, SORT_SIZE);
-   		Comparator<Tag> c;   
-   		if (comp == SORT_SIZE) c = new tagSizeComparator();
-    	else c = new tagComparator();   		
-   		final TreeSet<Tag> set=new TreeSet<Tag>(c);
+   		final Iterator<Tag> it = getTagIterator(tagName, priv, SORT_SIZE); 		
+   		final TreeSet<Tag> set=new TreeSet<Tag>((comp == SORT_SIZE) ? tagSizeComparator : tagComparator);
    		int count = 0;
    		while (it.hasNext() && count<=max) {
    			set.add(it.next());
@@ -1410,10 +1398,13 @@ public class bookmarksDB {
         }
     }
     
+    public static final TagComparator tagComparator = new TagComparator();
+    public static final TagSizeComparator tagSizeComparator = new TagSizeComparator();
+    
     /**
      * Comparator to sort objects of type Tag according to their names
      */
-    public static class tagComparator implements Comparator<Tag>, Serializable {
+    public static class TagComparator implements Comparator<Tag>, Serializable {
         
     	/**
 		 * generated serial
@@ -1426,7 +1417,7 @@ public class bookmarksDB {
     	
     }
     
-    public static class tagSizeComparator implements Comparator<Tag>, Serializable {
+    public static class TagSizeComparator implements Comparator<Tag>, Serializable {
         
     	/**
 		 * generated serial

@@ -23,6 +23,8 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 
+import java.util.ArrayList;
+
 import net.yacy.kelondro.data.meta.DigestURI;
 import de.anomic.crawler.ZURL;
 import de.anomic.http.server.RequestHeader;
@@ -71,22 +73,25 @@ public class IndexCreateParserErrors_p {
             String initiatorHash, executorHash;
             yacySeed initiatorSeed, executorSeed;
             int j=0;
-            for (ZURL.Entry entry: sb.crawlQueues.errorURL) {
-                    if (entry == null) continue;
-                    url = entry.url();
-                    if (url == null) continue;
-                    
-                    initiatorHash = entry.initiator();
-                    executorHash = entry.executor();
-                    initiatorSeed = sb.peers.getConnected(initiatorHash);
-                    executorSeed = sb.peers.getConnected(executorHash);
-                    prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
-                    prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
-                    prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false, true));
-                    prop.putHTML("rejected_list_"+j+"_failreason", entry.anycause());
-                    prop.put("rejected_list_"+j+"_dark", dark ? "1" : "0");
-                    dark = !dark;
-                    j++;
+            ArrayList<ZURL.Entry> l = sb.crawlQueues.errorURL.list(100);
+            ZURL.Entry entry;
+            for (int i = l.size() - 1; i >= 0; i--) {
+                entry = l.get(i);
+                if (entry == null) continue;
+                url = entry.url();
+                if (url == null) continue;
+                
+                initiatorHash = entry.initiator();
+                executorHash = entry.executor();
+                initiatorSeed = sb.peers.getConnected(initiatorHash);
+                executorSeed = sb.peers.getConnected(executorHash);
+                prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
+                prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
+                prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false, true));
+                prop.putHTML("rejected_list_"+j+"_failreason", entry.anycause());
+                prop.put("rejected_list_"+j+"_dark", dark ? "1" : "0");
+                dark = !dark;
+                j++;
             }
             prop.put("rejected_list", j);
         }

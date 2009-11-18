@@ -1194,7 +1194,7 @@ public final class HTTPDProxyHandler {
         if (myAddress != null) {
     
             // getting header set by other proxies in the chain
-            final StringBuilder viaValue = new StringBuilder();
+            final StringBuilder viaValue = new StringBuilder(80);
             if (header.containsKey(HeaderFramework.VIA)) viaValue.append(header.get(HeaderFramework.VIA));
             if (viaValue.length() > 0) viaValue.append(", ");
               

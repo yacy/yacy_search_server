@@ -87,7 +87,7 @@ public class LinkToken extends AbstractToken {
     }
 	
     protected void parse() throws wikiParserException {
-        final StringBuilder stringBuilder = new StringBuilder();
+        final StringBuilder stringBuilder = new StringBuilder(6000);
 
         if (this.patternNr < 0 || this.patternNr >= patterns.length) {
             throw new wikiParserException("patternNr was not set correctly: " + this.patternNr);
@@ -179,7 +179,7 @@ public class LinkToken extends AbstractToken {
         
         @Override
         public String toString() {
-            final StringBuilder stringBuilder = new StringBuilder();
+            final StringBuilder stringBuilder = new StringBuilder(300);
             stringBuilder.append("<a href=\"").append(this.href).append("\"");
             if (this.title != null) stringBuilder.append(" title=\"").append(this.title).append("\"");
             stringBuilder.append(">");
