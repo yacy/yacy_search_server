@@ -114,6 +114,12 @@ public class TextSnippet {
         return snippetsCache.get(key);
     }
     
+    /**
+     * removed all word hashes that can be computed as tokens from a given sentence from a given hash set
+     * @param sentence
+     * @param queryhashes
+     * @return the given hash set minus the hashes from the tokenization of the given sentence
+     */
     public static TreeSet<byte[]> removeAppearanceHashes(final String sentence, final TreeSet<byte[]> queryhashes) {
         // remove all hashes that appear in the sentence
         if (sentence == null) return queryhashes;

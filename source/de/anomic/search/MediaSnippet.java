@@ -37,12 +37,12 @@ import net.yacy.repository.LoaderDispatcher;
 
 
 public class MediaSnippet {
-    public int type;
+    public ContentDomain type;
     public DigestURI href, source;
     public String name, attr;
     public int ranking;
 
-    public MediaSnippet(final int type, final DigestURI href, final String name, final String attr, final int ranking, final DigestURI source) {
+    public MediaSnippet(final ContentDomain type, final DigestURI href, final String name, final String attr, final int ranking, final DigestURI source) {
         this.type = type;
         this.href = href;
         this.source = source; // the web page where the media resource appeared
@@ -58,7 +58,7 @@ public class MediaSnippet {
         return href.hashCode();
     }
     
-    public static ArrayList<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final TreeSet<byte[]> queryhashes, final int mediatype, final boolean fetchOnline, final int timeout, final boolean reindexing) {
+    public static ArrayList<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final TreeSet<byte[]> queryhashes, final ContentDomain mediatype, final boolean fetchOnline, final int timeout, final boolean reindexing) {
         if (queryhashes.size() == 0) {
             Log.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();
@@ -67,21 +67,21 @@ public class MediaSnippet {
         final Document document = LoaderDispatcher.retrieveDocument(url, fetchOnline, timeout, false, reindexing);
         final ArrayList<MediaSnippet> a = new ArrayList<MediaSnippet>();
         if (document != null) {
-            if ((mediatype == QueryParams.CONTENTDOM_ALL) || (mediatype == QueryParams.CONTENTDOM_AUDIO)) a.addAll(computeMediaSnippets(document, queryhashes, QueryParams.CONTENTDOM_AUDIO));
-            if ((mediatype == QueryParams.CONTENTDOM_ALL) || (mediatype == QueryParams.CONTENTDOM_VIDEO)) a.addAll(computeMediaSnippets(document, queryhashes, QueryParams.CONTENTDOM_VIDEO));
-            if ((mediatype == QueryParams.CONTENTDOM_ALL) || (mediatype == QueryParams.CONTENTDOM_APP)) a.addAll(computeMediaSnippets(document, queryhashes, QueryParams.CONTENTDOM_APP));
-            if ((mediatype == QueryParams.CONTENTDOM_ALL) || (mediatype == QueryParams.CONTENTDOM_IMAGE)) a.addAll(computeImageSnippets(document, queryhashes));
+            if ((mediatype == ContentDomain.ALL) || (mediatype == ContentDomain.AUDIO)) a.addAll(computeMediaSnippets(document, queryhashes, ContentDomain.AUDIO));
+            if ((mediatype == ContentDomain.ALL) || (mediatype == ContentDomain.VIDEO)) a.addAll(computeMediaSnippets(document, queryhashes, ContentDomain.VIDEO));
+            if ((mediatype == ContentDomain.ALL) || (mediatype == ContentDomain.APP)) a.addAll(computeMediaSnippets(document, queryhashes, ContentDomain.APP));
+            if ((mediatype == ContentDomain.ALL) || (mediatype == ContentDomain.IMAGE)) a.addAll(computeImageSnippets(document, queryhashes));
         }
         return a;
     }
     
-    public static ArrayList<MediaSnippet> computeMediaSnippets(final Document document, final TreeSet<byte[]> queryhashes, final int mediatype) {
+    public static ArrayList<MediaSnippet> computeMediaSnippets(final Document document, final TreeSet<byte[]> queryhashes, final ContentDomain mediatype) {
         
         if (document == null) return new ArrayList<MediaSnippet>();
         Map<DigestURI, String> media = null;
-        if (mediatype == QueryParams.CONTENTDOM_AUDIO) media = document.getAudiolinks();
-        else if (mediatype == QueryParams.CONTENTDOM_VIDEO) media = document.getVideolinks();
-        else if (mediatype == QueryParams.CONTENTDOM_APP) media = document.getApplinks();
+        if (mediatype == ContentDomain.AUDIO) media = document.getAudiolinks();
+        else if (mediatype == ContentDomain.VIDEO) media = document.getVideolinks();
+        else if (mediatype == ContentDomain.APP) media = document.getApplinks();
         if (media == null) return null;
         
         final Iterator<Map.Entry<DigestURI, String>> i = media.entrySet().iterator();
@@ -124,18 +124,15 @@ public class MediaSnippet {
             ientry = i.next();
             url = ientry.url();
             desc = ientry.alt();
+            int appcount = 0;
             s = TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes);
-            if (s.size() == 0) {
-                final int ranking = ientry.hashCode();
-                result.add(new MediaSnippet(QueryParams.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
-                continue;
-            }
+            appcount += queryhashes.size() - s.size();
+            // if the resulting set is empty, then _all_ words from the query appeared in the url
             s = TextSnippet.removeAppearanceHashes(desc, s);
-            if (s.size() == 0) {
-                final int ranking = ientry.hashCode();
-                result.add(new MediaSnippet(QueryParams.CONTENTDOM_IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
-                continue;
-            }
+            appcount += queryhashes.size() - s.size();
+            // if the resulting set is empty, then _all_ search words appeared in the description
+            final int ranking = (ientry.hashCode() / queryhashes.size() / 2) * appcount;
+            result.add(new MediaSnippet(ContentDomain.IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
         }
         return result;
     }

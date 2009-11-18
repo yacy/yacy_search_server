@@ -48,6 +48,7 @@ import net.yacy.kelondro.util.ISO639;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.net.natLib;
+import de.anomic.search.ContentDomain;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.SearchEvent;
@@ -177,7 +178,7 @@ public final class search {
         final long timestamp = System.currentTimeMillis();
         
     	// prepare a search profile
-        final RankingProfile rankingProfile = (profile.length() == 0) ? new RankingProfile(QueryParams.contentdomParser(contentdom)) : new RankingProfile("", profile);
+        final RankingProfile rankingProfile = (profile.length() == 0) ? new RankingProfile(ContentDomain.contentdomParser(contentdom)) : new RankingProfile("", profile);
         
         // prepare an abstract result
         final StringBuilder indexabstract = new StringBuilder(6000);
@@ -197,7 +198,7 @@ public final class search {
                     rankingProfile,
                     maxdist,
                     prefer,
-                    QueryParams.contentdomParser(contentdom),
+                    ContentDomain.contentdomParser(contentdom),
                     language,
                     "", // no navigation
                     false,
@@ -249,8 +250,7 @@ public final class search {
                     rankingProfile, 
                     maxdist, 
                     prefer, 
-                    QueryParams.
-                    contentdomParser(contentdom), 
+                    ContentDomain.contentdomParser(contentdom), 
                     language,
                     "", // no navigation
                     false, 

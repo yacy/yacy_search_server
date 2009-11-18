@@ -1039,7 +1039,7 @@ public final class Switchboard extends serverSwitch {
     
     public RankingProfile getRanking() {
         return (getConfig("rankingProfile", "").length() == 0) ?
-                  new RankingProfile(QueryParams.CONTENTDOM_TEXT) :
+                  new RankingProfile(ContentDomain.TEXT) :
                   new RankingProfile("", crypt.simpleDecode(sb.getConfig("rankingProfile", ""), null));
     }
     

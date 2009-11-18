@@ -38,8 +38,8 @@ public class SortStack<E> {
     // objects pushed on the stack must implement the hashCode() method to provide a handle
     // for a double-check.
     
-    protected TreeMap<Long, E> onstack; // object within the stack
-    protected HashSet<Integer> instack; // keeps track which element has been on the stack or is now in the offstack
+    private TreeMap<Long, E> onstack; // object within the stack
+    private HashSet<Integer> instack; // keeps track which element has been on the stack or is now in the offstack
     protected int maxsize;
     
     public SortStack(final int maxsize) {

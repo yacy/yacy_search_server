@@ -36,6 +36,7 @@ import net.yacy.kelondro.util.MemoryTracker;
 
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
+import de.anomic.search.ContentDomain;
 import de.anomic.search.MediaSnippet;
 import de.anomic.search.QueryParams;
 import de.anomic.search.SearchEvent;
@@ -94,7 +95,7 @@ public class yacysearchitem {
         prop.put("remoteIndexCount", Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
         prop.put("remotePeerCount", Formatter.number(theSearch.getRankingResult().getRemotePeerCount(), true));
         
-        if (theQuery.contentdom == QueryParams.CONTENTDOM_TEXT) {
+        if (theQuery.contentdom == ContentDomain.TEXT) {
             // text search
 
             // generate result object
@@ -156,10 +157,10 @@ public class yacysearchitem {
             return prop;
         }
         
-        if (theQuery.contentdom == QueryParams.CONTENTDOM_IMAGE) {
+        if (theQuery.contentdom == ContentDomain.IMAGE) {
             // image search; shows thumbnails
 
-            prop.put("content", theQuery.contentdom + 1); // switch on specific content
+            prop.put("content", theQuery.contentdom.getCode() + 1); // switch on specific content
             final MediaSnippet ms = theSearch.result().oneImage(item);
             if (ms == null) {
                 prop.put("content_items", "0");
@@ -176,16 +177,16 @@ public class yacysearchitem {
             return prop;
         }
         
-        if ((theQuery.contentdom == QueryParams.CONTENTDOM_AUDIO) ||
-            (theQuery.contentdom == QueryParams.CONTENTDOM_VIDEO) ||
-            (theQuery.contentdom == QueryParams.CONTENTDOM_APP)) {
+        if ((theQuery.contentdom == ContentDomain.AUDIO) ||
+            (theQuery.contentdom == ContentDomain.VIDEO) ||
+            (theQuery.contentdom == ContentDomain.APP)) {
             // any other media content
 
             // generate result object
             final ResultEntry result = theSearch.oneResult(item);
             if (result == null) return prop; // no content
             
-            prop.put("content", theQuery.contentdom + 1); // switch on specific content
+            prop.put("content", theQuery.contentdom.getCode() + 1); // switch on specific content
             final ArrayList<MediaSnippet> media = result.mediaSnippets();
             if (item == 0) col = true;
             if (media != null) {

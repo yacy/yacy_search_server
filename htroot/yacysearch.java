@@ -55,6 +55,7 @@ import de.anomic.data.DidYouMean;
 import de.anomic.data.LibraryProvider;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
+import de.anomic.search.ContentDomain;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.SearchEvent;
@@ -201,10 +202,10 @@ public class yacysearch {
         if (clustersearch) global = true; // switches search on, but search target is limited to cluster nodes
         
         // find search domain
-        final int contentdomCode = QueryParams.contentdomParser((post == null ? "text" : post.get("contentdom", "text")));
+        final ContentDomain contentdomCode = ContentDomain.contentdomParser((post == null ? "text" : post.get("contentdom", "text")));
         
         // patch until better search profiles are available
-        if ((contentdomCode != QueryParams.CONTENTDOM_TEXT) && (itemsPerPage <= 32)) itemsPerPage = 32;
+        if ((contentdomCode != ContentDomain.TEXT) && (itemsPerPage <= 32)) itemsPerPage = 64;
         
         // check the search tracker
         TreeSet<Long> trackerHandles = sb.localSearchTracker.get(client);
@@ -619,7 +620,7 @@ public class yacysearch {
                 prop.put("results_" + i + "_display", display);
             }
             prop.put("results", theQuery.displayResults());
-            prop.put("resultTable", (contentdomCode <= 1) ? "0" : "1");
+            prop.put("resultTable", (contentdomCode == ContentDomain.APP || contentdomCode == ContentDomain.AUDIO || contentdomCode == ContentDomain.VIDEO) ? 1 : 0);
             prop.put("eventID", theQuery.id(false)); // for bottomline
             
             // process result of search
@@ -663,11 +664,11 @@ public class yacysearch {
         prop.put("constraint", (constraint == null) ? "" : constraint.exportB64());
         prop.put("verify", (fetchSnippets) ? "true" : "false");
         prop.put("contentdom", (post == null ? "text" : post.get("contentdom", "text")));
-        prop.put("contentdomCheckText", (contentdomCode == QueryParams.CONTENTDOM_TEXT) ? "1" : "0");
-        prop.put("contentdomCheckAudio", (contentdomCode == QueryParams.CONTENTDOM_AUDIO) ? "1" : "0");
-        prop.put("contentdomCheckVideo", (contentdomCode == QueryParams.CONTENTDOM_VIDEO) ? "1" : "0");
-        prop.put("contentdomCheckImage", (contentdomCode == QueryParams.CONTENTDOM_IMAGE) ? "1" : "0");
-        prop.put("contentdomCheckApp", (contentdomCode == QueryParams.CONTENTDOM_APP) ? "1" : "0");
+        prop.put("contentdomCheckText", (contentdomCode == ContentDomain.TEXT) ? "1" : "0");
+        prop.put("contentdomCheckAudio", (contentdomCode == ContentDomain.AUDIO) ? "1" : "0");
+        prop.put("contentdomCheckVideo", (contentdomCode == ContentDomain.VIDEO) ? "1" : "0");
+        prop.put("contentdomCheckImage", (contentdomCode == ContentDomain.IMAGE) ? "1" : "0");
+        prop.put("contentdomCheckApp", (contentdomCode == ContentDomain.APP) ? "1" : "0");
         
         // for RSS: don't HTML encode some elements
         prop.putXML("rss_query", originalquerystring);

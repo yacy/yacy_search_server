@@ -81,7 +81,7 @@ public class RankingProfile {
         coeff_urlcompintoplist, coeff_descrcompintoplist, coeff_prefer,
         coeff_termfrequency, coeff_language;
     
-    public RankingProfile(final int mediatype) {
+    public RankingProfile(final ContentDomain mediatype) {
         // set default-values
         coeff_domlength          = 11;
         coeff_ybr                = 9;
@@ -105,11 +105,11 @@ public class RankingProfile {
         coeff_app_dc_subject     = 13;
         coeff_app_dc_description = 13;
         coeff_appemph            = 10;
-        coeff_catindexof         = (mediatype == QueryParams.CONTENTDOM_TEXT) ? 0 : 15;
-        coeff_cathasimage        = (mediatype == QueryParams.CONTENTDOM_IMAGE) ? 15 : 0;
-        coeff_cathasaudio        = (mediatype == QueryParams.CONTENTDOM_AUDIO) ? 15 : 0;
-        coeff_cathasvideo        = (mediatype == QueryParams.CONTENTDOM_VIDEO) ? 15 : 0;
-        coeff_cathasapp          = (mediatype == QueryParams.CONTENTDOM_APP) ? 15 : 0;
+        coeff_catindexof         = (mediatype == ContentDomain.TEXT) ? 0 : 15;
+        coeff_cathasimage        = (mediatype == ContentDomain.IMAGE) ? 15 : 0;
+        coeff_cathasaudio        = (mediatype == ContentDomain.AUDIO) ? 15 : 0;
+        coeff_cathasvideo        = (mediatype == ContentDomain.VIDEO) ? 15 : 0;
+        coeff_cathasapp          = (mediatype == ContentDomain.APP) ? 15 : 0;
         coeff_termfrequency      = 14;
         coeff_urlcompintoplist   = 3;
         coeff_descrcompintoplist = 2;
@@ -118,7 +118,7 @@ public class RankingProfile {
     }
     
     public RankingProfile(final String prefix, final String profile) {
-        this(QueryParams.CONTENTDOM_TEXT); // set defaults
+        this(ContentDomain.TEXT); // set defaults
         if ((profile != null) && (profile.length() > 0)) {
             //parse external form
             final HashMap<String, Integer> coeff = new HashMap<String, Integer>();

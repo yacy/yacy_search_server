@@ -50,8 +50,6 @@ import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.graphics.ProfilingGraph;
 
 public class ResultFetcher {
-
-    protected final static int workerThreadCount = 10;
     
     // input values
     final RankingProcess  rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
@@ -99,14 +97,14 @@ public class ResultFetcher {
         
         // start worker threads to fetch urls and snippets
         this.workerThreads = null;
-        deployWorker(10);
+        deployWorker(query.itemsPerPage, query.neededResults());
         MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), this.workerThreads.length + " online snippet fetch threads started", 0, 0), false);
         
     }
 
-    public void deployWorker(int neededResults) {
+    public void deployWorker(int deployCount, int neededResults) {
     	if (anyWorkerAlive()) return;
-    	this.workerThreads = new Worker[(query.onlineSnippetFetch) ? workerThreadCount : 1];
+    	this.workerThreads = new Worker[(query.onlineSnippetFetch) ? deployCount : 1];
     	for (int i = 0; i < workerThreads.length; i++) {
     		this.workerThreads[i] = new Worker(i, 10000, (query.onlineSnippetFetch) ? 2 : 0, neededResults);
     		this.workerThreads[i].start();
@@ -152,16 +150,16 @@ public class ResultFetcher {
 
             // start fetching urls and snippets
             URIMetadataRow page;
-            final int fetchAhead = snippetMode == 0 ? 0 : 10;
+            //final int fetchAhead = snippetMode == 0 ? 0 : 10;
             boolean nav_topics = query.navigators.equals("all") || query.navigators.indexOf("topics") >= 0;
             try {
                 while (System.currentTimeMillis() < this.timeout) {
-                	if (result.size() >= neededResults) break;
+                	if (result.size() > neededResults) break;
                     this.lastLifeSign = System.currentTimeMillis();
     
                     // check if we have enough
-                    if ((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (images.size() >= query.neededResults() + fetchAhead)) break;
-                    if ((query.contentdom != QueryParams.CONTENTDOM_IMAGE) && (result.size() >= query.neededResults() + fetchAhead)) break;
+                    //if ((query.contentdom == ContentDomain.IMAGE) && (images.size() >= query.neededResults() + fetchAhead)) break;
+                    //if ((query.contentdom != ContentDomain.IMAGE) && (result.size() >= query.neededResults() + fetchAhead)) break;
     
                     // get next entry
                     page = rankedCache.takeURL(true, taketimeout);
@@ -217,7 +215,7 @@ public class ResultFetcher {
         }
         
         // load snippet
-        if (query.contentdom == QueryParams.CONTENTDOM_TEXT) {
+        if (query.contentdom == ContentDomain.TEXT) {
             // attach text snippet
             startTime = System.currentTimeMillis();
             final TextSnippet snippet = TextSnippet.retrieveTextSnippet(metadata, snippetFetchWordHashes, (snippetMode == 2), ((query.constraint != null) && (query.constraint.get(Condenser.flag_cat_indexof))), 180, (snippetMode == 2) ? Integer.MAX_VALUE : 30000, query.isGlobal());
@@ -300,13 +298,13 @@ public class ResultFetcher {
         System.out.println("query.neededResults() = " + query.neededResults());
         */
         if ((!anyWorkerAlive()) &&
-            (((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (images.size() + 30 < query.neededResults())) ||
+            (((query.contentdom == ContentDomain.IMAGE) && (images.size() + 30 < query.neededResults())) ||
              (this.result.size() < query.neededResults())) &&
             //(event.query.onlineSnippetFetch) &&
             (this.rankedCache.size() > this.result.size())
            ) {
         	// start worker threads to fetch urls and snippets
-            deployWorker(query.neededResults());
+            deployWorker(query.itemsPerPage, query.neededResults());
         }
 
         // finally wait until enough results are there produced from the
@@ -373,10 +371,10 @@ public class ResultFetcher {
         long r = 0;
         
         // for media search: prefer pages with many links
-        if (query.contentdom == QueryParams.CONTENTDOM_IMAGE) r += rentry.limage() << query.ranking.coeff_cathasimage;
-        if (query.contentdom == QueryParams.CONTENTDOM_AUDIO) r += rentry.laudio() << query.ranking.coeff_cathasaudio;
-        if (query.contentdom == QueryParams.CONTENTDOM_VIDEO) r += rentry.lvideo() << query.ranking.coeff_cathasvideo;
-        if (query.contentdom == QueryParams.CONTENTDOM_APP  ) r += rentry.lapp()   << query.ranking.coeff_cathasapp;
+        if (query.contentdom == ContentDomain.IMAGE) r += rentry.limage() << query.ranking.coeff_cathasimage;
+        if (query.contentdom == ContentDomain.AUDIO) r += rentry.laudio() << query.ranking.coeff_cathasaudio;
+        if (query.contentdom == ContentDomain.VIDEO) r += rentry.lvideo() << query.ranking.coeff_cathasvideo;
+        if (query.contentdom == ContentDomain.APP  ) r += rentry.lapp()   << query.ranking.coeff_cathasapp;
         
         // prefer hit with 'prefer' pattern
         if (rentry.url().toNormalform(true, true).matches(query.prefer)) r += 256 << query.ranking.coeff_prefer;

@@ -469,8 +469,12 @@ public final class Condenser {
     	return true;
     }
 
+    /**
+     * tokenize the given sentence and generate a word-wordPos mapping
+     * @param sentence the sentence to be tokenized
+     * @return a ordered map containing word hashes as key and positions as value. The map is orderd by the hash ordering
+     */
     public static TreeMap<byte[], Integer> hashSentence(final String sentence) {
-        // generates a word-wordPos mapping
         final TreeMap<byte[], Integer> map = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
         final Enumeration<StringBuilder> words = wordTokenizer(sentence, "UTF-8");
         int pos = 0;

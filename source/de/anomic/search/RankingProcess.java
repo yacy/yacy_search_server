@@ -199,11 +199,11 @@ public final class RankingProcess extends Thread {
 			    if (!testFlags(iEntry)) continue;
 			    
 			    // check document domain
-			    if (query.contentdom != QueryParams.CONTENTDOM_TEXT) {
-			        if ((query.contentdom == QueryParams.CONTENTDOM_AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) continue;
-			        if ((query.contentdom == QueryParams.CONTENTDOM_VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) continue;
-			        if ((query.contentdom == QueryParams.CONTENTDOM_IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) continue;
-			        if ((query.contentdom == QueryParams.CONTENTDOM_APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) continue;
+			    if (query.contentdom != ContentDomain.TEXT) {
+			        if ((query.contentdom == ContentDomain.AUDIO) && (!(iEntry.flags().get(Condenser.flag_cat_hasaudio)))) continue;
+			        if ((query.contentdom == ContentDomain.VIDEO) && (!(iEntry.flags().get(Condenser.flag_cat_hasvideo)))) continue;
+			        if ((query.contentdom == ContentDomain.IMAGE) && (!(iEntry.flags().get(Condenser.flag_cat_hasimage)))) continue;
+			        if ((query.contentdom == ContentDomain.APP  ) && (!(iEntry.flags().get(Condenser.flag_cat_hasapp  )))) continue;
 			    }
 
 			    // check tld domain
@@ -417,10 +417,10 @@ public final class RankingProcess extends Thread {
             }
             
             // check content domain
-            if ((query.contentdom == QueryParams.CONTENTDOM_AUDIO && page.laudio() == 0) ||
-                (query.contentdom == QueryParams.CONTENTDOM_VIDEO && page.lvideo() == 0) ||
-                (query.contentdom == QueryParams.CONTENTDOM_IMAGE && page.limage() == 0) ||
-                (query.contentdom == QueryParams.CONTENTDOM_APP && page.lapp() == 0)) {
+            if ((query.contentdom == ContentDomain.AUDIO && page.laudio() == 0) ||
+                (query.contentdom == ContentDomain.VIDEO && page.lvideo() == 0) ||
+                (query.contentdom == ContentDomain.IMAGE && page.limage() == 0) ||
+                (query.contentdom == ContentDomain.APP && page.lapp() == 0)) {
             	continue;
             }
             

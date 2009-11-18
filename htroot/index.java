@@ -30,7 +30,7 @@
 
 
 import de.anomic.http.server.RequestHeader;
-import de.anomic.search.QueryParams;
+import de.anomic.search.ContentDomain;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
@@ -79,13 +79,13 @@ public class index {
         //global = global && indexDistributeGranted && indexReceiveGranted;
         
         // search domain
-        int contentdom = QueryParams.CONTENTDOM_TEXT;
+        ContentDomain contentdom = ContentDomain.TEXT;
         final String cds = (post == null) ? "text" : post.get("contentdom", "text");
-        if (cds.equals("text")) contentdom = QueryParams.CONTENTDOM_TEXT;
-        if (cds.equals("audio")) contentdom = QueryParams.CONTENTDOM_AUDIO;
-        if (cds.equals("video")) contentdom = QueryParams.CONTENTDOM_VIDEO;
-        if (cds.equals("image")) contentdom = QueryParams.CONTENTDOM_IMAGE;
-        if (cds.equals("app")) contentdom = QueryParams.CONTENTDOM_APP;
+        if (cds.equals("text")) contentdom = ContentDomain.TEXT;
+        if (cds.equals("audio")) contentdom = ContentDomain.AUDIO;
+        if (cds.equals("video")) contentdom = ContentDomain.VIDEO;
+        if (cds.equals("image")) contentdom = ContentDomain.IMAGE;
+        if (cds.equals("app")) contentdom = ContentDomain.APP;
         
         // we create empty entries for template strings
         String promoteSearchPageGreeting = env.getConfig(SwitchboardConstants.GREETING, "");
@@ -120,11 +120,11 @@ public class index {
         prop.put("display", display);
         prop.putHTML("constraint", constraint);
         prop.put("searchoptions_display", display);
-        prop.put("contentdomCheckText", (contentdom == QueryParams.CONTENTDOM_TEXT) ? "1" : "0");
-        prop.put("contentdomCheckAudio", (contentdom == QueryParams.CONTENTDOM_AUDIO) ? "1" : "0");
-        prop.put("contentdomCheckVideo", (contentdom == QueryParams.CONTENTDOM_VIDEO) ? "1" : "0");
-        prop.put("contentdomCheckImage", (contentdom == QueryParams.CONTENTDOM_IMAGE) ? "1" : "0");
-        prop.put("contentdomCheckApp", (contentdom == QueryParams.CONTENTDOM_APP) ? "1" : "0");
+        prop.put("contentdomCheckText", (contentdom == ContentDomain.TEXT) ? "1" : "0");
+        prop.put("contentdomCheckAudio", (contentdom == ContentDomain.AUDIO) ? "1" : "0");
+        prop.put("contentdomCheckVideo", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
+        prop.put("contentdomCheckImage", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
+        prop.put("contentdomCheckApp", (contentdom == ContentDomain.APP) ? "1" : "0");
         // online caution timing
         sb.localSearchLastAccess = System.currentTimeMillis();
         

@@ -50,7 +50,7 @@ import net.yacy.kelondro.logging.Log;
  */
 public class DocumentIndex extends Segment {
 	
-    private static final RankingProfile textRankingDefault = new RankingProfile(QueryParams.CONTENTDOM_TEXT);
+    private static final RankingProfile textRankingDefault = new RankingProfile(ContentDomain.TEXT);
     //private Bitfield zeroConstraint = new Bitfield(4);
     
     private final static File poison = new File(".");

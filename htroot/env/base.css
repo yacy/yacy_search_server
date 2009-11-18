@@ -203,8 +203,8 @@ tt, *.tt {
 
 .thumbcontainer {
   margin: 2px;
-  width: 100px;
-  height: 160px; /* 96px thumbnail + some lines of text */
+  width: 96px;
+  height: 96px; /* 96px thumbnail + some lines of text */
   float: left;
 }
 

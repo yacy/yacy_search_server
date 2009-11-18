@@ -50,13 +50,6 @@ public final class QueryParams {
     public static final int SEARCHDOM_GLOBALDHT = 3;
     public static final int SEARCHDOM_GLOBALALL = 4;
     
-    public static final int CONTENTDOM_ALL   = -1;
-    public static final int CONTENTDOM_TEXT  = 0;
-    public static final int CONTENTDOM_IMAGE = 1;
-    public static final int CONTENTDOM_AUDIO = 2;
-    public static final int CONTENTDOM_VIDEO = 3;
-    public static final int CONTENTDOM_APP   = 4;
-    
     public static enum FetchMode {
     	NO_FETCH_NO_VERIFY,
     	FETCH_BUT_ACCEPT_OFFLINE_OR_USE_CACHE,
@@ -70,7 +63,7 @@ public final class QueryParams {
     public TreeSet<byte[]> fullqueryHashes, queryHashes, excludeHashes;
     public int itemsPerPage, offset;
     public String prefer;
-    public int contentdom;
+    public ContentDomain contentdom;
     public String urlMask;
     public String targetlang;
     public String navigators;
@@ -113,7 +106,7 @@ public final class QueryParams {
     	this.tenant = null;
         this.maxDistance = Integer.MAX_VALUE;
         this.prefer = "";
-        this.contentdom = CONTENTDOM_ALL;
+        this.contentdom = ContentDomain.ALL;
         this.itemsPerPage = itemsPerPage;
         this.offset = 0;
         this.urlMask = ".*";
@@ -139,7 +132,7 @@ public final class QueryParams {
         final TreeSet<byte[]> fullqueryHashes,
         final String tenant,
         final RankingProfile ranking,
-        final int maxDistance, final String prefer, final int contentdom,
+        final int maxDistance, final String prefer, final ContentDomain contentdom,
         final String language,
         final String navigators,
         final boolean onlineSnippetFetch,
@@ -194,22 +187,8 @@ public final class QueryParams {
         this.offset = newOffset;
     }
     
-    public static int contentdomParser(final String dom) {
-        if (dom.equals("text")) return CONTENTDOM_TEXT;
-        else if (dom.equals("image")) return CONTENTDOM_IMAGE;
-        else if (dom.equals("audio")) return CONTENTDOM_AUDIO;
-        else if (dom.equals("video")) return CONTENTDOM_VIDEO;
-        else if (dom.equals("app")) return CONTENTDOM_APP;
-        return CONTENTDOM_TEXT;
-    }
-    
     public String contentdom() {
-        if (this.contentdom == CONTENTDOM_TEXT) return "text";
-        else if (this.contentdom == CONTENTDOM_IMAGE) return "image";
-        else if (this.contentdom == CONTENTDOM_AUDIO) return "audio";
-        else if (this.contentdom == CONTENTDOM_VIDEO) return "video";
-        else if (this.contentdom == CONTENTDOM_APP) return "app";
-        return "text";
+        return this.contentdom.toString();
     }
     
     public boolean isGlobal() {
