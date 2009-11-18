@@ -180,7 +180,7 @@ public final class search {
         final RankingProfile rankingProfile = (profile.length() == 0) ? new RankingProfile(QueryParams.contentdomParser(contentdom)) : new RankingProfile("", profile);
         
         // prepare an abstract result
-        final StringBuilder indexabstract = new StringBuilder();
+        final StringBuilder indexabstract = new StringBuilder(6000);
         int indexabstractContainercount = 0;
         int joincount = 0;
         QueryParams theQuery = null;
@@ -279,7 +279,7 @@ public final class search {
                 prop.put("joincount", "0");
             } else {
                 // attach information about index abstracts
-                final StringBuilder indexcount = new StringBuilder();
+                final StringBuilder indexcount = new StringBuilder(6000);
                 Map.Entry<byte[], Integer> entry;
                 final Iterator<Map.Entry<byte[], Integer>> i = theSearch.abstractsCount();
                 while (i.hasNext()) {
@@ -331,7 +331,7 @@ public final class search {
             // prepare reference hints
             final long timer = System.currentTimeMillis();
             final ArrayList<NavigatorEntry> ws = theSearch.getTopicNavigator(10);
-            final StringBuilder refstr = new StringBuilder();
+            final StringBuilder refstr = new StringBuilder(6000);
             for (NavigatorEntry e: ws) {
                 refstr.append(",").append(e.name);
             }
@@ -351,7 +351,7 @@ public final class search {
         } else {
             // result is a List of urlEntry elements
             final long timer = System.currentTimeMillis();
-            final StringBuilder links = new StringBuilder();
+            final StringBuilder links = new StringBuilder(6000);
             String resource = null;
             SortStack<ResultEntry>.stackElement entry;
             for (int i = 0; i < accu.size(); i++) {
