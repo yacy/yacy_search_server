@@ -25,8 +25,8 @@
 //javac -classpath .:../Classes Status.java
 //if the shell's current path is HTROOT
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
@@ -43,7 +43,6 @@ import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.retrieval.Response;
@@ -158,18 +157,16 @@ public class ViewFile {
         }
 
         // loading the resource content as byte array
-        InputStream resource = null;
-        long resourceLength = -1;
+        byte[] resource = null;
         ResponseHeader responseHeader = null;
         String resMime = null;
         // trying to load the resource body
         try {
-            resource = Cache.getContentStream(url);
+            resource = Cache.getContent(url);
         } catch (IOException e) {
             Log.logException(e);
             resource = null;
         }
-        resourceLength = Cache.getResourceContentLength(url);
         responseHeader = Cache.getResponseHeader(url);
 
         // if the resource body was not cached we try to load it from web
@@ -185,13 +182,7 @@ public class ViewFile {
             }
 
             if (entry != null) {
-                try {
-                    resource = Cache.getContentStream(url);
-                } catch (IOException e) {
-                    Log.logException(e);
-                    resource = null;
-                }
-                resourceLength = Cache.getResourceContentLength(url);
+                resource = entry.getContent();
             }
 
             if (resource == null) {
@@ -241,19 +232,14 @@ public class ViewFile {
             // TODO: how to handle very large files here ?
             String content;
             try {
-                content = new String(FileUtils.read(resource), "UTF-8");
+                content = new String(resource, "UTF-8");
             } catch (final Exception e) {
                 prop.put("error", "4");
                 prop.putHTML("error_errorText", e.getMessage());
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
                 return prop;
             } finally {
-                if (resource != null)
-                    try {
-                        resource.close();
-                    } catch (final Exception e) {
-                        /* ignore this */
-                    }
+                resource = null;
             }
 
             prop.put("error", "0");
@@ -268,7 +254,7 @@ public class ViewFile {
             // parsing the resource content
             Document document = null;
             try {
-                document = LoaderDispatcher.parseDocument(url, resourceLength, resource, null);
+                document = LoaderDispatcher.parseDocument(url, resource.length, new ByteArrayInputStream(resource), null);
                 if (document == null) {
                     prop.put("error", "5");
                     prop.put("error_errorText", "Unknown error");
@@ -281,12 +267,7 @@ public class ViewFile {
                 prop.put("viewMode", VIEW_MODE_NO_TEXT);
                 return prop;
             } finally {
-                if (resource != null)
-                    try {
-                        resource.close();
-                    } catch (final Exception e) {
-                        /* ignore this */
-                    }
+                resource = null;
             }
 
             resMime = document.dc_format();

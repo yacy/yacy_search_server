@@ -273,48 +273,26 @@ public final class LoaderDispatcher {
     }
 
     /**
-     * 
+     * load the url as resource from the web or the cache
      * @param url
      * @param fetchOnline
      * @param socketTimeout
      * @param forText 
-     * @return an Object array containing
-     * <table>
-     * <tr><td>[0]</td><td>the content as {@link InputStream}</td></tr>
-     * <tr><td>[1]</td><td>the content-length as {@link Integer}</td></tr>
-     * </table>
+     * @return the content as {@link byte[]}
      * @throws IOException 
      */
-    public Object[] getResource(final DigestURI url, final boolean fetchOnline, final int socketTimeout, final boolean forText, final boolean reindexing) throws IOException {
-        // load the url as resource from the web
-        long contentLength = -1;
-            
-        // trying to load the resource body from cache
-        InputStream resource = Cache.getContentStream(url);
-        if (resource != null) {
-            contentLength = Cache.getResourceContentLength(url);
-        } else if (fetchOnline) {
-            // if the content is not available in cache try to download it from web
-            
-            // try to download the resource using the loader
-            final Response entry = load(url, forText, reindexing);
-            if (entry == null) return null; // not found in web
-            
-            // read resource body (if it is there)
-            final byte[] resourceArray = entry.getContent();
+    public byte[] getResource(final DigestURI url, final boolean fetchOnline, final int socketTimeout, final boolean forText, final boolean reindexing) throws IOException {
+        byte[] resource = Cache.getContent(url);
+        if (resource != null) return resource;
         
-            // in case that the resource was not in ram, read it from disk
-            if (resourceArray == null) {
-                resource = Cache.getContentStream(url);   
-                contentLength = Cache.getResourceContentLength(url); 
-            } else {
-                resource = new ByteArrayInputStream(resourceArray);
-                contentLength = resourceArray.length;
-            }
-        } else {
-            return null;
-        }
-        return new Object[]{resource, Long.valueOf(contentLength)};
+        if (!fetchOnline) return null;
+        
+        // try to download the resource using the loader
+        final Response entry = load(url, forText, reindexing);
+        if (entry == null) return null; // not found in web
+        
+        // read resource body (if it is there)
+        return entry.getContent();
     }
     
     /**
@@ -332,16 +310,14 @@ public final class LoaderDispatcher {
     public static Document retrieveDocument(final DigestURI url, final boolean fetchOnline, final int timeout, final boolean forText, final boolean global) {
 
         // load resource
-        long resContentLength = 0;
-        InputStream resContent = null;
+        byte[] resContent = null;
         ResponseHeader responseHeader = null;
         try {
             // trying to load the resource from the cache
-            resContent = Cache.getContentStream(url);
+            resContent = Cache.getContent(url);
             responseHeader = Cache.getResponseHeader(url);
             if (resContent != null) {
                 // if the content was found
-                resContentLength = Cache.getResourceContentLength(url);
             } else if (fetchOnline) {
                 // if not found try to download it
                 
@@ -354,11 +330,9 @@ public final class LoaderDispatcher {
                     // read resource body (if it is there)
                     final byte[] resourceArray = entry.getContent();
                     if (resourceArray != null) {
-                        resContent = new ByteArrayInputStream(resourceArray);
-                        resContentLength = resourceArray.length;
+                        resContent = resourceArray;
                     } else {
-                        resContent = Cache.getContentStream(url); 
-                        resContentLength = Cache.getResourceContentLength(url);
+                        resContent = Cache.getContent(url); 
                     }
                 }
                 
@@ -379,12 +353,12 @@ public final class LoaderDispatcher {
         // parse resource
         Document document = null;
         try {
-            document = parseDocument(url, resContentLength, resContent, responseHeader);            
+            document = parseDocument(url, resContent.length, new ByteArrayInputStream(resContent), responseHeader);            
         } catch (final ParserException e) {
             Log.logFine("snippet fetch", "parser error " + e.getMessage() + " for url " + url);
             return null;
         } finally {
-            try { resContent.close(); } catch (final Exception e) {}
+            resContent = null;
         }
         return document;
     }

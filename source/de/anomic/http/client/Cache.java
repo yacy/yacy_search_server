@@ -34,10 +34,8 @@
 
 package de.anomic.http.client;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
@@ -195,12 +193,14 @@ public final class Cache {
      * is returned.
      * @throws IOException 
      */
+    /*
     public static InputStream getContentStream(final DigestURI url) throws IOException {
         // load the url as resource from the cache
         byte[] b = getContent(url);
         if (b == null) return null;
         return new ByteArrayInputStream(b);
     }
+    */
     
     /**
      * Returns the content of a cached resource as byte[]
@@ -228,6 +228,7 @@ public final class Cache {
      * @param url
      * @return the size of the cached content
      */
+    /*
     public static long getResourceContentLength(final DigestURI url) {
         // first try to get the length from the response header,
         // this is less costly than loading the content from its gzipped cache
@@ -245,7 +246,8 @@ public final class Cache {
             return -1;
         }
     }
-
+     */
+    
     /**
      * removed response header and cached content from the database
      * @param url

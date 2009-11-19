@@ -23,6 +23,7 @@
 import java.awt.Container;
 import java.awt.Image;
 import java.awt.MediaTracker;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -84,17 +85,17 @@ public class ViewImage {
         int maxheight = post.getInt("maxheight", 0);
         final int timeout = post.getInt("timeout", 5000);
         
-        // getting the image as stream
+        // get the image as stream
         Image scaled = iconcache.get(urlString);
         if (scaled == null) {
-            Object[] resource = null;
+            byte[] resourceb = null;
             if (url != null) try {
-                resource = sb.loader.getResource(url, true, timeout, false, true);
+                resourceb = sb.loader.getResource(url, true, timeout, false, true);
             } catch (IOException e) {
                 Log.logWarning("ViewImage", "cannot load: " + e.getMessage());
             }
             byte[] imgb = null;
-            if (resource == null) {
+            if (resourceb == null) {
                 if (urlString.endsWith(".ico")) {
                     // load default favicon dfltfvcn.ico
                     if (defaulticonb == null) try {
@@ -108,7 +109,7 @@ public class ViewImage {
                     return null;
                 }
             } else {
-                final InputStream imgStream = (InputStream) resource[0];
+                final InputStream imgStream = new ByteArrayInputStream(resourceb);
                 if (imgStream == null) return null;
 
                 // read image data
@@ -138,8 +139,8 @@ public class ViewImage {
                 maxwidth = (maxwidth == 0) ? w : maxwidth;
                 maxheight = (maxheight == 0) ? h : maxheight;
             } else if ((w > 16) || (h > 16)) {
-                maxwidth = (int) Math.min(64.0, w * 0.6);
-                maxheight = (int) Math.min(64.0, h * 0.6);
+                maxwidth = Math.min(96, w);
+                maxheight = Math.min(96, h);
             } else {
                 maxwidth = 16;
                 maxheight = 16;
@@ -151,7 +152,7 @@ public class ViewImage {
                 final double hs = (w <= maxwidth) ? 1.0 : ((double) maxwidth) / ((double) w);
                 final double vs = (h <= maxheight) ? 1.0 : ((double) maxheight) / ((double) h);
                 double scale = Math.min(hs, vs);
-                if (!auth) scale = Math.min(scale, 0.6); // this is for copyright purpose
+                //if (!auth) scale = Math.min(scale, 0.6); // this is for copyright purpose
                 if (scale < 1.0) {
                     width = Math.max(1, (int) (w * scale));
                     height = Math.max(1, (int) (h * scale));
@@ -172,7 +173,7 @@ public class ViewImage {
                 scaled = image;
             }
 
-            if ((height == 16) && (width == 16) && (resource != null)) {
+            if ((height == 16) && (width == 16) && (resourceb != null)) {
                 // this might be a favicon, store image to cache for faster re-load later on
                 iconcache.put(urlString, scaled);
             }

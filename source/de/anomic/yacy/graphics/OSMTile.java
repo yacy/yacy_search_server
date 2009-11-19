@@ -30,7 +30,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Random;
 
@@ -81,13 +80,13 @@ public class OSMTile {
             return null;
         }
         //System.out.println("*** DEBUG: fetching OSM tile: " + tileURL.toNormalform(true, true));
-        InputStream tileStream = null;
+        byte[] tileb = null;
         try {
-            tileStream = Cache.getContentStream(tileURL);
+            tileb = Cache.getContent(tileURL);
         } catch (IOException e1) {
             Log.logException(e1);
         }
-        if (tileStream == null) {
+        if (tileb == null) {
             // download resource using the crawler and keep resource in memory if possible
             Response entry = null;
             try {
@@ -96,11 +95,11 @@ public class OSMTile {
                 Log.logWarning("yamyOSM", "cannot load: " + e.getMessage());
                 return null;
             }
-            if ((entry == null) || (entry.getContent() == null)) return null;
-            tileStream = new ByteArrayInputStream(entry.getContent());
+            tileb = entry.getContent();
+            if (entry == null) return null;
         }
         try {
-            return ImageIO.read(tileStream);
+            return ImageIO.read(new ByteArrayInputStream(tileb));
         } catch (final EOFException e) {
             return null;
         } catch (final IOException e) {

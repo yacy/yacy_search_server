@@ -26,6 +26,7 @@
 
 package de.anomic.search;
 
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -374,22 +375,22 @@ public class Segment {
         InputStream resourceContent = null;
         try {
             // get the resource content
-            Object[] resource = null;
+            byte[] resourceb = null;
             try {
-                resource = loader.getResource(metadata.url(), fetchOnline, 10000, true, false);
+                resourceb = loader.getResource(metadata.url(), fetchOnline, 10000, true, false);
             } catch (IOException e) {
                 Log.logWarning("removeAllUrlReferences", "cannot load: " + e.getMessage());
             }
-            if (resource == null) {
+            if (resourceb == null) {
                 // delete just the url entry
                 urlMetadata().remove(urlhash);
                 return 0;
             } else {
-                resourceContent = (InputStream) resource[0];
-                final Long resourceContentLength = (Long) resource[1];
+                resourceContent = new ByteArrayInputStream(resourceb);
+                final long resourceContentLength = resourceb.length;
                 
                 // parse the resource
-                final Document document = LoaderDispatcher.parseDocument(metadata.url(), resourceContentLength.longValue(), resourceContent, null);
+                final Document document = LoaderDispatcher.parseDocument(metadata.url(), resourceContentLength, resourceContent, null);
                 
                 // get the word set
                 Set<String> words = null;

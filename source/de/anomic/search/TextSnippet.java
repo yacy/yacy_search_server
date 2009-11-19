@@ -26,7 +26,6 @@ package de.anomic.search;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
@@ -329,8 +328,7 @@ public class TextSnippet {
          * LOADING RESOURCE DATA
          * =========================================================================== */
         // if the snippet is not in the cache, we can try to get it from the htcache
-        long resContentLength = 0;
-        InputStream resContent = null;
+        byte[] resContent = null;
         ResponseHeader responseHeader = null;
         try {
             // first try to get the snippet from metadata
@@ -349,11 +347,11 @@ public class TextSnippet {
                 return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
             } else {
                 // trying to load the resource from the cache
-                resContent = Cache.getContentStream(url);
+                resContent = Cache.getContent(url);
                 responseHeader = Cache.getResponseHeader(url);
-                if (resContent != null && ((resContentLength = Cache.getResourceContentLength(url)) > maxDocLen) && (!fetchOnline)) {
+                if (resContent != null && !fetchOnline && resContent.length > maxDocLen) {
                     // content may be too large to be parsed here. To be fast, we omit calculation of snippet here
-                    return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "resource available, but too large: " + resContentLength + " bytes");
+                    return new TextSnippet(url, null, ERROR_SOURCE_LOADING, queryhashes, "resource available, but too large: " + resContent.length + " bytes");
                 } else if (fetchOnline) {
                     // if not found try to download it
                     
@@ -368,11 +366,9 @@ public class TextSnippet {
                         // read resource body (if it is there)
                         final byte[] resourceArray = entry.getContent();
                         if (resourceArray != null) {
-                            resContent = new ByteArrayInputStream(resourceArray);
-                            resContentLength = resourceArray.length;
+                            resContent = resourceArray;
                         } else {
-                            resContent = Cache.getContentStream(url); 
-                            resContentLength = Cache.getResourceContentLength(url);
+                            resContent = Cache.getContent(url); 
                         }
                     }
                     
@@ -394,11 +390,11 @@ public class TextSnippet {
          * =========================================================================== */
         Document document = null;
         try {
-             document = LoaderDispatcher.parseDocument(url, resContentLength, resContent, responseHeader);
+             document = LoaderDispatcher.parseDocument(url, resContent.length, new ByteArrayInputStream(resContent), responseHeader);
         } catch (final ParserException e) {
             return new TextSnippet(url, null, ERROR_PARSER_FAILED, queryhashes, e.getMessage()); // cannot be parsed
         } finally {
-            try { resContent.close(); } catch (final Exception e) {/* ignore this */}
+            resContent = null;
         }
         if (document == null) return new TextSnippet(url, null, ERROR_PARSER_FAILED, queryhashes, "parser error/failed"); // cannot be parsed
         

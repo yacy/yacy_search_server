@@ -495,7 +495,11 @@ public final class HTTPDProxyHandler {
                 long sizeBeforeDelete = -1;
                 if (cachedResponseHeader != null) {
                     // delete the cache
-                    sizeBeforeDelete = Cache.getResourceContentLength(url);
+                    ResponseHeader rh = Cache.getResponseHeader(url);
+                    if (rh != null && (sizeBeforeDelete = rh.getContentLength()) == 0) {
+                        byte[] b = Cache.getContent(url);
+                        if (b != null) sizeBeforeDelete = b.length;
+                    }
                     Cache.delete(url);
                     conProp.setProperty(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_CODE, "TCP_REFRESH_MISS");
                 }
