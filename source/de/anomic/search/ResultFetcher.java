@@ -332,20 +332,16 @@ public class ResultFetcher {
             return this.images.element(item).element;
         }
         
-        // feed some results from the result stack into the image stack
-        final int count = Math.min(5, Math.max(1, 10 * this.result.size() / (item + 1)));
-        for (int i = 0; i < count; i++) {
-            // generate result object
-            final ResultEntry result = nextResult();
-            MediaSnippet ms;
-            if (result != null) {
-                // iterate over all images in the result
-                final ArrayList<MediaSnippet> imagemedia = result.mediaSnippets();
-                if (imagemedia != null) {
-                    for (int j = 0; j < imagemedia.size(); j++) {
-                        ms = imagemedia.get(j);
-                        images.push(ms, Long.valueOf(ms.ranking));
-                    }
+        // generate result object
+        final ResultEntry result = nextResult();
+        MediaSnippet ms;
+        if (result != null) {
+            // iterate over all images in the result
+            final ArrayList<MediaSnippet> imagemedia = result.mediaSnippets();
+            if (imagemedia != null) {
+                for (int j = 0; j < imagemedia.size(); j++) {
+                    ms = imagemedia.get(j);
+                    images.push(ms, Long.valueOf(ms.ranking));
                 }
             }
         }

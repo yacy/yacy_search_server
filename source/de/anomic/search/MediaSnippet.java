@@ -123,6 +123,10 @@ public class MediaSnippet {
         while (i.hasNext()) {
             ientry = i.next();
             url = ientry.url();
+            String u = url.toString();
+            if (u.indexOf(".ico") >= 0 || u.indexOf("favicon") >= 0) continue;
+            if (ientry.height() > 0 && ientry.height() < 64) continue;
+            if (ientry.width() > 0 && ientry.width() < 64) continue;
             desc = ientry.alt();
             int appcount = 0;
             s = TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes);
@@ -131,7 +135,7 @@ public class MediaSnippet {
             s = TextSnippet.removeAppearanceHashes(desc, s);
             appcount += queryhashes.size() - s.size();
             // if the resulting set is empty, then _all_ search words appeared in the description
-            final int ranking = (ientry.hashCode() / queryhashes.size() / 2) * appcount;
+            final int ranking = /*(ientry.hashCode() / queryhashes.size() / 2) */ ientry.height() * ientry.width() * appcount * 10000 /* 0x7FFF0000)*/;
             result.add(new MediaSnippet(ContentDomain.IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
         }
         return result;

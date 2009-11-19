@@ -67,7 +67,7 @@ public class ImageEntry implements Comparable<ImageEntry> {
         // unfortunately it can not be ensured that all images get different hashes, but this should appear
         // only in very rare cases
         if (width < 0 || height < 0)
-            return 0x7FFF0000 | (url.hashCode() & 0xFFFF);
+            return /*0x7FFF0000 |*/ (url.hashCode() & 0xFFFF);
         return ((0x7FFF - (((width * height) >> 9) & 0x7FFF)) << 16) | (url.hashCode() & 0xFFFF);
     }
     
