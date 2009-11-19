@@ -31,6 +31,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import net.yacy.kelondro.index.Row.Entry;
+import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.MicroDate;
 import net.yacy.kelondro.rwi.AbstractReference;
@@ -38,7 +39,7 @@ import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 
 
-public class WordReferenceVars extends AbstractReference implements WordReference, Reference, Cloneable {
+public class WordReferenceVars extends AbstractReference implements WordReference, Reference, Cloneable, Comparable<WordReferenceVars> {
 
 	/**
 	 * object for termination of concurrent blocking queue processing
@@ -357,10 +358,18 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.wordsintext = this.wordsintext + oe.wordsintext();
     }
 
+    public boolean equals(Reference other) {
+        return this.urlHash.equals(other.metadataHash());
+    }
+    
     public int hashCode() {
         return this.urlHash.hashCode();
     }
-
+    
+    public int compareTo(WordReferenceVars o) {
+        return Base64Order.enhancedCoder.compare(this.urlHash.getBytes(), o.metadataHash().getBytes());
+    }
+    
     public void addPosition(int position) {
         this.positions.add(position);
     }
@@ -417,4 +426,5 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 	    	} catch (InterruptedException e) {}
     	}
     }
+
 }

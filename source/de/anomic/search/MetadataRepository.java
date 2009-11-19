@@ -41,7 +41,7 @@ import java.util.TreeSet;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.ObjectIndex;
@@ -111,7 +111,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         return 0;
     }
 
-    public synchronized URIMetadataRow load(final String urlHash, final WordReference searchedWord, final long ranking) {
+    public synchronized URIMetadataRow load(final String urlHash, final WordReferenceVars searchedWord, final long ranking) {
         // generates an plasmaLURLEntry using the url hash
         // if the url cannot be found, this returns null
         if (urlHash == null) return null;

@@ -50,7 +50,6 @@ import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.BinSearch;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Digest;
-import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.FileUtils;
@@ -495,11 +494,9 @@ public final class RankingProcess extends Thread {
         return this.local_resourceSize;
     }
     
-    public Reference remove(final String urlHash) {
-        final SortStack<WordReferenceVars>.stackElement se = stack.remove(urlHash.hashCode());
-        if (se == null) return null;
-        urlhashes.remove(urlHash);
-        return se.element;
+    public void remove(final WordReferenceVars reference) {
+        stack.remove(reference);
+        urlhashes.remove(reference.urlHash);
     }
     
     public Iterator<String> miss() {

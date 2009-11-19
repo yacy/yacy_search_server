@@ -33,10 +33,11 @@ import net.yacy.document.Document;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 import net.yacy.repository.LoaderDispatcher;
 
 
-public class MediaSnippet {
+public class MediaSnippet implements Comparable<MediaSnippet> {
     public ContentDomain type;
     public DigestURI href, source;
     public String name, attr;
@@ -56,6 +57,14 @@ public class MediaSnippet {
     @Override
     public int hashCode() {
         return href.hashCode();
+    }
+    
+    public boolean equals(MediaSnippet other) {
+        return this.href.hash().equals(other.href.hash());
+    }
+    
+    public int compareTo(MediaSnippet o) {
+        return Base64Order.enhancedCoder.compare(this.href.hash().getBytes(), o.href.hash().getBytes());
     }
     
     public static ArrayList<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final TreeSet<byte[]> queryhashes, final ContentDomain mediatype, final boolean fetchOnline, final int timeout, final boolean reindexing) {

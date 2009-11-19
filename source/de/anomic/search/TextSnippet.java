@@ -41,6 +41,7 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.ARC;
 import net.yacy.kelondro.index.ConcurrentARC;
 import net.yacy.kelondro.logging.Log;
@@ -78,18 +79,6 @@ public class TextSnippet {
     private final int errorCode;
     private TreeSet<byte[]> remaingHashes;
     private final DigestURI favicon;
-    
-    private static Log             log = null;
-    private static Switchboard     sb = null;
-    
-
-    public static void init(
-            final Log logx,
-            final Switchboard switchboard
-    ) {
-        log = logx;
-        sb = switchboard;
-    }
     
     public static boolean existsInCache(final DigestURI url, final TreeSet<byte[]> queryhashes) {
         final String hashes = yacySearch.set2string(queryhashes);
@@ -361,7 +350,7 @@ public class TextSnippet {
                     // getting resource metadata (e.g. the http headers for http resources)
                     if (entry != null) {
                         // place entry on indexing queue
-                        sb.toIndexer(entry);
+                        Switchboard.getSwitchboard().toIndexer(entry);
                         
                         // read resource body (if it is there)
                         final byte[] resourceArray = entry.getContent();
@@ -501,7 +490,7 @@ public class TextSnippet {
             }
             return null;
         } catch (final IndexOutOfBoundsException e) {
-            log.logSevere("computeSnippet: error with string generation", e);
+            Log.logSevere("computeSnippet", "error with string generation", e);
             return new Object[]{null, queryhashes};
         }
     }
@@ -570,12 +559,12 @@ public class TextSnippet {
             }
             return new Object[] {sentence, remainingHashes};
         } catch (final IndexOutOfBoundsException e) {
-            log.logSevere("computeSnippet: error with string generation", e);
+            Log.logSevere("computeSnippet", "error with string generation", e);
             return null;
         }
     }
     
-    public static String failConsequences(Segment indexSegment, final TextSnippet snippet, final String eventID) throws IOException {
+    public static String failConsequences(Segment indexSegment, final WordReferenceVars word, final TextSnippet snippet, final String eventID) throws IOException {
         // problems with snippet fetch
         final String urlHash = snippet.getUrl().hash();
         final String querystring = SetTools.setToString(snippet.getRemainingHashes(), ' ');
@@ -583,19 +572,19 @@ public class TextSnippet {
             (snippet.getErrorCode() == ERROR_RESOURCE_LOADING) ||
             (snippet.getErrorCode() == ERROR_PARSER_FAILED) ||
             (snippet.getErrorCode() == ERROR_PARSER_NO_LINES)) {
-            log.logInfo("error: '" + snippet.getError() + "', remove url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
+            Log.logInfo("TextSnippet", "error: '" + snippet.getError() + "', remove url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
             indexSegment.urlMetadata().remove(urlHash);
             final SearchEvent event = SearchEventCache.getEvent(eventID);
             assert indexSegment != null;
             assert event != null : "eventID = " + eventID;
             assert event.getQuery() != null;
             indexSegment.termIndex().remove(event.getQuery().queryHashes, urlHash);
-            event.remove(urlHash);
+            event.remove(word);
         }
         if (snippet.getErrorCode() == ERROR_NO_MATCH) {
-            log.logInfo("error: '" + snippet.getError() + "', remove words '" + querystring + "' for url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
+            Log.logInfo("TextSnippet", "error: '" + snippet.getError() + "', remove words '" + querystring + "' for url = " + snippet.getUrl().toNormalform(false, true) + ", cause: " + snippet.getError());
             indexSegment.termIndex().remove(snippet.getRemainingHashes(), urlHash);
-            SearchEventCache.getEvent(eventID).remove(urlHash);
+            SearchEventCache.getEvent(eventID).remove(word);
         }
         return snippet.getError();
     }

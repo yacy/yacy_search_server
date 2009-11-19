@@ -35,7 +35,7 @@ import java.util.Iterator;
  * specific elements in the list.
  * @param <E>
  */
-public class SortStore<E> extends SortStack<E> {
+public class SortStore<E extends Comparable<E>> extends SortStack<E> {
     
     private final ArrayList<stackElement> offstack; // objects that had been on the stack but had been removed
     
@@ -106,27 +106,14 @@ public class SortStore<E> extends SortStack<E> {
         return this.offstack;
     }
     
-    public stackElement get(final int hashcode) {
-        stackElement se = super.get(hashcode);
-        if (se != null) return se;
-        final Iterator<stackElement> j = this.offstack.iterator();
-        while (j.hasNext()) {
-            se = j.next();
-            if (se.element.hashCode() == hashcode) return se;
-        }
-        return null;
-    }
-    
-    public stackElement remove(final int hashcode) {
-        stackElement se = super.remove(hashcode);
-        if (se != null) return se;
-        for (int j = 0; j < this.offstack.size(); j++) {
-            se = this.offstack.get(j);
-            if (se.element.hashCode() == hashcode) {
-                this.offstack.remove(j);
-                return se;
+    public void remove(final E element) {
+        super.remove(element);
+        Iterator<stackElement> i = this.offstack.iterator();
+        while (i.hasNext()) {
+            if (i.next().element.equals(element)) {
+                i.remove();
+                return;
             }
         }
-        return null;
     }
 }

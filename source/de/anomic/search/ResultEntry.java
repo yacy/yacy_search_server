@@ -36,13 +36,14 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.Reference;
 
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 
-public class ResultEntry {
+public class ResultEntry implements Comparable<ResultEntry> {
     
     // payload objects
     private final URIMetadataRow urlentry;
@@ -100,6 +101,9 @@ public class ResultEntry {
     }
     public int hashCode() {
         return urlentry.hash().hashCode();
+    }
+    public boolean equals(ResultEntry other) {
+        return urlentry.hash().equals(other.urlentry.hash());
     }
     public String hash() {
         return urlentry.hash();
@@ -160,5 +164,8 @@ public class ResultEntry {
             return urlentry.toString();
         }
         return urlentry.toString(textSnippet.getLineRaw());
+    }
+    public int compareTo(ResultEntry o) {
+        return Base64Order.enhancedCoder.compare(this.hash().getBytes(), o.hash().getBytes());
     }
 }

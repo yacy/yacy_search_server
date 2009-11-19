@@ -118,7 +118,11 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
     public int hashCode() {
         return this.navigationHash().hashCode();
     }
-   
+    
+    public boolean equals(Reference other) {
+        return this.metadataHash().equals(other.metadataHash());
+    }
+    
     public boolean isOlder(Reference other) {
         return false;
     }

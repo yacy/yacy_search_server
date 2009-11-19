@@ -34,6 +34,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -384,10 +385,8 @@ public final class SearchEvent {
         }
     }
     
-    public void remove(final String urlhash) {
-        // removes the url hash reference from last search result
-        /*indexRWIEntry e =*/ this.rankedCache.remove(urlhash);
-        //assert e != null;
+    public void remove(final WordReferenceVars reference) {
+        this.rankedCache.remove(reference);
     }
     
     public ResultFetcher result() {

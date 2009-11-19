@@ -323,6 +323,10 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return false;
     }
     
+    public boolean equals(Reference other) {
+        return this.metadataHash().equals(other.metadataHash());
+    }
+    
     public int hashCode() {
         return this.metadataHash().hashCode();
     }

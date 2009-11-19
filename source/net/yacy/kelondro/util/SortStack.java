@@ -26,27 +26,28 @@
 
 package net.yacy.kelondro.util;
 
-import java.util.ConcurrentModificationException;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class SortStack<E> {
+public class SortStack<E extends Comparable<E>> {
 
     // implements a stack where elements 'float' on-top of the stack according to a weight value.
     // objects pushed on the stack must implement the hashCode() method to provide a handle
     // for a double-check.
     
-    private TreeMap<Long, E> onstack; // object within the stack
-    private HashSet<Integer> instack; // keeps track which element has been on the stack or is now in the offstack
+    private TreeMap<Long, List<E>> onstack; // object within the stack
+    private HashSet<E> instack; // keeps track which element has been on the stack or is now in the offstack
     protected int maxsize;
     
     public SortStack(final int maxsize) {
         // the maxsize is the maximum number of entries in the stack
         // if this is set to -1, the size is unlimited
-        this.onstack = new TreeMap<Long, E>();
-        this.instack = new HashSet<Integer>();
+        this.onstack = new TreeMap<Long, List<E>>();
+        this.instack = new HashSet<E>();
         this.maxsize = maxsize;
     }
 
@@ -58,17 +59,26 @@ public class SortStack<E> {
         push(se.element, se.weight);
     }
     
+    /**
+     * put a elememt on the stack using a order of the weight
+     * @param element
+     * @param weight
+     */
     public synchronized void push(final E element, Long weight) {
-        if (exists(element)) return;
-        
-        // manipulate weight in such a way that it has no conflicts
-        while (this.onstack.containsKey(weight)) weight = Long.valueOf(weight.longValue() + 1);
+        if (this.instack.contains(element)) return;
         
         // put the element on the stack
-        this.onstack.put(weight, element);
+        List<E> l = this.onstack.get(weight);
+        if (l == null) {
+            l = new LinkedList<E>();
+            l.add(element);
+            this.onstack.put(weight, l);
+        } else {
+            l.add(element);
+        }
         
         // register it for double-check
-        this.instack.add(Integer.valueOf(element.hashCode()));
+        this.instack.add(element);
 
         // check maximum size of the stack an remove elements if the stack gets too large
         if (this.maxsize <= 0) return;
@@ -77,69 +87,58 @@ public class SortStack<E> {
         }
     }
     
+    /**
+     * return the element with the smallest weight
+     * @return
+     */
     public synchronized stackElement top() {
         // returns the element that is currently on top of the stack
         if (this.onstack.isEmpty()) return null;
         final Long w = this.onstack.firstKey();
-        final E element = this.onstack.get(w);
+        final List<E> l = this.onstack.get(w);
+        final E element = l.get(0);
         return new stackElement(element, w);
     }
     
+    /**
+     * return the element with the smallest weight and remove it from the stack
+     * @return
+     */
     public synchronized stackElement pop() {
         // returns the element that is currently on top of the stack
         // it is removed and added to the offstack list
         // this is exactly the same as element(offstack.size())
         if (this.onstack.isEmpty()) return null;
         final Long w = this.onstack.firstKey();
-        final E element = this.onstack.remove(w);
-        final stackElement se = new stackElement(element, w);
-        return se;
+        final List<E> l = this.onstack.get(w);
+        final E element = l.remove(0);
+        if (l.size() == 0) this.onstack.remove(w);
+        return new stackElement(element, w);
     }
     
-    public boolean exists(final E element) {
+    public synchronized boolean exists(final E element) {
         // uses the hashCode of the element to find out of the element had been on the list or the stack
-        return this.instack.contains(Integer.valueOf(element.hashCode()));
+        return this.instack.contains(element);
     }
     
-    public boolean exists(final int hashcode) {
-        // uses the hashCode of the element to find out of the element had been on the list or the stack
-        return this.instack.contains(Integer.valueOf(hashcode));
-    }
-    
-    public stackElement get(final int hashcode) {
-        final Iterator<Map.Entry<Long, E>> i = this.onstack.entrySet().iterator();
-        Map.Entry<Long, E> entry;
-        while (i.hasNext()) {
-            entry = i.next();
-            if (entry.getValue().hashCode() == hashcode) return new stackElement(entry.getValue(), entry.getKey());
-        }
-        return null;
-    }
-    
-    public stackElement remove(final int hashcode) {
-        Map.Entry<Long, E> entry;
-        stackElement se;
-        int retry = 3;
-        retryloop : while (retry-- > 0) {
-            try {
-                final Iterator<Map.Entry<Long, E>> i = this.onstack.entrySet().iterator();
-                while (i.hasNext()) {
-                    entry = i.next();
-                    if (entry.getValue().hashCode() == hashcode) {
-                        se = new stackElement(entry.getValue(), entry.getKey());
-                        this.onstack.remove(se.weight);
-                        return se;
+    public synchronized void remove(final E element) {
+        if (!this.instack.contains(element)) return;
+        
+        for (Map.Entry<Long,List<E>> entry: this.onstack.entrySet()) {
+            Iterator<E> i = entry.getValue().iterator();
+            while (i.hasNext()) {
+                if (i.next().equals(element)) {
+                    i.remove();
+                    if (entry.getValue().size() == 0) {
+                        this.onstack.remove(entry.getKey());
                     }
+                    return;
                 }
-                break retryloop;
-            } catch (ConcurrentModificationException e) {
-                continue retryloop;
             }
         }
-        return null;
     }
     
-    public boolean bottom(final long weight) {
+    public synchronized boolean bottom(final long weight) {
         // returns true if the element with that weight would be on the bottom of the stack after inserting
         return weight > this.onstack.lastKey().longValue();
     }

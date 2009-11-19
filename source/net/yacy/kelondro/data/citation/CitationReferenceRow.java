@@ -181,6 +181,9 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
         return this.metadataHash().hashCode();
     }
 
+    public boolean equals(Reference other) {
+        return this.metadataHash().equals(other.metadataHash());
+    }
     
     public int distance() {
         throw new UnsupportedOperationException();
@@ -205,4 +208,5 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
     public int positions() {
         throw new UnsupportedOperationException();
     }
+
 }

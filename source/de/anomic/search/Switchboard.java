@@ -576,7 +576,6 @@ public final class Switchboard extends serverSwitch {
         
         // generate snippets cache
         log.logConfig("Initializing Snippet Cache");
-        TextSnippet.init(log, this);
         
         // init the wiki
         wikiParser = new wikiCode(this.peers.mySeed().getClusterAddress());

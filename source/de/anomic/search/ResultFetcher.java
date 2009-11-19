@@ -164,26 +164,24 @@ public class ResultFetcher {
                     // get next entry
                     page = rankedCache.takeURL(true, taketimeout);
                     if (page == null) break;
-                    if (result.exists(page.hash().hashCode())) continue;
                     if (failedURLs.get(page.hash()) != null) continue;
                     
                     final ResultEntry resultEntry = fetchSnippet(page, snippetMode);
-                    
+
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
+                    if (result.exists(resultEntry)) continue;
+                    
                     urlRetrievalAllTime += resultEntry.dbRetrievalTime;
                     snippetComputationAllTime += resultEntry.snippetComputationTime;
                     //System.out.println("+++DEBUG-resultWorker+++ fetched " + resultEntry.urlstring());
                     
                     // place the result to the result vector
-                    if (!result.exists(resultEntry)) {
-                        
-                        // apply post-ranking
-                        long ranking = Long.valueOf(rankedCache.getOrder().cardinal(resultEntry.word()));
-                        ranking += postRanking(resultEntry, rankedCache.getTopics());
-                        
-                        result.push(resultEntry, ranking);
-                        if (nav_topics) rankedCache.addTopics(resultEntry);
-                    }
+                    // apply post-ranking
+                    long ranking = Long.valueOf(rankedCache.getOrder().cardinal(resultEntry.word()));
+                    ranking += postRanking(resultEntry, rankedCache.getTopics());
+                    
+                    result.push(resultEntry, ranking);
+                    if (nav_topics) rankedCache.addTopics(resultEntry);
                     //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
                 }
             } catch (final Exception e) {
@@ -234,7 +232,7 @@ public class ResultFetcher {
                 registerFailure(page.hash(), "no text snippet for URL " + metadata.url());
                 if (!peers.mySeed().isVirgin())
                     try {
-                        TextSnippet.failConsequences(this.indexSegment, snippet, query.id(false));
+                        TextSnippet.failConsequences(this.indexSegment, page.word(), snippet, query.id(false));
                     } catch (IOException e) {
                         Log.logException(e);
                     }

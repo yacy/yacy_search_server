@@ -33,8 +33,8 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Properties;
 
-import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
+import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
@@ -119,7 +119,7 @@ public class URIMetadataRow implements URIMetadata {
     
     private final Row.Entry entry;
     private final String snippet;
-    private WordReference word; // this is only used if the url is transported via remote search requests
+    private WordReferenceVars word; // this is only used if the url is transported via remote search requests
     private final long ranking; // during generation of a search result this value is set
     private Components comp;
     
@@ -218,7 +218,7 @@ public class URIMetadataRow implements URIMetadata {
 		}
     }
     
-    public URIMetadataRow(final Row.Entry entry, final WordReference searchedWord, final long ranking) {
+    public URIMetadataRow(final Row.Entry entry, final WordReferenceVars searchedWord, final long ranking) {
         this.entry = entry;
         this.snippet = null;
         this.word = searchedWord;
@@ -285,7 +285,7 @@ public class URIMetadataRow implements URIMetadata {
         this.word = null;
         if (prop.containsKey("word")) throw new kelondroException("old database structure is not supported");
         if (prop.containsKey("wi")) {
-            this.word = new WordReferenceRow(Base64Order.enhancedCoder.decodeString(prop.getProperty("wi", "")));
+            this.word = new WordReferenceVars(new WordReferenceRow(Base64Order.enhancedCoder.decodeString(prop.getProperty("wi", ""))));
         }
         this.ranking = 0;
         this.comp = null;
@@ -450,7 +450,7 @@ public class URIMetadataRow implements URIMetadata {
         return snippet;
     }
 
-    public WordReference word() {
+    public WordReferenceVars word() {
         return word;
     }
 

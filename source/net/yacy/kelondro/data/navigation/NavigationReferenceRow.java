@@ -147,6 +147,10 @@ public final class NavigationReferenceRow extends AbstractReference implements N
         return this.navigationHash().hashCode();
     }
     
+    public boolean equals(Reference other) {
+        return this.metadataHash().equals(other.metadataHash());
+    }
+    
     public boolean isOlder(Reference other) {
         return false;
     }

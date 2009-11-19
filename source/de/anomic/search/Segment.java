@@ -49,6 +49,7 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
+import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
@@ -442,7 +443,7 @@ public class Segment {
         public void run() {
             Log.logInfo("INDEXCLEANER", "IndexCleaner-Thread started");
             ReferenceContainer<WordReference> container = null;
-            WordReference entry = null;
+            WordReferenceVars entry = null;
             DigestURI url = null;
             final HashSet<String> urlHashs = new HashSet<String>();
             try {
@@ -454,7 +455,7 @@ public class Segment {
                     wordHashNow = container.getTermHash();
                     while (containerIterator.hasNext() && run) {
                         waiter();
-                        entry = containerIterator.next();
+                        entry = new WordReferenceVars(containerIterator.next());
                         // System.out.println("Wordhash: "+wordHash+" UrlHash:
                         // "+entry.getUrlHash());
                         final URIMetadataRow ue = urlMetadata.load(entry.metadataHash(), entry, 0);
