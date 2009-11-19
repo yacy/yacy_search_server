@@ -60,6 +60,7 @@ import net.yacy.document.parser.vcfParser;
 import net.yacy.document.parser.vsdParser;
 import net.yacy.document.parser.xlsParser;
 import net.yacy.document.parser.zipParser;
+import net.yacy.document.parser.images.bmpParser;
 import net.yacy.document.parser.images.genericImageParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
@@ -83,6 +84,7 @@ public final class TextParser {
     private static final Set<String> denyExtension = new TreeSet<String>(insensitiveCollator);
     
     static {
+        initParser(new bmpParser());
         initParser(new bzipParser());
         initParser(new csvParser());
         initParser(new docParser());

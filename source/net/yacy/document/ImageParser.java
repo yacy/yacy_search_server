@@ -8,8 +8,6 @@ import java.awt.Toolkit;
 import net.yacy.document.parser.images.bmpParser;
 import net.yacy.document.parser.images.icoParser;
 
-
-
 public class ImageParser {
 
     public static final Image parse(final String filename, final byte[] source) {
@@ -17,9 +15,7 @@ public class ImageParser {
         Image image;
         if (((filename.endsWith(".ico")) || (filename.endsWith(".bmp"))) && (bmpParser.isBMP(source))) {
             // parse image with BMP parser
-            bmpParser bmpparser;
-            bmpparser = new bmpParser(source);
-            image = bmpparser.getImage();
+            image = bmpParser.parse(source).getImage();
             if (image == null) return null;
         } else if ((filename.endsWith(".ico")) && (icoParser.isICO(source))) {
             // parse image with ICO parser

@@ -1,4 +1,4 @@
-// pngParser.java
+// genericImageParser.java
 // (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 16.10.2009 on http://yacy.net
 //
@@ -81,10 +81,10 @@ public class genericImageParser extends AbstractParser implements Idiom {
         }
         if (image == null) throw new ParserException("ImageIO returned NULL", location);
         
-        /*
         // scan the image
         int height = image.getHeight();
         int width = image.getWidth();
+        /*
         Raster raster = image.getData();
         int[] pixel = raster.getPixel(0, 0, (int[])null);
         long[] average = new long[pixel.length];
@@ -109,6 +109,8 @@ public class genericImageParser extends AbstractParser implements Idiom {
         final HashSet<String> languages = new HashSet<String>();
         final HashMap<DigestURI, String> anchors = new HashMap<DigestURI, String>();
         final HashMap<String, ImageEntry> images  = new HashMap<String, ImageEntry>();
+        // add this image to the map of images
+        images.put(sb.toString(), new ImageEntry(location, "", width, height));
         
          return new Document(
              location,

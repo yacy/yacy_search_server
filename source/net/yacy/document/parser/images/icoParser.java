@@ -92,7 +92,7 @@ public class icoParser {
     
     public BufferedImage getImage(final int index) {
     	if (imagemaps == null || index >= imagemaps.length) return null;
-        return imagemaps[index].image;
+        return imagemaps[index].getImage();
     }
     
     public static void main(final String[] args) {
