@@ -30,12 +30,16 @@
 #
 # DEFINING SOME CONSTANTS
 #
-DATADIR="DATA"
-SETTINGSDIR="DATA/SETTINGS"
-CONFIGFILE="DATA/SETTINGS/yacy.conf"
-CONFIGTEMPLATE="defaults/yacy.init"
-LOCKFILE="DATA/yacy.running"
+DATADIR='DATA'
+SETTINGSDIR='DATA/SETTINGS'
+CONFIGFILE='DATA/SETTINGS/yacy.conf'
+CONFIGTEMPLATE='defaults/yacy.init'
+LOCKFILE='DATA/yacy.running'
 JAVA="`which java`"
+# THIS REGEX WILL ALSO RETURN EVERYTHING AFTER THE NUMBER WHICH IS OK HERE BECAUSE
+# WE EITHER HAVE NUMBERS (port) OR A NUMBER PLUS A UNIT (memory settings)
+NUMBERFILTER='s/^[^0-9]*\([0-9]*.*\)/\1/'
+NOCHANGESTEXT='No changes have been performed.'
 
 #
 # INITIALIZING VARIABLES
@@ -54,8 +58,21 @@ change_admin_settings()
 
 change_admin_localhost()
 {
+    if read_parameter 'adminAccountForLocalhost'
+    then
+        if [ $REPLY == 'true' ]
+        then
+            CURRENTLOCALACCESS='allowed'
+        else
+            CURRENTLOCALACCESS='not allowed'
+        fi
+    else
+        CURRENTLOCALACCESS = 'unknown'
+    fi
+
+
     echo
-    echo -n 'Allow admin access for all local users (y/n)? '
+    echo -n "Allow unrestricted admin access for all local users (y/n, currently $CURRENTLOCALACCESS)? "
     read INPUT
     case $INPUT in
         y)
@@ -66,7 +83,12 @@ change_admin_localhost()
             replace_parameter 'adminAccountForLocalhost' 'false'
             change_admin_password
             ;;
+        '')
+            STATUS="$NOCHANGESTEXT"
+            ;;
         *)
+            echo
+            echo 'Please enter y or n or just hit enter to abort.'
             change_admin_localhost
             ;;
     esac
@@ -95,6 +117,7 @@ change_admin_password()
         B64MD5=`echo $B64MD5 | sed "s/\(\S\) .*/\1/"`
         replace_parameter 'adminAccountBase64MD5' "$B64MD5"
     else
+        echo
         echo 'Entries did not match, please try again.'
         change_admin_password
     fi
@@ -105,46 +128,69 @@ change_admin_password()
 # CHANGES THE MEMORY SETTINGS
 change_mem_settings()
 {
+    if read_parameter 'javastart_Xmx' $NUMBERFILTER
+    then
+        CURRENTMEM="$REPLY"
+    else
+        CURRENTMEM='unknown'
+    fi
+
     echo
-    echo -n 'How much memory (in MB) do you want YaCy to be able to use? '
+    echo -n "How much memory (in MB) do you want YaCy to be able to use (currently $CURRENTMEM)? "
     read INPUT
 
     case $INPUT in
-      *[0-9]*)
+      [0-9]*)
             replace_parameter 'javastart_Xmx' "Xmx$INPUT"'m'
             replace_parameter 'javastart_Xms' "Xms$INPUT"'m'
+            STATUS="Memory settings have been changed. YaCy will be able to use $INPUT MB of RAM now."
+            ;;
+      '')
+            STATUS="$NOCHANGESTEXT"
             ;;
       *)
-            echo 'Please enter a number.'
+            echo
+            echo 'Please enter a number or just hit enter to abort.'
             change_mem_settings
             ;;
     esac
-    STATUS="Memory settings have been changed. YaCy will be able to use $INPUT MB of RAM now."
 }
 
 # CHANGES THE PORT SETTINGS
 change_port_settings()
 {
-    echo
-    echo -n 'Which port do you want YaCy to use (standard is 8080)? '
-    read INPUT
-
-
-    if [ "$INPUT" == '' ]
+    if read_parameter 'port'
     then
-        INPUT='8080'
+        CURRENTPORT="$REPLY"
+    else
+        CURRENTPORT='unknown'
     fi
 
+    echo
+    echo -n "Which port do you want YaCy to use (currently $CURRENTPORT)? "
+    read INPUT
+
     case $INPUT in
-      *[0-9]*)
-            replace_parameter 'port' $INPUT
+      [0-9]*)
+            if [ "$INPUT" -ge 1024 ] && [ "$INPUT" -le 65535 ];
+            then
+                replace_parameter 'port' $INPUT
+                STATUS="Port settings have been changed. YaCy listens to port $INPUT now."
+            else
+                echo
+                echo 'Please use choose a number between 1024 and 65535.'
+                change_port_settings
+            fi
+            ;;
+      '')
+            STATUS="$NOCHANGESTEXT"
             ;;
       *)
-            echo 'Please enter a number.'
+            echo
+            echo 'Please enter a number or just hit enter to abort.'
             change_port_settings
             ;;
     esac
-    STATUS="Port settings have been changed. YaCy listens to port $INPUT now."
 }
 
 # CHECKS IF CONFIG FILE EXISTS, EXISTS IF IT DOESN'T
@@ -205,6 +251,17 @@ print_menu()
     echo "[0] quit"
     echo
     echo "Status: $STATUS"
+}
+
+# READS THE VALUE OF A PARAMETER (FIRST ARGUMENT) FROM CONFIG FILE. PARAMETER CAN BE FILTERED
+# IF A SECOND PARAMETER WHICH IS A VALID sed REGEX EXISTS
+read_parameter()
+{
+    REPLY="`cat "$CONFIGFILE" | grep "^$1" | sed "s/\(^$1 *= *\)\(.*\)$/\2/"`"
+    if [ "$2" != '' ]
+    then
+        REPLY="`echo "$REPLY" | sed $2`"
+    fi
 }
 
 # REPLACES THE VALUE OF A PARAMETER (FIRST ARGUMENT) WITH A NEW ONE (SECOND ARGUMENT)
