@@ -24,9 +24,11 @@
 
 package net.yacy.document.parser.html;
 
+import java.util.Comparator;
+
 import net.yacy.kelondro.data.meta.DigestURI;
 
-public class ImageEntry implements Comparable<ImageEntry> {
+public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry> {
 
     private final DigestURI url;
     private final String alt;
@@ -83,6 +85,10 @@ public class ImageEntry implements Comparable<ImageEntry> {
         if (thc < ohc) return -1;
         if (thc > ohc) return 1;
         return this.url.toString().compareTo((h).url.toString());
+    }
+
+    public int compare(ImageEntry o1, ImageEntry o2) {
+        return o1.compareTo(o2);
     }
     
     @Override

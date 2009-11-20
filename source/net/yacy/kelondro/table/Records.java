@@ -30,6 +30,7 @@ package net.yacy.kelondro.table;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -1219,7 +1220,7 @@ public class Records {
         
     }
 
-    public class Handle implements Comparable<Handle> {
+    public class Handle implements Comparable<Handle>, Comparator<Handle> {
         
         public final static int NUL = Integer.MIN_VALUE; // the meta value for the kelondroTray' NUL abstraction
 

@@ -28,6 +28,7 @@ package de.anomic.search;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 
 import net.yacy.document.Condenser;
@@ -43,7 +44,7 @@ import net.yacy.kelondro.rwi.Reference;
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
 
-public class ResultEntry implements Comparable<ResultEntry> {
+public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEntry> {
     
     // payload objects
     private final URIMetadataRow urlentry;
@@ -166,6 +167,9 @@ public class ResultEntry implements Comparable<ResultEntry> {
         return urlentry.toString(textSnippet.getLineRaw());
     }
     public int compareTo(ResultEntry o) {
-        return Base64Order.enhancedCoder.compare(this.hash().getBytes(), o.hash().getBytes());
+        return Base64Order.enhancedCoder.compare(this.urlentry.hash().getBytes(), o.urlentry.hash().getBytes());
+    }
+    public int compare(ResultEntry o1, ResultEntry o2) {
+        return Base64Order.enhancedCoder.compare(o1.urlentry.hash().getBytes(), o2.urlentry.hash().getBytes());
     }
 }

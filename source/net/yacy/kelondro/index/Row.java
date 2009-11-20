@@ -226,7 +226,7 @@ public final class Row {
 
     }
     
-    public class Entry implements Comparable<Entry> {
+    public class Entry implements Comparable<Entry>, Comparator<Entry> {
 
         private byte[] rowinstance;
         private int offset; // the offset where the row starts within rowinstance
@@ -330,6 +330,10 @@ public final class Row {
             // compares only the content of the primary key
             if (objectOrder == null) throw new kelondroException("objects cannot be compared, no order given");
             return objectOrder.compare(this.bytes(), 0, this.getPrimaryKeyLength(), o.bytes(), 0, o.getPrimaryKeyLength());
+        }
+        
+        public int compare(Entry o1, Entry o2) {
+            return o1.compareTo(o2);
         }
         
         public final boolean equals(final Entry otherEntry) {

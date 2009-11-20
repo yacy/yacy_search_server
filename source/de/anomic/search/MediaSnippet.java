@@ -25,6 +25,7 @@
 package de.anomic.search;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
@@ -37,7 +38,7 @@ import net.yacy.kelondro.order.Base64Order;
 import net.yacy.repository.LoaderDispatcher;
 
 
-public class MediaSnippet implements Comparable<MediaSnippet> {
+public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaSnippet> {
     public ContentDomain type;
     public DigestURI href, source;
     public String name, attr;
@@ -65,6 +66,10 @@ public class MediaSnippet implements Comparable<MediaSnippet> {
     
     public int compareTo(MediaSnippet o) {
         return Base64Order.enhancedCoder.compare(this.href.hash().getBytes(), o.href.hash().getBytes());
+    }
+    
+    public int compare(MediaSnippet o1, MediaSnippet o2) {
+        return o1.compareTo(o2);
     }
     
     public static ArrayList<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final TreeSet<byte[]> queryhashes, final ContentDomain mediatype, final boolean fetchOnline, final int timeout, final boolean reindexing) {

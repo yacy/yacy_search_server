@@ -26,7 +26,9 @@
 
 package net.yacy.document.geolocalization;
 
-public class Coordinates implements Comparable<Coordinates> {
+import java.util.Comparator;
+
+public class Coordinates implements Comparable<Coordinates>, Comparator<Coordinates> {
 
 	private static final double tenmeter = 90.0 / 1.0e6;
 	
@@ -75,6 +77,10 @@ public class Coordinates implements Comparable<Coordinates> {
 		if (s < t) return -1;
 		return 0;
 	}
+    
+    public int compare(Coordinates o1, Coordinates o2) {
+        return o1.compareTo(o2);
+    }
     
     /**
      * equality test that is needed to use the class inside HashMap/HashSet

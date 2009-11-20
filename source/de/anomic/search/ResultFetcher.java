@@ -179,7 +179,7 @@ public class ResultFetcher {
                     // apply post-ranking
                     long ranking = Long.valueOf(rankedCache.getOrder().cardinal(resultEntry.word()));
                     ranking += postRanking(resultEntry, rankedCache.getTopics());
-                    
+                    //System.out.println("*** resultEntry.hash = " + resultEntry.hash());
                     result.push(resultEntry, ranking);
                     if (nav_topics) rankedCache.addTopics(resultEntry);
                     //System.out.println("DEBUG SNIPPET_LOADING: thread " + id + " got " + resultEntry.url());
@@ -339,7 +339,9 @@ public class ResultFetcher {
             if (imagemedia != null) {
                 for (int j = 0; j < imagemedia.size(); j++) {
                     ms = imagemedia.get(j);
+                    int b = images.size();
                     images.push(ms, Long.valueOf(ms.ranking));
+                    System.out.println("*** image " + ms.href.hash() + " images.size = " + b + "/" + images.size());
                 }
             }
         }

@@ -40,7 +40,7 @@ public class SortStack<E extends Comparable<E>> {
     // for a double-check.
     
     private TreeMap<Long, List<E>> onstack; // object within the stack
-    private HashSet<E> instack; // keeps track which element has been on the stack or is now in the offstack
+    private HashSet<E> instack; // keeps track which element has been on the stack
     protected int maxsize;
     
     public SortStack(final int maxsize) {
@@ -52,11 +52,7 @@ public class SortStack<E extends Comparable<E>> {
     }
 
     public int size() {
-        return this.onstack.size();
-    }
-    
-    public void push(final stackElement se) {
-        push(se.element, se.weight);
+        return this.instack.size();
     }
     
     /**
@@ -113,6 +109,7 @@ public class SortStack<E extends Comparable<E>> {
         final List<E> l = this.onstack.get(w);
         final E element = l.remove(0);
         if (l.size() == 0) this.onstack.remove(w);
+        this.instack.remove(element);
         return new stackElement(element, w);
     }
     

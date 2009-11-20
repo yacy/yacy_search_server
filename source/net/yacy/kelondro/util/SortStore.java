@@ -27,6 +27,7 @@
 package net.yacy.kelondro.util;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 
 /**
@@ -38,10 +39,18 @@ import java.util.Iterator;
 public class SortStore<E extends Comparable<E>> extends SortStack<E> {
     
     private final ArrayList<stackElement> offstack; // objects that had been on the stack but had been removed
+    private HashSet<E> offset; // keeps track which element has been on the stack or is now in the offstack
+    private long largest;
+    
+    public SortStore() {
+        this(-1);
+    }
     
     public SortStore(final int maxsize) {
         super(maxsize);
+        this.largest = Long.MIN_VALUE;
         this.offstack = new ArrayList<stackElement>();
+        this.offset = new HashSet<E>();
     }
     
     public int size() {
@@ -53,10 +62,12 @@ public class SortStore<E extends Comparable<E>> extends SortStack<E> {
     }
 
     public synchronized void push(final E element, final Long weight) {
+        if (this.offset.contains(element)) return;
         super.push(element, weight);
+        this.largest = Math.max(this.largest, weight.longValue());
         if (this.maxsize <= 0) return;
-        while ((super.size() > 0) && (super.size() + this.offstack.size() > this.maxsize)) {
-            super.pop();
+        while ((super.size() > 0) && (this.size() > this.maxsize)) {
+            this.pop();
         }
     }
 
@@ -69,7 +80,17 @@ public class SortStore<E extends Comparable<E>> extends SortStack<E> {
         final stackElement se = super.pop();
         if (se == null) return null;
         this.offstack.add(se);
+        this.offset.add(se.element);
         return se;
+    }
+    
+    public synchronized stackElement top() {
+        return super.top();
+    }
+    
+    public synchronized boolean exists(final E element) {
+        if (super.exists(element)) return true;
+        return this.offset.contains(element);
     }
     
     /**
@@ -84,7 +105,7 @@ public class SortStore<E extends Comparable<E>> extends SortStack<E> {
             return this.offstack.get(position);
         }
         if (position >= size()) return null; // we don't have that element
-        while (position >= this.offstack.size()) this.offstack.add(super.pop());
+        while (position >= this.offstack.size()) this.pop();
         return this.offstack.get(position);
     }
     
@@ -95,18 +116,18 @@ public class SortStore<E extends Comparable<E>> extends SortStack<E> {
      * @param count
      * @return
      */
-    public ArrayList<stackElement> list(final int count) {
+    public synchronized ArrayList<stackElement> list(final int count) {
         if (count < 0) {
             // shift all elements
-            while (super.size() > 0) this.offstack.add(super.pop());
+            while (super.size() > 0) this.offstack.add(this.pop());
             return this.offstack;
         }
         if (size() < count) throw new RuntimeException("list(" + count + ") exceeded avaiable number of elements (" + size() + ")"); 
-        while (this.offstack.size() < count) this.offstack.add(super.pop());
+        while (this.offstack.size() < count) this.offstack.add(this.pop());
         return this.offstack;
     }
     
-    public void remove(final E element) {
+    public synchronized void remove(final E element) {
         super.remove(element);
         Iterator<stackElement> i = this.offstack.iterator();
         while (i.hasNext()) {
@@ -115,5 +136,27 @@ public class SortStore<E extends Comparable<E>> extends SortStack<E> {
                 return;
             }
         }
+    }
+    
+    public synchronized boolean bottom(final long weight) {
+        if (super.bottom(weight)) return true;
+        return weight >= this.largest;
+    }
+
+    public static void main(String[] args) {
+        SortStore<String> a = new SortStore<String>();
+        a.push("abc", 1L);
+        a.pop();
+        a.push("abc", 2L);
+        a.push("6s_7dfZk4xvc", 1L);
+        a.push("6s_7dfZk4xvc", 1L);
+        a.push("6s_7dfZk4xvc", 1L);
+        a.push("6s_7dfZk4xvc", 1L);
+        a.push("6s_7dfZk4xvc", 1L);
+        a.push("6s_7dfZk4xvc", 1L);
+        a.push("6s_7dfZk4xvc", 1L);
+        a.push("6s_7dfZk4xvc", 1L);
+        a.pop();
+        System.out.println("size = " + a.size());
     }
 }

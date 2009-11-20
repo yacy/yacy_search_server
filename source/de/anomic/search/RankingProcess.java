@@ -331,7 +331,7 @@ public final class RankingProcess extends Thread {
                 return rwi;
             }
             // second appearances of dom
-            m.push(rwi);
+            m.push(rwi.element, rwi.weight);
         }
         // no more entries in sorted RWI entries. Now take Elements from the doubleDomCache
         // find best entry from all caches
