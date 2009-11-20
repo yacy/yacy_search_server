@@ -323,7 +323,11 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return false;
     }
     
-    public boolean equals(Reference other) {
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof WordReferenceRow)) return false;
+        WordReferenceRow other = (WordReferenceRow) obj;
         return this.metadataHash().equals(other.metadataHash());
     }
     

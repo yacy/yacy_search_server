@@ -358,8 +358,12 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.wordsintext = this.wordsintext + oe.wordsintext();
     }
 
-    public boolean equals(Reference other) {
-        return this.urlHash.equals(other.metadataHash());
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof WordReferenceVars)) return false;
+        WordReferenceVars other = (WordReferenceVars) obj;
+        return this.urlHash.equals(other.urlHash);
     }
     
     public int hashCode() {

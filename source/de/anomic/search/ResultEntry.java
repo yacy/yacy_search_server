@@ -103,7 +103,11 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
     public int hashCode() {
         return urlentry.hash().hashCode();
     }
-    public boolean equals(ResultEntry other) {
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof ResultEntry)) return false;
+        ResultEntry other = (ResultEntry) obj;
         return urlentry.hash().equals(other.urlentry.hash());
     }
     public String hash() {

@@ -26,8 +26,6 @@
 
 package net.yacy.kelondro.order;
 
-
-
 public abstract class AbstractOrder<A> implements Order<A> {
 
     protected A zero = null;
@@ -53,11 +51,19 @@ public abstract class AbstractOrder<A> implements Order<A> {
         this.zero = newzero;
     }
     
-    public boolean equals(final Order<A> otherOrder) {
-        if (otherOrder == null) return false;
+    @SuppressWarnings("unchecked")
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof Order<?>)) return false;
+        Order<A> other = (Order<A>) obj;
         final String thisSig = this.signature();
-        final String otherSig = otherOrder.signature();
+        final String otherSig = other.signature();
         if ((thisSig == null) || (otherSig == null)) return false;
         return thisSig.equals(otherSig);
+    }
+    
+    public int hashCode() {
+        return this.signature().hashCode();
     }
 }

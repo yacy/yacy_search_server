@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class SortStack<E extends Comparable<E>> {
+public class SortStack<E> {
 
     // implements a stack where elements 'float' on-top of the stack according to a weight value.
     // objects pushed on the stack must implement the hashCode() method to provide a handle
@@ -146,6 +146,9 @@ public class SortStack<E extends Comparable<E>> {
         public stackElement(final E element, final Long weight) {
             this.element = element;
             this.weight = weight;
+        }
+        public String toString() {
+            return element.toString() + "/" + weight;
         }
     }
 }

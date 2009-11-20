@@ -164,8 +164,12 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
         return this.serialNumber;
     }
     
-    public boolean equals(OAIPMHImporter o) {
-        return this.compareTo(o) == 0;
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof OAIPMHImporter)) return false;
+        OAIPMHImporter other = (OAIPMHImporter) obj;
+        return this.compareTo(other) == 0;
     }
 
     // methods that are needed to put the object into a Tree:

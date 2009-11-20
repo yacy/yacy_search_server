@@ -673,65 +673,19 @@ public class DigestURI implements Serializable {
      */
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((host == null) ? 0 : host.hashCode());
-        result = prime * result + ((path == null) ? 0 : path.hashCode());
-        result = prime * result + port;
-        result = prime * result
-                + ((protocol == null) ? 0 : protocol.hashCode());
-        result = prime * result + ((quest == null) ? 0 : quest.hashCode());
-        result = prime * result + ((ref == null) ? 0 : ref.hashCode());
-        result = prime * result
-                + ((userInfo == null) ? 0 : userInfo.hashCode());
-        return result;
+        return this.hash().hashCode();
     }
 
     /* (non-Javadoc)
      * @see java.lang.Object#equals(java.lang.Object)
      */
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (!(obj instanceof DigestURI))
-            return false;
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof DigestURI)) return false;
         DigestURI other = (DigestURI) obj;
-        if (host == null) {
-            if (other.host != null)
-                return false;
-        } else if (!host.equals(other.host))
-            return false;
-        if (path == null) {
-            if (other.path != null)
-                return false;
-        } else if (!path.equals(other.path))
-            return false;
-        if (port != other.port)
-            return false;
-        if (protocol == null) {
-            if (other.protocol != null)
-                return false;
-        } else if (!protocol.equals(other.protocol))
-            return false;
-        if (quest == null) {
-            if (other.quest != null)
-                return false;
-        } else if (!quest.equals(other.quest))
-            return false;
-        if (ref == null) {
-            if (other.ref != null)
-                return false;
-        } else if (!ref.equals(other.ref))
-            return false;
-        if (userInfo == null) {
-            if (other.userInfo != null)
-                return false;
-        } else if (!userInfo.equals(other.userInfo))
-            return false;
-        return true;
+        return this.toString().equals(other.toString());
     }
 
     public int compareTo(final Object h) {

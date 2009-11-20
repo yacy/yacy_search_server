@@ -76,9 +76,13 @@ public class ReferenceContainerOrder<ReferenceType extends Reference> extends Ab
         return this.embeddedOrder.cardinal(key);
     }
     
-	public boolean equals(final Order<ReferenceContainer<ReferenceType>> otherOrder) {
-        if (!(otherOrder instanceof ReferenceContainerOrder)) return false;
-        return this.embeddedOrder.equals(((ReferenceContainerOrder<ReferenceType>) otherOrder).embeddedOrder);
+    @SuppressWarnings("unchecked")
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof ReferenceContainerOrder<?>)) return false;
+        ReferenceContainerOrder<ReferenceType> other = (ReferenceContainerOrder<ReferenceType>) obj;
+        return this.embeddedOrder.equals(other.embeddedOrder);
     }
 
 	public long cardinal(final ReferenceContainer<ReferenceType> key) {

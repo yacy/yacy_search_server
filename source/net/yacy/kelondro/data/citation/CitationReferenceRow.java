@@ -181,7 +181,11 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
         return this.metadataHash().hashCode();
     }
 
-    public boolean equals(Reference other) {
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof CitationReferenceRow)) return false;
+        CitationReferenceRow other = (CitationReferenceRow) obj;
         return this.metadataHash().equals(other.metadataHash());
     }
     

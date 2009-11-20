@@ -339,9 +339,8 @@ public class ResultFetcher {
             if (imagemedia != null) {
                 for (int j = 0; j < imagemedia.size(); j++) {
                     ms = imagemedia.get(j);
-                    int b = images.size();
                     images.push(ms, Long.valueOf(ms.ranking));
-                    System.out.println("*** image " + ms.href.hash() + " images.size = " + b + "/" + images.size());
+                    //System.out.println("*** image " + ms.href.hash() + " images.size = " + images.size() + "/" + images.size());
                 }
             }
         }

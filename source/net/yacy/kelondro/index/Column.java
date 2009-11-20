@@ -260,34 +260,18 @@ public final class Column {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public final boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (!(obj instanceof Column))
-			return false;
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (!(obj instanceof Column)) return false;
 		Column other = (Column) obj;
-		if (celltype != other.celltype)
-			return false;
-		if (cellwidth != other.cellwidth)
-			return false;
-		if (encoder != other.encoder)
-			return false;
+		if (celltype != other.celltype) return false;
+		if (cellwidth != other.cellwidth) return false;
+		if (encoder != other.encoder) return false;
 		if (nickname == null) {
-			if (other.nickname != null)
-				return false;
-		} else if (!nickname.equals(other.nickname))
-			return false;
+			if (other.nickname != null) return false;
+		} else if (!nickname.equals(other.nickname)) return false;
 		return true;
 	}
-
-//    public boolean equals(final kelondroColumn otherCol) {
-//        return
-//          (this.celltype == otherCol.celltype) &&
-//          (this.cellwidth == otherCol.cellwidth) &&
-//          (this.encoder == otherCol.encoder) &&
-//          (this.nickname.equals(otherCol.nickname));
-//    }
 
 }

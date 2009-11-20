@@ -44,8 +44,8 @@ public interface Reference {
 
     public int hashCode();
     
-    public boolean equals(Reference other);
-    
+    public boolean equals(Object other);
+
     public void join(final Reference oe);
     
     public int positions();

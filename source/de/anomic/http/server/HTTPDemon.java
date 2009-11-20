@@ -1267,7 +1267,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         headers.put(HeaderFramework.SERVER, "AnomicHTTPD (www.anomic.de)");
         headers.put(HeaderFramework.DATE, DateFormatter.formatRFC1123(now));
         if (moddate.after(now)) {
-            System.out.println("*** DEBUG: correcting moddate = " + moddate.toString() + " to now = " + now.toString());
+            //System.out.println("*** DEBUG: correcting moddate = " + moddate.toString() + " to now = " + now.toString());
             moddate = now;
         }
         headers.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(moddate));

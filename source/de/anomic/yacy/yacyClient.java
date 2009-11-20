@@ -407,7 +407,7 @@ public final class yacyClient {
             if (feed == null) {
                 // case where the rss reader does not understand the content
                 yacyCore.log.logWarning("yacyClient.queryRemoteCrawlURLs failed asking peer '" + target.getName() + "': probably bad response from remote peer (2)");
-                System.out.println("***DEBUG*** rss input = " + new String(result));
+                //System.out.println("***DEBUG*** rss input = " + new String(result));
                 target.put(yacySeed.RCOUNT, "0");
                 seedDB.update(target.hash, target); // overwrite number of remote-available number to avoid that this peer is called again (until update is done by peer ping)
                 //Log.logException(e);

@@ -57,10 +57,18 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     
     @Override
     public int hashCode() {
-        return href.hashCode();
+        return href.hash().hashCode();
     }
     
-    public boolean equals(MediaSnippet other) {
+    public String toString() {
+        return href.hash();
+    }
+    
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof MediaSnippet)) return false;
+        MediaSnippet other = (MediaSnippet) obj;
         return this.href.hash().equals(other.href.hash());
     }
     

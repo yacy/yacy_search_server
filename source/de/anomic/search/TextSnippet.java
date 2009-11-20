@@ -27,6 +27,7 @@ package de.anomic.search;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
@@ -54,7 +55,7 @@ import de.anomic.http.client.Cache;
 import de.anomic.http.server.ResponseHeader;
 import de.anomic.yacy.yacySearch;
 
-public class TextSnippet {
+public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnippet> {
 
     private static final int maxCache = 1000;
 
@@ -168,6 +169,16 @@ public class TextSnippet {
     public boolean exists() {
         return line != null;
     }
+    public int compareTo(TextSnippet o) {
+        return Base64Order.enhancedCoder.compare(this.url.hash().getBytes(), o.url.hash().getBytes());
+    }
+    public int compare(TextSnippet o1, TextSnippet o2) {
+        return o1.compareTo(o2);
+    }
+    public int hashCode() {
+        return this.url.hash().hashCode();
+    }
+    
     @Override
     public String toString() {
         return (line == null) ? "" : line;

@@ -36,7 +36,7 @@ import java.util.Iterator;
  * specific elements in the list.
  * @param <E>
  */
-public class SortStore<E extends Comparable<E>> extends SortStack<E> {
+public class SortStore<E> extends SortStack<E> {
     
     private final ArrayList<stackElement> offstack; // objects that had been on the stack but had been removed
     private HashSet<E> offset; // keeps track which element has been on the stack or is now in the offstack

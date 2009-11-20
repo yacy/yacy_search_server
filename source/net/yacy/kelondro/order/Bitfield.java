@@ -106,10 +106,18 @@ public class Bitfield implements Cloneable {
         return new String(sb);
     }
     
-    public boolean equals(final Bitfield x) {
-        if (x.bb.length != bb.length) return false;
-        for (int i = 0; i < bb.length; i++) if (bb[i] != x.bb[i]) return false;
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof Bitfield)) return false;
+        Bitfield other = (Bitfield) obj;
+        if (other.bb.length != this.bb.length) return false;
+        for (int i = 0; i < this.bb.length; i++) if (this.bb[i] != other.bb[i]) return false;
         return true;
+    }
+    
+    public int hashCode() {
+        return this.toString().hashCode();
     }
     
     public void and(final Bitfield x) {

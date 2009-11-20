@@ -119,8 +119,12 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
         return this.navigationHash().hashCode();
     }
     
-    public boolean equals(Reference other) {
-        return this.metadataHash().equals(other.metadataHash());
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof NavigationReferenceVars)) return false;
+        NavigationReferenceVars other = (NavigationReferenceVars) obj;
+        return this.navigationHash().equals(other.navigationHash());
     }
     
     public boolean isOlder(Reference other) {

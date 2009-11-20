@@ -31,6 +31,7 @@ import java.io.File;
 import java.util.Date;
 import java.util.Locale;
 
+
 /**
  * This class represents an entry in a Tar archive. It consists
  * of the entry's header, as well as the entry's File. Entries
@@ -273,7 +274,7 @@ public class TarEntry implements TarConstants {
         this();
         this.parseTarHeader(headerBuf);
     }
-
+    
     /**
      * Determine if the two entries are equal. Equality is determined
      * by the header names being equal.
@@ -281,22 +282,12 @@ public class TarEntry implements TarConstants {
      * @param it Entry to be checked for equality.
      * @return True if the entries are equal.
      */
-    public boolean equals(TarEntry it) {
-        return this.getName().equals(it.getName());
-    }
-
-    /**
-     * Determine if the two entries are equal. Equality is determined
-     * by the header names being equal.
-     *
-     * @param it Entry to be checked for equality.
-     * @return True if the entries are equal.
-     */
-    public boolean equals(Object it) {
-        if (it == null || getClass() != it.getClass()) {
-            return false;
-        }
-        return equals((TarEntry) it);
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof TarEntry)) return false;
+        TarEntry other = (TarEntry) obj;
+        return this.getName().equals(other.getName());
     }
 
     /**

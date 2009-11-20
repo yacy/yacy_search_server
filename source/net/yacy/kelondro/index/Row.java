@@ -335,15 +335,29 @@ public final class Row {
         public int compare(Entry o1, Entry o2) {
             return o1.compareTo(o2);
         }
-        
-        public final boolean equals(final Entry otherEntry) {
-            // compares the content of the complete entry
+
+        // compare the content of the primary key
+        public boolean equals(final Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (!(obj instanceof Entry)) return false;
+            Entry other = (Entry) obj;
             final byte[] t = this.bytes();
-            final byte[] o = otherEntry.bytes();
+            final byte[] o = other.bytes();
             for (int i = 0; i < primaryKeyLength; i++) {
                 if (t[i] != o[i]) return false;
             }
             return true;
+        }
+        
+        public int hashCode() {
+            byte[] b = this.getPrimaryKeyBytes();
+            int len = b.length;
+            int h = 1;
+            for (int i = 0; i < len; i++) {
+                h = 31 * h + b[i];
+            }
+            return h;
         }
         
         public final byte[] bytes() {
@@ -716,13 +730,21 @@ public final class Row {
         return true;
     }
     
-    public final boolean equals(final Row otherRow) {
-        if (this.objectsize != otherRow.objectsize) return false;
-        if (this.columns() != otherRow.columns()) return false;
-        for (int i = 0; i < otherRow.row.length; i++) {
-            if (!(this.row[i].equals(otherRow.row[i]))) return false;
+    public boolean equals(final Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (!(obj instanceof Row)) return false;
+        Row other = (Row) obj;
+        if (this.objectsize != other.objectsize) return false;
+        if (this.columns() != other.columns()) return false;
+        for (int i = 0; i < other.row.length; i++) {
+            if (!(this.row[i].equals(other.row[i]))) return false;
         }
         return true;
+    }
+    
+    public int hashCode() {
+        return this.toString().hashCode();
     }
     
 }

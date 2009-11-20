@@ -50,6 +50,7 @@ public interface Order<A> extends Comparator<A> {
 
     public void rotate(A zero); // defines that the ordering rotates, and sets the zero point for the rotation
     
-    public boolean equals(Order<A> o); // used to compare different order objects; they may define the same ordering
+    public boolean equals(Object o); // used to compare different order objects; they may define the same ordering
 
+    public int hashCode();
 }

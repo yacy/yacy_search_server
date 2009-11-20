@@ -85,7 +85,7 @@ public class Coordinates implements Comparable<Coordinates>, Comparator<Coordina
     /**
      * equality test that is needed to use the class inside HashMap/HashSet
      */
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
     	if (!(o instanceof Coordinates)) return false;
     	Coordinates oo = (Coordinates) o;
     	if (this.lon == oo.lon && this.lat == oo.lat) return true;

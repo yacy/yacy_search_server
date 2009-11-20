@@ -1244,17 +1244,13 @@ public class Records {
             while (s.length() < 4) s = "0" + s;
             return s;
         }
-
-        public boolean equals(final Handle h) {
-            assert (index != NUL);
-            assert (h.index != NUL);
-            return (this.index == h.index);
-        }
-
-        public boolean equals(final Object h) {
-            assert (index != NUL);
-            assert (h instanceof Handle && ((Handle) h).index != NUL);
-            return (h instanceof Handle && this.index == ((Handle) h).index);
+        
+        public boolean equals(final Object obj) {
+            if (this == obj) return true;
+            if (obj == null) return false;
+            if (!(obj instanceof Handle)) return false;
+            Handle other = (Handle) obj;
+            return this.index == other.index;
         }
 
         public int compare(final Handle h0, final Handle h1) {
