@@ -97,7 +97,7 @@ public class ResultFetcher {
         
         // start worker threads to fetch urls and snippets
         this.workerThreads = null;
-        deployWorker(query.itemsPerPage, query.neededResults());
+        deployWorker(Math.min(10, query.itemsPerPage), query.neededResults());
         MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), this.workerThreads.length + " online snippet fetch threads started", 0, 0), false);
         
     }
@@ -302,7 +302,7 @@ public class ResultFetcher {
             (this.rankedCache.size() > this.result.size())
            ) {
         	// start worker threads to fetch urls and snippets
-            deployWorker(query.itemsPerPage, query.neededResults());
+            deployWorker(Math.min(10, query.itemsPerPage), query.neededResults());
         }
 
         // finally wait until enough results are there produced from the

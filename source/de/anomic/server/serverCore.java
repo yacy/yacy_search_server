@@ -443,7 +443,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     
     public List<Session> getJobList() {
         final Thread[] threadList = new Thread[sessionThreadGroup.activeCount()];     
-        serverCore.sessionThreadGroup.enumerate(threadList);
+        serverCore.sessionThreadGroup.enumerate(threadList, false);
         ArrayList<Session> l = new ArrayList<Session>();
         for (Thread t: threadList) {
             if (t == null) continue;

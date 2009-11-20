@@ -57,6 +57,8 @@ public class DocumentIndex extends Segment {
     private BlockingQueue<File> queue;
     private Worker[] worker;
     private CallbackListener callback;
+
+    private static final ThreadGroup workerThreadGroup = new ThreadGroup("workerThreadGroup");
     
     public DocumentIndex(Log log, final File segmentPath, CallbackListener callback, int cachesize) throws IOException {
         super(log, segmentPath, cachesize, targetFileSize * 4 - 1, false, false);
@@ -65,7 +67,7 @@ public class DocumentIndex extends Segment {
         this.queue = new LinkedBlockingQueue<File>(cores * 300);
         this.worker = new Worker[cores];
         for (int i = 0; i < cores; i++) {
-            this.worker[i] = new Worker();
+            this.worker[i] = new Worker(i);
             this.worker[i].start();
         }
     }
@@ -75,6 +77,10 @@ public class DocumentIndex extends Segment {
     }
 	
     class Worker extends Thread {
+        public Worker(int count) {
+            super(workerThreadGroup, "query-" + count);
+        }
+        
         public void run() {
             File f;
             URIMetadataRow resultRow;

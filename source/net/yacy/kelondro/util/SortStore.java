@@ -27,8 +27,8 @@
 package net.yacy.kelondro.util;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * extends the sortStack in such a way that it adds a list where objects, that had
@@ -38,8 +38,9 @@ import java.util.Iterator;
  */
 public class SortStore<E> extends SortStack<E> {
     
+    private static final Object PRESENT = new Object(); // Dummy value to associate with an Object in the backing Map
     private final ArrayList<stackElement> offstack; // objects that had been on the stack but had been removed
-    private HashSet<E> offset; // keeps track which element has been on the stack or is now in the offstack
+    private ConcurrentHashMap<E, Object> offset; // keeps track which element has been on the stack or is now in the offstack
     private long largest;
     
     public SortStore() {
@@ -50,7 +51,7 @@ public class SortStore<E> extends SortStack<E> {
         super(maxsize);
         this.largest = Long.MIN_VALUE;
         this.offstack = new ArrayList<stackElement>();
-        this.offset = new HashSet<E>();
+        this.offset = new ConcurrentHashMap<E, Object>();
     }
     
     public int size() {
@@ -61,8 +62,9 @@ public class SortStore<E> extends SortStack<E> {
         return this.offstack.size();
     }
 
-    public synchronized void push(final E element, final Long weight) {
-        if (this.offset.contains(element)) return;
+    public void push(final E element, final Long weight) {
+        if (this.offset.containsKey(element)) return;
+        if (super.exists(element)) return;
         super.push(element, weight);
         this.largest = Math.max(this.largest, weight.longValue());
         if (this.maxsize <= 0) return;
@@ -76,21 +78,20 @@ public class SortStore<E> extends SortStack<E> {
      * it is removed and added to the offstack list
      * this is exactly the same as element(offstack.size())
      */
-    public synchronized stackElement pop() {
+    public stackElement pop() {
         final stackElement se = super.pop();
         if (se == null) return null;
+        this.offset.put(se.element, PRESENT);
         this.offstack.add(se);
-        this.offset.add(se.element);
         return se;
     }
     
-    public synchronized stackElement top() {
+    public stackElement top() {
         return super.top();
     }
     
-    public synchronized boolean exists(final E element) {
-        if (super.exists(element)) return true;
-        return this.offset.contains(element);
+    public boolean exists(final E element) {
+        return super.exists(element) || this.offset.containsKey(element);
     }
     
     /**
@@ -100,11 +101,11 @@ public class SortStore<E> extends SortStack<E> {
      * @param position
      * @return
      */
-    public synchronized stackElement element(final int position) {
+    public stackElement element(final int position) {
         if (position < this.offstack.size()) {
             return this.offstack.get(position);
         }
-        if (position >= size()) return null; // we don't have that element
+        if (position >= super.size() + this.offstack.size()) return null; // we don't have that element
         while (position >= this.offstack.size()) this.pop();
         return this.offstack.get(position);
     }
@@ -116,24 +117,26 @@ public class SortStore<E> extends SortStack<E> {
      * @param count
      * @return
      */
-    public synchronized ArrayList<stackElement> list(final int count) {
+    public ArrayList<stackElement> list(final int count) {
         if (count < 0) {
             // shift all elements
-            while (super.size() > 0) this.offstack.add(this.pop());
+            while (super.size() > 0) this.pop();
             return this.offstack;
         }
-        if (size() < count) throw new RuntimeException("list(" + count + ") exceeded avaiable number of elements (" + size() + ")"); 
-        while (this.offstack.size() < count) this.offstack.add(this.pop());
+        if (count > super.size() + this.offstack.size()) throw new RuntimeException("list(" + count + ") exceeded avaiable number of elements (" + size() + ")"); 
+        while (count > this.offstack.size()) this.pop();
         return this.offstack;
     }
     
-    public synchronized void remove(final E element) {
+    public void remove(final E element) {
         super.remove(element);
+        synchronized (this.offstack) {
         Iterator<stackElement> i = this.offstack.iterator();
-        while (i.hasNext()) {
-            if (i.next().element.equals(element)) {
-                i.remove();
-                return;
+            while (i.hasNext()) {
+                if (i.next().element.equals(element)) {
+                    i.remove();
+                    return;
+                }
             }
         }
     }
@@ -148,12 +151,6 @@ public class SortStore<E> extends SortStack<E> {
         a.push("abc", 1L);
         a.pop();
         a.push("abc", 2L);
-        a.push("6s_7dfZk4xvc", 1L);
-        a.push("6s_7dfZk4xvc", 1L);
-        a.push("6s_7dfZk4xvc", 1L);
-        a.push("6s_7dfZk4xvc", 1L);
-        a.push("6s_7dfZk4xvc", 1L);
-        a.push("6s_7dfZk4xvc", 1L);
         a.push("6s_7dfZk4xvc", 1L);
         a.push("6s_7dfZk4xvc", 1L);
         a.pop();

@@ -26,28 +26,29 @@
 
 package net.yacy.kelondro.util;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SortStack<E> {
 
     // implements a stack where elements 'float' on-top of the stack according to a weight value.
     // objects pushed on the stack must implement the hashCode() method to provide a handle
     // for a double-check.
-    
+ 
+    private static final Object PRESENT = new Object(); // Dummy value to associate with an Object in the backing Map
     private TreeMap<Long, List<E>> onstack; // object within the stack
-    private HashSet<E> instack; // keeps track which element has been on the stack
+    private ConcurrentHashMap<E, Object> instack; // keeps track which element has been on the stack
     protected int maxsize;
     
     public SortStack(final int maxsize) {
         // the maxsize is the maximum number of entries in the stack
         // if this is set to -1, the size is unlimited
         this.onstack = new TreeMap<Long, List<E>>();
-        this.instack = new HashSet<E>();
+        this.instack = new ConcurrentHashMap<E, Object>();
         this.maxsize = maxsize;
     }
 
@@ -61,7 +62,7 @@ public class SortStack<E> {
      * @param weight
      */
     public void push(final E element, Long weight) {
-        if (!this.instack.add(element)) return;
+        if (this.instack.put(element, PRESENT) != null) return;
         
         // put the element on the stack
         synchronized (this.onstack) {
@@ -147,6 +148,7 @@ public class SortStack<E> {
     
     public boolean bottom(final long weight) {
         // returns true if the element with that weight would be on the bottom of the stack after inserting
+        if (this.onstack.size() == 0) return true;
         Long l;
         synchronized (this.onstack) {
             l = this.onstack.lastKey();

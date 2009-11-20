@@ -45,6 +45,8 @@ import de.anomic.yacy.dht.PeerSelection;
 
 public class yacySearch extends Thread {
 
+    private static final ThreadGroup ysThreadGroup = new ThreadGroup("yacySearchThreadGroup");
+    
     final private String wordhashes, excludehashes, urlhashes, sitehash, authorhash;
     final private boolean global;
     final private int partitions;
@@ -79,7 +81,7 @@ public class yacySearch extends Thread {
               final Blacklist blacklist,
               final RankingProfile rankingProfile,
               final Bitfield constraint) {
-        super("yacySearch_" + targetPeer.getName());
+        super(ysThreadGroup, "yacySearch_" + targetPeer.getName());
         //System.out.println("DEBUG - yacySearch thread " + this.getName() + " initialized " + ((urlhashes.length() == 0) ? "(primary)" : "(secondary)"));
         assert wordhashes.length() >= 12;
         this.wordhashes = wordhashes;

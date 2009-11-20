@@ -245,6 +245,7 @@ public final class RankingProcess extends Thread {
 			
 		    // kick out entries that are too bad according to current findings
 		    r = Long.valueOf(order.cardinal(fEntry));
+		    assert maxentries != 0;
 		    if ((maxentries >= 0) && (stack.size() >= maxentries) && (stack.bottom(r.longValue()))) continue;
 		    
 		    // insert
