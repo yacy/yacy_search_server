@@ -30,48 +30,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.Collator;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.io.CharBuffer;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.ByteBuffer;
 
 public class ContentTransformer extends AbstractTransformer implements Transformer {
-
-    public final static byte hashChar = (byte)'#';
-    public final static byte[] slashChar = {(byte)'/'};
-    public final static byte pcChar  = (byte)'%';
-    public final static byte[] dpdpa = "::".getBytes();
-
-    public final static byte lbr  = (byte)'[';
-    public final static byte rbr  = (byte)']';
-    public final static byte[] pOpen  = {hashChar, lbr};
-    public final static byte[] pClose = {rbr, hashChar};
-
-    public final static byte lcbr  = (byte)'{';
-    public final static byte rcbr  = (byte)'}';
-    public final static byte[] mOpen  = {hashChar, lcbr};
-    public final static byte[] mClose = {rcbr, hashChar};
-
-    public final static byte lrbr  = (byte)'(';
-    public final static byte rrbr  = (byte)')';
-    public final static byte[] aOpen  = {hashChar, lrbr};
-    public final static byte[] aClose = {rrbr, hashChar};
-
-    public final static byte[] iOpen  = {hashChar, pcChar};
-    public final static byte[] iClose = {pcChar, hashChar};
-
     
-    private final static Object[] meta_quotation = new Object[] {
-        new Object[] {pOpen, pClose},
-        new Object[] {mOpen, mClose},
-        new Object[] {aOpen, aClose},
-        new Object[] {iOpen, iClose}
-    };
-
     // statics: for initialization of the HTMLFilterAbstractTransformer
     private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
     private static final TreeSet<String> linkTags0 = new TreeSet<String>(insensitiveCollator);;
@@ -143,74 +110,6 @@ public class ContentTransformer extends AbstractTransformer implements Transform
             if (lc.indexOf(bluelist.get(i)) >= 0) return true;
         }
         return false;
-    }
-
-    public ArrayList<String> getStrings(final byte[] text){
-        final ArrayList<String> result = new ArrayList<String>();
-        
-        final ByteBuffer sbb = new ByteBuffer(text);
-        final ByteBuffer[] sbbs = splitQuotations(sbb);
-        for (int i = 0; i < sbbs.length; i++) {
-            // TODO: avoid empty if statements
-            if (sbbs[i].isWhitespace(true)) {
-                //sbb.append(sbbs[i]);
-            } else if ((sbbs[i].byteAt(0) == hashChar) ||
-                       (sbbs[i].startsWith(dpdpa))) {
-                // this is a template or a part of a template
-                //sbb.append(sbbs[i]);
-            } else {
-                // this is a text fragment, generate gettext quotation
-                final int ws = sbbs[i].whitespaceStart(true);
-                final int we = sbbs[i].whitespaceEnd(true);
-                result.add(new String(sbbs[i].getBytes(ws, we - ws)));
-            }
-        }
-        return result;
-    }
-
-    public final static ByteBuffer[] splitQuotations(final ByteBuffer text) {
-        final List<ByteBuffer> l = splitQuotation(text, 0);
-        final ByteBuffer[] sbbs = new ByteBuffer[l.size()];
-        for (int i = 0; i < l.size(); i++) sbbs[i] = l.get(i);
-        return sbbs;
-    }
-
-    private final static List<ByteBuffer> splitQuotation(ByteBuffer text, int qoff) {
-        final ArrayList<ByteBuffer> l = new ArrayList<ByteBuffer>();
-        if (qoff >= meta_quotation.length) {
-            if (text.length() > 0) l.add(text);
-            return l;
-        }
-        int p = -1, q;
-        final byte[] left = (byte[]) ((Object[]) meta_quotation[qoff])[0];
-        final byte[] right = (byte[]) ((Object[]) meta_quotation[qoff])[1];
-        qoff++;
-        while ((text.length() > 0) && ((p = text.indexOf(left)) >= 0)) {
-            q = text.indexOf(right, p + 1);
-            if (q >= 0) {
-                // found a pattern
-                l.addAll(splitQuotation(new ByteBuffer(text.getBytes(0, p)), qoff));
-                l.add(new ByteBuffer(text.getBytes(p, q + right.length - p)));
-                text = new ByteBuffer(text.getBytes(q + right.length));
-            } else {
-                // found only pattern start, no closing parantesis (a syntax error that is silently accepted here)
-                l.addAll(splitQuotation(new ByteBuffer(text.getBytes(0, p)), qoff));
-                l.addAll(splitQuotation(new ByteBuffer(text.getBytes(p)), qoff));
-                text.clear();
-            }
-        }
-
-        // find double-points
-        while ((text.length() > 0) && ((p = text.indexOf(dpdpa)) >= 0)) {
-            l.addAll(splitQuotation(new ByteBuffer(text.getBytes(0, p)), qoff));
-            l.add(new ByteBuffer(dpdpa));
-            l.addAll(splitQuotation(new ByteBuffer(text.getBytes(p + 2)), qoff));
-            text.clear();
-        }
-
-        // add remaining
-        if (text.length() > 0) l.addAll(splitQuotation(text, qoff));
-        return l;
     }
     
     public char[] transformText(final char[] text) {
