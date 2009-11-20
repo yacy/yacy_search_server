@@ -110,21 +110,15 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         Map.Entry<DigestURI, String> entry;
         DigestURI url;
         String desc;
-        TreeSet<byte[]> s;
         final ArrayList<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             entry = i.next();
             url = entry.getKey();
             desc = entry.getValue();
-            s = TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes);
-            if (s.size() == 0) {
-                result.add(new MediaSnippet(mediatype, url, desc, null, 0, document.dc_source()));
-                continue;
-            }
-            s = TextSnippet.removeAppearanceHashes(desc, s);
-            if (s.size() == 0) {
-                result.add(new MediaSnippet(mediatype, url, desc, null, 0, document.dc_source()));
-                continue;
+            int ranking =  TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() +
+                           TextSnippet.removeAppearanceHashes(desc, queryhashes).size();
+            if (ranking < 2 * queryhashes.size()) {
+                result.add(new MediaSnippet(mediatype, url, desc, null, ranking, document.dc_source()));
             }
         }
         return result;
@@ -140,7 +134,6 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         ImageEntry ientry;
         DigestURI url;
         String desc;
-        TreeSet<byte[]> s;
         final ArrayList<MediaSnippet> result = new ArrayList<MediaSnippet>();
         while (i.hasNext()) {
             ientry = i.next();
@@ -150,14 +143,10 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             if (ientry.height() > 0 && ientry.height() < 64) continue;
             if (ientry.width() > 0 && ientry.width() < 64) continue;
             desc = ientry.alt();
-            int appcount = 0;
-            s = TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes);
-            appcount += queryhashes.size() - s.size();
-            // if the resulting set is empty, then _all_ words from the query appeared in the url
-            s = TextSnippet.removeAppearanceHashes(desc, s);
-            appcount += queryhashes.size() - s.size();
-            // if the resulting set is empty, then _all_ search words appeared in the description
-            final int ranking = /*(ientry.hashCode() / queryhashes.size() / 2) */ ientry.height() * ientry.width() * appcount * 10000 /* 0x7FFF0000)*/;
+            int appcount = queryhashes.size()  * 2 - 
+                           TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() -
+                           TextSnippet.removeAppearanceHashes(desc, queryhashes).size();
+            final int ranking = Integer.MAX_VALUE - (ientry.height() + 1) * (ientry.width() + 1) * (appcount + 1);
             result.add(new MediaSnippet(ContentDomain.IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
         }
         return result;

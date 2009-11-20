@@ -140,7 +140,7 @@ public class SortStore<E> extends SortStack<E> {
     
     public synchronized boolean bottom(final long weight) {
         if (super.bottom(weight)) return true;
-        return weight >= this.largest;
+        return weight > this.largest;
     }
 
     public static void main(String[] args) {

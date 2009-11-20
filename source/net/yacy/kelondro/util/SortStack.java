@@ -60,26 +60,27 @@ public class SortStack<E> {
      * @param element
      * @param weight
      */
-    public synchronized void push(final E element, Long weight) {
-        if (this.instack.contains(element)) return;
+    public void push(final E element, Long weight) {
+        if (!this.instack.add(element)) return;
         
         // put the element on the stack
-        List<E> l = this.onstack.get(weight);
-        if (l == null) {
-            l = new LinkedList<E>();
-            l.add(element);
-            this.onstack.put(weight, l);
-        } else {
-            l.add(element);
+        synchronized (this.onstack) {
+            List<E> l = this.onstack.get(weight);
+            if (l == null) {
+                l = new LinkedList<E>();
+                l.add(element);
+                this.onstack.put(weight, l);
+            } else {
+                l.add(element);
+            }
         }
-        
-        // register it for double-check
-        this.instack.add(element);
 
         // check maximum size of the stack an remove elements if the stack gets too large
         if (this.maxsize <= 0) return;
-        while ((this.onstack.size() > 0) && (this.onstack.size() > this.maxsize)) {
-            this.onstack.remove(this.onstack.lastKey());
+        while ((this.onstack.size() > 0) && (this.onstack.size() > this.maxsize)) synchronized (this.onstack) {
+            if ((this.onstack.size() > 0) && (this.onstack.size() > this.maxsize)) {
+                this.onstack.remove(this.onstack.lastKey());
+            }
         }
     }
     
@@ -87,12 +88,16 @@ public class SortStack<E> {
      * return the element with the smallest weight
      * @return
      */
-    public synchronized stackElement top() {
+    public stackElement top() {
         // returns the element that is currently on top of the stack
-        if (this.onstack.isEmpty()) return null;
-        final Long w = this.onstack.firstKey();
-        final List<E> l = this.onstack.get(w);
-        final E element = l.get(0);
+        final E element;
+        final Long w;
+        synchronized (this.onstack) {
+            if (this.onstack.isEmpty()) return null;
+            w = this.onstack.firstKey();
+            final List<E> l = this.onstack.get(w);
+            element = l.get(0);
+        }
         return new stackElement(element, w);
     }
     
@@ -100,44 +105,53 @@ public class SortStack<E> {
      * return the element with the smallest weight and remove it from the stack
      * @return
      */
-    public synchronized stackElement pop() {
+    public stackElement pop() {
         // returns the element that is currently on top of the stack
         // it is removed and added to the offstack list
-        // this is exactly the same as element(offstack.size())
-        if (this.onstack.isEmpty()) return null;
-        final Long w = this.onstack.firstKey();
-        final List<E> l = this.onstack.get(w);
-        final E element = l.remove(0);
-        if (l.size() == 0) this.onstack.remove(w);
-        this.instack.remove(element);
+        final E element;
+        final Long w;
+        synchronized (this.onstack) {
+            if (this.onstack.isEmpty()) return null;
+            w = this.onstack.firstKey();
+            final List<E> l = this.onstack.get(w);
+            element = l.remove(0);
+            this.instack.remove(element);
+            if (l.size() == 0) this.onstack.remove(w);
+        }
         return new stackElement(element, w);
     }
     
-    public synchronized boolean exists(final E element) {
+    public boolean exists(final E element) {
         // uses the hashCode of the element to find out of the element had been on the list or the stack
         return this.instack.contains(element);
     }
     
-    public synchronized void remove(final E element) {
+    public void remove(final E element) {
         if (!this.instack.contains(element)) return;
         
-        for (Map.Entry<Long,List<E>> entry: this.onstack.entrySet()) {
-            Iterator<E> i = entry.getValue().iterator();
-            while (i.hasNext()) {
-                if (i.next().equals(element)) {
-                    i.remove();
-                    if (entry.getValue().size() == 0) {
-                        this.onstack.remove(entry.getKey());
+        synchronized (this.onstack) {
+            for (Map.Entry<Long,List<E>> entry: this.onstack.entrySet()) {
+                Iterator<E> i = entry.getValue().iterator();
+                while (i.hasNext()) {
+                    if (i.next().equals(element)) {
+                        i.remove();
+                        if (entry.getValue().size() == 0) {
+                            this.onstack.remove(entry.getKey());
+                        }
+                        return;
                     }
-                    return;
                 }
             }
         }
     }
     
-    public synchronized boolean bottom(final long weight) {
+    public boolean bottom(final long weight) {
         // returns true if the element with that weight would be on the bottom of the stack after inserting
-        return weight > this.onstack.lastKey().longValue();
+        Long l;
+        synchronized (this.onstack) {
+            l = this.onstack.lastKey();
+        }
+        return weight > l.longValue();
     }
     
     public class stackElement {
