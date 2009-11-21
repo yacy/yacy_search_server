@@ -34,12 +34,8 @@ a:link:hover {
 
 .SubMenugroup h3, .SubMenu h3 {
   -webkit-border-radius: 5px;
-  -webkit-border-radius: 5px;
-  -khtml-border-radius: 5px;
   -khtml-border-radius: 5px;
   -moz-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
   border-radius: 5px;
 
   background-color: #5090D0;
@@ -201,14 +197,10 @@ div#yacylivesearch {
 
 fieldset.maininput, fieldset.yacys { 
   background-color:#DEE6F3;
-  -webkit-border-radius: 10px;
-  -webkit-border-radius: 10px;
-  -khtml-border-radius: 10px;
-  -khtml-border-radius: 10px;
-  -moz-border-radius: 10px;
-  -moz-border-radius: 10px;
-  border-radius: 10px;
-  border-radius: 10px;
+  -webkit-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
 }
 
 form.search.small h2 {
@@ -286,6 +278,10 @@ fieldset {
   background-color:#DEE6F3;
   color:#18294A;
   border:0px solid #DEE6F3;
+  -webkit-border-radius: 5px;
+  -khtml-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
 }
 
 /* input, select, textarea, button {
@@ -295,14 +291,9 @@ fieldset {
 
 legend {
   background-color:#65AC2A;
-
-  -webkit-border-radius: 5px;
   -webkit-border-radius: 5px;
   -khtml-border-radius: 5px;
-  -khtml-border-radius: 5px;
   -moz-border-radius: 5px;
-  -moz-border-radius: 5px;
-  border-radius: 5px;
   border-radius: 5px;
   text-align:left;
   color:white;
