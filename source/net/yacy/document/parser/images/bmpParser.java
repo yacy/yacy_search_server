@@ -131,7 +131,7 @@ public class bmpParser extends AbstractParser implements Idiom {
         final HashMap<DigestURI, String> anchors = new HashMap<DigestURI, String>();
         final HashMap<String, ImageEntry> images  = new HashMap<String, ImageEntry>();
         // add this image to the map of images
-        images.put(sb.toString(), new ImageEntry(location, "", width, height));
+        images.put(sb.toString(), new ImageEntry(location, "", width, height, -1));
         
          return new Document(
              location,

@@ -20,8 +20,7 @@
   <p class="urlinfo">#[date]# | #[sizename]# | YBR-#[ybr]# | <a href="ViewFile.html?urlHash=#[urlhash]#&amp;words=#[words]#&amp;display=#[display]#">Info</a> | <a href="yacysearch.html?cat=image&amp;url=#[link]#&amp;search=#[former]#&amp;display=#[display]#">Pictures</a></p>
   </div>
   ::
-  #{items}#
-  <div class="thumbcontainer">
+  #(item)#::<div class="thumbcontainer">
     <a href="#[hrefCache]#" class="thumblink" onclick="return hs.expand(this)">
       <img src="/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=#[code]#" alt="#[name]#" />
     </a>
@@ -29,8 +28,7 @@
     <!--
     <div class="TableCellDark"><a href="#[href]#">#[name]#</a><br \>#[attr]#</div>
     -->
-  </div>
-  #{/items}#
+  </div>#(/item)#
   ::
   #{items}#
   <tr class="#(col)#TableCellLight::TableCellDark#(/col)#"><td>#[name]#</td><td><a href="#[href]#">#[hrefshort]#</a></tr>

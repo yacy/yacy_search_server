@@ -163,16 +163,22 @@ public class yacysearchitem {
             prop.put("content", theQuery.contentdom.getCode() + 1); // switch on specific content
             final MediaSnippet ms = theSearch.result().oneImage(item);
             if (ms == null) {
-                prop.put("content_items", "0");
+                prop.put("content_item", "0");
             } else {
-                prop.putHTML("content_items_0_hrefCache", (auth) ? "/ViewImage.png?url=" + ms.href.toNormalform(true, false) : ms.href.toNormalform(true, false));
-                prop.putHTML("content_items_0_href", ms.href.toNormalform(true, false));
-                prop.put("content_items_0_code", sb.licensedURLs.aquireLicense(ms.href));
-                prop.putHTML("content_items_0_name", shorten(ms.name, namelength));
-                prop.put("content_items_0_attr", (ms.attr.equals("-1 x -1")) ? "" : "(" + ms.attr + ")"); // attributes, here: original size of image
-                prop.put("content_items_0_source", ms.source.toNormalform(true, false));
-                prop.put("content_items_0_sourcedom", ms.source.getHost());
-                prop.put("content_items", 1);
+                prop.putHTML("content_item_hrefCache", (auth) ? "/ViewImage.png?url=" + ms.href.toNormalform(true, false) : ms.href.toNormalform(true, false));
+                prop.putHTML("content_item_href", ms.href.toNormalform(true, false));
+                prop.put("content_item_code", sb.licensedURLs.aquireLicense(ms.href));
+                prop.putHTML("content_item_name", shorten(ms.name, namelength));
+                prop.put("content_item_mime", ms.mime);
+                prop.put("content_item_fileSize", ms.fileSize);
+                prop.put("content_item_width", ms.width);
+                prop.put("content_item_height", ms.height);
+                prop.put("content_item_attr", (ms.attr.equals("-1 x -1")) ? "" : "(" + ms.attr + ")"); // attributes, here: original size of image
+                prop.put("content_item_urlhash", ms.source.hash());
+                prop.put("content_item_source", ms.source.toNormalform(true, false));
+                prop.put("content_item_sourcedom", ms.source.getHost());
+                prop.put("content_item_nl", (item == 0) ? 0 : 1);
+                prop.put("content_item", 1);
             }
             return prop;
         }

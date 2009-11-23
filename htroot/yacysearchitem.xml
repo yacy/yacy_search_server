@@ -9,4 +9,41 @@
 <yacy:path>#[path]#</yacy:path>
 <yacy:file>#[file]#</yacy:file>
 <guid isPermaLink="false">#[urlhash]#</guid>
-</item>#(/content)#
+</item>::#(item)#::<item>
+<title>#[name]#</title>
+<link>#[source]#</link>
+<description></description>
+<pubDate></pubDate>
+<guid isPermaLink="false">#[urlhash]#</guid>
+<yacy:host>#[sourcedom]#</yacy:host>
+<media:group>
+<media:content 
+               url="#[href]#" 
+               fileSize="#[fileSize]#"  
+               type="#[mime]#"
+               medium="image"
+               isDefault="true" 
+               expression="full" 
+               height="#[width]#"
+               width="#[height]#" />
+<media:content 
+               url="#[hrefCache]#" 
+               fileSize="#[fileSize]#"  
+               type="#[mime]#"
+               medium="image"
+               isDefault="false" 
+               expression="full" 
+               height="#[width]#"
+               width="#[height]#" />
+<media:content 
+               url="/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=#[code]#" 
+               fileSize="#[fileSize]#" 
+               type="#[mime]#"
+               medium="image"
+               isDefault="false" 
+               expression="sample" 
+               height="96"
+               width="96" />
+</media:group>
+</item>#(/item)#::
+#(/content)#

@@ -33,12 +33,14 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
     private final DigestURI url;
     private final String alt;
     private final int width, height;
-
-    public ImageEntry(final DigestURI url, final String alt, final int width, final int height) {
+    private final long fileSize;
+    
+    public ImageEntry(final DigestURI url, final String alt, final int width, final int height, long fileSize) {
         this.url = url;
         this.alt = alt;
         this.width = width;
         this.height = height;
+        this.fileSize = fileSize;
     }
 
     public DigestURI url() {
@@ -55,6 +57,10 @@ public class ImageEntry implements Comparable<ImageEntry>, Comparator<ImageEntry
 
     public int height() {
         return this.height;
+    }
+    
+    public long fileSize() {
+        return this.fileSize;
     }
 
     @Override

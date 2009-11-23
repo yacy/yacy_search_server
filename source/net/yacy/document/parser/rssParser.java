@@ -105,7 +105,7 @@ public class rssParser extends AbstractParser implements Idiom {
             
             if (feed.getImage() != null) {
                 final DigestURI imgURL = new DigestURI(feed.getImage(), null);
-                images.put(imgURL.hash(), new ImageEntry(imgURL, feedTitle, -1, -1));
+                images.put(imgURL.hash(), new ImageEntry(imgURL, feedTitle, -1, -1, -1));
             }            
             
             // loop through the feed items

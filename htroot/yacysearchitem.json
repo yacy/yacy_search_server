@@ -11,15 +11,18 @@
       "host": "#[host]#",
       "path": "#[path]#",
       "file": "#[file]#"
-    }::#{items}##(nl)#::    ,#(/nl)#
+    }::#(item)#::#(nl)#::    ,#(/nl)#
     {
       "title": "#[name]#",
       "icon": "/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=#[code]#",
       "image": "#[href]#",
       "cache": "#[hrefCache]#",
-      "link": "#[source]#",
-      "host": "#[sourcedom]#"
-    }#{/items}#::
+      "url": "#[source]#",
+      "urlhash": "#[urlhash]#",
+      "host": "#[sourcedom]#",
+      "width": "#[width]#",
+      "height": "#[height]#"
+    }#(/item)#::
 ::
 ::
 ::

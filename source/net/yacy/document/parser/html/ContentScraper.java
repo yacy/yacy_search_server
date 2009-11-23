@@ -148,7 +148,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                     final float ratio = (float) Math.min(width, height) / Math.max(width, height);
                     if (ratio > 0.4) {
                         final DigestURI url = absolutePath(tagopts.getProperty("src", ""));
-                        final ImageEntry ie = new ImageEntry(url, tagopts.getProperty("alt", ""), width, height);
+                        final ImageEntry ie = new ImageEntry(url, tagopts.getProperty("alt", ""), width, height, -1);
                         addImage(images, ie);
                     }
 // i think that real pictures have witdth & height tags - thq
@@ -190,7 +190,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 final String linktitle = tagopts.getProperty("title", "");
 
                 if (type.equalsIgnoreCase("shortcut icon")) {
-                    final ImageEntry ie = new ImageEntry(newLink, linktitle, -1,-1);
+                    final ImageEntry ie = new ImageEntry(newLink, linktitle, -1, -1, -1);
                     images.put(ie.url().hash(), ie);    
                     this.favicon = newLink;
                 } else if (!type.equalsIgnoreCase("stylesheet") && !type.equalsIgnoreCase("alternate stylesheet")) {
@@ -225,7 +225,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 final String type = (p < 0) ? "" : f.substring(p + 1);
                 if (type.equals("png") || type.equals("gif") || type.equals("jpg") || type.equals("jpeg")) {
                     // special handling of such urls: put them to the image urls
-                    final ImageEntry ie = new ImageEntry(url, super.stripAll(new String(text)).trim(), -1, -1);
+                    final ImageEntry ie = new ImageEntry(url, super.stripAll(new String(text)).trim(), -1, -1, -1);
                     addImage(images, ie);
                 } else {
                     anchors.put(url, super.stripAll(new String(text)).trim());

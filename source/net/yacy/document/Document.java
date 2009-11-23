@@ -386,7 +386,7 @@ dc_rights
                     if (Classification.isMediaExtension(ext)) {
                         // this is not a normal anchor, its a media link
                         if (Classification.isImageExtension(ext)) {
-                            ContentScraper.addImage(collectedImages, new ImageEntry(url, entry.getValue(), -1, -1));
+                            ContentScraper.addImage(collectedImages, new ImageEntry(url, entry.getValue(), -1, -1, -1));
                         }
                         else if (Classification.isAudioExtension(ext)) audiolinks.put(url, entry.getValue());
                         else if (Classification.isVideoExtension(ext)) videolinks.put(url, entry.getValue());

@@ -30,6 +30,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import de.anomic.data.MimeTable;
+
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -41,15 +43,40 @@ import net.yacy.repository.LoaderDispatcher;
 public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaSnippet> {
     public ContentDomain type;
     public DigestURI href, source;
-    public String name, attr;
+    public String name, attr, mime;
     public int ranking;
+    public int width, height;
+    public long fileSize;
 
-    public MediaSnippet(final ContentDomain type, final DigestURI href, final String name, final String attr, final int ranking, final DigestURI source) {
+    public MediaSnippet(final ContentDomain type, final DigestURI href, final String mime, final String name, final long fileSize, final String attr, final int ranking, final DigestURI source) {
         this.type = type;
         this.href = href;
+        this.mime = mime;
+        this.fileSize = fileSize;
         this.source = source; // the web page where the media resource appeared
         this.name = name;
         this.attr = attr;
+        this.width = -1;
+        this.height = -1;
+        int p = 0;
+        if ((p = attr.indexOf(" x ")) > 0) {
+            this.width = Integer.parseInt(attr.substring(0, p).trim());
+            this.height = Integer.parseInt(attr.substring(p + 3).trim());
+        }
+        this.ranking = ranking; // the smaller the better! small values should be shown first
+        if ((this.name == null) || (this.name.length() == 0)) this.name = "_";
+        if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
+    }
+    
+    public MediaSnippet(final ContentDomain type, final DigestURI href, final String mime, final String name, final long fileSize, final int width, final int height, final int ranking, final DigestURI source) {
+        this.type = type;
+        this.href = href;
+        this.fileSize = fileSize;
+        this.source = source; // the web page where the media resource appeared
+        this.name = name;
+        this.attr = width + " x " + height;
+        this.width = width;
+        this.height = height;
         this.ranking = ranking; // the smaller the better! small values should be shown first
         if ((this.name == null) || (this.name.length() == 0)) this.name = "_";
         if ((this.attr == null) || (this.attr.length() == 0)) this.attr = "_";
@@ -115,10 +142,10 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             entry = i.next();
             url = entry.getKey();
             desc = entry.getValue();
-            int ranking =  TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() +
+            int ranking = TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() +
                            TextSnippet.removeAppearanceHashes(desc, queryhashes).size();
             if (ranking < 2 * queryhashes.size()) {
-                result.add(new MediaSnippet(mediatype, url, desc, null, ranking, document.dc_source()));
+                result.add(new MediaSnippet(mediatype, url, MimeTable.url2mime(url), desc, document.getTextLength(), null, ranking, document.dc_source()));
             }
         }
         return result;
@@ -146,8 +173,8 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             int appcount = queryhashes.size()  * 2 - 
                            TextSnippet.removeAppearanceHashes(url.toNormalform(false, false), queryhashes).size() -
                            TextSnippet.removeAppearanceHashes(desc, queryhashes).size();
-            final int ranking = Integer.MAX_VALUE - (ientry.height() + 1) * (ientry.width() + 1) * (appcount + 1);
-            result.add(new MediaSnippet(ContentDomain.IMAGE, url, desc, ientry.width() + " x " + ientry.height(), ranking, document.dc_source()));
+            final int ranking = Integer.MAX_VALUE - (ientry.height() + 1) * (ientry.width() + 1) * (appcount + 1);  
+            result.add(new MediaSnippet(ContentDomain.IMAGE, url, MimeTable.url2mime(url), desc, ientry.fileSize(), ientry.width(), ientry.height(), ranking, document.dc_source()));
         }
         return result;
     }

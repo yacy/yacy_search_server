@@ -3,7 +3,8 @@
 <rss version="2.0"
 	xmlns:yacy="http://www.yacy.net/"
 	xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/"
-	xmlns:atom="http://www.w3.org/2005/Atom">
+    xmlns:media="http://search.yahoo.com/mrss/"
+    xmlns:atom="http://www.w3.org/2005/Atom">
 	<!-- YaCy Search Engine; http://yacy.net -->
 	<channel>
 		<title>#[promoteSearchPageGreeting]#</title>

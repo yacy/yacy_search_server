@@ -92,6 +92,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.visualization.RasterPlotter;
 
+import de.anomic.data.MimeTable;
 import de.anomic.http.server.servlets.crawlReceipt;
 import de.anomic.http.server.servlets.transferURL;
 import de.anomic.search.Switchboard;
@@ -107,7 +108,6 @@ public final class HTTPDFileHandler {
     
     private static final boolean safeServletsMode = false; // if true then all servlets are called synchronized
     
-    private static final Properties mimeTable = new Properties();
     // create a class loader
     private static final serverClassLoader provider = new serverClassLoader(/*this.getClass().getClassLoader()*/);
     private static serverSwitch switchboard = null;
@@ -142,20 +142,11 @@ public final class HTTPDFileHandler {
         if (switchboard == null) {
             switchboard = theSwitchboard;
 
-            if (mimeTable.size() == 0) {
+            if (MimeTable.size() == 0) {
                 // load the mime table
                 final String mimeTablePath = theSwitchboard.getConfig("mimeTable","");
-                BufferedInputStream mimeTableInputStream = null;
-                try {
-                    Log.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
-                    mimeTableInputStream = new BufferedInputStream(new FileInputStream(new File(theSwitchboard.getRootPath(), mimeTablePath)));
-                    mimeTable.load(mimeTableInputStream);
-                } catch (final Exception e) {                
-                    Log.logSevere("HTTPDFiles", "ERROR: path to configuration file or configuration invalid\n" + e);
-                    System.exit(1);
-                } finally {
-                    if (mimeTableInputStream != null) try { mimeTableInputStream.close(); } catch (final Exception e1) {}                
-                }
+                Log.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
+                MimeTable.init(new File(theSwitchboard.getRootPath(), mimeTablePath));
             }
             
             // create default files array
@@ -537,7 +528,7 @@ public final class HTTPDFileHandler {
                         // send an image to client
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
-                        final String mimeType = mimeTable.getProperty(targetExt, "text/html");
+                        final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
                         final ByteBuffer result = RasterPlotter.exportImage(yp.getImage(), targetExt);
 
                         // write the array to the client
@@ -551,7 +542,7 @@ public final class HTTPDFileHandler {
                         // send an image to client
                         targetDate = new Date(System.currentTimeMillis());
                         nocache = true;
-                        final String mimeType = mimeTable.getProperty(targetExt, "text/html");
+                        final String mimeType = MimeTable.ext2mime(targetExt, "text/html");
 
                         // generate an byte array from the generated image
                         int width = i.getWidth(null); if (width < 0) width = 96; // bad hack
@@ -721,7 +712,7 @@ public final class HTTPDFileHandler {
                 // we have found a file that can be written to the client
                 // if this file uses templates, then we use the template
                 // re-write - method to create an result
-                String mimeType = mimeTable.getProperty(targetExt,"text/html");
+                String mimeType = MimeTable.ext2mime(targetExt, "text/html");
                 final boolean zipContent = requestHeader.acceptGzip() && HTTPDemon.shallTransportZipped("." + conProp.getProperty("EXT",""));
                 if (path.endsWith("html") || 
                         path.endsWith("htm") || 
