@@ -11,4 +11,16 @@
       "host": "#[host]#",
       "path": "#[path]#",
       "file": "#[file]#"
-    }#(/content)#
+    }::#{items}##(nl)#::    ,#(/nl)#
+    {
+      "title": "#[name]#",
+      "icon": "/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=#[code]#",
+      "image": "#[href]#",
+      "cache": "#[hrefCache]#",
+      "link": "#[source]#",
+      "host": "#[sourcedom]#"
+    }#{/items}#::
+::
+::
+::
+#(/content)#
