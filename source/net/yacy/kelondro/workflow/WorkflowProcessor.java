@@ -56,7 +56,8 @@ public class WorkflowProcessor<J extends WorkflowJob> {
     
     public WorkflowProcessor(
             String name, String description, String[] childnames,
-            final Object env, final String jobExecMethod, final int inputQueueSize, final WorkflowProcessor<J> output, final int poolsize) {
+            final Object env, final String jobExecMethod,
+            final int inputQueueSize, final WorkflowProcessor<J> output, final int poolsize) {
         // start a fixed number of executors that handle entries in the process queue
         this.environment = env;
         this.processName = name;
@@ -135,7 +136,7 @@ public class WorkflowProcessor<J extends WorkflowJob> {
             Log.logWarning("PROCESSOR", "executing job " + environment.getClass().getName() + "." + methodName + " serialized");
             try {
                 final J out = (J) InstantBlockingThread.execMethod(this.environment, this.methodName).invoke(environment, new Object[]{in});
-                if ((out != null) && (output != null)) output.enQueue(out);
+                if (out != null && this.output != null) this.output.enQueue(out);
             } catch (final IllegalArgumentException e) {
                 Log.logException(e);
             } catch (final IllegalAccessException e) {

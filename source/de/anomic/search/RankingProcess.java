@@ -65,10 +65,8 @@ public final class RankingProcess extends Thread {
     private static boolean useYBR = true;
     private static final int maxDoubleDomAll = 20, maxDoubleDomSpecial = 10000;
     
-    private final Segment indexSegment;
     private final QueryParams query;
     private final int maxentries;
-    private final ReferenceOrder order;
     private final ConcurrentHashMap<String, Integer> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private final int[] flagcount; // flag counter
     private final TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
@@ -86,11 +84,7 @@ public final class RankingProcess extends Thread {
     private final ConcurrentHashMap<String, AuthorInfo> authorNavigator;
     
     
-    public RankingProcess(
-            final Segment indexSegment,
-            final QueryParams query,
-            final int maxentries,
-            final int concurrency) {
+    public RankingProcess(final QueryParams query, final int maxentries, final int concurrency) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
@@ -98,7 +92,6 @@ public final class RankingProcess extends Thread {
         this.stack = new SortStack<WordReferenceVars>(maxentries);
         this.doubleDomCache = new HashMap<String, SortStack<WordReferenceVars>>();
         this.handover = new HashSet<String>();
-        this.order = (query == null) ? null : new ReferenceOrder(query.ranking, query.targetlang);
         this.query = query;
         this.maxentries = maxentries;
         this.remote_peerCount = 0;
@@ -107,7 +100,6 @@ public final class RankingProcess extends Thread {
         this.local_resourceSize = 0;
         this.urlhashes = new ConcurrentHashMap<String, Integer>(0, 0.75f, concurrency);
         this.misses = new TreeSet<String>();
-        this.indexSegment = indexSegment;
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
         this.hostNavigator = new ConcurrentHashMap<String, HostInfo>();
@@ -119,6 +111,10 @@ public final class RankingProcess extends Thread {
         assert this.feeders >= 1;
     }
     
+    public QueryParams getQuery() {
+        return this.query;
+    }
+    
     public void run() {
         // do a search
         
@@ -126,7 +122,7 @@ public final class RankingProcess extends Thread {
         // so following sortings together with the global results will be fast
         try {
             long timer = System.currentTimeMillis();
-            final TermSearch<WordReference> search = this.indexSegment.termIndex().query(
+            final TermSearch<WordReference> search = this.query.getSegment().termIndex().query(
                     query.queryHashes,
                     query.excludeHashes,
                     null,
@@ -146,14 +142,6 @@ public final class RankingProcess extends Thread {
         oneFeederTerminated();
     }
     
-    public long ranking(final WordReferenceVars word) {
-        return order.cardinal(word);
-    }
-    
-    public int[] zones() {
-        return this.domZones;
-    }
-    
     public void add(final ReferenceContainer<WordReference> index, final boolean local, final int fullResource) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
@@ -170,7 +158,7 @@ public final class RankingProcess extends Thread {
         long timer = System.currentTimeMillis();
         
         // normalize entries
-        final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
+        final BlockingQueue<WordReferenceVars> decodedEntries = this.query.getOrder().normalizeWith(index);
         MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
         
         // iterate over normalized entries and select some that are better than currently stored
@@ -244,7 +232,7 @@ public final class RankingProcess extends Thread {
 		for (WordReferenceVars fEntry: filteredEntries) {
 			
 		    // kick out entries that are too bad according to current findings
-		    r = Long.valueOf(order.cardinal(fEntry));
+		    r = Long.valueOf(this.query.getOrder().cardinal(fEntry));
 		    assert maxentries != 0;
 		    if ((maxentries >= 0) && (stack.size() >= maxentries) && (stack.bottom(r.longValue()))) continue;
 		    
@@ -367,6 +355,15 @@ public final class RankingProcess extends Thread {
         return bestEntry;
     }
     
+    /**
+     * get one metadata entry from the ranked results. This will be the 'best' entry so far
+     * according to the applied ranking. If there are no more entries left or the timeout
+     * limit is reached then null is returned. The caller may distinguish the timeout case
+     * from the case where there will be no more also in the future by calling this.feedingIsFinished()
+     * @param skipDoubleDom should be true if it is wanted that double domain entries are skipped
+     * @param timeout the time this method may take for a result computation
+     * @return a metadata entry for a url
+     */
     public URIMetadataRow takeURL(final boolean skipDoubleDom, final int timeout) {
         // returns from the current RWI list the best URL entry and removes this entry from the list
     	long timeLimit = System.currentTimeMillis() + timeout;
@@ -377,7 +374,7 @@ public final class RankingProcess extends Thread {
             	try {Thread.sleep(50);} catch (final InterruptedException e1) {}
             	continue;
             }
-            final URIMetadataRow page = indexSegment.urlMetadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
+            final URIMetadataRow page = this.query.getSegment().urlMetadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
             if (page == null) {
             	misses.add(obrwi.element.metadataHash());
             	continue;
@@ -412,7 +409,7 @@ public final class RankingProcess extends Thread {
                 (query.constraint.get(Condenser.flag_cat_indexof)) &&
                 (!(pagetitle.startsWith("index of")))) {
                 final Iterator<byte[]> wi = query.queryHashes.iterator();
-                while (wi.hasNext()) try { indexSegment.termIndex().remove(wi.next(), page.hash()); } catch (IOException e) {}
+                while (wi.hasNext()) try { this.query.getSegment().termIndex().remove(wi.next(), page.hash()); } catch (IOException e) {}
                 continue;
             }
             
@@ -564,7 +561,7 @@ public final class RankingProcess extends Thread {
         DigestURI url;
         String hostname;
         for (int i = 0; i < rc; i++) {
-            mr = indexSegment.urlMetadata().load(hsa[i].hashsample, null, 0);
+            mr = this.query.getSegment().urlMetadata().load(hsa[i].hashsample, null, 0);
             if (mr == null) continue;
             url = mr.metadata().url();
             if (url == null) continue;
@@ -653,10 +650,6 @@ public final class RankingProcess extends Thread {
             result.add(new NavigatorEntry(e.author, e.count));
         }
         return result;
-    }
-    
-    public ReferenceOrder getOrder() {
-        return this.order;
     }
     
     public static void loadYBR(final File rankingPath, final int count) {

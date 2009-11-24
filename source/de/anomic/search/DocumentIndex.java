@@ -194,15 +194,13 @@ public class DocumentIndex extends Segment {
     public static final ArrayList<URIMetadataRow> findMetadata(
             final String querystring,
             final Segment indexSegment) {
-        QueryParams query = new QueryParams(querystring, 100, textRankingDefault, null);
-        return findMetadata(query, indexSegment);
+        QueryParams query = new QueryParams(querystring, 100, null, indexSegment, textRankingDefault);
+        return findMetadata(query);
     }
     
-    public static final ArrayList<URIMetadataRow> findMetadata(
-            final QueryParams query,
-            final Segment indexSegment) {
+    public static final ArrayList<URIMetadataRow> findMetadata(final QueryParams query) {
         
-        RankingProcess rankedCache = new RankingProcess(indexSegment, query, 1000, 2);
+        RankingProcess rankedCache = new RankingProcess(query, 1000, 2);
         rankedCache.run();
         
         ArrayList<URIMetadataRow> result = new ArrayList<URIMetadataRow>();

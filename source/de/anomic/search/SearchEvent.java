@@ -64,7 +64,6 @@ public final class SearchEvent {
     // class variables that may be implemented with an abstract class
     private long eventTime;
     private QueryParams query;
-    private final Segment indexSegment;
     private final yacySeedDB peers;
     private RankingProcess rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
     private ResultFetcher results;
@@ -82,13 +81,11 @@ public final class SearchEvent {
     private byte[] IAmaxcounthash, IAneardhthash;
     
    @SuppressWarnings("unchecked") SearchEvent(final QueryParams query,
-                             final Segment indexSegment,
                              final yacySeedDB peers,
                              final ResultURLs crawlResults,
                              final TreeMap<byte[], String> preselectedPeerHashes,
                              final boolean generateAbstracts) {
         this.eventTime = System.currentTimeMillis(); // for lifetime check
-        this.indexSegment = indexSegment;
         this.peers = peers;
         this.crawlResults = crawlResults;
         this.query = query;
@@ -109,7 +106,7 @@ public final class SearchEvent {
             
         	// initialize a ranking process that is the target for data
         	// that is generated concurrently from local and global search threads
-            this.rankedCache = new RankingProcess(indexSegment, query, max_results_preparation, fetchpeers + 1);
+            this.rankedCache = new RankingProcess(query, max_results_preparation, fetchpeers + 1);
             
             // start a local search concurrently
             this.rankedCache.start();
@@ -128,7 +125,7 @@ public final class SearchEvent {
                     query.authorhash == null ? "" : query.authorhash,
                     query.displayResults(),
                     query.maxDistance,
-                    indexSegment,
+                    query.getSegment(),
                     peers,
                     crawlResults,
                     rankedCache,
@@ -149,10 +146,10 @@ public final class SearchEvent {
             }
             
             // start worker threads to fetch urls and snippets
-            this.results = new ResultFetcher(rankedCache, query, indexSegment, peers, 10000);
+            this.results = new ResultFetcher(rankedCache, query, peers, 10000);
         } else {
             // do a local search
-            this.rankedCache = new RankingProcess(indexSegment, query, max_results_preparation, 2);
+            this.rankedCache = new RankingProcess(query, max_results_preparation, 2);
             this.rankedCache.run();
             //CrawlSwitchboard.Finding finding = wordIndex.retrieveURLs(query, false, 2, ranking, process);
             
@@ -184,7 +181,7 @@ public final class SearchEvent {
             }
             
             // start worker threads to fetch urls and snippets
-            this.results = new ResultFetcher(rankedCache, query, indexSegment, peers, 10);
+            this.results = new ResultFetcher(rankedCache, query, peers, 10);
         }
          
         // clean up events
@@ -223,7 +220,7 @@ public final class SearchEvent {
                final Iterator<byte[]> j = removeWords.iterator();
                // remove the same url hashes for multiple words
                while (j.hasNext()) {
-                   this.indexSegment.termIndex().remove(j.next(), this.results.failedURLs.keySet());
+                   this.query.getSegment().termIndex().remove(j.next(), this.results.failedURLs.keySet());
                }                    
            } catch (IOException e) {
                Log.logException(e);
@@ -376,7 +373,7 @@ public final class SearchEvent {
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + "   has urls: " + urls);
                 //System.out.println("DEBUG-INDEXABSTRACT ***: peer " + peer + " from words: " + words);
                 secondarySearchThreads[c++] = yacySearch.secondaryRemoteSearch(
-                        words, "", urls, indexSegment, peers, crawlResults, this.rankedCache, peer, Switchboard.urlBlacklist,
+                        words, "", urls, this.query.getSegment(), peers, crawlResults, this.rankedCache, peer, Switchboard.urlBlacklist,
                         query.ranking, query.constraint, preselectedPeerHashes);
 
             }

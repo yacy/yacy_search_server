@@ -54,7 +54,6 @@ public class ResultFetcher {
     // input values
     final RankingProcess  rankedCache; // ordered search results, grows dynamically as all the query threads enrich this container
     QueryParams     query;
-    private final Segment         indexSegment;
     private final yacySeedDB      peers;
     
     // result values
@@ -71,13 +70,11 @@ public class ResultFetcher {
     public ResultFetcher(
             RankingProcess rankedCache,
             final QueryParams query,
-            final Segment indexSegment,
             final yacySeedDB peers,
             final int taketimeout) {
     	
     	this.rankedCache = rankedCache;
     	this.query = query;
-        this.indexSegment = indexSegment;
         this.peers = peers;
         this.taketimeout = taketimeout;
         
@@ -120,7 +117,6 @@ public class ResultFetcher {
         }
         return false;
     }
-    
     
     public long getURLRetrievalTime() {
         return this.urlRetrievalAllTime;
@@ -166,7 +162,7 @@ public class ResultFetcher {
                     if (page == null) break;
                     if (failedURLs.get(page.hash()) != null) continue;
                     
-                    final ResultEntry resultEntry = fetchSnippet(page, snippetMode);
+                    final ResultEntry resultEntry = fetchSnippet(page, snippetMode); // does not fetch snippets if snippetMode == 0
 
                     if (resultEntry == null) continue; // the entry had some problems, cannot be used
                     if (result.exists(resultEntry)) continue;
@@ -177,7 +173,7 @@ public class ResultFetcher {
                     
                     // place the result to the result vector
                     // apply post-ranking
-                    long ranking = Long.valueOf(rankedCache.getOrder().cardinal(resultEntry.word()));
+                    long ranking = Long.valueOf(query.getOrder().cardinal(resultEntry.word()));
                     ranking += postRanking(resultEntry, rankedCache.getTopics());
                     //System.out.println("*** resultEntry.hash = " + resultEntry.hash());
                     result.push(resultEntry, ranking);
@@ -209,7 +205,7 @@ public class ResultFetcher {
         final long dbRetrievalTime = System.currentTimeMillis() - startTime;
         
         if (snippetMode == 0) {
-            return new ResultEntry(page, indexSegment, peers, null, null, dbRetrievalTime, 0); // result without snippet
+            return new ResultEntry(page, query.getSegment(), peers, null, null, dbRetrievalTime, 0); // result without snippet
         }
         
         // load snippet
@@ -222,17 +218,17 @@ public class ResultFetcher {
             
             if (snippet.getErrorCode() < 11) {
                 // we loaded the file and found the snippet
-                return new ResultEntry(page, indexSegment, peers, snippet, null, dbRetrievalTime, snippetComputationTime); // result with snippet attached
+                return new ResultEntry(page, query.getSegment(), peers, snippet, null, dbRetrievalTime, snippetComputationTime); // result with snippet attached
             } else if (snippetMode == 1) {
                 // we did not demand online loading, therefore a failure does not mean that the missing snippet causes a rejection of this result
                 // this may happen during a remote search, because snippet loading is omitted to retrieve results faster
-                return new ResultEntry(page, indexSegment, peers, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
+                return new ResultEntry(page, query.getSegment(), peers, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
             } else {
                 // problems with snippet fetch
                 registerFailure(page.hash(), "no text snippet for URL " + metadata.url());
                 if (!peers.mySeed().isVirgin())
                     try {
-                        TextSnippet.failConsequences(this.indexSegment, page.word(), snippet, query.id(false));
+                        TextSnippet.failConsequences(query.getSegment(), page.word(), snippet, query.id(false));
                     } catch (IOException e) {
                         Log.logException(e);
                     }
@@ -247,9 +243,9 @@ public class ResultFetcher {
             
             if ((mediaSnippets != null) && (mediaSnippets.size() > 0)) {
                 // found media snippets, return entry
-                return new ResultEntry(page, indexSegment, peers, null, mediaSnippets, dbRetrievalTime, snippetComputationTime);
+                return new ResultEntry(page, query.getSegment(), peers, null, mediaSnippets, dbRetrievalTime, snippetComputationTime);
             } else if (snippetMode == 1) {
-                return new ResultEntry(page, indexSegment, peers, null, null, dbRetrievalTime, snippetComputationTime);
+                return new ResultEntry(page, query.getSegment(), peers, null, null, dbRetrievalTime, snippetComputationTime);
             } else {
                 // problems with snippet fetch
                 registerFailure(page.hash(), "no media snippet for URL " + metadata.url());

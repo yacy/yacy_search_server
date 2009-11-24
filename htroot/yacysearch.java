@@ -440,7 +440,6 @@ public class yacysearch {
         			Word.words2hashes(query[1]),
         			Word.words2hashes(query[2]),
         			tenant,
-                    ranking,
                     maxDistance,
                     prefermask,
                     contentdomCode,
@@ -459,7 +458,9 @@ public class yacysearch {
                     authorhash,
                     DigestURI.TLD_any_zone_filter,
                     client,
-                    authenticated);
+                    authenticated,
+                    indexSegment,
+                    ranking);
             MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.INITIALIZATION, 0, 0), false);
             
             // tell all threads to do nothing for a specific time
@@ -478,7 +479,7 @@ public class yacysearch {
                 theQuery.setOffset(0); // in case that this is a new search, always start without a offset 
                 offset = 0;
             }
-            final SearchEvent theSearch = SearchEventCache.getEvent(theQuery, indexSegment, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
+            final SearchEvent theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false);
             
             // generate result object
             //serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + (System.currentTimeMillis() - timestamp) + " ms");
@@ -571,7 +572,7 @@ public class yacysearch {
             
             final int totalcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
             prop.put("num-results_offset", offset);
-            prop.put("num-results_itemscount", "0");
+            prop.put("num-results_itemscount", Formatter.number(0, true));
             prop.put("num-results_itemsPerPage", itemsPerPage);
             prop.put("num-results_totalcount", Formatter.number(totalcount, true));
             prop.put("num-results_globalresults", (globalsearch) ? "1" : "0");
@@ -611,7 +612,10 @@ public class yacysearch {
                 resnav.append(QueryParams.navurl("html", thispage + 1, display, theQuery, originalUrlMask, null, navigation));
                 resnav.append("\"><img src=\"env/grafics/navdr.gif\" width=\"16\" height=\"16\"></a>");
             }
-            prop.put("num-results_resnav", resnav.toString());
+            String resnavs = resnav.toString();
+            prop.put("num-results_resnav", resnavs);
+            prop.put("pageNavBottom", (totalcount - offset > 6) ? 1 : 0); // if there are more results than may fit on the page we add a navigation at the bottom
+            prop.put("pageNavBottom_resnav", resnavs);
         
             // generate the search result lines; the content will be produced by another servlet
             for (int i = 0; i < theQuery.displayResults(); i++) {

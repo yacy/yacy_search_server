@@ -28,6 +28,8 @@ package net.yacy.kelondro.workflow;
 public interface BlockingThread<J extends WorkflowJob> extends WorkflowThread {
 
     public void setManager(WorkflowProcessor<J> queue);
+    
+    
     public WorkflowProcessor<J> getManager();
 
     public J job(J next) throws Exception;

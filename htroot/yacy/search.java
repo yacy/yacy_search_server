@@ -53,6 +53,7 @@ import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.SearchEvent;
 import de.anomic.search.SearchEventCache;
+import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.search.ResultEntry;
@@ -189,13 +190,13 @@ public final class search {
         SearchEvent theSearch = null;
         if ((query.length() == 0) && (abstractSet != null)) {
             // this is _not_ a normal search, only a request for index abstracts
+            Segment indexSegment = sb.indexSegments.segment(Segments.Process.PUBLIC);
             theQuery = new QueryParams(
                     null,
                     abstractSet,
                     new TreeSet<byte[]>(Base64Order.enhancedCoder),
                     null,
                     null,
-                    rankingProfile,
                     maxdist,
                     prefer,
                     ContentDomain.contentdomParser(contentdom),
@@ -213,13 +214,16 @@ public final class search {
                     authorhash,
                     DigestURI.TLD_any_zone_filter,
                     client,
-                    false);
+                    false,
+                    indexSegment,
+                    rankingProfile
+                    );
             theQuery.domType = QueryParams.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
             final long timer = System.currentTimeMillis();
             //final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
-            final HashMap<byte[], ReferenceContainer<WordReference>> incc = sb.indexSegments.termIndex(Segments.Process.PUBLIC).searchConjunction(theQuery.queryHashes, QueryParams.hashes2StringSet(urls));
+            final HashMap<byte[], ReferenceContainer<WordReference>> incc = indexSegment.termIndex().searchConjunction(theQuery.queryHashes, QueryParams.hashes2StringSet(urls));
             
             MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.COLLECTION, incc.size(), System.currentTimeMillis() - timer), false);
             if (incc != null) {
@@ -247,10 +251,9 @@ public final class search {
                     excludehashes, 
                     null, 
                     null,
-                    rankingProfile, 
                     maxdist, 
-                    prefer, 
-                    ContentDomain.contentdomParser(contentdom), 
+                    prefer,
+                    ContentDomain.contentdomParser(contentdom),
                     language,
                     "", // no navigation
                     false, 
@@ -265,13 +268,16 @@ public final class search {
                     authorhash,
                     DigestURI.TLD_any_zone_filter,
                     client, 
-                    false);
+                    false,
+                    sb.indexSegments.segment(Segments.Process.PUBLIC),
+                    rankingProfile
+                    );
             theQuery.domType = QueryParams.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
             RSSFeed.channels(RSSFeed.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.queryHashes), ""));
             
             // make event
-            theSearch = SearchEventCache.getEvent(theQuery, sb.indexSegments.segment(Segments.Process.PUBLIC), sb.peers, sb.crawlResults, null, true);
+            theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.crawlResults, null, true);
             
             // set statistic details of search result and find best result index set
             if (theSearch.getRankingResult().getLocalResourceSize() == 0) {

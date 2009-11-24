@@ -55,6 +55,20 @@ public class InstantBlockingThread<J extends WorkflowJob> extends AbstractBlocki
         this.handle = Long.valueOf(System.currentTimeMillis() + this.getName().hashCode());
     }
     
+    public InstantBlockingThread(final Object env, final Method jobExecMethod, final WorkflowProcessor<J> manager) {
+        // jobExec is the name of a method of the object 'env' that executes the one-step-run
+        // jobCount is the name of a method that returns the size of the job
+        
+        // set the manager of blocking queues for input and output
+        this.setManager(manager);
+        
+        // define execution class
+        this.jobExecMethod = jobExecMethod;
+        this.environment = (env instanceof Class<?>) ? null : env;
+        this.setName(jobExecMethod.getClass().getName() + "." + jobExecMethod.getName() + "." + handleCounter++);
+        this.handle = Long.valueOf(System.currentTimeMillis() + this.getName().hashCode());
+    }
+    
     protected static Method execMethod(final Object env, final String jobExec) {
         final Class<?> theClass = (env instanceof Class<?>) ? (Class<?>) env : env.getClass();
         try {

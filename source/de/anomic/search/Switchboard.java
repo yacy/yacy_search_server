@@ -603,7 +603,7 @@ public final class Switchboard extends serverSwitch {
         int indexerThreads = Math.max(1, WorkflowProcessor.useCPU / 2);
         this.indexingStorageProcessor      = new WorkflowProcessor<indexingQueueEntry>(
                 "storeDocumentIndex",
-                "This is the sequencing step of the indexing queue: no concurrency is wanted here, because the access of the indexer works better if it is not concurrent. Files are written as streams, councurrency would destroy IO performance. In this process the words are written to the RWI cache, which flushes if it is full.",
+                "This is the sequencing step of the indexing queue. Files are written as streams, too much councurrency would destroy IO performance. In this process the words are written to the RWI cache, which flushes if it is full.",
                 new String[]{"RWI/Cache/Collections"},
                 this, "storeDocumentIndex", WorkflowProcessor.useCPU + 40, null, indexerThreads);
         this.indexingAnalysisProcessor     = new WorkflowProcessor<indexingQueueEntry>(

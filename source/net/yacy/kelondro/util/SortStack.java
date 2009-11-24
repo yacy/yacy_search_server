@@ -44,6 +44,10 @@ public class SortStack<E> {
     private ConcurrentHashMap<E, Object> instack; // keeps track which element has been on the stack
     protected int maxsize;
     
+    public SortStack() {
+        this(-1);
+    }
+    
     public SortStack(final int maxsize) {
         // the maxsize is the maximum number of entries in the stack
         // if this is set to -1, the size is unlimited

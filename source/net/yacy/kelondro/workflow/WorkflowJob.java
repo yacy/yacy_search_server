@@ -1,4 +1,4 @@
-// serverProcessor.java
+// WorkflowJob.java
 // (C) 2008 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 29.02.2008 on http://yacy.net
 //

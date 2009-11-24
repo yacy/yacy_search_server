@@ -9,7 +9,8 @@
 <yacy:path>#[path]#</yacy:path>
 <yacy:file>#[file]#</yacy:file>
 <guid isPermaLink="false">#[urlhash]#</guid>
-</item>::#(item)#::<item>
+</item>::
+#(item)#::<item>
 <title>#[name]#</title>
 <link>#[source]#</link>
 <description></description>
@@ -18,32 +19,32 @@
 <yacy:host>#[sourcedom]#</yacy:host>
 <media:group>
 <media:content 
-               url="#[href]#" 
-               fileSize="#[fileSize]#"  
-               type="#[mime]#"
-               medium="image"
-               isDefault="true" 
-               expression="full" 
-               height="#[width]#"
-               width="#[height]#" />
+  url="#[href]#" 
+  fileSize="#[fileSize]#"  
+  type="#[mimetype]#"
+  medium="image"
+  isDefault="true" 
+  expression="full" 
+  height="#[width]#"
+  width="#[height]#" />
 <media:content 
-               url="#[hrefCache]#" 
-               fileSize="#[fileSize]#"  
-               type="#[mime]#"
-               medium="image"
-               isDefault="false" 
-               expression="full" 
-               height="#[width]#"
-               width="#[height]#" />
+  url="#[hrefCache]#" 
+  fileSize="#[fileSize]#"  
+  type="#[mimetype]#"
+  medium="image"
+  isDefault="false" 
+  expression="full" 
+  height="#[width]#"
+  width="#[height]#" />
 <media:content 
-               url="/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=#[code]#" 
-               fileSize="#[fileSize]#" 
-               type="#[mime]#"
-               medium="image"
-               isDefault="false" 
-               expression="sample" 
-               height="96"
-               width="96" />
+  url="/ViewImage.png?maxwidth=96&amp;maxheight=96&amp;code=#[code]#" 
+  fileSize="#[fileSize]#" 
+  type="#[mimetype]#"
+  medium="image"
+  isDefault="false" 
+  expression="sample" 
+  height="96"
+  width="96" />
 </media:group>
 </item>#(/item)#::
 #(/content)#

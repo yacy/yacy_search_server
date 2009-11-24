@@ -86,10 +86,11 @@ public class yacysearchitem {
         final QueryParams theQuery = theSearch.getQuery();
         
         // dynamically update count values
+        final int totalcount = theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
         final int offset = theQuery.neededResults() - theQuery.displayResults() + 1;
         prop.put("offset", offset);
-        prop.put("itemscount", (item < 0) ? theQuery.neededResults() : item + 1);
-        prop.put("totalcount", Formatter.number(theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize(), true));
+        prop.put("itemscount", Formatter.number(Math.min((item < 0) ? theQuery.neededResults() : item + 1, totalcount)));
+        prop.put("totalcount", Formatter.number(totalcount, true));
         prop.put("localResourceSize", Formatter.number(theSearch.getRankingResult().getLocalResourceSize(), true));
         prop.put("remoteResourceSize", Formatter.number(theSearch.getRankingResult().getRemoteResourceSize(), true));
         prop.put("remoteIndexCount", Formatter.number(theSearch.getRankingResult().getRemoteIndexCount(), true));
@@ -169,7 +170,7 @@ public class yacysearchitem {
                 prop.putHTML("content_item_href", ms.href.toNormalform(true, false));
                 prop.put("content_item_code", sb.licensedURLs.aquireLicense(ms.href));
                 prop.putHTML("content_item_name", shorten(ms.name, namelength));
-                prop.put("content_item_mime", ms.mime);
+                prop.put("content_item_mimetype", ms.mime);
                 prop.put("content_item_fileSize", ms.fileSize);
                 prop.put("content_item_width", ms.width);
                 prop.put("content_item_height", ms.height);

@@ -71,6 +71,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     public MediaSnippet(final ContentDomain type, final DigestURI href, final String mime, final String name, final long fileSize, final int width, final int height, final int ranking, final DigestURI source) {
         this.type = type;
         this.href = href;
+        this.mime = mime;
         this.fileSize = fileSize;
         this.source = source; // the web page where the media resource appeared
         this.name = name;

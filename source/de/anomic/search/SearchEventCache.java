@@ -66,7 +66,6 @@ public class SearchEventCache {
     
     public static SearchEvent getEvent(
             final QueryParams query,
-            final Segment indexSegment,
             final yacySeedDB peers,
             final ResultURLs crawlResults,
             final TreeMap<byte[], String> preselectedPeerHashes,
@@ -90,7 +89,7 @@ public class SearchEventCache {
         }
         if (event == null) {
             // start a new event
-            event = new SearchEvent(query, indexSegment, peers, crawlResults, preselectedPeerHashes, generateAbstracts);
+            event = new SearchEvent(query, peers, crawlResults, preselectedPeerHashes, generateAbstracts);
         }
     
         return event;

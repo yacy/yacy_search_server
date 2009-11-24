@@ -61,6 +61,7 @@ import net.yacy.kelondro.util.SetTools;
 public final class Condenser {
 
     // this is the page analysis class
+    final static boolean pseudostemming = false; // switch for removal of words that appear in shortened form
     
     // category flags that show how the page can be distinguished in different interest groups
     public  static final int flag_cat_indexof       =  0; // a directory listing page (i.e. containing 'index of')
@@ -110,7 +111,7 @@ public final class Condenser {
             ) throws UnsupportedEncodingException {
         // if addMedia == true, then all the media links are also parsed and added to the words
         // added media words are flagged with the appropriate media flag
-        this.wordminsize = 3;
+        this.wordminsize = 2;
         this.wordcut = 2;
         this.words = new HashMap<String, Word>();
         this.RESULT_FLAGS = new Bitfield(4);
@@ -408,39 +409,41 @@ public final class Condenser {
             }
         }
 
-        Map.Entry<String, Word> entry;
-        // we search for similar words and reorganize the corresponding sentences
-        // a word is similar, if a shortened version is equal
-        final Iterator<Map.Entry<String, Word>> wi = words.entrySet().iterator(); // enumerates the keys in descending order
-        wordsearch: while (wi.hasNext()) {
-            entry = wi.next();
-            word = entry.getKey();
-            wordlen = word.length();
-            wsp = entry.getValue();
-            for (int i = wordcut; i > 0; i--) {
-                if (wordlen > i) {
-                    k = word.substring(0, wordlen - i);
-                    if (words.containsKey(k)) {
-                        // we will delete the word 'word' and repoint the
-                        // corresponding links
-                        // in sentences that use this word
-                        wsp1 = words.get(k);
-                        final Iterator<Integer> it1 = wsp.phrases(); // we iterate over all sentences that refer to this word
-                        while (it1.hasNext()) {
-                            idx = it1.next().intValue(); // number of a sentence
-                            s = (String[]) orderedSentences[idx];
-                            for (int j = 2; j < s.length; j++) {
-                                if (s[j].equals(intString(wsp.posInText, numlength)))
-                                    s[j] = intString(wsp1.posInText, numlength);
+        if (pseudostemming) {
+            Map.Entry<String, Word> entry;
+            // we search for similar words and reorganize the corresponding sentences
+            // a word is similar, if a shortened version is equal
+            final Iterator<Map.Entry<String, Word>> wi = words.entrySet().iterator(); // enumerates the keys in descending order
+            wordsearch: while (wi.hasNext()) {
+                entry = wi.next();
+                word = entry.getKey();
+                wordlen = word.length();
+                wsp = entry.getValue();
+                for (int i = wordcut; i > 0; i--) {
+                    if (wordlen > i) {
+                        k = word.substring(0, wordlen - i);
+                        if (words.containsKey(k)) {
+                            // we will delete the word 'word' and repoint the
+                            // corresponding links
+                            // in sentences that use this word
+                            wsp1 = words.get(k);
+                            final Iterator<Integer> it1 = wsp.phrases(); // we iterate over all sentences that refer to this word
+                            while (it1.hasNext()) {
+                                idx = it1.next().intValue(); // number of a sentence
+                                s = (String[]) orderedSentences[idx];
+                                for (int j = 2; j < s.length; j++) {
+                                    if (s[j].equals(intString(wsp.posInText, numlength)))
+                                        s[j] = intString(wsp1.posInText, numlength);
+                                }
+                                orderedSentences[idx] = s;
                             }
-                            orderedSentences[idx] = s;
+                            // update word counter
+                            wsp1.count = wsp1.count + wsp.count;
+                            words.put(k, wsp1);
+                            // remove current word
+                            wi.remove();
+                            continue wordsearch;
                         }
-                        // update word counter
-                        wsp1.count = wsp1.count + wsp.count;
-                        words.put(k, wsp1);
-                        // remove current word
-                        wi.remove();
-                        continue wordsearch;
                     }
                 }
             }

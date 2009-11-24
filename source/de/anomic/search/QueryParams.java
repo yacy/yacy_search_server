@@ -75,6 +75,8 @@ public final class QueryParams {
     public boolean allofconstraint;
     public boolean onlineSnippetFetch;
     public RankingProfile ranking;
+    private Segment indexSegment;
+    private final ReferenceOrder order;
     public String host; // this is the client host that starts the query, not a site operator
     public String sitehash; // this is a domain hash, 6 bytes long or null
     public String authorhash;
@@ -88,8 +90,9 @@ public final class QueryParams {
     
     public QueryParams(final String queryString,
     						 final int itemsPerPage,
-    		                 final RankingProfile ranking,
-    		                 final Bitfield constraint) {
+    		                 final Bitfield constraint,
+    		                 final Segment indexSegment,
+                             final RankingProfile ranking) {
     	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(queryString.getBytes()))) {
     		this.queryString = null;
             this.queryHashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
@@ -124,6 +127,8 @@ public final class QueryParams {
         this.handle = Long.valueOf(System.currentTimeMillis());
         this.specialRights = false;
         this.navigators = "all";
+        this.order = new ReferenceOrder(this.ranking, this.targetlang);
+        this.indexSegment = indexSegment;
     }
     
     public QueryParams(
@@ -131,7 +136,6 @@ public final class QueryParams {
 		final TreeSet<byte[]> excludeHashes, 
         final TreeSet<byte[]> fullqueryHashes,
         final String tenant,
-        final RankingProfile ranking,
         final int maxDistance, final String prefer, final ContentDomain contentdom,
         final String language,
         final String navigators,
@@ -143,7 +147,9 @@ public final class QueryParams {
         final String authorhash,
         final int domainzone,
         final String host,
-        final boolean specialRights) {
+        final boolean specialRights,
+        final Segment indexSegment,
+        final RankingProfile ranking) {
 		this.queryString = queryString;
 		this.queryHashes = queryHashes;
 		this.excludeHashes = excludeHashes;
@@ -171,6 +177,16 @@ public final class QueryParams {
         this.remotepeer = null;
 		this.handle = Long.valueOf(System.currentTimeMillis());
 		this.specialRights = specialRights;
+        this.order = new ReferenceOrder(this.ranking, this.targetlang);
+        this.indexSegment = indexSegment;
+    }
+    
+    public ReferenceOrder getOrder() {
+        return this.order;
+    }
+    
+    public Segment getSegment() {
+        return this.indexSegment;
     }
     
     public int neededResults() {
