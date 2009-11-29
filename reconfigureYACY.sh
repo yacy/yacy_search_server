@@ -112,8 +112,8 @@ change_admin_password()
 
     if [ $INPUT1 == $INPUT2 ]
     then
-        BASE64=`$JAVA -cp classes net/yacy/kelondro/order/Base64Order -es "$USERNAME:$INPUT1"`
-        B64MD5=`$JAVA -cp classes net/yacy/kelondro/order/Digest -strfhex "$BASE64"`
+        BASE64=`$JAVA -classpath lib/yacycore.jar net.yacy.kelondro.order.Base64Order -es "$USERNAME:$INPUT1"`
+        B64MD5=`$JAVA -classpath lib/yacycore.jar net/yacy/kelondro/order/Digest -strfhex "$BASE64"`
         B64MD5=`echo $B64MD5 | sed "s/\(\S\) .*/\1/"`
         replace_parameter 'adminAccountBase64MD5' "$B64MD5"
     else
