@@ -869,7 +869,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             return null;            
         } catch (final IOException e) {
             String message = e.getMessage();
-            if (logerr && !message.equals("Socket closed") && !message.equals("Connection reset")) Log.logWarning("SERVER", "receive closed by IOException: " + e.getMessage());
+            if (logerr && !message.equals("Socket closed") && !message.equals("Connection reset") && !message.equals("Read timed out")) Log.logWarning("SERVER", "receive closed by IOException: " + e.getMessage());
             return null;
         } finally {
         	try {

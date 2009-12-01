@@ -33,6 +33,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -113,12 +115,12 @@ public class Threaddump_p {
         bufferappend(buffer, plain, "THREADS WITH STATES: " + stateIn.toString());
         bufferappend(buffer, plain, "");
         // collect single dumps
-        HashMap<String, ArrayList<String>> dumps = dumpCollection(rootPath, stackTraces, plain, stateIn);
+        HashMap<String, SortedSet<String>> dumps = dumpCollection(rootPath, stackTraces, plain, stateIn);
         
         // write dumps
-        for (final Entry<String, ArrayList<String>> entry: dumps.entrySet()) {
-            ArrayList<String> threads = entry.getValue();
-            for (int i = 0; i < threads.size(); i++) bufferappend(buffer, plain, threads.get(i));
+        for (final Entry<String, SortedSet<String>> entry: dumps.entrySet()) {
+            SortedSet<String> threads = entry.getValue();
+            for (String t: threads) bufferappend(buffer, plain, t);
             bufferappend(buffer, plain, entry.getKey());
             bufferappend(buffer, plain, "");
         }
@@ -155,12 +157,12 @@ public class Threaddump_p {
     private static HashMap<String, Integer> dumpStatistic(final File rootPath, final ArrayList<Map<Thread,StackTraceElement[]>> stackTraces, final boolean plain, final Thread.State stateIn) {
         Map<Thread,StackTraceElement[]> trace;
         HashMap<String, Integer> result = new HashMap<String, Integer>();
-        HashMap<String, ArrayList<String>> x;
+        HashMap<String, SortedSet<String>> x;
         int count;
         for (int i = 0; i < stackTraces.size(); i++) {
             trace = stackTraces.get(i);
             x = dumpCollection(rootPath, trace, plain, stateIn);
-            for (final Entry<String, ArrayList<String>> e: x.entrySet()) {
+            for (final Entry<String, SortedSet<String>> e: x.entrySet()) {
                 Integer c = result.get(e.getKey());
                 count = e.getValue().size();
                 if (c == null) result.put(e.getKey(), Integer.valueOf(count));
@@ -173,12 +175,12 @@ public class Threaddump_p {
         return result;
     }
     
-    private static HashMap<String, ArrayList<String>> dumpCollection(final File rootPath, final Map<Thread,StackTraceElement[]> stackTraces, final boolean plain, final Thread.State stateIn) {
+    private static HashMap<String, SortedSet<String>> dumpCollection(final File rootPath, final Map<Thread,StackTraceElement[]> stackTraces, final boolean plain, final Thread.State stateIn) {
         final File classPath = new File(rootPath, "source");
   
         Thread thread;
         // collect single dumps
-        HashMap<String, ArrayList<String>> dumps = new HashMap<String, ArrayList<String>>();
+        HashMap<String, SortedSet<String>> dumps = new HashMap<String, SortedSet<String>>();
         for (final Entry<Thread, StackTraceElement[]> entry: stackTraces.entrySet()) {
             thread = entry.getKey();
             final StackTraceElement[] stackTraceElements = entry.getValue();
@@ -220,8 +222,8 @@ public class Threaddump_p {
                     }
                 }
                 String threaddump = sb.toString();
-                ArrayList<String> threads = dumps.get(threaddump);
-                if (threads == null) threads = new ArrayList<String>();
+                SortedSet<String> threads = dumps.get(threaddump);
+                if (threads == null) threads = new TreeSet<String>();
                 threads.add(threadtitle);
                 dumps.put(threaddump, threads);
             }
