@@ -794,9 +794,12 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                         break;
                     }
                     // check if we should still keep this alive:
+                    break; // no more keep-alive, not needed for speed and causes only trouble
+                    /*
                     if (sessionThreadGroup.activeCount() > maxBusySessions / 2) break;
                     // the more connections are alive, the shorter the keep alive timeout
                     situationDependentKeepAliveTimeout = keepAliveTimeout / Math.max(1, sessionThreadGroup.activeCount() - 20);
+                    */
                 } // end of while
             } catch (final IOException e) {
                 log.logSevere("command execution, IO exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
