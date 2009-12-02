@@ -35,6 +35,7 @@ import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 
+import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -50,11 +51,11 @@ public class cytag {
         StringBuilder connect = new StringBuilder();
         connect.append('{');
         addJSON(connect, "time", DateFormatter.formatShortMilliSecond(new Date()));
-        addJSON(connect, "trail", header.get("Referer", ""));
+        addJSON(connect, "trail", header.referer());
         addJSON(connect, "nick",  (post == null) ? "" : post.get("nick", ""));
         addJSON(connect, "tag",   (post == null) ? "" : post.get("tag", ""));
         addJSON(connect, "icon",  (post == null) ? "" : post.get("icon", ""));
-        addJSON(connect, "ip",    header.get("CLIENTIP", ""));
+        addJSON(connect, "ip",    header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, ""));
         addJSON(connect, "agent", header.get("User-Agent", ""));
         connect.append('}');
         

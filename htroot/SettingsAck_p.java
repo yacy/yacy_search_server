@@ -62,9 +62,8 @@ public class SettingsAck_p {
         final Switchboard sb = (Switchboard) env;
         
         // get referer for backlink
-        final String referer = header.get(RequestHeader.REFERER);
+        final String referer = header.referer();
         prop.put("referer", (referer == null) ? "Settings_p.html" : referer); 
-        
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
         
         if (post == null) {

@@ -25,12 +25,12 @@ package de.anomic.http.server;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
 
 import de.anomic.server.serverCore;
@@ -79,10 +79,15 @@ public class RequestHeader extends HeaderFramework {
     }
     
     public String refererHost() {
-        String  refererHost = "";
         final String referer = referer();
-        if (referer.length() > 0) try { refererHost = (new URL(referer)).getHost(); } catch (final MalformedURLException e) {}
-        return refererHost;
+        if (referer.length() == 0) return referer;
+        DigestURI url;
+        try {
+            url = new DigestURI(referer, null);
+            return url.getHost();
+        } catch (MalformedURLException e1) {
+            return referer;
+        }
     }
     
     public Date ifModifiedSince() {

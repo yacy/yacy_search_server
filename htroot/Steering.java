@@ -29,6 +29,9 @@
 
 import java.io.File;
 
+import net.yacy.kelondro.logging.Log;
+
+import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -45,13 +48,17 @@ public class Steering {
         prop.put("info", "0"); //no information submitted
         if (prop == null) { return null; }
 
+        final String requestIP = post.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "127.0.0.1");
+        
         // handle access rights
         if (!sb.verifyAuthentication(header, false)) {
+            Log.logInfo("STEERING", "log-in attempt for steering from " + requestIP);
             prop.put("AUTHENTICATE", "admin log-in"); // force log-in
             return prop;
         }
 
         if (post.containsKey("shutdown")) {
+            Log.logInfo("STEERING", "shutdown request from " + requestIP);
             sb.terminate(100);
             prop.put("info", "3");
             
@@ -59,6 +66,7 @@ public class Steering {
         }
 
         if (post.containsKey("restart")) {
+            Log.logInfo("STEERING", "restart request from " + requestIP);
             yacyRelease.restart();
             prop.put("info", "4");
             
@@ -66,6 +74,7 @@ public class Steering {
         }
         
         if (post.containsKey("update")) {
+            Log.logInfo("STEERING", "update request from " + requestIP);
             final boolean devenvironment = new File(sb.getRootPath(), ".svn").exists();
             final String releaseFileName = post.get("releaseinstall", "");
             final File releaseFile = new File(sb.getRootPath(), "DATA/RELEASE/".replace("/", File.separator) + releaseFileName);
