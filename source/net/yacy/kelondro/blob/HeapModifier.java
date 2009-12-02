@@ -56,8 +56,6 @@ public class HeapModifier extends HeapReader implements BLOB {
         super(heapFile, keylength, ordering);
     }
     
-    
-    
     /**
      * clears the content of the database
      * @throws IOException
@@ -137,7 +135,7 @@ public class HeapModifier extends HeapReader implements BLOB {
         
         // first find the gap entry for the closest gap in front of the give gap
         SortedMap<Long, Integer> head = this.free.headMap(thisSeek);
-        if (head.size() == 0) return;
+        if (head.isEmpty()) return;
         long previousSeek = head.lastKey().longValue();
         int previousSize = head.get(previousSeek).intValue();
         
@@ -214,7 +212,7 @@ public class HeapModifier extends HeapReader implements BLOB {
         // find gaps at the end of the file and shrink the file by these gaps
     	if (this.free == null) return;
         try {
-            while (this.free.size() > 0) {
+            while (!this.free.isEmpty()) {
                 Long seek = this.free.lastKey();
                 int size = this.free.get(seek).intValue();
                 if (seek.longValue() + size + 4 != this.file.length()) return;

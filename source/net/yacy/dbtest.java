@@ -436,7 +436,7 @@ public class dbtest {
                     for (int j = 0; j < readCount; j++) {
                         InstantBusyThread.oneTimeJob(new ReadJob(table_test, table_reference, random.nextLong() % writeCount), random.nextLong() % 1000, 20);
                     }
-                    if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
+                    if (!ra.isEmpty() && random.nextLong() % 7 == 0) {
                         rc++;
                         p = Math.abs(random.nextInt() % ra.size());
                         R = ra.get(p);
@@ -477,7 +477,7 @@ public class dbtest {
                     for (int j = 0; j < readCount; j++) {
                         new ReadJob(table_test, table_reference, random.nextLong() % writeCount).run();
                     }
-                    if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
+                    if (!ra.isEmpty() && random.nextLong() % 7 == 0) {
                         rc++;
                         p = Math.abs(random.nextInt() % ra.size());
                         R = ra.get(p);

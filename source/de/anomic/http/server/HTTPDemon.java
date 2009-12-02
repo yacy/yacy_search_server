@@ -1167,9 +1167,9 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             switch (errorcase) {
                 case ERRORCASE_FILE:
                     tp.put("errorMessageType_file", (detailedErrorMsgFile == null) ? "" : detailedErrorMsgFile.toString());
-                    if ((detailedErrorMsgValues != null) && (detailedErrorMsgValues.size() > 0)) {
+                    if ((detailedErrorMsgValues != null) && !detailedErrorMsgValues.isEmpty()) {
                         // rewriting the value-names and add the proper name prefix:
-                        for(Entry<String, String> entry: detailedErrorMsgValues.entrySet()) {
+                        for (Entry<String, String> entry: detailedErrorMsgValues.entrySet()) {
                             tp.put("errorMessageType_" + entry.getKey(), entry.getValue());
                         }                        
                     }                    

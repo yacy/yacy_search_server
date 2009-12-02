@@ -215,7 +215,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
     }
     
     public synchronized void removeMySeed() {
-        if ((seedActiveDB.size() == 0) && (seedPassiveDB.size() == 0) && (seedPotentialDB.size() == 0)) return; // avoid that the own seed is initialized too early
+        if (seedActiveDB.isEmpty() && seedPassiveDB.isEmpty() && seedPotentialDB.isEmpty()) return; // avoid that the own seed is initialized too early
         if (this.mySeed == null) initMySeed();
         try {
             seedActiveDB.remove(mySeed.hash);

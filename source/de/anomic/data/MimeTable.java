@@ -12,7 +12,7 @@ public class MimeTable {
     private static final Properties mimeTable = new Properties();
     
     public static void init(File mimeFile) {
-        if (mimeTable.size() == 0) {
+        if (mimeTable.isEmpty()) {
             // load the mime table
             BufferedInputStream mimeTableInputStream = null;
             try {
@@ -28,6 +28,10 @@ public class MimeTable {
     
     public static int size() {
         return mimeTable.size();
+    }
+    
+    public static boolean isEmpty() {
+        return mimeTable.isEmpty();
     }
     
     public static String ext2mime(String ext) {

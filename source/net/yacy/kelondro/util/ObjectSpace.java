@@ -58,7 +58,7 @@ public class ObjectSpace {
         incAlive(len);
         synchronized (objHeap) {
             final ArrayList<byte[]> buf = objHeap.get(Integer.valueOf(len));
-            if ((buf == null) || (buf.size() == 0)) return new byte[len];
+            if (buf == null || buf.isEmpty()) return new byte[len];
             return buf.remove(buf.size() - 1);
         }
     }

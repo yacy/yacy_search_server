@@ -212,7 +212,7 @@ public final class transferRWI {
                 unknownURLs.append(",").append(it.next());
             }
             if (unknownURLs.length() > 0) { unknownURLs.delete(0, 1); }
-            if ((wordhashes.size() == 0) || (received == 0)) {
+            if (wordhashes.isEmpty() || received == 0) {
                 sb.getLog().logInfo("Received 0 RWIs from " + otherPeerName + ", processed in " + (System.currentTimeMillis() - startProcess) + " milliseconds, requesting " + unknownURL.size() + " URLs, blocked " + blocked + " RWIs");
             } else {
                 String firstHash = wordhashes.get(0);

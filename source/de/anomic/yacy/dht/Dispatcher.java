@@ -154,7 +154,7 @@ public class Dispatcher {
         ArrayList<ReferenceContainer<WordReference>> containers = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime, false);
 
         // if ram does not provide any result, take from file
-        //if (containers.size() == 0) containers = selectContainers(hash, limitHash, maxContainerCount, maxtime, false);
+        //if (containers.isEmpty()) containers = selectContainers(hash, limitHash, maxContainerCount, maxtime, false);
         return containers;
     }
     
@@ -180,11 +180,11 @@ public class Dispatcher {
                 (indexContainerIterator.hasNext()) &&
                 (System.currentTimeMillis() < timeout) &&
                 ((container = indexContainerIterator.next()) != null) &&
-                ((containers.size() == 0) ||
+                ((containers.isEmpty()) ||
                  (Base64Order.enhancedCoder.compare(container.getTermHash(), limitHash) < 0))
                 
         ) {
-            if (container.size() == 0) continue;
+            if (container.isEmpty()) continue;
             refcount += container.size();
             containers.add(container);
         }
@@ -201,7 +201,7 @@ public class Dispatcher {
                     urlHashes.add(it.next().metadataHash());
                 }
                 if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + c.getTermHashAsString() + "'");
-                if (urlHashes.size() > 0) this.segment.termIndex().remove(c.getTermHash(), urlHashes);
+                if (!urlHashes.isEmpty()) this.segment.termIndex().remove(c.getTermHash(), urlHashes);
             }
             rc = containers;
         } else {
@@ -321,7 +321,7 @@ public class Dispatcher {
     	ArrayList<ReferenceContainer<WordReference>> selectedContainerCache = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime);
         this.log.logInfo("selectContainersToCache: selectedContainerCache was filled with " + selectedContainerCache.size() + " entries");
         
-        if (selectedContainerCache == null || selectedContainerCache.size() == 0) {
+        if (selectedContainerCache == null || selectedContainerCache.isEmpty()) {
         	this.log.logInfo("splitContainersFromCache: selectedContainerCache is empty, cannot do anything here.");
         	return false;
         }

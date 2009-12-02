@@ -143,7 +143,7 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
             for (int i = 0; i < this.array.length; i++) {
                 if (this.array[i] != null) {
                     col.addAll(this.array[i].removeDoubles());
-                    if (this.array[i].size() == 0) this.array[i] = null;
+                    if (this.array[i].isEmpty()) this.array[i] = null;
                 }
             }
         }
@@ -155,7 +155,7 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
             for (int i = 0; i < this.array.length; i++) {
                 if (this.array[i] != null) {
                     Entry entry = this.array[i].removeOne();
-                    if (this.array[i].size() == 0) this.array[i] = null;
+                    if (this.array[i].isEmpty()) this.array[i] = null;
                     return entry;
                 }
             }
@@ -202,6 +202,17 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return c;
     }
 
+    public final boolean isEmpty() {
+        synchronized (this.array) {
+            for (int i = 0; i < this.array.length; i++) {
+                if (this.array[i] != null) {
+                    if (!this.array[i].isEmpty()) return false;
+                }
+            }
+        }
+        return true;
+    }
+    
     public final Iterator<Entry> iterator() {
         return this.rows(true, null);
     }

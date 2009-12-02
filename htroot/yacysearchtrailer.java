@@ -61,7 +61,7 @@ public class yacysearchtrailer {
         
         // host navigators
         ArrayList<NavigatorEntry> hostNavigator = theSearch.getHostNavigator(10);
-        if (hostNavigator == null || hostNavigator.size() == 0) {
+        if (hostNavigator == null || hostNavigator.isEmpty()) {
         	prop.put("nav-domains", 0);
         } else {
         	prop.put("nav-domains", 1);
@@ -83,7 +83,7 @@ public class yacysearchtrailer {
         
         // author navigators
         ArrayList<NavigatorEntry> authorNavigator = theSearch.getAuthorNavigator(10);
-        if (authorNavigator == null || authorNavigator.size() == 0) {
+        if (authorNavigator == null || authorNavigator.isEmpty()) {
             prop.put("nav-authors", 0);
         } else {
             prop.put("nav-authors", 1);
@@ -107,7 +107,7 @@ public class yacysearchtrailer {
 
         // topics navigator
         ArrayList<NavigatorEntry> topicNavigator = theSearch.getTopicNavigator(10);
-        if (topicNavigator == null || topicNavigator.size() == 0) {
+        if (topicNavigator == null || topicNavigator.isEmpty()) {
             topicNavigator = new ArrayList<NavigatorEntry>(); 
             prop.put("nav-topics", "0");
         } else {

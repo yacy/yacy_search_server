@@ -143,7 +143,7 @@ public final class ObjectArrayCache {
         }
         // at this point index1 cannot be null
         assert (index1 != null);
-        if (index1.size() == 0) return null;
+        if (index1.isEmpty()) return null;
         final Row.Entry indexentry = index1.remove(key);
         if (indexentry == null) return null;
         return indexentry.getColBytes(1);
@@ -226,7 +226,7 @@ public final class ObjectArrayCache {
 			jcontrol.add(Long.valueOf(r));
 			kcontrol.putb((int) r, "x".getBytes());
 			if (random.nextLong() % 5 == 0) ra.add(Long.valueOf(r));
-			if ((ra.size() > 0) && (random.nextLong() % 7 == 0)) {
+			if (!ra.isEmpty() && random.nextLong() % 7 == 0) {
 				rc++;
 				p = Math.abs(random.nextInt() % ra.size());
 				R = ra.get(p);

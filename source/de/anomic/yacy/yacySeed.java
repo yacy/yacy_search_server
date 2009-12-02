@@ -677,7 +677,7 @@ public class yacySeed implements Cloneable {
         // take one gap; prefer biggest but take also another smaller by chance
         String interval = null;
         final Random r = new Random();
-        while (gaps.size() > 0) {
+        while (!gaps.isEmpty()) {
             interval = gaps.remove(gaps.lastKey());
             if (r.nextBoolean()) break;
         }

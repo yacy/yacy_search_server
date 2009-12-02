@@ -85,6 +85,10 @@ public class WorkflowProcessor<J extends WorkflowJob> {
         return this.input.size();
     }
     
+    public boolean queueIsEmpty() {
+        return this.input.isEmpty();
+    }
+    
     public int queueSizeMax() {
         return this.input.size() + this.input.remainingCapacity();
     }
@@ -116,11 +120,11 @@ public class WorkflowProcessor<J extends WorkflowJob> {
     }
     
     public synchronized void relaxCapacity() {
-        if (this.input.size() == 0) return;
+        if (this.input.isEmpty()) return;
         if (this.input.remainingCapacity() > 1000) return;
         BlockingQueue<J> i = new LinkedBlockingQueue<J>();
         J e;
-        while (this.input.size() > 0) {
+        while (!this.input.isEmpty()) {
             e = this.input.poll();
             if (e == null) break;
             i.add(e);

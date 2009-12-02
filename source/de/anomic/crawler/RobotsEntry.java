@@ -187,7 +187,7 @@ public class RobotsEntry {
     }
     
     public boolean isDisallowed(String path) {
-        if ((this.mem == null) || (this.denyPathList.size() == 0)) return false;   
+        if ((this.mem == null) || (this.denyPathList.isEmpty())) return false;   
         
         // if the path is null or empty we set it to /
         if ((path == null) || (path.length() == 0)) path = "/";            

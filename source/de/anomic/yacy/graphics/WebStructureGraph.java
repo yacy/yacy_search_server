@@ -257,7 +257,7 @@ public class WebStructureGraph {
                 }
             }
         }
-        if (h.size() == 0) return null;
+        if (h.isEmpty()) return null;
         return new structureEntry(domhash, domain, date, h);
     }
     

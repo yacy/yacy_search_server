@@ -197,7 +197,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     }
     public String getLineMarked(final TreeSet<byte[]> queryHashes) {
         if (line == null) return "";
-        if ((queryHashes == null) || (queryHashes.size() == 0)) return line.trim();
+        if ((queryHashes == null) || (queryHashes.isEmpty())) return line.trim();
         if (line.endsWith(".")) line = line.substring(0, line.length() - 1);
         final Iterator<byte[]> i = queryHashes.iterator();
         byte[] h;
@@ -310,7 +310,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     public static TextSnippet retrieveTextSnippet(final URIMetadataRow.Components comp, final TreeSet<byte[]> queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int maxDocLen, final boolean reindexing) {
         // heise = "0OQUNU3JSs05"
         final DigestURI url = comp.url();
-        if (queryhashes.size() == 0) {
+        if (queryhashes.isEmpty()) {
             //System.out.println("found no queryhashes for URL retrieve " + url);
             return new TextSnippet(url, null, ERROR_NO_HASH_GIVEN, queryhashes, "no query hashes given");
         }
@@ -427,7 +427,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         //if (hrefline  != null) line += (line.length() == 0) ? hrefline  : "<br />" + hrefline;
         if (textline  != null) line += (line.length() == 0) ? textline  : "<br />" + textline;
         
-        if ((line == null) || (remainingHashes.size() > 0)) return new TextSnippet(url, null, ERROR_NO_MATCH, remainingHashes, "no matching snippet found",resFavicon);
+        if (line == null || !remainingHashes.isEmpty()) return new TextSnippet(url, null, ERROR_NO_MATCH, remainingHashes, "no matching snippet found",resFavicon);
         if (line.length() > snippetMaxLength) line = line.substring(0, snippetMaxLength);
 
         // finally store this snippet in our own cache
@@ -451,7 +451,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             computeTextSnippet(final Iterator<StringBuilder> sentences, final TreeSet<byte[]> queryhashes, int maxLength) {
         try {
             if (sentences == null) return null;
-            if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
+            if ((queryhashes == null) || (queryhashes.isEmpty())) return null;
             Iterator<byte[]> j;
             TreeMap<byte[], Integer> hs;
             StringBuilder sentence;
@@ -471,14 +471,14 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             
             String result;
             TreeSet<byte[]> remaininghashes;
-            while (os.size() > 0) {
+            while (!os.isEmpty()) {
                 sentence = os.remove(os.lastKey()); // sentence with the biggest score
                 Object[] tsr = computeTextSnippet(sentence.toString(), queryhashes, maxLength);
                 if (tsr == null) continue;
                 result = (String) tsr[0];
                 if ((result != null) && (result.length() > 0)) {
                     remaininghashes = (TreeSet<byte[]>) tsr[1];
-                    if (remaininghashes.size() == 0) {
+                    if (remaininghashes.isEmpty()) {
                         // we have found the snippet
                         return new Object[]{result, remaininghashes};
                     } else if (remaininghashes.size() < queryhashes.size()) {
@@ -510,7 +510,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             computeTextSnippet(String sentence, final TreeSet<byte[]> queryhashes, final int maxLength) {
         try {
             if (sentence == null) return null;
-            if ((queryhashes == null) || (queryhashes.size() == 0)) return null;
+            if ((queryhashes == null) || (queryhashes.isEmpty())) return null;
             byte[] hash;
             
             // find all hashes that appear in the sentence

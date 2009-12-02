@@ -28,7 +28,7 @@ import java.util.Set;
 public class disorderSet extends HashSet<String> implements Set<String> {
 
     private static final long serialVersionUID = 1L;
-    disorderHeap dh;
+    private disorderHeap dh;
 
     public disorderSet() {
         super();
@@ -36,13 +36,13 @@ public class disorderSet extends HashSet<String> implements Set<String> {
     }
 
     public boolean hasAny() {
-        return (this.size() > 0);
+        return !this.isEmpty();
     }
 
     public String any() {
         // return just any element
-        if ((dh == null) || (dh.size() == 0)) {
-            if (this.size() == 0) return null;
+        if (dh == null || dh.isEmpty()) {
+            if (this.isEmpty()) return null;
             // fill up the queue
             dh = new disorderHeap();
             final Iterator<String> elements = this.iterator();

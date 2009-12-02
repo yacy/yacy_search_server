@@ -338,7 +338,7 @@ public class yacyCore {
                 seeds = PeerSelection.seedsByAge(sb.peers, false, attempts); // best for seed list maintenance/cleaning
             }
 
-            if ((seeds == null) || seeds.size() == 0) { return 0; }
+            if (seeds == null || seeds.isEmpty()) { return 0; }
             if (seeds.size() < attempts) { attempts = seeds.size(); }
 
             // This will try to get Peers that are not currently in amIAccessibleDB

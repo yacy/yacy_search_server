@@ -161,7 +161,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         return (this.textSnippet != null) && (this.textSnippet.getErrorCode() < 11);
     }
     public boolean hasMediaSnippets() {
-        return (this.mediaSnippets != null) && (this.mediaSnippets.size() > 0);
+        return (this.mediaSnippets != null) && (!this.mediaSnippets.isEmpty());
     }
     public String resource() {
         // generate transport resource

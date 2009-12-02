@@ -354,7 +354,7 @@ public class Blacklist_p {
         }
 
         // if we have not chosen a blacklist until yet we use the first file
-        if (blacklistToUse == null && dirlist != null && dirlist.size() > 0) {
+        if (blacklistToUse == null && dirlist != null && !dirlist.isEmpty()) {
             blacklistToUse = dirlist.get(0);
         }
 

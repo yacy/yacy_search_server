@@ -134,7 +134,7 @@ public class Threaddump_p {
         HashMap<String, Integer> dumps = dumpStatistic(rootPath, traces, plain, stateIn);
         
         // write dumps
-        while (dumps.size() > 0) {
+        while (!dumps.isEmpty()) {
             Entry<String, Integer> e = removeMax(dumps);
             bufferappend(buffer, plain, "Occurrences: " + e.getValue());
             bufferappend(buffer, plain, e.getKey());

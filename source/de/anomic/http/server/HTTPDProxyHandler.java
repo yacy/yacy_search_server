@@ -485,7 +485,7 @@ public final class HTTPDProxyHandler {
 
                 final ResponseHeader responseHeader = res.getResponseHeader();
                 // determine if it's an internal error of the httpc
-                if (responseHeader.size() == 0) {
+                if (responseHeader.isEmpty()) {
                     throw new Exception(res.getStatusLine());
                 }
 
@@ -570,7 +570,7 @@ public final class HTTPDProxyHandler {
                         FileUtils.copy(res.getDataAsStream(), toClientAndMemory);
                         // cached bytes
                         byte[] cacheArray;
-                        if(byteStream.size() > 0) {
+                        if (byteStream.size() > 0) {
                             cacheArray = byteStream.toByteArray();
                         } else {
                             cacheArray = null;
@@ -821,7 +821,7 @@ public final class HTTPDProxyHandler {
             
             // determine if it's an internal error of the httpc
             final ResponseHeader responseHeader = res.getResponseHeader();
-            if (responseHeader.size() == 0) {
+            if (responseHeader.isEmpty()) {
                 throw new Exception(res.getStatusLine());
             }            
             
@@ -937,7 +937,7 @@ public final class HTTPDProxyHandler {
             
             final ResponseHeader responseHeader = res.getResponseHeader();
             // determine if it's an internal error of the httpc
-            if (responseHeader.size() == 0) {
+            if (responseHeader.isEmpty()) {
                 throw new Exception(res.getStatusLine());
             }                                  
             

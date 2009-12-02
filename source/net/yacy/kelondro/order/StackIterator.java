@@ -91,7 +91,7 @@ public class StackIterator<E> implements CloneableIterator<E> {
         // this extends the ability to combine two iterators
         // to the ability of combining a set of iterators
         if (iterators == null) return null;
-        if (iterators.size() == 0) return null;
+        if (iterators.isEmpty()) return null;
         return stack(iterators.iterator());
     }
     

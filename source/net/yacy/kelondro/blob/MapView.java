@@ -294,6 +294,10 @@ public class MapView {
         return (blob == null) ? 0 : blob.size();
     }
 
+    public synchronized boolean isEmpty() {
+        return (blob == null) ? true : blob.isEmpty();
+    }
+    
     /**
      * close the Map table
      */

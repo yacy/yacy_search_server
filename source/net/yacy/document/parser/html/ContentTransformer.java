@@ -77,13 +77,13 @@ public class ContentTransformer extends AbstractTransformer implements Transform
                     r.close();
                 } catch (final IOException e) {
                 }
-                // if (bluelist.size() == 0) System.out.println("BLUELIST is empty");
+                // if (bluelist.isEmpty()) System.out.println("BLUELIST is empty");
             }
         }
     }
 
     public boolean isIdentityTransformer() {
-        return (bluelist.size() == 0);
+        return bluelist.isEmpty();
     }
 
     private static char[] genBlueLetters(int length) {

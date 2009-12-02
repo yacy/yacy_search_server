@@ -117,10 +117,10 @@ public final class Condenser {
         this.RESULT_FLAGS = new Bitfield(4);
 
         // construct flag set for document
-        if (document.getImages().size() > 0) RESULT_FLAGS.set(flag_cat_hasimage, true);
-        if (document.getAudiolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasaudio, true);
-        if (document.getVideolinks().size() > 0) RESULT_FLAGS.set(flag_cat_hasvideo, true);
-        if (document.getApplinks().size()   > 0) RESULT_FLAGS.set(flag_cat_hasapp,   true);
+        if (!document.getImages().isEmpty())     RESULT_FLAGS.set(flag_cat_hasimage, true);
+        if (!document.getAudiolinks().isEmpty()) RESULT_FLAGS.set(flag_cat_hasaudio, true);
+        if (!document.getVideolinks().isEmpty()) RESULT_FLAGS.set(flag_cat_hasvideo, true);
+        if (!document.getApplinks().isEmpty())   RESULT_FLAGS.set(flag_cat_hasapp,   true);
         
         this.languageIdentificator = new Identificator();
         
@@ -566,7 +566,7 @@ public final class Condenser {
                 sIndex = 0;
                 s.clear();
             }
-            while (s.size() == 0) {
+            while (s.isEmpty()) {
                 if (!e.hasNext()) return null;
                 r = e.next();
                 if (r == null) return null;

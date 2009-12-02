@@ -58,7 +58,7 @@ public abstract class AbstractBufferedIndex<ReferenceType extends Reference> ext
         // It must also be ensured that the counter is in/decreased every loop
         while ((count > 0) && (i.hasNext())) {
             container = i.next();
-            if ((container != null) && (container.size() > 0)) {
+            if (container != null && !container.isEmpty()) {
                 containers.add(container);
             }
             count--; // decrease counter even if the container was null or empty to ensure termination

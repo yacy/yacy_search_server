@@ -262,6 +262,10 @@ public final class HandleMap implements Iterable<Row.Entry> {
         return index.size();
     }
     
+    public final synchronized boolean isEmpty() {
+        return index.isEmpty();
+    }
+    
     public final synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
         return index.keys(up, firstKey);
     }

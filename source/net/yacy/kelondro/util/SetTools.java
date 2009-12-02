@@ -78,7 +78,7 @@ public class SetTools {
             singleMap = i.next();
             
             // check result
-            if ((singleMap == null) || (singleMap.size() == 0)) return new TreeMap<A, B>();
+            if ((singleMap == null) || (singleMap.isEmpty())) return new TreeMap<A, B>();
             
             // store result in order of result size
             orderMap.put(Long.valueOf(singleMap.size() * 1000 + count), singleMap);
@@ -86,12 +86,12 @@ public class SetTools {
         }
         
         // check if there is any result
-        if (orderMap.size() == 0) return new TreeMap<A, B>();
+        if (orderMap.isEmpty()) return new TreeMap<A, B>();
         
         // we now must pairwise build up a conjunction of these maps
         Long k = orderMap.firstKey(); // the smallest, which means, the one with the least entries
         TreeMap<A, B> mapA, mapB, joinResult = orderMap.remove(k);
-        while ((orderMap.size() > 0) && (joinResult.size() > 0)) {
+        while (!orderMap.isEmpty() && !joinResult.isEmpty()) {
             // take the first element of map which is a result and combine it with result
             k = orderMap.firstKey(); // the next smallest...
             mapA = joinResult;
@@ -103,7 +103,7 @@ public class SetTools {
         }
 
         // in 'searchResult' is now the combined search result
-        if (joinResult.size() == 0) return new TreeMap<A, B>();
+        if (joinResult.isEmpty()) return new TreeMap<A, B>();
         return joinResult;
     }
     
@@ -111,7 +111,7 @@ public class SetTools {
         // comparators must be equal
         if ((map1 == null) || (map2 == null)) return null;
         if (map1.comparator() != map2.comparator()) return null;
-        if ((map1.size() == 0) || (map2.size() == 0)) return new TreeMap<A, B>(map1.comparator());
+        if (map1.isEmpty() || map2.isEmpty()) return new TreeMap<A, B>(map1.comparator());
 
         // decide which method to use
         final int high = ((map1.size() > map2.size()) ? map1.size() : map2.size());
@@ -183,7 +183,7 @@ public class SetTools {
     	// comparators must be equal
         if ((set1 == null) || (set2 == null)) return null;
         if (set1.comparator() != set2.comparator()) return null;
-        if ((set1.size() == 0) || (set2.size() == 0)) return new TreeSet<A>(set1.comparator());
+        if (set1.isEmpty() || set2.isEmpty()) return new TreeSet<A>(set1.comparator());
 
         // decide which method to use
         final int high = ((set1.size() > set2.size()) ? set1.size() : set2.size());
@@ -241,7 +241,7 @@ public class SetTools {
 		// comparators must be equal
 		if ((set1 == null) || (set2 == null)) return false;
 		if (set1.comparator() != set2.comparator()) return false;
-		if ((set1.size() == 0) || (set2.size() == 0)) return false;
+		if (set1.isEmpty() || set2.isEmpty()) return false;
 
 		// decide which method to use
 		final int high = ((set1.size() > set2.size()) ? set1.size() : set2.size());
@@ -297,7 +297,7 @@ public class SetTools {
     public static <A, B> TreeMap<A, B> excludeConstructive(final TreeMap<A, B> map, final Set<A> set) {
         if (map == null) return null;
         if (set == null) return map;
-        if ((map.size() == 0) || (set.size() == 0)) return map;
+        if (map.isEmpty() || set.isEmpty()) return map;
         assert !(set instanceof TreeSet) || map.comparator() == ((TreeSet<A>) set).comparator();
         // if (map.comparator() != set.comparator()) return excludeConstructiveByTestMapInSet(map, set);
         return excludeConstructiveByTestMapInSet(map, set);
@@ -320,7 +320,7 @@ public class SetTools {
         if (map == null) return;
         if (set == null) return;
         assert !(map instanceof TreeMap && set instanceof TreeSet) || ((TreeMap<A, B>) map).comparator() == ((TreeSet<A>) set).comparator();
-        if ((map.size() == 0) || (set.size() == 0)) return;
+        if (map.isEmpty() || set.isEmpty()) return;
 
         if (map.size() < set.size())
             excludeDestructiveByTestMapInSet(map, set);
@@ -343,7 +343,7 @@ public class SetTools {
         if (set1 == null) return;
         if (set2 == null) return;
         assert !(set1 instanceof TreeSet && set2 instanceof TreeSet) || ((TreeSet<A>) set1).comparator() == ((TreeSet<A>) set2).comparator();
-        if ((set1.size() == 0) || (set2.size() == 0)) return;
+        if (set1.isEmpty() || set2.isEmpty()) return;
         
         if (set1.size() < set2.size())
             excludeDestructiveByTestSmallInLarge(set1, set2);

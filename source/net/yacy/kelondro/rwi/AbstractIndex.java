@@ -71,7 +71,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         // It must also be ensured that the counter is in/decreased every loop
         while ((count > 0) && (i.hasNext())) {
             container = i.next();
-            if ((container != null) && (container.size() > 0)) {
+            if (container != null && !container.isEmpty()) {
                 containers.add(container);
             }
             count--; // decrease counter even if the container was null or empty to ensure termination
@@ -117,7 +117,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
             }
         
             // check result
-            if ((singleContainer == null || singleContainer.size() == 0)) return new HashMap<byte[], ReferenceContainer<ReferenceType>>(0);
+            if ((singleContainer == null || singleContainer.isEmpty())) return new HashMap<byte[], ReferenceContainer<ReferenceType>>(0);
         
             containers.put(singleHash, singleContainer);
         }
@@ -154,13 +154,13 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
             }
         
             // check result
-            if ((singleContainer == null || singleContainer.size() == 0)) return ReferenceContainer.emptyContainer(factory, null, 0);
+            if ((singleContainer == null || singleContainer.isEmpty())) return ReferenceContainer.emptyContainer(factory, null, 0);
             if (resultContainer == null) resultContainer = singleContainer; else {
                 resultContainer = ReferenceContainer.joinConstructive(factory, resultContainer, singleContainer, maxDistance);
             }
             
             // finish if the result is empty
-            if (resultContainer.size() == 0) return resultContainer;
+            if (resultContainer.isEmpty()) return resultContainer;
         }
         return resultContainer;
     }

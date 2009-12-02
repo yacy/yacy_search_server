@@ -237,7 +237,7 @@ public final class RecordStack extends Records {
     
     private Node topNode() throws IOException {
         // return node ontop of the stack
-        if (size() == 0) return null;
+        if (isEmpty()) return null;
         final Records.Handle h = getHandle(toor);
         if (h == null) return null;
         return new Node(h);
@@ -245,7 +245,7 @@ public final class RecordStack extends Records {
     
     private Node botNode() throws IOException {
         // return node on bottom of the stack
-        if (size() == 0) {
+        if (isEmpty()) {
         	Log.logInfo("Stack", "size() == 0");
         	return null;
         }

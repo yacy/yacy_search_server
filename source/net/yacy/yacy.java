@@ -787,7 +787,7 @@ public final class yacy {
             if (wordset.size() != count) {
                 count = count - wordset.size();
                 final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(wordlist)));
-                while (wordset.size() > 0) {
+                while (!wordset.isEmpty()) {
                     word = wordset.first();
                     bw.write(word + "\n");
                     wordset.remove(word);

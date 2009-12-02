@@ -482,6 +482,10 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         return index.size();
     }
 
+    public final boolean isEmpty() {
+        return index.isEmpty();
+    }
+    
     public final String filename() {
         return index.filename();
     }

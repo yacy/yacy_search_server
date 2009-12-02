@@ -146,7 +146,10 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return (this.cache == null) ? 0 : this.cache.size();
     }
     
-    
+    public boolean isEmpty() {
+        if (this.cache == null) return true;
+        return this.cache.isEmpty();
+    }
 
     public int maxReferences() {
         // iterate to find the max score
@@ -298,7 +301,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
 	        final ReferenceContainer<ReferenceType> c = cache.get(tha);
 	        if ((c != null) && (c.remove(urlHash) != null)) {
 	            // removal successful
-	            if (c.size() == 0) {
+	            if (c.isEmpty()) {
 	                delete(termHash);
 	            } else {
 	                cache.put(tha, c);
@@ -311,14 +314,14 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     
     public int remove(final byte[] termHash, final Set<String> urlHashes) {
         assert this.cache != null;
-        if (urlHashes.size() == 0) return 0;
+        if (urlHashes.isEmpty()) return 0;
         ByteArray tha = new ByteArray(termHash);
         int count;
         synchronized (cache) {
 	        final ReferenceContainer<ReferenceType> c = cache.get(tha);
 	        if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
 	            // removal successful
-	            if (c.size() == 0) {
+	            if (c.isEmpty()) {
 	                delete(termHash);
 	            } else {
 	                cache.put(tha, c);
@@ -332,7 +335,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     public void add(final ReferenceContainer<ReferenceType> container) {
         // this puts the entries into the cache
     	assert this.cache != null;
-        if (this.cache == null || container == null || container.size() == 0) return;
+        if (this.cache == null || container == null || container.isEmpty()) return;
         
         // put new words into cache
         ByteArray tha = new ByteArray(container.getTermHash());

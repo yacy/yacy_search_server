@@ -88,7 +88,7 @@ public class ResultFetcher {
         // only with the query minus the stopwords which had not been used for the search
         final TreeSet<byte[]> filtered = SetTools.joinConstructive(query.queryHashes, Switchboard.stopwordHashes);
         this.snippetFetchWordHashes = (TreeSet<byte[]>) query.queryHashes.clone();
-        if ((filtered != null) && (filtered.size() > 0)) {
+        if (filtered != null && !filtered.isEmpty()) {
             SetTools.excludeDestructive(this.snippetFetchWordHashes, Switchboard.stopwordHashes);
         }
         
@@ -241,7 +241,7 @@ public class ResultFetcher {
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
             Log.logInfo("SEARCH_EVENT", "media snippet load time for " + metadata.url() + ": " + snippetComputationTime);
             
-            if ((mediaSnippets != null) && (mediaSnippets.size() > 0)) {
+            if (mediaSnippets != null && !mediaSnippets.isEmpty()) {
                 // found media snippets, return entry
                 return new ResultEntry(page, query.getSegment(), peers, null, mediaSnippets, dbRetrievalTime, snippetComputationTime);
             } else if (snippetMode == 1) {

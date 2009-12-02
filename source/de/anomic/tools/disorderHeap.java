@@ -50,7 +50,7 @@ public class disorderHeap implements Serializable {
     }
 
     public synchronized String remove() {
-        if (list.size() == 0) return null;
+        if (list.isEmpty()) return null;
         final int pos = (int) ((System.currentTimeMillis() / 13) % list.size());
         return list.remove(pos);
     }
@@ -69,6 +69,9 @@ public class disorderHeap implements Serializable {
         return list.size();
     }
 
+    public synchronized boolean isEmpty() {
+        return list.isEmpty();
+    }
 
     public static void main(final String[] args) {
         final disorderHeap ul = new disorderHeap();

@@ -262,7 +262,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             singleContainer = i.next();
             
             // check result
-            if ((singleContainer == null) || (singleContainer.size() == 0)) return null; // as this is a cunjunction of searches, we have no result if any word is not known
+            if (singleContainer == null || singleContainer.isEmpty()) return null; // as this is a cunjunction of searches, we have no result if any word is not known
             
             // store result in order of result size
             map.put(Long.valueOf(singleContainer.size() * 1000 + count), singleContainer);
@@ -270,13 +270,13 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         }
         
         // check if there is any result
-        if (map.size() == 0) return null; // no result, nothing found
+        if (map.isEmpty()) return null; // no result, nothing found
         
         // the map now holds the search results in order of number of hits per word
         // we now must pairwise build up a conjunction of these sets
         Long k = map.firstKey(); // the smallest, which means, the one with the least entries
         ReferenceContainer<ReferenceType> searchA, searchB, searchResult = map.remove(k);
-        while ((map.size() > 0) && (searchResult.size() > 0)) {
+        while (!map.isEmpty() && !searchResult.isEmpty()) {
             // take the first element of map which is a result and combine it with result
             k = map.firstKey(); // the next smallest...
             searchA = searchResult;
@@ -288,7 +288,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         }
 
         // in 'searchResult' is now the combined search result
-        if (searchResult.size() == 0) return null;
+        if (searchResult.isEmpty()) return null;
         return searchResult;
     }
     
@@ -298,12 +298,12 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
                             final Collection<ReferenceContainer<ReferenceType>> containers) {
         
         // check if there is any result
-        if ((containers == null) || (containers.size() == 0)) return pivot; // no result, nothing found
+        if (containers == null || containers.isEmpty()) return pivot; // no result, nothing found
         
         final Iterator<ReferenceContainer<ReferenceType>> i = containers.iterator();
         while (i.hasNext()) {
         	pivot = excludeDestructive(factory, pivot, i.next());
-        	if ((pivot == null) || (pivot.size() == 0)) return null;
+        	if (pivot == null || pivot.isEmpty()) return null;
         }
         
         return pivot;
@@ -322,7 +322,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             final ReferenceContainer<ReferenceType> i2,
             final int maxDistance) {
         if ((i1 == null) || (i2 == null)) return null;
-        if ((i1.size() == 0) || (i2.size() == 0)) return null;
+        if (i1.isEmpty() || i2.isEmpty()) return null;
         
         // decide which method to use
         final int high = ((i1.size() > i2.size()) ? i1.size() : i2.size());
@@ -418,8 +418,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             final ReferenceContainer<ReferenceType> excl) {
         if (pivot == null) return null;
         if (excl == null) return pivot;
-        if (pivot.size() == 0) return null;
-        if (excl.size() == 0) return pivot;
+        if (pivot.isEmpty()) return null;
+        if (excl.isEmpty()) return pivot;
         
         // decide which method to use
         final int high = ((pivot.size() > excl.size()) ? pivot.size() : excl.size());

@@ -58,7 +58,7 @@ public class serverAccessTracker {
         SortedMap<Long, String> track;
         while (i.hasNext()) {
             track = i.next().getValue();
-            if (track.tailMap(Long.valueOf(System.currentTimeMillis() - maxTrackingTime)).size() == 0) {
+            if (track.tailMap(Long.valueOf(System.currentTimeMillis() - maxTrackingTime)).isEmpty()) {
                 // all entries are too old. delete the whole track
                 i.remove();
             } else {
@@ -116,7 +116,7 @@ public class serverAccessTracker {
         synchronized (access) {
             if ((access = clearTooOldAccess(access)).size() != access.size()) {
                 // write back to tracker
-                if (access.size() == 0) {
+                if (access.isEmpty()) {
                     accessTracker.remove(host);
                 } else {
                     accessTracker.put(host, access);

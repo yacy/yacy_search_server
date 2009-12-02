@@ -83,7 +83,7 @@ public class IODispatcher extends Thread {
     public synchronized void dump(ReferenceContainerCache<? extends Reference> cache, File file, ReferenceContainerArray<? extends Reference> array) {
         if (dumpQueue == null || controlQueue == null || !this.isAlive()) {
             Log.logWarning("IODispatcher", "emergency dump of file " + file.getName());
-             if (cache.size() > 0) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
+             if (!cache.isEmpty()) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
         } else {
             DumpJob<? extends Reference> job = (DumpJob<? extends Reference>)new DumpJob(cache, file, array);
             try {
@@ -145,7 +145,7 @@ public class IODispatcher extends Thread {
                 controlQueue.acquire();
                 
                 // prefer dump actions to flush memory to disc
-                if (dumpQueue.size() > 0) {
+                if (!dumpQueue.isEmpty()) {
                 	File f = null;
                     try {
                         dumpJob = dumpQueue.take();
@@ -162,7 +162,7 @@ public class IODispatcher extends Thread {
                 }
                 
                 // otherwise do a merge operation
-                if (mergeQueue.size() > 0) {
+                if (!mergeQueue.isEmpty()) {
                 	File f = null, f1 = null, f2 = null;
                     try {
                         mergeJob = mergeQueue.take();
@@ -216,7 +216,7 @@ public class IODispatcher extends Thread {
         }
         public void dump() {
             try {
-                if (cache.size() > 0) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
+                if (!cache.isEmpty()) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
                 array.mountBLOBFile(file);
             } catch (IOException e) {
                 Log.logException(e);

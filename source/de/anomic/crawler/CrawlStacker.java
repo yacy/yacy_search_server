@@ -82,6 +82,11 @@ public final class CrawlStacker {
     public int size() {
         return this.fastQueue.queueSize() + this.slowQueue.queueSize();
     }
+    public boolean isEmpty() {
+        if (!this.fastQueue.queueIsEmpty()) return false;
+        if (!this.slowQueue.queueIsEmpty()) return false;
+        return true;
+    }
 
     public void clear() {
         this.fastQueue.clear();

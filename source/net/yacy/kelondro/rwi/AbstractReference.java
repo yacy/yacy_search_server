@@ -37,7 +37,7 @@ public abstract class AbstractReference implements Reference {
         return l;
     }
     protected static int max(ArrayList<Integer> a) {
-        assert a.size() > 0;
+        assert !a.isEmpty();
         if (a.size() == 1) return a.get(0);
         if (a.size() == 2) return Math.max(a.get(0), a.get(1));
         int r = a.get(0);
@@ -45,7 +45,7 @@ public abstract class AbstractReference implements Reference {
         return r;
     }
     protected static int min(ArrayList<Integer> a) {
-        assert a.size() > 0;
+        assert !a.isEmpty();
         if (a.size() == 1) return a.get(0);
         if (a.size() == 2) return Math.min(a.get(0), a.get(1));
         int r = a.get(0);

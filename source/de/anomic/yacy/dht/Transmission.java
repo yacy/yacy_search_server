@@ -184,7 +184,7 @@ public class Transmission {
         }
         
         public boolean transmit() {
-            if (this.targets.size() == 0) return false;
+            if (this.targets.isEmpty()) return false;
             yacySeed target = this.targets.remove(0);
             // transferring selected words to remote peer
             if (target == seeds.mySeed() || target.hash.equals(seeds.mySeed().hash)) {

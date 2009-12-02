@@ -144,7 +144,7 @@ public final class TransformerWriter extends Writer {
     }
 
     public static char[] genTag0(final String tagname, final Properties tagopts, final char quotechar) {   
-            final char[] tagoptsx = (tagopts.size() == 0) ? null : genOpts(tagopts, quotechar);
+            final char[] tagoptsx = (tagopts.isEmpty()) ? null : genOpts(tagopts, quotechar);
             final CharBuffer bb = new CharBuffer(tagname.length() + ((tagoptsx == null) ? 0 : (tagoptsx.length + 1)) + tagname.length() + 2);
             bb.append((int)'<').append(tagname);
             if (tagoptsx != null) {

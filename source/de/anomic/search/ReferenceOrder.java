@@ -107,7 +107,7 @@ public class ReferenceOrder {
                     entry = di.next();
                     doms.addScore(entry.getKey(), (entry.getValue()).intValue());
                 }
-                if (doms.size() > 0) maxdomcount = doms.getMaxScore();
+                if (!doms.isEmpty()) maxdomcount = doms.getMaxScore();
             } catch (InterruptedException e) {
                 Log.logException(e);
             } catch (Exception e) {

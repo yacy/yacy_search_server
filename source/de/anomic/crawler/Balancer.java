@@ -194,7 +194,7 @@ public class Balancer {
             while (i.hasNext()) {
                 if (urlHashes.contains(i.next())) i.remove();
             }
-            if (stack.size() == 0) q.remove();
+            if (stack.isEmpty()) q.remove();
         }
        
        return removedCounter;
@@ -214,12 +214,16 @@ public class Balancer {
         return urlFileIndex.size();
     }
     
+    public boolean isEmpty() {
+        return urlFileIndex.isEmpty();
+    }
+    
     private boolean domainStacksNotEmpty() {
         if (domainStacks == null) return false;
         synchronized (domainStacks) {
             final Iterator<LinkedList<String>> i = domainStacks.values().iterator();
             while (i.hasNext()) {
-                if (i.next().size() > 0) return true;
+                if (!i.next().isEmpty()) return true;
             }
         }
         return false;
@@ -275,7 +279,7 @@ public class Balancer {
     }
     
     private String nextFromDelayed() {
-		if (this.delayed.size() == 0) return null;
+		if (this.delayed.isEmpty()) return null;
 		Long first = this.delayed.firstKey();
 		if (first.longValue() < System.currentTimeMillis()) {
 			return this.delayed.remove(first);
@@ -284,7 +288,7 @@ public class Balancer {
     }
     
     private String anyFromDelayed() {
-        if (this.delayed.size() == 0) return null;
+        if (this.delayed.isEmpty()) return null;
         Long first = this.delayed.firstKey();
         return this.delayed.remove(first);
     }
@@ -325,11 +329,11 @@ public class Balancer {
     	Request crawlEntry = null;
     	synchronized (this) {
     	    String failhash = null;
-    		while (this.urlFileIndex.size() > 0) {
+    		while (!this.urlFileIndex.isEmpty()) {
 		    	// first simply take one of the entries in the top list, that should be one without any delay
 		        String nexthash = nextFromDelayed();
 		        //System.out.println("*** nextFromDelayed=" + nexthash);
-		        if (nexthash == null && this.top.size() > 0) {
+		        if (nexthash == null && !this.top.isEmpty()) {
 		            nexthash = top.remove();
 		            //System.out.println("*** top.remove()=" + nexthash);
 		        }
@@ -418,7 +422,7 @@ public class Balancer {
     }
     
     private void filltop(boolean delay, long maximumwaiting, boolean acceptonebest) {
-    	if (this.top.size() > 0) return;
+    	if (!this.top.isEmpty()) return;
     	
     	//System.out.println("*** DEBUG started filltop delay=" + ((delay) ? "true":"false") + ", maximumwaiting=" + maximumwaiting + ", acceptonebest=" + ((acceptonebest) ? "true":"false"));
     	
@@ -438,7 +442,7 @@ public class Balancer {
     		entry = i.next();
     		
     		// clean up empty entries
-    		if (entry.getValue().size() == 0) {
+    		if (entry.getValue().isEmpty()) {
     			i.remove();
     			continue;
     		}
@@ -457,18 +461,18 @@ public class Balancer {
     		}
     		n = entry.getValue().removeFirst();
     		this.top.add(n);
-    		if (entry.getValue().size() == 0) i.remove();
+    		if (entry.getValue().isEmpty()) i.remove();
     	}
     	
     	// if we could not find any entry, then take the best we have seen so far
-    	if (acceptonebest && this.top.size() > 0 && besthash != null) {
+    	if (acceptonebest && !this.top.isEmpty() && besthash != null) {
     		removeHashFromDomainStacks(besthash);
     		this.top.add(besthash);
     	}
     }
     
     private void fillDomainStacks(int maxdomstacksize) throws IOException {
-    	if (this.domainStacks.size() > 0 && System.currentTimeMillis() - lastDomainStackFill < 120000L) return;
+    	if (!this.domainStacks.isEmpty() && System.currentTimeMillis() - lastDomainStackFill < 120000L) return;
     	this.domainStacks.clear();
     	//synchronized (this.delayed) { delayed.clear(); }
     	this.lastDomainStackFill = System.currentTimeMillis();

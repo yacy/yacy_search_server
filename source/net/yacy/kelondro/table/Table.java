@@ -200,7 +200,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
                 final ArrayList<Long[]> doubles = index.removeDoubles();
                 //assert index.size() + doubles.size() + fail == i;
                 //System.out.println(" -removed " + doubles.size() + " doubles- done.");
-                if (doubles.size() > 0) {
+                if (!doubles.isEmpty()) {
                     Log.logInfo("TABLE", tablefile + ": WARNING - TABLE " + tablefile + " has " + doubles.size() + " doubles");
                     // from all the doubles take one, put it back to the index and remove the others from the file
                     // first put back one element each
@@ -219,7 +219,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
                     }
                     // now remove the entries in a sorted way (top-down)
                     Long top;
-                    while (delpos.size() > 0) {
+                    while (!delpos.isEmpty()) {
                         top = delpos.last();
                         delpos.remove(top);
                         removeInFile(top.intValue());
@@ -337,7 +337,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         }
         // finally delete the affected rows, but start with largest id first, otherwise we overwrite wrong entries
         Long s;
-        while (d.size() > 0) {
+        while (!d.isEmpty()) {
             s = d.last();
             d.remove(s);
             this.removeInFile(s.intValue());
@@ -627,6 +627,10 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
 
     public synchronized int size() {
         return index.size();
+    }
+    
+    public synchronized boolean isEmpty() {
+        return index.isEmpty();
     }
     
     public Iterator<Entry> iterator() {

@@ -126,7 +126,7 @@ public class News {
                     final Map<String, String> attributeMap = record.attributes();
                     prop.putHTML("table_list_" + i + "_att", attributeMap.toString());
                     int j = 0;
-                    if (attributeMap.size() > 0) {
+                    if (!attributeMap.isEmpty()) {
 	                    for (Entry<String, String> attribute: attributeMap.entrySet()) {
 	                    	prop.put("table_list_" + i + "_attributes_" + j + "_name", attribute.getKey());
 	                    	prop.putHTML("table_list_" + i + "_attributes_" + j + "_value", attribute.getValue());

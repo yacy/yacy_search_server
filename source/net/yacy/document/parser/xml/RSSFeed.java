@@ -111,6 +111,10 @@ public class RSSFeed implements Iterable<RSSMessage> {
         return messages.get(guid);
     }
 
+    public boolean isEmpty() {
+        return messages.isEmpty();
+    }
+    
     public int size() {
         return messages.size();
     }
@@ -121,7 +125,7 @@ public class RSSFeed implements Iterable<RSSMessage> {
     
     public RSSMessage pollMessage() {
         // retrieve and delete item
-        if (messageQueue.size() == 0) return null;
+        if (messageQueue.isEmpty()) return null;
         final String nextGUID = messageQueue.poll();
         if (nextGUID == null) return null;
         return messages.remove(nextGUID);

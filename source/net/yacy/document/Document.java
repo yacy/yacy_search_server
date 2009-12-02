@@ -152,7 +152,7 @@ public class Document {
      */
     public String dc_language() {
         if (this.languages == null) return null;
-        if (this.languages.size() == 0) return null;
+        if (this.languages.isEmpty()) return null;
         if (this.languages.size() == 1) return languages.iterator().next();
         if (this.languages.contains(this.source.language())) return this.source.language();
         // now we are confused: the declared languages differ all from the TLD
@@ -203,7 +203,7 @@ dc_rights
             s = (this.keywords.get(i)).trim();
             if (s.length() > 0) hs.add(s.toLowerCase());
         }
-        if (hs.size() == 0) return "";
+        if (hs.isEmpty()) return "";
         // generate a new list
         final StringBuilder sb = new StringBuilder(this.keywords.size() * 6);
         final Iterator<String> i = hs.iterator();

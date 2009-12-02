@@ -154,7 +154,7 @@ public class HeapReader {
         FileUtils.deletedelete(fgf);
         
         // everything is fine now
-        return this.index.size() > 0;
+        return !this.index.isEmpty();
     }
     
     private void initIndexReadFromHeap() throws IOException {
@@ -258,6 +258,11 @@ public class HeapReader {
      */
     public synchronized int size() {
         return (this.index == null) ? 0 : this.index.size();
+    }
+    
+    public synchronized boolean isEmpty() {
+        if (this.index == null) return true;
+        return this.index.isEmpty();
     }
     
     /**

@@ -219,14 +219,14 @@ public class Blacklist {
         ArrayList<String> hostList = blacklistMap.get(host);
         if(hostList != null) {
             hostList.remove(path);
-            if (hostList.size() == 0)
+            if (hostList.isEmpty())
                 blacklistMap.remove(host);
         }
         final HashMap<String, ArrayList<String>> blacklistMapNotMatch = getBlacklistMap(blacklistType,false);
         hostList = blacklistMapNotMatch.get(host);
         if (hostList != null) {
             hostList.remove(path);
-            if (hostList.size() == 0)
+            if (hostList.isEmpty())
                 blacklistMapNotMatch.remove(host);
         }
     }
@@ -462,7 +462,7 @@ public class Blacklist {
     
     public static final String defaultBlacklist(final File listsPath) {
         List<String> dirlist = FileUtils.getDirListing(listsPath, Blacklist.BLACKLIST_FILENAME_FILTER);
-        if (dirlist.size() == 0) return null;
+        if (dirlist.isEmpty()) return null;
         return dirlist.get(0);
     }
 

@@ -330,6 +330,10 @@ public class MapDataMining extends MapView {
         return super.size();
     }
     
+    public synchronized boolean isEmpty() {
+        return super.isEmpty();
+    }
+    
     public synchronized void close() {
         // close cluster
         if (sortClusterMap != null) {

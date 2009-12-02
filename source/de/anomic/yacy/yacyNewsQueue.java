@@ -99,23 +99,27 @@ public class yacyNewsQueue {
     public int size() {
         return queueStack.size();
     }
+    
+    public boolean isEmpty() {
+        return queueStack.isEmpty();
+    }
 
     public synchronized void push(final yacyNewsRecord entry) throws IOException {
         queueStack.push(r2b(entry, true));
     }
 
     public synchronized yacyNewsRecord pop() throws IOException {
-        if (queueStack.size() == 0) return null;
+        if (queueStack.isEmpty()) return null;
         return b2r(queueStack.pop());
     }
 
     public synchronized yacyNewsRecord top() throws IOException {
-        if (queueStack.size() == 0) return null;
+        if (queueStack.isEmpty()) return null;
         return b2r(queueStack.top());
     }
 
     public synchronized yacyNewsRecord topInc() throws IOException {
-        if (queueStack.size() == 0) return null;
+        if (queueStack.isEmpty()) return null;
         final yacyNewsRecord entry = pop();
         if (entry != null) {
             entry.incDistribution();

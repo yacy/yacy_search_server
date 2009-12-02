@@ -221,7 +221,7 @@ public class Compressor implements BLOB {
         // check if the buffer is full or could be full after this write
         if (this.bufferlength + b.length * 2 > this.maxbufferlength) {
             // in case that we compress, just compress as much as is necessary to get enough room
-            while (this.bufferlength + b.length * 2 > this.maxbufferlength && this.buffer.size() > 0) {
+            while (this.bufferlength + b.length * 2 > this.maxbufferlength && !this.buffer.isEmpty()) {
                 flushOne();
             }
             // in case that this was not enough, just flush all
@@ -245,6 +245,12 @@ public class Compressor implements BLOB {
         return this.backend.size() + this.buffer.size();
     }
     
+    public synchronized boolean isEmpty() {
+        if (!this.backend.isEmpty()) return false;
+        if (!this.buffer.isEmpty()) return false;
+        return true;
+    }
+    
     public synchronized CloneableIterator<byte[]> keys(boolean up, boolean rotating) throws IOException {
         flushAll();
         return this.backend.keys(up, rotating);
@@ -256,7 +262,7 @@ public class Compressor implements BLOB {
     }
     
     private boolean flushOne() throws IOException {
-        if (this.buffer.size() == 0) return false;
+        if (this.buffer.isEmpty()) return false;
         // depending on process case, write it to the file or compress it to the other queue
         Map.Entry<String, byte[]> entry = this.buffer.entrySet().iterator().next();
         this.buffer.remove(entry.getKey());
@@ -268,7 +274,7 @@ public class Compressor implements BLOB {
     }
 
     private void flushAll() throws IOException {
-        while (this.buffer.size() > 0) {
+        while (!this.buffer.isEmpty()) {
             if (!flushOne()) break;
         }
         assert this.bufferlength == 0;

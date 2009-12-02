@@ -130,7 +130,7 @@ public final class Identificator {
             }
         }
         
-        if (relevantLanguages.size() == 0) return null;
+        if (relevantLanguages.isEmpty()) return null;
            
         // compare characters in text with characters in statistics
         final float[] offsetList = new float[relevantLanguages.size()];

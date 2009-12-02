@@ -68,7 +68,7 @@ public abstract class loaderCore implements loaderProcess {
     public boolean available() {
         // true if it is ok to feed with feed()
         return (status() == STATUS_READY) ||
-               ((status() == STATUS_COMPLETED) && ((result == null) || (result.size() == 0)));
+               (status() == STATUS_COMPLETED && (result == null || result.isEmpty()));
     }
     
     public Exception error() {

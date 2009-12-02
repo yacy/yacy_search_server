@@ -380,7 +380,7 @@ public class CrawlQueues {
         
         // check if we have an entry in the provider list, otherwise fill the list
         yacySeed seed;
-        if (remoteCrawlProviderHashes.size() == 0) {
+        if (remoteCrawlProviderHashes.isEmpty()) {
             if (sb.peers != null && sb.peers.sizeConnected() > 0) {
                 final Iterator<yacySeed> e = PeerSelection.getProvidesRemoteCrawlURLs(sb.peers);
                 while (e.hasNext()) {
@@ -391,12 +391,12 @@ public class CrawlQueues {
                 }
             }
         }
-        if (remoteCrawlProviderHashes.size() == 0) return false;
+        if (remoteCrawlProviderHashes.isEmpty()) return false;
         
         // take one entry from the provider list and load the entries from the remote peer
         seed = null;
         String hash = null;
-        while ((seed == null) && (remoteCrawlProviderHashes.size() > 0)) {
+        while ((seed == null) && (!remoteCrawlProviderHashes.isEmpty())) {
             hash = remoteCrawlProviderHashes.remove(remoteCrawlProviderHashes.size() - 1);
             if (hash == null) continue;
             seed = sb.peers.get(hash);
@@ -411,7 +411,7 @@ public class CrawlQueues {
         
         // we know a peer which should provide remote crawl entries. load them now.
         final RSSFeed feed = yacyClient.queryRemoteCrawlURLs(sb.peers, seed, 30, 60000);
-        if (feed == null || feed.size() == 0) {
+        if (feed == null || feed.isEmpty()) {
             // something is wrong with this provider. To prevent that we get not stuck with this peer
             // we remove it from the peer list
             sb.peers.peerActions.peerDeparture(seed, "no results from provided remote crawls");

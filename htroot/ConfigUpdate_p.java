@@ -177,7 +177,7 @@ public class ConfigUpdate_p {
             }
         }
         // latest downloaded release
-        yacyVersion dflt = (downloadedReleases.size() == 0) ? null : downloadedReleases.last();
+        yacyVersion dflt = (downloadedReleases.isEmpty()) ? null : downloadedReleases.last();
         int relcount = 0;
         for(yacyRelease release : downloadedReleases) {
             prop.put("candeploy_downloadedreleases_" + relcount + "_name", ((release.isMainRelease()) ? "main" : "dev") + " " + release.getReleaseNr() + "/" + release.getSvn());
@@ -204,7 +204,7 @@ public class ConfigUpdate_p {
         }
         
         // dev
-        dflt = (releasess.dev.size() == 0) ? null : releasess.dev.last();
+        dflt = (releasess.dev.isEmpty()) ? null : releasess.dev.last();
         final TreeSet<yacyRelease> remoteDevReleases = releasess.dev;
         remoteDevReleases.removeAll(downloadedReleases);
         for(yacyRelease release : remoteDevReleases) {

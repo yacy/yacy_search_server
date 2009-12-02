@@ -433,7 +433,7 @@ public final class Switchboard extends serverSwitch {
         listManager.reloadBlacklists();
 
         // load badwords (to filter the topwords)
-        if (badwords == null || badwords.size() == 0) {
+        if (badwords == null || badwords.isEmpty()) {
             final File badwordsFile = new File(rootPath, SwitchboardConstants.LIST_BADWORDS_DEFAULT);
             badwords = SetTools.loadList(badwordsFile, NaturalOrder.naturalComparator);
             badwordHashes = Word.words2hashes(badwords);
@@ -443,7 +443,7 @@ public final class Switchboard extends serverSwitch {
         }
 
         // load stopwords
-        if (stopwords == null || stopwords.size() == 0) {
+        if (stopwords == null || stopwords.isEmpty()) {
             final File stopwordsFile = new File(rootPath, SwitchboardConstants.LIST_STOPWORDS_DEFAULT);
             stopwords = SetTools.loadList(stopwordsFile, NaturalOrder.naturalComparator);
             stopwordHashes = Word.words2hashes(stopwords);
@@ -1092,7 +1092,7 @@ public final class Switchboard extends serverSwitch {
             crawlQueues.coreCrawlJobSize() > 0 ||
             crawlQueues.limitCrawlJobSize() > 0 ||
             crawlQueues.remoteTriggeredCrawlJobSize() > 0 ||
-            (crawlStacker != null && crawlStacker.size() > 0) ||
+            (crawlStacker != null && !crawlStacker.isEmpty()) ||
             crawlQueues.noticeURL.notEmpty())
             return false;
         return this.crawler.cleanProfiles();

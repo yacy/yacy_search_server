@@ -91,14 +91,14 @@ public class nxTools {
         }    
 
     public static String tail1(final Vector<String> list) {
-    	if ((list == null) || (list.size() == 0)) return "";
+    	if (list == null || list.isEmpty()) return "";
     	return list.lastElement();
     }
     
     public static String tail1(final ArrayList<String> list) {
-        if ((list == null) || (list.size() == 0)) return "";
+        if (list == null || list.isEmpty()) return "";
         return list.get(list.size()-1);
-        }
+    }
 
     public static String awk(String sentence, final String separator, int count) {
 	// returns the nth word of sentence, where count is the counter and the first word has the number 1

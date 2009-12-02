@@ -314,7 +314,7 @@ public final class Heap extends HeapModifier implements BLOB {
         if (b.length == 0) return true;
         
         // then look if we can use a free entry
-        if (this.free.size() == 0) return false;
+        if (this.free.isEmpty()) return false;
         
         // find the largest entry
         long lseek = -1;

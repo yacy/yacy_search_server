@@ -501,7 +501,6 @@ public class CrawlProfile {
             } else {
                 // increase counter
                 dp.inc();
-                doms.put(domain, dp);
             }
             domsCache.put(this.mem.get(HANDLE), doms);
         }

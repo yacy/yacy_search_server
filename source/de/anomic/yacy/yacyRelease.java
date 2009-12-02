@@ -127,8 +127,8 @@ public final class yacyRelease extends yacyVersion {
         
         // check if we know that there is a release that is more recent than that which we are using
         final DevAndMainVersions releases = yacyRelease.allReleases(true, sb.getConfig("update.onlySignedFiles", "1").equals("1"));
-        final yacyRelease latestmain = (releases.main.size() == 0) ? null : releases.main.last();
-        final yacyRelease latestdev  = (releases.dev.size() == 0) ? null : releases.dev.last();
+        final yacyRelease latestmain = (releases.main.isEmpty()) ? null : releases.main.last();
+        final yacyRelease latestdev  = (releases.dev.isEmpty()) ? null : releases.dev.last();
         final String concept = sb.getConfig("update.concept", "any");
         String blacklist = sb.getConfig("update.blacklist", "...[123]");
         if (blacklist.equals("....[123]")) {
@@ -213,10 +213,10 @@ public final class yacyRelease extends yacyVersion {
         DevAndMainVersions locLatestRelease = latestReleases.get(location);
         if (force ||
             (locLatestRelease == null) /*||
-            ((latestRelease[0].size() == 0) &&
-             (latestRelease[1].size() == 0) &&
-             (latestRelease[2].size() == 0) &&
-             (latestRelease[3].size() == 0) )*/) {
+            ((latestRelease[0].isEmpty()) &&
+             (latestRelease[1].isEmpty()) &&
+             (latestRelease[2].isEmpty()) &&
+             (latestRelease[3].isEmpty()) )*/) {
             locLatestRelease = allReleaseFrom(location);
             latestReleases.put(location, locLatestRelease);
         }
@@ -607,7 +607,7 @@ public final class yacyRelease extends yacyVersion {
         }
         
         // if we have some files
-        if(downloadedreleases.size() > 0) {
+        if (!downloadedreleases.isEmpty()) {
             Log.logFine("STARTUP", "deleting downloaded releases older than "+ deleteAfterDays +" days");
             
             // keep latest version

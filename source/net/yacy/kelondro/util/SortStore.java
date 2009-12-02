@@ -54,6 +54,11 @@ public class SortStore<E> extends SortStack<E> {
         this.offset = new ConcurrentHashMap<E, Object>();
     }
     
+    public boolean isEmpty() {
+        if (!super.isEmpty()) return false;
+        return this.offstack.isEmpty();
+    }
+    
     public int size() {
         return super.size() + this.offstack.size();
     }
@@ -68,7 +73,7 @@ public class SortStore<E> extends SortStack<E> {
         super.push(element, weight);
         this.largest = Math.max(this.largest, weight.longValue());
         if (this.maxsize <= 0) return;
-        while ((super.size() > 0) && (this.size() > this.maxsize)) {
+        while (!super.isEmpty() && this.size() > this.maxsize) {
             this.pop();
         }
     }
@@ -120,7 +125,7 @@ public class SortStore<E> extends SortStack<E> {
     public ArrayList<stackElement> list(final int count) {
         if (count < 0) {
             // shift all elements
-            while (super.size() > 0) this.pop();
+            while (!super.isEmpty()) this.pop();
             return this.offstack;
         }
         if (count > super.size() + this.offstack.size()) throw new RuntimeException("list(" + count + ") exceeded avaiable number of elements (" + size() + ")"); 

@@ -212,7 +212,7 @@ public final class TextParser {
         final String documentCharset = htmlParser.patchCharsetEncoding(charset);
         List<Idiom> idioms = idiomParser(location, mimeType);
         
-        if (idioms.size() == 0) {
+        if (idioms.isEmpty()) {
             final String errorMsg = "No parser available to parse extension '" + location.getFileExtension() + "' or mimetype '" + mimeType + "'";
             log.logInfo("Unable to parse '" + location + "'. " + errorMsg);
             throw new ParserException(errorMsg, location);
@@ -249,7 +249,7 @@ public final class TextParser {
         try {
             // try to get a parser. If this works, we don't need the parser itself, we just return null to show that everything is ok.
             List<Idiom> idioms = idiomParser(url, mimeType);
-            return (idioms == null || idioms.size() == 0) ? "no parser found" : null;
+            return (idioms == null || idioms.isEmpty()) ? "no parser found" : null;
         } catch (ParserException e) {
             // in case that a parser is not available, return a error string describing the problem.
             return e.getMessage();

@@ -73,7 +73,7 @@ public class SearchEventCache {
         
         String id = query.id(false);
         SearchEvent event = SearchEventCache.lastEvents.get(id);
-        if (Switchboard.getSwitchboard() != null && Switchboard.getSwitchboard().crawlQueues.noticeURL.size() > 0 && event != null && System.currentTimeMillis() - event.getEventTime() > 60000) {
+        if (Switchboard.getSwitchboard() != null && !Switchboard.getSwitchboard().crawlQueues.noticeURL.isEmpty() && event != null && System.currentTimeMillis() - event.getEventTime() > 60000) {
             // if a local crawl is ongoing, don't use the result from the cache to use possibly more results that come from the current crawl
             // to prevent that this happens during a person switches between the different result pages, a re-search happens no more than
             // once a minute

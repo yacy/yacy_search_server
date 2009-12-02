@@ -71,7 +71,7 @@ public class listManager {
     public static void removeFromListSet(final String setName, final String listName) {
         final Set<String> listSet = getListSet(setName);
         
-        if (listSet.size() > 0) {
+        if (!listSet.isEmpty()) {
             listSet.remove(listName);
             switchboard.setConfig(setName, collection2string(listSet));
         }
@@ -127,7 +127,7 @@ public class listManager {
     public static String collection2string(final Collection<String> col){
         final StringBuilder str = new StringBuilder();
         
-        if (col != null && (col.size() > 0)) {
+        if (col != null && !col.isEmpty()) {
             final Iterator<String> it = col.iterator();
             str.append(it.next());
             while(it.hasNext()) {

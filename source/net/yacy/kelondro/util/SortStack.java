@@ -56,6 +56,11 @@ public class SortStack<E> {
         this.maxsize = maxsize;
     }
 
+    
+    public boolean isEmpty() {
+        return this.instack.isEmpty();
+    }
+    
     public int size() {
         return this.instack.size();
     }
@@ -82,8 +87,8 @@ public class SortStack<E> {
 
         // check maximum size of the stack an remove elements if the stack gets too large
         if (this.maxsize <= 0) return;
-        while ((this.onstack.size() > 0) && (this.onstack.size() > this.maxsize)) synchronized (this.onstack) {
-            if ((this.onstack.size() > 0) && (this.onstack.size() > this.maxsize)) {
+        while (!this.onstack.isEmpty() && this.onstack.size() > this.maxsize) synchronized (this.onstack) {
+            if (!this.onstack.isEmpty() && this.onstack.size() > this.maxsize) {
                 this.onstack.remove(this.onstack.lastKey());
             }
         }
@@ -121,7 +126,7 @@ public class SortStack<E> {
             final List<E> l = this.onstack.get(w);
             element = l.remove(0);
             this.instack.remove(element);
-            if (l.size() == 0) this.onstack.remove(w);
+            if (l.isEmpty()) this.onstack.remove(w);
         }
         return new stackElement(element, w);
     }
@@ -140,7 +145,7 @@ public class SortStack<E> {
                 while (i.hasNext()) {
                     if (i.next().equals(element)) {
                         i.remove();
-                        if (entry.getValue().size() == 0) {
+                        if (entry.getValue().isEmpty()) {
                             this.onstack.remove(entry.getKey());
                         }
                         return;
@@ -152,7 +157,7 @@ public class SortStack<E> {
     
     public boolean bottom(final long weight) {
         // returns true if the element with that weight would be on the bottom of the stack after inserting
-        if (this.onstack.size() == 0) return true;
+        if (this.onstack.isEmpty()) return true;
         Long l;
         synchronized (this.onstack) {
             l = this.onstack.lastKey();

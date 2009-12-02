@@ -73,7 +73,7 @@ public class DidYouMean {
 	 */
 	public String getSuggestion(final String word, long timeout) {
 	    Set<String> s = getSuggestions(word, timeout);
-	    if (s == null || s.size() == 0) return null;
+	    if (s == null || s.isEmpty()) return null;
 	    return s.iterator().next();
 	}
 	
@@ -85,7 +85,7 @@ public class DidYouMean {
      */
     public String getSuggestion(final String word, long timeout, int preSortSelection) {
         Set<String> s = getSuggestions(word, timeout, preSortSelection);
-        if (s == null || s.size() == 0) return null;
+        if (s == null || s.isEmpty()) return null;
         return s.iterator().next();
     }
 	
@@ -133,7 +133,7 @@ public class DidYouMean {
         SortedSet<String> result = new TreeSet<String>();
         StringBuilder sb;
         for (int i = 0; i < words.length; i++) {
-            if (s[i].size() == 0) continue;
+            if (s[i].isEmpty()) continue;
             sb = new StringBuilder(20);
             for (int j = 0; j < words.length; j++) {
                 if (j > 0) sb.append(' ');

@@ -113,8 +113,8 @@ public class BlacklistCleaner_p {
                 prop.put(RESULTS + "blList", blacklistToUse);
                 prop.put(RESULTS + "entries", illegalEntries.size());
                 prop.putHTML(RESULTS + "blEngine", Switchboard.urlBlacklist.getEngineInfo());
-                prop.put(RESULTS + "disabled", (illegalEntries.size() == 0) ? "1" : "0");
-                if (illegalEntries.size() > 0) {
+                prop.put(RESULTS + "disabled", (illegalEntries.isEmpty()) ? "1" : "0");
+                if (!illegalEntries.isEmpty()) {
                     prop.put(RESULTS + DISABLED + "entries", illegalEntries.size());
                     int i = 0;
                     String key;
@@ -148,7 +148,7 @@ public class BlacklistCleaner_p {
         }
         
         if (supported) {
-            if (lists.size() > 0) {
+            if (!lists.isEmpty()) {
                 prop.put("disabled", "0");
                 prop.put(DISABLED + "blacklists", lists.size());
                 int count = 0;

@@ -308,7 +308,7 @@ public class yacyNewsPool {
     
     public yacyNewsRecord myPublication() throws IOException {
         // generate a record for next peer-ping
-        if (outgoingNews.size() == 0) return null;
+        if (outgoingNews.isEmpty()) return null;
         final yacyNewsRecord record = outgoingNews.topInc();
         if ((record != null) && (record.distributed() >= maxDistribution)) {
             // move record to its final position. This is only for history

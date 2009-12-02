@@ -290,7 +290,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         
         // otherwise take any headline
         for (int i = 0; i < 4; i++) {
-            if (headlines[i].size() > 0) return headlines[i].get(0);
+            if (!headlines[i].isEmpty()) return headlines[i].get(0);
         }
         
         // take description tag
@@ -393,7 +393,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (p > 0) cl[i] = cl[i].substring(0, p);
             if (ISO639.exists(cl[i])) hs.add(cl[i]);
         }
-        if (hs.size() == 0) return null;
+        if (hs.isEmpty()) return null;
         return hs;
     }
     

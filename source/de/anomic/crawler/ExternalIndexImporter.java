@@ -170,7 +170,7 @@ public class ExternalIndexImporter extends AbstractImporter implements Importer 
                     if (isAborted()) break;
                     
                     // importing entity container to home db
-                    if (newContainer.size() > 0) { homeWordIndex.termIndex().add(newContainer); }
+                    if (!newContainer.isEmpty()) { homeWordIndex.termIndex().add(newContainer); }
                     
                     // delete complete index entity file
                     this.importWordIndex.termIndex().delete(this.wordHash);                 

@@ -468,7 +468,7 @@ public class Segment {
                             }
                         }
                     }
-                    if (urlHashs.size() > 0) try {
+                    if (!urlHashs.isEmpty()) try {
                         final int removed = termIndex.remove(container.getTermHash(), urlHashs);
                         Log.logFine("INDEXCLEANER", container.getTermHashAsString() + ": " + removed + " of " + container.size() + " URL-entries deleted");
                         lastWordHash = container.getTermHash();

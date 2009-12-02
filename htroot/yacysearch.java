@@ -377,7 +377,7 @@ public class yacysearch {
 
             // filter out stopwords
             final TreeSet<String> filtered = SetTools.joinConstructive(query[0], Switchboard.stopwords);
-            if (filtered.size() > 0) {
+            if (!filtered.isEmpty()) {
                 SetTools.excludeDestructive(query[0], Switchboard.stopwords);
             }
 
@@ -543,7 +543,7 @@ public class yacysearch {
             
             // find geographic info
             Set<Location> coordinates = LibraryProvider.geoDB.find(originalquerystring);
-            if (coordinates == null || coordinates.size() == 0 || offset > 0) {
+            if (coordinates == null || coordinates.isEmpty() || offset > 0) {
                 prop.put("geoinfo", "0");
             } else {
                 int i = 0;
@@ -628,14 +628,14 @@ public class yacysearch {
             prop.put("eventID", theQuery.id(false)); // for bottomline
             
             // process result of search
-            if (filtered.size() > 0) {
+            if (!filtered.isEmpty()) {
                 prop.put("excluded", "1");
                 prop.putHTML("excluded_stopwords", filtered.toString());
             } else {
                 prop.put("excluded", "0");
             }
 
-            if (prop == null || prop.size() == 0) {
+            if (prop == null || prop.isEmpty()) {
                 if (post == null || post.get("query", post.get("search", "")).length() < 3) {
                     prop.put("num-results", "2"); // no results - at least 3 chars
                 } else {

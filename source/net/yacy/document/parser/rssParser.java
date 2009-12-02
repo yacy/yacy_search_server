@@ -133,17 +133,17 @@ public class rssParser extends AbstractParser implements Idiom {
                         FileUtils.copy(new ByteArrayInputStream(itemContent.getBytes("UTF-8")), writer, Charset.forName("UTF-8"));
                         
                         final String itemHeadline = scraper.getTitle();     
-                        if ((itemHeadline != null) && (itemHeadline.length() > 0)) {
+                        if (itemHeadline != null && !itemHeadline.isEmpty()) {
                             feedSections.add(itemHeadline);
                         }
                         
                         final Map<DigestURI, String> itemLinks = scraper.getAnchors();
-                        if ((itemLinks != null) && (itemLinks.size() > 0)) {
+                        if (itemLinks != null && !itemLinks.isEmpty()) {
                             anchors.putAll(itemLinks);
                         }
                         
                         final HashMap<String, ImageEntry> itemImages = scraper.getImages();
-                        if ((itemImages != null) && (itemImages.size() > 0)) {
+                        if (itemImages != null && !itemImages.isEmpty()) {
                             ContentScraper.addAllImages(images, itemImages);
                         }
                         

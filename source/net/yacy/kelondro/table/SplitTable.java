@@ -186,7 +186,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         String maxf;
         long maxram;
         ObjectIndex table;
-        while (t.size() > 0) {
+        while (!t.isEmpty()) {
             // find maximum table
             maxram = 0;
             maxf = null;
@@ -258,6 +258,12 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         int s = 0;
         while (i.hasNext()) s += i.next().size();
         return s;
+    }
+    
+    public boolean isEmpty() {
+        final Iterator<ObjectIndex> i = tables.values().iterator();
+        while (i.hasNext()) if (!i.next().isEmpty()) return false;
+        return true;
     }
     
     public int writeBufferSize() {

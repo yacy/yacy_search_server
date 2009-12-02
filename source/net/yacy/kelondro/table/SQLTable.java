@@ -138,6 +138,10 @@ public class SQLTable implements ObjectIndex, Iterable<Row.Entry> {
         }
     }
     
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+    
     public Row row() {
         return this.rowdef;
     }

@@ -131,7 +131,7 @@ public final class RankingProcess extends Thread {
             this.localSearchInclusion = search.inclusion();
             final ReferenceContainer<WordReference> index = search.joined();
             MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.JOIN, index.size(), System.currentTimeMillis() - timer), false);
-            if (index.size() == 0) {
+            if (index.isEmpty()) {
                 return;
             }
             
@@ -147,7 +147,7 @@ public final class RankingProcess extends Thread {
         // attention: if minEntries is too high, this method will not terminate within the maxTime
 
         assert (index != null);
-        if (index.size() == 0) return;
+        if (index.isEmpty()) return;
         if (local) {
             this.local_resourceSize += fullResource;
         } else {
@@ -306,7 +306,7 @@ public final class RankingProcess extends Thread {
         // returns from the current RWI list the best entry and removes this entry from the list
         SortStack<WordReferenceVars> m;
         SortStack<WordReferenceVars>.stackElement rwi;
-        while (stack.size() > 0) {
+        while (!stack.isEmpty()) {
             rwi = stack.pop();
             if (rwi == null) continue; // in case that a synchronization problem occurred just go lazy over it
             if (!skipDoubleDom) return rwi;
@@ -336,7 +336,7 @@ public final class RankingProcess extends Thread {
                     break; // not the best solution...
                 }
                 if (m == null) continue;
-                if (m.size() == 0) continue;
+                if (m.isEmpty()) continue;
                 if (bestEntry == null) {
                     bestEntry = m.top();
                     continue;
@@ -459,6 +459,14 @@ public final class RankingProcess extends Thread {
             c += s.size();
         }
         return c;
+    }
+    
+    public boolean isEmpty() {
+        if (!stack.isEmpty()) return false;
+        for (SortStack<WordReferenceVars> s: this.doubleDomCache.values()) {
+            if (!s.isEmpty()) return false;
+        }
+        return true;
     }
     
     public int[] flagCount() {
@@ -705,3 +713,12 @@ public final class RankingProcess extends Thread {
     }
 
 }
+/*
+Thread= Thread-937 id=4224 BLOCKED
+Thread= Thread-919 id=4206 BLOCKED
+Thread= Thread-936 id=4223 BLOCKED
+at net.yacy.kelondro.util.SortStack.pop(SortStack.java:118)
+at de.anomic.search.RankingProcess.takeRWI(RankingProcess.java:310)
+at de.anomic.search.RankingProcess.takeURL(RankingProcess.java:371)
+at de.anomic.search.ResultFetcher$Worker.run(ResultFetcher.java:161)
+*/

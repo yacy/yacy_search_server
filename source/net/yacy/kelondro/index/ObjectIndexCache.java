@@ -210,6 +210,20 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         return index0.size() + index1.size();
     }
     
+    public final synchronized boolean isEmpty() {
+        if ((index0 != null) && (index1 == null)) {
+            return index0.isEmpty();
+        }
+        if ((index0 == null) && (index1 != null)) {
+            return index1.isEmpty();
+        }
+        assert ((index0 != null) && (index1 != null));
+        if (!index0.isEmpty()) return false;
+        if (!index1.isEmpty()) return false;
+        return true;
+    }
+    
+    
     public final synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
         // returns the key-iterator of the underlying kelondroIndex
         if (index1 == null) {

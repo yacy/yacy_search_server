@@ -65,14 +65,14 @@ public class enumerateFiles implements Enumeration<File> {
         do {
             // System.out.println("D " + hierarchy.toString());
             t = null;
-            while ((t == null) && (hierarchy.size() > 0)) {
+            while ((t == null) && (!hierarchy.isEmpty())) {
                 t = hierarchy.get(hierarchy.size() - 1);
-                if (t.size() == 0) {
+                if (t.isEmpty()) {
                     hierarchy.remove(hierarchy.size() - 1); // we step up one hierarchy
                     t = null;
                 }
             }
-            if ((hierarchy.size() == 0) || (t == null || t.size() == 0)) return null; // this is the end
+            if (hierarchy.isEmpty() || (t == null || t.isEmpty())) return null; // this is the end
             // fetch value
             if (incOrder) f = t.first(); else f = t.last();
             t.remove(f);

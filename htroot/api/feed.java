@@ -54,7 +54,7 @@ public class feed {
             
             // read the channel
             feed = RSSFeed.channels(channels[channelIndex]);
-            if ((feed == null) || (feed.size() == 0)) continue channelIteration;
+            if (feed == null || feed.isEmpty()) continue channelIteration;
 
             RSSMessage message = feed.getChannel();
             if (message != null) {
@@ -62,7 +62,7 @@ public class feed {
                 prop.putXML("channel_description", message.getDescription());
                 prop.put("channel_pubDate", message.getPubDate());
             }
-            while ((messageMaxCount > 0) && (feed.size() > 0)) {
+            while (messageMaxCount > 0 && !feed.isEmpty()) {
                 message = feed.pollMessage();
                 if (message == null) continue;
 

@@ -65,6 +65,12 @@ public interface BLOB {
     public int size();
     
     /**
+     * ask if the BLOB is empty
+     * @return true iff size() == 0
+     */
+    public boolean isEmpty();
+    
+    /**
      * iterator over all keys
      * @param up
      * @param rotating

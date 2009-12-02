@@ -176,6 +176,10 @@ public final class ScoreCluster<E> {
         return refkeyDB.size();
     }
     
+    public synchronized boolean isEmpty() {
+        return refkeyDB.isEmpty();
+    }
+    
     public synchronized void incScore(final E[] objs) {
         for (int i = 0; i < objs.length; i++) addScore(objs[i], 1);
     }
@@ -293,22 +297,22 @@ public final class ScoreCluster<E> {
     }
     
     public synchronized int getMaxScore() {
-        if (refkeyDB.size() == 0) return -1;
+        if (refkeyDB.isEmpty()) return -1;
         return (int) ((keyrefDB.lastKey().longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
 
     public synchronized int getMinScore() {
-        if (refkeyDB.size() == 0) return -1;
+        if (refkeyDB.isEmpty()) return -1;
         return (int) ((keyrefDB.firstKey().longValue() & 0xFFFFFFFF00000000L) >> 32);
     }
 
     public synchronized E getMaxObject() {
-        if (refkeyDB.size() == 0) return null;
+        if (refkeyDB.isEmpty()) return null;
         return keyrefDB.get(keyrefDB.lastKey());
     }
     
     public synchronized E getMinObject() {
-        if (refkeyDB.size() == 0) return null;
+        if (refkeyDB.isEmpty()) return null;
         return keyrefDB.get(keyrefDB.firstKey());
     }
     
@@ -368,7 +372,7 @@ public final class ScoreCluster<E> {
         private void internalNext() {
             Long key;
             int score = (max + min) / 2;
-            while (keyrefDBcopy.size() > 0) {
+            while (!keyrefDBcopy.isEmpty()) {
                 key = ((up) ? keyrefDBcopy.firstKey() : keyrefDBcopy.lastKey());
                 n = keyrefDBcopy.remove(key);
                 score = (int) ((key.longValue() & 0xFFFFFFFF00000000L) >> 32);
@@ -404,7 +408,7 @@ public final class ScoreCluster<E> {
         }
        
         public boolean hasNext() {
-            return view.size() > 0;
+            return !view.isEmpty();
         }
         
         public E next() {

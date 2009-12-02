@@ -46,7 +46,7 @@ public class TermSearch <ReferenceType extends Reference> {
             int maxDistance) {
         
         this.inclusionContainers =
-            (queryHashes.size() == 0) ?
+            (queryHashes.isEmpty()) ?
                 new HashMap<byte[], ReferenceContainer<ReferenceType>>(0) :
                 base.searchConjunction(queryHashes, urlselection);
                 
@@ -55,7 +55,7 @@ public class TermSearch <ReferenceType extends Reference> {
             inclusionContainers = new HashMap<byte[], ReferenceContainer<ReferenceType>>(0); // prevent that only a subset is returned
         
         HashMap<byte[], ReferenceContainer<ReferenceType>> exclusionContainers =
-            (inclusionContainers.size() == 0) ?
+            (inclusionContainers.isEmpty()) ?
                 new HashMap<byte[], ReferenceContainer<ReferenceType>>(0) :
                 base.searchConjunction(excludeHashes, urlselection);
     

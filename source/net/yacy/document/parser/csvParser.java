@@ -78,7 +78,7 @@ public class csvParser extends AbstractParser implements Idiom {
         // the first row is used as headline
         // all lines are artificially terminated by a '.' to separate them as sentence for the condenser.
         List<String[]> table = getTable(location, mimeType, charset, source);
-        if (table.size() == 0) throw new ParserException("document has no lines", location);
+        if (table.isEmpty()) throw new ParserException("document has no lines", location);
         StringBuilder sb = new StringBuilder();
         for (String[] row: table) sb.append(concatRow(row)).append(' ');
         try {

@@ -142,7 +142,7 @@ public final class HTTPDFileHandler {
         if (switchboard == null) {
             switchboard = theSwitchboard;
 
-            if (MimeTable.size() == 0) {
+            if (MimeTable.isEmpty()) {
                 // load the mime table
                 final String mimeTablePath = theSwitchboard.getConfig("mimeTable","");
                 Log.logConfig("HTTPDFiles", "Loading mime mapping file " + mimeTablePath);
@@ -174,7 +174,7 @@ public final class HTTPDFileHandler {
                 if (!(htTemplatePath.exists())) htTemplatePath.mkdir();
             }
             //This is now handles by #%env/templates/foo%#
-            //if (templates.size() == 0) templates.putAll(httpTemplate.loadTemplates(htTemplatePath));
+            //if (templates.isEmpty()) templates.putAll(httpTemplate.loadTemplates(htTemplatePath));
             
             // create htLocaleDefault, htLocalePath
             if (htDefaultPath == null) htDefaultPath = theSwitchboard.getConfigPath("htDefaultPath", "htroot");

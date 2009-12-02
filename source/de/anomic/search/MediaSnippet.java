@@ -109,7 +109,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     }
     
     public static ArrayList<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final TreeSet<byte[]> queryhashes, final ContentDomain mediatype, final boolean fetchOnline, final int timeout, final boolean reindexing) {
-        if (queryhashes.size() == 0) {
+        if (queryhashes.isEmpty()) {
             Log.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();
         }
@@ -194,12 +194,12 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
             url = entry.getKey();
             desc = entry.getValue();
             s = removeAppearanceHashes(url.toNormalform(false, false), queryhashes);
-            if (s.size() == 0) {
+            if (isEmpty()) {
                 result += "<br /><a href=\"" + url + "\">" + ((desc.length() == 0) ? url : desc) + "</a>";
                 continue;
             }
             s = removeAppearanceHashes(desc, s);
-            if (s.size() == 0) {
+            if (isEmpty()) {
                 result += "<br /><a href=\"" + url + "\">" + ((desc.length() == 0) ? url : desc) + "</a>";
                 continue;
             }

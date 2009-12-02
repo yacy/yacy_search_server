@@ -319,7 +319,7 @@ public final class yacyClient {
             final byte[] content = postToFile(target, "query.html", post, 10000);
             final HashMap<String, String> result = FileUtils.table(content);
             
-            if (result == null || result.size() == 0) { return null; }
+            if (result == null || result.isEmpty()) { return null; }
             //final Date remoteTime = yacyCore.parseUniversalDate((String) result.get(yacySeed.MYTIME)); // read remote time
             return yacySeed.genRemoteSeed(result.get("response"), salt, false);
         } catch (final Exception e) {
@@ -341,7 +341,7 @@ public final class yacyClient {
             final byte[] content = postToFile(target, "query.html", post, 5000);
             final HashMap<String, String> result = FileUtils.table(content);
             
-            if (result == null || result.size() == 0) { return -1; }
+            if (result == null || result.isEmpty()) { return -1; }
             return Integer.parseInt(result.get("response"));
         } catch (final Exception e) {
             yacyCore.log.logSevere("yacyClient.queryRWICount error:" + e.getMessage());
@@ -364,7 +364,7 @@ public final class yacyClient {
             final byte[] content = postToFile(target, "query.html", post, 5000);
             final HashMap<String, String> result = FileUtils.table(content);
             
-            if ((result == null) || (result.size() == 0)) return -1;
+            if (result == null || result.isEmpty()) return -1;
             final String resp = result.get("response");
             if (resp == null) {
                 return -1;
@@ -493,7 +493,7 @@ public final class yacyClient {
             return null;
         }
 
-        if ((result == null) || (result.size() == 0)) {
+        if (result == null || result.isEmpty()) {
             if (yacyCore.log.isFine()) yacyCore.log.logFine("SEARCH failed FROM "
 					+ target.hash
 					+ ":"

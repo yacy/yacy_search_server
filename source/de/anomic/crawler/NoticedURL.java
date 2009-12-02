@@ -121,6 +121,14 @@ public class NoticedURL {
         return ((coreStack == null) ? 0 : coreStack.size()) + ((limitStack == null) ? 0 : limitStack.size()) + ((remoteStack == null) ? 0 : remoteStack.size());
     }
 
+    public boolean isEmpty() {
+        if (coreStack == null) return true;
+        if (!coreStack.isEmpty()) return false;
+        if (!limitStack.isEmpty()) return false;
+        if (!remoteStack.isEmpty()) return false;
+        return true;
+    }
+    
     public int stackSize(final int stackType) {
         switch (stackType) {
             case STACK_TYPE_CORE:     return (coreStack == null) ? 0 : coreStack.size();

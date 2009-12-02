@@ -98,7 +98,7 @@ public class MemoryTracker extends Thread {
             if (history.size() % 10 == 0) { // reduce number of System.currentTimeMillis() calls
                 Event e;
                 final long now = System.currentTimeMillis();
-                while (history.size() > 0) {
+                while (!history.isEmpty()) {
                     e = history.get(0);
                     if (now - e.time < 600000) break;
                     history.remove(0);

@@ -452,6 +452,10 @@ public class RowCollection implements Iterable<Row.Entry> {
         return this.chunkcount;
     }
     
+    public boolean isEmpty() {
+        return this.chunkcount == 0;
+    }
+    
     public int sorted() {
         return this.sortBound;
     }
@@ -853,7 +857,7 @@ public class RowCollection implements Iterable<Row.Entry> {
                     removeRow(i + 1, false);
                     d++;
                     if (i + 1 < chunkcount - 1) u = false;
-                } else if (collection.size() > 0) {
+                } else if (!collection.isEmpty()) {
                     // finish collection of double occurrences
                     collection.addUnique(get(i + 1, false));
                     removeRow(i + 1, false);

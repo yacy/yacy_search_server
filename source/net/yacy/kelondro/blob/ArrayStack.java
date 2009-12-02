@@ -287,7 +287,7 @@ public class ArrayStack implements BLOB {
     }
     
     public synchronized File smallestBLOB(File excluding, long maxsize) {
-        if (this.blobs.size() == 0) return null;
+        if (this.blobs.isEmpty()) return null;
         File bestFile = null;
         long smallest = Long.MAX_VALUE;
         File f = null;
@@ -305,7 +305,7 @@ public class ArrayStack implements BLOB {
     }
     
     public synchronized File unmountOldestBLOB(boolean smallestFromFirst2) {
-        if (this.blobs.size() == 0) return null;
+        if (this.blobs.isEmpty()) return null;
         int idx = 0;
         if (smallestFromFirst2 && this.blobs.get(1).location.length() < this.blobs.get(0).location.length()) idx = 1;
         return unmount(idx);
@@ -313,7 +313,7 @@ public class ArrayStack implements BLOB {
     
     /*
     public synchronized File unmountSimilarSizeBLOB(long otherSize) {
-        if (this.blobs.size() == 0 || otherSize == 0) return null;
+        if (this.blobs.isEmpty() || otherSize == 0) return null;
         blobItem b;
         double delta, bestDelta = Double.MAX_VALUE;
         int bestIndex = -1;
@@ -365,10 +365,10 @@ public class ArrayStack implements BLOB {
     
     private void executeLimits() {
         // check if storage limits are reached and execute consequences
-        if (blobs.size() == 0) return;
+        if (blobs.isEmpty()) return;
         
         // age limit:
-        while (blobs.size() > 0 && System.currentTimeMillis() - blobs.get(0).creation.getTime() - this.fileAgeLimit > this.repositoryAgeMax) {
+        while (!blobs.isEmpty() && System.currentTimeMillis() - blobs.get(0).creation.getTime() - this.fileAgeLimit > this.repositoryAgeMax) {
             // too old
             blobItem oldestBLOB = blobs.remove(0);
             oldestBLOB.blob.close(false);
@@ -377,7 +377,7 @@ public class ArrayStack implements BLOB {
         }
         
         // size limit
-        while (blobs.size() > 0 && length() > this.repositorySizeMax) {
+        while (!blobs.isEmpty() && length() > this.repositorySizeMax) {
             // too large
             blobItem oldestBLOB = blobs.remove(0);
             oldestBLOB.blob.close(false);
@@ -444,6 +444,11 @@ public class ArrayStack implements BLOB {
         int s = 0;
         for (blobItem bi: blobs) s += bi.blob.size();
         return s;
+    }
+    
+    public synchronized boolean isEmpty() {
+        for (blobItem bi: blobs) if (!bi.blob.isEmpty()) return false;
+        return true;
     }
     
     /**
@@ -676,7 +681,7 @@ public class ArrayStack implements BLOB {
      * @throws IOException
      */
     public synchronized void put(byte[] key, byte[] b) throws IOException {
-        blobItem bi = (blobs.size() == 0) ? null : blobs.get(blobs.size() - 1);
+        blobItem bi = (blobs.isEmpty()) ? null : blobs.get(blobs.size() - 1);
         if (bi == null)
             System.out.println("bi == null");
         else if (System.currentTimeMillis() - bi.creation.getTime() > this.fileAgeLimit)
