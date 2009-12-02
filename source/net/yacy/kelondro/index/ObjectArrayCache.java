@@ -150,14 +150,14 @@ public final class ObjectArrayCache {
     }
     
     public final byte[] removeoneb() {
-        if ((index1 != null) && (index1.size() != 0)) {
+        if (index1 != null && !index1.isEmpty()) {
             final Row.Entry indexentry = index1.removeOne();
             assert (indexentry != null);
             if (indexentry == null) return null;
             //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
             return indexentry.getColBytes(1);
         }
-        if ((index0 != null) && (index0.size() != 0)) {
+        if (index0 != null && !index0.isEmpty()) {
             final Row.Entry indexentry = index0.removeOne();
             assert (indexentry != null);
             if (indexentry == null) return null;

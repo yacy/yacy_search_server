@@ -99,14 +99,14 @@ public class RobotsEntry {
         this.allowPathList = new LinkedList<String>();
         this.denyPathList = new LinkedList<String>();
         
-        this.mem = new HashMap<String, String>(5);
+        this.mem = new HashMap<String, String>(10);
         if (loadedDate != null) this.mem.put(LOADED_DATE,Long.toString(loadedDate.getTime()));
         if (modDate != null) this.mem.put(MOD_DATE,Long.toString(modDate.getTime()));
         if (eTag != null) this.mem.put(ETAG,eTag);
         if (sitemap != null) this.mem.put(SITEMAP,sitemap);
         if (crawlDelayMillis > 0) this.mem.put(CRAWL_DELAY_MILLIS, Long.toString(crawlDelayMillis));
         
-        if ((allowPathList != null)&&(allowPathList.size()>0)) {
+        if (allowPathList != null && !allowPathList.isEmpty()) {
             this.allowPathList.addAll(allowPathList);
             
             final StringBuilder pathListStr = new StringBuilder(allowPathList.size() * 30);
@@ -117,7 +117,7 @@ public class RobotsEntry {
             this.mem.put(ALLOW_PATH_LIST,pathListStr.substring(0,pathListStr.length()-1));
         }
         
-        if ((disallowPathList != null)&&(disallowPathList.size()>0)) {
+        if (disallowPathList != null && !disallowPathList.isEmpty()) {
             this.denyPathList.addAll(disallowPathList);
             
             final StringBuilder pathListStr = new StringBuilder(disallowPathList.size() * 30);

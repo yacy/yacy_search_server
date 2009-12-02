@@ -75,8 +75,6 @@ public class ReferenceOrder {
         public void run() {
             BlockingQueue<WordReferenceVars> vars = WordReferenceVars.transform(container);
             
-            WordReferenceVars entryMin = null;
-            WordReferenceVars entryMax = null;
             HashMap<String, Integer> doms0 = new HashMap<String, Integer>();
             Integer int1 = 1;
             
@@ -88,8 +86,8 @@ public class ReferenceOrder {
                 while ((iEntry = vars.take()) != WordReferenceVars.poison) {
                     decodedEntries.put(iEntry);
                     // find min/max
-                    if (entryMin == null) entryMin = iEntry.clone(); else entryMin.min(iEntry);
-                    if (entryMax == null) entryMax = iEntry.clone(); else entryMax.max(iEntry);
+                    if (min == null) min = iEntry.clone(); else min.min(iEntry);
+                    if (max == null) max = iEntry.clone(); else max.max(iEntry);
                     // update domcount
                     dom = iEntry.metadataHash().substring(6);
                     count = doms0.get(dom);
@@ -113,8 +111,6 @@ public class ReferenceOrder {
             } catch (Exception e) {
                 Log.logException(e);
             } finally {
-                if (min == null) min = entryMin.clone(); else min.min(entryMin);
-                if (max == null) max = entryMax.clone(); else max.max(entryMax);
                 try {
                     decodedEntries.put(WordReferenceVars.poison);
                 } catch (InterruptedException e) {}

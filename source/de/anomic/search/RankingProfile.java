@@ -121,7 +121,7 @@ public class RankingProfile {
         this(ContentDomain.TEXT); // set defaults
         if ((profile != null) && (profile.length() > 0)) {
             //parse external form
-            final HashMap<String, Integer> coeff = new HashMap<String, Integer>();
+            final HashMap<String, Integer> coeff = new HashMap<String, Integer>(40);
             final String[] elts = ((profile.startsWith("{") && (profile.endsWith("}"))) ? profile.substring(1, profile.length() - 1) : profile).split(",");
             int p;
             final int s = (prefix == null) ? 0 : prefix.length();
@@ -187,7 +187,7 @@ public class RankingProfile {
     }
     
     public Map<String, String> preToExternalMap(final String prefix) {
-        final Map<String, String> ext = new HashMap<String, String>();
+        final Map<String, String> ext = new HashMap<String, String>(40);
         ext.put(prefix + DOMLENGTH, Integer.toString(coeff_domlength));
         ext.put(prefix + YBR, Integer.toString(coeff_ybr));
         ext.put(prefix + DATE, Integer.toString(coeff_date));

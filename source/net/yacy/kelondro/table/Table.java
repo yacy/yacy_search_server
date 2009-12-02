@@ -265,7 +265,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
     private final Map<String, String> memoryStats() {
         // returns statistical data about this object
         assert table == null || table.size() == index.size() : "table.size() = " + table.size() + ", index.size() = " + index.size();
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<String, String>(8);
         map.put("tableSize", Integer.toString(index.size()));
         map.put("tableKeyChunkSize", Integer.toString(index.row().objectsize));
         map.put("tableKeyMem", Integer.toString(index.row().objectsize * index.size()));

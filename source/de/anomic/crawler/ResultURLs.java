@@ -59,10 +59,10 @@ public final class ResultURLs {
     private final Map<EventOrigin, LinkedList<String>> resultStacks;
     private final Map<EventOrigin, ScoreCluster<String>> resultDomains;
 
-    public ResultURLs() {
+    public ResultURLs(int initialStackCapacity) {
         // init result stacks
-        resultStacks = new HashMap<EventOrigin, LinkedList<String>>();
-        resultDomains = new HashMap<EventOrigin, ScoreCluster<String>>();
+        resultStacks = new HashMap<EventOrigin, LinkedList<String>>(initialStackCapacity);
+        resultDomains = new HashMap<EventOrigin, ScoreCluster<String>>(initialStackCapacity);
         for (EventOrigin origin: EventOrigin.values()) {
             resultStacks.put(origin, new LinkedList<String>());
             resultDomains.put(origin, new ScoreCluster<String>());
@@ -271,7 +271,7 @@ public final class ResultURLs {
      * @param args
      */
     public static void main(final String[] args) {
-        final ResultURLs results = new ResultURLs();
+        final ResultURLs results = new ResultURLs(10);
         try {
             final DigestURI url = new DigestURI("http", "www.yacy.net", 80, "/");
             final URIMetadataRow urlRef = new URIMetadataRow(url, "YaCy Homepage", "", "", "", new Date(), new Date(), new Date(), "", new byte[] {}, 123, 42, '?', new Bitfield(), "de", 0, 0, 0, 0, 0, 0);

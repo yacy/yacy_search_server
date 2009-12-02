@@ -385,7 +385,7 @@ public final class Switchboard extends serverSwitch {
 		indexSegments.setSegment(Segments.Process.PUBLIC,         getConfig(SwitchboardConstants.SEGMENT_PUBLIC, "default"));
 		
 		// init crawl results monitor cache
-        crawlResults = new ResultURLs();
+        crawlResults = new ResultURLs(100);
         
         // start yacy core
         log.logConfig("Starting YaCy Protocol Core");

@@ -136,7 +136,7 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
     
     private final Map<String, String> memoryStats() {
         // returns statistical data about this object
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final HashMap<String, String> map = new HashMap<String, String>(20);
         map.put("objectHitChunkSize", (readHitCache == null) ? "0" : Integer.toString(readHitCache.rowdef.objectsize));
         map.put("objectHitCacheCount", (readHitCache == null) ? "0" : Integer.toString(readHitCache.size()));
         map.put("objectHitMem", (readHitCache == null) ? "0" : Long.toString(readHitCache.rowdef.objectsize * readHitCache.size()));

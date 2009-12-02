@@ -190,34 +190,34 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
     }
 
     public final synchronized Row.Entry removeOne() {
-        if ((index1 != null) && (index1.size() != 0)) {
+        if (index1 != null && !index1.isEmpty()) {
             return index1.removeOne();
         }
-        if ((index0 != null) && (index0.size() != 0)) {
+        if (index0 != null && !index0.isEmpty()) {
         	return index0.removeOne();
         }
         return null;
     }
     
     public final synchronized int size() {
-        if ((index0 != null) && (index1 == null)) {
+        if (index0 != null && index1 == null) {
             return index0.size();
         }
-        if ((index0 == null) && (index1 != null)) {
+        if (index0 == null && index1 != null) {
             return index1.size();
         }
-        assert ((index0 != null) && (index1 != null));
+        assert (index0 != null && index1 != null);
         return index0.size() + index1.size();
     }
     
     public final synchronized boolean isEmpty() {
-        if ((index0 != null) && (index1 == null)) {
+        if (index0 != null && index1 == null) {
             return index0.isEmpty();
         }
-        if ((index0 == null) && (index1 != null)) {
+        if (index0 == null && index1 != null) {
             return index1.isEmpty();
         }
-        assert ((index0 != null) && (index1 != null));
+        assert (index0 != null && index1 != null);
         if (!index0.isEmpty()) return false;
         if (!index1.isEmpty()) return false;
         return true;

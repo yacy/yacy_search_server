@@ -300,7 +300,7 @@ public final class Condenser {
         int idx;
         int wordInSentenceCounter = 1;
         boolean comb_indexof = false, last_last = false, last_index = false;
-        final HashMap<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>();
+        final HashMap<StringBuilder, Phrase> sentences = new HashMap<StringBuilder, Phrase>(100);
         
         // read source
         final sievedWordsEnum wordenum = new sievedWordsEnum(is);

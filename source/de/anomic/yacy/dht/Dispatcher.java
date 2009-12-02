@@ -211,7 +211,7 @@ public class Dispatcher {
             for (ReferenceContainer<WordReference> c: containers) {
                 container = this.segment.termIndex().delete(c.getTermHash());
                 if (this.log.isFine()) this.log.logFine("selected " + container.size() + " urls for word '" + c.getTermHashAsString() + "'");
-                if (container.size() != 0) rc.add(container);
+                if (!container.isEmpty()) rc.add(container);
             }
         }
         

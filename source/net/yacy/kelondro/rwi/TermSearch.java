@@ -50,7 +50,7 @@ public class TermSearch <ReferenceType extends Reference> {
                 new HashMap<byte[], ReferenceContainer<ReferenceType>>(0) :
                 base.searchConjunction(queryHashes, urlselection);
                 
-        if ((inclusionContainers.size() != 0) &&
+        if (!inclusionContainers.isEmpty() &&
             (inclusionContainers.size() < queryHashes.size()))
             inclusionContainers = new HashMap<byte[], ReferenceContainer<ReferenceType>>(0); // prevent that only a subset is returned
         

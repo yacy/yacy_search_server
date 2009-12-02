@@ -314,7 +314,7 @@ public class CrawlProfile {
                      final int cacheStrategy) {
             if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
             final String handle = (startURL == null) ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, Word.commonHashLength) : startURL.hash();
-            mem = new HashMap<String, String>();
+            mem = new HashMap<String, String>(40);
             mem.put(HANDLE,           handle);
             mem.put(NAME,             name);
             mem.put(START_URL,        (startURL == null) ? "" : startURL.toNormalform(true, false));

@@ -37,12 +37,12 @@ public final class serverClassLoader extends ClassLoader {
     public serverClassLoader() {
         //super(ClassLoader.getSystemClassLoader());
     	super(Thread.currentThread().getContextClassLoader());
-        this.classes = new HashMap<File, Class<?>>();
+        this.classes = new HashMap<File, Class<?>>(100);
     }
 
     public serverClassLoader(final ClassLoader parent) {
         super(parent);
-        classes = new HashMap<File, Class<?>>();
+        classes = new HashMap<File, Class<?>>(100);
     }
 
     public Package[] packages() {

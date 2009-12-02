@@ -357,7 +357,7 @@ public class Domains {
          "INT=International"
      };
 
-    private static HashMap<String, Integer> TLDID = new HashMap<String, Integer>();
+    private static HashMap<String, Integer> TLDID = new HashMap<String, Integer>(32);
     //private static HashMap<String, String> TLDName = new HashMap<String, String>();
 
     private static void insertTLDProps(final String[] TLDList, final int id) {

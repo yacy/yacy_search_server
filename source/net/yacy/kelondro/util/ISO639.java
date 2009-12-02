@@ -168,7 +168,7 @@ public class ISO639 {
         "zh-Chinese",
         "zu-Zulu"};
 
-    static HashMap<String, String> mapping = new HashMap<String, String>();
+    static HashMap<String, String> mapping = new HashMap<String, String>(codes.length);
 
     static {
         for (int i = 0; i < codes.length; i++) {

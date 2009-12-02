@@ -77,7 +77,7 @@ public class add_p {
     }
     private static void publishNews(final String url, final String title, final String description, final String tagsString) {
     	// create a news message
-    	final HashMap<String, String> map = new HashMap<String, String>();
+    	final HashMap<String, String> map = new HashMap<String, String>(8);
     	map.put("url", url.replace(',', '|'));
     	map.put("title", title.replace(',', ' '));
     	map.put("description", description.replace(',', ' '));

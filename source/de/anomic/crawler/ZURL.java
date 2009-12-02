@@ -90,10 +90,6 @@ public class ZURL implements Iterable<ZURL.Entry> {
         this.stack = new ConcurrentLinkedQueue<String>();
     }
     
-    public int size() {
-        return urlIndex.size() ;
-    }
-    
     public void clear() throws IOException {
         if (urlIndex != null) urlIndex.clear();
         if (stack != null) stack.clear();
