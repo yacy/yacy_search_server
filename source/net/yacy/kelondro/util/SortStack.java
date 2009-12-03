@@ -62,6 +62,13 @@ public class SortStack<E> {
     }
     
     public int size() {
+        /*
+        int c = 0;
+        synchronized (onstack) {
+            for (List<E> l: onstack.values()) c += l.size();
+            assert c == this.instack.size() : "c = " + c + "; this.size() = " + this.instack.size();
+        }
+        */
         return this.instack.size();
     }
     
@@ -71,10 +78,10 @@ public class SortStack<E> {
      * @param weight
      */
     public void push(final E element, Long weight) {
-        if (this.instack.put(element, PRESENT) != null) return;
-        
         // put the element on the stack
         synchronized (this.onstack) {
+            if (this.instack.put(element, PRESENT) != null) return;
+            
             List<E> l = this.onstack.get(weight);
             if (l == null) {
                 l = new LinkedList<E>();
@@ -83,13 +90,15 @@ public class SortStack<E> {
             } else {
                 l.add(element);
             }
+            //this.instack.put(element, PRESENT);
         }
-
         // check maximum size of the stack an remove elements if the stack gets too large
         if (this.maxsize <= 0) return;
         while (!this.onstack.isEmpty() && this.onstack.size() > this.maxsize) synchronized (this.onstack) {
+            List<E> l;
             if (!this.onstack.isEmpty() && this.onstack.size() > this.maxsize) {
-                this.onstack.remove(this.onstack.lastKey());
+                l = this.onstack.remove(this.onstack.lastKey());
+                for (E e: l) instack.remove(e);
             }
         }
     }
@@ -137,9 +146,8 @@ public class SortStack<E> {
     }
     
     public void remove(final E element) {
-        if (!this.instack.contains(element)) return;
-        
         synchronized (this.onstack) {
+            if (!this.instack.contains(element)) return;
             for (Map.Entry<Long,List<E>> entry: this.onstack.entrySet()) {
                 Iterator<E> i = entry.getValue().iterator();
                 while (i.hasNext()) {
