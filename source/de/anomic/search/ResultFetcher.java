@@ -173,7 +173,7 @@ public class ResultFetcher {
                     
                     // place the result to the result vector
                     // apply post-ranking
-                    long ranking = Long.valueOf(query.getOrder().cardinal(resultEntry.word()));
+                    long ranking = Long.valueOf(rankedCache.getOrder().cardinal(resultEntry.word()));
                     ranking += postRanking(resultEntry, rankedCache.getTopics());
                     //System.out.println("*** resultEntry.hash = " + resultEntry.hash());
                     result.push(resultEntry, ranking);

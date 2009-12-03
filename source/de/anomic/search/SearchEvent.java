@@ -79,6 +79,7 @@ public final class SearchEvent {
     private TreeMap<byte[], String> IAResults;
     private TreeMap<byte[], Integer> IACount;
     private byte[] IAmaxcounthash, IAneardhthash;
+    private final ReferenceOrder order;
     
    @SuppressWarnings("unchecked") SearchEvent(final QueryParams query,
                              final yacySeedDB peers,
@@ -98,6 +99,7 @@ public final class SearchEvent {
         this.IAmaxcounthash = null;
         this.IAneardhthash = null;
         this.localSearchThread = null;
+        this.order = new ReferenceOrder(query.ranking, query.targetlang);
         
         final long start = System.currentTimeMillis();
         if ((query.domType == QueryParams.SEARCHDOM_GLOBALDHT) ||
@@ -106,7 +108,7 @@ public final class SearchEvent {
             
         	// initialize a ranking process that is the target for data
         	// that is generated concurrently from local and global search threads
-            this.rankedCache = new RankingProcess(query, max_results_preparation, fetchpeers + 1);
+            this.rankedCache = new RankingProcess(this.query, this.order, max_results_preparation, fetchpeers + 1);
             
             // start a local search concurrently
             this.rankedCache.start();
@@ -149,7 +151,7 @@ public final class SearchEvent {
             this.results = new ResultFetcher(rankedCache, query, peers, 10000);
         } else {
             // do a local search
-            this.rankedCache = new RankingProcess(query, max_results_preparation, 2);
+            this.rankedCache = new RankingProcess(this.query, this.order, max_results_preparation, 2);
             this.rankedCache.run();
             //CrawlSwitchboard.Finding finding = wordIndex.retrieveURLs(query, false, 2, ranking, process);
             
@@ -191,8 +193,12 @@ public final class SearchEvent {
         // store this search to a cache so it can be re-used
         if (MemoryControl.available() < 1024 * 1024 * 10) SearchEventCache.cleanupEvents(true);
         SearchEventCache.put(query.id(false), this);
-    }
-    
+   }
+   
+   public ReferenceOrder getOrder() {
+       return this.order;
+   }
+   
    public long getEventTime() {
        return this.eventTime;
    }

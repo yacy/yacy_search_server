@@ -82,9 +82,9 @@ public final class RankingProcess extends Thread {
     private final ConcurrentHashMap<String, Integer> ref;  // reference score computation for the commonSense heuristic
     private final ConcurrentHashMap<String, HostInfo> hostNavigator;
     private final ConcurrentHashMap<String, AuthorInfo> authorNavigator;
+    private final ReferenceOrder order;
     
-    
-    public RankingProcess(final QueryParams query, final int maxentries, final int concurrency) {
+    public RankingProcess(final QueryParams query, final ReferenceOrder order, final int maxentries, final int concurrency) {
         // we collect the urlhashes and construct a list with urlEntry objects
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
@@ -93,6 +93,7 @@ public final class RankingProcess extends Thread {
         this.doubleDomCache = new HashMap<String, SortStack<WordReferenceVars>>();
         this.handover = new HashSet<String>();
         this.query = query;
+        this.order = order;
         this.maxentries = maxentries;
         this.remote_peerCount = 0;
         this.remote_indexCount = 0;
@@ -113,6 +114,10 @@ public final class RankingProcess extends Thread {
     
     public QueryParams getQuery() {
         return this.query;
+    }
+    
+    public ReferenceOrder getOrder() {
+        return this.order;
     }
     
     public void run() {
@@ -158,7 +163,7 @@ public final class RankingProcess extends Thread {
         long timer = System.currentTimeMillis();
         
         // normalize entries
-        final BlockingQueue<WordReferenceVars> decodedEntries = this.query.getOrder().normalizeWith(index);
+        final BlockingQueue<WordReferenceVars> decodedEntries = this.order.normalizeWith(index);
         MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.NORMALIZING, index.size(), System.currentTimeMillis() - timer), false);
         
         // iterate over normalized entries and select some that are better than currently stored
@@ -232,7 +237,7 @@ public final class RankingProcess extends Thread {
 		for (WordReferenceVars fEntry: filteredEntries) {
 			
 		    // kick out entries that are too bad according to current findings
-		    r = Long.valueOf(this.query.getOrder().cardinal(fEntry));
+		    r = Long.valueOf(this.order.cardinal(fEntry));
 		    assert maxentries != 0;
 		    if (maxentries >= 0 && stack.size() >= maxentries && stack.bottom(r.longValue())) continue;
 		    

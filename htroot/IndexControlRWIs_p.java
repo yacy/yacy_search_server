@@ -55,6 +55,7 @@ import de.anomic.data.listManager;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProcess;
+import de.anomic.search.ReferenceOrder;
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Segment;
 import de.anomic.search.Switchboard;
@@ -407,7 +408,7 @@ public class IndexControlRWIs_p {
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_domlength", DigestURI.domLengthEstimation(entry.hash()));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ybr", RankingProcess.ybr(entry.hash()));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_tf", 1000.0 * entry.word().termFrequency());
-                prop.putNum("genUrlList_urlList_"+i+"_urlExists_authority", (ranked.getQuery().getOrder() == null) ? -1 : ranked.getQuery().getOrder().authority(entry.hash()));
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_authority", (ranked.getOrder() == null) ? -1 : ranked.getOrder().authority(entry.hash()));
                 prop.put("genUrlList_urlList_"+i+"_urlExists_date", DateFormatter.formatShortDay(new Date(entry.word().lastModified())));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_wordsintitle", entry.word().wordsintitle());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_wordsintext", entry.word().wordsintext());
@@ -503,7 +504,8 @@ public class IndexControlRWIs_p {
 
     public static RankingProcess genSearchresult(final serverObjects prop, final Switchboard sb, Segment segment, final byte[] keyhash, final Bitfield filter) {
         final QueryParams query = new QueryParams(new String(keyhash), -1, filter, segment, sb.getRanking());
-        final RankingProcess ranked = new RankingProcess(query, Integer.MAX_VALUE, 1);
+        final ReferenceOrder order = new ReferenceOrder(query.ranking, query.targetlang);
+        final RankingProcess ranked = new RankingProcess(query, order, Integer.MAX_VALUE, 1);
         ranked.run();
         
         if (ranked.filteredCount() == 0) {

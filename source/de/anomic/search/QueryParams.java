@@ -76,7 +76,6 @@ public final class QueryParams {
     public boolean onlineSnippetFetch;
     public RankingProfile ranking;
     private Segment indexSegment;
-    private final ReferenceOrder order;
     public String host; // this is the client host that starts the query, not a site operator
     public String sitehash; // this is a domain hash, 6 bytes long or null
     public String authorhash;
@@ -127,7 +126,6 @@ public final class QueryParams {
         this.handle = Long.valueOf(System.currentTimeMillis());
         this.specialRights = false;
         this.navigators = "all";
-        this.order = new ReferenceOrder(this.ranking, this.targetlang);
         this.indexSegment = indexSegment;
     }
     
@@ -177,12 +175,7 @@ public final class QueryParams {
         this.remotepeer = null;
 		this.handle = Long.valueOf(System.currentTimeMillis());
 		this.specialRights = specialRights;
-        this.order = new ReferenceOrder(this.ranking, this.targetlang);
         this.indexSegment = indexSegment;
-    }
-    
-    public ReferenceOrder getOrder() {
-        return this.order;
     }
     
     public Segment getSegment() {
