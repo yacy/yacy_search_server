@@ -4,6 +4,5 @@
     <li><a href="/IndexControlRWIs_p.html" class="MenuItemLink lock">RWI Admin</a></li>
     <li><a href="/IndexControlURLs_p.html" class="MenuItemLink lock">URL Reference Admin</a></li>
     <li><a href="/IndexImport_p.html" class="MenuItemLink lock">Queue Import</a></li>
-    <li><a href="/IndexCleaner_p.html" class="MenuItemLink lock">Index Cleaner</a></li>
   </ul>
 </div>
