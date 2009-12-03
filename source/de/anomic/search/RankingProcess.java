@@ -89,7 +89,7 @@ public final class RankingProcess extends Thread {
         // attention: if minEntries is too high, this method will not terminate within the maxTime
         // sortorder: 0 = hash, 1 = url, 2 = ranking
         this.localSearchInclusion = null;
-        this.stack = new SortStack<WordReferenceVars>(maxentries);
+        this.stack = new SortStack<WordReferenceVars>(maxentries, true);
         this.doubleDomCache = new HashMap<String, SortStack<WordReferenceVars>>();
         this.handover = new HashSet<String>();
         this.query = query;
@@ -234,7 +234,7 @@ public final class RankingProcess extends Thread {
 		    // kick out entries that are too bad according to current findings
 		    r = Long.valueOf(this.query.getOrder().cardinal(fEntry));
 		    assert maxentries != 0;
-		    if ((maxentries >= 0) && (stack.size() >= maxentries) && (stack.bottom(r.longValue()))) continue;
+		    if (maxentries >= 0 && stack.size() >= maxentries && stack.bottom(r.longValue())) continue;
 		    
 		    // insert
 		    if ((maxentries < 0) || (stack.size() < maxentries)) {
@@ -315,7 +315,7 @@ public final class RankingProcess extends Thread {
             m = this.doubleDomCache.get(domhash);
             if (m == null) {
                 // first appearance of dom
-                m = new SortStack<WordReferenceVars>((query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll);
+                m = new SortStack<WordReferenceVars>((query.specialRights) ? maxDoubleDomSpecial : maxDoubleDomAll, true);
                 this.doubleDomCache.put(domhash, m);
                 return rwi;
             }
@@ -446,6 +446,7 @@ public final class RankingProcess extends Thread {
             }
             
             // accept url
+            //System.out.println("handing over hash " + page.hash());
             this.handover.add(page.hash()); // remember that we handed over this url
             return page;
         }

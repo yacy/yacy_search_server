@@ -43,17 +43,27 @@ public class SortStack<E> {
     private TreeMap<Long, List<E>> onstack; // object within the stack
     private ConcurrentHashMap<E, Object> instack; // keeps track which element has been on the stack
     protected int maxsize;
+    private boolean upward;
     
-    public SortStack() {
-        this(-1);
+    public SortStack(boolean upward) {
+        this(-1, upward);
     }
-    
-    public SortStack(final int maxsize) {
+
+    /**
+     * create a new sort stack
+     * all elements in the stack are not ordered by their insert order but by a given element weight
+     * weights that are preferred are returned first when a pop from the stack is made
+     * the stack may be ordered upward (preferring small weights) or downward (preferring high wights)
+     * @param maxsize the maximum size of the stack. When the stack exceeds this number, then the worst entries according to entry order are removed
+     * @param upward is the entry order and controls which elements are returned on pop. if true, then the smallest is returned first
+     */
+    public SortStack(final int maxsize, boolean upward) {
         // the maxsize is the maximum number of entries in the stack
         // if this is set to -1, the size is unlimited
         this.onstack = new TreeMap<Long, List<E>>();
         this.instack = new ConcurrentHashMap<E, Object>();
         this.maxsize = maxsize;
+        this.upward = upward;
     }
 
     
@@ -73,7 +83,7 @@ public class SortStack<E> {
     }
     
     /**
-     * put a elememt on the stack using a order of the weight
+     * put a element on the stack using a order of the weight
      * @param element
      * @param weight
      */
@@ -97,7 +107,7 @@ public class SortStack<E> {
         while (!this.onstack.isEmpty() && this.onstack.size() > this.maxsize) synchronized (this.onstack) {
             List<E> l;
             if (!this.onstack.isEmpty() && this.onstack.size() > this.maxsize) {
-                l = this.onstack.remove(this.onstack.lastKey());
+                l = this.onstack.remove((this.upward) ? this.onstack.lastKey() : this.onstack.firstKey());
                 for (E e: l) instack.remove(e);
             }
         }
@@ -113,7 +123,7 @@ public class SortStack<E> {
         final Long w;
         synchronized (this.onstack) {
             if (this.onstack.isEmpty()) return null;
-            w = this.onstack.firstKey();
+            w = (this.upward) ? this.onstack.firstKey() : this.onstack.lastKey();
             final List<E> l = this.onstack.get(w);
             element = l.get(0);
         }
@@ -131,7 +141,7 @@ public class SortStack<E> {
         final Long w;
         synchronized (this.onstack) {
             if (this.onstack.isEmpty()) return null;
-            w = this.onstack.firstKey();
+            w = (this.upward) ? this.onstack.firstKey() : this.onstack.lastKey();
             final List<E> l = this.onstack.get(w);
             element = l.remove(0);
             this.instack.remove(element);
@@ -168,7 +178,7 @@ public class SortStack<E> {
         if (this.onstack.isEmpty()) return true;
         Long l;
         synchronized (this.onstack) {
-            l = this.onstack.lastKey();
+            l = (this.upward) ? this.onstack.lastKey() : this.onstack.firstKey();
         }
         return weight > l.longValue();
     }

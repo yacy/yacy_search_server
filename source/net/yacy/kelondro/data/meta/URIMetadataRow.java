@@ -356,7 +356,7 @@ public class URIMetadataRow implements URIMetadata {
         // the result is a String of 12 bytes within a 72-bit space
         // (each byte has an 6-bit range)
         // that should be enough for all web pages on the world
-        return this.entry.getColString(col_hash, null);
+        return new String(this.entry.getPrimaryKeyBytes());
     }
 
     public long ranking() {

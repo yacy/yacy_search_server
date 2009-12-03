@@ -43,12 +43,20 @@ public class SortStore<E> extends SortStack<E> {
     private ConcurrentHashMap<E, Object> offset; // keeps track which element has been on the stack or is now in the offstack
     private long largest;
     
-    public SortStore() {
-        this(-1);
+    public SortStore(boolean upward) {
+        this(-1, upward);
     }
     
-    public SortStore(final int maxsize) {
-        super(maxsize);
+    /**
+     * create a new sort stack
+     * all elements in the stack are not ordered by their insert order but by a given element weight
+     * weights that are preferred are returned first when a pop from the stack is made
+     * the stack may be ordered upward (preferring small weights) or downward (preferring high wights)
+     * @param maxsize the maximum size of the stack. When the stack exceeds this number, then the worst entries according to entry order are removed
+     * @param upward is the entry order and controls which elements are returned on pop. if true, then the smallest is returned first
+     */
+    public SortStore(final int maxsize, boolean upward) {
+        super(maxsize, upward);
         this.largest = Long.MIN_VALUE;
         this.offstack = new ArrayList<stackElement>();
         this.offset = new ConcurrentHashMap<E, Object>();
@@ -152,7 +160,7 @@ public class SortStore<E> extends SortStack<E> {
     }
 
     public static void main(String[] args) {
-        SortStore<String> a = new SortStore<String>();
+        SortStore<String> a = new SortStore<String>(true);
         a.push("abc", 1L);
         a.pop();
         a.push("abc", 2L);

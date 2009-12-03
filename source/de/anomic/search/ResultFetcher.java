@@ -80,8 +80,8 @@ public class ResultFetcher {
         
         this.urlRetrievalAllTime = 0;
         this.snippetComputationAllTime = 0;
-        this.result = new SortStore<ResultEntry>(-1); // this is the result, enriched with snippets, ranked and ordered by ranking
-        this.images = new SortStore<MediaSnippet>(-1);
+        this.result = new SortStore<ResultEntry>(-1, true); // this is the result, enriched with snippets, ranked and ordered by ranking
+        this.images = new SortStore<MediaSnippet>(-1, true);
         this.failedURLs = new HashMap<String, String>(); // a map of urls to reason strings where a worker thread tried to work on, but failed.
         
         // snippets do not need to match with the complete query hashes,
