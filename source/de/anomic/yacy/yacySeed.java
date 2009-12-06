@@ -213,7 +213,7 @@ public class yacySeed implements Cloneable {
         this.dna.put(yacySeed.IPTYPE, "&empty;");
 
         // settings that can only be computed by visiting peer
-        this.dna.put(yacySeed.LASTSEEN, DateFormatter.formatShortSecond(new Date(System.currentTimeMillis() - DateFormatter.UTCDiff()))); // for last-seen date
+        this.dna.put(yacySeed.LASTSEEN, DateFormatter.formatShortSecond(new Date(DateFormatter.correctedUTCTime()))); // for last-seen date
         this.dna.put(yacySeed.USPEED, yacySeed.ZERO);  // the computated uplink speed of the peer
 
         this.dna.put(yacySeed.CRWCNT, yacySeed.ZERO);
@@ -518,7 +518,7 @@ public class yacySeed implements Cloneable {
         // because java thinks it must apply the UTC offset to the current time,
         // to create a string that looks like our current time, it adds the local UTC offset to the
         // time. To create a corrected UTC Date string, we first subtract the local UTC offset.
-        dna.put(yacySeed.LASTSEEN, DateFormatter.formatShortSecond(new Date(System.currentTimeMillis() - DateFormatter.UTCDiff())) );
+        dna.put(yacySeed.LASTSEEN, DateFormatter.formatShortSecond(new Date(DateFormatter.correctedUTCTime())) );
     }
     
     /**
@@ -738,7 +738,7 @@ public class yacySeed implements Cloneable {
         // now calculate other information about the host
         newSeed.dna.put(yacySeed.NAME, (name) == null ? "anonymous" : name);
         newSeed.dna.put(yacySeed.PORT, Integer.toString((port <= 0) ? 8080 : port));
-        newSeed.dna.put(yacySeed.BDATE, DateFormatter.formatShortSecond(new Date(System.currentTimeMillis() - DateFormatter.UTCDiff())) );
+        newSeed.dna.put(yacySeed.BDATE, DateFormatter.formatShortSecond(new Date(DateFormatter.correctedUTCTime())) );
         newSeed.dna.put(yacySeed.LASTSEEN, newSeed.dna.get(yacySeed.BDATE)); // just as initial setting
         newSeed.dna.put(yacySeed.UTC, DateFormatter.UTCDiffString());
         newSeed.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);
