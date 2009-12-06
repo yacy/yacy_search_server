@@ -97,7 +97,7 @@ public class yacyPeerActions {
         }
 
         // connection time
-        final long nowUTC0Time = DateFormatter.correctedUTCTime(); // is better to have this value in a variable for debugging
+        final long nowUTC0Time = System.currentTimeMillis(); // is better to have this value in a variable for debugging
         long ctimeUTC0 = seed.getLastSeenUTC();
 
         if (ctimeUTC0 > nowUTC0Time) {
