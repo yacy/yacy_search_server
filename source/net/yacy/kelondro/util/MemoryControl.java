@@ -43,7 +43,9 @@ public class MemoryControl {
 
     private static long lastGC = 0l;
     
-    private static long DHTkbytes = 0;
+    private static long DHTkbytes = 0L;
+    private static long prevDHTtreshold = 0L;
+    private static int DHTtresholdCount = 0;
     private static boolean allowDHT = true;
 
     /**
@@ -178,12 +180,27 @@ public class MemoryControl {
     	return allowDHT;
     }
     
-    public static void setDHTkbytes(long kbytes) {
+    public static void setDHTallowed() {
+    	allowDHT = true;
+    }
+    
+    public static void setDHTkbytes(final long kbytes) {
     	DHTkbytes = kbytes;
     }
     
-    private static void checkDHTrule(long available) {
-        if ((available >> 10) < DHTkbytes) allowDHT = false;
+    private static void checkDHTrule(final long available) {
+    	// disable dht if memory is less than treshold - 4 times, maximum 11 minutes between each detection
+    	if ((available >> 10) < DHTkbytes) {
+    		final long t = System.currentTimeMillis();
+    		if(prevDHTtreshold + 11L /* minutes */ * 60000L > t) {
+    			DHTtresholdCount++;
+    			if(DHTtresholdCount > 3 /* occurencies - 1 */) allowDHT = false;
+    		}
+    		else DHTtresholdCount = 1;
+    		
+    		prevDHTtreshold = t;
+    	}
+    	//allowDHT = ((available >> 10) < DHTkbytes) ? false : true; // stupid
     }
 
     /**
