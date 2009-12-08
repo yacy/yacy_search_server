@@ -31,8 +31,8 @@ import java.util.ArrayList;
 import java.util.TreeSet;
 
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.Formatter;
-import net.yacy.kelondro.util.MemoryTracker;
 
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
@@ -153,7 +153,7 @@ public class yacysearchitem {
             prop.put("content_description", desc);
             prop.putXML("content_description-xml", desc);
             prop.putJSON("content_description-json", desc);
-            MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + item, 0, 0), false);
+            EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + item, 0, 0), false, 30000, ProfilingGraph.maxTime);
             
             return prop;
         }

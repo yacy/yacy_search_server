@@ -26,26 +26,27 @@
 
 package de.anomic.yacy.graphics;
 
-import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
+import java.util.Iterator;
 
-
-import net.yacy.kelondro.util.MemoryTracker;
-import net.yacy.kelondro.util.MemoryTracker.Event;
+import net.yacy.kelondro.util.EventTracker;
+import net.yacy.kelondro.util.EventTracker.Event;
 import net.yacy.visualization.RasterPlotter;
 import net.yacy.visualization.ChartPlotter;
-
 
 public class ProfilingGraph {
     
     private static ChartPlotter bufferChart = null;
+    public static long maxTime = 600000L;
     
     public static long maxPayload(final String eventname, final long min) {
-    	final ArrayList<Event> list = MemoryTracker.history(eventname);
+    	final Iterator<Event> list = EventTracker.getHistory(eventname);
     	if (list == null) return min;
         long max = min, l;
         synchronized (list) {
-            for (MemoryTracker.Event event: list) {
+            EventTracker.Event event;
+            while (list.hasNext()) {
+                event = list.next();
                 l = ((Long) event.payload).longValue();
                 if (l > max) max = l;
             }
@@ -102,49 +103,61 @@ public class ProfilingGraph {
             }
             */
             // draw memory
-            ArrayList<Event> events = MemoryTracker.history("memory");
+            Iterator<Event> events = EventTracker.getHistory("memory");
             x0 = 1; y0 = 0;
-            if (events != null) synchronized (events) {for (MemoryTracker.Event event: events) {
-                time = event.time - now;
-                bytes = ((Long) event.payload).longValue();
-                x1 = (int) (time/1000);
-                y1 = (int) (bytes / 1024 / 1024);
-                chart.setColor("AAAAFF");
-                chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x1, y1, 2, null, 0);
-                chart.setColor("0000FF");
-                if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x0, y0, x1, y1);
-                x0 = x1; y0 = y1;
-            }}
+            if (events != null) {
+                EventTracker.Event event;
+                while (events.hasNext()) {
+                    event = events.next();
+                    time = event.time - now;
+                    bytes = ((Long) event.payload).longValue();
+                    x1 = (int) (time/1000);
+                    y1 = (int) (bytes / 1024 / 1024);
+                    chart.setColor("AAAAFF");
+                    chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x1, y1, 2, null, 0);
+                    chart.setColor("0000FF");
+                    if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_RIGHT, x0, y0, x1, y1);
+                    x0 = x1; y0 = y1;
+                }
+            }
             
             // draw wordcache
-            events = MemoryTracker.history("wordcache");
+            events = EventTracker.getHistory("wordcache");
             x0 = 1; y0 = 0;
-            if (events != null) synchronized (events) {for (MemoryTracker.Event event: events) {
-                time = event.time - now;
-                words = (int) ((Long) event.payload).longValue();
-                x1 = (int) (time/1000);
-                y1 = words;
-                chart.setColor("228822");
-                chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_LEFT, x1, y1, 2, null, 315);
-                chart.setColor("008800");
-                if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_LEFT, x0, y0, x1, y1);
-                x0 = x1; y0 = y1;
-            }}
+            if (events != null) {
+                EventTracker.Event event;
+                while (events.hasNext()) {
+                    event = events.next();
+                    time = event.time - now;
+                    words = (int) ((Long) event.payload).longValue();
+                    x1 = (int) (time/1000);
+                    y1 = words;
+                    chart.setColor("228822");
+                    chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_LEFT, x1, y1, 2, null, 315);
+                    chart.setColor("008800");
+                    if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_LEFT, x0, y0, x1, y1);
+                    x0 = x1; y0 = y1;
+                }
+            }
             
             // draw ppm
-            events = MemoryTracker.history("ppm");
+            events = EventTracker.getHistory("ppm");
             x0 = 1; y0 = 0;
-            if (events != null) synchronized (events) {for (MemoryTracker.Event event: events) {
-                time = event.time - now;
-                ppm = (int) ((Long) event.payload).longValue();
-                x1 = (int) (time/1000);
-                y1 = ppm;
-                chart.setColor("AA8888");
-                if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT0, x0, y0, x1, y1);
-                chart.setColor("AA2222");
-                chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT0, x1, y1, 2, ppm + " PPM", 0);
-                x0 = x1; y0 = y1;
-            }}
+            if (events != null) {
+                EventTracker.Event event;
+                while (events.hasNext()) {
+                    event = events.next();
+                    time = event.time - now;
+                    ppm = (int) ((Long) event.payload).longValue();
+                    x1 = (int) (time/1000);
+                    y1 = ppm;
+                    chart.setColor("AA8888");
+                    if (x0 < 0) chart.chartLine(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT0, x0, y0, x1, y1);
+                    chart.setColor("AA2222");
+                    chart.chartDot(ChartPlotter.DIMENSION_BOTTOM, ChartPlotter.DIMENSION_ANOT0, x1, y1, 2, ppm + " PPM", 0);
+                    x0 = x1; y0 = y1;
+                }
+            }
             
             bufferChart = chart;
         } catch (final ConcurrentModificationException cme) {

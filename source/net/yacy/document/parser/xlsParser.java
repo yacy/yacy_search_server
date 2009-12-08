@@ -160,7 +160,6 @@ public class xlsParser extends AbstractParser implements Idiom {
                  */
                 Log.logException(e);
                 final String errorMsg = "Unable to parse the xls document '" + location + "':" + e.getMessage();
-                theLogger.logSevere(errorMsg);
                 throw new ParserException(errorMsg, location);
             }
         }

@@ -128,6 +128,7 @@ import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.Domains;
+import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.MemoryTracker;
@@ -193,6 +194,7 @@ import de.anomic.yacy.yacyUpdateLocation;
 import de.anomic.yacy.yacyRelease;
 import de.anomic.yacy.dht.Dispatcher;
 import de.anomic.yacy.dht.PeerSelection;
+import de.anomic.yacy.graphics.ProfilingGraph;
 import de.anomic.yacy.graphics.WebStructureGraph;
 
 public final class Switchboard extends serverSwitch {
@@ -1486,7 +1488,7 @@ public final class Switchboard extends serverSwitch {
                     log.logInfo("AUTO-UPDATE: omiting update because download failed (file cannot be found, is too small or signature is bad)");
                 } else {
                     yacyRelease.deployRelease(downloaded);
-                    terminate(5000);
+                    terminate(5000, "auto-update to install " + downloaded.getName());
                     log.logInfo("AUTO-UPDATE: deploy and restart initiated");
                 }
             }
@@ -1765,10 +1767,10 @@ public final class Switchboard extends serverSwitch {
         if (System.currentTimeMillis() - lastPPMUpdate > 20000) {
             // we don't want to do this too often
             updateMySeed();
-            MemoryTracker.update("ppm", Long.valueOf(currentPPM()), true);
+            EventTracker.update("ppm", Long.valueOf(currentPPM()), true, 30000, ProfilingGraph.maxTime);
             lastPPMUpdate = System.currentTimeMillis();
         }
-        MemoryTracker.update("indexed", queueEntry.url().toNormalform(true, false), false);
+        EventTracker.update("indexed", queueEntry.url().toNormalform(true, false), false, 30000, ProfilingGraph.maxTime);
         
         // if this was performed for a remote crawl request, notify requester
         if ((processCase == EventOrigin.GLOBAL_CRAWLING) && (queueEntry.initiator() != null)) {
@@ -2005,7 +2007,7 @@ public final class Switchboard extends serverSwitch {
     }
     
     public int currentPPM() {
-        return MemoryTracker.countEvents("indexed", 20000) * 3;
+        return EventTracker.countEvents("indexed", 20000) * 3;
     }
     
     public String makeDefaultPeerName() {
@@ -2127,13 +2129,15 @@ public final class Switchboard extends serverSwitch {
         else if (this.terminate || curThread.isInterrupted()) throw new InterruptedException("Shutdown in progress ...");
     }
 
-    public void terminate(final long delay) {
+    public void terminate(final long delay, String reason) {
         if (delay <= 0) throw new IllegalArgumentException("The shutdown delay must be greater than 0.");
-        (new delayedShutdown(this,delay)).start();
+        log.logInfo("caught delayed terminate request: " + reason);
+        (new delayedShutdown(this, delay, reason)).start();
     }
     
-    public void terminate() {
+    public void terminate(String reason) {
         this.terminate = true;
+        log.logInfo("caught terminate request: " + reason);
         this.shutdownSync.release();
     }
     
@@ -2171,9 +2175,11 @@ public final class Switchboard extends serverSwitch {
 class delayedShutdown extends Thread {
     private final Switchboard sb;
     private final long delay;
-    public delayedShutdown(final Switchboard sb, final long delay) {
+    private final String reason;
+    public delayedShutdown(final Switchboard sb, final long delay, final String reason) {
         this.sb = sb;
         this.delay = delay;
+        this.reason = reason;
     }
     
     public void run() {
@@ -2184,6 +2190,6 @@ class delayedShutdown extends Thread {
         } catch (final Exception e) {
             Log.logException(e);
         }
-        this.sb.terminate();
+        this.sb.terminate(reason);
     }
 }

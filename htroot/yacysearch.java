@@ -44,9 +44,9 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.util.Domains;
+import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.kelondro.util.MemoryTracker;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.kelondro.util.ISO639;
 import net.yacy.repository.LoaderDispatcher;
@@ -461,7 +461,7 @@ public class yacysearch {
                     authenticated,
                     indexSegment,
                     ranking);
-            MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.INITIALIZATION, 0, 0), false);
+            EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.INITIALIZATION, 0, 0), false, 30000, ProfilingGraph.maxTime);
             
             // tell all threads to do nothing for a specific time
             sb.intermissionAllThreads(10000);

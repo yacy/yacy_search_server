@@ -38,8 +38,8 @@ import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.kelondro.util.MemoryTracker;
 import net.yacy.kelondro.util.SetTools;
 
 import de.anomic.crawler.ResultURLs;
@@ -139,7 +139,7 @@ public final class SearchEvent {
                     (query.domType == QueryParams.SEARCHDOM_GLOBALDHT) ? null : preselectedPeerHashes);
             if (this.primarySearchThreads != null) {
                 if (this.primarySearchThreads.length > fetchpeers) this.rankedCache.moreFeeders(this.primarySearchThreads.length - fetchpeers);
-                MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "remote search thread start", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false);
+                EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "remote search thread start", this.primarySearchThreads.length, System.currentTimeMillis() - timer), false, 30000, ProfilingGraph.maxTime);
                 // finished searching
                 Log.logFine("SEARCH_EVENT", "SEARCH TIME AFTER GLOBAL-TRIGGER TO " + primarySearchThreads.length + " PEERS: " + ((System.currentTimeMillis() - start) / 1000) + " seconds");
             } else {
@@ -179,7 +179,7 @@ public final class SearchEvent {
                     IACount.put(wordhash, Integer.valueOf(container.size()));
                     IAResults.put(wordhash, ReferenceContainer.compressIndex(container, null, 1000).toString());
                 }
-                MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "abstract generation", this.rankedCache.searchContainerMap().size(), System.currentTimeMillis() - timer), false);
+                EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "abstract generation", this.rankedCache.searchContainerMap().size(), System.currentTimeMillis() - timer), false, 30000, ProfilingGraph.maxTime);
             }
             
             // start worker threads to fetch urls and snippets
@@ -188,7 +188,7 @@ public final class SearchEvent {
          
         // clean up events
         SearchEventCache.cleanupEvents(false);
-        MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "event-cleanup", 0, 0), false);
+        EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "event-cleanup", 0, 0), false, 30000, ProfilingGraph.maxTime);
         
         // store this search to a cache so it can be re-used
         if (MemoryControl.available() < 1024 * 1024 * 10) SearchEventCache.cleanupEvents(true);

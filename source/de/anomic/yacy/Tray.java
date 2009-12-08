@@ -136,7 +136,7 @@ public final class Tray {
 		menuItem = new MenuItem(label);
 		menuItem.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent e) {
-				sb.terminate();
+				sb.terminate("shutdown from tray");
 			}
 		});
 		menu.add(menuItem);

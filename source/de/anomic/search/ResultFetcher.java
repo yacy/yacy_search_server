@@ -39,7 +39,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.MemoryTracker;
+import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.kelondro.util.SortStack;
 import net.yacy.kelondro.util.SortStore;
@@ -95,8 +95,7 @@ public class ResultFetcher {
         // start worker threads to fetch urls and snippets
         this.workerThreads = null;
         deployWorker(Math.min(10, query.itemsPerPage), query.neededResults());
-        MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), this.workerThreads.length + " online snippet fetch threads started", 0, 0), false);
-        
+        EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), this.workerThreads.length + " online snippet fetch threads started", 0, 0), false, 30000, ProfilingGraph.maxTime);
     }
 
     public void deployWorker(int deployCount, int neededResults) {
@@ -281,7 +280,7 @@ public class ResultFetcher {
     public ResultEntry oneResult(final int item) {
         // check if we already retrieved this item
     	// (happens if a search pages is accessed a second time)
-        MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "obtain one result entry - start", 0, 0), false);
+        EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), "obtain one result entry - start", 0, 0), false, 30000, ProfilingGraph.maxTime);
         if (this.result.sizeStore() > item) {
             // we have the wanted result already in the result array .. return that
             return this.result.element(item).element;

@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import de.anomic.yacy.graphics.ProfilingGraph;
+
 import net.yacy.kelondro.index.ARC;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.SimpleARC;
@@ -39,8 +41,8 @@ import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
 import net.yacy.kelondro.order.Order;
 import net.yacy.kelondro.util.ByteArray;
+import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.MemoryControl;
-import net.yacy.kelondro.util.MemoryTracker;
 
 
 /*
@@ -108,7 +110,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     public void add(ReferenceContainer<ReferenceType> newEntries) throws IOException {
         this.ram.add(newEntries);
         if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < System.currentTimeMillis()) {
-            MemoryTracker.update("wordcache", Long.valueOf(this.ram.size()), true);
+            EventTracker.update("wordcache", Long.valueOf(this.ram.size()), true, 30000, ProfilingGraph.maxTime);
             cleanCache();
         }
     }
@@ -116,7 +118,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     public void add(byte[] termHash, ReferenceType entry) throws IOException {
         this.ram.add(termHash, entry);
         if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < System.currentTimeMillis()) {
-            MemoryTracker.update("wordcache", Long.valueOf(this.ram.size()), true);
+            EventTracker.update("wordcache", Long.valueOf(this.ram.size()), true, 30000, ProfilingGraph.maxTime);
             cleanCache();
         }
     }

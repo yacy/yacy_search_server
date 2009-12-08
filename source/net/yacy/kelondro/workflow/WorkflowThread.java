@@ -24,8 +24,6 @@
 
 package net.yacy.kelondro.workflow;
 
-import net.yacy.kelondro.logging.Log;
-
 public interface WorkflowThread {
     
     // -------------------------------------------------------
@@ -58,9 +56,6 @@ public interface WorkflowThread {
     public long getMemoryUse();
     // returns the sum of all memory usage differences before and after one busy job
     
-    public void setLog(Log log);
-    // defines a log where process states can be written to
-
     public void jobExceptionHandler(Exception e);
     // handles any action necessary during job execution
     

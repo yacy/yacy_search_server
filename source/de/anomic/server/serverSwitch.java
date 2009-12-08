@@ -380,7 +380,6 @@ public class serverSwitch {
             newThread.setMemPreReqisite(initialMemoryPreRequisite);
             setConfig(threadName + "_memprereq", initialMemoryPreRequisite);
         }
-        newThread.setLog(log);
         newThread.setDescription(threadShortDescription, threadLongDescription, threadMonitorURL);
         workerThreads.put(threadName, newThread);
         // start the thread

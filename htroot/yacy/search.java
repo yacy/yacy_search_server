@@ -41,7 +41,7 @@ import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.ReferenceContainer;
-import net.yacy.kelondro.util.MemoryTracker;
+import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.SortStack;
 import net.yacy.kelondro.util.ISO639;
 
@@ -225,7 +225,7 @@ public final class search {
             //final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
             final HashMap<byte[], ReferenceContainer<WordReference>> incc = indexSegment.termIndex().searchConjunction(theQuery.queryHashes, QueryParams.hashes2StringSet(urls));
             
-            MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.COLLECTION, incc.size(), System.currentTimeMillis() - timer), false);
+            EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.COLLECTION, incc.size(), System.currentTimeMillis() - timer), false, 30000, ProfilingGraph.maxTime);
             if (incc != null) {
                 final Iterator<Map.Entry<byte[], ReferenceContainer<WordReference>>> ci = incc.entrySet().iterator();
                 Map.Entry<byte[], ReferenceContainer<WordReference>> entry;
@@ -342,7 +342,7 @@ public final class search {
                 refstr.append(",").append(e.name);
             }
             prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());
-            MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), "reference collection", ws.size(), System.currentTimeMillis() - timer), false);
+            EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), "reference collection", ws.size(), System.currentTimeMillis() - timer), false, 30000, ProfilingGraph.maxTime);
         }
         prop.put("indexabstract", indexabstract.toString());
         
@@ -369,7 +369,7 @@ public final class search {
             }
             prop.put("links", links.toString());
             prop.put("linkcount", accu.size());
-            MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), "result list preparation", accu.size(), System.currentTimeMillis() - timer), false);
+            EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), "result list preparation", accu.size(), System.currentTimeMillis() - timer), false, 30000, ProfilingGraph.maxTime);
         }
         
         // add information about forward peers

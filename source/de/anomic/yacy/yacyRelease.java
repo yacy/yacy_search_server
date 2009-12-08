@@ -416,7 +416,7 @@ public final class yacyRelease extends yacyVersion {
                     Log.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
                     OS.execAsynchronous(scriptFile);
                     Log.logInfo("RESTART", "script is running");
-                    sb.terminate(5000);
+                    sb.terminate(5000, "windows restart");
                 } catch (final IOException e) {
                     Log.logSevere("RESTART", "restart failed", e);
                 }
@@ -466,7 +466,7 @@ public final class yacyRelease extends yacyVersion {
                     Log.logInfo("RESTART", "wrote restart-script to " + scriptFile.getAbsolutePath());
                     OS.execAsynchronous(scriptFile);
                     Log.logInfo("RESTART", "script is running");
-                    sb.terminate(5000);
+                    sb.terminate(5000, "unix restart");
                 } catch (final IOException e) {
                     Log.logSevere("RESTART", "restart failed", e);
                 }
@@ -567,7 +567,7 @@ public final class yacyRelease extends yacyVersion {
             OS.execAsynchronous(scriptFile);
             Log.logInfo("UPDATE", "script is running");
             sb.setConfig("update.time.deploy", System.currentTimeMillis());
-            sb.terminate(5000);
+            sb.terminate(5000, "auto-deploy for " + releaseFile.getName());
         } catch (final IOException e) {
             Log.logSevere("UPDATE", "update failed", e);
         }

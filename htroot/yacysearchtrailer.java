@@ -27,7 +27,7 @@
 import java.util.ArrayList;
 import java.util.Iterator;
 
-import net.yacy.kelondro.util.MemoryTracker;
+import net.yacy.kelondro.util.EventTracker;
 
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.QueryParams;
@@ -146,7 +146,7 @@ public class yacysearchtrailer {
             prop.put("nav-about_body", aboutBody);
         }
         
-        MemoryTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + "bottomline", 0, 0), false);
+        EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.FINALIZATION + "-" + "bottomline", 0, 0), false, 30000, ProfilingGraph.maxTime);
         
         return prop;
     }

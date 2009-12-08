@@ -24,11 +24,10 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 
-import net.yacy.kelondro.util.MemoryTracker;
+import net.yacy.kelondro.util.EventTracker;
 
 import de.anomic.http.server.RequestHeader;
 import de.anomic.server.serverObjects;
@@ -41,15 +40,14 @@ public class PerformanceSearch_p {
         // return variable that accumulates replacements
         final serverObjects prop = new serverObjects();
         
-        final ArrayList<MemoryTracker.Event> events = MemoryTracker.history("SEARCH");
+        final Iterator<EventTracker.Event> events = EventTracker.getHistory("SEARCH");
         int c = 0;
-        MemoryTracker.Event event;
-        ProfilingGraph.searchEvent search;
-        long lastt = 0;
-        if (events != null) synchronized (events) {
-            Iterator<MemoryTracker.Event> i = events.iterator();
-            while (i.hasNext()) {
-                event = i.next();
+        if (events != null) {
+            EventTracker.Event event;
+            ProfilingGraph.searchEvent search;
+            long lastt = 0;
+            while (events.hasNext()) {
+                event = events.next();
                 search = (ProfilingGraph.searchEvent) event.payload;
                 prop.put("table_" + c + "_query", search.queryID);
                 prop.put("table_" + c + "_event", search.processName);

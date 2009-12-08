@@ -33,6 +33,7 @@ import net.yacy.kelondro.util.MemoryControl;
 
 public abstract class AbstractBusyThread extends AbstractThread implements BusyThread {
 
+    private final static Log log = new Log("BusyThread");
     private long startup = 0, intermission = 0, idlePause = 0, busyPause = 0;
     private long idletime = 0, memprereq = 0;
     private long idleCycles = 0, busyCycles = 0, outofmemoryCycles = 0;
@@ -167,7 +168,7 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
                 idletime += System.currentTimeMillis() - timestamp;
             } catch (final SocketException e) {
                 // in case that a socket is interrupted, this method must die silently (shutdown)
-                this.log.logFine("socket-job interrupted: " + e.getMessage());
+                log.logFine("socket-job interrupted: " + e.getMessage());
             } catch (final Exception e) {
                 // handle exceptions: thread must not die on any unexpected exceptions
                 // if the exception is too bad it should call terminate()
@@ -201,16 +202,16 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
                 Thread.sleep(millis);
             //}
         } catch (final InterruptedException e) {
-            if (this.log != null)
-                this.log.logConfig("thread '" + this.getName() + "' interrupted because of shutdown.");
+            if (log != null)
+                log.logConfig("thread '" + this.getName() + "' interrupted because of shutdown.");
         }
     }
     
     public void notifyThread() {
         if (this.syncObject != null) {
             synchronized (this.syncObject) {
-                if (this.log != null)
-                    if (this.log.isFine()) this.log.logFine("thread '" + this.getName()
+                if (log != null)
+                    if (log.isFine()) log.logFine("thread '" + this.getName()
                             + "' has received a notification from thread '"
                             + Thread.currentThread().getName() + "'.");
                 this.syncObject.notifyAll();

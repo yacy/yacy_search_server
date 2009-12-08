@@ -132,7 +132,7 @@ public class ConfigUpdate_p {
                         prop.put("candeploy_autoUpdate", "4");
                     } else {
                         yacyRelease.deployRelease(downloaded);
-                        sb.terminate(5000);
+                        sb.terminate(5000, "manual release update to " + downloaded.getName());
                         sb.getLog().logInfo("AUTO-UPDATE: deploy and restart initiated");
                         prop.put("candeploy_autoUpdate", "1");
                     }

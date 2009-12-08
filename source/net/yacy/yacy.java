@@ -316,8 +316,6 @@ public final class yacy {
                     // first start the server
                     sb.deployThread("10_httpd", "HTTPD Server/Proxy", "the HTTPD, used as web server and proxy", null, server, 0, 0, 0, 0);
                     //server.start();
-                    // repair log settings, gets overwritten with "PLASMA" in deployThread
-                    server.setLog(new Log("SERVER"));
 
                     // open the browser window
                     final boolean browserPopUpTrigger = sb.getConfig(SwitchboardConstants.BROWSER_POP_UP_TRIGGER, "true").equals("true");
@@ -515,10 +513,10 @@ public final class yacy {
         return config;
     }
     
-    public static void shutdown() {
+    public static void shutdown(String reason) {
     	if (sb != null) {
     		// YaCy is running in the same runtime. we can shutdown via interrupt
-    		sb.terminate();
+    		sb.terminate(reason);
     	} else {    	
     		final File applicationRoot = new File(System.getProperty("user.dir").replace('\\', '/'));
     		shutdown(applicationRoot);
@@ -1056,7 +1054,7 @@ class shutdownHookThread extends Thread {
 
                 // sending the yacy main thread a shutdown signal
                 Log.logFine("SHUTDOWN","Signaling shutdown to the switchboard.");
-                this.sb.terminate();
+                this.sb.terminate("shutdown hook");
 
                 // waiting for the yacy thread to finish execution
                 Log.logFine("SHUTDOWN","Waiting for main thread to finish.");

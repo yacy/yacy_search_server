@@ -93,13 +93,13 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     public    static final String LF_STRING = new String(new byte[]{LF});
     public    static final Class<?>[] stringType = {"".getClass()}; //  set up some reflection
     public    static final long startupTime = System.currentTimeMillis();
-    private   static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
-    private   static final HashMap<String, Object> commandObjMethodCache = new HashMap<String, Object>(5);
+    static final ThreadGroup sessionThreadGroup = new ThreadGroup("sessionThreadGroup");
+    static final HashMap<String, Object> commandObjMethodCache = new HashMap<String, Object>(5);
     
     /**
      * will be increased with each session and is used to return a hash code
      */
-    private static int sessionCounter = 0;
+    static int sessionCounter = 0;
     
     // static variables
     private  static final long keepAliveTimeout = 60000; // time that a connection is kept alive if requested with a keepAlive statement
@@ -123,18 +123,18 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     /**
      * specifies if the server should try to do a restart
      */
-    private boolean forceRestart = false;
+    boolean forceRestart = false;
     
     public static boolean useStaticIP = false;
-    
+    protected Log log;
     private SSLSocketFactory sslSocketFactory = null;
     private ServerSocket socket;           // listener
     private final int timeout;             // connection time-out of the socket
-    private serverHandler handlerPrototype;        // the command class (a serverHandler) 
+    serverHandler handlerPrototype;        // the command class (a serverHandler) 
 
     private final serverSwitch switchboard;   // the command class switchboard
-    private HashMap<String, String> denyHost;
-    private int commandMaxLength;
+    HashMap<String, String> denyHost;
+    int commandMaxLength;
     private int maxBusySessions;
     private long lastAutoTermination;
     

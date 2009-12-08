@@ -58,7 +58,8 @@ public class WebStructureGraph {
     private final Log    log;
     private final File         rankingPath, structureFile;
     private final String       crlFile, crgFile;
-    private TreeMap<String, String> structure_old, structure_new; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
+    TreeMap<String, String> structure_old; // <b64hash(6)>','<host> to <date-yyyymmdd(8)>{<target-b64hash(6)><target-count-hex(4)>}*
+    TreeMap<String, String> structure_new;
     
     public WebStructureGraph(final Log log, final File rankingPath, final String crlFile, final String crgFile, final File structureFile) {
         this.log = log;

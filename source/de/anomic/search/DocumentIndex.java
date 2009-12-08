@@ -53,12 +53,12 @@ public class DocumentIndex extends Segment {
     private static final RankingProfile textRankingDefault = new RankingProfile(ContentDomain.TEXT);
     //private Bitfield zeroConstraint = new Bitfield(4);
     
-    private final static File poison = new File(".");
-    private BlockingQueue<File> queue;
+    final static File poison = new File(".");
+    BlockingQueue<File> queue;
     private Worker[] worker;
-    private CallbackListener callback;
+    CallbackListener callback;
 
-    private static final ThreadGroup workerThreadGroup = new ThreadGroup("workerThreadGroup");
+    static final ThreadGroup workerThreadGroup = new ThreadGroup("workerThreadGroup");
     
     public DocumentIndex(Log log, final File segmentPath, CallbackListener callback, int cachesize) throws IOException {
         super(log, segmentPath, cachesize, targetFileSize * 4 - 1, false, false);
