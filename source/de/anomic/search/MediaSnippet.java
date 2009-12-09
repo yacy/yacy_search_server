@@ -59,7 +59,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         this.width = -1;
         this.height = -1;
         int p = 0;
-        if ((p = attr.indexOf(" x ")) > 0) {
+        if (attr != null && (p = attr.indexOf(" x ")) > 0) {
             this.width = Integer.parseInt(attr.substring(0, p).trim());
             this.height = Integer.parseInt(attr.substring(p + 3).trim());
         }
