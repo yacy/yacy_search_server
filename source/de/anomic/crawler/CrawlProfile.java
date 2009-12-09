@@ -35,6 +35,7 @@ import net.yacy.kelondro.blob.Heap;
 import net.yacy.kelondro.blob.MapView;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.CloneableIterator;
@@ -155,19 +156,11 @@ public class CrawlProfile {
         final entry ne = new entry(mem);
         try {
             profileTable.put(ne.handle(), ne.map());
-        } catch (final kelondroException e) {
+        } catch (final Exception e) {
             clear();
             try {
                 profileTable.put(ne.handle(), ne.map());
-            } catch (final IOException ee) {
-                Log.logException(e);
-                System.exit(0);
-            }
-        } catch (final IOException e) {
-            clear();
-            try {
-                profileTable.put(ne.handle(), ne.map());
-            } catch (final IOException ee) {
+            } catch (final Exception ee) {
                 Log.logException(e);
                 System.exit(0);
             }
@@ -200,19 +193,11 @@ public class CrawlProfile {
                              cacheStrategy);
         try {
             profileTable.put(ne.handle(), ne.map());
-        } catch (final kelondroException e) {
+        } catch (final Exception e) {
             clear();
             try {
                 profileTable.put(ne.handle(), ne.map());
-            } catch (final IOException ee) {
-                Log.logException(e);
-                System.exit(0);
-            }
-        } catch (final IOException e) {
-            clear();
-            try {
-                profileTable.put(ne.handle(), ne.map());
-            } catch (final IOException ee) {
+            } catch (final Exception ee) {
                 Log.logException(e);
                 System.exit(0);
             }
@@ -241,7 +226,7 @@ public class CrawlProfile {
         return new entry(m);
     }
 
-    public void changeEntry(final entry e, final String propName, final String newValue) throws IOException {
+    public void changeEntry(final entry e, final String propName, final String newValue) throws IOException, RowSpaceExceededException {
         e.mem.put(propName,  newValue);
         profileTable.put(e.handle(), e.mem);
     }
@@ -269,7 +254,7 @@ public class CrawlProfile {
     
     public final static int CACHE_STRATEGY_NOCACHE = 0;    // never use the cache, all content from fresh internet source
     public final static int CACHE_STRATEGY_IFFRESH = 1;    // use the cache if the cache exists and is fresh using the proxy-fresh rules
-    public final static int CACHE_STRATEGY_IFEXIST = 2;    // use the cache if the cache exist. Do no check freshness. Othervise use online source.
+    public final static int CACHE_STRATEGY_IFEXIST = 2;    // use the cache if the cache exist. Do no check freshness. Otherwise use online source.
     public final static int CACHE_STRATEGY_CACHEONLY = 3;  // never go online, use all content from cache. If no cache exist, treat content as unavailable
     
     public static class entry {

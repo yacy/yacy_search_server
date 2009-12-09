@@ -42,6 +42,7 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.Reference;
@@ -256,7 +257,11 @@ public class IndexControlRWIs_p {
                 
                 // make an indexContainerCache
                 ReferenceContainerCache<WordReference> icc = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, index.rowdef, Segment.wordOrder);
-                icc.add(index);
+                try {
+                    icc.add(index);
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                }
                 
                 // transport to other peer
                 final String gzipBody = sb.getConfig("indexControl.gzipBody","false");

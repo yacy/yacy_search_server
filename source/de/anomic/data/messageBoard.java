@@ -33,6 +33,7 @@ import java.util.TimeZone;
 
 import net.yacy.kelondro.blob.Heap;
 import net.yacy.kelondro.blob.MapView;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
 
@@ -193,7 +194,8 @@ public class messageBoard {
         try {
             database.put(message.key, message.record);
             return message.key;
-        } catch (final IOException e) {
+        } catch (final Exception e) {
+            Log.logException(e);
             return null;
         }
     }

@@ -33,6 +33,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Order;
 
@@ -133,8 +134,9 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
      * @param urlselection
      * @param maxDistance the maximum distance that the words in the result may have
      * @return ReferenceContainer the join result
+     * @throws RowSpaceExceededException 
      */
-    public ReferenceContainer<ReferenceType> searchJoin(final TreeSet<byte[]> wordHashes, final Set<String> urlselection, int maxDistance) {
+    public ReferenceContainer<ReferenceType> searchJoin(final TreeSet<byte[]> wordHashes, final Set<String> urlselection, int maxDistance) throws RowSpaceExceededException {
         // first check if there is any entry that has no match;
         // this uses only operations in ram
         for (byte[] wordHash: wordHashes) {
@@ -170,7 +172,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
             final TreeSet<byte[]> excludeHashes,
             final Set<String> urlselection,
             ReferenceFactory<ReferenceType> termFactory,
-            int maxDistance) {
+            int maxDistance) throws RowSpaceExceededException {
 
         return new TermSearch<ReferenceType>(this, queryHashes, excludeHashes, urlselection, termFactory, maxDistance);
     }

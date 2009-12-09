@@ -31,6 +31,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import net.yacy.kelondro.index.HandleMap;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.Digest;
@@ -89,19 +90,21 @@ public final class HeapWriter  {
      * @param key
      * @param blob
      * @throws IOException
+     * @throws RowSpaceExceededException 
+     * @throws RowSpaceExceededException 
      */
-    public synchronized void add(final byte[] key, final byte[] blob) throws IOException {
+    public synchronized void add(final byte[] key, final byte[] blob) throws IOException, RowSpaceExceededException {
         //System.out.println("HeapWriter.add: " + new String(key));
         assert blob.length > 0;
         assert key.length == this.keylength;
         assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
         assert index.get(key) < 0 : "index.get(key) = " + index.get(key) + ", index.size() = " + index.size() + ", file.length() = " + this.heapFileTMP.length() +  ", key = " + new String(key); // must not occur before
         if ((blob == null) || (blob.length == 0)) return;
+        index.putUnique(key, seek);
         int chunkl = key.length + blob.length;
         os.writeInt(chunkl);
         os.write(key);
         os.write(blob);
-        index.putUnique(key, seek);
         //assert (this.doublecheck.add(new String(key))) : "doublecheck failed for " + new String(key);
         this.seek += chunkl + 4;
     }

@@ -48,6 +48,7 @@ import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.ObjectIndexCache;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowCollection;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
@@ -90,7 +91,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
             final String tablename, 
             final Row rowdef,
             final boolean useTailCache,
-            final boolean exceed134217727) {
+            final boolean exceed134217727) throws RowSpaceExceededException {
         this(path, tablename, rowdef, ArrayStack.oneMonth, (long) Integer.MAX_VALUE, useTailCache, exceed134217727);
     }
 
@@ -101,7 +102,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
             final long fileAgeLimit,
             final long fileSizeLimit,
             final boolean useTailCache,
-            final boolean exceed134217727) {
+            final boolean exceed134217727) throws RowSpaceExceededException {
         this.path = path;
         this.prefix = tablename;
         this.rowdef = rowdef;
@@ -125,7 +126,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         return prefix + "." + DateFormatter.formatShortMilliSecond(new Date()) + ".table";
     }
     
-    public void init() {
+    public void init() throws RowSpaceExceededException {
         current = null;
 
         // initialized tables map
@@ -205,7 +206,11 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
             if (maxf != null) {
                 f = new File(path, maxf);
                 Log.logInfo("kelondroSplitTable", "opening partial eco table " + f);
-                table = new Table(f, rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727);
+                try {
+                    table = new Table(f, rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727);
+                } catch (RowSpaceExceededException e) {
+                    table = new Table(f, rowdef, 0, 0, false, this.exceed134217727);
+                }
                 tables.put(maxf, table);
             }
         }
@@ -230,7 +235,16 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     		    if (f.isDirectory()) delete(path, l[i]); else FileUtils.deletedelete(f);
     		}
     	}
-    	init();
+    	try {
+            init();
+        } catch (RowSpaceExceededException e) {
+            useTailCache = false;
+            try {
+                init();
+            } catch (RowSpaceExceededException e1) {
+                throw new IOException(e1);
+            }
+        }
     }
     
     public static void delete(final File path, final String tablename) {
@@ -291,7 +305,16 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     private ObjectIndex newTable() {
         this.current = newFilename();
         final File f = new File(path, this.current);
-        Table table = new Table(f, rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727);
+        Table table = null;
+        try {
+            table = new Table(f, rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727);
+        } catch (RowSpaceExceededException e) {
+            try {
+                table = new Table(f, rowdef, 0, 0, false, this.exceed134217727);
+            } catch (RowSpaceExceededException e1) {
+                Log.logException(e1);
+            }
+        }
         tables.put(this.current, table);
         return table;
     }
@@ -314,7 +337,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         return table;
     }
     
-    public synchronized Row.Entry replace(final Row.Entry row) throws IOException {
+    public synchronized Row.Entry replace(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
         ObjectIndex keeper = keeperOf(row.getColBytes(0));
         if (keeper != null) return keeper.replace(row);
@@ -323,7 +346,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         return null;
     }
     
-    public synchronized void put(final Row.Entry row) throws IOException {
+    public synchronized void put(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
         ObjectIndex keeper = keeperOf(row.getColBytes(0));
         if (keeper != null) {keeper.put(row); return;}
@@ -551,14 +574,14 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         return null;
     }
     */
-    public synchronized void addUnique(final Row.Entry row) throws IOException {
+    public synchronized void addUnique(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
         ObjectIndex table = (this.current == null) ? null : tables.get(this.current);
         if (table == null) table = newTable(); else table = checkTable(table);
         table.addUnique(row);
     }
     
-    public ArrayList<RowCollection> removeDoubles() throws IOException {
+    public ArrayList<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
         final Iterator<ObjectIndex> i = tables.values().iterator();
         final ArrayList<RowCollection> report = new ArrayList<RowCollection>();
         while (i.hasNext()) {

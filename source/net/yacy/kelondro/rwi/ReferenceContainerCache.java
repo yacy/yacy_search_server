@@ -37,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.blob.HeapWriter;
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
@@ -113,6 +114,8 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
                 try {
                     dump.add(wordHash, container.exportCollection());
                 } catch (IOException e) {
+                    Log.logException(e);
+                } catch (RowSpaceExceededException e) {
                     Log.logException(e);
                 }
                 urlcount += container.size();
@@ -195,6 +198,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             this.rot = rot;
             if (startWordHash != null && startWordHash.length == 0) startWordHash = null;
             this.cachecopy = sortedClone();
+            assert this.cachecopy != null;
             this.p = 0;
             if (startWordHash != null) {
                 while ( (this.p < this.cachecopy.length) &&
@@ -218,7 +222,12 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             if (this.p < this.cachecopy.length) {
                 ReferenceContainer<ReferenceType> c = this.cachecopy[this.p++];
                 this.latestTermHash = c.getTermHash();
-                return c.topLevelClone();
+                try {
+                    return c.topLevelClone();
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                    return null;
+                }
             }
             // rotation iteration
             if (!rot) {
@@ -228,7 +237,12 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             p = 0;
             ReferenceContainer<ReferenceType> c = this.cachecopy[this.p++];
             this.latestTermHash = c.getTermHash();
-            return c.topLevelClone();
+            try {
+                return c.topLevelClone();
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+                return null;
+            }
         }
 
         public void remove() {
@@ -246,7 +260,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * test if a given key is in the heap
      * this works with heaps in write- and read-mode
      * @param key
-     * @return true, if the key is used in the heap; false othervise
+     * @return true, if the key is used in the heap; false otherwise
      */
     public boolean has(final byte[] key) {
         return this.cache.containsKey(new ByteArray(key));
@@ -267,7 +281,12 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         ReferenceType ee;
         while (e.hasNext()) {
             ee = e.next();
-            if (urlselection.contains(ee.metadataHash())) c1.add(ee);
+            if (urlselection.contains(ee.metadataHash())) try {
+                c1.add(ee);
+            } catch (RowSpaceExceededException e1) {
+                Log.logException(e1);
+                break;
+            }
         }
         return c1;
     }
@@ -286,7 +305,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     /**
      * delete a indexContainer from the heap cache. This can only be used for write-enabled heaps
      * @param wordHash
-     * @return the indexContainer if the cache contained the container, null othervise
+     * @return the indexContainer if the cache contained the container, null otherwise
      */
     public ReferenceContainer<ReferenceType> delete(final byte[] termHash) {
         // returns the index that had been deleted
@@ -332,7 +351,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return 0;
     }
  
-    public void add(final ReferenceContainer<ReferenceType> container) {
+    public void add(final ReferenceContainer<ReferenceType> container) throws RowSpaceExceededException {
         // this puts the entries into the cache
     	assert this.cache != null;
         if (this.cache == null || container == null || container.isEmpty()) return;
@@ -356,7 +375,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
     }
 
-    public void add(final byte[] termHash, final ReferenceType newEntry) {
+    public void add(final byte[] termHash, final ReferenceType newEntry) throws RowSpaceExceededException {
         assert this.cache != null;
         ByteArray tha = new ByteArray(termHash);
         

@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 
 public class Stacks {
@@ -160,8 +161,9 @@ public class Stacks {
      * @param b the new stack element
      * @return the handle used to store the new element
      * @throws IOException
+     * @throws RowSpaceExceededException 
      */
-    public long push(String stack, byte[] b) throws IOException {
+    public long push(String stack, byte[] b) throws IOException, RowSpaceExceededException {
         Stack s = getStack(stack);
         if (s == null) return -1;
         return s.push(b);
@@ -175,8 +177,9 @@ public class Stacks {
      * @param b the new stack element
      * @return the handle used to store the new element
      * @throws IOException
+     * @throws RowSpaceExceededException 
      */
-    protected void push(String stack, Stack.Entry e) throws IOException {
+    protected void push(String stack, Stack.Entry e) throws IOException, RowSpaceExceededException {
         Stack s = getStack(stack);
         if (s == null) return;
         s.push(e);

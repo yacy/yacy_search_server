@@ -161,7 +161,9 @@ public class NoticedURL {
                     break;
                 default: break;
             }
-        } catch (final IOException er) {}
+        } catch (final Exception er) {
+            Log.logException(er);
+        }
     }
 
     public Request get(final String urlhash) {

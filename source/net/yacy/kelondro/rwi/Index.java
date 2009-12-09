@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 
@@ -46,8 +47,9 @@ public interface Index <ReferenceType extends Reference> {
 	 * reference to be stored, then the old and the new references are merged
 	 * @param newEntries the References to be merged with existing references
 	 * @throws IOException
+	 * @throws RowSpaceExceededException 
 	 */
-	public void add(ReferenceContainer<ReferenceType> newEntries) throws IOException;
+	public void add(ReferenceContainer<ReferenceType> newEntries) throws IOException, RowSpaceExceededException;
 
 	/**
 	 * add a single reference to the reverse index
@@ -57,8 +59,9 @@ public interface Index <ReferenceType extends Reference> {
 	 * @param termHash
 	 * @param entry
 	 * @throws IOException
+	 * @throws RowSpaceExceededException 
 	 */
-    public void add(final byte[] termHash, final ReferenceType entry) throws IOException;
+    public void add(final byte[] termHash, final ReferenceType entry) throws IOException, RowSpaceExceededException;
     
 	/**
 	 * check if there are references stored to the given word hash

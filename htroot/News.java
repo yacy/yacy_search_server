@@ -24,7 +24,6 @@
 // javac -classpath .:../classes Network.java
 // if the shell's current path is HTROOT
 
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -65,7 +64,7 @@ public class News {
                         id = check.substring(4);
                         try {
                             sb.peers.newsPool.moveOff(tableID, id);
-                        } catch (final IOException ee) {Log.logException(ee);}
+                        } catch (final Exception ee) {Log.logException(ee);}
                     }
                 }
             }
@@ -81,7 +80,7 @@ public class News {
                     } else {
                         sb.peers.newsPool.moveOffAll(tableID);
                     }
-                } catch (final IOException e) {
+                } catch (final Exception e) {
                     Log.logException(e);
                 }
             }

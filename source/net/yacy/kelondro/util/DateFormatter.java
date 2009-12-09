@@ -559,7 +559,7 @@ public final class DateFormatter {
     }
         
     public DateFormatter(final String datestring) throws java.text.ParseException {
-        // parse a date string; othervise throw a java.text.ParseException
+        // parse a date string; otherwise throw a java.text.ParseException
         if ((datestring.length() == 14) || (datestring.length() == 17)) {
             // parse a ShortString
             try {years = Integer.parseInt(datestring.substring(0, 4)) - 1970;} catch (final NumberFormatException e) {

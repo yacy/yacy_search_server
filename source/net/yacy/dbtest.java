@@ -17,6 +17,7 @@ import net.yacy.kelondro.index.ObjectArrayCache;
 import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.CloneableIterator;
@@ -129,6 +130,10 @@ public class dbtest {
                 getTable_test().put(getTable_test().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
                 if (getTable_reference() != null) getTable_reference().put(getTable_test().row().newEntry(new byte[][] { entry.getKey(), entry.getValue() , entry.getValue() }));
             } catch (final IOException e) {
+                System.err.println(e);
+                Log.logException(e);
+                System.exit(0);
+            } catch (RowSpaceExceededException e) {
                 System.err.println(e);
                 Log.logException(e);
                 System.exit(0);

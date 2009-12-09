@@ -34,6 +34,7 @@ import net.yacy.kelondro.blob.BLOB;
 import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
@@ -154,20 +155,23 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         }
 
         public ReferenceContainer<ReferenceType> next() {
-        	try {
-				if (iterator.hasNext()) {
-                	return get(iterator.next());
-				}
-	            // rotation iteration
-	            if (!rot) {
-	                return null;
-	            }
-	            iterator = array.keys(true, null);
-	            return get(iterator.next());
-            } catch (IOException e) {
+			if (iterator.hasNext()) try {
+                return get(iterator.next());
+            } catch (Exception e) {
                 Log.logException(e);
-				return null;
-			}
+                return null;
+            }
+            // rotation iteration
+            if (!rot) {
+                return null;
+            }
+            try {
+                iterator = array.keys(true, null);
+                return get(iterator.next());
+            } catch (Exception e) {
+                Log.logException(e);
+                return null;
+            }
         }
 
         public void remove() {
@@ -184,7 +188,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * test if a given key is in the heap
      * this works with heaps in write- and read-mode
      * @param key
-     * @return true, if the key is used in the heap; false othervise
+     * @return true, if the key is used in the heap; false otherwise
      * @throws IOException 
      */
     public synchronized boolean has(final byte[] termHash) {
@@ -196,8 +200,9 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * @param key
      * @return the indexContainer if one exist, null otherwise
      * @throws IOException 
+     * @throws RowSpaceExceededException 
      */
-    public ReferenceContainer<ReferenceType> get(final byte[] termHash) throws IOException {
+    public ReferenceContainer<ReferenceType> get(final byte[] termHash) throws IOException, RowSpaceExceededException {
         long timeout = System.currentTimeMillis() + 3000;
         Iterator<byte[]> entries = this.array.getAll(termHash).iterator();
     	if (entries == null || !entries.hasNext()) return null;
@@ -312,7 +317,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
                             final File heapLocation,
                             final ReferenceFactory<ReferenceType> factory,
                             final ByteOrder termOrder,
-                            final Row payloadrow) throws IOException {
+                            final Row payloadrow) throws IOException, RowSpaceExceededException {
        
         System.out.println("CELL REFERENCE COLLECTION startup");
         HandleMap references = new HandleMap(payloadrow.primaryKeyLength, termOrder, 4, 0, 1000000);

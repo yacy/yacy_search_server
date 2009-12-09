@@ -38,7 +38,6 @@
 
 package de.anomic.yacy;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.Collections;
 import java.util.Date;
@@ -353,7 +352,7 @@ public class yacyCore {
                 } else {
                     sb.peers.mySeed().put("news", de.anomic.tools.crypt.simpleEncode(record.toString()));
                 }
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 log.logSevere("publishMySeed: problem with news encoding", e);
             }
             sb.peers.mySeed().setUnusedFlags();

@@ -46,6 +46,7 @@ import java.util.zip.GZIPInputStream;
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowCollection;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
@@ -390,7 +391,7 @@ public class AttrSeq {
             return seq;
         }
         
-        public RowCollection getSeqCollection() {
+        public RowCollection getSeqCollection() throws RowSpaceExceededException {
             final RowCollection collection = new RowCollection(structure.seqrow, seq.size());
             final Iterator<String> i = seq.iterator();
             while (i.hasNext()) {

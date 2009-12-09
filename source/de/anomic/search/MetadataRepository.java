@@ -46,6 +46,7 @@ import net.yacy.kelondro.index.Cache;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.table.SplitTable;
@@ -76,8 +77,18 @@ public final class MetadataRepository implements Iterable<byte[]> {
             final String tablename,
             final boolean useTailCache,
             final boolean exceed134217727) {
-        this.location = path;        
-        this.urlIndexFile = new Cache(new SplitTable(this.location, tablename, URIMetadataRow.rowdef, useTailCache, exceed134217727), 20000000, 20000000);
+        this.location = path;
+        ObjectIndex backupIndex = null;
+        try {
+            backupIndex = new SplitTable(this.location, tablename, URIMetadataRow.rowdef, useTailCache, exceed134217727);
+        } catch (RowSpaceExceededException e) {
+            try {
+                backupIndex = new SplitTable(this.location, tablename, URIMetadataRow.rowdef, false, exceed134217727);
+            } catch (RowSpaceExceededException e1) {
+                Log.logException(e1);
+            }
+        }
+        this.urlIndexFile = new Cache(backupIndex, 20000000, 20000000);
         this.exportthread = null; // will have a export thread assigned if exporter is running
         this.statsDump = null;
     }
@@ -144,7 +155,11 @@ public final class MetadataRepository implements Iterable<byte[]> {
             return; // this did not need to be stored, but is updated
         }
 
-        urlIndexFile.put(entry.toRowEntry());
+        try {
+            urlIndexFile.put(entry.toRowEntry());
+        } catch (RowSpaceExceededException e) {
+            throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
+        }
         statsDump = null;
     }
     

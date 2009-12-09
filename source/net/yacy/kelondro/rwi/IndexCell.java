@@ -35,7 +35,9 @@ import de.anomic.yacy.graphics.ProfilingGraph;
 
 import net.yacy.kelondro.index.ARC;
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.index.SimpleARC;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.MergeIterator;
@@ -105,21 +107,35 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     /**
      * add entries to the cell: this adds the new entries always to the RAM part, never to BLOBs
      * @throws IOException 
-     * @throws IOException 
+     * @throws RowSpaceExceededException 
+     * @throws RowSpaceExceededException 
      */
-    public void add(ReferenceContainer<ReferenceType> newEntries) throws IOException {
-        this.ram.add(newEntries);
-        if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < System.currentTimeMillis()) {
+    public void add(ReferenceContainer<ReferenceType> newEntries) throws IOException, RowSpaceExceededException {
+        try {
+            this.ram.add(newEntries);
+            if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < System.currentTimeMillis()) {
+                EventTracker.update("wordcache", Long.valueOf(this.ram.size()), true, 30000, ProfilingGraph.maxTime);
+                cleanCache();
+            }
+        } catch (RowSpaceExceededException e) {
             EventTracker.update("wordcache", Long.valueOf(this.ram.size()), true, 30000, ProfilingGraph.maxTime);
             cleanCache();
+            this.ram.add(newEntries);
         }
+        
     }
 
-    public void add(byte[] termHash, ReferenceType entry) throws IOException {
-        this.ram.add(termHash, entry);
-        if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < System.currentTimeMillis()) {
+    public void add(byte[] termHash, ReferenceType entry) throws IOException, RowSpaceExceededException {
+        try {
+            this.ram.add(termHash, entry);
+            if (this.ram.size() % 1000 == 0 || this.lastCleanup + cleanupCycle < System.currentTimeMillis()) {
+                EventTracker.update("wordcache", Long.valueOf(this.ram.size()), true, 30000, ProfilingGraph.maxTime);
+                cleanCache();
+            }
+        } catch (RowSpaceExceededException e) {
             EventTracker.update("wordcache", Long.valueOf(this.ram.size()), true, 30000, ProfilingGraph.maxTime);
             cleanCache();
+            this.ram.add(termHash, entry);
         }
     }
 
@@ -150,7 +166,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             ReferenceContainer<ReferenceType> c1;
             try {
                 c1 = this.array.get(termHash);
-            } catch (IOException e) {
+            } catch (Exception e) {
+                Log.logException(e);
                 c1 = null;
             }
             countFile = (c1 == null) ? 0 : c1.size();
@@ -174,13 +191,29 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      */
     public ReferenceContainer<ReferenceType> get(byte[] termHash, Set<String> urlselection) throws IOException {
         ReferenceContainer<ReferenceType> c0 = this.ram.get(termHash, null);
-        ReferenceContainer<ReferenceType> c1 = this.array.get(termHash);
+        ReferenceContainer<ReferenceType> c1 = null;
+        try {
+            c1 = this.array.get(termHash);
+        } catch (RowSpaceExceededException e2) {
+            Log.logException(e2);
+        }
         if (c1 == null) {
             if (c0 == null) return null;
             return c0;
         }
         if (c0 == null) return c1;
-        return c1.merge(c0);
+        try {
+            return c1.merge(c0);
+        } catch (RowSpaceExceededException e) {
+            // try to free some ram
+            countCache.clear();
+            try {
+                return c1.merge(c0);
+            } catch (RowSpaceExceededException e1) {
+                // go silently over the problem
+                return (c1.size() > c0.size()) ? c1: c0;
+            }
+        }
     }
 
     /**
@@ -189,7 +222,12 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * @throws IOException 
      */
     public ReferenceContainer<ReferenceType> delete(byte[] termHash) throws IOException {
-        ReferenceContainer<ReferenceType> c1 = this.array.get(termHash);
+        ReferenceContainer<ReferenceType> c1 = null;
+        try {
+            c1 = this.array.get(termHash);
+        } catch (RowSpaceExceededException e2) {
+            Log.logException(e2);
+        }
         if (c1 != null) {
             this.array.delete(termHash);
             this.countCache.remove(new ByteArray(termHash));
@@ -198,7 +236,18 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         cleanCache();
         if (c1 == null) return c0;
         if (c0 == null) return c1;
-        return c1.merge(c0);
+        try {
+            return c1.merge(c0);
+        } catch (RowSpaceExceededException e) {
+            // try to free some ram
+            countCache.clear();
+            try {
+                return c1.merge(c0);
+            } catch (RowSpaceExceededException e1) {
+                // go silently over the problem
+                return (c1.size() > c0.size()) ? c1: c0;
+            }
+        }
     }
     
     /**

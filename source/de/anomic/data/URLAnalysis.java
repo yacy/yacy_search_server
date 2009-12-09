@@ -55,6 +55,7 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.index.HandleMap;
 import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainerArray;
@@ -406,12 +407,12 @@ public class URLAnalysis {
             System.out.println("INDEX REFERENCE COLLECTION starting dump of statistics");
             idx.dump(new File(statisticPath));
             System.out.println("INDEX REFERENCE COLLECTION finished dump, wrote " + idx.size() + " entries to " + statisticPath);
-        } catch (IOException e) {
+        } catch (Exception e) {
             Log.logException(e);
         }
     }
 
-    public static int diffurlcol(String metadataPath, String statisticFile, String diffFile) throws IOException {
+    public static int diffurlcol(String metadataPath, String statisticFile, String diffFile) throws IOException, RowSpaceExceededException {
         System.out.println("INDEX DIFF URL-COL startup");
         HandleMap idx = new HandleMap(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 4, new File(statisticFile), 0);
         MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
@@ -438,7 +439,7 @@ public class URLAnalysis {
         return c;
     }
     
-    public static void export(String metadataPath, int format, String export, String diffFile) throws IOException {
+    public static void export(String metadataPath, int format, String export, String diffFile) throws IOException, RowSpaceExceededException {
         // format: 0=text, 1=html, 2=rss/xml
         System.out.println("URL EXPORT startup");
         MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
@@ -453,7 +454,7 @@ public class URLAnalysis {
         System.out.println("URL EXPORT finished export, wrote " + ((hs == null) ? mr.size() : hs.size()) + " entries");
     }
     
-    public static void delete(String metadataPath, String diffFile) throws IOException {
+    public static void delete(String metadataPath, String diffFile) throws IOException, RowSpaceExceededException {
         System.out.println("URL DELETE startup");
         MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
         int mrSize = mr.size();
@@ -488,7 +489,7 @@ public class URLAnalysis {
             // java -Xmx1000m -cp classes de.anomic.data.URLAnalysis -diffurlcol DATA/INDEX/freeworld/TEXT/METADATA used.dump diffurlcol.dump
             try {
                 diffurlcol(args[1], args[2], args[3]);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.logException(e);
             }
         } else if (args[0].equals("-export") && args.length >= 4) {
@@ -499,7 +500,7 @@ public class URLAnalysis {
             int format = (args[2].equals("xml")) ? 2 : (args[2].equals("html")) ? 1 : 0;
             try {
                 export(args[1], format, args[3], (args.length >= 5) ? args[4] : null);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.logException(e);
             }
         } else if (args[0].equals("-delete") && args.length >= 3) {
@@ -509,7 +510,7 @@ public class URLAnalysis {
             // instead of 'xml' (which is in fact a rss), the format can also be 'text' and 'html'
             try {
                 delete(args[1], args[2]);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.logException(e);
             }
         } else {

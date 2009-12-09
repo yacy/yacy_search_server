@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.table.Table;
@@ -77,7 +78,15 @@ public class Balancer {
         if (!(cachePath.exists())) cachePath.mkdir(); // make the path
         cacheStacksPath.mkdirs();
         File f = new File(cacheStacksPath, stackname + indexSuffix);
-        urlFileIndex = new Table(f, Request.rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727);
+        try {
+            urlFileIndex = new Table(f, Request.rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727);
+        } catch (RowSpaceExceededException e) {
+            try {
+                urlFileIndex = new Table(f, Request.rowdef, 0, 0, false, exceed134217727);
+            } catch (RowSpaceExceededException e1) {
+                Log.logException(e1);
+            }
+        }
         lastDomainStackFill = 0;
         Log.logInfo("Balancer", "opened balancer file with " + urlFileIndex.size() + " entries from " + f.toString());
     }
@@ -229,7 +238,7 @@ public class Balancer {
         return false;
     }
     
-    public void push(final Request entry) throws IOException {
+    public void push(final Request entry) throws IOException, RowSpaceExceededException {
         assert entry != null;
         String hash = entry.url().hash();
         synchronized (this) {
@@ -303,6 +312,7 @@ public class Balancer {
      * @param profile
      * @return a url in a CrawlEntry object
      * @throws IOException
+     * @throws RowSpaceExceededException 
      */
     public Request pop(final boolean delay, final CrawlProfile profile) throws IOException {
         // returns a crawl entry from the stack and ensures minimum delta times
@@ -389,9 +399,13 @@ public class Balancer {
 		                //System.out.println("*** delayed +=" + nexthash);
 		                this.delayed.put(new Long(System.currentTimeMillis() + sleeptime + 1), nexthash);
 		            }
-		        	this.urlFileIndex.put(rowEntry);
-		        	this.domainStacks.remove(nexthash.substring(6));
-		        	failhash = nexthash;
+		        	try {
+                        this.urlFileIndex.put(rowEntry);
+                        this.domainStacks.remove(nexthash.substring(6));
+                        failhash = nexthash;
+                    } catch (RowSpaceExceededException e) {
+                        Log.logException(e);
+                    }
                     continue;
 		        }
 		        break;

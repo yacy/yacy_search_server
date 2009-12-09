@@ -52,6 +52,7 @@ import java.util.Iterator;
 
 import net.yacy.kelondro.index.Column;
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.table.RecordStack;
 import net.yacy.kelondro.util.DateFormatter;
@@ -104,7 +105,7 @@ public class yacyNewsQueue {
         return queueStack.isEmpty();
     }
 
-    public synchronized void push(final yacyNewsRecord entry) throws IOException {
+    public synchronized void push(final yacyNewsRecord entry) throws IOException, RowSpaceExceededException {
         queueStack.push(r2b(entry, true));
     }
 
@@ -118,7 +119,7 @@ public class yacyNewsQueue {
         return b2r(queueStack.top());
     }
 
-    public synchronized yacyNewsRecord topInc() throws IOException {
+    public synchronized yacyNewsRecord topInc() throws IOException, RowSpaceExceededException {
         if (queueStack.isEmpty()) return null;
         final yacyNewsRecord entry = pop();
         if (entry != null) {
@@ -158,7 +159,7 @@ public class yacyNewsQueue {
         return newsDB.get(id);
     }
 
-    private Row.Entry r2b(final yacyNewsRecord r, final boolean updateDB) throws IOException {
+    private Row.Entry r2b(final yacyNewsRecord r, final boolean updateDB) throws IOException, RowSpaceExceededException {
         if (r == null) return null;
         if (updateDB) {
             newsDB.put(r);

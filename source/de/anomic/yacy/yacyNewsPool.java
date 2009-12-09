@@ -51,6 +51,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.repository.Blacklist;
 
 import de.anomic.search.Switchboard;
@@ -303,10 +305,12 @@ public class yacyNewsPool {
                 incomingNews.push(record); // we want to see our own news..
                 outgoingNews.push(record); // .. and put it on the publishing list
             }
-        } catch (final IOException e) {}
+        } catch (final Exception e) {
+            Log.logException(e);
+        }
     }
     
-    public yacyNewsRecord myPublication() throws IOException {
+    public yacyNewsRecord myPublication() throws IOException, RowSpaceExceededException {
         // generate a record for next peer-ping
         if (outgoingNews.isEmpty()) return null;
         final yacyNewsRecord record = outgoingNews.topInc();
@@ -317,7 +321,7 @@ public class yacyNewsPool {
         return record;
     }
     
-    public void enqueueIncomingNews(final yacyNewsRecord record) throws IOException {
+    public void enqueueIncomingNews(final yacyNewsRecord record) throws IOException, RowSpaceExceededException {
         // called if a news is attached to a seed
 
         // check consistency
@@ -352,7 +356,7 @@ public class yacyNewsPool {
         return switchQueue(dbKey).size();
     }
     
-    public int automaticProcess(final yacySeedDB seedDB) throws IOException, InterruptedException {
+    public int automaticProcess(final yacySeedDB seedDB) throws IOException, InterruptedException, RowSpaceExceededException {
         // processes news in the incoming-db
         // returns number of processes
         yacyNewsRecord record;
@@ -468,7 +472,7 @@ public class yacyNewsPool {
         }
     }
 
-    public void moveOff(final int dbKey, final String id) throws IOException {
+    public void moveOff(final int dbKey, final String id) throws IOException, RowSpaceExceededException {
         // this is called if a queue element shall be moved to another queue or off the queue
         // it depends on the dbKey how the record is handled
         switch (dbKey) {
@@ -479,7 +483,7 @@ public class yacyNewsPool {
         }
     }
 
-    private boolean moveOff(final yacyNewsQueue fromqueue, final yacyNewsQueue toqueue, final String id) throws IOException {
+    private boolean moveOff(final yacyNewsQueue fromqueue, final yacyNewsQueue toqueue, final String id) throws IOException, RowSpaceExceededException {
         // called if a published news shall be removed
         final yacyNewsRecord record = fromqueue.remove(id);
         if (record == null) {
@@ -493,7 +497,7 @@ public class yacyNewsPool {
         return true;
     }
     
-    public void moveOffAll(final int dbKey) throws IOException {
+    public void moveOffAll(final int dbKey) throws IOException, RowSpaceExceededException {
         // this is called if a queue element shall be moved to another queue or off the queue
         // it depends on the dbKey how the record is handled
         switch (dbKey) {
@@ -504,7 +508,7 @@ public class yacyNewsPool {
         }
     }
 
-    private int moveOffAll(final yacyNewsQueue fromqueue, final yacyNewsQueue toqueue) throws IOException {
+    private int moveOffAll(final yacyNewsQueue fromqueue, final yacyNewsQueue toqueue) throws IOException, RowSpaceExceededException {
         // move off all news from a specific queue to another queue
         final Iterator<yacyNewsRecord> i = fromqueue.records(true);
         yacyNewsRecord record;

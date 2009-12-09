@@ -51,6 +51,8 @@ import java.util.Iterator;
 
 import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.table.Table;
 import net.yacy.kelondro.util.DateFormatter;
@@ -69,14 +71,29 @@ public class yacyNewsDB {
             final boolean useTailCache,
             final boolean exceed134217727) {
         this.path = path;
-        this.news = new Table(path, yacyNewsRecord.rowdef, 10, 0, useTailCache, exceed134217727);
-        //this.news = new kelondroCache(kelondroTree.open(path, true, preloadTime, yacyNewsRecord.rowdef));
+        try {
+            this.news = new Table(path, yacyNewsRecord.rowdef, 10, 0, useTailCache, exceed134217727);
+        } catch (RowSpaceExceededException e) {
+            try {
+                this.news = new Table(path, yacyNewsRecord.rowdef, 0, 0, false, exceed134217727);
+            } catch (RowSpaceExceededException e1) {
+                Log.logException(e1);
+            }
+        }
     }
 
     private void resetDB() {
         try {close();} catch (final Exception e) {}
         if (path.exists()) FileUtils.deletedelete(path);
-        this.news = new Table(path, yacyNewsRecord.rowdef, 10, 0, false, false);
+        try {
+            this.news = new Table(path, yacyNewsRecord.rowdef, 10, 0, false, false);
+        } catch (RowSpaceExceededException e) {
+            try {
+                this.news = new Table(path, yacyNewsRecord.rowdef, 0, 0, false, false);
+            } catch (RowSpaceExceededException e1) {
+                Log.logException(e1);
+            }
+        }
     }
     
     public void close() {
@@ -96,10 +113,10 @@ public class yacyNewsDB {
         news.remove(id.getBytes());
     }
 
-    public synchronized yacyNewsRecord put(final yacyNewsRecord record) throws IOException {
+    public synchronized yacyNewsRecord put(final yacyNewsRecord record) throws IOException, RowSpaceExceededException {
         try {
             return b2r(news.replace(r2b(record)));
-        } catch (final kelondroException e) {
+        } catch (final Exception e) {
             resetDB();
             return b2r(news.replace(r2b(record)));
         }

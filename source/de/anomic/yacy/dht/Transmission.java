@@ -24,7 +24,6 @@
 
 package de.anomic.yacy.dht;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,6 +32,7 @@ import java.util.Iterator;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
@@ -115,8 +115,9 @@ public class Transmission {
          * add a container to the Entry cache.
          * all entries in the container are checked and only such are stored which have a reference entry
          * @param container
+         * @throws RowSpaceExceededException 
          */
-        public void add(ReferenceContainer<WordReference> container) {
+        public void add(ReferenceContainer<WordReference> container) throws RowSpaceExceededException {
             // iterate through the entries in the container and check if the reference is in the repository
             Iterator<WordReference>  i = container.entries();
             ArrayList<String> notFound = new ArrayList<String>();
@@ -247,7 +248,13 @@ public class Transmission {
         }
 
         public void restore() {
-            for (ReferenceContainer<WordReference> ic : this) try { segment.termIndex().add(ic); } catch (IOException e) {}
+            for (ReferenceContainer<WordReference> ic : this) try {
+                segment.termIndex().add(ic);
+            } catch (Exception e) {
+                Log.logException(e);
+            }
         }
+
     }
+    
 }

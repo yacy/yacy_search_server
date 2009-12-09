@@ -93,7 +93,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return get(index, true);
     }
     
-    public final synchronized void put(final Row.Entry entry) {
+    public final synchronized void put(final Row.Entry entry) throws RowSpaceExceededException {
         assert (entry != null);
         assert (entry.getPrimaryKeyBytes() != null);
         // when reaching a specific amount of un-sorted entries, re-sort all
@@ -110,7 +110,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         }
     }
 
-    public final synchronized Row.Entry replace(final Row.Entry entry) {
+    public final synchronized Row.Entry replace(final Row.Entry entry) throws RowSpaceExceededException {
         assert (entry != null);
         assert (entry.getPrimaryKeyBytes() != null);
         int index = -1;
@@ -131,7 +131,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return oldentry;
     }
 
-    public final synchronized long inc(byte[] key, int col, long add, Row.Entry initrow) {
+    public final synchronized long inc(byte[] key, int col, long add, Row.Entry initrow) throws RowSpaceExceededException {
         final int index = find(key, 0, key.length);
         if (index >= 0) {
             // the entry existed before
@@ -371,8 +371,9 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
      * After this merge, none of the input collections should be used, because they can be altered 
      * @param c
      * @return
+     * @throws RowSpaceExceededException 
      */
-    public final RowSet merge(RowSet c) {
+    public final RowSet merge(RowSet c) throws RowSpaceExceededException {
         assert c != null;
         /*
         if (this.isSorted() && this.size() >= c.size()) {
@@ -399,8 +400,9 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
      * the current collection is not altered in any way, the returned collection is a new collection with copied content.
      * @param c
      * @return
+     * @throws RowSpaceExceededException 
      */
-    protected final static RowSet mergeEnum(RowCollection c0, RowCollection c1) {
+    protected final static RowSet mergeEnum(RowCollection c0, RowCollection c1) throws RowSpaceExceededException {
         assert c0.rowdef == c1.rowdef : c0.rowdef.toString() + " != " + c1.rowdef.toString();
         RowSet r = new RowSet(c0.rowdef, c0.size() + c1.size());
         try {
@@ -485,8 +487,18 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         		"neun......xxxx", 
         		"zehn......xxxx" };
         final RowSet d = new RowSet(new Row("byte[] key-10, Cardinal x-4 {b256}", NaturalOrder.naturalOrder), 0);
-        for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());
-        for (int ii = 0; ii < test.length; ii++) d.add(test[ii].getBytes());
+        for (int ii = 0; ii < test.length; ii++)
+            try {
+                d.add(test[ii].getBytes());
+            } catch (RowSpaceExceededException e) {
+                e.printStackTrace();
+            }
+        for (int ii = 0; ii < test.length; ii++)
+            try {
+                d.add(test[ii].getBytes());
+            } catch (RowSpaceExceededException e) {
+                e.printStackTrace();
+            }
         d.sort();
         d.remove("fuenf".getBytes());
         final Iterator<Row.Entry> ii = d.iterator();
@@ -584,7 +596,11 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         random = new Random(0);
         for (int i = 0; i < testsize; i++) {
             key = randomHash(random);
-            c.put(c.rowdef.newEntry(new byte[][]{key, key}));
+            try {
+                c.put(c.rowdef.newEntry(new byte[][]{key, key}));
+            } catch (RowSpaceExceededException e) {
+                e.printStackTrace();
+            }
             if (i % 1000 == 0) {
                 for (int j = 0; j < delkeys.length; j++) c.remove(delkeys[j]);
                 c.sort();

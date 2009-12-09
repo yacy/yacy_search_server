@@ -28,6 +28,7 @@ package net.yacy.kelondro.blob;
 
 import java.io.IOException;
 
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 
@@ -125,8 +126,9 @@ public interface BLOB {
      * @param key  the primary key
      * @param b
      * @throws IOException
+     * @throws RowSpaceExceededException 
      */
-    public void put(byte[] key, byte[] b) throws IOException;
+    public void put(byte[] key, byte[] b) throws IOException, RowSpaceExceededException;
     
     /**
      * replace an existing entry in the BLOB with a new entry

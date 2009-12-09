@@ -29,6 +29,8 @@ import java.util.Random;
 import java.util.TreeMap;
 
 import net.yacy.kelondro.index.HandleMap;
+import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.MemoryControl;
 import de.anomic.yacy.yacySeed;
@@ -111,7 +113,12 @@ public class FlatWordPartitionScheme implements PartitionScheme {
         long a = MemoryControl.available();
         HandleMap idx = new HandleMap(12, Base64Order.enhancedCoder, 4, 0, 150000);
         for (int i = 0; i < count; i++) {
-            idx.inc(FlatWordPartitionScheme.positionToHash(r.nextInt(count)));
+            try {
+                idx.inc(FlatWordPartitionScheme.positionToHash(r.nextInt(count)));
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+                break;
+            }
         }
         long timek = ((long) count) * 1000L / (System.currentTimeMillis() - start);
         System.out.println("Result HandleMap: " + timek + " inc per second");

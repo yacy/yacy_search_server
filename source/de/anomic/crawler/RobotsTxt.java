@@ -256,7 +256,8 @@ public class RobotsTxt {
         try {
             this.robotsTable.put(entry.hostName, entry.mem);
             return entry.hostName;
-        } catch (final IOException e) {
+        } catch (final Exception e) {
+            Log.logException(e);
             return null;
         }
     }    

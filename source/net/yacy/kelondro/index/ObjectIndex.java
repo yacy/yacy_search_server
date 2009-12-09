@@ -46,10 +46,10 @@ public interface ObjectIndex {
     public Row row();
     public boolean has(byte[] key); // use this only if there is no get in case that has returns true
     public Row.Entry get(byte[] key) throws IOException;
-    public Row.Entry replace(Row.Entry row) throws IOException;
-    public void put(Row.Entry row) throws IOException;
-    public void addUnique(Row.Entry row) throws IOException; // no double-check
-    public ArrayList<RowCollection> removeDoubles() throws IOException; // removes all elements that are double (to be used after all addUnique)
+    public Row.Entry replace(Row.Entry row) throws IOException, RowSpaceExceededException;
+    public void put(Row.Entry row) throws IOException, RowSpaceExceededException;
+    public void addUnique(Row.Entry row) throws IOException, RowSpaceExceededException; // no double-check
+    public ArrayList<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException; // removes all elements that are double (to be used after all addUnique)
     public Row.Entry remove(byte[] key) throws IOException;
     public Row.Entry removeOne() throws IOException;
     public CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) throws IOException; // iterates only the key

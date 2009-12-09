@@ -34,6 +34,7 @@ import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
@@ -145,7 +146,7 @@ public class CRProcess {
         return true;
     }
     
-    public static boolean accumulate_upd(final File f, final ObjectIndex acc) throws IOException {
+    public static boolean accumulate_upd(final File f, final ObjectIndex acc) throws IOException, RowSpaceExceededException {
         // open file
         AttrSeq source_cr = null;
         try {
@@ -231,7 +232,7 @@ public class CRProcess {
     		final File bkp_dir,
     		final File to_file,
     		int max_files,
-    		final boolean newdb) throws IOException {
+    		final boolean newdb) throws IOException, RowSpaceExceededException {
         if (!(from_dir.isDirectory())) {
             System.out.println("source path " + from_dir + " is not a directory.");
             return;
@@ -390,7 +391,7 @@ public class CRProcess {
         return count;
     }
     
-    public static int genrcix(final File cr_path_in, final File rci_path_out) throws IOException {
+    public static int genrcix(final File cr_path_in, final File rci_path_out) throws IOException, RowSpaceExceededException {
         //kelondroFlexTable       acc = new kelondroFlexTable(cr_path_in, CRG_accname, kelondroBase64Order.enhancedCoder, 128 * 1024 * 1024, -1, CRG_accrow, true);
         final IndexCell<WordReference> seq = new IndexCell<WordReference>(
                                 cr_path_in, "index", Segment.wordReferenceFactory, Base64Order.enhancedCoder, CRG_colrow, 10000, 1000000000L, 20, null, 1000000);
@@ -530,7 +531,7 @@ public class CRProcess {
                 }
             }
             */
-        } catch (final IOException e) {
+        } catch (final Exception e) {
             Log.logException(e);
         }
     }

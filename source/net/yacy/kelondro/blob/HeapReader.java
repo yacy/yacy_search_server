@@ -35,6 +35,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ExecutionException;
 
 import net.yacy.kelondro.index.HandleMap;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.io.CachedFileWriter;
 import net.yacy.kelondro.io.Writer;
 import net.yacy.kelondro.logging.Log;
@@ -132,6 +133,9 @@ public class HeapReader {
         try {
             this.index = new HandleMap(this.keylength, this.ordering, 8, fif, 1000000);
         } catch (IOException e) {
+            Log.logException(e);
+            return false;
+        } catch (RowSpaceExceededException e) {
             Log.logException(e);
             return false;
         }

@@ -265,21 +265,25 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         entry = index.get(key);
         // learn from result
         if (entry == null) {
-            if (checkMissSpace()) {
+            if (checkMissSpace()) try {
                 final Row.Entry dummy = readMissCache.replace(readMissCache.row().newEntry(key));
                 if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
+            } catch (RowSpaceExceededException e) {
+                clearCache();
             }
             return null;
         }
         
-        if (checkHitSpace()) {
+        if (checkHitSpace()) try {
             final Row.Entry dummy = readHitCache.replace(entry);
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
+        } catch (RowSpaceExceededException e) {
+            clearCache();
         }
         return entry;
     }
 
-    public final synchronized void put(final Row.Entry row) throws IOException {
+    public final synchronized void put(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert (row != null);
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
@@ -291,25 +295,26 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         if (readMissCache != null) {
             if (readMissCache.remove(key) != null) {
                 this.hasnotHit++;
-                // the entry did not exist before
-                index.put(row); // write to back-end
-                if (checkHitSpace()) {
-                    final Row.Entry dummy = readHitCache.replace(row); // learn that entry
-                    if (dummy == null) this.writeUnique++; else this.writeDouble++;
-                }
-                return;
             }
         }
         
         // write to the back-end
-        index.put(row);
-        if (checkHitSpace()) {
+        try {
+            index.put(row);
+        } catch (RowSpaceExceededException e1) {
+            // flush all caches to get more memory
+            clearCache();
+            index.put(row); // try again
+        }
+        if (checkHitSpace()) try {
             final Row.Entry dummy = readHitCache.replace(row); // overwrite old entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
+        } catch (RowSpaceExceededException e) {
+            clearCache();
         }
     }
     
-    public final synchronized Row.Entry replace(final Row.Entry row) throws IOException {
+    public final synchronized Row.Entry replace(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert (row != null);
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
@@ -322,27 +327,43 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
             if (readMissCache.remove(key) != null) {
                 this.hasnotHit++;
                 // the entry does not exist before
-                index.put(row); // write to backend
-                if (checkHitSpace()) {
+                try {
+                    index.put(row);
+                } catch (RowSpaceExceededException e1) {
+                    // flush all caches to get more memory
+                    clearCache();
+                    index.put(row); // try again
+                }
+                // write to backend
+                if (checkHitSpace()) try {
                     final Row.Entry dummy = readHitCache.replace(row); // learn that entry
                     if (dummy == null) this.writeUnique++; else this.writeDouble++;
+                } catch (RowSpaceExceededException e) {
+                    clearCache();
                 }
                 return null;
             }
         }
         
-        Row.Entry entry;
-        
+        Row.Entry entry = null;
         // write to the back-end
-        entry = index.replace(row);
-        if (checkHitSpace()) {
+        try {
+            entry = index.replace(row);
+        } catch (RowSpaceExceededException e1) {
+            // flush all caches to get more memory
+            clearCache();
+            index.replace(row); // try again
+        }
+        if (checkHitSpace()) try {
             final Row.Entry dummy = readHitCache.replace(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
+        } catch (RowSpaceExceededException e) {
+            clearCache();
         }
         return entry;
     }
 
-    public final synchronized void addUnique(final Row.Entry row) throws IOException {
+    public final synchronized void addUnique(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert (row != null);
         assert (row.columns() == row().columns());
         //assert (!(serverLog.allZero(row.getColBytes(index.primarykey()))));
@@ -355,23 +376,25 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
             this.readMissCache.remove(key);
             this.hasnotDelete++;
             // the entry does not exist before
-            index.addUnique(row); // write to backend
-            if (checkHitSpace()) {
-                final Row.Entry dummy = readHitCache.replace(row); // learn that entry
-                if (dummy == null) this.writeUnique++; else this.writeDouble++;
-            }
-            return;
         }
         
         // the worst case: we must write to the back-end directly
-        index.addUnique(row);
-        if (checkHitSpace()) {
+        try {
+            index.addUnique(row);
+        } catch (RowSpaceExceededException e1) {
+            // flush all caches to get more memory
+            clearCache();
+            index.addUnique(row); // try again
+        }
+        if (checkHitSpace()) try {
             final Row.Entry dummy = readHitCache.replace(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
+        } catch (RowSpaceExceededException e) {
+            clearCache();
         }
     }
 
-    public final synchronized void addUnique(final Row.Entry row, final Date entryDate) throws IOException {
+    public final synchronized void addUnique(final Row.Entry row, final Date entryDate) throws IOException, RowSpaceExceededException {
         if (entryDate == null) {
             addUnique(row);
             return;
@@ -390,19 +413,37 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         }
 
         // the worst case: we must write to the backend directly
-        index.addUnique(row);
-        if (checkHitSpace()) {
+        try {
+            index.addUnique(row);
+        } catch (RowSpaceExceededException e1) {
+            // flush all caches to get more memory
+            clearCache();
+            index.addUnique(row); // try again
+        }
+        if (checkHitSpace()) try {
             final Row.Entry dummy = readHitCache.replace(row); // learn that entry
             if (dummy == null) this.writeUnique++; else this.writeDouble++;
+        } catch (RowSpaceExceededException e) {
+            clearCache();
         }
     }
     
-    public final synchronized void addUnique(final List<Row.Entry> rows) throws IOException {
+    public final synchronized void addUnique(final List<Row.Entry> rows) throws IOException, RowSpaceExceededException {
         final Iterator<Row.Entry> i = rows.iterator();
-        while (i.hasNext()) addUnique(i.next());
+        Row.Entry r;
+        while (i.hasNext()) {
+            r = i.next();
+            try {
+                addUnique(r);
+            } catch (RowSpaceExceededException e) {
+                // flush all caches to get more memory
+                clearCache();
+                addUnique(r); // try again
+            }
+        }
     }
 
-    public final synchronized ArrayList<RowCollection> removeDoubles() throws IOException {
+    public final synchronized ArrayList<RowCollection> removeDoubles() throws IOException, RowSpaceExceededException {
         return index.removeDoubles();
         // todo: remove reported entries from the cache!!!
     }
@@ -411,7 +452,7 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         checkMissSpace();
         
         // add entry to miss-cache
-        if (checkMissSpace()) {
+        if (checkMissSpace()) try {
             // set the miss cache; if there was already an entry we know that the return value must be null
             final Row.Entry dummy = readMissCache.replace(readMissCache.row().newEntry(key));
             if (dummy == null) {
@@ -420,6 +461,8 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
                 this.hasnotHit++;
                 this.hasnotDouble++;
             }
+        } catch (RowSpaceExceededException e) {
+            clearCache();
         }
         
         // remove entry from hit-cache
@@ -443,9 +486,11 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         final Row.Entry entry = index.removeOne();
         if (entry == null) return null;
         final byte[] key = entry.getPrimaryKeyBytes();
-        if (checkMissSpace()) {
+        if (checkMissSpace()) try {
             final Row.Entry dummy = readMissCache.replace(readMissCache.row().newEntry(key));
             if (dummy == null) this.hasnotUnique++; else this.hasnotDouble++;
+        } catch (RowSpaceExceededException e) {
+            clearCache();
         }
         if (readHitCache != null) {
             final Row.Entry dummy = readHitCache.remove(key);

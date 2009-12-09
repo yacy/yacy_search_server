@@ -223,7 +223,7 @@ public class Segment {
             ientry.setWord(wprop);
             try {
                 this.termIndex.add(Word.word2hash(word), ientry);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.logException(e);
             }
             wordCount++;

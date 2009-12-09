@@ -36,6 +36,7 @@ import java.util.TreeMap;
 
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
@@ -69,7 +70,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         this.lastTimeWrote = 0;
     }
     
-    public ReferenceContainer<ReferenceType> topLevelClone() {
+    public ReferenceContainer<ReferenceType> topLevelClone() throws RowSpaceExceededException {
         final ReferenceContainer<ReferenceType> newContainer = new ReferenceContainer<ReferenceType>(this.factory, this.termHash, this.size());
         newContainer.addAllUnique(this);
         return newContainer;
@@ -97,29 +98,29 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return new String(termHash);
     }
     
-    public void add(final Reference entry) {
+    public void add(final Reference entry) throws RowSpaceExceededException {
         // add without double-occurrence test
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         this.addUnique(entry.toKelondroEntry());
     }
     
-    public ReferenceContainer<ReferenceType> merge(final ReferenceContainer<ReferenceType> c) {
+    public ReferenceContainer<ReferenceType> merge(final ReferenceContainer<ReferenceType> c) throws RowSpaceExceededException {
         return new ReferenceContainer<ReferenceType>(this.factory, this.termHash, super.merge(c));
     }
     
-    public Reference replace(final Reference entry) {
+    public Reference replace(final Reference entry) throws RowSpaceExceededException {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         final Row.Entry r = super.replace(entry.toKelondroEntry());
         if (r == null) return null;
         return factory.produceSlow(r);
     }
     
-    public void put(final Reference entry) {
+    public void put(final Reference entry) throws RowSpaceExceededException {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         super.put(entry.toKelondroEntry());
     }
     
-    public boolean putRecent(final Reference entry) {
+    public boolean putRecent(final Reference entry) throws RowSpaceExceededException {
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
         // returns true if the new entry was added, false if it already existed
         final Row.Entry oldEntryRow = this.replace(entry.toKelondroEntry());
@@ -134,7 +135,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return true;
     }
 
-    public int putAllRecent(final ReferenceContainer<ReferenceType> c) {
+    public int putAllRecent(final ReferenceContainer<ReferenceType> c) throws RowSpaceExceededException {
         // adds all entries in c and checks every entry for double-occurrence
         // returns the number of new elements
         if (c == null) return 0;
@@ -206,7 +207,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         
     }
     
-    public static Object mergeUnique(final Object a, final Object b) {
+    public static Object mergeUnique(final Object a, final Object b) throws RowSpaceExceededException {
         final ReferenceContainer<?> c = (ReferenceContainer<?>) a;
         c.addAllUnique((ReferenceContainer<?>) b);
         return c;
@@ -233,7 +234,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             final ReferenceFactory<ReferenceType> factory,
             final Collection<ReferenceContainer<ReferenceType>> includeContainers,
             final Collection<ReferenceContainer<ReferenceType>> excludeContainers,
-            final int maxDistance) {
+            final int maxDistance) throws RowSpaceExceededException {
         // join a search result and return the joincount (number of pages after join)
 
         // since this is a conjunction we return an empty entity if any word is not known
@@ -250,7 +251,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
     public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> joinContainers(
             final ReferenceFactory<ReferenceType> factory,
             final Collection<ReferenceContainer<ReferenceType>> containers,
-            final int maxDistance) {
+            final int maxDistance) throws RowSpaceExceededException {
         
         // order entities by their size
         final TreeMap<Long, ReferenceContainer<ReferenceType>> map = new TreeMap<Long, ReferenceContainer<ReferenceType>>();
@@ -320,7 +321,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             final ReferenceFactory<ReferenceType> factory,
             final ReferenceContainer<ReferenceType> i1,
             final ReferenceContainer<ReferenceType> i2,
-            final int maxDistance) {
+            final int maxDistance) throws RowSpaceExceededException {
         if ((i1 == null) || (i2 == null)) return null;
         if (i1.isEmpty() || i2.isEmpty()) return null;
         
@@ -344,7 +345,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             final ReferenceFactory<ReferenceType> factory,
             final ReferenceContainer<ReferenceType> small,
             final ReferenceContainer<ReferenceType> large,
-            final int maxDistance) {
+            final int maxDistance) throws RowSpaceExceededException {
         //System.out.println("DEBUG: JOIN METHOD BY TEST, maxdistance = " + maxDistance);
         assert small.rowdef.equals(large.rowdef) : "small = " + small.rowdef.toString() + "; large = " + large.rowdef.toString();
         final int keylength = small.rowdef.width(0);
@@ -373,7 +374,7 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             final ReferenceFactory<ReferenceType> factory,
             final ReferenceContainer<ReferenceType> i1,
             final ReferenceContainer<ReferenceType> i2,
-            final int maxDistance) {
+            final int maxDistance) throws RowSpaceExceededException {
         //System.out.println("DEBUG: JOIN METHOD BY ENUMERATION, maxdistance = " + maxDistance);
         assert i1.rowdef.equals(i2.rowdef) : "i1 = " + i1.rowdef.toString() + "; i2 = " + i2.rowdef.toString();
         final int keylength = i1.rowdef.width(0);

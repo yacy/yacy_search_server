@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.util.ScoreCluster;
@@ -169,11 +170,13 @@ public class MapDataMining extends MapView {
         }
     }
     
-    public synchronized void put(final String key, final Map<String, String> newMap) throws IOException {
+    public synchronized void put(final String key, final Map<String, String> newMap) throws IOException, RowSpaceExceededException {
         assert (key != null);
         assert (key.length() > 0);
         assert (newMap != null);
-
+        
+        super.put(key, newMap);
+        
         // update elementCount
         if ((longaccfields != null) || (doubleaccfields != null)) {
             final Map<String, String> oldMap = super.get(key, false);
@@ -182,8 +185,6 @@ public class MapDataMining extends MapView {
                 if ((longaccfields != null) || (doubleaccfields != null)) updateAcc(oldMap, false);
             }
         }
-        
-        super.put(key, newMap);
         
         // update sortCluster
         if (sortClusterMap != null) updateSortCluster(key, newMap);

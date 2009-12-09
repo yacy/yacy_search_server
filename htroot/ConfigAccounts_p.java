@@ -29,10 +29,10 @@
 //javac -classpath .:../Classes Message.java
 //if the shell's current path is HTROOT
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 
@@ -209,7 +209,8 @@ public class ConfigAccounts_p {
 						entry.setProperty(userDB.Entry.TIME_USED, timeUsed);
 						for(i=0;i<rights.length;i++)
 							entry.setProperty(rights[i], rightsSet.get(rights[i]));
-		            }catch (final IOException e){
+		            } catch (final Exception e) {
+		                Log.logException(e);
 					}
                 }else{
 					prop.put("error", "1");

@@ -400,8 +400,7 @@ public class bookmarksDB {
     public void saveBookmark(final Bookmark bookmark){
     	try {
     		bookmarksTable.put(bookmark.getUrlHash(), bookmark.entry);
-        } catch (final IOException e) {
-        	// TODO Auto-generated catch block
+        } catch (final Exception e) {
             Log.logException(e);
         }
     }
@@ -539,13 +538,19 @@ public class bookmarksDB {
      */
     public void storeTag(final Tag tag){
     	if (tag == null) return;
-        try {
-            if(tag.size() >0){
+        if (tag.size() >0) {
+            try {
                 bookmarksDB.this.tagsTable.put(tag.getTagHash(), tag.getMap());
-            }else{
-                bookmarksDB.this.tagsTable.remove(tag.getTagHash());
+            } catch (Exception e) {
+                Log.logException(e);
             }
-        } catch (final IOException e) {}
+        } else {
+            try {
+                bookmarksDB.this.tagsTable.remove(tag.getTagHash());
+            } catch (IOException e) {
+                Log.logException(e);
+            }
+        }
     } 
     /**
      * save a Tag in tagCache; see also flushTagCache(), addTag(), loadTag() 
@@ -1040,13 +1045,19 @@ public class bookmarksDB {
             this.mem.put(URL_HASHES, listManager.collection2string(list));
         }
         public void setDatesTable(){
-            try {
-                if(this.size() >0){
+            if (this.size() >0) {
+                try {
                     bookmarksDB.this.datesTable.put(getDateString(), mem);
-                }else{
-                    bookmarksDB.this.datesTable.remove(getDateString());
+                } catch (Exception e) {
+                    Log.logException(e);
                 }
-            } catch (final IOException e) {}
+            } else {
+                try {
+                    bookmarksDB.this.datesTable.remove(getDateString());
+                } catch (IOException e) {
+                    Log.logException(e);
+                }
+            }
         }
         public String getDateString(){
             return date;

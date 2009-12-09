@@ -64,13 +64,13 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return r;
     }
     
-    public final void addUnique(Entry row) {
+    public final void addUnique(Entry row) throws RowSpaceExceededException {
         int i = indexFor(row);
         if (i < 0) return;
         accessArray(i).addUnique(row);
     }
 
-    public final void addUnique(List<Entry> rows) {
+    public final void addUnique(List<Entry> rows) throws RowSpaceExceededException {
         for (Entry row: rows) addUnique(row);
     }
 
@@ -125,7 +125,7 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         }            
     }
 
-    public final void put(Entry row) {
+    public final void put(Entry row) throws RowSpaceExceededException {
         int i = indexFor(row);
         if (i < 0) return;
         accessArray(i).put(row);
@@ -137,7 +137,7 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return accessArray(i).remove(key);
     }
 
-    public final ArrayList<RowCollection> removeDoubles() {
+    public final ArrayList<RowCollection> removeDoubles() throws RowSpaceExceededException {
         ArrayList<RowCollection> col = new ArrayList<RowCollection>();
         synchronized (this.array) {
             for (int i = 0; i < this.array.length; i++) {
@@ -163,7 +163,7 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return null;
     }
 
-    public final Entry replace(Entry row) {
+    public final Entry replace(Entry row) throws RowSpaceExceededException {
         int i = indexFor(row);
         if (i < 0) return null;
         return accessArray(i).replace(row);
@@ -217,7 +217,7 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return this.rows(true, null);
     }
 
-    public final long inc(byte[] key, int col, long add, Entry initrow) {
+    public final long inc(byte[] key, int col, long add, Entry initrow) throws RowSpaceExceededException {
         int i = indexFor(key);
         if (i < 0) return -1;
         return accessArray(i).inc(key, col, add, initrow);

@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
@@ -169,9 +170,14 @@ public class Compressor implements BLOB {
         if (b != null) {
             // compress the entry now and put it to the backend
             byte[] bb = compress(b);
-            this.backend.put(key, bb);
-            this.bufferlength = this.bufferlength - b.length;
-            return b;
+            try {
+                this.backend.put(key, bb);
+                this.bufferlength = this.bufferlength - b.length;
+                return b;
+            } catch (RowSpaceExceededException e) {
+                buffer.put(new String(key), b);
+                return b;
+            }
         }
         
         // return from the backend
@@ -222,7 +228,12 @@ public class Compressor implements BLOB {
         if (this.bufferlength + b.length * 2 > this.maxbufferlength) {
             // in case that we compress, just compress as much as is necessary to get enough room
             while (this.bufferlength + b.length * 2 > this.maxbufferlength && !this.buffer.isEmpty()) {
-                flushOne();
+                try {
+                    flushOne();
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                    break;
+                }
             }
             // in case that this was not enough, just flush all
             if (this.bufferlength + b.length * 2 > this.maxbufferlength) flushAll();
@@ -261,21 +272,31 @@ public class Compressor implements BLOB {
         return this.backend.keys(up, firstKey);
     }
     
-    private boolean flushOne() throws IOException {
+    private boolean flushOne() throws IOException, RowSpaceExceededException {
         if (this.buffer.isEmpty()) return false;
         // depending on process case, write it to the file or compress it to the other queue
         Map.Entry<String, byte[]> entry = this.buffer.entrySet().iterator().next();
         this.buffer.remove(entry.getKey());
         byte[] b = entry.getValue();
         this.bufferlength -= b.length;
-        b = compress(b);
-        this.backend.put(entry.getKey().getBytes(), b);
+        byte[] bb = compress(b);
+        try {
+            this.backend.put(entry.getKey().getBytes(), bb);
+        } catch (RowSpaceExceededException e) {
+            this.buffer.put(entry.getKey(), b);
+            throw e;
+        }
         return true;
     }
 
     private void flushAll() throws IOException {
         while (!this.buffer.isEmpty()) {
-            if (!flushOne()) break;
+            try {
+                if (!flushOne()) break;
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+                break;
+            }
         }
         assert this.bufferlength == 0;
     }

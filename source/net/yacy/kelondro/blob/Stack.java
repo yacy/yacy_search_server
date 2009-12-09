@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.order.NaturalOrder;
 
 
@@ -88,8 +89,9 @@ public class Stack {
      * @param b the new stack element
      * @return the handle used to store the new element
      * @throws IOException
+     * @throws RowSpaceExceededException 
      */
-    public synchronized long push(byte[] b) throws IOException {
+    public synchronized long push(byte[] b) throws IOException, RowSpaceExceededException {
         long handle = nextHandle();
         this.stack.put(NaturalOrder.encodeLong(handle, 8), b);
         return handle;
@@ -102,8 +104,9 @@ public class Stack {
      * @param b the new stack element
      * @return the handle used to store the new element
      * @throws IOException
+     * @throws RowSpaceExceededException 
      */
-    protected synchronized void push(Entry e) throws IOException {
+    protected synchronized void push(Entry e) throws IOException, RowSpaceExceededException {
         this.stack.put(NaturalOrder.encodeLong(e.h, 8), e.b);
     }
     

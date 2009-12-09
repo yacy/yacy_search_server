@@ -396,13 +396,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             }
             seedPassiveDB.remove(seed.hash);
             seedPotentialDB.remove(seed.hash);
-        } catch (final IOException e) {
-            yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-            resetActiveTable();
-        } catch (final kelondroException e) {
-            yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-            resetActiveTable();
-        } catch (final IllegalArgumentException e) {
+        } catch (final Exception e) {
             yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
             resetActiveTable();
         }
@@ -421,13 +415,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             synchronized (seedPropMap) {
                 seedPassiveDB.put(seed.hash, seedPropMap);
             }
-        } catch (final IOException e) {
-            yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-            resetPassiveTable();
-        } catch (final kelondroException e) {
-            yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-            resetPassiveTable();
-        } catch (final IllegalArgumentException e) {
+        } catch (final Exception e) {
             yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
             resetPassiveTable();
         }
@@ -446,13 +434,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             synchronized (seedPropMap) {
                 seedPotentialDB.put(seed.hash, seedPropMap);
             }
-        } catch (final IOException e) {
-            yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-            resetPotentialTable();
-        } catch (final kelondroException e) {
-            yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
-            resetPotentialTable();
-        } catch (final IllegalArgumentException e) {
+        } catch (final Exception e) {
             yacyCore.log.logSevere("ERROR add: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
             resetPotentialTable();
         }
@@ -536,13 +518,13 @@ public final class yacySeedDB implements AlternativeDomainNames {
         }
         
         yacySeed s = get(hash, seedActiveDB);
-        if (s != null) try { seedActiveDB.put(hash, seed.getMap()); return;} catch (final IOException e) {}
+        if (s != null) try { seedActiveDB.put(hash, seed.getMap()); return;} catch (final Exception e) {Log.logException(e);}
         
         s = get(hash, seedPassiveDB);
-        if (s != null) try { seedPassiveDB.put(hash, seed.getMap()); return;} catch (final IOException e) {}
+        if (s != null) try { seedPassiveDB.put(hash, seed.getMap()); return;} catch (final Exception e) {Log.logException(e);}
         
         s = get(hash, seedPotentialDB);
-        if (s != null) try { seedPotentialDB.put(hash, seed.getMap()); return;} catch (final IOException e) {}
+        if (s != null) try { seedPotentialDB.put(hash, seed.getMap()); return;} catch (final Exception e) {Log.logException(e);}
     }
     
     public yacySeed lookupByName(String peerName) {

@@ -30,6 +30,8 @@ import java.util.TreeSet;
 
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.TermSearch;
 import net.yacy.kelondro.util.DateFormatter;
@@ -89,12 +91,12 @@ public final class timeline {
         //yacyCore.log.logInfo("INIT TIMELINE SEARCH: " + plasmaSearchQuery.anonymizedQueryHashes(query[0]) + " - " + count + " links");
         
         // get the index container with the result vector
-        final TermSearch<WordReference> search = segment.termIndex().query(
-                q,
-                Word.words2hashes(query[1]),
-                null,
-                Segment.wordReferenceFactory,
-                maxdist);
+        TermSearch<WordReference> search = null;
+        try {
+            search = segment.termIndex().query(q, Word.words2hashes(query[1]), null, Segment.wordReferenceFactory, maxdist);
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+        }
         ReferenceContainer<WordReference> index = search.joined();
         
         Iterator<WordReference> i = index.entries();

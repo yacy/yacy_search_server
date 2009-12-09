@@ -38,6 +38,7 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.table.SplitTable;
@@ -62,7 +63,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
     );
 
     // the class object
-    protected final ObjectIndex urlIndex;
+    protected ObjectIndex urlIndex;
     protected final ConcurrentLinkedQueue<String> stack;
     
     public ZURL(
@@ -79,7 +80,15 @@ public class ZURL implements Iterable<ZURL.Entry> {
                 if (f.isDirectory()) SplitTable.delete(cachePath, tablename); else FileUtils.deletedelete(f);
             }
         }
-        this.urlIndex = new Table(f, rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727);
+        try {
+            this.urlIndex = new Table(f, rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727);
+        } catch (RowSpaceExceededException e) {
+            try {
+                this.urlIndex = new Table(f, rowdef, 0, 0, false, exceed134217727);
+            } catch (RowSpaceExceededException e1) {
+                Log.logException(e1);
+            }
+        }
         //urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, 0, true);
         this.stack = new ConcurrentLinkedQueue<String>();
     }
@@ -236,8 +245,8 @@ public class ZURL implements Iterable<ZURL.Entry> {
             	//System.out.println("*** DEBUG ZURL " + urlIndex.filename() + " store " + newrow.getColString(0, "UTF-8"));
                 if (urlIndex != null) urlIndex.put(newrow);
                 this.stored = true;
-            } catch (final IOException e) {
-                System.out.println("INTERNAL ERROR AT plasmaEURL:url2hash:" + e.toString());
+            } catch (final Exception e) {
+                Log.logException(e);
             }
         }
 

@@ -147,7 +147,7 @@ public class Records {
         }
         
         synchronized void writeused(final boolean finalwrite) throws IOException {
-            // we write only at close time, not in between. othervise, the read/write head
+            // we write only at close time, not in between. Otherwise, the read/write head
             // needs to run up and own all the way between the beginning and the end of the
             // file for each record. We check consistency beteen file size and
             if (finalwrite) synchronized (entryFile) {
@@ -1055,7 +1055,7 @@ public class Records {
         public Node(final Handle handle, final byte[] bulkchunk, final int offset) throws IOException {
             // this initializer is used to create nodes from bulk-read byte arrays
             // if write is true, then the chunk in bulkchunk is written to the file
-            // othervise it is considered equal to what is stored in the file
+            // otherwise it is considered equal to what is stored in the file
             // (that is ensured during pre-loaded enumeration)
             this.handle = handle;
             boolean changed;

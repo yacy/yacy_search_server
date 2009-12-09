@@ -34,6 +34,7 @@ import java.util.Map;
 
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -225,9 +226,10 @@ public class Dispatcher {
      * @param containers
      * @param scheme
      * @return
+     * @throws RowSpaceExceededException 
      */
     @SuppressWarnings("unchecked")
-    private ArrayList<ReferenceContainer<WordReference>>[] splitContainers(ArrayList<ReferenceContainer<WordReference>> containers) {
+    private ArrayList<ReferenceContainer<WordReference>>[] splitContainers(ArrayList<ReferenceContainer<WordReference>> containers) throws RowSpaceExceededException {
         
         // init the result vector
         int partitionCount = this.seeds.scheme.verticalPartitions();
@@ -302,7 +304,12 @@ public class Dispatcher {
             
             // fill the entry with the containers
             for (ReferenceContainer<WordReference> c: containers[vertical]) {
-                entry.add(c);
+                try {
+                    entry.add(c);
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                    break;
+                }
             }
             
             // put the entry into the cloud
@@ -315,31 +322,43 @@ public class Dispatcher {
             final byte[] limitHash,
             final int maxContainerCount,
             final int maxReferenceCount,
-            final int maxtime) throws IOException {
+            final int maxtime) {
         if (this.transmissionCloud == null) return false;
 
-    	ArrayList<ReferenceContainer<WordReference>> selectedContainerCache = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime);
-        this.log.logInfo("selectContainersToCache: selectedContainerCache was filled with " + selectedContainerCache.size() + " entries");
+    	ArrayList<ReferenceContainer<WordReference>> selectedContainerCache;
+        try {
+            selectedContainerCache = selectContainers(hash, limitHash, maxContainerCount, maxReferenceCount, maxtime);
+        } catch (IOException e) {
+            this.log.logSevere("selectContainersEnqueueToCloud: selectedContainer failed", e);
+            return false;
+        }
+        this.log.logInfo("selectContainersEnqueueToCloud: selectedContainerCache was filled with " + selectedContainerCache.size() + " entries");
         
         if (selectedContainerCache == null || selectedContainerCache.isEmpty()) {
-        	this.log.logInfo("splitContainersFromCache: selectedContainerCache is empty, cannot do anything here.");
+        	this.log.logInfo("selectContainersEnqueueToCloud: selectedContainerCache is empty, cannot do anything here.");
         	return false;
         }
 
-        ArrayList<ReferenceContainer<WordReference>>[] splittedContainerCache = splitContainers(selectedContainerCache);
+        ArrayList<ReferenceContainer<WordReference>>[] splittedContainerCache;
+        try {
+            splittedContainerCache = splitContainers(selectedContainerCache);
+        } catch (RowSpaceExceededException e) {
+            this.log.logSevere("selectContainersEnqueueToCloud: splitContainers failed because of too low RAM", e);
+            return false;
+        }
         selectedContainerCache = null;
         if (splittedContainerCache == null) {
-        	this.log.logInfo("enqueueContainersFromCache: splittedContainerCache is empty, cannot do anything here.");
+        	this.log.logInfo("selectContainersEnqueueToCloud: splittedContainerCache is empty, cannot do anything here.");
         	return false;
         }
         this.log.logInfo("splitContainersFromCache: splittedContainerCache filled with " + splittedContainerCache.length + " partitions, deleting selectedContainerCache");
         if (splittedContainerCache.length != this.seeds.scheme.verticalPartitions()) {
-        	this.log.logWarning("enqueueContainersFromCache: splittedContainerCache has wrong length.");
+        	this.log.logWarning("selectContainersEnqueueToCloud: splittedContainerCache has wrong length.");
         	return false;
         }
         enqueueContainersToCloud(splittedContainerCache);
         splittedContainerCache = null;
-    	this.log.logInfo("enqueueContainersFromCache: splittedContainerCache enqueued to cloud array which has now " + this.transmissionCloud.size() + " entries.");
+    	this.log.logInfo("selectContainersEnqueueToCloud: splittedContainerCache enqueued to cloud array which has now " + this.transmissionCloud.size() + " entries.");
         return true;
     }
     
@@ -401,8 +420,13 @@ public class Dispatcher {
         // removes all entries from the dispatcher and puts them back to a RAMRI
         if (indexingTransmissionProcessor != null) this.indexingTransmissionProcessor.announceShutdown();
         if (this.transmissionCloud != null) {
-        	for (Map.Entry<ByteArray, Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
-        		for (ReferenceContainer<WordReference> i : e.getValue()) try {this.segment.termIndex().add(i);} catch (IOException e1) {}
+        	outerLoop: for (Map.Entry<ByteArray, Transmission.Chunk> e : this.transmissionCloud.entrySet()) {
+        		for (ReferenceContainer<WordReference> i : e.getValue()) try {
+        		    this.segment.termIndex().add(i);
+        		} catch (Exception e1) {
+        		    Log.logException(e1);
+        		    break outerLoop;
+        		}
         	}
         	this.transmissionCloud.clear();
         }

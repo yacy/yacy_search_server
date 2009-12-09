@@ -217,13 +217,18 @@ public class RowCollection implements Iterable<Row.Entry> {
         return needed;
     }
     
-    protected final void ensureSize(final int elements) {
+    protected final void ensureSize(final int elements) throws RowSpaceExceededException {
         long allocram = neededSpaceForEnsuredSize(elements, true);
         if (allocram == 0) return;
         assert allocram > chunkcache.length : "wrong alloc computation: allocram = " + allocram + ", chunkcache.length = " + chunkcache.length;
-        byte[] newChunkcache = new byte[(int) allocram]; // increase space
-        System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
-        chunkcache = newChunkcache;
+        if (!MemoryControl.request(allocram, true)) throw new RowSpaceExceededException(allocram, "RowCollection grow");
+        try {
+            byte[] newChunkcache = new byte[(int) allocram]; // increase space
+            System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
+            chunkcache = newChunkcache;
+        } catch (OutOfMemoryError e) {
+            throw new RowSpaceExceededException(allocram, "RowCollection grow after OutOfMemoryError " + e.getMessage());
+        }
     }
     
     /**
@@ -285,7 +290,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         return entry;
     }
     
-    public synchronized final void set(final int index, final Row.Entry a) {
+    public synchronized final void set(final int index, final Row.Entry a) throws RowSpaceExceededException {
         assert (index >= 0) : "set: access with index " + index + " is below zero";
         ensureSize(index + 1);
         boolean sameKey = match(a.bytes(), 0, a.cellwidth(0), index);
@@ -296,7 +301,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public final void insertUnique(final int index, final Row.Entry a) {
+    public final void insertUnique(final int index, final Row.Entry a) throws RowSpaceExceededException {
         assert (a != null);
 
         if (index < chunkcount) {
@@ -309,23 +314,23 @@ public class RowCollection implements Iterable<Row.Entry> {
         set(index, a);
     }
     
-    public synchronized void addUnique(final Row.Entry row) {
+    public synchronized void addUnique(final Row.Entry row) throws RowSpaceExceededException {
         final byte[] r = row.bytes();
         addUnique(r, 0, r.length);
     }
 
-    public synchronized void addUnique(final List<Row.Entry> rows) {
+    public synchronized void addUnique(final List<Row.Entry> rows) throws RowSpaceExceededException {
         assert this.sortBound == 0 : "sortBound = " + this.sortBound + ", chunkcount = " + this.chunkcount;
         final Iterator<Row.Entry> i = rows.iterator();
         while (i.hasNext()) addUnique(i.next());
     }
     
-    public synchronized void add(final byte[] a) {
+    public synchronized void add(final byte[] a) throws RowSpaceExceededException {
         assert a.length == this.rowdef.objectsize : "a.length = " + a.length + ", objectsize = " + this.rowdef.objectsize;
         addUnique(a, 0, a.length);
     }
     
-    private final void addUnique(final byte[] a, final int astart, final int alength) {
+    private final void addUnique(final byte[] a, final int astart, final int alength) throws RowSpaceExceededException {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + astart;
         assert (!(Log.allZero(a, astart, alength))) : "a = " + NaturalOrder.arrayList(a, astart, alength);
@@ -349,7 +354,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    protected final void addSorted(final byte[] a, final int astart, final int alength) {
+    protected final void addSorted(final byte[] a, final int astart, final int alength) throws RowSpaceExceededException {
         assert (a != null);
         assert (astart >= 0) && (astart < a.length) : " astart = " + astart;
         assert (!(Log.allZero(a, astart, alength))) : "a = " + NaturalOrder.arrayList(a, astart, alength);
@@ -364,7 +369,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public synchronized final void addAllUnique(final RowCollection c) {
+    public synchronized final void addAllUnique(final RowCollection c) throws RowSpaceExceededException {
         if (c == null) return;
         assert(rowdef.objectsize == c.rowdef.objectsize);
         ensureSize(chunkcount + c.size());
@@ -838,7 +843,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         }
     }
     
-    public synchronized ArrayList<RowCollection> removeDoubles() {
+    public synchronized ArrayList<RowCollection> removeDoubles() throws RowSpaceExceededException {
         assert (this.rowdef.objectOrder != null);
         // removes double-occurrences of chunks
         // in contrast to uniq() this removes also the remaining, non-double entry that had a double-occurrence to the others
@@ -969,7 +974,7 @@ public class RowCollection implements Iterable<Row.Entry> {
     		Base64Order.enhancedCoder.encodeLong(random.nextLong(), 4);
     }
     
-    public static void test(final int testsize) {
+    public static void test(final int testsize) throws RowSpaceExceededException {
     	final Row r = new Row(new Column[]{
     			new Column("hash", Column.celltype_string, Column.encoder_bytes, 12, "hash")},
     			Base64Order.enhancedCoder);
@@ -1075,7 +1080,11 @@ public class RowCollection implements Iterable<Row.Entry> {
     
     public static void main(final String[] args) {
     	//test(1000);
-    	test(50000);
+    	try {
+            test(50000);
+        } catch (RowSpaceExceededException e) {
+            e.printStackTrace();
+        }
     	//test(100000);
     	//test(1000000);
     	

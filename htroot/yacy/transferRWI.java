@@ -27,7 +27,6 @@
 // javac -classpath .:../classes transferRWI.java
 
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -183,7 +182,7 @@ public final class transferRWI {
                 // learn entry
                 try {
                     sb.indexSegments.termIndex(Segments.Process.DHTIN).add(wordHash.getBytes(), iEntry);
-                } catch (IOException e) {
+                } catch (Exception e) {
                     Log.logException(e);
                 }
                 serverCore.checkInterruption();

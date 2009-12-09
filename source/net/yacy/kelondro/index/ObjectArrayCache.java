@@ -34,8 +34,8 @@ import net.yacy.kelondro.order.NaturalOrder;
 
 public final class ObjectArrayCache {
 
-	// we use two indexes: one for initialization, and one for data aquired during runtime
-	// this has a gread advantage, if the setup-data is large. Then a re-organisation of
+	// we use two indexes: one for initialization, and one for data acquired during runtime
+	// this has a gread advantage, if the setup-data is large. Then a re-organization of
 	// the run-time data does not need much memory and is done faster.
 	// we distinguish two phases: the init phase where data can only be written
 	// to index0 with addb, and a runtime-phase where data can only be written
@@ -82,7 +82,7 @@ public final class ObjectArrayCache {
         return indexentry.getColBytes(1);
     }
     
-    public final byte[] putb(final int ii, final byte[] value) {
+    public final byte[] putb(final int ii, final byte[] value) throws RowSpaceExceededException {
         assert ii >= 0 : "i = " + ii;
         assert value != null;
         final byte[] key = NaturalOrder.encodeLong(ii, 4);
@@ -114,7 +114,7 @@ public final class ObjectArrayCache {
         return oldentry.getColBytes(1);
     }
 
-    public final void addb(final int ii, final byte[] value) {
+    public final void addb(final int ii, final byte[] value) throws RowSpaceExceededException {
     	assert index1 == null; // valid only in init-phase
         assert ii >= 0 : "i = " + ii;
         assert value != null;
@@ -224,7 +224,11 @@ public final class ObjectArrayCache {
 			r = Math.abs(random.nextLong() % 10000);
 			//System.out.println("add " + r);
 			jcontrol.add(Long.valueOf(r));
-			kcontrol.putb((int) r, "x".getBytes());
+			try {
+                kcontrol.putb((int) r, "x".getBytes());
+            } catch (RowSpaceExceededException e) {
+                e.printStackTrace();
+            }
 			if (random.nextLong() % 5 == 0) ra.add(Long.valueOf(r));
 			if (!ra.isEmpty() && random.nextLong() % 7 == 0) {
 				rc++;

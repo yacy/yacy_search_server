@@ -48,6 +48,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
@@ -679,8 +680,9 @@ public class ArrayStack implements BLOB {
      * @param key  the primary key
      * @param b
      * @throws IOException
+     * @throws RowSpaceExceededException 
      */
-    public synchronized void put(byte[] key, byte[] b) throws IOException {
+    public synchronized void put(byte[] key, byte[] b) throws IOException, RowSpaceExceededException {
         blobItem bi = (blobs.isEmpty()) ? null : blobs.get(blobs.size() - 1);
         if (bi == null)
             System.out.println("bi == null");
@@ -729,23 +731,43 @@ public class ArrayStack implements BLOB {
         blobs = null;
     }
     
-    public File mergeMount(File f1, File f2, ReferenceFactory<? extends Reference> factory, Row payloadrow, File newFile, int writeBuffer) throws IOException {
+    public File mergeMount(File f1, File f2,
+            ReferenceFactory<? extends Reference> factory,
+            Row payloadrow, File newFile, int writeBuffer) {
         Log.logInfo("BLOBArray", "merging " + f1.getName() + " with " + f2.getName());
         File resultFile = mergeWorker(factory, this.keylength, this.ordering, f1, f2, payloadrow, newFile, writeBuffer);
         if (resultFile == null) {
             Log.logWarning("BLOBArray", "merge of files " + f1 + ", " + f2 + " returned null. newFile = " + newFile);
             return null;
         }
-        mountBLOB(resultFile, false);
+        try {
+            mountBLOB(resultFile, false);
+        } catch (IOException e) {
+            Log.logWarning("BLOBArray", "merge of files " + f1 + ", " + f2 + " successfull, but read failed. resultFile = " + resultFile);
+            return null;
+        }
         Log.logInfo("BLOBArray", "merged " + f1.getName() + " with " + f2.getName() + " into " + resultFile);
         return resultFile;
     }
     
-    private static <ReferenceType extends Reference> File mergeWorker(ReferenceFactory<ReferenceType> factory, int keylength, ByteOrder order, File f1, File f2, Row payloadrow, File newFile, int writeBuffer) throws IOException {
+    private static <ReferenceType extends Reference> File mergeWorker(
+            ReferenceFactory<ReferenceType> factory,
+            int keylength, ByteOrder order, File f1, File f2, Row payloadrow, File newFile, int writeBuffer) {
         // iterate both files and write a new one
         
-        CloneableIterator<ReferenceContainer<ReferenceType>> i1 = new ReferenceIterator<ReferenceType>(f1, factory, payloadrow);
-        CloneableIterator<ReferenceContainer<ReferenceType>> i2 = new ReferenceIterator<ReferenceType>(f2, factory, payloadrow);
+        CloneableIterator<ReferenceContainer<ReferenceType>> i1 = null, i2 = null;
+        try {
+            i1 = new ReferenceIterator<ReferenceType>(f1, factory, payloadrow);
+        } catch (IOException e) {
+            Log.logSevere("ArrayStack", "cannot merge because input files cannot be read, f1 = " + f1.toString() + ": " + e.getMessage(), e);
+            return null;
+        }
+        try {
+            i2 = new ReferenceIterator<ReferenceType>(f2, factory, payloadrow);
+        } catch (IOException e) {
+            Log.logSevere("ArrayStack", "cannot merge because input files cannot be read, f2 = " + f2.toString() + ": " + e.getMessage(), e);
+            return null;
+        }
         if (!i1.hasNext()) {
             if (i2.hasNext()) {
                 FileUtils.deletedelete(f1);
@@ -763,23 +785,31 @@ public class ArrayStack implements BLOB {
         assert i1.hasNext();
         assert i2.hasNext();
         File tmpFile = new File(newFile.getParentFile(), newFile.getName() + ".prt");
-        HeapWriter writer = new HeapWriter(tmpFile, newFile, keylength, order, writeBuffer);
-        merge(i1, i2, order, writer);
         try {
+            HeapWriter writer = new HeapWriter(tmpFile, newFile, keylength, order, writeBuffer);
+            merge(i1, i2, order, writer);
             writer.close(true);
-            // we don't need the old files any more
-            FileUtils.deletedelete(f1);
-            FileUtils.deletedelete(f2);
-            return newFile;
         } catch (IOException e) {
-            Log.logSevere("ArrayStack", "cannot close writing: " + e.getMessage(), e);
+            Log.logSevere("ArrayStack", "cannot writing or close writing merge, newFile = " + newFile.toString() + ", tmpFile = " + tmpFile.toString() + ": " + e.getMessage(), e);
+            FileUtils.deletedelete(tmpFile);
+            FileUtils.deletedelete(newFile);
+            return null;
+        } catch (RowSpaceExceededException e) {
+            Log.logSevere("ArrayStack", "cannot merge because of memory failure: " + e.getMessage(), e);
             FileUtils.deletedelete(tmpFile);
             FileUtils.deletedelete(newFile);
             return null;
         }
+        // we don't need the old files any more
+        FileUtils.deletedelete(f1);
+        FileUtils.deletedelete(f2);
+        return newFile;
     }
     
-    private static <ReferenceType extends Reference> void merge(CloneableIterator<ReferenceContainer<ReferenceType>> i1, CloneableIterator<ReferenceContainer<ReferenceType>> i2, ByteOrder ordering, HeapWriter writer) throws IOException {
+    private static <ReferenceType extends Reference> void merge(
+            CloneableIterator<ReferenceContainer<ReferenceType>> i1,
+            CloneableIterator<ReferenceContainer<ReferenceType>> i2,
+            ByteOrder ordering, HeapWriter writer) throws IOException, RowSpaceExceededException {
         assert i1.hasNext();
         assert i2.hasNext();
         ReferenceContainer<ReferenceType> c1, c2, c1o, c2o;
@@ -870,6 +900,8 @@ public class ArrayStack implements BLOB {
             heap.put("aaaaaaaaaaaX".getBytes(), "WXYZ".getBytes());
             heap.close(true);
         } catch (final IOException e) {
+            Log.logException(e);
+        } catch (RowSpaceExceededException e) {
             Log.logException(e);
         }
     }

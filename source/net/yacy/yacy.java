@@ -103,7 +103,7 @@ import de.anomic.yacy.yacyVersion;
 *
 * On termination, the following must be done:
 * <ul>
-* <li>stop feeding of the crawling process because it othervise fills the
+* <li>stop feeding of the crawling process because it otherwise fills the
 * indexing queue.
 * <li>say goodbye to connected peers and disable new connections. Don't wait for
 * success.

@@ -38,6 +38,7 @@ import java.util.Map;
 
 import net.yacy.kelondro.index.ARC;
 import net.yacy.kelondro.index.ConcurrentARC;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -136,8 +137,9 @@ public class MapView {
      * @param key  the primary key
      * @param newMap
      * @throws IOException
+     * @throws RowSpaceExceededException 
      */
-    public void put(String key, final Map<String, String> newMap) throws IOException {
+    public void put(String key, final Map<String, String> newMap) throws IOException, RowSpaceExceededException {
         assert key != null;
         assert key.length() > 0;
         assert newMap != null;
@@ -372,6 +374,8 @@ public class MapView {
             // clean up
             map.close();
         } catch (IOException e) {
+            Log.logException(e);
+        } catch (RowSpaceExceededException e) {
             Log.logException(e);
         }
     }

@@ -24,10 +24,11 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.CrawlSwitchboard;
@@ -150,7 +151,8 @@ public class CrawlProfileEditor_p {
 						final String val = (tee.type == eentry.BOOLEAN) ? Boolean.toString(post.containsKey(tee.name)) : post.get(tee.name, cval);
 						if (!cval.equals(val)) sb.crawler.profilesActiveCrawls.changeEntry(selentry, tee.name, val);
 					}
-				} catch (final IOException ex) {
+				} catch (final Exception ex) {
+				    Log.logException(ex);
 					prop.put("error", "1");
 					prop.putHTML("error_message", ex.getMessage());
 				}

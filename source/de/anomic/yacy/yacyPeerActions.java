@@ -24,7 +24,6 @@
 
 package de.anomic.yacy;
 
-import java.io.IOException;
 import java.util.HashMap;
 
 import net.yacy.document.content.RSSMessage;
@@ -239,7 +238,7 @@ public class yacyPeerActions {
             }
             try {
                 synchronized (this.newsPool) {this.newsPool.enqueueIncomingNews(record);}
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 Log.logSevere("YACY", "processPeerArrival", e);
             }
         }

@@ -318,7 +318,7 @@ public final class ByteBuffer extends OutputStream {
         // - first byte begins with 110, the following byte begins with 10
         // - first byte begins with 1110, the following two bytes begin with 10
         // - First byte begins with 11110, the following three bytes begin with 10
-        // if an utf-8 sequence is detected, the length of the sequence is returned. -1 othervise
+        // if an utf-8 sequence is detected, the length of the sequence is returned. -1 otherwise
         if ((start < length) &&
             ((buffer[offset + start] & 0x80) != 0)) return 1;
         if ((start < length - 1) &&

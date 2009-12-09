@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.SortedMap;
 
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.io.CachedFileWriter;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
@@ -225,7 +226,7 @@ public class HeapModifier extends HeapReader implements BLOB {
         }
     }
 
-	public void put(byte[] key, byte[] b) throws IOException {
+	public void put(byte[] key, byte[] b) throws IOException, RowSpaceExceededException {
 		throw new UnsupportedOperationException("put is not supported in BLOBHeapModifier");
 	}
 

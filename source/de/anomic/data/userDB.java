@@ -37,6 +37,7 @@ import java.util.Random;
 
 import net.yacy.kelondro.blob.Heap;
 import net.yacy.kelondro.blob.MapView;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.CloneableIterator;
@@ -113,7 +114,8 @@ public final class userDB {
         try {
             userTable.put(entry.userName,entry.mem);
             return entry.userName;
-        } catch (final IOException e) {
+        } catch (final Exception e) {
+            Log.logException(e);
             return null;
         }
     }    
@@ -203,16 +205,19 @@ public final class userDB {
         }
         return null;
 	}
-    public Entry passwordAuth(final String user, final String password){
+	
+    public Entry passwordAuth(final String user, final String password) {
         final Entry entry=this.getEntry(user);
-        if( entry != null && entry.getMD5EncodedUserPwd().equals(Digest.encodeMD5Hex(user+":"+password)) ){
-                if(entry.isLoggedOut()){
-                    try{
-                        entry.setProperty(Entry.LOGGED_OUT, "false");
-                    }catch(final IOException e){}
-                    return null;
+        if (entry != null && entry.getMD5EncodedUserPwd().equals(Digest.encodeMD5Hex(user+":"+password))) {
+            if (entry.isLoggedOut()){
+                try {
+                    entry.setProperty(Entry.LOGGED_OUT, "false");
+                } catch (final Exception e) {
+                    Log.logException(e);
                 }
-                return entry;
+                return null;
+            }
+            return entry;
         }
         return null;
     }
@@ -225,13 +230,15 @@ public final class userDB {
         this.ipUsers.put(ip, entry.getUserName()); //XXX: This is insecure. TODO: use cookieauth
         return entry;
     }
-    public Entry md5Auth(final String user, final String md5){
+    public Entry md5Auth(final String user, final String md5) {
         final Entry entry=this.getEntry(user);
-        if( entry != null && entry.getMD5EncodedUserPwd().equals(md5)){
-            if(entry.isLoggedOut()){
-                try{
+        if (entry != null && entry.getMD5EncodedUserPwd().equals(md5)) {
+            if (entry.isLoggedOut()){
+                try {
 				    entry.setProperty(Entry.LOGGED_OUT, "false");
-                }catch(final IOException e){}
+                } catch (final Exception e) {
+                    Log.logException(e);
+                }
                 return null;
             }
 			return entry;
@@ -369,7 +376,9 @@ public final class userDB {
             }
             try {
                 this.setProperty(TIME_USED,"0");
-            } catch (final IOException e) {}
+            } catch (final Exception e) {
+                Log.logException(e);
+            }
             return 0;
         }
         
@@ -383,7 +392,9 @@ public final class userDB {
             }
             try {
                 this.setProperty(TIME_LIMIT,"0");
-            } catch (final IOException e) {}
+            } catch (final Exception e) {
+                Log.logException(e);
+            }
             return 0;
         }
         
@@ -393,7 +404,7 @@ public final class userDB {
             }
             try {
                 this.setProperty(TRAFFIC_SIZE,"0");
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 Log.logException(e);
             }
             return 0;
@@ -410,7 +421,7 @@ public final class userDB {
             final long newTrafficSize = currentTrafficSize + responseSize;
             try {
                 this.setProperty(TRAFFIC_SIZE,Long.toString(newTrafficSize));
-            } catch (final IOException e) {
+            } catch (final Exception e) {
                 Log.logException(e);
             }
             return newTrafficSize;
@@ -483,7 +494,7 @@ public final class userDB {
             return this.mem;
         }
         
-        public void setProperty(final String propName, final String newValue) throws IOException {
+        public void setProperty(final String propName, final String newValue) throws IOException, RowSpaceExceededException {
             this.mem.put(propName,  newValue);
             userDB.this.userTable.put(getUserName(), this.mem);
         }
@@ -552,13 +563,15 @@ public final class userDB {
                 cookieUsers.remove(logintoken);
             }
         }
-        public void logout(final String ip){
-        	   try{
-        		   setProperty(LOGGED_OUT, "true");
-        		   if(ipUsers.containsKey(ip)){
-        			   ipUsers.remove(ip);
-        		   }
-        	   }catch(final IOException e){}
+        public void logout(final String ip) {
+    	   try {
+    		   setProperty(LOGGED_OUT, "true");
+    		   if (ipUsers.containsKey(ip)){
+    			   ipUsers.remove(ip);
+    		   }
+    	   } catch (final Exception e) {
+               Log.logException(e);
+           }
         }
         public void logout(){
         		logout("xxxxxx");

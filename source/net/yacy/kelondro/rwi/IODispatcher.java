@@ -109,12 +109,8 @@ public class IODispatcher extends Thread {
     
     public synchronized void merge(File f1, File f2, ReferenceFactory<? extends Reference> factory, ArrayStack array, Row payloadrow, File newFile) {
         if (mergeQueue == null || controlQueue == null || !this.isAlive()) {
-            try {
-                Log.logWarning("IODispatcher", "emergency merge of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
-                array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
-            } catch (IOException e) {
-                Log.logSevere("IODispatcher", "emergency merge failed: " + e.getMessage(), e);
-            }
+            Log.logWarning("IODispatcher", "emergency merge of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
+            array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
         } else {
             MergeJob job = new MergeJob(f1, f2, factory, array, payloadrow, newFile);
             try {
@@ -128,11 +124,7 @@ public class IODispatcher extends Thread {
                 }
             } catch (InterruptedException e) {
                 Log.logWarning("IODispatcher", "interrupted: " + e.getMessage(), e);
-                try {
-                    array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
-                } catch (IOException ee) {
-                    Log.logSevere("IODispatcher", "IO failed: " + e.getMessage(), ee);
-                }
+                array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
             }
         }
     }
@@ -255,12 +247,7 @@ public class IODispatcher extends Thread {
         		Log.logWarning("IODispatcher", "merge of file (2) " + f2.getName() + " failed: file does not exists");
         		return null;
         	}
-            try {
-                return array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
-            } catch (IOException e) {
-                Log.logSevere("IODispatcher", "mergeMount failed: " + e.getMessage(), e);
-            }
-            return null;
+            return array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
         }
     }
 

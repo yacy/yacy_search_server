@@ -60,6 +60,7 @@ import net.yacy.document.parser.xml.RSSReader;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
@@ -594,7 +595,12 @@ public final class yacyClient {
             
 			// add the url entry to the word indexes
 			for (int m = 0; m < words; m++) {
-				container[m].add(entry);
+				try {
+                    container[m].add(entry);
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                    break;
+                }
 			}
             
 			// store url hash for statistics
@@ -647,7 +653,7 @@ public final class yacyClient {
 		// insert the containers to the index
         for (int m = 0; m < words; m++) try {
                 indexSegment.termIndex().add(container[m]);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.logException(e);
             }
         

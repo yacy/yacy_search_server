@@ -133,7 +133,8 @@ public class blogBoard {
         try {
             database.put(page.key, page.record);
             return page.key;
-        } catch (final IOException e) {
+        } catch (final Exception e) {
+            Log.logException(e);
             return null;
         }
     }

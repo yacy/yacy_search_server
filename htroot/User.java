@@ -27,8 +27,7 @@
 //javac -classpath .:../Classes Message.java
 //if the shell's current path is HTROOT
 
-import java.io.IOException;
-
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 
@@ -131,7 +130,9 @@ public class User{
         				try {
 							entry.setProperty(userDB.Entry.MD5ENCODED_USERPWD_STRING, Digest.encodeMD5Hex(entry.getUserName()+":"+post.get("newpass", "")));
 							prop.put("status_password", "0"); //changes
-						} catch (final IOException e) {}
+						} catch (final Exception e) {
+						    Log.logException(e);
+						}
         			}else{
         				prop.put("status_password", "3"); //empty
         			}

@@ -121,7 +121,7 @@ public final class Cache {
         hm.put("@@URL", url.toNormalform(true, false));
         try {
             responseHeaderDB.put(url.hash(), hm);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new IOException("Cache.store: cannot write to headerDB: " + e.getMessage());
         }
         

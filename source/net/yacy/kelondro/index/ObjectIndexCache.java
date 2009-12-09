@@ -108,7 +108,7 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         return index1.has(key);
 	}
     
-	public final synchronized Row.Entry replace(final Row.Entry entry) {
+	public final synchronized Row.Entry replace(final Row.Entry entry) throws RowSpaceExceededException {
         assert (entry != null);
         finishInitialization();
         // if the new entry is within the initialization part, just overwrite it
@@ -122,7 +122,7 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         return index1.replace(entry);
     }
    
-	public final synchronized void put(final Row.Entry entry) {
+	public final synchronized void put(final Row.Entry entry) throws RowSpaceExceededException {
         assert (entry != null);
         if (entry == null) return;
         finishInitialization();
@@ -137,7 +137,7 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         index1.put(entry);
     }
    
-    public final synchronized void addUnique(final Row.Entry entry) {
+    public final synchronized void addUnique(final Row.Entry entry) throws RowSpaceExceededException {
     	assert (entry != null);
     	if (entry == null) return;
         if (index1 == null) {
@@ -149,12 +149,12 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         index1.addUnique(entry);
     }
 
-	public final void addUnique(final List<Entry> rows) {
+	public final void addUnique(final List<Entry> rows) throws RowSpaceExceededException {
 		final Iterator<Entry> i = rows.iterator();
 		while (i.hasNext()) addUnique(i.next());
 	}
 	
-	public final synchronized long inc(final byte[] key, int col, long add, Row.Entry initrow) {
+	public final synchronized long inc(final byte[] key, int col, long add, Row.Entry initrow) throws RowSpaceExceededException {
         assert (key != null);
         finishInitialization();
         assert index0.isSorted();
@@ -163,7 +163,7 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         return index1.inc(key, col, add, initrow);
     }    
     
-    public final synchronized ArrayList<RowCollection> removeDoubles() {
+    public final synchronized ArrayList<RowCollection> removeDoubles() throws RowSpaceExceededException {
 	    // finish initialization phase explicitely
         index0.sort();
 	    if (index1 == null) {

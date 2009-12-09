@@ -32,6 +32,7 @@ import java.util.HashMap;
 
 import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 
@@ -78,7 +79,7 @@ public class Relations {
         return tablename + "-" + keysize + "-" + payloadsize + ".eco";
     }
     
-    public void declareRelation(final String name, final int keysize, final int payloadsize) {
+    public void declareRelation(final String name, final int keysize, final int payloadsize) throws RowSpaceExceededException {
         // try to get the relation from the relation-cache
         final ObjectIndex relation = relations.get(name);
         if (relation != null) return;
@@ -90,18 +91,28 @@ public class Relations {
                 if (!list[i].equals(targetfilename)) continue;
                 final Row row = rowdef(list[i]);
                 if (row.primaryKeyLength != keysize || row.column(1).cellwidth != payloadsize) continue; // a wrong table
-                final ObjectIndex table = new Table(new File(baseDir, list[i]), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
+                ObjectIndex table;
+                try {
+                    table = new Table(new File(baseDir, list[i]), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
+                } catch (RowSpaceExceededException e) {
+                    table = new Table(new File(baseDir, list[i]), row, 0, 0, false, this.exceed134217727);
+                }
                 relations.put(name, table);
                 return;
             }
         }
         // the relation does not exist, create it
         final Row row = rowdef(keysize, payloadsize);
-        final ObjectIndex table = new Table(new File(baseDir, targetfilename), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
+        ObjectIndex table;
+        try {
+            table = new Table(new File(baseDir, targetfilename), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
+        } catch (RowSpaceExceededException e) {
+            table = new Table(new File(baseDir, targetfilename), row, 0, 0, false, this.exceed134217727);
+        }
         relations.put(name, table);
     }
     
-    public ObjectIndex getRelation(final String name) {
+    public ObjectIndex getRelation(final String name) throws RowSpaceExceededException {
         // try to get the relation from the relation-cache
         final ObjectIndex relation = relations.get(name);
         if (relation != null) return relation;
@@ -110,7 +121,12 @@ public class Relations {
         for (int i = 0; i < list.length; i++) {
             if (list[i].startsWith(name)) {
                 final Row row = rowdef(list[i]);
-                final ObjectIndex table = new Table(new File(baseDir, list[i]), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
+                ObjectIndex table;
+                try {
+                    table = new Table(new File(baseDir, list[i]), row, 1024*1024, 0, this.useTailCache, this.exceed134217727);
+                } catch (RowSpaceExceededException e) {
+                    table = new Table(new File(baseDir, list[i]), row, 0, 0, false, this.exceed134217727);
+                }
                 relations.put(name, table);
                 return table;
             }
@@ -119,13 +135,13 @@ public class Relations {
         return null;
     }
     
-    public String putRelation(final String name, final String key, final String value) throws IOException {
+    public String putRelation(final String name, final String key, final String value) throws IOException, RowSpaceExceededException {
         final byte[] r = putRelation(name, key.getBytes(), value.getBytes());
         if (r == null) return null;
         return new String(r);
     }
     
-    public byte[] putRelation(final String name, final byte[] key, final byte[] value) throws IOException {
+    public byte[] putRelation(final String name, final byte[] key, final byte[] value) throws IOException, RowSpaceExceededException {
         final ObjectIndex table = getRelation(name);
         if (table == null) return null;
         final Row.Entry entry = table.row().newEntry();
@@ -138,13 +154,13 @@ public class Relations {
         return oldentry.getColBytes(3);
     }
     
-    public String getRelation(final String name, final String key) throws IOException {
+    public String getRelation(final String name, final String key) throws IOException, RowSpaceExceededException {
         final byte[] r = getRelation(name, key.getBytes());
         if (r == null) return null;
         return new String(r);
     }
     
-    public byte[] getRelation(final String name, final byte[] key) throws IOException {
+    public byte[] getRelation(final String name, final byte[] key) throws IOException, RowSpaceExceededException {
         final ObjectIndex table = getRelation(name);
         if (table == null) return null;
         final Row.Entry entry = table.get(key);
@@ -152,13 +168,13 @@ public class Relations {
         return entry.getColBytes(3);
     }
     
-    public boolean hasRelation(final String name, final byte[] key) {
+    public boolean hasRelation(final String name, final byte[] key) throws RowSpaceExceededException {
         final ObjectIndex table = getRelation(name);
         if (table == null) return false;
         return table.has(key);
     }
     
-    public byte[] removeRelation(final String name, final byte[] key) throws IOException {
+    public byte[] removeRelation(final String name, final byte[] key) throws IOException, RowSpaceExceededException {
         final ObjectIndex table = getRelation(name);
         if (table == null) return null;
         final Row.Entry entry = table.remove(key);
@@ -174,6 +190,8 @@ public class Relations {
             r.putRelation(table1, "abcdefg", "eineintrag");
             r.putRelation(table1, "abcdefg", "eineintrag");
         } catch (final IOException e) {
+            Log.logException(e);
+        } catch (RowSpaceExceededException e) {
             Log.logException(e);
         }
     }

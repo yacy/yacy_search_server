@@ -242,7 +242,7 @@ public class IndexControlURLs_p {
             // parse format
             int format = 0;
             final String fname = post.get("format", "url-text");
-            final boolean dom = fname.startsWith("dom"); // if dom== false complete urls are exported, othervise only the domain
+            final boolean dom = fname.startsWith("dom"); // if dom== false complete urls are exported, otherwise only the domain
             if (fname.endsWith("text")) format = 0;
             if (fname.endsWith("html")) format = 1;
             if (fname.endsWith("rss")) format = 2;

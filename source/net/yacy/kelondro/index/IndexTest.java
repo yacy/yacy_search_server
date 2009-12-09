@@ -113,7 +113,12 @@ public class IndexTest {
         Runtime.getRuntime().gc();
         long freeStartKelondro = MemoryControl.available();
         HandleMap ii = new HandleMap(12, Base64Order.enhancedCoder, 4, count, count);
-        for (int i = 0; i < count; i++) ii.putUnique(tests[i], 1);
+        for (int i = 0; i < count; i++)
+            try {
+                ii.putUnique(tests[i], 1);
+            } catch (RowSpaceExceededException e) {
+                e.printStackTrace();
+            }
         ii.get(randomHash(r)); // trigger sort
         long t6 = System.currentTimeMillis();
         System.out.println("time   for HandleMap<byte[]> generation: " + (t6 - t5));

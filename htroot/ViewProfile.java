@@ -41,6 +41,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 
 import de.anomic.http.server.RequestHeader;
@@ -100,7 +101,9 @@ public class ViewProfile {
                 try {
                     final yacyNewsRecord record = sb.peers.newsPool.getByOriginator(yacyNewsPool.INCOMING_DB, yacyNewsPool.CATEGORY_PROFILE_UPDATE, seed.hash);
                     if (record != null) sb.peers.newsPool.moveOff(yacyNewsPool.INCOMING_DB, record.id());
-                } catch (final IOException e) {}
+                } catch (final Exception e) {
+                    Log.logException(e);
+                }
                 
                 // try to get the profile from remote peer
                 if (sb.clusterhashes != null) seed.setAlternativeAddress(sb.clusterhashes.get(seed.hash.getBytes()));

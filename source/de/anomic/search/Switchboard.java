@@ -691,7 +691,7 @@ public final class Switchboard extends serverSwitch {
             if (k.startsWith("network.unit.update.location")) d.add(k);
             if (k.startsWith("network.unit.bootstrap")) d.add(k);
         }
-        for (String s:d) this.removeConfig(s); // must be removed afterwards othervise a ki.remove() would not remove the property on file
+        for (String s:d) this.removeConfig(s); // must be removed afterwards otherwise a ki.remove() would not remove the property on file
         
         // include additional network definition properties into our settings
         // note that these properties cannot be set in the application because they are
@@ -1142,7 +1142,7 @@ public final class Switchboard extends serverSwitch {
     /**
      * pass a response to the indexer
      * @param response
-     * @return null if successful, an error message othervise
+     * @return null if successful, an error message otherwise
      */
     public String toIndexer(final Response response) {
         assert response != null;
@@ -1380,7 +1380,9 @@ public final class Switchboard extends serverSwitch {
                         crawler.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
                                 Long.toString(crawler.profilesActiveCrawls.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE_RECRAWL_CYCLE)));
                 }
-            } catch (final IOException e) {};
+            } catch (final Exception e) {
+                Log.logException(e);
+            }
             
             // close unused connections
             Client.cleanup();
@@ -1432,7 +1434,9 @@ public final class Switchboard extends serverSwitch {
             try {                
                 if (this.log.isFine()) log.logFine("Cleaning Incoming News, " + this.peers.newsPool.size(yacyNewsPool.INCOMING_DB) + " entries on stack");
                 if (this.peers.newsPool.automaticProcess(peers) > 0) hasDoneSomething = true;
-            } catch (final IOException e) {}
+            } catch (final Exception e) {
+                Log.logException(e);
+            }
             if (getConfigBool("cleanup.deletionProcessedNews", true)) {
                 this.peers.newsPool.clear(yacyNewsPool.PROCESSED_DB);
             }
@@ -1959,19 +1963,14 @@ public final class Switchboard extends serverSwitch {
             }
 	        log.logInfo("dhtTransferJob: selected " + new String(startHash) + " as start hash");
 	        log.logInfo("dhtTransferJob: selected " + new String(limitHash) + " as limit hash");
-	        try {
-	            boolean enqueued = this.dhtDispatcher.selectContainersEnqueueToCloud(
-	                    startHash,
-	                    limitHash,
-	                    dhtMaxContainerCount,
-	                    dhtMaxReferenceCount,
-	                    5000);
-	            hasDoneSomething = hasDoneSomething | enqueued;
-	            log.logInfo("dhtTransferJob: result from enqueueing: " + ((enqueued) ? "true" : "false"));
-	        } catch (IOException e) {
-	            log.logSevere("dhtTransferJob: interrupted with exception: " + e.getMessage(), e);
-	            return false;
-	        }
+	        boolean enqueued = this.dhtDispatcher.selectContainersEnqueueToCloud(
+                    startHash,
+                    limitHash,
+                    dhtMaxContainerCount,
+                    dhtMaxReferenceCount,
+                    5000);
+            hasDoneSomething = hasDoneSomething | enqueued;
+            log.logInfo("dhtTransferJob: result from enqueueing: " + ((enqueued) ? "true" : "false"));
         }
         if (this.dhtDispatcher.transmissionSize() >= 10) {
         	log.logInfo("dhtTransferJob: no dequeueing from cloud to transmission: too many concurrent sessions: " + this.dhtDispatcher.transmissionSize());

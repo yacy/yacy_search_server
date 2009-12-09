@@ -55,8 +55,9 @@ public final class HandleSet implements Iterable<byte[]> {
      * @param objectOrder
      * @param file
      * @throws IOException 
+     * @throws RowSpaceExceededException 
      */
-    public HandleSet(final int keylength, final ByteOrder objectOrder, final File file, final int expectedspace) throws IOException {
+    public HandleSet(final int keylength, final ByteOrder objectOrder, final File file, final int expectedspace) throws IOException, RowSpaceExceededException {
         this(keylength, objectOrder, (int) (file.length() / (keylength + 8)), expectedspace);
         // read the index dump and fill the index
         InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
@@ -107,7 +108,7 @@ public final class HandleSet implements Iterable<byte[]> {
         return index.has(key);
     }
     
-    public final synchronized int put(final byte[] key) throws IOException {
+    public final synchronized int put(final byte[] key) throws IOException, RowSpaceExceededException {
         assert (key != null);
         final Row.Entry newentry = index.row().newEntry();
         newentry.setCol(0, key);
@@ -116,7 +117,7 @@ public final class HandleSet implements Iterable<byte[]> {
         return (int) oldentry.getColLong(1);
     }
     
-    public final synchronized void putUnique(final byte[] key) throws IOException {
+    public final synchronized void putUnique(final byte[] key) throws IOException, RowSpaceExceededException {
         assert (key != null);
         final Row.Entry newentry = this.rowdef.newEntry();
         newentry.setCol(0, key);

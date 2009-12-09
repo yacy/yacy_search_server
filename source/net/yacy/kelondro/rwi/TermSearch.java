@@ -31,6 +31,8 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.index.RowSpaceExceededException;
+
 
 public class TermSearch <ReferenceType extends Reference> {
 
@@ -43,7 +45,7 @@ public class TermSearch <ReferenceType extends Reference> {
             final TreeSet<byte[]> excludeHashes,
             final Set<String> urlselection,
             ReferenceFactory<ReferenceType> termFactory,
-            int maxDistance) {
+            int maxDistance) throws RowSpaceExceededException {
         
         this.inclusionContainers =
             (queryHashes.isEmpty()) ?

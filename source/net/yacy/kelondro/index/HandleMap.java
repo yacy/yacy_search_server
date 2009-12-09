@@ -73,8 +73,9 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @param objectOrder
      * @param file
      * @throws IOException 
+     * @throws RowSpaceExceededException 
      */
-    public HandleMap(final int keylength, final ByteOrder objectOrder, int idxbytes, final File file, final int expectedspace) throws IOException {
+    public HandleMap(final int keylength, final ByteOrder objectOrder, int idxbytes, final File file, final int expectedspace) throws IOException, RowSpaceExceededException {
         this(keylength, objectOrder, idxbytes, (int) (file.length() / (keylength + idxbytes)), expectedspace);
         // read the index dump and fill the index
         InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
@@ -180,7 +181,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
         return indexentry.getColLong(1);
     }
     
-    public final synchronized long put(final byte[] key, final long l) {
+    public final synchronized long put(final byte[] key, final long l) throws RowSpaceExceededException {
         assert l >= 0 : "l = " + l;
         assert (key != null);
         final Row.Entry newentry = index.row().newEntry();
@@ -191,7 +192,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
         return oldentry.getColLong(1);
     }
     
-    public final synchronized void putUnique(final byte[] key, final long l) {
+    public final synchronized void putUnique(final byte[] key, final long l) throws RowSpaceExceededException {
         assert l >= 0 : "l = " + l;
         assert (key != null);
         final Row.Entry newentry = this.rowdef.newEntry();
@@ -200,7 +201,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
         index.addUnique(newentry);
     }
     
-    public final synchronized long add(final byte[] key, long a) {
+    public final synchronized long add(final byte[] key, long a) throws RowSpaceExceededException {
         assert key != null;
         assert a > 0; // it does not make sense to add 0. If this occurres, it is a performance issue
 
@@ -218,15 +219,15 @@ public final class HandleMap implements Iterable<Row.Entry> {
         return i;
     }
     
-    public final synchronized long inc(final byte[] key) {
+    public final synchronized long inc(final byte[] key) throws RowSpaceExceededException {
         return add(key, 1);
     }
     
-    public final synchronized long dec(final byte[] key) {
+    public final synchronized long dec(final byte[] key) throws RowSpaceExceededException {
         return add(key, -1);
     }
     
-    public final synchronized ArrayList<Long[]> removeDoubles() {
+    public final synchronized ArrayList<Long[]> removeDoubles() throws RowSpaceExceededException {
         final ArrayList<Long[]> report = new ArrayList<Long[]>();
         Long[] is;
         int c;
@@ -370,6 +371,8 @@ public final class HandleMap implements Iterable<Row.Entry> {
                     map.putUnique(c.key, c.l);
                 }
             } catch (InterruptedException e) {
+                Log.logException(e);
+            } catch (RowSpaceExceededException e) {
                 Log.logException(e);
             }
             if (sortAtEnd) {
