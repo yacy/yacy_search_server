@@ -12,7 +12,7 @@
 </item>::
 #(item)#::<item>
 <title>#[name]#</title>
-<link>#[source]#</link>
+<link>#[source-xml]#</link>
 <description></description>
 <pubDate></pubDate>
 <guid isPermaLink="false">#[urlhash]#</guid>

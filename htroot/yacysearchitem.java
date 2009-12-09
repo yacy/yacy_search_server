@@ -177,6 +177,7 @@ public class yacysearchitem {
                 prop.put("content_item_attr", (ms.attr.equals("-1 x -1")) ? "" : "(" + ms.attr + ")"); // attributes, here: original size of image
                 prop.put("content_item_urlhash", ms.source.hash());
                 prop.put("content_item_source", ms.source.toNormalform(true, false));
+                prop.putXML("content_item_source-xml", ms.source.toNormalform(true, false));
                 prop.put("content_item_sourcedom", ms.source.getHost());
                 prop.put("content_item_nl", (item == 0) ? 0 : 1);
                 prop.put("content_item", 1);
