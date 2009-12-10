@@ -402,7 +402,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
         if (s == null) s = metas.get("dc.description");
         if (s == null) s = "";
         if (s.length() == 0) {
-            return getTitle().toLowerCase().split(DigestURI.splitrex);
+            return DigestURI.splitpattern.split(getTitle().toLowerCase());
         }
         if (s.contains(",")) return s.split(" |,");
         if (s.contains(";")) return s.split(" |;");

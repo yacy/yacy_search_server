@@ -938,11 +938,12 @@ public class DigestURI implements Serializable {
         return language;
     }
 
-    public static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';
+    private static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';
+    public static final Pattern splitpattern = Pattern.compile(splitrex);
     public static String[] urlComps(String normalizedURL) {
         final int p = normalizedURL.indexOf("//");
         if (p > 0) normalizedURL = normalizedURL.substring(p + 2);
-        return normalizedURL.toLowerCase().split(splitrex); // word components of the url
+        return splitpattern.split(normalizedURL.toLowerCase()); // word components of the url
     }
 
     public static void main(final String[] args) {

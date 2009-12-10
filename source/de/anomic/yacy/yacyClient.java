@@ -616,7 +616,7 @@ public final class yacyClient {
             final String references = result.get("references");
             yacyCore.log.logInfo("remote search (client): peer " + target.getName() + " sent references " + references);
             if (references != null) {
-                // add references twice, so they can be countet (must have at least 2 entries)
+                // add references twice, so they can be counted (must have at least 2 entries)
                 containerCache.addTopic(references.split(","));
                 containerCache.addTopic(references.split(","));
             }

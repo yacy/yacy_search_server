@@ -641,7 +641,7 @@ public final class RankingProcess extends Thread {
         // take out relevant information for reference computation
         if ((resultEntry.url() == null) || (resultEntry.title() == null)) return;
         //final String[] urlcomps = htmlFilterContentScraper.urlComps(resultEntry.url().toNormalform(true, true)); // word components of the url
-        final String[] descrcomps = resultEntry.title().toLowerCase().split(DigestURI.splitrex); // words in the description
+        final String[] descrcomps = DigestURI.splitpattern.split(resultEntry.title().toLowerCase()); // words in the description
         
         // add references
         //addTopic(urlcomps);

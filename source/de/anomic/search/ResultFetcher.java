@@ -373,7 +373,7 @@ public class ResultFetcher {
         // apply 'common-sense' heuristic using references
         final String urlstring = rentry.url().toNormalform(true, true);
         final String[] urlcomps = DigestURI.urlComps(urlstring);
-        final String[] descrcomps = rentry.title().toLowerCase().split(DigestURI.splitrex);
+        final String[] descrcomps = DigestURI.splitpattern.split(rentry.title().toLowerCase());
         Integer tc;
         for (int j = 0; j < urlcomps.length; j++) {
             tc = topwords.get(urlcomps[j]);
