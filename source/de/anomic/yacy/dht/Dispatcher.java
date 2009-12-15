@@ -210,9 +210,11 @@ public class Dispatcher {
             // but to avoid race conditions return the results from the deletes
             rc = new ArrayList<ReferenceContainer<WordReference>>(containers.size());
             for (ReferenceContainer<WordReference> c: containers) {
-                container = this.segment.termIndex().delete(c.getTermHash());
-                if (this.log.isFine()) this.log.logFine("selected " + container.size() + " urls for word '" + c.getTermHashAsString() + "'");
-                if (!container.isEmpty()) rc.add(container);
+                container = this.segment.termIndex().delete(c.getTermHash()); // be aware this might be null!
+                if (container != null && !container.isEmpty()) {
+                    if (this.log.isFine()) this.log.logFine("selected " + container.size() + " urls for word '" + c.getTermHashAsString() + "'");
+                    rc.add(container);
+                }
             }
         }
         

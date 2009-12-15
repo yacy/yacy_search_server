@@ -107,8 +107,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     /**
      * add entries to the cell: this adds the new entries always to the RAM part, never to BLOBs
      * @throws IOException 
-     * @throws RowSpaceExceededException 
-     * @throws RowSpaceExceededException 
+     * @throws RowSpaceExceededException
      */
     public void add(ReferenceContainer<ReferenceType> newEntries) throws IOException, RowSpaceExceededException {
         try {
@@ -186,8 +185,11 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     }
     
     /**
-     * all containers in the BLOBs and the RAM are merged and returned
-     * @throws IOException 
+     * all containers in the BLOBs and the RAM are merged and returned.
+     * Please be aware that the returned values may be top-level cloned ReferenceContainers or direct links to containers
+     * If the containers are modified after they are returned, they MAY alter the stored index.
+     * @throws IOException
+     * @return a container with merged ReferenceContainer from RAM and the file array or null if there is no data to be returned
      */
     public ReferenceContainer<ReferenceType> get(byte[] termHash, Set<String> urlselection) throws IOException {
         ReferenceContainer<ReferenceType> c0 = this.ram.get(termHash, null);
