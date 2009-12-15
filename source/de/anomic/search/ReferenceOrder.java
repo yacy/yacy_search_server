@@ -182,6 +182,6 @@ public class ReferenceOrder {
 
     private static final String patchUK(String l) {
         // this is to patch a bad language name setting that was used in 0.60 and before
-        if (l.equals("uk")) return "en"; else return l;
+        if (l == null || l.equals("uk")) return "en"; else return l;
     }
 }
