@@ -116,11 +116,12 @@ public class MapView {
         return bb.toString();
     }
 
-    private static Map<String, String> bytes2map(byte[] b) throws IOException {
+    private static Map<String, String> bytes2map(byte[] b) throws IOException, RowSpaceExceededException {
         final BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(b)));
         final Map<String, String> map = new HashMap<String, String>();
         String line;
         int pos;
+        try {
         while ((line = br.readLine()) != null) { // very slow readLine????
             line = line.trim();
             if (line.equals("# EOF")) return map;
@@ -128,6 +129,9 @@ public class MapView {
             pos = line.indexOf("=");
             if (pos < 0) continue;
             map.put(line.substring(0, pos), line.substring(pos + 1));
+        }
+        } catch (OutOfMemoryError e) {
+            throw new RowSpaceExceededException(0, "readLine probably uses too much RAM", e);
         }
         return map;
     }
@@ -229,7 +233,11 @@ public class MapView {
                 // read object
                 final byte[] b = blob.get(keyb);
                 if (b == null) return null;
-                map = bytes2map(b);
+                try {
+                    map = bytes2map(b);
+                } catch (RowSpaceExceededException e) {
+                    throw new IOException(e.getMessage());
+                }
         
                 // write map to cache
                 cache.put(key, map);
@@ -245,7 +253,11 @@ public class MapView {
                 b = blob.get(keyb);
             }
             if (b == null) return null;
-            return bytes2map(b);
+            try {
+                return bytes2map(b);
+            } catch (RowSpaceExceededException e) {
+                throw new IOException(e.getMessage());
+            }
         }
     }
 
