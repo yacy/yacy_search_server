@@ -605,6 +605,7 @@ public class bookmarksDB {
     	Tag tag;
     	while(it.hasNext()){
     		tag=it.next();
+    		if (tag == null) continue;
     		if(priv ||tag.hasPublicItems()){
     			set.add(tag);
     		}
