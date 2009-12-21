@@ -97,8 +97,8 @@ public class Network {
                 long ICount;
                 long RCount;
                 try {
-                    LCount = Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
-                    ICount = Long.parseLong(seed.get(yacySeed.ICOUNT, "0"));
+                    LCount = seed.getLinkCount();
+                    ICount = seed.getWordCount();
                     RCount = Long.parseLong(seed.get(yacySeed.RCOUNT, "0"));
                 } catch (final Exception e) {LCount = 0; ICount = 0; RCount = 0;}
 
@@ -426,8 +426,8 @@ public class Network {
                             prop.putNum(STR_TABLE_LIST + conCount + "_lastSeen", /*seed.getLastSeenString() + " " +*/ lastseen);
                             prop.put(STR_TABLE_LIST + conCount + "_utc", seed.get(yacySeed.UTC, "-"));
                             prop.putHTML(STR_TABLE_LIST + conCount + "_uptime", DateFormatter.formatInterval(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, "0"))));
-                            prop.putNum(STR_TABLE_LIST + conCount + "_LCount", seed.getLong(yacySeed.LCOUNT, 0));
-                            prop.putNum(STR_TABLE_LIST + conCount + "_ICount", seed.getLong(yacySeed.ICOUNT, 0));
+                            prop.putNum(STR_TABLE_LIST + conCount + "_LCount", seed.getLinkCount());
+                            prop.putNum(STR_TABLE_LIST + conCount + "_ICount", seed.getWordCount());
                             prop.putNum(STR_TABLE_LIST + conCount + "_RCount", seed.getLong(yacySeed.RCOUNT, 0));
                             prop.putNum(STR_TABLE_LIST + conCount + "_sI", seed.getLong(yacySeed.INDEX_OUT, 0));
                             prop.putNum(STR_TABLE_LIST + conCount + "_sU", seed.getLong(yacySeed.URL_OUT, 0));

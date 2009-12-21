@@ -191,7 +191,7 @@ public class Status {
             prop.putNum("peerStatistics_pagesperminute", sb.peers.mySeed().getPPM());
             prop.putNum("peerStatistics_queriesperhour", Math.round(6000d * sb.peers.mySeed().getQPM()) / 100d);
             prop.putNum("peerStatistics_links", sb.peers.mySeed().getLinkCount());
-            prop.put("peerStatistics_words", Formatter.number(sb.peers.mySeed().get(yacySeed.ICOUNT, "0")));
+            prop.put("peerStatistics_words", Formatter.number(sb.peers.mySeed().getWordCount()));
             prop.putNum("peerStatistics_disconnects", sb.peers.peerActions.disconnects);
             prop.put("peerStatistics_connects", Formatter.number(sb.peers.mySeed().get(yacySeed.CCOUNT, "0")));
             thisHash = sb.peers.mySeed().hash;

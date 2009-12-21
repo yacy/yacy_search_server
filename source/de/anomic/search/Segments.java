@@ -153,15 +153,15 @@ public class Segments implements Iterable<Segment> {
         return segment;
     }
     
-    public int URLCount() {
-        int c = 0;
-        for (Segment s: this.segments.values()) c += s.urlMetadata().size();
+    public long URLCount() {
+        long c = 0;
+        for (Segment s: this.segments.values()) c += (long) s.urlMetadata().size();
         return c;
     }
     
-    public int RWICount() {
-        int c = 0;
-        for (Segment s: this.segments.values()) c += s.termIndex().sizesMax();
+    public long RWICount() {
+        long c = 0;
+        for (Segment s: this.segments.values()) c += (long) s.termIndex().sizesMax();
         return c;
     }
     

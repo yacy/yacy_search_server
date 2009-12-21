@@ -78,8 +78,8 @@ public class Banner {
         final yacySeed seed = sb.peers.mySeed();
         if (seed != null){
             name    = seed.get(yacySeed.NAME, "-").toUpperCase();
-            links   = Long.parseLong(seed.get(yacySeed.LCOUNT, "0"));
-            words   = Long.parseLong(seed.get(yacySeed.ICOUNT, "0"));
+            links   = seed.getLinkCount();
+            words   = seed.getWordCount();
             myppm   = seed.getPPM();
             myqph   = 60d * seed.getQPM();
 

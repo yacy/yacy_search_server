@@ -2032,10 +2032,10 @@ public final class Switchboard extends serverSwitch {
         peers.mySeed().put(yacySeed.RSPEED, Double.toString(totalQPM /*Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f)*/ ));
         
         peers.mySeed().put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
-        peers.mySeed().put(yacySeed.LCOUNT, Integer.toString(indexSegments.URLCount())); // the number of links that the peer has stored (LURL's)
+        peers.mySeed().put(yacySeed.LCOUNT, Long.toString(indexSegments.URLCount())); // the number of links that the peer has stored (LURL's)
         peers.mySeed().put(yacySeed.NCOUNT, Integer.toString(crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
         peers.mySeed().put(yacySeed.RCOUNT, Integer.toString(crawlQueues.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT))); // the number of links that the peer provides for remote crawling (ZURL's)
-        peers.mySeed().put(yacySeed.ICOUNT, Integer.toString(indexSegments.RWICount())); // the minimum number of words that the peer has indexed (as it says)
+        peers.mySeed().put(yacySeed.ICOUNT, Long.toString(indexSegments.RWICount())); // the minimum number of words that the peer has indexed (as it says)
         peers.mySeed().put(yacySeed.SCOUNT, Integer.toString(peers.sizeConnected())); // the number of seeds that the peer has stored
         peers.mySeed().put(yacySeed.CCOUNT, Double.toString(((int) ((peers.sizeConnected() + peers.sizeDisconnected() + peers.sizePotential()) * 60.0 / (uptime + 1.01)) * 100) / 100.0)); // the number of clients that the peer connects (as connects/hour)
         peers.mySeed().put(yacySeed.VERSION, yacyBuildProperties.getLongVersion());

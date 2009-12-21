@@ -605,6 +605,14 @@ public class yacySeed implements Cloneable {
         }
     }
 
+    public final long getWordCount() {
+        try {
+            return getLong(yacySeed.ICOUNT, 0);
+        } catch (final NumberFormatException e) {
+            return 0;
+        }
+    }
+
     private boolean getFlag(final int flag) {
         final String flags = get(yacySeed.FLAGS, yacySeed.FLAGSZERO);
         return (new bitfield(flags.getBytes())).get(flag);
