@@ -268,10 +268,14 @@ Search Result==Suchergebnis
 #File: ConfigAppearance_p.html
 #---------------------------
 Appearance and Integration==Erscheinungsbild und Integration
+You can change the appearance of the YaCy interface with skins.==Sie können hier das Aussehen der YaCy Oberfläche mit Skins verändern,
 #You can change the appearance of YaCy with skins==Sie können hier das Erscheinungsbild von YaCy mit Skins ändern
+The selected skin and language also affects the appearance of the search page.==das ausgewählte Design und die gewählte Sprache wirken sich auch auf das Erscheinungsbild der Suchseite aus.
+If you <a href="ConfigPortal.html">create a search portal with YaCy</a> then you can==Wenn Sie <a href="ConfigPortal.html">ein Such-Portal mit Yacy erstellen möchten</a> können Sie
+change the appearance of the search page here.==das Erscheinungsbild der Suchseite <a href="ConfigPortal.html">hier</a> weitgehend ändern und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
 #and the default icons and links on the search page can be replaced with you own.==und die standard Grafiken und Links auf der Suchseite durch Ihre eigenen ersetzen.
 Skin Selection==Skinauswahl
-Select one of the default skins, download new skins, or create your own skin.==Wählen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder basteln Sie sich selber einen neuen Skin.
+Select one of the default skins, download new skins, or create your own skin.==Wählen Sie einen der mitgelieferten Skins, laden Sie einen neuen herunter oder erstellen Sie selbst einen neuen Skin.
 Current skin==Aktueller Skin
 Available Skins==Verfügbare Skins
 "Use"=="Benutzen"
@@ -298,7 +302,10 @@ Status Page==Status Seite
 The search page can be integrated in your own web pages with an iframe. Simply use the following code:==Die Suchseite kann mit einem iframe in Ihre eigene Website integriert werden. Benutzen Sie einfach folgenden Code:
 This would look like:==Das wird dann so aussehen:
 #For a search page with a small header, use this code:==Für eine Seite mit einem kleinen Kopf benutzen Sie diesen Code:
-#A third option is the interactive search. Use this code:==Eine dritte Option ist die interaktive Suche. Benutzen Sie dazu diesen Code: 
+#A third option is the interactive search. Use this code:==Eine dritte Option ist die interaktive Suche. Benutzen Sie dazu diesen Code:
+Make sure that you only download data from trustworthy sources. The new Skin file==Stellen Sie sicher, dass Sie nur Dateien aus vertrauenswürdigen Quellen herunterladen.
+might overwrite existing data if a file of the same name exists already.==Achtung, existiert bereits eine Datei mit gleichem Namen, wird diese überschrieben !
+
 #-----------------------------
 
 #File: ConfigAccounts_p.html
@@ -391,6 +398,9 @@ Use this language==Diese Sprachdatei sofort benutzen
 "Install"=="Installieren"
 Unable to get URL:==Nicht möglich die angegebene Datei von folgender URL zu installieren:
 Error saving the language file.==Es trat ein Fehler beim Speichern der Sprachdatei auf.
+Make sure that you only download data from trustworthy sources. The new language file==Stellen Sie sicher, dass Sie nur Dateien aus vertrauenswürdigen Quellen herunterladen.
+might overwrite existing data if a file of the same name exists already.==Achtung, existiert bereits eine Datei mit gleichem Namen, wird diese überschrieben !
+
 #-----------------------------
 
 #File: ConfigNetwork_p.html
@@ -472,7 +482,7 @@ http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignment
 #---------------------------
 Your Personal Profile==Ihr persönliches Profil
 You can create a personal profile here, which can be seen by other YaCy-members==Hier können Sie Ihr persönliches Profil verwalten, welches andere YaCy-Benutzer ansehen können
-#or <a href="ViewProfile.html?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf?hash=localhash">FOAF RDF file</a>.==oder <a href="ViewProfile.html?hash=localhash">in der Öffentlichkeit</a> eine <a #href="ViewProfile.rdf?hash=localhash">FOAF RDF Datei</a> benutzen.
+or <a href="ViewProfile.html?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf?hash=localhash">FOAF RDF file</a>.==oder <a href="ViewProfile.html?hash=localhash">in der Öffentlichkeit</a> eine <a href="ViewProfile.rdf?hash=localhash">FOAF RDF Datei</a> benutzen.
 #Name==Name
 #Nick Name==Nick Name
 Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==Homepage (erscheint auf der <a href="/Supporter.html">Unterstützer Seite,</a> so lange Ihr Peer online ist).
@@ -2818,7 +2828,7 @@ YaCy P2P Websearch==YaCy P2P Websuche
 >Images==>Bilder
 >Audio==>Audio
 >Video==>Videos
->Application==>Anwendungen
+>Applications==>Anwendungen
 Search term:==Suchbegriff:
 "help"=="Hilfe"
 Resource/Network:==Ressource/Netzwerk:
