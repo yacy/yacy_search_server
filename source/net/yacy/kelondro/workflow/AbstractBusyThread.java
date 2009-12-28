@@ -3,8 +3,8 @@
 // first published 14.03.2005 on http://yacy.net
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -100,6 +100,7 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
     }
 
 
+    @Override
     public void run() {
         if (startup > 0) {
             // do a startup-delay
@@ -192,6 +193,7 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
         logSystem("thread '" + this.getName() + "' terminated.");
     }
 
+    // ratzen: German for to sleep (coll.)
     private void ratz(final long millis) {
         try {/*
             if (this.syncObject != null) {

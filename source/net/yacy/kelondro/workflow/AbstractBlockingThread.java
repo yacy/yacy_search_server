@@ -3,8 +3,8 @@
 // first published 27.03.2008 on http://yacy.net
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -39,6 +39,7 @@ public abstract class AbstractBlockingThread<J extends WorkflowJob> extends Abst
         return this.manager;
     }
 
+    @Override
     public void run() {
         this.open();
         if (log != null) {

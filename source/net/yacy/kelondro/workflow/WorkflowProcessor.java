@@ -3,8 +3,8 @@
 // first published 27.02.2008 on http://yacy.net
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -55,7 +55,7 @@ public class WorkflowProcessor<J extends WorkflowJob> {
     private long execCount;
     
     public WorkflowProcessor(
-            String name, String description, String[] childnames,
+            final String name, final String description, final String[] childnames,
             final Object env, final String jobExecMethod,
             final int inputQueueSize, final WorkflowProcessor<J> output, final int poolsize) {
         // start a fixed number of executors that handle entries in the process queue
@@ -106,7 +106,7 @@ public class WorkflowProcessor<J extends WorkflowJob> {
         return j;
     }
     
-    public void passOn(J next) throws InterruptedException {
+    public void passOn(final J next) throws InterruptedException {
         // don't mix this method up with enQueue()!
         // this method enqueues into the _next_ queue, not this queue!
         if (this.output == null) return;
@@ -197,7 +197,7 @@ public class WorkflowProcessor<J extends WorkflowJob> {
         return processMonitor.iterator();
     }
     
-    protected void increaseJobTime(long time) {
+    protected void increaseJobTime(final long time) {
         this.execTime += time;
         this.execCount++;
     }

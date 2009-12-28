@@ -3,8 +3,8 @@
 // first published 27.03.2008 on http://yacy.net
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -27,12 +27,12 @@ package net.yacy.kelondro.workflow;
 
 public interface BlockingThread<J extends WorkflowJob> extends WorkflowThread {
 
-    public void setManager(WorkflowProcessor<J> queue);
+    public void setManager(final WorkflowProcessor<J> queue);
     
     
     public WorkflowProcessor<J> getManager();
 
-    public J job(J next) throws Exception;
+    public J job(final J next) throws Exception;
     // performes one job procedure; this loopes until terminate() is called
     // job returns true if it has done something
     // it returns false if it is idle and does not expect to work on more for a longer time
