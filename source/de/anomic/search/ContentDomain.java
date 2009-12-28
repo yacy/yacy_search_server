@@ -28,6 +28,7 @@ public enum ContentDomain {
         return TEXT;
     }
     
+    @Override
     public String toString() {
         if (this == TEXT) return "text";
         else if (this == IMAGE) return "image";

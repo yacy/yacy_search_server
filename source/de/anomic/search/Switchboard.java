@@ -902,7 +902,7 @@ public final class Switchboard extends serverSwitch {
         setRemotecrawlPPM(Math.max(1, (int) getConfigLong("network.unit.remotecrawl.speed", 60)));
     }
     
-    public void setRemotecrawlPPM(int ppm) {
+    public void setRemotecrawlPPM(final int ppm) {
         setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_BUSYSLEEP, 60000 / ppm);
         setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_IDLESLEEP, Math.max(10000, 180000 / ppm));
         setConfig(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_BUSYSLEEP, Math.max(15000, 1800000 / ppm));
@@ -1008,7 +1008,7 @@ public final class Switchboard extends serverSwitch {
     	}
     }
 
-    public String urlExists(Segments.Process process, final String hash) {
+    public String urlExists(final Segments.Process process, final String hash) {
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,
         // if it not exists, null is returned
@@ -1016,19 +1016,19 @@ public final class Switchboard extends serverSwitch {
         return this.crawlQueues.urlExists(hash);
     }
     
-    public void urlRemove(Segment segment, final String hash) {
+    public void urlRemove(final Segment segment, final String hash) {
         segment.urlMetadata().remove(hash);
         crawlResults.remove(hash);
         crawlQueues.urlRemove(hash);
     }
     
-    public void urlRemove(Segments.Process process, final String hash) {
+    public void urlRemove(final Segments.Process process, final String hash) {
         indexSegments.urlMetadata(process).remove(hash);
         crawlResults.remove(hash);
         crawlQueues.urlRemove(hash);
     }
     
-    public DigestURI getURL(Segments.Process process, final String urlhash) {
+    public DigestURI getURL(final Segments.Process process, final String urlhash) {
         if (urlhash == null) return null;
         if (urlhash.length() == 0) return null;
         final DigestURI ne = crawlQueues.getURL(urlhash);
@@ -1056,7 +1056,16 @@ public final class Switchboard extends serverSwitch {
         if (System.currentTimeMillis() - this.remoteSearchLastAccess < Integer.parseInt(getConfig(SwitchboardConstants.REMOTESEARCH_ONLINE_CAUTION_DELAY, "30000"))) return"remotesearch";
         return null;
     }
-    
+
+    /**
+     * Creates a human readable string from a number which represents the size of a file.
+     * The method has a side effect: It changes the input. Since the method is private and
+     * only used in this class for values which are not used later, this should be OK in
+     * this case, but one should never use this method without thinking about the side
+     * effect. [MN]
+     * @param bytes the length of a file
+     * @return the length of a file in human readable form
+     */
     private static String ppRamString(long bytes) {
         if (bytes < 1024) return bytes + " KByte";
         bytes = bytes / 1024;
@@ -1205,7 +1214,7 @@ public final class Switchboard extends serverSwitch {
         }
     }
     
-    public boolean processSurrogate(String s) {
+    public boolean processSurrogate(final String s) {
         File surrogateFile = new File(this.surrogatesInPath, s);
         File outfile = new File(this.surrogatesOutPath, s);
         if (!surrogateFile.exists() || !surrogateFile.canWrite() || !surrogateFile.canRead()) return false;
@@ -1589,7 +1598,7 @@ public final class Switchboard extends serverSwitch {
         return new indexingQueueEntry(in.process, in.queueEntry, document, null);
     }
     
-    private Document parseDocument(Response response) throws InterruptedException {
+    private Document parseDocument(final Response response) throws InterruptedException {
         Document document = null;
         final EventOrigin processCase = response.processCase(peers.mySeed().hash);
         
@@ -1721,7 +1730,7 @@ public final class Switchboard extends serverSwitch {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_FINISHED);
     }
     
-    private void storeDocumentIndex(Segments.Process process, final Response queueEntry, final Document document, final Condenser condenser) {
+    private void storeDocumentIndex(final Segments.Process process, final Response queueEntry, final Document document, final Condenser condenser) {
         
         // CREATE INDEX
         final String dc_title = document.dc_title();
@@ -1862,14 +1871,15 @@ public final class Switchboard extends serverSwitch {
         return false;
     }
     
-    public void setPerformance(int wantedPPM) {
+    public void setPerformance(final int wantedPPM) {
+        int wPPM = wantedPPM;
         // we consider 3 cases here
         //         wantedPPM <=   10: low performance
         // 10   <  wantedPPM <  1000: custom performance
         // 1000 <= wantedPPM        : maximum performance
-        if (wantedPPM <= 10) wantedPPM = 10;
-        if (wantedPPM >= 6000) wantedPPM = 6000;
-        final int newBusySleep = 60000 / wantedPPM; // for wantedPPM = 10: 6000; for wantedPPM = 1000: 60
+        if (wPPM <= 10) wPPM = 10;
+        if (wPPM >= 6000) wPPM = 6000;
+        final int newBusySleep = 60000 / wPPM; // for wantedPPM = 10: 6000; for wantedPPM = 1000: 60
 
         BusyThread thread;
         
@@ -1894,7 +1904,7 @@ public final class Switchboard extends serverSwitch {
     	return accessSet.tailSet(Long.valueOf(System.currentTimeMillis() - timeInterval)).size();
     }
     
-    public String dhtShallTransfer(String segment) {
+    public String dhtShallTransfer(final String segment) {
         String cautionCause = onlineCaution();
     	if (cautionCause != null) {
             return "online caution for " + cautionCause + ", dht transmission";
@@ -1937,7 +1947,7 @@ public final class Switchboard extends serverSwitch {
         return dhtTransferJob(getConfig(SwitchboardConstants.SEGMENT_DHTOUT, "default"));
     }
     
-    public boolean dhtTransferJob(String segment) {
+    public boolean dhtTransferJob(final String segment) {
     	final String rejectReason = dhtShallTransfer(segment);
         if (rejectReason != null) {
             if (this.log.isFine()) log.logFine(rejectReason);
@@ -2128,13 +2138,13 @@ public final class Switchboard extends serverSwitch {
         else if (this.terminate || curThread.isInterrupted()) throw new InterruptedException("Shutdown in progress ...");
     }
 
-    public void terminate(final long delay, String reason) {
+    public void terminate(final long delay, final String reason) {
         if (delay <= 0) throw new IllegalArgumentException("The shutdown delay must be greater than 0.");
         log.logInfo("caught delayed terminate request: " + reason);
         (new delayedShutdown(this, delay, reason)).start();
     }
     
-    public void terminate(String reason) {
+    public void terminate(final String reason) {
         this.terminate = true;
         log.logInfo("caught terminate request: " + reason);
         this.shutdownSync.release();
@@ -2181,6 +2191,7 @@ class delayedShutdown extends Thread {
         this.reason = reason;
     }
     
+    @Override
     public void run() {
         try {
             Thread.sleep(delay);
