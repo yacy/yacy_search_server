@@ -110,16 +110,21 @@ change_admin_password()
     read -s INPUT2
     echo
 
-    if [ $INPUT1 == $INPUT2 ]
+    if [ "$INPUT1" == "" ]
     then
+        echo
+        echo 'Empty password is not allowed, please try again.'
+        change_admin_password
+    elif [ $INPUT1 != $INPUT2 ]
+    then
+        echo
+        echo 'Entries did not match, please try again.'
+        change_admin_password
+    else
         BASE64=`$JAVA -classpath lib/yacycore.jar net.yacy.kelondro.order.Base64Order -es "$USERNAME:$INPUT1"`
         B64MD5=`$JAVA -classpath lib/yacycore.jar net.yacy.kelondro.order.Digest -strfhex "$BASE64"`
         B64MD5=`echo $B64MD5 | sed "s/\(\S\) .*/\1/"`
         replace_parameter 'adminAccountBase64MD5' "$B64MD5"
-    else
-        echo
-        echo 'Entries did not match, please try again.'
-        change_admin_password
     fi
     STATUS='Admin password has been changed.'
 
