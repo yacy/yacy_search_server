@@ -5,8 +5,8 @@
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate: 2009-04-03 15:23:45 +0200 (Fr, 03 Apr 2009) $
-// $LastChangedRevision: 5777 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 

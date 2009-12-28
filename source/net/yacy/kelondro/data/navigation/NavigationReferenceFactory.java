@@ -5,8 +5,8 @@
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate: 2009-04-03 15:23:45 +0200 (Fr, 03 Apr 2009) $
-// $LastChangedRevision: 5777 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -32,11 +32,11 @@ import net.yacy.kelondro.rwi.ReferenceFactory;
 
 public class NavigationReferenceFactory implements ReferenceFactory<NavigationReference> {
 
-    public NavigationReference produceSlow(Entry e) {
+    public NavigationReference produceSlow(final Entry e) {
         return new NavigationReferenceRow(e);
     }
     
-    public NavigationReference produceFast(NavigationReference r) {
+    public NavigationReference produceFast(final NavigationReference r) {
         if (r instanceof NavigationReferenceVars) return r;
         return new NavigationReferenceVars(r);
     }

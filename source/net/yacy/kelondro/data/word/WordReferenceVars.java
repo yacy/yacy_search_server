@@ -5,8 +5,8 @@
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate: 2009-03-20 16:44:59 +0100 (Fr, 20 Mrz 2009) $
-// $LastChangedRevision: 5736 $
-// $LastChangedBy: borg-0300 $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -59,7 +59,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     public double termFrequency;
     
     public WordReferenceVars(
-    		final String   urlHash,
+            final String   urlHash,
             final int      urlLength,     // byte-length of complete URL
             final int      urlComps,      // number of path components
             final int      titleLength,   // length of description/length (longer are better?)
@@ -150,6 +150,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.termFrequency = 0.0;
     }
     
+    @Override
     public WordReferenceVars clone() {
         final WordReferenceVars c = new WordReferenceVars(
                 this.urlHash,
@@ -233,7 +234,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return this.positions.size();
     }
 
-    public int position(int p) {
+    public int position(final int p) {
         return this.positions.get(p);
     }
 
@@ -358,6 +359,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         this.wordsintext = this.wordsintext + oe.wordsintext();
     }
 
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
@@ -366,15 +368,16 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return this.urlHash.equals(other.urlHash);
     }
     
+    @Override
     public int hashCode() {
         return this.urlHash.hashCode();
     }
     
-    public int compareTo(WordReferenceVars o) {
+    public int compareTo(final WordReferenceVars o) {
         return Base64Order.enhancedCoder.compare(this.urlHash.getBytes(), o.metadataHash().getBytes());
     }
     
-    public void addPosition(int position) {
+    public void addPosition(final int position) {
         this.positions.add(position);
     }
     
@@ -413,11 +416,12 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     	BlockingQueue<WordReferenceRow> in;
     	BlockingQueue<WordReferenceVars> out;
     	
-    	public Transformer(BlockingQueue<WordReferenceRow> in, BlockingQueue<WordReferenceVars> out) {
+    	public Transformer(final BlockingQueue<WordReferenceRow> in, final BlockingQueue<WordReferenceVars> out) {
     		this.in = in;
     		this.out = out;
     	}
     	
+        @Override
     	public void run() {
     		WordReferenceRow row;
     		try {

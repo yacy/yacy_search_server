@@ -5,8 +5,8 @@
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate: 2009-03-20 16:44:59 +0100 (Fr, 20 Mrz 2009) $
-// $LastChangedRevision: 5736 $
-// $LastChangedBy: borg-0300 $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -218,6 +218,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         this.entry = rentry;
     }
     
+    @Override
     public WordReferenceRow clone() {
         final byte[] b = new byte[urlEntryRow.objectsize];
         System.arraycopy(entry.bytes(), 0, b, 0, urlEntryRow.objectsize);
@@ -256,7 +257,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return 1;
     }
 
-    public int position(int p) {
+    public int position(final int p) {
         assert p == 0 : "p = " + p;
         return (int) this.entry.getColLong(col_posintext);
     }
@@ -313,6 +314,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return (((double) this.hitcount()) / ((double) (this.wordsintext() + this.wordsintitle() + 1)));
     }
     
+    @Override
     public String toString() {
         return toPropertyForm();
     }
@@ -323,6 +325,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return false;
     }
     
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
@@ -331,11 +334,12 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return this.metadataHash().equals(other.metadataHash());
     }
     
+    @Override
     public int hashCode() {
         return this.metadataHash().hashCode();
     }
 
-    public void join(Reference oe) {
+    public void join(final Reference oe) {
         throw new UnsupportedOperationException("");
         
     }

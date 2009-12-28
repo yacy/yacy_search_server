@@ -5,8 +5,8 @@
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate: 2009-04-03 15:23:45 +0200 (Fr, 03 Apr 2009) $
-// $LastChangedRevision: 5777 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -43,12 +43,14 @@ public interface NavigationReference extends Reference {
 
     public int hitcount();
 
-    public int position(int p);
+    public int position(final int p);
     
     public byte flags();
     
+    @Override
     public String toString();
     
+    @Override
     public int hashCode();
 
 }

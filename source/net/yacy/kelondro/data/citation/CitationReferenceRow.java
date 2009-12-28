@@ -5,8 +5,8 @@
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate: 2009-03-20 16:44:59 +0100 (Fr, 20 Mrz 2009) $
-// $LastChangedRevision: 5736 $
-// $LastChangedBy: borg-0300 $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -117,6 +117,7 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
         this.entry = rentry;
     }
     
+    @Override
     public CitationReferenceRow clone() {
         final byte[] b = new byte[citationRow.objectsize];
         System.arraycopy(entry.bytes(), 0, b, 0, citationRow.objectsize);
@@ -167,6 +168,7 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
         return 1.0 / ((double) (llocal() + lother() + 1));
     }
     
+    @Override
     public String toString() {
         return toPropertyForm();
     }
@@ -177,11 +179,13 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
         return false;
     }
     
+    @Override
     public int hashCode() {
         return this.metadataHash().hashCode();
     }
 
-    public boolean equals(Object obj) {
+    @Override
+    public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
         if (!(obj instanceof CitationReferenceRow)) return false;

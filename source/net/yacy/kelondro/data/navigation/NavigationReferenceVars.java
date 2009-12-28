@@ -5,8 +5,8 @@
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate: 2009-03-20 16:44:59 +0100 (Fr, 20 Mrz 2009) $
-// $LastChangedRevision: 5736 $
-// $LastChangedBy: borg-0300 $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -58,6 +58,7 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
         this.flags = e.flags();
     }
     
+    @Override
     public NavigationReferenceVars clone() {
         final NavigationReferenceVars c = new NavigationReferenceVars(
                 this.termhash,
@@ -102,7 +103,7 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
         return this.hitcount;
     }
 
-    public int position(int p) {
+    public int position(final int p) {
         assert p == 0 : "p = " + p;
         return this.position;
     }
@@ -111,14 +112,17 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
         return this.flags;
     }
  
+    @Override
     public String toString() {
         return toPropertyForm();
     }
     
+    @Override
     public int hashCode() {
         return this.navigationHash().hashCode();
     }
     
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
@@ -127,14 +131,14 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
         return this.navigationHash().equals(other.navigationHash());
     }
     
-    public boolean isOlder(Reference other) {
+    public boolean isOlder(final Reference other) {
         return false;
     }
 
     
     // unsupported operations:
 
-    public void join(Reference oe) {
+    public void join(final Reference oe) {
         throw new UnsupportedOperationException();
     }
 

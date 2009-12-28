@@ -5,8 +5,8 @@
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate: 2009-03-20 16:44:59 +0100 (Fr, 20 Mrz 2009) $
-// $LastChangedRevision: 5736 $
-// $LastChangedBy: borg-0300 $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -96,10 +96,11 @@ public final class NavigationReferenceRow extends AbstractReference implements N
         this.entry = navEntryRow.newEntry(row);
     }
     
-    public NavigationReferenceRow(Row.Entry entry) {
+    public NavigationReferenceRow(final Row.Entry entry) {
         this.entry = entry;
     }
     
+    @Override
     public NavigationReferenceRow clone() {
         final byte[] b = new byte[navEntryRow.objectsize];
         System.arraycopy(entry.bytes(), 0, b, 0, navEntryRow.objectsize);
@@ -130,7 +131,7 @@ public final class NavigationReferenceRow extends AbstractReference implements N
         return (int) this.entry.getColLong(col_count);
     }
 
-    public int position(int p) {
+    public int position(final int p) {
         assert p == 0 : "p = " + p;
         return (int) this.entry.getColLong(col_pos);
     }
@@ -139,14 +140,17 @@ public final class NavigationReferenceRow extends AbstractReference implements N
         return (byte) this.entry.getColLong(col_flags);
     }
  
+    @Override
     public String toString() {
         return toPropertyForm();
     }
     
+    @Override
     public int hashCode() {
         return this.navigationHash().hashCode();
     }
     
+    @Override
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
@@ -155,14 +159,14 @@ public final class NavigationReferenceRow extends AbstractReference implements N
         return this.navigationHash().equals(other.navigationHash());
     }
     
-    public boolean isOlder(Reference other) {
+    public boolean isOlder(final Reference other) {
         return false;
     }
 
     
     // unsupported operations:
 
-    public void join(Reference oe) {
+    public void join(final Reference oe) {
         throw new UnsupportedOperationException();
     }
 

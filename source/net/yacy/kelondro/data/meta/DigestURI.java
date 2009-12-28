@@ -3,8 +3,8 @@
 // first published 13.07.2006 on http://yacy.net
 //
 // $LastChangedDate: 2009-10-10 01:22:22 +0200 (Sa, 10 Okt 2009) $
-// $LastChangedRevision: 6392 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -57,11 +57,12 @@ public class DigestURI implements Serializable {
     private String protocol, host, userInfo, path, quest, ref, hash;
     private int port;
     
-    public static String domhash(String host) {
-        if (!host.startsWith("http://")) host = "http://" + host;
+    public static String domhash(final String host) {
+        String h = host;
+        if (!h.startsWith("http://")) h = "http://" + h;
         DigestURI url = null;
         try {
-            url = new DigestURI(host, null);
+            url = new DigestURI(h, null);
         } catch (MalformedURLException e) {
             Log.logException(e);
             return null;
@@ -83,7 +84,7 @@ public class DigestURI implements Serializable {
         parseURLString(url);
         this.hash = hash;
     }
-    
+
     private void parseURLString(String url) throws MalformedURLException {
         // identify protocol
         assert (url != null);
@@ -295,9 +296,10 @@ public class DigestURI implements Serializable {
         escape();
     }
 
-    
     //  resolve '..'
-    public String resolveBackpath(String path) /* throws MalformedURLException */ {
+    public String resolveBackpath(final String path) {
+        String p = path;
+
         /* original version by [MC]
         int p;
         while ((p = path.indexOf("/..")) >= 0) {
@@ -308,15 +310,15 @@ public class DigestURI implements Serializable {
         }*/
         
         /* by [MT] */
-        if (path.length() == 0 || path.charAt(0) != '/') { path = "/" + path; }
+        if (p.length() == 0 || p.charAt(0) != '/') { p = "/" + p; }
 
-        final Matcher matcher = backPathPattern.matcher(path);
+        final Matcher matcher = backPathPattern.matcher(p);
         while (matcher.find()) {
-            path = matcher.replaceAll("");
-            matcher.reset(path);
+            p = matcher.replaceAll("");
+            matcher.reset(p);
         }
         
-        return path.equals("")?"/":path;
+        return p.equals("")?"/":p;
     }
     
     /**
@@ -629,6 +631,7 @@ public class DigestURI implements Serializable {
         return quest;
     }
 
+    @Override
     public String toString() {
         return toNormalform(false, true);
     }
@@ -924,7 +927,7 @@ public class DigestURI implements Serializable {
         return domDomain(this.hash) == 7;
     }
 
-    public static final boolean isLocal(String urlhash) {
+    public static final boolean isLocal(final String urlhash) {
         return domDomain(urlhash) == 7;
     }
 
