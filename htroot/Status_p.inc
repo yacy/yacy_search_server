@@ -17,10 +17,17 @@
     
     <dt>Protection</dt>
     <dd>#(protection)#
-      <strong>Password is missing</strong>
+      <strong>Password is missing.</strong>
       ::
       password-protected
-      #(/protection)#</dd>
+      #(/protection)#
+
+      #(unrestrictedLocalAccess)#
+      ::
+      <br />Unrestricted access from localhost.
+      #(/unrestrictedLocalAccess)#
+      <a href="ConfigAccounts_p.html">[Configure]</a>
+    </dd>
     
     <dt>Address</dt>
     <dd>Host: #[host]#:#[port]# #(extPortFormat)#::| (Binding to interface: #[extPort]#)#(/extPortFormat)# #(sslSupport)#::| SSL: enabled#(/sslSupport)#<br />
@@ -102,7 +109,7 @@
     <dd>
     #(seedServer)#
       Disabled.
-      <a href="Settings_p.html?page=seed">[Configure]</a>.
+      <a href="Settings_p.html?page=seed">[Configure]</a>
       ::
       Enabled: Updating to server #[seedServer]#.
       Last upload: #[lastUpload]# ago.

@@ -128,7 +128,11 @@ public class Status {
         } else {
             prop.put("protection", "1"); // protected
         }
-        
+
+        if (sb.getConfigBool("adminAccountForLocalhost", false)) {
+            prop.put("unrestrictedLocalAccess", 1);
+        }
+
         // free disk space
         if ((adminaccess) && (!sb.observer.getDisksOK()))
         {
