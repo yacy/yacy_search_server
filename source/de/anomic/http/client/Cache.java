@@ -65,7 +65,7 @@ public final class Cache {
     private static String prefix;
     public static final Log log = new Log("HTCACHE");
     
-    public static void init(final File htCachePath, String peerSalt, final long CacheSizeMax) {
+    public static void init(final File htCachePath, final String peerSalt, final long CacheSizeMax) {
         
         cachePath = htCachePath;
         maxCacheSize = CacheSizeMax;
@@ -111,7 +111,7 @@ public final class Cache {
         fileDB.close(true);
     }
     
-    public static void store(DigestURI url, final ResponseHeader responseHeader, byte[] file) throws IOException {
+    public static void store(final DigestURI url, final ResponseHeader responseHeader, final byte[] file) throws IOException {
         if (responseHeader == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: responseHeader == null");
         if (file == null) throw new IOException("Cache.store of url " + url.toString() + " not possible: file == null");
         
@@ -205,7 +205,7 @@ public final class Cache {
     /**
      * Returns the content of a cached resource as byte[]
      * @param url the requested resource
-     * @return the resource content as byte[]. In no data
+     * @return the resource content as byte[]. If no data
      * is available or the cached file is not readable, <code>null</code>
      * is returned.
      * @throws IOException 
@@ -253,7 +253,7 @@ public final class Cache {
      * @param url
      * @throws IOException
      */
-    public static void delete(DigestURI url) throws IOException {
+    public static void delete(final DigestURI url) throws IOException {
         responseHeaderDB.remove(url.hash());
         fileDB.remove(url.hash().getBytes("UTF-8"));
     }
