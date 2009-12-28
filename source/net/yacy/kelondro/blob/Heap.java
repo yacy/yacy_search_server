@@ -5,8 +5,8 @@
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate: 2008-03-14 01:16:04 +0100 (Fr, 14 Mrz 2008) $
-// $LastChangedRevision: 4558 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -107,6 +107,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * the number of BLOBs in the heap
      * @return the number of BLOBs in the heap
      */
+    @Override
     public synchronized int size() {
         return super.size() + ((this.buffer == null) ? 0 : this.buffer.size());
     }
@@ -117,6 +118,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * @param key
      * @return true if the key exists, false otherwise
      */
+    @Override
     public synchronized boolean has(final byte[] key) {
         assert index != null;
         assert this.keylength == key.length : this.keylength + "!=" + key.length;
@@ -212,6 +214,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * @return
      * @throws IOException
      */
+    @Override
     public synchronized byte[] get(final byte[] key) throws IOException {
         assert this.keylength == key.length : this.keylength + "!=" + key.length;
         
@@ -228,7 +231,8 @@ public final class Heap extends HeapModifier implements BLOB {
      * @return the size of the BLOB or -1 if the BLOB does not exist
      * @throws IOException
      */
-    public synchronized long length(byte[] key) throws IOException {
+    @Override
+    public synchronized long length(final byte[] key) throws IOException {
         assert this.keylength == key.length : this.keylength + "!=" + key.length;
         
         // check the buffer
@@ -242,6 +246,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * clears the content of the database
      * @throws IOException
      */
+    @Override
     public synchronized void clear() throws IOException {
     	this.buffer.clear();
         this.buffersize = 0;
@@ -251,7 +256,8 @@ public final class Heap extends HeapModifier implements BLOB {
     /**
      * close the BLOB table
      */
-    public synchronized void close(boolean writeIDX) {
+    @Override
+    public synchronized void close(final boolean writeIDX) {
     	if (file != null && buffer != null) {
             try {
                 flushBuffer();
@@ -266,10 +272,12 @@ public final class Heap extends HeapModifier implements BLOB {
     	assert file == null;
     }
     
+    @Override
     public synchronized void close() {
         this.close(true);
     }
     
+    @Override
     public void finalize() {
         this.close();
     }
@@ -281,6 +289,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
+    @Override
     public synchronized void put(final byte[] key, final byte[] b) throws IOException, RowSpaceExceededException {
         assert this.keylength == key.length : this.keylength + "!=" + key.length;
         
@@ -400,6 +409,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * @param key  the primary key
      * @throws IOException
      */
+    @Override
     public synchronized void remove(final byte[] key) throws IOException {
         assert this.keylength == key.length : this.keylength + "!=" + key.length;
         
@@ -420,6 +430,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * @return
      * @throws IOException
      */
+    @Override
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
         try {
             this.flushBuffer();
@@ -436,6 +447,7 @@ public final class Heap extends HeapModifier implements BLOB {
      * @return
      * @throws IOException
      */
+    @Override
     public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
         try {
             this.flushBuffer();
@@ -445,6 +457,7 @@ public final class Heap extends HeapModifier implements BLOB {
         return super.keys(up, firstKey);
     }
 
+    @Override
     public synchronized long length() {
         return super.length() + this.buffersize;
     }
@@ -478,7 +491,7 @@ public final class Heap extends HeapModifier implements BLOB {
         }
     }
 
-    private static Map<String, String> map(String a, String b) {
+    private static Map<String, String> map(final String a, final String b) {
         HashMap<String, String> m = new HashMap<String, String>();
         m.put(a, b);
         return m;

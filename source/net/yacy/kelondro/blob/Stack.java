@@ -3,8 +3,8 @@
 // first published 03.07.2009 on http://yacy.net
 //
 // $LastChangedDate: 2008-03-14 01:16:04 +0100 (Fr, 14 Mrz 2008) $
-// $LastChangedRevision: 4558 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -91,7 +91,7 @@ public class Stack {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
-    public synchronized long push(byte[] b) throws IOException, RowSpaceExceededException {
+    public synchronized long push(final byte[] b) throws IOException, RowSpaceExceededException {
         long handle = nextHandle();
         this.stack.put(NaturalOrder.encodeLong(handle, 8), b);
         return handle;
@@ -106,7 +106,7 @@ public class Stack {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
-    protected synchronized void push(Entry e) throws IOException, RowSpaceExceededException {
+    protected synchronized void push(final Entry e) throws IOException, RowSpaceExceededException {
         this.stack.put(NaturalOrder.encodeLong(e.h, 8), e.b);
     }
     
@@ -117,7 +117,7 @@ public class Stack {
      *         or null if no such element exists
      * @throws IOException
      */
-    public synchronized byte[] get(long handle) throws IOException {
+    public synchronized byte[] get(final long handle) throws IOException {
         byte[] k = NaturalOrder.encodeLong(handle, 8);
         byte[] b = this.stack.get(k);
         if (b == null) return null;
@@ -130,7 +130,7 @@ public class Stack {
      * @return the removed element
      * @throws IOException
      */
-    public synchronized byte[] remove(long handle) throws IOException {
+    public synchronized byte[] remove(final long handle) throws IOException {
         byte[] k = NaturalOrder.encodeLong(handle, 8);
         byte[] b = this.stack.get(k);
         if (b == null) return null;
@@ -178,7 +178,7 @@ public class Stack {
         return po(this.stack.firstKey(), false);
     }
     
-    private Entry po(byte[] k, boolean remove) throws IOException {
+    private Entry po(final byte[] k, final boolean remove) throws IOException {
         if (k == null) return null;
         assert k.length == 8;
         byte[] b = this.stack.get(k);
@@ -198,7 +198,7 @@ public class Stack {
          * @param h
          * @param b
          */
-        public Entry(long h, byte[] b) {
+        public Entry(final long h, final byte[] b) {
             this.h = h;
             this.b = b;
         }
@@ -208,7 +208,7 @@ public class Stack {
          * @param k
          * @param b
          */
-        public Entry(byte[] k, byte[] b) {
+        public Entry(final byte[] k, final byte[] b) {
             this.h = NaturalOrder.decodeLong(k);
             this.b = b;
         }
@@ -237,6 +237,7 @@ public class Stack {
         this.stack.close(true);
     }
     
+    @Override
     public void finalize() {
         this.close();
     }

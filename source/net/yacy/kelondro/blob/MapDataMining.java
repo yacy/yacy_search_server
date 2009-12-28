@@ -6,8 +6,8 @@
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -144,6 +144,7 @@ public class MapDataMining extends MapView {
         if (doubleaccfields != null && doubleaccumulator != null) for (int i = 0; i < doubleaccfields.length; i++) accMap.put(doubleaccfields[i], doubleaccumulator[i]);
     }
 
+    @Override
     public synchronized void clear() throws IOException {
     	super.clear();
         if (sortfields == null) sortClusterMap = null; else {
@@ -170,6 +171,7 @@ public class MapDataMining extends MapView {
         }
     }
     
+    @Override
     public synchronized void put(final String key, final Map<String, String> newMap) throws IOException, RowSpaceExceededException {
         assert (key != null);
         assert (key.length() > 0);
@@ -242,6 +244,7 @@ public class MapDataMining extends MapView {
         }
     }
 
+    @Override
     public synchronized void remove(final String key) throws IOException {
         if (key == null) return;
         
@@ -327,14 +330,17 @@ public class MapDataMining extends MapView {
         return accumulator.doubleValue();
     }
     
+    @Override
     public synchronized int size() {
         return super.size();
     }
     
+    @Override
     public synchronized boolean isEmpty() {
         return super.isEmpty();
     }
     
+    @Override
     public synchronized void close() {
         // close cluster
         if (sortClusterMap != null) {

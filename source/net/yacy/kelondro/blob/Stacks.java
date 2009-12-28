@@ -3,8 +3,8 @@
 // first published 03.07.2009 on http://yacy.net
 //
 // $LastChangedDate: 2008-03-14 01:16:04 +0100 (Fr, 14 Mrz 2008) $
-// $LastChangedRevision: 4558 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -46,7 +46,7 @@ public class Stacks {
      * @param stackFile
      * @throws IOException
      */
-    public Stacks(final File stacksLocation, String stacksPrefix) {
+    public Stacks(final File stacksLocation, final String stacksPrefix) {
         if (!stacksLocation.exists()) stacksLocation.mkdirs();
         assert stacksLocation.isDirectory();
         this.stacksLocation = stacksLocation;
@@ -72,7 +72,7 @@ public class Stacks {
         private File location;
         Stack stack;
         
-        public StackInstance(File location) throws IOException {
+        public StackInstance(final File location) throws IOException {
             String filename = location.getName();
             assert filename.startsWith(stacksPrefix + "_");
             assert filename.endsWith(".bstack");
@@ -81,7 +81,7 @@ public class Stacks {
             this.stack = new Stack(location);
         }
         
-        public StackInstance(String stack) throws IOException {
+        public StackInstance(final String stack) throws IOException {
             this.location = new File(stacksLocation, stacksPrefix + "_" + stack + ".bstack");
             this.name = stack;
             this.stack = new Stack(location);
@@ -100,7 +100,7 @@ public class Stacks {
         }
     }
     
-    private Stack getStack(String stack) {
+    private Stack getStack(final String stack) {
         StackInstance si = this.stacks.get(stack);
         if (si == null) {
             // create a new Stack on the fly
@@ -137,7 +137,7 @@ public class Stacks {
      * @param stack the name of the stack
      * @return the number of entries on the stack
      */
-    public int size(String stack) {
+    public int size(final String stack) {
         Stack s = getStack(stack);
         if (s == null) return -1;
         return s.size();
@@ -149,7 +149,7 @@ public class Stacks {
      * @return an iterator of all handles of the stack
      * @throws IOException
      */
-    public synchronized Iterator<Long> handles(String stack) throws IOException {
+    public synchronized Iterator<Long> handles(final String stack) throws IOException {
         Stack s = getStack(stack);
         if (s == null) return null;
         return s.handles();
@@ -163,7 +163,7 @@ public class Stacks {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
-    public long push(String stack, byte[] b) throws IOException, RowSpaceExceededException {
+    public long push(final String stack, final byte[] b) throws IOException, RowSpaceExceededException {
         Stack s = getStack(stack);
         if (s == null) return -1;
         return s.push(b);
@@ -179,7 +179,7 @@ public class Stacks {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
-    protected void push(String stack, Stack.Entry e) throws IOException, RowSpaceExceededException {
+    protected void push(final String stack, final Stack.Entry e) throws IOException, RowSpaceExceededException {
         Stack s = getStack(stack);
         if (s == null) return;
         s.push(e);
@@ -193,7 +193,7 @@ public class Stacks {
      *         or null if no such element exists
      * @throws IOException
      */
-    public byte[] get(String stack, long handle) throws IOException {
+    public byte[] get(final String stack, final long handle) throws IOException {
         Stack s = getStack(stack);
         if (s == null) return null;
         return s.get(handle);
@@ -206,7 +206,7 @@ public class Stacks {
      * @return the removed element
      * @throws IOException
      */
-    public byte[] remove(String stack, long handle) throws IOException {
+    public byte[] remove(final String stack, final long handle) throws IOException {
         Stack s = getStack(stack);
         if (s == null) return null;
         return s.remove(handle);
@@ -218,7 +218,7 @@ public class Stacks {
      * @return the top element or null if the stack is empty
      * @throws IOException
      */
-    public Stack.Entry pop(String stack) throws IOException {
+    public Stack.Entry pop(final String stack) throws IOException {
         Stack s = getStack(stack);
         if (s == null) return null;
         return s.pop();
@@ -232,7 +232,7 @@ public class Stacks {
      * @return the element on the top of the stack or null, if stack is empty
      * @throws IOException
      */
-    public Stack.Entry top(String stack) throws IOException {
+    public Stack.Entry top(final String stack) throws IOException {
         Stack s = getStack(stack);
         if (s == null) return null;
         return s.top();
@@ -244,7 +244,7 @@ public class Stacks {
      * @return the bottom element or null if the stack is empty
      * @throws IOException
      */
-    public Stack.Entry pot(String stack) throws IOException {
+    public Stack.Entry pot(final String stack) throws IOException {
         Stack s = getStack(stack);
         if (s == null) return null;
         return s.pot();
@@ -258,7 +258,7 @@ public class Stacks {
      * @return the element on the bottom of the stack or null, if stack is empty
      * @throws IOException
      */
-    public Stack.Entry bot(String stack) throws IOException {
+    public Stack.Entry bot(final String stack) throws IOException {
         Stack s = getStack(stack);
         if (s == null) return null;
         return s.bot();
@@ -273,6 +273,7 @@ public class Stacks {
         }
     }
     
+    @Override
     public void finalize() {
         this.close();
     }

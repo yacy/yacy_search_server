@@ -3,8 +3,8 @@
 // first published 05.01.2009 on http://yacy.net
 //
 // $LastChangedDate: 2008-03-14 01:16:04 +0100 (Fr, 14 Mrz 2008) $
-// $LastChangedRevision: 4558 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -73,15 +73,18 @@ public class HeapModifier extends HeapReader implements BLOB {
     /**
      * close the BLOB table
      */
+    @Override
     public synchronized void close(boolean writeIDX) {
         shrinkWithGapsAtEnd();
         super.close(writeIDX);
     }
     
+    @Override
     public synchronized void close() {
         close(true);
     }
     
+    @Override
     public void finalize() {
         this.close();
     }
