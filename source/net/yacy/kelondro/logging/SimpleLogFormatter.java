@@ -6,8 +6,8 @@
 //Frankfurt, Germany, 2004
 //
 //This file is contributed by Martin Thelian
-//last major change: $LastChangedDate: 2008-08-02 14:12:04 +0200 (Sat, 02 Aug 2008) $ by $LastChangedBy: danielr $
-//Revision: $LastChangedRevision: 5030 $
+//last major change: $LastChangedDate: 2008-08-02 14:12:04 +0200 (Sat, 02 Aug 2008) $ by $LastChangedBy$
+//Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -50,10 +50,11 @@ public final class SimpleLogFormatter extends SimpleFormatter {
           super();
       }        
       
+    @Override
       public final synchronized String format(final LogRecord record) {
           
-          final StringBuffer buffer = this.buffer;
-          buffer.setLength(0);
+          final StringBuffer stringBuffer = this.buffer;
+          stringBuffer.setLength(0);
           
           // adding the loglevel
           final int logLevel = record.getLevel().intValue();
@@ -81,28 +82,28 @@ public final class SimpleLogFormatter extends SimpleFormatter {
           this.formatter.format(this.date, this.buffer, this.position);
 
           // adding the logger name
-          buffer.append(' ');
-          buffer.append(record.getLoggerName());
+          stringBuffer.append(' ');
+          stringBuffer.append(record.getLoggerName());
           
           // adding the logging message
-          buffer.append(' ');
-          buffer.append(formatMessage(record));
+          stringBuffer.append(' ');
+          stringBuffer.append(formatMessage(record));
           
           // adding the stack trace if available
-          buffer.append(System.getProperty("line.separator"));
+          stringBuffer.append(System.getProperty("line.separator"));
           if (record.getThrown() != null) {
               StringWriter writer = null;
               try {
                   writer = new StringWriter();
                   final PrintWriter printer = new PrintWriter(writer);
                   record.getThrown().printStackTrace(printer);
-                  buffer.append(writer.toString());
+                  stringBuffer.append(writer.toString());
               } catch (final Exception e) {
-                  buffer.append("Failed to get stack trace: " + e.getMessage());
+                  stringBuffer.append("Failed to get stack trace: " + e.getMessage());
               } finally {
                   if (writer != null) try {writer.close();} catch (final Exception ex) {}
               }
           }
-          return buffer.toString();
+          return stringBuffer.toString();
       }
 }

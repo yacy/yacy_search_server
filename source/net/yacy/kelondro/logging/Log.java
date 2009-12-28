@@ -3,8 +3,8 @@
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
-// last major change: $LastChangedDate: 2009-01-30 14:48:11 +0000 (Fr, 30 Jan 2009) $ by $LastChangedBy: orbiter $
-// Revision: $LastChangedRevision: 5539 $
+// last major change: $LastChangedDate: 2009-01-30 14:48:11 +0000 (Fr, 30 Jan 2009) $ by $LastChangedBy$
+// Revision: $LastChangedRevision$
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -213,7 +213,7 @@ public final class Log {
         return Logger.getLogger(appName).isLoggable(Level.FINEST);
     }
     
-    private final static void enQueueLog(Logger logger, Level level, String message, final Throwable thrown) {
+    private final static void enQueueLog(final Logger logger, final Level level, final String message, final Throwable thrown) {
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
             logger.log(level, message, thrown);
         } else {
@@ -225,7 +225,7 @@ public final class Log {
         }
     }
     
-    private final static void enQueueLog(Logger logger, Level level, String message) {
+    private final static void enQueueLog(final Logger logger, final Level level, final String message) {
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
             logger.log(level, message);
         } else {
@@ -237,7 +237,7 @@ public final class Log {
         }
     }
     
-    private final static void enQueueLog(String loggername, Level level, String message, final Throwable thrown) {
+    private final static void enQueueLog(final String loggername, final Level level, final String message, final Throwable thrown) {
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
             Logger.getLogger(loggername).log(level, message, thrown);
         } else {
@@ -249,7 +249,7 @@ public final class Log {
         }
     }
     
-    private final static void enQueueLog(String loggername, Level level, String message) {
+    private final static void enQueueLog(final String loggername, final Level level, final String message) {
         if (logRunnerThread == null || !logRunnerThread.isAlive()) {
             Logger.getLogger(loggername).log(level, message);
         } else {
@@ -267,28 +267,28 @@ public final class Log {
         public final Level level;
         public final String message;
         public final Throwable thrown;
-        public logEntry(Logger logger, Level level, String message, final Throwable thrown) {
+        public logEntry(final Logger logger, final Level level, final String message, final Throwable thrown) {
             this.logger = logger;
             this.loggername = null;
             this.level = level;
             this.message = message;
             this.thrown = thrown;
         }
-        public logEntry(Logger logger, Level level, String message) {
+        public logEntry(final Logger logger, final Level level, final String message) {
             this.logger = logger;
             this.loggername = null;
             this.level = level;
             this.message = message;
             this.thrown = null;
         }
-        public logEntry(String loggername, Level level, String message, final Throwable thrown) {
+        public logEntry(final String loggername, final Level level, final String message, final Throwable thrown) {
             this.logger = null;
             this.loggername = loggername;
             this.level = level;
             this.message = message;
             this.thrown = thrown;
         }
-        public logEntry(String loggername, Level level, String message) {
+        public logEntry(final String loggername, final Level level, final String message) {
             this.logger = null;
             this.loggername = loggername;
             this.level = level;
@@ -313,6 +313,7 @@ public final class Log {
         	super("Log Runner");
         }
         
+        @Override
         public void run() {
             logEntry entry;
             try {

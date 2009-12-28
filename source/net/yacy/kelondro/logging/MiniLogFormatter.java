@@ -6,8 +6,8 @@
 //Frankfurt, Germany, 2004
 //
 //This file ist contributed by Martin Thelian
-//last major change: $LastChangedDate: 2008-12-04 13:54:16 +0100 (Thu, 04 Dec 2008) $ by $LastChangedBy: orbiter $
-//Revision: $LastChangedRevision: 5379 $
+//last major change: $LastChangedDate: 2008-12-04 13:54:16 +0100 (Thu, 04 Dec 2008) $ by $LastChangedBy$
+//Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -36,15 +36,16 @@ public final class MiniLogFormatter extends SimpleFormatter {
           super();
       }        
       
+    @Override
       public final synchronized String format(final LogRecord record) {
           
-          final StringBuilder buffer = this.buffer;
-          buffer.setLength(0);
-          buffer.append(formatMessage(record));
+          final StringBuilder stringBuilder = this.buffer;
+          stringBuilder.setLength(0);
+          stringBuilder.append(formatMessage(record));
           
           // adding the stack trace if available
-          buffer.append(System.getProperty("line.separator"));
+          stringBuilder.append(System.getProperty("line.separator"));
           
-          return buffer.toString();
+          return stringBuilder.toString();
       }
 }

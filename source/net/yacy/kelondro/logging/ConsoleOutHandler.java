@@ -6,8 +6,8 @@
 //Frankfurt, Germany, 2004
 //
 //This file ist contributed by Martin Thelian
-//last major change: $LastChangedDate: 2008-08-02 14:12:04 +0200 (Sa, 02 Aug 2008) $ by $LastChangedBy: danielr $
-//Revision: $LastChangedRevision: 5030 $
+//last major change: $LastChangedDate: 2008-08-02 14:12:04 +0200 (Sa, 02 Aug 2008) $ by $LastChangedBy$
+//Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -38,11 +38,13 @@ public final class ConsoleOutHandler extends StreamHandler {
         setOutputStream(System.out);        
     }
     
+    @Override
     public final synchronized void publish(final LogRecord record) {
         super.publish(record);
         flush();
     }
     
+    @Override
     public final synchronized void close() {
         flush();
     }

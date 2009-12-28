@@ -6,7 +6,7 @@
 //Frankfurt, Germany, 2004
 //
 //This file ist contributed by Martin Thelian
-//last major change: $LastChangedDate$ by $LastChangedBy$
+//last major change: $LastChangedDate: 2009-10-12 23:59:39 +0200 (Mo, 12. Okt 2009) $ by $LastChangedBy$
 //Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify

@@ -6,8 +6,8 @@
 //Frankfurt, Germany, 2004
 //
 //This file ist contributed by Matthias Soehnholz
-//last major change: $LastChangedDate: 2008-11-17 16:23:17 +0000 (Mo, 17 Nov 2008) $ by $LastChangedBy: lotus $
-//Revision: $LastChangedRevision: 5349 $
+//last major change: $LastChangedDate: 2008-11-17 16:23:17 +0000 (Mo, 17 Nov 2008) $ by $LastChangedBy$
+//Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by

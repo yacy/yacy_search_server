@@ -6,8 +6,8 @@
 //Frankfurt, Germany, 2004
 //
 //This file ist contributed by Martin Thelian
-//last major change: $LastChangedDate: 2008-08-02 14:12:04 +0200 (Sa, 02 Aug 2008) $ by $LastChangedBy: danielr $
-//Revision: $LastChangedRevision: 5030 $
+//last major change: $LastChangedDate: 2008-08-02 14:12:04 +0200 (Sa, 02 Aug 2008) $ by $LastChangedBy$
+//Revision: $LastChangedRevision$
 //
 //This program is free software; you can redistribute it and/or modify
 //it under the terms of the GNU General Public License as published by
@@ -150,6 +150,7 @@ public final class ConsoleOutErrHandler extends Handler {
         this.stdErrHandler.close();
     }
     
+    @Override
     public synchronized void setLevel(final Level newLevel) throws SecurityException {
         super.setLevel(newLevel);
     }
@@ -160,6 +161,7 @@ public final class ConsoleOutErrHandler extends Handler {
         this.stdErrHandler.setLevel(stdErrLevel);
     }
     
+    @Override
     public void setFormatter(final Formatter newFormatter) throws SecurityException {
         super.setFormatter(newFormatter);
         if (newFormatter == null) return;
@@ -171,6 +173,7 @@ public final class ConsoleOutErrHandler extends Handler {
         }
     }
 
+    @Override
     public final void setFilter(final Filter newFilter) throws SecurityException {
         super.setFilter(newFilter);
         if (newFilter == null) return;
