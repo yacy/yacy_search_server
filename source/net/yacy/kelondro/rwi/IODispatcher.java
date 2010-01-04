@@ -109,7 +109,11 @@ public class IODispatcher extends Thread {
     
     public synchronized void merge(File f1, File f2, ReferenceFactory<? extends Reference> factory, ArrayStack array, Row payloadrow, File newFile) {
         if (mergeQueue == null || controlQueue == null || !this.isAlive()) {
-            Log.logWarning("IODispatcher", "emergency merge of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
+            if (f2 == null) {
+                Log.logWarning("IODispatcher", "emergency rewrite of file " + f1.getName() + " to " + newFile.getName());
+            } else {
+                Log.logWarning("IODispatcher", "emergency merge of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
+            }
             array.mergeMount(f1, f2, factory, payloadrow, newFile, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
         } else {
             MergeJob job = new MergeJob(f1, f2, factory, array, payloadrow, newFile);
@@ -117,10 +121,18 @@ public class IODispatcher extends Thread {
                 if (this.isAlive()) {
                     this.mergeQueue.put(job);
                     this.controlQueue.release();
-                    Log.logInfo("IODispatcher", "appended merge job of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
+                    if (f2 == null) {
+                        Log.logInfo("IODispatcher", "appended rewrite job of file " + f1.getName() + " to " + newFile.getName());
+                    } else {
+                        Log.logInfo("IODispatcher", "appended merge job of files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
+                    }
                 } else {
                     job.merge();
-                    Log.logWarning("IODispatcher", "dispatcher not running, merged files " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
+                    if (f2 == null) {
+                        Log.logWarning("IODispatcher", "dispatcher not running, merged files " + f1.getName() + " to " + newFile.getName());
+                    } else {
+                        Log.logWarning("IODispatcher", "dispatcher not running, rewrote file " + f1.getName() + ", " + f2.getName() + " to " + newFile.getName());
+                    }
                 }
             } catch (InterruptedException e) {
                 Log.logWarning("IODispatcher", "interrupted: " + e.getMessage(), e);
@@ -166,7 +178,11 @@ public class IODispatcher extends Thread {
                         Log.logSevere("IODispatcher", "main run job was interrupted (2)", e);
                         Log.logException(e);
                     } catch (Exception e) {
-                        Log.logSevere("IODispatcher", "main run job had errors (2), dump to " + f + " failed. Input files are " + f1 + " and " + f2, e);
+                        if (f2 == null) {
+                        Log.logSevere("IODispatcher", "main run job had errors (2), dump to " + f + " failed. Input file is " + f1, e);
+                        } else {
+                            Log.logSevere("IODispatcher", "main run job had errors (2), dump to " + f + " failed. Input files are " + f1 + " and " + f2, e);
+                        }
                         Log.logException(e);
                     }
                     continue loop;
@@ -243,7 +259,7 @@ public class IODispatcher extends Thread {
         		Log.logWarning("IODispatcher", "merge of file (1) " + f1.getName() + " failed: file does not exists");
         		return null;
         	}
-        	if (!f2.exists()) {
+        	if (f2 != null && !f2.exists()) {
         		Log.logWarning("IODispatcher", "merge of file (2) " + f2.getName() + " failed: file does not exists");
         		return null;
         	}

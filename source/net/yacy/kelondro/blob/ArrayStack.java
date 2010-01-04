@@ -5,8 +5,8 @@
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -269,6 +269,14 @@ public class ArrayStack implements BLOB {
         unmountBLOB(bestMatch[1], false);
         unmountBLOB(bestMatch[0], false);
         return bestMatch;
+    }
+
+    public synchronized File unmountOldest() {
+        if (this.blobs.size() == 0) return null;
+        if (System.currentTimeMillis() - this.blobs.get(0).creation.getTime() < this.fileAgeLimit) return null;
+        File f = this.blobs.get(0).location;
+        unmountBLOB(f, false);
+        return f;
     }
     
     public synchronized File[] unmountSmallest(long maxResultSize) {
@@ -731,23 +739,52 @@ public class ArrayStack implements BLOB {
         blobs = null;
     }
     
+    /**
+     * merge two blob files into one. If the second file is given as null,
+     * then the first file is only rewritten into a new one.
+     * @param f1
+     * @param f2 (may also be null)
+     * @param factory
+     * @param payloadrow
+     * @param newFile
+     * @param writeBuffer
+     * @return the target file where the given files are merged in
+     */
     public File mergeMount(File f1, File f2,
             ReferenceFactory<? extends Reference> factory,
             Row payloadrow, File newFile, int writeBuffer) {
-        Log.logInfo("BLOBArray", "merging " + f1.getName() + " with " + f2.getName());
-        File resultFile = mergeWorker(factory, this.keylength, this.ordering, f1, f2, payloadrow, newFile, writeBuffer);
-        if (resultFile == null) {
-            Log.logWarning("BLOBArray", "merge of files " + f1 + ", " + f2 + " returned null. newFile = " + newFile);
-            return null;
+        if (f2 == null) {
+            // this is a rewrite
+            Log.logInfo("BLOBArray", "rewrite of " + f1.getName());
+            File resultFile = rewriteWorker(factory, this.keylength, this.ordering, f1, payloadrow, newFile, writeBuffer);
+            if (resultFile == null) {
+                Log.logWarning("BLOBArray", "rewrite of file " + f1 + " returned null. newFile = " + newFile);
+                return null;
+            }
+            try {
+                mountBLOB(resultFile, false);
+            } catch (IOException e) {
+                Log.logWarning("BLOBArray", "rewrite of file " + f1 + " successfull, but read failed. resultFile = " + resultFile);
+                return null;
+            }
+            Log.logInfo("BLOBArray", "rewrite of " + f1.getName() + " into " + resultFile);
+            return resultFile;
+        } else {
+            Log.logInfo("BLOBArray", "merging " + f1.getName() + " with " + f2.getName());
+            File resultFile = mergeWorker(factory, this.keylength, this.ordering, f1, f2, payloadrow, newFile, writeBuffer);
+            if (resultFile == null) {
+                Log.logWarning("BLOBArray", "merge of files " + f1 + ", " + f2 + " returned null. newFile = " + newFile);
+                return null;
+            }
+            try {
+                mountBLOB(resultFile, false);
+            } catch (IOException e) {
+                Log.logWarning("BLOBArray", "merge of files " + f1 + ", " + f2 + " successfull, but read failed. resultFile = " + resultFile);
+                return null;
+            }
+            Log.logInfo("BLOBArray", "merged " + f1.getName() + " with " + f2.getName() + " into " + resultFile);
+            return resultFile;
         }
-        try {
-            mountBLOB(resultFile, false);
-        } catch (IOException e) {
-            Log.logWarning("BLOBArray", "merge of files " + f1 + ", " + f2 + " successfull, but read failed. resultFile = " + resultFile);
-            return null;
-        }
-        Log.logInfo("BLOBArray", "merged " + f1.getName() + " with " + f2.getName() + " into " + resultFile);
-        return resultFile;
     }
     
     private static <ReferenceType extends Reference> File mergeWorker(
@@ -803,6 +840,44 @@ public class ArrayStack implements BLOB {
         // we don't need the old files any more
         FileUtils.deletedelete(f1);
         FileUtils.deletedelete(f2);
+        return newFile;
+    }
+    
+    private static <ReferenceType extends Reference> File rewriteWorker(
+            ReferenceFactory<ReferenceType> factory,
+            int keylength, ByteOrder order, File f, Row payloadrow, File newFile, int writeBuffer) {
+        // iterate both files and write a new one
+        
+        CloneableIterator<ReferenceContainer<ReferenceType>> i = null;
+        try {
+            i = new ReferenceIterator<ReferenceType>(f, factory, payloadrow);
+        } catch (IOException e) {
+            Log.logSevere("ArrayStack", "cannot rewrite because input file cannot be read, f = " + f.toString() + ": " + e.getMessage(), e);
+            return null;
+        }
+        if (!i.hasNext()) {
+            FileUtils.deletedelete(f);
+            return null;
+        }
+        assert i.hasNext();
+        File tmpFile = new File(newFile.getParentFile(), newFile.getName() + ".prt");
+        try {
+            HeapWriter writer = new HeapWriter(tmpFile, newFile, keylength, order, writeBuffer);
+            rewrite(i, order, writer);
+            writer.close(true);
+        } catch (IOException e) {
+            Log.logSevere("ArrayStack", "cannot writing or close writing rewrite, newFile = " + newFile.toString() + ", tmpFile = " + tmpFile.toString() + ": " + e.getMessage(), e);
+            FileUtils.deletedelete(tmpFile);
+            FileUtils.deletedelete(newFile);
+            return null;
+        } catch (RowSpaceExceededException e) {
+            Log.logSevere("ArrayStack", "cannot rewrite because of memory failure: " + e.getMessage(), e);
+            FileUtils.deletedelete(tmpFile);
+            FileUtils.deletedelete(newFile);
+            return null;
+        }
+        // we don't need the old files any more
+        FileUtils.deletedelete(f);
         return newFile;
     }
     
@@ -873,6 +948,26 @@ public class ArrayStack implements BLOB {
                 c2o = c2;
                 c2 = i2.next();
                 assert ordering.compare(c2.getTermHash(), c2o.getTermHash()) > 0;
+                continue;
+            }
+            break;
+        }
+        // finished with writing
+    }
+    
+    private static <ReferenceType extends Reference> void rewrite(
+            CloneableIterator<ReferenceContainer<ReferenceType>> i,
+            ByteOrder ordering, HeapWriter writer) throws IOException, RowSpaceExceededException {
+        assert i.hasNext();
+        ReferenceContainer<ReferenceType> c, co;
+        c = i.next();
+        while (true) {
+            assert c != null;
+            writer.add(c.getTermHash(), c.exportCollection());
+            if (i.hasNext()) {
+                co = c;
+                c = i.next();
+                assert ordering.compare(c.getTermHash(), co.getTermHash()) > 0;
                 continue;
             }
             break;

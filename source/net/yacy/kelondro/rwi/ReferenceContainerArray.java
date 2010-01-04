@@ -310,6 +310,15 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             donesomething = true;
         }
 
+        // merge very old files with it self (hack from sixcooler, see http://forum.yacy-websuche.de/viewtopic.php?p=15004#p15004)
+        while (this.merger.queueLength() < 1) {
+            File ff = this.array.unmountOldest();
+            if (ff == null) break;
+            Log.logInfo("RICELL-shrink4/rewrite", "unmountOldest()");
+            merger.merge(ff, null, this.factory, this.array, this.payloadrow, newContainerBLOBFile());
+            donesomething = true;
+        }
+
         return donesomething;
     }
     
