@@ -56,6 +56,7 @@ import net.yacy.document.parser.rtfParser;
 import net.yacy.document.parser.sevenzipParser;
 import net.yacy.document.parser.swfParser;
 import net.yacy.document.parser.tarParser;
+import net.yacy.document.parser.torrentParser;
 import net.yacy.document.parser.vcfParser;
 import net.yacy.document.parser.vsdParser;
 import net.yacy.document.parser.xlsParser;
@@ -101,6 +102,7 @@ public final class TextParser {
         initParser(new sevenzipParser());
         initParser(new swfParser());
         initParser(new tarParser());
+        initParser(new torrentParser());
         initParser(new vcfParser());
         initParser(new vsdParser());
         initParser(new xlsParser());
@@ -109,6 +111,7 @@ public final class TextParser {
     
     public static Set<Idiom> idioms() {
         Set<Idiom> c = new HashSet<Idiom>();
+        c.addAll(ext2parser.values());
         c.addAll(mime2parser.values());
         return c;
     }

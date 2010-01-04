@@ -59,8 +59,9 @@ public class torrentParser extends AbstractParser implements Idiom {
     public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
     static {
         SUPPORTED_EXTENSIONS.add("torrent");
+        SUPPORTED_MIME_TYPES.add("application/x-bittorrent");
     }
-    
+
     public torrentParser() {
         super("Torrent Metadata Parser");
     }
@@ -92,7 +93,8 @@ public class torrentParser extends AbstractParser implements Idiom {
         List<BObject> filelist = info.get("files").getList();
         StringBuilder filenames = new StringBuilder(40 * filelist.size());
         for (BObject fo: filelist) {
-            filenames.append(fo.getMap().get("path").getList().get(0).toString()).append(" ");
+            List<BObject> l = fo.getMap().get("path").getList(); // one file may have several names
+            for (BObject fl: l) filenames.append(fl.toString()).append(" ");
         }
         String name = info.get("name").getString();
         try {
