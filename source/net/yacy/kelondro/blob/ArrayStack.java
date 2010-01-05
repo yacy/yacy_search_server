@@ -903,6 +903,7 @@ public class ArrayStack implements BLOB {
                     assert ordering.compare(c1.getTermHash(), c1o.getTermHash()) > 0;
                     continue;
                 }
+                c1 = null;
                 break;
             }
             if (e > 0) {
@@ -913,44 +914,58 @@ public class ArrayStack implements BLOB {
                     assert ordering.compare(c2.getTermHash(), c2o.getTermHash()) > 0;
                     continue;
                 }
+                c2 = null;
                 break;
             }
             assert e == 0;
             // merge the entries
             writer.add(c1.getTermHash(), (c1.merge(c2)).exportCollection());
+            c1o = c1;
+            c2o = c2;
             if (i1.hasNext() && i2.hasNext()) {
                 c1 = i1.next();
+                assert ordering.compare(c1.getTermHash(), c1o.getTermHash()) > 0;
                 c2 = i2.next();
+                assert ordering.compare(c2.getTermHash(), c2o.getTermHash()) > 0;
                 continue;
             }
-            if (i1.hasNext()) c1 = i1.next();
-            if (i2.hasNext()) c2 = i2.next();
+            c1 = null;
+            c2 = null;
+            if (i1.hasNext()) {
+                c1 = i1.next();
+                assert ordering.compare(c1.getTermHash(), c1o.getTermHash()) > 0;
+            }
+            if (i2.hasNext()) {
+                c2 = i2.next();
+                assert ordering.compare(c2.getTermHash(), c2o.getTermHash()) > 0;
+            }
             break;
            
         }
         // catch up remaining entries
         assert !(i1.hasNext() && i2.hasNext());
-        while (i1.hasNext()) {
+        assert (c1 == null) || (c2 == null);
+        while (c1 != null) {
             //System.out.println("FLUSH REMAINING 1: " + c1.getWordHash());
             writer.add(c1.getTermHash(), c1.exportCollection());
             if (i1.hasNext()) {
                 c1o = c1;
                 c1 = i1.next();
                 assert ordering.compare(c1.getTermHash(), c1o.getTermHash()) > 0;
-                continue;
+            } else {
+                c1 = null;
             }
-            break;
         }
-        while (i2.hasNext()) {
+        while (c2 != null) {
             //System.out.println("FLUSH REMAINING 2: " + c2.getWordHash());
             writer.add(c2.getTermHash(), c2.exportCollection());
             if (i2.hasNext()) {
                 c2o = c2;
                 c2 = i2.next();
                 assert ordering.compare(c2.getTermHash(), c2o.getTermHash()) > 0;
-                continue;
+            } else {
+                c2 = null;
             }
-            break;
         }
         // finished with writing
     }
