@@ -30,7 +30,9 @@ package net.yacy.document.parser;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.net.MalformedURLException;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -78,109 +80,122 @@ public class rssParser extends AbstractParser implements Idiom {
 
 	public Document parse(final DigestURI location, final String mimeType, final String charset, final InputStream source) throws ParserException, InterruptedException {
 
+        final LinkedList<String> feedSections = new LinkedList<String>();
+        final HashMap<DigestURI, String> anchors = new HashMap<DigestURI, String>();
+        final HashMap<String, ImageEntry> images  = new HashMap<String, ImageEntry>();
+        final ByteBuffer text = new ByteBuffer();
+        final CharBuffer authors = new CharBuffer();
+        
+        RSSFeed feed = null;
         try {
-            final LinkedList<String> feedSections = new LinkedList<String>();
-            final HashMap<DigestURI, String> anchors = new HashMap<DigestURI, String>();
-            final HashMap<String, ImageEntry> images  = new HashMap<String, ImageEntry>();
-            final ByteBuffer text = new ByteBuffer();
-            final CharBuffer authors = new CharBuffer();
+            feed = new RSSReader(source).getFeed();
+        } catch (IOException e) {
+            throw new ParserException("reading feed failed: " + e.getMessage(), location);
+        }
+        if (feed == null) throw new ParserException("no feed in document", location);
+        
+        String feedTitle = "";
+        String feedDescription = "";
+        if (feed.getChannel() != null) {//throw new ParserException("no channel in document",location);
             
-            final RSSFeed feed = new RSSReader(source).getFeed();
-            if (feed == null) throw new ParserException("no feed in document",location);
+            // get the rss feed title and description
+            feedTitle = feed.getChannel().getTitle();
+
+            // get feed creator
+			final String feedCreator = feed.getChannel().getAuthor();
+			if (feedCreator != null && feedCreator.length() > 0) authors.append(",").append(feedCreator);            
             
-            String feedTitle = "";
-            String feedDescription = "";
-            if (feed.getChannel() != null) {//throw new ParserException("no channel in document",location);
-                
-                // get the rss feed title and description
-                feedTitle = feed.getChannel().getTitle();
-    
-                // get feed creator
-    			final String feedCreator = feed.getChannel().getAuthor();
-    			if (feedCreator != null && feedCreator.length() > 0) authors.append(",").append(feedCreator);            
-                
-                // get the feed description
-                feedDescription = feed.getChannel().getDescription();
-            }
-            
-            if (feed.getImage() != null) {
-                final DigestURI imgURL = new DigestURI(feed.getImage(), null);
+            // get the feed description
+            feedDescription = feed.getChannel().getDescription();
+        }
+        
+        if (feed.getImage() != null) {
+            try {
+                DigestURI imgURL = new DigestURI(feed.getImage(), null);
                 images.put(imgURL.hash(), new ImageEntry(imgURL, feedTitle, -1, -1, -1));
-            }            
-            
-            // loop through the feed items
-            for (final RSSMessage item: feed) {
-                    // check for interruption
-                    checkInterruption();
+            } catch (MalformedURLException e) {}
+        }            
+        
+        // loop through the feed items
+        for (final RSSMessage item: feed) {
+                // check for interruption
+                checkInterruption();
+                
+    			final String itemTitle = item.getTitle();
+                DigestURI itemURL = null;
+                try {
+                    itemURL = new DigestURI(item.getLink(), null);
+                } catch (MalformedURLException e) {
+                    continue;
+                }
+    			final String itemDescr = item.getDescription();
+    			final String itemCreator = item.getCreator();
+    			if (itemCreator != null && itemCreator.length() > 0) authors.append(",").append(itemCreator);
+                
+                feedSections.add(itemTitle);
+                anchors.put(itemURL, itemTitle);
+                
+            	if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append((byte) 32);
+            	text.append(AbstractScraper.stripAll(itemDescr).trim()).append(' ');
+                
+                final String itemContent = item.getDescription();
+                if ((itemContent != null) && (itemContent.length() > 0)) {
                     
-        			final String itemTitle = item.getTitle();
-                    final DigestURI    itemURL   = new DigestURI(item.getLink(), null);
-        			final String itemDescr = item.getDescription();
-        			final String itemCreator = item.getCreator();
-        			if (itemCreator != null && itemCreator.length() > 0) authors.append(",").append(itemCreator);
-                    
-                    feedSections.add(itemTitle);
-                    anchors.put(itemURL, itemTitle);
-                    
-                	if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append((byte) 32);
-                	text.append(AbstractScraper.stripAll(itemDescr).trim()).append(' ');
-                    
-                    final String itemContent = item.getDescription();
-                    if ((itemContent != null) && (itemContent.length() > 0)) {
-                        
-                        final ContentScraper scraper = new ContentScraper(itemURL);
-                        final Writer writer = new TransformerWriter(null, null, scraper, null, false);
+                    final ContentScraper scraper = new ContentScraper(itemURL);
+                    final Writer writer = new TransformerWriter(null, null, scraper, null, false);
+                    try {
                         FileUtils.copy(new ByteArrayInputStream(itemContent.getBytes("UTF-8")), writer, Charset.forName("UTF-8"));
-                        
-                        final String itemHeadline = scraper.getTitle();     
-                        if (itemHeadline != null && !itemHeadline.isEmpty()) {
-                            feedSections.add(itemHeadline);
-                        }
-                        
-                        final Map<DigestURI, String> itemLinks = scraper.getAnchors();
-                        if (itemLinks != null && !itemLinks.isEmpty()) {
-                            anchors.putAll(itemLinks);
-                        }
-                        
-                        final HashMap<String, ImageEntry> itemImages = scraper.getImages();
-                        if (itemImages != null && !itemImages.isEmpty()) {
-                            ContentScraper.addAllImages(images, itemImages);
-                        }
-                        
-                        final byte[] extractedText = scraper.getText();
-                        if ((extractedText != null) && (extractedText.length > 0)) {
-							if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append((byte) 32);
-							text.append(scraper.getText());
-                        }
-                        
+                    } catch (UnsupportedEncodingException e) {
+                        continue;
+                    } catch (IOException e) {
+                        continue;
                     }
-            }
-            
-            final Document theDoc = new Document(
-                    location,
-                    mimeType,
-                    "UTF-8",
-                    null,
-                    null,
-                    feedTitle,
-                    (authors.length() > 0)?authors.toString(1,authors.length()):"",
-                    feedSections.toArray(new String[feedSections.size()]),
-                    feedDescription,
-                    text.getBytes(),
-                    anchors,
-                    images);            
-            // close streams
+                    
+                    final String itemHeadline = scraper.getTitle();     
+                    if (itemHeadline != null && !itemHeadline.isEmpty()) {
+                        feedSections.add(itemHeadline);
+                    }
+                    
+                    final Map<DigestURI, String> itemLinks = scraper.getAnchors();
+                    if (itemLinks != null && !itemLinks.isEmpty()) {
+                        anchors.putAll(itemLinks);
+                    }
+                    
+                    final HashMap<String, ImageEntry> itemImages = scraper.getImages();
+                    if (itemImages != null && !itemImages.isEmpty()) {
+                        ContentScraper.addAllImages(images, itemImages);
+                    }
+                    
+                    final byte[] extractedText = scraper.getText();
+                    if ((extractedText != null) && (extractedText.length > 0)) {
+						if ((text.length() != 0) && (text.byteAt(text.length() - 1) != 32)) text.append((byte) 32);
+						text.append(scraper.getText());
+                    }
+                    
+                }
+        }
+        
+        final Document theDoc = new Document(
+                location,
+                mimeType,
+                "UTF-8",
+                null,
+                null,
+                feedTitle,
+                (authors.length() > 0)?authors.toString(1,authors.length()):"",
+                feedSections.toArray(new String[feedSections.size()]),
+                feedDescription,
+                text.getBytes(),
+                anchors,
+                images);            
+        // close streams
+        try {
             text.close();
             authors.close();
-            
-            
-            return theDoc;
-            
-        } catch (final InterruptedException e) {
-        	throw e;
-        } catch (final IOException e) {
-            throw new ParserException("Unexpected error while parsing rss file." + e.getMessage(),location); 
+        } catch (IOException e) {
         }
+        
+        return theDoc;
 	}
 
 	public Set<String> supportedMimeTypes() {
