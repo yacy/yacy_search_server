@@ -654,7 +654,7 @@ public class Response {
 
         // check profile
         if (!profile().indexText() && !profile().indexMedia()) {
-            return "indexing not allowed - indexText and indexMedia not set (for crawler = " + profile.name()+ ")";
+            return "indexing not allowed - indexText and indexMedia not set (for crawler = " + profile.name() + ")";
         }
 
         // -CGI access in request
@@ -670,17 +670,19 @@ public class Response {
         // -ranges in request
         // we checked that in shallStoreCache
 
-        // check if pictures can be indexed
+        // check if document can be indexed
         if (responseHeader != null) {
             final String mimeType = responseHeader.mime();
             String parserError = TextParser.supportsMime(mimeType);
-            if (parserError != null) { return "Media_Content, parser error: " + parserError; }
+            if (parserError != null && TextParser.supportsExtension(url()) != null)  return "no parser available: " + parserError;
         }
+        /*
         if (Classification.isMediaExtension(url().getFileExtension()) &&
            !Classification.isImageExtension((url().getFileExtension()))) {
             return "Media_Content_(forbidden)";
         }
-
+         */
+        
         // -if-modified-since in request
         // if the page is fresh at the very moment we can index it
         // -> this does not apply for the crawler

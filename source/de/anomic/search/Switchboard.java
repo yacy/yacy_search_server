@@ -1200,7 +1200,7 @@ public final class Switchboard extends serverSwitch {
             if (log.isFine()) log.logFine("deQueue: not indexed any word in URL " + response.url() + "; cause: " + noIndexReason);
             addURLtoErrorDB(response.url(), (referrerURL == null) ? "" : referrerURL.hash(), response.initiator(), response.name(), noIndexReason);
             // finish this entry
-            return "not indexed any word in URL " + response.url() + "; cause: " + noIndexReason;
+            return "not allowed: " + noIndexReason;
         }
 
         // put document into the concurrent processing queue

@@ -127,7 +127,7 @@ update.onlySignedFiles = 1
 # a peer can be re-started periodically
 # restart.process can be either 'off' (no automatic restart) or 'time' (time- rule-based, see below)
 restart.process = off
-# the restart.cycle is the number of hours that must pass bevore a restart is done
+# the restart.cycle is the number of hours that must pass before a restart is done
 restart.cycle = 20
 # the restart.hour is a pattern that must match with the hour string (two-digit, 24h)
 # when the restart should be performed

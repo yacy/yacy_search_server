@@ -87,16 +87,28 @@ public class torrentParser extends AbstractParser implements Idiom {
         if (bo == null) throw new ParserException("BDecoder.parse returned null", location);
         if (bo.getType() != BType.dictionary) throw new ParserException("BDecoder object is not a dictionary", location);
         Map<String, BObject> map = bo.getMap();
-        String comment = map.get("comment").getString();
+        BObject commento = map.get("comment");
+        String comment = (commento == null) ? "" : commento.getString();
         //Date creation = new Date(map.get("creation date").getInteger());
-        Map<String, BObject> info = map.get("info").getMap();
-        List<BObject> filelist = info.get("files").getList();
-        StringBuilder filenames = new StringBuilder(40 * filelist.size());
-        for (BObject fo: filelist) {
-            List<BObject> l = fo.getMap().get("path").getList(); // one file may have several names
-            for (BObject fl: l) filenames.append(fl.toString()).append(" ");
+        BObject infoo = map.get("info");
+        StringBuilder filenames = new StringBuilder();
+        String name = "";
+        if (infoo != null) {
+            Map<String, BObject> info = infoo.getMap();
+            BObject fileso = info.get("files");
+            if (fileso != null) {
+                List<BObject> filelist = fileso.getList();
+                for (BObject fo: filelist) {
+                    BObject patho = fo.getMap().get("path");
+                    if (patho != null) {
+                        List<BObject> l = patho.getList(); // one file may have several names
+                        for (BObject fl: l) filenames.append(fl.toString()).append(" ");
+                    }
+                }
+            }
+            BObject nameo = info.get("name");
+            if (nameo != null) name = nameo.getString();
         }
-        String name = info.get("name").getString();
         try {
             return new Document(
                     location,

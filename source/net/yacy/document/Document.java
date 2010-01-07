@@ -391,13 +391,10 @@ dc_rights
                         else if (Classification.isAudioExtension(ext)) audiolinks.put(url, entry.getValue());
                         else if (Classification.isVideoExtension(ext)) videolinks.put(url, entry.getValue());
                         else if (Classification.isApplicationExtension(ext)) applinks.put(url, entry.getValue());
-                    } else {
-                        hyperlinks.put(url, entry.getValue());
                     }
-                } else {
-                    // a path to a directory
-                    hyperlinks.put(url, entry.getValue());
                 }
+                // in any case we consider this as a link and let the parser decide if that link can be followed
+                hyperlinks.put(url, entry.getValue());
             }
         }
         
