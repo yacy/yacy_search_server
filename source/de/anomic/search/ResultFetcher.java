@@ -153,8 +153,8 @@ public class ResultFetcher {
                     this.lastLifeSign = System.currentTimeMillis();
     
                     // check if we have enough
-                    //if ((query.contentdom == ContentDomain.IMAGE) && (images.size() >= query.neededResults() + fetchAhead)) break;
-                    //if ((query.contentdom != ContentDomain.IMAGE) && (result.size() >= query.neededResults() + fetchAhead)) break;
+                    if ((query.contentdom == ContentDomain.IMAGE) && (images.size() >= query.neededResults() + 50)) break;
+                    if ((query.contentdom != ContentDomain.IMAGE) && (result.size() >= query.neededResults() + 10)) break;
     
                     // get next entry
                     page = rankedCache.takeURL(true, taketimeout);

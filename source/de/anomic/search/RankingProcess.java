@@ -76,7 +76,7 @@ public final class RankingProcess extends Thread {
     private int remote_peerCount, remote_indexCount, remote_resourceSize, local_resourceSize;
     private final SortStack<WordReferenceVars> stack;
     private int feeders;
-    private final HashMap<String, SortStack<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
+    private final ConcurrentHashMap<String, SortStack<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     private final HashSet<String> handover; // key = urlhash; used for double-check of urls that had been handed over to search process
     
     private final ConcurrentHashMap<String, Integer> ref;  // reference score computation for the commonSense heuristic
@@ -90,7 +90,7 @@ public final class RankingProcess extends Thread {
         // sortorder: 0 = hash, 1 = url, 2 = ranking
         this.localSearchInclusion = null;
         this.stack = new SortStack<WordReferenceVars>(maxentries, true);
-        this.doubleDomCache = new HashMap<String, SortStack<WordReferenceVars>>();
+        this.doubleDomCache = new ConcurrentHashMap<String, SortStack<WordReferenceVars>>();
         this.handover = new HashSet<String>();
         this.query = query;
         this.order = order;
