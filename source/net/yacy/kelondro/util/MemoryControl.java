@@ -194,12 +194,13 @@ public class MemoryControl {
     		final long t = System.currentTimeMillis();
     		if(prevDHTtreshold + 11L /* minutes */ * 60000L > t) {
     			DHTtresholdCount++;
-    			log.logInfo("checkDHTrule: below treshold; tresholdCount: " + DHTtresholdCount);
     			if(DHTtresholdCount > 3 /* occurencies - 1 */) allowDHT = false;
     		}
     		else DHTtresholdCount = 1;
     		
     		prevDHTtreshold = t;
+    		
+			log.logInfo("checkDHTrule: below treshold; tresholdCount: " + DHTtresholdCount + "; allowDHT: " + allowDHT);
     	}
     	//allowDHT = ((available >> 10) < DHTkbytes) ? false : true; // stupid
     }

@@ -31,10 +31,10 @@ import java.util.Map;
 
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Formatter;
+import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.OS;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowThread;
-
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
@@ -83,13 +83,31 @@ public class PerformanceQueues_p {
 	            }
         	}
             if (post.containsKey("Xmx")) {
-                int xmx = 120; // default maximum heap size
-                try { xmx = Integer.valueOf(post.get("Xmx", "120")).intValue(); } catch (final NumberFormatException e){}
+                int xmx = 180; // default maximum heap size
+                try { xmx = Integer.valueOf(post.get("Xmx", "" + xmx)).intValue(); } catch (final NumberFormatException e){}
                 if (!(OS.isWin32 && xmx >= 2000)){
 	                sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
 	                sb.setConfig("javastart_Xms", "Xms" + xmx + "m");
 	                prop.put("setStartupCommit", "1");
                 }
+            }
+            if(post.containsKey("diskFree")) {
+            	int diskFree = 3000; // default
+            	try { diskFree = Integer.valueOf(post.get("diskFree", "" + diskFree)).intValue(); } catch (final NumberFormatException e){}
+            	sb.setConfig(SwitchboardConstants.DISK_FREE, diskFree);
+            }
+            if(post.containsKey("diskFreeHardlimit")) {
+            	int diskFreeHardlimit = 1000; // default
+            	try { diskFreeHardlimit = Integer.valueOf(post.get("diskFreeHardlimit", "" + diskFreeHardlimit)).intValue(); } catch (final NumberFormatException e){}
+            	sb.setConfig(SwitchboardConstants.DISK_FREE_HARDLIMIT, diskFreeHardlimit);
+            }
+            if(post.containsKey("memoryAcceptDHT")) {
+            	int memoryAcceptDHT = 50000; // default
+            	try { memoryAcceptDHT = Integer.valueOf(post.get("memoryAcceptDHT", "" + memoryAcceptDHT)).intValue(); } catch (final NumberFormatException e){}
+            	sb.setConfig(SwitchboardConstants.MEMORY_ACCEPTDHT, memoryAcceptDHT);
+            }
+            if(post.containsKey("resetObserver")) {
+            	MemoryControl.setDHTallowed();
             }
         }
         final Map<String, String> defaultSettings = ((post == null) || (!(post.containsKey("submitdefault")))) ? null : FileUtils.loadMap(defaultSettingsFile);
@@ -337,6 +355,15 @@ public class PerformanceQueues_p {
         prop.put("Xmx", Xmx.substring(0, Xmx.length() - 1));
         final String Xms = sb.getConfig("javastart_Xms", "Xms120m").substring(3);
         prop.put("Xms", Xms.substring(0, Xms.length() - 1));
+        
+        final String diskFree = sb.getConfig(SwitchboardConstants.DISK_FREE, "3000");
+        final String diskFreeHardlimit = sb.getConfig(SwitchboardConstants.DISK_FREE_HARDLIMIT, "1000");
+        final String memoryAcceptDHT = sb.getConfig(SwitchboardConstants.MEMORY_ACCEPTDHT, "50000");
+        final boolean observerTrigger = !MemoryControl.getDHTallowed();
+        prop.put("diskFree", diskFree);
+        prop.put("diskFreeHardlimit", diskFreeHardlimit);
+        prop.put("memoryAcceptDHT", memoryAcceptDHT);
+        if(observerTrigger) prop.put("observerTrigger", "1");
         
         // return rewrite values for templates
         return prop;
