@@ -208,7 +208,8 @@ public final class userDB {
 	
     public Entry passwordAuth(final String user, final String password) {
         final Entry entry=this.getEntry(user);
-        if (entry != null && entry.getMD5EncodedUserPwd().equals(Digest.encodeMD5Hex(user+":"+password))) {
+        final String md5pwd;
+        if (entry != null && (md5pwd = entry.getMD5EncodedUserPwd()) != null && md5pwd.equals(Digest.encodeMD5Hex(user+":"+password))) {
             if (entry.isLoggedOut()){
                 try {
                     entry.setProperty(Entry.LOGGED_OUT, "false");
