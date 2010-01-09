@@ -416,7 +416,7 @@ public class URLAnalysis {
         System.out.println("INDEX DIFF URL-COL startup");
         HandleMap idx = new HandleMap(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 4, new File(statisticFile), 0);
         MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
-        HandleSet hs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 1000000, 0);
+        HandleSet hs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 1000000);
         System.out.println("INDEX DIFF URL-COL loaded dump, starting diff");
         long start = System.currentTimeMillis();
         long update = start - 7000;

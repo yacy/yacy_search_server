@@ -329,7 +329,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
                             final Row payloadrow) throws IOException, RowSpaceExceededException {
        
         System.out.println("CELL REFERENCE COLLECTION startup");
-        HandleMap references = new HandleMap(payloadrow.primaryKeyLength, termOrder, 4, 1000000, 0);
+        HandleMap references = new HandleMap(payloadrow.primaryKeyLength, termOrder, 4, 1000000);
         String[] files = heapLocation.list();
         for (String f: files) {
             if (f.length() < 22 || !f.startsWith("text.index") || !f.endsWith(".blob")) continue;
