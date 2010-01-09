@@ -34,17 +34,15 @@ import net.yacy.kelondro.order.StackIterator;
 
 public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
 
-    private final int      objectCount;
     private final Row      rowdef;
     private final RowSet[] array;
     
-    public RowSetArray(final Row rowdef, final int objectCount, final int arraySize) {
+    public RowSetArray(final Row rowdef, final int arraySize) {
         this.array = new RowSet[arraySize];
+        this.rowdef = rowdef;
         for (int i = 0; i < arraySize; i++) {
             this.array[i] = null;
         }
-        this.rowdef = rowdef;
-        this.objectCount = objectCount / arraySize;
     }
     
     private final int indexFor(byte[] key) {
@@ -58,7 +56,7 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
     private final RowSet accessArray(int i) {
         RowSet r = this.array[i];
         if (r == null) synchronized (this.array) {
-            r = new RowSet(this.rowdef, this.objectCount);
+            r = new RowSet(this.rowdef);
             this.array[i] = r;
         }
         return r;

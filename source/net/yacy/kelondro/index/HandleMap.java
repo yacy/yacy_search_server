@@ -62,9 +62,14 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @param objectOrder
      * @param space
      */
-    public HandleMap(final int keylength, final ByteOrder objectOrder, int idxbytes, final int initialspace, final int expectedspace) {
+    public HandleMap(final int keylength, final ByteOrder objectOrder, int idxbytes, final int expectedspace) {
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("long c-" + idxbytes + " {b256}")}, objectOrder);
-        this.index = new ObjectIndexCache(rowdef, initialspace, expectedspace);
+        this.index = new ObjectIndexCache(rowdef, expectedspace);
+    }
+    
+    public HandleMap(final int keylength, final ByteOrder objectOrder, int idxbytes, final int expectedspace, final int initialspace) throws RowSpaceExceededException {
+        this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("long c-" + idxbytes + " {b256}")}, objectOrder);
+        this.index = new ObjectIndexCache(rowdef, expectedspace, initialspace);
     }
 
     /**
@@ -76,7 +81,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @throws RowSpaceExceededException 
      */
     public HandleMap(final int keylength, final ByteOrder objectOrder, int idxbytes, final File file, final int expectedspace) throws IOException, RowSpaceExceededException {
-        this(keylength, objectOrder, idxbytes, (int) (file.length() / (keylength + idxbytes)), expectedspace);
+        this(keylength, objectOrder, idxbytes, expectedspace, (int) (file.length() / (keylength + idxbytes)));
         // read the index dump and fill the index
         InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
         if (file.getName().endsWith(".gz")) is = new GZIPInputStream(is);
@@ -290,8 +295,8 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @param bufferSize
      * @return
      */
-    public final static initDataConsumer asynchronusInitializer(final int keylength, final ByteOrder objectOrder, int idxbytes, final int space, final int expectedspace) {
-        initDataConsumer initializer = new initDataConsumer(new HandleMap(keylength, objectOrder, idxbytes, space, expectedspace));
+    public final static initDataConsumer asynchronusInitializer(final int keylength, final ByteOrder objectOrder, int idxbytes, final int expectedspace) {
+        initDataConsumer initializer = new initDataConsumer(new HandleMap(keylength, objectOrder, idxbytes, expectedspace));
         ExecutorService service = Executors.newSingleThreadExecutor();
         initializer.setResult(service.submit(initializer));
         service.shutdown();

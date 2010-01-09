@@ -62,7 +62,15 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         this.termHash = termHash;
     }
     
-    public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final int objectCount) {
+    public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash) {
+        super(factory.getRow());
+        assert termHash == null || (termHash[2] != '@' && termHash.length == this.rowdef.primaryKeyLength);
+        this.termHash = termHash;
+        this.factory = factory;
+        this.lastTimeWrote = 0;
+    }
+    
+    public ReferenceContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final int objectCount) throws RowSpaceExceededException {
         super(factory.getRow(), objectCount);
         assert termHash == null || (termHash[2] != '@' && termHash.length == this.rowdef.primaryKeyLength);
         this.termHash = termHash;
@@ -76,8 +84,13 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return newContainer;
     }
     
-    public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> emptyContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final int elementCount) {
-    	assert termHash == null || (termHash[2] != '@' && termHash.length == factory.getRow().primaryKeyLength);
+    public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> emptyContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash) {
+        assert termHash == null || (termHash[2] != '@' && termHash.length == factory.getRow().primaryKeyLength);
+        return new ReferenceContainer<ReferenceType>(factory, termHash);
+    }
+
+    public static <ReferenceType extends Reference> ReferenceContainer<ReferenceType> emptyContainer(final ReferenceFactory<ReferenceType> factory, final byte[] termHash, final int elementCount) throws RowSpaceExceededException {
+        assert termHash == null || (termHash[2] != '@' && termHash.length == factory.getRow().primaryKeyLength);
         return new ReferenceContainer<ReferenceType>(factory, termHash, elementCount);
     }
 

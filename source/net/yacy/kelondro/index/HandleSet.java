@@ -44,9 +44,14 @@ public final class HandleSet implements Iterable<byte[]> {
     private final Row rowdef;
     private ObjectIndex index;
     
-    public HandleSet(final int keylength, final ByteOrder objectOrder, final int initialspace, final int expectedspace) {
+    public HandleSet(final int keylength, final ByteOrder objectOrder, final int expectedspace) {
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key")}, objectOrder);
-        this.index = new ObjectIndexCache(rowdef, initialspace, expectedspace);
+        this.index = new ObjectIndexCache(rowdef, expectedspace);
+    }
+    
+    public HandleSet(final int keylength, final ByteOrder objectOrder, final int expectedspace, final int initialspace) throws RowSpaceExceededException {
+        this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key")}, objectOrder);
+        this.index = new ObjectIndexCache(rowdef, expectedspace, initialspace);
     }
 
     /**
@@ -58,7 +63,7 @@ public final class HandleSet implements Iterable<byte[]> {
      * @throws RowSpaceExceededException 
      */
     public HandleSet(final int keylength, final ByteOrder objectOrder, final File file, final int expectedspace) throws IOException, RowSpaceExceededException {
-        this(keylength, objectOrder, (int) (file.length() / (keylength + 8)), expectedspace);
+        this(keylength, objectOrder, expectedspace, (int) (file.length() / (keylength + 8)));
         // read the index dump and fill the index
         InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
         byte[] a = new byte[keylength];

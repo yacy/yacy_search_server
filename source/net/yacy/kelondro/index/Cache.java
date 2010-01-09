@@ -82,8 +82,8 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
     
     private void init() {
         this.keyrow = new Row(new Column[]{index.row().column(0)}, index.row().objectOrder);
-        this.readHitCache = new RowSet(index.row(), 0);
-        this.readMissCache = new RowSet(this.keyrow, 0);
+        this.readHitCache = new RowSet(index.row());
+        this.readMissCache = new RowSet(this.keyrow);
         this.readHit = 0;
         this.readMiss = 0;
         this.writeUnique = 0;

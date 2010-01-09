@@ -282,25 +282,28 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * get a indexContainer from a heap
      * @param key
      * @return the indexContainer if one exist, null otherwise
+     * @throws  
      */
     public ReferenceContainer<ReferenceType> get(final byte[] key, Set<String> urlselection) {
         ReferenceContainer<ReferenceType> c = this.cache.get(new ByteArray(key));
         if (urlselection == null) return c;
         if (c == null) return null;
         // because this is all in RAM, we must clone the entries (flat)
-        ReferenceContainer<ReferenceType> c1 = new ReferenceContainer<ReferenceType>(factory, c.getTermHash(), c.size());
-        Iterator<ReferenceType> e = c.entries();
-        ReferenceType ee;
-        while (e.hasNext()) {
-            ee = e.next();
-            if (urlselection.contains(ee.metadataHash())) try {
-                c1.add(ee);
-            } catch (RowSpaceExceededException e1) {
-                Log.logException(e1);
-                break;
+        try {
+            ReferenceContainer<ReferenceType> c1 = new ReferenceContainer<ReferenceType>(factory, c.getTermHash(), c.size());
+            Iterator<ReferenceType> e = c.entries();
+            ReferenceType ee;
+            while (e.hasNext()) {
+                ee = e.next();
+                if (urlselection.contains(ee.metadataHash())) {
+                    c1.add(ee);
+                }
             }
+            return c1;
+        } catch (RowSpaceExceededException e2) {
+            Log.logException(e2);
         }
-        return c1;
+        return null;
     }
 
     /**

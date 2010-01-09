@@ -135,8 +135,8 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
                 table = null; System.gc();
                 Log.logSevere("TABLE", tablefile.getName() + ": RAM after releasing the table: " + (MemoryControl.available() / 1024 / 1024) + "MB");
             }
-            index = new HandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, records, 100000);
-            HandleMap errors = new HandleMap(rowdef.primaryKeyLength, NaturalOrder.naturalOrder, 4, records, 10);
+            index = new HandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, records);
+            HandleMap errors = new HandleMap(rowdef.primaryKeyLength, NaturalOrder.naturalOrder, 4, records);
             Log.logInfo("TABLE", tablefile + ": TABLE " + tablefile.toString() + " has table copy " + ((table == null) ? "DISABLED" : "ENABLED"));
 
             // read all elements from the file into the copy table
@@ -695,8 +695,8 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         }
         
         // initialize index and copy table
-        table = (table == null) ? null : new RowSet(taildef, 1);
-        index = new HandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, 1, 100000);        
+        table = (table == null) ? null : new RowSet(taildef);
+        index = new HandleMap(rowdef.primaryKeyLength, rowdef.objectOrder, 4, 100000);        
     }
 
     public Row row() {

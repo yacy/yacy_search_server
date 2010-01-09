@@ -95,7 +95,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
     
     public ZURL() {
         // creates a new ZUR in RAM
-        this.urlIndex = new RowSet(rowdef, 0);
+        this.urlIndex = new RowSet(rowdef);
         this.stack = new ConcurrentLinkedQueue<String>();
     }
     

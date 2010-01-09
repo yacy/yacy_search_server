@@ -295,7 +295,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     public CloneableIterator<ReferenceContainer<ReferenceType>> references(byte[] starttermHash, boolean rot) {
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.ram.rowdef().getOrdering().clone());
-        containerOrder.rotate(new ReferenceContainer<ReferenceType>(factory, starttermHash, 0));
+        containerOrder.rotate(new ReferenceContainer<ReferenceType>(factory, starttermHash));
         return new MergeIterator<ReferenceContainer<ReferenceType>>(
             this.ram.references(starttermHash, rot),
             new MergeIterator<ReferenceContainer<ReferenceType>>(
@@ -311,7 +311,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     public CloneableIterator<ReferenceContainer<ReferenceType>> references(byte[] startTermHash, boolean rot, boolean ram) {
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.ram.rowdef().getOrdering().clone());
-        containerOrder.rotate(new ReferenceContainer<ReferenceType>(factory, startTermHash, 0));
+        containerOrder.rotate(new ReferenceContainer<ReferenceType>(factory, startTermHash));
         if (ram) {
             return this.ram.references(startTermHash, rot);
         }

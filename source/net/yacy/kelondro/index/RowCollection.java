@@ -79,12 +79,17 @@ public class RowCollection implements Iterable<Row.Entry> {
         this.lastTimeWrote = rc.lastTimeWrote;
     }
     
-    public RowCollection(final Row rowdef, final int objectCount) {
+    public RowCollection(final Row rowdef) {
         this.rowdef = rowdef;
-        this.chunkcache = new byte[objectCount * rowdef.objectsize];
-        this.chunkcount = 0;
         this.sortBound = 0;
         this.lastTimeWrote = System.currentTimeMillis();
+        this.chunkcache = new byte[0];
+        this.chunkcount = 0;
+    }
+     
+    public RowCollection(final Row rowdef, final int objectCount) throws RowSpaceExceededException {
+        this(rowdef);
+        ensureSize(objectCount);
     }
      
     public RowCollection(final Row rowdef, final int objectCount, final byte[] cache, final int sortBound) {
@@ -218,6 +223,7 @@ public class RowCollection implements Iterable<Row.Entry> {
     }
     
     protected final void ensureSize(final int elements) throws RowSpaceExceededException {
+        if (elements == 0) return;
         long allocram = neededSpaceForEnsuredSize(elements, true);
         if (allocram == 0) return;
         assert allocram > chunkcache.length : "wrong alloc computation: allocram = " + allocram + ", chunkcache.length = " + chunkcache.length;

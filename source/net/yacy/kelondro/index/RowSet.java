@@ -46,8 +46,13 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         assert rowdef.objectOrder != null;
     }
         
-    public RowSet(final Row rowdef, final int objectCount) {
+    public RowSet(final Row rowdef, final int objectCount) throws RowSpaceExceededException {
         super(rowdef, objectCount);
+        assert rowdef.objectOrder != null;
+    }
+    
+    public RowSet(final Row rowdef) {
+        super(rowdef);
         assert rowdef.objectOrder != null;
     }
     
@@ -64,16 +69,16 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
     
     public final static RowSet importRowSet(byte[] b, final Row rowdef) {
     	assert b.length >= exportOverheadSize : "b.length = " + b.length;
-    	if (b.length < exportOverheadSize) return new RowSet(rowdef, 0);
+    	if (b.length < exportOverheadSize) return new RowSet(rowdef);
         final int size = (int) NaturalOrder.decodeLong(b, 0, 4);
         assert size >= 0 : "size = " + size;
-        if (size < 0) return new RowSet(rowdef, 0);
+        if (size < 0) return new RowSet(rowdef);
         final int orderbound = (int) NaturalOrder.decodeLong(b, 10, 4);
         assert orderbound >= 0 : "orderbound = " + orderbound;
-        if (orderbound < 0) return new RowSet(rowdef, 0);
+        if (orderbound < 0) return new RowSet(rowdef);
         final byte[] chunkcache = new byte[size * rowdef.objectsize];
         assert b.length - exportOverheadSize == size * rowdef.objectsize;
-        if (b.length - exportOverheadSize != size * rowdef.objectsize) return new RowSet(rowdef, 0);
+        if (b.length - exportOverheadSize != size * rowdef.objectsize) return new RowSet(rowdef);
         System.arraycopy(b, exportOverheadSize, chunkcache, 0, chunkcache.length);
         return new RowSet(rowdef, size, chunkcache, orderbound);
     }
@@ -486,7 +491,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         		"acht......xxxx", 
         		"neun......xxxx", 
         		"zehn......xxxx" };
-        final RowSet d = new RowSet(new Row("byte[] key-10, Cardinal x-4 {b256}", NaturalOrder.naturalOrder), 0);
+        final RowSet d = new RowSet(new Row("byte[] key-10, Cardinal x-4 {b256}", NaturalOrder.naturalOrder));
         for (int ii = 0; ii < test.length; ii++)
             try {
                 d.add(test[ii].getBytes());
@@ -583,7 +588,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         
         // remove test
         final long start = System.currentTimeMillis();
-        final RowSet c = new RowSet(new Row("byte[] a-12, byte[] b-12", Base64Order.enhancedCoder), 0);
+        final RowSet c = new RowSet(new Row("byte[] a-12, byte[] b-12", Base64Order.enhancedCoder));
         byte[] key;
         final int testsize = 5000;
         final byte[][] delkeys = new byte[testsize / 5][];

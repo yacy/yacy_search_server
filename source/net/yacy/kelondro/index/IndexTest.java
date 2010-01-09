@@ -112,7 +112,12 @@ public class IndexTest {
         System.out.println("sorted map");
         Runtime.getRuntime().gc();
         long freeStartKelondro = MemoryControl.available();
-        HandleMap ii = new HandleMap(12, Base64Order.enhancedCoder, 4, count, count);
+        HandleMap ii = null;
+        try {
+            ii = new HandleMap(12, Base64Order.enhancedCoder, 4, count, count);
+        } catch (RowSpaceExceededException e1) {
+            e1.printStackTrace();
+        }
         for (int i = 0; i < count; i++)
             try {
                 ii.putUnique(tests[i], 1);

@@ -538,7 +538,12 @@ public final class yacyClient {
 		assert words > 0 : "wordhashes = " + wordhashes;
 		final ReferenceContainer<WordReference>[] container = new ReferenceContainer[words];
 		for (int i = 0; i < words; i++) {
-			container[i] = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhashes.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes(), count);
+			try {
+                container[i] = ReferenceContainer.emptyContainer(Segment.wordReferenceFactory, wordhashes.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes(), count);
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+                return null;
+            }
 		}
 
 		// insert results to containers

@@ -46,7 +46,7 @@ public abstract class AbstractBufferedIndex<ReferenceType extends Reference> ext
         // this does not use the cache
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.ordering().clone());
         if (startHash.length == 0) startHash = null;
-        ReferenceContainer<ReferenceType> emptyContainer = ReferenceContainer.emptyContainer(factory, startHash, 0);
+        ReferenceContainer<ReferenceType> emptyContainer = ReferenceContainer.emptyContainer(factory, startHash);
         containerOrder.rotate(emptyContainer);
         final TreeSet<ReferenceContainer<ReferenceType>> containers = new TreeSet<ReferenceContainer<ReferenceType>>(containerOrder);
         final Iterator<ReferenceContainer<ReferenceType>> i = references(startHash, rot, ram);

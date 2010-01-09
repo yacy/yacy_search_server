@@ -46,11 +46,16 @@ public final class ObjectArrayCache {
     private       RowSet index1;
     //private final kelondroOrder<kelondroRow.Entry> entryOrder;
     
-    public ObjectArrayCache(final int payloadSize, final int initSize) {
-    	this.rowdef = new Row("Cardinal key-4 {b256}, byte[] payload-" + payloadSize, NaturalOrder.naturalOrder);
-    	this.index0 = new RowSet(rowdef, initSize);
-    	this.index1 = null;
-        //this.entryOrder = new kelondroRow.EntryComparator(rowdef.objectOrder);
+    public ObjectArrayCache(final int payloadSize) {
+        this.rowdef = new Row("Cardinal key-4 {b256}, byte[] payload-" + payloadSize, NaturalOrder.naturalOrder);
+        this.index0 = new RowSet(rowdef);
+        this.index1 = null;
+    }
+    
+    public ObjectArrayCache(final int payloadSize, final int initSize) throws RowSpaceExceededException {
+        this.rowdef = new Row("Cardinal key-4 {b256}, byte[] payload-" + payloadSize, NaturalOrder.naturalOrder);
+        this.index0 = new RowSet(rowdef, initSize);
+        this.index1 = null;
     }
     
     public final long memoryNeededForGrow() {
@@ -71,7 +76,7 @@ public final class ObjectArrayCache {
                 // finish initialization phase
                 index0.sort();
                 index0.uniq();
-                index1 = new RowSet(rowdef, 0); 
+                index1 = new RowSet(rowdef); 
             }
             final Row.Entry indexentry = index0.get(key);
             if (indexentry != null) return indexentry.getColBytes(1);
@@ -133,7 +138,7 @@ public final class ObjectArrayCache {
                 // finish initialization phase
                 index0.sort();
                 index0.uniq();
-                index1 = new RowSet(rowdef, 0); 
+                index1 = new RowSet(rowdef); 
             }
             final Row.Entry indexentry = index0.remove(key);
             if (indexentry != null) {
@@ -187,7 +192,7 @@ public final class ObjectArrayCache {
                 // finish initialization phase
                 index0.sort();
                 index0.uniq();
-                index1 = new RowSet(rowdef, 0);
+                index1 = new RowSet(rowdef);
             }
             return index0.rows();
         } else {
@@ -219,7 +224,7 @@ public final class ObjectArrayCache {
 		int p, rc = 0;
 		final ArrayList<Long> ra = new ArrayList<Long>();
 		final HashSet<Long> jcontrol = new HashSet<Long>();
-		final ObjectArrayCache kcontrol = new ObjectArrayCache(1, 0);
+		final ObjectArrayCache kcontrol = new ObjectArrayCache(1);
 		for (int i = 0; i < 1000000; i++) {
 			r = Math.abs(random.nextLong() % 10000);
 			//System.out.println("add " + r);

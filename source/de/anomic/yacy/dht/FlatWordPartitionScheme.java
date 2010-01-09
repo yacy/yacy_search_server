@@ -111,7 +111,7 @@ public class FlatWordPartitionScheme implements PartitionScheme {
 
         System.gc(); // for resource measurement
         long a = MemoryControl.available();
-        HandleMap idx = new HandleMap(12, Base64Order.enhancedCoder, 4, 0, 150000);
+        HandleMap idx = new HandleMap(12, Base64Order.enhancedCoder, 4, 150000);
         for (int i = 0; i < count; i++) {
             try {
                 idx.inc(FlatWordPartitionScheme.positionToHash(r.nextInt(count)));
