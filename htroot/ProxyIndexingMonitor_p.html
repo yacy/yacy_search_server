@@ -6,14 +6,13 @@
   </head>
   <body id="ProxyIndexingMonitor">
     #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
     <h2>Indexing with Proxy</h2>
     <p>
-      This is the control page for web pages that your peer has indexed during the current application run-time
-      as result of proxy fetch/prefetch.
-      <strong>No personal or protected page is indexed</strong>;
+      YaCy can be used to 'scrape' content from pages that pass the integrated caching HTTP proxy.
+      When scraping proxy pages then <strong>no personal or protected page is indexed</strong>;
       those pages are detected by properties in the HTTP header (like Cookie-Use, or HTTP Authorization)
-      or by POST-Parameters (either in URL or as HTTP protocol)
-      and automatically excluded from indexing.
+      or by POST-Parameters (either in URL or as HTTP protocol) and automatically excluded from indexing.
     </p>
     
     <form action="ProxyIndexingMonitor_p.html" method="post" enctype="multipart/form-data">

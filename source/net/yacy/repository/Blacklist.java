@@ -42,6 +42,7 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.SetTools;
 
@@ -329,6 +330,11 @@ public class Blacklist {
         if (!matched && (app = blacklistMapMatched.get(hostlow)) != null) {
             for (int i=app.size()-1; !matched && i>-1; i--) {
                 pp = app.get(i);
+                if (pp.indexOf("?*") > 0) {
+                    // prevent "Dangling meta character '*'" exception
+                    Log.logWarning("Blacklist", "ignored blacklist path to prevent 'Dangling meta character' exception: " + pp);
+                    continue;
+                }
                 matched |= ((pp.equals("*")) || (path.matches(pp)));
             }
         }

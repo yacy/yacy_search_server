@@ -105,13 +105,6 @@ public class WatchCrawler_p {
         if (post != null) {
             // a crawl start
             
-            if ((post.containsKey("autoforward")) &&
-                (sb.crawlQueues.coreCrawlJobSize() == 0) &&
-                (sb.crawlQueues.remoteTriggeredCrawlJobSize() == 0) &&
-                (sb.getIndexingProcessorsQueueSize() < 30)) {
-                prop.put("forwardToCrawlStart", "1");
-            }
-            
             if (post.containsKey("continue")) {
                 // continue queue
                 final String queue = post.get("continue", "");

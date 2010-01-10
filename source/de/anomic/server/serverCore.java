@@ -542,7 +542,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             if (this.controlSocket != null) try {
                 this.controlSocket.close();
                 log.logInfo("Closing main socket of thread '" + this.getName() + "'");
-                //this.controlSocket = null;
+                this.controlSocket = null;
             } catch (final Exception e) {}
         }
         
@@ -808,7 +808,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         }
 
         public boolean isSSL() {
-            return this.controlSocket instanceof SSLSocket;
+            return this.controlSocket != null && this.controlSocket instanceof SSLSocket;
         }
         
     }

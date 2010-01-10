@@ -60,12 +60,12 @@
   <li class="menugroup" id="menugroupCrawlerControl">
     <h3>Index&nbsp;Control</h3>
     <ul class="menu">
-      <li><a href="/WatchCrawler_p.html?autoforward=" class="MenuItemLink lock">Web Crawler</a></li>
+      <li><a href="/CrawlStart_p.html" class="MenuItemLink lock">Index Creation</a></li>
+      <li><a href="/WatchCrawler_p.html" class="MenuItemLink lock">Crawler Monitor</a></li>
       <li><a href="/CrawlResults.html?process=5&amp;autoforward=" class="MenuItemLink">Crawl Results</a></li>
-      <li><a href="/ContentIntegrationPHPBB3_p.html" class="MenuItemLink lock">External Content</a></li>
+      <li><a href="/ContentIntegrationPHPBB3_p.html" class="MenuItemLink lock">Content Import</a></li>
       <li><a href="/IndexControlRWIs_p.html" class="MenuItemLink lock">Index Administration</a></li>
       <li><a href="/Blacklist_p.html" class="MenuItemLink lock">Filter &amp; Blacklists</a></li>
-      <li><a href="/ProxyIndexingMonitor_p.html" class="MenuItemLink lock">Indexing with Proxy</a></li>
     </ul>
   </li>
   <li class="menugroup" id="menugroupIntegration">

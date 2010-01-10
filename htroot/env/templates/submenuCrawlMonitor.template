@@ -1,0 +1,29 @@
+<div class="SubMenu">
+  <h3>Web Crawler</h3>
+</div>
+<div class="SubMenu">
+  <div class="SubMenugroup">
+    <h3>Processing Monitor</h3>
+    <ul class="SubMenu">
+      <li><a href="/WatchCrawler_p.html" class="MenuItemLink lock">Crawler Queues</a></li>
+      <li><a href="/IndexCreateLoaderQueue_p.html" class="MenuItemLink lock">Loader</a></li>
+      <li><a href="/IndexCreateParserErrors_p.html" class="MenuItemLink lock">Parser Errors</a></li>
+    </ul>
+  </div>
+  
+  <div class="SubMenugroup">
+    <h3>Queues</h3>
+    <ul class="SubMenu">
+      <li><a href="/IndexCreateWWWLocalQueue_p.html" class="MenuItemLink lock">Local</a></li>
+      <li><a href="/IndexCreateWWWGlobalQueue_p.html" class="MenuItemLink lock">Global</a></li>
+      <li><a href="/IndexCreateWWWRemoteQueue_p.html" class="MenuItemLink lock">Remote</a></li>
+    </ul>
+  </div>
+  
+  <div class="SubMenugroup">
+    <h3>Crawler Steering</h3>
+    <ul class="SubMenu">
+      <li><a href="/CrawlProfileEditor_p.html" class="MenuItemLink lock">Crawl Profile Editor</a></li>
+    </ul>
+  </div>
+</div>
