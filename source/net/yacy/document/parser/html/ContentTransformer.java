@@ -72,7 +72,7 @@ public class ContentTransformer extends AbstractTransformer implements Transform
                     final BufferedReader r = new BufferedReader(new FileReader(f));
                     String s;
                     while ((s = r.readLine()) != null) {
-                        if (!s.startsWith("#") && s.length() > 0) bluelist.add(s.toLowerCase());
+                        if (s.length() > 0 && s.charAt(0) != '#') bluelist.add(s.toLowerCase());
                     }
                     r.close();
                 } catch (final IOException e) {

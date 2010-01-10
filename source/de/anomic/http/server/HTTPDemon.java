@@ -161,7 +161,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         this.clientIP = null;
         
         // configuring keep alive support
-        keepAliveSupport = Boolean.valueOf(switchboard.getConfig("connectionKeepAliveSupport","false")).booleanValue();
+        keepAliveSupport = Boolean.parseBoolean(switchboard.getConfig("connectionKeepAliveSupport","false"));
     }
     
     public Properties getConProp() {

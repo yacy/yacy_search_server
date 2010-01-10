@@ -46,11 +46,11 @@ public class WorkflowProcessor<J extends WorkflowJob> {
 
     private ExecutorService executor;
     private BlockingQueue<J> input;
-    private WorkflowProcessor<J> output;
-    private int poolsize;
-    private Object environment;
-    private String processName, methodName, description;
-    private String[] childs;
+    private final WorkflowProcessor<J> output;
+    private final int poolsize;
+    private final Object environment;
+    private final String processName, methodName, description;
+    private final String[] childs;
     private long blockTime, execTime, passOnTime; 
     private long execCount;
     

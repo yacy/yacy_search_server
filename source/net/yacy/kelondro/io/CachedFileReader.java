@@ -33,7 +33,7 @@ public final class CachedFileReader extends AbstractReader implements Reader {
 
     private final RandomAccessFile RAFile;
     private byte[] cache;
-    private int cachelen;
+    private final int cachelen;
 
     public CachedFileReader(final File file) throws IOException, FileNotFoundException {
         this.name = file.getName();

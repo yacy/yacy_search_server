@@ -58,7 +58,7 @@ public class IndexCreateWWWGlobalQueue_p {
         if (post != null) {
             if (post.containsKey("limit")) {
                 try {
-                    showLimit = Integer.valueOf(post.get("limit")).intValue();
+                    showLimit = Integer.parseInt(post.get("limit"));
                 } catch (final NumberFormatException e) {}
             }            
             

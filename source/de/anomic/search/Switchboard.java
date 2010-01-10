@@ -201,10 +201,10 @@ public final class Switchboard extends serverSwitch {
     
     // load slots
     public  static int  xstackCrawlSlots     = 2000;
-    private        int  dhtMaxContainerCount = 500;
-    private        int  dhtMaxReferenceCount = 1000;
     public  static long lastPPMUpdate        = System.currentTimeMillis()- 30000;
-
+    private final  int  dhtMaxContainerCount = 500;
+    private        int  dhtMaxReferenceCount = 1000;
+    
     // colored list management
     public static TreeSet<String> badwords       = new TreeSet<String>(NaturalOrder.naturalComparator);
     public static TreeSet<String> stopwords      = new TreeSet<String>(NaturalOrder.naturalComparator);    
@@ -703,7 +703,7 @@ public final class Switchboard extends serverSwitch {
             	setConfig(Switchboard.loadHashMap(new DigestURI(networkUnitDefinition, null)));
             } catch (final MalformedURLException e) { }
         } else {
-            final File networkUnitDefinitionFile = (networkUnitDefinition.startsWith("/")) ? new File(networkUnitDefinition) : new File(getRootPath(), networkUnitDefinition);
+            final File networkUnitDefinitionFile = (networkUnitDefinition.length() > 0 && networkUnitDefinition.charAt(0) == '/') ? new File(networkUnitDefinition) : new File(getRootPath(), networkUnitDefinition);
             if (networkUnitDefinitionFile.exists()) {
                 initProps = FileUtils.loadMap(networkUnitDefinitionFile);
                 setConfig(initProps);

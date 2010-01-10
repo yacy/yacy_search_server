@@ -89,8 +89,8 @@ public class MediawikiImporter extends Thread implements Importer {
     public    File targetdir;
     public    int count;
     private   long start;
-    private   long docsize;
-    private   int approxdocs;
+    private   final long docsize;
+    private   final int approxdocs;
     
     
     public MediawikiImporter(File sourcefile, File targetdir, String baseURL) throws MalformedURLException {
@@ -332,7 +332,7 @@ public class MediawikiImporter extends Thread implements Importer {
 
     private static class indexProducer implements Callable<Integer> {
 
-        private BlockingQueue<wikisourcerecord> entries;
+        private final BlockingQueue<wikisourcerecord> entries;
         PrintWriter out;
         protected static wikisourcerecord poison = new wikisourcerecord("", 0, 0);
         int count;
@@ -381,9 +381,9 @@ public class MediawikiImporter extends Thread implements Importer {
     
     private static class wikiConsumer implements Callable<Integer> {
 
-        private   BlockingQueue<wikiraw> entries;
+        private   final BlockingQueue<wikiraw> entries;
         protected static wikiraw poison = new wikiraw(new byte[0], 0, 0);
-        private   indexProducer producer;
+        private   final indexProducer producer;
         private   int count;
         
         public wikiConsumer(int bufferCount, indexProducer producer) {
@@ -511,7 +511,7 @@ public class MediawikiImporter extends Thread implements Importer {
     
     private static class PositionAwareReader {
     
-        private InputStream is;
+        private final InputStream is;
         private long seekpos;
         private ByteBuffer bb;
         
@@ -608,8 +608,8 @@ public class MediawikiImporter extends Thread implements Importer {
     
     private static class convertConsumer implements Callable<Integer> {
 
-        private BlockingQueue<wikiparserrecord> in, out;
-        private wikiparserrecord poison;
+        private final BlockingQueue<wikiparserrecord> in, out;
+        private final wikiparserrecord poison;
         
         public convertConsumer(BlockingQueue<wikiparserrecord> in, BlockingQueue<wikiparserrecord> out, wikiparserrecord poison) {
             this.poison = poison;
@@ -650,11 +650,11 @@ public class MediawikiImporter extends Thread implements Importer {
     
     private static class convertWriter implements Callable<Integer> {
 
-        private BlockingQueue<wikiparserrecord> in;
-        private wikiparserrecord poison;
+        private final BlockingQueue<wikiparserrecord> in;
+        private final wikiparserrecord poison;
         private OutputStreamWriter osw;
-        private String targetstub;
-        private File targetdir;
+        private final String targetstub;
+        private final File targetdir;
         private int fc, rc;
         private String outputfilename;
         

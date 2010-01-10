@@ -120,7 +120,7 @@ public final class ScoreCluster<E> {
         if (o instanceof byte[]) s = new String((byte[]) o);
         
         // this can be used to calculate a score from a string
-        if ((s == null) || (s.length() == 0) || (s.charAt(0) == '-')) return 0;
+        if (s == null || s.length() == 0 || s.charAt(0) == '-') return 0;
         try {
             long l = 0;
             if (s.length() == shortDateFormatString.length()) {

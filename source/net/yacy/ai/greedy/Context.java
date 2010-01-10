@@ -40,18 +40,18 @@ public class Context<
                     >{
     
     private static final Object PRESENT = new Object();
-    private Goal<SpecificRole, SpecificFinding, SpecificModel> goal;
-    private SpecificModel initialModel;
-    private SpecificRole initialRole;
-    private PriorityBlockingQueue<Challenge<SpecificRole, SpecificFinding, SpecificModel>> result;
-    private ConcurrentHashMap<SpecificModel, Object> models; // caches all observed models for a double-check
-    private ConcurrentHashMap<SpecificRole, Integer> bestMove;
-    private AtomicInteger instances;
-    private long timeoutForSnapshot;
+    private final Goal<SpecificRole, SpecificFinding, SpecificModel> goal;
+    private final SpecificModel initialModel;
+    private final SpecificRole initialRole;
+    private final PriorityBlockingQueue<Challenge<SpecificRole, SpecificFinding, SpecificModel>> result;
+    private final ConcurrentHashMap<SpecificModel, Object> models; // caches all observed models for a double-check
+    private final ConcurrentHashMap<SpecificRole, Integer> bestMove;
+    private final AtomicInteger instances;
+    private final long timeoutForSnapshot;
+    private final Semaphore termination;
+    private final boolean feedAssetCache, useAssetCache;
     private long startTime;
     private boolean fullfilled;
-    private Semaphore termination;
-    private boolean feedAssetCache, useAssetCache;
     
     protected Context(
             Goal<SpecificRole, SpecificFinding, SpecificModel> goal,

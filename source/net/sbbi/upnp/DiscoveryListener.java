@@ -69,7 +69,7 @@ import org.apache.commons.logging.LogFactory;
  * @version 1.0
  */
 @SuppressWarnings("unchecked")
-public class DiscoveryListener implements Runnable {
+public final class DiscoveryListener implements Runnable {
   
   private final static Log log = LogFactory.getLog( DiscoveryListener.class );
   
@@ -82,7 +82,7 @@ public class DiscoveryListener implements Runnable {
   
   private static final int DEFAULT_TIMEOUT = 250;
  
-  private Map registeredHandlers = new HashMap();
+  private final Map registeredHandlers = new HashMap();
   
   private final Object REGISTRATION_PROCESS = new Object();
   

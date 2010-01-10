@@ -32,7 +32,7 @@ public class Coordinates implements Comparable<Coordinates>, Comparator<Coordina
 
 	private static final double tenmeter = 90.0 / 1.0e6;
 	
-    private double lon, lat;
+    private final double lon, lat;
     
     public Coordinates(double lon, double lat) {
         this.lon = lon;

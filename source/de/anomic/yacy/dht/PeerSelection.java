@@ -77,43 +77,15 @@ public class PeerSelection {
     }
     
     private static int guessedOwn = 0;
-    //private static int guessedNotOwn = 0;
-    private static int verifiedOwn = 0;
-    private static int verifiedNotOwn = 0;
     
     public static boolean shallBeOwnWord(final yacySeedDB seedDB, final byte[] wordhash, String urlhash, int redundancy) {
         // the guessIfOwnWord is a fast method that should only fail in case that a 'true' may be incorrect, but a 'false' shall always be correct
         if (guessIfOwnWord(seedDB, wordhash, urlhash)) {
             // this case must be verified, because it can be wrong.
             guessedOwn++;
-            if (verifyIfOwnWord(seedDB, wordhash, urlhash, redundancy)) {
-                // this is the correct case, but does not need to be an average case
-                verifiedOwn++;
-                //System.out.println("*** DEBUG shallBeOwnWord: true. guessed: true. verified/guessed ration = " + verifiedOwn + "/" + guessedOwn);
-                return true;
-            } else {
-                // this may happen, but can be corrected
-                verifiedNotOwn++;
-                //System.out.println("*** DEBUG shallBeOwnWord: false. guessed: true. verified/guessed ration = " + verifiedNotOwn + "/" + guessedNotOwn);
-                return false;
-            }
+            return verifyIfOwnWord(seedDB, wordhash, urlhash, redundancy);
         } else {
             return false;
-            /*
-            // this should mean that the guessing should not be wrong
-            guessedNotOwn++;
-            if (yacyPeerSelection.verifyIfOwnWord(seedDB, wordhash, redundancy)) {
-                // this should never happen
-                verifiedOwn++;
-                System.out.println("*** DEBUG shallBeOwnWord: true. guessed: false. verified/guessed ration = " + verifiedOwn + "/" + guessedOwn);
-                return true;
-            } else {
-                // this should always happen
-                verifiedNotOwn++;
-                //System.out.println("*** DEBUG shallBeOwnWord: false. guessed: false. verified/guessed ration = " + verifiedNotOwn + "/" + guessedNotOwn);
-                return false;
-            }
-            */
         }
         
     }
@@ -176,10 +148,10 @@ public class PeerSelection {
     
     private static class acceptRemoteIndexSeedEnum implements Iterator<yacySeed> {
 
-        private Iterator<yacySeed> se;
+        private final Iterator<yacySeed> se;
         private yacySeed nextSeed;
-        private yacySeedDB seedDB;
-        private HashSet<String> doublecheck;
+        private final yacySeedDB seedDB;
+        private final HashSet<String> doublecheck;
         private int remaining;
         private boolean alsoMyOwn;
         

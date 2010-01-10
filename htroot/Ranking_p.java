@@ -117,13 +117,13 @@ public class Ranking_p {
                 prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_value", i);
                 try {
                     prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_checked",
-                            (i == Integer.valueOf(entry.getValue()).intValue()) ? "1" : "0");
+                            (i == Integer.parseInt(entry.getValue())) ? "1" : "0");
                 } catch (final NumberFormatException e) {
                     prop.put("attr" + attrExtension + "_" + j + "_select_" + i + "_checked", "0");
                 }
             }
             prop.put("attr" + attrExtension + "_" + j + "_value",
-                    Integer.valueOf(map.get(key)).intValue());
+                    Integer.parseInt(map.get(key)));
             j++;
         }
     }

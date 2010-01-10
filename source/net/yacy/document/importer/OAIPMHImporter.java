@@ -68,13 +68,14 @@ public class OAIPMHImporter extends Thread implements Importer, Comparable<OAIPM
     public static TreeSet<OAIPMHImporter> runningJobs = new TreeSet<OAIPMHImporter>();
     public static TreeSet<OAIPMHImporter> finishedJobs = new TreeSet<OAIPMHImporter>();
     
-    private LoaderDispatcher loader;
+    private final LoaderDispatcher loader;
     private DigestURI source;
     private int recordsCount, chunkCount;
-    private long startTime, finishTime;
-    private ResumptionToken resumptionToken;
+    private final long startTime;
+    private long finishTime;
+    private final ResumptionToken resumptionToken;
     private String message;
-    private int serialNumber;
+    private final int serialNumber;
     
     public OAIPMHImporter(LoaderDispatcher loader, DigestURI source) {
         this.serialNumber = importerCounter--;

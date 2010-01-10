@@ -80,19 +80,19 @@ public class ArrayStack implements BLOB {
     
     public static final long oneMonth    = 1000L * 60L * 60L * 24L * 365L / 12L;
     
-    protected int keylength;
-    protected ByteOrder ordering;
-    private   File heapLocation;
-    private   long fileAgeLimit;
-    private   long fileSizeLimit;
-    private   long repositoryAgeMax;
-    private   long repositorySizeMax;
-    protected List<blobItem> blobs;
-    private   String prefix;
-    private   int buffersize;
+    protected     int            keylength;
+    protected     ByteOrder      ordering;
+    private final File           heapLocation;
+    private       long           fileAgeLimit;
+    private       long           fileSizeLimit;
+    private       long           repositoryAgeMax;
+    private       long           repositorySizeMax;
+    protected     List<blobItem> blobs;
+    private final String         prefix;
+    private final int            buffersize;
     
     // the thread pool for the keeperOf executor service
-    private ExecutorService executor;
+    private final ExecutorService executor;
     
     public ArrayStack(
             final File heapLocation,
@@ -608,9 +608,9 @@ public class ArrayStack implements BLOB {
     
     public class BlobValues implements Iterator<byte[]>, Iterable<byte[]> {
 
-        private Iterator<blobItem> bii;
+        private final Iterator<blobItem> bii;
+        private final byte[] key;
         private byte[] next;
-        private byte[] key;
         
         public BlobValues(byte[] key) {
             this.bii = blobs.iterator();

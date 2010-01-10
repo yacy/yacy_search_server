@@ -66,8 +66,8 @@ public class imagetest {
         */
         final RasterPlotter img = new RasterPlotter(800, 600, RasterPlotter.MODE_SUB, "FFFFFF");
         img.setColor(RasterPlotter.GREY);
-        for (int y = 0; y < 600; y = y + 50) PrintTool.print(img, 0, 6 + y, 0, "" + y, -1);
-        for (int x = 0; x < 800; x = x + 50) PrintTool.print(img, x, 6    , 0, "" + x, -1);
+        for (int y = 0; y < 600; y = y + 50) PrintTool.print(img, 0, 6 + y, 0, Integer.toString(y), -1);
+        for (int x = 0; x < 800; x = x + 50) PrintTool.print(img, x, 6    , 0, Integer.toString(x), -1);
         img.setColor(RasterPlotter.RED);
         img.dot(550, 110, 90, true);
         img.setColor(RasterPlotter.GREEN);

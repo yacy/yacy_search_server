@@ -64,7 +64,7 @@ public class ServiceEventMessageParser extends org.xml.sax.helpers.DefaultHandle
   
   private String currentPropName = null;
   
-  private Map changedStateVars = new HashMap();
+  private final Map changedStateVars = new HashMap();
 
   protected ServiceEventMessageParser() {
   }

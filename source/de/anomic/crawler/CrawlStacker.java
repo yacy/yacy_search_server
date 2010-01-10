@@ -45,15 +45,16 @@ import de.anomic.yacy.yacySeedDB;
 
 public final class CrawlStacker {
 
-    private Log log = new Log("STACKCRAWL");
+    private final Log log = new Log("STACKCRAWL");
 
-    private WorkflowProcessor<Request>  fastQueue, slowQueue;
-    private long                      dnsHit, dnsMiss;
-    private CrawlQueues               nextQueue;
-    private CrawlSwitchboard          crawler;
-    private Segment                   indexSegment;
-    private yacySeedDB                peers;
-    private boolean                   acceptLocalURLs, acceptGlobalURLs;
+    private final WorkflowProcessor<Request>  fastQueue, slowQueue;
+    //private long                      dnsHit;
+    private long                      dnsMiss;
+    private final CrawlQueues               nextQueue;
+    private final CrawlSwitchboard          crawler;
+    private final Segment                   indexSegment;
+    private final yacySeedDB                peers;
+    private final boolean                   acceptLocalURLs, acceptGlobalURLs;
 
     // this is the process that checks url for double-occurrences and for allowance/disallowance by robots.txt
 
@@ -68,7 +69,7 @@ public final class CrawlStacker {
         this.crawler = cs;
         this.indexSegment = indexSegment;
         this.peers = peers;
-        this.dnsHit = 0;
+        //this.dnsHit = 0;
         this.dnsMiss = 0;
         this.acceptLocalURLs = acceptLocalURLs;
         this.acceptGlobalURLs = acceptGlobalURLs;
@@ -158,7 +159,7 @@ public final class CrawlStacker {
         if (prefetchHost(entry.url().getHost())) {
             try {
                 this.fastQueue.enQueue(entry);
-                this.dnsHit++;
+                //this.dnsHit++;
             } catch (InterruptedException e) {
                 Log.logException(e);
             }

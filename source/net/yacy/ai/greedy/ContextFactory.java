@@ -32,9 +32,9 @@ public class ContextFactory<
                             SpecificModel extends Model<SpecificRole, SpecificFinding>
                            >{
 
-    private Goal<SpecificRole, SpecificFinding, SpecificModel> goal;
-    private long timeoutForSnapshot;
-    private boolean feedAssetCache, useAssetCache;
+    private final Goal<SpecificRole, SpecificFinding, SpecificModel> goal;
+    private final long timeoutForSnapshot;
+    private final boolean feedAssetCache, useAssetCache;
     
     public ContextFactory(
             Goal<SpecificRole, SpecificFinding, SpecificModel> goal,

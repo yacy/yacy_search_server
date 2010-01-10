@@ -272,7 +272,7 @@ public class serverSwitch {
     }
     
     public boolean getConfigBool(final String key, final boolean dflt) {
-        return Boolean.valueOf(getConfig(key, Boolean.toString(dflt))).booleanValue();
+        return Boolean.parseBoolean(getConfig(key, Boolean.toString(dflt)));
     }
     
     /**

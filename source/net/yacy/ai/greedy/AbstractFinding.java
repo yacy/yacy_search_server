@@ -30,7 +30,7 @@ import java.util.Comparator;
 
 public abstract class AbstractFinding<SpecificRole extends Role> implements Finding<SpecificRole>, Comparator<Finding<SpecificRole>>, Comparable<Finding<SpecificRole>>, Cloneable {
 
-    private SpecificRole role;
+    private final SpecificRole role;
     private int priority;
     
     /**

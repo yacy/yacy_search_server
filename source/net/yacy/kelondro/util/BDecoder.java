@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class BDecoder {
 
-    private byte[] b;
+    private final byte[] b;
     private int pos;
     
     public BDecoder(byte[] b) {

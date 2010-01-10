@@ -75,7 +75,7 @@ public class yacySeedUploadScp implements yacySeedUploader {
             throw new Exception("Seed SCP upload settings not configured properly. Server port must not be null or empty.");
             int port = 22;
             try {
-                port = Integer.valueOf(seedScpServerPort).intValue();
+                port = Integer.parseInt(seedScpServerPort);
             } catch (final NumberFormatException ex) {
                 throw new Exception("Seed SCP upload settings not configured properly. Server port is not a vaild integer.");
             }

@@ -579,7 +579,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                     anchorext = "_" + (doubles + 1);
                 }
 
-                if (element.startsWith("3")) {
+                if (element.length() > 0 && element.charAt(0) == '3') {
                     if (level < 3) {
                         level = 3;
                         level3 = 0;
@@ -593,7 +593,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                     directory.append("\" class=\"WikiTOC\">");
                     directory.append(element);
                     directory.append("</a><br />\n");
-                } else if (element.startsWith("2")) {
+                } else if (element.length() > 0 && element.charAt(0) == '2') {
                     if (level == 1) {
                         level2 = 0;
                         level = 2;
@@ -610,7 +610,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
                     directory.append("\" class=\"WikiTOC\">");
                     directory.append(element);
                     directory.append("</a><br />\n");
-                } else if (element.startsWith("1")) {
+                } else if (element.length() > 0 && element.charAt(0) == '1') {
                     if (level > 1) {
                         level = 1;
                         level2 = 0;
@@ -712,7 +712,7 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             result = processTable(result);
 
             // format lines
-            if (result.startsWith(" ")) {
+            if (result.length() > 0 && result.charAt(0) == ' ') {
                 result = "<tt>" + result.substring(1) + "</tt>";
             }
             if (result.startsWith("----")) {
@@ -720,10 +720,10 @@ public class wikiCode extends abstractWikiParser implements wikiParser {
             }
 
             // citings contributed by [MN]
-            if (result.startsWith(":")) {
+            if (result.length() > 0 && result.charAt(0) == ':') {
                 String head = "";
                 String tail = "";
-                while (result.startsWith(":")) {
+                while (result.length() > 0 && result.charAt(0) == ':') {
                     head = head + "<blockquote>";
                     tail = tail + "</blockquote>";
                     result = result.substring(1);

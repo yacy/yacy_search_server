@@ -200,8 +200,8 @@ public class Digest {
     
     private static class md5FilechunkConsumer implements Callable<MessageDigest> {
 
-        private   BlockingQueue<filechunk> empty;
-        private   BlockingQueue<filechunk> filed;
+        private   final BlockingQueue<filechunk> empty;
+        private   final BlockingQueue<filechunk> filed;
         protected static filechunk poison = new filechunk(0);
         private   MessageDigest digest;
         

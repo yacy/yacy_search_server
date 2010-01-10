@@ -34,8 +34,8 @@ public class RowSpaceExceededException extends Exception {
 
     private static final long serialVersionUID = 9059516027929222151L;
 
-    private String forUsage;
-    private long neededRAM, availableRAM, time;
+    private final String forUsage;
+    private final long neededRAM, availableRAM, time;
     
     public RowSpaceExceededException(final long neededRAM, final String forUsage) {
         super(Long.toString(neededRAM) + " bytes needed for " + forUsage + ": " + MemoryControl.available() + " free at " + (new Date()).toString());

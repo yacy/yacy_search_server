@@ -41,7 +41,7 @@ import org.xml.sax.helpers.DefaultHandler;
  *
  */
 public class ODContentHandler extends DefaultHandler {
-	private Writer out;
+	private final Writer out;
 	public ODContentHandler(Writer out) {
 	    this.out = out;
 	}

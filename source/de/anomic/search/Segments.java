@@ -69,7 +69,7 @@ public class Segments implements Iterable<Segment> {
     private final int entityCacheMaxSize;
     private final long maxFileSize;
     private HashMap<String, Segment> segments;
-    private HashMap<Process, String> process_assignment;
+    private final HashMap<Process, String> process_assignment;
     private final boolean useTailCache;
     private final boolean exceed134217727;
     

@@ -201,7 +201,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         // plus the mentioned features
         
         private final boolean rot;
-        private ArrayList<ReferenceContainer<ReferenceType>> cachecopy;
+        private final ArrayList<ReferenceContainer<ReferenceType>> cachecopy;
         private int p;
         private byte[] latestTermHash;
         
@@ -428,7 +428,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
     }
  
     public static class ContainerOrder<ReferenceType extends Reference> implements Comparator<ReferenceContainer<ReferenceType>> {
-        private ByteOrder o;
+        private final ByteOrder o;
         public ContainerOrder(ByteOrder order) {
             this.o = order;
         }

@@ -68,7 +68,7 @@ public class JXPathParser implements XMLParser {
   
   private final static Log log = LogFactory.getLog( JXPathParser.class );
   
-  private char buggyChar = (char)0;
+  private final char buggyChar = (char)0;
   
   public Object parseXML( InputStream in ){
     StringBuffer xml = new StringBuffer();

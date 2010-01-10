@@ -63,7 +63,7 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
     private       Row         keyrow;
     private       int         readHit, readMiss, writeUnique, writeDouble, cacheDelete, cacheFlush;
     private       int         hasnotHit, hasnotMiss, hasnotUnique, hasnotDouble, hasnotDelete;
-    private       int         hitLimit, missLimit;
+    private final int         hitLimit, missLimit;
     
     /**
      * create a ObjectIndex cache. The cache may either limited by a number of entries in the hit/miss cache

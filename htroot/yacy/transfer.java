@@ -87,7 +87,7 @@ public final class transfer {
                 // consolidation of cr files
                 //System.out.println("yacy/transfer:post=" + post.toString());
                 //String cansendprotocol = (String) post.get("can-send-protocol", "http");
-                final String access = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(otherpeer + ":" + filename)) + ":" + Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw("" + System.currentTimeMillis()));
+                final String access = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(otherpeer + ":" + filename)) + ":" + Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis())));
                 prop.put("response", "ok");
                 prop.put("process_access", access);
                 prop.put("process_address", sb.peers.mySeed().getPublicAddress());

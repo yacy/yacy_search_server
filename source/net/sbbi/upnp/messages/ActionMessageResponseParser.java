@@ -65,8 +65,8 @@ public class ActionMessageResponseParser extends org.xml.sax.helpers.DefaultHand
   
   private final static String SOAP_FAULT_EL = "Fault";
   
-  private ServiceAction serviceAction;
-  private String bodyElementName;
+  private final ServiceAction serviceAction;
+  private final String bodyElementName;
   private boolean faultResponse = false;
   private UPNPResponseException msgEx;
 

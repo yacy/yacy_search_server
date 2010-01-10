@@ -239,7 +239,7 @@ public class TarEntry implements TarConstants {
         // No absolute pathnames
         // Windows (and Posix?) paths can start with "\\NetworkDrive\",
         // so we loop on starting /'s.
-        while (fileName.startsWith("/")) {
+        while (fileName.length() > 0 && fileName.charAt(0) == '/') {
             fileName = fileName.substring(1);
         }
 

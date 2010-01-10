@@ -237,7 +237,7 @@ public class ConfigNetwork_p {
         input = input.replace(' ', ',');
         input = input.replace(' ', ';');
         input = input.replaceAll(",,", ",");
-        if (input.startsWith(",")) input = input.substring(1);
+        if (input.length() > 0 && input.charAt(0) == ',') input = input.substring(1);
         if (input.endsWith(",")) input = input.substring(0, input.length() - 1);
         return input;
     }

@@ -370,7 +370,7 @@ public final class userDB {
         public long getTimeUsed() {
             if (this.mem.containsKey(TIME_USED)) {
                 try{
-                    return Long.valueOf(this.mem.get(TIME_USED)).longValue();
+                    return Long.parseLong(this.mem.get(TIME_USED));
                 }catch(final NumberFormatException e){
                     return 0;
                 }
@@ -386,7 +386,7 @@ public final class userDB {
         public long getTimeLimit() {
             if (this.mem.containsKey(TIME_LIMIT)) {
                 try{
-                    return Long.valueOf(this.mem.get(TIME_LIMIT)).longValue();
+                    return Long.parseLong(this.mem.get(TIME_LIMIT));
                 }catch(final NumberFormatException e){
                     return 0;
                 }
@@ -401,7 +401,7 @@ public final class userDB {
         
         public long getTrafficSize() {
             if (this.mem.containsKey(TRAFFIC_SIZE)) {
-                return Long.valueOf(this.mem.get(TRAFFIC_SIZE)).longValue();
+                return Long.parseLong(this.mem.get(TRAFFIC_SIZE));
             }
             try {
                 this.setProperty(TRAFFIC_SIZE,"0");
@@ -434,7 +434,7 @@ public final class userDB {
         
         public int surfRight(){
             final long timeUsed=this.updateLastAccess(true);
-            if(this.hasProxyRight() == false)
+            if (!this.hasProxyRight())
                 return PROXY_NORIGHT;
 
             if(! (this.getTimeLimit() <= 0 || ( timeUsed < this.getTimeLimit())) ){ //no timelimit or timelimit not reached

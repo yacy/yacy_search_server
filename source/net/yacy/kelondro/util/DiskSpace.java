@@ -114,7 +114,7 @@ public class DiskSpace {
             checkMappedSubDirs(pathsToCheck);
             
             for (int i = 0; i < allVolumes.size(); i++){
-                if (usedVolumes.get(i) == true) {
+                if (usedVolumes.get(i)) {
                     yacyUsedVolumes.add(allVolumes.get (i));
                     yacyUsedMountPoints.add(allMountPoints.get (i));
                 }
@@ -159,7 +159,7 @@ public class DiskSpace {
         try {
             final List<String> lines = dfUnixExec();
             nextLine: for (final String line: lines){
-                if (line.charAt(0) != '/') continue;
+                if (line.length() > 0 && line.charAt(0) != '/') continue;
                 final String[] tokens = line.split(" +", 6);
                 if (tokens.length < 6) continue;
                 for (int i = 0; i < yacyUsedVolumes.size(); i++){
@@ -185,7 +185,7 @@ public class DiskSpace {
             final List<String> lines = dfUnixExec();
 
             nextLine: for (final String line: lines){
-                if (line.charAt(0) != '/') continue;
+                if (line.length() > 0 && line.charAt(0) != '/') continue;
                 final String[] tokens = line.split(" +", 6);
                 if (tokens.length < 6) continue;
                 for (int i = 0; i < allMountPoints.size(); i++) {

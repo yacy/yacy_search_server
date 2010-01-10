@@ -56,9 +56,9 @@ import net.sbbi.upnp.services.*;
  * @version 1.0
  */
 
-public class UPNPMessageFactory {
+public final class UPNPMessageFactory {
 
-  private UPNPService service;
+  private final UPNPService service;
 
   /**
    * Private constructor since this is a factory.

@@ -53,7 +53,7 @@ public class ChunkIterator implements Iterator<byte[]> {
     
     private final DataInputStream stream;
     private byte[] nextBytes;
-    private int recordsize;
+    private final int recordsize;
     
     public ChunkIterator(final File file, final int recordsize, final int chunksize) throws FileNotFoundException {
         assert (file.exists());

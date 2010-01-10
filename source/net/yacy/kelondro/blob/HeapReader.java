@@ -497,7 +497,7 @@ public class HeapReader {
         
         DataInputStream is;
         int keylen;
-        private File blobFile;
+        private final File blobFile;
         Map.Entry<String, byte[]> nextEntry;
         
         public entries(final File blobFile, final int keylen) throws IOException {
@@ -569,7 +569,7 @@ public class HeapReader {
     }
 
     public static class entry implements Map.Entry<String, byte[]> {
-        private String s;
+        private final String s;
         private byte[] b;
         
         public entry(final String s, final byte[] b) {

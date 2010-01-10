@@ -36,7 +36,7 @@ import net.yacy.kelondro.logging.Log;
  * It has been implemented as a Singleton since it has to access several
  * files on instanciation which should be avoided since it is very slow.
  */
-public class LanguageStatisticsHolder extends Vector<LanguageStatistics> {
+public final class LanguageStatisticsHolder extends Vector<LanguageStatistics> {
 
     private static final long serialVersionUID = -887517724227204705L;
 

@@ -367,7 +367,7 @@ public final class TransformerWriter extends Writer {
                 buffer.append(c);
                 if (c == singlequote) inSingleQuote = false;
                 // check error cases
-                if ((c == rb) && (buffer.charAt(0) == lb)) {
+                if ((c == rb) && (buffer.length() > 0 && buffer.charAt(0) == lb)) {
                     inSingleQuote = false;
                     // the tag ends here. after filtering: pass on
                     filtered = filterSentence(buffer.getChars(), singlequote);
@@ -379,7 +379,7 @@ public final class TransformerWriter extends Writer {
                 buffer.append(c);
                 if (c == doublequote) inDoubleQuote = false;
                 // check error cases
-                if (c == rb && buffer.charAt(0) == lb) {
+                if (c == rb && buffer.length() > 0 && buffer.charAt(0) == lb) {
                     inDoubleQuote = false;
                     // the tag ends here. after filtering: pass on
                     filtered = filterSentence(buffer.getChars(), doublequote);
@@ -441,7 +441,7 @@ public final class TransformerWriter extends Writer {
                     } else {
                         buffer.append(c);
                     }
-                } else if (buffer.charAt(0) == lb) {
+                } else if (buffer.length() > 0 && buffer.charAt(0) == lb) {
                     if (c == singlequote) inSingleQuote = true;
                     if (c == doublequote) inDoubleQuote = true;
                     // fill in tag text

@@ -29,7 +29,7 @@ import java.util.Iterator;
 
 public class StackIterator<E> implements CloneableIterator<E> {
     
-    private CloneableIterator<E> a, b;
+    private final CloneableIterator<E> a, b;
     private E na, nb;
     
     public StackIterator(

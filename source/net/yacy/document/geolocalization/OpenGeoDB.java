@@ -68,13 +68,13 @@ public class OpenGeoDB {
         insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
     }
     
-    private HashMap<Integer, String>       locTypeHash2locType;
-    private HashMap<Integer, Location>     id2loc;
-    private HashMap<Integer, Integer>      id2locTypeHash;
-    private TreeMap<String, List<Integer>> locationName2ids;
-    private TreeMap<String, List<Integer>> kfz2ids;
-    private HashMap<String, List<Integer>> predial2ids;
-    private HashMap<String, Integer>       zip2id;
+    private final HashMap<Integer, String>       locTypeHash2locType;
+    private final HashMap<Integer, Location>     id2loc;
+    private final HashMap<Integer, Integer>      id2locTypeHash;
+    private final TreeMap<String, List<Integer>> locationName2ids;
+    private final TreeMap<String, List<Integer>> kfz2ids;
+    private final HashMap<String, List<Integer>> predial2ids;
+    private final HashMap<String, Integer>       zip2id;
     
     public OpenGeoDB(final File file) {
 
@@ -157,7 +157,7 @@ public class OpenGeoDB {
     }
  
     private static final String removeQuotes(String s) {
-        if (s.charAt(0) != '\'') return s;
+        if (s.length() > 0 && s.charAt(0) != '\'') return s;
         if (s.charAt(s.length() - 1) != '\'') return s;
         s = s.substring(1, s.length() - 1);
         return s;

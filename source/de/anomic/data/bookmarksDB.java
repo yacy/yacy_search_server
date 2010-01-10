@@ -165,7 +165,7 @@ public class bookmarksDB {
         	BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
         	Log.logInfo("BOOKMARKS", "autoReCrawl - reading schedules from " + f);
         	while( null != (s = in.readLine()) ) {
-        		if (!s.startsWith("#") && s.length()>0) {        			
+        		if (s.length() > 0 && s.charAt(0) != '#') {        			
         			String parser[] = s.split("\t");
         			if (parser.length == 13) {        				
         				folderReCrawl(Long.parseLong(parser[0]), parser[1], parser[2], Integer.parseInt(parser[3]), Long.parseLong(parser[4]), 
@@ -355,7 +355,7 @@ public class bookmarksDB {
     public static String cleanTagsString(String tagsString){
     	
     	// get rid of heading, trailing and double commas since they are useless
-        while (tagsString.startsWith(",")) {
+        while (tagsString.length() > 0 && tagsString.charAt(0) == ',') {
             tagsString = tagsString.substring(1);
         }
         while (tagsString.endsWith(",")) {

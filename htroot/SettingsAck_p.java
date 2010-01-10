@@ -458,7 +458,7 @@ public class SettingsAck_p {
             
             int crawlerTimeout;
             try {
-                crawlerTimeout = Integer.valueOf(timeoutStr).intValue();
+                crawlerTimeout = Integer.parseInt(timeoutStr);
                 if (crawlerTimeout < 0) crawlerTimeout = 0;
                 env.setConfig("crawler.clientTimeout", Integer.toString(crawlerTimeout));
             } catch (final NumberFormatException e) {
@@ -473,7 +473,7 @@ public class SettingsAck_p {
             
             long maxHttpSize;
             try {
-                maxHttpSize = Integer.valueOf(maxSizeStr).intValue();
+                maxHttpSize = Integer.parseInt(maxSizeStr);
                 if(maxHttpSize < 0) {
                     maxHttpSize = -1;
                 }
@@ -490,7 +490,7 @@ public class SettingsAck_p {
             
             long maxFtpSize;
             try {
-                maxFtpSize = Integer.valueOf(maxSizeStr).intValue();
+                maxFtpSize = Integer.parseInt(maxSizeStr);
                 env.setConfig("crawler.ftp.maxFileSize", Long.toString(maxFtpSize));
             } catch (final NumberFormatException e) {
                 prop.put("info", "31");

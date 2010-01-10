@@ -44,7 +44,7 @@ public class URLLicense {
     private final ConcurrentHashMap<String, DigestURI> permissions;
     private final ConcurrentLinkedQueue<String> aging;
     private long lastCheck;
-    private int keylen;
+    private final int keylen;
     
     public URLLicense(final int keylen) {
         this.permissions = new ConcurrentHashMap<String, DigestURI>();

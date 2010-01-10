@@ -1980,7 +1980,7 @@ public class ftpc {
         if (pattern.equals("*")) {
             return true;
         }
-        if ((pattern.startsWith("*")) && (pattern.endsWith("*"))) {
+        if (pattern.length() > 0 && pattern.charAt(0) == '*' && pattern.endsWith("*")) {
             return // avoid recursion deadlock
             ((matches(name, pattern.substring(1))) || (matches(name, pattern.substring(0, pattern.length() - 1))));
         }
@@ -2310,7 +2310,7 @@ public class ftpc {
                     + (((stop - start) < 2000) ? (stop - start) + " milliseconds"
                             : (((int) ((stop - start) / 100)) / 10) + " seconds"));
             if (start == stop) {
-                errPrintln(logPrefix + "");
+                errPrintln(logPrefix);
             } else {
                 outPrintln(" (" + (length * 1000 / 1024 / (stop - start)) + " kbytes/second)");
             }
@@ -2602,7 +2602,7 @@ public class ftpc {
                 sys();
             }
             final String base = "ftp://" + ((account.equals("anonymous")) ? "" : (account + ":" + password + "@"))
-                    + host + ((port == 21) ? "" : (":" + port)) + ((remotePath.charAt(0) == '/') ? "" : pwd() + "/")
+                    + host + ((port == 21) ? "" : (":" + port)) + ((remotePath.length() > 0 && remotePath.charAt(0) == '/') ? "" : pwd() + "/")
                     + remotePath;
 
             return dirhtml(base, remotemessage, remotegreeting, remotesystem, list);
@@ -2805,7 +2805,7 @@ public class ftpc {
     private static void printHelp() {
         System.out.println(logPrefix + "ftp help");
         System.out.println(logPrefix + "----------");
-        System.out.println(logPrefix + "");
+        System.out.println(logPrefix);
         System.out.println(logPrefix + "The following commands are supported");
         System.out.println(logPrefix
                 + "java ftp  -- (without arguments) starts the shell. Thy 'help' then for shell commands.");
@@ -2815,14 +2815,14 @@ public class ftpc {
         System.out.println(logPrefix
                 + "java ftp -get <host>[':'<port>] <remoteFile> <localPath> [<account> <password>]");
         System.out.println(logPrefix + "java ftp -put <host>[':'<port>] <localFile> <remotePath> <account> <password>");
-        System.out.println(logPrefix + "");
+        System.out.println(logPrefix);
     }
 
     public static void main(final String[] args) {
         System.out.println(logPrefix + "WELCOME TO THE ANOMIC FTP CLIENT v" + vDATE);
         System.out.println(logPrefix + "Visit http://www.anomic.de and support shareware!");
         System.out.println(logPrefix + "try -h for command line options");
-        System.out.println(logPrefix + "");
+        System.out.println(logPrefix);
         if (args.length == 0) {
             (new ftpc()).shell(null);
         } else if (args.length == 1) {

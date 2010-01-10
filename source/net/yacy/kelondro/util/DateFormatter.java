@@ -511,8 +511,8 @@ public final class DateFormatter {
     public static long UTCDiff(final String diffString) {
         if (diffString.length() != 5) throw new IllegalArgumentException("UTC String malformed (wrong size):" + diffString);
         boolean ahead = true;
-        if (diffString.charAt(0) == '+') ahead = true;
-        else if (diffString.charAt(0) == '-') ahead = false;
+        if (diffString.length() > 0 && diffString.charAt(0) == '+') ahead = true;
+        else if (diffString.length() > 0 && diffString.charAt(0) == '-') ahead = false;
         else throw new IllegalArgumentException("UTC String malformed (wrong sign):" + diffString);
         final long oh = Long.parseLong(diffString.substring(1, 3));
         final long om = Long.parseLong(diffString.substring(3));

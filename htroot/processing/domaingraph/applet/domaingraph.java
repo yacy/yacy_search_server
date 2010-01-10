@@ -11,10 +11,10 @@ import processing.core.*; import traer.physics.*; import traer.animation.*; impo
 
 
 
-final float NODE_SIZE       = 6;
-final float EDGE_LENGTH     = 30;
-final float EDGE_STRENGTH   = 0.001f;
-final float SPACER_STRENGTH = 250;
+final static float NODE_SIZE       = 6;
+final static float EDGE_LENGTH     = 30;
+final static float EDGE_STRENGTH   = 0.001f;
+final static float SPACER_STRENGTH = 250;
 
 ParticleSystem physics;
 Smoother3D centroid;
@@ -195,7 +195,7 @@ public HashMap parseProps(String s) {
     p = l[i].indexOf("=");
     if (p > 0) {
       z = l[i].substring(p + 1).trim();
-      if (z.charAt(0) == '"') z = z.substring(1);
+      if (z.length() > 0 && z.charAt(0) == '"') z = z.substring(1);
       if (z.charAt(z.length() - 1) == '"') z = z.substring(0, z.length() - 1);
       map.put(l[i].substring(0, p), z);
     }

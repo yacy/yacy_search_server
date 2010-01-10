@@ -31,8 +31,8 @@ import de.anomic.search.Switchboard;
 
 public class SitemapImporter extends AbstractImporter implements Importer {
 
-	private SitemapParser parser = null;
-	private DigestURI sitemapURL = null;
+	private final SitemapParser parser;
+	private final DigestURI sitemapURL;
 	private final ImporterManager superviser;
 	
 	public SitemapImporter(final Switchboard sb, final ImporterManager importManager, final DigestURI sitemapURL, final CrawlProfile.entry profileEntry) throws ImporterException {

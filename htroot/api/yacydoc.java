@@ -97,7 +97,7 @@ public class yacydoc {
         prop.putXML("dc_publisher", metadata.url().toNormalform(false, true));
         prop.putXML("dc_contributor", "");
         prop.putXML("dc_date", entry.moddate().toString());
-        prop.putXML("dc_type", "" + entry.doctype());
+        prop.putXML("dc_type", String.valueOf(entry.doctype()));
         prop.putXML("dc_identifier", urlhash);
         prop.putXML("dc_language", entry.language());
 

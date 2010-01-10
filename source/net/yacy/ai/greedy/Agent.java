@@ -53,12 +53,12 @@ public class Agent<
                     Comparator<Agent<SpecificRole, SpecificFinding, SpecificModel>>,
                     Comparable<Agent<SpecificRole, SpecificFinding, SpecificModel>> {
     
-    private Context<SpecificRole, SpecificFinding, SpecificModel> context;
-    private SpecificModel model;
-    private SpecificFinding finding;
+    private final Context<SpecificRole, SpecificFinding, SpecificModel> context;
+    private final SpecificModel model;
+    private final SpecificFinding finding;
     private boolean findingFail; // a flag set by child nodes that signal that a specific role has terminated the branch below the current node
-    private Agent<SpecificRole, SpecificFinding, SpecificModel> parentAgent; // the next parent node
-    private int pathlength;
+    private final Agent<SpecificRole, SpecificFinding, SpecificModel> parentAgent; // the next parent node
+    private final int pathlength;
     
     /**
      * create a poison agent

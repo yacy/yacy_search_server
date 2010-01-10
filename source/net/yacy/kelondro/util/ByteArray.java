@@ -40,7 +40,7 @@ import net.yacy.kelondro.order.ByteOrder;
 
 public class ByteArray {
     
-    private byte[] buffer;
+    private final byte[] buffer;
     private int hash;
 
     

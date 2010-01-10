@@ -36,7 +36,7 @@ public class Stacks {
 
     File stacksLocation;
     String stacksPrefix;
-    private ConcurrentHashMap<String, StackInstance> stacks;
+    private final ConcurrentHashMap<String, StackInstance> stacks;
     
     /**
      * create a stack organizing object.
@@ -69,7 +69,7 @@ public class Stacks {
     
     private class StackInstance {
         String name;
-        private File location;
+        private final File location;
         Stack stack;
         
         public StackInstance(final File location) throws IOException {

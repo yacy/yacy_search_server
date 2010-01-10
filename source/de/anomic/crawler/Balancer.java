@@ -50,8 +50,8 @@ public class Balancer {
 
     // class variables
     private final ConcurrentHashMap<String, LinkedList<String>> domainStacks;    // a map from domain name part to Lists with url hashs
-    private   ConcurrentLinkedQueue<String> top;
-    private   TreeMap<Long, String> delayed;
+    private   final ConcurrentLinkedQueue<String> top;
+    private   final TreeMap<Long, String> delayed;
     protected ObjectIndex  urlFileIndex;
     private   final File   cacheStacksPath;
     private   long         minimumLocalDelta;
@@ -397,7 +397,7 @@ public class Balancer {
 		        	// put that thing back to omit a delay here
 		            if (!delayed.values().contains(nexthash)) {
 		                //System.out.println("*** delayed +=" + nexthash);
-		                this.delayed.put(new Long(System.currentTimeMillis() + sleeptime + 1), nexthash);
+		                this.delayed.put(Long.valueOf(System.currentTimeMillis() + sleeptime + 1), nexthash);
 		            }
 		        	try {
                         this.urlFileIndex.put(rowEntry);

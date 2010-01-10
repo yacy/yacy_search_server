@@ -50,7 +50,7 @@ import net.yacy.kelondro.util.MemoryControl;
 public class IODispatcher extends Thread {
 
     private   Semaphore                    controlQueue;
-    private   Semaphore                    termination;
+    private   final Semaphore              termination;
     private   ArrayBlockingQueue<MergeJob> mergeQueue;
     private   ArrayBlockingQueue<DumpJob<? extends Reference>> dumpQueue;
     //private ReferenceFactory<ReferenceType> factory;

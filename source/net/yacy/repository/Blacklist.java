@@ -242,8 +242,7 @@ public class Blacklist {
         blacklistMap = (isMatchable(host)) ? getBlacklistMap(blacklistType,true) : getBlacklistMap(blacklistType,false);
         
         // avoid PatternSyntaxException e
-        if(!isMatchable(host) && host.startsWith("*"))
-            host = "." + host;
+        if (!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*') host = "." + host;
         
         ArrayList<String> hostList = blacklistMap.get(host.toLowerCase());
         if (hostList == null) blacklistMap.put(host.toLowerCase(), (hostList = new ArrayList<String>()));
@@ -273,8 +272,7 @@ public class Blacklist {
             blacklistMap = (isMatchable(host)) ? getBlacklistMap(blacklistType,true) : getBlacklistMap(blacklistType,false);
 
             // avoid PatternSyntaxException e
-            if(!isMatchable(host) && host.startsWith("*"))
-                host = "." + host;
+            if (!isMatchable(host) && host.length() > 0 && host.charAt(0) == '*') host = "." + host;
 
             ArrayList<String> hostList = blacklistMap.get(host.toLowerCase());
             if (hostList != null) ret = hostList.contains(path);

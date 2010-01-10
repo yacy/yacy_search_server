@@ -1026,7 +1026,7 @@ public class Records {
     }
     
     public final class Node {
-        private Handle handle = null; // index of the entry, by default NUL means undefined
+        private final Handle handle; // index of the entry, by default NUL means undefined
         private byte[] ohChunk = null; // contains overhead values
         private byte[] bodyChunk = null; // contains all row values
         private boolean ohChanged = false;

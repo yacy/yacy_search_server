@@ -82,11 +82,11 @@ public class Transmission {
          * - a set of yacy seeds which will shrink as the containers are transmitted to them
          * - a counter that gives the number of sucessful and unsuccessful transmissions so far
          */
-        private byte[]                          primaryTarget;
-        private ReferenceContainerCache<WordReference> containers;
-        private HashMap<String, URIMetadataRow> references;
-        private HashSet<String>                 badReferences;
-        private ArrayList<yacySeed>             targets;
+        private final byte[]                          primaryTarget;
+        private final ReferenceContainerCache<WordReference> containers;
+        private final HashMap<String, URIMetadataRow> references;
+        private final HashSet<String>                 badReferences;
+        private final ArrayList<yacySeed>             targets;
         private int                             hit, miss;
         
         /**

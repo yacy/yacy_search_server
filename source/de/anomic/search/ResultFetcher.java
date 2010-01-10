@@ -130,8 +130,8 @@ public class ResultFetcher {
         private final long timeout; // the date until this thread should try to work
         private long lastLifeSign; // when the last time the run()-loop was executed
         private final int id;
-        private int snippetMode;
-        private int neededResults;
+        private final int snippetMode;
+        private final int neededResults;
         
         public Worker(final int id, final long maxlifetime, int snippetMode, int neededResults) {
             this.id = id;

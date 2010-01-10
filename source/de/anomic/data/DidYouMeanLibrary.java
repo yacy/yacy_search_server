@@ -46,7 +46,7 @@ import net.yacy.kelondro.logging.Log;
  */
 public class DidYouMeanLibrary {
 
-    private File dictionaryPath;
+    private final File dictionaryPath;
     private TreeSet<String> dict, tcid;
     
     /**

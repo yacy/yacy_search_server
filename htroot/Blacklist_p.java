@@ -388,7 +388,7 @@ public class Blacklist_p {
                 final String nextEntry = sortedlist[j];
                 
                 if (nextEntry.length() == 0) continue;
-                if (nextEntry.startsWith("#")) continue;
+                if (nextEntry.charAt(0) == '#') continue;
                 prop.put(DISABLED + EDIT + "Itemlist_" + entryCount + "_dark", dark ? "1" : "0");
                 dark = !dark;
                 prop.putHTML(DISABLED + EDIT + "Itemlist_" + entryCount + "_item", nextEntry);

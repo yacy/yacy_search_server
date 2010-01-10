@@ -72,7 +72,7 @@ import org.apache.commons.logging.LogFactory;
  * @version 1.0
  */
 @SuppressWarnings("unchecked")
-public class DiscoveryAdvertisement implements Runnable {
+public final class DiscoveryAdvertisement implements Runnable {
   
   private final static Log log = LogFactory.getLog( DiscoveryAdvertisement.class );
   
@@ -92,9 +92,9 @@ public class DiscoveryAdvertisement implements Runnable {
   private final static String NTS_SSDP_BYE_BYE = "ssdp:byebye";
   private final static String NT_ALL_EVENTS = "DiscoveryAdvertisement:nt:allevents";
   
-  private Map byeByeRegistered = new HashMap();
-  private Map aliveRegistered = new HashMap();
-  private Map USNPerIP = new HashMap();
+  private final Map byeByeRegistered = new HashMap();
+  private final Map aliveRegistered = new HashMap();
+  private final Map USNPerIP = new HashMap();
   
   private final Object REGISTRATION_PROCESS = new Object();
   

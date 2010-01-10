@@ -161,7 +161,7 @@ public class psParser extends AbstractParser implements Idiom {
             boolean isComment = false;
             boolean isText = false;
             
-            if (version.startsWith("2")) {
+            if (version.length() > 0 && version.charAt(0) == '2') {
                 boolean isConnector = false;
                 
                 while ((ichar = reader.read()) > 0) {
@@ -184,7 +184,7 @@ public class psParser extends AbstractParser implements Idiom {
                     }
                 }
               
-            } else  if (version.startsWith("3")) {
+            } else  if (version.length() > 0 && version.charAt(0) == '3') {
                 final StringBuilder stmt = new StringBuilder();
                 boolean isBMP = false;
                 boolean isStore = false;

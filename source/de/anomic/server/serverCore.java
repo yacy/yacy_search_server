@@ -199,7 +199,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         this.sslSocketFactory = initSSLFactory();
 
         // init session parameter
-        this.maxBusySessions = Math.max(1, Integer.valueOf(switchboard.getConfig("httpdMaxBusySessions","100")).intValue());
+        this.maxBusySessions = Math.max(1, Integer.parseInt(switchboard.getConfig("httpdMaxBusySessions","100")));
         
         this.lastAutoTermination = System.currentTimeMillis();
         
@@ -260,7 +260,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             bindIP = extendedPortString.substring(0,pos).trim();
             extendedPortString = extendedPortString.substring(pos+1); 
             
-            if (bindIP.startsWith("#")) {
+            if (bindIP.length() > 0 && bindIP.charAt(0) == '#') {
                 final String interfaceName = bindIP.substring(1);
                 String hostName = null;
                 if (this.log.isFine()) this.log.logFine("Trying to determine IP address of interface '" + interfaceName + "'.");                    
@@ -773,7 +773,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                         log.logSevere("command execution, method exception " + e.getMessage() + " for client " + this.userAddress.getHostAddress(), e);
                         if (!this.userAddress.isSiteLocalAddress()) {
                             if (denyHost != null) {
-                                denyHost.put((""+this.userAddress.getHostAddress()), "deny"); // block client: hacker attempt
+                                denyHost.put(this.userAddress.getHostAddress(), "deny"); // block client: hacker attempt
                             }
                         }
                         break;

@@ -59,12 +59,12 @@ import java.net.URL;
 
 public class ServiceEventSubscription {
 
-  private String serviceType = null;
-  private String serviceId = null;
-  private URL serviceURL = null;
-  private String SID = null;
-  private InetAddress deviceIp = null;
-  private int durationTime = 0;
+  private final String serviceType;
+  private final String serviceId;
+  private final URL serviceURL;
+  private final String SID;
+  private final InetAddress deviceIp;
+  private final int durationTime;
   
   public ServiceEventSubscription( String serviceType, String serviceId, URL serviceURL, 
                                    String sid, InetAddress deviceIp, int durationTime ) {

@@ -211,7 +211,7 @@ public class CrawlQueues {
                     ", robinsonMode=" + ((sb.isRobinsonMode()) ? "on" : "off"));
         }
         
-        String queueCheck = crawlIsPossible(NoticedURL.STACK_TYPE_CORE, "Core");
+        String queueCheck = crawlIsPossible(NoticedURL.STACK_TYPE_CORE);
         if (queueCheck != null) {
             log.logInfo("omitting de-queue/local: " + queueCheck);
             return false;
@@ -311,10 +311,9 @@ public class CrawlQueues {
     /**
      * Checks if crawl queue has elements and new crawl will not exceed thread-limit
      * @param stackType
-     * @param type
      * @return
      */
-    private String crawlIsPossible(int stackType, final String type) {
+    private String crawlIsPossible(int stackType) {
         //System.out.println("stacksize = " + noticeURL.stackSize(stackType));
         if (noticeURL.stackSize(stackType) == 0) {
             //log.logDebug("GlobalCrawl: queue is empty");
@@ -485,7 +484,7 @@ public class CrawlQueues {
         
         // do nothing if either there are private processes to be done
         // or there is no global crawl on the stack
-        String queueCheck = crawlIsPossible(NoticedURL.STACK_TYPE_REMOTE, "Global");
+        String queueCheck = crawlIsPossible(NoticedURL.STACK_TYPE_REMOTE);
         if (queueCheck != null) {
             if (log.isFinest()) log.logFinest("omitting de-queue/remote: " + queueCheck);
             return false;

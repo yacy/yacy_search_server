@@ -207,7 +207,7 @@ public class CrawlProfileEditor_p {
 				prop.put("edit_entries_" + count + "_readonly_label", ee.label);
 				prop.put("edit_entries_" + count + "_readonly_type", ee.type);
 				if (ee.type == eentry.BOOLEAN) {
-					prop.put("edit_entries_" + count + "_readonly_type_checked", Boolean.valueOf(val).booleanValue() ? "1" : "0");
+					prop.put("edit_entries_" + count + "_readonly_type_checked", Boolean.parseBoolean(val) ? "1" : "0");
 				} else {
 					prop.put("edit_entries_" + count + "_readonly_type_value", val);
 				}
@@ -228,7 +228,7 @@ public class CrawlProfileEditor_p {
         prop.put("crawlProfiles_" + count + "_depth", profile.depth());
         prop.put("crawlProfiles_" + count + "_mustmatch", profile.mustMatchPattern().toString());
         prop.put("crawlProfiles_" + count + "_mustnotmatch", profile.mustNotMatchPattern().toString());
-        prop.put("crawlProfiles_" + count + "_crawlingIfOlder", (profile.recrawlIfOlder() == 0L) ? "no re-crawl" : ""+ DateFormat.getDateTimeInstance().format(profile.recrawlIfOlder()));
+        prop.put("crawlProfiles_" + count + "_crawlingIfOlder", (profile.recrawlIfOlder() == 0L) ? "no re-crawl" : DateFormat.getDateTimeInstance().format(profile.recrawlIfOlder()));
         prop.put("crawlProfiles_" + count + "_crawlingDomFilterDepth", (profile.domFilterDepth() == Integer.MAX_VALUE) ? "inactive" : Integer.toString(profile.domFilterDepth()));
 
         // start contrib [MN]
@@ -245,7 +245,7 @@ public class CrawlProfileEditor_p {
         prop.put("crawlProfiles_"+count+"_crawlingDomFilterContent", i);
         // end contrib [MN]
 
-        prop.put("crawlProfiles_" + count + "_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : ""+profile.domMaxPages());
+        prop.put("crawlProfiles_" + count + "_crawlingDomMaxPages", (profile.domMaxPages() == Integer.MAX_VALUE) ? "unlimited" : Integer.toString(profile.domMaxPages()));
         prop.put("crawlProfiles_" + count + "_withQuery", (profile.crawlingQ()) ? "1" : "0");
         prop.put("crawlProfiles_" + count + "_storeCache", (profile.storeHTCache()) ? "1" : "0");
         prop.put("crawlProfiles_" + count + "_indexText", (profile.indexText()) ? "1" : "0");

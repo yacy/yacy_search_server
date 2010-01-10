@@ -313,7 +313,7 @@ public class Bookmarks {
 	       			tagCount=0;
 	       			while (tagsIt.hasNext()) {            	
 	       				final String tname = tagsIt.next();
-	       				if ((!tname.startsWith("/")) && (!tname.equals(""))) {
+	       				if (!tname.isEmpty() && tname.charAt(0) != '/') {
 	       					prop.putHTML("display_bookmarks_"+count+"_tags_"+tagCount+"_tag", tname);
 	       					tagCount++;
 	       				}

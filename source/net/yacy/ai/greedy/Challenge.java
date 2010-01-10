@@ -36,8 +36,8 @@ public class Challenge<
                   Comparator<Challenge<SpecificRole, SpecificFinding, SpecificModel>>,
                   Comparable<Challenge<SpecificRole, SpecificFinding, SpecificModel>> {
     
-    private Agent<SpecificRole,SpecificFinding,SpecificModel> agent;
-    private SpecificFinding finding;
+    private final Agent<SpecificRole,SpecificFinding,SpecificModel> agent;
+    private final SpecificFinding finding;
 
     public Challenge() {
         this.agent = null;

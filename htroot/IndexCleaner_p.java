@@ -96,14 +96,14 @@ public class IndexCleaner_p {
             prop.put("urldb_lastBlacklistedHash", urldbCleanerThread.lastBlacklistedHash);
             prop.putHTML("urldb_lastUrl", urldbCleanerThread.lastUrl);
             prop.put("urldb_lastHash", urldbCleanerThread.lastHash);
-            prop.put("urldb_threadAlive", urldbCleanerThread.isAlive() + "");
+            prop.put("urldb_threadAlive", Boolean.toString(urldbCleanerThread.isAlive()));
             prop.put("urldb_threadToString", urldbCleanerThread.toString());
             final double percent = ((double)urldbCleanerThread.blacklistedUrls/urldbCleanerThread.totalSearchedUrls)*100;
             prop.putNum("urldb_percent", percent);
         }
         if (indexCleanerThread!=null) {
             prop.put("rwidb", "1");
-            prop.put("rwidb_threadAlive", indexCleanerThread.isAlive() + "");
+            prop.put("rwidb_threadAlive", Boolean.toString(indexCleanerThread.isAlive()));
             prop.put("rwidb_threadToString", indexCleanerThread.toString());
             prop.putNum("rwidb_RWIcountstart", indexCleanerThread.rwiCountAtStart);
             prop.putNum("rwidb_RWIcountnow", indexCleanerThread.rwisize());

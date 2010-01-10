@@ -36,16 +36,17 @@ package net.yacy.kelondro.index;
 
 public final class ConcurrentARC<K, V> implements ARC<K, V> {
 
-    private int mask;
+    private final int mask;
     private final ARC<K, V> arc[];
     
     @SuppressWarnings("unchecked")
 	public ConcurrentARC(final int cacheSize, final int partitions) {
-    	this.mask = 1;
-    	while (this.mask < partitions) this.mask = this.mask * 2;
-    	this.arc = new SimpleARC[mask];
-    	for (int i = 0; i < this.arc.length; i++) this.arc[i] = new SimpleARC<K, V>(cacheSize / this.mask);
-    	this.mask -= 1;
+    	int m = 1;
+    	while (m < partitions) m = m * 2;
+    	this.arc = new SimpleARC[m];
+    	for (int i = 0; i < this.arc.length; i++) this.arc[i] = new SimpleARC<K, V>(cacheSize / m);
+    	m -= 1;
+    	this.mask = m;
     }
     
     /**

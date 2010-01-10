@@ -34,7 +34,7 @@ import net.yacy.kelondro.order.NaturalOrder;
 
 public class Stack {
 
-    private Heap stack;
+    private final Heap stack;
     private long lastHandle;
     
     /**

@@ -485,7 +485,7 @@ public class RowCollection implements Iterable<Row.Entry> {
     public class keyIterator implements Iterator<byte[]> {
 
         private int p;
-        private boolean keepOrderWhenRemoving;
+        private final boolean keepOrderWhenRemoving;
         
         public keyIterator(final boolean keepOrderWhenRemoving) {
             this.p = 0;

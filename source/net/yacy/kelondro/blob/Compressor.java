@@ -49,10 +49,10 @@ public class Compressor implements BLOB {
     static byte[] gzipMagic  = {(byte) 'z', (byte) '|'}; // magic for gzip-encoded content
     static byte[] plainMagic = {(byte) 'p', (byte) '|'}; // magic for plain content (no encoding)
     
-    private BLOB backend;
+    private final BLOB backend;
     private HashMap<String, byte[]> buffer; // entries which are not yet compressed, format is RAW (without magic)
     private long bufferlength;
-    private long maxbufferlength;
+    private final long maxbufferlength;
     
     public Compressor(BLOB backend, long buffersize) {
         this.backend = backend;

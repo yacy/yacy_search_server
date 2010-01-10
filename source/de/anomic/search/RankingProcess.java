@@ -70,7 +70,7 @@ public final class RankingProcess extends Thread {
     private final ConcurrentHashMap<String, Integer> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private final int[] flagcount; // flag counter
     private final TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
-    private final int[] domZones;
+    //private final int[] domZones;
     private HashMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
     
     private int remote_peerCount, remote_indexCount, remote_resourceSize, local_resourceSize;
@@ -106,8 +106,8 @@ public final class RankingProcess extends Thread {
         this.hostNavigator = new ConcurrentHashMap<String, HostInfo>();
         this.authorNavigator = new ConcurrentHashMap<String, AuthorInfo>();
         this.ref = new ConcurrentHashMap<String, Integer>();
-        this.domZones = new int[8];
-        for (int i = 0; i < 8; i++) {this.domZones[i] = 0;}
+        //this.domZones = new int[8];
+        //for (int i = 0; i < 8; i++) {this.domZones[i] = 0;}
         this.feeders = concurrency;
         assert this.feeders >= 1;
     }
@@ -211,7 +211,7 @@ public final class RankingProcess extends Thread {
 			    }
 			    
 			    // count domZones
-			    this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
+			    //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
 			    
 			    // get statistics for host navigator
 			    if (nav_hosts) {

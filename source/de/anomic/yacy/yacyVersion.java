@@ -24,11 +24,11 @@ public class yacyVersion implements Comparator<yacyVersion>, Comparable<yacyVers
     public static double latestRelease = 0.1; // 
 
     private float releaseNr;
-    private String dateStamp;
+    private final String dateStamp;
     private int svn;
-    private boolean mainRelease;
+    private final boolean mainRelease;
 
-    private String name;
+    private final String name;
 
     /**
      *  parse a release file name

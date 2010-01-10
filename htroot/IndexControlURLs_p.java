@@ -337,7 +337,7 @@ public class IndexControlURLs_p {
         prop.put("genUrlProfile_referrer", (le == null) ? 0 : 1);
         prop.putHTML("genUrlProfile_referrer_url", (le == null) ? "<unknown>" : le.metadata().url().toNormalform(false, true));
         prop.put("genUrlProfile_referrer_hash", (le == null) ? "" : le.hash());
-        prop.put("genUrlProfile_doctype", ""+entry.doctype());
+        prop.put("genUrlProfile_doctype", String.valueOf(entry.doctype()));
         prop.put("genUrlProfile_language", entry.language());
         prop.put("genUrlProfile_size", entry.size());
         prop.put("genUrlProfile_wordCount", entry.wordCount());

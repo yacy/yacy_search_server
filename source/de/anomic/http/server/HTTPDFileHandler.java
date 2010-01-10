@@ -396,7 +396,7 @@ public final class HTTPDFileHandler {
             File targetClass=null;
 
             // locate the file
-            if (!path.startsWith("/") && !path.startsWith("\\")) path = "/" + path; // attach leading slash
+            if (path.length() > 0 && path.charAt(0) != '/' && path.charAt(0) != '\\') path = "/" + path; // attach leading slash
             
             // a different language can be desired (by i.e. ConfigBasic.html) than the one stored in the locale.language
             String localeSelection = switchboard.getConfig("locale.language","default");
@@ -691,7 +691,7 @@ public final class HTTPDFileHandler {
                     HTTPDemon.sendRespondHeader(conProp, out, httpVersion, statusCode, null, mimeType, cgiBody.length(), targetDate, null, null, null, null, nocache);
                     out.write(cgiBody.getBytes());
                 } else {
-                    HTTPDemon.sendRespondError(conProp, out, exitValue, statusCode, null, HeaderFramework.http1_1.get(statusCode + ""), null);
+                    HTTPDemon.sendRespondError(conProp, out, exitValue, statusCode, null, HeaderFramework.http1_1.get(Integer.toString(statusCode)), null);
                 }
                 
 
@@ -955,7 +955,7 @@ public final class HTTPDFileHandler {
                                 final String rangesVal = rangeHeaderVal.substring("bytes=".length());
                                 final String[] ranges = rangesVal.split(",");
                                 if ((ranges.length == 1)&&(ranges[0].endsWith("-"))) {
-                                    rangeStartOffset = Integer.valueOf(ranges[0].substring(0,ranges[0].length()-1)).intValue();
+                                    rangeStartOffset = Integer.parseInt(ranges[0].substring(0,ranges[0].length()-1));
                                     statusCode = 206;
                                     if (header == null) header = new ResponseHeader();
                                     header.put(HeaderFramework.CONTENT_RANGE, "bytes " + rangeStartOffset + "-" + (targetFile.length()-1) + "/" + targetFile.length());

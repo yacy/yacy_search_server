@@ -287,7 +287,7 @@ public class yacysearch {
                 if (ftb == -1) ftb = querystring.length();
                 String ft = querystring.substring(filetype + 9, ftb);
                 querystring = querystring.replace("filetype:" + ft, "");
-                while(ft.startsWith(".")) ft = ft.substring(1);
+                while (ft.length() > 0 && ft.charAt(0) == '.') ft = ft.substring(1);
                 if(ft.length() > 0) {
                     if (urlmask == null) {
                         urlmask = ".*\\." + ft;
@@ -311,8 +311,8 @@ public class yacysearch {
                 if (ftb == -1) ftb = querystring.length();
                 String domain = querystring.substring(site + 5, ftb);
                 querystring = querystring.replace("site:" + domain, "");
-                while(domain.startsWith(".")) domain = domain.substring(1);
-                while(domain.endsWith(".")) domain = domain.substring(0, domain.length() - 1);
+                while (domain.length() > 0 && domain.charAt(0) == '.') domain = domain.substring(1);
+                while (domain.endsWith(".")) domain = domain.substring(0, domain.length() - 1);
                 sitehash = DigestURI.domhash(domain);
             }
             int authori = querystring.indexOf("author:");
@@ -343,7 +343,7 @@ public class yacysearch {
                 if (ftb == -1) ftb = querystring.length();
                 String domain = querystring.substring(tld + 4, ftb);
                 querystring = querystring.replace("tld:" + domain, "");
-                while(domain.startsWith(".")) domain = domain.substring(1);
+                while (domain.length() > 0 && domain.charAt(0) == '.') domain = domain.substring(1);
                 if (domain.indexOf(".") < 0) domain = "\\." + domain; // is tld
                 if (domain.length() > 0) {
                     if (urlmask == null) {

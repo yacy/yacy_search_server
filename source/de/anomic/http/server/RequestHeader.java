@@ -202,7 +202,7 @@ public class RequestHeader extends HeaderFramework {
             }
         } else {
             // no host in url. set path
-            if (args.startsWith("/")) {
+            if (args.length() > 0 && args.charAt(0) == '/') {
                 // thats also fine, its a perfect localhost access
                 // in this case, we simulate a
                 // http://localhost/s

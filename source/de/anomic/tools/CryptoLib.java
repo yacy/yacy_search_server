@@ -75,8 +75,8 @@ public class CryptoLib {
     public static final int bitkey       = 1024;
     public static final String signAlgorithm = "SHA1with"+algorithm;
     
-    private KeyFactory keyFact;
-    private Signature sign;
+    private final KeyFactory keyFact;
+    private final Signature sign;
     
     public CryptoLib() throws NoSuchAlgorithmException {
 	keyFact = KeyFactory.getInstance(algorithm);

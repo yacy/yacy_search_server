@@ -319,7 +319,7 @@ public class SetTools {
         // comparators must be equal
         if (map == null) return;
         if (set == null) return;
-        assert !(map instanceof TreeMap && set instanceof TreeSet) || ((TreeMap<A, B>) map).comparator() == ((TreeSet<A>) set).comparator();
+        assert !(map instanceof TreeMap<?,?> && set instanceof TreeSet<?>) || ((TreeMap<A, B>) map).comparator() == ((TreeSet<A>) set).comparator();
         if (map.isEmpty() || set.isEmpty()) return;
 
         if (map.size() < set.size())
@@ -342,7 +342,7 @@ public class SetTools {
     public static <A> void excludeDestructive(final Set<A> set1, final Set<A> set2) {
         if (set1 == null) return;
         if (set2 == null) return;
-        assert !(set1 instanceof TreeSet && set2 instanceof TreeSet) || ((TreeSet<A>) set1).comparator() == ((TreeSet<A>) set2).comparator();
+        assert !(set1 instanceof TreeSet<?> && set2 instanceof TreeSet<?>) || ((TreeSet<A>) set1).comparator() == ((TreeSet<A>) set2).comparator();
         if (set1.isEmpty() || set2.isEmpty()) return;
         
         if (set1.size() < set2.size())
@@ -372,7 +372,7 @@ public class SetTools {
             int pos;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if ((line.length() > 0) && (!(line.startsWith("#"))) && ((pos = line.indexOf(sep)) > 0))
+                if ((line.length() > 0 && line.charAt(0) != '#') && ((pos = line.indexOf(sep)) > 0))
                     map.put(line.substring(0, pos).trim().toLowerCase(), line.substring(pos + sep.length()).trim());
             }
         } catch (final IOException e) {            
@@ -391,7 +391,7 @@ public class SetTools {
             int pos;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if ((line.length() > 0) && (!(line.startsWith("#"))) && ((pos = line.indexOf(sep)) > 0)) {
+                if ((line.length() > 0 && line.charAt(0) != '#') && ((pos = line.indexOf(sep)) > 0)) {
                     key = line.substring(0, pos).trim().toLowerCase();
                     value = line.substring(pos + sep.length()).trim();
                     if (!map.containsKey(key)) map.put(key, new ArrayList<String>());
@@ -415,7 +415,7 @@ public class SetTools {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if ((line.length() > 0) && (!(line.startsWith("#")))) list.add(line.trim().toLowerCase());
+                if (line.length() > 0 && line.charAt(0) != '#') list.add(line.trim().toLowerCase());
             }
             br.close();
         } catch (final IOException e) {            

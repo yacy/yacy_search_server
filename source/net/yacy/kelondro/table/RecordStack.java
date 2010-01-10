@@ -271,7 +271,7 @@ public final class RecordStack extends Records {
             while ((s = f.readLine()) != null) {
                 s = s.trim();
                 line++;
-                if ((s.length() > 0) && (!(s.startsWith("#")))) {
+                if (s.length() > 0 && s.charAt(0) != '#') {
                     st = new StringTokenizer(s, separator);
                     // buffer the entry
                     c = 0;
@@ -346,7 +346,7 @@ public final class RecordStack extends Records {
                 while (true) {
                     m = f.readLine();
                     if (m == null) break;
-                    if ((m.length() > 1) && (!m.startsWith("#"))) {
+                    if (m.length() > 1 && m.charAt(0) != '#') {
                         m = m + " " + db;
                         cmd(line2args(m));
                     }

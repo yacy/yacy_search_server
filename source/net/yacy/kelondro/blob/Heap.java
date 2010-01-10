@@ -44,7 +44,7 @@ public final class Heap extends HeapModifier implements BLOB {
 
     private HashMap<String, byte[]> buffer;     // a write buffer to limit IO to the file; attention: Maps cannot use byte[] as key
     private int                     buffersize; // bytes that are buffered in buffer
-    private int                     buffermax;  // maximum size of the buffer
+    private final int               buffermax;  // maximum size of the buffer
     
     /*
      * This class implements a BLOB management based on a sequence of records in a random access file

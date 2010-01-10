@@ -122,7 +122,7 @@ public class RankingProfile {
         if ((profile != null) && (profile.length() > 0)) {
             //parse external form
             final HashMap<String, Integer> coeff = new HashMap<String, Integer>(40);
-            final String[] elts = ((profile.startsWith("{") && (profile.endsWith("}"))) ? profile.substring(1, profile.length() - 1) : profile).split(",");
+            final String[] elts = ((profile.length() > 0 && profile.charAt(0) == '{' && profile.endsWith("}")) ? profile.substring(1, profile.length() - 1) : profile).split(",");
             int p;
             final int s = (prefix == null) ? 0 : prefix.length();
             String e;

@@ -110,7 +110,7 @@ public class AttrSeq {
         while ((line = br.readLine()) != null) {
             line = line.trim();
             if (line.length() == 0) continue;
-            if (line.startsWith("#")) {
+            if (line.charAt(0) == '#') {
                 if (line.startsWith("# Structure=")) {
                     structure = new Structure(line.substring(12));
                 }
@@ -287,7 +287,7 @@ public class AttrSeq {
             }
             
             // parse sequence definition:
-            if (seqs.startsWith("*")) seqs = seqs.substring(1);
+            if (seqs.length() > 0 && seqs.charAt(0) == '*') seqs = seqs.substring(1);
             l = new ArrayList<Column>();
             st = new StringTokenizer(seqs, ",");
             while (st.hasMoreTokens()) {

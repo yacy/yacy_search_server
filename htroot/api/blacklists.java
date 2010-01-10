@@ -36,7 +36,7 @@ public class blacklists {
                             final String nextEntry = list.get(j);
 
                             if (nextEntry.length() == 0) continue;
-                            if (nextEntry.startsWith("#")) continue;
+                            if (nextEntry.charAt(0) == '#') continue;
 
                             prop.putXML("lists_" + blacklistCount + "_items_" + count + "_item", nextEntry);
                             count++;

@@ -376,7 +376,7 @@ public final class FileUtils {
             String line;
             while ((line = br.readLine()) != null) {
                 line = line.trim();
-                if ((line.length() > 0) && (!(line.startsWith("#")))) set.add(line.trim().toLowerCase());
+                if (line.length() > 0 && line.charAt(0) != '#') set.add(line.trim().toLowerCase());
             }
             br.close();
         } catch (final IOException e) {
@@ -527,8 +527,8 @@ public final class FileUtils {
         String line;
         final HashMap<String, String> props = new HashMap<String, String>(list.size());
         while (i.hasNext()) {
-            line = (i.next()).trim();
-            if (line.startsWith("#")) continue; // exclude comments
+            line = i.next().trim();
+            if (line.length() > 0 && line.charAt(0) == '#') continue; // exclude comments
             //System.out.println("NXTOOLS_PROPS - LINE:" + line);
             pos = line.indexOf("=");
             if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
@@ -615,7 +615,8 @@ public final class FileUtils {
             // Read the List
             String line = "";
             while ((line = br.readLine()) != null) {
-                if ((!line.startsWith("#") || withcomments) || !line.equals("")) {
+                if (line.length() == 0) continue;
+                if (line.charAt(0) != '#' || withcomments) {
                     //temp += line + serverCore.CRLF_STRING;
                     temp.append(line).append(CR).append(LF);
                 }
@@ -762,7 +763,7 @@ public final class FileUtils {
      */
     
     public static class StringsIterator implements Iterator<String> {
-        private BufferedReader reader;
+        private final BufferedReader reader;
         private String nextLine;
         public StringsIterator(final BufferedReader reader) {
             this.reader = reader;

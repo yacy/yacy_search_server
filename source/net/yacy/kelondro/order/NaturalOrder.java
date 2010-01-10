@@ -243,7 +243,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
     
     public static class LongIter implements Iterator<Long> {
 
-        private Iterator<byte[]> b256Iterator;
+        private final Iterator<byte[]> b256Iterator;
         
         public LongIter(Iterator<byte[]> b256Iterator) {
             this.b256Iterator = b256Iterator;
@@ -257,7 +257,7 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
             byte[] b = this.b256Iterator.next();
             assert (b != null);
             if (b == null) return null;
-            return new Long(decodeLong(b));
+            return Long.valueOf(decodeLong(b));
         }
 
         public void remove() {

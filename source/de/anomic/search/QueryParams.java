@@ -75,7 +75,7 @@ public final class QueryParams {
     public boolean allofconstraint;
     public boolean onlineSnippetFetch;
     public RankingProfile ranking;
-    private Segment indexSegment;
+    private final Segment indexSegment;
     public String host; // this is the client host that starts the query, not a site operator
     public String sitehash; // this is a domain hash, 6 bytes long or null
     public String authorhash;

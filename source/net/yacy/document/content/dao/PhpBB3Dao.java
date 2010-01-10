@@ -47,8 +47,8 @@ import net.yacy.kelondro.logging.Log;
 public class PhpBB3Dao implements Dao {
 
     protected DatabaseConnection conn = null;
-    private   String urlstub, prefix;
-    private   HashMap<Integer, String> users;
+    private   final String urlstub, prefix;
+    private   final HashMap<Integer, String> users;
 
     public PhpBB3Dao(
             String urlstub,

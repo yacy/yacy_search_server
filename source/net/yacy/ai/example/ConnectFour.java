@@ -58,7 +58,7 @@ public class ConnectFour {
     }
     
     public static class Move extends AbstractFinding<Coin> implements Finding<Coin> {
-        private int column;
+        private final int column;
         public Move(Coin role, int column) {
             super(role, (column > (width / 2)) ? (width - column - 1) : column);
             this.column = column;

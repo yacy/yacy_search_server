@@ -74,10 +74,10 @@ public final class SearchEvent {
     // class variables for remote searches
     private yacySearch[] primarySearchThreads, secondarySearchThreads;
     private final TreeMap<byte[], String> preselectedPeerHashes;
-    private ResultURLs crawlResults;
-    private Thread localSearchThread;
-    private TreeMap<byte[], String> IAResults;
-    private TreeMap<byte[], Integer> IACount;
+    private final ResultURLs crawlResults;
+    private final Thread localSearchThread;
+    private final TreeMap<byte[], String> IAResults;
+    private final TreeMap<byte[], Integer> IACount;
     private byte[] IAmaxcounthash, IAneardhthash;
     private final ReferenceOrder order;
     

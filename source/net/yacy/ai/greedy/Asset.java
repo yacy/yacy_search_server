@@ -32,8 +32,8 @@ public class Asset<
                    SpecificModel extends Model<SpecificRole, SpecificFinding>
                   > {
     
-    private SpecificModel model;
-    private SpecificFinding finding;
+    private final SpecificModel model;
+    private final SpecificFinding finding;
 
     public Asset(SpecificModel model, SpecificFinding finding) {
         this.model = model;

@@ -62,8 +62,8 @@ public class ReferenceOrder {
     
     public class Normalizer extends Thread {
         
-        private ReferenceContainer<WordReference> container;
-        private BlockingQueue<WordReferenceVars> decodedEntries;
+        private final ReferenceContainer<WordReference> container;
+        private final BlockingQueue<WordReferenceVars> decodedEntries;
         
         public Normalizer(final ReferenceContainer<WordReference> container) {
             // normalize ranking: find minimum and maximum of separate ranking criteria

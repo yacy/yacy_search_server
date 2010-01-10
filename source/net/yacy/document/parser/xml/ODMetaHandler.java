@@ -31,7 +31,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 public class ODMetaHandler extends DefaultHandler {
-	private StringBuilder buffer = new StringBuilder();
+	private final StringBuilder buffer = new StringBuilder();
 	
 	private String docCreator = null;
 	private String docLanguage = null;

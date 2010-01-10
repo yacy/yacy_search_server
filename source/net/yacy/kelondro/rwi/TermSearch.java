@@ -36,7 +36,7 @@ import net.yacy.kelondro.index.RowSpaceExceededException;
 
 public class TermSearch <ReferenceType extends Reference> {
 
-    private ReferenceContainer<ReferenceType> joinResult;
+    private final ReferenceContainer<ReferenceType> joinResult;
     HashMap<byte[], ReferenceContainer<ReferenceType>> inclusionContainers;
     
     public TermSearch(

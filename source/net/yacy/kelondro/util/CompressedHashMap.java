@@ -301,7 +301,7 @@ public class CompressedHashMap {
     public static void main(final String[] args) {
         final long start = System.currentTimeMillis();
         final CompressedHashMap map = new CompressedHashMap(4);
-        for (int i = 0; i < 100; i++) map.put(3333 + i, ("" + (1000 + i)).getBytes());
+        for (int i = 0; i < 100; i++) map.put(3333 + i, Integer.toString(1000 + i).getBytes());
         final Iterator<entry> i = map.entries();
         CompressedHashMap.entry e;
         System.out.println("Enumeration of elements: count=" + map.size());

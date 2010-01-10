@@ -71,8 +71,8 @@ public class ActionMessage {
   
   private final static Log log = LogFactory.getLog( ActionMessage.class );
   
-  private UPNPService service;
-  private ServiceAction serviceAction;
+  private final UPNPService service;
+  private final ServiceAction serviceAction;
   private List inputParameters;
   
   /**

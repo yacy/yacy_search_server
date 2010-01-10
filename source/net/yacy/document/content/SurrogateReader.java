@@ -51,9 +51,9 @@ public class SurrogateReader extends DefaultHandler implements Runnable {
     private boolean parsingValue;
     private DCEntry surrogate;
     private String elementName;
-    private BlockingQueue<DCEntry> surrogates;
+    private final BlockingQueue<DCEntry> surrogates;
     private SAXParser saxParser;
-    private InputStream stream;
+    private final InputStream stream;
     
     public SurrogateReader(final InputStream stream, int queueSize) throws IOException {
         this.buffer = new StringBuilder();

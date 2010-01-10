@@ -112,7 +112,7 @@ public class index {
         prop.put("searchoptions_prefermaskoptions", "0");
         prop.putHTML("searchoptions_prefermaskoptions_prefermaskfilter", prefermaskfilter);
         prop.put("searchoptions_indexofChecked", "");
-        prop.put("searchoptions_publicSearchpage", (publicPage == true) ? "0" : "1");
+        prop.put("searchoptions_publicSearchpage", (publicPage) ? "0" : "1");
         prop.put("results", "");
         prop.putHTML("cat", cat);
         prop.put("type", type);

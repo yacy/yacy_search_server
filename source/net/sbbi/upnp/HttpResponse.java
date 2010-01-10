@@ -59,8 +59,8 @@ import java.util.StringTokenizer;
 @SuppressWarnings("unchecked")
 public class HttpResponse {
   
-  private String header;
-  private Map fields;
+  private final String header;
+  private final Map fields;
   private String body;
   
   

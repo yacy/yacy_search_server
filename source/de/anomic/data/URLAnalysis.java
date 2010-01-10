@@ -239,7 +239,7 @@ public class URLAnalysis {
             for (Map.Entry<String, Integer> e: results.entrySet()) {
                 os.write(e.getKey().getBytes());
                 os.write(new byte[]{'\t'});
-                os.write(("" + e.getValue()).getBytes());
+                os.write(Integer.toString(e.getValue()).getBytes());
                 os.write(new byte[]{'\n'});
                 count++;
                 if (System.currentTimeMillis() - time > 10000) {

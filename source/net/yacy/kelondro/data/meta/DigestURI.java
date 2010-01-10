@@ -162,7 +162,7 @@ public class DigestURI implements Serializable {
                     }
                 } else {
                     host = null;
-                    if (h.startsWith("/")) {
+                    if (h.length() > 0 && h.charAt(0) == '/') {
                         char c = h.charAt(2);
                         if (c == ':' || c == '|')
                             path = h.substring(1);
@@ -256,15 +256,15 @@ public class DigestURI implements Serializable {
             this.path = baseURL.path;
         } else if (relPath.contains(":") && patternMail.matcher(relPath.toLowerCase()).find()) { // discards also any unknown protocol from previous if
             throw new MalformedURLException("relative path malformed: " + relPath);
-        } else if (relPath.startsWith("/")) {
+        } else if (relPath.length() > 0 && relPath.charAt(0) == '/') {
             this.path = relPath;
         } else if (baseURL.path.endsWith("/")) {
-            if (relPath.startsWith("#") || relPath.startsWith("?")) {
+            if (relPath.length() > 0 && (relPath.charAt(0) == '#' || relPath.charAt(0) == '?')) {
                 throw new MalformedURLException("relative path malformed: " + relPath);
             }
             this.path = baseURL.path + relPath;
         } else {
-            if (relPath.startsWith("#") || relPath.startsWith("?")) {
+            if (relPath.length() > 0 && (relPath.charAt(0) == '#' || relPath.charAt(0) == '?')) {
                 this.path = baseURL.path + relPath;
             } else {
                 final int q = baseURL.path.lastIndexOf('/');

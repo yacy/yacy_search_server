@@ -95,24 +95,24 @@ public class translator {
 
 		while(it.hasNext()){
 			line = it.next();
-			if(! line.startsWith("#")){
+			if (line.length() == 0 || line.charAt(0) != '#'){
 				splitted = line.split("==", 2);
-				if(splitted.length == 2){
+				if (splitted.length == 2) {
 					translationList.put(splitted[0], splitted[1]);
 				//}else{ //Invalid line
 				}
-			}else if(line.startsWith("#File: ")){
-				if(!forFile.equals("")){
-						lists.put(forFile, translationList);
+			} else if (line.startsWith("#File: ")) {
+				if (!forFile.equals("")){
+					lists.put(forFile, translationList);
 				}
-				if(line.charAt(6)==' '){
+				if (line.charAt(6)==' ') {
 					forFile=line.substring(7);
-				}else{
+				} else {
 					forFile=line.substring(6);
 				}
-				if(lists.containsKey(forFile)){
+				if (lists.containsKey(forFile)) {
 					translationList=lists.get(forFile);
-				}else{
+				} else {
 					translationList=new Hashtable<String, String>();
 				}
 			}

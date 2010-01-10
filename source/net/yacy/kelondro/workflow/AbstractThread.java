@@ -133,7 +133,7 @@ public abstract class AbstractThread extends Thread implements WorkflowThread {
         }
     }
     
-    public void open() {} // dummy definition; should be overriden
-    public void close() {} // dummy definition; should be overriden
+    public void open() {}; // dummy definition; should be overriden
+    public void close() {}; // dummy definition; should be overriden
     
 }

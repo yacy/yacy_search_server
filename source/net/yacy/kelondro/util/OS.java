@@ -126,7 +126,7 @@ public final class OS {
 	public static String getMacFSType(final File f) {
 		if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
 			final String s = macGetFileType.invoke(null, new Object[] {f}).toString();
-			if ((s == null) || (s.charAt(0) == 0)) return blankTypeString;
+			if (s == null || (s.length() > 0 && s.charAt(0) == 0)) return blankTypeString;
 			return s;
 		} catch (final Exception e) {
 			return null;
@@ -137,7 +137,7 @@ public final class OS {
 	public static String getMacFSCreator(final File f) {
 		if ((isMacArchitecture) && (macMRJFileUtils != null)) try {
 			final String s = macGetFileCreator.invoke(null, new Object[] {f}).toString();
-			if ((s == null) || (s.charAt(0) == 0)) return blankTypeString;
+			if (s == null || (s.length() > 0 && s.charAt(0) == 0)) return blankTypeString;
 			return s;
 		} catch (final Exception e) {
 			return null;

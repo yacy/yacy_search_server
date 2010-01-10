@@ -46,8 +46,8 @@ import de.anomic.crawler.retrieval.Response;
 
 public class OAIPMHReader {
 
-    private DigestURI source;
-    private ResumptionToken resumptionToken;
+    private final DigestURI source;
+    private final ResumptionToken resumptionToken;
     
     public OAIPMHReader(LoaderDispatcher loader, DigestURI source, File targetDir, String filePrefix) throws IOException {
         this.source = source;

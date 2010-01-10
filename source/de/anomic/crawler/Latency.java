@@ -231,7 +231,7 @@ public class Latency {
         private long timeacc;
         private long lastacc;
         private int count;
-        private String host;
+        private final String host;
         private long robotsMinDelay;
         public Host(String host, long time) {
             this.host = host;

@@ -34,8 +34,9 @@ import net.yacy.kelondro.logging.Log;
 
 public class MergeIterator<E> implements CloneableIterator<E> {
     
-    private Comparator<E> comp;
-    private CloneableIterator<E> a, b;
+    private final Comparator<E> comp;
+    private final CloneableIterator<E> a;
+    private final CloneableIterator<E> b;
     private E na, nb;
     private final Method merger;
     private final boolean up;

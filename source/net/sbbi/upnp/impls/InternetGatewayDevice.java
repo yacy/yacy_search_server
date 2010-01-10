@@ -439,7 +439,7 @@ public class InternetGatewayDevice {
     StateVariableMessage natTableSize = msgFactory.getStateVariableMessage( "PortMappingNumberOfEntries" );
     try {
       StateVariableResponse resp = natTableSize.service();
-      rtrval = new Integer(  resp.getStateVariableValue() );
+      rtrval = Integer.valueOf(  resp.getStateVariableValue() );
     } catch ( UPNPResponseException ex ) {
       // 404 can happen if device do not implement state variables queries
       if ( ex.getDetailErrorCode() != 404 ) {
@@ -492,7 +492,7 @@ public class InternetGatewayDevice {
         throw ex;
       }
     }
-    return new Integer( size );
+    return Integer.valueOf( size );
   }
   
   private void checkPortMappingProtocol( String prot ) throws IllegalArgumentException {

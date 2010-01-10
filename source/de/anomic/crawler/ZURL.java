@@ -149,7 +149,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
     }
     
     private class EntryIterator implements Iterator<ZURL.Entry> {
-        private Iterator<String> hi;
+        private final Iterator<String> hi;
         public EntryIterator() {
             this.hi = stack.iterator();
         }

@@ -407,7 +407,7 @@ public class NetworkGraph {
 
     //[MN]
     private static String addBlanksAndDots(final long input, final int length) {
-        return addBlanksAndDots(input + "", length);
+        return addBlanksAndDots(Long.toString(input), length);
     }
 
     //[MN]

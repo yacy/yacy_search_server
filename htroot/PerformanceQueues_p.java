@@ -84,7 +84,7 @@ public class PerformanceQueues_p {
         	}
             if (post.containsKey("Xmx")) {
                 int xmx = 180; // default maximum heap size
-                try { xmx = Integer.valueOf(post.get("Xmx", "" + xmx)).intValue(); } catch (final NumberFormatException e){}
+                try { xmx = Integer.parseInt(post.get("Xmx", Integer.toString(xmx))); } catch (final NumberFormatException e){}
                 if (!(OS.isWin32 && xmx >= 2000)){
 	                sb.setConfig("javastart_Xmx", "Xmx" + xmx + "m");
 	                sb.setConfig("javastart_Xms", "Xms" + xmx + "m");
@@ -93,17 +93,17 @@ public class PerformanceQueues_p {
             }
             if(post.containsKey("diskFree")) {
             	int diskFree = 3000; // default
-            	try { diskFree = Integer.valueOf(post.get("diskFree", "" + diskFree)).intValue(); } catch (final NumberFormatException e){}
+            	try { diskFree = Integer.parseInt(post.get("diskFree", Integer.toString(diskFree))); } catch (final NumberFormatException e){}
             	sb.setConfig(SwitchboardConstants.DISK_FREE, diskFree);
             }
             if(post.containsKey("diskFreeHardlimit")) {
             	int diskFreeHardlimit = 1000; // default
-            	try { diskFreeHardlimit = Integer.valueOf(post.get("diskFreeHardlimit", "" + diskFreeHardlimit)).intValue(); } catch (final NumberFormatException e){}
+            	try { diskFreeHardlimit = Integer.parseInt(post.get("diskFreeHardlimit", Integer.toString(diskFreeHardlimit))); } catch (final NumberFormatException e){}
             	sb.setConfig(SwitchboardConstants.DISK_FREE_HARDLIMIT, diskFreeHardlimit);
             }
             if(post.containsKey("memoryAcceptDHT")) {
             	int memoryAcceptDHT = 50000; // default
-            	try { memoryAcceptDHT = Integer.valueOf(post.get("memoryAcceptDHT", "" + memoryAcceptDHT)).intValue(); } catch (final NumberFormatException e){}
+            	try { memoryAcceptDHT = Integer.parseInt(post.get("memoryAcceptDHT", Integer.toString(memoryAcceptDHT))); } catch (final NumberFormatException e){}
             	sb.setConfig(SwitchboardConstants.MEMORY_ACCEPTDHT, memoryAcceptDHT);
             }
             if(post.containsKey("resetObserver")) {

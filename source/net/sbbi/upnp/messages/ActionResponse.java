@@ -59,8 +59,8 @@ import java.util.*;
 @SuppressWarnings("unchecked")
 public class ActionResponse {
 
-  private Map outArguments = new HashMap();
-  private Map outArgumentsVals = new HashMap();
+  private final Map outArguments = new HashMap();
+  private final Map outArgumentsVals = new HashMap();
 
   protected ActionResponse() {
   }

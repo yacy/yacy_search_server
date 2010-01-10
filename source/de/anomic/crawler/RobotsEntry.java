@@ -147,7 +147,7 @@ public class RobotsEntry {
     
     public Date getLoadedDate() {
         if (this.mem.containsKey(LOADED_DATE)) {
-            return new Date(Long.valueOf(this.mem.get(LOADED_DATE)).longValue());
+            return new Date(Long.parseLong(this.mem.get(LOADED_DATE)));
         }
         return null;
     }
@@ -160,7 +160,7 @@ public class RobotsEntry {
     
     public Date getModDate() {
         if (this.mem.containsKey(MOD_DATE)) {
-            return new Date(Long.valueOf(this.mem.get(MOD_DATE)).longValue());
+            return new Date(Long.parseLong(this.mem.get(MOD_DATE)));
         }
         return null;
     }        

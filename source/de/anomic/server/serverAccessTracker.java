@@ -31,11 +31,11 @@ import net.yacy.kelondro.logging.Log;
 
 public class serverAccessTracker {
 
-    private long cleanupCycle = 60000; // 1 minute
+    private static final long cleanupCycle = 60000; // 1 minute
     
-    private long  maxTrackingTime;
-    private int   maxTrackingCount;
-    private int   maxHostCount;
+    private final long  maxTrackingTime;
+    private final int   maxTrackingCount;
+    private final int   maxHostCount;
     private final ConcurrentHashMap<String, SortedMap<Long, String>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
     private long lastCleanup;
     

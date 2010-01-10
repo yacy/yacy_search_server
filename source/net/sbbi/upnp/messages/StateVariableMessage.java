@@ -69,8 +69,8 @@ public class StateVariableMessage {
   
   private final static Log log = LogFactory.getLog( StateVariableMessage.class );
   
-  private UPNPService service;
-  private ServiceStateVariable serviceStateVar;
+  private final UPNPService service;
+  private final ServiceStateVariable serviceStateVar;
   
   protected StateVariableMessage( UPNPService service, ServiceStateVariable serviceStateVar ) {
     this.service = service;

@@ -84,19 +84,19 @@ public class Dispatcher {
     private Map<ByteArray, Transmission.Chunk> transmissionCloud;
     
     // the segment backend is used to store the remaining indexContainers in case that the object is closed
-    private Segment segment;
+    private final Segment segment;
     
     // the seed database
-    private yacySeedDB seeds;
+    private final yacySeedDB seeds;
     
     // the log
-    private Log log;
+    private final Log log;
     
     // transmission process
     private WorkflowProcessor<Transmission.Chunk> indexingTransmissionProcessor;
    
     // transmission object
-    private Transmission transmission;
+    private final Transmission transmission;
     
     public Dispatcher(
             final Segment segment,

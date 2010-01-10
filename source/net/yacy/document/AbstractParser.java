@@ -55,7 +55,7 @@ public abstract class AbstractParser implements Idiom {
     /**
      * Parser name
      */
-    private String parserName;
+    private final String parserName;
     
     /**
      * The source file file size in bytes if the source document was passed

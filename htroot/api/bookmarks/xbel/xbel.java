@@ -47,7 +47,7 @@ public class xbel {
         	}
         	if(post.containsKey("folder")) {
         		final String folderName=post.get("folder");
-        		if (folderName.startsWith("/")) { root = folderName; } 
+        		if (folderName.length() > 0 && folderName.charAt(0) == '/') { root = folderName; } 
         			else { root = "/" + folderName; }
         	}
         	if(post.containsKey("style") && !post.get("style").equals("")) {

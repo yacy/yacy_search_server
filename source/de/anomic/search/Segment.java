@@ -463,7 +463,7 @@ public class Segment {
                             urlHashs.add(entry.metadataHash());
                         } else {
                             url = ue.metadata().url();
-                            if ((url == null) || (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, url) == true)) {
+                            if (url == null || Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, url)) {
                                 urlHashs.add(entry.metadataHash());
                             }
                         }

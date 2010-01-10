@@ -316,8 +316,8 @@ public final class HandleMap implements Iterable<Row.Entry> {
     
     public final static class initDataConsumer implements Callable<HandleMap> {
 
-        private BlockingQueue<entry> cache;
-        private HandleMap map;
+        private final BlockingQueue<entry> cache;
+        private final HandleMap map;
         private Future<HandleMap> result;
         private boolean sortAtEnd;
         

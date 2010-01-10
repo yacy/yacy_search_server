@@ -279,7 +279,7 @@ public final class Row {
         
         public Entry(String external, final boolean decimalCardinal) {
             // parse external form
-            if (external.charAt(0) == '{') external = external.substring(1, external.length() - 1);
+            if (external.length() > 0 && external.charAt(0) == '{') external = external.substring(1, external.length() - 1);
             final String[] elts = external.split(",");
             if (nickref == null) genNickRef();
             String nick;

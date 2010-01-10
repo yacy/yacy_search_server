@@ -455,7 +455,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         private String failure;
         private final int format;
         private final boolean dom;
-        private HandleSet set;
+        private final HandleSet set;
         
         public Export(final File f, final String filter, HandleSet set, final int format, boolean dom) {
             // format: 0=text, 1=html, 2=rss/xml

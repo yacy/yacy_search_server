@@ -6,7 +6,7 @@ import de.anomic.yacy.yacyBuildProperties;
 /**
  * Properties set when compiling this release/version
  */
-public class yacyBuildProperties {
+public final class yacyBuildProperties {
 	private yacyBuildProperties() {
 	}
 
