@@ -196,6 +196,7 @@ public final class yacy {
                 System.out.println("could not find logging properties in homePath=" + homePath);
                 Log.logException(e);
             }
+            Log.logConfig("STARTUP", "YaCy version: " + yacyBuildProperties.getVersion() + "/" + yacyBuildProperties.getSVNRevision());
             Log.logConfig("STARTUP", "Java version: " + System.getProperty("java.version", "no-java-version"));
             Log.logConfig("STARTUP", "Operation system: " + System.getProperty("os.name","unknown"));
             Log.logConfig("STARTUP", "Application root-path: " + homePath);
