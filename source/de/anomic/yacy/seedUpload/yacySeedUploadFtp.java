@@ -68,8 +68,4 @@ public class yacySeedUploadFtp implements yacySeedUploader {
         return new String[] {CONFIG_FTP_SERVER,CONFIG_FTP_ACCOUNT,CONFIG_FTP_PASSWORD,CONFIG_FTP_PATH};
     }
 
-    public String[] getLibxDependencies() {
-        return new String[]{};
-    }
-
 }
