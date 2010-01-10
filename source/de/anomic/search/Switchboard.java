@@ -371,7 +371,6 @@ public final class Switchboard extends serverSwitch {
                 this.useTailCache,
                 this.exceed134217727);
         crawler = new CrawlSwitchboard(
-                peers,
                 networkName,
                 log,
                 this.queuesRoot);
@@ -847,7 +846,6 @@ public final class Switchboard extends serverSwitch {
             
             // startup
             crawler = new CrawlSwitchboard(
-                    peers,
                     networkName,
                     log,
                     this.queuesRoot);

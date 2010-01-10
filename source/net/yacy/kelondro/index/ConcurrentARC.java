@@ -40,7 +40,7 @@ public final class ConcurrentARC<K, V> implements ARC<K, V> {
     private final ARC<K, V> arc[];
     
     @SuppressWarnings("unchecked")
-	public ConcurrentARC(final int cacheSize, int partitions) {
+	public ConcurrentARC(final int cacheSize, final int partitions) {
     	this.mask = 1;
     	while (this.mask < partitions) this.mask = this.mask * 2;
     	this.arc = new SimpleARC[mask];
@@ -53,7 +53,7 @@ public final class ConcurrentARC<K, V> implements ARC<K, V> {
      * @param s
      * @param v
      */
-    public final void put(K s, V v) {
+    public final void put(final K s, final V v) {
     	this.arc[s.hashCode() & mask].put(s, v);
     }
     
@@ -62,7 +62,7 @@ public final class ConcurrentARC<K, V> implements ARC<K, V> {
      * @param s
      * @return the value
      */
-    public final V get(K s) {
+    public final V get(final K s) {
     	return this.arc[s.hashCode() & mask].get(s);
     }
     
@@ -71,7 +71,7 @@ public final class ConcurrentARC<K, V> implements ARC<K, V> {
      * @param s
      * @return
      */
-    public final boolean containsKey(K s) {
+    public final boolean containsKey(final K s) {
     	return this.arc[s.hashCode() & mask].containsKey(s);
     }
     
@@ -80,7 +80,7 @@ public final class ConcurrentARC<K, V> implements ARC<K, V> {
      * @param s
      * @return the old value
      */
-    public final V remove(K s) {
+    public final V remove(final K s) {
     	return this.arc[s.hashCode() & mask].remove(s);
     }
     

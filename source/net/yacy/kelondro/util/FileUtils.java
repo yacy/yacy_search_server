@@ -555,14 +555,12 @@ public final class FileUtils {
     public static ArrayList<String> getListArray(final File listFile){
         String line;
         final ArrayList<String> list = new ArrayList<String>();
-        int count = 0;
         BufferedReader br = null;
         try {
             br = new BufferedReader(new InputStreamReader(new FileInputStream(listFile),"UTF-8"));
 
             while((line = br.readLine()) != null){
                 list.add(line);
-                count++;
             }
             br.close();
         } catch(final IOException e) {

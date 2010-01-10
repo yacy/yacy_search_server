@@ -62,12 +62,12 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @param objectOrder
      * @param space
      */
-    public HandleMap(final int keylength, final ByteOrder objectOrder, int idxbytes, final int expectedspace) {
+    public HandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace) {
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("long c-" + idxbytes + " {b256}")}, objectOrder);
         this.index = new ObjectIndexCache(rowdef, expectedspace);
     }
     
-    public HandleMap(final int keylength, final ByteOrder objectOrder, int idxbytes, final int expectedspace, final int initialspace) throws RowSpaceExceededException {
+    public HandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace, final int initialspace) throws RowSpaceExceededException {
         this.rowdef = new Row(new Column[]{new Column("key", Column.celltype_binary, Column.encoder_bytes, keylength, "key"), new Column("long c-" + idxbytes + " {b256}")}, objectOrder);
         this.index = new ObjectIndexCache(rowdef, expectedspace, initialspace);
     }
@@ -80,12 +80,12 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @throws IOException 
      * @throws RowSpaceExceededException 
      */
-    public HandleMap(final int keylength, final ByteOrder objectOrder, int idxbytes, final File file, final int expectedspace) throws IOException, RowSpaceExceededException {
+    public HandleMap(final int keylength, final ByteOrder objectOrder, final int idxbytes, final File file, final int expectedspace) throws IOException, RowSpaceExceededException {
         this(keylength, objectOrder, idxbytes, expectedspace, (int) (file.length() / (keylength + idxbytes)));
         // read the index dump and fill the index
         InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
         if (file.getName().endsWith(".gz")) is = new GZIPInputStream(is);
-        byte[] a = new byte[keylength + idxbytes];
+        final byte[] a = new byte[keylength + idxbytes];
         int c;
         Row.Entry entry;
         while (true) {
@@ -123,7 +123,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
     	return new int[]{keym, this.rowdef.width(1) - valm};
     }
 
-    private final int eq(byte[] a, byte[] b) {
+    private final int eq(final byte[] a, final byte[] b) {
     	for (int i = 0; i < a.length; i++) {
     		if (a[i] != b[i]) return i;
     	}
@@ -137,12 +137,12 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @return the number of written entries
      * @throws IOException
      */
-    public final int dump(File file) throws IOException {
+    public final int dump(final File file) throws IOException {
         // we must use an iterator from the combined index, because we need the entries sorted
         // otherwise we could just write the byte[] from the in kelondroRowSet which would make
         // everything much faster, but this is not an option here.
-        File tmp = new File(file.getParentFile(), file.getName() + ".prt");
-        Iterator<Row.Entry> i = this.index.rows(true, null);
+        final File tmp = new File(file.getParentFile(), file.getName() + ".prt");
+        final Iterator<Row.Entry> i = this.index.rows(true, null);
         OutputStream os = new BufferedOutputStream(new FileOutputStream(tmp), 4 * 1024 * 1024);
         if (file.getName().endsWith(".gz")) os = new GZIPOutputStream(os);
         int c = 0;
@@ -206,7 +206,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
         index.addUnique(newentry);
     }
     
-    public final synchronized long add(final byte[] key, long a) throws RowSpaceExceededException {
+    public final synchronized long add(final byte[] key, final long a) throws RowSpaceExceededException {
         assert key != null;
         assert a > 0; // it does not make sense to add 0. If this occurres, it is a performance issue
 
@@ -218,7 +218,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
             index.addUnique(newentry);
             return 1;
         }
-        long i = indexentry.getColLong(1) + a;
+        final long i = indexentry.getColLong(1) + a;
         indexentry.setCol(1, i);
         index.put(indexentry);
         return i;
@@ -295,9 +295,9 @@ public final class HandleMap implements Iterable<Row.Entry> {
      * @param bufferSize
      * @return
      */
-    public final static initDataConsumer asynchronusInitializer(final int keylength, final ByteOrder objectOrder, int idxbytes, final int expectedspace) {
-        initDataConsumer initializer = new initDataConsumer(new HandleMap(keylength, objectOrder, idxbytes, expectedspace));
-        ExecutorService service = Executors.newSingleThreadExecutor();
+    public final static initDataConsumer asynchronusInitializer(final int keylength, final ByteOrder objectOrder, final int idxbytes, final int expectedspace) {
+        final initDataConsumer initializer = new initDataConsumer(new HandleMap(keylength, objectOrder, idxbytes, expectedspace));
+        final ExecutorService service = Executors.newSingleThreadExecutor();
         initializer.setResult(service.submit(initializer));
         service.shutdown();
         return initializer;
@@ -321,13 +321,13 @@ public final class HandleMap implements Iterable<Row.Entry> {
         private Future<HandleMap> result;
         private boolean sortAtEnd;
         
-        public initDataConsumer(HandleMap map) {
+        public initDataConsumer(final HandleMap map) {
             this.map = map;
             cache = new LinkedBlockingQueue<entry>();
             sortAtEnd = false;
         }
         
-        protected final void setResult(Future<HandleMap> result) {
+        protected final void setResult(final Future<HandleMap> result) {
             this.result = result;
         }
         
@@ -348,7 +348,7 @@ public final class HandleMap implements Iterable<Row.Entry> {
          * to signal the initialization thread that no more entries will be submitted with consumer()
          * this method must be called. The process will not terminate if this is not called before.
          */
-        public final void finish(boolean sortAtEnd) {
+        public final void finish(final boolean sortAtEnd) {
             this.sortAtEnd = sortAtEnd;
             try {
                 cache.put(poisonEntry);

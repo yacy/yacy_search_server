@@ -48,13 +48,13 @@ public final class SimpleARC<K, V> implements ARC<K, V> {
         this.cacheSize = cacheSize / 2;
         this.levelA = new LinkedHashMap<K, V>(cacheSize, 0.1f, accessOrder) {
             private static final long serialVersionUID = 1L;
-            @Override protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+            @Override protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
                 return size() > SimpleARC.this.cacheSize;
             }
         };
         this.levelB = new LinkedHashMap<K, V>(cacheSize, 0.1f, accessOrder) {
             private static final long serialVersionUID = 1L;
-            @Override protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+            @Override protected boolean removeEldestEntry(final Map.Entry<K, V> eldest) {
                 return size() > SimpleARC.this.cacheSize;
             }
         };
@@ -65,7 +65,7 @@ public final class SimpleARC<K, V> implements ARC<K, V> {
      * @param s
      * @param v
      */
-    public final synchronized void put(K s, V v) {
+    public final synchronized void put(final K s, final V v) {
         if (this.levelB.containsKey(s)) {
         	this.levelB.put(s, v);
             assert (this.levelB.size() <= cacheSize); // the cache should shrink automatically
@@ -80,7 +80,7 @@ public final class SimpleARC<K, V> implements ARC<K, V> {
      * @param s
      * @return the value
      */
-    public final synchronized V get(K s) {
+    public final synchronized V get(final K s) {
         V v = this.levelB.get(s);
         if (v != null) return v;
         v = this.levelA.remove(s);
@@ -97,7 +97,7 @@ public final class SimpleARC<K, V> implements ARC<K, V> {
      * @param s
      * @return
      */
-    public final synchronized boolean containsKey(K s) {
+    public final synchronized boolean containsKey(final K s) {
         if (this.levelB.containsKey(s)) return true;
         return this.levelA.containsKey(s);
     }
@@ -107,8 +107,8 @@ public final class SimpleARC<K, V> implements ARC<K, V> {
      * @param s
      * @return the old value
      */
-    public final synchronized V remove(K s) {
-        V r = this.levelB.remove(s);
+    public final synchronized V remove(final K s) {
+        final V r = this.levelB.remove(s);
         if (r != null) return r;
         return this.levelA.remove(s);
     }

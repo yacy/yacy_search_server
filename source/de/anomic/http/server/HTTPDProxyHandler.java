@@ -138,10 +138,10 @@ public final class HTTPDProxyHandler {
                 if (pattern == null) pattern = "DATA/LOG/proxyAccess%u%g.log";
                 
                 final String limitStr = manager.getProperty(className + ".logging.FileHandler.limit");
-                if (limitStr != null) try { limit = Integer.valueOf(limitStr).intValue(); } catch (final NumberFormatException e) {}
+                if (limitStr != null) try { limit = Integer.parseInt(limitStr); } catch (final NumberFormatException e) {}
                 
                 final String countStr = manager.getProperty(className + ".logging.FileHandler.count");
-                if (countStr != null) try { count = Integer.valueOf(countStr).intValue(); } catch (final NumberFormatException e) {}
+                if (countStr != null) try { count = Integer.parseInt(countStr); } catch (final NumberFormatException e) {}
                 
                 // creating the proxy access logger
                 final Logger proxyLogger = Logger.getLogger("PROXY.access");
@@ -168,7 +168,7 @@ public final class HTTPDProxyHandler {
         sb = Switchboard.getSwitchboard();
         if (sb != null) {
             
-        isTransparentProxy = Boolean.valueOf(sb.getConfig("isTransparentProxy","false")).booleanValue();
+        isTransparentProxy = Boolean.parseBoolean(sb.getConfig("isTransparentProxy","false"));
             
         // set timeout
         timeout = Integer.parseInt(sb.getConfig("proxy.clientTimeout", "10000"));

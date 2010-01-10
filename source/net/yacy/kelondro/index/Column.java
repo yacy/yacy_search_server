@@ -63,7 +63,7 @@ public final class Column {
 
         // cut quotes etc.
         celldef = celldef.trim();
-        if (celldef.startsWith("<")) celldef = celldef.substring(1);
+        if (celldef.charAt(0) == '<') celldef = celldef.substring(1);
         if (celldef.endsWith(">")) celldef = celldef.substring(0, celldef.length() - 1);
         
         // parse type definition
@@ -260,11 +260,11 @@ public final class Column {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (!(obj instanceof Column)) return false;
-		Column other = (Column) obj;
+		final Column other = (Column) obj;
 		if (celltype != other.celltype) return false;
 		if (cellwidth != other.cellwidth) return false;
 		if (encoder != other.encoder) return false;

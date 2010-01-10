@@ -91,7 +91,7 @@ public class Digest {
     public static byte[] decodeHex(final String hex) {
         final byte[] result = new byte[hex.length() / 2];
         for (int i = 0; i < result.length; i++) {
-            result[i] = (byte) (16 * Integer.parseInt(hex.charAt(i * 2) + "", 16) + Integer.parseInt(hex.charAt(i * 2 + 1) + "", 16));
+            result[i] = (byte) (16 * Integer.parseInt(Character.toString(hex.charAt(i * 2)), 16) + Integer.parseInt(Character.toString(hex.charAt(i * 2 + 1)), 16));
         }
         return result;
     }

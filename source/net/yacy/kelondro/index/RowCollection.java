@@ -208,7 +208,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         return this.rowdef;
     }
     
-    protected final long neededSpaceForEnsuredSize(final int elements, boolean forcegc) {
+    protected final long neededSpaceForEnsuredSize(final int elements, final boolean forcegc) {
         assert elements > 0 : "elements = " + elements;
         final long needed = elements * rowdef.objectsize;
         if (chunkcache.length >= needed) return 0;
@@ -224,12 +224,12 @@ public class RowCollection implements Iterable<Row.Entry> {
     
     protected final void ensureSize(final int elements) throws RowSpaceExceededException {
         if (elements == 0) return;
-        long allocram = neededSpaceForEnsuredSize(elements, true);
+        final long allocram = neededSpaceForEnsuredSize(elements, true);
         if (allocram == 0) return;
         assert allocram > chunkcache.length : "wrong alloc computation: allocram = " + allocram + ", chunkcache.length = " + chunkcache.length;
         if (!MemoryControl.request(allocram, true)) throw new RowSpaceExceededException(allocram, "RowCollection grow");
         try {
-            byte[] newChunkcache = new byte[(int) allocram]; // increase space
+            final byte[] newChunkcache = new byte[(int) allocram]; // increase space
             System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
             chunkcache = newChunkcache;
         } catch (OutOfMemoryError e) {
@@ -258,7 +258,7 @@ public class RowCollection implements Iterable<Row.Entry> {
             return; // if the swap buffer is not available, we must give up.
                     // This is not critical. Otherwise we provoke a serious
                     // problem with OOM
-        byte[] newChunkcache = new byte[(int) needed];
+        final byte[] newChunkcache = new byte[(int) needed];
         System.arraycopy(chunkcache, 0, newChunkcache, 0, Math.min(
                 chunkcache.length, newChunkcache.length));
         chunkcache = newChunkcache;
@@ -299,7 +299,7 @@ public class RowCollection implements Iterable<Row.Entry> {
     public synchronized final void set(final int index, final Row.Entry a) throws RowSpaceExceededException {
         assert (index >= 0) : "set: access with index " + index + " is below zero";
         ensureSize(index + 1);
-        boolean sameKey = match(a.bytes(), 0, a.cellwidth(0), index);
+        final boolean sameKey = match(a.bytes(), 0, a.cellwidth(0), index);
         //if (sameKey) System.out.print("$");
         a.writeToArray(chunkcache, index * rowdef.objectsize);
         if (index >= this.chunkcount) this.chunkcount = index + 1;
@@ -439,7 +439,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         if (chunkcount == 0) return null;
         this.sort();
         final Row.Entry r = get(0, false);
-        byte[] b = r.getPrimaryKeyBytes();
+        final byte[] b = r.getPrimaryKeyBytes();
         return b;
     }
     
@@ -447,7 +447,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         if (chunkcount == 0) return null;
         this.sort();
         final Row.Entry r = get(chunkcount - 1, false);
-        byte[] b = r.getPrimaryKeyBytes();
+        final byte[] b = r.getPrimaryKeyBytes();
         return b;
     }
     
@@ -471,7 +471,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         return this.sortBound;
     }
     
-    public synchronized Iterator<byte[]> keys(boolean keepOrderWhenRemoving) {
+    public synchronized Iterator<byte[]> keys(final boolean keepOrderWhenRemoving) {
         // iterates byte[] - type entries
         return new keyIterator(keepOrderWhenRemoving);
     }
@@ -487,7 +487,7 @@ public class RowCollection implements Iterable<Row.Entry> {
         private int p;
         private boolean keepOrderWhenRemoving;
         
-        public keyIterator(boolean keepOrderWhenRemoving) {
+        public keyIterator(final boolean keepOrderWhenRemoving) {
             this.p = 0;
             this.keepOrderWhenRemoving = keepOrderWhenRemoving;
         }
@@ -858,7 +858,6 @@ public class RowCollection implements Iterable<Row.Entry> {
         final ArrayList<RowCollection> report = new ArrayList<RowCollection>();
         if (chunkcount < 2) return report;
         int i = chunkcount - 2;
-        int d = 0;
         boolean u = true;
         RowCollection collection = new RowCollection(this.rowdef, 2);
         try {
@@ -866,13 +865,11 @@ public class RowCollection implements Iterable<Row.Entry> {
                 if (match(i, i + 1)) {
                     collection.addUnique(get(i + 1, false));
                     removeRow(i + 1, false);
-                    d++;
                     if (i + 1 < chunkcount - 1) u = false;
                 } else if (!collection.isEmpty()) {
                     // finish collection of double occurrences
                     collection.addUnique(get(i + 1, false));
                     removeRow(i + 1, false);
-                    d++;
                     if (i + 1 < chunkcount - 1) u = false;
                     collection.trim(false);
                     report.add(collection);

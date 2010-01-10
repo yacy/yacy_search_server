@@ -87,19 +87,19 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
     }
     
     public final synchronized byte[] smallestKey() {
-        byte[] b0 = index0.smallestKey();
+        final byte[] b0 = index0.smallestKey();
         if (b0 == null) return null;
         if (index1 == null) return b0;
-        byte[] b1 = index0.smallestKey();
+        final byte[] b1 = index0.smallestKey();
         if (b1 == null || rowdef.objectOrder.compare(b1, b0) > 0) return b0;
         return b1;
     }
     
     public final synchronized byte[] largestKey() {
-        byte[] b0 = index0.largestKey();
+        final byte[] b0 = index0.largestKey();
         if (b0 == null) return null;
         if (index1 == null) return b0;
-        byte[] b1 = index0.largestKey();
+        final byte[] b1 = index0.largestKey();
         if (b1 == null || rowdef.objectOrder.compare(b0, b1) > 0) return b0;
         return b1;
     }
@@ -126,7 +126,7 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         finishInitialization();
         // if the new entry is within the initialization part, just overwrite it
         assert index0.isSorted();
-        byte[] key = entry.getPrimaryKeyBytes();
+        final byte[] key = entry.getPrimaryKeyBytes();
         if (index0.has(key)) {
             // replace the entry
             return index0.replace(entry);
@@ -141,7 +141,7 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         finishInitialization();
         // if the new entry is within the initialization part, just overwrite it
         assert index0.isSorted();
-        byte[] key = entry.getPrimaryKeyBytes();
+        final byte[] key = entry.getPrimaryKeyBytes();
         if (index0.has(key)) {
             // replace the entry
             index0.put(entry);
@@ -167,11 +167,11 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
 		while (i.hasNext()) addUnique(i.next());
 	}
 	
-	public final synchronized long inc(final byte[] key, int col, long add, Row.Entry initrow) throws RowSpaceExceededException {
+	public final synchronized long inc(final byte[] key, final int col, final long add, final Row.Entry initrow) throws RowSpaceExceededException {
         assert (key != null);
         finishInitialization();
         assert index0.isSorted();
-        long l = index0.inc(key, col, add, null);
+        final long l = index0.inc(key, col, add, null);
         if (l != Long.MIN_VALUE) return l;
         return index1.inc(key, col, add, initrow);
     }    
@@ -182,8 +182,8 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
 	    if (index1 == null) {
 	        return index0.removeDoubles();
 	    }
-        ArrayList<RowCollection> d0 = index0.removeDoubles();
-        ArrayList<RowCollection> d1 = index1.removeDoubles();
+	    final ArrayList<RowCollection> d0 = index0.removeDoubles();
+	    final ArrayList<RowCollection> d1 = index1.removeDoubles();
         d0.addAll(d1);
         return d0;
 	}
@@ -254,8 +254,8 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         // index0 should be sorted
         // sort index1 to enable working of the merge iterator
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
-        CloneableIterator<byte[]> k0 = index0.keys(up, firstKey);
-        CloneableIterator<byte[]> k1 = index1.keys(up, firstKey);
+        final CloneableIterator<byte[]> k0 = index0.keys(up, firstKey);
+        final CloneableIterator<byte[]> k1 = index1.keys(up, firstKey);
         if (k0 == null) return k1;
         if (k1 == null) return k0;
         return new MergeIterator<byte[]>(
@@ -284,8 +284,8 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         // sort index1 to enable working of the merge iterator
         //index1.sort();
         //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
-        CloneableIterator<Row.Entry> k0 = index0.rows(up, firstKey);
-        CloneableIterator<Row.Entry> k1 = index1.rows(up, firstKey);
+        final CloneableIterator<Row.Entry> k0 = index0.rows(up, firstKey);
+        final CloneableIterator<Row.Entry> k1 = index1.rows(up, firstKey);
         if (k0 == null) return k1;
         if (k1 == null) return k0;
         return new MergeIterator<Row.Entry>(

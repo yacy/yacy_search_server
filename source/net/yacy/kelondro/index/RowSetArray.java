@@ -45,15 +45,15 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         }
     }
     
-    private final int indexFor(byte[] key) {
+    private final int indexFor(final byte[] key) {
         return (int) (this.rowdef.objectOrder.cardinal(key) % ((long) array.length));
     }
     
-    private final int indexFor(Entry row) {
+    private final int indexFor(final Entry row) {
         return (int) (this.rowdef.objectOrder.cardinal(row.bytes(), 0, row.getPrimaryKeyLength()) % ((long) array.length));
     }
     
-    private final RowSet accessArray(int i) {
+    private final RowSet accessArray(final int i) {
         RowSet r = this.array[i];
         if (r == null) synchronized (this.array) {
             r = new RowSet(this.rowdef);
@@ -62,13 +62,13 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return r;
     }
     
-    public final void addUnique(Entry row) throws RowSpaceExceededException {
-        int i = indexFor(row);
+    public final void addUnique(final Entry row) throws RowSpaceExceededException {
+        final int i = indexFor(row);
         if (i < 0) return;
         accessArray(i).addUnique(row);
     }
 
-    public final void addUnique(List<Entry> rows) throws RowSpaceExceededException {
+    public final void addUnique(final List<Entry> rows) throws RowSpaceExceededException {
         for (Entry row: rows) addUnique(row);
     }
 
@@ -94,25 +94,25 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return null;
     }
 
-    public final Entry get(byte[] key) {
-        int i = indexFor(key);
+    public final Entry get(final byte[] key) {
+        final int i = indexFor(key);
         if (i < 0) return null;
-        RowSet r = this.array[i];
+        final RowSet r = this.array[i];
         if (r == null) return null;
         return r.get(key);
     }
 
-    public final boolean has(byte[] key) {
-        int i = indexFor(key);
+    public final boolean has(final byte[] key) {
+        final int i = indexFor(key);
         if (i < 0) return false;
-        RowSet r = this.array[i];
+        final RowSet r = this.array[i];
         if (r == null) return false;
         return r.has(key);
     }
 
-    public final CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) {
+    public final CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) {
         synchronized (this.array) {
-            Collection<CloneableIterator<byte[]>> col = new ArrayList<CloneableIterator<byte[]>>();
+            final Collection<CloneableIterator<byte[]>> col = new ArrayList<CloneableIterator<byte[]>>();
             for (int i = 0; i < this.array.length; i++) {
                 if (this.array[i] != null) {
                     this.array[i].sort();
@@ -123,20 +123,20 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         }            
     }
 
-    public final void put(Entry row) throws RowSpaceExceededException {
-        int i = indexFor(row);
+    public final void put(final Entry row) throws RowSpaceExceededException {
+        final int i = indexFor(row);
         if (i < 0) return;
         accessArray(i).put(row);
     }
 
-    public final Entry remove(byte[] key) {
-        int i = indexFor(key);
+    public final Entry remove(final byte[] key) {
+        final int i = indexFor(key);
         if (i < 0) return null;
         return accessArray(i).remove(key);
     }
 
     public final ArrayList<RowCollection> removeDoubles() throws RowSpaceExceededException {
-        ArrayList<RowCollection> col = new ArrayList<RowCollection>();
+        final ArrayList<RowCollection> col = new ArrayList<RowCollection>();
         synchronized (this.array) {
             for (int i = 0; i < this.array.length; i++) {
                 if (this.array[i] != null) {
@@ -152,7 +152,7 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         synchronized (this.array) {
             for (int i = 0; i < this.array.length; i++) {
                 if (this.array[i] != null) {
-                    Entry entry = this.array[i].removeOne();
+                    final Entry entry = this.array[i].removeOne();
                     if (this.array[i].isEmpty()) this.array[i] = null;
                     return entry;
                 }
@@ -161,8 +161,8 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return null;
     }
 
-    public final Entry replace(Entry row) throws RowSpaceExceededException {
-        int i = indexFor(row);
+    public final Entry replace(final Entry row) throws RowSpaceExceededException {
+        final int i = indexFor(row);
         if (i < 0) return null;
         return accessArray(i).replace(row);
     }
@@ -171,9 +171,9 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return this.rowdef;
     }
 
-    public final CloneableIterator<Entry> rows(boolean up, byte[] firstKey) {
+    public final CloneableIterator<Entry> rows(final boolean up, final byte[] firstKey) {
         synchronized (this.array) {
-            Collection<CloneableIterator<Entry>> col = new ArrayList<CloneableIterator<Entry>>();
+            final Collection<CloneableIterator<Entry>> col = new ArrayList<CloneableIterator<Entry>>();
             for (int i = 0; i < this.array.length; i++) {
                 if (this.array[i] != null) {
                     this.array[i].sort();
@@ -215,8 +215,8 @@ public final class RowSetArray implements ObjectIndex, Iterable<Row.Entry> {
         return this.rows(true, null);
     }
 
-    public final long inc(byte[] key, int col, long add, Entry initrow) throws RowSpaceExceededException {
-        int i = indexFor(key);
+    public final long inc(final byte[] key, final int col, final long add, final Entry initrow) throws RowSpaceExceededException {
+        final int i = indexFor(key);
         if (i < 0) return -1;
         return accessArray(i).inc(key, col, add, initrow);
     }

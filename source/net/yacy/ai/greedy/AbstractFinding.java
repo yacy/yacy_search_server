@@ -59,7 +59,7 @@ public abstract class AbstractFinding<SpecificRole extends Role> implements Find
      * set the current priority
      * This may only be used internally as part of the engine process to create a result queue
      */
-    public void setPriority(int newPriority) {
+    public void setPriority(final int newPriority) {
         this.priority = newPriority;
     }
 
@@ -71,15 +71,15 @@ public abstract class AbstractFinding<SpecificRole extends Role> implements Find
         return this.role;
     }
     
-    public int compare(Finding<SpecificRole> f1, Finding<SpecificRole> f2) {
-        int p1 = f1.getPriority();
-        int p2 = f2.getPriority();
+    public int compare(final Finding<SpecificRole> f1, final Finding<SpecificRole> f2) {
+        final int p1 = f1.getPriority();
+        final int p2 = f2.getPriority();
         if (p1 < p2) return 1;
         if (p1 > p2) return -1;
         return 0;
     }
 
-    public int compareTo(Finding<SpecificRole> o) {
+    public int compareTo(final Finding<SpecificRole> o) {
         return compare(this, o);
     }
     

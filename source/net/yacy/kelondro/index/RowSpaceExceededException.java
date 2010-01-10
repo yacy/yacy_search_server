@@ -37,7 +37,7 @@ public class RowSpaceExceededException extends Exception {
     private String forUsage;
     private long neededRAM, availableRAM, time;
     
-    public RowSpaceExceededException(long neededRAM, String forUsage) {
+    public RowSpaceExceededException(final long neededRAM, final String forUsage) {
         super(Long.toString(neededRAM) + " bytes needed for " + forUsage + ": " + MemoryControl.available() + " free at " + (new Date()).toString());
         this.time = System.currentTimeMillis();
         this.availableRAM = MemoryControl.available();
@@ -45,7 +45,7 @@ public class RowSpaceExceededException extends Exception {
         this.forUsage = forUsage;
     }
 
-    public RowSpaceExceededException(long neededRAM, String forUsage, Throwable t) {
+    public RowSpaceExceededException(final long neededRAM, final String forUsage, final Throwable t) {
         super(Long.toString(neededRAM) + " bytes needed for " + forUsage + ": " + MemoryControl.available() + " free at " + (new Date()).toString(), t);
         this.time = System.currentTimeMillis();
         this.availableRAM = MemoryControl.available();

@@ -65,8 +65,8 @@ public final class HandleSet implements Iterable<byte[]> {
     public HandleSet(final int keylength, final ByteOrder objectOrder, final File file, final int expectedspace) throws IOException, RowSpaceExceededException {
         this(keylength, objectOrder, expectedspace, (int) (file.length() / (keylength + 8)));
         // read the index dump and fill the index
-        InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
-        byte[] a = new byte[keylength];
+        final InputStream is = new BufferedInputStream(new FileInputStream(file), 1024 * 1024);
+        final byte[] a = new byte[keylength];
         int c;
         while (true) {
             c = is.read(a);
@@ -84,12 +84,12 @@ public final class HandleSet implements Iterable<byte[]> {
      * @return the number of written entries
      * @throws IOException
      */
-    public final int dump(File file) throws IOException {
+    public final int dump(final File file) throws IOException {
         // we must use an iterator from the combined index, because we need the entries sorted
         // otherwise we could just write the byte[] from the in kelondroRowSet which would make
         // everything much faster, but this is not an option here.
-        Iterator<Row.Entry> i = this.index.rows(true, null);
-        OutputStream os = new BufferedOutputStream(new FileOutputStream(file), 1024 * 1024);
+        final Iterator<Row.Entry> i = this.index.rows(true, null);
+        final OutputStream os = new BufferedOutputStream(new FileOutputStream(file), 1024 * 1024);
         int c = 0;
         while (i.hasNext()) {
             os.write(i.next().bytes());

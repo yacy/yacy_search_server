@@ -5,8 +5,8 @@
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -53,12 +53,10 @@ public class Compressor implements BLOB {
     private HashMap<String, byte[]> buffer; // entries which are not yet compressed, format is RAW (without magic)
     private long bufferlength;
     private long maxbufferlength;
-    private int cdr;
     
     public Compressor(BLOB backend, long buffersize) {
         this.backend = backend;
         this.maxbufferlength = buffersize;
-        this.cdr = 0;
         initBuffer();
     }
     
@@ -101,7 +99,6 @@ public class Compressor implements BLOB {
     private byte[] compressAddMagic(byte[] b) {
         // compress a byte array and add a leading magic for the compression
         try {
-            cdr++;
             //System.out.print("/(" + cdr + ")"); // DEBUG
             final ByteArrayOutputStream baos = new ByteArrayOutputStream(b.length / 5);
             baos.write(gzipMagic);
@@ -130,7 +127,6 @@ public class Compressor implements BLOB {
         if (b == null) return null;
         if (ByteArray.startsWith(b, gzipMagic)) {
             //System.out.print("\\"); // DEBUG
-            cdr--;
             ByteArrayInputStream bais = new ByteArrayInputStream(b);
             // eat up the magic
             bais.read();

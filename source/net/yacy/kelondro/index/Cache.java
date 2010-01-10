@@ -72,7 +72,7 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
      * @param hitLimit a limit of cache hit entries. If given as value <= 0, then only the RAM limits the size
      * @param missLimit a limit of cache miss entries. If given as value <= 0, then only the RAM limits the size
      */
-    public Cache(final ObjectIndex backupIndex, int hitLimit, int missLimit) {
+    public Cache(final ObjectIndex backupIndex, final int hitLimit, final int missLimit) {
         this.index = backupIndex;
         this.hitLimit = hitLimit;
         this.missLimit = missLimit;

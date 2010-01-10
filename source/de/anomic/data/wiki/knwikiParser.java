@@ -189,7 +189,7 @@ public class knwikiParser implements wikiParser {
         private String text;
         private final boolean nl;
 
-        public Text(final String text, final boolean escaped, final boolean newLineBefore) {
+        public Text(final String text, final boolean newLineBefore) {
                 this.text = text;
                 this.nl = newLineBefore;
         }
@@ -223,13 +223,13 @@ public class knwikiParser implements wikiParser {
 
             if (text == null) return null;
 
-            if (text.length() < 2) return new Text[] {new Text(text, false, true) };
+            if (text.length() < 2) return new Text[] {new Text(text, true) };
 
             final int startLen = escapeBegin.length();
             final int endLen = escapeEnd.length();
             final ArrayList<Text> r = new ArrayList<Text>();
             boolean escaped = text.startsWith(escapeBegin);
-            if (escaped) r.add(new Text("", false, true));
+            if (escaped) r.add(new Text("", true));
             int i, j = 0;
             while ((i = text.indexOf((escaped) ? escapeEnd : escapeBegin, j)) > -1) {
                 r.add(resolve2Text(text, escaped, (j > 0) ? j + ((escaped) ? startLen : endLen) : 0, i, escapeEnd));
@@ -244,7 +244,6 @@ public class knwikiParser implements wikiParser {
             if (to == -1) to = text.length();
             return new Text(
                 text.substring(from, to),
-                escaped,
                 from < escapeEnd.length() + 2 || (!escaped && text.charAt(from - escapeEnd.length() - 1) == '\n'));
         }
 		

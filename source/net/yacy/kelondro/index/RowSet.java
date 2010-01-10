@@ -67,7 +67,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         assert rowdef.objectOrder != null;
     }
     
-    public final static RowSet importRowSet(byte[] b, final Row rowdef) {
+    public final static RowSet importRowSet(final byte[] b, final Row rowdef) {
     	assert b.length >= exportOverheadSize : "b.length = " + b.length;
     	if (b.length < exportOverheadSize) return new RowSet(rowdef);
         final int size = (int) NaturalOrder.decodeLong(b, 0, 4);
@@ -105,11 +105,11 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         if ((this.chunkcount - this.sortBound) > collectionReSortLimit) {
             sort();
         }
-        int index = find(entry.bytes(), 0, super.rowdef.primaryKeyLength);
+        final int index = find(entry.bytes(), 0, super.rowdef.primaryKeyLength);
         if (index < 0) {
             super.addUnique(entry);
         } else {
-            int sb = this.sortBound; // save the sortBound, because it is not altered (we replace at the same place)
+            final int sb = this.sortBound; // save the sortBound, because it is not altered (we replace at the same place)
             set(index, entry);       // this may alter the sortBound, which we will revert in the next step
             this.sortBound = sb;     // revert a sortBound altering
         }
@@ -129,19 +129,19 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
             super.addUnique(entry);
         } else {
             oldentry = get(index, true);
-            int sb = this.sortBound; // save the sortBound, because it is not altered (we replace at the same place)
+            final int sb = this.sortBound; // save the sortBound, because it is not altered (we replace at the same place)
             set(index, entry);       // this may alter the sortBound, which we will revert in the next step
             this.sortBound = sb;     // revert a sortBound altering
         }
         return oldentry;
     }
 
-    public final synchronized long inc(byte[] key, int col, long add, Row.Entry initrow) throws RowSpaceExceededException {
+    public final synchronized long inc(final byte[] key, final int col, final long add, final Row.Entry initrow) throws RowSpaceExceededException {
         final int index = find(key, 0, key.length);
         if (index >= 0) {
             // the entry existed before
             final Row.Entry entry = get(index, false); // no clone necessary
-            long l = entry.incCol(col, add);
+            final long l = entry.incCol(col, add);
             set(index, entry);
             return l;
         } else if (initrow != null) {
@@ -378,7 +378,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
      * @return
      * @throws RowSpaceExceededException 
      */
-    public final RowSet merge(RowSet c) throws RowSpaceExceededException {
+    public final RowSet merge(final RowSet c) throws RowSpaceExceededException {
         assert c != null;
         /*
         if (this.isSorted() && this.size() >= c.size()) {
@@ -407,9 +407,9 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
      * @return
      * @throws RowSpaceExceededException 
      */
-    protected final static RowSet mergeEnum(RowCollection c0, RowCollection c1) throws RowSpaceExceededException {
+    protected final static RowSet mergeEnum(final RowCollection c0, final RowCollection c1) throws RowSpaceExceededException {
         assert c0.rowdef == c1.rowdef : c0.rowdef.toString() + " != " + c1.rowdef.toString();
-        RowSet r = new RowSet(c0.rowdef, c0.size() + c1.size());
+        final RowSet r = new RowSet(c0.rowdef, c0.size() + c1.size());
         try {
         	c0.sort();
         } catch (Exception e) {

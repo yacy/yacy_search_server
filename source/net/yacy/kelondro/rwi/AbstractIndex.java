@@ -60,7 +60,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         // creates a set of indexContainers
         // this does not use the cache
         final Order<ReferenceContainer<ReferenceType>> containerOrder = new ReferenceContainerOrder<ReferenceType>(factory, this.ordering().clone());
-        ReferenceContainer<ReferenceType> emptyContainer = ReferenceContainer.emptyContainer(factory, startHash);
+        final ReferenceContainer<ReferenceType> emptyContainer = ReferenceContainer.emptyContainer(factory, startHash);
         containerOrder.rotate(emptyContainer);
         final TreeSet<ReferenceContainer<ReferenceType>> containers = new TreeSet<ReferenceContainer<ReferenceType>>(containerOrder);
         final Iterator<ReferenceContainer<ReferenceType>> i = references(startHash, rot);
@@ -103,7 +103,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         final HashMap<byte[], ReferenceContainer<ReferenceType>> containers = new HashMap<byte[], ReferenceContainer<ReferenceType>>(wordHashes.size());
         byte[] singleHash;
         ReferenceContainer<ReferenceType> singleContainer;
-        Iterator<byte[]> i = wordHashes.iterator();
+        final Iterator<byte[]> i = wordHashes.iterator();
         while (i.hasNext()) {
         
             // get next word hash:
@@ -136,7 +136,7 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
      * @return ReferenceContainer the join result
      * @throws RowSpaceExceededException 
      */
-    public ReferenceContainer<ReferenceType> searchJoin(final TreeSet<byte[]> wordHashes, final Set<String> urlselection, int maxDistance) throws RowSpaceExceededException {
+    public ReferenceContainer<ReferenceType> searchJoin(final TreeSet<byte[]> wordHashes, final Set<String> urlselection, final int maxDistance) throws RowSpaceExceededException {
         // first check if there is any entry that has no match;
         // this uses only operations in ram
         for (byte[] wordHash: wordHashes) {
@@ -171,8 +171,8 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
             final TreeSet<byte[]> queryHashes,
             final TreeSet<byte[]> excludeHashes,
             final Set<String> urlselection,
-            ReferenceFactory<ReferenceType> termFactory,
-            int maxDistance) throws RowSpaceExceededException {
+            final ReferenceFactory<ReferenceType> termFactory,
+            final int maxDistance) throws RowSpaceExceededException {
 
         return new TermSearch<ReferenceType>(this, queryHashes, excludeHashes, urlselection, termFactory, maxDistance);
     }

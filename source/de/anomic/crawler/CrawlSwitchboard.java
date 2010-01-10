@@ -34,8 +34,6 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 
-import de.anomic.yacy.yacySeedDB;
-
 public final class CrawlSwitchboard {
 
     public static final String CRAWL_PROFILE_PROXY                 = "proxy";
@@ -66,7 +64,6 @@ public final class CrawlSwitchboard {
     private final File            queuesRoot;
     
     public CrawlSwitchboard(
-            final yacySeedDB peers,
             final String networkName,
             final Log log,
             final File queuesRoot) {

@@ -599,7 +599,7 @@ public final class HTTPDFileHandler {
                     env.put("CONTENT_TYPE", requestHeader.getContentType());
                 }
                 if (method.equalsIgnoreCase(HeaderFramework.METHOD_POST) && body != null) {
-                    env.put("CONTENT_LENGTH", requestHeader.getContentLength() + "");
+                    env.put("CONTENT_LENGTH", Integer.toString(requestHeader.getContentLength()));
                 }
 
                 // add values from request header to environment (see: http://hoohoo.ncsa.uiuc.edu/cgi/env.html#headers)

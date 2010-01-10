@@ -71,7 +71,7 @@ public final class Row {
         this.primaryKeyLength = row[0].cellwidth;
     }
 
-    public Row(String structure, final ByteOrder objectOrder) {
+    public Row(final String structure, final ByteOrder objectOrder) {
         assert (objectOrder != null);
         this.objectOrder = objectOrder;
         // define row with row syntax
@@ -204,7 +204,7 @@ public final class Row {
             return a.compareTo(b);
         }
         
-        public boolean equal(Entry a, Entry b) {
+        public boolean equal(final Entry a, final Entry b) {
             return a.equals(b);
         }
 
@@ -332,7 +332,7 @@ public final class Row {
             return objectOrder.compare(this.bytes(), 0, this.getPrimaryKeyLength(), o.bytes(), 0, o.getPrimaryKeyLength());
         }
         
-        public int compare(Entry o1, Entry o2) {
+        public int compare(final Entry o1, final Entry o2) {
             return o1.compareTo(o2);
         }
 
@@ -341,7 +341,7 @@ public final class Row {
             if (this == obj) return true;
             if (obj == null) return false;
             if (!(obj instanceof Entry)) return false;
-            Entry other = (Entry) obj;
+            final Entry other = (Entry) obj;
             final byte[] t = this.bytes();
             final byte[] o = other.bytes();
             for (int i = 0; i < primaryKeyLength; i++) {
@@ -351,8 +351,8 @@ public final class Row {
         }
         
         public int hashCode() {
-            byte[] b = this.getPrimaryKeyBytes();
-            int len = b.length;
+            final byte[] b = this.getPrimaryKeyBytes();
+            final int len = b.length;
             int h = 1;
             for (int i = 0; i < len; i++) {
                 h = 31 * h + b[i];
@@ -484,10 +484,10 @@ public final class Row {
             }
         }
         
-        public final long incCol(final int column, long c) {
-            int encoder = row[column].encoder;
-            int colstrt = colstart[column];
-            int cellwidth = row[column].cellwidth;
+        public final long incCol(final int column, final long c) {
+            final int encoder = row[column].encoder;
+            final int colstrt = colstart[column];
+            final int cellwidth = row[column].cellwidth;
             long l;
             switch (encoder) {
             case Column.encoder_b64e:
@@ -517,14 +517,14 @@ public final class Row {
             final Object[] ref = nickref.get(nickname);
             if (ref == null) return dflt;
             final Column col = (Column) ref[0];
-            return getColString(col.encoder, ((Integer) ref[1]).intValue(), col.cellwidth, encoding);
+            return getColString(((Integer) ref[1]).intValue(), col.cellwidth, encoding);
         }
         
         public final String getColString(final int column, final String encoding) {
-            return getColString(row[column].encoder, colstart[column], row[column].cellwidth, encoding);
+            return getColString(colstart[column], row[column].cellwidth, encoding);
         }
         
-        private final String getColString(final int encoder, final int clstrt, int length, final String encoding) {
+        private final String getColString(final int clstrt, int length, final String encoding) {
             if (rowinstance[offset + clstrt] == 0) return null;
             if (length > rowinstance.length - offset - clstrt) length = rowinstance.length - offset - clstrt;
             while ((length > 0) && (rowinstance[offset + clstrt + length - 1] == 0)) length--;
@@ -660,7 +660,7 @@ public final class Row {
         }
     }
     
-    public Queue newQueue(int maxsize) {
+    public Queue newQueue(final int maxsize) {
         return new Queue(maxsize);
     }
     
@@ -668,11 +668,11 @@ public final class Row {
         
         private final ArrayBlockingQueue<Entry> queue;
         
-        public Queue(int maxsize) {
+        public Queue(final int maxsize) {
             this.queue = new ArrayBlockingQueue<Entry>(maxsize);
         }
         
-        public void put(Entry e) throws InterruptedException {
+        public void put(final Entry e) throws InterruptedException {
             this.queue.put(e);
         }
         
@@ -680,7 +680,7 @@ public final class Row {
             return this.queue.take();
         }
         
-        public Entry get(byte[] key) {
+        public Entry get(final byte[] key) {
             for (Entry e: this.queue) {
                 if (objectOrder.compare(key, 0, key.length, e.bytes(), 0, e.getPrimaryKeyLength()) == 0) {
                     return e;
@@ -689,8 +689,8 @@ public final class Row {
             return null;
         }
         
-        public Entry delete(byte[] key) {
-            Iterator<Entry> i = this.queue.iterator();
+        public Entry delete(final byte[] key) {
+            final Iterator<Entry> i = this.queue.iterator();
             Entry e;
             while (i.hasNext()) {
                 e = i.next();
@@ -734,7 +734,7 @@ public final class Row {
         if (this == obj) return true;
         if (obj == null) return false;
         if (!(obj instanceof Row)) return false;
-        Row other = (Row) obj;
+        final Row other = (Row) obj;
         if (this.objectsize != other.objectsize) return false;
         if (this.columns() != other.columns()) return false;
         for (int i = 0; i < other.row.length; i++) {

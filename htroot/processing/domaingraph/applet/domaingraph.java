@@ -161,7 +161,6 @@ public void processDomain(HashMap props) {
 public void processCitation(String host, HashMap props) {
   //println("Citation: " + props.toString());
   String id = (String) props.get("id"); if (id == null) id = "";
-  int count = 0;
   try {
   String counts = (String) props.get("count"); if (counts != null) count = Integer.parseInt(counts);
   } catch (NumberFormatException e) {}

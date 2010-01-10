@@ -57,52 +57,52 @@ public class IndexTest {
     
     public static final long mb = 1024 * 1024;
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         
         // pre-generate test data so it will not influence test case time
-        int count = args.length == 0 ? 1000000 : Integer.parseInt(args[0]);
+        final int count = args.length == 0 ? 1000000 : Integer.parseInt(args[0]);
         byte[][] tests = new byte[count][];
-        Random r = new Random(0);
+        final Random r = new Random(0);
         for (int i = 0; i < count; i++) tests[i] = randomHash(r);
         System.out.println("generated " + count + " test data entries \n");
         
         // start
         System.out.println("\nSTANDARD JAVA CLASS MAPS \n");
-        long t1 = System.currentTimeMillis();
+        final long t1 = System.currentTimeMillis();
         
         // test tree map
         System.out.println("sorted map");
         Runtime.getRuntime().gc();
-        long freeStartTree = MemoryControl.free();
+        final long freeStartTree = MemoryControl.free();
         TreeMap<byte[], Integer> tm = new TreeMap<byte[], Integer>(Base64Order.enhancedCoder);
         for (int i = 0; i < count; i++) tm.put(tests[i], 1);
-        long t2 = System.currentTimeMillis();
+        final long t2 = System.currentTimeMillis();
         System.out.println("time   for TreeMap<byte[]> generation: " + (t2 - t1));
         
         int bugs = 0;
         for (int i = 0; i < count; i++) if (tm.get(tests[i]) == null) bugs++;
         Runtime.getRuntime().gc();
-        long freeEndTree = MemoryControl.available();
+        final long freeEndTree = MemoryControl.available();
         tm.clear(); tm = null;
-        long t3 = System.currentTimeMillis();
+        final long t3 = System.currentTimeMillis();
         System.out.println("time   for TreeMap<byte[]> test: " + (t3 - t2) + ", " + bugs + " bugs");
         System.out.println("memory for TreeMap<byte[]>: " + (freeStartTree - freeEndTree) / mb + " MB\n");
 
         // test hash map
         System.out.println("unsorted map");
         Runtime.getRuntime().gc();
-        long freeStartHash = MemoryControl.available();
+        final long freeStartHash = MemoryControl.available();
         HashMap<String, Integer> hm = new HashMap<String, Integer>();
         for (int i = 0; i < count; i++) hm.put(new String(tests[i]), 1);
-        long t4 = System.currentTimeMillis();
+        final long t4 = System.currentTimeMillis();
         System.out.println("time   for HashMap<String> generation: " + (t4 - t3));
         
         bugs = 0;
         for (int i = 0; i < count; i++) if (hm.get(new String(tests[i])) == null) bugs++;
         Runtime.getRuntime().gc();
-        long freeEndHash = MemoryControl.available();
+        final long freeEndHash = MemoryControl.available();
         hm.clear(); hm = null;
-        long t5 = System.currentTimeMillis();
+        final long t5 = System.currentTimeMillis();
         System.out.println("time   for HashMap<String> test: " + (t5 - t4) + ", " + bugs + " bugs");
         System.out.println("memory for HashMap<String>: " + (freeStartHash - freeEndHash) / mb + " MB\n");
         
@@ -111,7 +111,7 @@ public class IndexTest {
         // test kelondro index
         System.out.println("sorted map");
         Runtime.getRuntime().gc();
-        long freeStartKelondro = MemoryControl.available();
+        final long freeStartKelondro = MemoryControl.available();
         HandleMap ii = null;
         try {
             ii = new HandleMap(12, Base64Order.enhancedCoder, 4, count, count);
@@ -125,33 +125,33 @@ public class IndexTest {
                 e.printStackTrace();
             }
         ii.get(randomHash(r)); // trigger sort
-        long t6 = System.currentTimeMillis();
+        final long t6 = System.currentTimeMillis();
         System.out.println("time   for HandleMap<byte[]> generation: " + (t6 - t5));
         
         bugs = 0;
         for (int i = 0; i < count; i++) if (ii.get(tests[i]) != 1) bugs++;
         Runtime.getRuntime().gc();
-        long freeEndKelondro = MemoryControl.available();
+        final long freeEndKelondro = MemoryControl.available();
         ii.clear(); ii = null;
-        long t7 = System.currentTimeMillis();
+        final long t7 = System.currentTimeMillis();
         System.out.println("time   for HandleMap<byte[]> test: " + (t7 - t6) + ", " + bugs + " bugs");
         System.out.println("memory for HandleMap<byte[]>: " + (freeStartKelondro - freeEndKelondro) / mb + " MB\n");
 
         // test ByteArray
         System.out.println("unsorted map");
         Runtime.getRuntime().gc();
-        long freeStartBA = MemoryControl.available();
+        final long freeStartBA = MemoryControl.available();
         HashMap<ByteArray, Integer> bm = new HashMap<ByteArray, Integer>();
         for (int i = 0; i < count; i++) bm.put(new ByteArray(tests[i]), 1);
-        long t8 = System.currentTimeMillis();
+        final long t8 = System.currentTimeMillis();
         System.out.println("time   for HashMap<ByteArray> generation: " + (t8 - t7));
         
         bugs = 0;
         for (int i = 0; i < count; i++) if (bm.get(new ByteArray(tests[i])) == null) bugs++;
         Runtime.getRuntime().gc();
-        long freeEndBA = MemoryControl.available();
+        final long freeEndBA = MemoryControl.available();
         bm.clear(); bm = null;
-        long t9 = System.currentTimeMillis();
+        final long t9 = System.currentTimeMillis();
         System.out.println("time   for HashMap<ByteArray> test: " + (t9 - t8) + ", " + bugs + " bugs");
         System.out.println("memory for HashMap<ByteArray>: " + (freeStartBA - freeEndBA) / mb + " MB\n");
 
