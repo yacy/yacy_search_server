@@ -56,6 +56,7 @@ public final class ResourceObserver {
     private int checkMemoryUsageCount;
     private int disksFree;
     private int memoryFree;
+    private boolean disabledDHT = false;
     
     /**
      * The ResourceObserver checks the resources
@@ -106,7 +107,7 @@ public final class ResourceObserver {
      * checks the resources and pauses crawls if necessary
      */
     public void resourceObserverJob() {
-    	MemoryControl.setDHTkbytes(sb.getConfigLong(SwitchboardConstants.MEMORY_ACCEPTDHT, 0));
+    	MemoryControl.setDHTkbytes(getMinFreeMemory());
     	
         checkDiskUsageCount++;
         checkMemoryUsageCount++;
@@ -136,11 +137,19 @@ public final class ResourceObserver {
             	log.logInfo("disabling index receive");
                 sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
                 sb.peers.mySeed().setFlagAcceptRemoteIndex(false);
+                disabledDHT = true;
             }
         }
         else {
-            if (DiskSpace.isUsable())
+            if (DiskSpace.isUsable()) {
+            	if(disabledDHT) { // we were wrong!
+            		log.logInfo("enabling index receive");
+                    sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+                    sb.peers.mySeed().setFlagAcceptRemoteIndex(true);
+                    disabledDHT = false;
+            	}
                 log.logInfo("run completed; everything in order");
+            }
             else
                 log.logInfo("The observer is out of order: " + DiskSpace.getErrorMessage());
         }
@@ -161,17 +170,24 @@ public final class ResourceObserver {
     }
     
     /**
-     * @return amount of space (MiB) that should be kept free
+     * @return amount of space (bytes) that should be kept free
      */
     public long getMinFreeDiskSpace () {
         return sb.getConfigLong(SwitchboardConstants.DISK_FREE, 3000) /* MiB */ * 1024L * 1024L;
     }
     
     /**
-     * @return amount of space (MiB) that should at least be kept free
+     * @return amount of space (bytes) that should at least be kept free
      */
     public long getMinFreeDiskSpace_hardlimit () {
         return sb.getConfigLong(SwitchboardConstants.DISK_FREE_HARDLIMIT, 100) /* MiB */ * 1024L * 1024L;
+    }
+    
+    /**
+     * @return amount of space (KiB) that should at least be free
+     */
+    public long getMinFreeMemory() {
+    	return sb.getConfigLong(SwitchboardConstants.MEMORY_ACCEPTDHT, 0);
     }
     
     /**

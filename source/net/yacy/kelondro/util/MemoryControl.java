@@ -182,10 +182,12 @@ public class MemoryControl {
     
     public static void setDHTallowed() {
     	allowDHT = true;
+    	DHTtresholdCount = 0;
     }
     
     public static void setDHTkbytes(final long kbytes) {
     	DHTkbytes = kbytes;
+    	DHTtresholdCount = 0;
     }
     
     private static void checkDHTrule(final long available) {
@@ -202,7 +204,8 @@ public class MemoryControl {
     		
 			log.logInfo("checkDHTrule: below treshold; tresholdCount: " + DHTtresholdCount + "; allowDHT: " + allowDHT);
     	}
-    	//allowDHT = ((available >> 10) < DHTkbytes) ? false : true; // stupid
+    	else if (!allowDHT && (available >> 10) > (DHTkbytes * 2L)) // we were wrong!
+    		setDHTallowed();
     }
 
     /**

@@ -133,13 +133,20 @@ public class Status {
             prop.put("unrestrictedLocalAccess", 1);
         }
 
-        // free disk space
-        if ((adminaccess) && (!sb.observer.getDisksOK()))
-        {
-            final String minFree = Formatter.bytesToString(sb.observer.getMinFreeDiskSpace());
-            prop.put("warningDiskSpaceLow", "1");
-            prop.put("warningDiskSpaceLow_minSpace", minFree);
-        }
+        // resource observer status
+        if (adminaccess) {
+	        if (!sb.observer.getDisksOK()){
+	            final String minFree = Formatter.bytesToString(sb.observer.getMinFreeDiskSpace());
+	            prop.put("warningDiskSpaceLow", "1");
+	            prop.put("warningDiskSpaceLow_minSpace", minFree);
+	        }
+	        if (!sb.observer.getMemoryOK()){
+	            final String minFree = Formatter.bytesToString(sb.observer.getMinFreeMemory() * 1024L);
+	            prop.put("warningMemoryLow", "1");
+	            prop.put("warningMemoryLow_minSpace", minFree);
+	        }
+	        
+	    }
         
         
         // version information
