@@ -60,7 +60,7 @@ public final class robotsParser {
     public static final String ROBOTS_ALLOW = "Allow:".toUpperCase();
     public static final String ROBOTS_COMMENT = "#";
     public static final String ROBOTS_SITEMAP = "Sitemap:".toUpperCase();
-    public static final String ROBOTS_CRAWL_DELAY = "Crawl-Delay:".toUpperCase();
+    public static final String ROBOTS_CRAWL_DELAY = "Crawl-delay:".toUpperCase();
     
     private ArrayList<String> allowList;
     private ArrayList<String> denyList;
@@ -107,27 +107,48 @@ public final class robotsParser {
                 inBlock = false;        
         
         try {
-            while ((line = reader.readLine()) != null) {
+            lineparser: while ((line = reader.readLine()) != null) {
                 // replacing all tabs with spaces
                 line = line.replaceAll("\t"," ").trim();
                 lineUpper = line.toUpperCase();
                 
+                // parse empty line
                 if (line.length() == 0) {
-                    // OLD: we have reached the end of the rule block
-                    // rule4Yacy = false; inBlock = false;
-                    
-                    // NEW: just ignore it
-                } else if (line.startsWith(ROBOTS_COMMENT)) {
+                    // we have reached the end of the rule block
+                    if (rule4YaCyFound) {
+                        // stop here because other robot blocks are either not for YaCy
+                        // or global settings which shall not overwrite YaCys settings.
+                        break lineparser;
+                    }
+                    continue lineparser;
+                }
+                
+                // parse comment
+                if (line.startsWith(ROBOTS_COMMENT)) {
                     // we can ignore this. Just a comment line
-                } else if (lineUpper.startsWith(ROBOTS_SITEMAP)) {
+                    continue lineparser;
+                }
+                
+                // parse sitemap
+                if (lineUpper.startsWith(ROBOTS_SITEMAP)) {
                     pos = line.indexOf(" ");
                     if (pos != -1) {
                         sitemap = line.substring(pos).trim();
                     }
-                } else if (lineUpper.startsWith(ROBOTS_USER_AGENT)) {
+                    continue lineparser;
+                }
+                
+                // parse user agent
+                if (lineUpper.startsWith(ROBOTS_USER_AGENT)) {
                     
                     if (inBlock) {
                         // we have detected the start of a new block
+                        if (rule4YaCyFound) {
+                            // stop here because other robot blocks are either not for YaCy
+                            // or global settings which shall not overwrite YaCys settings.
+                            break lineparser;
+                        }
+                        
                         inBlock = false;
                         isRule4AllAgents = false;
                         isRule4YaCyAgent = false;
@@ -144,9 +165,14 @@ public final class robotsParser {
                         final String userAgent = line.substring(pos).trim();
                         isRule4AllAgents |= userAgent.equals("*");
                         isRule4YaCyAgent |= userAgent.toLowerCase().indexOf("yacy") >=0;
+                        isRule4YaCyAgent |= userAgent.toLowerCase().indexOf("yacybot") >=0;
                         if (isRule4YaCyAgent) rule4YaCyFound = true;
                     }
-                } else if (lineUpper.startsWith(ROBOTS_CRAWL_DELAY)) {
+                    continue lineparser;
+                }
+                
+                // parse crawl delay
+                if (lineUpper.startsWith(ROBOTS_CRAWL_DELAY)) {
                     inBlock = true;
                 	if (isRule4YaCyAgent || isRule4AllAgents) {
                 		pos = line.indexOf(" ");
@@ -159,8 +185,11 @@ public final class robotsParser {
                 			}
                 		}
                 	}
-                } else if (lineUpper.startsWith(ROBOTS_DISALLOW) || 
-                           lineUpper.startsWith(ROBOTS_ALLOW)) {
+                	continue lineparser;
+                }
+                
+                // parse disallow
+                if (lineUpper.startsWith(ROBOTS_DISALLOW) || lineUpper.startsWith(ROBOTS_ALLOW)) {
                     inBlock = true;
                     final boolean isDisallowRule = lineUpper.startsWith(ROBOTS_DISALLOW);
                     
@@ -169,18 +198,18 @@ public final class robotsParser {
                         pos = line.indexOf(ROBOTS_COMMENT);
                         if (pos != -1) line = line.substring(0,pos).trim();
                                            
-                        // cutting of tailing *
+                        // cut off tailing *
                         if (line.endsWith("*")) line = line.substring(0,line.length()-1);
                         
-                        // getting the path
+                        // parse the path
                         pos = line.indexOf(" ");
-                        if (pos != -1) {
+                        if (pos >= 0) {
                             // getting the path
                             String path = line.substring(pos).trim();
                             
                             // unencoding all special charsx
                             try {
-                                path = URLDecoder.decode(path,"UTF-8");
+                                path = URLDecoder.decode(path, "UTF-8");
                             } catch (final Exception e) {
                                 /* 
                                  * url decoding failed. E.g. because of
@@ -201,6 +230,7 @@ public final class robotsParser {
                             }
                         }
                     }
+                    continue lineparser;
                 }
             }
         } catch (final IOException e) {}

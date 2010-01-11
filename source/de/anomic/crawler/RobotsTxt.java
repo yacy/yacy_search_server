@@ -228,12 +228,6 @@ public class RobotsTxt {
         return robotsTxt4Host;
     }
     
-    public long crawlDelayMillis(final DigestURI theURL) {
-        final String urlHostPort = getHostPort(theURL);
-        final RobotsEntry robotsEntry = getEntry(urlHostPort, true);
-        return robotsEntry.getCrawlDelayMillis();
-    }
-    
     private RobotsEntry addEntry(
     		final String hostName, 
     		final ArrayList<String> allowPathList, 
@@ -309,17 +303,9 @@ public class RobotsTxt {
     
     public Long getCrawlDelayMillis(final DigestURI theURL) {
         if (theURL == null) throw new IllegalArgumentException(); 
-        Long crawlDelay = null;
-        
-        // generating the hostname:poart string needed to do a DB lookup
         final String urlHostPort = getHostPort(theURL);
-        final RobotsEntry robotsTxt4Host = getEntry(urlHostPort, true);
-                       
-        try {
-            crawlDelay = robotsTxt4Host.getCrawlDelayMillis();
-        } catch (final NumberFormatException e) {/* ignore this */}
-        
-        return crawlDelay;
+        final RobotsEntry robotsEntry = getEntry(urlHostPort, true);
+        return robotsEntry.getCrawlDelayMillis();
     }
     
     public boolean isDisallowed(final DigestURI nexturl) {

@@ -172,7 +172,7 @@ public class Latency {
         if (!local && host != null) waiting += host.flux(waiting);
         
         // find the delay as given by robots.txt on target site
-        long robotsDelay = (local) ? 0 : Switchboard.getSwitchboard().robots.crawlDelayMillis(url);
+        long robotsDelay = (local) ? 0 : Switchboard.getSwitchboard().robots.getCrawlDelayMillis(url);
         waiting = Math.max(waiting, robotsDelay);
         
         // use the access latency as rule how fast we can access the server
@@ -216,7 +216,7 @@ public class Latency {
         if (!local && host != null) s.append(", flux = ").append(host.flux(waiting));
         
         // find the delay as given by robots.txt on target site
-        long robotsDelay = (local) ? 0 : Switchboard.getSwitchboard().robots.crawlDelayMillis(url);
+        long robotsDelay = (local) ? 0 : Switchboard.getSwitchboard().robots.getCrawlDelayMillis(url);
         s.append(", robots.delay = ").append(robotsDelay);
         
         // use the access latency as rule how fast we can access the server
