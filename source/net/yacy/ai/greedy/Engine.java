@@ -37,12 +37,12 @@ public class Engine<
                     SpecificModel extends Model<SpecificRole, SpecificFinding>
                    > {
 
-    private final PriorityBlockingQueue<Agent<SpecificRole, SpecificFinding, SpecificModel>> agentQueue;
-    private final PriorityBlockingQueue<Challenge<SpecificRole, SpecificFinding, SpecificModel>> challengeQueue;
-    private final Agent<SpecificRole, SpecificFinding, SpecificModel> poisonAgent;
-    private final Challenge<SpecificRole, SpecificFinding, SpecificModel> poisonChallenge;
-    private final ConcurrentHashMap<SpecificModel, List<SpecificFinding>> settings;
-    private final ConcurrentHashMap<Asset<SpecificRole, SpecificFinding, SpecificModel>, SpecificModel> assets;
+    protected final PriorityBlockingQueue<Agent<SpecificRole, SpecificFinding, SpecificModel>> agentQueue;
+    protected final PriorityBlockingQueue<Challenge<SpecificRole, SpecificFinding, SpecificModel>> challengeQueue;
+    protected final Agent<SpecificRole, SpecificFinding, SpecificModel> poisonAgent;
+    protected final Challenge<SpecificRole, SpecificFinding, SpecificModel> poisonChallenge;
+    protected final ConcurrentHashMap<SpecificModel, List<SpecificFinding>> settings;
+    protected final ConcurrentHashMap<Asset<SpecificRole, SpecificFinding, SpecificModel>, SpecificModel> assets;
     private final int cores;
     
     

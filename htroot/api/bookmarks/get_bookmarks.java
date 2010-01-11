@@ -101,7 +101,7 @@ public class get_bookmarks {
 				count = print_XBEL(it, count);
 				prop.put("display_xbel", count);
 				break;
-       		} else if (qtype.equals("folders") && !query.isEmpty()) {       			
+       		} else if (query.length() > 0 && qtype.equals("folders")) {       			
         		if (query.length() > 0 && query.charAt(0) == '/') { root = query; } 
         			else { root = "/" + query; }
        		}

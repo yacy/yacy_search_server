@@ -152,7 +152,7 @@ public class rssParser extends AbstractParser implements Idiom {
                     }
                     
                     final String itemHeadline = scraper.getTitle();     
-                    if (itemHeadline != null && !itemHeadline.isEmpty()) {
+                    if (itemHeadline != null && itemHeadline.length() > 0) {
                         feedSections.add(itemHeadline);
                     }
                     

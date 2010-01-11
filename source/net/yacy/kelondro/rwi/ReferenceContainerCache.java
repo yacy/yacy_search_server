@@ -145,7 +145,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * create a clone of the cache content that is sorted using the this.containerOrder
      * @return the sorted ReferenceContainer[]
      */
-    private ArrayList<ReferenceContainer<ReferenceType>> sortedClone() {
+    protected ArrayList<ReferenceContainer<ReferenceType>> sortedClone() {
         ArrayList<ReferenceContainer<ReferenceType>> cachecopy = new ArrayList<ReferenceContainer<ReferenceType>>(cache.size());
         synchronized (cache) {
             for (final Map.Entry<ByteArray, ReferenceContainer<ReferenceType>> entry: cache.entrySet()) {

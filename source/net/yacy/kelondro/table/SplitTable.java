@@ -242,7 +242,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
             try {
                 init();
             } catch (RowSpaceExceededException e1) {
-                throw new IOException(e1);
+                throw new IOException(e1.getMessage());
             }
         }
     }
