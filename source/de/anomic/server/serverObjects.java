@@ -353,4 +353,20 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
         return super.clone();
     }
 
+    /**
+     * output the objects in a HTTP GET syntax
+     */
+    public String toString() {
+        if (this.size() == 0) return "";
+        StringBuilder param = new StringBuilder();
+        for (Map.Entry<String, String> entry: this.entrySet()) {
+            param.append(entry.getKey());
+            param.append('=');
+            param.append(entry.getValue());
+            param.append('&');
+        }
+        param.setLength(param.length() - 1);
+        return param.toString();
+    }
+    
 }

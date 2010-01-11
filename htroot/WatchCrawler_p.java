@@ -130,6 +130,9 @@ public class WatchCrawler_p {
                 if (sb.peers == null) {
                     prop.put("info", "3");
                 } else {
+                    // log a GET url for this crawl start for possible use in cronjobs
+                    Log.logInfo("CRAWLSTART-URL", "http://localhost:" + sb.getConfig("port", "8080") + "/WatchCrawler_p.html?" + post.toString());
+                    
                     // set new properties
                     final boolean fullDomain = post.get("range", "wide").equals("domain"); // special property in simple crawl start
                     final boolean subPath    = post.get("range", "wide").equals("subpath"); // special property in simple crawl start
