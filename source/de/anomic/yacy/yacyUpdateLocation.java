@@ -37,8 +37,8 @@ import net.yacy.kelondro.data.meta.DigestURI;
  *
  */
 public class yacyUpdateLocation {
-    private DigestURI locationURL;
-    private PublicKey publicKey;
+    private final DigestURI locationURL;
+    private final PublicKey publicKey;
 
     public yacyUpdateLocation(DigestURI locationURL, PublicKey publicKey) {
 	this.locationURL = locationURL;

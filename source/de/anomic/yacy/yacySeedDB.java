@@ -89,7 +89,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
     public  yacyPeerActions peerActions;
     public  yacyNewsPool newsPool;
     
-    private int netRedundancy;
+    private final int netRedundancy;
     public  PartitionScheme scheme;
     
     private yacySeed mySeed; // my own seed

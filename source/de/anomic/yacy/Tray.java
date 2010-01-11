@@ -218,7 +218,7 @@ class nativeTrayIcon {
 			Method setImageAutoSizeMethod = TrayIconClass.getMethod("setImageAutoSize", partypes2);
 
 			Object arglist2[] = new Object[1];
-			arglist2[0] = Boolean.valueOf(true);
+			arglist2[0] = Boolean.TRUE;
 			setImageAutoSizeMethod.invoke(this.TrayIcon, arglist2);
 
 			// with reflections: this.TrayIcon.addActionListener(al)

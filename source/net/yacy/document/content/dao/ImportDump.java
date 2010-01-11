@@ -36,7 +36,7 @@ import net.yacy.kelondro.util.FileUtils;
 
 public class ImportDump {
 
-    private DatabaseConnection conn = null;
+    private final DatabaseConnection conn;
 
     public ImportDump(
             String dbType,

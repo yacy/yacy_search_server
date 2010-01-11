@@ -522,7 +522,7 @@ public class CrawlQueues {
         
         protected Request request;
         private final Integer code;
-        private long start;
+        private final long start;
         
         public crawlWorker(final Request entry) {
             this.start = System.currentTimeMillis();

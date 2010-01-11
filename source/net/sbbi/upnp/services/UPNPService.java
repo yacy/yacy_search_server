@@ -77,7 +77,7 @@ public class UPNPService {
 
   protected Map UPNPServiceActions;
   protected Map UPNPServiceStateVariables;
-  private String USN;
+  private final String USN;
 
   private boolean parsedSCPD = false;
   private DocumentContainer UPNPService;

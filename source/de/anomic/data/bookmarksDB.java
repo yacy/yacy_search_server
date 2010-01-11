@@ -104,7 +104,7 @@ public class bookmarksDB {
     MapView datesTable;
     
     // autoReCrawl    
-    private BusyThread autoReCrawl;
+    private final BusyThread autoReCrawl;
     
 	// ------------------------------------
 	// bookmarksDB's class constructor

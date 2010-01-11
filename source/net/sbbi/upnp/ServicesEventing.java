@@ -89,7 +89,7 @@ public class ServicesEventing implements Runnable {
   
   private ServerSocket server = null;
   
-  private List registered = new ArrayList();
+  private final List registered = new ArrayList();
   
   private ServicesEventing() {
   }
@@ -359,9 +359,9 @@ public class ServicesEventing implements Runnable {
   
   class RequestProcessor implements Runnable {
     
-    private Socket client;
+    private final Socket client;
     
-    RequestProcessor( Socket client ) {
+    RequestProcessor(final Socket client) {
       this.client = client;
     }
     

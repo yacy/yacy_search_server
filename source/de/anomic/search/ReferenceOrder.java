@@ -49,7 +49,7 @@ public class ReferenceOrder {
     protected WordReferenceVars min, max;
     protected final ScoreCluster<String> doms; // collected for "authority" heuristic 
     private   final RankingProfile ranking;
-    private   String language;
+    private   final String language;
     
     public ReferenceOrder(final RankingProfile profile, String language) {
         this.min = null;

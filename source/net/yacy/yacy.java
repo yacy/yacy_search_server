@@ -1039,8 +1039,8 @@ public final class yacy {
 * machine shuts down. Signals the plasmaSwitchboard to shut down.
 */
 class shutdownHookThread extends Thread {
-    private Switchboard sb = null;
-    private Thread mainThread = null;
+    private final Switchboard sb;
+    private final Thread mainThread;
 
     public shutdownHookThread(final Thread mainThread, final Switchboard sb) {
         super();
