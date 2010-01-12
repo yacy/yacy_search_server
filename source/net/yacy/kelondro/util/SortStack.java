@@ -177,10 +177,18 @@ public class SortStack<E> {
         // returns true if the element with that weight would be on the bottom of the stack after inserting
         if (this.onstack.isEmpty()) return true;
         Long l;
-        synchronized (this.onstack) {
-            l = (this.upward) ? this.onstack.lastKey() : this.onstack.firstKey();
+        
+        if (this.upward) {
+            synchronized (this.onstack) {
+                l = this.onstack.lastKey();
+            }
+            return weight > l.longValue();
+        } else {
+            synchronized (this.onstack) {
+                l = this.onstack.firstKey();
+            }
+            return weight < l.longValue();
         }
-        return weight > l.longValue();
     }
     
     public class stackElement {

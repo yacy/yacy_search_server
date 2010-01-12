@@ -67,7 +67,7 @@ public final class RankingProcess extends Thread {
     
     private final QueryParams query;
     private final int maxentries;
-    private final ConcurrentHashMap<String, Integer> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
+    private final ConcurrentHashMap<String, Long> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private final int[] flagcount; // flag counter
     private final TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
     //private final int[] domZones;
@@ -99,7 +99,7 @@ public final class RankingProcess extends Thread {
         this.remote_indexCount = 0;
         this.remote_resourceSize = 0;
         this.local_resourceSize = 0;
-        this.urlhashes = new ConcurrentHashMap<String, Integer>(0, 0.75f, concurrency);
+        this.urlhashes = new ConcurrentHashMap<String, Long>(0, 0.75f, concurrency);
         this.misses = new TreeSet<String>();
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
@@ -172,7 +172,8 @@ public final class RankingProcess extends Thread {
         String domhash;
         boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts") >= 0;
         WordReferenceVars iEntry;
-        final ArrayList<WordReferenceVars> filteredEntries = new ArrayList<WordReferenceVars>();
+        Long r;
+        //final ArrayList<WordReferenceVars> filteredEntries = new ArrayList<WordReferenceVars>();
 
         // apply all constraints
         try {
@@ -225,39 +226,39 @@ public final class RankingProcess extends Thread {
 			    }
 			    
 			    // accept
-			    filteredEntries.add(iEntry);
+			    //filteredEntries.add(iEntry);
 			    
 			    // increase counter for statistics
-			    if (!local) this.remote_indexCount++;
+			    if (!local) this.remote_indexCount++;/*
 			}
-		} catch (InterruptedException e) {}
 		
-		// do the ranking
-		Long r;
-		for (WordReferenceVars fEntry: filteredEntries) {
-			
-		    // kick out entries that are too bad according to current findings
-		    r = Long.valueOf(this.order.cardinal(fEntry));
-		    assert maxentries != 0;
-		    if (maxentries >= 0 && stack.size() >= maxentries && stack.bottom(r.longValue())) continue;
-		    
-		    // insert
-		    if ((maxentries < 0) || (stack.size() < maxentries)) {
-		        // in case that we don't have enough yet, accept any new entry
-		        if (urlhashes.containsKey(fEntry.metadataHash())) continue;
-		        stack.push(fEntry, r);
-		    } else {
-		        // if we already have enough entries, insert only such that are necessary to get a better result
-		        if (stack.bottom(r.longValue())) {
-		            continue;
-		        }
-		        // double-check
-		        if (urlhashes.containsKey(fEntry.metadataHash())) continue;
-		        stack.push(fEntry, r);
-		    }
-		    
-		}
+    		// do the ranking
+    		for (WordReferenceVars fEntry: filteredEntries) {
+    			*/
+    		    // kick out entries that are too bad according to current findings
+    		    r = Long.valueOf(this.order.cardinal(iEntry));
+    		    assert maxentries != 0;
+    
+                // double-check
+    		    if (urlhashes.containsKey(iEntry.metadataHash())) continue;
+                
+    		    // insert
+    		    if (maxentries < 0 || stack.size() < maxentries) {
+    		        // in case that we don't have enough yet, accept any new entry
+    		        stack.push(iEntry, r);
+    		    } else {
+    		        // if we already have enough entries, insert only such that are necessary to get a better result
+    		        if (stack.bottom(r.longValue())) continue;
+    		        
+    		        // take the entry. the stack is automatically reduced
+    		        // to the maximum size by deletion of elements at the bottom
+    		        stack.push(iEntry, r);
+    		    }
+    		    urlhashes.put(iEntry.metadataHash(), r);
+    		}
 
+        } catch (InterruptedException e) {}
+        
         //if ((query.neededResults() > 0) && (container.size() > query.neededResults())) remove(true, true);
 		EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(query.id(true), SearchEvent.PRESORT, index.size(), System.currentTimeMillis() - timer), false, 30000, ProfilingGraph.maxTime);
     }
@@ -574,7 +575,7 @@ public final class RankingProcess extends Thread {
         URIMetadataRow mr;
         DigestURI url;
         String hostname;
-        for (int i = 0; i < rc; i++) {
+        loop: for (int i = 0; i < rc; i++) {
             mr = this.query.getSegment().urlMetadata().load(hsa[i].hashsample, null, 0);
             if (mr == null) continue;
             url = mr.metadata().url();
@@ -582,6 +583,7 @@ public final class RankingProcess extends Thread {
             hostname = url.getHost();
             if (hostname == null) continue;
             if (query.tenant != null && !hostname.contains(query.tenant) && !url.toNormalform(true, true).contains(query.tenant)) continue;
+            for (NavigatorEntry entry: result) if (entry.name.equals(hostname)) continue loop; // check if one entry already exists
             result.add(new NavigatorEntry(hostname, hsa[i].count));
         }
         return result;

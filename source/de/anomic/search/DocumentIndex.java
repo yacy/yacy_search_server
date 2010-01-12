@@ -201,7 +201,7 @@ public class DocumentIndex extends Segment {
     
     public static final ArrayList<URIMetadataRow> findMetadata(final QueryParams query, final ReferenceOrder order) {
         
-        RankingProcess rankedCache = new RankingProcess(query, order, 1000, 2);
+        RankingProcess rankedCache = new RankingProcess(query, order, SearchEvent.max_results_preparation, 2);
         rankedCache.run();
         
         ArrayList<URIMetadataRow> result = new ArrayList<URIMetadataRow>();

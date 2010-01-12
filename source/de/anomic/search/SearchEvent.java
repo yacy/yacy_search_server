@@ -59,7 +59,7 @@ public final class SearchEvent {
     public static final String NORMALIZING = "normalizing";
     public static final String FINALIZATION = "finalization";
     
-    private static final int max_results_preparation = 1000;
+    public static final int max_results_preparation = 3000;
     
     // class variables that may be implemented with an abstract class
     private long eventTime;
