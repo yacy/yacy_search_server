@@ -60,14 +60,14 @@ public final class DateFormatter {
     private static final Calendar CAL_GMT = Calendar.getInstance(TZ_GMT, Locale.US);
 
     /** Date formatter/parser for minimal yyyyMMdd pattern */
-    private static final SimpleDateFormat FORMAT_SHORT_DAY    = new SimpleDateFormat(PATTERN_SHORT_DAY);
+    private static final SimpleDateFormat FORMAT_SHORT_DAY    = new SimpleDateFormat(PATTERN_SHORT_DAY, Locale.US);
     /** Date formatter/parser for minimal yyyyMMddHHmmss pattern */
-    private static final SimpleDateFormat FORMAT_SHORT_SECOND = new SimpleDateFormat(PATTERN_SHORT_SECOND);
+    private static final SimpleDateFormat FORMAT_SHORT_SECOND = new SimpleDateFormat(PATTERN_SHORT_SECOND, Locale.US);
     /** Date formatter/parser for minimal yyyyMMddHHmmssSSS pattern */
-    private static final SimpleDateFormat FORMAT_SHORT_MILSEC = new SimpleDateFormat(PATTERN_SHORT_MILSEC);
+    private static final SimpleDateFormat FORMAT_SHORT_MILSEC = new SimpleDateFormat(PATTERN_SHORT_MILSEC, Locale.US);
     
     /** Date formatter/non-sloppy parser for W3C datetime (ISO8601) in GMT/UTC */
-    private static final SimpleDateFormat FORMAT_ISO8601      = new SimpleDateFormat(PATTERN_ISO8601);
+    private static final SimpleDateFormat FORMAT_ISO8601      = new SimpleDateFormat(PATTERN_ISO8601, Locale.US);
     
     /** Date formatter/parser for standard compliant HTTP header dates (RFC 1123) */
     private static final SimpleDateFormat FORMAT_RFC1123      = new SimpleDateFormat(PATTERN_RFC1123, Locale.US);

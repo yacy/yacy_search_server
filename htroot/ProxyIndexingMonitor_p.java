@@ -103,6 +103,7 @@ public class ProxyIndexingMonitor_p {
                     prop.put("info", "1"); //delete DATA/PLASMADB/crawlProfiles0.db
                 } else {
                     try {
+                        assert sb.crawler.defaultProxyProfile.handle() != null;
                         sb.crawler.profilesActiveCrawls.changeEntry(sb.crawler.defaultProxyProfile, "generalDepth", Integer.toString(newProxyPrefetchDepth));
                         sb.crawler.profilesActiveCrawls.changeEntry(sb.crawler.defaultProxyProfile, "storeHTCache", (proxyStoreHTCache) ? "true": "false");
                         sb.crawler.profilesActiveCrawls.changeEntry(sb.crawler.defaultProxyProfile, "remoteIndexing",proxyIndexingRemote ? "true":"false");

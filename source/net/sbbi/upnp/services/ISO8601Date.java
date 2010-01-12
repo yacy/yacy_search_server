@@ -216,7 +216,7 @@ public class ISO8601Date {
   
   private static String twoDigit(int i) {
     if (i >= 0 && i < 10) {
-      return "0" + String.valueOf(i);
+      return "0" + i;
     }
     return String.valueOf(i);
   }
@@ -231,9 +231,9 @@ public class ISO8601Date {
     calendar.setTime(date);
     StringBuffer buffer = new StringBuffer();
     buffer.append(calendar.get(Calendar.YEAR));
-    buffer.append("-");
+    buffer.append('-');
     buffer.append(twoDigit(calendar.get(Calendar.MONTH) + 1));
-    buffer.append("-");
+    buffer.append('-');
     buffer.append(twoDigit(calendar.get(Calendar.DAY_OF_MONTH)));
     return buffer.toString();
   }
@@ -248,17 +248,17 @@ public class ISO8601Date {
     calendar.setTime(date);
     StringBuffer buffer = new StringBuffer();
     buffer.append(calendar.get(Calendar.YEAR));
-    buffer.append("-");
+    buffer.append('-');
     buffer.append(twoDigit(calendar.get(Calendar.MONTH) + 1));
-    buffer.append("-");
+    buffer.append('-');
     buffer.append(twoDigit(calendar.get(Calendar.DAY_OF_MONTH)));
-    buffer.append("T");
+    buffer.append('T');
     buffer.append(twoDigit(calendar.get(Calendar.HOUR_OF_DAY)));
-    buffer.append(":");
+    buffer.append(':');
     buffer.append(twoDigit(calendar.get(Calendar.MINUTE)));
-    buffer.append(":");
+    buffer.append(':');
     buffer.append(twoDigit(calendar.get(Calendar.SECOND)));
-    buffer.append(".");
+    buffer.append('.');
     buffer.append(twoDigit(calendar.get(Calendar.MILLISECOND) / 10));
     return buffer.toString();
   }
@@ -273,19 +273,19 @@ public class ISO8601Date {
     calendar.setTime(date);
     StringBuffer buffer = new StringBuffer();
     buffer.append(calendar.get(Calendar.YEAR));
-    buffer.append("-");
+    buffer.append('-');
     buffer.append(twoDigit(calendar.get(Calendar.MONTH) + 1));
-    buffer.append("-");
+    buffer.append('-');
     buffer.append(twoDigit(calendar.get(Calendar.DAY_OF_MONTH)));
-    buffer.append("T");
+    buffer.append('T');
     buffer.append(twoDigit(calendar.get(Calendar.HOUR_OF_DAY)));
-    buffer.append(":");
+    buffer.append(':');
     buffer.append(twoDigit(calendar.get(Calendar.MINUTE)));
-    buffer.append(":");
+    buffer.append(':');
     buffer.append(twoDigit(calendar.get(Calendar.SECOND)));
-    buffer.append(".");
+    buffer.append('.');
     buffer.append(twoDigit(calendar.get(Calendar.MILLISECOND) / 10));
-    buffer.append("Z");
+    buffer.append('Z');
     return buffer.toString();
   }
   
@@ -299,11 +299,11 @@ public class ISO8601Date {
     calendar.setTime(date);
     StringBuffer buffer = new StringBuffer();
     buffer.append(twoDigit(calendar.get(Calendar.HOUR_OF_DAY)));
-    buffer.append(":");
+    buffer.append(':');
     buffer.append(twoDigit(calendar.get(Calendar.MINUTE)));
-    buffer.append(":");
+    buffer.append(':');
     buffer.append(twoDigit(calendar.get(Calendar.SECOND)));
-    buffer.append(".");
+    buffer.append('.');
     buffer.append(twoDigit(calendar.get(Calendar.MILLISECOND) / 10));
     return buffer.toString();
   }
@@ -318,13 +318,13 @@ public class ISO8601Date {
     calendar.setTime(date);
     StringBuffer buffer = new StringBuffer();
     buffer.append(twoDigit(calendar.get(Calendar.HOUR_OF_DAY)));
-    buffer.append(":");
+    buffer.append(':');
     buffer.append(twoDigit(calendar.get(Calendar.MINUTE)));
-    buffer.append(":");
+    buffer.append(':');
     buffer.append(twoDigit(calendar.get(Calendar.SECOND)));
-    buffer.append(".");
+    buffer.append('.');
     buffer.append(twoDigit(calendar.get(Calendar.MILLISECOND) / 10));
-    buffer.append("Z");
+    buffer.append('Z');
     return buffer.toString();
   }
   

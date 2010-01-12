@@ -228,6 +228,7 @@ public class CrawlProfile {
 
     public void changeEntry(final entry e, final String propName, final String newValue) throws IOException, RowSpaceExceededException {
         e.mem.put(propName,  newValue);
+        assert e.handle() != null;
         profileTable.put(e.handle(), e.mem);
     }
     

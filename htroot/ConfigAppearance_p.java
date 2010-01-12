@@ -109,7 +109,7 @@ public class ConfigAppearance_p {
                     return prop;
                 }
                 try {
-                    final File skinFile = new File(skinPath, url.substring(url.lastIndexOf("/"), url.length()));
+                    final File skinFile = new File(skinPath, url.substring(url.lastIndexOf('/'), url.length()));
                     final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(skinFile)));
 
                     while (it.hasNext()) {

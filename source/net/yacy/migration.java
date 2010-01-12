@@ -49,7 +49,7 @@ public class migration {
             if(fromRev < NEW_OVERLAYS){
                 migrateDefaultFiles(sb);
             }
-            Log.logInfo("MIGRATION", "Migrating from "+String.valueOf(fromRev)+ " to "+String.valueOf(toRev));
+            Log.logInfo("MIGRATION", "Migrating from "+ fromRev + " to " + toRev);
             presetPasswords(sb);
             migrateSwitchConfigSettings(sb);
             migrateWorkFiles(sb);

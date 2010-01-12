@@ -91,16 +91,16 @@ public abstract class AbstractParser implements Idiom {
     
     public final File createTempFile(final String name) throws IOException {
         String parserClassName = this.getClass().getName();
-        int idx = parserClassName.lastIndexOf(".");
+        int idx = parserClassName.lastIndexOf('.');
         if (idx != -1) {
             parserClassName = parserClassName.substring(idx+1);
         } 
                     
         // getting the file extension
-        idx = name.lastIndexOf("/");
+        idx = name.lastIndexOf('/');
         final String fileName = (idx != -1) ? name.substring(idx+1) : name;        
         
-        idx = fileName.lastIndexOf(".");
+        idx = fileName.lastIndexOf('.');
         final String fileExt = (idx > -1) ? fileName.substring(idx+1) : "";
         
         // creates the temp file

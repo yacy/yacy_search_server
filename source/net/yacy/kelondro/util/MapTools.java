@@ -45,7 +45,7 @@ public final class MapTools {
         String token;
         while (st.hasMoreTokens()) {
             token = st.nextToken().trim();
-            pos = token.indexOf("=");
+            pos = token.indexOf('=');
             if (pos > 0) p.setProperty(token.substring(0, pos).trim(), token.substring(pos + 1).trim());
         }
         return p;
@@ -56,13 +56,13 @@ public final class MapTools {
         if (string == null) return null;
         final HashMap<String, String> map = new HashMap<String, String>();
         int pos;
-        if ((pos = string.indexOf("{")) >= 0) string = string.substring(pos + 1).trim();
-        if ((pos = string.lastIndexOf("}")) >= 0) string = string.substring(0, pos).trim();
+        if ((pos = string.indexOf('{')) >= 0) string = string.substring(pos + 1).trim();
+        if ((pos = string.lastIndexOf('}')) >= 0) string = string.substring(0, pos).trim();
         final StringTokenizer st = new StringTokenizer(string, separator);
         String token;
         while (st.hasMoreTokens()) {
             token = st.nextToken().trim();
-            pos = token.indexOf("=");
+            pos = token.indexOf('=');
             if (pos > 0) map.put(token.substring(0, pos).trim(), token.substring(pos + 1).trim());
         }
         return map;
@@ -100,8 +100,8 @@ public final class MapTools {
         if (string == null) return null;
         final Set<String> set = Collections.synchronizedSet(new HashSet<String>());
         int pos;
-        if ((pos = string.indexOf("{")) >= 0) string = string.substring(pos + 1).trim();
-        if ((pos = string.lastIndexOf("}")) >= 0) string = string.substring(0, pos).trim();
+        if ((pos = string.indexOf('{')) >= 0) string = string.substring(pos + 1).trim();
+        if ((pos = string.lastIndexOf('}')) >= 0) string = string.substring(0, pos).trim();
         final StringTokenizer st = new StringTokenizer(string, separator);
         while (st.hasMoreTokens()) {
             set.add(st.nextToken().trim());

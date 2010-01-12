@@ -25,6 +25,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.SortedMap;
@@ -94,7 +95,7 @@ public final class ScoreCluster<E> {
     }
     
     public static final String shortDateFormatString = "yyyyMMddHHmmss";
-    public static final SimpleDateFormat shortFormatter = new SimpleDateFormat(shortDateFormatString);
+    public static final SimpleDateFormat shortFormatter = new SimpleDateFormat(shortDateFormatString, Locale.US);
     public static final long minutemillis = 60000;
     public static long date2000 = 0;
     

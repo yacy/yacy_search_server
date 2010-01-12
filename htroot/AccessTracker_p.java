@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -46,7 +47,7 @@ import de.anomic.yacy.yacySeed;
 
 public class AccessTracker_p {
 	
-	private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+	private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
 	
 	private static final SortedMap<Long, String> treemapclone(final SortedMap<Long, String> m) {
 		final TreeMap<Long, String> accessClone = new TreeMap<Long, String>();

@@ -30,6 +30,7 @@ import java.io.StringWriter;
 import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
@@ -41,10 +42,9 @@ public final class SimpleLogFormatter extends SimpleFormatter {
       private final FieldPosition position = new FieldPosition(0);
 
       // e.g. 2005/05/25 11:22:53
-      private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+      private final SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
       
       private final StringBuffer buffer = new StringBuffer();
-      
   
       public SimpleLogFormatter() {
           super();
@@ -99,7 +99,7 @@ public final class SimpleLogFormatter extends SimpleFormatter {
                   record.getThrown().printStackTrace(printer);
                   stringBuffer.append(writer.toString());
               } catch (final Exception e) {
-                  stringBuffer.append("Failed to get stack trace: " + e.getMessage());
+                  stringBuffer.append("Failed to get stack trace: ").append(e.getMessage());
               } finally {
                   if (writer != null) try {writer.close();} catch (final Exception ex) {}
               }

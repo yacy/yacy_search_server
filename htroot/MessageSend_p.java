@@ -29,6 +29,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
@@ -39,7 +40,7 @@ import de.anomic.yacy.yacySeed;
 
 public class MessageSend_p {
 
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
     public static String dateString(final Date date) {
         return SimpleFormatter.format(date);
     }

@@ -120,11 +120,11 @@ public class ActionMessage {
       // this action requires params so we just set them...
       for ( Iterator itr = inputParameters.iterator(); itr.hasNext(); ) {
         InputParamContainer container = (InputParamContainer)itr.next();
-        body.append( "<" ).append( container.name ).append( ">" ).append( container.value );
-        body.append( "</" ).append( container.name ).append( ">" );
+        body.append( '<' ).append( container.name ).append( '>' ).append( container.value );
+        body.append( "</" ).append( container.name ).append( '>' );
       }
     }
-    body.append( "</u:" ).append( serviceAction.getName() ).append( ">" );
+    body.append( "</u:" ).append( serviceAction.getName() ).append( '>' );
     body.append( "</s:Body>" );
     body.append( "</s:Envelope>" );
     

@@ -202,7 +202,7 @@ public final class Switchboard extends serverSwitch {
     // load slots
     public  static int  xstackCrawlSlots     = 2000;
     public  static long lastPPMUpdate        = System.currentTimeMillis()- 30000;
-    private final  int  dhtMaxContainerCount = 500;
+    private static final int  dhtMaxContainerCount = 500;
     private        int  dhtMaxReferenceCount = 1000;
     
     // colored list management
@@ -1367,6 +1367,8 @@ public final class Switchboard extends serverSwitch {
                 entry selentry;
                 while (it.hasNext()) {
                     selentry = it.next();
+                    assert selentry.handle() != null;
+                    if (selentry.handle() == null) continue;
                     if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY))
                     	crawler.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,
                     			Long.toString(crawler.profilesActiveCrawls.getRecrawlDate(CrawlSwitchboard.CRAWL_PROFILE_PROXY_RECRAWL_CYCLE)));
@@ -1808,7 +1810,7 @@ public final class Switchboard extends serverSwitch {
         }
     }
     
-    private static SimpleDateFormat DateFormat1 = new SimpleDateFormat("EEE, dd MMM yyyy");
+    private static SimpleDateFormat DateFormat1 = new SimpleDateFormat("EEE, dd MMM yyyy", Locale.US);
     public static String dateString(final Date date) {
         if (date == null) return "";
         return DateFormat1.format(date);

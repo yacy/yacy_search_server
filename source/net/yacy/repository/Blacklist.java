@@ -402,7 +402,7 @@ public class Blacklist {
             allowRegex = properties.get("allowRegex").equalsIgnoreCase("true") ? true : false;
         }
 
-        if ((slashPos = element.indexOf("/")) == -1) {
+        if ((slashPos = element.indexOf('/')) == -1) {
             host = element;
             path = ".*";
         } else {
@@ -411,7 +411,7 @@ public class Blacklist {
         }
 
         if (!allowRegex || !isValidRegex(host)) {
-            final int i = host.indexOf("*");
+            final int i = host.indexOf('*');
 
             // check whether host begins illegally
             if (!host.matches("([A-Za-z0-9_-]+|\\*)(\\.([A-Za-z0-9_-]+|\\*))*")) {

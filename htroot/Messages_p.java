@@ -30,6 +30,7 @@ import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.TreeMap;
 
 import net.yacy.kelondro.util.DateFormatter;
@@ -45,7 +46,7 @@ import de.anomic.yacy.yacySeed;
 
 public class Messages_p {
 
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
     private static final String PEERSKNOWN = "peersKnown_";
 
     public static String dateString(final Date date) {

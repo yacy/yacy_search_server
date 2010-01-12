@@ -74,7 +74,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         final String host = urlcomps.url().getHost();
         if (host != null && host.endsWith(".yacyh")) {
             // translate host into current IP
-            int p = host.indexOf(".");
+            int p = host.indexOf('.');
             final String hash = yacySeed.hexHash2b64Hash(host.substring(p + 1, host.length() - 6));
             final yacySeed seed = peers.getConnected(hash);
             final String filename = urlcomps.url().getFile();
@@ -97,7 +97,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
             }
             alternative_urlstring = "http://" + address + "/" + host.substring(0, p) + filename;
             alternative_urlname = "http://share." + seed.getName() + ".yacy" + filename;
-            if ((p = alternative_urlname.indexOf("?")) > 0) alternative_urlname = alternative_urlname.substring(0, p);
+            if ((p = alternative_urlname.indexOf('?')) > 0) alternative_urlname = alternative_urlname.substring(0, p);
         }
     }
     public int hashCode() {

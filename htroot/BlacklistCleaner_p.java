@@ -303,8 +303,8 @@ public class BlacklistCleaner_p {
             // remove the entry from the running blacklist engine
             for (int blTypes=0; blTypes < supportedBlacklistTypes.length; blTypes++) {
                 if (listManager.listSetContains(supportedBlacklistTypes[blTypes] + ".BlackLists", blacklistToUse)) {
-                    final String host = (s.indexOf("/") == -1) ? s : s.substring(0, s.indexOf("/"));
-                    final String path = (s.indexOf("/") == -1) ? ".*" : s.substring(s.indexOf("/") + 1);
+                    final String host = (s.indexOf('/') == -1) ? s : s.substring(0, s.indexOf('/'));
+                    final String path = (s.indexOf('/') == -1) ? ".*" : s.substring(s.indexOf('/') + 1);
                     try {
                     Switchboard.urlBlacklist.remove(supportedBlacklistTypes[blTypes], host, path);
                     } catch (final RuntimeException e) {
@@ -340,7 +340,7 @@ public class BlacklistCleaner_p {
             pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklistToUse), true));
             String host, path;
             for (int i=0, pos; i<newEntry.length; i++) {
-                pos = newEntry[i].indexOf("/");
+                pos = newEntry[i].indexOf('/');
                 if (pos < 0) {
                     host = newEntry[i];
                     path = ".*";

@@ -115,7 +115,7 @@ public class RequestHeader extends HeaderFramework {
     }
     
     public static Properties parseRequestLine(final String s, final Properties prop, final String virtualHost) {
-        final int p = s.indexOf(" ");
+        final int p = s.indexOf(' ');
         if (p >= 0) {
             final String cmd = s.substring(0,p);
             final String args = s.substring(p+1);
@@ -148,7 +148,7 @@ public class RequestHeader extends HeaderFramework {
         }
         
         // store the version propery "HTTP" and cut the query at both ends
-        int sep = args.lastIndexOf(" ");
+        int sep = args.lastIndexOf(' ');
         if ((sep >= 0)&&(args.substring(sep + 1).toLowerCase().startsWith("http/"))) {
             // HTTP version is given
             prop.setProperty(CONNECTION_PROP_HTTP_VER, args.substring(sep + 1).trim());
@@ -169,7 +169,7 @@ public class RequestHeader extends HeaderFramework {
         // additionally, the values URL and ARGC are computed
         
         String argsString = "";
-        sep = args.indexOf("?");
+        sep = args.indexOf('?');
         if (sep >= 0) {
             // there are values attached to the query string
             argsString = args.substring(sep + 1); // cut head from tail of query
@@ -184,7 +184,7 @@ public class RequestHeader extends HeaderFramework {
         if (args.toUpperCase().startsWith("HTTP://")) {
             // a host was given. extract it and set path
             args = args.substring(7);
-            sep = args.indexOf("/");
+            sep = args.indexOf('/');
             if (sep < 0) {
                 // this is a malformed url, something like
                 // http://index.html
@@ -220,7 +220,7 @@ public class RequestHeader extends HeaderFramework {
 
         // find out file extension (we already stripped ?-parameters from args)
         String ext = "";  // default when no file extension
-        sep = path.lastIndexOf(".");
+        sep = path.lastIndexOf('.');
         if (sep >= 0) {
             final int ancpos = path.indexOf("#", sep + 1);
             if (ancpos  >= sep) {
@@ -245,7 +245,7 @@ public class RequestHeader extends HeaderFramework {
         while ((line = theSession.readLineAsString()) != null) {
             if (line.length() == 0) break; // this separates the header of the HTTP request from the body
             // parse the header line: a property separated with the ':' sign
-            if ((p = line.indexOf(":")) >= 0) {
+            if ((p = line.indexOf(':')) >= 0) {
                 // store a property
                 header.add(line.substring(0, p).trim(), line.substring(p + 1).trim());
             }

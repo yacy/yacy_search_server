@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
@@ -43,7 +44,7 @@ public class messageBoard {
     private static final int categoryLength = 12;
     private static final String dateFormat = "yyyyMMddHHmmss";
 
-    static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat);
+    static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat, Locale.US);
 
     static {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));

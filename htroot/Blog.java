@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 
 import net.yacy.kelondro.util.DateFormatter;
 
@@ -53,7 +54,7 @@ public class Blog {
 
     private static final String DEFAULT_PAGE = "blog_default";
 
-        private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+        private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
         // TODO: make userdefined date/time-strings (localisation)
 
     public static String dateString(final Date date) {

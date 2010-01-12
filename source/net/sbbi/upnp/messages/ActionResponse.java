@@ -93,8 +93,8 @@ public class ActionResponse {
     for ( Iterator i = outArguments.keySet().iterator(); i.hasNext(); ) {
       String name = (String)i.next();
       String value = (String)outArgumentsVals.get( name );
-      rtrVal.append( name ).append( "=" ).append( value );
-      if ( i.hasNext() ) rtrVal.append( "\n" );
+      rtrVal.append( name ).append( '=' ).append( value );
+      if ( i.hasNext() ) rtrVal.append( '\n' );
     }
     return rtrVal.toString();
   }

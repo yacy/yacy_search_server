@@ -36,6 +36,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 
 import de.anomic.data.diff;
 import de.anomic.data.wiki.wikiBoard;
@@ -52,7 +53,7 @@ public class Wiki {
     //private static String ListLevel = "";
     //private static String numListLevel = "";
 
-    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+    private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
     public static String dateString(final Date date) {
         return SimpleFormatter.format(date);
     }

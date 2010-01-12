@@ -581,7 +581,7 @@ public class Blacklist_p {
         }
 
         // remove the entry from the running blacklist engine
-        int pos = oldEntry.indexOf("/");
+        int pos = oldEntry.indexOf('/');
         if (pos < 0) {
             // add default empty path pattern
             pos = oldEntry.length();
@@ -616,7 +616,7 @@ public class Blacklist_p {
             newEntry = newEntry.substring(8);
         }
 
-        int pos = newEntry.indexOf("/");
+        int pos = newEntry.indexOf('/');
         if (pos < 0) {
             // add default empty path pattern
             pos = newEntry.length();

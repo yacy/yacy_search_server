@@ -240,12 +240,12 @@ public class ConnectFour {
             StringBuffer s = new StringBuffer((width + 1) * height);
             Coin coin;
             for (int row = height - 1; row >= 0; row--) {
-                s.append("\"");
+                s.append('\"');
                 for (int column = 0; column < width; column++) {
                     coin = b[row * width + column];
                     s.append((coin == null) ? " " : coin.toString());
                 }
-                if (row == 0) s.append("\""); else s.append("\"+\n");
+                if (row == 0) s.append('\"'); else s.append("\"+\n");
             }
             return s.toString();
         }

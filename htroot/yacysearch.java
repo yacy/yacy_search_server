@@ -344,7 +344,7 @@ public class yacysearch {
                 String domain = querystring.substring(tld + 4, ftb);
                 querystring = querystring.replace("tld:" + domain, "");
                 while (domain.length() > 0 && domain.charAt(0) == '.') domain = domain.substring(1);
-                if (domain.indexOf(".") < 0) domain = "\\." + domain; // is tld
+                if (domain.indexOf('.') < 0) domain = "\\." + domain; // is tld
                 if (domain.length() > 0) {
                     if (urlmask == null) {
                         urlmask = "[a-zA-Z]*://[^/]*" + domain + "/.*";

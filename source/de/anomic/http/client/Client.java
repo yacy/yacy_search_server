@@ -718,7 +718,7 @@ public class Client {
      */
     public static String generateLocation() {
         String loc = System.getProperty("user.timezone", "nowhere");
-        final int p = loc.indexOf("/");
+        final int p = loc.indexOf('/');
         if (p > 0) {
             loc = loc.substring(0, p);
         }

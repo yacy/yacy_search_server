@@ -498,7 +498,7 @@ public final class FileUtils {
     	final HashMap<String, String> props = new HashMap<String, String>();
     	while (li.hasNext()) {
     		line = li.next();
-    		pos = line.indexOf("=");
+    		pos = line.indexOf('=');
     		if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
     	}
     	return props;
@@ -530,7 +530,7 @@ public final class FileUtils {
             line = i.next().trim();
             if (line.length() > 0 && line.charAt(0) == '#') continue; // exclude comments
             //System.out.println("NXTOOLS_PROPS - LINE:" + line);
-            pos = line.indexOf("=");
+            pos = line.indexOf('=');
             if (pos > 0) props.put(line.substring(0, pos).trim(), line.substring(pos + 1).trim());
         }
         return props;
