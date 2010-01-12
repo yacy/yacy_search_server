@@ -171,13 +171,13 @@ public final class RankingProcess extends Thread {
         HostInfo hs;
         String domhash;
         boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts") >= 0;
-        WordReferenceVars iEntry;
         Long r;
-        //final ArrayList<WordReferenceVars> filteredEntries = new ArrayList<WordReferenceVars>();
+        final ArrayList<WordReferenceVars> filteredEntries = new ArrayList<WordReferenceVars>();
 
         // apply all constraints
         try {
-			while (true) {
+            WordReferenceVars iEntry;
+            while (true) {
 			    iEntry = decodedEntries.poll(1, TimeUnit.SECONDS);
 			    if (iEntry == null || iEntry == WordReferenceVars.poison) break;
 			    assert (iEntry.metadataHash().length() == index.row().primaryKeyLength);
@@ -226,35 +226,35 @@ public final class RankingProcess extends Thread {
 			    }
 			    
 			    // accept
-			    //filteredEntries.add(iEntry);
+			    filteredEntries.add(iEntry);
 			    
 			    // increase counter for statistics
-			    if (!local) this.remote_indexCount++;/*
+			    if (!local) this.remote_indexCount++;
 			}
-		
+
     		// do the ranking
     		for (WordReferenceVars fEntry: filteredEntries) {
-    			*/
+    			
     		    // kick out entries that are too bad according to current findings
-    		    r = Long.valueOf(this.order.cardinal(iEntry));
+    		    r = Long.valueOf(this.order.cardinal(fEntry));
     		    assert maxentries != 0;
     
                 // double-check
-    		    if (urlhashes.containsKey(iEntry.metadataHash())) continue;
+    		    if (urlhashes.containsKey(fEntry.metadataHash())) continue;
                 
     		    // insert
     		    if (maxentries < 0 || stack.size() < maxentries) {
     		        // in case that we don't have enough yet, accept any new entry
-    		        stack.push(iEntry, r);
+    		        stack.push(fEntry, r);
     		    } else {
     		        // if we already have enough entries, insert only such that are necessary to get a better result
     		        if (stack.bottom(r.longValue())) continue;
     		        
     		        // take the entry. the stack is automatically reduced
     		        // to the maximum size by deletion of elements at the bottom
-    		        stack.push(iEntry, r);
+    		        stack.push(fEntry, r);
     		    }
-    		    urlhashes.put(iEntry.metadataHash(), r);
+    		    urlhashes.put(fEntry.metadataHash(), r);
     		}
 
         } catch (InterruptedException e) {}
