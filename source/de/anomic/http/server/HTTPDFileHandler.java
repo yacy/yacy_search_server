@@ -378,7 +378,7 @@ public final class HTTPDFileHandler {
                 String val;
                 while (e.hasNext()) {
                     val = e.next();
-                    if ((val != null) && (val.indexOf("<script") >= 0) && !path.equals("/WatchCrawler_p.html")) {
+                    if ((val != null) && (val.indexOf("<script") >= 0) && !path.equals("/Crawler_p.html")) {
                         // deny request
                         HTTPDemon.sendRespondError(conProp,out,4,403,null,"bad post values",null);
                         return;

@@ -1,4 +1,4 @@
-// WatchCrawler_p.java
+// Crawler_p.java
 // (C) 2006 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 18.12.2006 on http://www.anomic.de
 // this file was created using the an implementation from IndexCreate_p.java, published 02.12.2004
@@ -57,13 +57,13 @@ import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
 
-public class WatchCrawler_p {
+public class Crawler_p {
 	public static final String CRAWLING_MODE_URL = "url";
 	public static final String CRAWLING_MODE_FILE = "file";
 	public static final String CRAWLING_MODE_SITEMAP = "sitemap";
 	
 
-    // this servlet does NOT create the WatchCrawler page content!
+    // this servlet does NOT create the Crawler servlet page content!
     // this servlet starts a web crawl. The interface for entering the web crawl parameters is in IndexCreate_p.html
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
@@ -131,7 +131,7 @@ public class WatchCrawler_p {
                     prop.put("info", "3");
                 } else {
                     // log a GET url for this crawl start for possible use in cronjobs
-                    Log.logInfo("CRAWLSTART-URL", "http://localhost:" + sb.getConfig("port", "8080") + "/WatchCrawler_p.html?" + post.toString());
+                    Log.logInfo("CRAWLSTART-URL", "http://localhost:" + sb.getConfig("port", "8080") + "/Crawler_p.html?" + post.toString());
                     
                     // set new properties
                     final boolean fullDomain = post.get("range", "wide").equals("domain"); // special property in simple crawl start

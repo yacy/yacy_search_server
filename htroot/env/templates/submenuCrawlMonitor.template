@@ -5,7 +5,7 @@
   <div class="SubMenugroup">
     <h3>Processing Monitor</h3>
     <ul class="SubMenu">
-      <li><a href="/WatchCrawler_p.html" class="MenuItemLink lock">Crawler Queues</a></li>
+      <li><a href="/Crawler_p.html" class="MenuItemLink lock">Crawler Queues</a></li>
       <li><a href="/IndexCreateLoaderQueue_p.html" class="MenuItemLink lock">Loader</a></li>
       <li><a href="/IndexCreateParserErrors_p.html" class="MenuItemLink lock">Parser Errors</a></li>
     </ul>

@@ -1949,7 +1949,7 @@ which you can also <a href="index.html">search yourself</a>.==den Sie auch selbs
 You have a principal peer because you publish your seed-list to a public accessible server==Sie haben einen Principal Peer, weil Sie Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch laden,
 where it can be retrieved using the URL==von wo aus sie unter folgender Adresse erreichbar ist:
 Your Web Page Indexer is idle. You can start your own web crawl <a href="CrawlStart_p.html">here</a>==Ihr Webseiten Indexierer ist untätig. Sie können <a href="CrawlStart_p.html">hier</a> einen Web Crawl starten
-Your Web Page Indexer is busy. You can <a href="WatchCrawler_p.html">monitor your web crawl</a> here.==Ihr Webseiten Indexierer ist beschäftigt. Sie können Ihren Web Crawl <a href="WatchCrawler_p.html">hier</a> kontrollieren
+Your Web Page Indexer is busy. You can <a href="Crawler_p.html">monitor your web crawl</a> here.==Ihr Webseiten Indexierer ist beschäftigt. Sie können Ihren Web Crawl <a href="Crawler_p.html">hier</a> kontrollieren
 #-----------------------------
 
 #File: Status_p.inc
@@ -2166,7 +2166,7 @@ View this profile as==Zeige dieses Profil als
 #vCard==vCard
 #-----------------------------
 
-#File: WatchCrawler_p.html
+#File: Crawler_p.html
 #---------------------------
 Crawler Queues==Crawler Puffer
 PPM \(Pages Per Minute\)==PPM (Seiten pro Minute)

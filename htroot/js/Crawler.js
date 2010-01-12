@@ -12,7 +12,7 @@ var changing=false; //change the interval
 var statusLoaded=true;
 var queueLoaded=true;
 
-function initWatchCrawler(){
+function initCrawler(){
     refresh();
     //loadInterval=window.setInterval("refresh()", refreshInterval*1000);
     countInterval=window.setInterval("countdown()", 1000);
@@ -172,12 +172,12 @@ function putQueueState(queue, state) {
 	a = document.getElementById(queue + "stateA");
 	img = document.getElementById(queue + "stateIMG");
 	if (state == "paused") {
-		a.href = "WatchCrawler_p.html?continue=" + queue;
+		a.href = "Crawler_p.html?continue=" + queue;
 		a.title = "Continue this queue";
 		img.src = "/env/grafics/start.gif";
 		img.alt = "Continue this queue";
 	} else {
-		a.href = "WatchCrawler_p.html?pause=" + queue;
+		a.href = "Crawler_p.html?pause=" + queue;
 		a.title = "Pause this queue";
 		img.src = "/env/grafics/stop.gif";
 		img.alt = "Pause this queue";

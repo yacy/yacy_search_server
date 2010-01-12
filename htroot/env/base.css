@@ -754,7 +754,7 @@ body#QuickCrawlLink p, body#QuickCrawlLink h4 {
 body#Wiki form fieldset p.help{
 	clear:both;
 }
-/* WatchCrawler_p.html */
+/* Crawler_p.html */
 body#watchCrawler table.watchCrawler {float:left; margin: 0px 5px 5px 0px;}
 body#watchCrawler p.watchCrawler {clear:both;}
 body#watchCrawler p#crawlingQueues{clear:both; margin: 20px 0px 0px 0px;}

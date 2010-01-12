@@ -12,7 +12,7 @@ function handleResponse(){
 	        doctitle=response.getElementsByTagName("title")[0].firstChild.nodeValue;
 	    }
 		// document.getElementById("title").innerHTML=doctitle;
-		document.WatchCrawler.bookmarkTitle.value=doctitle
+		document.Crawler.bookmarkTitle.value=doctitle
 		
 		// determine if crawling is allowed by the robots.txt
         docrobotsOK="";		

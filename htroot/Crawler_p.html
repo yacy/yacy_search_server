@@ -6,8 +6,8 @@
 <script type="text/javascript" src="/js/ajax.js"></script>
 <script type="text/javascript" src="/js/xml.js"></script>
 <script type="text/javascript" src="/js/html.js"></script>
-<script type="text/javascript" src="/js/WatchCrawler.js"></script></head>
-<body id="watchCrawler" onload="initWatchCrawler();">
+<script type="text/javascript" src="/js/Crawler.js"></script></head>
+<body id="Crawler" onload="initCrawler();">
 #%env/templates/header.template%#
 #%env/templates/submenuCrawlMonitor.template%#
 <h2>Crawler Queues</h2>
@@ -67,7 +67,7 @@
         </tbody>
       </table>
 
-      <form action="WatchCrawler_p.html" method="post" enctype="multipart/form-data">
+      <form action="Crawler_p.html" method="post" enctype="multipart/form-data">
       <table border="0" cellpadding="2" cellspacing="1" class="watchCrawler">
         <tbody>
           <tr class="TableHeader"> 
