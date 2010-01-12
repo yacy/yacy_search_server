@@ -281,6 +281,10 @@ public final class Heap extends HeapModifier implements BLOB {
     public void finalize() {
         this.close();
     }
+    
+    public int getBuffermax() {
+        return this.buffermax;
+    }
 
     /**
      * write a whole byte array as BLOB to the table

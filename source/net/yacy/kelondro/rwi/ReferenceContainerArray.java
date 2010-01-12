@@ -310,7 +310,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             donesomething = true;
         }
 
-        // merge very old files with it self (hack from sixcooler, see http://forum.yacy-websuche.de/viewtopic.php?p=15004#p15004)
+        // rewrite old files (hack from sixcooler, see http://forum.yacy-websuche.de/viewtopic.php?p=15004#p15004)
         while (this.merger.queueLength() < 1) {
             File ff = this.array.unmountOldest();
             if (ff == null) break;

@@ -38,7 +38,7 @@ import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.FileUtils;
 
 
-public final class HeapWriter  {
+public final class HeapWriter {
 
     private final int          keylength;     // the length of the primary key
     private HandleMap          index;         // key/seek relation for used records

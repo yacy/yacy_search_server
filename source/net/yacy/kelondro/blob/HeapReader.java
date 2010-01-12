@@ -256,6 +256,10 @@ public class HeapReader {
         return this.heapFile.getName();
     }
     
+    public File location() {
+        return this.heapFile;
+    }
+    
     /**
      * the number of BLOBs in the heap
      * @return the number of BLOBs in the heap
@@ -491,14 +495,14 @@ public class HeapReader {
      * this is used to import heap dumps into a write-enabled index heap
      */
     public static class entries implements
-        CloneableIterator<Map.Entry<String, byte[]>>,
-        Iterator<Map.Entry<String, byte[]>>,
-        Iterable<Map.Entry<String, byte[]>> {
+        CloneableIterator<Map.Entry<byte[], byte[]>>,
+        Iterator<Map.Entry<byte[], byte[]>>,
+        Iterable<Map.Entry<byte[], byte[]>> {
         
         DataInputStream is;
         int keylen;
         private final File blobFile;
-        Map.Entry<String, byte[]> nextEntry;
+        Map.Entry<byte[], byte[]> nextEntry;
         
         public entries(final File blobFile, final int keylen) throws IOException {
             if (!(blobFile.exists())) throw new IOException("file " + blobFile + " does not exist");
@@ -508,7 +512,7 @@ public class HeapReader {
             this.nextEntry = next0();
         }
 
-        public CloneableIterator<Entry<String, byte[]>> clone(Object modifier) {
+        public CloneableIterator<Entry<byte[], byte[]>> clone(Object modifier) {
             // if the entries iterator is cloned, close the file!
             if (is != null) try { is.close(); } catch (final IOException e) {}
             is = null;
@@ -527,7 +531,7 @@ public class HeapReader {
             return false;
         }
 
-        private Map.Entry<String, byte[]> next0() {
+        private Map.Entry<byte[], byte[]> next0() {
             try {
                 while (true) {
                     int len = is.readInt();
@@ -536,15 +540,15 @@ public class HeapReader {
                     byte[] payload = new byte[len - this.keylen];
                     if (is.read(payload) < payload.length) return null;
                     if (key[0] == 0) continue; // this is an empty gap
-                    return new entry(new String(key), payload);
+                    return new entry(key, payload);
                 }
             } catch (final IOException e) {
                 return null;
             }
         }
         
-        public Map.Entry<String, byte[]> next() {
-            final Map.Entry<String, byte[]> n = this.nextEntry;
+        public Map.Entry<byte[], byte[]> next() {
+            final Map.Entry<byte[], byte[]> n = this.nextEntry;
             this.nextEntry = next0();
             return n;
         }
@@ -553,7 +557,7 @@ public class HeapReader {
             throw new UnsupportedOperationException("blobs cannot be altered during read-only iteration");
         }
 
-        public Iterator<Map.Entry<String, byte[]>> iterator() {
+        public Iterator<Map.Entry<byte[], byte[]>> iterator() {
             return this;
         }
         
@@ -568,16 +572,16 @@ public class HeapReader {
         }
     }
 
-    public static class entry implements Map.Entry<String, byte[]> {
-        private final String s;
+    public static class entry implements Map.Entry<byte[], byte[]> {
+        private final byte[] s;
         private byte[] b;
         
-        public entry(final String s, final byte[] b) {
+        public entry(final byte[] s, final byte[] b) {
             this.s = s;
             this.b = b;
         }
     
-        public String getKey() {
+        public byte[] getKey() {
             return s;
         }
 

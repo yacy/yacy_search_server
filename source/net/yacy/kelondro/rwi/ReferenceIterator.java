@@ -65,9 +65,9 @@ public class ReferenceIterator <ReferenceType extends Reference> implements Clon
      * because they may get very large, it is wise to deallocate some memory before calling next()
      */
     public ReferenceContainer<ReferenceType> next() {
-        Map.Entry<String, byte[]> entry = blobs.next();
+        Map.Entry<byte[], byte[]> entry = blobs.next();
         byte[] payload = entry.getValue();
-        return new ReferenceContainer<ReferenceType>(factory, entry.getKey().getBytes(), RowSet.importRowSet(payload, payloadrow));
+        return new ReferenceContainer<ReferenceType>(factory, entry.getKey(), RowSet.importRowSet(payload, payloadrow));
     }
     
     public void remove() {
