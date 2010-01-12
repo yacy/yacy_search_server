@@ -27,6 +27,7 @@
 Access Tracker==Zugriffe
 Server Access Overview==Server Zugriff Überblick
 This is a list of \#\[num\]\# requests to the local http server within the last hour.==Dies ist eine Liste von #[num]# Anfragen, die an den lokalen http Server innerhalb der letzten Stunde gestellt wurden.
+This is a list of requests to the local http server within the last hour.==Dies ist eine Liste von Anfragen, die innerhalb der letzten Stunde an den lokalen HTTP Server gestellt wurden.
 Showing \#\[num\]\# requests.==Gezeigt werden #[num]# Anfragen.
 Access Count During==Erfasster Zugriff während der
 last Second==letzten Sekunde
@@ -551,6 +552,8 @@ regex on release number strings==regex mit Versionsnummern
 Release type==Release Typ
 only main releases==nur offizielle Versionen
 any release including developer releases==jede Version, auch Entwickler Versionen
+Signed autoupdate:==signierte Aktualisierung:
+only accept signed files==Nur signierte Dateien akzeptieren
 "Submit"=="Speichern"
 Accepted Changes.==Änderungen akzeptiert.
 System Update Statistics==System Aktualisierungs Statistiken
