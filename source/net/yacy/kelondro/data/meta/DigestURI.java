@@ -935,7 +935,7 @@ public class DigestURI implements Serializable {
     public final String language() {
         String language = "en";
         if (host == null) return language;
-        final int pos = host.lastIndexOf(".");
+        final int pos = host.lastIndexOf('.');
         if (pos > 0 && host.length() - pos == 3) language = host.substring(pos + 1).toLowerCase();
         if (language.equals("uk")) language = "en";
         return language;

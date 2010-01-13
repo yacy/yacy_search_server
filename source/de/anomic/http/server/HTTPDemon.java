@@ -348,7 +348,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         final String host = this.prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST);
         if (host == null) return false;
         int pos;
-        if ((pos = host.indexOf(":")) < 0) {
+        if ((pos = host.indexOf(':')) < 0) {
             // default port 80
             return false; // not allowed
         }
@@ -439,7 +439,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         
         int pos;
         String unknownCommand = null, args = null;
-        if ((pos = requestLine.indexOf(" ")) > 0) {
+        if ((pos = requestLine.indexOf(' ')) > 0) {
             unknownCommand = requestLine.substring(0,pos);
             args = requestLine.substring(pos+1);
         } else {
@@ -660,7 +660,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // this is to support https   
         
         // parse HTTP version
-        int pos = arg.indexOf(" ");
+        int pos = arg.indexOf(' ');
         String httpVersion = "HTTP/1.0";
         if (pos >= 0) {
             httpVersion = arg.substring(pos + 1);
@@ -670,7 +670,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         
         // parse hostname and port
         prop.setProperty(HeaderFramework.CONNECTION_PROP_HOST, arg);
-        pos = arg.indexOf(":");
+        pos = arg.indexOf(':');
         int port = 443;
         if (pos >= 0) {
             port = Integer.parseInt(arg.substring(pos + 1));
@@ -773,8 +773,8 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         int argc = 0;
         // Textfield1=default+value+Textfield+1&Textfield2=default+value+Textfield+2&selection1=sel1&selection2=othervalue1&selection2=sel2&selection3=sel3&Menu1=SubEnry11&radio1=button1&check1=button2&check1=button3&hidden1=&sButton1=enter+%281%29
         while (argsString.length() > 0) {
-            eqp = argsString.indexOf("=");
-            sep = argsString.indexOf("&");
+            eqp = argsString.indexOf('=');
+            sep = argsString.indexOf('&');
             if ((eqp <= 0) || (sep <= 0)) break;
             // resulting equations are inserted into the property args with leading '&'
             args.put(parseArg(argsString.substring(0, eqp)), parseArg(argsString.substring(eqp + 1, sep)));
@@ -1127,7 +1127,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             final String method = conProp.getProperty(HeaderFramework.CONNECTION_PROP_METHOD);
             
             int port = 80;
-            final int pos = host.indexOf(":");        
+            final int pos = host.indexOf(':');        
             if (pos != -1) {
                 port = Integer.parseInt(host.substring(pos + 1));
                 host = host.substring(0, pos);
@@ -1414,7 +1414,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         if ((path == null) || (path.length() == 0)) return true;
         
         int pos;
-        if ((pos = path.lastIndexOf(".")) != -1) {
+        if ((pos = path.lastIndexOf('.')) != -1) {
             return !disallowZippedContentEncoding.contains(path.substring(pos).toLowerCase());
         }
         return true;
@@ -1477,7 +1477,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         if ((hostName == null) || (hostName.length() == 0)) return false;
         
         try {                            
-            final int idx = hostName.indexOf(":");
+            final int idx = hostName.indexOf(':');
             final String dstHost = (idx != -1) ? hostName.substring(0,idx).trim() : hostName.trim();     
             final Integer dstPort = (idx != -1) ? Integer.valueOf(hostName.substring(idx+1).trim()) : Integer.valueOf(80);
             

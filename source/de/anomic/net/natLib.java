@@ -67,7 +67,7 @@ public class natLib {
             }
         }
         if (ip == null) return false;
-        if (ip.indexOf(":") >= 0) return false; // ipv6...
+        if (ip.indexOf(':') >= 0) return false; // ipv6...
         return (isNotLocal(ip)) && (isIP(ip));
     }
     

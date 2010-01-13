@@ -490,7 +490,7 @@ public class serverSwitch {
 	// read user name according to host addresses
 	final String a = authorization.get(host);
 	if (a == null) return null;
-	final int p = a.indexOf("@");
+	final int p = a.indexOf('@');
 	if (p < 0) return null;
 	return a.substring(0, p);
     }
@@ -499,7 +499,7 @@ public class serverSwitch {
 	// read access rigths according to host addresses
 	final String a = authorization.get(host);
 	if (a == null) return null;
-	final int p = a.indexOf("@");
+	final int p = a.indexOf('@');
 	if (p < 0) return null;
 	return a.substring(p + 1);
     }

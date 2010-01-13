@@ -608,7 +608,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                         	badPeerHashes.add(seed.hash);
                         	continue; 
                         }
-                        if ((pos = addressStr.indexOf(":"))!= -1) {
+                        if ((pos = addressStr.indexOf(':'))!= -1) {
                             addressStr = addressStr.substring(0,pos);
                         }
                         seedIPAddress = InetAddress.getByName(addressStr);
@@ -637,7 +637,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                             badPeerHashes.add(seed.hash);
                             continue;
                         }
-                        if ((pos = addressStr.indexOf(":"))!= -1) {
+                        if ((pos = addressStr.indexOf(':'))!= -1) {
                             addressStr = addressStr.substring(0,pos);
                         }
                         seedIPAddress = InetAddress.getByName(addressStr);
@@ -660,7 +660,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
                 try {
                     seed = e.next();
                     if ((seed != null) && ((addressStr = seed.getPublicAddress()) != null)) {
-                        if ((pos = addressStr.indexOf(":"))!= -1) {
+                        if ((pos = addressStr.indexOf(':'))!= -1) {
                             addressStr = addressStr.substring(0,pos);
                         }
                         seedIPAddress = InetAddress.getByName(addressStr);
@@ -676,7 +676,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             if (this.mySeed == null) return null;
             addressStr = mySeed.getPublicAddress();
             if (addressStr == null) return null;
-            if ((pos = addressStr.indexOf(":"))!= -1) {
+            if ((pos = addressStr.indexOf(':'))!= -1) {
                 addressStr = addressStr.substring(0,pos);
             }
             seedIPAddress = InetAddress.getByName(addressStr);
@@ -837,7 +837,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
         if (host.endsWith(".yacyh")) {
             // this is not functional at the moment
             // caused by lowecasing of hashes at the browser client
-            p = host.indexOf(".");
+            p = host.indexOf('.');
             if ((p > 0) && (p != (host.length() - 6))) {
                 subdom = host.substring(0, p);
                 host = host.substring(p + 1);
@@ -860,7 +860,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
             return seed.getPublicAddress() + ((subdom == null) ? "" : ("/" + subdom));
         } else if (host.endsWith(".yacy")) {
             // identify subdomain
-            p = host.indexOf(".");
+            p = host.indexOf('.');
             if ((p > 0) && (p != (host.length() - 5))) {
                 subdom = host.substring(0, p); // no double-dot attack possible, the subdom cannot have ".." in it
                 host = host.substring(p + 1); // if ever, the double-dots are here but do not harm

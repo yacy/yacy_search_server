@@ -131,7 +131,7 @@ public final class robotsParser {
                 
                 // parse sitemap
                 if (lineUpper.startsWith(ROBOTS_SITEMAP)) {
-                    pos = line.indexOf(" ");
+                    pos = line.indexOf(' ');
                     if (pos != -1) {
                         sitemap = line.substring(pos).trim();
                     }
@@ -160,10 +160,10 @@ public final class robotsParser {
                     if (pos != -1) line = line.substring(0,pos).trim();
                     
                     // getting out the robots name
-                    pos = line.indexOf(" ");
+                    pos = line.indexOf(' ');
                     if (pos != -1) {
                         final String userAgent = line.substring(pos).trim();
-                        isRule4AllAgents |= userAgent.equals("*");
+                        isRule4AllAgents |= userAgent.equals('*');
                         isRule4YaCyAgent |= userAgent.toLowerCase().indexOf("yacy") >=0;
                         isRule4YaCyAgent |= userAgent.toLowerCase().indexOf("yacybot") >=0;
                         if (isRule4YaCyAgent) rule4YaCyFound = true;
@@ -175,7 +175,7 @@ public final class robotsParser {
                 if (lineUpper.startsWith(ROBOTS_CRAWL_DELAY)) {
                     inBlock = true;
                 	if (isRule4YaCyAgent || isRule4AllAgents) {
-                		pos = line.indexOf(" ");
+                		pos = line.indexOf(' ');
                 		if (pos != -1) {
                 			try {
                 				// the crawl delay can be a float number and means number of seconds
@@ -202,7 +202,7 @@ public final class robotsParser {
                         if (line.endsWith("*")) line = line.substring(0,line.length()-1);
                         
                         // parse the path
-                        pos = line.indexOf(" ");
+                        pos = line.indexOf(' ');
                         if (pos >= 0) {
                             // getting the path
                             String path = line.substring(pos).trim();

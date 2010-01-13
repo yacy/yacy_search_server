@@ -376,9 +376,9 @@ dc_rights
             if (u.startsWith("mailto:")) {
                 emaillinks.put(u.substring(7), entry.getValue());
             } else {
-                extpos = u.lastIndexOf(".");
+                extpos = u.lastIndexOf('.');
                 if (extpos > 0) {
-                    if (((qpos = u.indexOf("?")) >= 0) && (qpos > extpos)) {
+                    if (((qpos = u.indexOf('?')) >= 0) && (qpos > extpos)) {
                         ext = u.substring(extpos + 1, qpos).toLowerCase();
                     } else {
                         ext = u.substring(extpos + 1).toLowerCase();

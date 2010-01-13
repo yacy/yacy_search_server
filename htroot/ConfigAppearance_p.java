@@ -121,7 +121,7 @@ public class ConfigAppearance_p {
                     return prop;
                 }
                 if (post.containsKey("use_skin") && (post.get("use_skin", "")).equals("on")) {
-                    changeSkin(sb, skinPath, url.substring(url.lastIndexOf("/"), url.length()));
+                    changeSkin(sb, skinPath, url.substring(url.lastIndexOf('/'), url.length()));
                 }
             }
             

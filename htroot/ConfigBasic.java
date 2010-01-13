@@ -125,7 +125,7 @@ public class ConfigBasic {
             String host = null;
             if (header.containsKey(HeaderFramework.HOST)) {
                 host = header.get(HeaderFramework.HOST);
-                final int idx = host.indexOf(":");
+                final int idx = host.indexOf(':');
                 if (idx != -1) host = host.substring(0,idx);
             } else {
                 host = Domains.myPublicLocalIP().getHostAddress();

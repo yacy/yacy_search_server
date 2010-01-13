@@ -468,7 +468,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         //String ip =      conProp.getProperty(httpHeader.CONNECTION_PROP_CLIENTIP); // the ip from the connecting peer
         
         int port, pos;        
-        if ((pos = host.indexOf(":")) < 0) {
+        if ((pos = host.indexOf(':')) < 0) {
             port = 80;
         } else {
             port = Integer.parseInt(host.substring(pos + 1));
@@ -508,7 +508,7 @@ public class HeaderFramework extends TreeMap<String, String> implements Map<Stri
         String line;
         while ((line = reader.readLine()) != null) {
             if (line.length() == 0) break;
-            if ((p = line.indexOf(":")) >= 0) {
+            if ((p = line.indexOf(':')) >= 0) {
                 // store a property
                 add(line.substring(0, p).trim(), line.substring(p + 1).trim());
             }

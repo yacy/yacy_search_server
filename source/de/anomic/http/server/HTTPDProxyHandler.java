@@ -332,7 +332,7 @@ public final class HTTPDProxyHandler {
                 return;
             }
 
-            if ((pos = host.indexOf(":")) < 0) {
+            if ((pos = host.indexOf(':')) < 0) {
                 port = 80;
             } else {
                 port = Integer.parseInt(host.substring(pos + 1));
@@ -451,7 +451,7 @@ public final class HTTPDProxyHandler {
             final String httpVer = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER); // the ip from the connecting peer            
             
             int port, pos;        
-            if ((pos = host.indexOf(":")) < 0) {
+            if ((pos = host.indexOf(':')) < 0) {
                 port = 80;
             } else {
                 port = Integer.parseInt(host.substring(pos + 1));
@@ -762,7 +762,7 @@ public final class HTTPDProxyHandler {
             final String httpVer = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER);
             
             int port, pos;
-            if ((pos = host.indexOf(":")) < 0) {
+            if ((pos = host.indexOf(':')) < 0) {
                 port = 80;
             } else {
                 port = Integer.parseInt(host.substring(pos + 1));
@@ -865,7 +865,7 @@ public final class HTTPDProxyHandler {
             final String httpVer = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER);
 
             int port, pos;
-            if ((pos = host.indexOf(":")) < 0) {
+            if ((pos = host.indexOf(':')) < 0) {
                 port = 80;
             } else {
                 port = Integer.parseInt(host.substring(pos + 1));
@@ -1049,11 +1049,11 @@ public final class HTTPDProxyHandler {
 
     private static String domain(final String host) {
         String domain = host;
-        int pos = domain.lastIndexOf(".");
+        int pos = domain.lastIndexOf('.');
         if (pos >= 0) {
             // truncate from last part
             domain = domain.substring(0, pos);
-            pos = domain.lastIndexOf(".");
+            pos = domain.lastIndexOf('.');
             if (pos >= 0) {
                 // truncate from first part
                 domain = domain.substring(pos + 1);
@@ -1224,7 +1224,7 @@ public final class HTTPDProxyHandler {
         if (args != null) { path = path + "?" + args; }
     
         int port, pos;
-        if ((pos = host.indexOf(":")) < 0) {
+        if ((pos = host.indexOf(':')) < 0) {
             port = 80;
         } else {
             port = Integer.parseInt(host.substring(pos + 1));
@@ -1503,7 +1503,7 @@ public final class HTTPDProxyHandler {
         // getting some connection properties
         String orgHostPort = "80";
         String orgHostName = conProp.getProperty(HeaderFramework.CONNECTION_PROP_HOST,"unknown").toLowerCase();
-        int pos = orgHostName.indexOf(":");
+        int pos = orgHostName.indexOf(':');
         if (pos != -1) {
             orgHostPort = orgHostName.substring(pos+1);
             orgHostName = orgHostName.substring(0,pos);                        
@@ -1531,7 +1531,7 @@ public final class HTTPDProxyHandler {
             if (addr != null) if (addr != null) testHostNames.add(testHostName);                             
         }
         
-        pos = orgHostName.lastIndexOf(".");
+        pos = orgHostName.lastIndexOf('.');
         if (pos != -1) {
             final Iterator<String> iter = topLevelDomains.iterator();
             while (iter.hasNext()) {
@@ -1661,8 +1661,8 @@ public final class HTTPDProxyHandler {
         if (conProp.containsKey(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_HEADER)) {
             final HeaderFramework proxyRespondHeader = (HeaderFramework) conProp.get(HeaderFramework.CONNECTION_PROP_PROXY_RESPOND_HEADER);
             mime = proxyRespondHeader.mime();
-            if (mime.indexOf(";") != -1) {
-                mime = mime.substring(0,mime.indexOf(";"));
+            if (mime.indexOf(';') != -1) {
+                mime = mime.substring(0,mime.indexOf(';'));
             }
         }
         logMessage.append(mime);        

@@ -153,7 +153,7 @@ public final class transferRWI {
                 estring = it.next();
                 
                 // check if RWI entry is well-formed
-                p = estring.indexOf("{");
+                p = estring.indexOf('{');
                 if ((p < 0) || (estring.indexOf("x=") < 0) || !(estring.indexOf("[B@") < 0)) {
                     blocked++;
                     continue;

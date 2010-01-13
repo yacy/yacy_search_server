@@ -109,7 +109,7 @@ public class ConfigLanguage_p {
                     return prop;
                 }
                 try{
-                    final File langFile = new File(langPath, url.substring(url.lastIndexOf("/"), url.length()));
+                    final File langFile = new File(langPath, url.substring(url.lastIndexOf('/'), url.length()));
                     final BufferedWriter bw = new BufferedWriter(new PrintWriter(new FileWriter(langFile)));
 
                     while (it.hasNext()) {
@@ -121,7 +121,7 @@ public class ConfigLanguage_p {
                     return prop;
                 }
                 if(post.containsKey("use_lang") && (post.get("use_lang")).equals("on")){
-                    translator.changeLang(env, langPath, url.substring(url.lastIndexOf("/"), url.length()));
+                    translator.changeLang(env, langPath, url.substring(url.lastIndexOf('/'), url.length()));
                 }
             }
         }

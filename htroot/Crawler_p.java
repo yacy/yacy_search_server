@@ -156,7 +156,7 @@ public class Crawler_p {
                     if (crawlingStartURL!= null && fullDomain) {
                         newcrawlingMustMatch = ".*" + crawlingStartURL.getHost() + ".*";
                     }
-                    if (crawlingStart!= null && subPath && (pos = crawlingStart.lastIndexOf("/")) > 0) {
+                    if (crawlingStart!= null && subPath && (pos = crawlingStart.lastIndexOf('/')) > 0) {
                         newcrawlingMustMatch = crawlingStart.substring(0, pos + 1) + ".*";
                     }
                     

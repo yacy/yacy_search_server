@@ -130,7 +130,7 @@ public class RankingProfile {
             for (int i = 0; i < elts.length; i++) {
                 e = elts[i].trim();
                 if ((s == 0) || (e.startsWith(prefix))) {
-                    p = e.indexOf("=");
+                    p = e.indexOf('=');
                     if (p < 0) System.out.println("DEBUG: bug in plasmaSearchRankingProfile: e = " + e);
                     if ((p > 0) && (e.length() > p + 1)) coeff.put(e.substring(s, p), Integer.valueOf(Integer.parseInt(e.substring(p + 1))));
                 }

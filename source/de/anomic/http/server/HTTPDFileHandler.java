@@ -405,8 +405,8 @@ public final class HTTPDFileHandler {
                 // the indexOf(".") is just a workaround because there from ConfigLanguage.html commes "de.lng" and
                 // from ConfigBasic.html comes just "de" in the "language" parameter
                 localeSelection = args.get("language", localeSelection);
-                if (localeSelection.indexOf(".") != -1)
-                    localeSelection = localeSelection.substring(0, localeSelection.indexOf("."));
+                if (localeSelection.indexOf('.') != -1)
+                    localeSelection = localeSelection.substring(0, localeSelection.indexOf('.'));
             }
             
             File targetFile = getLocalizedFile(path, localeSelection);
@@ -655,7 +655,7 @@ public final class HTTPDFileHandler {
                     String key;
                     String value;
                     for (int i = 0; i < cgiHeader.length; i++) {
-                        indexOfDelimiter = cgiHeader[i].indexOf(":");
+                        indexOfDelimiter = cgiHeader[i].indexOf(':');
                         key = cgiHeader[i].substring(0, indexOfDelimiter).trim();
                         value = cgiHeader[i].substring(indexOfDelimiter + 1).trim();
                         conProp.setProperty(key, value);
@@ -1110,7 +1110,7 @@ public final class HTTPDFileHandler {
     private static final File rewriteClassFile(final File template) {
         try {
             String f = template.getCanonicalPath();
-            final int p = f.lastIndexOf(".");
+            final int p = f.lastIndexOf('.');
             if (p < 0) return null;
             f = f.substring(0, p) + ".class";
             //System.out.println("constructed class path " + f);

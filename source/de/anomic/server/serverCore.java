@@ -243,7 +243,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     
     public static int getPortNr(String extendedPortString) {
         int pos = -1;
-        if ((pos = extendedPortString.indexOf(":"))!= -1) {
+        if ((pos = extendedPortString.indexOf(':'))!= -1) {
             extendedPortString = extendedPortString.substring(pos+1);
         }
         return Integer.parseInt(extendedPortString);         
@@ -256,7 +256,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         int bindPort;
         
         int pos = -1;
-        if ((pos = extendedPortString.indexOf(":"))!= -1) {
+        if ((pos = extendedPortString.indexOf(':'))!= -1) {
             bindIP = extendedPortString.substring(0,pos).trim();
             extendedPortString = extendedPortString.substring(pos+1); 
             

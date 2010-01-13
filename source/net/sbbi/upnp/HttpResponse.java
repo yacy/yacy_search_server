@@ -70,7 +70,8 @@ public class HttpResponse {
    * @throws IllegalArgumentException if some error occurs during parsing
    */
   protected HttpResponse( String rawHttpResponse ) throws IllegalArgumentException {
-    if ( rawHttpResponse == null || rawHttpResponse.trim().length() == 0 ) {
+      rawHttpResponse = rawHttpResponse.trim();
+    if ( rawHttpResponse == null || rawHttpResponse.length() == 0 ) {
       throw new IllegalArgumentException( "Empty HTTP response message" );
     }
     boolean bodyParsing = false;
@@ -123,7 +124,7 @@ public class HttpResponse {
       while (tokenizer.countTokens() > 0) {
         String nextToken = tokenizer.nextToken().trim();
         if ( nextToken.startsWith( elementName ) ) {
-          int index = nextToken.indexOf( "=" );
+          int index = nextToken.indexOf( '=' );
           if ( index != -1 ) {
             return nextToken.substring( index + 1 ).trim();
           }

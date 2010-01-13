@@ -192,7 +192,7 @@ public HashMap parseProps(String s) {
   int p;
   String z;
   for (int i = 0; i < l.length; i++) {
-    p = l[i].indexOf("=");
+    p = l[i].indexOf('=');
     if (p > 0) {
       z = l[i].substring(p + 1).trim();
       if (z.length() > 0 && z.charAt(0) == '"') z = z.substring(1);
