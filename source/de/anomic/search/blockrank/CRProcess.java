@@ -28,6 +28,7 @@ package de.anomic.search.blockrank;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Date;
 import java.util.Iterator;
 
 import net.yacy.kelondro.data.word.WordReference;
@@ -455,7 +456,7 @@ public class CRProcess {
                 final File tmp_dir = new File(root_path, "DATA/RANKING/GLOBAL/016_tmp");
                 final File err_dir = new File(root_path, "DATA/RANKING/GLOBAL/017_err");
                 final File acc_dir = new File(root_path, "DATA/RANKING/GLOBAL/018_acc");
-                final String filename = "CRG-a-" + new DateFormatter().toShortString(true) + ".cr.gz";
+                final String filename = "CRG-a-" + DateFormatter.formatShortMilliSecond(new Date()) + ".cr.gz";
                 final File to_file = new File(root_path, "DATA/RANKING/GLOBAL/020_con0/" + filename);
                 if (!(ready_dir.exists())) ready_dir.mkdirs();
                 if (!(tmp_dir.exists())) tmp_dir.mkdirs();

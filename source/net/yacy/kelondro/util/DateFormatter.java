@@ -449,32 +449,6 @@ public final class DateFormatter {
     // find out time zone and DST offset
     private static Calendar thisCalendar = Calendar.getInstance();
 
-    // pre-calculation of time tables
-    private final static long[] dimnormalacc = new long[12], dimleapacc = new long[12];
-    private final static long[] utimeyearsacc = new long[67];
-    static {
-        long millis = 0;
-        for (int i = 0; i < 67; i++) {
-            utimeyearsacc[i] = millis;
-            millis += ((i & 3) == 0) ? leapyearMillis : normalyearMillis;
-        }
-        millis = 0;
-        for (int i = 0; i < 12; i++) {
-            dimnormalacc[i] = millis;
-            millis += (dayMillis * dimnormal[i]);
-        }
-        millis = 0;
-        for (int i = 0; i < 12; i++) {
-            dimleapacc[i] = millis;
-            millis += (dayMillis * dimleap[i]);
-        }
-    }
-    
-    // class variables
-    private int milliseconds, seconds, minutes, hours, days, months, years; // years since 1970
-    private int dow; // day-of-week
-    private long utime;
-
     public static String UTCDiffString() {
         // we express the UTC Difference in 5 digits:
         // SHHMM
@@ -497,7 +471,7 @@ public final class DateFormatter {
         return "+" + diff;
     }
 
-    public static long UTCDiff() {
+    private static long UTCDiff() {
         // DST_OFFSET is dependent on the time of the Calendar, so it has to be updated
         // to get the correct current offset
         synchronized(thisCalendar) {
@@ -508,7 +482,7 @@ public final class DateFormatter {
         }
     }
     
-    public static long UTCDiff(final String diffString) {
+    private static long UTCDiff(final String diffString) {
         if (diffString.length() != 5) throw new IllegalArgumentException("UTC String malformed (wrong size):" + diffString);
         boolean ahead = true;
         if (diffString.length() > 0 && diffString.charAt(0) == '+') ahead = true;
@@ -519,124 +493,10 @@ public final class DateFormatter {
         return ((ahead) ? (long) 1 : (long) -1) * (oh * hourMillis + om * minuteMillis);
     }
     
-
     public static long correctedUTCTime() {
         return System.currentTimeMillis() - UTCDiff();
     }
-    
-    public DateFormatter() {
-        this(System.currentTimeMillis());
-    }
-    
-    public DateFormatter(final long utime) {
-        // set the time as the difference, measured in milliseconds,
-        // between the current time and midnight, January 1, 1970 UTC/GMT
-        this.utime = utime;
-        dow = (int) (((utime / dayMillis) + 3) % 7);
-        years = (int) (utime / normalyearMillis); // a guess
-        if (utime < utimeyearsacc[years]) years--; // the correction
-        long remain = utime - utimeyearsacc[years];
-        months = (int) (remain / (29 * dayMillis)); // a guess
-        if (months > 11) months = 11;
-        if ((years & 3) == 0) {
-            if (remain < dimleapacc[months]) months--; // correction
-            remain = remain - dimleapacc[months];           
-        } else {
-            if (remain < dimnormalacc[months]) months--; // correction
-            remain = remain - dimnormalacc[months];
-        }
-        days = (int) (remain / dayMillis); remain = remain % dayMillis;
-        hours = (int) (remain / hourMillis); remain = remain % hourMillis;
-        minutes = (int) (remain / minuteMillis); remain = remain % minuteMillis;
-        seconds = (int) (remain / secondMillis); remain = remain % secondMillis;
-        milliseconds = (int) remain;
-    }
 
-    private void calcUTime() {
-        this.utime = utimeyearsacc[years] + dimleapacc[months - 1] + dayMillis * (days - 1) +
-                     hourMillis * hours + minuteMillis * minutes + secondMillis * seconds + milliseconds;
-        this.dow = (int) (((utime / dayMillis) + 3) % 7);
-    }
-        
-    public DateFormatter(final String datestring) throws java.text.ParseException {
-        // parse a date string; otherwise throw a java.text.ParseException
-        if ((datestring.length() == 14) || (datestring.length() == 17)) {
-            // parse a ShortString
-            try {years = Integer.parseInt(datestring.substring(0, 4)) - 1970;} catch (final NumberFormatException e) {
-                throw new java.text.ParseException("serverDate '" + datestring + "' wrong year", 0);
-            }
-            if (years < 0) throw new java.text.ParseException("serverDate '" + datestring + "' wrong year", 0);
-            try {months = Integer.parseInt(datestring.substring(4, 6)) - 1;} catch (final NumberFormatException e) {
-                throw new java.text.ParseException("serverDate '" + datestring + "' wrong month", 4);
-            }
-            if ((months < 0) || (months > 11)) throw new java.text.ParseException("serverDate '" + datestring + "' wrong month", 4);
-            try {days = Integer.parseInt(datestring.substring(6, 8)) - 1;} catch (final NumberFormatException e) {
-                throw new java.text.ParseException("serverDate '" + datestring + "' wrong day", 6);
-            }
-            if ((days < 0) || (days > 30)) throw new java.text.ParseException("serverDate '" + datestring + "' wrong day", 6);
-            try {hours = Integer.parseInt(datestring.substring(8, 10));} catch (final NumberFormatException e) {
-                throw new java.text.ParseException("serverDate '" + datestring + "' wrong hour", 8);
-            }
-            if ((hours < 0) || (hours > 23)) throw new java.text.ParseException("serverDate '" + datestring + "' wrong hour", 8);
-            try {minutes = Integer.parseInt(datestring.substring(10, 12));} catch (final NumberFormatException e) {
-                throw new java.text.ParseException("serverDate '" + datestring + "' wrong minute", 10);
-            }
-            if ((minutes < 0) || (minutes > 59)) throw new java.text.ParseException("serverDate '" + datestring + "' wrong minute", 10);
-            try {seconds = Integer.parseInt(datestring.substring(12, 14));} catch (final NumberFormatException e) {
-                throw new java.text.ParseException("serverDate '" + datestring + "' wrong second", 12);
-            }
-            if ((seconds < 0) || (seconds > 59)) throw new java.text.ParseException("serverDate '" + datestring + "' wrong second", 12);
-            if (datestring.length() == 17) {
-                try {milliseconds = Integer.parseInt(datestring.substring(14, 17));} catch (final NumberFormatException e) {
-                    throw new java.text.ParseException("serverDate '" + datestring + "' wrong millisecond", 14);
-                }
-            } else {
-                milliseconds = 0;
-            }
-            if ((milliseconds < 0) || (milliseconds > 999)) throw new java.text.ParseException("serverDate '" + datestring + "' wrong millisecond", 14);
-            calcUTime();
-            return;
-        }
-        throw new java.text.ParseException("serverDate '" + datestring + "' format unknown", 0);
-    }
-    
-    public String toString() {
-        return "utime=" + utime + ", year=" + (years + 1970) +
-               ", month=" + (months + 1) + ", day=" + (days + 1) +
-               ", hour=" + hours + ", minute=" + minutes +
-               ", second=" + seconds + ", millis=" + milliseconds +
-               ", day-of-week=" + wkday[dow];
-    }
-    
-    public String toShortString(final boolean millis) {
-        // returns a "yyyyMMddHHmmssSSS"
-        final byte[] result = new byte[(millis) ? 17 : 14];
-        int x = 1970 + years;
-        result[ 0] = (byte) (48 + (x / 1000)); x = x % 1000;
-        result[ 1] = (byte) (48 + (x / 100)); x = x % 100;
-        result[ 2] = (byte) (48 + (x / 10)); x = x % 10;
-        result[ 3] = (byte) (48 + x);
-        x = months + 1;
-        result[ 4] = (byte) (48 + (x / 10));
-        result[ 5] = (byte) (48 + (x % 10));
-        x = days + 1;
-        result[ 6] = (byte) (48 + (x / 10));
-        result[ 7] = (byte) (48 + (x % 10));
-        result[ 8] = (byte) (48 + (hours / 10));
-        result[ 9] = (byte) (48 + (hours % 10));
-        result[10] = (byte) (48 + (minutes / 10));
-        result[11] = (byte) (48 + (minutes % 10));
-        result[12] = (byte) (48 + (seconds / 10));
-        result[13] = (byte) (48 + (seconds % 10));
-        if (millis) {
-            x = milliseconds;
-            result[14] = (byte) (48 + (x / 100)); x = x % 100;
-            result[15] = (byte) (48 + (x / 10)); x = x % 10;
-            result[16] = (byte) (48 + x);
-        }
-        return new String(result);
-    }
-    
     public static long remainingTime(final long start, final long due, final long minimum) {
         if (due < 0) return -1;
         final long r = due + start - System.currentTimeMillis();
@@ -647,30 +507,16 @@ public final class DateFormatter {
     public static void main(final String[] args) {
         //System.out.println("kelondroDate is (" + new kelondroDate().toString() + ")");
         System.out.println("offset is " + (UTCDiff()/1000/60/60) + " hours, javaDate is " + new Date() + ", correctedDate is " + new Date(correctedUTCTime()));
-        System.out.println("serverDate : " + new DateFormatter().toShortString(false));
         System.out.println("  javaDate : " + formatShortSecond());
         System.out.println("serverDate : " + new DateFormatter().toString());
         System.out.println("  JavaDate : " + DateFormat.getDateInstance().format(new Date()));
-        System.out.println("serverDate0: " + new DateFormatter(0).toShortString(false));
         System.out.println("  JavaDate0: " + format(FORMAT_SHORT_SECOND, new Date(0)));
-        System.out.println("serverDate0: " + new DateFormatter(0).toString());
         System.out.println("  JavaDate0: " + DateFormat.getDateInstance().format(new Date(0)));
-        // parse test
-        try {
-            System.out.println("serverDate re-parse short: " + new DateFormatter(new DateFormatter().toShortString(false)).toShortString(true));
-            System.out.println("serverDate re-parse long : " + new DateFormatter(new DateFormatter().toShortString(true)).toShortString(true));
-        } catch (final java.text.ParseException e) {
-            System.out.println("Parse Exception: " + e.getMessage() + ", pos " + e.getErrorOffset());
-        }
         //String testresult;
         final int cycles = 10000;
         long start;
         
         final String[] testresult = new String[10000];
-        start = System.currentTimeMillis();
-        for (int i = 0; i < cycles; i++) testresult[i] = new DateFormatter().toShortString(false);
-        System.out.println("time for " + cycles + " calls to serverDate:" + (System.currentTimeMillis() - start) + " milliseconds");
-        
         start = System.currentTimeMillis();
         for (int i = 0; i < cycles; i++) testresult[i] = format(FORMAT_SHORT_SECOND, new Date());
         System.out.println("time for " + cycles + " calls to   javaDate:" + (System.currentTimeMillis() - start) + " milliseconds");

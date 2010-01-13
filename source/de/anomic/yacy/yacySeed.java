@@ -213,7 +213,7 @@ public class yacySeed implements Cloneable {
         this.dna.put(yacySeed.IPTYPE, "&empty;");
 
         // settings that can only be computed by visiting peer
-        this.dna.put(yacySeed.LASTSEEN, DateFormatter.formatShortSecond(new Date(System.currentTimeMillis() - DateFormatter.UTCDiff()))); // for last-seen date
+        this.dna.put(yacySeed.LASTSEEN, DateFormatter.formatShortSecond(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/))); // for last-seen date
         this.dna.put(yacySeed.USPEED, yacySeed.ZERO);  // the computated uplink speed of the peer
 
         this.dna.put(yacySeed.CRWCNT, yacySeed.ZERO);
@@ -503,6 +503,7 @@ public class yacySeed implements Cloneable {
      * @return the difference to UTC (universal time coordinated) in milliseconds of this yacySeed,
      * the difference to <code>+0130</code> if not present or <code>0</code> if an error occured during conversion
      */
+    /*
     public final long getUTCDiff() {
         String utc = this.dna.get(yacySeed.UTC);
         if (utc == null) { utc = "+0130"; }
@@ -512,13 +513,15 @@ public class yacySeed implements Cloneable {
             return 0;
         }
     }
-
+     */
     /** puts the current time into the lastseen field and cares about the time differential to UTC */
     public final void setLastSeenUTC() {
         // because java thinks it must apply the UTC offset to the current time,
         // to create a string that looks like our current time, it adds the local UTC offset to the
         // time. To create a corrected UTC Date string, we first subtract the local UTC offset.
-        dna.put(yacySeed.LASTSEEN, DateFormatter.formatShortSecond(new Date(System.currentTimeMillis() - DateFormatter.UTCDiff())) );
+        String ls = DateFormatter.formatShortSecond(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/));
+        //System.out.println("SETTING LAST-SEEN of " + this.getName() + " to " + ls);
+        dna.put(yacySeed.LASTSEEN, ls );
     }
     
     /**
@@ -533,7 +536,7 @@ public class yacySeed implements Cloneable {
             // But the given time string is already in UTC time, so the subtraction
             // of the local UTC offset is wrong. We correct this here by adding the local UTC
             // offset again.
-            return t + DateFormatter.UTCDiff();
+            return t /*+ DateFormatter.UTCDiff()*/;
         } catch (final java.text.ParseException e) { // in case of an error make seed look old!!!
             return System.currentTimeMillis() - DateFormatter.dayMillis;
         } catch (final java.lang.NumberFormatException e) {
@@ -554,7 +557,7 @@ public class yacySeed implements Cloneable {
     public final int getAge() {
         try {
             final long t = DateFormatter.parseShortSecond(get(yacySeed.BDATE, "20040101000000")).getTime();
-            return (int) ((System.currentTimeMillis() - (t - getUTCDiff() + DateFormatter.UTCDiff())) / 1000 / 60 / 60 / 24);
+            return (int) ((System.currentTimeMillis() - (t /*- getUTCDiff() + DateFormatter.UTCDiff()*/)) / 1000 / 60 / 60 / 24);
         } catch (final java.text.ParseException e) {
             return -1;
         } catch (final java.lang.NumberFormatException e) {
@@ -746,7 +749,7 @@ public class yacySeed implements Cloneable {
         // now calculate other information about the host
         newSeed.dna.put(yacySeed.NAME, (name) == null ? "anonymous" : name);
         newSeed.dna.put(yacySeed.PORT, Integer.toString((port <= 0) ? 8080 : port));
-        newSeed.dna.put(yacySeed.BDATE, DateFormatter.formatShortSecond(new Date(System.currentTimeMillis() - DateFormatter.UTCDiff())) );
+        newSeed.dna.put(yacySeed.BDATE, DateFormatter.formatShortSecond(new Date(System.currentTimeMillis() /*- DateFormatter.UTCDiff()*/)) );
         newSeed.dna.put(yacySeed.LASTSEEN, newSeed.dna.get(yacySeed.BDATE)); // just as initial setting
         newSeed.dna.put(yacySeed.UTC, DateFormatter.UTCDiffString());
         newSeed.dna.put(yacySeed.PEERTYPE, yacySeed.PEERTYPE_VIRGIN);

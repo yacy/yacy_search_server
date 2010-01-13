@@ -157,7 +157,7 @@ public class WebStructureGraph {
     
     public void flushCitationReference(final String type) {
         if (crg.length() < 12) return;
-        final String filename = type.toUpperCase() + "-A-" + new DateFormatter().toShortString(true) + "." + crg.substring(0, 12) + ".cr.gz";
+        final String filename = type.toUpperCase() + "-A-" + DateFormatter.formatShortMilliSecond(new Date()) + "." + crg.substring(0, 12) + ".cr.gz";
         final File path = new File(rankingPath, (type.equals("crl")) ? crlFile : crgFile);
         path.mkdirs();
         final File file = new File(path, filename);
