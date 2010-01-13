@@ -73,7 +73,8 @@ public final class RankingProcess extends Thread {
     //private final int[] domZones;
     private HashMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
     
-    private int remote_peerCount, remote_indexCount, remote_resourceSize, local_resourceSize;
+    private int remote_resourceSize, remote_indexCount, remote_peerCount;
+    private int local_resourceSize, local_indexCount;
     private final SortStack<WordReferenceVars> stack;
     private int feeders;
     private final ConcurrentHashMap<String, SortStack<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
@@ -96,9 +97,10 @@ public final class RankingProcess extends Thread {
         this.order = order;
         this.maxentries = maxentries;
         this.remote_peerCount = 0;
-        this.remote_indexCount = 0;
         this.remote_resourceSize = 0;
+        this.remote_indexCount = 0;
         this.local_resourceSize = 0;
+        this.local_indexCount = 0;
         this.urlhashes = new ConcurrentHashMap<String, Long>(0, 0.75f, concurrency);
         this.misses = new TreeSet<String>();
         this.flagcount = new int[32];
@@ -140,7 +142,7 @@ public final class RankingProcess extends Thread {
                 return;
             }
             
-            add(index, true, index.size());
+            add(index, true, -1);
         } catch (final Exception e) {
             Log.logException(e);
         }
@@ -153,8 +155,9 @@ public final class RankingProcess extends Thread {
 
         assert (index != null);
         if (index.isEmpty()) return;
+        
         if (local) {
-            this.local_resourceSize += fullResource;
+            this.local_resourceSize += index.size();
         } else {
             this.remote_resourceSize += fullResource;
             this.remote_peerCount++;
@@ -229,9 +232,9 @@ public final class RankingProcess extends Thread {
 			    filteredEntries.add(iEntry);
 			    
 			    // increase counter for statistics
-			    if (!local) this.remote_indexCount++;
+			    if (local) this.local_indexCount++; else this.remote_indexCount++;
 			}
-
+            
     		// do the ranking
     		for (WordReferenceVars fEntry: filteredEntries) {
     			
@@ -487,14 +490,19 @@ public final class RankingProcess extends Thread {
         return this.stack.size();
     }
 
+    public int getLocalIndexCount() {
+        // the number of results in the local peer after filtering
+        return this.local_indexCount;
+    }
+    
+    public int getLocalResourceSize() {
+        // the number of hits in the local peer (index size, size of the collection in the own index)
+        return this.local_resourceSize;
+    }
+    
     public int getRemoteIndexCount() {
         // the number of result contributions from all the remote peers
         return this.remote_indexCount;
-    }
-    
-    public int getRemotePeerCount() {
-        // the number of remote peers that have contributed
-        return this.remote_peerCount;
     }
     
     public int getRemoteResourceSize() {
@@ -502,9 +510,9 @@ public final class RankingProcess extends Thread {
         return this.remote_resourceSize;
     }
     
-    public int getLocalResourceSize() {
-        // the number of hits in the local peer (index size, size of the collection in the own index)
-        return this.local_resourceSize;
+    public int getRemotePeerCount() {
+        // the number of remote peers that have contributed
+        return this.remote_peerCount;
     }
     
     public void remove(final WordReferenceVars reference) {

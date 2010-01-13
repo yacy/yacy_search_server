@@ -280,7 +280,7 @@ public final class search {
             theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.crawlResults, null, true);
             
             // set statistic details of search result and find best result index set
-            if (theSearch.getRankingResult().getLocalResourceSize() == 0) {
+            if (theSearch.getRankingResult().getLocalIndexCount() == 0) {
                 prop.put("indexcount", "");
                 prop.put("joincount", "0");
             } else {
@@ -304,11 +304,11 @@ public final class search {
                 }
                 prop.put("indexcount", indexcount.toString());
                 
-                if (theSearch.getRankingResult().getLocalResourceSize() == 0) {
+                if (theSearch.getRankingResult().getLocalIndexCount() == 0) {
                     joincount = 0;
                     prop.put("joincount", "0");
                 } else {
-                    joincount = theSearch.getRankingResult().getLocalResourceSize();
+                    joincount = theSearch.getRankingResult().getLocalIndexCount();
                     prop.put("joincount", Integer.toString(joincount));
                     accu = theSearch.result().completeResults(3000);
                 }
@@ -379,7 +379,7 @@ public final class search {
 
         // prepare search statistics
         theQuery.remotepeer = sb.peers.lookupByIP(natLib.getInetAddress(client), true, false, false);
-        theQuery.resultcount = (theSearch == null) ? 0 : theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize();
+        theQuery.resultcount = (theSearch == null) ? 0 : theSearch.getRankingResult().getLocalIndexCount() + theSearch.getRankingResult().getRemoteResourceSize();
         theQuery.searchtime = System.currentTimeMillis() - timestamp;
         theQuery.urlretrievaltime = (theSearch == null) ? 0 : theSearch.result().getURLRetrievalTime();
         theQuery.snippetcomputationtime = (theSearch == null) ? 0 : theSearch.result().getSnippetComputationTime();
