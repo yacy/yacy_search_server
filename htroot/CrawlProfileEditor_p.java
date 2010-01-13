@@ -138,7 +138,7 @@ public class CrawlProfileEditor_p {
         }
         prop.put("profiles", count);
         selentry = sb.crawler.profilesActiveCrawls.getEntry(handle);
-        assert selentry.handle() != null;
+        assert selentry == null || selentry.handle() != null;
         // read post for change submit
         if ((post != null) && (selentry != null)) {
 			if (post.containsKey("submit")) {

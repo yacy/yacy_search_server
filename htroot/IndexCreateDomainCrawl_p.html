@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Index Creation with a Web Crawl for a Single Domain</title>
+    #%env/templates/metas.template%#
+    <script type="text/javascript" src="/js/ajax.js"></script>
+    <script type="text/javascript" src="/js/IndexCreate.js"></script>
+  </head>
+  <body id="IndexCreate">
+    #%env/templates/header.template%#
+    #%env/templates/submenuIndexCreate.template%#
+    <h2>Easy Crawl Start</h2>
+    
+    <p id="startCrawling">
+    <strong>Start Crawling Job:</strong>&nbsp;
+    You can define URLs as start points for Web page crawling and start crawling here.
+    "Crawling" means that YaCy will download the given web-site, extract all links in it
+    and then download the content behind these links.
+    This is repeated as long as specified under "Crawling Depth".
+    </p>
+    
+    <form action="Crawler_p.html" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="crawlingFilter" value=".*" />
+      <input type="hidden" name="crawlingIfOlderCheck" value="off" />
+      <input type="hidden" name="crawlingDomFilterCheck" value="off" />
+      <input type="hidden" name="crawlingDomMaxCheck" value="off" />
+      <input type="hidden" name="crawlingQ" value="off" />
+      <input type="hidden" name="storeHTCache" value="on" />
+      <input type="hidden" name="indexText" value="on" />
+      <input type="hidden" name="indexMedia" value="on" />
+      <input type="hidden" name="crawlOrder" value="on" />
+      <input type="hidden" name="intention" value="simple web crawl" />
+      <input type="hidden" name="xsstopw" value="off" />
+      <table border="0" cellpadding="5" cellspacing="1">
+        <tr class="TableHeader">
+          <td><strong>Attribut</strong></td>
+          <td><strong>Value</strong></td>
+          <td><strong>Description</strong></td>
+        </tr>
+        <tr valign="top" class="TableCellSummary">
+          <td>Starting Point:</td>
+          <td>
+            <input name="crawlingURL" type="text" size="41" maxlength="256" value="http://" onkeypress="changed()" />
+            <span id="robotsOK"></span><br />
+            <span id="title"><br/></span>
+            <img src="/env/grafics/empty.gif" name="ajax" alt="empty" />
+          </td>
+          <td>
+            Enter here the start url of the web crawl. 
+          </td>
+        </tr>
+        <tr valign="top" class="TableCellLight">
+          <td><label for="crawlingDepth">Crawling Range</label>:</td>
+          <td>
+          <input type="radio" name="range" value="wide" checked="checked" />Wide: depth <input name="crawlingDepth" id="crawlingDepth" type="text" size="2" maxlength="2" value="#[crawlingDepth]#" />&nbsp;&nbsp;|&nbsp;&nbsp;
+          <input type="radio" name="range" value="domain" />Complete Domain
+          </td>
+          <td>
+            The range defines if the crawl shall consider a complete domain, or a wide crawl up to a specific depth.
+          </td>
+        </tr>
+        
+        <tr valign="top" class="TableCellLight">
+          <td colspan="3"><input type="submit" name="crawlingstart" value="Start New Distributed Crawl (will be visible at other peers)" /></td>
+        </tr>
+      </table>
+    </form>
+    
+    #%env/templates/footer.template%#
+  </body>
+</html>
