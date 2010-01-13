@@ -16,8 +16,9 @@
     <p>
       If you read from a imported database, here are some hints to get around problems when importing dumps in phpMyAdmin:
       <ul>
-      <li>before importing large database dumps, set <pre>$cfg['UploadDir'] = '/tmp';</pre> in phpmyadmin/config.inc.php and place your dump file in /tmp. Otherwise it is not possible to upload files larger than 2MB.</li>
-      <li>deselect the partial import flag/li>
+      <li>before importing large database dumps, set the following Line in phpmyadmin/config.inc.php and place your dump file in /tmp (Otherwise it is not possible to upload files larger than 2MB):</li>
+      <pre>$cfg['UploadDir'] = '/tmp';</pre>
+      <li>deselect the partial import flag</li>
       </ul>
     </p>
     <p>
