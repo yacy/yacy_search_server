@@ -36,8 +36,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.kelondro.blob.Heap;
-import net.yacy.kelondro.blob.MapView;
+import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -57,7 +56,7 @@ public class RobotsTxt {
     public static final String ROBOTS_DB_PATH_SEPARATOR = ";";    
     private static final Log log = new Log("ROBOTS");
     
-    MapView robotsTable;
+    MapHeap robotsTable;
     private final File robotsTableFile;
     private final ConcurrentHashMap<String, DomSync> syncObjects;
     //private static final HashSet<String> loadedRobots = new HashSet<String>(); // only for debugging
@@ -69,13 +68,11 @@ public class RobotsTxt {
     public RobotsTxt(final File robotsTableFile) {
         this.robotsTableFile = robotsTableFile;
         robotsTableFile.getParentFile().mkdirs();
-        Heap blob = null;
         try {
-            blob = new Heap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
+            robotsTable = new MapHeap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024, 100, '_');
         } catch (final IOException e) {
             Log.logException(e);
         }
-        robotsTable = new MapView(blob, 100, '_');
         syncObjects = new ConcurrentHashMap<String, DomSync>();
     }
     
@@ -84,13 +81,11 @@ public class RobotsTxt {
         if (robotsTable != null) robotsTable.close();
         FileUtils.deletedelete(robotsTableFile);
         robotsTableFile.getParentFile().mkdirs();
-        Heap blob = null;
         try {
-            blob = new Heap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024);
+            robotsTable = new MapHeap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024, 100, '_');
         } catch (final IOException e) {
             Log.logException(e);
         }
-        robotsTable = new MapView(blob, 100, '_');
         syncObjects.clear();
     }
     

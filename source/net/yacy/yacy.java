@@ -46,7 +46,6 @@ import java.util.concurrent.Semaphore;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import net.yacy.kelondro.blob.Heap;
 import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
@@ -920,7 +919,7 @@ public final class yacy {
             final String[] dbFileNames = {"seed.new.db","seed.old.db","seed.pot.db"};
             for (int i=0; i < dbFileNames.length; i++) {
                 final File dbFile = new File(yacyDBPath,dbFileNames[i]);
-                final MapDataMining db = new MapDataMining(new Heap(dbFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null, null);
+                final MapDataMining db = new MapDataMining(dbFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, yacySeedDB.sortFields, yacySeedDB.longaccFields, yacySeedDB.doubleaccFields, null, null);
                 
                 MapDataMining.mapIterator it;
                 it = db.maps(true, false);

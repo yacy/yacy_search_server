@@ -42,8 +42,7 @@ import java.util.Map;
 
 import net.yacy.kelondro.blob.ArrayStack;
 import net.yacy.kelondro.blob.Compressor;
-import net.yacy.kelondro.blob.Heap;
-import net.yacy.kelondro.blob.MapView;
+import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
@@ -56,7 +55,7 @@ public final class Cache {
     private static final String RESPONSE_HEADER_DB_NAME = "responseHeader.heap";
     private static final String FILE_DB_NAME = "file.array";
 
-    private static MapView responseHeaderDB = null;
+    private static MapHeap responseHeaderDB = null;
     private static Compressor fileDB = null;
     private static ArrayStack fileDBunbuffered = null;
     
@@ -78,13 +77,11 @@ public final class Cache {
 
         // open the response header database
         final File dbfile = new File(cachePath, RESPONSE_HEADER_DB_NAME);
-        Heap blob = null;
         try {
-            blob = new Heap(dbfile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 1024);
+            responseHeaderDB = new MapHeap(dbfile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 1024, 500, '_');
         } catch (final IOException e) {
             Log.logException(e);
         }
-        responseHeaderDB = new MapView(blob, 500, '_');
         try {
             fileDBunbuffered = new ArrayStack(new File(cachePath, FILE_DB_NAME), prefix, 12, Base64Order.enhancedCoder, 1024 * 1024 * 2);
             fileDBunbuffered.setMaxSize(maxCacheSize);

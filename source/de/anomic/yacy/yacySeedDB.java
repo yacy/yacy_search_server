@@ -39,7 +39,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import net.yacy.kelondro.blob.Heap;
 import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
@@ -242,12 +241,12 @@ public final class yacySeedDB implements AlternativeDomainNames {
 				Log.logWarning("yacySeedDB", "could not create directories for "+ seedDBFile.getParent());
 		}
         try {
-            return new MapDataMining(new Heap(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, null, this);
+            return new MapDataMining(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, sortFields, longaccFields, doubleaccFields, null, this);
         } catch (final Exception e) {
             // try again
             FileUtils.deletedelete(seedDBFile);
             try {
-                return new MapDataMining(new Heap(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512), 500, sortFields, longaccFields, doubleaccFields, null, this);
+                return new MapDataMining(seedDBFile, Word.commonHashLength, Base64Order.enhancedCoder, 1024 * 512, 500, sortFields, longaccFields, doubleaccFields, null, this);
             } catch (IOException e1) {
                 Log.logException(e1);
                 System.exit(-1);

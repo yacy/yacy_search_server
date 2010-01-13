@@ -88,7 +88,7 @@ public class torrentParser extends AbstractParser implements Idiom {
         if (bo.getType() != BType.dictionary) throw new ParserException("BDecoder object is not a dictionary", location);
         Map<String, BObject> map = bo.getMap();
         BObject commento = map.get("comment");
-        String comment = (commento == null) ? "" : commento.getString();
+        String comment = (commento == null) ? "" : new String(commento.getString());
         //Date creation = new Date(map.get("creation date").getInteger());
         BObject infoo = map.get("info");
         StringBuilder filenames = new StringBuilder();
@@ -107,7 +107,7 @@ public class torrentParser extends AbstractParser implements Idiom {
                 }
             }
             BObject nameo = info.get("name");
-            if (nameo != null) name = nameo.getString();
+            if (nameo != null) name = new String(nameo.getString());
         }
         try {
             return new Document(

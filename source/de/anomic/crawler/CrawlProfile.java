@@ -31,8 +31,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-import net.yacy.kelondro.blob.Heap;
-import net.yacy.kelondro.blob.MapView;
+import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -52,15 +51,14 @@ public class CrawlProfile {
     
     static HashMap<String, ConcurrentHashMap<String, DomProfile>> domsCache = new HashMap<String, ConcurrentHashMap<String, DomProfile>>();
     
-    MapView profileTable;
+    MapHeap profileTable;
     private final File profileTableFile;
     
     public CrawlProfile(final File file) throws IOException {
         //System.out.println("loading crawl profile from " + file);
         this.profileTableFile = file;
         profileTableFile.getParentFile().mkdirs();
-        final Heap dyn = new Heap(profileTableFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
-        profileTable = new MapView(dyn, 500, '_');
+        profileTable = new MapHeap(profileTableFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
         profileIterator pi = new profileIterator(true);
         entry e;
         while (pi.hasNext()) {
@@ -75,13 +73,11 @@ public class CrawlProfile {
         if (profileTable != null) profileTable.close();
         FileUtils.deletedelete(profileTableFile);
         profileTableFile.getParentFile().mkdirs();
-        Heap dyn = null;
         try {
-            dyn = new Heap(profileTableFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64);
+            profileTable = new MapHeap(profileTableFile, Word.commonHashLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
         } catch (IOException e) {
             Log.logException(e);
         }
-        profileTable = new MapView(dyn, 500, '_');
     }
     
     public void close() {

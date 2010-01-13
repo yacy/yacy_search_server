@@ -42,8 +42,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import net.yacy.kelondro.blob.Heap;
-import net.yacy.kelondro.blob.MapView;
+import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -65,13 +64,13 @@ public class blogBoardComments {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
     
-    private MapView database = null;
+    private MapHeap database = null;
     
     public blogBoardComments(final File actpath) throws IOException {
         new File(actpath.getParent()).mkdir();
         if (database == null) {
             //database = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, newFile), 500, '_');
-            database = new MapView(new Heap(actpath, keyLength, NaturalOrder.naturalOrder, 1024 * 64), 500, '_');
+            database = new MapHeap(actpath, keyLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
         }
     }
     
@@ -121,7 +120,7 @@ public class blogBoardComments {
         //System.out.println("DEBUG: read from blogBoardComments");
         return read(key, database);
     }
-    private CommentEntry read(String key, final MapView base) {
+    private CommentEntry read(String key, final MapHeap base) {
         key = normalize(key);
         if (key.length() > keyLength) key = key.substring(0, keyLength);
         Map<String, String> record;

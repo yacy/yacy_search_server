@@ -57,8 +57,7 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
-import net.yacy.kelondro.blob.Heap;
-import net.yacy.kelondro.blob.MapView;
+import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
@@ -94,14 +93,14 @@ public class bookmarksDB {
 	final static String SLEEP_TIME = "3600000"; // default sleepTime: check for recrawls every hour
 	
 	// bookmarks
-    MapView bookmarksTable;		// kelondroMap bookmarksTable;
+    MapHeap bookmarksTable;		// kelondroMap bookmarksTable;
     
     // tags
-    MapView tagsTable;
+    MapHeap tagsTable;
     TreeMap<String, Tag> tagCache;					
     
     // dates
-    MapView datesTable;
+    MapHeap datesTable;
     
     // autoReCrawl    
     private final BusyThread autoReCrawl;
@@ -116,19 +115,19 @@ public class bookmarksDB {
         bookmarksFile.getParentFile().mkdirs();
         //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
         //this.bookmarksTable = new MapView(BLOBTree.toHeap(bookmarksFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, bookmarksFileNew), 1000, '_');
-        this.bookmarksTable = new MapView(new Heap(bookmarksFile, 12, NaturalOrder.naturalOrder, 1024 * 64), 1000, '_');
+        this.bookmarksTable = new MapHeap(bookmarksFile, 12, NaturalOrder.naturalOrder, 1024 * 64, 1000, '_');
         
         // tags
         tagsFile.getParentFile().mkdirs();
         final boolean tagsFileExisted = tagsFile.exists();
         //this.tagsTable = new MapView(BLOBTree.toHeap(tagsFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, tagsFileNew), 500, '_');
-        this.tagsTable = new MapView(new Heap(tagsFile, 12, NaturalOrder.naturalOrder, 1024 * 64), 500, '_');
+        this.tagsTable = new MapHeap(tagsFile, 12, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
         if (!tagsFileExisted) rebuildTags();
 
         // dates
         final boolean datesExisted = datesFile.exists();
         //this.datesTable = new MapView(BLOBTree.toHeap(datesFile, true, true, 20, 256, '_', NaturalOrder.naturalOrder, datesFileNew), 500, '_');
-        this.datesTable = new MapView(new Heap(datesFile, 20, NaturalOrder.naturalOrder, 1024 * 64), 500, '_');
+        this.datesTable = new MapHeap(datesFile, 20, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
         if (!datesExisted) rebuildDates();
 
         // autoReCrawl

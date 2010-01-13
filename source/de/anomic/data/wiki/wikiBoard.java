@@ -35,8 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import net.yacy.kelondro.blob.Heap;
-import net.yacy.kelondro.blob.MapView;
+import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -53,20 +52,20 @@ public class wikiBoard {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    MapView datbase = null;
-    MapView bkpbase = null;
+    MapHeap datbase = null;
+    MapHeap bkpbase = null;
     static HashMap<String, String> authors = new HashMap<String, String>();
 
     public wikiBoard( final File actpath, final File bkppath) throws IOException {
         new File(actpath.getParent()).mkdirs();
         if (datbase == null) {
             //datbase = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, actpathNew), 500, '_');
-            datbase = new MapView(new Heap(actpath, keyLength, NaturalOrder.naturalOrder, 1024 * 64), 500, '_');
+            datbase = new MapHeap(actpath, keyLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
         }
         new File(bkppath.getParent()).mkdirs();
         if (bkpbase == null) {
             //bkpbase = new MapView(BLOBTree.toHeap(bkppath, true, true, keyLength + dateFormat.length(), recordSize, '_', NaturalOrder.naturalOrder, bkppathNew), 500, '_');
-            bkpbase = new MapView(new Heap(bkppath, keyLength + dateFormat.length(), NaturalOrder.naturalOrder, 1024 * 64), 500, '_');
+            bkpbase = new MapHeap(bkppath, keyLength + dateFormat.length(), NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
         }
     }
 
@@ -280,7 +279,7 @@ public class wikiBoard {
         return read(key, datbase);
     }
 
-    entry read(String key, final MapView base) {
+    entry read(String key, final MapHeap base) {
         try {
             key = normalize(key);
             if (key.length() > keyLength) key = key.substring(0, keyLength);

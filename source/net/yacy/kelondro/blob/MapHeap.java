@@ -40,6 +40,7 @@ import net.yacy.kelondro.index.ARC;
 import net.yacy.kelondro.index.ConcurrentARC;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.order.RotateIterator;
@@ -49,15 +50,21 @@ import net.yacy.kelondro.util.kelondroException;
 
 
 
-public class MapView {
+public class MapHeap {
 
     private BLOB blob;
     private ARC<String, Map<String, String>> cache;
     private final char fillchar;
 
     
-    public MapView(final Heap blob, final int cachesize, char fillchar) {
-        this.blob = blob;
+    public MapHeap(
+            final File heapFile,
+            final int keylength,
+            final ByteOrder ordering,
+            int buffermax,
+            final int cachesize,
+            char fillchar) throws IOException {
+        this.blob = new Heap(heapFile, keylength, ordering, buffermax);
         this.cache = new ConcurrentARC<String, Map<String, String>>(cachesize, Runtime.getRuntime().availableProcessors());
         this.fillchar = fillchar;
         /*
@@ -370,10 +377,8 @@ public class MapView {
         File f = new File("maptest");
         if (f.exists()) FileUtils.deletedelete(f);
         try {
-            // make a blob
-            Heap blob = new Heap(f, 12, NaturalOrder.naturalOrder, 1024 * 1024);
             // make map
-            MapView map = new MapView(blob, 1024, '_');
+            MapHeap map = new MapHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 1024, 1024, '_');
             // put some values into the map
             Map<String, String> m = new HashMap<String, String>();
             m.put("k", "000"); map.put("123", m);

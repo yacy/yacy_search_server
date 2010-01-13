@@ -32,8 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 
-import net.yacy.kelondro.blob.Heap;
-import net.yacy.kelondro.blob.MapView;
+import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -50,14 +49,14 @@ public class messageBoard {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    MapView database = null;
+    MapHeap database = null;
     private int sn = 0;
 
     public messageBoard(final File path) throws IOException {
         new File(path.getParent()).mkdir();
         if (database == null) {
             //database = new MapView(BLOBTree.toHeap(path, true, true, categoryLength + dateFormat.length() + 2, recordSize, '_', NaturalOrder.naturalOrder, pathNew), 500, '_');
-            database = new MapView(new Heap(path, categoryLength + dateFormat.length() + 2, NaturalOrder.naturalOrder, 1024 * 64), 500, '_');
+            database = new MapHeap(path, categoryLength + dateFormat.length() + 2, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
         }
         sn = 0;
     }

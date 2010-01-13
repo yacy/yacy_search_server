@@ -35,8 +35,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Random;
 
-import net.yacy.kelondro.blob.Heap;
-import net.yacy.kelondro.blob.MapView;
+import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -53,7 +52,7 @@ public final class userDB {
     public static final int USERNAME_MAX_LENGTH = 128;
     public static final int USERNAME_MIN_LENGTH = 4;
     
-    MapView userTable;
+    MapHeap userTable;
     private final File userTableFile;
 	HashMap<String, String> ipUsers = new HashMap<String, String>();
     HashMap<String, Object> cookieUsers = new HashMap<String, Object>();
@@ -62,7 +61,7 @@ public final class userDB {
         this.userTableFile = userTableFile;
         userTableFile.getParentFile().mkdirs();
         //this.userTable = new MapView(BLOBTree.toHeap(userTableFile, true, true, 128, 256, '_', NaturalOrder.naturalOrder, userTableFile), 10, '_');
-        this.userTable = new MapView(new Heap(userTableFile, 128, NaturalOrder.naturalOrder, 1024 * 64), 10, '_');
+        this.userTable = new MapHeap(userTableFile, 128, NaturalOrder.naturalOrder, 1024 * 64, 10, '_');
     }
     
     void resetDatabase() {
@@ -71,7 +70,7 @@ public final class userDB {
         FileUtils.deletedelete(userTableFile);
         userTableFile.getParentFile().mkdirs();
         try {
-            userTable = new MapView(new Heap(userTableFile, 256, NaturalOrder.naturalOrder, 1024 * 64), 10, '_');
+            userTable = new MapHeap(userTableFile, 256, NaturalOrder.naturalOrder, 1024 * 64, 10, '_');
         } catch (IOException e) {
             Log.logException(e);
         }

@@ -41,7 +41,7 @@ import net.yacy.kelondro.order.NaturalOrder;
 
 
 public final class Heap extends HeapModifier implements BLOB {
-
+    
     private HashMap<String, byte[]> buffer;     // a write buffer to limit IO to the file; attention: Maps cannot use byte[] as key
     private int                     buffersize; // bytes that are buffered in buffer
     private final int               buffermax;  // maximum size of the buffer
@@ -143,8 +143,11 @@ public final class Heap extends HeapModifier implements BLOB {
         final int pos = (int) file.length();
         index.put(key, pos);
         file.seek(pos);
-        file.writeInt(key.length + blob.length);
+        file.writeInt(this.keylength + blob.length);
         file.write(key);
+        if (this.keylength > key.length) {
+            for (int i = 0; i < this.keylength - key.length; i++) file.write(HeapWriter.ZERO);
+        }
         file.write(blob, 0, blob.length);
     }
     
@@ -171,7 +174,7 @@ public final class Heap extends HeapModifier implements BLOB {
             key = entry.getKey().getBytes();
             assert key.length == this.keylength : "key.length = " + key.length + ", this.keylength = " + this.keylength;
             blob = entry.getValue();
-            posBuffer += 4 + key.length + blob.length;
+            posBuffer += 4 + this.keylength + blob.length;
         }
         assert l + (4 + this.keylength) * this.buffer.size() == posBuffer : "l = " + l + ", this.keylength = " + this.keylength + ", this.buffer.size() = " + this.buffer.size() + ", posBuffer = " + posBuffer;
         
@@ -188,7 +191,7 @@ public final class Heap extends HeapModifier implements BLOB {
             assert key.length == this.keylength : "key.length = " + key.length + ", this.keylength = " + this.keylength;
             blob = entry.getValue();
             index.put(key, posFile);
-            b = AbstractWriter.int2array(key.length + blob.length);
+            b = AbstractWriter.int2array(this.keylength + blob.length);
             assert b.length == 4;
             assert posBuffer + 4 < ba.length : "posBuffer = " + posBuffer + ", ba.length = " + ba.length;
             System.arraycopy(b, 0, ba, posBuffer, 4);
@@ -198,8 +201,8 @@ public final class Heap extends HeapModifier implements BLOB {
             //System.out.println("*** DEBUG posFile=" + posFile + ",blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length);
             //System.err.println("*** DEBUG posFile=" + posFile + ",blob.length=" + blob.length + ",ba.length=" + ba.length + ",posBuffer=" + posBuffer + ",key.length=" + key.length);
             System.arraycopy(blob, 0, ba, posBuffer + 4 + this.keylength, blob.length); //java.lang.ArrayIndexOutOfBoundsException here
-            posFile += 4 + key.length + blob.length;
-            posBuffer += 4 + key.length + blob.length;
+            posFile += 4 + this.keylength + blob.length;
+            posBuffer += 4 + this.keylength + blob.length;
         }
         assert ba.length == posBuffer; // must fit exactly
         this.file.seek(pos);
@@ -355,6 +358,9 @@ public final class Heap extends HeapModifier implements BLOB {
                 final int reclenf = file.readInt();
                 assert reclenf == reclen;
                 file.write(key);
+                if (this.keylength > key.length) {
+                    for (int j = 0; j < this.keylength - key.length; j++) file.write(HeapWriter.ZERO);
+                }
                 file.write(b);
 
                 // remove the entry from the free list
@@ -383,6 +389,9 @@ public final class Heap extends HeapModifier implements BLOB {
             file.seek(lseek);
             file.writeInt(reclen);
             file.write(key);
+            if (this.keylength > key.length) {
+                for (int j = 0; j < this.keylength - key.length; j++) file.write(HeapWriter.ZERO);
+            }
             file.write(b);
             
             // add the index to the new entry
@@ -505,7 +514,7 @@ public final class Heap extends HeapModifier implements BLOB {
         final File f = new File("/Users/admin/blobtest.heap");
         try {
             //f.delete();
-            final MapView heap = new MapView(new Heap(f, 12, NaturalOrder.naturalOrder, 1024 * 512), 500, '_');
+            final MapHeap heap = new MapHeap(f, 12, NaturalOrder.naturalOrder, 1024 * 512, 500, '_');
             heap.put("aaaaaaaaaaaa", map("aaaaaaaaaaaa", "eins zwei drei"));
             heap.put("aaaaaaaaaaab", map("aaaaaaaaaaab", "vier fuenf sechs"));
             heap.put("aaaaaaaaaaac", map("aaaaaaaaaaac", "sieben acht neun"));

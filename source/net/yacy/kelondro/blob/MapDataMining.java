@@ -27,6 +27,7 @@
 
 package net.yacy.kelondro.blob;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -36,19 +37,29 @@ import java.util.Map;
 
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.util.ScoreCluster;
 
 
-public class MapDataMining extends MapView {
+public class MapDataMining extends MapHeap {
 
     private final String[] sortfields, longaccfields, doubleaccfields;
     private HashMap<String, ScoreCluster<String>> sortClusterMap; // a String-kelondroMScoreCluster - relation
     private HashMap<String, Object> accMap; // to store accumulations of specific fields
     
 	@SuppressWarnings("unchecked")
-	public MapDataMining(final Heap dyn, final int cachesize, final String[] sortfields, final String[] longaccfields, final String[] doubleaccfields, final Method externalInitializer, final Object externalHandler) {
-        super(dyn, cachesize, '_');
+	public MapDataMining(final File heapFile,
+            final int keylength,
+            final ByteOrder ordering,
+            int buffermax,
+            final int cachesize,
+            final String[] sortfields,
+            final String[] longaccfields,
+            final String[] doubleaccfields,
+            final Method externalInitializer,
+            final Object externalHandler) throws IOException {
+        super(heapFile, keylength, ordering, buffermax, cachesize, '_');
         
         // create fast ordering clusters and acc fields
         this.sortfields = sortfields;
@@ -86,7 +97,7 @@ public class MapDataMining extends MapView {
 
         // fill cluster and accumulator with values
         if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) try {
-            final CloneableIterator<byte[]> it = dyn.keys(true, false);
+            final CloneableIterator<byte[]> it = super.keys(true, false);
             String mapname;
             Object cell;
             long valuel;

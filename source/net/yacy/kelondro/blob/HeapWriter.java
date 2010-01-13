@@ -40,6 +40,8 @@ import net.yacy.kelondro.util.FileUtils;
 
 public final class HeapWriter {
 
+    public final static byte[] ZERO = new byte[]{0};
+    
     private final int          keylength;     // the length of the primary key
     private HandleMap          index;         // key/seek relation for used records
     private final File         heapFileTMP;   // the temporary file of the heap during writing
@@ -101,9 +103,12 @@ public final class HeapWriter {
         assert index.get(key) < 0 : "index.get(key) = " + index.get(key) + ", index.size() = " + index.size() + ", file.length() = " + this.heapFileTMP.length() +  ", key = " + new String(key); // must not occur before
         if ((blob == null) || (blob.length == 0)) return;
         index.putUnique(key, this.seek);
-        int chunkl = key.length + blob.length;
+        int chunkl = this.keylength + blob.length;
         os.writeInt(chunkl);
         os.write(key);
+        if (this.keylength > key.length) {
+            for (int i = 0; i < this.keylength - key.length; i++) os.write(ZERO);
+        }
         os.write(blob);
         //assert (this.doublecheck.add(new String(key))) : "doublecheck failed for " + new String(key);
         this.seek += chunkl + 4;
