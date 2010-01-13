@@ -252,7 +252,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         // is always (but not only) called if an IO-dependent exception occurrs.
         log.logSevere("Unexpected Error. " + e.getClass().getName(),e);
         final String message = e.getMessage();
-        if (message.indexOf("heap space") > 0) Log.logException(e);
+        if (message != null && message.indexOf("heap space") > 0) Log.logException(e);
         return "501 Exception occurred: " + message;
     }
     

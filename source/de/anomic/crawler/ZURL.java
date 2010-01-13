@@ -127,7 +127,6 @@ public class ZURL implements Iterable<ZURL.Entry> {
             final int workcount,
             String anycause) {
         assert executor != null;
-        assert executor.length() > 0;
         if (anycause == null) anycause = "unknown";
         Entry entry = new Entry(bentry, executor, workdate, workcount, anycause);
         entry.store();
