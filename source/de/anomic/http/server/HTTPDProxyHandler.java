@@ -100,7 +100,7 @@ public final class HTTPDProxyHandler {
     // can only be instantiated upon first instantiation of this class object
     private static Switchboard sb = null;
     private static final HashSet<String> yellowList;
-    private static int timeout = 30000;
+    private static int timeout = 60000;
     private static boolean yacyTrigger = true;
     public static boolean isTransparentProxy = false;
     private static Process redirectorProcess = null;
