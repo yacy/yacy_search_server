@@ -284,8 +284,8 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
         return this.table != null;
     }
     
-    public static int staticRAMIndexNeed(final File f, final Row rowdef) throws IOException {
-        return (int) (((long)(rowdef.primaryKeyLength + 4)) * tableSize(f, rowdef.objectsize) * RowCollection.growfactorLarge100 / 100L);
+    public static long staticRAMIndexNeed(final File f, final Row rowdef) throws IOException {
+        return (((long)(rowdef.primaryKeyLength + 4)) * tableSize(f, rowdef.objectsize) * RowCollection.growfactorLarge100 / 100L);
     }
     
     public synchronized void addUnique(final Entry row) throws IOException, RowSpaceExceededException {
