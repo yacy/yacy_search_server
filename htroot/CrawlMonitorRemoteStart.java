@@ -73,7 +73,7 @@ public class CrawlMonitorRemoteStart {
         recordIterator = sb.peers.newsPool.recordIterator(yacyNewsPool.PROCESSED_DB, true);
         showedCrawl = 0;
         while (recordIterator.hasNext()) {
-            record = (yacyNewsRecord) recordIterator.next();
+            record = recordIterator.next();
             if (record == null) continue;
             if (record.category().equals(yacyNewsPool.CATEGORY_CRAWL_START)) {
                 peer = sb.peers.get(record.originator());
