@@ -150,7 +150,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
         
         // first pass: find tables
         final HashMap<String, Long> t = new HashMap<String, Long>();
-        long ram, sum = 0, time, maxtime = 0;
+        long ram, time, maxtime = 0;
         Date d;
         for (int i = 0; i < tablefile.length; i++) {
             if ((tablefile[i].startsWith(prefix)) &&
@@ -170,11 +170,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
                 }
                 
                 try {
-                    ram = Table.staticRAMIndexNeed(f, rowdef);
-                    if (ram > 0) {
-                        t.put(tablefile[i], Long.valueOf(ram));
-                        sum += ram;
-                    }
+                    t.put(tablefile[i], Table.staticRAMIndexNeed(f, rowdef));
                 } catch (IOException e) {
                     Log.logWarning("SplitTable", "file " + f.toString() + " appears to be corrupted: " + e.getMessage());
                 }
