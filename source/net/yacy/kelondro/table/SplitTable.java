@@ -191,7 +191,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
             while (i.hasNext()) {
                 entry = i.next();
                 ram = entry.getValue().longValue();
-                if (ram > maxram) {
+                if (maxf == null || ram > maxram) {
                     maxf = entry.getKey();
                     maxram = ram;
                 }
@@ -199,16 +199,14 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
             
             // open next biggest table
             t.remove(maxf);
-            if (maxf != null) {
-                f = new File(path, maxf);
-                Log.logInfo("kelondroSplitTable", "opening partial eco table " + f);
-                try {
-                    table = new Table(f, rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727);
-                } catch (RowSpaceExceededException e) {
-                    table = new Table(f, rowdef, 0, 0, false, this.exceed134217727);
-                }
-                tables.put(maxf, table);
+            f = new File(path, maxf);
+            Log.logInfo("kelondroSplitTable", "opening partial eco table " + f);
+            try {
+                table = new Table(f, rowdef, EcoFSBufferSize, 0, this.useTailCache, this.exceed134217727);
+            } catch (RowSpaceExceededException e) {
+                table = new Table(f, rowdef, 0, 0, false, this.exceed134217727);
             }
+            tables.put(maxf, table);
         }
         
         // init the thread pool for the keeperOf executor service
