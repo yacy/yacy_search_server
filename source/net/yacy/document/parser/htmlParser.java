@@ -59,6 +59,7 @@ public class htmlParser extends AbstractParser implements Idiom {
         SUPPORTED_EXTENSIONS.add("shtml");
         SUPPORTED_EXTENSIONS.add("xhtml");
         SUPPORTED_EXTENSIONS.add("php");
+        SUPPORTED_EXTENSIONS.add("php3");
         SUPPORTED_EXTENSIONS.add("asp");
         SUPPORTED_EXTENSIONS.add("aspx");
         SUPPORTED_EXTENSIONS.add("txt");
