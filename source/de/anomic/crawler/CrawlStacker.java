@@ -237,7 +237,7 @@ public final class CrawlStacker {
             return "post url not allowed";
         }
 
-        final DigestURI referrerURL = (entry.referrerhash() == null) ? null : nextQueue.getURL(entry.referrerhash());
+        final DigestURI referrerURL = (entry.referrerhash() == null || entry.referrerhash().length() == 0) ? null : nextQueue.getURL(entry.referrerhash());
 
         // add domain to profile domain list
         if ((profile.domFilterDepth() != Integer.MAX_VALUE) || (profile.domMaxPages() != Integer.MAX_VALUE)) {

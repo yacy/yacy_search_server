@@ -830,13 +830,6 @@ public final class Switchboard extends serverSwitch {
             ", " + robots.size() + " entries" +
             ", " + ppRamString(robotsDBFile.length()/1024));
             
-            // start a loader
-            log.logConfig("Starting Crawl Loader");
-            this.crawlQueues = new CrawlQueues(this, this.queuesRoot);
-            this.crawlQueues.noticeURL.setMinimumDelta(
-                    this.getConfigLong("minimumLocalDelta", this.crawlQueues.noticeURL.getMinimumLocalDelta()),
-                    this.getConfigLong("minimumGlobalDelta", this.crawlQueues.noticeURL.getMinimumGlobalDelta()));
-
             this.crawlStacker = new CrawlStacker(
                     this.crawlQueues,
                     this.crawler,
