@@ -72,7 +72,7 @@ for option in $options;do
 			-l|--logging) 
 				LOGGING=1
                 # enable asserts
-                JAVA_ARGS="$JAVA_ARGS -ea -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
+                JAVA_ARGS="$JAVA_ARGS -ea"
 				if [ $DEBUG -eq 1 ];then
 					echo "can not combine -l and -d"
 					exit 1;
@@ -81,7 +81,7 @@ for option in $options;do
 			-d|--debug)
 				DEBUG=1
                 # enable asserts
-                JAVA_ARGS="$JAVA_ARGS -ea"
+                JAVA_ARGS="$JAVA_ARGS -ea -Dcom.sun.management.jmxremote.port=9999 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false"
 				if [ $LOGGING -eq 1 ];then
 					echo "can not combine -l and -d"
 					exit 1;
@@ -95,7 +95,7 @@ for option in $options;do
 				;;
 		esac #case option 
 	else #parameter
-		if [ x$option = "--" ];then #option / parameter seperator
+		if [ x$option = "--" ];then #option / parameter separator
 			isparameter=1;
 			continue
 		else

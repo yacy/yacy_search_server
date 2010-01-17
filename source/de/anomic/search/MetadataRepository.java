@@ -64,13 +64,6 @@ public final class MetadataRepository implements Iterable<byte[]> {
     private   Export              exportthread; // will have a export thread assigned if exporter is running
     private   File                location;
     private   ArrayList<hostStat> statsDump;
-    
-    public MetadataRepository(
-            final File path,
-            final boolean useTailCache,
-            final boolean exceed134217727) {
-        this(path, "urls", useTailCache, exceed134217727);
-    }
 
     public MetadataRepository(
             final File path,
@@ -126,7 +119,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         // generates an plasmaLURLEntry using the url hash
         // if the url cannot be found, this returns null
         if (urlHash == null) return null;
-        assert urlIndexFile != null;
+        assert urlIndexFile != null : "urlHash = " + urlHash;
         try {
             final Row.Entry entry = urlIndexFile.get(urlHash.getBytes());
             if (entry == null) return null;

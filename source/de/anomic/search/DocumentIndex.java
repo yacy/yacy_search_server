@@ -60,8 +60,8 @@ public class DocumentIndex extends Segment {
 
     static final ThreadGroup workerThreadGroup = new ThreadGroup("workerThreadGroup");
     
-    public DocumentIndex(Log log, final File segmentPath, CallbackListener callback, int cachesize) throws IOException {
-        super(log, segmentPath, cachesize, targetFileSize * 4 - 1, false, false);
+    public DocumentIndex(final File segmentPath, CallbackListener callback, int cachesize) throws IOException {
+        super(new Log("DocumentIndex"), segmentPath, cachesize, targetFileSize * 4 - 1, false, false);
         int cores = Runtime.getRuntime().availableProcessors() + 1;
         this.callback = callback;
         this.queue = new LinkedBlockingQueue<File>(cores * 300);
@@ -70,10 +70,6 @@ public class DocumentIndex extends Segment {
             this.worker[i] = new Worker(i);
             this.worker[i].start();
         }
-    }
-    
-    public DocumentIndex(final File segmentPath, CallbackListener callback, int cachesize) throws IOException {
-        this(new Log("DocumentIndex"), segmentPath, callback, cachesize);
     }
 	
     class Worker extends Thread {

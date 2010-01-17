@@ -1367,7 +1367,7 @@ public final class Switchboard extends serverSwitch {
                 entry selentry;
                 while (it.hasNext()) {
                     selentry = it.next();
-                    assert selentry.handle() != null;
+                    assert selentry.handle() != null : "profile.name = " + selentry.name();
                     if (selentry.handle() == null) continue;
                     if (selentry.name().equals(CrawlSwitchboard.CRAWL_PROFILE_PROXY))
                     	crawler.profilesActiveCrawls.changeEntry(selentry, CrawlProfile.entry.RECRAWL_IF_OLDER,

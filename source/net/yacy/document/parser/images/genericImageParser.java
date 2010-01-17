@@ -41,6 +41,7 @@ import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 
 public class genericImageParser extends AbstractParser implements Idiom {
 
@@ -75,8 +76,10 @@ public class genericImageParser extends AbstractParser implements Idiom {
         try {
             image = ImageIO.read(sourceStream);
         } catch (final EOFException e) {
+            Log.logException(e);
             throw new ParserException(e.getMessage(), location);
         } catch (final IOException e) {
+            Log.logException(e);
             throw new ParserException(e.getMessage(), location);
         }
         if (image == null) throw new ParserException("ImageIO returned NULL", location);

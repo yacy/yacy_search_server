@@ -96,8 +96,10 @@ public class bmpParser extends AbstractParser implements Idiom {
         try {
             image = ImageIO.read(sourceStream);
         } catch (final EOFException e) {
+            Log.logException(e);
             throw new ParserException(e.getMessage(), location);
         } catch (final IOException e) {
+            Log.logException(e);
             throw new ParserException(e.getMessage(), location);
         }
         if (image == null) throw new ParserException("ImageIO returned NULL", location);

@@ -82,15 +82,14 @@ public class swfParser extends AbstractParser implements Idiom {
             try {
             	contents = swf2html.convertSWFToHTML(source);
             } catch (NegativeArraySizeException e) {
-                // seen in log
-                return null;
-            } catch (IOException e) {
-                // seems to happen quite often
-                return null;
-            } catch (Exception e) {
-            	// we have seen a lot of OOM errors in the parser...
                 Log.logException(e);
-            	return null;
+                throw new ParserException(e.getMessage(), location);
+            } catch (IOException e) {
+                Log.logException(e);
+                throw new ParserException(e.getMessage(), location);
+            } catch (Exception e) {
+                Log.logException(e);
+                throw new ParserException(e.getMessage(), location);
             }
             String url = null;
             String urlnr = null;
