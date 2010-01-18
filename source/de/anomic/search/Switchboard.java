@@ -757,7 +757,6 @@ public final class Switchboard extends serverSwitch {
         synchronized (this) {            
             // shut down
             this.crawler.close();
-            this.peers.close();
             this.dhtDispatcher.close();
             synchronized (this.indexSegments) {
                 this.indexSegments.close();
@@ -786,11 +785,8 @@ public final class Switchboard extends serverSwitch {
             // relocate
             this.crawlQueues.relocate(this.queuesRoot); // cannot be closed because the busy threads are working with that object
             final File mySeedFile = new File(this.networkRoot, yacySeedDB.DBFILE_OWN_SEED);
-            peers = new yacySeedDB(
+            peers.relocate(
                     this.networkRoot,
-                    "seed.new.heap",
-                    "seed.old.heap",
-                    "seed.pot.heap",
                     mySeedFile,
                     redundancy,
                     partitionExponent,
@@ -802,6 +798,7 @@ public final class Switchboard extends serverSwitch {
                     wordCacheMaxCount,
                     fileSizeMax,
                     this.useTailCache,
+                    
                     this.exceed134217727);
             // set the default segment names
             setDefaultSegments();

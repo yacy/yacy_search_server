@@ -88,7 +88,7 @@ public final class yacySeedDB implements AlternativeDomainNames {
     public  yacyPeerActions peerActions;
     public  yacyNewsPool newsPool;
     
-    private final int netRedundancy;
+    private int netRedundancy;
     public  PartitionScheme scheme;
     
     private yacySeed mySeed; // my own seed
@@ -115,26 +115,75 @@ public final class yacySeedDB implements AlternativeDomainNames {
         this.scheme = new VerticalWordPartitionScheme(partitionExponent);
         
         // set up seed database
-        seedActiveDB = openSeedTable(seedActiveDBFile);
-        seedPassiveDB = openSeedTable(seedPassiveDBFile);
-        seedPotentialDB = openSeedTable(seedPotentialDBFile);
+        this.seedActiveDB = openSeedTable(seedActiveDBFile);
+        this.seedPassiveDB = openSeedTable(seedPassiveDBFile);
+        this.seedPotentialDB = openSeedTable(seedPotentialDBFile);
         
         // start our virtual DNS service for yacy peers with empty cache
-        nameLookupCache = new Hashtable<String, String>();
+        this.nameLookupCache = new Hashtable<String, String>();
         
         // cache for reverse name lookup
-        ipLookupCache = new Hashtable<InetAddress, SoftReference<yacySeed>>();
+        this.ipLookupCache = new Hashtable<InetAddress, SoftReference<yacySeed>>();
         
         // check if we are in the seedCaches: this can happen if someone else published our seed
         removeMySeed();
         
-        lastSeedUpload_seedDBSize = sizeConnected();
+        this.lastSeedUpload_seedDBSize = sizeConnected();
 
         // tell the httpdProxy how to find this table as address resolver
         HTTPDemon.setAlternativeResolver(this);
         
         // create or init news database
         this.newsPool = new yacyNewsPool(networkRoot, useTailCache, exceed134217727);
+        
+        // deploy peer actions
+        this.peerActions = new yacyPeerActions(this, newsPool);
+    }
+    
+    public void relocate(
+            File newNetworkRoot,
+            final File myOwnSeedFile, 
+            final int redundancy,
+            final int partitionExponent,
+            final boolean useTailCache,
+            final boolean exceed134217727) {
+        // close old databases
+        this.seedActiveDB.close();
+        this.seedPassiveDB.close();
+        this.seedPotentialDB.close();
+        this.newsPool.close();
+        this.peerActions.close();
+        
+        // open new according to the newNetworkRoot
+        this.seedActiveDBFile = new File(newNetworkRoot, seedActiveDBFile.getName());
+        this.seedPassiveDBFile = new File(newNetworkRoot, seedPassiveDBFile.getName());
+        this.seedPotentialDBFile = new File(newNetworkRoot, seedPotentialDBFile.getName());
+        this.mySeed = null; // my own seed
+        this.myOwnSeedFile = myOwnSeedFile;
+        this.netRedundancy = redundancy;
+        this.scheme = new VerticalWordPartitionScheme(partitionExponent);
+        
+        // set up seed database
+        this.seedActiveDB = openSeedTable(seedActiveDBFile);
+        this.seedPassiveDB = openSeedTable(seedPassiveDBFile);
+        this.seedPotentialDB = openSeedTable(seedPotentialDBFile);
+        
+        // start our virtual DNS service for yacy peers with empty cache
+        this.nameLookupCache.clear();
+        
+        // cache for reverse name lookup
+        this.ipLookupCache.clear();
+        
+        // check if we are in the seedCaches: this can happen if someone else published our seed
+        removeMySeed();
+        
+        this.lastSeedUpload_seedDBSize = sizeConnected();
+
+        // tell the httpdProxy how to find this table as address resolver
+        HTTPDemon.setAlternativeResolver(this);
+        
+        // create or init news database
+        this.newsPool = new yacyNewsPool(newNetworkRoot, useTailCache, exceed134217727);
         
         // deploy peer actions
         this.peerActions = new yacyPeerActions(this, newsPool);

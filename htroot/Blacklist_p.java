@@ -114,8 +114,8 @@ public class Blacklist_p {
                  * Creation of a new blacklist
                  * =========================================================== */
                 
-                blacklistToUse = post.get("newListName");
-                if (blacklistToUse.trim().length() == 0) {
+                blacklistToUse = post.get("newListName", "").trim();
+                if (blacklistToUse.length() == 0) {
                     prop.put("LOCATION","");
                     return prop;
                 }   
@@ -160,7 +160,7 @@ public class Blacklist_p {
                  * =========================================================== */                
                 
                 blacklistToUse = post.get("selectedListName");
-                if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
+                if (blacklistToUse == null || blacklistToUse.length() == 0) {
                     prop.put("LOCATION","");
                     return prop;
                 }                   
@@ -187,8 +187,8 @@ public class Blacklist_p {
                  * Activate/Deactivate a blacklist
                  * =========================================================== */                   
                 
-                blacklistToUse = post.get("selectedListName");
-                if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
+                blacklistToUse = post.get("selectedListName", "").trim();
+                if (blacklistToUse == null || blacklistToUse.length() == 0) {
                     prop.put("LOCATION", "");
                     return prop;
                 }                   
@@ -209,8 +209,8 @@ public class Blacklist_p {
                  * Share a blacklist
                  * =========================================================== */                   
                 
-                blacklistToUse = post.get("selectedListName");
-                if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
+                blacklistToUse = post.get("selectedListName", "").trim();
+                if (blacklistToUse == null || blacklistToUse.length() == 0) {
                     prop.put("LOCATION", "");
                     return prop;
                 }                   
@@ -227,7 +227,7 @@ public class Blacklist_p {
                  * Delete an entry from a blacklist
                  * =========================================================== */
                 
-                blacklistToUse = post.get("currentBlacklist");
+                blacklistToUse = post.get("currentBlacklist", "").trim();
                 String temp = null;
                 
                 final String[] selectedBlacklistEntries = post.getAll("selectedEntry.*");
@@ -249,9 +249,9 @@ public class Blacklist_p {
                  * Add new entry to blacklist
                  * =========================================================== */
 
-                blacklistToUse = post.get("currentBlacklist");
+                blacklistToUse = post.get("currentBlacklist", "").trim();
 
-                final String temp = addBlacklistEntry(post.get("currentBlacklist"), post.get("newEntry"), header, supportedBlacklistTypes);
+                final String temp = addBlacklistEntry(blacklistToUse, post.get("newEntry", "").trim(), header, supportedBlacklistTypes);
                 if (temp != null) {
                     prop.put("LOCATION", temp);
                     return prop;
@@ -264,7 +264,7 @@ public class Blacklist_p {
                  * Move an entry from one blacklist to another
                  * =========================================================== */
                 
-                blacklistToUse = post.get("currentBlacklist");
+                blacklistToUse = post.get("currentBlacklist", "").trim();
                 String targetBlacklist = post.get("targetBlacklist");
                 String temp = null;
                 
@@ -299,7 +299,7 @@ public class Blacklist_p {
                  * Edit entry of a blacklist
                  * =========================================================== */
                 
-                blacklistToUse = post.get("currentBlacklist");
+                blacklistToUse = post.get("currentBlacklist", "").trim();
                 
                 final String[] editedBlacklistEntries = post.getAll("editedBlacklistEntry.*");
         
@@ -511,11 +511,11 @@ public class Blacklist_p {
             final RequestHeader header,
             final String[] supportedBlacklistTypes) {
 
-        if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
+        if (blacklistToUse == null || blacklistToUse.length() == 0) {
             return "";
         }
 
-        if (newEntry == null || newEntry.trim().length() == 0) {
+        if (newEntry == null || newEntry.length() == 0) {
             return header.get("PATH") + "?selectList=&selectedListName=" + blacklistToUse;
         }
 
@@ -539,11 +539,11 @@ public class Blacklist_p {
             final RequestHeader header,
             final String[] supportedBlacklistTypes) {
 
-        if (blacklistToUse == null || blacklistToUse.trim().length() == 0) {
+        if (blacklistToUse == null || blacklistToUse.length() == 0) {
             return "";
         }
 
-        if (oldEntry == null || oldEntry.trim().length() == 0) {
+        if (oldEntry == null || oldEntry.length() == 0) {
             return header.get("PATH") + "?selectList=&selectedListName=" + blacklistToUse;
         }
 
