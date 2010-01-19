@@ -28,8 +28,12 @@ package net.yacy.document.parser.images;
 
 import java.awt.image.BufferedImage;
 import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;import java.util.HashMap;
+import java.io.InputStream;import java.net.MalformedURLException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -105,9 +109,13 @@ public class genericImageParser extends AbstractParser implements Idiom {
         String [] propNames = image.getPropertyNames();
         if (propNames == null) propNames = new String[0];
         StringBuilder sb = new StringBuilder(propNames.length * 80);
+        sb.append("\n");
         for (String propName: propNames) {
             sb.append(propName).append(" = ").append(image.getProperty(propName)).append(" .\n");
         }
+        // append also properties that we measured
+        sb.append("width").append(" = ").append(Integer.toString(width)).append(" .\n");
+        sb.append("height").append(" = ").append(Integer.toString(height)).append(" .\n");
         
         final HashSet<String> languages = new HashSet<String>();
         final HashMap<DigestURI, String> anchors = new HashMap<DigestURI, String>();
@@ -142,6 +150,25 @@ public class genericImageParser extends AbstractParser implements Idiom {
     
     public Set<String> supportedExtensions() {
         return SUPPORTED_EXTENSIONS;
+    }
+    
+    public static void main(final String[] args) {
+        File image = new File(args[0]);
+        genericImageParser parser = new genericImageParser();
+        DigestURI uri;
+        try {
+            uri = new DigestURI("http://localhost/" + image.getName());
+            Document document = parser.parse(uri, "image/" + uri.getFileExtension(), "UTF-8", new FileInputStream(image));
+            System.out.println(document.toString());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (ParserException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
     
 }

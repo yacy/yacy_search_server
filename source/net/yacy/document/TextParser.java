@@ -33,6 +33,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.text.Collator;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -224,20 +225,31 @@ public final class TextParser {
         if (log.isFine()) log.logInfo("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "'.");
         
         Document doc = null;
+        HashMap<Idiom, ParserException> failedParser = new HashMap<Idiom, ParserException>();
         for (Idiom parser: idioms) {
             parser.setContentLength(contentLength);
             try {
                 doc = parser.parse(location, mimeType, documentCharset, sourceStream);
             } catch (ParserException e) {
-                log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);
+                failedParser.put(parser, e);
+                //log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);
             }
             if (doc != null) break;
         }
         
         if (doc == null) {
-            final String errorMsg = "Parsing content with file extension '" + location.getFileExtension() + "' and mimetype '" + mimeType + "' failed.";
-            log.logWarning("Unable to parse '" + location + "'. " + errorMsg);
-            throw new ParserException(errorMsg, location);
+            if (failedParser.size() == 0) {
+                final String errorMsg = "Parsing content with file extension '" + location.getFileExtension() + "' and mimetype '" + mimeType + "' failed.";
+                //log.logWarning("Unable to parse '" + location + "'. " + errorMsg);
+                throw new ParserException(errorMsg, location);
+            } else {
+                String failedParsers = "";
+                for (Map.Entry<Idiom, ParserException> error: failedParser.entrySet()) {
+                    log.logWarning("tried parser '" + error.getKey().getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + error.getValue().getMessage(), error.getValue());
+                    failedParsers += error.getKey().getName() + " ";
+                }
+                throw new ParserException("All parser failed: " + failedParsers, location);
+            }
         }
         return doc;
     }

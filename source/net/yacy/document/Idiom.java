@@ -109,6 +109,11 @@ public interface Idiom {
      * @return parser name
      */
     public String getName();
+    
+    public boolean equals(Object o);
+    
+    public int hashCode();
+    
 }
 
 

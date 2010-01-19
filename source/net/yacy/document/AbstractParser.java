@@ -232,4 +232,12 @@ public abstract class AbstractParser implements Idiom {
     public void reset() {
         this.contentLength = -1;
     }
+    
+    public boolean equals(Object o) {
+        return this.getName().equals(((Idiom) o).getName());
+    }
+    
+    public int hashCode() {
+        return this.getName().hashCode();
+    }
 }

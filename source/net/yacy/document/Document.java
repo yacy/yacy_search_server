@@ -25,6 +25,7 @@ package net.yacy.document;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -561,19 +562,36 @@ dc_rights
     
     public void writeXML(OutputStreamWriter os, Date date) throws IOException {
         os.write("<record>\n");
-        os.write("<dc:Title><![CDATA[" + this.dc_title() + "]]></dc:Title>\n");
+        String title = this.dc_title();
+        if (title != null && title.length() > 0) os.write("<dc:Title><![CDATA[" + this.dc_title() + "]]></dc:Title>\n");
         os.write("<dc:Identifier>" + this.dc_identifier() + "</dc:Identifier>\n");
-        os.write("<dc:Creator><![CDATA[" + this.dc_creator() + "]]></dc:Creator>\n");
-        os.write("<dc:Description><![CDATA[");
-        byte[] buffer = new byte[1000];
-        int c = 0;
-        InputStream is = this.getText();
-        while ((c = is.read(buffer)) > 0) os.write(new String(buffer, 0, c));
-        is.close();
-        os.write("]]></dc:Description>\n");
-        os.write("<dc:Language>" + this.dc_language() + "</dc:Language>\n");
+        String creator = this.dc_creator();
+        if (creator != null && creator.length() > 0) os.write("<dc:Creator><![CDATA[" + this.dc_creator() + "]]></dc:Creator>\n");
+        if (this.text != null) {
+            os.write("<dc:Description><![CDATA[");
+            byte[] buffer = new byte[1000];
+            int c = 0;
+            InputStream is = this.getText();
+            while ((c = is.read(buffer)) > 0) os.write(new String(buffer, 0, c));
+            is.close();
+            os.write("]]></dc:Description>\n");
+        }
+        String language = this.dc_language();
+        if (language != null && language.length() > 0) os.write("<dc:Language>" + this.dc_language() + "</dc:Language>\n");
         os.write("<dc:Date>" + DateFormatter.formatISO8601(date) + "</dc:Date>\n");
         os.write("</record>\n");
+    }
+    
+    public String toString() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        OutputStreamWriter osw = new OutputStreamWriter(baos);
+        try {
+            writeXML(osw, new Date());
+            osw.close();
+            return new String(baos.toByteArray(), "UTF-8");
+        } catch (IOException e) {
+            return "";
+        }
     }
     
     public void close() {
