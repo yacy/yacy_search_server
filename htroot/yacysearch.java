@@ -591,7 +591,7 @@ public class yacysearch {
                 resnav.append(QueryParams.navurl("html", thispage - 1, display, theQuery, originalUrlMask, null, navigation));
             	resnav.append("\"><img src=\"env/grafics/navdl.gif\" width=\"16\" height=\"16\"></a>&nbsp;");
             }
-            final int numberofpages = Math.min(10, Math.max(1 + thispage, 1 + ((theSearch.getRankingResult().getLocalIndexCount() < 11) ? theSearch.getRankingResult().getLocalResourceSize() : theSearch.getRankingResult().getLocalIndexCount()) / theQuery.displayResults()));
+            final int numberofpages = Math.min(10, Math.max(1 + thispage, 1 + ((theSearch.getRankingResult().getLocalIndexCount() < 11) ? Math.max(30, theSearch.getRankingResult().getLocalResourceSize() + theSearch.getRankingResult().getRemoteResourceSize()) : theSearch.getRankingResult().getLocalIndexCount()) / theQuery.displayResults()));
             for (int i = 0; i < numberofpages; i++) {
                 if (i == thispage) {
                     resnav.append("<img src=\"env/grafics/navs");
