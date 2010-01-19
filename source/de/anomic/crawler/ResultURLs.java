@@ -137,8 +137,8 @@ public final class ResultURLs {
      */
     public synchronized String getHashNo(final EventOrigin stack, final int pos, final int index) {
         final String result = getResultStackAt(stack, pos);
-        if(result != null) {
-            if(result.length() < Word.commonHashLength * 3) {
+        if (result != null) {
+            if (result.length() < Word.commonHashLength * 3) {
                 Log.logSevere("ResultURLs", "unexpected error: result of stack is too short: "+ result.length());
                 if(result.length() <= Word.commonHashLength * 2) {
                     return null;
@@ -189,8 +189,10 @@ public final class ResultURLs {
     public int deleteDomain(final EventOrigin stack, String host, String hosthash) {
         assert hosthash.length() == 6;
         int i = 0;
+        String urlhash;
         while (i < getStackSize(stack)) {
-            if (getUrlHash(stack, i).substring(6).equals(hosthash)) getStack(stack).remove(i); else i++;
+            urlhash = getUrlHash(stack, i);
+            if (urlhash == null || urlhash.substring(6).equals(hosthash)) getStack(stack).remove(i); else i++;
         }
         assert host != null : "host = null";
         assert getDomains(stack) != null : "getDomains(" + stack + ") = null";

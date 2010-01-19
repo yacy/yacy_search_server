@@ -498,6 +498,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
 
     	public Session(final ThreadGroup theThreadGroup, final Socket controlSocket, final int socketTimeout) {
             super(theThreadGroup, controlSocket.getInetAddress().toString() + "@" + Long.toString(System.currentTimeMillis()));
+            this.setPriority(Thread.MAX_PRIORITY);
             this.socketTimeout = socketTimeout;
             this.controlSocket = controlSocket;
             this.hashIndex = sessionCounter;

@@ -104,7 +104,7 @@ public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte
         return b2m(b);
     }
     
-    private static Map<String, byte[]> b2m(byte[] b) {
+    static Map<String, byte[]> b2m(byte[] b) {
         if (b == null) return null;
         System.out.println("b = " + new String(b));
         BDecoder decoder = new BDecoder(b);

@@ -533,6 +533,7 @@ public class CrawlQueues {
                 workers.put(code, this);
                 this.start();
             }
+            this.setPriority(Thread.MIN_PRIORITY); // http requests from the crawler should not cause that other functions work worse
         }
         
         public long age() {
