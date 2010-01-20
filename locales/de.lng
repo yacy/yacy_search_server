@@ -479,7 +479,7 @@ http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignment
 #---------------------------
 Your Personal Profile==Ihr persönliches Profil
 You can create a personal profile here, which can be seen by other YaCy-members==Hier können Sie Ihr persönliches Profil verwalten, welches andere YaCy-Benutzer ansehen können
-#or <a href="ViewProfile.html?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf?hash=localhash">FOAF RDF file</a>.==oder <a href="ViewProfile.html?hash=localhash">in der Öffentlichkeit</a> eine <a href="ViewProfile.rdf?hash=localhash">FOAF RDF Datei</a> benutzen.
+or <a href="ViewProfile.html\?hash=localhash">in the public</a> using a <a href="ViewProfile.rdf\?hash=localhash">FOAF RDF file</a>.==oder <a href="ViewProfile.html?hash=localhash">in der Öffentlichkeit</a> eine <a #href="ViewProfile.rdf?hash=localhash">FOAF RDF Datei</a> benutzen.
 #Name==Name
 #Nick Name==Nick Name
 Homepage \(appears on every <a href="/Supporter.html">Supporter Page</a> as long as your peer is online\)==Homepage (erscheint auf der <a href="/Supporter.html">Unterstützer Seite,</a> so lange Ihr Peer online ist).
@@ -537,10 +537,13 @@ Downloaded Releases==Heruntergeladene Versionen
 Automatic Update==Automatische Aktualisierung
 check for new releases, download if available and restart with downloaded release==suche nach neuer Version, lade sie herunter und starte neu mit dieser Version
 "Check \+ Download \+ Install Release Now"=="Suchen + Herunterladen + Version nun installieren"
-Download of release #[downloadedRelease]# finished. Restart Initiated.
-No more recent release found.
-Omiting update because this is a development environment.
-Omiting update because download of relase #[downloadedRelease]# failed.
+Download of release \#\[downloadedRelease\]\# finished. Restart Initiated.== Der Download von Version #[downloadedRelease]# ist beendet. Ein Neustart ist eingeleitet.
+No more recent release found.==Kein neueres Release gefunden.
+Release will be installed. Please wait.==Das Release wird installiert. Bitte warten.
+You installed YaCy with a package manager.==Sie haben YaCy mit einem Paketmanager installiert.
+To update YaCy, use the package manager:==Um YaCy auf den neuesten Stand zu bringen, verwenden Sie den Packetmanager.
+Omitting update because this is a development environment.==Update ausgelassen weil dies ein Entwicklersystem ist.
+Omitting update because download of release \#\[downloadedRelease\]\# failed.==Update ausgelassen weil der Download von Version #[downloadedRelease]# fehlschlug.
 Automated System Update==Automatische Systemaktualisierung
 manual update==manuelle Aktualisierung
 no automatic look-up, updates can be made manually using this interface \(see options above\)==Keine automatische Aktualisierung. Updates können manuell gemacht werden (siehe die Optionen oben).
@@ -555,7 +558,7 @@ any release including developer releases==jede Version, auch Entwickler Versione
 Signed autoupdate:==signierte Aktualisierung:
 only accept signed files==Nur signierte Dateien akzeptieren
 "Submit"=="Speichern"
-Accepted Changes.==Änderungen akzeptiert.
+Accepted Changes.==&Auml;nderungen akzeptiert.
 System Update Statistics==System Aktualisierungs Statistiken
 Last System Lookup==Letzter System Check
 never==niemals
@@ -629,15 +632,16 @@ Local Text Indexing==Lokal Text Indexieren
 Local Media Indexing==Lokal Media Indexieren
 Remote Indexing==Remote Indexieren
 Status / Action==Status / Aktion
+terminated::active==beendet::aktiv
 no::yes==nein::ja
 Running==Läuft
 "Terminate"=="Beenden"
 Finished==Beendet
-"Delete"=="löschen"
+"Delete"=="Löschen"
 "Delete finished crawls"=="Beendete Crawls löschen"
 Select the profile to edit==Profil zur Bearbeitung auswählen
 "Edit profile"=="Profil bearbeiten"
-An error occured during editing the crawl profile:==Es trat folgender Fehler bei der Bearbeitung des Crawl Profils auf:
+An error occurred during editing the crawl profile:==Es trat folgender Fehler bei der Bearbeitung des Crawl Profils auf:
 Edit Profile==Bearbeite Profil
 "Submit changes"=="Änderungen speichern"
 #---------------------------
@@ -1063,6 +1067,67 @@ There are \#\[num\]\# entries in the loader set:==Es befinden sich #[num]# Eintr
 Initiator==Initiator
 Depth==Tiefe
 #URL==URL
+#-----------------------------
+
+#File: IndexCreateParserErrors_p.html
+#---------------------------
+Parser Errors==Parser Fehler
+Rejected URL List:==Liste der zurückgewiesenen URLs:
+There are \#\[num\]\# entries in the rejected-urls list.==Es befinden sich #[num]# Einträge in Liste der zurückgewiesenen URLs.
+Showing latest \#\[num\]\# entries.==Es werden die letzten #[num]# Einträge angezeigt.
+"show more"=="Mehr anzeigen"
+"clear list"=="Liste löschen"
+There are \#\[num\]\# entries in the rejected-queue:==Es befinden sich #[num]# Einträge in der zurückgewiesenen URL Liste:
+#Initiator==Initiator
+Executor==Ausführender
+#URL==URL
+Fail-Reason==Fehlermeldung
+#-----------------------------
+
+#File: ContentIntegrationPHPBB3_p.html
+#---------------------------
+Content Integration: Retrieval from phpBB3 Databases==Integration von Inhalt: Import aus phpBB3 Datenbanken
+It is possible to extract texts directly from mySQL and postgreSQL databases.==Es ist möglich Texte direkt aus MySQL und PostgreSQL Datenbanken zu extrahieren.
+Each extraction is specific to the data that is hosted in the database.==Jeder Vorgang extrahiert genau die Datens&auml;tze die in der Datenbank gehostet werden.
+This interface gives you access to the phpBB3 forums software content.==Dieses Interface erlaubt den Zugriff auf die Inhalte der phpBB3 Forum Software.
+If you read from a imported database, here are some hints to get around problems when importing dumps in phpMyAdmin:==Wenn aus einer importierten Datenbank gelesen werden soll sind hier einige Hinweise, um Probleme zu vermeiden wenn Datenbankdumps in phpMyAdmin importiert werden.
+before importing large database dumps, set==Bevor gro&szlig;e Datenbankdumps importiert werden, folgende Werte
+in phpmyadmin/config.inc.php and place your dump file in /tmp. Otherwise it is not possible to upload files larger than 2MB.==in die Datei phpmyadmin/config.inc.php schreiben und die Datenbank Datei in /tmp ablegen. Andernfalls ist es nicht m&ouml;glich Dateien gr&ouml;&szlig;er als 2MB hochzuladen.
+deselect the partial import flag==Den teilweisen Import Flag abschalten
+When a export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==Wenn ein Export gestartet wird werden Hilfsdateien in DATA/SURROGATE/in erzeugt, die automatisch von einem Indexer Thread geholt und verarbeitet werden.
+All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when a index is deleted.==Alle indexierten Hilfsdateien werden dann nach DATA/SURROGATE/out verschoben und k&ouml;nnen recycelt werden wenn ein Index gel&ouml;scht wird.
+The URL stub==Der Teil der URL
+like http://forum.yacy-websuche.de==wie z.B. http://forum.yacy-websuche.de
+this must be the path right in front of '\/viewtopic.php\?'==dies muss den kompletten Pfad vor '\/viewtopic.php\?' enthalten
+Type==Typ
+of database==der Datenbank
+use either 'mysql' or 'pgsql'==Verwende entweder 'mysql' oder 'pgsql'
+Host=Hostname
+of the database==der Datenbank
+of database service==des Datenbank Dienstes
+(usually 3306 for mySQL)==(normalerweise 3306 für MySQL)
+Name of the database==Name der Datenbank
+on the host==auf dem Host
+Table prefix string==Tabellen Präfix
+for table names==für Tabellennamen
+User==Benutzer
+that can access the database==mit Zugriff auf die Datenbank
+Password==Passwort
+for the account of that user given above==für den Zugang des oben angegebenen Benutzers
+Posts per file==Beitr&auml;ge pro Datei
+in exported surrogates==in der exportierten Hilfsdatei
+Check database connection==Datenbankverbindung überprüfen
+Export Content to Surrogates==Exportiere Inhalt in Hilfsdateien
+Import a database dump==Importieren eines Datenbankauszugs
+Import Dump==Datenbankdump importieren
+Posts in database==Beiträge in Datenbank
+first entry==Erster Eintrag
+last entry==Letzter Eintrag
+Info failed:==Info Fehlgeschlagen:
+Export successful! Wrote \#\[files\]\# files in DATA/SURROGATES/in==Export erfolgreich! #[files]# Dateien in DATA/SURROGATES/in geschrieben
+Export failed:==Export fehlgeschlagen:
+Import successful!==Import erfolgreich!
+Import failed:==Import fehlgeschlagen:
 #-----------------------------
 
 #File: IndexCreateWWWGlobalQueue_p.html
@@ -2146,6 +2211,7 @@ reversed order==umgekehrte Reihenfolge
 
 #File: ViewProfile.html
 #---------------------------
+Local Peer Profile:==Lokales Peer Profil:
 Remote Peer Profile==Remote Peer Profil
 Remote Peer Profile:==Remote Peer Profil:
 Wrong access of this page==Falscher Zugriff auf diese Seite
@@ -2202,6 +2268,7 @@ Anchor Name==Linktitel
 Delete==Löschen
 Next update in==Nächste Aktualisierung in
 /> seconds.==/> Sekunden.
+See a access timing <a href="/api/latency_p.xml">here</a>==<a href="/api/latency_p.xml">Hier</a> gibt es eine Tabelle mit Latenz- und Zugriffszeiten
 Queue</th>==Puffer</th>
 >Size==>Größe
 #Max==Max
@@ -2279,11 +2346,11 @@ of YaCy. For a more detailed description visit the==in YaCy benutzt werden könn
 #YaCy Wiki==YaCy Wiki
 Description==Beschreibung
 \=\=headline====Überschrift
-These tags create headlines. If a page has three or more headlines, a directory will be created automaticly.==Diese Tags erzeugen Überschriften. Wenn die Seite drei oder mehr Überschriften enthält, wird automatisch ein Inhaltsverzeichnis erstellt.
+These tags create headlines. If a page has three or more headlines, a directory will be created automatically.==Diese Tags erzeugen Überschriften. Wenn die Seite drei oder mehr Überschriften enthält, wird automatisch ein Inhaltsverzeichnis erstellt.
 #text==Text
-These tags create stressed texts. The first pair emphasizes the text \(most browsers will display it in italics\),==Diese Tags erzeugen hervorgehobenen Text. Das erste Paar betont den Text (die meissten Browser zeigen die Texte kursiv),
+These tags create stressed texts. The first pair emphasizes the text \(most browsers will display it in italics\),==Diese Tags erzeugen hervorgehobenen Text. Das erste Paar betont den Text (die meisten Browser zeigen die Texte kursiv),
 the second one emphazises it more strongly \(i.e. bold\) and the last tags create a combination of both.==das Zweite betont den Text stärker (z.B. fett) und der letzte Tag erzeugt eine Mischung aus beidem.
-Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.==Der Text erscheint eingerückt. Dieser Tag eigenet sich, um Zitate zu markieren, wird aber auch zum Designen benutzt.
+Lines will be indented. This tag is supposed to mark citations, but may as well be used for styling purposes.==Der Text erscheint eingerückt. Dieser Tag eignet sich, um Zitate zu markieren, wird aber auch zum Designen benutzt.
 point==Punkt
 These tags create a numbered list.==Diese Tags erstellen eine nummerierte Liste.
 something==etwas
@@ -2300,8 +2367,8 @@ description\]\]==Beschreibung]]
 This tag creates links to other pages of the wiki.==Dieser Tag erzeugt einen Link zu einer anderen Seite im Wiki.
 This tag displays an image, it can be aligned left, right or center.==Dieser Tag fügt ein Bild ein, es kann links (left), rechts (right) oder mittig (center) ausgerichtet werden.
 These tags create a table, whereas the first marks the beginning of the table, the second starts==Diese Tags erstellen eine Tabelle, wobei der erste den Anfang der Tabelle markiert, der zweite beginnt 
-a new line, the third and fourth each create a new cell in the line. The last displayed tag==eine neue Zeile, der dritte und vierte erzeugen eine neue Zelle in der Zeile. Der zuletztt dargestellte Tag
-closes the table.==schliesst die Tabelle.
+a new line, the third and fourth each create a new cell in the line. The last displayed tag==eine neue Zeile, der dritte und vierte erzeugen eine neue Zelle in der Zeile. Der zuletzt dargestellte Tag
+closes the table.==schließt die Tabelle.
 #The escape tags will cause all tags in the text between the starting and the closing tag to not be treated as wiki-code.==Durch diesen Tag wird der Text, der zwischen den Klammern steht, nicht interpretiert und unformatiert als normaler Text ausgegeben.
 A text between these tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.==Ein Text zwischen diesen Tags wird alle Leerzeichen und Zeilenumbrüche beinhalten. Gut geeignet für ASCII-Kunst und Programm Code.
 If a line starts with a space, it will be displayed in a non-proportional font.==Wenn eine Zeile mit einem Leerzeichen anfängt, wird diese als nicht-proportionale Schriftart dargestellt.
@@ -2378,10 +2445,14 @@ Publication==Veröffentlichung
 >Help==>Hilfe
 #Web&nbsp;Indexing==Web Indexierung
 #Crawl Start &amp; Monitoring==Crawl Start &amp; Kontrolle
+Index Control==Index Kontrolle
+Index Creation==Indexerzeugung
+Crawler Monitor==Crawler Überwachung
 Crawl Results==Crawl Ergebnisse
+Content Import==Inhalte Importieren
 Index Administration==Indexverwaltung
-#Filter &amp; Blacklists==Filter &amp; Blacklists
-Indexing with Proxy==Indexierung per Proxy
+Filter &amp; Blacklists==Filter &amp; Sperrlisten
+#Indexing with Proxy==Indexierung per Proxy
 Monitoring==Kontrolle
 YaCy Network==YaCy Netzwerk
 Web Visualization==Internet Visualisierung
@@ -2389,10 +2460,10 @@ Access Tracker==Zugriffe
 #Server Log==Server Log
 News Monitor==News Anzeige
 Cookies in Proxy==Cookies per Proxy
-Peer Control==Peer Kontrolle
 Search Integration==Suchintegration
 Search Portals==Such Portale
 Customization==Anpassungen
+Peer Control==Peer Kontrolle
 Admin Console==Admin Konsole
 #>Terminal==>Terminal
 >Messages==>Nachrichten
@@ -2465,6 +2536,20 @@ Incoming&nbsp;Cookies==Eingehende Cookies
 Outgoing&nbsp;Cookies==Ausgehende Cookies
 #-----------------------------
 
+#File: env/templates/submenuCrawlMonitor.template
+#---------------------------
+Processing Monitor==Prozess Monitor
+Crawler Queues==Crawler Puffer
+Loader<==Lade Puffer<
+Parser Errors==Parser Fehler
+Queues==Warteschlangen
+Local<==Lokal<
+#Global==Global
+#Remote==Remote
+Crawler Steering==Crawl Steuerung
+Crawl Profile Editor==Crawl Profil Editor
+#-----------------------------
+
 #File: env/templates/submenuCustomization.template
 #---------------------------
 Customization==Anpassung
@@ -2487,21 +2572,27 @@ Queue Import==Puffer Import
 #---------------------------
 #Web Crawler Control==Web Crawler Steuerung
 #Start a Web Crawl==Starte einen Web Crawl
-Crawl Start==Crawl starten
-Crawl Profile Editor==Crawl Profil Editor
-Crawler Queues==Crawler Puffer
+#Crawl Start==Crawl starten
+#Crawl Profile Editor==Crawl Profil Editor
+#Crawler Queues==Crawler Puffer
 #Indexing<==Indexierung<
-Loader<==Lader<
+#Loader<==Lader<
 #URLs to be processed==zu verarbeitende URLs
 #Processing Queues==Warteschlangen
-Local<==Lokal<
+#Local<==Lokal<
 #Global<==Global<
 #Remote<==Remote<
-Overhang<==Überhang<
+#Overhang<==Überhang<
 Media Crawl Queues==Medien Crawl-Puffer
->Images==>Bilder
->Movies==>Filme
->Music==>Musik
+#>Images==>Bilder
+#>Movies==>Filme
+#>Music==>Musik
+#--- New menu items ---
+Index Creation==Indexerzeugung
+Crawl starten (Advanced)==Crawl starten (Erweitert)
+Indexing of Media Wikis==Indexierung von Media Wikis
+Indexing of phpBB3 Forums==Indexierung von phpBB3 Foren
+Scraping Proxy Configuration==Indexierung per Proxy
 #-----------------------------
 
 #File: env/templates/submenuPublication.template
@@ -2531,7 +2622,7 @@ Image Collage==Bilder Collage
 Your Username/Password is wrong.==Benutzername/Passwort waren falsch.
 Username</label>==Benutzername</label>
 Password</label>==Passwort</label>
-"login"=="anmelden"
+"login"=="Anmelden"
 #-----------------------------
 
 #File: proxymsg/error.html
