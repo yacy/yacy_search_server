@@ -1794,7 +1794,7 @@ This table contains a short description of the tags that can be used in the Wiki
 Code==Code
 Description==Description
 \=\=headline====Entête
-This tags create headlines. If a page has three or more headlines, a directory will be created automaticly.==Ces tags créent des entêtes. Si la page contient trois entêtes ou plus, un dossier est automatiquement créé.
+This tags create headlines. If a page has three or more headlines, a directory will be created automatically.==Ces tags créent des entêtes. Si la page contient trois entêtes ou plus, un dossier est automatiquement créé.
 text==Texte
 This tags create stressed texts. Most browsers will display the texts in italics, bold, and a combination of both.==Ces tags créent un text souligné. La plupart des browsers affichent le text en italique, en gras ou en combinaison des deux.
 Lines will be indented. This tag is supposed to mark citations.==Le text apparaîtra indenté. Ce tag est utilisé pour marquer les citations.  
@@ -1804,7 +1804,7 @@ something==quelque chose
 another thing==une autre chose
 and yet another==et encore une autre
 something else==autre chose
-This tags create a unnumbered list.==Ces tgs créent une liste non enumérée.
+This tags create an unnumbered list.==Ces tgs créent une liste non enumérée.
 word==mot
 \:definition==:Definition
 This tags create a definition list.==Ces tags créent une liste définie.
