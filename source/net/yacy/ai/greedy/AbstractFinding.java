@@ -35,14 +35,23 @@ public abstract class AbstractFinding<SpecificRole extends Role> implements Find
     
     /**
      * create a new finding for a given role
-     * the priority is fixed in the beginning because is results from a premise
-     * that invoked a special finding computation set
+     * the priority can be fixed in the beginning
      * @param role
      * @param priority
      */
     public AbstractFinding(SpecificRole role, int priority) {
         this.role = role;
         this.priority = priority;
+    }
+    
+    /**
+     * create a new finding for a given role
+     * the priority should be assigned afterward
+     * @param role
+     */
+    public AbstractFinding(SpecificRole role) {
+        this.role = role;
+        this.priority = 0;
     }
     
     public abstract Object clone();

@@ -107,7 +107,7 @@ public class Agent<
         // in case that there are no agents left, store the current state
         // and fire a shutdown signal
         if (this.context.getInstanceCount() > 0) return;
-        addResult();
+        //addResult();
         //if (this.getContext().countResults() > 0) this.context.getGoal().announceFullfillment();
     }
 

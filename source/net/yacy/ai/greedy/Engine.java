@@ -145,9 +145,11 @@ public class Engine<
                     
                     if (context.isCompleted()) continue;
                     
-                    //System.out.println(agent.getCurrentModel().toString());
-                    //System.out.println("will apply " + challenge.getFinding().toString());
-                    
+                    String debug = agent.getModel().toString() + "\nwill apply " + challenge.getFinding().toString();
+                    System.out.println(debug);
+                    if (debug.equals("[],[3, 2],[1]\nwill apply 2 -> 1")) {
+                        System.out.println("one more please");
+                    }
                     // apply finding: compute next model
                     // avoid double computation of findings using cached assets
                     if (context.useAssetCache()) {
@@ -198,6 +200,7 @@ public class Engine<
                     if (terminationRole != null) {
                         // the current role has a termination situation. In case that it is the start user, add a result
                         nextAgent.addResult();
+                        if (goal.isFulfilled(nextAgent.getModel())) nextAgent.getContext().announceCompletion();
                         // one of the roles has terminated.
                         // prune this branch for other branches from the parent
                         //System.out.println("terminationRole = " + terminationRole);
@@ -212,6 +215,11 @@ public class Engine<
                         //System.out.println("found winner model for " + terminationRole.toString() + ", latest finding: " + challenge.getFinding().toString() + "\n" + nextModel.toString());
                         agent.checkInstanceCount();
                         continue;
+                    }
+                    
+                    // check time-out for snapshot
+                    if (nextAgent.getContext().isSnapshotTimeout()) {
+                        nextAgent.addResult();
                     }
                     
                     // check pruning

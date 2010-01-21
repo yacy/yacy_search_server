@@ -228,10 +228,17 @@ public class ConnectFour {
             return r;
         }
 
+        private int getPriority(Move finding) {
+            if (finding.column <= width / 2) return finding.column;
+            return width - 1 - finding.column;
+        }
+        
         public List<Move> explore() {
             ArrayList<Move> moves = new ArrayList<Move>();
             for (int i = 0; i < width; i++) {
-                if (!columnFull(i)) moves.add(new Move(this.currentRole(), i));
+                Move move = new Move(this.currentRole(), i);
+                move.setPriority(getPriority(move));
+                if (!columnFull(i)) moves.add(move);
             }
             return moves;
         }
@@ -254,11 +261,6 @@ public class ConnectFour {
     public static class Strategy implements Goal<Coin, Move, Board> {        
 
         public Strategy() {
-        }
-
-        public int getPriority(Board model, Move finding) {
-            if (finding.column <= width / 2) return finding.column;
-            return width - 1 - finding.column;
         }
 
         public boolean isFulfilled(Board model) {

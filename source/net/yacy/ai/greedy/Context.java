@@ -39,7 +39,7 @@ public class Context<
                      SpecificModel extends Model<SpecificRole, SpecificFinding>
                     >{
     
-    private static final Object PRESENT = new Object();
+    private static final Object PRESENT = (Object) "";
     private final Goal<SpecificRole, SpecificFinding, SpecificModel> goal;
     private final SpecificModel initialModel;
     private final SpecificRole initialRole;
@@ -89,9 +89,11 @@ public class Context<
         Integer b = this.bestMove.get(role);
         if (b == null) {
             this.bestMove.put(role, ranking);
+            System.out.println("first move");
             return true;
         } else {
             if (b.intValue() < ranking) {
+                System.out.println("best next move");
                 this.bestMove.put(role, ranking);
                 return true;
             }
@@ -106,6 +108,9 @@ public class Context<
     }
     
     public void addModel(SpecificModel model) {
+        if (model.toString().equals("[],[3, 2, 1],[]")) {
+            System.out.println("target");
+        }
         this.models.put(model, PRESENT);
     }
     
@@ -189,19 +194,27 @@ public class Context<
     public boolean isCompleted() {
         if (this.fullfilled) return true;
         //System.out.println("runtime = " + runtime);
+        //boolean expired = System.currentTimeMillis() - this.startTime > this.timeoutForSnapshot;
+        //if (expired) this.termination.release();
+        //return expired;
+        return false;
+    }
+
+    public boolean isSnapshotTimeout() {
+        if (this.fullfilled) return true;
         boolean expired = System.currentTimeMillis() - this.startTime > this.timeoutForSnapshot;
-        if (expired) this.termination.release();
         return expired;
     }
 
-    public void awaitTermination(long pauseAfterAquire) {
+    public void awaitTermination(long pauseAfterAquire, boolean announceCompletionAfterTimeOut) {
         try {
-            if (this.termination.tryAcquire(timeoutForSnapshot + pauseAfterAquire, TimeUnit.MILLISECONDS)) {
+            if (this.termination.tryAcquire(timeoutForSnapshot, TimeUnit.MILLISECONDS)) {
                 Thread.sleep(pauseAfterAquire);
             } else {
                 System.out.println("timed-out termination");
             }
         } catch (InterruptedException e) {}
+        if (announceCompletionAfterTimeOut) announceCompletion();
     }
     
     public void printReport(int count) {

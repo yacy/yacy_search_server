@@ -24,7 +24,7 @@ public class Battle<
             cfactroy = contexts.get(currentModel.currentRole());
             agent = new Agent<SpecificRole, SpecificFinding, SpecificModel>(cfactroy.produceContext(currentModel));
             engine.inject(agent);
-            agent.getContext().awaitTermination(relaxtime);
+            agent.getContext().awaitTermination(relaxtime, false);
             if (agent.getContext().hasNoResults()) {
                 System.out.println("battle terminated, "+ agent.getModel().currentRole() + " found no finding");
                 break;

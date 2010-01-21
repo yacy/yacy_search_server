@@ -1,6 +1,6 @@
-// Goal.java
-// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
-// first published 03.12.2009 on http://yacy.net;
+// Unirole.java
+// (C) 2010 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// first published 06.01.2010 on http://yacy.net;
 //
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
@@ -26,14 +26,12 @@
 
 package net.yacy.ai.greedy;
 
+public enum Unirole implements Role {
+    i;
 
-public interface Goal<
-                        SpecificRole extends Role,
-                        SpecificFinding extends Finding<SpecificRole>,
-                        SpecificModel extends Model<SpecificRole, SpecificFinding>
-                       > {
-
-    public boolean pruning(SpecificModel model);
-    public boolean isSnapshot(SpecificModel model);
-    public boolean isFulfilled(SpecificModel model);
+    public Role nextRole() {
+        return this;
+    }
+    
+    public static Unirole unirole = Unirole.i;
 }
