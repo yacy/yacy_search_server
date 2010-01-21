@@ -156,6 +156,7 @@ by==von
 Comments</a>==Kommentare</a>
 >edit==>bearbeiten
 >delete==>löschen
+Edit<==Bearbeiten<
 previous entries==vorherige Einträge
 next entries==nächste  Einträge
 new entry==Neuer Eintrag
@@ -212,22 +213,32 @@ here.==benutzen.
 #File: Bookmarks.html
 #---------------------------
 YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Lesezeichen
+
+The bookmarks list can also be retrieved as RSS feed. This can also be done when you select a specific tag.==Die Liste der Lesezeichen kann auch als RSS Feed abgerufen werden. Dies ist auch beim Auswählen eines bestimmten Tags möglich.
+Click the API icon to load the RSS from the current selection.==Klicken Sie auf die API Sprechblase, um einen RSS Feed der aktuellen Auswahl zu laden.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
 <h3>Bookmarks==<h3>Lesezeichen
+Bookmarks \(==Lesezeichen \(
 #Login==Login
 Add Bookmark==Lesezeichen hinzufügen
+Import Bookmarks==Lesezeichen importieren
 Import XML Bookmarks==Importiere XML-Lesezeichen
+Import HTML Bookmarks==Importiere HTML-Lesezeichen
+"import"=="Importieren"
+Default Tags:==Standard Tag
+imported==importiert
 Edit Bookmark==Lesezeichen bearbeiten
 #URL:==URL:
 Title:==Titel:
 Description:==Beschreibung:
 Folder \(/folder/subfolder\):==Ordner (/Ordner/Unterordner):
 Tags \(comma separated\):==Tags (durch Komma trennen):
-Public:==Öffentlich:
+>Public:==>Öffentlich:
 yes==ja
 no==nein
 Bookmark is a newsfeed==Lesezeichen ist ein Newsfeed
-"create"=="erzeugen"
-"edit"=="bearbeiten"
+"create"=="Erzeugen"
+"edit"=="Bearbeiten"
 File:==Datei:
 import as Public==als öffentlich importieren
 "private bookmark"=="Privates Lesezeichen"
@@ -244,6 +255,7 @@ next page==nächste Seite
 All==Alle
 Show==Zeige
 Bookmarks per page.==Lesezeichen pro Seite.
+unsorted==unsortiert
 #-----------------------------
 
 #File: Collage.html
@@ -656,7 +668,8 @@ DHT Transfer==DHT-Verteilung
 Proxy Use==Proxy Benutzung
 Local Crawling</a>==Lokales Crawlen</a>
 Global Crawling</a>==Globales Crawlen</a>
-Crawl Results Overview==Crawl Ergebnisse Überblick
+Surrogate Import</a>==Surrogat Import</a>
+#Crawl Results Overview==Crawl Ergebnisse Überblick
 These are monitoring pages for the different indexing queues.==Dies sind die Monitor Seiten für die unterschiedlichen Index Varianten.
 YaCy knows 5 different ways to acquire web indexes. The details of these processes \(1-5\) are described within the submenu's listed==YaCy kennt 5 verschiedene Arten, um zu indexieren. Die Details zu diesen Prozessen (1-5) sind in den Untermenüs oben beschrieben.
 above which also will show you a table with indexing results so far. The information in these tables is considered as private,==Dort kann man ausserdem eine Tabelle mit den Resultaten des Index sehen. Informationen in diesen Tabellen sind als privat eingestuft,
@@ -698,6 +711,10 @@ This is the 'mirror'-case of process \(1\).==Dies ist der 'Gegensatz' Prozess zu
 <em>Use Case:</em> This list may fill if you check the 'Accept remote crawling requests'-flag on the 'Index Crate' page==<em>Anwendung:</em> Diese Liste füllt sich, wenn Sie 'Akzeptiere remote Crawling Anfragen' auf der 'Index erzeugen' Seite aktiviert haben.
 The stack is empty.==Die Liste ist leer.
 Statistics about \#\[domains\]\# domains in this stack:==Statistiken über #[domains]# Domains in diesem Bereich:
+\(7\) Results from surrogates import==\(7\) Ergebnisse aus dem Surrogat Import
+These records had been imported from surrogate files in DATA/SURROGATES/in==Diese Datensätze wurden aus Surrogat Dateien in DATA/SURROGATES/in importiert
+<em>Use Case:</em> place files with dublin core metadata content into DATA/SURROGATES/in or use an index import method==<em>Anwendungsfall:</em> Dateien mit Dublin Core Metadaten Inhalt in das DATA/SURROGATES/in kopieren oder eine der Index Import Funktionen nutzen
+\(i.e. <a href="/IndexImportWikimedia_p.html">wikimedia import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH retrieval</a>\)==(z.B. <a href="/IndexImportWikimedia_p.html">WikiMedia Dump Import</a>, <a href="/IndexImportOAIPMH_p.html">OAI-PMH Import</a>\)
 #Domain==Domain
 #URLs=URLs
 "delete all"=="alle löschen"
@@ -725,6 +742,8 @@ Description</strong>==Beschreibung</strong>
 >From URL==>Von URL
 From Sitemap==Von Sitemap
 From File==Von Datei
+Existing start URLs are always re-crawled.==Existierende Start-URLs werden immer wieder gecrawled.
+Other already visited URLs are sorted out as \"double\", if they are not allowed using the re-crawl option.==Andere bereits besuchte Seiten werden als 'doppelt' aussortiert, wenn diese nicht ausdrücklich per Re-crawl Option zugelassen wurden.
 Create Bookmark==Lesezeichen erstellen
 \(works with "Starting Point: From URL" only\)==(funktioniert nur mit "Startpunkt von URL")
 Title<==Titel<
@@ -790,7 +809,6 @@ so they can omit starting a crawl with the same start point.==damit sie es verme
 Exclude <em>static</em> Stop-Words==<em>Statische</em> Stop-Words ausschließen
 This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem häufig vorkommende Wörter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle Wörter von der Indexierung auszuschliessen, die in der Datei <tt>yacy.stopwords</tt> enthalten sind,
 check this box.==aktivieren Sie diese Box.
-Other already visited URLs are sorted out as \"double\".==Andere bereits besuchte Seiten werden als 'doppelt' aussortiert.
 "Start New Crawl"=="Neuen Crawl starten"
 Depth</label>:==Tiefe</label>:
 #-----------------------------
@@ -827,6 +845,7 @@ Searching the local index is extremely fast, it happends within milliseconds, ev
 global index needs more time to find the correct remote peer that contains best search results. This is especially the case while the==Im Gegensatz dazu braucht es mehr Zeit den globalen Index zu durchsuchen, da erst der richtige Peer, der die besten Ergbnisse liefern kann, gefunden werden muss. Dies ist vermutlich auch der Grund warum
 distributed index is in test mode. Search results get more stable \(repeated global search produce more similar results\) the longer==diese Art von Suchmaschine noch in der Testphase ist. Die Suchergebnisse werden immer besser (eine wiederholte globale Suche bringt mehr gleiche Ergebnisse), je länger
 the search time is.==die Zeit zum Suchen ist.
+Accesskeys<==Schnell-Zugriffstasten<
 You may want to use accesskeys to navigate through the YaCy webinterface:==Sie können durch das YaCy Web Interface auch mit Hilfe von Tastenkombinationen navigieren. Drücken Sie dazu eine der folgenden Kombinationen ('Taste' steht für einen der drei unten genannten Buchstaben):
 Windows and Internet Explorer: Alt \+ Accesskey \+ Enter==Windows und Internet Explorer: Alt + Taste + Enter
 Windows and Mozilla/Firefox/Netscape: Alt \+ Accesskey==Windows und Mozilla/Firefox/Netscape: Alt + Taste
@@ -842,6 +861,7 @@ Search Page==Suchseite
 Network==Netzwerk
 Status==Status
 
+Regular Expressions<==Reguläre Ausdrücke<
 YaCy uses Regular Expressions for some functions, for example in the blacklist.==YaCy benutzt reguläre Ausdrücke für einige Funktionen, z.B. die Blacklist.
 There are some standards for these regexps, YaCy uses the syntax used by Perl 5.==Es gibt einige Standards für diese Ausdrücke, YaCy orientiert sich an der Syntax von Perl 5.
 Here ist a short overview about the functions, which should fir for most cases\:<==Hier finden Sie einen kurzen Überblick über die Funktionen, die die meisten Anwendungsfälle abdecken sollten:<
@@ -863,7 +883,7 @@ at least n appearances of x==mindestens n Vorkommen von x
 at least n, maximum m appearanches of x==mindestens n, maximal m Vorkommen von m
 Modify priority of instructions==Priorität der Befehle ändern
 Escape-Character, used to escape special characters \(for example "\[" or "\*"\), so that they loose their special meaning==Escape-Zeichen, das benutzt wird, um Zeichen mit Sonderbedeutung (z.B. "[" oder "*"),  zu "escapen", d.h. ihre Sonderbedeutung verlieren.
-Regex follow a special priority \(descending\)\: concatenation, unary operators \(\*,\+,\^,\{\}\), binary operators \(\|\). This can be overridden with brackets.==Regex folgen Prioritäten (absteigend): Verkettung, unäre Operatore (*,+,^,{}), binäre Operatoren (|). Die Reihenfolge kann durch setzen von Klammern geändert werden.
+Regex follow a special priority \(descending\)\: concatenation, unary operators \(\*,\+,\^,\{\}\), binary operators \(\|\). This can be overridden with brackets.==Regex folgen Prioritäten (absteigend): Verkettung, unäre Operatore (*,+,^,{}), binäre Operatoren (|). Die Reihenfolge kann durch das Setzen von Klammern geändert werden.
 Example:==Beispiel:
 This matches heise.de/ with a string in front of it, for example "http://www.", followed by any string, then a slash and a number. The dot in "heise.de" is not escaped with "\\", because it represents any character, thus the "." itself, too.==Dies erfüllt heise.de/ mit einem String davor, z.B. "http://www.". Es folgt ein beliebiger String, dann ein Slash und eine Zahl. Der Punkt in "heise.de" ist nicht escaped, weil der Punkt für ein beliebiges Zeichen steht, folglich auch für "." selbst.
 A possible URL which would match this regexp is\:==Eine URL, die den regulären Ausdruck erfüllen würde, ist:
@@ -1598,12 +1618,19 @@ The network picture below shows how the latest search query was solved by asking
 #File: ProxyIndexingMonitor_p.html
 #---------------------------
 Indexing with Proxy==Indexierung per Proxy
-This is the control page for web pages that your peer has indexed during the current application run-time==Dies ist die Kontrollseite für Internetseiten, die Ihr Peer während der aktuellen Sitzung
-as result of proxy fetch/prefetch.==durch Besuchen einer Seite indexiert.
-No personal or protected page is indexed==Persönliche Seiten und geschütze Seiten werden nicht indexiert
-those pages are detected by properties in the HTTP header \(like Cookie-Use, or HTTP Authorization\)==solche Seiten werden entweder durch Merkmale im HTTP Header (Kopf der Seite) (z.B.: Cookies oder HTTP Authorisierung)
+YaCy can be used to 'scrape' content from pages that pass the integrated caching HTTP proxy.==YaCy kann dazu verwendet werden den Inhalt aller Webseiten zu 'crawlen', die den eingebauten HTTP Proxy Server passieren.
+When scraping proxy pages then <strong>no personal or protected page is indexed</strong>;==Beim Indexieren von Seiten aus der Proxy Nutzung werden <strong>keine persönlichen oder geschützten Seiten indexiert</strong>!
+# This is the control page for web pages that your peer has indexed during the current application run-time==Dies ist die Kontrollseite für Internetseiten, die Ihr Peer während der aktuellen Sitzung
+# as result of proxy fetch/prefetch.==durch Besuchen einer Seite indexiert.
+# No personal or protected page is indexed==Persönliche Seiten und geschütze Seiten werden nicht indexiert
+those pages are detected by properties in the HTTP header \(like Cookie-Use, or HTTP Authorization\)==Solche Seiten werden entweder durch Merkmale im HTTP Header (Kopf der Seite) (z.B.: Cookies oder HTTP Authorisierung)
 or by POST-Parameters \(either in URL or as HTTP protocol\)==oder durch POST-Parameter (z.B. in einer URL oder im HTTP Protokoll) erkannt
 and automatically excluded from indexing.==und automatisch von der Indexierung ausgeschlossen.
+
+Proxy Auto Config:==Automatische Proxy Konfiguration:
+this controls the proxy auto configuration script for browsers at http://localhost:8080/autoconfig.pac==Diese Einstellung regelt das Automatische Proxy Konfigurationsskript unter http://localhost:8080/autoconfig.pac
+.yacy-domains only==nur .yacy Domains
+whether the proxy should only be used for .yacy-Domains==Soll der Proxy nur für .yacy Domains verwendet werden diese Checkbox aktivieren.
 Proxy pre-fetch setting:==Proxy Indexier Einstellung:
 this is an automated html page loading procedure that takes actual proxy-requested==Dies ist eine automatische Web Seiten Lade Funktion, die aktuell besuchte
 URLs as crawling start points for crawling.==URLs als Startpunkt zum Indexieren benutzt.
@@ -2305,7 +2332,7 @@ size<==Grösse
 YaCyWiki page:==YaCyWiki Seite:
 last edited by==zuletzt bearbeitet von
 change date==Änderungsdatum
-Edit</a>==Bearbeiten</a>
+Edit<==Bearbeiten<
 only granted to admin==nur als Admin erlaubt
 Grant Write Access to==Erlaube es folgenden Benutzern das Wiki zu bearbeiten 
 "all"=="Allen"
@@ -2380,6 +2407,9 @@ alt text==alt Beschreibung
 #File: yacyinteractive.html
 #---------------------------
 YaCy Interactive Search==YaCy interaktive Suche
+This page uses the JSON search API to display search results as you type.==Diese Seite verwendet die JSON Such API, um die Suchergebnisse beim Tippen anzuzeigen.
+Click the API icon to see an example call to the native API.==Klicken Sie auf die API Sprechblase, um einen Beispielaufruf der nativen API zu sehen.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
 >total results==>Ergebnisse insgesamt
 &nbsp;topwords:==&nbsp;Topwörter:
 >Name==>Name
@@ -2445,7 +2475,7 @@ Publication==Veröffentlichung
 >Help==>Hilfe
 #Web&nbsp;Indexing==Web Indexierung
 #Crawl Start &amp; Monitoring==Crawl Start &amp; Kontrolle
-Index Control==Index Kontrolle
+Index&nbsp;Control==Index&nbsp;Kontrolle
 Index Creation==Indexerzeugung
 Crawler Monitor==Crawler Überwachung
 Crawl Results==Crawl Ergebnisse
