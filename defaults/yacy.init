@@ -702,6 +702,13 @@ indexer.slots = 100
 # maximum size of stacker queue
 stacker.slots = 2000
 
+# search domains. If set to false then that search is not available
+search.text = true
+search.images = true
+search.audio = true
+search.video = true
+search.app = true
+
 # number of search results displayed by default
 search.items = 10
 

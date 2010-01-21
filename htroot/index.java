@@ -120,11 +120,16 @@ public class index {
         prop.put("display", display);
         prop.putHTML("constraint", constraint);
         prop.put("searchoptions_display", display);
-        prop.put("contentdomCheckText", (contentdom == ContentDomain.TEXT) ? "1" : "0");
-        prop.put("contentdomCheckAudio", (contentdom == ContentDomain.AUDIO) ? "1" : "0");
-        prop.put("contentdomCheckVideo", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
-        prop.put("contentdomCheckImage", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
-        prop.put("contentdomCheckApp", (contentdom == ContentDomain.APP) ? "1" : "0");
+        prop.put("searchtext", sb.getConfigBool("search.text", true) ? 1 : 0);
+        prop.put("searchaudio", sb.getConfigBool("search.audio", true) ? 1 : 0);
+        prop.put("searchvideo", sb.getConfigBool("search.video", true) ? 1 : 0);
+        prop.put("searchimage", sb.getConfigBool("search.image", true) ? 1 : 0);
+        prop.put("searchapp", sb.getConfigBool("search.app", true) ? 1 : 0);
+        prop.put("searchtext_check", (contentdom == ContentDomain.TEXT) ? "1" : "0");
+        prop.put("searchaudio_check", (contentdom == ContentDomain.AUDIO) ? "1" : "0");
+        prop.put("searchvideo_check", (contentdom == ContentDomain.VIDEO) ? "1" : "0");
+        prop.put("searchimage_check", (contentdom == ContentDomain.IMAGE) ? "1" : "0");
+        prop.put("searchapp_check", (contentdom == ContentDomain.APP) ? "1" : "0");
         // online caution timing
         sb.localSearchLastAccess = System.currentTimeMillis();
         
