@@ -603,10 +603,12 @@ Incoming Cookies Monitor==Überwachung eingehender Cookies
 Cookie Monitor: Incoming Cookies==Cookie Überwachung: Eingehende Cookies
 This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Dies ist eine Liste aller Cookies, die ein Webserver an Clients des YaCy Proxys geschickt hat:
 Showing \#\[num\]\# entries from a total of \#\[total\]\# Cookies.==Angezeigt werden #[num]# Einträge von insgesamt #[total]# Cookies.
-Sending Host==Sendender Host
+Sending Host==Host (Sender)
 Date</td>==Datum</td>
-Receiving Client==Erhaltender Client
+Receiving Client==Client (Empfänger)
 #Cookie==Cookie
+"Enable Cookie Monitoring"=="Cookie Überwachung aktivieren"
+"Disable Cookie Monitoring"=="Cookie Überwachung deaktivieren"
 #-----------------------------
 
 #File: CookieMonitorOutgoing_p.html
@@ -615,10 +617,12 @@ Outgoing Cookies Monitor==Überwachung ausgehender Cookies
 Cookie Monitor: Outgoing Cookies==Cookie Überwachung: Ausgehende Cookies
 This is a list of cookies that browsers using the YaCy proxy sent to webservers:==Dies ist eine Auflistung aller Cookies, die Browser, die den YaCy Proxy benutzen, an einen Webserver geschickt haben:
 Showing \#\[num\]\# entries from a total of \#\[total\]\# Cookies.==Angezeigt werden #[num]# Einträge von insgesamt #[total]# Cookies.
-Receiving Host==Erhaltender Host
+Receiving Host==Host (Empfänger)
 Date</td>==Datum</td>
-Sending Client==Sendender Client
+Sending Client==Client (Sender)
 #Cookie==Cookie
+"Enable Cookie Monitoring"=="Cookie Überwachung aktivieren"
+"Disable Cookie Monitoring"=="Cookie Überwachung deaktivieren"
 #-----------------------------
 
 #File: CrawlProfileEditor_p.html
@@ -1034,6 +1038,7 @@ Index Control==Index Kontrolle
 Index Administration==Index Administration
 The local index currently contains \#\[ucount\]\# URL references==Der lokale Index enthält im Moment #[ucount]# URL-Referenzen
 URL Retrieval==URL Abfrage
+Select Segment:==Segment Auswahl:
 Retrieve by URL:<==Abfrage nach URL:<
 "Show Details for URL"=="Details für URL zeigen"
 Retrieve by URL-Hash==Abfrage nach URL-Hash
@@ -1044,6 +1049,7 @@ Show top==Zeige die
 domains from all URLs.==Top-Domains aus allen URLs.
 "Generate Statistics"=="Statistik erstellen"
 Statistics about the top-\#\[domains\]\# domains in the database:==Statistik über die Top-#[domains]# Domains in der Datenbank:
+"delete all"=="Alle Löschen"
 #Domain==Domain
 #URLs==URLs
 Sequential List of URL-Hashes==aufeinanderfolgende Liste der URL-Hashes
@@ -1054,6 +1060,8 @@ Export File==Export-Datei
 #URL Filter==URL Filter
 #Export Format==Export Format
 #Only Domain <i>\(superfast\)==Nur Domains <i>(sehr schnell)
+Only Domain:==Liste mit nur Domainnamen:
+Full URL List:==Liste mit vollständiger URL:
 Plain Text List \(domains only\)==Einfache Text Liste (nur Domains)
 HTML \(domains as URLs, no title\)==HTML (Domains als URLs, kein Titel)
 #Full URL List <i>\(high IO\)==Vollständige URL Liste <i>(hoher IO)
@@ -1062,6 +1070,8 @@ HTML \(URLs with title\)==HTML (URLs mit Titel)
 #XML (RSS)==XML (RSS)
 "Export URLs"=="URLs exportieren"
 Export to file \#\[exportfile\]\# is running ..  \#\[urlcount\]\# URLs so far==Export nach Datei #[exportfile]# läuft ..  #[urlcount]# URLs bisher
+Finished export of \#\[urlcount\]\# URLs to file==Export beendet und #[urlcount]# URLs gespeichert in Datei
+Export to file \#\[exportfile\]\# failed:==Export in Datei #[exportfile]# fehlgeschlagen:
 No entry found for URL-hash==Keinen Eintrag gefunden für URL-Hash
 #URL String</td>==URL Adresse</td>
 #Hash</td>==Hash</td>
