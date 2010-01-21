@@ -46,6 +46,7 @@ import de.anomic.data.translator;
 import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
+import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import java.util.Collections;
@@ -72,6 +73,9 @@ public class ConfigLanguage_p {
         if (post != null){
             String selectedLanguage = post.get("language");
 
+            // store this call as api call
+            ((Switchboard) env).recordAPICall(post, "ConfigLanguage.html", "configuration", "language settings: " + selectedLanguage);
+            
             //change language
             if(post.containsKey("use_button") && selectedLanguage != null){
                 /* Only change language if filename is contained in list of filesnames

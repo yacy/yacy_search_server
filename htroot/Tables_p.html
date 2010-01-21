@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Table Viewer</title>
+    #(showtable)#::
+    <link rel="alternate" type="application/xml" title="Tables" href="Tables.rss?table=#[table]#" />
+    #(/showtable)#
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Tables">
+    #%env/templates/header.template%#
+    #%env/templates/submenuConfig.template%#
+    
+    <h2>Table Administration</h2>
+    <form action="Tables_p.html" method="get">
+      <fieldset><legend>Table Selection</legend>
+      <dl>
+        <dt class="TableCellDark">Select Table:
+          <select name="table" size="1">
+            #{tables}#
+            <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
+            #{/tables}#
+          </select></dt>
+        <dd>
+          <input type="submit" name="edittable" value="Show Table" />
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    #(showtable)#::
+    <form action="Tables_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+      <legend><label for="table">Table Editor: showing table '#[table]#'</label></legend>
+      <table border="0" cellpadding="2" cellspacing="1">
+        <tr class="TableHeader" valign="bottom">
+          <td>&nbsp;</td>
+          <td>PK</td>
+          #{columns}#
+          <td>#[header]#</td>
+          #{/columns}#
+        </tr>
+        #{list}#
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+          <td align="left"><input type="checkbox" name="mark_#[pk]#" /></td>
+          <td>#[pk]#</td>
+          #{columns}#
+          <td align="left">#[cell]#</td>
+          #{/columns}#
+        </tr>
+        #{/list}#
+      </table>
+      <p>
+      <input type="hidden" name="table" value="#[table]#" />
+      <input type="submit" name="editrow" value="Edit Selected Row" />
+      <input type="submit" name="addrow" value="Add a new Row" />&nbsp;&nbsp;&nbsp;&nbsp;
+      <input type="submit" name="deleterows" value="Delete Selected Rows" />
+      <input type="submit" name="deletetable" value="Delete Table" />
+      </p>
+      </fieldset>
+    </form>
+    #(/showtable)#
+    #(showedit)#::
+    <form action="Tables_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset><legend>Row Editor</legend>
+      <dl>
+        <dt class="TableCellLight">Primary Key</dt>
+        <dd>#[pk]#</dd>
+        #{list}#
+        <dt class="TableCellLight">#[key]#</dt>
+        <dd>
+          <input type="text" name="col_#[key]#" value="#[value]#" size="80"/>
+        </dd>
+        #{/list}#
+        <dt class="TableCellDark"></dt>
+        <dd>
+          <input type="hidden" name="table" value="#[table]#" />
+          <input type="hidden" name="pk" value="#[pk]#" />
+          <input type="submit" name="commitrow" value="Commit" />
+        </dd>
+      </dl>
+    </fieldset>
+    </form>
+    #(/showedit)#
+    #%env/templates/footer.template%#
+  </body>
+</html>

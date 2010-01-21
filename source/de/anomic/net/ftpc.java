@@ -550,7 +550,7 @@ public class ftpc {
             }
             printElements(l);
         } catch (final IOException e) {
-            errPrintln("Error: remote list not available");
+            errPrintln("Error: remote list not available (1): " + e.getMessage());
         }
         return true;
     }
@@ -1378,7 +1378,7 @@ public class ftpc {
             }
             printElements(l);
         } catch (final IOException e) {
-            errPrintln("Error: remote list not available");
+            errPrintln("Error: remote list not available (2): " + e.getMessage());
         }
         return true;
     }

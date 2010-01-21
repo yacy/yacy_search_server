@@ -43,10 +43,14 @@ import net.yacy.kelondro.util.ScoreCluster;
 
 
 public class MapDataMining extends MapHeap {
+    
+    private final static Long LONG0 = Long.valueOf(0);
+    private final static Double DOUBLE0 = Double.valueOf(0.0);
 
     private final String[] sortfields, longaccfields, doubleaccfields;
     private HashMap<String, ScoreCluster<String>> sortClusterMap; // a String-kelondroMScoreCluster - relation
-    private HashMap<String, Object> accMap; // to store accumulations of specific fields
+    private HashMap<String, Long>   accLong; // to store accumulations of Long cells
+    private HashMap<String, Double> accDouble; // to store accumulations of Double cells
     
 	@SuppressWarnings("unchecked")
 	public MapDataMining(final File heapFile,
@@ -77,21 +81,22 @@ public class MapDataMining extends MapHeap {
 
         Long[] longaccumulator = null;
         Double[] doubleaccumulator = null;
-        if ((longaccfields == null) && (doubleaccfields == null)) {
-        	accMap = null;
+        if (longaccfields == null) {
+        	accLong = null;
         } else {
-            accMap = new HashMap<String, Object>();
-            if (longaccfields != null) {
-                longaccumulator = new Long[longaccfields.length];
-                for (int i = 0; i < longaccfields.length; i++) {
-                    longaccumulator[i] = Long.valueOf(0);   
-                }
+            accLong = new HashMap<String, Long>();
+            longaccumulator = new Long[longaccfields.length];
+            for (int i = 0; i < longaccfields.length; i++) {
+                longaccumulator[i] = LONG0;   
             }
-            if (doubleaccfields != null) {
-                doubleaccumulator = new Double[doubleaccfields.length];
-                for (int i = 0; i < doubleaccfields.length; i++) {
-                    doubleaccumulator[i] = Double.valueOf(0);   
-                }
+        }
+        if (doubleaccfields == null) {
+            accDouble = null;
+        } else {
+            accDouble = new HashMap<String, Double>();
+            doubleaccumulator = new Double[doubleaccfields.length];
+            for (int i = 0; i < doubleaccfields.length; i++) {
+                doubleaccumulator[i] = DOUBLE0;   
             }
         }
 
@@ -99,7 +104,7 @@ public class MapDataMining extends MapHeap {
         if ((sortfields != null) || (longaccfields != null) || (doubleaccfields != null)) try {
             final CloneableIterator<byte[]> it = super.keys(true, false);
             String mapname;
-            Object cell;
+            String cell;
             long valuel;
             double valued;
             Map<String, String> map;
@@ -117,8 +122,7 @@ public class MapDataMining extends MapHeap {
                     cell = map.get(longaccfields[i]);
                     valuel = 0;
                     if (cell != null) try {
-                        if (cell instanceof Long)   valuel = ((Long) cell).longValue();
-                        if (cell instanceof String) valuel = Long.parseLong((String) cell);
+                        valuel = Long.parseLong(cell);
                         longaccumulator[i] = Long.valueOf(longaccumulator[i].longValue() + valuel);
                     } catch (final NumberFormatException e) {}
                 }
@@ -127,8 +131,7 @@ public class MapDataMining extends MapHeap {
                     cell = map.get(doubleaccfields[i]);
                     valued = 0d;
                     if (cell != null) try {
-                        if (cell instanceof Double) valued = ((Double) cell).doubleValue();
-                        if (cell instanceof String) valued = Double.parseDouble((String) cell);
+                        valued = Double.parseDouble(cell);
                         doubleaccumulator[i] = new Double(doubleaccumulator[i].doubleValue() + valued);
                     } catch (final NumberFormatException e) {}
                 }
@@ -151,8 +154,8 @@ public class MapDataMining extends MapHeap {
         if (sortfields != null && cluster != null) for (int i = 0; i < sortfields.length; i++) sortClusterMap.put(sortfields[i], cluster[i]);
 
         // fill acc map
-        if (longaccfields != null && longaccumulator != null) for (int i = 0; i < longaccfields.length; i++) accMap.put(longaccfields[i], longaccumulator[i]);
-        if (doubleaccfields != null && doubleaccumulator != null) for (int i = 0; i < doubleaccfields.length; i++) accMap.put(doubleaccfields[i], doubleaccumulator[i]);
+        if (longaccfields != null && longaccumulator != null) for (int i = 0; i < longaccfields.length; i++) accLong.put(longaccfields[i], longaccumulator[i]);
+        if (doubleaccfields != null && doubleaccumulator != null) for (int i = 0; i < doubleaccfields.length; i++) accDouble.put(doubleaccfields[i], doubleaccumulator[i]);
     }
 
     @Override
@@ -165,19 +168,20 @@ public class MapDataMining extends MapHeap {
             }
         }
         
-        if ((longaccfields == null) && (doubleaccfields == null)) {
-        	accMap = null;
+        if (longaccfields == null) {
+            accLong = null;
         } else {
-        	accMap = new HashMap<String, Object>();
-        	if (longaccfields != null) {
-                for (int i = 0; i < longaccfields.length; i++) {
-            		accMap.put(longaccfields[i], Long.valueOf(0));
-            	}
+            accLong = new HashMap<String, Long>();
+            for (int i = 0; i < longaccfields.length; i++) {
+                accLong.put(longaccfields[i], LONG0);
             }
-        	if (doubleaccfields != null) {
-                for (int i = 0; i < doubleaccfields.length; i++) {
-            		accMap.put(doubleaccfields[i], new Double(0));
-            	}
+        }
+        if (doubleaccfields == null) {
+            accDouble = null;
+        } else {
+            accDouble = new HashMap<String, Double>();
+            for (int i = 0; i < doubleaccfields.length; i++) {
+                accDouble.put(doubleaccfields[i], DOUBLE0);
             }
         }
     }
@@ -190,6 +194,9 @@ public class MapDataMining extends MapHeap {
         
         super.put(key, newMap);
         
+        // update sortCluster
+        if (sortClusterMap != null) updateSortCluster(key, newMap);
+
         // update elementCount
         if ((longaccfields != null) || (doubleaccfields != null)) {
             final Map<String, String> oldMap = super.get(key, false);
@@ -197,13 +204,10 @@ public class MapDataMining extends MapHeap {
                 // element exists, update acc
                 if ((longaccfields != null) || (doubleaccfields != null)) updateAcc(oldMap, false);
             }
-        }
         
-        // update sortCluster
-        if (sortClusterMap != null) updateSortCluster(key, newMap);
-
-        // update accumulators with new values (add)
-        if ((longaccfields != null) || (doubleaccfields != null)) updateAcc(newMap, true);
+            // update accumulators with new values (add)
+            updateAcc(newMap, true);
+        }
     }
     
     private void updateAcc(final Map<String, String> map, final boolean add) {
@@ -217,11 +221,11 @@ public class MapDataMining extends MapHeap {
             if (value != null) {
                 try {
                     valuel = Long.parseLong(value);
-                    longaccumulator = (Long) accMap.get(longaccfields[i]);
+                    longaccumulator = accLong.get(longaccfields[i]);
                     if (add) {
-                        accMap.put(longaccfields[i], Long.valueOf(longaccumulator.longValue() + valuel));
+                        accLong.put(longaccfields[i], Long.valueOf(longaccumulator.longValue() + valuel));
                     } else {
-                        accMap.put(longaccfields[i], Long.valueOf(longaccumulator.longValue() - valuel));
+                        accLong.put(longaccfields[i], Long.valueOf(longaccumulator.longValue() - valuel));
                     }
                 } catch (final NumberFormatException e) {}
             }
@@ -231,11 +235,11 @@ public class MapDataMining extends MapHeap {
             if (value != null) {
                 try {
                     valued = Double.parseDouble(value);
-                    doubleaccumulator = (Double) accMap.get(doubleaccfields[i]);
+                    doubleaccumulator = accDouble.get(doubleaccfields[i]);
                     if (add) {
-                        accMap.put(doubleaccfields[i], new Double(doubleaccumulator.doubleValue() + valued));
+                        accDouble.put(doubleaccfields[i], Double.valueOf(doubleaccumulator.doubleValue() + valued));
                     } else {
-                        accMap.put(doubleaccfields[i], new Double(doubleaccumulator.doubleValue() - valued));
+                        accDouble.put(doubleaccfields[i], Double.valueOf(doubleaccumulator.doubleValue() - valued));
                     }
                 } catch (final NumberFormatException e) {}
             }
@@ -330,13 +334,13 @@ public class MapDataMining extends MapHeap {
     }
     
     public synchronized long getLongAcc(final String field) {
-        final Long accumulator = (Long) accMap.get(field);
+        final Long accumulator = accLong.get(field);
         if (accumulator == null) return -1;
         return accumulator.longValue();
     }
     
     public synchronized double getDoubleAcc(final String field) {
-        final Double accumulator = (Double) accMap.get(field);
+        final Double accumulator = accDouble.get(field);
         if (accumulator == null) return -1;
         return accumulator.doubleValue();
     }

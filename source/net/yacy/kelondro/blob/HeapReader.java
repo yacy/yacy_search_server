@@ -110,6 +110,21 @@ public class HeapReader {
         this.file.close();
         // the file will be opened again automatically when the next access to it comes.
     }
+
+    protected byte[] normalizeKey(byte[] key) {
+        return normalizeKey(key, this.keylength);
+    }
+    
+    protected static byte[] normalizeKey(byte[] key, int keylength) {
+        if (key.length == keylength) return key;
+        byte[] k = new byte[keylength];
+        if (key.length < keylength) {
+            System.arraycopy(key, 0, k, 0, key.length);
+        } else {
+            System.arraycopy(key, 0, k, 0, keylength);
+        }
+        return k;
+    }
     
     private boolean initIndexReadDump() {
         // look for an index dump and read it if it exist
@@ -278,9 +293,9 @@ public class HeapReader {
      * @param key
      * @return true if the key exists, false otherwise
      */
-    public synchronized boolean has(final byte[] key) {
+    public synchronized boolean has(byte[] key) {
         assert index != null;
-        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
+        key = normalizeKey(key);
         
         // check if the file index contains the key
         return index.get(key) >= 0;
@@ -344,8 +359,8 @@ public class HeapReader {
      * @return
      * @throws IOException
      */
-    public synchronized byte[] get(final byte[] key) throws IOException {
-        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
+    public synchronized byte[] get(byte[] key) throws IOException {
+        key = normalizeKey(key);
        
         // check if the index contains the key
         final long pos = index.get(key);
@@ -377,8 +392,9 @@ public class HeapReader {
         return blob;
     }
     
-    protected boolean checkKey(final byte[] key, final long pos) throws IOException {
-    	file.seek(pos);
+    protected boolean checkKey(byte[] key, final long pos) throws IOException {
+        key = normalizeKey(key);
+        file.seek(pos);
         file.readInt(); // skip the size value
         
         // read the key
@@ -394,7 +410,7 @@ public class HeapReader {
      * @throws IOException
      */
     public synchronized long length(byte[] key) throws IOException {
-        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
+        key = normalizeKey(key);
         
         // check if the index contains the key
         final long pos = index.get(key);
@@ -533,13 +549,23 @@ public class HeapReader {
 
         private Map.Entry<byte[], byte[]> next0() {
             try {
+                byte b;
+                byte[] payload;
+                final byte[] key = new byte[this.keylen];
+                final int keylen1 = this.keylen - 1;
                 while (true) {
                     int len = is.readInt();
-                    byte[] key = new byte[this.keylen];
-                    if (is.read(key) < key.length) return null;
-                    byte[] payload = new byte[len - this.keylen];
+                    if (len == 0) continue;
+                    b = is.readByte(); // check for empty record
+                    if (b == 0) {
+                        // read some more bytes to consume the empty record
+                        is.skip(len - 1);
+                        continue;
+                    }
+                    key[0] = b;
+                    if (is.read(key, 1, keylen1) < keylen1) return null;
+                    payload = new byte[len - this.keylen];
                     if (is.read(payload) < payload.length) return null;
-                    if (key[0] == 0) continue; // this is an empty gap
                     return new entry(key, payload);
                 }
             } catch (final IOException e) {
@@ -594,6 +620,21 @@ public class HeapReader {
             b = value;
             return b1;
         }
+    }
+    
+    public static void main(final String args[]) {
+        File f = new File(args[0]);
+        try {
+            entries hr = new HeapReader.entries(f, 12);
+            Map.Entry<byte[], byte[]> entry;
+            while (hr.hasNext()) {
+                entry = hr.next();
+                System.out.println(new String(entry.getKey()) + ":" + new String(entry.getValue()));
+            }
+        } catch (IOException e) {
+            Log.logException(e);
+        }
+        
     }
     
 }

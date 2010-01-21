@@ -70,7 +70,10 @@ public class ConfigBasic {
             return prop;
         }
         
-        // starting a peer ping
+        // store this call as api call
+        if (post != null && post.containsKey("set")) {
+            sb.recordAPICall(post, "ConfigBasic.html", "configuration", "basic settings");
+        }
         
         //boolean doPeerPing = false;
         if ((sb.peers.mySeed().isVirgin()) || (sb.peers.mySeed().isJunior())) {

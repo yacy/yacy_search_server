@@ -55,7 +55,7 @@ public class serverSwitch {
     private   final TreeMap<String, serverSwitchAction>  switchActions;
     private   final serverAccessTracker                  accessTracker;
     
-    public serverSwitch(final File rootPath, final String initPath, final String configPath, final boolean applyPro) {
+    public serverSwitch(final File rootPath, final String initPath, final String configPath) {
         // we initialize the switchboard with a property file,
         // but maintain these properties then later in a new 'config' file
         // to reset all changed configs, the config file must
@@ -79,15 +79,7 @@ public class serverSwitch {
         // if 'pro'-version is selected, overload standard settings with 'pro'-settings
         Iterator<String> i;
         String prop;
-    	if (applyPro) {
-        	i = new HashMap<String, String>(initProps).keySet().iterator(); // clone the map to avoid concurrent modification exceptions
-        	while (i.hasNext()) {
-        		prop = i.next();
-        		if (prop.endsWith("__pro")) {
-        			initProps.put(prop.substring(0, prop.length() - 5), initProps.get(prop));
-        		}
-        	}
-        }
+        
         // delete the 'pro' init settings
         i = initProps.keySet().iterator();
         while (i.hasNext()) {

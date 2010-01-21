@@ -95,11 +95,11 @@ public final class HeapWriter {
      * @throws RowSpaceExceededException 
      * @throws RowSpaceExceededException 
      */
-    public synchronized void add(final byte[] key, final byte[] blob) throws IOException, RowSpaceExceededException {
+    public synchronized void add(byte[] key, final byte[] blob) throws IOException, RowSpaceExceededException {
         //System.out.println("HeapWriter.add: " + new String(key));
         assert blob.length > 0;
-        assert key.length == this.keylength;
-        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
+        key = HeapReader.normalizeKey(key, this.keylength);
+        assert index.row().primaryKeyLength == this.keylength : index.row().primaryKeyLength + "!=" + key.length;
         assert index.get(key) < 0 : "index.get(key) = " + index.get(key) + ", index.size() = " + index.size() + ", file.length() = " + this.heapFileTMP.length() +  ", key = " + new String(key); // must not occur before
         if ((blob == null) || (blob.length == 0)) return;
         index.putUnique(key, this.seek);

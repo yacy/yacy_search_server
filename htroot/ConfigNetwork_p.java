@@ -54,6 +54,9 @@ public class ConfigNetwork_p {
         
         if (post != null) {
             
+            // store this call as api call
+            sb.recordAPICall(post, "ConfigNetwork.html", "configuration", "network settings");
+            
             if (post.containsKey("changeNetwork")) {
                 final String networkDefinition = post.get("networkDefinition", "defaults/yacy.network.freeworld.unit");
                 if (networkDefinition.equals(sb.getConfig("network.unit.definition", ""))) {

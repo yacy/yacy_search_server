@@ -68,8 +68,74 @@ public class BEncoder {
             dict.toStream(baos);
             baos.close();
             return baos.toByteArray();
-        } catch (IOException e) {
-        }
+        } catch (IOException e) {}
+        return null;
+    }
+    
+    public static byte[] encodeMap(String key, byte[] value) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            BDecoder.BDictionaryObject.toStream(baos, key, value);
+            baos.close();
+            return baos.toByteArray();
+        } catch (IOException e) {}
+        return null;
+    }
+    
+    public static byte[] encodeMap(
+            String key0, byte[] value0,
+            String key1, byte[] value1
+            ) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            BDecoder.BDictionaryObject.toStream(
+                    baos,
+                    key0, value0,
+                    key1, value1
+                    );
+            baos.close();
+            return baos.toByteArray();
+        } catch (IOException e) {}
+        return null;
+    }
+    
+    public static byte[] encodeMap(
+            String key0, byte[] value0,
+            String key1, byte[] value1,
+            String key2, byte[] value2
+            ) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            BDecoder.BDictionaryObject.toStream(
+                    baos,
+                    key0, value0,
+                    key1, value1,
+                    key2, value2
+                    );
+            baos.close();
+            return baos.toByteArray();
+        } catch (IOException e) {}
+        return null;
+    }
+    
+    public static byte[] encodeMap(
+            String key0, byte[] value0,
+            String key1, byte[] value1,
+            String key2, byte[] value2,
+            String key3, byte[] value3
+            ) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            BDecoder.BDictionaryObject.toStream(
+                    baos,
+                    key0, value0,
+                    key1, value1,
+                    key2, value2,
+                    key3, value3
+                    );
+            baos.close();
+            return baos.toByteArray();
+        } catch (IOException e) {}
         return null;
     }
     

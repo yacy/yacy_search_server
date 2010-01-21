@@ -94,8 +94,8 @@ public class HeapModifier extends HeapReader implements BLOB {
      * @param key  the primary key
      * @throws IOException
      */
-    public synchronized void remove(final byte[] key) throws IOException {
-        assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
+    public synchronized void remove(byte[] key) throws IOException {
+        key = normalizeKey(key);
         
         // check if the index contains the key
         final long seek = index.get(key);
@@ -234,14 +234,14 @@ public class HeapModifier extends HeapReader implements BLOB {
 	}
 
 	public synchronized int replace(byte[] key, Rewriter rewriter) throws IOException {
-	    assert index.row().primaryKeyLength == key.length : index.row().primaryKeyLength + "!=" + key.length;
-        
+	    key = normalizeKey(key);
+	    
 	    // check if the index contains the key
         final long pos = index.get(key);
         if (pos < 0) return 0;
         
         // check consistency of the index
-        assert (checkKey(key, pos)) : "key compare failed; key = " + new String(key) + ", seek = " + pos;
+        assert checkKey(key, pos) : "key compare failed; key = " + new String(key) + ", seek = " + pos;
         
         // access the file and read the container
         file.seek(pos);

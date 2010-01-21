@@ -124,7 +124,6 @@ public final class yacy {
     // static objects
     public static final String vString = yacyBuildProperties.getVersion();
     public static double version = 0.1;
-    public static boolean pro = false;
     
     public static final String vDATE   = yacyBuildProperties.getBuildDate();
     public static final String copyright = "[ YaCy v" + vString + ", build " + vDATE + " by Michael Christen / www.yacy.net ]";
@@ -211,7 +210,6 @@ public final class yacy {
                 Log.logSevere("STARTUP", "WARNING: the file " + f + " can not be created!");
             f.deleteOnExit();
             
-            pro = new File(homePath, "libx").exists();
             final String oldconf = "DATA/SETTINGS/httpProxy.conf".replace("/", File.separator);
             final String newconf = "DATA/SETTINGS/yacy.conf".replace("/", File.separator);
             final File oldconffile = new File(homePath, oldconf);
@@ -220,7 +218,7 @@ public final class yacy {
                 if(!oldconffile.renameTo(newconfFile))
                     Log.logSevere("STARTUP", "WARNING: the file " + oldconffile + " can not be renamed to "+ newconfFile +"!");
             }
-            sb = new Switchboard(homePath, "defaults/yacy.init".replace("/", File.separator), newconf, pro);
+            sb = new Switchboard(homePath, "defaults/yacy.init".replace("/", File.separator), newconf);
             //sbSync.V(); // signal that the sb reference was set
             
             // save information about available memory at startup time

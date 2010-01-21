@@ -130,16 +130,8 @@ public class Crawler_p {
                 if (sb.peers == null) {
                     prop.put("info", "3");
                 } else {
-                    // log a GET url for this crawl start for possible use in cronjobs
-                    Log.logInfo("CRAWLSTART-URL", "http://localhost:" + sb.getConfig("port", "8080") + "/Crawler_p.html?" + post.toString());
-                    
-                    // set new properties
-                    final boolean fullDomain = post.get("range", "wide").equals("domain"); // special property in simple crawl start
-                    final boolean subPath    = post.get("range", "wide").equals("subpath"); // special property in simple crawl start
-                    
                     String crawlingStart = post.get("crawlingURL","").trim(); // the crawljob start url
-
-                    // adding the prefix http:// if necessary
+                    // add the prefix http:// if necessary
                     int pos = crawlingStart.indexOf("://");
                     if (pos == -1) crawlingStart = "http://" + crawlingStart;
 
@@ -147,6 +139,14 @@ public class Crawler_p {
                     DigestURI crawlingStartURL = null;
                     try {crawlingStartURL = new DigestURI(crawlingStart, null);} catch (final MalformedURLException e1) {}
                     crawlingStart = (crawlingStartURL == null) ? null : crawlingStartURL.toNormalform(true, true);
+                   
+                    // store this call as api call
+                    sb.recordAPICall(post, "Crawler_p.html", "crawler", "crawl start for " + crawlingStartURL.getHost());
+                    
+                    // set new properties
+                    final boolean fullDomain = post.get("range", "wide").equals("domain"); // special property in simple crawl start
+                    final boolean subPath    = post.get("range", "wide").equals("subpath"); // special property in simple crawl start
+                    
                     
                     // set the crawling filter
                     String newcrawlingMustMatch = post.get("mustmatch", CrawlProfile.MATCH_ALL);

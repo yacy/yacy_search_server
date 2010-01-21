@@ -119,15 +119,14 @@ public final class Heap extends HeapModifier implements BLOB {
      * @return true if the key exists, false otherwise
      */
     @Override
-    public synchronized boolean has(final byte[] key) {
+    public synchronized boolean has(byte[] key) {
         assert index != null;
-        assert this.keylength == key.length : this.keylength + "!=" + key.length;
-        
+        key = normalizeKey(key);
         // check the buffer
         if (this.buffer.containsKey(new String(key))) return true;
         return super.has(key);
     }
-
+    
     /**
      * add a BLOB to the heap: this adds the blob always to the end of the file
      * @param key
@@ -135,19 +134,15 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws IOException
      * @throws RowSpaceExceededException 
      */
-    private void add(final byte[] key, final byte[] blob) throws IOException, RowSpaceExceededException {
+    private void add(byte[] key, final byte[] blob) throws IOException, RowSpaceExceededException {
         assert blob.length > 0;
-        assert key.length == this.keylength;
-        assert this.keylength == key.length : this.keylength + "!=" + key.length;
         if ((blob == null) || (blob.length == 0)) return;
         final int pos = (int) file.length();
+        key = normalizeKey(key);
         index.put(key, pos);
         file.seek(pos);
         file.writeInt(this.keylength + blob.length);
         file.write(key);
-        if (this.keylength > key.length) {
-            for (int i = 0; i < this.keylength - key.length; i++) file.write(HeapWriter.ZERO);
-        }
         file.write(blob, 0, blob.length);
     }
     
@@ -171,8 +166,7 @@ public final class Heap extends HeapModifier implements BLOB {
         byte[] key, blob;
         while (i.hasNext()) {
             entry = i.next();
-            key = entry.getKey().getBytes();
-            assert key.length == this.keylength : "key.length = " + key.length + ", this.keylength = " + this.keylength;
+            key = normalizeKey(entry.getKey().getBytes());
             blob = entry.getValue();
             posBuffer += 4 + this.keylength + blob.length;
         }
@@ -187,8 +181,7 @@ public final class Heap extends HeapModifier implements BLOB {
         byte[] b;
         while (i.hasNext()) {
             entry = i.next();
-            key = entry.getKey().getBytes();
-            assert key.length == this.keylength : "key.length = " + key.length + ", this.keylength = " + this.keylength;
+            key = normalizeKey(entry.getKey().getBytes());
             blob = entry.getValue();
             index.put(key, posFile);
             b = AbstractWriter.int2array(this.keylength + blob.length);
@@ -218,8 +211,8 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws IOException
      */
     @Override
-    public synchronized byte[] get(final byte[] key) throws IOException {
-        assert this.keylength == key.length : this.keylength + "!=" + key.length;
+    public synchronized byte[] get(byte[] key) throws IOException {
+        key = normalizeKey(key);
         
         // check the buffer
         byte[] blob = this.buffer.get(new String(key));
@@ -235,9 +228,8 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws IOException
      */
     @Override
-    public synchronized long length(final byte[] key) throws IOException {
-        assert this.keylength == key.length : this.keylength + "!=" + key.length;
-        
+    public synchronized long length(byte[] key) throws IOException {
+        key = normalizeKey(key);
         // check the buffer
         byte[] blob = this.buffer.get(new String(key));
         if (blob != null) return blob.length;
@@ -297,8 +289,8 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws RowSpaceExceededException 
      */
     @Override
-    public synchronized void put(final byte[] key, final byte[] b) throws IOException, RowSpaceExceededException {
-        assert this.keylength == key.length : this.keylength + "!=" + key.length;
+    public synchronized void put(byte[] key, final byte[] b) throws IOException, RowSpaceExceededException {
+        key = normalizeKey(key);
         
         // we do not write records of length 0 into the BLOB
         if (b.length == 0) return;
@@ -329,8 +321,8 @@ public final class Heap extends HeapModifier implements BLOB {
         this.buffersize += b.length;
     }
     
-    private boolean putToGap(final byte[] key, final byte[] b) throws IOException, RowSpaceExceededException {
-        assert this.keylength == key.length : this.keylength + "!=" + key.length;
+    private boolean putToGap(byte[] key, final byte[] b) throws IOException, RowSpaceExceededException {
+        key = normalizeKey(key);
         
         // we do not write records of length 0 into the BLOB
         if (b.length == 0) return true;
@@ -423,8 +415,8 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws IOException
      */
     @Override
-    public synchronized void remove(final byte[] key) throws IOException {
-        assert this.keylength == key.length : this.keylength + "!=" + key.length;
+    public synchronized void remove(byte[] key) throws IOException {
+        key = normalizeKey(key);
         
         // check the buffer
         byte[] blob = this.buffer.remove(new String(key));

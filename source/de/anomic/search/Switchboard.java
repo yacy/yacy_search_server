@@ -70,9 +70,11 @@ import net.yacy.document.content.RSSMessage;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.xml.RSSFeed;
+import net.yacy.kelondro.blob.BEncodedHeapArray;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
@@ -129,6 +131,7 @@ import de.anomic.http.server.ResponseHeader;
 import de.anomic.http.server.RobotsTxtConfig;
 import de.anomic.net.UPnP;
 import de.anomic.search.blockrank.CRDistribution;
+import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverCore;
 import de.anomic.tools.crypt;
@@ -214,6 +217,7 @@ public final class Switchboard extends serverSwitch {
     public  Dispatcher                     dhtDispatcher;
     public  List<String>                   trail;
     public  yacySeedDB                     peers;
+    public  BEncodedHeapArray              tables;
     
     public WorkflowProcessor<indexingQueueEntry> indexingDocumentProcessor;
     public WorkflowProcessor<indexingQueueEntry> indexingCondensementProcessor;
@@ -234,14 +238,13 @@ public final class Switchboard extends serverSwitch {
     
     private static Switchboard sb = null;
     
-    public Switchboard(final File rootPath, final String initPath, final String configPath, final boolean applyPro) throws IOException {
-        super(rootPath, initPath, configPath, applyPro);
+    public Switchboard(final File rootPath, final String initPath, final String configPath) throws IOException {
+        super(rootPath, initPath, configPath);
         MemoryTracker.startSystemProfiling();
         sb=this;
         
         // set loglevel and log
         setLog(new Log("PLASMA"));
-        if (applyPro) this.log.logInfo("This is the pro-version of YaCy");
         
         // UPnP port mapping
         if (getConfigBool(SwitchboardConstants.UPNP_ENABLED, false))
@@ -273,6 +276,9 @@ public final class Switchboard extends serverSwitch {
         this.log.logConfig("Work Path:    " + this.workPath.toString());
         this.dictionariesPath = getConfigPath(SwitchboardConstants.DICTIONARY_SOURCE_PATH, SwitchboardConstants.DICTIONARY_SOURCE_PATH_DEFAULT);
         this.log.logConfig("Dictionaries Path:" + this.dictionariesPath.toString());
+        
+        // init tables
+        this.tables = new BEncodedHeapArray(this.workPath, 12);
         
         // init libraries
         this.log.logConfig("initializing libraries");
@@ -1100,6 +1106,7 @@ public final class Switchboard extends serverSwitch {
         indexSegments.close();
         peers.close();
         Cache.close();
+        tables.close();
         UPnP.deletePortMapping();
         Tray.removeTray();
         log.logConfig("SWITCHBOARD SHUTDOWN TERMINATED");
@@ -2089,6 +2096,25 @@ public final class Switchboard extends serverSwitch {
             }
         }
         yacyCore.log.logInfo("BOOTSTRAP: " + (peers.sizeConnected() - sc) + " new seeds while bootstraping.");
+    }
+    
+    
+    public void recordAPICall(final serverObjects post, final String servletName, String type, String comment) {
+        String apiurl = /*"http://localhost:" + getConfig("port", "8080") +*/ "/" + servletName + "?" + post.toString();
+        try {
+            sb.tables.insert(
+                    "api",
+                    "type", type.getBytes(),
+                    "comment", comment.getBytes(),
+                    "date", DateFormatter.formatShortMilliSecond(new Date()).getBytes(),
+                    "url", apiurl.getBytes()
+                    );
+        } catch (RowSpaceExceededException e2) {
+            Log.logException(e2);
+        } catch (IOException e2) {
+            Log.logException(e2);
+        }
+        Log.logInfo("APICALL", apiurl);
     }
     
     public void checkInterruption() throws InterruptedException {

@@ -110,7 +110,10 @@ public class FTPLoader {
                 if (file.length() == 0) {
                     // directory -> get list of files
                     RequestHeader requestHeader = new RequestHeader();
-                    if (request.referrerhash() != null) requestHeader.put(RequestHeader.REFERER, sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash()).toNormalform(true, false));
+                    if (request.referrerhash() != null) {
+                        DigestURI u = sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
+                        if (u != null) requestHeader.put(RequestHeader.REFERER, u.toNormalform(true, false));
+                    }
                     
                     byte[] dirList = generateDirlist(ftpClient, request, path);
 

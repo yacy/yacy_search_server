@@ -57,7 +57,11 @@ public class ConfigPortal {
                 }
             }
             if (post.containsKey("searchpage_set")) {
-                sb.setConfig(SwitchboardConstants.GREETING, post.get(SwitchboardConstants.GREETING, ""));
+                String newGreeting = post.get(SwitchboardConstants.GREETING, "");
+                // store this call as api call
+                sb.recordAPICall(post, "ConfigPortal.html", "appearance", "new portal design. greeting: " + newGreeting);
+                
+                sb.setConfig(SwitchboardConstants.GREETING, newGreeting);
                 sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, post.get(SwitchboardConstants.GREETING_HOMEPAGE, ""));
                 sb.setConfig(SwitchboardConstants.GREETING_LARGE_IMAGE, post.get(SwitchboardConstants.GREETING_LARGE_IMAGE, ""));
                 sb.setConfig(SwitchboardConstants.GREETING_SMALL_IMAGE, post.get(SwitchboardConstants.GREETING_SMALL_IMAGE, ""));

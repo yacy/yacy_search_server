@@ -250,8 +250,12 @@ public class Blacklist_p {
                  * =========================================================== */
 
                 blacklistToUse = post.get("currentBlacklist", "").trim();
-
-                final String temp = addBlacklistEntry(blacklistToUse, post.get("newEntry", "").trim(), header, supportedBlacklistTypes);
+                String blentry = post.get("newEntry", "").trim();
+                
+                // store this call as api call
+                listManager.switchboard.recordAPICall(post, "Blacklist_p.html", "blacklist", "add to blacklist: " + blentry);
+                
+                final String temp = addBlacklistEntry(blacklistToUse, blentry, header, supportedBlacklistTypes);
                 if (temp != null) {
                     prop.put("LOCATION", temp);
                     return prop;
