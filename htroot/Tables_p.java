@@ -1,10 +1,7 @@
-// News.java
+// Tables_p.java
 // -----------------------
-// part of YaCy
-// (C) by Michael Peter Christen; mc@yacy.net
-// first published on http://www.anomic.de
-// Frankfurt, Germany, 2005
-// last major change: 29.07.2005
+// (C) 2010 by Michael Peter Christen; mc@yacy.net
+// first published 21.01.2010 in Frankfurt, Germany on http://yacy.net
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,10 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-// You must compile this file with
-// javac -classpath .:../classes Network.java
-// if the shell's current path is HTROOT
 
 import java.io.IOException;
 import java.util.HashMap;
