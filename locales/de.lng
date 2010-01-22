@@ -60,7 +60,7 @@ Count</td>==Anzahl</td>
 Queries Per Last Hour==Suchanfragen pro letzter Stunde
 Access Dates==Zugriffszeiten
 This is a list of searches that had been requested from remote peer search interface==Dies ist eine Liste aller Suchanfragen, die von einem anderen Peer gestellt wurden. 
-#---------------------------
+#-----------------------------
 
 
 #File: Blacklist_p.html
@@ -100,7 +100,7 @@ Entries per page:==Einträge pro Seite:
 "Go"=="Los"
 Edit existing pattern\(s\):==Bearbeite existierende Einträge:
 "Save URL pattern\(s\)"=="URL Einträge speichern"
-#---------------------------
+#-----------------------------
 
 #File: BlacklistCleaner_p.html
 #---------------------------
@@ -121,7 +121,7 @@ Double==Doppelt
 "Change Selected"=="Markierte bearbeiten"
 "Delete Selected"=="Markierte löschen"
 No Blacklist selected==Es wurde keine Blacklist ausgewählt
-#---------------------------
+#-----------------------------
 
 #File: BlacklistImpExp_p.html
 #---------------------------
@@ -132,7 +132,7 @@ other YaCy peers:==anderen YaCy Peers:
 "Load new blacklist items"=="Lade neue Blacklist"
 #URL:==URL:
 file:==Datei:
-#---------------------------
+#-----------------------------
 
 #File: BlacklistTest_p.html
 #---------------------------
@@ -148,7 +148,7 @@ It is blocked for the following cases:==Sie wird in den folgenden Fällen gebloc
 #Proxy==Proxy
 Search==Suche
 Surftips==Surftipps
-#---------------------------
+#-----------------------------
 
 #File: Blog.html
 #---------------------------
@@ -274,7 +274,7 @@ Right Search Engine==rechte Suchmaschine
 Query==Suchwort
 "Compare"=="Vergleiche"
 Search Result==Suchergebnis
-#---------------------------
+#-----------------------------
 
 #File: ConfigAccounts_p.html
 #---------------------------
@@ -477,6 +477,7 @@ Your peer does not accept any outside index data, but responds on all remote sea
 When you allow access from the YaCy network, your data is recognized using keywords==Falls Sie Zugriff vom YaCy-Netzwerk aus erlauben, so werden Ihre Daten anhand von Schlüsselwörtern erkannt
 Please describe your search portal with some keywords \(comma-separated\)==Bitte beschreiben Sie Ihr Suchportal mit einigen Schlüsselwörtern (kommagetrennt)
 "Save"=="Speichern"
+#-----------------------------
 
 #File: ConfigParser.html
 #---------------------------
@@ -570,12 +571,12 @@ any release including developer releases==jede Version, auch Entwickler Versione
 Signed autoupdate:==signierte Aktualisierung:
 only accept signed files==Nur signierte Dateien akzeptieren
 "Submit"=="Speichern"
-Accepted Changes.==&Auml;nderungen akzeptiert.
+Accepted Changes.==Änderungen akzeptiert.
 System Update Statistics==System Aktualisierungs Statistiken
 Last System Lookup==Letzter System Check
 never==niemals
 Last Release Download==Letzter Download
-Last Deploy==Letzte Anwendung
+Last Deploy==Letztes Update
 #-----------------------------
 
 #File: Connections_p.html
@@ -660,7 +661,7 @@ Select the profile to edit==Profil zur Bearbeitung auswählen
 An error occurred during editing the crawl profile:==Es trat folgender Fehler bei der Bearbeitung des Crawl Profils auf:
 Edit Profile==Bearbeite Profil
 "Submit changes"=="Änderungen speichern"
-#---------------------------
+#-----------------------------
 
 #File: CrawlResults.html
 #---------------------------
@@ -752,7 +753,7 @@ Create Bookmark==Lesezeichen erstellen
 \(works with "Starting Point: From URL" only\)==(funktioniert nur mit "Startpunkt von URL")
 Title<==Titel<
 Folder<==Ordner<
-This option lets you create a bookmark from your crawl start URL. For automatic re-crawling you can use the following default folders:==Diese Option gibt Ihnen die Möglichkeit ein Lesezeichen aus Ihrer Crawl Start URL zu erstellen. Um diese automatisch wieder zu crawlen, können Sie diese folgenden standard Ordner benutzen:
+This option lets you create a bookmark from your crawl start URL. For automatic re-crawling you can use the following default folders:==Diese Option gibt Ihnen die Möglichkeit ein Lesezeichen aus Ihrer Crawl Start URL zu erstellen. Um diese automatisch wieder zu crawlen, können Sie diese folgenden Standard Ordner benutzen:
 Attention: recrawl settings depend on the folder. They can be adjusted in==Achtung: Recrawl-Einstellungen sind vom Ordner abhängig. Diese können angepasst werden in
 Crawling Depth</label>==Crawling-Tiefe</label>
 This defines how often the Crawler will follow links embedded in websites.==Dies definiert, wie oft der Crawler eingebetteten Links in Webseiten folgen wird.
@@ -765,7 +766,9 @@ Use filter==Filter nutzen
 Restrict to start domain==Auf Startdomain beschränken
 Restrict to sub-path==Auf Sub-Pfad beschränken
 #The filter is an emacs-like regular expression that must match with the URLs which are used to be crawled;==Dieser Filter ist ein emacs-ähnlicher regulärer Ausdruck, der mit den zu crawlenden URLs übereinstimmen muss;
-default is 'catch all'.==standard ist 'sammel alle'.
+The filter is a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regular expression</a>==Dieser Filter ist ein <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">Regulärer Ausdruck</a>
+that must match with the URLs which are used to be crawled; default is \'catch all\'.==der auf die zum Crawlen verwendeten URLs zutreffen muss. Die Standard Einstellung ist 'alle zulassen'.
+Example: to allow only urls that contain the word \'science\', set the filter to \'.*science.*\'.==Beispiel: Um nur URLs zuzulassen, die das Wort 'Wissenschaft' beeinhalten, setzen Sie den Filter auf '.*Wissenschaft.*'.
 You can also use an automatic domain-restriction to fully crawl a single domain.==Sie können aber auch eine automatische Domain-Beschränkung benutzen, um eine einzelne Domain komplett zu crawlen.
 Must-Not-Match Filter==Muss-nicht-entsprechen Filter
 This filter must not match to allow that the page is accepted for crawling.==Dieser Filter muss nicht passen, um zu erlauben, dass die Seite zum crawlen akzeptiert wird.
@@ -798,11 +801,28 @@ A questionmark is usually a hint for a dynamic page. URLs pointing to dynamic co
 is accessed with URLs containing question marks. If you are unsure, do not check this to avoid crawl loops.==nur von URLs zu erreichen sind, die ein Fragezeichen enthalten. Wenn Sie unsicher sind, aktivieren Sie diese Funktion nicht, um Crawl Schleifen zu vermeiden.
 Store to Web Cache==Speichern im Web-Cache
 This option is used by default for proxy prefetch, but is not needed for explicit crawling.==Diese Option ist standardmässig beim Proxy aktiviert, wird aber zum reinen Crawlen nicht gebraucht.
+
+Policy for usage of Web Cache==Regeln für die Nutzung des Web Caches
+The caching policy states when to use the cache during crawling:==Die Caching Regeln legen fest wann der Cache während des Crawlen verwendet wird:
+#no&nbsp;cache==no&nbsp;cache
+no&nbsp;cache==keinen&nbsp;Cache
+#if&nbsp;fresh==if&nbsp;fresh
+if&nbsp;fresh==bei&nbsp;frischem&nbsp;Cache&nbsp;Hit
+#if&nbsp;exist==if&nbsp;exist
+if&nbsp;exist==bei&nbsp;Cache&nbsp;Hit
+#cache&nbsp;only==cache&nbsp;only
+cache&nbsp;only==nur&nbsp;Cache
+never use the cache, all content from fresh internet source;==Den Cache nie verwenden, allen Inhalt frisch von der Online Quelle
+use the cache if the cache exists and is fresh using the proxy-fresh rules;==Verwende den Cache, wenn ein Treffer im Cache existiert und dieser aktuell ist.
+use the cache if the cache exist. Do no check freshness. Otherwise use online source;==Verwende den Cache, wenn ein Treffer existiert ohne die Aktualität zu prüfen. Andernfalls verwende die Quelle online;
+never go online, use all content from cache. If no cache exist, treat content as unavailable==Gehe niemals online, verwende nur den Cache Inhalt. Wenn kein Cache existiert, behandle den Inhalt als nicht verfügbar
+
 Do Local Indexing:==Lokales Indexieren:
 index text==Indexiere Text
-index media==Indexiere Media
+index media==Indexiere Medien
 This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==Dies aktiviert die Indexierung von Webseiten, die der Crawler runterlädt. Dies sollte standardmässig aktiviert sein, ausser Sie wollen den
 Document Cache without indexing.==Dokumenten Cache ohne Indexierung füllen.
+Do Remote Indexing:==Remote Indexierung:
 Describe your intention to start this global crawl \(optional\)==Beschreiben Sie warum Sie diesen globalen Crawl starten (optional)
 This message will appear in the 'Other Peer Crawl Start' table of other peers.==Diese Nachricht wird bei anderen Peers in der 'Anderer Peer Crawl Start' Tabelle angezeigt.
 If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler mit anderen Peers Kontakt aufnehmen und diese als Remote Indexierer für Ihren Crawl benutzen.
@@ -811,12 +831,41 @@ Only senior and principal peers can initiate or receive remote crawls.==Nur Seni
 A YaCyNews message will be created to inform all peers about a global crawl==Eine Nachricht wird im YaCy News Bereich angezeigt, um alle Peers von diesem globalen Crawl zu informieren 
 so they can omit starting a crawl with the same start point.==damit sie es vermeiden können, einen Crawl vom selben Startpunkt zu starten.
 Exclude <em>static</em> Stop-Words==<em>Statische</em> Stop-Words ausschließen
-This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem häufig vorkommende Wörter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle Wörter von der Indexierung auszuschliessen, die in der Datei <tt>yacy.stopwords</tt> enthalten sind,
+This can be useful to circumvent that extremely common words are added to the database, i.e. \"the\", \"he\", \"she\", \"it\"... To exclude all words given in the file <tt>yacy.stopwords</tt> from indexing,==Dies ist sinnvoll, um zu verhindern, dass extrem häufig vorkommende Wörter wie z.B. "der", "die", "das", "und", "er", "sie" etc in die Datenbank aufgenommen werden. Um alle Wörter von der Indexierung auszuschließen, die in der Datei <tt>yacy.stopwords</tt> enthalten sind,
 check this box.==aktivieren Sie diese Box.
 "Start New Crawl"=="Neuen Crawl starten"
 Depth</label>:==Tiefe</label>:
 #-----------------------------
 
+#File: ConfigWikiSearch.html
+#---------------------------
+YaCy \'\#\[clientname\]\#\': Configuration of a Wiki Search==YaCy '#[clientname]#': Konfiguration einer Wiki Suche
+#Integration in MediaWiki==Integration in MediaWiki
+It is possible to insert wiki pages into the YaCy index using a web crawl on that pages.==Es ist möglich Wiki Seiten in den YaCy Index aufzunehmen, indem man diese Seiten crawlen läßt.
+This guide helps you to crawl your wiki and to insert a search window in your wiki pages.==Diese Anleitung hilft Ihnen, Ihr Wiki zu crawlen und ein Suchfeld in die Wiki Seiten einzubauen.
+Retrieval of Wiki Pages==Abrufen der Wiki Seiten
+The following form is a simplified crawl start that uses the proper values for a wiki crawl.==Das folgende Eingabeformular ist eine vereinfachte Crawl Startseite die passende Werte für eine Wiki Suche voreingestellt hat.
+Just insert the front page URL of your wiki.==Fügen Sie einfach die Start URL Ihres Wikis ein.
+After you started the crawl you may want to get back==Nachdem Sie den Crawl gestartet haben sollten Sie nochmals zurück
+to this page to read the integration hints below.==auf diese Seite gehen, um die Integrationshinweise weiter unten zu lesen.
+URL of the wiki main page==URL der Wiki Hauptseite
+This is a crawl start point==Das ist der Ausgangspunkt des Crawls
+"Get content of Wiki: crawl wiki pages"=="Hole den Inhalt des Wiki: Crawle die Wiki Seiten"
+Inserting a Search Window to MediaWiki==Einfügen eines Suchfeldes in ein MediaWiki
+To integrate a search window into a MediaWiki, you must insert some code into the wiki template.==Um ein Suchfeld in das MediWiki einzufügen, müssen Sie einigen Code in Ihr Wiki Template einfügen.
+There are several templates that can be used for MediaWiki, but in this guide we consider that==Es gibt einige Templates die für ein MediaWiki verwendet werden können. Aber in dieser Anleitung setzen wir voraus, dass
+you are using the default template, \'MonoBook.php\':==Sie das Standard Template einsetzen, 'MonoBook.php':
+open skins/MonoBook.php==Öffnen Sie skins/MonoBook.php
+find the line where the default search window is displayed, there are the following statements:==Finden Sie die Zeile in der die Standard Suchmaschine angezeigt wird, erkennbar an folgenden Anweisungen:
+Remove that code or set it in comments using \'&lt;!--\' and \'--&gt;\'==Entfernen Sie diesen Code oder setzen sie ihn zwischen Kommentar Klammern mit '&lt;!--' und '--&gt;'
+Insert the following code:==Fügen Sie folgenden Code ein:
+Search with YaCy in this Wiki:==Mit YaCy in diesem Wiki suchen:
+value=\"Search\"==value="Suche"
+Check all appearances of static IPs given in the code snippet and replace it with your own IP, or your host name==Überprüfen Sie alle in diesem Codeschnipsel vorkommenden statischen IP Adressen und ersetzen Sie diese mit Ihrer eigenen IP oder dem eigenen Hostnamen.
+You may want to change the default text elements in the code snippet==Sie können auch die Standard Textelemente in dem Code Ausschnitt gegen eigene Texte austauschen.
+To see all options for the search widget, look at the more generic description of search widgets at==Um alle Optionen für das Suchfeld zu sehen, schauen Sie sich die generische Beschreibung des Such Widgets auf
+the <a href=\"ConfigLiveSearch.html\">configuration for live search</a>.==der Seite <a href=\"ConfigLiveSearch.html\">Integration eines Suchfelds für Live Suche</a> an.
+#-----------------------------
 
 #File: Help.html
 #---------------------------
@@ -1118,14 +1167,14 @@ Fail-Reason==Fehlermeldung
 #---------------------------
 Content Integration: Retrieval from phpBB3 Databases==Integration von Inhalt: Import aus phpBB3 Datenbanken
 It is possible to extract texts directly from mySQL and postgreSQL databases.==Es ist möglich Texte direkt aus MySQL und PostgreSQL Datenbanken zu extrahieren.
-Each extraction is specific to the data that is hosted in the database.==Jeder Vorgang extrahiert genau die Datens&auml;tze die in der Datenbank gehostet werden.
+Each extraction is specific to the data that is hosted in the database.==Jeder Vorgang extrahiert genau die Datensätze die in der Datenbank gehostet werden.
 This interface gives you access to the phpBB3 forums software content.==Dieses Interface erlaubt den Zugriff auf die Inhalte der phpBB3 Forum Software.
 If you read from a imported database, here are some hints to get around problems when importing dumps in phpMyAdmin:==Wenn aus einer importierten Datenbank gelesen werden soll sind hier einige Hinweise, um Probleme zu vermeiden wenn Datenbankdumps in phpMyAdmin importiert werden.
 before importing large database dumps, set==Bevor gro&szlig;e Datenbankdumps importiert werden, folgende Werte
-in phpmyadmin/config.inc.php and place your dump file in /tmp. Otherwise it is not possible to upload files larger than 2MB.==in die Datei phpmyadmin/config.inc.php schreiben und die Datenbank Datei in /tmp ablegen. Andernfalls ist es nicht m&ouml;glich Dateien gr&ouml;&szlig;er als 2MB hochzuladen.
+in phpmyadmin/config.inc.php and place your dump file in /tmp. Otherwise it is not possible to upload files larger than 2MB.==in die Datei phpmyadmin/config.inc.php schreiben und die Datenbank Datei in /tmp ablegen. Andernfalls ist es nicht möglich Dateien größer als 2MB hochzuladen.
 deselect the partial import flag==Den teilweisen Import Flag abschalten
 When a export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==Wenn ein Export gestartet wird werden Hilfsdateien in DATA/SURROGATE/in erzeugt, die automatisch von einem Indexer Thread geholt und verarbeitet werden.
-All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when a index is deleted.==Alle indexierten Hilfsdateien werden dann nach DATA/SURROGATE/out verschoben und k&ouml;nnen recycelt werden wenn ein Index gel&ouml;scht wird.
+All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when a index is deleted.==Alle indexierten Hilfsdateien werden dann nach DATA/SURROGATE/out verschoben und können recycelt werden wenn ein Index gelöscht wird.
 The URL stub==Der Teil der URL
 like http://forum.yacy-websuche.de==wie z.B. http://forum.yacy-websuche.de
 this must be the path right in front of '\/viewtopic.php\?'==dies muss den kompletten Pfad vor '\/viewtopic.php\?' enthalten
@@ -1144,7 +1193,7 @@ User==Benutzer
 that can access the database==mit Zugriff auf die Datenbank
 Password==Passwort
 for the account of that user given above==für den Zugang des oben angegebenen Benutzers
-Posts per file==Beitr&auml;ge pro Datei
+Posts per file==Beiträge pro Datei
 in exported surrogates==in der exportierten Hilfsdatei
 Check database connection==Datenbankverbindung überprüfen
 Export Content to Surrogates==Exportiere Inhalt in Hilfsdateien
@@ -1320,7 +1369,7 @@ Errors==Fehler
 Tried to create left child node twice==Doppelte Erzeugung des linken Tochterknoten wurde versucht
 Tried to create right child node twice==Doppelte Erzeugung des rechten Tochterknoten wurde versucht
 Malformed URL Exception==Missgeformte URL
-#---------------------------
+#-----------------------------
 
 #File: Messages_p.html
 #---------------------------
@@ -2023,7 +2072,7 @@ Blacklist item==Blacklist Eintrag
 "select all"=="alle auswählen"
 "deselect all"=="alle abwählen"
 value="add"==value="hinzufügen"
-#---------------------------
+#-----------------------------
 
 #File: Status.html
 #---------------------------
@@ -2146,7 +2195,7 @@ provided by YaCy peers using public bookmarks, link votes and crawl start points
 #-----------------------------
 
 #File: Surftips.html
-#-----------------------------
+#---------------------------
 Surftips</title>==Surftipps</title>
 Surftips</h2>==Surftipps</h2>
 Surftips are switched off==Surftipps sind ausgeschaltet
@@ -2164,7 +2213,7 @@ Show surftips to everyone==Zeige Surftipps allen Benutzern
 #-----------------------------
 
 #File: terminal_p.html
-#-----------------------------
+#---------------------------
 #YaCy System Monitor==YaCy System Monitor
 div id="location">
 Search Form==Suchformular
@@ -2183,12 +2232,16 @@ Network Monitor==Netzwerk Monitor
 #-----------------------------
 
 #File: Threaddump_p.html
-#-----------------------------
+#---------------------------
+YaCy Debugging: Thread Dump==YaCy Debug: Thread Dump
+Threaddump<==Thread Dump<
+"Single Threaddump"=="Einzelner Thread Dump"
+"Multiple Dump Statistic"=="Mehrfache Dump Statistiken"
 #"create Threaddump"=="Threaddump erstellen"
 #-----------------------------
 
 #File: User.html
-#-----------------------------
+#---------------------------
 User Page==Benutzer Seite
 You are not logged in.<br />==Sie sind nicht angemeldet.<br /> 
 Username:==Benutzername:
@@ -2375,7 +2428,7 @@ Changes will be published as announcement on YaCyNews==Änderungen werden über 
 #-----------------------------
 
 #File: WikiHelp.html
-#-----------------------------
+#---------------------------
 Wiki Help==Wiki Hilfe
 Wiki-Code==Wiki-Befehle
 This table contains a short description of the tags that can be used in the Wiki and several other servlets==Diese Tabelle enthält eine kurze Beschreibung der Tags, die in diesem Wiki und an anderen Stellen
@@ -2566,7 +2619,7 @@ System Update==System Aktualisierung
 Advanced Settings==Erweiterte Einstellungen
 Parser Configuration==Parser Einstellungen
 Local robots.txt==Lokale robots.txt
-Advanced Properties==Erweitertes Verhalten
+Advanced Properties==Erweiterte Konfiguration
 #-----------------------------
 
 #File: env/templates/submenuCookie.template
@@ -2629,7 +2682,7 @@ Media Crawl Queues==Medien Crawl-Puffer
 #>Music==>Musik
 #--- New menu items ---
 Index Creation==Indexerzeugung
-Crawl starten (Advanced)==Crawl starten (Erweitert)
+Crawl Start \(Advanced\)==Crawl starten (Erweitert)
 Indexing of Media Wikis==Indexierung von Media Wikis
 Indexing of phpBB3 Forums==Indexierung von phpBB3 Foren
 Scraping Proxy Configuration==Indexierung per Proxy
@@ -2658,7 +2711,7 @@ Image Collage==Bilder Collage
 #-----------------------------
 
 #File: proxymsg/authfail.inc
-#-----------------------------
+#---------------------------
 Your Username/Password is wrong.==Benutzername/Passwort waren falsch.
 Username</label>==Benutzername</label>
 Password</label>==Passwort</label>
@@ -2666,7 +2719,7 @@ Password</label>==Passwort</label>
 #-----------------------------
 
 #File: proxymsg/error.html
-#-----------------------------
+#---------------------------
 YaCy: Error Message==YaCy: Fehler Nachricht
 YaCy - Distributed Web Indexing - Administration==YaCy - Verteiltes Internet-Indexieren - Administration 
 Problems with request:==Probleme mit Anfrage:
@@ -2679,13 +2732,13 @@ Generated \#\[date\]\# by==Erstellt am #[date]# von
 #-----------------------------
 
 #File: proxymsg/proxylimits.inc
-#-----------------------------
+#---------------------------
 Your Account is disabled for surfing.==Ihr Account ist deaktivert zum surfen.
 Your Timelimit \(\#\[timelimit\]\# Minutes per Day\) is reached.==Ihr Zeitlimit (#[timelimit]# Minuten am Tag) wurde erreicht. 
 #-----------------------------
 
 #File: proxymsg/unknownHost.inc
-#-----------------------------
+#---------------------------
 The server==Der Server
 could not be found.==wurde nicht gefunden.
 Did you mean:==Meinten Sie vielleicht:
@@ -2702,7 +2755,7 @@ PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSET
 #-----------------------------
 
 #File: yacy/ui/index.html
-#-----------------------------
+#---------------------------
 About YaCy-UI==Über YaCy-UI
 Admin Console==Admin Konsole
 "Bookmarks"=="Lesezeichen"
@@ -2710,7 +2763,7 @@ Admin Console==Admin Konsole
 #-----------------------------
 
 #File: yacy/ui/yacyui-admin.html
-#-----------------------------
+#---------------------------
 Peer Control==Peer
 "Login"=="Login"
 #Login==Anmelden
@@ -2745,7 +2798,7 @@ Accounts==Konten
 #-----------------------------
 
 #File: yacy/ui/yacyui-bookmarks.html
-#-----------------------------
+#---------------------------
 'Add'=='Hinzufügen'
 'Crawl'=='Crawlen'
 'Edit'=='Bearbeiten'
@@ -2764,7 +2817,7 @@ Accounts==Konten
 #-----------------------------
 
 #File: yacy/ui/sidebar/sidebar_1.html
-#-----------------------------
+#---------------------------
 YaCy P2P Websearch==YaCy P2P Websuche
 "Search"=="Suchen"
 >Text==>Text
@@ -2785,7 +2838,7 @@ Bookmark Folders==Lesezeichen Ordner
 #-----------------------------
 
 #File: yacy/ui/sidebar/sidebar_2.html
-#-----------------------------
+#---------------------------
 Search Options==Suchoptionen
 Constraint:==Einschränkungen:
 all pages==alle Seiten
@@ -2796,3 +2849,4 @@ Bookmark TagCloud==Lesezeichen TagWolke
 alt="help"==alt="Hilfe"
 title="help"==title="Hilfe"
 #-----------------------------
+# EOF
