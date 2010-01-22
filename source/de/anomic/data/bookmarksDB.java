@@ -46,9 +46,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -97,7 +97,7 @@ public class bookmarksDB {
     
     // tags
     MapHeap tagsTable;
-    TreeMap<String, Tag> tagCache;					
+    ConcurrentHashMap<String, Tag> tagCache;					
     
     // dates
     MapHeap datesTable;
@@ -111,7 +111,7 @@ public class bookmarksDB {
 
     public bookmarksDB(final File bookmarksFile, final File tagsFile, final File datesFile) throws IOException {
         // bookmarks
-        tagCache=new TreeMap<String, Tag>();
+        tagCache = new ConcurrentHashMap<String, Tag>();
         bookmarksFile.getParentFile().mkdirs();
         //this.bookmarksTable = new kelondroMap(kelondroDyn.open(bookmarksFile, bufferkb * 1024, preloadTime, 12, 256, '_', true, false));
         //this.bookmarksTable = new MapView(BLOBTree.toHeap(bookmarksFile, true, true, 12, 256, '_', NaturalOrder.naturalOrder, bookmarksFileNew), 1000, '_');
@@ -566,7 +566,7 @@ public class bookmarksDB {
         while(it.hasNext()){
             storeTag(tagCache.get(it.next()));
         }
-        tagCache=new TreeMap<String, Tag>();
+        tagCache = new ConcurrentHashMap<String, Tag>();
     }
     
     public String addTag(final Tag tag) {		// TODO: is addTag() really needed - check storeTag() and saveTag()

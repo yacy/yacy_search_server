@@ -282,7 +282,15 @@ public final class HTTPDFileHandler {
             if (path.startsWith("/xml/")) {
                 path = "/api/" + path.substring(5);
             }
-
+            // another bad patch to map the /util/ path to /api/util/ to support old yacybars
+            if (path.startsWith("/util/")) {
+                path = "/api/util/" + path.substring(6);
+            }
+            // one more for bookmarks
+            if (path.startsWith("/bookmarks/")) {
+                path = "/api/bookmarks/" + path.substring(11);
+            }
+            
             final boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
             final String refererHost = requestHeader.refererHost();
             final boolean accessFromLocalhost = serverCore.isLocalhost(clientIP) && (refererHost.length() == 0 || serverCore.isLocalhost(refererHost));
