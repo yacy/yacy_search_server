@@ -93,8 +93,6 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.visualization.RasterPlotter;
 
 import de.anomic.data.MimeTable;
-import de.anomic.http.server.servlets.crawlReceipt;
-import de.anomic.http.server.servlets.transferURL;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverClassLoader;
@@ -1162,6 +1160,7 @@ public final class HTTPDFileHandler {
     
     public static final Object invokeServlet(final File targetClass, final RequestHeader request, final serverObjects args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
         // debug functions: for special servlets call them without reflection to get better stack trace results
+        /*
         if (targetClass.getName().equals("transferURL.class")) {
             try {
                 return transferURL.respond(request, args, switchboard);
@@ -1180,7 +1179,7 @@ public final class HTTPDFileHandler {
                 throw new InvocationTargetException(e);
             }
         }
-        
+        */
         Object result;
         if (safeServletsMode) synchronized (switchboard) {
             result = rewriteMethod(targetClass).invoke(null, new Object[] {request, args, switchboard});
