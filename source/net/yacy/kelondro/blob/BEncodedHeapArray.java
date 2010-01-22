@@ -51,7 +51,7 @@ public class BEncodedHeapArray {
     private int keymaxlen;
     
     public BEncodedHeapArray(final File location, final int keymaxlen) {
-        this.location = location;
+        this.location = new File(location.getAbsolutePath());
         this.keymaxlen = keymaxlen;
         this.tables = new ConcurrentHashMap<String, BEncodedHeap>();
         String[] files = this.location.list();
