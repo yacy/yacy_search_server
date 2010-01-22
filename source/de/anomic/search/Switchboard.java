@@ -1599,7 +1599,7 @@ public final class Switchboard extends serverSwitch {
             document = TextParser.parseSource(response.url(), response.getMimeType(), response.getCharacterEncoding(), b);
             assert(document != null) : "Unexpected error. Parser returned null.";
         } catch (final ParserException e) {
-            this.log.logWarning("Unable to parse the resource '" + response.url() + "'. " + e.getMessage(), e);
+            this.log.logWarning("Unable to parse the resource '" + response.url() + "'. " + e.getMessage());
             addURLtoErrorDB(response.url(), response.referrerHash(), response.initiator(), response.name(), e.getMessage());
             if (document != null) {
                 document.close();

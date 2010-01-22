@@ -214,13 +214,15 @@ public final class TextParser {
         mimeType = normalizeMimeType(mimeType);
         final String fileExt = location.getFileExtension();
         final String documentCharset = htmlParser.patchCharsetEncoding(charset);
-        List<Idiom> idioms = idiomParser(location, mimeType);
-        
-        if (idioms.isEmpty()) {
-            final String errorMsg = "No parser available to parse extension '" + location.getFileExtension() + "' or mimetype '" + mimeType + "'";
-            log.logInfo("Unable to parse '" + location + "'. " + errorMsg);
+        List<Idiom> idioms = null;
+        try {
+            idioms = idiomParser(location, mimeType);
+        } catch (ParserException e) {
+            final String errorMsg = "Parser Failure for extension '" + location.getFileExtension() + "' or mimetype '" + mimeType + "': " + e.getMessage();
+            log.logWarning(errorMsg);
             throw new ParserException(errorMsg, location);
         }
+        assert !idioms.isEmpty();
         
         if (log.isFine()) log.logInfo("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "'.");
         
@@ -309,6 +311,9 @@ public final class TextParser {
         if (mimeType2 == null || denyMime.contains(mimeType2)) return idioms; // in this case we are a bit more lazy
         idiom = mime2parser.get(mimeType2);
         if (idiom != null && !idioms.contains(idiom)) idioms.add(idiom);
+        
+        // finall check if we found any parser
+        if (idioms.isEmpty()) throw new ParserException("no parser found for extension '" + ext + "' and mime type '" + mimeType1 + "'", url);
         
         return idioms;
     }
