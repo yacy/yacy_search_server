@@ -551,7 +551,7 @@ public class HeapReader {
             try {
                 byte b;
                 byte[] payload;
-                final byte[] key = new byte[this.keylen];
+                byte[] key;
                 final int keylen1 = this.keylen - 1;
                 while (true) {
                     int len = is.readInt();
@@ -562,6 +562,7 @@ public class HeapReader {
                         is.skip(len - 1);
                         continue;
                     }
+                    key = new byte[this.keylen];
                     key[0] = b;
                     if (is.read(key, 1, keylen1) < keylen1) return null;
                     payload = new byte[len - this.keylen];
