@@ -92,8 +92,16 @@ Move selected pattern\(s\) to==Verschiebe gewählten Eintrag zu
 #You can select them here for deletion==Sie können sie einzeln zum Löschen wählen
 Add new pattern:==Neuen Eintrag hinzufügen:
 "Add URL pattern"=="URL hinzufügen"
-was removed from blacklist==wurde aus Blacklist entfernt
-was added to the blacklist==wurde zur Blacklist hinzugefügt
+The right \'\*\', after the \'\/\', can be replaced by a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a>.==Der rechte Asterisk '*', nach dem '/', kann durch einen <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regulären Ausdruck</a> ersetzt werden.
+domain.net\/fullpath<==domain.de/vollerpfad<
+domain.net\/\*<==domain.de/*<
+\*.domain.net\/\*<==*.domain.de/*<
+\*.sub.domain.net\/\*<==*.sub.domain.de/*<
+#sub.domain.\*\/\*<==sub.domain.*/*<
+#domain.\*\/\*<==domain.*/*<
+a complete <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a> \(slow\)==ein ganzer <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">Regulärer Ausdruck</a> (langsam)
+#was removed from blacklist==wurde aus Blacklist entfernt
+#was added to the blacklist==wurde zur Blacklist hinzugefügt
 Activate this list for==Diese Liste ist gültig für
 Show entries:==Zeige Einträge:
 Entries per page:==Einträge pro Seite:
@@ -104,12 +112,13 @@ Edit existing pattern\(s\):==Bearbeite existierende Einträge:
 
 #File: BlacklistCleaner_p.html
 #---------------------------
-Blacklist Cleaner==Blacklist aufrämen
+Blacklist Cleaner==Blacklist aufräumen
 Here you can remove or edit illegal or double blacklist-entries.==Hier können Sie ungültige oder doppelte Einträge auf der Blacklist entfernen oder bearbeiten.
 Check list==Liste testen
 "Check"=="Teste"
+Allow regular expressions in host part of blacklist entries.==Erlaube reguläre Ausdrücke im Hostnamen Teil der Blacklist Einträge.
 The blacklist-cleaner only works for the following blacklist-engines up to now:==Der Blacklist-Cleaner arbeitet zur Zeit nur mit den folgenden Blacklist-Engines:
-#Illegal Entries for==Ungültige Einträge für
+Illegal Entries in \#\[blList\]\# for==Ungültige Einträge in #[blList]# für
 Deleted \#\[delCount\]\# entries==#[delCount]# Einträge gelöscht
 Altered \#\[alterCount\]\# entries!==#[alterCount]# Einträge geändert
 Two wildcards in host-part==Zwei Wildcards im Host-Teil
@@ -131,7 +140,17 @@ Import blacklist items from...==Importiere Blacklist von...
 other YaCy peers:==anderen YaCy Peers:
 "Load new blacklist items"=="Lade neue Blacklist"
 #URL:==URL:
-file:==Datei:
+plain text file:<==Einfache Textdatei:<
+XML file:==XML Datei:
+Upload a regular text file which contains one blacklist entry per line.==Upload einer reguläre Testdatei mit jeweils einem Blacklisten Eintrag pro Zeile.
+Upload an XML file which contains one or more blacklists.==Upload einer XML Datei die eine oder mehrere Blacklisten enthält.
+Export blacklist items to...==Exportiere Blacklist nach...
+Here you can export a blacklist as an XML file. This file will contain additional==Hier können Sie eine (oder alle) Blacklist(en) in eine XML Datei exportieren. Diese Datei enthält dann zusätzliche
+information about which cases a blacklist is activated for.==Informationen in welchen Fällen die Blacklist angewendet wird.
+"Export list as XML"=="Exportiere Liste(n) als XML Datei"
+Here you can export a blacklist as a regular text file with one blacklist entry per line.==Hier können Sie eine (oder alle) Blacklist(en) in eine reguläre Textdatei exportieren die jeweils einen Eintrag pro Zeile enthält.
+This file will not contain any additional information==Diese Datei enthält sonst keine zusätzlichen Informationen
+"Export list as text"=="Exportiere Liste(n) als Textdatei"
 #-----------------------------
 
 #File: BlacklistTest_p.html
@@ -805,7 +824,7 @@ This option is used by default for proxy prefetch, but is not needed for explici
 Policy for usage of Web Cache==Regeln für die Nutzung des Web Caches
 The caching policy states when to use the cache during crawling:==Die Caching Regeln legen fest wann der Cache während des Crawlen verwendet wird:
 #no&nbsp;cache==no&nbsp;cache
-no&nbsp;cache==keinen&nbsp;Cache
+no&nbsp;cache==kein&nbsp;Cache
 #if&nbsp;fresh==if&nbsp;fresh
 if&nbsp;fresh==bei&nbsp;frischem&nbsp;Cache&nbsp;Hit
 #if&nbsp;exist==if&nbsp;exist
@@ -822,7 +841,7 @@ index text==Indexiere Text
 index media==Indexiere Medien
 This enables indexing of the wepages the crawler will download. This should be switched on by default, unless you want to crawl only to fill the==Dies aktiviert die Indexierung von Webseiten, die der Crawler runterlädt. Dies sollte standardmässig aktiviert sein, ausser Sie wollen den
 Document Cache without indexing.==Dokumenten Cache ohne Indexierung füllen.
-Do Remote Indexing:==Remote Indexierung:
+Do Remote Indexing==Nutze Remote Indexierung
 Describe your intention to start this global crawl \(optional\)==Beschreiben Sie warum Sie diesen globalen Crawl starten (optional)
 This message will appear in the 'Other Peer Crawl Start' table of other peers.==Diese Nachricht wird bei anderen Peers in der 'Anderer Peer Crawl Start' Tabelle angezeigt.
 If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler mit anderen Peers Kontakt aufnehmen und diese als Remote Indexierer für Ihren Crawl benutzen.
@@ -1130,7 +1149,7 @@ No entry found for URL-hash==Keinen Eintrag gefunden für URL-Hash
 #Referrer</td>==Referrer</td>
 #Doctype</td>==Dokumententyp</td>
 #Language</td>==Sprache</td>
-#Size</td>==Grösse</td>
+#Size</td>==Größe</td>
 #Words</td>==Wörter</td>
 "Delete URL"=="URL löschen"
 this may produce unresolved references at other word indexes but they do not harm==dies mag ungelöste Referenzen an anderen Wort Indizes erzeugen, aber es richtet keinen Schaden an
@@ -1360,7 +1379,7 @@ Total time submitting ranking files:==Insgesamte Versandzeit der Ranking Dateien
 Failed ranking distributions:==Fehlgeschlagene Ranking Verteilung:
 Indexing</legend>==Indexierung</legend>
 Indexed sites:==Indexierte Seiten:
-Size of indexed sites:==Grösse der indexierten Seiten:
+Size of indexed sites:==Größe der indexierten Seiten:
 Indexed words:==Indexierte Wörter:
 Indexed anchors:==Indexierte Verweise:
 Total link storage time:==Gesamte Link Speicherzeit:
@@ -1576,7 +1595,7 @@ free memory in the JVM within total amount==freier Speicher in der JVM innerhalb
 >Used<==>Belegt<
 used memory in the JVM within total amount==genutzter Speicher in der JVM innerhalb des Gesamten Speichers
 #EcoTable RAM Index:==EcoTabelle RAM Index:
->Size==>Grösse
+>Size==>Größe
 >Key==>Schlüssel
 >Value==>Wert
 #FlexTable RAM Index:==FlexTabelle RAM Index:
@@ -1634,7 +1653,7 @@ Cache Settings:==Cache Einstellungen:
 #RAM Cache==RAM Cache
 <td>Description==<td>Beschreibung
 URLs in RAM buffer:==URLs im RAM Puffer:
-This is the size of the URL write buffer. Its purpose is to buffer incoming URLs==Dies ist die Grösse des URLs write Puffer. Seine Aufgabe ist es die eingehenden URLs zu puffern
+This is the size of the URL write buffer. Its purpose is to buffer incoming URLs==Dies ist die Größe des URL Schreibpuffers. Seine Aufgabe ist es die eingehenden URLs zu puffern
 in case of search result transmission and during DHT transfer.==im Falle von Suchergebnisübertragung und während des DHT Transfers.
 Words in RAM cache:==Wörter im RAM-Cache
 This is the current size of the word caches.==Dies ist die momentane Größe des Wort-Caches.
@@ -1652,7 +1671,7 @@ This is is the number of word indexes that shall be held in the==Dies ist die An
 ram cache during indexing. When YaCy is shut down, this cache must be==RAM-Cache gehalten werden sollen. Sobald YaCy herunterfährt muss dieser Cache
 flushed to disc; this may last some minutes.==auf die Festplatte gesichert werden; dies kann einige Minuten dauern.
 #Initial space of words in cache:==Anfangs Freiraum im Word Cache:
-#This is is the init size of space for words in cache.==Dies ist die Anfangsgrösse von Wörtern im Cache.
+#This is is the init size of space for words in cache.==Dies ist die Anfangsgröße von Wörtern im Cache.
 Enter New Cache Size==Neue Cachegröße eintragen
 Thread Pool Settings:==Threadpool Einstellungen:
 maximum Active==max. aktiv
@@ -1707,12 +1726,12 @@ Do Remote Indexing==Remote Indexierung
 If checked, the crawler will contact other peers and use them as remote indexers for your crawl.==Wenn aktiviert, wird der Crawler andere Peers anfragen und als remote Indexierer für Ihren Crawl nutzen.
 If you need your crawling results locally, you should switch this off.==Sollten Sie Ihre Crawling Ergebnisse lokal benötigen, dann deaktivieren Sie diese Funktion.
 Only senior and principal peers can initiate or receive remote crawls.==Nur Senior und Principal Peers können einen remote Crawl starten oder empfangen.
-Please note that this setting only take effect for a prefetch depth greater than 0.==Bitte berücksichtigen Sie, dass diese Einstellung nur wirkt, wenn Ihre Indexier Tiefe grösser als 0 ist.
+Please note that this setting only take effect for a prefetch depth greater than 0.==Bitte berücksichtigen Sie, dass diese Einstellung nur wirkt, wenn Ihre Indexier Tiefe größer als 0 ist.
 Proxy generally==Proxy Allgemein
 Path==Verzeichnis
 The path where the pages are stored \(max. length 300\)==Verzeichnis in dem der Cache sein soll (max. 300 Zeichen)
-Size</label>==Grösse</label>
-The size in MB of the cache.==Die Grösse des Cache in MB.
+Size</label>==Größe</label>
+The size in MB of the cache.==Die Größe des Cache in MB.
 "Set proxy profile"=="Proxy Profil speichern"
 The file DATA/PLASMADB/crawlProfiles0.db is missing or corrupted.==Die Datei DATA/PLASMADB/crawlProfiles0.db fehlt entweder oder ist defekt.
 Please delete that file and restart.==Bitte löschen Sie diese Datei und starten Sie YaCy neu.
@@ -1722,7 +1741,7 @@ Local Text Indexing is now \#\(indexingLocalText\)\#off::on==Lokales Text Indexi
 Local Media Indexing is now \#\(indexingLocalMedia\)\#off::on==Lokales Medien Indexieren ist nun #(indexingLocalMedia)#aus::an
 Remote Indexing is now \#\(indexingRemote\)\#off::on==Remote-Indexieren ist nun #(indexingRemote)#aus::an
 Cachepath is now set to \'\#\[return\]\#\'.</strong> Please move the old data in the new directory.==Der Cache ist nun im Verzeichnis '#[return]#'.</strong> Bitte verschieben Sie Ihre alten Daten in das neue Verzeichnis.
-Cachesize is now set to \#\[return\]\#MB.==Die Cache Grösse ist nun auf #[return]#MB gesetzt.
+Cachesize is now set to \#\[return\]\#MB.==Die Cache Größe ist nun auf #[return]#MB gesetzt.
 Changes will take effect after restart only.==Änderungen werden erst nach einem Neustart von YaCy wirksam.
 An error has occurred:==Es trat ein Fehler auf:
 You can see a snapshot of recently indexed pages==Sie können sich Voransichten von frisch indexierten Seiten
@@ -2272,7 +2291,7 @@ View URL Content==Zeige URL Inhalte
 #Hash==Hash
 Word Count==Anzahl Wörter
 Description==Beschreibung
-Size==Grösse
+Size==Größe
 View as==Zeige als
 #Original==Original
 Plain Text==Quelltext
@@ -2381,13 +2400,19 @@ Level==Stufe
 
 #File: WatchWebStructure_p.html
 #---------------------------
+The data that is visualized here can also be retrieved in a XML file, which lists the reference relation between the domains.==Die Daten die hier visualisiert werden können auch in einer XML geladen werden, die die verweisenden Relationen zwischen den Domains auflistet.
+With a GET-property 'about' you get only reference relations about the host that you give in the argument field for 'about'.==Mit der GET Eigenschaft 'about' können Sie nur die verweisenden Relationen über den im 'about' Argument Feld angegebenen Host abrufen.
+With a GET-property 'latest' you get a list of references that had been computed during the current run-time of YaCy, and with each next call only an update to the next list of references.==Mit der GET Eigenschaft 'latest' können Sie eine Liste der Referenzen abrufen, die während der aktuellen Laufzeit von YaCy berechnet wurden. Und mit jedem Aufruf nur ein Update der jeweils bis dahin neuen Referenzen.
+Click the API icon to see the XML file.==Klicken Sie auf die API Sprechblase, um die XML Datei anzusehen.
+To see a list of all APIs, please visit the <a href=\"http://www.yacy-websuche.de/wiki/index.php/Dev:API\">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+
 Web Structure==Netz Struktur
 host<==Host<
 depth<==Tiefe<
 nodes<==Knoten<
 time<==Zeit<
-size<==Grösse
-"change"=="ändern"
+size<==Größe<
+"change"=="Ändern"
 #-----------------------------
 
 #File: Wiki.html
@@ -2476,7 +2501,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 >total results==>Ergebnisse insgesamt
 &nbsp;topwords:==&nbsp;Topwörter:
 >Name==>Name
->Size==>Grösse
+>Size==>Größe
 >Date==>Datum
 #>Link==>Link
 #-----------------------------
@@ -2599,12 +2624,12 @@ Remote&nbsp;Search==Remote Suche
 
 #File: env/templates/submenuBlacklist.template
 #---------------------------
-#Filter &amp; Blacklistsu==Filter &amp; Blacklists
+Filter &amp; Blacklists==Filter &amp; Sperrlisten
 Blacklist Administration==Blacklist Verwaltung
 Blacklist Cleaner==Blacklist aufräumen
 Blacklist Test==Blacklist testen
+Import/Export==Import / Export
 Index Cleaner==Index Aufräumer
-#Import/Export==Import/Export
 #-----------------------------
 
 #File: env/templates/submenuConfig.template
