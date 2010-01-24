@@ -2022,7 +2022,7 @@ Your peer will then upload the seed-bootstrap information periodically,==Ihr Pee
 but only if there have been changes to the seed-list.==jedoch nur wenn Änderungen an der Seed-Liste vorgenommen wurden.
 Upload Method==Upload-Methode
 "Submit"=="Speichern"
-Retry Uploading==Upload versuchen
+Retry Uploading==Upload erneut versuchen
 Here you can specify which upload method should be used.==Hier können Sie auswählen welche Upload-Methode verwendet werden soll.
 Select 'none' to deactivate uploading.==Verwenden Sie 'none' um den Upload zu deaktivieren.
 The URL that can be used to retrieve the uploaded seed file, like==Die URL die genutzt werden kann um die hochgeladene Seed-Liste zu erhalten, wie
@@ -2127,7 +2127,7 @@ status</a> page.==Status-Seite</a> sehen.
 The Peer Name is:==Der Name dieses Peers ist:
 Your static Ip\(or DynDns\) is:==Ihre statische IP(oder DynDns) ist:
 Seed Settings changed.\#\(success\)\#::You are now a principal peer.==Seed Einstellungen wurden geändert.#(success)#::Sie sind nun ein Principal Peer.
-Seed Settings changed, but something is wrong.==Seed Einstellungen wurden geändert, aber etwas war falsch.
+Seed Settings changed, but something is wrong.==Seed Einstellungen wurden geändert, aber etwas stimmt nicht.
 Seed Uploading was deactivated automatically.==Seed Upload wurde automatisch deaktiviert.
 Please return to the settings page and modify the data.==Bitte kehren Sie zu den Einstellungen zurück und modifizieren Sie die Daten.
 The remote-proxy setting has been changed==Die remote-proxy Einstellungen wurden geändert.
@@ -2212,6 +2212,7 @@ or to set up a 'virtual server' in your router settings \(often called DMZ\).==o
 Please be fair, contribute your own index to the global index.==Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
 Free disk space is lower than \#\[minSpace\]\#. Crawling has been disabled. Please fix==Der freie Festplattenspeicher ist geringer als #[minSpace]#. Crawling wurde deaktiviert. Bitte beheben Sie 
 it as soon as possible and restart YaCy.==dieses Problem so schnell wie möglich und starten Sie YaCy neu.
+Free memory is lower than \#\[minSpace\]\#. DHT has been disabled. Please fix==Es steht weniger als #[minSpace]# Arbeitsspeicher zur Verfügung. DHT wurde deaktiviert. Bitte beheben Sie 
 Latest public version is==Die neueste stabile Version ist
 You can download a more recent version of YaCy. Click here to install this update and restart YaCy:==Sie können eine aktuellere Version von YaCy herunterladen. Klicken Sie hier, um dieses Update zu installieren und YaCy neu zu starten:
 #"Update YaCy"=="Update YaCy"
@@ -2235,6 +2236,7 @@ Processors:==Prozessoren:
 Protection==Sicherheit
 Password is missing==Kein Passwort
 password-protected==Passwort-geschützt
+Unrestricted access from localhost==Uneingeschränkter Zugriff von localhost
 Address</dt>==Adresse</dt>
 peer address not assigned==Peer Adresse nicht zugewiesen
 Public Address:==Öffentliche Adresse:
@@ -2273,7 +2275,7 @@ Pre-Queueing==Vor-Pufferung
 Seed server==Seed Server
 Configure==Konfigurieren
 Enabled: Updating to server==Aktiviert, Seed Server:
-Last upload: #\[lastUpload\]# ago.==letzte Aktualisierung vor: #\[lastUpload\]#
+Last upload: #\[lastUpload\]# ago.==Letzte Aktualisierung vor: #\[lastUpload\]#
 Enabled: Updating to file==Aktiviert: Aktualisiere die Datei
 #-----------------------------
 
