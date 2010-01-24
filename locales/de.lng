@@ -535,6 +535,40 @@ enable/disable Parser==Parser aktiv / inaktiv
 "Submit"=="Speichern"
 #-----------------------------
 
+#File: ConfigPHPBB3Search.html
+#---------------------------
+Configuration of a phpBB3 Search==Konfiguration einer phpBB3 Suche
+#Integration in phpBB3==Integration in phpBB3
+It is possible to insert forum pages into the YaCy index using a database import of forum postings.==Es ist möglich die Forumsseiten mit YaCy zu indexieren, indem die Datenbank mit den Forumseinträgen importiert wird.
+This guide helps you to insert a search window in your phpBB3 pages.==Diese Anleitung hilft Ihnen ein YaCy Suchfeld in Ihre phpBB3 Forenseiten einzubinden.
+Retrieval of phpBB3 Forum Pages using a database export==Extraktion der phpBB3 Forenseiten durch Datenbank Export
+Forum posting contain rich information about the topic, the time, the subject and the author.==Forenbeiträge enthalten reichaltige Informationen über das Thema, die Zeit, den Betreff und den Autor.
+This information is in an bad annotated form in web pages delivered by the forum software.==Diese Information wird in einem schlecht kommentierten Format in Form von Webseiten ausgeliefert, die von der Forumssoftware erzeugt werden.
+It is much better to retrieve the forum postings directly from the database.==Es ist viel besser die Forenbeiträge direkt aus der Datenbank zu extrahieren.
+This will cause that YaCy is able to offer nice navigation features after searches.==Durch den Direktimport kann YaCy nach einer Suche auch hilfreiche Features zur Navigation anbieten.
+YaCy has a phpBB3 extraction feature, please go to the <a href="ContentIntegrationPHPBB3_p.html">phpBB3 content integration</a> servlet for direct database imports.==YaCy kann bereits Daten aus einer phpBB3 Installation extrahieren. Auf der Seite <a href="ContentIntegrationPHPBB3_p.html">Import aus phpBB3 Datenbanken</a> finden Sie ein Servlet für den direkten Datenbank Import.
+Retrieval of phpBB3 Forum Pages using a web crawl==Extraktion der phpBB3 Forenseiten durch Web Crawling
+The following form is a simplified crawl start that uses the proper values for a phpbb3 forum crawl.==Das folgende Eingabeformular ist eine vereinfachte Crawl Startseite, die passende Werte für eine phpBB3 Forensuche voreingestellt hat.
+Just insert the front page URL of your forum. After you started the crawl you may want to get back==Fügen Sie einfach die Startseite Ihres Forums ein. Nachdem Sie den Crawl gestartet haben sollten Sie zurück
+to this page to read the integration hints below.==auf die Seite kommen, um die Integrationshinweise unten zu lesen.
+URL of the phpBB3 forum main page==URL der Hauptseite des phpBB3 Forums
+This is a crawl start point==Das ist der Ausgangspunkt für den Crawl
+"Get content of phpBB3: crawl forum pages"=="Hole den phpBB3 Foreninhalt: Crawlen der Forenseiten"
+Inserting a Search Window to phpBB3==Einfügen eines Suchfeldes in das phpBB3 Forum
+To integrate a search window into phpBB3, you must insert some code into a forum template.==Um ein Suchfeld in Ihr phpBB3 Forum einzubauen, müssen Sie folgende Zeilen Code in das Forums Template einbauen.
+There are several templates that can be used for phpBB3, but in this guide we consider that==Da es viele verschiedene Templates für phpBB3 Foren gibt, gehen wir in dieser Anleitung davon aus, dass
+you are using the default template, \'prosilver\'==Sie das Standard Template 'prosilver' verwenden.
+open styles/prosilver/template/overall_header.html==Öffnen Sie die Datei styles/prosilver/template/overall_header.html
+find the line where the default search window is displayed, thats right behind the <pre>\&lt;div id=\"search-box\"\&gt;</pre> statement==Finden Sie die Zeile in der das Standard Suchfeld angezeigt wird, das sich gleich hinter der Anweisung <pre>&lt;div id="search-box"&gt;</pre> befindet
+Insert the following code right behind the div tag==Fügen Sie folgenden Code gleich nach dem div Tag ein
+YaCy Forum Search==YaCy Foren Suche
+;YaCy Search==;YaCy Suche
+Check all appearances of static IPs given in the code snippet and replace it with your own IP, or your host name==Überprüfen Sie alle in diesem Codeschnipsel vorkommenden statischen IP Adressen und ersetzen Sie diese mit Ihrer eigenen IP oder dem eigenen Hostnamen.
+You may want to change the default text elements in the code snippet==Sie können auch die Standard Textelemente in dem Code Ausschnitt gegen eigene Texte austauschen.
+To see all options for the search widget, look at the more generic description of search widgets at==Um alle Optionen für das Suchfeld zu sehen, schauen Sie sich die generische Beschreibung des Such Widgets auf
+the <a href=\"ConfigLiveSearch.html\">configuration for live search</a>.==der Seite <a href=\"ConfigLiveSearch.html\">Integration eines Suchfelds für Live Suche</a> an.
+#-----------------------------
+
 #File: ConfigProfile_p.html
 #---------------------------
 Your Personal Profile==Ihr persönliches Profil
