@@ -434,7 +434,7 @@ might overwrite existing data if a file of the same name exists already.==Achtun
 #File: ConfigNetwork_p.html
 #---------------------------
 Network Configuration==Netzwerk Einstellungen
-Accepted Changes==Änderungen gespeichert
+Accepted Changes==Änderungen wurden gespeichert
 Inapplicable Setting Combination==unpassende Einstellungskombination
 P2P operation can run without remote indexing, but runs better with remote indexing switched on. Please switch 'Accept Remote Crawl Requests' on==P2P-Tätigkeit läuft ohne Remote-Indexierung, aber funktioniert besser, wenn diese eingeschaltet ist. Bitte aktivieren Sie 'Remote Crawling akzeptieren'
 For P2P operation, at least DHT distribution or DHT receive \(or both\) must be set. You have thus defined a Robinson configuration==Für P2P-Tätigkeit muss mindestens DHT-Verteilung oder DHT-Empfang (oder beides) aktiviert sein. Ansonsten haben Sie einen Robinson-Peer definiert
@@ -495,15 +495,43 @@ Your peer does not accept any outside index data, but responds on all remote sea
 #>Peer Tags==>Peer Tags
 When you allow access from the YaCy network, your data is recognized using keywords==Falls Sie Zugriff vom YaCy-Netzwerk aus erlauben, so werden Ihre Daten anhand von Schlüsselwörtern erkannt
 Please describe your search portal with some keywords \(comma-separated\)==Bitte beschreiben Sie Ihr Suchportal mit einigen Schlüsselwörtern (kommagetrennt)
+If you leave the field empty, no peer asks your peer. If you fill in a \'\*\', your peer is always asked.==Wenn Sie das Feld leer lassen werden Sie keine Anfragen von anderen Peers bekommen. Wenn Sie ein '*' eintragen, wird Ihr Peer immer abgefragt.
 "Save"=="Speichern"
 #-----------------------------
 
 #File: ConfigParser.html
 #---------------------------
+Parser Configuration==Parser Einstellungen
 Content Parser Settings==Inhalt Parser Einstellungen
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==Mit diesen Einstellungen können Sie das Parsen zusätzlicher Dateitypen basierend auf ihren MIME-Typen ermöglichen.
 For a detailed description of the various MIME-types take a look at==Für eine detailierte Beschreibung der verschiedenen MIME-Typen können Sie einen Blick auf
 http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a> werfen.
+enable/disable Parser==Parser aktiv / inaktiv
+# --- Parser Names are hard-coded BEGIN ---
+##Mime-Type==MIME Typ
+##Microsoft Powerpoint Parser==Microsoft Powerpoint Parser
+#Torrent Metadata Parser==Torrent Metadaten Parser
+##HTML Parser==HTML Parser
+#GNU Zip Compressed Archive Parser==GNU Zip Komprimiertes Archiv Parser
+##Adobe Flash Parser==Adobe Flash Parser
+#Word Document Parser==Word Dokument Parser
+##vCard Parser==vCard Parser
+#Bzip 2 UNIX Compressed File Parser==bzip2 UNIX Komprimierte Datei Parser
+#OASIS OpenDocument V2 Text Document Parser==OASIS OpenDocument V2 Text Dokument Parser
+##Microsoft Excel Parser==Microsoft Excel Parser
+#ZIP File Parser==ZIP Datei Parser
+##Rich Site Summary/Atom Feed Parser==Rich Site Summary / Atom Feed Parser
+#Comma Separated Value Parser==Comma Separated Value (CSV) Parser
+##Microsoft Visio Parser==Microsoft Visio Parser
+#Tape Archive File Parser==Bandlaufwerk Archiv Datei Parser
+#7zip Archive Parser==7zip Archiv Parser
+##Acrobat Portable Document Parser==Adobe Acrobat Portables Dokument Format Parser
+##Rich Text Format Parser==Rich Text Format Parser
+#Generic Image Parser==Generischer Bild Parser
+#PostScript Document Parser==PostScript Dokument Parser
+#Open Office XML Document Parser==Open Office XML Dokument Parser
+#BMP Image Parser==BMP Bild Parser
+# --- Parser Names are hard-coded END ---
 "Submit"=="Speichern"
 #-----------------------------
 
@@ -550,10 +578,10 @@ Surftips==der Surftipps
 News pages==der News-Seiten
 Blog==des Blogs
 Wiki=des Wikis
-Public bookmarks==der öffentlichen Bookmarks
+Public bookmarks==der öffentlichen Lesezeichen
 Home Page==der Home-Page
 File Share==des File-Shares
-Save restrictions==Beschränkungen speichern
+"Save restrictions"=="Beschränkungen speichern"
 #-----------------------------
 
 #File: ConfigUpdate_p.html
@@ -1425,7 +1453,7 @@ attachment &le;==Anhang  &le;
 Your Message==Ihre Nachricht
 Subject:==Betreff:
 Text:==Inhalt:
-"Enter"=="Los"
+"Enter"=="Nachricht senden"
 "Preview"=="Vorschau"
 You can use==Sie können hier
 Wiki Code</a> here.==Wiki Code </a> benutzen.
@@ -1548,6 +1576,16 @@ Performance Settings==Leistungseinstellungen
 Memory Settings==Speicher Einstellungen
 Memory reserved for JVM==Für JVM reservierter Speicher
 "Set"=="Setzen"
+Resource Observer==Ressourcen Beobachter
+DHT-Trigger==DHT-Schalter
+not triggered:==nicht aktiv:
+triggered==aktiv
+reset state==Status zurücksetzen
+HDD==Festplattenspeicher
+disable crawls below==Deaktivere Crawls unter
+free space==freiem Speicher
+disable DHT-in below==Deaktivere eingehende DHT Transfers unter
+RAM==Arbeitsspeicher
 Accepted change. This will take effect after <strong>restart</strong> of YaCy==Änderung akzeptiert. Diese werden erst nach einem <strong>Neustart</strong> von YaCy wirksam
 refresh graph==aktualisiere Diagramm
 #show memory tables==Zeige Speicher-Tabellen
@@ -1556,14 +1594,6 @@ and use==und nutze
 of the defined performance.==der vorgegebenen Geschwindigkeit.
 Save==Speichern
 Changes take effect immediately==Änderungen werden sofort wirksam
-Online Caution Settings==Online Caution Einstellungen
-This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.==Dies ist die Zeit die der Crawler pausiert, wenn auf den Proxy zugegriffen wird, oder eine lokale oder globale Suche durchgeführt wird.
-The delay is extended by this time each time the proxy is accessed afterwards.==Die normale Verzögerung wird um diese Zeit verlängert, wenn auf den Proxy zugegriffen wird.
-This shall improve performance of the affected process \(proxy or search\).==Dies soll die Performance des betroffenen Prozesses (Proxy oder Suche) erhöhen.
-\(current delta is==(Seit dem letzten Zugriff auf Proxy/Lokale-Suche/Globale-Suche sind
-seconds since last proxy/local-search/remote-search access.\)==Sekunden vergangen.)
-Enter New Parameters==Neue Parameter eintragen
-milliseconds==Millisekunden
 YaCy Priority Settings==YaCy Priorität Einstellungen
 YaCy Process Priority==YaCy Prozess Priorität
 #Normal==Normal
@@ -1571,6 +1601,18 @@ Below normal==unter Normal
 Idle</option>==untätig</option>
 "Set new Priority"=="Neue Priorität speichern"
 Changes take effect after <strong>restart</strong> of YaCy==Änderungen werden erst nach einem <strong>Neustart</strong> von YaCy wirksam.
+Online Caution Settings==Onlinezugriff Verzögerung Einstellungen
+This is the time that the crawler idles when the proxy is accessed, or a local or remote search is done.==Dies ist die Zeit die der Crawler pausiert, wenn auf den Proxy zugegriffen wird, oder eine lokale oder globale Suche durchgeführt wird.
+The delay is extended by this time each time the proxy is accessed afterwards.==Die normale Verzögerung wird um diese Zeit verlängert, wenn auf den Proxy zugegriffen wird.
+This shall improve performance of the affected process \(proxy or search\).==Dies soll die Performance des betroffenen Prozesses (Proxy oder Suche) erhöhen.
+\(current delta is==(Seit dem letzten Zugriff auf Proxy/Lokale-Suche/Globale-Suche sind
+seconds since last proxy/local-search/remote-search access.\)==Sekunden vergangen.)
+Online Caution Case==Onlinezugriff Typ
+indexer delay \(milliseconds\) after case occurency==Indexierer Verzögerung (Millisekunden) nach Onlinezugriff
+#Proxy:==Proxy:
+Local Search:==Lokale Suche:
+Remote Search:==Remote Suche:
+"Enter New Parameters"=="Neue Parameter eintragen"
 #-----------------------------
 
 #File: PerformanceMemory_p.html
@@ -1677,6 +1719,22 @@ Thread Pool Settings:==Threadpool Einstellungen:
 maximum Active==max. aktiv
 current Active==derzeit aktiv
 Enter new Threadpool Configuration==neue Threadpoolkonfiguration eintragen
+#-----------------------------
+
+#File: PerformanceConcurrency_p.html
+#---------------------------
+Performance of Concurrent Processes==Performance gleichzeitig laufender Prozesse
+serverProcessor Objects==serverProcessor Objekte
+#Thread==Thread
+Queue Size<br />Current==Größe der Warteschlange<br />Aktuell
+Queue Size<br />Current==Größe der Warteschlange<br />Maximum
+Concurrency:<br />Number of Threads==Gleichzeitigkeit:<br />Anzahl der Threads
+Childs==Kindprozesse
+Average<br />Block Time<br />Reading==Durchschnittlich<br />reservierte Zeit<br />lesend
+Average<br />Exec Time==Durchschnittliche Ausführungszeit
+Average<br />Block Time<br />Writing==Durchschnittlich<br />reservierte Zeit<br />schreibend
+Total<br />Cycles==Gesamtanzahl Zyklen
+Full Description==Volle Beschreibung
 #-----------------------------
 
 #File: PerformanceSearch_p.html
@@ -1815,8 +1873,15 @@ If you want to restore all settings to the default values,==Wenn Sie alle Einste
 but <strong>forgot your administration password</strong>, you must stop the proxy,==aber Ihr <strong>Administatorpasswort vergessen haben</strong>, müssen Sie YaCy stoppen,
 delete the file 'DATA/SETTINGS/yacy.conf' in the YaCy application root folder and start YaCy again.==die Datei 'DATA/SETTINGS/yacy.conf' im YaCy Hauptordner löschen und YaCy neu starten.
 #Performance Settings of Queues and Processes==Performanceeinstellungen für Puffer und Prozesse
+Performance Settings of Busy Queues==Performanceeinstellungen für Puffer und Prozesse
+Performance of Concurrent Processes==Performance der gleichzeitig laufenden Prozesse
 Performance Settings for Memory==Performanceeinstellungen für Speicher
 Performance Settings of Search Sequence==Performanceeinstellungen des Suchablaufs
+### --- Those 3 items are removed in latest SVN BEGIN
+Viewer and administration for database tables==Administration der Datenbank Tabellen
+Viewer for Peer-News==Einstellungen Peer Nachrichten
+Viewer for Cookies in Proxy==Einstellung Cookie Überwachung
+### --- Those 3 items are removed in latest SVN END
 Server Access Settings==Server Zugangs-Einstellungen
 Proxy Access Settings==Proxy Zugangs-Einstellungen
 #Content Parser Settings==Inhalt Parser Einstellungen
@@ -1950,7 +2015,7 @@ Path</label>==Pfad</label>
 The remote path on the FTP server, like==Der Remote-Pfad auf dem FTP-Server, wie
 Missing sub-directories are NOT created automatically.==Fehlende Unterverzeichnisse werden NICHT automatisch erstellt.
 Username==Benutzername
-Your log-in at the FTP server==Ihr Log-in auf dem FTP-Server
+Your log-in at the FTP server==Ihr Login auf dem FTP-Server
 Password</label>==Passwort</label>
 The password==Das Passwort
 "Submit"=="Speichern"
@@ -1959,7 +2024,7 @@ The password==Das Passwort
 #File: Settings_Seed_UploadScp.inc
 #---------------------------
 
-Uploading via SCP:==Uplaod per SCP:
+Uploading via SCP:==Upload per SCP:
 This is the account for a server where you are able to login via ssh.==Dies ist der Account für einen Server, auf dem Sie sich per SSH anmelden müssen.
 #Server==Server
 The host where you have an account, like 'my.host.net'==Der Host auf dem Sie einen Account haben, wie z.B. 'mein.host.net' 
@@ -1968,7 +2033,7 @@ The sshd port of the host, like '22'==Der SSHD Port vom Host z.B. '22'
 Path</label>==Pfad</label>
 The remote path on the server, like '~/yacy/seed.txt'. Missing sub-directories are NOT created automatically.==Der Remote Pfad auf dem Server z.B. '~/yacy/seed.txt'. Fehlende Unterverzeichnise werden NICHT automatisch erstellt.
 Username==Benutzername
-Your log-in at the server==Ihr Log-In auf dem Server
+Your log-in at the server==Ihr Login auf dem Server
 Password</label>==Passwort</label>
 The password==Das Passwort
 "Submit"=="Speichern"
@@ -2229,6 +2294,24 @@ provided by YaCy peers using public bookmarks, link votes and crawl start points
 "authentication required"=="Autorisierung erforderlich"
 Hide surftips for users without autorization==Verberge Surftipps für Benutzer ohne Autorisierung
 Show surftips to everyone==Zeige Surftipps allen Benutzern
+#-----------------------------
+
+### This Tables section is removed in current SVN Versions
+#File: Tables_p.html
+#---------------------------
+Table Administration==Administration der Datenbank Tabellen
+Table Selection==Tabellenauswahl
+Select Table:==Auswahl Tabelle:
+"Show Table"=="Zeige Tabelle"
+Table Editor: showing table==Tabellen Editor: zeige Tabelle
+#PK==Primärschlüssel
+"Edit Selected Row"=="Bearbeite ausgwählte Zeile"
+"Add a new Row"=="Füge neue Zeile ein"
+"Delete Selected Rows"=="Lösche ausgewählte Zeile"
+"Delete Table"=="Lösche Tabelle"
+Row Editor==Zeileneditor
+Primary Key==Primärschlüssel
+"Commit"=="Absenden"
 #-----------------------------
 
 #File: terminal_p.html
