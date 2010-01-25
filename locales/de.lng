@@ -634,8 +634,8 @@ check for new releases, download if available and restart with downloaded releas
 Download of release \#\[downloadedRelease\]\# finished. Restart Initiated.== Der Download von Version #[downloadedRelease]# ist beendet. Ein Neustart ist eingeleitet.
 No more recent release found.==Kein neueres Release gefunden.
 Release will be installed. Please wait.==Das Release wird installiert. Bitte warten.
-You installed YaCy with a package manager.==Sie haben YaCy mit einem Paketmanager installiert.
-To update YaCy, use the package manager:==Um YaCy auf den neuesten Stand zu bringen, verwenden Sie den Packetmanager.
+You installed YaCy with a package manager.==Sie haben YaCy mit einer Paketverwaltung oder Installer installiert.
+To update YaCy, use the package manager:==Um YaCy auf den neuesten Stand zu bringen, verwenden Sie den Paketmanager.
 Omitting update because this is a development environment.==Update ausgelassen weil dies ein Entwicklersystem ist.
 Omitting update because download of release \#\[downloadedRelease\]\# failed.==Update ausgelassen weil der Download von Version #[downloadedRelease]# fehlschlug.
 Automated System Update==Automatische Systemaktualisierung
@@ -1671,28 +1671,29 @@ free memory in the JVM within total amount==freier Speicher in der JVM innerhalb
 >Used<==>Belegt<
 used memory in the JVM within total amount==genutzter Speicher in der JVM innerhalb des Gesamten Speichers
 #EcoTable RAM Index:==EcoTabelle RAM Index:
+Table RAM Index:==Tabelle RAM Speicher Index:
 >Size==>Größe
 >Key==>Schlüssel
 >Value==>Wert
 #FlexTable RAM Index:==FlexTabelle RAM Index:
 Table</td>==Tabelle</td>
-Chunk Size==Chunk Größe
+Chunk Size<==Chunk Größe<
 #Count</td>==Anzahl</td>
-Used Memory==Benutzter Speicher
+Used Memory<==Benutzter Speicher<
 #Node Caches:==Knoten Cache:
 
-#TODO
-#Read Hit</td>
-#Read Miss</td>
-#Write Unique</td>
-#Write Double</td>
-#Deletes</td>
-#Flushes</td>
-#Total Mem = #[nodeCacheTotalMem]# MB; Stop Grow when less than #[nodeCacheStopGrow]# MB available left; Start Shrink when less than #[nodeCacheStartShrink]# MB availabe left
-#Object Read Caches:
-#Read Hit Cache</td>
-#Read Miss Cache</td>
-#Total Mem: #[objectHitCacheTotalMem]# MB (hit), #[objectMissCacheTotalMem]# MB (miss); Stop Grow when less than #[objectCacheStopGrow]# MB available left; Start Shrink when less than #[objectCacheStartShrink]# MB availabe left</td>
+Object Read Caches==Objekt Lese Caches
+Read Hit<==Lese Treffer<
+Read Miss<==Lese Verfehler<
+Write Unique<==Schreiben einzigartig<
+Write Double<==Schreiben mehrfach<
+Deletes<==Löschungen<
+Flushes<==Leerungen<
+Total Mem==Gesamter Speicher
+MB \(hit\)==MB (Treffer)
+MB \(miss\)==MB (Verfehler)
+Stop Grow when less than \#\[objectCacheStopGrow\]\# MB available left==Beende Erweiterung wenn weniger als #[objectCacheStopGrow]# MB verfügbar sind
+Start Shrink when less than \#\[objectCacheStartShrink\]\# MB availabe left==Starte Verkleinerung wenn weniger als #[objectCacheStartShrink]# MB verfügbar sind
 
 Other Caching Structures:==Andere Zwischenspeicher Strukturen:
 Type</td>==Typ</td>
