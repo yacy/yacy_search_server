@@ -6,7 +6,7 @@ PIDFILE="yacy.pid"
 OS="`uname`"
 
 #get javastart args
-JAVA_ARGS="-server -XX:+UseAdaptiveSizePolicy";
+JAVA_ARGS="-server -XX:+UseAdaptiveSizePolicy -Djava.net.preferIPv4Stack=true";
 #JAVA_ARGS="-verbose:gc -XX:+PrintGCTimeStamps -XX:+PrintGCDetails $JAVA_ARGS";
 
 #check if OS is Sun Solaris or one of the OpenSolaris distributions and use different version of id if necessary
