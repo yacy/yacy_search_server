@@ -431,6 +431,41 @@ Make sure that you only download data from trustworthy sources. The new language
 might overwrite existing data if a file of the same name exists already.==Achtung, existiert bereits eine Datei mit gleichem Namen, wird diese überschrieben !
 #-----------------------------
 
+#File: ConfigLiveSearch.html
+#---------------------------
+Integration of a Search Field for Live Search==Integration eines Suchfeldes für die Live Suche
+A \'Live-Search\' input field that reacts as search-as-you-type in a pop-up window can easily be integrated in any web page==Eine 'Live Suche' Eingabefeld zeigt live beim Eingeben in einem Pop-up Fenster Ergebnisse and und kann einfach in jede bestehende Webseite eingebaut werden
+This is the same function as can be seen on all pages of the YaCy online-interface \(look at the window in the upper right corner\)==Das ist dieselbe Funktion, die man auf allen Seiten des YaCy Webinterfaces sehen kann (z.B. das Fenster in der oberen rechten Ecke)
+Just use the code snippet below to integrate that in your own web pages==Verwenden Sie einfach den Code Ausschnitt unten, um das Suchfeld in Ihre Webseite einzubauen.
+Please check if the address, as given in the example \'\#\[ip\]\#\:\#\[port\]\#\' here is correct and replace it with more appropriate values if necessary==Bitte überprüfen Sie, ob die Adresse die im Beispiel '#[ip]#:#[port]#' richtig ist und ersetzen Sie die Adresse wenn nötig mit richtigen Werten
+Code Snippet:==Code Ausschnitt:
+YaCy Portal Search==YaCy Portal Suche
+"Search"=="Suche"
+Configuration options and defaults for \'yconf\':==Konfigurations Optionen und Standardeinstellungen für 'yconf':
+Defaults<==Standardeinstellungen<
+url<==URL<
+is a mandatory property - no default<==muss angegeben werden<
+YaCy P2P Web Search==YaCy P2P Web Suche
+Size and position \(width \| height \| position\)==Größe und Position (Breite | Höhe | Position)
+Specifies where the dialog should be displayed. Possible values for position: \'center\', \'left\', \'right\', \'top\', \'bottom\', or an array containing a coordinate pair \(in pixel offset from top left of viewport\) or the possible string values \(e.g. \[\'right\',\'top\'\] for top right corner\)==Gibt an wo der Dialog angezeigt werden soll. Mögliche Werte für position: 'center', 'left', 'right', 'top', 'bottom', oder ein Array das ein Koordinatenpaar enthält (in Pixel Werten als Offset von der linken oberen Ecke des Viewports) oder einer möglichen String Variabble (e.g. ['right','top'] für die rechte obere Ecke)
+Animation effects \(show | hide\)==Animationseffekte (show | hide)
+The effect to be used. Possible values: \'blind\', \'clip\', \'drop\', \'explode\', \'fold\', \'puff\', \'slide\', \'scale\', \'size\', \'pulsate\'.==
+Der Effekt der angewendet werden soll. Mögliche Werte sind: 'blind', 'clip', 'drop', 'explode', 'fold', 'puff', 'slide', 'scale', 'size', 'pulsate'.
+Interaction \(modal \| resizable\)==Interaktion (modal | resizable)
+If modal is set to true, the dialog will have modal behavior; other items on the page will be disabled \(i.e. cannot be interacted with\).==Wenn modal auf true gesetzt wird verhält sich der Dialog genau so; Andere Elemente auf der Seite werden deaktiviert. (können also solange das Fenster geöffnet ist nicht verwendet werden)
+Modal dialogs create an overlay below the dialog but above other page elements.==Modale Dialoge erzeugen einen Overlay unter dem Dialog aber überhalb anderer Seitenelemente
+If resizable is set to true, the dialog will be resizeable.==Wenn resizable auf true gesetzt wird, kann man die Größe des Dialogfensters verändern.
+Load JavaScript load_js==JavaScript laden load_js
+If load_js is set to false, you have to manually load the needed JavaScript on your portal page.==Wenn load_js auf false gesetzt wird, müssen Sie manuell das benötigte Javascript auf Ihrer Portalseite laden.
+This can help to avoid timing problems or double loading.==Das kann helfen Timing Probleme oder das doppelte Laden zu verhindern.
+Load Stylesheets load_css==Stylesheets laden load_css
+If load_css is set to false, you have to manually load the needed CSS on your portal page.==Wenn load_css auf false gesetzt wird, müssen Sie manuell das benötigte CSS auf Ihrer Portalseite laden. 
+#Themes==Themes
+You can <==Sie können <
+download</a> ready made themes or <a href=\"http://jqueryui.com/themeroller/\" target=\"_blank\">create</a>==fertige Themes herunterladen</a> oder <a href="http://jqueryui.com/themeroller/" target="_blank">erstellen</a>
+your own custom theme. <br/>Themes are installed into: DATA/HTDOCS/yacy/ui/css/themes/==Ihr ganz eigenes Theme. <br/>Themes werden im folgenden Verzeichnis installiert: DATA/HTDOCS/yacy/ui/css/themes/
+#-----------------------------
+
 #File: ConfigNetwork_p.html
 #---------------------------
 Network Configuration==Netzwerk Einstellungen
@@ -569,6 +604,32 @@ To see all options for the search widget, look at the more generic description o
 the <a href=\"ConfigLiveSearch.html\">configuration for live search</a>.==der Seite <a href=\"ConfigLiveSearch.html\">Integration eines Suchfelds für Live Suche</a> an.
 #-----------------------------
 
+#File: ConfigPortal.html
+#---------------------------
+Integration of a Search Portal==Integration eines Suchportals
+If you like to integrate YaCy as portal for your web pages, you may want to change icons and messages on the search page.==Wenn Sie YaCy als Suchportal für Ihre Webseiten integrieren wollen, können Sie auch die Icons und Nachrichten auf den Suchseiten verändern.
+The search page may be customized.==Die Suchseite kann auf die eigenen Bedürfnisse zugeschnitten werden.
+You can change the \'corporate identity\'-images, the greeting line==Sie können die 'Corporate Identity' Bilder, die Grußzeile
+and a link to a home page that is reached when the \'corporate identity\'-images are clicked.==und einen Link auf die Homepage ändern, der aufgerufen wird wenn die 'Corporate Identity' Bilder angeklickt werden.
+To change also colours and styles use the <a href=\"ConfigAppearance_p.html\">Appearance Servlet</a> for different skins and languages.==
+Um auch die Farben und Stile zu verändern verwenden Sie das <a href="ConfigAppearance_p.html">Servlet Aussehen</a> für andere Skins und Sprachen.
+Greeting Line<==Grußzeile<
+URL of Home Page<==URL der Homepage<
+URL of a Small Corporate Image<==URL des kleinen Corporate Identity Bildes<
+URL of a Large Corporate Image<==URL des großen Corporate Identity Bildes<
+Default Pop-Up Page<==Standard Pop-up<
+>Status Page==>Status Seite
+>Search Front Page==Frontseite Suche
+>Search Page \(small header\)==>Suchseite (kleine Kopfzeile)
+>Interactive Search Page==>Interaktive Suchseite
+"Change Search Page"=="Ändere die Suchseite"
+"Set to Default Values"=="Standardwerte setzen"
+The search page can be integrated in your own web pages with an iframe. Simply use the following code:==Die Suchseite kann in Ihre eigenen Webseiten mit einem iframe eingebaut werden. Verwenden Sie dazu den folgenden Code:
+This would look like:==Das würde so aussehen:
+For a search page with a small header, use this code:==Für eine Suchseite mit kleiner Kopfzeile verwenden Sie folgenden Code:
+A third option is the interactive search. Use this code:==Als dritte Option gibt es die interaktive Suche. Verwenden Sie dazu folgenden Code:
+#-----------------------------
+
 #File: ConfigProfile_p.html
 #---------------------------
 Your Personal Profile==Ihr persönliches Profil
@@ -618,6 +679,21 @@ File Share==des File-Shares
 "Save restrictions"=="Beschränkungen speichern"
 #-----------------------------
 
+#File: ConfigSearchBox.html
+#---------------------------
+Integration of a Search Box==Integration einer Suchbox
+We give information how to integrate a search box on any web page that==Hier finden Sie Informationen dazu wie man eine Suchbox auf jeder Webseite einsetzen kann das
+calls the normal YaCy search window.==ein normales YaCy Suchfenster aufruft.
+Simply use the following code:==Verwenden Sie einfach den folgenden Code:
+MySearch==Meine Suche
+"Search"=="Suchen"
+This would look like:==Das sieht dann so aus:
+This does not use a style sheet file to make the integration into another web page with a different style sheet easier.==Da hier keine Stylesheet Datei verwendet wird, gestaltet sich die Integration in andere Webseiten mit einem anderen Stylesheet einfacher.
+You would need to change the following items:==Sie müssen dazu die folgenden Einträge ändern:
+Replace the given colors \#eeeeee \(box background\) and \#cccccc \(box border\)==Ersetzen sie die vorgegebenen Farben #eeeeee (Hintergrund der Box) and #cccccc (Boxenrand)
+Replace the word \"MySearch\" with your own message==Ersetzen Sie das Wort "Meine Suche" mit Ihrer eigenen Nachricht
+#-----------------------------
+
 #File: ConfigUpdate_p.html
 #---------------------------
 Manual System Update==Manuelle Systemaktualisierung
@@ -632,7 +708,7 @@ Automatic Update==Automatische Aktualisierung
 check for new releases, download if available and restart with downloaded release==suche nach neuer Version, lade sie herunter und starte neu mit dieser Version
 "Check \+ Download \+ Install Release Now"=="Suchen + Herunterladen + Version nun installieren"
 Download of release \#\[downloadedRelease\]\# finished. Restart Initiated.== Der Download von Version #[downloadedRelease]# ist beendet. Ein Neustart ist eingeleitet.
-No more recent release found.==Kein neueres Release gefunden.
+No more recent release found.==Kein neuere Version gefunden.
 Release will be installed. Please wait.==Das Release wird installiert. Bitte warten.
 You installed YaCy with a package manager.==Sie haben YaCy mit einer Paketverwaltung oder Installer installiert.
 To update YaCy, use the package manager:==Um YaCy auf den neuesten Stand zu bringen, verwenden Sie den Paketmanager.
@@ -643,8 +719,9 @@ manual update==manuelle Aktualisierung
 no automatic look-up, updates can be made manually using this interface \(see options above\)==Keine automatische Aktualisierung. Updates können manuell gemacht werden (siehe die Optionen oben).
 automatic update==automatische Aktualisierung
 updates are made within fixed cycles:==Aktualisierungen werden nach festen Regeln gemacht:
-Time between lookup==Zeit zwischen Checks
-Release blacklist==Versionen Blacklist
+Time between lookup==Zeit zwischen Update Prüfungen
+hours==Stunden
+Release blacklist==Versionen Negativliste
 regex on release number strings==regex mit Versionsnummern
 Release type==Release Typ
 only main releases==nur offizielle Versionen
@@ -1251,8 +1328,8 @@ It is possible to extract texts directly from mySQL and postgreSQL databases.==E
 Each extraction is specific to the data that is hosted in the database.==Jeder Vorgang extrahiert genau die Datensätze die in der Datenbank gehostet werden.
 This interface gives you access to the phpBB3 forums software content.==Dieses Interface erlaubt den Zugriff auf die Inhalte der phpBB3 Forum Software.
 If you read from a imported database, here are some hints to get around problems when importing dumps in phpMyAdmin:==Wenn aus einer importierten Datenbank gelesen werden soll sind hier einige Hinweise, um Probleme zu vermeiden wenn Datenbankdumps in phpMyAdmin importiert werden.
-before importing large database dumps, set==Bevor gro&szlig;e Datenbankdumps importiert werden, folgende Werte
-in phpmyadmin/config.inc.php and place your dump file in /tmp. Otherwise it is not possible to upload files larger than 2MB.==in die Datei phpmyadmin/config.inc.php schreiben und die Datenbank Datei in /tmp ablegen. Andernfalls ist es nicht möglich Dateien größer als 2MB hochzuladen.
+before importing large database dumps, set==Bevor große Datenbankdumps importiert werden die folgende Zeile
+in phpmyadmin/config.inc.php and place your dump file in /tmp \(Otherwise it is not possible to upload files larger than 2MB\)==in die Datei phpmyadmin/config.inc.php schreiben und die Datenbank Datei in /tmp ablegen (Andernfalls ist es nicht möglich Dateien größer als 2MB hochzuladen)
 deselect the partial import flag==Den teilweisen Import Flag abschalten
 When a export is started, surrogate files are generated into DATA/SURROGATE/in which are automatically fetched by an indexer thread.==Wenn ein Export gestartet wird werden Hilfsdateien in DATA/SURROGATE/in erzeugt, die automatisch von einem Indexer Thread geholt und verarbeitet werden.
 All indexed surrogate files are then moved to DATA/SURROGATE/out and can be re-cycled when a index is deleted.==Alle indexierten Hilfsdateien werden dann nach DATA/SURROGATE/out verschoben und können recycelt werden wenn ein Index gelöscht wird.
@@ -2261,6 +2338,7 @@ Memory Usage==Speicherverbrauch
 free:==Frei:
 total:==Total:
 max:==Maximal:
+
 Configure==Einstellen
 Reset</a>==Zurücksetzen</a>
 Incoming Connections==Eingehende Verbindungen
@@ -2831,6 +2909,14 @@ Crawl Start \(Advanced\)==Crawl starten (Erweitert)
 Indexing of Media Wikis==Indexierung von Media Wikis
 Indexing of phpBB3 Forums==Indexierung von phpBB3 Foren
 Scraping Proxy Configuration==Indexierung per Proxy
+#-----------------------------
+
+#File: env/templates/submenuPortalIntegration.template
+#---------------------------
+Search Portal Integration==Suchportal Integration
+Live Search Anywhere==Live Suche Überall
+Generic Search Portal==Generisches Suchportal
+Search Box Anywhere==Such-Box Überall
 #-----------------------------
 
 #File: env/templates/submenuPublication.template
