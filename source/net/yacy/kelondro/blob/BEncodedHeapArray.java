@@ -52,6 +52,7 @@ public class BEncodedHeapArray {
     
     public BEncodedHeapArray(final File location, final int keymaxlen) {
         this.location = new File(location.getAbsolutePath());
+        if (!this.location.exists()) this.location.mkdirs();
         this.keymaxlen = keymaxlen;
         this.tables = new ConcurrentHashMap<String, BEncodedHeap>();
         String[] files = this.location.list();

@@ -555,17 +555,22 @@ public class HeapReader {
                 final int keylen1 = this.keylen - 1;
                 while (true) {
                     int len = is.readInt();
-                    if (len == 0) continue;
-                    b = is.readByte(); // check for empty record
+                    if (len == 0) continue; // rare, but possible: zero length record (takes 4 bytes)
+                    b = is.readByte();      // read a single by te to check for empty record
                     if (b == 0) {
+                        // this is empty
                         // read some more bytes to consume the empty record
-                        is.skip(len - 1);
+                        is.skip(len - 1);   // all that is remaining
                         continue;
                     }
+                    // we are now ahead of remaining this.keylen - 1 bytes of the key
                     key = new byte[this.keylen];
-                    key[0] = b;
-                    if (is.read(key, 1, keylen1) < keylen1) return null;
-                    payload = new byte[len - this.keylen];
+                    key[0] = b;             // the first entry that we know already
+                    if (is.read(key, 1, keylen1) < keylen1) return null; // read remaining key bytes
+                    // so far we have read this.keylen - 1 + 1 = this.keylen bytes.
+                    // there must be a remaining number of len - this.keylen bytes left for the BLOB
+                    if (len < this.keylen) return null;    // a strange case that can only happen in case of corrupted data
+                    payload = new byte[len - this.keylen]; // the remaining record entries
                     if (is.read(payload) < payload.length) return null;
                     return new entry(key, payload);
                 }
@@ -573,6 +578,22 @@ public class HeapReader {
                 return null;
             }
         }
+        
+        /* the old code:
+         
+           private Map.Entry<byte[], byte[]> next0() {
+            try {
+                while (true) {
+                    int len = is.readInt();
+                    byte[] key = new byte[this.keylen];
+                    if (is.read(key) < key.length) return null;
+                    byte[] payload = new byte[len - this.keylen];
+                    if (is.read(payload) < payload.length) return null;
+                    if (key[0] == 0) continue; // this is an empty gap
+                    return new entry(key, payload);
+                }
+            }
+         */        
         
         public Map.Entry<byte[], byte[]> next() {
             final Map.Entry<byte[], byte[]> n = this.nextEntry;

@@ -283,7 +283,7 @@ public class serverSwitch {
         if (f == null) {
             ret = null;
         } else {
-            ret = (f.isAbsolute() ? f : new File(this.rootPath, path));
+            ret = (f.isAbsolute() ? new File(f.getAbsolutePath()) : new File(this.rootPath, path));
         }
         
         return ret;

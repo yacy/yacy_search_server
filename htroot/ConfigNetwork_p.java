@@ -32,6 +32,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MapTools;
 import net.yacy.kelondro.workflow.BusyThread;
 
+import de.anomic.data.Tables;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
@@ -55,7 +56,7 @@ public class ConfigNetwork_p {
         if (post != null) {
             
             // store this call as api call
-            sb.recordAPICall(post, "ConfigNetwork.html", "configuration", "network settings");
+            sb.tables.recordAPICall(post, "ConfigNetwork.html", Tables.API_TYPE_CONFIGURATION, "network settings");
             
             if (post.containsKey("changeNetwork")) {
                 final String networkDefinition = post.get("networkDefinition", "defaults/yacy.network.freeworld.unit");

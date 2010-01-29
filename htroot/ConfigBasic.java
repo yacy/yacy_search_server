@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 
+import de.anomic.data.Tables;
 import de.anomic.data.translator;
 import de.anomic.http.server.HTTPDemon;
 import de.anomic.http.server.HTTPDFileHandler;
@@ -72,7 +73,7 @@ public class ConfigBasic {
         
         // store this call as api call
         if (post != null && post.containsKey("set")) {
-            sb.recordAPICall(post, "ConfigBasic.html", "configuration", "basic settings");
+            sb.tables.recordAPICall(post, "ConfigBasic.html", Tables.API_TYPE_CONFIGURATION, "basic settings");
         }
         
         //boolean doPeerPing = false;

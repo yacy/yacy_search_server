@@ -45,6 +45,7 @@ import net.yacy.kelondro.util.FileUtils;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.SitemapImporter;
 import de.anomic.crawler.retrieval.Request;
+import de.anomic.data.Tables;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.http.server.RequestHeader;
@@ -141,7 +142,7 @@ public class Crawler_p {
                     crawlingStart = (crawlingStartURL == null) ? null : crawlingStartURL.toNormalform(true, true);
                    
                     // store this call as api call
-                    sb.recordAPICall(post, "Crawler_p.html", "crawler", "crawl start for " + crawlingStartURL.getHost());
+                    sb.tables.recordAPICall(post, "Crawler_p.html", Tables.API_TYPE_CRAWLER, "crawl start for " + crawlingStart);
                     
                     // set new properties
                     final boolean fullDomain = post.get("range", "wide").equals("domain"); // special property in simple crawl start

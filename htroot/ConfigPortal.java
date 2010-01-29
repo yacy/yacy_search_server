@@ -25,6 +25,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import de.anomic.data.Tables;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
@@ -59,7 +60,7 @@ public class ConfigPortal {
             if (post.containsKey("searchpage_set")) {
                 String newGreeting = post.get(SwitchboardConstants.GREETING, "");
                 // store this call as api call
-                sb.recordAPICall(post, "ConfigPortal.html", "appearance", "new portal design. greeting: " + newGreeting);
+                sb.tables.recordAPICall(post, "ConfigPortal.html", Tables.API_TYPE_CONFIGURATION, "new portal design. greeting: " + newGreeting);
                 
                 sb.setConfig(SwitchboardConstants.GREETING, newGreeting);
                 sb.setConfig(SwitchboardConstants.GREETING_HOMEPAGE, post.get(SwitchboardConstants.GREETING_HOMEPAGE, ""));

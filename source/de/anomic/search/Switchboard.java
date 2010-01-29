@@ -70,12 +70,10 @@ import net.yacy.document.content.RSSMessage;
 import net.yacy.document.content.SurrogateReader;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.document.parser.xml.RSSFeed;
-import net.yacy.kelondro.blob.BEncodedHeapArray;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.meta.URIMetadataRow.Components;
 import net.yacy.kelondro.data.word.Word;
-import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
@@ -112,6 +110,7 @@ import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.LibraryProvider;
+import de.anomic.data.Tables;
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
@@ -132,7 +131,6 @@ import de.anomic.http.server.ResponseHeader;
 import de.anomic.http.server.RobotsTxtConfig;
 import de.anomic.net.UPnP;
 import de.anomic.search.blockrank.CRDistribution;
-import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.server.serverCore;
 import de.anomic.tools.crypt;
@@ -218,7 +216,7 @@ public final class Switchboard extends serverSwitch {
     public  Dispatcher                     dhtDispatcher;
     public  List<String>                   trail;
     public  yacySeedDB                     peers;
-    public  BEncodedHeapArray              tables;
+    public  Tables                         tables;
     
     public WorkflowProcessor<indexingQueueEntry> indexingDocumentProcessor;
     public WorkflowProcessor<indexingQueueEntry> indexingCondensementProcessor;
@@ -279,7 +277,7 @@ public final class Switchboard extends serverSwitch {
         this.log.logConfig("Dictionaries Path:" + this.dictionariesPath.toString());
         
         // init tables
-        this.tables = new BEncodedHeapArray(this.workPath, 12);
+        this.tables = new Tables(this.workPath);
         
         // init libraries
         this.log.logConfig("initializing libraries");
@@ -2100,26 +2098,7 @@ public final class Switchboard extends serverSwitch {
         }
         yacyCore.log.logInfo("BOOTSTRAP: " + (peers.sizeConnected() - sc) + " new seeds while bootstraping.");
     }
-    
-    
-    public void recordAPICall(final serverObjects post, final String servletName, String type, String comment) {
-        String apiurl = /*"http://localhost:" + getConfig("port", "8080") +*/ "/" + servletName + "?" + post.toString();
-        try {
-            sb.tables.insert(
-                    "api",
-                    "type", type.getBytes(),
-                    "comment", comment.getBytes(),
-                    "date", DateFormatter.formatShortMilliSecond(new Date()).getBytes(),
-                    "url", apiurl.getBytes()
-                    );
-        } catch (RowSpaceExceededException e2) {
-            Log.logException(e2);
-        } catch (IOException e2) {
-            Log.logException(e2);
-        }
-        Log.logInfo("APICALL", apiurl);
-    }
-    
+
     public void checkInterruption() throws InterruptedException {
         final Thread curThread = Thread.currentThread();
         if ((curThread instanceof WorkflowThread) && ((WorkflowThread)curThread).shutdownInProgress()) throw new InterruptedException("Shutdown in progress ...");
