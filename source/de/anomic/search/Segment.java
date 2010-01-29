@@ -371,7 +371,7 @@ public class Segment {
         final URIMetadataRow entry = urlMetadata().load(urlhash, null, 0);
         if (entry == null) return 0;
         final URIMetadataRow.Components metadata = entry.metadata();
-        if (metadata.url() == null) return 0;
+        if (metadata == null || metadata.url() == null) return 0;
         
         InputStream resourceContent = null;
         try {

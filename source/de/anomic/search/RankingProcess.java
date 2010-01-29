@@ -44,6 +44,7 @@ import java.util.concurrent.TimeUnit;
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadataRow.Components;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceVars;
@@ -393,7 +394,7 @@ public final class RankingProcess extends Thread {
             final URIMetadataRow.Components metadata = page.metadata();
             
             // check url constraints
-            if (metadata.url() == null) {
+            if (metadata == null || metadata.url() == null) {
                 continue; // rare case where the url is corrupted
             }
             
@@ -583,10 +584,13 @@ public final class RankingProcess extends Thread {
         URIMetadataRow mr;
         DigestURI url;
         String hostname;
+        Components metadata;
         loop: for (int i = 0; i < rc; i++) {
             mr = this.query.getSegment().urlMetadata().load(hsa[i].hashsample, null, 0);
             if (mr == null) continue;
-            url = mr.metadata().url();
+            metadata = mr.metadata();
+            if (metadata == null) continue;
+            url = metadata.url();
             if (url == null) continue;
             hostname = url.getHost();
             if (hostname == null) continue;

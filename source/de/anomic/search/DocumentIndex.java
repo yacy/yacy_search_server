@@ -40,6 +40,7 @@ import net.yacy.document.TextParser;
 import net.yacy.document.ParserException;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadataRow.Components;
 import net.yacy.kelondro.logging.Log;
 
 
@@ -179,8 +180,11 @@ public class DocumentIndex extends Segment {
     public ArrayList<File> find(String querystring, int pos, int count) {
         ArrayList<URIMetadataRow> result = findMetadata(querystring, this);
         ArrayList<File> files = new ArrayList<File>();
+        Components metadata;
         for (URIMetadataRow row : result) {
-            files.add(row.metadata().url().getLocalFile());
+            metadata = row.metadata();
+            if (metadata == null) continue;
+            files.add(metadata.url().getLocalFile());
             count--;
             if (count == 0) break;
         }

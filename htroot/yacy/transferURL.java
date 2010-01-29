@@ -109,7 +109,7 @@ public final class transferURL {
                 
                 // check if entry is well-formed
                 final URIMetadataRow.Components metadata = lEntry.metadata();
-                if (metadata.url() == null) {
+                if (metadata == null || metadata.url() == null) {
                     yacyCore.log.logWarning("transferURL: received invalid URL from peer " + otherPeerName + "\n\tURL Property: " + urls);
                     blocked++;
                     continue;

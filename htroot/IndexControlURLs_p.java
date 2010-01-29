@@ -323,7 +323,7 @@ public class IndexControlURLs_p {
         }
         final URIMetadataRow.Components metadata = entry.metadata();
         final URIMetadataRow le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != Word.commonHashLength)) ? null : segment.urlMetadata().load(entry.referrerHash(), null, 0);
-        if (metadata.url() == null) {
+        if (metadata == null || metadata.url() == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);
             return prop;

@@ -218,7 +218,7 @@ public class MapHeap {
     }
     
     private String normalizeKey(String key) {
-        if (blob == null) return key;
+        if (blob == null || key == null) return key;
     	if (key.length() > blob.keylength()) key = key.substring(0, blob.keylength());
         while (key.length() < blob.keylength()) key += fillchar;
         return key;

@@ -556,6 +556,7 @@ public final class yacyClient {
 			assert (urlEntry.hash().length() == 12) : "urlEntry.hash() = " + urlEntry.hash();
 			if (urlEntry.hash().length() != 12) continue; // bad url hash
 			final URIMetadataRow.Components metadata = urlEntry.metadata();
+			if (metadata == null) continue;
 			if (blacklist.isListed(Blacklist.BLACKLIST_SEARCH, metadata.url())) {
 				yacyCore.log.logInfo("remote search (client): filtered blacklisted url " + metadata.url() + " from peer " + target.getName());
 				continue; // block with backlist

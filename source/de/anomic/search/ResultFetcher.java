@@ -201,6 +201,7 @@ public class ResultFetcher {
 
         long startTime = System.currentTimeMillis();
         final URIMetadataRow.Components metadata = page.metadata();
+        if (metadata == null) return null;
         final long dbRetrievalTime = System.currentTimeMillis() - startTime;
         
         if (snippetMode == 0) {

@@ -307,6 +307,7 @@ public class URIMetadataRow implements URIMetadata {
         // generate a parseable string; this is a simple property-list
         final Components metadata = this.metadata();
         final StringBuilder s = new StringBuilder(300);
+        if (metadata == null) return null;
         //System.out.println("author=" + comp.author());
         try {
             s.append("hash=").append(hash());

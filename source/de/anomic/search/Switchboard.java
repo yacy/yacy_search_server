@@ -73,6 +73,7 @@ import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.blob.BEncodedHeapArray;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.data.meta.URIMetadataRow.Components;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -997,8 +998,10 @@ public final class Switchboard extends serverSwitch {
         final DigestURI ne = crawlQueues.getURL(urlhash);
         if (ne != null) return ne;
         final URIMetadataRow le = indexSegments.urlMetadata(process).load(urlhash, null, 0);
-        if (le != null) return le.metadata().url();
-        return null;
+        if (le == null) return null;
+        Components metadata = le.metadata();
+        if (metadata == null) return null;
+        return metadata.url();
     }
     
     public RankingProfile getRanking() {
