@@ -1688,9 +1688,9 @@ Memory Settings==Speicher Einstellungen
 Memory reserved for JVM==Für JVM reservierter Speicher
 "Set"=="Setzen"
 Resource Observer==Ressourcen Beobachter
-DHT-Trigger==DHT-Schalter
-not triggered:==nicht aktiv:
-triggered==aktiv
+DHT-Trigger==DHT-Umschalter
+not triggered:==nicht ausgelöst:
+triggered==ausgelöst
 reset state==Status zurücksetzen
 HDD==Festplattenspeicher
 disable crawls below==Deaktivere Crawls unter
