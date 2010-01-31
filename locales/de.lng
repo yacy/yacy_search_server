@@ -94,7 +94,7 @@ Add new pattern:==Neuen Eintrag hinzufügen:
 "Add URL pattern"=="URL hinzufügen"
 The right \'\*\', after the \'\/\', can be replaced by a <a href=\"http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html\">regex</a>.==Der rechte Asterisk '*', nach dem '/', kann durch einen <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/util/regex/Pattern.html">regulären Ausdruck</a> ersetzt werden.
 domain.net\/fullpath<==domain.de/vollerpfad<
-domain.net\/\*<==domain.de/*<
+>domain.net\/\*<==>domain.de/*<
 \*.domain.net\/\*<==*.domain.de/*<
 \*.sub.domain.net\/\*<==*.sub.domain.de/*<
 #sub.domain.\*\/\*<==sub.domain.*/*<
@@ -239,6 +239,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 <h3>Bookmarks==<h3>Lesezeichen
 Bookmarks \(==Lesezeichen \(
 #Login==Login
+List Bookmarks==Lesezeichen Liste
 Add Bookmark==Lesezeichen hinzufügen
 Import Bookmarks==Lesezeichen importieren
 Import XML Bookmarks==Importiere XML-Lesezeichen
@@ -246,7 +247,7 @@ Import HTML Bookmarks==Importiere HTML-Lesezeichen
 "import"=="Importieren"
 Default Tags:==Standard Tag
 imported==importiert
-Edit Bookmark==Lesezeichen bearbeiten
+#Edit Bookmark==Lesezeichen bearbeiten
 #URL:==URL:
 Title:==Titel:
 Description:==Beschreibung:
@@ -274,7 +275,7 @@ next page==nächste Seite
 All==Alle
 Show==Zeige
 Bookmarks per page.==Lesezeichen pro Seite.
-unsorted==unsortiert
+#unsorted==unsortiert
 #-----------------------------
 
 #File: Collage.html
@@ -1260,8 +1261,6 @@ Statistics about the top-\#\[domains\]\# domains in the database:==Statistik üb
 #Domain==Domain
 #URLs==URLs
 Sequential List of URL-Hashes==aufeinanderfolgende Liste der URL-Hashes
-#Finished export of \#\[urlcount\]\# URLs to file \#\[exportfile\]\#==Export von #[urlcount]# nach Datei #[exportfile]# wurde beendet
-Export to file \#\[exportfile\]\# failed==Export nach Date #[exportfile]# fehlgeschlagen
 Loaded URL Export==Export geladener URLs
 Export File==Export-Datei
 #URL Filter==URL Filter
@@ -1337,10 +1336,10 @@ The URL stub==Der Teil der URL
 like http://forum.yacy-websuche.de==wie z.B. http://forum.yacy-websuche.de
 this must be the path right in front of '\/viewtopic.php\?'==dies muss den kompletten Pfad vor '\/viewtopic.php\?' enthalten
 Type==Typ
-of database==der Datenbank
+> of database<==> der Datenbank<
 use either 'mysql' or 'pgsql'==Verwende entweder 'mysql' oder 'pgsql'
 Host=Hostname
-of the database==der Datenbank
+> of the database<==> der Datenbank<
 of database service==des Datenbank Dienstes
 (usually 3306 for mySQL)==(normalerweise 3306 für MySQL)
 Name of the database==Name der Datenbank
@@ -2621,8 +2620,9 @@ change date==Änderungsdatum
 Edit<==Bearbeiten<
 only granted to admin==nur als Admin erlaubt
 Grant Write Access to==Erlaube es folgenden Benutzern das Wiki zu bearbeiten 
-"all"=="Allen"
-"admin"=="Administrator"
+# !!! Do not translate the input buttons because that breaks the function to switch rights !!!
+#"all"=="Allen"
+#"admin"=="Administrator"
 Start Page==Startseite
 #Index==Index
 Versions==Versionen
@@ -2670,7 +2670,7 @@ something==etwas
 another thing==was anderes
 and yet another==und wieder was anderes
 something else==irgendwas
-These tags create a unnumbered list.==Diese Tags erstellen eine unnummerierte Liste.
+These tags create an unnumbered list.==Diese Tags erstellen eine unnummerierte Liste.
 word==Wort
 \:definition==:Definition
 These tags create a definition list.==Diese Tags erstellen eine definierte Liste.
@@ -2774,8 +2774,8 @@ YaCy Network==YaCy Netzwerk
 Web Visualization==Internet Visualisierung
 Access Tracker==Zugriffe
 #Server Log==Server Log
-News Monitor==News Anzeige
-Cookies in Proxy==Cookies per Proxy
+#News Monitor==News Anzeige
+#Cookies in Proxy==Cookies per Proxy
 Search Integration==Suchintegration
 Search Portals==Such Portale
 Customization==Anpassungen
@@ -2858,7 +2858,6 @@ Processing Monitor==Prozess Monitor
 Crawler Queues==Crawler Puffer
 Loader<==Lade Puffer<
 Parser Errors==Parser Fehler
-Queues==Warteschlangen
 Local<==Lokal<
 #Global==Global
 #Remote==Remote
@@ -2879,9 +2878,6 @@ User Profile==Benutzerprofil
 #Index Administration==Index Administration
 #RWI Admin==RWI Admin
 URL Reference Admin==URL Referenzen Admin
-Queue Import==Puffer Import
-#Index Transfer==Index Transfer
-#Index Cleaner==Index Aufräumer
 #-----------------------------
 
 #File: env/templates/submenuIndexCreate.template
@@ -2899,7 +2895,7 @@ Queue Import==Puffer Import
 #Global<==Global<
 #Remote<==Remote<
 #Overhang<==Überhang<
-Media Crawl Queues==Medien Crawl-Puffer
+#Media Crawl Queues==Medien Crawl-Puffer
 #>Images==>Bilder
 #>Movies==>Filme
 #>Music==>Musik
@@ -2985,12 +2981,30 @@ PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==BITTE ERSET
 &lt;YaCy-application-home&gt;<strong>\#\[wwwpath\]\#</strong>==&lt;YaCy-Programmpfad&gt;<strong>#[wwwpath]#</strong> ABLEGEN.
 #-----------------------------
 
+#File: yacy/ui/js/jquery-flexigrid.js
+#---------------------------
+'Displaying \{from\} to \{to\} of \{total}\ items'=='Zeige {from} bis {to} von {total} Elementen'
+'Processing, please wait ...'=='In Bearbeitung. Bitte warten ...'
+'No items'=='Keine Elemente'
+#-----------------------------
+
+#File: yacy/ui/js/jquery-ui-1.7.2.min.js
+#---------------------------
+Loading&#8230;==Lade&#8230;
+#-----------------------------
+
+#File: yacy/ui/js/jquery.ui.all.min.js
+#---------------------------
+Loading&#8230;==Lade&#8230;
+#-----------------------------
+
 #File: yacy/ui/index.html
 #---------------------------
 About YaCy-UI==Über YaCy-UI
 Admin Console==Admin Konsole
 "Bookmarks"=="Lesezeichen"
->Bookmarks==>Lesezeichen				
+>Bookmarks==>Lesezeichen
+#Server Log==Server Log
 #-----------------------------
 
 #File: yacy/ui/yacyui-admin.html
@@ -3008,19 +3022,19 @@ Monitoring==Überwachung
 YaCy Network==YaCy Netzwerk
 >Settings==>Einstellungen
 "Basic Settings"=="Eingangskonfiguration"
-#Basic==Basis
+\tBasic==Basis
 Accounts==Konten
 "Network"=="Netzwerk"
-#Network==Netzwerk
+\tNetwork==Netzwerk
 "Advanced Settings"=="Erweiterte Einstellungen"
-#Advanced==Erweitert
+\tAdvanced==Erweitert
 "Update Settings"=="System Aktualisierung"
-#Update==Aktualisierung
+\tUpdate==Aktualisierung
 >YaCy Project==>YaCy Projekt
 "YaCy Project Home"=="YaCy Projekt Homepage"
-#Project==Projekt
+\tProject==Projekt
 "YaCy Statistics"=="YaCy Statistiken"
-#Statistics==Statistiken
+\tStatistics==Statistiken
 "YaCy Forum"=="YaCy Forum"
 #Forum==Forum
 "Help"=="Hilfe"
@@ -3045,6 +3059,12 @@ Accounts==Konten
 #>Title==>Titel
 #>Tags==>Tags
 #>Date==>Datum
+#'Hash'=='Hash'
+'Public'=='Öffentlich'
+'Title'=='Titel'
+#'Tags'=='Tags'
+'Folders'=='Ordner'
+'Date'=='Datum'
 #-----------------------------
 
 #File: yacy/ui/sidebar/sidebar_1.html
@@ -3070,6 +3090,7 @@ Bookmark Folders==Lesezeichen Ordner
 
 #File: yacy/ui/sidebar/sidebar_2.html
 #---------------------------
+Bookmark Tags<==Lesezeichen Tags<
 Search Options==Suchoptionen
 Constraint:==Einschränkungen:
 all pages==alle Seiten
@@ -3077,7 +3098,18 @@ index pages==Index Seiten
 URL mask:==URL Filter:
 Prefer mask:==Vorzugsmaske:
 Bookmark TagCloud==Lesezeichen TagWolke
+Topwords<==Top Wörter<
 alt="help"==alt="Hilfe"
 title="help"==title="Hilfe"
 #-----------------------------
+
+#File: yacy/ui/yacyui-welcome.html
+#---------------------------
+>Overview==>Übersicht
+YaCy-UI is going to be a JavaScript based client for YaCy based on the existing XML and JSON API.==YaCy-UI wird ein in JavaScript geschriebener Client für YaCy, der auf der existierenden XML und JSON API aufbaut.
+YaCy-UI is at most alpha status, as there is still problems with retriving the search results.==YaCy-UI ist bestenfalls im Alpha Stadium, da es immer noch Probleme beim Abholen der Suchergebnisse gibt.
+I am currently changing the backend to a more application friendly format and getting good results with it \(I will check that in some time after the stable release 0.7\).==Ich ändere gerade das Backend in ein andwendungsfreundlicheres Format und bekomme gute Ergebnisse damit (Ich werde die Änderungen einige Zeit nach der Veröffentlichung der stabilen Version 0.7 einchecken).
+For now have a look at the bookmarks, performance has increased significantly, due to the use of JSON and Flexigrid!==Aktuell können Sie sich die Lesezeichen ansehen - Die Performance hat sich signifikant gebessert durch die Verwendung von JSON und Flexigrid!
+#-----------------------------
+
 # EOF
