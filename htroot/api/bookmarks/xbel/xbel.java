@@ -59,7 +59,7 @@ public class xbel {
     	}
     	prop.put("style", style);
     	R = root.replaceAll("[^/]","").length() - 1;
-    	count = recurseFolders(switchboard.bookmarksDB.getFolderList(root, isAdmin),root,0,true,"");
+    	count = recurseFolders(BookmarkHelper.getFolderList(root, switchboard.bookmarksDB.getTagIterator(isAdmin)),root,0,true,"");
         prop.put("xbel", count);
     	return prop;    // return from serverObjects respond()    
     }

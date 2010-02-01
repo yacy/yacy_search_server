@@ -108,7 +108,7 @@ public class get_bookmarks {
        		}
        		prop.putHTML("display_folder", "0");
        		R = root.replaceAll("[^/]","").length() - 1;
-        	count = recurseFolders(sb.bookmarksDB.getFolderList(root, isAdmin),root,0,true,"");
+        	count = recurseFolders(BookmarkHelper.getFolderList(root, sb.bookmarksDB.getTagIterator(isAdmin)),root,0,true,"");
             prop.put("display_xbel", count);        	 
        		break;
        	

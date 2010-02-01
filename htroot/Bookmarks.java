@@ -349,7 +349,7 @@ public class Bookmarks {
 	    	//-----------------------
 	       	
 	       	count = 0;
-	       	count = recurseFolders(sb.bookmarksDB.getFolderList(isAdmin),"/",0,true,"");
+	       	count = recurseFolders(BookmarkHelper.getFolderList("/", sb.bookmarksDB.getTagIterator(isAdmin)), "/", 0, true, "");
 	       	prop.put("display_folderlist", count);
     	}
        	return prop;    // return from serverObjects respond()

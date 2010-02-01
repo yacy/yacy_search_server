@@ -2,6 +2,7 @@
 
 import java.util.Iterator;
 
+import de.anomic.data.BookmarkHelper;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.userDB;
 import de.anomic.http.server.RequestHeader;
@@ -49,7 +50,7 @@ public class get_folders {
     	Iterator<String> it = null;
     	
     	// loop through folderList
-    	it = sb.bookmarksDB.getFolderList(root, isAdmin);    	
+    	it = BookmarkHelper.getFolderList(root, sb.bookmarksDB.getTagIterator(isAdmin));    	
     	int n = root.split("/").length;
     	if (n == 0) n = 1;
     	int count = 0;

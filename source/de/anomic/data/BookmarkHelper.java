@@ -34,8 +34,10 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.Map.Entry;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -49,6 +51,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.anomic.data.bookmarksDB.Bookmark;
+import de.anomic.data.bookmarksDB.Tag;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -248,5 +251,27 @@ public class BookmarkHelper {
         }
         
         return importCount;
+    }
+    
+    public static Iterator<String> getFolderList(final String root, Iterator<Tag> tagIterator) {
+        
+        final Set<String> folders = new TreeSet<String>();
+        String path = "";
+        Tag tag;
+        
+        while (tagIterator.hasNext()) {
+            tag=tagIterator.next();          
+            if (tag.getFriendlyName().startsWith((root.equals("/") ? root : root+"/"))) {
+                path = tag.getFriendlyName();
+                path = BookmarkHelper.cleanTagsString(path);                  
+                while(path.length() > 0 && !path.equals(root)){
+                    folders.add(path);                  
+                    path = path.replaceAll("(/.[^/]*$)", "");   // create missing folders in path
+                }                   
+            }
+        }
+        if (!root.equals("/")) { folders.add(root); }
+        folders.add("\uffff");
+        return folders.iterator();      
     }
 }

@@ -55,7 +55,6 @@ import net.yacy.kelondro.workflow.InstantBusyThread;
 
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Request;
-import de.anomic.data.BookmarkDate.Entry;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacyNewsPool;
@@ -97,7 +96,7 @@ public class bookmarksDB {
         // tags
         tags = new ConcurrentHashMap<String, Tag>();
         Log.logInfo("BOOKMARKS", "started init of tags from bookmarks.db...");
-        final Iterator<Bookmark> it = bookmarkIterator(true);
+        final Iterator<Bookmark> it = new bookmarkIterator(true);
         Bookmark bookmark;
         Tag tag;
         String[] tags;
@@ -111,7 +110,7 @@ public class bookmarksDB {
                     tag = new Tag(tags[i]);
                 }
                 tag.addUrl(bookmark.getUrlHash());
-                saveTag(tag);
+                putTag(tag);
             }
         }
         Log.logInfo("BOOKMARKS", "finished init " + this.tags.size() + " tags using your "+bookmarks.size()+" bookmarks.");        
@@ -120,7 +119,7 @@ public class bookmarksDB {
         final boolean datesExisted = datesFile.exists();
         //this.datesTable = new MapView(BLOBTree.toHeap(datesFile, true, true, 20, 256, '_', NaturalOrder.naturalOrder, datesFileNew), 500, '_');
         this.dates = new BookmarkDate(datesFile);
-        if (!datesExisted) this.dates.init(bookmarkIterator(true));
+        if (!datesExisted) this.dates.init(new bookmarkIterator(true));
 
         // autoReCrawl
         Switchboard sb = Switchboard.getSwitchboard();
@@ -299,37 +298,6 @@ public class bookmarksDB {
        	return;
     } // } autoReCrawl() 
     
-    // -------------------------------------
-	// bookmarksDB's public helper functions
-	// -------------------------------------
-    
-    public Iterator<String> getFolderList(final boolean priv){    
-    	return getFolderList("/", priv);    	
-    }
-    
-    public Iterator<String> getFolderList(final String root, final boolean priv){
-        
-    	final Set<String> folders = new TreeSet<String>();
-    	String path = "";   	
-    	final Iterator<Tag> it = this.getTagIterator(priv);
-    	Tag tag;
-    	
-    	while(it.hasNext()){
-    		tag=it.next();    		
-    		if (tag.getFriendlyName().startsWith((root.equals("/") ? root : root+"/"))) {
-    			path = tag.getFriendlyName();
-    			path = BookmarkHelper.cleanTagsString(path);                  
-    			while(path.length() > 0 && !path.equals(root)){
-    				folders.add(path);    				
-    				path = path.replaceAll("(/.[^/]*$)", "");	// create missing folders in path
-    			}       			
-    		}
-    	}
-    	if (!root.equals("/")) { folders.add(root); }
-    	folders.add("\uffff");
-    	return folders.iterator();    	
-    }
- 
     // -----------------------------------------------------------
 	// bookmarksDB's functions for bookmarksTable / bookmarkCache
 	// ----------------------------------------------------------- 
@@ -380,7 +348,7 @@ public class bookmarksDB {
             tag=getTag(BookmarkHelper.tagHash(it.next()));
             if(tag!=null){
                 tag.delete(urlHash);
-                saveTag(tag);
+                putTag(tag);
             }
         }
         Bookmark b;
@@ -393,17 +361,15 @@ public class bookmarksDB {
         return b != null;
     }
     
-    public Iterator<Bookmark> bookmarkIterator(final boolean up){
-    	try {
-            return new bookmarkIterator(up);
-        } catch (final IOException e) {
-            return new HashSet<Bookmark>().iterator();
-        }
-    }
-    
-    public Iterator<String> getBookmarksIterator(final boolean priv){
+    public Iterator<String> getBookmarksIterator(final boolean priv) {
         final TreeSet<String> set=new TreeSet<String>(new bookmarkComparator(true));
-        final Iterator<Bookmark> it=bookmarkIterator(true);
+        Iterator<Bookmark> it;
+        try {
+            it = new bookmarkIterator(true);
+        } catch (IOException e) {
+            Log.logException(e);
+            return set.iterator();
+        }
         Bookmark bm;
         while(it.hasNext()){
             bm=it.next();
@@ -447,29 +413,18 @@ public class bookmarksDB {
     }
     
     /**
-     * load/retrieve an object of type Tag from the tagsTable (also save it in tagCache)
-     * @param hash an object of type String, containing a tagHash
-     */
-    private Tag loadTag(final String hash){
-        return this.tags.get(hash);
-    }
-    
-    /**
      * retrieve an object of type Tag from the the tagCache, if object is not cached return loadTag(hash)
      * @param hash an object of type String, containing a tagHash
      */
     public Tag getTag(final String hash){
-        if(tags.containsKey(hash)){
-            return tags.get(hash);
-        }
-        return loadTag(hash); //null if it does not exists
+        return this.tags.get(hash); //null if it does not exists
     }
     
     /**
      * store a Tag in tagsTable or remove an empty tag
      * @param tag an object of type Tag to be stored/removed
      */
-    public void storeTag(final Tag tag){
+    public void putTag(final Tag tag){
     	if (tag == null) return;
         if (tag.size() > 0) {
             this.tags.put(tag.getTagHash(), tag);
@@ -478,43 +433,22 @@ public class bookmarksDB {
         }
     }
     
-    /**
-     * save a Tag in tagCache; see also flushTagCache(), addTag(), loadTag() 
-     * @param tag an object of type Tag to be saved in tagCache
-     */
-    public void saveTag(final Tag tag) {
-        if (tag != null) {
-            tags.put(tag.getTagHash(), tag);
-        }
-    }
-    
-    public String addTag(final Tag tag) {		// TODO: is addTag() really needed - check storeTag() and saveTag()
-    	//tagsTable.set(tag.getTagName(), tag.getMap());
-        //tagCache.put(tag.getTagHash(), tag);
-    	saveTag(tag);
-        return tag.getTagName();
-    }
-    
     public void removeTag(final String hash) {
         tags.remove(hash);
     }
     
-    public Iterator<Tag> tagIterator(final boolean up) {
-        return this.tags.values().iterator();
-    }
-    
     public Iterator<Tag> getTagIterator(final boolean priv) {
-    	return getTagIterator(priv,1);
+    	return getTagIterator(priv, 1);
     }
     
-    public Iterator<Tag> getTagIterator(final boolean priv, final int c) {
+    private Iterator<Tag> getTagIterator(final boolean priv, final int c) {
     	final TreeSet<Tag> set=new TreeSet<Tag>((c == SORT_SIZE) ? tagSizeComparator : tagComparator);
-    	final Iterator<Tag> it = tagIterator(true);
+    	final Iterator<Tag> it = this.tags.values().iterator();
     	Tag tag;
-    	while(it.hasNext()){
+    	while (it.hasNext()) {
     		tag=it.next();
     		if (tag == null) continue;
-    		if(priv ||tag.hasPublicItems()){
+    		if (priv ||tag.hasPublicItems()) {
     			set.add(tag);
     		}
     	}    	  		
@@ -534,7 +468,7 @@ public class bookmarksDB {
     	return set.iterator();
     }
     
-    public Iterator<Tag> getTagIterator(final String tagName, final boolean priv, final int comp){
+    public Iterator<Tag> getTagIterator(final String tagName, final boolean priv, final int comp) {
     	final TreeSet<Tag> set=new TreeSet<Tag>((comp == SORT_SIZE) ? tagSizeComparator : tagComparator);
     	Iterator<String> it=null;
     	final Iterator<String> bit=getBookmarksIterator(tagName, priv);
@@ -555,9 +489,8 @@ public class bookmarksDB {
     	return set.iterator();
     }
     
-    public Iterator<Tag> getTagIterator(final String tagName, final boolean priv, final int comp, final int max){
-    	if (max==SHOW_ALL) 
-    		return getTagIterator(priv, comp);
+    public Iterator<Tag> getTagIterator(final String tagName, final boolean priv, final int comp, final int max) {
+    	if (max==SHOW_ALL) return getTagIterator(priv, comp);
    		final Iterator<Tag> it = getTagIterator(tagName, priv, SORT_SIZE); 		
    		final TreeSet<Tag> set=new TreeSet<Tag>((comp == SORT_SIZE) ? tagSizeComparator : tagComparator);
    		int count = 0;
@@ -594,7 +527,8 @@ public class bookmarksDB {
     	}
     	return false;
     }
-    public void addTag(final String selectTag, final String newTag){    		
+    
+    public void addTag(final String selectTag, final String newTag) {    		
     	final Iterator<String> it = getTag(BookmarkHelper.tagHash(selectTag)).getUrlHashes().iterator();	// get urlHashes for selectTag        
     	Bookmark bookmark;
     	while (it.hasNext()) {	// looping through all bookmarks which were tagged with selectTag
@@ -626,6 +560,7 @@ public class bookmarksDB {
             else
                 urlHashes = new HashSet<String>();
         }
+        
         public Tag(final String name, final HashSet<String> entries){
             tagHash=BookmarkHelper.tagHash(name);
             mem=new HashMap<String, String>();
@@ -633,6 +568,7 @@ public class bookmarksDB {
             urlHashes=entries;
             mem.put(TAG_NAME, name);
         }
+        
         public Tag(final String name){
             tagHash=BookmarkHelper.tagHash(name);
             mem=new HashMap<String, String>();
@@ -644,6 +580,7 @@ public class bookmarksDB {
             mem.put(URL_HASHES, listManager.collection2string(this.urlHashes));
             return mem;
         }
+        
         /**
          * get the lowercase Tagname
          */
@@ -654,9 +591,11 @@ public class bookmarksDB {
             return "";*/
             return getFriendlyName().toLowerCase();
         }
+        
         public String getTagHash(){
             return tagHash;
         }
+        
         /**
          * @return the tag name, with all uppercase chars
          */
@@ -670,9 +609,11 @@ public class bookmarksDB {
             }
             return "notagname";
         }
+        
         public Set<String> getUrlHashes(){
             return urlHashes;
         }
+        
         public boolean hasPublicItems(){
         	final Iterator<String> it=getBookmarksIterator(this.getTagName(), false);
         	if(it.hasNext()){
@@ -680,12 +621,15 @@ public class bookmarksDB {
         	}
         	return false;
         }
+        
         public void addUrl(final String urlHash){
             urlHashes.add(urlHash);
         }
+        
         public void delete(final String urlHash){
             urlHashes.remove(urlHash);
         }
+        
         public int size(){
             return urlHashes.size();
         }
@@ -695,6 +639,7 @@ public class bookmarksDB {
      * Subclass of bookmarksDB, which provides the Bookmark object-type
      */
     public class Bookmark {
+        
         public static final String BOOKMARK_URL="bookmarkUrl";
         public static final String BOOKMARK_TITLE="bookmarkTitle";
         public static final String BOOKMARK_DESCRIPTION="bookmarkDesc";
@@ -898,7 +843,7 @@ public class bookmarksDB {
                 }
                 tag.addUrl(getUrlHash());
                 if(local){
-                    saveTag(tag);
+                    putTag(tag);
                 }
             }
             toMap();
@@ -918,8 +863,9 @@ public class bookmarksDB {
      * Subclass of bookmarksDB, which provides the bookmarkIterator object-type
      */
     public class bookmarkIterator implements Iterator<Bookmark> {
+
         Iterator<byte[]> bookmarkIter;
-        //bookmarksDB.Bookmark nextEntry;
+        
         public bookmarkIterator(final boolean up) throws IOException {
             //flushBookmarkCache(); //XXX: this will cost performance
             this.bookmarkIter = bookmarksDB.this.bookmarks.keys(up, false);
@@ -946,14 +892,7 @@ public class bookmarksDB {
         }
         
         public void remove() {
-//            if (this.nextEntry != null) {
-//                try {
-//                    final Object bookmarkName = this.nextEntry.getUrlHash();
-//                    if (bookmarkName != null) removeBookmark((String) bookmarkName);
-//                } catch (final kelondroException e) {
-//                    //resetDatabase();
-//                }
-//            }
+            throw new UnsupportedOperationException();
         }
     }
     
@@ -1019,7 +958,7 @@ public class bookmarksDB {
     	
     }
     
-    public Entry getDate(final String date) {
+    public BookmarkDate.Entry getDate(final String date) {
         return dates.getDate(date);
     }
 }
