@@ -909,7 +909,8 @@ public final class Switchboard extends serverSwitch {
         final File bookmarksFile = new File(workPath, "bookmarks.heap");
         final File tagsFile = new File(workPath, "bookmarkTags.heap");
         final File datesFile = new File(workPath, "bookmarkDates.heap");
-        this.bookmarksDB = new bookmarksDB(bookmarksFile, tagsFile, datesFile);
+        tagsFile.delete();
+        this.bookmarksDB = new bookmarksDB(bookmarksFile, datesFile);
         this.log.logConfig("Loaded Bookmarks DB from files "+ bookmarksFile.getName()+ ", "+tagsFile.getName());
         this.log.logConfig(this.bookmarksDB.tagsSize()+" Tag, "+this.bookmarksDB.bookmarksSize()+" Bookmarks");
     }

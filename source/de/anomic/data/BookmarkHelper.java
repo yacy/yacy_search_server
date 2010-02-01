@@ -154,8 +154,6 @@ public class BookmarkHelper {
             
             importCount++;
         }
-
-        db.flushTagCache();
         
         return importCount;
     }
@@ -248,7 +246,6 @@ public class BookmarkHelper {
                 importCount += parseXMLimport(db, children.item(i), importPublic);
             }
         }
-        db.flushTagCache();
         
         return importCount;
     }
