@@ -2,6 +2,7 @@
 import java.util.HashMap;
 import java.util.Set;
 
+import de.anomic.data.BookmarkHelper;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.userDB;
@@ -45,7 +46,7 @@ public class add_p {
 			String tagsString = post.get("tags","");
 			String pathString = post.get("path","/unsorted");
 			tagsString=tagsString+","+pathString;
-			final Set<String> tags=listManager.string2set(bookmarksDB.cleanTagsString(tagsString)); 
+			final Set<String> tags=listManager.string2set(BookmarkHelper.cleanTagsString(tagsString)); 
 			final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url, username);
 			if(bookmark != null){
 				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);

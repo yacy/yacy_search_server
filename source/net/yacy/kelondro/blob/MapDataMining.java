@@ -371,12 +371,10 @@ public class MapDataMining extends MapHeap {
         // the key is also included in every map that is returned; it's key is 'key'
 
         Iterator<byte[]> keyIterator;
-        boolean finish;
         Map<String, String> n;
 
         public mapIterator(final Iterator<byte[]> keyIterator) {
             this.keyIterator = keyIterator;
-            this.finish = false;
             this.n = next0();
         }
 
@@ -391,21 +389,17 @@ public class MapDataMining extends MapHeap {
         }
         
         private Map<String, String> next0() {
-            if (finish) return null;
             if (keyIterator == null) return null;
             String nextKey;
             Map<String, String> map;
             while (keyIterator.hasNext()) {
                 nextKey = new String(keyIterator.next());
-                if (nextKey == null) {
-                    finish = true;
-                    return null;
-                }
                 try {
                     map = get(nextKey);
                 } catch (final IOException e) {
                     break;
                 }
+                assert map != null;
                 if (map == null) continue; // circumvention of a modified exception
                 map.put("key", nextKey);
                 return map;

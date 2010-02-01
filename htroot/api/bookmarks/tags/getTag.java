@@ -2,7 +2,6 @@
 import java.util.Iterator;
 
 import de.anomic.data.bookmarksDB;
-import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
@@ -18,7 +17,7 @@ public class getTag {
         final Switchboard switchboard = (Switchboard) env;
         final boolean isAdmin=switchboard.verifyAuthentication(header, true);
         final serverObjects prop = new serverObjects();
-        Iterator<Tag> it = null;
+        Iterator<bookmarksDB.Tag> it = null;
         String tagName = "";
         int top = SHOW_ALL;
         int comp = SORT_ALPHA;

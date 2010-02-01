@@ -45,6 +45,7 @@ import net.yacy.kelondro.util.FileUtils;
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.SitemapImporter;
 import de.anomic.crawler.retrieval.Request;
+import de.anomic.data.BookmarkHelper;
 import de.anomic.data.Tables;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
@@ -259,7 +260,7 @@ public class Crawler_p {
                             
                             if (reasonString == null) {
                             	// create a bookmark from crawl start url
-                            	Set<String> tags=listManager.string2set(bookmarksDB.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));                                
+                            	Set<String> tags=listManager.string2set(BookmarkHelper.cleanTagsString(post.get("bookmarkFolder","/crawlStart")));                                
                                 tags.add("crawlStart");
                             	if (post.get("createBookmark","off").equals("on")) {
                                 	bookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(crawlingStart, "admin");

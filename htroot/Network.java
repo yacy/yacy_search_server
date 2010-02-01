@@ -291,6 +291,7 @@ public class Network {
                     if(e != null) {
                     while (e.hasNext() && conCount < maxCount) {
                         seed = e.next();
+                        assert seed != null;
                         if (seed != null) {
                             if((post != null && post.containsKey("search"))  && peerSearchPattern != null /*(wrongregex == null)*/) {
                                 boolean abort = true;

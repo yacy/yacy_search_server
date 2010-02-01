@@ -6,6 +6,7 @@ import java.util.Iterator;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.DateFormatter;
 
+import de.anomic.data.BookmarkHelper;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.userDB;
 import de.anomic.http.server.RequestHeader;
@@ -96,7 +97,7 @@ public class get_bookmarks {
        		if (qtype.equals("tags") && !query.equals("")) {
        			prop.putHTML("display_folder", "1");
        			prop.putHTML("display_folder_foldername", query);
-       			prop.putHTML("display_folder_folderhash", bookmarksDB.tagHash(query));       			
+       			prop.putHTML("display_folder_folderhash", BookmarkHelper.tagHash(query));       			
        			it = sb.bookmarksDB.getBookmarksIterator(query, isAdmin);
 				count = print_XBEL(it, count);
 				prop.put("display_xbel", count);
@@ -202,7 +203,7 @@ public class get_bookmarks {
     	}
    
     	if(fn.startsWith((root.equals("/") ? root : root+"/"))){
-    		prop.put("display_xbel_"+count+"_elements", "<folder id=\""+bookmarksDB.tagHash(fn)+"\">");
+    		prop.put("display_xbel_"+count+"_elements", "<folder id=\""+BookmarkHelper.tagHash(fn)+"\">");
     		count++;
     		  		
     		final String title = fn; // just to make sure fn stays untouched    		

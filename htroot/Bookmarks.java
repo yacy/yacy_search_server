@@ -43,10 +43,10 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.repository.LoaderDispatcher;
 
+import de.anomic.data.BookmarkHelper;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.listManager;
 import de.anomic.data.userDB;
-import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
@@ -143,7 +143,7 @@ public class Bookmarks {
     				pathString="/unsorted"; //default folder
     			}
     			tagsString=tagsString+","+pathString;
-    			final Set<String> tags=listManager.string2set(bookmarksDB.cleanTagsString(tagsString)); 
+    			final Set<String> tags=listManager.string2set(BookmarkHelper.cleanTagsString(tagsString)); 
     			final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.createBookmark(url, username);
     			if(bookmark != null){
     				bookmark.setProperty(bookmarksDB.Bookmark.BOOKMARK_TITLE, title);
@@ -233,7 +233,7 @@ public class Bookmarks {
     			Log.logInfo("BOOKMARKS", "I try to import bookmarks from HTML-file");
     			try {
     				final File file=new File(post.get("htmlfile"));    			
-    				sb.bookmarksDB.importFromBookmarks(new DigestURI(file) , post.get("htmlfile$file"), tags, isPublic);
+    				BookmarkHelper.importFromBookmarks(sb.bookmarksDB, new DigestURI(file), post.get("htmlfile$file"), tags, isPublic);
     			} catch (final MalformedURLException e) {}
     			Log.logInfo("BOOKMARKS", "success!!");
     		}else if(post.containsKey("xmlfile")){
@@ -241,7 +241,7 @@ public class Bookmarks {
     			if((post.get("public")).equals("public")){
     				isPublic=true;
     			}
-    			sb.bookmarksDB.importFromXML(post.get("xmlfile$file"), isPublic);
+    			BookmarkHelper.importFromXML(sb.bookmarksDB, post.get("xmlfile$file"), isPublic);
     		}else if(post.containsKey("delete")){
     			final String urlHash=post.get("delete");
     			sb.bookmarksDB.removeBookmark(urlHash);
@@ -357,8 +357,8 @@ public class Bookmarks {
     
     private static void printTagList(final String id, final String tagName, final int comp, final int max, final boolean opt){    	
     	int count=0;
-        bookmarksDB.Tag tag;
-    	Iterator<Tag> it = null;
+    	bookmarksDB.Tag tag;
+    	Iterator<bookmarksDB.Tag> it = null;
     	
         if (tagName.equals("")) {
         	it = sb.bookmarksDB.getTagIterator(isAdmin, comp, max);

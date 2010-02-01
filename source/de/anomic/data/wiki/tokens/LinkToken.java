@@ -33,9 +33,9 @@ import java.util.Iterator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.anomic.data.BookmarkHelper;
 import de.anomic.data.bookmarksDB;
 import de.anomic.data.bookmarksDB.Bookmark;
-import de.anomic.data.bookmarksDB.Tag;
 import de.anomic.data.wiki.wikiParserException;
 import de.anomic.search.Switchboard;
 
@@ -152,7 +152,7 @@ public class LinkToken extends AbstractToken {
     }
     
     private Link[] getLinksFromBookmarkTag(final String tagName) {
-        final Tag tag = this.sb.bookmarksDB.getTag(bookmarksDB.tagHash(tagName));
+        final bookmarksDB.Tag tag = this.sb.bookmarksDB.getTag(BookmarkHelper.tagHash(tagName));
         if (tag == null) return null;
         final ArrayList<Link> r = new ArrayList<Link>();
         final Iterator<String> it = tag.getUrlHashes().iterator();

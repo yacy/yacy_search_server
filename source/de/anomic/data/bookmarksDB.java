@@ -24,20 +24,15 @@
 package de.anomic.data;
 
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
 import java.net.MalformedURLException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
@@ -47,36 +42,22 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import net.yacy.document.parser.html.ContentScraper;
-import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.blob.MapHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.DateFormatter;
-import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.kelondroException;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
-
 import de.anomic.crawler.CrawlProfile;
 import de.anomic.crawler.retrieval.Request;
+import de.anomic.data.BookmarkDate.Entry;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.yacy.yacyNewsPool;
@@ -97,13 +78,12 @@ public class bookmarksDB {
     
     // tags
     MapHeap tagsTable;
-    ConcurrentHashMap<String, Tag> tagCache;					
-    
-    // dates
-    MapHeap datesTable;
+    ConcurrentHashMap<String, Tag> tagCache;
     
     // autoReCrawl    
     private final BusyThread autoReCrawl;
+    
+    BookmarkDate dates;
     
 	// ------------------------------------
 	// bookmarksDB's class constructor
@@ -127,8 +107,8 @@ public class bookmarksDB {
         // dates
         final boolean datesExisted = datesFile.exists();
         //this.datesTable = new MapView(BLOBTree.toHeap(datesFile, true, true, 20, 256, '_', NaturalOrder.naturalOrder, datesFileNew), 500, '_');
-        this.datesTable = new MapHeap(datesFile, 20, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
-        if (!datesExisted) rebuildDates();
+        this.dates = new BookmarkDate(datesFile);
+        if (!datesExisted) this.dates.init(bookmarkIterator(true));
 
         // autoReCrawl
         Switchboard sb = Switchboard.getSwitchboard();
@@ -148,7 +128,7 @@ public class bookmarksDB {
         bookmarksTable.close();
         flushTagCache();
         tagsTable.close();
-        datesTable.close();
+        dates.close();
     }
     
     // -----------------------------------------------------
@@ -310,19 +290,7 @@ public class bookmarksDB {
     
     // -------------------------------------
 	// bookmarksDB's public helper functions
-	// -------------------------------------    
- 
-    /**
-     * returns an object of type String that contains a tagHash
-     * @param tagName an object of type String with the name of the tag. 
-     *        tagName is converted to lower case before hash is generated!
-     */
-    public static String tagHash(final String tagName){
-        return new String(Word.word2hash(tagName.toLowerCase()));
-    }    
-    public static String tagHash(final String tagName, final String user){
-        return new String(Word.word2hash(user+":"+tagName.toLowerCase()));
-    }
+	// -------------------------------------
     
     public Iterator<String> getFolderList(final boolean priv){    
     	return getFolderList("/", priv);    	
@@ -339,7 +307,7 @@ public class bookmarksDB {
     		tag=it.next();    		
     		if (tag.getFriendlyName().startsWith((root.equals("/") ? root : root+"/"))) {
     			path = tag.getFriendlyName();
-    			path = cleanTagsString(path);                  
+    			path = BookmarkHelper.cleanTagsString(path);                  
     			while(path.length() > 0 && !path.equals(root)){
     				folders.add(path);    				
     				path = path.replaceAll("(/.[^/]*$)", "");	// create missing folders in path
@@ -349,34 +317,6 @@ public class bookmarksDB {
     	if (!root.equals("/")) { folders.add(root); }
     	folders.add("\uffff");
     	return folders.iterator();    	
-    }
-    
-    public static String cleanTagsString(String tagsString){
-    	
-    	// get rid of heading, trailing and double commas since they are useless
-        while (tagsString.length() > 0 && tagsString.charAt(0) == ',') {
-            tagsString = tagsString.substring(1);
-        }
-        while (tagsString.endsWith(",")) {
-            tagsString = tagsString.substring(0,tagsString.length() -1);
-        }
-        while(tagsString.contains(",,")){
-            tagsString = tagsString.replaceAll(",,", ",");
-        }
-        // get rid of double and trailing slashes
-        while(tagsString.endsWith("/")){
-            tagsString = tagsString.substring(0, tagsString.length() -1);
-        }
-        while(tagsString.contains("/,")){
-            tagsString = tagsString.replaceAll("/,", ",");
-        }
-        while(tagsString.contains("//")){
-            tagsString = tagsString.replaceAll("//", "/");
-        }
-        // space characters following a comma are removed
-        tagsString = tagsString.replaceAll(",\\s+", ","); 
-    	
-        return tagsString;
     }
  
     // -----------------------------------------------------------
@@ -426,7 +366,7 @@ public class bookmarksDB {
         bookmarksDB.Tag tag=null;
         final Iterator<String> it=tags.iterator();
         while(it.hasNext()){
-            tag=getTag(tagHash(it.next()));
+            tag=getTag(BookmarkHelper.tagHash(it.next()));
             if(tag!=null){
                 tag.delete(urlHash);
                 saveTag(tag);
@@ -465,7 +405,7 @@ public class bookmarksDB {
     
     public Iterator<String> getBookmarksIterator(final String tagName, final boolean priv){
         final TreeSet<String> set=new TreeSet<String>(new bookmarkComparator(true));
-        final String tagHash=tagHash(tagName);
+        final String tagHash=BookmarkHelper.tagHash(tagName);
         final Tag tag=getTag(tagHash);
         Set<String> hashes=new HashSet<String>();
         if(tag != null){
@@ -641,7 +581,7 @@ public class bookmarksDB {
     		tags = bm.getTags();
     		it = tags.iterator();
     		while (it.hasNext()) {
-    			tag=getTag( tagHash(it.next()) );
+    			tag=getTag(BookmarkHelper.tagHash(it.next()) );
         		if(priv ||tag.hasPublicItems()){
         			set.add(tag);
         		}
@@ -672,10 +612,10 @@ public class bookmarksDB {
         String[] tags;
         while(it.hasNext()){
             bookmark=it.next();            
-            tags = cleanTagsString(bookmark.getTagsString() + bookmark.getFoldersString()).split(",");
+            tags = BookmarkHelper.cleanTagsString(bookmark.getTagsString() + bookmark.getFoldersString()).split(",");
             tag=null;
             for(int i=0;i<tags.length;i++){
-                tag=getTag(tagHash(tags[i]));
+                tag=getTag(BookmarkHelper.tagHash(tags[i]));
                 if(tag==null){
                     tag=new Tag(tags[i]);
                 }
@@ -686,40 +626,6 @@ public class bookmarksDB {
         flushTagCache();
         Log.logInfo("BOOKMARKS", "Rebuilt "+tagsTable.size()+" tags using your "+bookmarksTable.size()+" bookmarks.");
     }
- 
-    // ---------------------------------------
-	// bookmarksDB's functions for datesTable
-	// ---------------------------------------
-    
-    public bookmarksDate getDate(final String date){
-    	Map<String, String> map;
-        try {
-            map = datesTable.get(date);
-        } catch (final IOException e) {
-            map = null;
-        }
-        if(map==null) return new bookmarksDate(date);
-        return new bookmarksDate(date, map);
-    }
-    // rebuilds the datesDB from the bookmarksDB
-    public void rebuildDates(){
-        Log.logInfo("BOOKMARKS", "rebuilding dates.db from bookmarks.db...");
-        final Iterator<Bookmark> it=bookmarkIterator(true);
-        Bookmark bookmark;        
-        String date;
-        bookmarksDate bmDate;
-        while(it.hasNext()){
-            bookmark=it.next();
-            date = String.valueOf(bookmark.getTimeStamp());
-            bmDate=getDate(date);
-            if(bmDate==null){
-                bmDate=new bookmarksDate(date);
-            }
-            bmDate.add(bookmark.getUrlHash());
-            bmDate.setDatesTable();
-        }
-        Log.logInfo("BOOKMARKS", "Rebuilt "+datesTable.size()+" dates using your "+bookmarksTable.size()+" bookmarks.");
-    }
   
     // -------------------------------------
 	// bookmarksDB's experimental functions
@@ -727,10 +633,10 @@ public class bookmarksDB {
     
     public boolean renameTag(final String oldName, final String newName){
  	
-    	final Tag oldTag=getTag(tagHash(oldName));
+    	final Tag oldTag=getTag(BookmarkHelper.tagHash(oldName));
     	if (oldTag != null) {
     		final Set<String> urlHashes = oldTag.getUrlHashes();	// preserve urlHashes of oldTag
-    		removeTag(tagHash(oldName));							// remove oldHash from TagsDB
+    		removeTag(BookmarkHelper.tagHash(oldName));							// remove oldHash from TagsDB
     		final Iterator<String> it = urlHashes.iterator();		
             Bookmark bookmark;
             Set<String> tags = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
@@ -747,162 +653,13 @@ public class bookmarksDB {
     	return false;
     }
     public void addTag(final String selectTag, final String newTag){    		
-    	final Iterator<String> it = getTag(tagHash(selectTag)).getUrlHashes().iterator();	// get urlHashes for selectTag        
+    	final Iterator<String> it = getTag(BookmarkHelper.tagHash(selectTag)).getUrlHashes().iterator();	// get urlHashes for selectTag        
     	Bookmark bookmark;
     	while (it.hasNext()) {	// looping through all bookmarks which were tagged with selectTag
     		bookmark = getBookmark(it.next());
     		bookmark.addTag(newTag);
     		saveBookmark(bookmark);
         }
-    }
-    
-
-    // --------------------------------------
-	// bookmarksDB's Import/Export functions
-	// --------------------------------------
-    
-    public int importFromBookmarks(final DigestURI baseURL, final String input, final String tag, final boolean importPublic){
-		try {
-			// convert string to input stream
-			final ByteArrayInputStream byteIn = new ByteArrayInputStream(input.getBytes("UTF-8"));
-			final InputStreamReader reader = new InputStreamReader(byteIn,"UTF-8");
-			
-			// import stream
-			return this.importFromBookmarks(baseURL,reader,tag,importPublic);
-		} catch (final UnsupportedEncodingException e) { 
-			return 0;
-		}        	
-    }
-    
-    public int importFromBookmarks(final DigestURI baseURL, final InputStreamReader input, final String tag, final boolean importPublic){
-    	  	
-    	int importCount = 0;
-    	
-    	Map<DigestURI, String> links = new HashMap<DigestURI, String>();
-    	String title;
-    	DigestURI url;
-    	Bookmark bm;
-    	final Set<String> tags=listManager.string2set(tag); //this allow multiple default tags
-    	try {
-    		//load the links
-    		final ContentScraper scraper = new ContentScraper(baseURL);    		
-    		//OutputStream os = new htmlFilterOutputStream(null, scraper, null, false);
-    		final Writer writer= new TransformerWriter(null,null,scraper, null, false);
-    		FileUtils.copy(input,writer);
-    		writer.close();
-    		links = scraper.getAnchors();    		
-    	} catch (final IOException e) { Log.logWarning("BOOKMARKS", "error during load of links: "+ e.getClass() +" "+ e.getMessage());}
-    	for (Entry<DigestURI, String> link: links.entrySet()) {
-    		url= link.getKey();
-    		title=link.getValue();
-    		Log.logInfo("BOOKMARKS", "links.get(url)");
-    		if(title.equals("")){//cannot be displayed
-    			title=url.toString();
-    		}
-    		bm=new Bookmark(url.toString());
-    		bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
-    		bm.setTags(tags);
-    		bm.setPublic(importPublic);
-    		saveBookmark(bm);
-    		
-    		importCount++;
-    	}
-
-    	flushTagCache();
-    	
-    	return importCount;
-    }
-    
-    public int importFromXML(final String input, final boolean importPublic){    	
-		try {
-			// convert string to input stream
-			final ByteArrayInputStream byteIn = new ByteArrayInputStream(input.getBytes("UTF-8"));
-			
-			// import stream
-			return this.importFromXML(byteIn,importPublic);
-		} catch (final UnsupportedEncodingException e) { 
-			return 0;
-		}    	
-    }
-    
-    public int importFromXML(final InputStream input, final boolean importPublic){
-    	final DocumentBuilderFactory factory=DocumentBuilderFactory.newInstance();
-    	factory.setValidating(false);
-    	factory.setNamespaceAware(false);
-    	DocumentBuilder builder;
-    	try {
-    		builder = factory.newDocumentBuilder();
-    		final Document doc=builder.parse(input);
-    		return parseXMLimport(doc, importPublic);
-    	} catch (final ParserConfigurationException e) {  
-    	} catch (final SAXException e) {
-    	} catch (final IOException e) {
-    	}
-    	return 0;
-    	
-    }
-    
-    public int parseXMLimport(final Node doc, final boolean importPublic){
-    	int importCount = 0;
-        if(doc.getNodeName()=="post"){
-            final NamedNodeMap attributes = doc.getAttributes();
-            final String url=attributes.getNamedItem("href").getNodeValue();
-            if(url.equals("")){
-                return 0;
-            }
-            final Bookmark bm=new Bookmark(url);
-            String tagsString="";
-            String title="";
-            String description="";
-            String time="";
-            if(attributes.getNamedItem("tag")!=null){
-                tagsString=attributes.getNamedItem("tag").getNodeValue();
-            }
-            if(attributes.getNamedItem("description")!=null){
-                title=attributes.getNamedItem("description").getNodeValue();
-            }
-            if(attributes.getNamedItem("extended")!=null){
-                description=attributes.getNamedItem("extended").getNodeValue();
-            }
-            if(attributes.getNamedItem("time")!=null){
-                time=attributes.getNamedItem("time").getNodeValue();
-            }
-            Set<String> tags=new HashSet<String>();
-            
-            if(title != null){
-                bm.setProperty(Bookmark.BOOKMARK_TITLE, title);
-            }
-            if(tagsString!=null){
-                tags = listManager.string2set(tagsString.replace(' ', ','));
-            }
-            bm.setTags(tags, true);
-            if(time != null){
-            	
-            	Date parsedDate = null;
-            	try {
-					parsedDate = DateFormatter.parseISO8601(time);
-				} catch (final ParseException e) {
-					parsedDate = new Date();
-				}            	
-                bm.setTimeStamp(parsedDate.getTime());
-            }
-            if(description!=null){
-                bm.setProperty(Bookmark.BOOKMARK_DESCRIPTION, description);
-            }
-            bm.setPublic(importPublic);
-            saveBookmark(bm);
-            
-            importCount++;
-        }
-        final NodeList children=doc.getChildNodes();
-        if(children != null){
-            for (int i=0; i<children.getLength(); i++) {
-            	importCount += parseXMLimport(children.item(i), importPublic);
-            }
-        }
-        flushTagCache();
-        
-        return importCount;
     }
     
     // --------------------------------------
@@ -928,14 +685,14 @@ public class bookmarksDB {
                 urlHashes = new HashSet<String>();
         }
         public Tag(final String name, final HashSet<String> entries){
-            tagHash=tagHash(name);
+            tagHash=BookmarkHelper.tagHash(name);
             mem=new HashMap<String, String>();
             //mem.put(URL_HASHES, listManager.arraylist2string(entries));
             urlHashes=entries;
             mem.put(TAG_NAME, name);
         }
         public Tag(final String name){
-            tagHash=tagHash(name);
+            tagHash=BookmarkHelper.tagHash(name);
             mem=new HashMap<String, String>();
             //mem.put(URL_HASHES, "");
             urlHashes=new HashSet<String>();
@@ -991,84 +748,7 @@ public class bookmarksDB {
             return urlHashes.size();
         }
     }
-    /**
-     * Subclass of bookmarksDB, which provide the bookmarksDate object-type
-     */    
-    public class bookmarksDate{
-        public static final String URL_HASHES="urlHashes";
-        private final Map<String, String> mem;
-        String date;
-
-        public bookmarksDate(final String mydate){
-            //round to seconds, but store as milliseconds (java timestamp)
-            date=String.valueOf((Long.parseLong(mydate)/1000)*1000);
-            mem=new HashMap<String, String>();
-            mem.put(URL_HASHES, "");
-        }
-
-        public bookmarksDate(final String mydate, final Map<String, String> map){
-            //round to seconds, but store as milliseconds (java timestamp)
-            date=String.valueOf((Long.parseLong(mydate)/1000)*1000);
-            mem=map;
-        }
-        public bookmarksDate(final String mydate, final ArrayList<String> entries){
-            //round to seconds, but store as milliseconds (java timestamp)
-            date=String.valueOf((Long.parseLong(mydate)/1000)*1000);
-            mem=new HashMap<String, String>();
-            mem.put(URL_HASHES, listManager.collection2string(entries));
-        }
-        public void add(final String urlHash){
-            final String urlHashes = mem.get(URL_HASHES);
-            ArrayList<String> list;
-            if(urlHashes != null && !urlHashes.equals("")){
-                list=listManager.string2arraylist(urlHashes);
-            }else{
-                list=new ArrayList<String>();
-            }
-            if(!list.contains(urlHash) && urlHash != null && !urlHash.equals("")){
-                list.add(urlHash);
-            }
-            this.mem.put(URL_HASHES, listManager.collection2string(list));
-            /*if(urlHashes!=null && !urlHashes.equals("") ){
-                if(urlHashes.indexOf(urlHash) <0){
-                    this.mem.put(URL_HASHES, urlHashes+","+urlHash);
-                }
-            }else{
-                this.mem.put(URL_HASHES, urlHash);
-            }*/
-        }
-        public void delete(final String urlHash){
-            final ArrayList<String> list=listManager.string2arraylist(this.mem.get(URL_HASHES));
-            if(list.contains(urlHash)){
-                list.remove(urlHash);
-            }
-            this.mem.put(URL_HASHES, listManager.collection2string(list));
-        }
-        public void setDatesTable(){
-            if (this.size() >0) {
-                try {
-                    bookmarksDB.this.datesTable.put(getDateString(), mem);
-                } catch (Exception e) {
-                    Log.logException(e);
-                }
-            } else {
-                try {
-                    bookmarksDB.this.datesTable.remove(getDateString());
-                } catch (IOException e) {
-                    Log.logException(e);
-                }
-            }
-        }
-        public String getDateString(){
-            return date;
-        }
-        public ArrayList<String> getBookmarkList(){
-            return listManager.string2arraylist(this.mem.get(URL_HASHES));
-        }
-        public int size(){
-            return listManager.string2arraylist(this.mem.get(URL_HASHES)).size();
-        }
-    }
+    
     /**
      * Subclass of bookmarksDB, which provides the Bookmark object-type
      */
@@ -1114,7 +794,7 @@ public class bookmarksDB {
             }else{
                 entry.put(BOOKMARK_TIMESTAMP, String.valueOf(System.currentTimeMillis()));
             }  
-            final bookmarksDate bmDate=getDate(entry.get(BOOKMARK_TIMESTAMP));
+            final BookmarkDate.Entry bmDate=dates.getDate(entry.get(BOOKMARK_TIMESTAMP));
             bmDate.add(this.urlHash);
             bmDate.setDatesTable();
             
@@ -1271,7 +951,7 @@ public class bookmarksDB {
             final Iterator<String> it=tags.iterator();
             while(it.hasNext()){
                 final String tagName=it.next();
-                Tag tag=getTag(tagHash(tagName));
+                Tag tag=getTag(BookmarkHelper.tagHash(tagName));
                 if(tag == null){
                     tag=new Tag(tagName);
                 }
@@ -1441,5 +1121,9 @@ public class bookmarksDB {
     		else return -1;
     	}
     	
+    }
+    
+    public Entry getDate(final String date) {
+        return dates.getDate(date);
     }
 }

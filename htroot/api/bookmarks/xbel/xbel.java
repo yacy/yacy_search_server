@@ -6,6 +6,7 @@ import java.util.Iterator;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.util.DateFormatter;
 
+import de.anomic.data.BookmarkHelper;
 import de.anomic.data.bookmarksDB;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
@@ -80,7 +81,7 @@ public class xbel {
     	}
    
     	if(fn.startsWith((root.equals("/") ? root : root+"/"))){
-    		prop.put("xbel_"+count+"_elements", "<folder id=\""+bookmarksDB.tagHash(fn)+"\">");
+    		prop.put("xbel_"+count+"_elements", "<folder id=\""+BookmarkHelper.tagHash(fn)+"\">");
     		count++;
     		  		
     		final String title = fn; // just to make sure fn stays untouched    		

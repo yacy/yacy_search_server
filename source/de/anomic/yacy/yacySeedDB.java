@@ -982,13 +982,17 @@ public final class yacySeedDB implements AlternativeDomainNames {
         public yacySeed internalNext() {
             if ((it == null) || (!(it.hasNext()))) return null;
             try {
-                while (true) {
-                    final Map<String, String> dna = it.next();
-                    if (dna == null) return null;
+                Map<String, String> dna;
+                while (it.hasNext()) {
+                    dna = it.next();
+                    assert dna != null;
+                    if (dna == null) continue;
                     final String hash = dna.remove("key");
-                    if (hash == null) { continue; } // bad seed
+                    assert hash != null;
+                    if (hash == null) continue; // bad seed
                     return new yacySeed(hash, dna);
                 }
+                return null;
             } catch (final Exception e) {
                 Log.logException(e);
                 yacyCore.log.logSevere("ERROR internalNext: seed.db corrupt (" + e.getMessage() + "); resetting seed.db", e);
