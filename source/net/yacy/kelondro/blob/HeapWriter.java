@@ -100,18 +100,17 @@ public final class HeapWriter {
         assert blob.length > 0;
         key = HeapReader.normalizeKey(key, this.keylength);
         assert index.row().primaryKeyLength == this.keylength : index.row().primaryKeyLength + "!=" + key.length;
+        assert key.length == this.keylength : "key.length == " + key.length + ", this.keylength = " + this.keylength; // after normalizing they should be equal in length
         assert index.get(key) < 0 : "index.get(key) = " + index.get(key) + ", index.size() = " + index.size() + ", file.length() = " + this.heapFileTMP.length() +  ", key = " + new String(key); // must not occur before
         if ((blob == null) || (blob.length == 0)) return;
         index.putUnique(key, this.seek);
         int chunkl = this.keylength + blob.length;
         os.writeInt(chunkl);
         os.write(key);
-        if (this.keylength > key.length) {
-            for (int i = 0; i < this.keylength - key.length; i++) os.write(ZERO);
-        }
         os.write(blob);
         //assert (this.doublecheck.add(new String(key))) : "doublecheck failed for " + new String(key);
         this.seek += chunkl + 4;
+        os.flush(); // necessary? may cause bad IO performance :-(
     }
     
     protected static File fingerprintIndexFile(File f, String fingerprint) {

@@ -29,7 +29,6 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -555,11 +554,12 @@ public class HeapReader {
         private Map.Entry<byte[], byte[]> next0() {
             try {
                 byte b;
+                int len;
                 byte[] payload;
                 byte[] key;
                 final int keylen1 = this.keylen - 1;
                 while (true) {
-                    int len = is.readInt();
+                    len = is.readInt();
                     if (len == 0) continue; // rare, but possible: zero length record (takes 4 bytes)
                     b = is.readByte();      // read a single by te to check for empty record
                     if (b == 0) {
@@ -575,6 +575,10 @@ public class HeapReader {
                     // so far we have read this.keylen - 1 + 1 = this.keylen bytes.
                     // there must be a remaining number of len - this.keylen bytes left for the BLOB
                     if (len < this.keylen) return null;    // a strange case that can only happen in case of corrupted data
+                    if (is.available() < (len - this.keylen)) { // this really indicates corrupted data
+                        Log.logWarning("HeapReader", "corrupted data by entry of " + len + " bytes");
+                        return null;
+                    }
                     payload = new byte[len - this.keylen]; // the remaining record entries
                     if (is.read(payload) < payload.length) return null;
                     return new entry(key, payload);
