@@ -367,11 +367,15 @@ public final class MetadataRepository implements Iterable<byte[]> {
                         if (metadata == null) {
                             if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", "corrupted entry for hash = " + entry.hash());
                             remove(entry.hash());
-                        } else if (metadata.url() == null) {
+                            continue;
+                        }
+                        if (metadata.url() == null) {
                             if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + "URL == null");
                             remove(entry.hash());
-                        } else if (blacklist.isListed(Blacklist.BLACKLIST_CRAWLER, metadata.url()) ||
-                                blacklist.isListed(Blacklist.BLACKLIST_DHT, metadata.url())) {
+                            continue;
+                        }
+                        if (blacklist.isListed(Blacklist.BLACKLIST_CRAWLER, metadata.url()) ||
+                            blacklist.isListed(Blacklist.BLACKLIST_DHT, metadata.url())) {
                             lastBlacklistedUrl = metadata.url().toNormalform(true, true);
                             lastBlacklistedHash = entry.hash();
                             if (Log.isFine("URLDBCLEANER")) Log.logFine("URLDBCLEANER", ++blacklistedUrls + " blacklisted (" + ((double) blacklistedUrls / totalSearchedUrls) * 100 + "%): " + entry.hash() + " " + metadata.url().toNormalform(false, true));
