@@ -29,6 +29,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -115,11 +116,15 @@ public class HeapReader {
         return normalizeKey(key, this.keylength);
     }
     
+    
+    private static final byte zero = 0;
+    
     protected static byte[] normalizeKey(byte[] key, int keylength) {
         if (key.length == keylength) return key;
         byte[] k = new byte[keylength];
         if (key.length < keylength) {
             System.arraycopy(key, 0, k, 0, key.length);
+            for (int i = key.length; i < keylength; i++) k[i] = zero;
         } else {
             System.arraycopy(key, 0, k, 0, keylength);
         }
