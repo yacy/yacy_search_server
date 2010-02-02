@@ -111,6 +111,7 @@ public final class crawlReceipt {
         if ((sb.isRobinsonMode()) && (!sb.isInMyCluster(otherPeer))) {
         	// we reject urls that are from outside our cluster
         	prop.put("delay", "9999");
+        	return prop;
     	}
         
         // generating a new loaded URL entry
