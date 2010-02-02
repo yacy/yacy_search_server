@@ -140,7 +140,7 @@ public final class transferURL {
                 }
                 
                 // write entry to database
-                yacyCore.log.logInfo("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.metadata().url().toNormalform(true, false));
+                if (yacyCore.log.isFine()) yacyCore.log.logFine("Accepting URL " + i + "/" + urlc + " from peer " + otherPeerName + ": " + lEntry.metadata().url().toNormalform(true, false));
                 try {
                     sb.indexSegments.urlMetadata(Segments.Process.DHTIN).store(lEntry);
                     sb.crawlResults.stack(lEntry, iam, iam, EventOrigin.DHT_TRANSFER);
