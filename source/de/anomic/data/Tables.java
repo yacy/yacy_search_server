@@ -18,8 +18,15 @@ import de.anomic.server.serverObjects;
 
 public class Tables {
 
+    public final static String API_TABLENAME = "api";
+    public final static String API_TYPE_STEERING = "steering";
     public final static String API_TYPE_CONFIGURATION = "configuration";
     public final static String API_TYPE_CRAWLER = "crawler";
+    
+    public final static String API_COL_TYPE = "type";
+    public final static String API_COL_COMMENT = "comment";
+    public final static String API_COL_DATE = "date";
+    public final static String API_COL_URL = "url";
     
     private BEncodedHeapArray tables;
     
@@ -126,11 +133,11 @@ public class Tables {
         String apiurl = /*"http://localhost:" + getConfig("port", "8080") +*/ "/" + servletName + "?" + post.toString();
         try {
             this.tables.insert(
-                    "api",
-                    "type", type.getBytes(),
-                    "comment", comment.getBytes(),
-                    "date", DateFormatter.formatShortMilliSecond(new Date()).getBytes(),
-                    "url", apiurl.getBytes()
+                    API_TABLENAME,
+                    API_COL_TYPE, type.getBytes(),
+                    API_COL_COMMENT, comment.getBytes(),
+                    API_COL_DATE, DateFormatter.formatShortMilliSecond(new Date()).getBytes(),
+                    API_COL_URL, apiurl.getBytes()
                     );
         } catch (RowSpaceExceededException e2) {
             Log.logException(e2);

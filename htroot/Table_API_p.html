@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Peer Steering</title>
+    #(showtable)#::
+    <link rel="alternate" type="application/xml" title="Tables" href="Tables.rss?table=#[table]#" />
+    #(/showtable)#
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Tables">
+    #%env/templates/header.template%#
+    
+    <h2>Steering of API Actions</h2>
+    <p>This table shows actions that had been issued on the YaCy interface
+    to change the configuration or to request crawl actions.
+    These recorded actions can be used to repeat specific actions and to send them
+    to a scheduler for a periodic execution.
+    </p>
+    #(showtable)#::
+    <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+      <fieldset>
+      <legend><label for="table">Recorded Actions</label></legend>
+      <table border="0" cellpadding="2" cellspacing="1">
+        <tr class="TableHeader" valign="bottom">
+          <td>&nbsp;</td>
+          <td>Date</td>
+          <td>Type</td>
+          <td>Comment</td>
+          <td>URL</td>
+        </tr>
+        #{list}#
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+          <td align="left"><input type="checkbox" name="mark_#[pk]#" /></td>
+          <td>#[date]#</td>
+          <td>#[type]#</td>
+          <td>#[comment]#</td>
+          <td>#[url]#</td>
+        </tr>
+        #{/list}#
+      </table>
+      <p>
+      <input type="hidden" name="table" value="#[table]#" />
+      <input type="submit" name="execrows" value="Execute Selected Actions" />
+      <input type="submit" name="deleterows" value="Delete Selected Actions" />
+      </p>
+      </fieldset>
+    </form>
+    #(/showtable)#
+    #(showexec)#::
+    <form action="#">
+      <fieldset>
+      <legend><label for="table">Result of API execution</label></legend>
+      <table border="0" cellpadding="2" cellspacing="1">
+        <tr class="TableHeader" valign="bottom">
+          <td>Status</td>
+          <td>URL</td>
+        </tr>
+        #{list}#
+        <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
+          <td>#[status]#</td>
+          <td>#[url]#</td>
+        </tr>
+        #{/list}#
+      </table>
+      </fieldset>
+    </form>
+    #(/showexec)#
+    #%env/templates/footer.template%#
+  </body>
+</html>
