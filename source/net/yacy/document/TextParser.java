@@ -364,7 +364,7 @@ public final class TextParser {
     public static String getDenyMime() {
         String s = "";
         for (String d: denyMime) s += d + ",";
-        s = s.substring(0, s.length() - 1);
+        if (s.length() > 0) s = s.substring(0, s.length() - 1);
         return s;
     }
     
