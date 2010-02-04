@@ -83,7 +83,7 @@ public class ConfigLanguage_p {
                  * read from the language directory. This is very important to prevent
                  * directory traversal attacks!
                  */
-                if (langFiles.contains(selectedLanguage)) {
+                if (langFiles.contains(selectedLanguage) || selectedLanguage.startsWith("default")) {
                     translator.changeLang(env, langPath, selectedLanguage);
                 }
 

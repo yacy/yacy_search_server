@@ -226,7 +226,7 @@ public class translator {
         final HashMap<String, String> map = new HashMap<String, String>();
         int p;
         for (int i = 0; i < ms.length; i++) {
-            p = ms[i].indexOf("/");
+            p = ms[i].indexOf('/');
             if (p > 0)
                 map.put(ms[i].substring(0, p), ms[i].substring(p + 1));
         }
