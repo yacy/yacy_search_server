@@ -110,7 +110,7 @@ import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
 import de.anomic.data.LibraryProvider;
-import de.anomic.data.Tables;
+import de.anomic.data.WorkTables;
 import de.anomic.data.URLLicense;
 import de.anomic.data.blogBoard;
 import de.anomic.data.blogBoardComments;
@@ -216,7 +216,7 @@ public final class Switchboard extends serverSwitch {
     public  Dispatcher                     dhtDispatcher;
     public  List<String>                   trail;
     public  yacySeedDB                     peers;
-    public  Tables                         tables;
+    public  WorkTables                         tables;
     
     public WorkflowProcessor<indexingQueueEntry> indexingDocumentProcessor;
     public WorkflowProcessor<indexingQueueEntry> indexingCondensementProcessor;
@@ -277,7 +277,7 @@ public final class Switchboard extends serverSwitch {
         this.log.logConfig("Dictionaries Path:" + this.dictionariesPath.toString());
         
         // init tables
-        this.tables = new Tables(this.workPath);
+        this.tables = new WorkTables(this.workPath);
         
         // init libraries
         this.log.logConfig("initializing libraries");
