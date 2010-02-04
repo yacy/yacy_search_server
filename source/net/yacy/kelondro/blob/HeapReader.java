@@ -41,6 +41,7 @@ import net.yacy.kelondro.io.Writer;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.order.RotateIterator;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
@@ -112,9 +113,11 @@ public class HeapReader {
     }
 
     protected byte[] normalizeKey(byte[] key) {
+        // check size of key: zero-filled keys are only possible of the ordering is
+        // an instance of the natural ordering. Base64-orderings cannot use zeros in keys.
+        assert key.length >= this.keylength || this.ordering instanceof NaturalOrder;
         return normalizeKey(key, this.keylength);
     }
-    
     
     private static final byte zero = 0;
     

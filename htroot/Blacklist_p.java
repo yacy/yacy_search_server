@@ -43,7 +43,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
 
-import de.anomic.data.Tables;
+import de.anomic.data.WorkTables;
 import de.anomic.data.listManager;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.SearchEventCache;
@@ -254,7 +254,7 @@ public class Blacklist_p {
                 String blentry = post.get("newEntry", "").trim();
                 
                 // store this call as api call
-                listManager.switchboard.tables.recordAPICall(post, "Blacklist_p.html", Tables.API_TYPE_CONFIGURATION, "add to blacklist: " + blentry);
+                listManager.switchboard.tables.recordAPICall(post, "Blacklist_p.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "add to blacklist: " + blentry);
                 
                 final String temp = addBlacklistEntry(blacklistToUse, blentry, header, supportedBlacklistTypes);
                 if (temp != null) {

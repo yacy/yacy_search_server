@@ -42,7 +42,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
-import de.anomic.data.Tables;
+import de.anomic.data.WorkTables;
 import de.anomic.data.translator;
 import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
@@ -75,7 +75,7 @@ public class ConfigLanguage_p {
             String selectedLanguage = post.get("language");
 
             // store this call as api call
-            ((Switchboard) env).tables.recordAPICall(post, "ConfigLanguage.html", Tables.API_TYPE_CONFIGURATION, "language settings: " + selectedLanguage);
+            ((Switchboard) env).tables.recordAPICall(post, "ConfigLanguage.html", WorkTables.TABLE_API_TYPE_CONFIGURATION, "language settings: " + selectedLanguage);
             
             //change language
             if(post.containsKey("use_button") && selectedLanguage != null){

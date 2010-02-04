@@ -24,22 +24,16 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-import java.util.Iterator;
-
 import de.anomic.http.server.RequestHeader;
-import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
-import de.anomic.yacy.yacyNewsPool;
-import de.anomic.yacy.yacyNewsRecord;
-import de.anomic.yacy.yacySeed;
 
 public class IndexCreateDomainCrawl_p {
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         // return variable that accumulates replacements
-        Switchboard sb = (Switchboard) env;
+        //Switchboard sb = (Switchboard) env;
         serverObjects prop = new serverObjects();
         
         // define visible variables

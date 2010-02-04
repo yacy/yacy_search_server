@@ -28,7 +28,6 @@ import java.util.Iterator;
 
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsPool;

@@ -1,4 +1,4 @@
-// BEncodedHeapArray.java
+// Tables.java
 // (C) 2010 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 14.01.2010 on http://yacy.net
 //
@@ -37,10 +37,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.util.LookAheadIterator;
 
 
-public class BEncodedHeapArray {
+public class Tables {
  
     private static final String suffix = ".bheap";
     private static final String system_table_pkcounter = "pkcounter";
@@ -50,7 +52,7 @@ public class BEncodedHeapArray {
     private ConcurrentHashMap<String, BEncodedHeap> tables;
     private int keymaxlen;
     
-    public BEncodedHeapArray(final File location, final int keymaxlen) {
+    public Tables(final File location, final int keymaxlen) {
         this.location = new File(location.getAbsolutePath());
         if (!this.location.exists()) this.location.mkdirs();
         this.keymaxlen = keymaxlen;
@@ -126,7 +128,7 @@ public class BEncodedHeapArray {
     }
     
     private byte[] ukey(String tablename) throws IOException {
-        byte[] pk = select(system_table_pkcounter, tablename.getBytes(), system_table_pkcounter_counterName);
+        byte[] pk = select(system_table_pkcounter, tablename.getBytes()).from(system_table_pkcounter_counterName);
         int pki;
         if (pk == null) {
             pki = size(tablename);
@@ -156,14 +158,14 @@ public class BEncodedHeapArray {
      * @throws RowSpaceExceededException
      * @throws IOException
      */
-    public byte[] insert(final String tablename, Map<String, byte[]> map) throws RowSpaceExceededException, IOException {
+    public byte[] insert(final String tablename, Map<String, byte[]> map) throws IOException {
         byte[] uk = ukey(tablename);
         insert(tablename, uk, map);
         insert(system_table_pkcounter, tablename.getBytes(), system_table_pkcounter_counterName, uk);
         return uk;
     }
 
-    public byte[] insert(final String tablename, String key, byte[] value) throws RowSpaceExceededException, IOException {
+    public byte[] insert(final String tablename, String key, byte[] value) throws IOException {
         byte[] uk = ukey(tablename);
         insert(tablename, uk, key, value);
         insert(system_table_pkcounter, tablename.getBytes(), system_table_pkcounter_counterName, uk);
@@ -173,12 +175,12 @@ public class BEncodedHeapArray {
     public byte[] insert(final String tablename,
             String key0, byte[] value0,
             String key1, byte[] value1
-            ) throws RowSpaceExceededException, IOException {
+            ) throws IOException {
         byte[] uk = ukey(tablename);
         insert(tablename, uk,
-                key0, value0,
-                key1, value1
-                );
+            key0, value0,
+            key1, value1
+            );
         insert(system_table_pkcounter, tablename.getBytes(), system_table_pkcounter_counterName, uk);
         return uk;
     }
@@ -187,13 +189,13 @@ public class BEncodedHeapArray {
             String key0, byte[] value0,
             String key1, byte[] value1,
             String key2, byte[] value2
-            ) throws RowSpaceExceededException, IOException {
+            ) throws IOException {
         byte[] uk = ukey(tablename);
         insert(tablename, uk,
-                key0, value0,
-                key1, value1,
-                key2, value2
-                );
+            key0, value0,
+            key1, value1,
+            key2, value2
+            );
         insert(system_table_pkcounter, tablename.getBytes(), system_table_pkcounter_counterName, uk);
         return uk;
     }
@@ -203,47 +205,59 @@ public class BEncodedHeapArray {
             String key1, byte[] value1,
             String key2, byte[] value2,
             String key3, byte[] value3
-            ) throws RowSpaceExceededException, IOException {
+            ) throws IOException {
         byte[] uk = ukey(tablename);
         insert(tablename, uk,
-                key0, value0,
-                key1, value1,
-                key2, value2,
-                key3, value3
-                );
+            key0, value0,
+            key1, value1,
+            key2, value2,
+            key3, value3
+            );
         insert(system_table_pkcounter, tablename.getBytes(), system_table_pkcounter_counterName, uk);
         return uk;
     }
 
     public void insert(final String table, byte[] pk,
             String key, byte[] value
-            ) throws RowSpaceExceededException, IOException {
+            ) throws IOException {
         BEncodedHeap heap = getHeap(table);
-        heap.put(pk, key, value);
+        try {
+            heap.put(pk, key, value);
+        } catch (RowSpaceExceededException e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
     public void insert(final String table, byte[] pk,
             String key0, byte[] value0,
             String key1, byte[] value1
-            ) throws RowSpaceExceededException, IOException {
+            ) throws IOException {
         BEncodedHeap heap = getHeap(table);
-        heap.put(pk,
+        try {
+            heap.put(pk,
                 key0, value0,
                 key1, value1
                 );
+        } catch (RowSpaceExceededException e) {
+            throw new IOException(e.getMessage());
+        }
     }
     
     public void insert(final String table, byte[] pk,
             String key0, byte[] value0,
             String key1, byte[] value1,
             String key2, byte[] value2
-            ) throws RowSpaceExceededException, IOException {
+            ) throws IOException {
         BEncodedHeap heap = getHeap(table);
-        heap.put(pk,
+        try {
+            heap.put(pk,
                 key0, value0,
                 key1, value1,
                 key2, value2
                 );
+        } catch (RowSpaceExceededException e) {
+            throw new IOException(e.getMessage());
+        }
     }
     
     public void insert(final String table, byte[] pk,
@@ -251,29 +265,45 @@ public class BEncodedHeapArray {
             String key1, byte[] value1,
             String key2, byte[] value2,
             String key3, byte[] value3
-            ) throws RowSpaceExceededException, IOException {
+            ) throws IOException {
         BEncodedHeap heap = getHeap(table);
-        heap.put(pk,
+        try {
+            heap.put(pk,
                 key0, value0,
                 key1, value1,
                 key2, value2,
                 key3, value3
                 );
+        } catch (RowSpaceExceededException e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
-    public void insert(final String table, byte[] pk, Map<String, byte[]> map) throws RowSpaceExceededException, IOException {
+    public void insert(final String table, byte[] pk, Map<String, byte[]> map) throws IOException {
         BEncodedHeap heap = getHeap(table);
-        heap.put(pk, map);
+        try {
+            heap.put(pk, map);
+        } catch (RowSpaceExceededException e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
-    public Map<String, byte[]> select(final String table, byte[] pk) throws IOException {
+    public void insert(final String table, Row row) throws IOException {
         BEncodedHeap heap = getHeap(table);
-        return heap.get(pk);
+        try {
+            heap.put(row.pk, row.map);
+        } catch (RowSpaceExceededException e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
-    public byte[] select(final String table, byte[] pk, String key) throws IOException {
+    public byte[] createRow(String table) throws IOException {
+        return this.insert(table, new HashMap<String, byte[]>());
+    }
+    
+    public Row select(final String table, byte[] pk) throws IOException {
         BEncodedHeap heap = getHeap(table);
-        return heap.getProp(pk, key);
+        return new Row(pk, heap.get(pk));
     }
 
     public void delete(final String table, byte[] pk) throws IOException {
@@ -291,14 +321,78 @@ public class BEncodedHeapArray {
         return heap.keys();
     }
 
-    public Iterator<Map.Entry<byte[], Map<String, byte[]>>> iterator(String table) throws IOException {
-        BEncodedHeap heap = getHeap(table);
-        return heap.iterator();
+    public Iterator<Row> iterator(String table) throws IOException {
+        return new RowIterator(table);
+    }
+    
+    public Iterator<Row> iterator(String table, String whereKey, byte[] whereValue) throws IOException {
+        return new RowIterator(table, whereKey, whereValue);
     }
     
     public List<String> columns(String table) throws IOException {
         BEncodedHeap heap = getHeap(table);
         return heap.columns();
+    }
+
+    public class RowIterator extends LookAheadIterator<Row> implements Iterator<Row> {
+
+        private final String whereKey;
+        private final byte[] whereValue;
+        private final Iterator<Map.Entry<byte[], Map<String, byte[]>>> i;
+        
+        public RowIterator(String table) throws IOException {
+            this.whereKey = null;
+            this.whereValue = null;
+            BEncodedHeap heap = getHeap(table);
+            i = heap.iterator();
+        }
+        
+        public RowIterator(String table, String whereKey, byte[] whereValue) throws IOException {
+            this.whereKey = whereKey;
+            this.whereValue = whereValue;
+            BEncodedHeap heap = getHeap(table);
+            i = heap.iterator();
+        }
+        
+        protected Row next0() {
+            while (i.hasNext()) {
+                Row r = new Row(i.next());
+                if (this.whereKey == null) return r;
+                if (ByteBuffer.equals(r.from(this.whereKey), this.whereValue)) return r;
+            }
+            return null;
+        }
+        
+    }
+    
+    public class Row {
+        
+        private final byte[] pk;
+        private final Map<String, byte[]> map;
+        
+        public Row(final Map.Entry<byte[], Map<String, byte[]>> entry) {
+            this.pk = entry.getKey();
+            this.map = entry.getValue();
+        }
+        
+        public Row(final byte[] pk, final Map<String, byte[]> map) {
+            this.pk = pk;
+            this.map = map;
+        }
+        
+        public byte[] getPK() {
+            return this.pk;
+        }
+        
+        public byte[] from(String colname) {
+            return this.map.get(colname);
+        }
+        
+        public String toString() {
+            StringBuilder sb = new StringBuilder(keymaxlen + 20 * map.size());
+            sb.append(new String(pk)).append(":").append(map.toString());
+            return sb.toString();
+        }
     }
     
     public static void main(String[] args) {
@@ -307,7 +401,7 @@ public class BEncodedHeapArray {
         // System.out.println(f.getAbsolutePath());
         // System.out.println(f.getParent());
         try {
-            BEncodedHeapArray map = new BEncodedHeapArray(f.getParentFile(), 4);
+            Tables map = new Tables(f.getParentFile(), 4);
             // put some values into the map
             Map<String, byte[]> m = new HashMap<String, byte[]>();
             m.put("k", "000".getBytes());
@@ -317,17 +411,13 @@ public class BEncodedHeapArray {
             m.put("k", "222".getBytes());
             map.insert("testdao", "789".getBytes(), m);
             // iterate over keys
-            Iterator<Map.Entry<byte[], Map<String, byte[]>>> i = map.iterator("testdao");
+            Iterator<Row> i = map.iterator("testdao");
             while (i.hasNext()) {
-                Map.Entry<byte[], Map<String, byte[]>> entry = i.next();
-                System.out.println(new String(entry.getKey(), "UTF-8") + ": "
-                        + entry.getValue());
+                System.out.println(i.next().toString());
             }
             // clean up
             map.close();
         } catch (IOException e) {
-            Log.logException(e);
-        } catch (RowSpaceExceededException e) {
             Log.logException(e);
         }
     }

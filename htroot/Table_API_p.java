@@ -22,9 +22,10 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.logging.Log;
 
-import de.anomic.data.Tables;
+import de.anomic.data.WorkTables;
 import de.anomic.http.client.Client;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.http.server.ResponseContainer;
@@ -41,7 +42,11 @@ public class Table_API_p {
         if (post != null && post.get("deleterows", "").length() > 0) {
             for (Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getKey().startsWith("mark_") && entry.getValue().equals("on")) {
-                    sb.tables.delete(Tables.API_TABLENAME, entry.getKey().substring(5).getBytes());
+                    try {
+                        sb.tables.delete(WorkTables.TABLE_API_NAME, entry.getKey().substring(5).getBytes());
+                    } catch (IOException e) {
+                        Log.logException(e);
+                    }
                 }
             }
         }
@@ -56,9 +61,9 @@ public class Table_API_p {
             LinkedHashMap<String, Integer> l = new LinkedHashMap<String, Integer>();
             for (Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getKey().startsWith("mark_") && entry.getValue().equals("on")) {
-                    Map<String, byte[]> map = sb.tables.select(Tables.API_TABLENAME, entry.getKey().substring(5).getBytes());
-                    String url = "http://localhost:" + sb.getConfig("port", "8080") + new String(map.get(Tables.API_COL_URL));
                     try {
+                        Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME, entry.getKey().substring(5).getBytes());
+                        String url = "http://localhost:" + sb.getConfig("port", "8080") + new String(row.from(WorkTables.TABLE_API_COL_URL));
                         result = client.GET(url);
                         l.put(url, result.getStatusCode());
                     } catch (IOException e) {
@@ -88,23 +93,31 @@ public class Table_API_p {
         prop.put("showtable", 1);
         
         // insert rows
-        final int maxCount = Math.min(1000, sb.tables.size(Tables.API_TABLENAME));
-        final Iterator<Map.Entry<byte[], Map<String, byte[]>>> mapIterator = sb.tables.iterator(Tables.API_TABLENAME);
-        Map.Entry<byte[], Map<String, byte[]>> record;
-        Map<String, byte[]> map;
+        int maxCount;
+        try {
+            maxCount = Math.min(1000, sb.tables.size(WorkTables.TABLE_API_NAME));
+        } catch (IOException e) {
+            Log.logException(e);
+            maxCount = 0;
+        }
         int count = 0;
-        boolean dark = true;
-        while ((mapIterator.hasNext()) && (count < maxCount)) {
-            record = mapIterator.next();
-            if (record == null) continue;
-            map = record.getValue();
-            prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
-            prop.put("showtable_list_" + count + "_pk", new String(record.getKey()));
-            prop.put("showtable_list_" + count + "_date", map.get(Tables.API_COL_DATE));
-            prop.put("showtable_list_" + count + "_type", map.get(Tables.API_COL_TYPE));
-            prop.put("showtable_list_" + count + "_comment", map.get(Tables.API_COL_COMMENT));
-            prop.put("showtable_list_" + count + "_url", "http://" + sb.myPublicIP() + ":" + sb.getConfig("port", "8080") + new String(map.get(Tables.API_COL_URL)));
-            count++;
+        try {
+            final Iterator<Tables.Row> mapIterator = sb.tables.iterator(WorkTables.TABLE_API_NAME);
+            Tables.Row row;
+            boolean dark = true;
+            while ((mapIterator.hasNext()) && (count < maxCount)) {
+                row = mapIterator.next();
+                if (row == null) continue;
+                prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
+                prop.put("showtable_list_" + count + "_pk", new String(row.getPK()));
+                prop.put("showtable_list_" + count + "_date", row.from(WorkTables.TABLE_API_COL_DATE));
+                prop.put("showtable_list_" + count + "_type", row.from(WorkTables.TABLE_API_COL_TYPE));
+                prop.put("showtable_list_" + count + "_comment", row.from(WorkTables.TABLE_API_COL_COMMENT));
+                prop.put("showtable_list_" + count + "_url", "http://" + sb.myPublicIP() + ":" + sb.getConfig("port", "8080") + new String(row.from(WorkTables.TABLE_API_COL_URL)));
+                count++;
+            }
+        } catch (IOException e) {
+            Log.logException(e);
         }
         prop.put("showtable_list", count);
         

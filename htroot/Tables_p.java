@@ -17,10 +17,15 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import net.yacy.kelondro.blob.Tables;
+import net.yacy.kelondro.logging.Log;
 
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
@@ -33,7 +38,7 @@ public class Tables_p {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
         String table = (post == null) ? null : post.get("table", null);
-        if (table != null && !sb.tables.has(table)) table = null;
+        if (table != null && !sb.tables.hasHeap(table)) table = null;
 
         // show table selection
         int count = 0;
@@ -48,19 +53,26 @@ public class Tables_p {
         prop.put("tables", count);
         
         List<String> columns = null;
-        if (table != null) {
+        if (table != null) try {
             columns = sb.tables.columns(table);
+        } catch (IOException e) {
+            Log.logException(e);
+            columns = new ArrayList<String>();
         }
         
         // apply deletion requests
-        if (post != null && post.get("deletetable", "").length() > 0) {
+        if (post != null && post.get("deletetable", "").length() > 0) try {
             sb.tables.clear(table);
+        } catch (IOException e) {
+            Log.logException(e);
         }
         
         if (post != null && post.get("deleterows", "").length() > 0) {
             for (Map.Entry<String, String> entry: post.entrySet()) {
-                if (entry.getKey().startsWith("mark_") && entry.getValue().equals("on")) {
+                if (entry.getKey().startsWith("mark_") && entry.getValue().equals("on")) try {
                     sb.tables.delete(table, entry.getKey().substring(5).getBytes());
+                } catch (IOException e) {
+                    Log.logException(e);
                 }
             }
         }
@@ -73,7 +85,11 @@ public class Tables_p {
                     map.put(entry.getKey().substring(4), entry.getValue().getBytes());
                 }
             }
-            sb.tables.insert(table, pk.getBytes(), map);
+            try {
+                sb.tables.insert(table, pk.getBytes(), map);
+            } catch (IOException e) {
+                Log.logException(e);
+            }
         }
         
         // generate table
@@ -92,28 +108,34 @@ public class Tables_p {
             prop.put("showtable_columns", columns.size());
             
             // insert all rows
-            final int maxCount = Math.min(1000, sb.tables.size(table));
-            final Iterator<Map.Entry<byte[], Map<String, byte[]>>> mapIterator = sb.tables.iterator(table);
-            Map.Entry<byte[], Map<String, byte[]>> record;
-            Map<String, byte[]> map;
-            byte[] pk;
+            int maxCount;
+            try {
+                maxCount = Math.min(1000, sb.tables.size(table));
+            } catch (IOException e) {
+                Log.logException(e);
+                maxCount = 0;
+            }
             count = 0;
-            boolean dark = true;
-            byte[] cell;
-            while ((mapIterator.hasNext()) && (count < maxCount)) {
-                record = mapIterator.next();
-                if (record == null) continue;
-                pk = record.getKey();
-                map = record.getValue();
-                prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
-                prop.put("showtable_list_" + count + "_pk",  new String(pk));
-                for (int i = 0; i < columns.size(); i++) {
-                    cell = map.get(columns.get(i));
-                    prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cell == null ? "" : new String(cell));
+            try {
+                final Iterator<Tables.Row> mapIterator = sb.tables.iterator(table);
+                Tables.Row row;
+                boolean dark = true;
+                byte[] cell;
+                while ((mapIterator.hasNext()) && (count < maxCount)) {
+                    row = mapIterator.next();
+                    if (row == null) continue;
+                    prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
+                    prop.put("showtable_list_" + count + "_pk",  new String(row.getPK()));
+                    for (int i = 0; i < columns.size(); i++) {
+                        cell = row.from(columns.get(i));
+                        prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cell == null ? "" : new String(cell));
+                    }
+                    prop.put("showtable_list_" + count + "_columns", columns.size());
+                    
+                    count++;
                 }
-                prop.put("showtable_list_" + count + "_columns", columns.size());
-                
-                count++;
+            } catch (IOException e) {
+                Log.logException(e);
             }
             prop.put("showtable_list", count);
         }
@@ -127,15 +149,21 @@ public class Tables_p {
                     break;
                 }
             }
-            if (pk != null && sb.tables.has(table, pk.getBytes())) {
-                setEdit(sb, prop, table, pk, columns);
+            try {
+                if (pk != null && sb.tables.has(table, pk.getBytes())) {
+                    setEdit(sb, prop, table, pk, columns);
+                }
+            } catch (IOException e) {
+                Log.logException(e);
             }
         }
         
-        if (post != null && table != null && post.containsKey("addrow")) {
+        if (post != null && table != null && post.containsKey("addrow")) try {
             // get a new key
-            String pk = sb.tables.createRow(table);
+            String pk = new String(sb.tables.createRow(table));
             setEdit(sb, prop, table, pk, columns);
+        } catch (IOException e) {
+            Log.logException(e);
         }
         
         // adding the peer address
@@ -145,15 +173,15 @@ public class Tables_p {
         return prop;
     }
     
-    private static void setEdit(final Switchboard sb, final serverObjects prop, final String table, final String pk, List<String> columns) {
+    private static void setEdit(final Switchboard sb, final serverObjects prop, final String table, final String pk, List<String> columns) throws IOException {
         prop.put("showedit", 1);
         prop.put("showedit_table", table);
         prop.put("showedit_pk", pk);
-        Map<String, byte[]> map = sb.tables.select(table, pk.getBytes());
+        Tables.Row row = sb.tables.select(table, pk.getBytes());
         int count = 0;
         byte[] cell;
         for (String col: columns) {
-            cell = map.get(col);
+            cell = row.from(col);
             prop.put("showedit_list_" + count + "_key", col);
             prop.put("showedit_list_" + count + "_value", cell == null ? "" : new String(cell));
             count++;
