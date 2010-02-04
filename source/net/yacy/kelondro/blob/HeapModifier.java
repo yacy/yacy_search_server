@@ -233,8 +233,9 @@ public class HeapModifier extends HeapReader implements BLOB {
 		throw new UnsupportedOperationException("put is not supported in BLOBHeapModifier");
 	}
 
-	public synchronized int replace(byte[] key, Rewriter rewriter) throws IOException {
+	public synchronized int replace(byte[] key, final Rewriter rewriter) throws IOException {
 	    key = normalizeKey(key);
+	    assert key.length == this.keylength;
 	    
 	    // check if the index contains the key
         final long pos = index.get(key);
@@ -245,13 +246,13 @@ public class HeapModifier extends HeapReader implements BLOB {
         
         // access the file and read the container
         file.seek(pos);
-        final int len = file.readInt() - index.row().primaryKeyLength;
+        final int len = file.readInt() - this.keylength;
         if (MemoryControl.available() < len) {
             if (!MemoryControl.request(len, true)) return 0; // not enough memory available for this blob
         }
         
         // read the key
-        final byte[] keyf = new byte[index.row().primaryKeyLength];
+        final byte[] keyf = new byte[this.keylength];
         file.readFully(keyf, 0, keyf.length);
         assert this.ordering.equal(key, keyf);
         
@@ -262,9 +263,15 @@ public class HeapModifier extends HeapReader implements BLOB {
         // rewrite the entry
         blob = rewriter.rewrite(blob);
         int reduction = len - blob.length;
-        if (reduction == 0) return 0; // nothing to do
+        if (reduction == 0) {
+            // even if the reduction is zero then it is still be possible that the record has been changed
+            this.file.seek(pos + 4 + key.length);
+            file.write(blob);
+            return 0;
+        }
         
-        // check if the new entry is smaller than the old entry
+        // the new entry must be smaller than the old entry and must at least be 4 bytes smaller
+        // because that is the space needed to write a new empty entry record at the end of the gap
         if (blob.length > len - 4) throw new IOException("replace of BLOB for key " + new String(key) + " failed (too large): new size = " + blob.length + ", old size = " + (len - 4));
         
         // replace old content
@@ -275,7 +282,7 @@ public class HeapModifier extends HeapReader implements BLOB {
         
         // define the new empty entry
         final int newfreereclen = reduction - 4;
-        assert newfreereclen > 0;
+        assert newfreereclen >= 0;
         file.writeInt(newfreereclen);
         
         // fill zeros to the content

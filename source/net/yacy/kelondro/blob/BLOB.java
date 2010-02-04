@@ -5,8 +5,8 @@
 // This is a part of YaCy, a peer-to-peer based web search engine
 //
 // $LastChangedDate: 2006-04-02 22:40:07 +0200 (So, 02 Apr 2006) $
-// $LastChangedRevision: 1986 $
-// $LastChangedBy: orbiter $
+// $LastChangedRevision$
+// $LastChangedBy$
 //
 // LICENSE
 // 
@@ -162,7 +162,7 @@ public interface BLOB {
         /**
          * a rewrite method that is used in the replace functionality of a BLOB
          * the result of such a rewrite must be always smaller or equal in size
-         * if the input
+         * of the input
          * @param b
          * @return an array that is equal or smaller in size than b
          */
