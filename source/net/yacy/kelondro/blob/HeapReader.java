@@ -29,6 +29,7 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -225,6 +226,11 @@ public class HeapReader {
                     indexready.consume(key, seek);
                     key = new byte[keylength];
                 } else {
+                    // free the lost space
+                    free.put(seek, reclen);
+                    file.seek(seek + 4);
+                    Arrays.fill(key, (byte) 0);
+                    file.write(key); // mark the place as empty record
                     Log.logWarning("kelondroBLOBHeap", "BLOB " + heapFile.getName() + ": skiped not wellformed key " + new String(key) + " at seek pos " + seek);
                 }
             }            
