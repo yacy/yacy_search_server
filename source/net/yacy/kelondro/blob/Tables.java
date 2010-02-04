@@ -29,10 +29,12 @@ package net.yacy.kelondro.blob;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -50,7 +52,7 @@ public class Tables {
     
     private File location;
     private ConcurrentHashMap<String, BEncodedHeap> tables;
-    private int keymaxlen;
+    int keymaxlen;
     
     public Tables(final File location, final int keymaxlen) {
         this.location = new File(location.getAbsolutePath());
@@ -110,7 +112,7 @@ public class Tables {
         }
     }
     
-    private BEncodedHeap getHeap(final String tablename) throws IOException {
+    BEncodedHeap getHeap(final String tablename) throws IOException {
         final String table = tablename + suffix;
         BEncodedHeap heap = this.tables.get(tablename);
         if (heap != null) return heap;
@@ -329,6 +331,36 @@ public class Tables {
         return new RowIterator(table, whereKey, whereValue);
     }
     
+    public Collection<Row> orderByPK(String table, int maxcount) throws IOException {
+        return orderByPK(table, maxcount, null, null);
+    }
+    
+    public Collection<Row> orderByPK(String table, int maxcount, String whereKey, byte[] whereValue) throws IOException {
+        TreeMap<String, Row> sortTree = new TreeMap<String, Row>();
+        Iterator<Row> i = iterator(table, whereKey, whereValue);
+        Row row;
+        while ((maxcount < 0 || maxcount-- > 0) && i.hasNext()) {
+            row = i.next();
+            sortTree.put(new String(row.pk), row);
+        }
+        return sortTree.values();
+    }
+    
+    public Collection<Row> orderBy(String table, int maxcount, String sortField) throws IOException {
+        return orderBy(table, maxcount, sortField, null, null);
+    }
+    
+    public Collection<Row> orderBy(String table, int maxcount, String sortField, String whereKey, byte[] whereValue) throws IOException {
+        TreeMap<String, Row> sortTree = new TreeMap<String, Row>();
+        Iterator<Row> i = iterator(table, whereKey, whereValue);
+        Row row;
+        while ((maxcount < 0 || maxcount-- > 0) && i.hasNext()) {
+            row = i.next();
+            sortTree.put(new String(row.from(sortField)) + new String(row.pk), row);
+        }
+        return sortTree.values();
+    }
+    
     public List<String> columns(String table) throws IOException {
         BEncodedHeap heap = getHeap(table);
         return heap.columns();
@@ -367,8 +399,8 @@ public class Tables {
     
     public class Row {
         
-        private final byte[] pk;
-        private final Map<String, byte[]> map;
+        final byte[] pk;
+        final Map<String, byte[]> map;
         
         public Row(final Map.Entry<byte[], Map<String, byte[]>> entry) {
             this.pk = entry.getKey();

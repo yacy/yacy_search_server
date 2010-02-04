@@ -34,11 +34,11 @@ import java.util.Map;
 
 public class BDecoder {
 
-    private final static byte[] _e = "e".getBytes();
-    private final static byte[] _i = "i".getBytes();
-    private final static byte[] _d = "d".getBytes();
-    private final static byte[] _l = "l".getBytes();
-    private final static byte[] _p = ":".getBytes();
+    final static byte[] _e = "e".getBytes();
+    final static byte[] _i = "i".getBytes();
+    final static byte[] _d = "d".getBytes();
+    final static byte[] _l = "l".getBytes();
+    final static byte[] _p = ":".getBytes();
     
     private final byte[] b;
     private int pos;
