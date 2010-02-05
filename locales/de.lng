@@ -264,6 +264,7 @@ import as Public==als öffentlich importieren
 "private bookmark"=="Privates Lesezeichen"
 "public bookmark"=="Öffentliches Lesezeichen"
 Tagged with==Stichworte:
+'Confirm deletion'=='Löschen bestätigen'
 Edit==Bearbeiten
 Delete==Löschen
 Folders==Ordner
@@ -840,6 +841,7 @@ above which also will show you a table with indexing results so far. The informa
 so you need to log-in with your administration password.==also müssen Sie sich mit Ihrem Administrator Passwort einloggen, um sie zu sehen.
 Case \(6\) is a monitor of the local receipt-generator, the opposed case of \(1\). It contains also an indexing result monitor but is not considered private==Fall (6) ist ein Monitor des lokalen Empfangs-Generator, der Gegensatz zu (1). Er enthält ausserdem einen Index Resulate Monitor, ist aber nicht privat,
 since it shows crawl requests from other peers.==da er Crawl Anfragen von anderen Peers zeigt.
+Case \(7\) occurs if surrogate files are imported==Fall (7) tritt ein wenn Surrogat Dateien importiert werden.
 The image above illustrates the data flow initiated by web index acquisition.==Das obige Bild zeigt den Datenfluss, der durch die Index Erwerbung über das Internet entsteht.
 Some processes occur double to document the complex index migration structure.==Einige Prozesse erscheinen doppelt, um die Komplexizität der Index Verteilungs Struktur zu erklären.
 \(1\) Results of Remote Crawl Receipts==(1) Ergebnisse der Remote Crawl Rückmeldungen
@@ -1165,6 +1167,7 @@ Index Control==Index Kontrolle
 Index Administration==Index Administration
 The local index currently contains \#\[wcount\]\# reverse word indexes==Der lokale Index enthält im Moment #[wcount]# inverse Wort Indexe
 RWI Retrieval \(= search for a single word\)==RWI Abfrage (= Suche nach einem einzelnen Wort)
+Select Segment:==Segment Auswahl:
 Retrieve by Word:<==Abfrage nach Wort:<
 "Show URL Entries for Word"=="URL Einträge für Wort zeigen"
 Retrieve by Word-Hash==Abfrage nach Wort-Hash
@@ -2858,6 +2861,7 @@ Processing Monitor==Prozess Monitor
 Crawler Queues==Crawler Puffer
 Loader<==Lade Puffer<
 Parser Errors==Parser Fehler
+>Queues<==>Warteschlangen<
 Local<==Lokal<
 #Global==Global
 #Remote==Remote
