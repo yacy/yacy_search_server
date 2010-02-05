@@ -574,7 +574,12 @@ public class HeapReader {
                     if (b == 0) {
                         // this is empty
                         // read some more bytes to consume the empty record
-                        is.skip(len - 1);   // all that is remaining
+                        if (len > 1) {
+                        	if (len - 1 != is.skipBytes(len - 1)) {   // all that is remaining
+	                            Log.logWarning("HeapReader", "problem skiping " +  + len + " bytes in " + this.blobFile.getName());
+	                            return null;
+                        	}
+                        }
                         continue;
                     }
                     // we are now ahead of remaining this.keylen - 1 bytes of the key
@@ -585,7 +590,7 @@ public class HeapReader {
                     // there must be a remaining number of len - this.keylen bytes left for the BLOB
                     if (len < this.keylen) return null;    // a strange case that can only happen in case of corrupted data
                     if (is.available() < (len - this.keylen)) { // this really indicates corrupted data
-                        Log.logWarning("HeapReader", "corrupted data by entry of " + len + " bytes");
+                        Log.logWarning("HeapReader", "corrupted data by entry of " + len + " bytes at available of: " + is.available() + " in " + this.blobFile.getName());
                         return null;
                     }
                     payload = new byte[len - this.keylen]; // the remaining record entries
