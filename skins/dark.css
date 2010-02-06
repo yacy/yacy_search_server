@@ -26,7 +26,6 @@ div.head h1			{ background-color: #333; color: #AAA; }
 .TableCellDark		{ color: #666; background-color: #252525; }
 .TableCellLight		{ color: #666; background-color: #2C2C2C; }
 .TableCellSummary	{ color: #777; background-color: #333; }
-.TableCellPassive	{ color: #666; background-color: #252525; }
 .TableCellActive	{ color: #666; background-color: #2C2C2C; }
 
 /* Blog and Wiki*/

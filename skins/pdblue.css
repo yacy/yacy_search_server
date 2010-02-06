@@ -84,10 +84,6 @@ table {
   border:1px solid #888888;
 }
 
-.TableCellPassive {
-  background-color: lightgrey;
-}
-
 .TableCellActive {       
   background-color: #ffbbaa;     
 }

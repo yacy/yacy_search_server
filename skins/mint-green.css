@@ -58,10 +58,6 @@ div.head h1
   font-weight:bold;
 }
 
-.TableCellPassive {
-  background-color: lightgrey;
-}
-
 .TableCellActive {  	 
   background-color: #E1E5B1; 	 
 }
