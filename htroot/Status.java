@@ -135,12 +135,12 @@ public class Status {
 
         // resource observer status
         if (adminaccess) {
-	        if (!sb.observer.getDisksOK()){
+	        if (!sb.observer.getDiskAvailable()){
 	            final String minFree = Formatter.bytesToString(sb.observer.getMinFreeDiskSpace());
 	            prop.put("warningDiskSpaceLow", "1");
 	            prop.put("warningDiskSpaceLow_minSpace", minFree);
 	        }
-	        if (!sb.observer.getMemoryOK()){
+	        if (!sb.observer.getMemoryAvailable()){
 	            final String minFree = Formatter.bytesToString(sb.observer.getMinFreeMemory() * 1024L);
 	            prop.put("warningMemoryLow", "1");
 	            prop.put("warningMemoryLow_minSpace", minFree);

@@ -1,10 +1,12 @@
 // ResourceObserver.java
 // -----------------------
-// part of YaCy
-// (C) by Detlef Reichl; detlef!reichl()gmx!org
+// (c) David Wieditz; lotus at mail.berlios.de
+// first published 6.2.2010
+//
+// based on the former code (c) by Detlef Reichl; detlef!reichl()gmx!org
 // Pforzheim, Germany, 2008
 //
-// changes by David Wieditz
+// part of YaCy
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -22,164 +24,136 @@
 
 package de.anomic.crawler;
 
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.util.DiskSpace;
 import net.yacy.kelondro.util.MemoryControl;
-
 import de.anomic.search.Switchboard;
 import de.anomic.search.SwitchboardConstants;
 
-public final class ResourceObserver {
-    // Unknown for now
-    //private static final static long MIN_FREE_MEMORY = 0;
-    // We are called with the cleanup job every five minutes;
-    // the disk usage should be checked with every run
-    private static final int CHECK_DISK_USAGE_FREQ = 1;
-    // The memory usage should be checked on every run
-    private static final int CHECK_MEMORY_USAGE_FREQ = 1;
+public class ResourceObserver {
+
+    public static final Log log = new Log("RESOURCE OBSERVER");
     
     // return values for available disk/memory
     private static final int LOW = 0;
     private static final int MEDIUM = 1;
     private static final int HIGH = 2;
     
-    public static final Log log = new Log("RESOURCE OBSERVER");
     private final Switchboard sb;
-
-    private int checkDiskUsageCount;
-    private int checkMemoryUsageCount;
-    private int disksFree;
-    private int memoryFree;
+    private final File path; // path to check
+    
+    private int normalizedDiskFree = HIGH;
+    private int normalizedMemoryFree = HIGH;
     private boolean disabledDHT = false;
     
-    /**
-     * The ResourceObserver checks the resources
-     * and pauses crawls if necessary
-     * @param sb the plasmaSwitchboard
-     */
     public ResourceObserver(final Switchboard sb) {
         this.sb = sb;
-        log.logInfo("initializing the resource observer");
-
-        final ArrayList<String> pathsToCheck = new ArrayList<String>();
-        //  FIXME whats about the secondary path???
-        //   = (getConfig(plasmaSwitchboard.INDEX_SECONDARY_PATH, "");
-        final String[] pathes =  {
-                            SwitchboardConstants.HTDOCS_PATH,        
-                            SwitchboardConstants.INDEX_PRIMARY_PATH,
-                            SwitchboardConstants.LISTS_PATH,
-                            SwitchboardConstants.RANKING_PATH,
-                            SwitchboardConstants.WORK_PATH};
-        String path;
-        for (final String element : pathes) {
-            try {
-                path = sb.getConfigPath(element, "").getCanonicalPath();
-                if (path.length() > 0) pathsToCheck.add(path);
-            } catch (final IOException e) {}
-        }
-        
-        DiskSpace.init(pathsToCheck);
-        
-        if (!DiskSpace.isUsable())
-            log.logWarning("Disk usage returned: " + DiskSpace.getErrorMessage());
-        
-        checkDiskUsageCount = 0;
-        checkMemoryUsageCount = 0;
-        disksFree = HIGH;
-        memoryFree = HIGH;
+        this.path = sb.getConfigPath(SwitchboardConstants.INDEX_PRIMARY_PATH, "");
     }
     
     public static void initThread() {
-    	Switchboard sb = Switchboard.getSwitchboard();
-    	// initializing the resourceObserver
-    	sb.observer =  new ResourceObserver(sb);
-    	// run the oberver here a first time
+    	final Switchboard sb = Switchboard.getSwitchboard();
+    	sb.observer =  new ResourceObserver(Switchboard.getSwitchboard());
     	sb.observer.resourceObserverJob();
     }
-
+    
     /**
      * checks the resources and pauses crawls if necessary
      */
     public void resourceObserverJob() {
     	MemoryControl.setDHTkbytes(getMinFreeMemory());
+
+    	normalizedDiskFree = getNormalizedDiskFree();
+    	normalizedMemoryFree = getNormalizedMemoryFree();
+
+    	if (normalizedDiskFree < HIGH || normalizedMemoryFree < HIGH) {
+
+    		if (normalizedDiskFree < HIGH) { // pause crawls
+    			if (!sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
+    				log.logInfo("pausing local crawls");
+    				sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
+    			}
+    			if (!sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
+    				log.logInfo("pausing remote triggered crawls");
+    				sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
+    			}
+    		}
+
+    		if ((normalizedDiskFree == LOW || normalizedMemoryFree < HIGH) && sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false)) {
+    			log.logInfo("disabling index receive");
+    			sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
+    			sb.peers.mySeed().setFlagAcceptRemoteIndex(false);
+    			disabledDHT = true;
+    		}
+    	}
     	
-        checkDiskUsageCount++;
-        checkMemoryUsageCount++;
-        int tmpDisksFree = HIGH;
-        int tmpMemoryFree = HIGH;
-        if (checkDiskUsageCount >= CHECK_DISK_USAGE_FREQ) {
-            checkDiskUsageCount = 0;
-            tmpDisksFree = checkDisks();
-            disksFree = tmpDisksFree;
-        }
-        if (checkMemoryUsageCount >= CHECK_MEMORY_USAGE_FREQ) {
-            checkMemoryUsageCount = 0;
-            tmpMemoryFree = checkMemory();
-            memoryFree = tmpMemoryFree;
-        }
-        
-        if (tmpDisksFree < HIGH || tmpMemoryFree < HIGH) {
-            if (tmpDisksFree < HIGH && !sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
-                log.logInfo("pausing local crawls");
-                sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL);
-            }
-            if (tmpDisksFree < HIGH && !sb.crawlJobIsPaused(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL)) {
-                log.logInfo("pausing remote triggered crawls");
-                sb.pauseCrawlJob(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL);
-            }
-            if ((tmpDisksFree == LOW || tmpMemoryFree < HIGH) && sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false)) {
-            	log.logInfo("disabling index receive");
-                sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
-                sb.peers.mySeed().setFlagAcceptRemoteIndex(false);
-                disabledDHT = true;
-            }
-        }
-        else {
-            if (DiskSpace.isUsable()) {
-            	if(disabledDHT) { // we were wrong!
-            		log.logInfo("enabling index receive");
-                    sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
-                    sb.peers.mySeed().setFlagAcceptRemoteIndex(true);
-                    disabledDHT = false;
-            	}
-                log.logInfo("run completed; everything in order");
-            }
-            else
-                log.logInfo("The observer is out of order: " + DiskSpace.getErrorMessage());
-        }
+    	else {
+    		if(disabledDHT) { // we were wrong!
+    			log.logInfo("enabling index receive");
+    			sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+    			sb.peers.mySeed().setFlagAcceptRemoteIndex(true);
+    			disabledDHT = false;
+    		}
+    		log.logInfo("resources ok");
+    	}
+    }
+    
+    /**
+     * returns the amount of disk space available
+     * @return <ul>
+     * <li><code>HIGH</code> if disk space is available</li>
+     * <li><code>MEDIUM</code> if low disk space is available</li>
+     * <li><code>LOW</code> if lower than hardlimit disk space is available</li>
+     * </ul>
+     */
+    private int getNormalizedDiskFree() {
+    	final long currentSpace = getUsableSpace(this.path);
+    	if(currentSpace < 1L) return HIGH;
+    	int ret = HIGH;
+    	
+    	if (currentSpace < getMinFreeDiskSpace()) {
+    		log.logWarning("Volume " + this.path.toString() + ": free space (" + (currentSpace / 1024 / 1024) + " MB) is too low (< " + (getMinFreeDiskSpace() / 1024 / 1024) + " MB)");
+    		ret = MEDIUM;
+    	}
+    	if (currentSpace < getMinFreeDiskSpace_hardlimit()) {
+    		ret = LOW;
+    	}
+    	return ret;
+    }
+    
+    private int getNormalizedMemoryFree() {
+    	if(!MemoryControl.getDHTallowed()) return LOW;
+        return HIGH;
     }
     
     /**
      * @return <code>true</code> if disk space is available
      */
-    public boolean getDisksOK () {
-        return disksFree == HIGH;
+    public boolean getDiskAvailable() {
+        return normalizedDiskFree == HIGH;
     }
     
     /**
      * @return <code>true</code> if memory is available
      */
-    public boolean getMemoryOK () {
-        return memoryFree == HIGH;
+    public boolean getMemoryAvailable() {
+        return normalizedMemoryFree == HIGH;
     }
     
     /**
      * @return amount of space (bytes) that should be kept free
      */
-    public long getMinFreeDiskSpace () {
+    public long getMinFreeDiskSpace() {
         return sb.getConfigLong(SwitchboardConstants.DISK_FREE, 3000) /* MiB */ * 1024L * 1024L;
     }
     
     /**
      * @return amount of space (bytes) that should at least be kept free
      */
-    public long getMinFreeDiskSpace_hardlimit () {
+    public long getMinFreeDiskSpace_hardlimit() {
         return sb.getConfigLong(SwitchboardConstants.DISK_FREE_HARDLIMIT, 100) /* MiB */ * 1024L * 1024L;
     }
     
@@ -190,39 +164,25 @@ public final class ResourceObserver {
     	return sb.getConfigLong(SwitchboardConstants.MEMORY_ACCEPTDHT, 0);
     }
     
-    /**
-     * returns the amount of disk space available
-     * @return <ul>
-     * <li><code>HIGH</code> if disk space is available</li>
-     * <li><code>MEDIUM</code> if low disk space is available</li>
-     * <li><code>LOW</code> if lower than hardlimit or 1/5 disk space is available (the max)</li>
-     * </ul>
-     */
-    private int checkDisks() {
-        int ret = HIGH;   
     
-        if (!DiskSpace.isUsable ())
-            return HIGH;
-        
-        final HashMap<String, long[]> usage = DiskSpace.getDiskUsage();
-        long[] val;
-        for (final Map.Entry<String, long[]> entry: usage.entrySet()) {
-            val = entry.getValue();
-            log.logInfo("df of Volume " + entry.getKey() + ": " + (val[1] / 1024 / 1024) + " MB");
-            if (val[1] < getMinFreeDiskSpace()) {
-                log.logWarning("Volume " + entry.getKey() + ": free space (" + (val[1] / 1024 / 1024) + " MB) is too low (< " + (getMinFreeDiskSpace() / 1024 / 1024) + " MB)");
-                ret = MEDIUM;
-            }
-            if (val[1] < Math.max(getMinFreeDiskSpace() / 5L, getMinFreeDiskSpace_hardlimit())) {
-            	ret = LOW;
-            }
-        }
-        return ret;
-    }
+	/**
+	 * This method calls File.getUsableSpace() from Java 6.
+	 * @param file the path to be checked
+	 * @return "The number of available bytes on the partition or 0L  if the abstract pathname does not name a partition." -1L on error.
+	 * @author lotus at mail.berlios.de
+	 */
+	public static long getUsableSpace(final File file) {
+		 try {
+			final Class<?> File6 = Class.forName("java.io.File");
+			final Class<?>[] param = {File.class, String.class };
+			final Constructor<?> File6Constructor = File6.getConstructor(param);
+			final Object file6 = File6Constructor.newInstance(file, "");
+			final Method getFreeSpace = file6.getClass().getMethod("getUsableSpace", (Class[])null);
+			final Object space = getFreeSpace.invoke(file6, (Object[])null);
+			return Long.parseLong(space.toString());
+		} catch (Throwable e) {
+			return -1L;
+		}
+	}
     
-    private int checkMemory() {
-    	if(!MemoryControl.getDHTallowed()) return LOW;
-        return HIGH;
-    }
 }
-
