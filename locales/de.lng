@@ -2413,6 +2413,26 @@ Hide surftips for users without autorization==Verberge Surftipps für Benutzer o
 Show surftips to everyone==Zeige Surftipps allen Benutzern
 #-----------------------------
 
+#File: Table_API_p.html
+#---------------------------
+: Peer Steering==: Peer Steuerung
+Steering of API Actions<==Steuerung der API Aktionen<
+This table shows actions that had been issued on the YaCy interface==Diese Tabelle zeigt Aktionen, die auf dem YaCy Interface ausgelöst wurden, 
+to change the configuration or to request crawl actions.==um Konfigurationen zu ändern oder Crawl Aktionen anzufordern.
+These recorded actions can be used to repeat specific actions and to send them==Diese aufgezeichneten Aktionen können dazu verwendet werden, bestimmte Aktionen wiederholt auszuführen und um sie
+to a scheduler for a periodic execution.==einem Scheduler für periodische Ausführung zu übergeben.
+>Recorded Actions<==>Aufgezeichnete Aktionen<
+>Date==>Datum
+>Type==>Typ
+>Comment==>Kommentar
+#>URL==>URL
+"Execute Selected Actions"=="Führe ausgewählte Aktionen aus"
+"Delete Selected Actions"=="Lösche ausgewählte Aktionen"
+>Result of API execution==>Ergebis der API Ausführung
+#>Status<==>Status>
+#>URL<==>URL<
+#-----------------------------
+
 ### This Tables section is removed in current SVN Versions
 #File: Tables_p.html
 #---------------------------
@@ -2752,6 +2772,7 @@ Pictures==Bilder
 #File: env/templates/header.template
 #---------------------------
 YaCy - Distributed Search Engine==YaCy - Verteilte Suchmaschine
+### SEARCH & BROWSE ###
 Search&nbsp;&amp;&nbsp;Browse==Suchen&nbsp;&amp;&nbsp;Surfen
 Search Page==Suchseite
 Rich Client Search==Rich Client Suche
@@ -2762,8 +2783,7 @@ Ranking Config==Ranking Einstellungen
 Publication==Veröffentlichung
 >Bookmarks==>Lesezeichen
 >Help==>Hilfe
-#Web&nbsp;Indexing==Web Indexierung
-#Crawl Start &amp; Monitoring==Crawl Start &amp; Kontrolle
+### INDEX CONTROL ###
 Index&nbsp;Control==Index&nbsp;Kontrolle
 Index Creation==Indexerzeugung
 Crawler Monitor==Crawler Überwachung
@@ -2771,30 +2791,32 @@ Crawl Results==Crawl Ergebnisse
 Content Import==Inhalte Importieren
 Index Administration==Indexverwaltung
 Filter &amp; Blacklists==Filter &amp; Sperrlisten
-#Indexing with Proxy==Indexierung per Proxy
+### SEARCH INTEGRATION ###
+Search Integration==Suchintegration
+Search Portals==Such Portale
+Customization==Anpassungen
+### MONITORING ###
 Monitoring==Kontrolle
 YaCy Network==YaCy Netzwerk
 Web Visualization==Internet Visualisierung
 Access Tracker==Zugriffe
 #Server Log==Server Log
-#News Monitor==News Anzeige
-#Cookies in Proxy==Cookies per Proxy
-Search Integration==Suchintegration
-Search Portals==Such Portale
-Customization==Anpassungen
+>Messages==>Nachrichten
+#>Terminal==>Terminal
+"New Messages"=="Neue Nachrichten"
+### PEER CONTROL
 Peer Control==Peer Kontrolle
 Admin Console==Admin Konsole
-#>Terminal==>Terminal
->Messages==>Nachrichten
-"New Messages"=="Neue Nachrichten"
+>Steering==>API Steuerung
 Confirm Restart==Bestätige Neustart
 Re-Start</a>==Neustarten</a>
 Confirm Shutdown==Bestätige Herunterfahren
 >Shutdown==>Herunterfahren
+### THE PROJECT ###
 The Project==Das Projekt
 Project Home==Projektseite
-English Forum==Englisches Forum
 #Deutsches Forum==Deutsches Forum
+English Forum==Englisches Forum
 YaCy Project Wiki==YaCy Projekt Wiki
 YaCy Statistics==YaCy Statistiken
 #-----------------------------
