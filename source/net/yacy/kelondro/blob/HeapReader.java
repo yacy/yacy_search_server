@@ -589,10 +589,10 @@ public class HeapReader {
                     // so far we have read this.keylen - 1 + 1 = this.keylen bytes.
                     // there must be a remaining number of len - this.keylen bytes left for the BLOB
                     if (len < this.keylen) return null;    // a strange case that can only happen in case of corrupted data
-                    if (is.available() < (len - this.keylen)) { // this really indicates corrupted data
-                        Log.logWarning("HeapReader", "corrupted data by entry of " + len + " bytes at available of: " + is.available() + " in " + this.blobFile.getName());
-                        return null;
-                    }
+//                    if (is.available() < (len - this.keylen)) { // this really indicates corrupted data but doesn't work for >2GB Blobs
+//                        Log.logWarning("HeapReader", "corrupted data by entry of " + len + " bytes at available of: " + is.available() + " in " + this.blobFile.getName());
+//                        return null;
+//                    }
                     payload = new byte[len - this.keylen]; // the remaining record entries
                     if (is.read(payload) < payload.length) return null;
                     return new entry(key, payload);
