@@ -133,6 +133,7 @@ public class ConfigNetwork_p {
                 } else {
                     sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
                     sb.peers.mySeed().setFlagAcceptRemoteIndex(false);
+                    sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, false);
                 }
     
                 if (post.get("indexReceiveBlockBlacklist", "").equals("on")) {

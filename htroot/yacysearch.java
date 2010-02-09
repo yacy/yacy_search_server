@@ -191,7 +191,8 @@ public class yacysearch {
         }
         
         // SEARCH
-        final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+        final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true) ||
+        									sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true);
         global = global && indexReceiveGranted; // if the user does not want indexes from remote peers, it cannot be a global search
         //final boolean offline = yacyCore.seedDB.mySeed().isVirgin();
         
@@ -430,7 +431,7 @@ public class yacysearch {
 
             // prepare search properties
             //final boolean yacyonline = ((sb.webIndex.seedDB != null) && (sb.webIndex.seedDB.mySeed() != null) && (sb.webIndex.seedDB.mySeed().getPublicAddress() != null));
-            final boolean globalsearch = (global) /* && (yacyonline)*/ && (sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false));
+            final boolean globalsearch = (global) && indexReceiveGranted; /* && (yacyonline)*/ 
         
             // do the search
             final TreeSet<byte[]> queryHashes = Word.words2hashes(query[0]);

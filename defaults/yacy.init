@@ -903,11 +903,12 @@ compare_yacy.right = YaCy
 
 # minimum free disk space for crawling (MiB)
 disk.free = 3000
-# minimum for DHT or 1/5th of former, whatever is max
+# minimum for DHT
 disk.free.hardlimit = 1000
 
 # minimum memory to accept dht-in (KB)
 memory.acceptDHT = 50000
+memory.disabledDHT = false
 
 # setting if execution of CGI files is allowed or not
 cgi.allow = false

@@ -75,7 +75,8 @@ public class index {
         final int type = (post == null) ? 0 : post.getInt("type", 0);
         
         final boolean indexDistributeGranted = sb.getConfigBool(SwitchboardConstants.INDEX_DIST_ALLOW, true);
-        final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
+        final boolean indexReceiveGranted = sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true) ||
+        									sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true);
         //global = global && indexDistributeGranted && indexReceiveGranted;
         
         // search domain

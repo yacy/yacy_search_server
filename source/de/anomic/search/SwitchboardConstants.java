@@ -393,6 +393,7 @@ public final class SwitchboardConstants {
     public static final String DISK_FREE_HARDLIMIT = "disk.free.hardlimit";
     
     public static final String MEMORY_ACCEPTDHT = "memory.acceptDHT";
+    public static final String INDEX_RECEIVE_AUTODISABLED = "memory.disabledDHT";
     
     /*
      * Some constants

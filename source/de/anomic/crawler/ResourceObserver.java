@@ -47,7 +47,6 @@ public class ResourceObserver {
     
     private int normalizedDiskFree = HIGH;
     private int normalizedMemoryFree = HIGH;
-    private boolean disabledDHT = false;
     
     public ResourceObserver(final Switchboard sb) {
         this.sb = sb;
@@ -86,16 +85,16 @@ public class ResourceObserver {
     			log.logInfo("disabling index receive");
     			sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, false);
     			sb.peers.mySeed().setFlagAcceptRemoteIndex(false);
-    			disabledDHT = true;
+    			sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, true);
     		}
     	}
     	
     	else {
-    		if(disabledDHT) { // we were wrong!
+    		if(sb.getConfigBool(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, false)) { // we were wrong!
     			log.logInfo("enabling index receive");
     			sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_ALLOW, true);
     			sb.peers.mySeed().setFlagAcceptRemoteIndex(true);
-    			disabledDHT = false;
+    			sb.setConfig(SwitchboardConstants.INDEX_RECEIVE_AUTODISABLED, false);
     		}
     		log.logInfo("resources ok");
     	}
