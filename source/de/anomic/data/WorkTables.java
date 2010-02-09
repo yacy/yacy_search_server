@@ -64,6 +64,8 @@ public class WorkTables extends Tables {
                     );
         } catch (IOException e) {
             Log.logException(e);
+        } catch (NullPointerException e) {
+        	Log.logException(e);
         }
         Log.logInfo("APICALL", apiurl);
     }
