@@ -1485,6 +1485,70 @@ The crawling queue==Der Crawler-Puffer
 Various stack files that belong to the crawling queue==Verschiedene Stack-Dateien, die zum Crawler-Puffer gehören
 #-----------------------------
 
+#File: IndexImportWikimedia_p.html
+#---------------------------
+#Wikimedia Dump Import==Wikimedia Dump Import
+No import thread is running, you can start a new thread here==Sie können hier einen neuen Thread starten, da aktuell kein Import Thread läuft
+Bad input data:==Ungültige Eingabedaten:
+Wikimedia Dump File Selection: select a \'bz2\' file==Wikimedia Dump Datei Auswahl: Wähle eine 'bz2' Datei aus
+You can import Wikipedia dumps here. An example is the file==Hier können Sie Wikimedia Dumps importieren. Als Beispiel dient die Datei
+Dumps must be in XML format and must be encoded in bz2. Do not decompress the file after downloading!==Dumps müssen im XML Format vorliegen und bz2 komprimiert sein. Entpacken Sie die Datei nicht nach dem Herunterladen!
+"Import Wikimedia Dump"=="Importiere Wikimedia Dump"
+When the import is started, the following happens:==Wenn der Import gestartet wird passiert Folgendes:
+The dump is extracted on the fly and wiki entries are translated into Dublin Core data format. The output looks like this:==Der Dump wird zur Laufzeit extrahiert und die Wiki Einträge werden in das Dublin Core Datenformat übersetzt. Die Ausgabe schaut wie folgt aus:
+Each 10000 wiki records are combined in one output file which is written to /DATA/SURROGATES/in into a temporary file.==Je 10000 Wiki Einträge werden zusammen in eine Ausgabedatei geschrieben und in /DATA/SURROGATES/in temporär gespeichert.
+When each of the generated output file is finished, it is renamed to a .xml file==Wenn jede der generierten Ausgabedateien abgearbeitet wurde wird diese in eine .xml Datei umbenannt.
+Each time a xml surrogate file appears in /DATA/SURROGATES/in, the YaCy indexer fetches the file and indexes the record entries.==Immer wenn eine xml Surrogat Datei in /DATA/SURROGATES/in erscheint, holt der YaCy Indexer diese Datei und indexiert die enthaltenen Datensätze.
+When a surrogate file is finished with indexing, it is moved to /DATA/SURROGATES/out==Wenn eine Surrogat Datei vollständig indexiert wurde, wird sie nach /DATA/SURROGATES/out verschoben
+You can recycle processed surrogate files by moving them from /DATA/SURROGATES/out to /DATA/SURROGATES/in==Sie können schon abgearbeitete Surrogat Dateien durch Verschieben von /DATA/SURROGATES/out nach /DATA/SURROGATES/in recyclen.
+Import Process==Import Prozess
+#Thread:==Thread:
+#Dump:==Dump:
+Processed:==Bearbeitet:
+Wiki Entries==Wiki Einträge
+Speed:==Geschwindigkeit:
+articles per second<==Artikel pro Sekunde<
+Running Time:==Laufzeit:
+hours,==Stunden,
+minutes<==Minuten<
+Remaining Time:==Verbleibende Zeit:
+#hours,==Stunden,
+#minutes<==Minuten<
+#-----------------------------
+
+#File: IndexImportOAIPMH_p.html
+#---------------------------
+#OAI-PMH Import==OAI-PMH Import
+Results from the import can be monitored in the <a href=\"/CrawlResults.html?process=7\">indexing results for surrogates==Ergebnisse aus dem Import finden Sie auf der Seite <a href="/CrawlResults.html?process=7">Ergebnisse aus dem Surrogat Import
+Single request import==Einfacher Anfrage Import
+This will submit only a single request as given here to a OAI-PMH server and imports records into the index==Mit dieser Methode wird nur eine einzelne Abfrage an einen OAI-PMH Server geschickt und die Datensätze in den Index aufgenommen
+"Import OAI-PMH source"=="Importiere OAI-PMH Quelle"
+Source:==Quelle:
+Processed:==Bearbeitet:
+records<==Datensätze<
+#ResumptionToken:==ResumptionToken:
+Import failed:==Import fehlgeschlagen:
+Import all Records from a server==Importiere alle Datensätze von einem Server
+Import all records that follow according to resumption elements into index==Importiere alle folgenden Datensätze die Wiederaufnahme Elementen entsprechen in den Index
+"import this source"=="Importiere diese Quelle"
+"import from a list"=="Importiere von einer Liste"
+Import started!==Import gestartet!
+Bad input data:==Ungültige Eingabedaten:
+#-----------------------------
+
+#File: IndexImportOAIPMHList_p.html
+#---------------------------
+OAI-PMH source import list==OAI-PMH Quellen Import Liste
+OAI Source List==OAI Quellen Liste
+>Source<==>Quelle<
+Import List==Importierte Liste
+#>Thread<==>Thread<
+#>Source<==>Quelle<
+>Processed<br />Chunks<==>Bearbeitete<br />Datenblöcke<
+>Imported<br />Records<==>Importierte<br />Datensätze<
+>Speed<br />\(records/second\)==>Geschwindigkeit<br />==(Datensätze/Sekunde)
+#-----------------------------
+
 #File: LogStatistics_p.html
 #---------------------------
 : Log Statistics==: Logstatistik
@@ -2871,6 +2935,14 @@ Advanced Settings==Erweiterte Einstellungen
 Parser Configuration==Parser Einstellungen
 Local robots.txt==Lokale robots.txt
 Advanced Properties==Erweiterte Konfiguration
+#-----------------------------
+
+#File: env/templates/submenuContentIntegration.template
+#---------------------------
+External Content Integration==Integration von externen Inhalten
+Import phpBB3 forum==Importiere phpBB3 Forum
+Import Wikimedia dumps==Importiere Wikimedia Dumps
+Import OAI-PMH Sources==Importiere OAI-PMH Quellen
 #-----------------------------
 
 #File: env/templates/submenuCookie.template
