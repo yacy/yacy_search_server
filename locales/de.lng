@@ -408,6 +408,7 @@ monitor at the network page</a> what the other peers are doing==auf der Netzwerk
 Your Peer name is a default name; please set an individual peer name.==Ihr Peer-Name ist ein Standardname; bitte stellen Sie einen individuellen Namen ein.
 You did not set a user name and/or a password.==Sie haben keinen Nutzernamen und/oder kein Passwort gesetzt.
 Some pages are protected by passwords.==Einige Seiten sind passwortgeschützt.
+You should set a password at the <a href="ConfigAccounts_p.html">Accounts Menu</a> to secure your YaCy peer.</p>::==Sie sollten ein Password in der <a href="ConfigAccounts_p.html">Benutzerverwaltung</a> setzen, um Ihren YaCy peer abzusichern.</p>::
 You did not open a port in your firewall or your router does not forward the server port to your peer.==Sie haben keinen Port in Ihrer Firewall geöffnet oder Ihr Router leitet den Server-Port nicht zu Ihrem Peer weiter.
 This is needed if you want to fully participate in the YaCy network.==Dies ist jedoch erforderlich, wenn Sie vollständig am YaCy-Netzwerk teilhaben möchten.
 You can also use your peer without opening it, but this is not recomended.==Sie können Ihren Peer auch nutzen ohne ihn zu öffnen, dies wird jedoch nicht empfohlen.

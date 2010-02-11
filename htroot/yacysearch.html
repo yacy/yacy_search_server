@@ -42,7 +42,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
     <link media="screen" type="text/css" href="/yacy/ui/css/themes/start/ui.theme.css" rel="stylesheet" />
 #(/display)#
 
-<script>
+<script type="text/javascript">
 //<![CDATA[
 $(function() {
 	$.extend($.ui.accordion.defaults, {
@@ -162,9 +162,9 @@ var progressbar = new Progressbar(#[results]#, document.getElementById("results"
 <!-- attach the bottomline -->
 #(pageNavBottom)#::<div id="pageNavBottom" align="center">#[resnav]#</div>#(/pageNavBottom)#
 </div>
-<div style="width=220px;">
+<!-- div style="width=220px;" -->
 <!--#include virtual="yacysearchtrailer.html?eventID=#[eventID]#&display=#[display]#" -->
-</div>
-</div>
+<!-- /div -->
+<!-- /div -->
 </body>
 </html>
