@@ -1519,7 +1519,7 @@ Remaining Time:==Verbleibende Zeit:
 #File: IndexImportOAIPMH_p.html
 #---------------------------
 #OAI-PMH Import==OAI-PMH Import
-Results from the import can be monitored in the <a href=\"/CrawlResults.html?process=7\">indexing results for surrogates==Ergebnisse aus dem Import finden Sie auf der Seite <a href="/CrawlResults.html?process=7">Ergebnisse aus dem Surrogat Import
+Results from the import can be monitored in the <a href=\"\/CrawlResults.html\?process=7\">indexing results for surrogates==Ergebnisse aus dem Import finden Sie auf der Seite <a href="/CrawlResults.html?process=7">Ergebnisse aus dem Surrogat Import
 Single request import==Einfacher Anfrage Import
 This will submit only a single request as given here to a OAI-PMH server and imports records into the index==Mit dieser Methode wird nur eine einzelne Abfrage an einen OAI-PMH Server geschickt und die Datensätze in den Index aufgenommen
 "Import OAI-PMH source"=="Importiere OAI-PMH Quelle"
