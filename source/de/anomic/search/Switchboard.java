@@ -1642,21 +1642,25 @@ public final class Switchboard extends serverSwitch {
                 
                 // process the next hyperlink
                 nextUrl = nextEntry.getKey();
-                String u = nextUrl.toNormalform(true, true);
+                String u = nextUrl.toNormalform(true, true, true);
                 if (!(u.startsWith("http") || u.startsWith("ftp"))) continue;
                 // enqueue the hyperlink into the pre-notice-url db
-                crawlStacker.enqueueEntry(new Request(
-                        response.initiator(),
-                        nextUrl,
-                        response.url().hash(),
-                        nextEntry.getValue(),
-                        null,
-                        docDate,
-                        response.profile().handle(),
-                        response.depth() + 1,
-                        0,
-                        0
-                        ));
+                try {
+                    crawlStacker.enqueueEntry(new Request(
+                            response.initiator(),
+                            new DigestURI(u, null),
+                            response.url().hash(),
+                            nextEntry.getValue(),
+                            null,
+                            docDate,
+                            response.profile().handle(),
+                            response.depth() + 1,
+                            0,
+                            0
+                            ));
+                } catch (MalformedURLException e) {
+                    Log.logException(e);
+                }
             }
             final long stackEndTime = System.currentTimeMillis();
             if (log.isInfo()) log.logInfo("CRAWL: ADDED " + hl.size() + " LINKS FROM " + response.url().toNormalform(false, true) +

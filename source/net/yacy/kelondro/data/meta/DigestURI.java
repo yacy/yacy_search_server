@@ -574,15 +574,34 @@ public class DigestURI implements Serializable {
     }
     
     public String getFile() {
-        return getFile(false);
+        return getFile(false, false);
     }
     
-    public String getFile(final boolean excludeReference) {
+    public String getFile(final boolean excludeReference, final boolean removeSessionID) {
         // this is the path plus quest plus ref
         // if there is no quest and no ref the result is identical to getPath
         // this is defined according to http://java.sun.com/j2se/1.4.2/docs/api/java/net/URL.html#getFile()
         if (quest == null) return (excludeReference || ref == null) ? path : path + "#" + ref;
-        return (excludeReference || ref == null) ? path + "?" + quest : path + "?" + quest + "#" + ref;
+        String q = quest;
+        if (removeSessionID) {
+            for (String sid: sessionIDnames) {
+                if (q.startsWith(sid + "=")) {
+                    int p = q.indexOf('&');
+                    if (p < 0) return (excludeReference || ref == null) ? path : path + "#" + ref;
+                    q = q.substring(p + 1);
+                    continue;
+                }
+                int p = q.indexOf("&" + sid + "=");
+                if (p < 0) continue;
+                int p1 = q.indexOf('&', p);
+                if (p1 < 0) {
+                    q = q.substring(0, p);
+                } else {
+                    q = q.substring(0, p) + q.substring(p1);
+                }
+            }
+        }
+        return (excludeReference || ref == null) ? path + "?" + q : path + "?" + q + "#" + ref;
     }
     
     public String getFileName() {
@@ -657,14 +676,18 @@ public class DigestURI implements Serializable {
     }
     
     public String toNormalform(final boolean excludeReference, final boolean stripAmp) {
-        String result = toNormalform(excludeReference); 
+        return toNormalform(excludeReference, stripAmp, false);
+    }
+    
+    public String toNormalform(final boolean excludeReference, final boolean stripAmp, final boolean removeSessionID) {
+        String result = toNormalform0(excludeReference, removeSessionID); 
         if (stripAmp) {
             result = result.replaceAll("&amp;", "&");
         }
         return result;
     }
     
-    private String toNormalform(final boolean excludeReference) {
+    private String toNormalform0(final boolean excludeReference, final boolean removeSessionID) {
         // generates a normal form of the URL
         boolean defaultPort = false;
         if (this.protocol.equals("mailto")) {
@@ -678,7 +701,7 @@ public class DigestURI implements Serializable {
         } else if (this.protocol.equals("file")) {
             defaultPort = true;
         }
-        final String path = this.getFile(excludeReference);
+        final String path = this.getFile(excludeReference, removeSessionID);
         
         if (defaultPort) {
             return
@@ -810,7 +833,7 @@ public class DigestURI implements Serializable {
         // combine the attributes
         final StringBuilder hash = new StringBuilder(12);
         // form the 'local' part of the hash
-        String normalform = toNormalform(true, true);
+        String normalform = toNormalform(true, true, true);
         String b64l = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(normalform));
         if (b64l.length() < 5) return null;
         hash.append(b64l.substring(0, 5)); // 5 chars
