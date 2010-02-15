@@ -130,7 +130,13 @@ public class Tables {
     }
     
     private byte[] ukey(String tablename) throws IOException {
-        byte[] pk = select(system_table_pkcounter, tablename.getBytes()).from(system_table_pkcounter_counterName);
+        Row row = select(system_table_pkcounter, tablename.getBytes());
+        if (row == null) {
+            // table counter entry in pkcounter table does not exist: make a new table entry
+            row = new Row(tablename.getBytes(), system_table_pkcounter_counterName, int2key(0).getBytes());
+            insert(system_table_pkcounter, row);
+        }
+        byte[] pk = row.from(system_table_pkcounter_counterName);
         int pki;
         if (pk == null) {
             pki = size(tablename);
@@ -305,7 +311,8 @@ public class Tables {
     
     public Row select(final String table, byte[] pk) throws IOException {
         BEncodedHeap heap = getHeap(table);
-        return new Row(pk, heap.get(pk));
+        if (heap.has(pk)) return new Row(pk, heap.get(pk));
+        return null;
     }
 
     public void delete(final String table, byte[] pk) throws IOException {
@@ -403,11 +410,25 @@ public class Tables {
         final Map<String, byte[]> map;
         
         public Row(final Map.Entry<byte[], Map<String, byte[]>> entry) {
+            assert entry != null;
+            assert entry.getKey() != null;
+            assert entry.getValue() != null;
             this.pk = entry.getKey();
             this.map = entry.getValue();
         }
         
         public Row(final byte[] pk, final Map<String, byte[]> map) {
+            assert pk != null;
+            assert map != null;
+            this.pk = pk;
+            this.map = map;
+        }
+        
+        public Row(final byte[] pk, String k0, byte[] v0) {
+            assert k0 != null;
+            assert v0 != null;
+            HashMap<String, byte[]> map = new HashMap<String, byte[]>();
+            map.put(k0, v0);
             this.pk = pk;
             this.map = map;
         }

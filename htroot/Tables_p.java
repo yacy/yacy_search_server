@@ -178,6 +178,7 @@ public class Tables_p {
         prop.put("showedit_table", table);
         prop.put("showedit_pk", pk);
         Tables.Row row = sb.tables.select(table, pk.getBytes());
+        if (row == null) return;
         int count = 0;
         byte[] cell;
         for (String col: columns) {

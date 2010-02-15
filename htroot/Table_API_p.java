@@ -72,9 +72,11 @@ public class Table_API_p {
             for (String pk: pks) {
                 try {
                     Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME, pk.getBytes());
-                    String url = "http://localhost:" + sb.getConfig("port", "8080") + new String(row.from(WorkTables.TABLE_API_COL_URL));
-                    result = client.GET(url);
-                    l.put(url, result.getStatusCode());
+                    if (row != null) {
+                        String url = "http://localhost:" + sb.getConfig("port", "8080") + new String(row.from(WorkTables.TABLE_API_COL_URL));
+                        result = client.GET(url);
+                        l.put(url, result.getStatusCode());
+                    }
                 } catch (IOException e) {
                     Log.logException(e);
                 }
