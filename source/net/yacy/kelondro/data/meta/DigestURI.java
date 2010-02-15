@@ -585,13 +585,13 @@ public class DigestURI implements Serializable {
         String q = quest;
         if (removeSessionID) {
             for (String sid: sessionIDnames) {
-                if (q.startsWith(sid + "=")) {
+                if (q.toLowerCase().startsWith(sid.toLowerCase() + "=")) {
                     int p = q.indexOf('&');
                     if (p < 0) return (excludeReference || ref == null) ? path : path + "#" + ref;
                     q = q.substring(p + 1);
                     continue;
                 }
-                int p = q.indexOf("&" + sid + "=");
+                int p = q.toLowerCase().indexOf("&" + sid.toLowerCase() + "=");
                 if (p < 0) continue;
                 int p1 = q.indexOf('&', p);
                 if (p1 < 0) {
@@ -750,25 +750,30 @@ public class DigestURI implements Serializable {
     }
     
     public final boolean isIndividual() {
-        final String ls = unescape(path.toLowerCase());
+        final String q = unescape(path.toLowerCase());
+        for (String sid: sessionIDnames) {
+            if (q.startsWith(sid.toLowerCase() + "=")) return true;
+            int p = q.indexOf("&" + sid.toLowerCase() + "=");
+            if (p >= 0) return true;
+        }
         int pos;
         return
-               ((pos = ls.indexOf("sid")) > 0 &&
-                (ls.charAt(--pos) == '?' || ls.charAt(pos) == '&' || ls.charAt(pos) == ';') &&
-                (pos += 5) < ls.length() &&
-                (ls.charAt(pos) != '&' && ls.charAt(--pos) == '=')
+               ((pos = q.indexOf("sid")) > 0 &&
+                (q.charAt(--pos) == '?' || q.charAt(pos) == '&' || q.charAt(pos) == ';') &&
+                (pos += 5) < q.length() &&
+                (q.charAt(pos) != '&' && q.charAt(--pos) == '=')
                 ) ||
 
-               ((pos = ls.indexOf("sessionid")) > 0 &&
-                (pos += 10) < ls.length() &&
-                (ls.charAt(pos) != '&' &&
-                 (ls.charAt(--pos) == '=' || ls.charAt(pos) == '/'))
+               ((pos = q.indexOf("sessionid")) > 0 &&
+                (pos += 10) < q.length() &&
+                (q.charAt(pos) != '&' &&
+                 (q.charAt(--pos) == '=' || q.charAt(pos) == '/'))
                 ) ||
 
-               ((pos = ls.indexOf("phpsessid")) > 0 &&
-                (pos += 10) < ls.length() &&
-                (ls.charAt(pos) != '&' &&
-                 (ls.charAt(--pos) == '=' || ls.charAt(pos) == '/')));
+               ((pos = q.indexOf("phpsessid")) > 0 &&
+                (pos += 10) < q.length() &&
+                (q.charAt(pos) != '&' &&
+                 (q.charAt(--pos) == '=' || q.charAt(pos) == '/')));
     }
 
 
@@ -1029,8 +1034,11 @@ public class DigestURI implements Serializable {
           new String[]{"http://www.anomic.de","javascipt:temp"},
           new String[]{null,"http://yacy-websuche.de/wiki/index.php?title=De:IntroInformationFreedom&action=history"},
           new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&showuser=23585"},
-          new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&amp;showuser=23585"}
+          new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&amp;showuser=23585"},
+          new String[]{null, "http://www.scc.kit.edu/publikationen/80.php?PHPSESSID=5f3624d3e1c33d4c086ab600d4d5f5a1"},
+          new String[]{null, "http://www.scc.kit.edu/publikationen/80.php"}
           };
+        DigestURI.initSessionIDNames(new File("defaults/sessionid.names"));
         String environment, url;
         DigestURI aURL, aURL1;
         java.net.URL jURL;
@@ -1038,7 +1046,7 @@ public class DigestURI implements Serializable {
             environment = test[i][0];
             url = test[i][1];
             try {aURL = DigestURI.newURL(environment, url);} catch (final MalformedURLException e) {Log.logException(e); aURL = null;}
-            if (aURL != null) System.out.println("normalized: " + aURL.toNormalform(true, true));
+            if (aURL != null) System.out.println("normalized: " + aURL.toNormalform(true, true,  true) + " - hash=" + aURL.hash());
             if (environment == null) {
                 try {jURL = new java.net.URL(url);} catch (final MalformedURLException e) {jURL = null;}
             } else {
