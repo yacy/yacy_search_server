@@ -825,6 +825,30 @@ ul.folder li.treeMenu_closed ul {
  	display: none;
 }
 
+div#kiosk {
+  position:absolute;
+  top:0px;
+  right:0px;
+  z-index: 100;
+}
+div#kiosk span {
+  display: none;
+}
+div#kiosk:hover span {
+   display: block;
+   position: absolute;
+   font-size:1em;
+   top: 18px; 
+   left: -80px;
+   width: 80px;
+   padding: 3px;
+   color: #000000; 
+   background: #DDDDDD;
+   text-align: center;
+   border: 1px dashed black;
+   z-index: 100;
+}
+ 
 /* API */
 div#api {
   position:absolute;

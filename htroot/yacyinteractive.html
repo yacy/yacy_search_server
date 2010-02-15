@@ -88,7 +88,11 @@ if (q != "") search(q);
 </script>
 #(display)#
 	#%env/templates/simpleheader.template%#
-	::
+	<div id="kiosk">
+    <a href="yacyinteractive.html?display=2"\><img src="env/grafics/close.gif" width="16" height="16" alt="close" /></a>
+    <span>kiosk mode</span>
+    </div>
+    ::
 <div id="api"><a href="yacysearch.json?query=yacy"><img src="env/grafics/api.png" width="60" height="40" alt="API" /></a>
 <span>This page uses the JSON search API to display search results as you type.
 Click the API icon to see an example call to the native API.
