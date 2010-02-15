@@ -275,7 +275,12 @@ public final class Switchboard extends serverSwitch {
         this.log.logConfig("Work Path:    " + this.workPath.toString());
         this.dictionariesPath = getConfigPath(SwitchboardConstants.DICTIONARY_SOURCE_PATH, SwitchboardConstants.DICTIONARY_SOURCE_PATH_DEFAULT);
         this.log.logConfig("Dictionaries Path:" + this.dictionariesPath.toString());
-        
+
+        // init sessionid name file
+        final String sessionidNamesFile = getConfig("sessionidNamesFile","");
+        this.log.logConfig("Loading sessionid file " + sessionidNamesFile);
+        DigestURI.initSessionIDNames(new File(getRootPath(), sessionidNamesFile));
+
         // init tables
         this.tables = new WorkTables(this.workPath);
         
@@ -1545,7 +1550,7 @@ public final class Switchboard extends serverSwitch {
             return ((Boolean)status[SwitchboardConstants.CRAWLJOB_STATUS]).booleanValue();
         }
     }
-    
+
     public indexingQueueEntry parseDocument(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_PARSING);
         

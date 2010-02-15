@@ -222,6 +222,9 @@ fileHost = localpeer
 # specify the path to the MIME matching file table
 mimeTable = defaults/httpd.mime
 
+# specify the path to the sessionid name file
+sessionidNamesFile = defaults/sessionid.names
+
 # a path to the file cache, used for the internal proxy and as crawl buffer
 # This will be used if the server is addressed as a proxy
 proxyCache = DATA/HTCACHE

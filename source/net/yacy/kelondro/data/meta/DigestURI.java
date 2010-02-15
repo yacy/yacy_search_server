@@ -30,7 +30,9 @@ package net.yacy.kelondro.data.meta;
 import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.text.Collator;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,6 +41,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.Domains;
+import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Punycode;
 import net.yacy.kelondro.util.Punycode.PunycodeException;
 
@@ -52,6 +55,23 @@ public class DigestURI implements Serializable {
     private static final Pattern patternSlash = Pattern.compile("/");
     private static final Pattern patternAmp = Pattern.compile("&");
     private static final Pattern patternMail = Pattern.compile("^[a-z]+:.*?");
+    
+    // session id handling
+    private static final Collator insensitiveCollator = Collator.getInstance(Locale.US);
+    private static final TreeSet<String> sessionIDnames;
+    static {
+        insensitiveCollator.setStrength(Collator.SECONDARY);
+        insensitiveCollator.setDecomposition(Collator.NO_DECOMPOSITION);
+        sessionIDnames = new TreeSet<String>(insensitiveCollator);
+    }
+    
+    public static final void initSessionIDNames(File idNamesFile) {
+        for (String s: FileUtils.loadList(idNamesFile)) {
+            if (s == null) continue;
+            s = s.trim();
+            if (s.length() > 0) sessionIDnames.add(s);
+        }
+    }
     
     // class variables
     private String protocol, host, userInfo, path, quest, ref, hash;
@@ -554,15 +574,15 @@ public class DigestURI implements Serializable {
     }
     
     public String getFile() {
-        return getFile(true);
+        return getFile(false);
     }
     
-    public String getFile(final boolean includeReference) {
+    public String getFile(final boolean excludeReference) {
         // this is the path plus quest plus ref
         // if there is no quest and no ref the result is identical to getPath
         // this is defined according to http://java.sun.com/j2se/1.4.2/docs/api/java/net/URL.html#getFile()
-        if (quest != null) return ((includeReference) && (ref != null)) ? path + "?" + quest + "#" + ref : path + "?" + quest;
-        return ((includeReference) && (ref != null)) ? path + "#" + ref : path;
+        if (quest == null) return (excludeReference || ref == null) ? path : path + "#" + ref;
+        return (excludeReference || ref == null) ? path + "?" + quest : path + "?" + quest + "#" + ref;
     }
     
     public String getFileName() {
@@ -636,15 +656,15 @@ public class DigestURI implements Serializable {
         return toNormalform(false, true);
     }
     
-    public String toNormalform(final boolean stripReference, final boolean stripAmp) {
-        String result = toNormalform(!stripReference); 
+    public String toNormalform(final boolean excludeReference, final boolean stripAmp) {
+        String result = toNormalform(excludeReference); 
         if (stripAmp) {
             result = result.replaceAll("&amp;", "&");
         }
         return result;
     }
     
-    private String toNormalform(final boolean includeReference) {
+    private String toNormalform(final boolean excludeReference) {
         // generates a normal form of the URL
         boolean defaultPort = false;
         if (this.protocol.equals("mailto")) {
@@ -658,7 +678,7 @@ public class DigestURI implements Serializable {
         } else if (this.protocol.equals("file")) {
             defaultPort = true;
         }
-        final String path = this.getFile(includeReference);
+        final String path = this.getFile(excludeReference);
         
         if (defaultPort) {
             return
