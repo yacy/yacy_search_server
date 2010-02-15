@@ -602,22 +602,6 @@ public class HeapReader {
             }
         }
         
-        /* the old code:
-         
-           private Map.Entry<byte[], byte[]> next0() {
-            try {
-                while (true) {
-                    int len = is.readInt();
-                    byte[] key = new byte[this.keylen];
-                    if (is.read(key) < key.length) return null;
-                    byte[] payload = new byte[len - this.keylen];
-                    if (is.read(payload) < payload.length) return null;
-                    if (key[0] == 0) continue; // this is an empty gap
-                    return new entry(key, payload);
-                }
-            }
-         */        
-        
         public Map.Entry<byte[], byte[]> next() {
             final Map.Entry<byte[], byte[]> n = this.nextEntry;
             this.nextEntry = next0();

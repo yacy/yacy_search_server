@@ -307,36 +307,6 @@ public class BDecoder {
             return null;
         }
     }
-    /*
-    public static BObject parse(InputStream is) {
-        if (is.available() < 1) return null;
-        char ch = (char) is.read();
-        if ((ch >= '0') && (ch <= '9')) {
-            StringBuilder s = new StringBuilder();
-            s.append(ch);
-            while ((ch = (char) is.read()) != ':') s.append(ch);
-            int len = Integer.parseInt(s.toString());
-            byte[] b = new byte[len];
-            is.read(b);
-            return new BStringObject(new String(b));
-        } else if (ch == 'l') {
-            pos++;
-            return new BListObject(readList());
-        } else if (ch == 'd') {
-            pos++;
-            return new BDictionaryObject(convertToMap(readList()));
-        } else if (ch == 'i') {
-            pos++;
-            int end = pos;
-            while (b[end] != 'e') ++end;
-            BIntegerObject io = new BIntegerObject(Long.parseLong(new String(b, pos, end - pos)));
-            pos = end + 1;
-            return io;
-        } else {
-            return null;
-        }
-    }
-    */
     
     public static void print(BObject bo, int t) {
         for (int i = 0; i < t; i++) System.out.print(" ");

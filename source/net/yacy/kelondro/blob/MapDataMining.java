@@ -191,18 +191,12 @@ public class MapDataMining extends MapHeap {
         assert (key != null);
         assert (key.length() > 0);
         assert (newMap != null);
-        
-//        super.put(key, newMap); // moved down for solving yacy-bar-values - needed to be before the other stuff?
-//        
-//        // update sortCluster
-//        if (sortClusterMap != null) updateSortCluster(key, newMap);
 
         // update elementCount
         if ((longaccfields != null) || (doubleaccfields != null)) {
             final Map<String, String> oldMap = super.get(key, false);
             if (oldMap != null) {
                 // element exists, update acc
-                // if ((longaccfields != null) || (doubleaccfields != null)) updateAcc(oldMap, false); // we already checked this - don't we? 
                 updateAcc(oldMap, false);
             }
         

@@ -532,11 +532,13 @@ public final class yacySeedDB implements AlternativeDomainNames {
         if ((this.mySeed != null) && (hash.equals(mySeed.hash))) return mySeed;
         ConcurrentHashMap<String, String> entry = new ConcurrentHashMap<String, String>();
         try {
-            entry.putAll(database.get(hash));
+            Map<String, String> map = database.get(hash);
+            if (map == null) return null;
+            entry.putAll(map);
         } catch (final IOException e) {
-            entry = null;
+            Log.logException(e);
+            return null;
         }
-        if (entry == null) return null;
         return new yacySeed(hash, entry);
     }
     
