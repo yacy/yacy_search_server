@@ -27,7 +27,6 @@ package net.yacy.kelondro.util;
 
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -35,6 +34,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 
 public final class MapTools {
 
@@ -51,10 +51,10 @@ public final class MapTools {
         return p;
     }
     
-    public static HashMap<String, String> string2map(String string, final String separator) {
+    public static ConcurrentHashMap<String, String> string2map(String string, final String separator) {
         // this can be used to parse a Map.toString() into a Map again
         if (string == null) return null;
-        final HashMap<String, String> map = new HashMap<String, String>();
+        final ConcurrentHashMap<String, String> map = new ConcurrentHashMap<String, String>();
         int pos;
         if ((pos = string.indexOf('{')) >= 0) string = string.substring(pos + 1).trim();
         if ((pos = string.lastIndexOf('}')) >= 0) string = string.substring(0, pos).trim();

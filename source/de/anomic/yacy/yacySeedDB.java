@@ -38,6 +38,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.blob.MapDataMining;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -529,9 +530,9 @@ public final class yacySeedDB implements AlternativeDomainNames {
     private yacySeed get(final String hash, final MapDataMining database) {
         if (hash == null) return null;
         if ((this.mySeed != null) && (hash.equals(mySeed.hash))) return mySeed;
-        Map<String, String> entry;
+        ConcurrentHashMap<String, String> entry = new ConcurrentHashMap<String, String>();
         try {
-            entry = database.get(hash);
+            entry.putAll(database.get(hash));
         } catch (final IOException e) {
             entry = null;
         }
@@ -982,9 +983,10 @@ public final class yacySeedDB implements AlternativeDomainNames {
         public yacySeed internalNext() {
             if ((it == null) || (!(it.hasNext()))) return null;
             try {
-                Map<String, String> dna;
+                ConcurrentHashMap<String, String> dna;
                 while (it.hasNext()) {
-                    dna = it.next();
+                    dna = new ConcurrentHashMap<String, String>();
+                    dna.putAll(it.next());
                     assert dna != null;
                     if (dna == null) continue;
                     final String hash = dna.remove("key");

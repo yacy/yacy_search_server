@@ -55,6 +55,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.order.Base64Order;
@@ -169,12 +170,12 @@ public class yacySeed implements Cloneable {
     /** the peer-hash */
     public String hash;
     /** a set of identity founding values, eg. IP, name of the peer, YaCy-version, ...*/
-    private final Map<String, String> dna;
+    private final ConcurrentHashMap<String, String> dna;
     public int available;
     public int selectscore = -1; // only for debugging
     public String alternativeIP = null;
 
-    public yacySeed(final String theHash, final Map<String, String> theDna) {
+    public yacySeed(final String theHash, final ConcurrentHashMap<String, String> theDna) {
         // create a seed with a pre-defined hash map
         assert theHash != null;
         this.hash = theHash;
@@ -186,7 +187,7 @@ public class yacySeed implements Cloneable {
     }
 
     public yacySeed(final String theHash) {
-        this.dna = new HashMap<String, String>();
+        this.dna = new ConcurrentHashMap<String, String>();
 
         // settings that can only be computed by originating peer:
         // at first startup -
@@ -776,7 +777,7 @@ public class yacySeed implements Cloneable {
         if (seed == null) { return null; }
         
         // extract hash
-        final HashMap<String, String> dna = MapTools.string2map(seed, ",");
+        final ConcurrentHashMap<String, String> dna = MapTools.string2map(seed, ",");
         final String hash = dna.remove(yacySeed.HASH);
         if (hash == null) return null;
         final yacySeed resultSeed = new yacySeed(hash, dna);
@@ -881,11 +882,10 @@ public class yacySeed implements Cloneable {
         return mySeed;
     }
 
-    @SuppressWarnings("unchecked")
     public final yacySeed clone() {
-        synchronized (this.dna) {
-            return new yacySeed(this.hash, (HashMap<String, String>) (new HashMap<String, String>(this.dna).clone()));
-        }
+        ConcurrentHashMap<String, String> ndna = new ConcurrentHashMap<String, String>();
+        ndna.putAll(this.dna);
+        return new yacySeed(this.hash, ndna);
     }
     
 }

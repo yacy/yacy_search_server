@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -180,10 +181,10 @@ public class Network {
                     return prop;
                 }
 
-                final HashMap<String, String> map = new HashMap<String, String>();
+                final ConcurrentHashMap<String, String> map = new ConcurrentHashMap<String, String>();
                 map.put(yacySeed.IP, post.get("peerIP"));
                 map.put(yacySeed.PORT, post.get("peerPort"));
-                yacySeed peer = new yacySeed(post.get("peerHash"),map);
+                yacySeed peer = new yacySeed(post.get("peerHash"), map);
 
                 sb.updateMySeed();
                 final int added = yacyClient.publishMySeed(sb.peers.mySeed(), sb.peers.peerActions, peer.getPublicAddress(), peer.hash);
