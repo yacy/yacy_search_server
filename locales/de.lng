@@ -26,7 +26,7 @@
 #---------------------------
 Access Tracker==Zugriffe
 Server Access Overview==Server Zugriff Überblick
-This is a list of \#\[num\]\# requests to the local http server within the last hour.==Dies ist eine Liste von #[num]# Anfragen, die an den lokalen http Server innerhalb der letzten Stunde gestellt wurden.
+This is a list of \#\[num\]\# requests to the local http server within the last hour.==Dies ist eine Liste von #[num]# Anfragen, die an den lokalen HTTP Server innerhalb der letzten Stunde gestellt wurden.
 This is a list of requests to the local http server within the last hour.==Dies ist eine Liste von Anfragen, die innerhalb der letzten Stunde an den lokalen HTTP Server gestellt wurden.
 Showing \#\[num\]\# requests.==Gezeigt werden #[num]# Anfragen.
 Access Count During==Erfasster Zugriff während der
@@ -398,7 +398,7 @@ Peer Port:==Peer-Port:
 Configure your router for YaCy:==Ihren Router für YaCy konfigurieren:
 Configuration was not successful. This may take a moment.==Die Konfiguration war nicht erfolgreich. Dies kann einen Moment dauern.
 Set Configuration==Konfiguration speichern
-What you should do next:==Was Sie als nächstes tun können:
+What you should do next:==Was Sie als Nächstes tun können:
 Your basic configuration is complete! You can now \(for example\)==Ihre Grundeinstellungen sind vollständig! Sie können jetzt (beispielsweise)
 just <==Einfach <
 start an uncensored search==eine unzensierte Suche beginnen
@@ -490,7 +490,7 @@ Long Description==Lange Beschreibung
 Indexing Domain==Indexierungs Domain
 #DHT==DHT
 "Change Network"=="Netzwerk wechseln"
-Distributed Computing Network for Domain==Verteilte Netzwerk für Domain
+Distributed Computing Network for Domain==Verteiltes Rechnen Netzwerk für die Domain
 You can configure if you want to participate at the global YaCy network or if you want to have your==Sie können einstellen, ob Sie am globalen YaCy-Netzwerk teilnehmen wollen oder ob Sie einen eigenen
 own separate search cluster with or without connection to the global network. You may also define==separaten Such-Cluster, mit oder ohne Verbindung zum globalen Netz, haben möchten. Sie können auch
 a completely independent search engine instance, without any data exchange between your peer and other==eine vollkommen unabhängige Instanz einer Suchmaschine, ohne jeglichen Datenaustausch zwischen Ihrem und anderen Peers, definieren.
@@ -2792,6 +2792,7 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
 >Name==>Name
 >Size==>Größe
 >Date==>Datum
+kiosk mode==Kiosk Modus
 #>Link==>Link
 #-----------------------------
 
