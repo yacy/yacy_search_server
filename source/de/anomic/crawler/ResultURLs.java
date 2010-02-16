@@ -1,4 +1,4 @@
-// plasmaCrawlLURL.java
+// ResultURLs.java
 // -----------------------
 // part of YaCy
 // (C) by Michael Peter Christen; mc@yacy.net
@@ -23,48 +23,43 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-/*
-   This class provides storage functions for the plasma search engine.
-   - the url-specific properties, including condenser results
-   - the text content of the url
-   Both entities are accessed with a hash, which is based on the MD5
-   algorithm. The MD5 is not encoded as a hex value, but a b64 value.
-*/
-
 package de.anomic.crawler;
 
 import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
-import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
+import net.yacy.kelondro.util.ReverseMapIterator;
 import net.yacy.kelondro.util.ScoreCluster;
 
 import de.anomic.crawler.retrieval.EventOrigin;
-import de.anomic.yacy.yacySeedDB;
 
 public final class ResultURLs {
 
-    // result stacks;
-    // these have all entries of form
-    // strings: urlHash + initiatorHash + ExecutorHash
-    private final Map<EventOrigin, LinkedList<String>> resultStacks;
+    private final Map<EventOrigin, LinkedHashMap<String, InitExecEntry>> resultStacks; // a mapping from urlHash to Entries
     private final Map<EventOrigin, ScoreCluster<String>> resultDomains;
 
+    public class InitExecEntry {
+        public String initiatorHash, executorHash;
+        public InitExecEntry(final String initiatorHash, final String executorHash) {
+            this.initiatorHash = initiatorHash;
+            this.executorHash = executorHash;
+        }
+    }
+    
     public ResultURLs(int initialStackCapacity) {
         // init result stacks
-        resultStacks = new HashMap<EventOrigin, LinkedList<String>>(initialStackCapacity);
+        resultStacks = new HashMap<EventOrigin, LinkedHashMap<String, InitExecEntry>>(initialStackCapacity);
         resultDomains = new HashMap<EventOrigin, ScoreCluster<String>>(initialStackCapacity);
         for (EventOrigin origin: EventOrigin.values()) {
-            resultStacks.put(origin, new LinkedList<String>());
+            resultStacks.put(origin, new LinkedHashMap<String, InitExecEntry>());
             resultDomains.put(origin, new ScoreCluster<String>());
         }
     }
@@ -74,9 +69,9 @@ public final class ResultURLs {
         assert executorHash != null;
         if (e == null) { return; }
         try {
-            final List<String> resultStack = getStack(stackType);
+            final LinkedHashMap<String, InitExecEntry> resultStack = getStack(stackType);
             if (resultStack != null) {
-                resultStack.add(e.hash() + initiatorHash + executorHash);
+                resultStack.put(e.hash(), new InitExecEntry(initiatorHash, executorHash));
             }
         } catch (final Exception ex) {
             System.out.println("INTERNAL ERROR in newEntry/2: " + ex.toString());
@@ -94,7 +89,7 @@ public final class ResultURLs {
     }
     
     public synchronized int getStackSize(final EventOrigin stack) {
-        final List<String> resultStack = getStack(stack);
+        final LinkedHashMap<String, InitExecEntry> resultStack = getStack(stack);
         if (resultStack == null) return 0;
         return resultStack.size();
     }
@@ -104,77 +99,11 @@ public final class ResultURLs {
         if (domains == null) return 0;
         return domains.size();
     }
-
-    public synchronized String getUrlHash(final EventOrigin stack, final int pos) {
-        return getHashNo(stack, pos, 0);
-    }
-
-    public synchronized String getInitiatorHash(final EventOrigin stack, final int pos) {
-        return getHashNo(stack, pos, 1);
-    }
-
-    public synchronized String getExecutorHash(final EventOrigin stack, final int pos) {
-        return getHashNo(stack, pos, 2);
-    }
     
-    /**
-     * gets the hash at <em>index</em> in element at <em>pos</em> in <em>stack</em> (based on {@link yacySeedDB#commonHashLength}) 
-     * 
-     * <p>simplified example with {@link yacySeedDB#commonHashLength} = 3:</p>
-     * <code>String[][] stacks[1][0] = "123456789";
-     * System.out.println(getHashNo(1, 0, 0));
-     * System.out.println(getHashNo(1, 0, 0));
-     * System.out.println(getHashNo(1, 0, 0));</code>
-     * <p>Output:
-     * 123<br/>
-     * 456<br/>
-     * 789</p>
-     * 
-     * @param stack
-     * @param pos
-     * @param index starting at 0
-     * @return
-     */
-    public synchronized String getHashNo(final EventOrigin stack, final int pos, final int index) {
-        final String result = getResultStackAt(stack, pos);
-        if (result != null) {
-            if (result.length() < Word.commonHashLength * 3) {
-                Log.logSevere("ResultURLs", "unexpected error: result of stack is too short: "+ result.length());
-                if(result.length() <= Word.commonHashLength * 2) {
-                    return null;
-                }
-                // return what is there
-                return result.substring(Word.commonHashLength * 2);
-            }
-            return result.substring(Word.commonHashLength * index, Word.commonHashLength * (index + 1));
-        } else if(isValidStack(stack)) {
-            Log.logSevere("ResultURLs", "unexpected error: result of stack is null: "+ stack +","+ pos);
-        }
-        return result;
-    }
-
-    /**
-     * gets the element at pos in stack
-     * 
-     * @param stack
-     * @param pos
-     * @return null if either stack or element do not exist
-     */
-    private String getResultStackAt(final EventOrigin stack, final int pos) {
-        assert pos >= 0 : "precondition violated: " + pos + " >= 0";
-        
-        final List<String> resultStack = getStack(stack);
-        
-        if(resultStack == null) {
-            return null;
-        }
-        assert pos < resultStack.size() : "pos = " + pos + ", resultStack.size() = " + resultStack.size();
-        if(pos >= resultStack.size()) {
-            Log.logSevere("ResultURLs", "unexpected error: Index out of Bounds "+ pos +" of "+ resultStack.size());
-            return null;
-        }
-        
-        return resultStack.get(pos);
+    public synchronized Iterator<Map.Entry<String, InitExecEntry>> results(final EventOrigin stack) {
+        final LinkedHashMap<String, InitExecEntry> resultStack = getStack(stack);
+        if (resultStack == null) return new LinkedHashMap<String, InitExecEntry>().entrySet().iterator();
+        return new ReverseMapIterator<String, InitExecEntry>(resultStack);
     }
 
     /**
@@ -187,14 +116,16 @@ public final class ResultURLs {
     }
     
     public int deleteDomain(final EventOrigin stack, String host, String hosthash) {
-        assert hosthash.length() == 6;
-        int i = 0;
-        String urlhash;
-        while (i < getStackSize(stack)) {
-            urlhash = getUrlHash(stack, i);
-            if (urlhash == null || urlhash.substring(6).equals(hosthash)) getStack(stack).remove(i); else i++;
-        }
         assert host != null : "host = null";
+        assert hosthash.length() == 6;
+        final Iterator<Map.Entry<String, InitExecEntry>> i = results(stack);
+        Map.Entry<String, InitExecEntry> w;
+        String urlhash;
+        while (i.hasNext()) {
+            w = i.next();
+            urlhash = w.getKey();
+            if (urlhash == null || urlhash.substring(6).equals(hosthash)) i.remove();
+        }
         assert getDomains(stack) != null : "getDomains(" + stack + ") = null";
         return getDomains(stack).deleteScore(host);
     }
@@ -217,33 +148,15 @@ public final class ResultURLs {
      * @param stack id of resultStack
      * @return null if stack does not exist (id is unknown or stack is null (which should not occur and an error is logged))
      */
-    private List<String> getStack(final EventOrigin stack) {
+    private LinkedHashMap<String, InitExecEntry> getStack(final EventOrigin stack) {
         return resultStacks.get(stack);
     }
     private ScoreCluster<String> getDomains(final EventOrigin stack) {
         return resultDomains.get(stack);
     }
-    
-    /**
-     * tests if a stack with id <em>stack</em> exists
-     * 
-     * @param stack
-     * @return
-     */
-    private boolean isValidStack(final EventOrigin stack) {
-        return getStack(stack) != null;
-    }
-
-    public synchronized boolean removeStack(final EventOrigin stack, final int pos) {
-        final List<String> resultStack = getStack(stack);
-        if (resultStack == null) {
-            return false;
-        }
-        return resultStack.remove(pos) != null;
-    }
 
     public synchronized void clearStack(final EventOrigin stack) {
-        final List<String> resultStack = getStack(stack);
+        final LinkedHashMap<String, InitExecEntry> resultStack = getStack(stack);
         if (resultStack != null) resultStack.clear();
         final ScoreCluster<String> resultDomains = getDomains(stack);
         if (resultDomains != null) {
@@ -255,15 +168,10 @@ public final class ResultURLs {
 
     public synchronized boolean remove(final String urlHash) {
         if (urlHash == null) return false;
-        String hash;
+        LinkedHashMap<String, InitExecEntry> resultStack;
         for (EventOrigin origin: EventOrigin.values()) {
-            for (int i = getStackSize(origin) - 1; i >= 0; i--) {
-                hash = getUrlHash(origin, i);
-                if (hash != null && hash.equals(urlHash)) {
-                    removeStack(origin, i);
-                    return true;
-                }
-            }
+            resultStack = getStack(origin);
+            if (resultStack != null) resultStack.remove(urlHash);
         }
         return true;
     }
@@ -283,16 +191,6 @@ public final class ResultURLs {
             results.stack(urlRef, urlRef.hash(), url.hash(), stackNo);
             // size
             System.out.println("size of stack:\t"+ results.getStackSize(stackNo));
-            // get
-            System.out.println("url hash:\t"+ results.getUrlHash(stackNo, 0));
-            System.out.println("executor hash:\t"+ results.getExecutorHash(stackNo, 0));
-            System.out.println("initiator hash:\t"+ results.getInitiatorHash(stackNo, 0));
-            // test errors
-            System.out.println("invalid test:\n=======");
-            // get
-            System.out.println("url hash:\t"+ results.getUrlHash(stackNo, 1));
-            System.out.println("executor hash:\t"+ results.getExecutorHash(stackNo, 1));
-            System.out.println("initiator hash:\t"+ results.getInitiatorHash(stackNo, 1));
         } catch (final MalformedURLException e) {
             Log.logException(e);
         }

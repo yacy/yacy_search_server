@@ -155,7 +155,7 @@ public class IndexControlRWIs_p {
             // delete word
             if (post.containsKey("keyhashdeleteall")) try {
                 if (delurl || delurlref) {
-                    // generate an urlx array
+                    // generate urlx: an array of url hashes to be deleted
                     ReferenceContainer<WordReference> index = null;
                     index = segment.termIndex().get(keyhash, null);
                     final Iterator<WordReference> en = index.entries();
@@ -169,12 +169,14 @@ public class IndexControlRWIs_p {
                 if (delurlref) {
                     for (i = 0; i < urlx.length; i++) segment.removeAllUrlReferences(urlx[i], sb.loader, true);
                 }
+                // delete the word first because that is much faster than the deletion of the urls from the url database
+                segment.termIndex().delete(keyhash);
+                // now delete all urls if demanded
                 if (delurl || delurlref) {
                     for (i = 0; i < urlx.length; i++) {
                         sb.urlRemove(segment, urlx[i]);
                     }
                 }
-                segment.termIndex().delete(keyhash);
                 post.remove("keyhashdeleteall");
                 post.put("urllist", "generated");
             } catch (IOException e) {

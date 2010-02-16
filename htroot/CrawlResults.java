@@ -29,11 +29,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Locale;
+import java.util.Map;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
 
+import de.anomic.crawler.ResultURLs.InitExecEntry;
 import de.anomic.crawler.retrieval.EventOrigin;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Segments;
@@ -173,21 +175,20 @@ public class CrawlResults {
             prop.put("table_showURL", (showURL) ? "1" : "0");
 
             boolean dark = true;
-            String urlHash, initiatorHash, executorHash;
             String urlstr, urltxt;
             yacySeed initiatorSeed, executorSeed;
             URIMetadataRow urle;
             URIMetadataRow.Components metadata;
 
-            int i, cnt = 0;
-            for (i = sb.crawlResults.getStackSize(tabletype) - 1; i >= (sb.crawlResults.getStackSize(tabletype) - lines); i--) {
-                initiatorHash = sb.crawlResults.getInitiatorHash(tabletype, i);
-                executorHash = sb.crawlResults.getExecutorHash(tabletype, i);
-                urlHash = sb.crawlResults.getUrlHash(tabletype, i);
+            int cnt = 0;
+            Iterator<Map.Entry<String, InitExecEntry>> i = sb.crawlResults.results(tabletype);
+            Map.Entry<String, InitExecEntry> entry;
+            while (i.hasNext()) {
+                entry = i.next();
                 try {
-                    urle = sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(urlHash, null, 0);
+                    urle = sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(entry.getKey(), null, 0);
                     if(urle == null) {
-                        Log.logWarning("PLASMA", "CrawlResults: URL not in index for crawl result "+ i +" with hash "+ urlHash);
+                        Log.logWarning("PLASMA", "CrawlResults: URL not in index for crawl result "+ i +" with hash "+ entry.getKey());
                         urlstr = null;
                         urltxt = null;
                         metadata = null;
@@ -196,13 +197,13 @@ public class CrawlResults {
                         urlstr = metadata.url().toNormalform(false, true);
                         urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
                     }
-                    initiatorSeed = sb.peers.getConnected(initiatorHash);
-                    executorSeed = sb.peers.getConnected(executorHash);
+                    initiatorSeed = sb.peers.getConnected(entry.getValue().initiatorHash);
+                    executorSeed = sb.peers.getConnected(entry.getValue().executorHash);
 
                     prop.put("table_indexed_" + cnt + "_dark", (dark) ? "1" : "0");
                     prop.put("table_indexed_" + cnt + "_feedbackpage", "CrawlResults.html");
                     prop.put("table_indexed_" + cnt + "_tabletype", tabletype.getCode());
-                    prop.put("table_indexed_" + cnt + "_urlhash", urlHash);
+                    prop.put("table_indexed_" + cnt + "_urlhash", entry.getKey());
 
                     if (showInit) {
                         prop.put("table_indexed_" + cnt + "_showInit", "1");
@@ -239,7 +240,7 @@ public class CrawlResults {
                                 prop.putHTML("table_indexed_" + cnt + "_showTitle_available_nodescr_urldescr", metadata.dc_title());
                             }
 
-                            prop.put("table_indexed_" + cnt + "_showTitle_available_urlHash", urlHash);
+                            prop.put("table_indexed_" + cnt + "_showTitle_available_urlHash", entry.getKey());
                             prop.putHTML("table_indexed_" + cnt + "_showTitle_available_urltitle", urlstr);
                     } else
                         prop.put("table_indexed_" + cnt + "_showTitle", "0");
@@ -248,7 +249,7 @@ public class CrawlResults {
                         prop.put("table_indexed_" + cnt + "_showURL", "1");
                             prop.put("table_indexed_" + cnt + "_showURL_available", "1");
 
-                            prop.put("table_indexed_" + cnt + "_showURL_available_urlHash", urlHash);
+                            prop.put("table_indexed_" + cnt + "_showURL_available_urlHash", entry.getKey());
                             prop.putHTML("table_indexed_" + cnt + "_showURL_available_urltitle", urlstr);
                             prop.put("table_indexed_" + cnt + "_showURL_available_url", urltxt);
                     } else
