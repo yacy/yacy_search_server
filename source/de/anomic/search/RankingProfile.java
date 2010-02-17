@@ -30,6 +30,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import net.yacy.kelondro.logging.Log;
+
 public class RankingProfile {
 
     // pre-sort attributes
@@ -117,12 +119,17 @@ public class RankingProfile {
         coeff_language           = 13;
     }
     
-    public RankingProfile(final String prefix, final String profile) {
+    public RankingProfile(final String prefix, String profile) {
         this(ContentDomain.TEXT); // set defaults
         if ((profile != null) && (profile.length() > 0)) {
             //parse external form
             final HashMap<String, Integer> coeff = new HashMap<String, Integer>(40);
-            final String[] elts = ((profile.length() > 0 && profile.charAt(0) == '{' && profile.endsWith("}")) ? profile.substring(1, profile.length() - 1) : profile).split(",");
+            final String[] elts;
+            if (profile.length() > 0 && profile.charAt(0) == '{' && profile.endsWith("}")) {
+                profile = profile.substring(1, profile.length() - 1);
+            }
+            profile = profile.trim();
+            if (profile.indexOf('&') > 0) elts = profile.split("&"); else elts = profile.split(","); 
             int p;
             final int s = (prefix == null) ? 0 : prefix.length();
             String e;
@@ -132,7 +139,12 @@ public class RankingProfile {
                 if ((s == 0) || (e.startsWith(prefix))) {
                     p = e.indexOf('=');
                     if (p < 0) System.out.println("DEBUG: bug in plasmaSearchRankingProfile: e = " + e);
-                    if ((p > 0) && (e.length() > p + 1)) coeff.put(e.substring(s, p), Integer.valueOf(Integer.parseInt(e.substring(p + 1))));
+                    if ((p > 0) && (e.length() > p + 1)) try {
+                        coeff.put(e.substring(s, p), Integer.valueOf(Integer.parseInt(e.substring(p + 1))));
+                    } catch (NumberFormatException e1) {
+                        System.out.println("wrong parameter: " + e.substring(s, p) + "=" + e.substring(p + 1));
+                        Log.logException(e1);
+                    }
                 }
             }
             coeff_domlength          = parseMap(coeff, DOMLENGTH, coeff_domlength);
