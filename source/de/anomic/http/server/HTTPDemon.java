@@ -37,7 +37,6 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -1277,10 +1276,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             else headers.put(HeaderFramework.PRAGMA, "no-cache");
         }
         
-        if (contentType == null) 
-            contentType = "text/html; charset=UTF-8";
-        else if (contentType.startsWith("text/") && contentType.toLowerCase().indexOf("charset=")==-1)
-            contentType +="; charset=" + Charset.defaultCharset().name();
+        if (contentType == null) contentType = "text/html; charset=UTF-8";
         headers.put(HeaderFramework.CONTENT_TYPE, contentType);  
         if (contentLength > 0)   headers.put(HeaderFramework.CONTENT_LENGTH, Long.toString(contentLength));
         //if (cookie != null)      headers.put(httpHeader.SET_COOKIE, cookie);
