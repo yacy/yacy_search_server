@@ -1109,6 +1109,7 @@ There is ".html" at the end, which is not included with the Regular Expression.=
 #File: index.html
 #---------------------------
 YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Suchseite
+kiosk mode==Kiosk Modus
 "Search"=="Suchen"
 #Text==Text
 Images==Bilder
