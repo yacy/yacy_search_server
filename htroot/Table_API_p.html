@@ -6,7 +6,24 @@
     <link rel="alternate" type="application/xml" title="Tables" href="Tables.rss?table=#[table]#" />
     #(/showtable)#
     #%env/templates/metas.template%#
-  </head>
+    <script>
+    <!--
+    function selectall(name){
+        var selectForm = document.forms.namedItem(name);
+        var count = selectForm.elements["num"].value;
+        for(i = 0; i < count; i++){
+    	    selectForm.elements["item_" + i].checked = true;
+        }
+    }
+    function deselectall(name){
+        var selectForm = document.forms.namedItem(name);
+        var count = selectForm.elements["num"].value;
+        for(i = 0; i < count; i++){
+            selectForm.elements["item_" + i].checked = false;
+        }
+    }
+    -->
+    </script> </head>
   <body id="Tables">
     #%env/templates/header.template%#
     
@@ -17,12 +34,12 @@
     to a scheduler for a periodic execution.
     </p>
     #(showtable)#::
-    <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" name="apilist">
       <fieldset>
       <legend><label for="table">Recorded Actions</label></legend>
       <table border="0" cellpadding="2" cellspacing="1">
         <tr class="TableHeader" valign="bottom">
-          <td>&nbsp;</td>
+          <td><input type="checkbox" name="allswitch" onselect="selectall(this.form.name)" ondeselect="deselectall(this.form.name)"/></td>
           <td>Date</td>
           <td>Type</td>
           <td>Comment</td>
@@ -30,7 +47,7 @@
         </tr>
         #{list}#
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-          <td align="left"><input type="checkbox" name="mark_#[pk]#" /></td>
+          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
           <td>#[date]#</td>
           <td>#[type]#</td>
           <td>#[comment]#</td>
@@ -39,7 +56,9 @@
         #{/list}#
       </table>
       <p>
-      <input type="hidden" name="table" value="#[table]#" />
+      <input type="hidden" name="num" value="#[num]#" />
+      <input type="button" onclick="selectall(this.form.name)" value="Select All" />
+      <input type="button" onclick="deselectall(this.form.name)" value="Deselect All" />&nbsp;&nbsp;&nbsp;&nbsp;
       <input type="submit" name="execrows" value="Execute Selected Actions" />
       <input type="submit" name="deleterows" value="Delete Selected Actions" />
       </p>

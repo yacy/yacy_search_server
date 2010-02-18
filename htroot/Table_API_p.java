@@ -42,9 +42,9 @@ public class Table_API_p {
         
         if (post != null && post.get("deleterows", "").length() > 0) {
             for (Map.Entry<String, String> entry: post.entrySet()) {
-                if (entry.getKey().startsWith("mark_") && entry.getValue().equals("on")) {
+                if (entry.getValue().startsWith("mark_")) {
                     try {
-                        sb.tables.delete(WorkTables.TABLE_API_NAME, entry.getKey().substring(5).getBytes());
+                        sb.tables.delete(WorkTables.TABLE_API_NAME, entry.getValue().substring(5).getBytes());
                     } catch (IOException e) {
                         Log.logException(e);
                     }
@@ -59,8 +59,8 @@ public class Table_API_p {
             // create a time-ordered list of events to execute
             TreeSet<String> pks = new TreeSet<String>();
             for (Map.Entry<String, String> entry: post.entrySet()) {
-                if (entry.getKey().startsWith("mark_") && entry.getValue().equals("on")) {
-                    pks.add(entry.getKey().substring(5));
+                if (entry.getValue().startsWith("mark_")) {
+                    pks.add(entry.getValue().substring(5));
                 }
             }
             
@@ -114,6 +114,7 @@ public class Table_API_p {
                 if (row == null) continue;
                 prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
                 prop.put("showtable_list_" + count + "_pk", new String(row.getPK()));
+                prop.put("showtable_list_" + count + "_count", count);
                 prop.put("showtable_list_" + count + "_date", row.from(WorkTables.TABLE_API_COL_DATE));
                 prop.put("showtable_list_" + count + "_type", row.from(WorkTables.TABLE_API_COL_TYPE));
                 prop.put("showtable_list_" + count + "_comment", row.from(WorkTables.TABLE_API_COL_COMMENT));
@@ -124,6 +125,7 @@ public class Table_API_p {
             Log.logException(e);
         }
         prop.put("showtable_list", count);
+        prop.put("showtable_num", count);
         
         // return rewrite properties
         return prop;
