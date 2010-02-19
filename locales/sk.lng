@@ -1,6 +1,5 @@
 # sk.lng
 # English-->Slovak
-# $LastChangedDate$
 # -----------------------
 # part of YaCy
 # (C) by Michael Peter Christen; mc@anomic.de
@@ -9,21 +8,22 @@
 #
 # This file is maintained by Rostislav Svoboda <Rostislav.Svoboda@gmail.com>
 # This file is written by (chronological order) Rostislav Svoboda <Rostislav.Svoboda@gmail.com>
+#
 
 # If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
 
-#-------------------------------------------------------
 #File: ConfigLanguage_p.html
+#---------------------------
 #Only part 1.
 #Contributors are in chronological ordern, not how much they did absolutely.
 #Thank you for your help!
 <!-- lang -->default\(english\)==Slovensky
 <!-- author -->==Rostislav Svoboda
 <!-- maintainer -->==&lt;Rostislav.Svoboda@gmail.com&gt;
+#-----------------------------
 
-#-----------------------------------------------------------
 #File: Blacklist_p.html
-
+#---------------------------
 Blacklist Manager==Spravca blacklistu
 Blacklist==Blacklist
 This function provides an URL filter to the proxy; any blacklisted URL is blocked==Tato funkcia poskytuje URL filter pre proxy: URL adresa z blacklistu je blokovana 
@@ -71,10 +71,10 @@ was added to the blacklist==bol do blacklistu pridany
 #File:==Subor:
 or==alebo
 Activate this list for==Tento zoznam je platny pre
+#-----------------------------
 
-#-----------------------------------------------------------
 #File: Blog.html
-
+#---------------------------
 # NOT USED
 #>by==>od
 >edit==>edituj
@@ -108,11 +108,10 @@ Please select the XML-file you want to import:==Prosim zvolte XML subor ktory ch
 Import==Importuj
 # NOT USED
 #Browse...==Hladaj...
+#-----------------------------
 
-
-#-----------------------------------------------------------
 #File: Bookmarks.html
-
+#---------------------------
 YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Z&aacute;lozky
 <h2>Bookmarks==<h2>Z&aacute;lozky
 Add Bookmark==Pridaj z&aacute;lozku
@@ -140,27 +139,27 @@ next page==dal&scaron;ia str&aacute;nka
 All==V&scaron;etky
 Show==Zobraz
 Bookmarks per page.==z&aacute;loziek na str&aacute;nku.
+#-----------------------------
 
-#-----------------------------------------------------------
 #File: CacheAdmin_p.html
-
+#---------------------------
 Local Cache Management==Sprava lokalnej cache
 >Local Cache==Lokalna cache
 The current cache size is==Aktualna velkost cache je
 The maximum cache size is==Maximalna velkost cache je
+#-----------------------------
 
-#-----------------------------------------------------------
 #File: ConfigAdvanced_p.html
-
+#---------------------------
 Advanced Config==Pokrocile nastavenia
 Here are all configuration options from YaCy.==Tu sa nachadzaju vsetky konfiguracne nastavenia YaCy.
 You can change anything, but some options need a restart, and some options can crash YaCy, if wrong values are used.==Vsetky konfiguracne nastavenia mozu byt zmenene, avsak niektore volby vyzaduju restart a niektore mozu sposobit pad YaCy v pripade zadnia nespravnych hodnot.
 For explanation please look into defaults/yacy.init==Vysvetlenie najdete v subore defaults/yacy.init
 "Save"==Uloz
+#-----------------------------
 
-#-----------------------------------------------------------
 #File: ConfigBasic.html
-
+#---------------------------
 Select a language for the interface==Zvolte jazyk web rozhrania
 Basic Configuration==Zakladne nastavenia
 Your YaCy Peer needs some basic information to operate properly==Vase YaCy vyzaduje pre spravne fungovanie niekolko zakladnych udajov 
@@ -199,10 +198,10 @@ This is needed if you want to fully participate in the YaCy network.==Toto je nu
 You can also use your peer without opening it, but this is not recomended.==Taktisto mozete pouzivat Vaseho peera bez jeho otvorenia, avsak toto sa nedoporucuje.
 The peer port was changed successfully. Your browser will be redirected to the new==Port peera bol uspesne zmeneny. Vas browser bude presmerovany na novu 
 location</a> in 10 seconds.==adresu</a> za 10 sekund.
+#-----------------------------
 
-#-------------------------------------------------------
 #File: ConfigLanguage_p.html
-
+#---------------------------
 Language selection==V&yacute;ber jazyka
 Language selection==V&yacute;ber jazyka
 You can change the language of the YaCy-webinterface with translation files.==Jazyk YaCy web rozhrania m&ocirc;zete zmenit pomocou prekladov&yacute;ch s&uacute;borov. Vyberte zvolen&yacute; jazyk zo zoznamu.
@@ -219,9 +218,10 @@ Use this language==Tento jazyk ihned pouzit
 "Install"==In&scaron;taluj
 Unable to get URL:==Nie je mozn&eacute; nain&scaron;talovat s&uacute;bor z tejto URL adresy::
 Error saving the language file.==Pri nahr&aacute;van&iacute; s&uacute;boru do&scaron;lo k chybe.
-#-------------------------------------------------------
-#File: ConfigProfile_p.html
+#-----------------------------
 
+#File: ConfigProfile_p.html
+#---------------------------
 Your Personal Profile==V&aacute;&scaron; osobn&yacute; profil.
 You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Na tomto mieste m&ocirc;zete vytvorit v&aacute;&scaron; osobn&yacute; profil. Ostatn&yacute; uz&iacute;vatelia YaCy uvidia tieto inform&aacute;cie pomocou odkazu na str&aacute;nke siete.
 You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Va&scaron;e osobn&eacute; &uacute;daje nemus&iacute;te ud&aacute;vat, ak v&scaron;ak chcete distribuovat va&scaron;e kontaktn&eacute; &uacute;daje, m&ocirc;zete tak urobit tu.
@@ -236,10 +236,10 @@ Yahoo!==Yahoo!
 MSN==MSN
 Comment==Koment&aacute;r
 "Save"==Uloz profil
+#-----------------------------
 
-#-------------------------------------------------------
 #File: ConfigSkins_p.html
-
+#---------------------------
 Skin Selection==Vyber skinov
 You can change the appearance of YaCy with skins. Select one of the default skins, download new skins, or create your own skin.==Vzhlad YaCy mozete zmenit pomocou skinov. Zvolte jeden z predvytvorenych skinov, stiahnite si nove, alebo vytvorte vlastne skiny.
 Current skin:==Pouzity skin:
@@ -251,10 +251,10 @@ Use this skin==Pouzi tento skin
 "install"==Nainstaluj
 Unable to get URL:==Nie je mozne nainstalovat pozadovany subor z URL adresy:
 Error saving the skin.==Chyba pri stahovani skinu.
+#-----------------------------
 
-#-----------------------------------------------------------
 #File: Connections_p.html
-
+#---------------------------
 Connection Tracking==Stav spojenia
 Incoming Connections==Prichadzajuce spojenia
 Showing \#\[numActiveRunning\]\# active, \#\[numActivePending\]\# pending connections from a max. of \#\[numMax\]\# allowed incoming connections.==	Zobrazenych je #[numActiveRunning]# aktivnych a #[numActivePending]# cakajuci spojeni z max. #[numMax]# povolenych prichadzajucich spojeni. 
@@ -266,10 +266,10 @@ Command==Prikaz
 Used==Pouzity
 Close==Zatvor
 Waiting for new request nr.==Caka sa na poziadavku cislo.
+#-----------------------------
 
-#-------------------------------------------------------
 #File: CookieMonitorIncoming_p.html
-
+#---------------------------
 Incoming Cookies Monitor==Sledovanie prichadzajucich cookies
 Cookie Monitor: Incoming Cookies==Sledovanie cookies: Prichadzajuce cookies
 This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Toto je zoznam vsetkych cookies, ktore web server poslal klientom YaCy proxy:
@@ -280,10 +280,10 @@ Sending Host==Odosielatej
 Date==Datum
 Receiving Client==Prijemca 	
 Cookie==Cookie
+#-----------------------------
 
-#-------------------------------------------------------
 #File: CookieMonitorOutgoing_p.html
-
+#---------------------------
 Outgoing Cookies Monitor==Sledovanie odchadzajucich cookies
 Cookie Monitor: Outgoing Cookies==Sledovanie cookies: Odchadzajuce cookies
 This is a list of Cookies that a browser using the YaCy Proxy has sent to a web server:==Toto je zoznam vsetkych cookies, ktore Vas web prehliadac pouzivajuci YaCy proxy poslal web serverom:
@@ -296,10 +296,10 @@ Date==Datum
 # NOT USED 
 #Receiving Client==Prijemca 	
 Cookie==Cookie
+#-----------------------------
 
-#-----------------------------------------------------------
 #File: Help.html
-
+#---------------------------
 YaCy: Help==YaCy: Pomoc
 >Help==>Pomoc
 # NOT USED
@@ -375,10 +375,10 @@ This matches heise.de/ with a string in front of it, for example "http://www.", 
 A possible URL which would match this regexp is\:==URL adresa ktoru oznacuje tento regularny vyraz je:
 An URL which would not match is:==URL adresa ktoru neoznacuje tento regularny vyraz je:
 There is ".html" at the end, which is not included with the Regular Expression.==Tu je na konci retazec ".html" ktory nie je obsiahnutny regularnym vyrazom. 
+#-----------------------------
 
-#-----------------------------------------------------------
 #File: index.html
-
+#---------------------------
 YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Vyhladavacia stranka
 # NOT USED
 #P2P WEB SEARCH==P2P Internetov&eacute; Vyhlad&aacute;vanie
@@ -476,10 +476,10 @@ show all==zobrazit vsetko
 #with the target of implementing a P2P-based global search engine.==s cielom vytvorenia globalneho, na principoch sieti P2P postaveneho vyhladavaca.
 # NOT USED
 #Architecture \(C\) by Michael Peter Christen==Architektur (c) vytvoril Michael Peter Christen
+#-----------------------------
 
-#-------------------------------------------------------
 #File: IndexCleaner_p.html
-
+#---------------------------
 # NOT USED
 #Index Control==Kontrola indexu
 Index Cleaner==Cistic indexu
@@ -500,10 +500,10 @@ Start/Resume==Start/Pokracuj
 Stop==Stop
 Pause==Pauza
 RWIDbCleaner - Clean up the database by deletion of words with reference to blacklisted urls:==UrlDBCleaner - Vycistite databazu tym ze zmazete slova ktore su v spojeni s vasim blacklistom:
+#-----------------------------
 
-#-------------------------------------------------------
 #File: IndexControl_p.html
-
+#---------------------------
 Index Control==Kontrola indexu
 Index Administration==Administr&aacute;cia indexu
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references==Lok&aacute;lny index pozost&aacute;va moment&aacute;lne z #[wcount]# slov a #[ucount]# URL odkazov.
@@ -534,10 +534,10 @@ Changes will take effect immediately==Zmenu su okamzite ucinne
 #Let this translation here to avoid errors.-
 Word:</td>==Slovo:</td>
 Word-Hash:</td>==Hash-slovo:</td>
+#-----------------------------
 
-#-------------------------------------------------------
 #File: IndexCreate_p.html
-
+#---------------------------
 Index Creation==Tvorba indexu
 Start Crawling Job:==Odstartuj crawling:
 You can define URLs as start points for Web page crawling and start crawling here. \"Crawling\" means that YaCy will download the given website, extract all links in it and then download the content behind these links. This is repeated as long as specified under \"Crawling Depth\".==Tu mozete zadat URL adresy web stranok ktore budu preliezane (crawled) a z ktorych sa preliezanie (crawling) odstartuje. "Crawling" znamena, ze YaCy siahne zvolenu web stranku, extrahuje vsetky odkazy a nasledne stiahne web stranky pod tymito odkazmi. Toto sa opakuje do hlbky zadanej v policku "Hlbka crawlingu".
@@ -692,10 +692,10 @@ Busy Peers==Vytazeni peeri
 \#\(crawlingQ\)\#no::yes\#\(/crawlingQ\)\#==#(crawlingQ)#nie::ano#(/crawlingQ)#
 \#\{available\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)&nbsp;&nbsp; \#\{/available\}\#==#{available}##[name]# (#[due]# sekund)&nbsp;&nbsp; #{/available}#
 \#\{busy\}\#\#\[name\]\# \(\#\[due\]\# seconds due\)&nbsp;&nbsp;\#\{/busy\}\#==#{busy}##[name]# (#[due]# sekund)&nbsp;&nbsp;#{/busy}#
+#-----------------------------
 
-#-------------------------------------------------------
 #File: IndexCreateIndexingQueue_p.html
-
+#---------------------------
 Index Creation/Indexing Queue==Vytvorenie indexu/Cakacia listina indexu 
 Index Creation: Indexing Queue==Vytvorenie indexu: Cakacia listina indexu
 The indexing queue is empty==Cakacia listina indexu je prazdna.
@@ -719,10 +719,10 @@ Showing latest \#\[num\]\# entries.==Zobrazuju sa #[num]# posledne zaznami.
 There are \#\[num\]\# entries in the rejected-queue:==V cakacej listine odmietnutych sa nachadza #[num]# zaznamov:
 Executor==Vykonavatel
 Fail-Reason==Dovod zlyhania
+#-----------------------------
 
-#-------------------------------------------------------
 #File: IndexCreateLoaderQueue_p.html
-
+#---------------------------
 Index Creation / Loader Queue==Vytvorenie indexu / Cakacia listina nahravaca
 Index Creation: Loader Queue==Vytvorenie indexu: Cakacia listina nahravaca
 The loader set is empty==Cakacia listina nahravaca je prazdna.
@@ -730,10 +730,10 @@ There are \#\[num\]\# entries in the loader set:==V cakacej listine nahravaca sa
 Initiator==Iniciator
 Depth==Hlbka
 URL==URL adresa
+#-----------------------------
 
-#-------------------------------------------------------
 #File: IndexCreateWWWGlobalQueue_p.html
-
+#---------------------------
 # NOT USED
 #YaCy '\#\[clientname\]\#': Index Creation / WWW Global Crawl Crawl Queue==YaCy '#[clientname]#': Vytvorenie indexu / Globalna WWW cakacia listina
 Index Creation: WWW Global Crawl Queue==Vytvorenie indexu: Globalna WWW cakacia listina
@@ -751,10 +751,10 @@ Depth==Hlbka
 Modified Date==Datum poslednej zmeny
 Anchor Name==Meno kotvy
 #URL==URL
+#-----------------------------
 
-#-------------------------------------------------------
 #File: IndexCreateWWWLocalQueue_p.html
-
+#---------------------------
 YaCy '\#\[clientname\]\#': Index Creation / WWW Local Crawl Queue==YaCy '#[clientname]#': Vytvorenie indexu / Lokalna WWW cakacia listina
 Index Creation: WWW Local Crawl Queue==Vytvorenie indexu: Lokalna WWW cakacia listina
 This queue stores the urls that shall be crawled localy by this peer.==Tato cakacia listi naobsahuje URL adresy ktore by sa mali byt crawlovane lokalne Vasom peeri.
@@ -779,10 +779,10 @@ Delete==Zmaz
 # NOT USED
 #\[Delete\]==[Zmaz]
 This may take a quite long time.==Toto moze chvilku trvat.
+#-----------------------------
 
-#-------------------------------------------------------
 #File: IndexImport_p.html
-
+#---------------------------
 YaCy \'\#\[clientname\]\#\': Index Import==YaCy '#[clientname]#': Import indexu
 Index DB Import==Import databazoveho indexu 
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==	Lokalny index pozostava aktualne z (najmenej) #[wcount]# slov a #[ucount]# URL adries.
@@ -843,10 +843,10 @@ Various stack files that belong to the crawling queue==Rozdielne stack subory pa
 Abort==Zrus
 Pause==Pauza
 Continue==Pokracuj
+#-----------------------------
 
-#-------------------------------------------------------
 #File: IndexMonitor.html
-
+#---------------------------
 #YaCy '#[clientname]#': Index Monitor
 Index Monitor Menu==Menu monitoringu indexu 
 # NOT USED
@@ -919,10 +919,10 @@ Words==Slov
 Title==Nazov
 URL==URL adresa
 "delete"=="zmaz"
+#-----------------------------
 
-#-------------------------------------------------------
 #File: IndexTransfer_p.html
-
+#---------------------------
 The local index currently consists of \(at least\) \#\[wcount\]\# reverse word indexes and \#\[ucount\]\# URL references.==	Lokalny index momentalne pozostava z (priblizne) #[wcount]# slov a #[ucount]# URL adries.
 # NOT USED 
 #Chunk Size<br>\(Word Entries\)==Velkost chunku<br>(zaznamov slov)
@@ -943,10 +943,10 @@ Start/Stop Transfer==Start/Stop prenosu
 "Start New Index Transfer"=="Odstartuj novy prenos indexu"
 # NOT USED
 #Remote<br>Peer==Vzdialeny<br>peer
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Language_p.html
-
+#---------------------------
 Language selection==Vyber jazyka
 Language selection==Vyber jazyka
 You can change the language of the YaCy-webinterface with translation files.==Mozete zmenit jazyk YaCy web rozhrania pomocou prekladoveho suboru. Vyberte zvoleny jazyk zo zoznamu.
@@ -962,10 +962,10 @@ Use this language==Pouzi tento jazyk
 "Install"==Instaluj
 Unable to get URL:==Nie je mozne nainstalovat subor z URL adresy:
 Error saving the language file.==Pri ukladani jazykoveho suboru doslo k chybe. 
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Lab.html
-
+#---------------------------
 # NOT USED
 #YaCy \'\#\[clientname\]\#\': Lab==YaCy '#[clientname]#': Laboratorium
 # NOT USED
@@ -976,10 +976,10 @@ You may try out these things but please do not care about bugs.==Vsetky nove fun
 The <a==<a
 Advanced <a==Pokrocile <a
 Configuration</a>==Nastavenia</a>
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Messages_p.html
-
+#---------------------------
 >Messages==>Spravy
 >Date==>Datum
 >From==>Od
@@ -993,10 +993,10 @@ Subject:==Subjekt:
 reply==odpovedaj
 >delete==>zmaz
 I/O error reading message table: ==Vstupno/Vystupna chyba pri citani tabulky sprav:
+#-----------------------------
 
-#-------------------------------------------------------
 #File: MessageSend_p.html
-
+#---------------------------
 Send message==Posli spravu
 You cannot send a message to==Nemozete poslat spravu pre
 The peer does not respond. It was now removed from the peer-list.==Peer neodpoveda. Bol prave zmazany zo zoznamu peerov.
@@ -1017,10 +1017,10 @@ The target peer is alive but did not receive your message. Sorry.==Cielovy peer 
 Here is a copy of your message, so you can copy it to save it for further attempts:==Tu je kopia Vasej spravy, mozete si ju skopirovat a ulozit pre neskorsie pokusy:
 You cannot call this page directly. Instead, use a link on the==Na tuto stranku sa nemozete priamo odkazovat. Namiesto toho pouzite odkaz na
 Network</a> page.==stranku siete</a>.
-	
-#-------------------------------------------------------
-#File: Network.html
+#-----------------------------
 
+#File: Network.html
+#---------------------------
 Network Overview==Prehlad stavu siete
 Network Menu==Menu siet
 Network&nbsp;Overview==Prehlad&nbsp;stavu&nbsp;siete
@@ -1130,10 +1130,10 @@ Peer Hash==Hash peera
 Peer IP==IP adresa peera
 Peer Port==Port peera
 add Peer==Pridaj peera
-	
-#-------------------------------------------------------
-#File: News.html
+#-----------------------------
 
+#File: News.html
+#---------------------------
 Network Menu==Menu siete
 News&nbsp;Overview==Prehlad sprav
 Incoming&nbsp;News==Prichadzajuce spravy
@@ -1171,9 +1171,10 @@ Distributed==Distribuovane
 Attributes==Atribut
 "\#\(page\)\#::Process Selected News::Delete Selected News::Abort Publication of Selected News::Delete Selected News\#\(/page\)\#"==#(page)#::Oznac&nbsp;vybrate&nbsp;spravy&nbsp;ako&nbsp;precitane::Zmaz&nbsp;vybrate&nbsp;spravy::Prerus&nbsp;rozsirovanie&nbsp;oznacenych&nbsp;sprav::Zmaz&nbsp;oznacene&nbsp;spravy#(/page)#
 "\#\(page\)\#::Process All News::Delete All News::Abort Publication of All News::Delete All News\#\(/page\)\#"==#(page)#::Oznac&nbsp;vsetky&nbsp;spravy&nbsp;ako&nbsp;precitane::Zmaz&nbsp;vsetky&nbsp;spravy::Prerus&nbsp;rozsirovanie&nbsp;vsetkych&nbsp;sprav::Zmaz&nbsp;vsetky&nbsp;spravy#(/page)#
+#-----------------------------
 
-#-------------------------------------------------------
 #File: PerformanceQueues_p.html
+#---------------------------
 Performance Settings of Queues and Processes==Nastavenia vykonu pre cakacie listiny a procesy
 Scheduled tasks overview and waiting time settings:==Prehlad naplanovanych uloh a nastaveny casov cakania
 Queue Size==Velkost cakacej listiny
@@ -1260,9 +1261,10 @@ The maximum of this caches can be set below.==Maxima tychto cache pamati mozete 
 Maximum URLs currently assigned==Maximalny pocet prave priradenych URL adries
 # NOT USED
 #not controlled<br>for DHT cache==nekontrolovane<br>na DHT cache
+#-----------------------------
 
-#-------------------------------------------------------
 #File: PerformanceMemory_p.html
+#---------------------------
 Performance Settings for Memory==Nastavenia vykonu pamate
 Memory Usage:==Vyuzitie pamate:
 After Startup==Po starte
@@ -1356,9 +1358,10 @@ Re-Configuration:==Nova konfiguracia:
 #Write Cache Object Allocation:==
 #now alive in write cache==
 #currently held in write buffer heap==
+#-----------------------------
 
-#-------------------------------------------------------
 #File: PerformanceSearch_p.html
+#---------------------------
 Performance Settings of Search Sequence==Nastavenia vykonu priebehu vyhladavania
 Timing Settings of Search Sequence==Casove nastavenia priebehu vyhladavania
 Settings for local search profile:==Nastavenia lokalneho profilu vyhladavania 
@@ -1383,10 +1386,10 @@ Timing results of latest search request:==Casove vysledky posledneho vyhladavaci
 absolute milliseconds==absolutne, v millisekundach
 absolute amount==absolutna hodnota
 The network picture below shows how the latest search query was solved by asking corresponding peers in the DHT:==Obrazok siete nizsie ukazuje bol vyrieseny posledny vyhladavaci dotaz u prislusnych peerov v DHT:
+#-----------------------------
 
-#-------------------------------------------------------
 #File: ProxyIndexingMonitor_p.html
-
+#---------------------------
 Index Monitor for Proxy Indexing==Monitor indexu pre indexaciu proxy
 This is the control page for web pages that your peer has indexed during the current application run-time==Toto je kontrolna stranke pre web stranky, ktore Vas peer indexoval pocas aktualneho behu aplikacie 
 as result of proxy fetch/prefetch.==ako vysledok proxy vyberu/predvyberu.
@@ -1427,11 +1430,10 @@ An error has occurred:==Nastala chyba:
 You can see a snapshot of recently indexed pages==Mozete si pozriet 'aktualny snimok' (snapshot) prave zaindexovanych web stranok
 on the==na 
 Page.==stranke.
+#-----------------------------
 
-
-#-------------------------------------------------------
 #File: QuickCrawlLink_p.html
-
+#---------------------------
 YaCy \'\#\[clientname\]\#\': Quick Crawl Link==YaCy '#[clientname]#''#[clientname]#': Rychly Crawl Link
 Quick Crawl Link==Rychly Crawl Link
 Quickly adding Bookmarks:==Rychly Crawl - Zalozky:
@@ -1445,10 +1447,10 @@ URL successfully added to Crawler Queue==URL adresa bola uspesne pridana do caka
 Malformed URL==Chyba v URL adrese
 Unable to create new crawling profile for URL:==Nie je mozne vytvorit crawling profil pre tuto URL adresu:
 Unable to add URL to crawler queue:==Nie je mozne pridat URL adresu do cakacej listiny crawleru: 
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Settings_p.html
-
+#---------------------------
 YaCy \'\#\[clientname\]\#\': Settings==YaCy '#[clientname]#': Nastavenia
 <h2>Settings</h2>==<h2>Nastavenia</h2>
 This is the configuration page for YaCy. Access to this page should be limited to an administration person only.==Toto je konfiguracna stranka pre YaCy. Pristun na tuto stranku by mal mat iba administrator.
@@ -1472,18 +1474,20 @@ Message Forwarding \(optional\)==Preposielanie sprav (nepovinne)
 #Remote Proxy \(optional\)==Vzdialene proxy (nepovinne)
 Content Parser Settings==Nastavenia parsera obsahu
 Port Forwarding \(optional\)==Port Forwarding (nepovinne)
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Settings_General.inc
+#---------------------------
 General Settings==Vseobecne nastavenia
 <b>Your peer name defines also a new '.yacy' - domain, which can be accessed from every peer running this proxy.</b>==<b>Nazov Vaseho peera vytvara '.yacy' domenu ktora je dosiahnutelna kazdemu uzivatelovi tychto proxy.</b>
 Using your 'Home Page' and 'File Share' - zones you also have a platform to provide content to your new domain.==Prostrednictvom Vasich zon: 'Domovska stranka' a 'Zdielaj subor' mate tiez platformu na poskytovanie obsahu Vasej novej domeny. 
 staticIP ==statika IP adresa
 <b>The staticIP can help that your peer can be reached by other peers in case that your==<b>Staticka IP adresa moze pomoct Vasemu peeru pri dosiahnutelnosti z inych peerov v pripade, ze
 peer is behind a firewall or proxy.</b>==Vas peer je za firewallom alebo inym proxy..</b>
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Settings_ProxyAccess.inc
+#---------------------------
 # NOT USED
 #Server Access Settings==Nastavenia pristupu k serveru
 These settings configure the access method to your own http proxy and server.==Tieto nastavenia ovplyvnuju pristup na Vas HTTP proxy a HTTP server.
@@ -1511,18 +1515,20 @@ The default setting should be right in most cases.==Predvolene nastavenia by mal
 If you want, you can also set a proxy account so that every proxy user must authenticate first, but this is rather unusual.==Ak chcete mozete tiez vytvorit proxy ucet, takze kazdy uzivatel proxy sa musi najprv prihlasit, co je vsak neobvykle riesenie.
 IP-Number filter:==Filter IP adries:
 Use <a==Pouzi <a
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Settings_Http.inc
+#---------------------------
 HTTP Networking==HTTP Siet
 Transparent&nbsp;Proxy:==Transparentne proxy:
 With this you can specify if YaCy can be used as transparent proxy.==Tu mozete urcit ci moze byt YaCy pouzite ako transparentne proxy. 
 Hint: On linux you can configure your firewall to transparently redirect all http traffic through yacy using this iptables rule:==Rada: Pod linuxom mozete nakonfigurovat Vas firewall na transparentne presmerovanie vsetkej http prevadzky (http traffic) za pouzitia toho iptables pravidla:  
 With this you can specify if YaCy should support the HTTP connection keep-alive feature.==Tu mozete urcit ci ma YaCy podporovat HTTP connection keep-alive funkcie.
 Changes will take effect immediately.==Zmeny su okamzite ucinne.
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Settings_Proxy.inc
+#---------------------------
 YaCy can use another proxy to connect to the internet. You can enter the address for the remote proxy here:==YaCy moze pouzit iny proxy server na pripojenie k internetu. Na tomto mieste mozete zadat adresu tohoto vzdialeneho proxy servera:  
 Use remote proxy:==Pouzi vzialeny proxy server:
 Enables the usage of the remote proxy by yacy==Aktivuje pouzitie vzdialeneho proxy servera cez YaCy
@@ -1536,10 +1542,10 @@ the port of the remote proxy==Port vzdialeneho proxy servera
 no-proxy adresses:==Adresy bez proxy:
 IP addresses for which the remote proxy should not be used==IP adresy pre ktore nema byt vzdialeny proxy server pouzity
 Changes will take effect immediately.==Zmeny su okamzite ucinne.
+#-----------------------------
 
-
-#-------------------------------------------------------
 #File: Settings_PortForwarding.inc
+#---------------------------
 #check for logical mistakes, unsure about some translations
 Port Forwarding==Port forwarding 
 You can use a remote server running a ssh demon to forward your server/proxy port.==Mozete pouzit vzdialeny server na ktorom bezi ssh demon na preposielanie Vaseho server/proxy portu.  
@@ -1559,9 +1565,10 @@ Forwarding&nbsp;host&nbsp;port:==Forwardujuci host port
 Forwarding&nbsp;host&nbsp;user:==Forwardujuci host uzivatel
 Forwarding&nbsp;host&nbsp;password:==Forwardujuce host heslo
 Changes will take effect immediately.==Zmeny su okamzite ucinne.
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Settings_ServerAccess.inc
+#---------------------------
 Server Access Settings==Nastavenia pristupu k serveru
 Here you can restrict access to the server.==Na tomto mieste mozete obmedzit pristup k serveru.
 # NOT USED
@@ -1576,9 +1583,10 @@ ATTENTION: Your current IP is recognized as==POZOR: Vasa aktualna IP adresa rozp
 # NOT USED
 #. If the value you enter here does not match with this IP, you will not be able to access the server pages anymore==Ak hodnota ktoru ste tu zadali nezodpoveda tejto IP adrese, tak nebudete schopny pristupovat na tiete stranky servera.
 IP-Number filter:==Filter IP adries:
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Settings_Seed.inc
+#---------------------------
 Seed Upload Settings==Nastavenia nahravania seedu
 With these settings you can configure if you have an account on a public accessible==Tymito nastaveniami mozete urcit ci mate konto na verejne dostupnom 
 server where you can host a seed-list file.==serveri, kde mozete dat k dispozicii subor seed-zoznamu
@@ -1591,9 +1599,10 @@ Retry Uploading==Vyskusaj nahravanie
 Here you can specify which upload method should be used.==Tu mozete urcit aka nahravacia metoda sa ma pouzit.
 Select 'none' to deactivate uploading.==Zvojte 'none' na deaktivovanie nahravania.
 The URL that can be used to retrieve the uploaded seed file, like==URL adresa ktora moze byt pouzita na ziskanie nahravacieho seedu ako
+#-----------------------------
 
-#--------------------------------------------------------
 #File: yacy/seedUpload/yacySeedUploadFtp.html
+#---------------------------
 Uploading via FTP:==Nahravanie cez FTP:
 This is the account for a FTP server where you can host a seed-list file.==Toto je ucet pre FTP server kde mozete dat k dispozicii seed-list subor.
 If you set this, you will become a principal peer.==AK tak urobite stanete sa Principal peerom.
@@ -1606,16 +1615,18 @@ Missing sub-directories are NOT created automatically.==Chybajuce podadresare NE
 Your log-in at the FTP server==Vas log-in na FTP serveri
 Password:==Heslo:
 The password==Heslo
+#-----------------------------
 
-#--------------------------------------------------------
 #File: yacy/seedUpload/yacySeedUploadFile.html
+#---------------------------
 Store into filesystem:==Uloz na suborovy system:
 You must configure this if you want to store the seed-list file onto the file system.==Ak chcete ulozit seed-list subor na suborovy system musite nastavit nasledovne parametre.
 File&nbsp;Location:==Miesto ulozenia:
 Here you can specify the path within the filesystem where the seed-list file should be stored.==Tu mozete zadat cestu v suborovom systeme kde ma byt seed-list subor ulozeny.
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Settings_MessageForwarding.inc
+#---------------------------
 Message Forwarding==Presmerovanie sprav
 With this settings you can activate or deactivate forwarding of yacy-messages via email.==S tymito nastaveniami mozete zapnut alebo vypnut presmerovanie YaCy sprav cez email.
 Enable message forwarding:==Zapni presmerovanie sprav:
@@ -1625,18 +1636,19 @@ The command-line program that should be used to forward the message.<br>e.g.:==P
 Forwarding To:==Presmeruj na:
 The recipient email-address.<br> e.g.:==Email adresa prijimatela.<br>napr.:
 Changes will take effect immediately.==Zmeny su okamzite ucinne.
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Settings_Parser.inc
+#---------------------------
 Content Parser Settings==Nastavenia parsera obsahu
 With this settings you can activate or deactivate parsing of additional content-types based on their MIME-types.==S tymito nastavenia mozete zapnut alebo vypnut parsovanie dodatocnych suborov na zaklade ich mime-typov.
 For a detailed description of the various MIME-types take a look at==Detailny popis rozlicnych mime-typov najdete na
 http://www.iana.org/assignments/media-types/</a>==http://www.iana.org/assignments/media-types/</a>.
 Changes take effect immediately==Zmeny su okamzite ucinne
+#-----------------------------
 
-#-------------------------------------------------------
 #File: SettingsAck_p.html
-
+#---------------------------
 YaCy \'\#\[clientname\]\#\': Settings Acknowledge==YaCy '#[clientname]#': Spracovanie nastaveni
 Settings Receipt:==Prijatie nastaveni:
 No information has been submitted==Ziadne informacie neboli prenesene:
@@ -1721,28 +1733,28 @@ You can now go back to the==Mozete sa vratit do
 Settings</a> page if you want to make more changes.==Nastaveni</a> a vykonat dalsie zmeny.
 Port rebinding will be done in a few seconds==Novy port bude aktivovany za niekolko sekund.
 You can reach your YaCy server under the new location==Vas YaCy server je pristupny pod novou adresou:
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Settings_Admin.inc
-
+#---------------------------
 Administration Account Settings==Nastavenia konta administratora
 This is the account that restricts access to this 'Settings' page. If you have not customized it yet, you should do so now:==Toto je konto ktore obmedzuje pristum na tuto stranku 'Nastaveni'. Ak ste toto konte este nevytvorili, mali by ste teraz tak urobit.
 Account Name:==Nazov konta:
 Password:==Heslo:
 Password \(repeat same as above\):==Heslo (zopakujte prosim):
 value="submit">==value="Uloz">
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Settings_SystemBehaviour.inc
-
+#---------------------------
 System Behaviour Settings==Systemove nastavenia
 Auto pop-up of status page on start-up:==Automaticky pop-up stranky stavu pri starte YaCy:
 "enable"=="aktivuj"
 "disable"=="deaktivuj"
+#-----------------------------
 
-#-------------------------------------------------------
 #File: simple_search.html
-
+#---------------------------
 YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Vyhladavacia stranka
 "Search for \#\[former\]\#"=="Hladaj #[former]#"
 	P2P WEB SEARCH==P2P Internetov&eacute; Vyhlad&aacute;vanie
@@ -1771,10 +1783,10 @@ known links.==znamych odkazov.
 You can try to==Mozete skusit 
 catch up more links==Zhromazdit viacej odkazov
 from 'late' peers to enrich this search result.==z pomalych peerov na zlepsenie vysledkov vyhladavania.
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Status.html
-
+#---------------------------
 System-, Index- and Peer-Status==Stav systemu, indexu a peera
 Welcome to YaCy!==Vitajte v YaCy!
 "Restart"=="Restartuj"
@@ -1848,10 +1860,10 @@ Last Refresh:==Posledna aktualizacia:
 #>here<==>tu<
 # NOT USED
 #to log in as administrator and see full status.==na prihlasenie sa ako administrator a na zobrazenie vsetkych informacii
+#-----------------------------
 
-#--------------------------------------------------------
 #File: Status_p.inc
-
+#---------------------------
 Private System Properties==Sukromne systemove vlastnosti
 System Resources==Systemove zdroje
 Processors:==Procesory:
@@ -1890,10 +1902,10 @@ Remote triggered Crawl==prichadzajuce vzialene crawly
 Global Crawl Trigger==odchadzajuce vzialene crawly
 #Pre-Queueing==
  local== lokalne
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Steering.html
-
+#---------------------------
 Steering==Ovladanie
 Steering Receipt:==Navod na ovladanie
 No information has been submitted==Udaje neboli odoslane
@@ -1906,9 +1918,10 @@ Shutting down.==Vypinanie.
 Application will terminate after working off all scheduled tasks.==YaCy proxy bude ukonceny po vykonani vsetkych nasledujucich uloh.
 Then YaCy will restart.==Potom sa YaCy restartuje.
 You can now go back to the <a href="Settings_p.html">Settings</a> page if you want to make more changes.==Mozete sa vratit na stranku <a href="Settings_p.html">nastavenia</a> ak chcete vykonat viacero zmien.
+#-----------------------------
 
-#-------------------------------------------------------
 #File: User_p.html
+#---------------------------
 new User==Novy uzivatel
 Edit User==Edituj uzivatela
 Delete User==Zmaz uzivatela
@@ -1927,10 +1940,10 @@ User changed:==Zmeneny uzivatel:
 Passwords do not match.==Zadane hesla nie su rovnake.
 If you want to manage more Users, return to the==Ak chcete spravovat viacerych pouzivatelov, vratte sa spat do 
 user</a> page.==stranky pouzivatelov</a>.
+#-----------------------------
 
-#-------------------------------------------------------
 #File: ViewFile.html
-
+#---------------------------
 YaCy \'\#\[clientname\]\#\': View URL Content==YaCy '#[clientname]#': Zobraz obsah URL adresy
 View URL Content==Zobraz obsah URL adresy
 #URL==URL
@@ -1952,18 +1965,17 @@ Plain Resource Content==Cisty obsah zdroja
 Parsed Resource Content==Parsovany obsah zdroja
 Parsed Resource Sentences==Parsovane zdrojove vety
 Original Resource Content==Originalny obsah zdroja
+#-----------------------------
 
-
-#-------------------------------------------------------
 #File: ViewLog_p.html
-
+#---------------------------
 Lines==Riadkov
 reversed order==v prevratenom poradi
 "refresh"==aktualizuj
+#-----------------------------
 
-#-------------------------------------------------------
 #File: ViewProfile.html
-
+#---------------------------
 Remote Peer Profile==Profil vzdialeneho peera
 Remote Peer Profile:==Profil vzdialeneho peera:
 Wrong access of this page==Nespravny pristup na tuto stranku
@@ -1972,7 +1984,7 @@ Wrong access of this page==Nespravny pristup na tuto stranku
 The peer==Peer
 is not online.==nie je online.
 This is==Toto je profil peera s nazvom: 
-'s Profile:==
+#'s Profile:==
 Name==Meno
 # NOT USED
 #Nick Name==Prezyvka
@@ -1983,15 +1995,16 @@ Jabber==Jabber
 Yahoo!==Yahoo!
 MSN==MSN
 Comment==Komentar
+#-----------------------------
 
-#-------------------------------------------------------
 #File: Wiki.html
-
+#---------------------------
 yacyWiki==YaCyWiki
 Changes will be published as announcement on YaCyNews==Zmeny budu zverejnene pomocou oznamov na YaCyNews-och
+#-----------------------------
 
-#-----------------------------------------------------------
 #File: yacysearch.html
+#---------------------------
 # NOT USED
 #Result Page==Stranka vysledkov
 # NOT USED
@@ -2040,17 +2053,17 @@ The global search resulted in \#\[globalresults\]\# link contributions from othe
 YaCy is a GPL'ed project==YaCy ist ein GPL Projekt
 with the target of implementing a P2P-based global search engine.==mit dem Ziel eine globale P2P-basierte Suchmaschine zu realisieren.
 Architecture \(C\) by Michael Peter Christen==Architektur (C) von Michael Peter Christen
+#-----------------------------
 
-#--------------------------------------------------------
 #File: env/templates/simpleheader.template
-
+#---------------------------
 Project Home==Domovsk&aacute; str&aacute;nka
 Help / Wiki==Pomoc / Wiki
 Peer Owner Profile==Profi vlastn&iacute;ka peera
+#-----------------------------
 
-#--------------------------------------------------------
 #File: env/templates/header.template
-
+#---------------------------
 # NOT USED
 #YaCy&nbsp;-&nbsp;Distributed&nbsp;Web&nbsp;Indexing&nbsp;-&nbsp;Administration==YaCy - Indexovanie Distribuovan&eacute;ho Internetu - Administr&aacute;cia
 # NOT USED
@@ -2094,35 +2107,35 @@ Newsletters==Newsletter
 Download YaCy==Stiahni YaCy
 #YaCy Wiki==YaCy Wiki
 >Contact==>Kontakt
+#-----------------------------
 
-#--------------------------------------------------------
 #File: env/templates/submenuConfig.template
-
+#---------------------------
 Peer Configuration Menu==Konfigur&aacute;cia menu peera
 Basic Configuraton==Z&aacute;kladn&eacute; nastavenia
 >Language==>Jazyk
 Peer Profile==Profil
 Interface Skins==Nastavenie vzhladu
 >Advanced==>Pokrocil&eacute; nastavenia
+#-----------------------------
 
-#--------------------------------------------------------
 #File: env/templates/submenuCookie.template
-
+#---------------------------
 Cookie Menu==Cookie Menu
 Incoming&nbsp;Cookies==Prichadzajuce cookies
 Outgoing&nbsp;Cookies==Odchadzajuce cookies
+#-----------------------------
 
-#--------------------------------------------------------
 #File: env/templates/submenuIndexControl.template
-
+#---------------------------
 Index Control Menu==Menu spravy indexu
 #Index Administration==Administracia indexu 
 #Index Import==Import indexu
 #Index Transfer==Prenos indexu
+#-----------------------------
 
-#--------------------------------------------------------
 #File: env/templates/submenuIndexCreate.template
-
+#---------------------------
 Index Creation Menu==Menu vytvorenia indexu
 Control Queues==Kontrola cakacej listiny
 WWW Crawl Queues==Cakacia listina WWW crawlu
@@ -2136,28 +2149,32 @@ Media Crawl Queues==Cakacia listina Media crawlu
 >Images==>Obrazky
 >Movies==>Filmy
 >Music==>Hudba
+#-----------------------------
 
-#--------------------------------------------------------
 #File: env/templates/submenuPerformance.template
-
+#---------------------------
 Performance Menu==Menu vykonu
 Queues Performance Settings==Cakacia listina nastaveny vykonu
 Memory Settings for Database Caches==Nastavenia pamate databazovej cache
 Timing Settings for Search Sequence==Nastavenia casu pre vyhladavaciu sekvenciu
+#-----------------------------
 
-#--------------------------------------------------------
 #File: htdocsdefault/dir.html
-
+#---------------------------
 YaCy: Public Files==YaCy: Verejne subory
 Public&nbsp;File&nbsp;Directory==Adresar verejneho suboru
 value="\#\[peername\]\#'s Console"==value="#[peername]#s konzola"
 Welcome! You are identified and authorized as==Vytajte! Ste identifikovany a autorizovany ako
+#-----------------------------
 
-#--------------------------------------------------------
 #File: htdocsdefault/welcome.html
+#---------------------------
 YACY: Default Page for Individual Peer Content==YACY: Standartna stranaka pre individualny obsah peera
 Individual&nbsp;Web&nbsp;Page==Vlastna web stranka
 Welcome to your own web page<br>in the <b>YaCy Network==Vytajte na Vasej vlastnej web stranke v<br> sieti YaCy
 THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==TOTO JE PRIKLAD WEB STRANKY PRE VAS VLASTNY WEB SERVER!
 PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==PROSIM NAHRADTE TUTO STRANKU TYM ZE UMIESTNITE VLASTNY index.html SUBOR DO ADRESARA
 &lt;YaCy-application-home&gt;<b>\#\[wwwpath\]\#</b>==&lt;YaCy-adresar&gt;<b>#[wwwpath]#</b>
+#-----------------------------
+
+# EOF

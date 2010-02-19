@@ -1,28 +1,29 @@
 # it.lng
 # English-->Italian
-# $LastChangedDate$
 # -----------------------
 # part of YaCy
 # (C) by Michael Peter Christen; mc@anomic.de
 # first published on http://www.anomic.de
 # Frankfurt, Germany, 2005
 #
+#
 # This file is written by (chronological order) Riccardo Lemmi <riccardo@reflab.it>
+#
 
 # If you find any mistakes or untranslated strings in this file please don't hesitate to email them to the maintainer.
 
-#-------------------------------------------------------
 #File: Language_p.html
+#---------------------------
 #Only part 1.
 #Contributors are in chronological ordern, not how much they did absolutely.
 #Thank you for your help!
 <!-- lang -->default\(english\)==Italian
 <!-- author -->==Riccardo Lemmi
 <!-- maintainer -->==
+#-----------------------------
 
-#-----------------------------------------------------------
 #File: Blacklist_p.html
-
+#---------------------------
 Blacklist Manager==Blacklist Manager
 Blacklist==Blacklist
 This function provides an URL filter to the proxy; any blacklisted URL is blocked==Questa funzione fornisce al proxy un filtro per le URL; le URL nella blacklist non vengono caricate
@@ -58,10 +59,10 @@ Import blacklist items from file:==Importa le entrare delle blacklist dal file:
 was removed from blacklist==&egrave; stato rimosso dalla blacklist
 was added to the blacklist==&egrave; stato aggiunto alla blacklist
 File:==File:
+#-----------------------------
 
-#-----------------------------------------------------------
 #File: Bookmarks.html
-
+#---------------------------
 YaCy \'\#\[clientname\]\#\': Bookmarks==YaCy '#[clientname]#': Bookmarks
 <h2>Bookmarks==<h2>Bookmarks
 Add Bookmark==Aggiunti Bookmark
@@ -80,18 +81,18 @@ Edit==Modifica
 Delete==Cancella
 next page==prossima pagina
 All==Tutto
+#-----------------------------
 
-#-----------------------------------------------------------
 #File: CacheAdmin_p.html
-
+#---------------------------
 Local Cache Management==Gestione Cache locale
 Local Cache==Cache locale
 The current cache size is==La dimensione corrente della cache &egrave;
 The maximum cache size is==La dimensione massima della cache &egrave;
+#-----------------------------
 
-#-------------------------------------------------------
 #File: ConfigProfile_p.html
-
+#---------------------------
 Your Personal Profile==Il tuo profilo personale
 You can create a personal profile here. Other YaCy users can view these information using a link on the network page.==Qui puoi create il tuo profilo personale. Gli altri utenti YaCy vedranno queste informazioni usando il link nella pagina 'Network'.
 You do not need to provide any personal data here, but if you want to distribute your contact information, you can do that here.==Non c'&egrave; bisogno di fornire dati personali, ma se vuoi distribuire le informazioni per contattarti, lo puoi fare qui.
@@ -105,10 +106,10 @@ You do not need to provide any personal data here, but if you want to distribute
 #MSN=MSN
 Comment==Commento
 "Save"==Salva
+#-----------------------------
 
-#-----------------------------------------------------------
 #File: Connections_p.html
-
+#---------------------------
 YaCy \'\#\[clientname\]\#\': Connection Tracking==YaCy '#[clientname]#': Stato connessione
 Connection Tracking==Stato connessione
 Incoming Connections==Connessioni entranti
@@ -121,30 +122,30 @@ Command==Comando
 Used==Usato
 Close==Chiuso
 Waiting for new request nr.==In attesa della nuova richiesta Nr.
+#-----------------------------
 
-#-------------------------------------------------------
 #File: CookieMonitorIncoming_p.html
-
+#---------------------------
 Incoming Cookies Monitor==Incoming Cookies Monitor
 Cookie Monitor: Incoming Cookies==Cookie Monitor: Incoming Cookies
 This is a list of Cookies that a web server has sent to clients of the YaCy Proxy:==Questa &egrave; una lista di Cookies che il server ha mnadato hai client dello YaCy Proxy:
 Showing==Mostra
 entries from a total of==le entrate per un totale di
 Cookies==Cookies
+#-----------------------------
 
-#-------------------------------------------------------
 #File: CookieMonitorOutgoing_p.html
-
+#---------------------------
 Outgoing Cookies Monitor==Outgoing Cookies Monitor
 Cookie Monitor: Outgoing Cookies==Cookie Monitor: Outgoing Cookies
 This is a list of Cookies that a browser using the YaCy Proxy has sent to a web server:==:Questa &egrave; una lista di Cookies che un browser che ha usato lo YaCy Proxy has mandato al server web
 Showing==Mostra
 entries from a total of==le entrate per un totale di
 Cookies==Cookies
+#-----------------------------
 
-#-----------------------------------------------------------
 #File: Help.html
-
+#---------------------------
 YaCy: Help==YaCy: Aiuto
 Help==Aiuto
 This is a distributed web crawler and also a caching HTTP proxy. You are using the <i>online-interface</i> of the application. You can use this interface to configure your personal settings, proxy settings, access control and crawling properties. You can also use this interface to start crawls, send messages to other peers and monitor your index, cache status and crawling processes. Most important, you can use the search page to search either your own or the <i>global</i> index.==YaCy &egrave; un web crawler distributio e anche un proxy HTTP. Tu stai usando <i>l'intefaccia on-line<i> dell'applicazione. Puoi usare questa interfaccia per configurare le tue preferenze personali e del proxy, controllare l'accesso e  le propriet&agrave; del crawler. Ancora pi&ugrave; importante, puoi usare la pagina del search per cercare tu stesso sul'indice <i>globale</i>.
@@ -205,3 +206,6 @@ exactly n appearances of x==esattamente n ricorrenze di  x
 at least n appearances of x==almeno n ricorrenze di x
 at least n, maximum m appearanches of x==almeno n, massimo m ricorrenze di x
 Modify priority of instructions==Modifica la priorit&agrave; delle istruzioni
+#-----------------------------
+
+# EOF

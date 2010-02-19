@@ -2495,9 +2495,11 @@ to a scheduler for a periodic execution.==einem Scheduler für periodische Ausf�
 >Type==>Typ
 >Comment==>Kommentar
 #>URL==>URL
+"Select All"=="Alles auswählen"
+"Deselect All"=="Alles abwählen"
 "Execute Selected Actions"=="Führe ausgewählte Aktionen aus"
 "Delete Selected Actions"=="Lösche ausgewählte Aktionen"
->Result of API execution==>Ergebis der API Ausführung
+>Result of API execution==>Ergebnis der API Ausführung
 #>Status<==>Status>
 #>URL<==>URL<
 #-----------------------------

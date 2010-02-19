@@ -340,6 +340,7 @@ There is ".html" at the end, which is not included with the Regular Expression.=
 #File: index.html
 #---------------------------
 YaCy \'\#\[clientname\]\#\': Search Page==YaCy '#[clientname]#': Page de recherche
+kiosk mode==Kiosque Mode
 "Search"=="Chercher"
 Text==Texte
 Images==Images
@@ -942,7 +943,6 @@ Attributes==Attributs
 
 #File: PerformanceQueues_p.html
 #---------------------------
-
 Performance Settings of Queues and Processes==Paramètres de performance des files et des processus
 Scheduled tasks overview and waiting time settings:==Aperçu des tâches programmées et paramètres d'attente:
 Queue Size==Taille de file
@@ -1198,7 +1198,6 @@ Seed Upload Settings==Paramètres d'envoi de Seed
 Message Forwarding \(optional\)==Redirection de messages (optionel)
 
 #-----------------------------
-
 
 #File: Settings_ProxyAccess.inc
 #---------------------------
@@ -1506,7 +1505,7 @@ Your '.yacy' home at==Ihre YaCy-Domain ist
 This peer's name==Name dieses Noeuds
 This peer's statistics==Statistik dieses Noeuds
 Unknown==unbekannt
-Uptime==Online seit
+Uptime==En ligne depuis
 Connects \(==Verbindungen (
 "connected Juniors"=="verbundene Juniors"
 "connected Seniors"=="verbundene Seniors"
@@ -1519,8 +1518,8 @@ Junior - You cannot be reached from outside. A possible reason is that you are b
 Senior - You are running a server and you support the global internet index, which you can also <a href="index.html">search yourself</a>. Thank you!==Senior - Sie lassen YaCy bei sich laufen und unterstützen den globalen Index, den Sie auch selbst <a href="index.html">durchsuchen</a> können. Danke!
 Principal - You are senior and you publish your seed-list to a public accessible server where it can be retrieved using the URL==Principal - Sie haben den Senior-Status und laden zusätzlich Ihre Seed-Liste auf einen öffentlich zugänglichen Server hoch, von wo aus sie unter folgender Adresse erreichbar ist:
 You can of course <a href="index.html">search the internet</a> using the other peers' global index on your own search page.==Natürlich können Sie auch mithilfe des globalen Indexes von Ihrer Suchseite aus <a href="index.html">das Internet durchsuchen</a>.
-Other peers==Andere Noeuds
-other peers online.==andere Noeuds online.
+Other peers==Autres peers
+other peers online.==Autres peers en ligne.
 not online==nicht online
 Online-mode==Onlinemodus
 You are in <em>Cache-browsing</em> mode.==Sie sind im <em>Cache</em> Modus.
@@ -1608,7 +1607,7 @@ You can now go back to the <a href="Settings_p.html">Settings</a> page if you wa
 #-----------------------------
 
 #File: Surftips.html
-#-----------------------------
+#---------------------------
 Surftips</title>==Surftipps</title>
 Surftips</h2>==Surftipps</h2>
 Surftips are switched off==Les surftipps sont désactivés
@@ -1622,6 +1621,29 @@ alt="Give negative vote"==alt="Donner un avis négatif"
 provided by YaCy peers using public bookmarks, link votes and crawl start points==fournis par les noeuds YaCy utilisant les marque-pages publics, les évaluations de lien et les points de départ de crawl
 Hide surftips==Surftipps cachés
 "Please enter a comment to your link recommendation. \(Your Vote is also considered without a comment.\)"=="S'il vous plait, commentez votre recommandation de lien. (Votre avis sera accepté même sans commentaire.)"
+#-----------------------------
+
+#File: Table_API_p.html
+#---------------------------
+: Peer Steering==: Peer Contrôle
+#Steering of API Actions<==Steuerung der API Aktionen<
+#This table shows actions that had been issued on the YaCy interface==Diese Tabelle zeigt Aktionen, die auf dem YaCy Interface ausgelöst wurden, 
+#to change the configuration or to request crawl actions.==um Konfigurationen zu ändern oder Crawl Aktionen anzufordern.
+#These recorded actions can be used to repeat specific actions and to send them==Diese aufgezeichneten Aktionen können dazu verwendet werden, bestimmte Aktionen wiederholt auszuführen und um sie
+#to a scheduler for a periodic execution.==einem Scheduler für periodische Ausführung zu übergeben.
+#>Recorded Actions<==>Aufgezeichnete Aktionen<
+#>Date==>Date
+#>Type==>Type
+>Comment==>Commentaire
+#>URL==>URL
+"Select All"=="Sélectionner tout"
+"Deselect All"=="Désélectionner tout"
+#"Execute Selected Actions"=="Führe ausgewählte Aktionen aus"
+#"Delete Selected Actions"=="Lösche ausgewählte Aktionen"
+#>Result of API execution==>Ergebnis der API Ausführung
+#>Status<==>Status>
+#>URL<==>URL<
+#-----------------------------
 
 #File: User_p.html
 #---------------------------
@@ -1786,7 +1808,7 @@ Changes will be published as announcement on YaCyNews==Les modifications seront 
 #-----------------------------
 
 #File: WikiHelp.html
-#-----------------------------
+#---------------------------
 Wiki Help==Aide Wiki
 Index Creation==Index créer
 This table contains a short description of the tags that can be used in the Wiki and several other servlets of YaCy. For a more detailed description visit the==Cette table contient une brève description des tags qui peuvent êtres utilisés dans ce wiki et dans plusieurs autres endroits de YaCy. Pour une description plus détaillée, vous pouvez visiter ce 
@@ -1823,6 +1845,21 @@ The escape tags will cause all tags in the text between the starting and the clo
 A text between this tags will keep all the spaces and linebreaks in it. Great for ASCII-art and program code.==Un texte entre ces tags garde ses espace et ses sauts de lignes. Excellent pour l'art-ASCII et le code de programme.  
 If a line starts with a space, it will be displayed in a non-proportional font.==Si une ligne commence avec un espace, elle apparaîtra avec une fonte non proportionnelle.
 
+#-----------------------------
+
+#File: yacyinteractive.html
+#---------------------------
+YaCy Interactive Search==YaCy Recherche interactive
+#This page uses the JSON search API to display search results as you type.==Diese Seite verwendet die JSON Such API, um die Suchergebnisse beim Tippen anzuzeigen.
+#Click the API icon to see an example call to the native API.==Klicken Sie auf die API Sprechblase, um einen Beispielaufruf der nativen API zu sehen.
+#To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+>total results==>Total des résultats
+&nbsp;topwords:==&nbsp;Top mots:
+>Name==>Nom
+>Size==>Taille
+>Date==>Date
+kiosk mode==Kiosque Mode
+>Link==>Lien
 #-----------------------------
 
 #File: yacysearch.html
@@ -2004,3 +2041,5 @@ THIS IS A DEMONSTRATION PAGE FOR YOUR OWN INDIVIDUAL WEB SERVER!==CECI EST UNE P
 PLEASE REPLACE THIS PAGE BY PUTTING A FILE index.html INTO THE PATH==REMPLACEZ CETTE PAGE EN AJOUTANT UN FICHIER index.html DANS LE DOSSIER
 <YaCy-application-home><strong>\#\[wwwpath\]\#</strong>==<YaCy-Application-Home><strong>#[wwwpath]#</strong> ABLEGEN.
 #-----------------------------
+
+# EOF
