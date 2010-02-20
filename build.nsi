@@ -47,8 +47,8 @@ SetCompressor /SOLID LZMA
 ; http://www.java.com/de/download/manual.jsp BundleId +1 / +2
 
 !define JRE_VERSION6 "1.6"
-!define JRE_32 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=33890" ;jre-6u16-windows-i586.exe
-!define JRE_64 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=33892" ;jre-6u16-windows-x64.exe
+!define JRE_32 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=37718" ;jre-6u18-windows-i586.exe
+!define JRE_64 "http://javadl.sun.com/webapps/download/AutoDL?BundleId=37401" ;jre-6u18-windows-x64.exe
 
 ; ----------------------------------------
 ; GENERAL APPEARANCE
