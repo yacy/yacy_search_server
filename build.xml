@@ -192,8 +192,8 @@
     	<pathelement location="${lib}/jsch-0.1.21.jar" />
     	<pathelement location="${lib}/log4j-1.2.9.jar" />
     	<pathelement location="${lib}/mysql-connector-java-5.1.7-bin.jar" />
-    	<pathelement location="${lib}/poi-3.5-FINAL-20090928.jar" />
-    	<pathelement location="${lib}/poi-scratchpad-3.5-FINAL-20090928.jar" />
+    	<pathelement location="${lib}/poi-3.6-20091214.jar" />
+    	<pathelement location="${lib}/poi-scratchpad-3.6-20091214.jar" />
     	<pathelement location="${lib}/servlet-api.jar" />
     	<pathelement location="${lib}/tm-extractors-1.0.jar" />
     	<pathelement location="${lib}/webcat-0.1-swf.jar" />
