@@ -24,7 +24,6 @@
 	<classpathentry exported="true" kind="lib" path="lib/commons-codec-1.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/J7Zip-modified.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/jakarta-oro-2.0.7.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jsch-0.1.21.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/log4j-1.2.9.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/webcat-0.1-swf.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/activation.jar"/>
@@ -36,6 +35,7 @@
 	<classpathentry kind="lib" path="lib/poi-scratchpad-3.6-20091214.jar"/>
 	<classpathentry kind="lib" path="lib/bcmail-jdk15-145.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk15-145.jar"/>
+	<classpathentry kind="lib" path="lib/jsch-0.1.42.jar"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>
