@@ -394,8 +394,8 @@ public class bookmarksDB {
         	final Iterator<String> it=hashes.iterator();
         	Bookmark bm;
         	while(it.hasNext()){
-        		bm=getBookmark(it.next());
-        		if(bm.getPublic()){
+        		bm = getBookmark(it.next());
+        		if (bm != null && bm.getPublic()) {
         			set.add(bm.getUrlHash());
         		}
         	}
