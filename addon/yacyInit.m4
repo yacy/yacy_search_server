@@ -307,7 +307,7 @@ ifdef(`ArchLinux', `
 
   restart)
 	$0 stop --leave-pidfile
-	sleep 1
+	sleep 3
 	$0 start
 	;;
   reload)
