@@ -3,9 +3,7 @@ cd `dirname $0`
 
 if [ -x `which wget` ]
 then
-	port=`cat DATA/SETTINGS/yacy.conf |grep "^port="|sed "s/.*=//"`
-	pw=`cat DATA/SETTINGS/yacy.conf |grep "^adminAccountBase64MD5="|sed "s/.*=//"`
-	wget -q -t 1 --timeout=5 --header "Authorization: realm=$pw" http://localhost:$port/ConfigUpdate_p.html?autoUpdate= -O /dev/null
+	bin/apicall.sh "ConfigUpdate_p.html?autoUpdate="
 
 elif [ -x `which java` ]
 then
