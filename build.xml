@@ -378,6 +378,7 @@
       <fileset dir="bin">
         <include name="searchtest*"/>
         <include name="localsearch.sh"/>
+        <include name="apicall.sh"/>
         <include name="up.sh"/>
         <include name="down.sh"/>
       </fileset>
