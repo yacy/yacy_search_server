@@ -208,11 +208,6 @@ public class RowCollection implements Iterable<Row.Entry> {
         return this.rowdef;
     }
     
-    protected final int maxIntFromLong(long val) {
-    	if (val >= Integer.MAX_VALUE) return Integer.MAX_VALUE;
-    	return (int) val;
-    }
-    
     protected final long neededSpaceForEnsuredSize(final int elements, final boolean forcegc) {
         assert elements > 0 : "elements = " + elements;
         final long needed = elements * rowdef.objectsize;
@@ -220,21 +215,22 @@ public class RowCollection implements Iterable<Row.Entry> {
         assert needed > 0 : "needed = " + needed;
         long allocram = needed * growfactorLarge100 / 100L;
         assert allocram > 0 : "elements = " + elements + ", new = " + allocram;
-        if (MemoryControl.request(allocram, false)) return allocram;
+        if (allocram <= Integer.MAX_VALUE && MemoryControl.request(allocram, false)) return allocram;
         allocram = needed * growfactorSmall100 / 100L;
         assert allocram > 0 : "elements = " + elements + ", new = " + allocram;
-        if (MemoryControl.request(allocram, forcegc)) return allocram;
+        if (allocram <= Integer.MAX_VALUE && MemoryControl.request(allocram, forcegc)) return allocram;
         return needed;
     }
     
     protected final void ensureSize(final int elements) throws RowSpaceExceededException {
         if (elements == 0) return;
-        final int allocram = maxIntFromLong(neededSpaceForEnsuredSize(elements, true));
+        final long allocram = neededSpaceForEnsuredSize(elements, true);
         if (allocram == 0) return;
         assert allocram > chunkcache.length : "wrong alloc computation: allocram = " + allocram + ", chunkcache.length = " + chunkcache.length;
-        if (!MemoryControl.request(allocram, true)) throw new RowSpaceExceededException(allocram, "RowCollection grow");
+        if (allocram > Integer.MAX_VALUE || !MemoryControl.request(allocram, true))
+        	throw new RowSpaceExceededException(allocram, "RowCollection grow");
         try {
-            final byte[] newChunkcache = new byte[allocram]; // increase space
+            final byte[] newChunkcache = new byte[(int) allocram]; // increase space
             System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
             chunkcache = newChunkcache;
         } catch (OutOfMemoryError e) {
