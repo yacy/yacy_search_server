@@ -545,6 +545,7 @@ public final class yacyRelease extends yacyVersion {
                     "while [ -f ../yacy.running ]; do" + serverCore.LF_STRING +
                     "sleep 1" + serverCore.LF_STRING +
                     "done" + serverCore.LF_STRING +
+                    "rm " + apphome + "/lib/*" + serverCore.LF_STRING +
                     "cp -Rf yacy/* " + apphome + serverCore.LF_STRING +
                     "rm -Rf yacy" + serverCore.LF_STRING +
     /*                ((releaseFile.getName().endsWith(".gz")) ?
