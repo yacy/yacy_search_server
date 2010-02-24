@@ -202,6 +202,21 @@ public class yacysearch {
         //if (offline || !indexDistributeGranted || !indexReceiveGranted) { global = false; }
         if (clustersearch) global = true; // switches search on, but search target is limited to cluster nodes
         
+        // increase search statistic counter
+        if (!global) {
+            // we count only searches on the local peer here, because global searches
+            // are counted on the target peer to preserve privacy of the searcher
+            if (authenticated) {
+                // local or authenticated search requests are counted separately
+                // because they are not part of a public available peer statistic
+                sb.searchQueriesRobinsonFromLocal++;
+            } else {
+                // robinson-searches from non-authenticated requests are public
+                // and may be part of the public available statistic
+                sb.searchQueriesRobinsonFromRemote++;
+            }
+        }
+        
         // find search domain
         final ContentDomain contentdom = ContentDomain.contentdomParser((post == null ? "text" : post.get("contentdom", "text")));
         

@@ -74,6 +74,8 @@
     <receivedurls>#[my-rU]#</receivedurls>
     <ppm>#[my-ppm]#</ppm>
     <qph>#[my-qph]#</qph>
+    <qph-publocal>#[my-qph-publocal]#</qph-publocal>
+    <qph-pubremote>#[my-qph-pubremote]#</qph-pubremote>
     <seeds>#[my-seeds]#</seeds>
     <connects>#[my-connects]#</connects>
     <location>#[my-location]#</location>

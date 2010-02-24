@@ -126,8 +126,8 @@ public class Network {
                 prop.put("table_my-rankingreceive", seed.getFlagAcceptCitationReference() ? 1 : 0);
 
 
-                myppm = seed.getPPM();
-                myqph = 60d * seed.getQPM();
+                myppm = sb.currentPPM();
+                myqph = 60d * sb.averageQPM();
                 prop.put("table_my-version", seed.get(yacySeed.VERSION, "-"));
                 prop.put("table_my-utc", seed.get(yacySeed.UTC, "-"));
                 prop.put("table_my-uptime", DateFormatter.formatInterval(60000 * Long.parseLong(seed.get(yacySeed.UPTIME, ""))));
@@ -140,8 +140,8 @@ public class Network {
                 prop.putNum("table_my-rU", Long.parseLong(seed.get(yacySeed.URL_IN, "0")));
                 prop.putNum("table_my-ppm", myppm);
                 prop.putNum("table_my-qph", Math.round(100d * myqph) / 100d);
-                prop.putNum("table_my-totalppm", sb.currentPPM());
-                prop.putNum("table_my-totalqph", Math.round(6000d * sb.totalQPM) / 100d);
+                prop.putNum("table_my-qph-publocal", Math.round(6000d * sb.averageQPMPublicLocal()) / 100d);
+                prop.putNum("table_my-qph-pubremote", Math.round(6000d * sb.averageQPMGlobal()) / 100d);
                 prop.putNum("table_my-seeds", Long.parseLong(seed.get(yacySeed.SCOUNT, "0")));
                 prop.putNum("table_my-connects", Double.parseDouble(seed.get(yacySeed.CCOUNT, "0")));
                 prop.put("table_my-url", seed.get(yacySeed.SEEDLIST, ""));

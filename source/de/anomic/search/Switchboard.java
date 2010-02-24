@@ -208,8 +208,9 @@ public final class Switchboard extends serverSwitch {
     public  ArrayList<QueryParams>         remoteSearches; // array of search result properties as HashMaps
     public  ConcurrentHashMap<String, TreeSet<Long>> localSearchTracker, remoteSearchTracker; // mappings from requesting host to a TreeSet of Long(access time)
     public  long                           indexedPages = 0;
-    public  double                         requestedQueries = 0d;
-    public  double                         totalQPM = 0d;
+    public  int                            searchQueriesRobinsonFromLocal = 0; // absolute counter of all local queries submitted on this peer from a local or autheticated used
+    public  int                            searchQueriesRobinsonFromRemote = 0; // absolute counter of all local queries submitted on this peer from a remote IP without authentication
+    public  double                         searchQueriesGlobal = 0d; // partial counter of remote queries (1/number-of-requested-peers)
     public  TreeMap<byte[], String>        clusterhashes; // map of peerhash(String)/alternative-local-address as ip:port or only ip (String) or null if address in seed should be used
     public  URLLicense                     licensedURLs;
     public  List<Pattern>                  networkWhitelist, networkBlacklist;
@@ -1999,6 +2000,23 @@ public final class Switchboard extends serverSwitch {
         return EventTracker.countEvents("indexed", 20000) * 3;
     }
     
+    public double averageQPM() {
+        final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
+        return (this.searchQueriesRobinsonFromRemote + this.searchQueriesGlobal) * 60d / Math.max(uptime, 1d);
+    }
+    public double averageQPMGlobal() {
+        final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
+        return (this.searchQueriesGlobal) * 60d / Math.max(uptime, 1d);
+    }
+    public double averageQPMPrivateLocal() {
+        final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
+        return (this.searchQueriesRobinsonFromLocal) * 60d / Math.max(uptime, 1d);
+    }
+    public double averageQPMPublicLocal() {
+        final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
+        return (this.searchQueriesRobinsonFromRemote) * 60d / Math.max(uptime, 1d);
+    }
+    
     public String makeDefaultPeerName() {
         String name = myPublicIP() + "-" + yacyCore.speedKey  + "dpn" + OS.infoKey() + (System.currentTimeMillis() & 99);
         name = name.replace('.', '-');
@@ -2018,9 +2036,7 @@ public final class Switchboard extends serverSwitch {
         //the speed of indexing (pages/minute) of the peer
         final long uptime = (System.currentTimeMillis() - serverCore.startupTime) / 1000;
         peers.mySeed().put(yacySeed.ISPEED, Integer.toString(currentPPM()));
-        totalQPM = requestedQueries * 60d / Math.max(uptime, 1d);
-        peers.mySeed().put(yacySeed.RSPEED, Double.toString(totalQPM /*Math.max((float) requestcdiff, 0f) * 60f / Math.max((float) uptimediff, 1f)*/ ));
-        
+        peers.mySeed().put(yacySeed.RSPEED, Double.toString(averageQPM()));
         peers.mySeed().put(yacySeed.UPTIME, Long.toString(uptime/60)); // the number of minutes that the peer is up in minutes/day (moving average MA30)
         peers.mySeed().put(yacySeed.LCOUNT, Long.toString(indexSegments.URLCount())); // the number of links that the peer has stored (LURL's)
         peers.mySeed().put(yacySeed.NCOUNT, Integer.toString(crawlQueues.noticeURL.size())); // the number of links that the peer has noticed, but not loaded (NURL's)
