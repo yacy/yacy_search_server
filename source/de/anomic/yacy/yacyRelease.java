@@ -513,6 +513,7 @@ public final class yacyRelease extends yacyVersion {
                     "IF not exist yacy goto NODATA" + serverCore.LF_STRING +
 
                     "cd yacy" + serverCore.LF_STRING +
+                    "del /Q \"" + apphome + "\\lib\\*\"  >nul" + serverCore.LF_STRING +
                     "xcopy *.* \"" + apphome + "\" /E /Y >nul" + serverCore.LF_STRING +
                     // /E - all subdirectories
                     // /Y - don't ask
