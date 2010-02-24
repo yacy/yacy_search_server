@@ -512,9 +512,26 @@ public class Balancer {
 					cel.add(crawlEntry);
 					count--;
 					if (count <= 0) break;
-				} catch (IOException e) {
-				}
+				} catch (IOException e) {}
 	    	}
+	    	
+	    	int depth = 0;
+	    	loop: while (count > 0) {
+    	    	// iterate over the domain stacks
+    	        for (LinkedList<String> list: this.domainStacks.values()) {
+    	            if (list.size() <= depth) continue loop;
+    	            String n = list.get(depth);
+                    try {
+                        Row.Entry rowEntry = urlFileIndex.get(n.getBytes());
+                        if (rowEntry == null) continue;
+                        final Request crawlEntry = new Request(rowEntry);
+                        cel.add(crawlEntry);
+                        count--;
+                        if (count <= 0) break loop;
+                    } catch (IOException e) {}
+    	        }
+	    	}
+	    	
     	}
     	return cel;
     }
