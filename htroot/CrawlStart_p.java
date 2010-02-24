@@ -50,10 +50,10 @@ public class CrawlStart_p {
         
         prop.put("crawlingIfOlderCheck", "0");
         prop.put("crawlingIfOlderUnitYearCheck", "0");
-        prop.put("crawlingIfOlderUnitMonthCheck", "1");
-        prop.put("crawlingIfOlderUnitDayCheck", "0");
+        prop.put("crawlingIfOlderUnitMonthCheck", "0");
+        prop.put("crawlingIfOlderUnitDayCheck", "1");
         prop.put("crawlingIfOlderUnitHourCheck", "0");
-        prop.put("crawlingIfOlderNumber", "3");
+        prop.put("crawlingIfOlderNumber", "7");
         
         final int crawlingDomFilterDepth = (int) env.getConfigLong("crawlingDomFilterDepth", -1);
         prop.put("crawlingDomFilterCheck", (crawlingDomFilterDepth == -1) ? "0" : "1");
