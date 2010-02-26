@@ -20,11 +20,7 @@
 	<classpathentry exported="true" kind="lib" path="lib/servlet-api.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/xerces.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/bzip2.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/mysql-connector-java-5.1.7-bin.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/commons-codec-1.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/J7Zip-modified.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jakarta-oro-2.0.7.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/log4j-1.2.9.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/webcat-0.1-swf.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/activation.jar"/>
 	<classpathentry exported="true" kind="lib" path="lib/commons-jxpath-1.3.jar"/>
@@ -36,6 +32,10 @@
 	<classpathentry kind="lib" path="lib/bcmail-jdk15-145.jar"/>
 	<classpathentry kind="lib" path="lib/bcprov-jdk15-145.jar"/>
 	<classpathentry kind="lib" path="lib/jsch-0.1.42.jar"/>
+	<classpathentry kind="lib" path="lib/jakarta-oro-2.0.8.jar"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.4.jar"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.15.jar"/>
+	<classpathentry kind="lib" path="lib/mysql-connector-java-5.1.12-bin.jar"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="gen"/>
 </classpath>
