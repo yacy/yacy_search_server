@@ -36,11 +36,16 @@ import java.util.Map;
 public class compare_yacy {
     
     private static final String defaultsearch = "YaCy";
-    private static final String[] order = {defaultsearch, "YaCy (local)", "google.de", "google.com", "scroogle.org", "metager.de", "metager2.de (web)", "metager2.de (international)", "yahoo.com", "romso.de", "search.live.com", "Wikipedia English", "Wikipedia Deutsch", "Sciencenet"};
+    private static final String[] order = {defaultsearch, "YaCy (local)", "bing.com",
+        "google.de", "google.com", "scroogle.org",
+        "metager.de", "metager2.de (web)", "metager2.de (international)",
+        "yahoo.com", "romso.de", "search.live.com", "Wikipedia English", "Wikipedia Deutsch",
+        "Sciencenet", "dbpedia", "wolfram alpha"};
     private static final Map<String, String> searchengines = new HashMap<String, String>();
     static {
         searchengines.put(defaultsearch, "yacysearch.html?display=2&verify=true&resource=global&query=");
         searchengines.put("YaCy (local)", "yacysearch.html?display=2&verify=true&resource=local&query=");
+        searchengines.put("bing.com", "http://www.bing.com/search?q=");
         searchengines.put("google.de", "http://www.google.de/search?q=");
         searchengines.put("google.com", "http://www.google.com/search?q=");
         searchengines.put("scroogle.org", "http://www.scroogle.org/cgi-bin/nbbw.cgi?Gw=");
@@ -49,10 +54,11 @@ public class compare_yacy {
         searchengines.put("metager2.de (international)", "http://www.metager2.de/search.php?ses=international&q=");
         searchengines.put("yahoo.com", "http://search.yahoo.com/search?p=");
         searchengines.put("romso.de", "http://romso.de/?q=");
-        searchengines.put("search.live.com", "http://search.live.com/results.aspx?q=");
         searchengines.put("Wikipedia English", "http://en.wikipedia.org/wiki/");
         searchengines.put("Wikipedia Deutsch", "http://de.wikipedia.org/wiki/");
         searchengines.put("Sciencenet", "http://sciencenet.fzk.de:8080/yacysearch.html?display=2&verify=true&resource=global&query=");
+        searchengines.put("dbpedia", "http://dbpedia.neofonie.de/browse/~:");
+        searchengines.put("wolfram alpha", "http://www.wolframalpha.com/input/?i=");
     }
     
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
