@@ -36,6 +36,7 @@ import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.Formatter;
 import net.yacy.kelondro.util.MemoryControl;
+import net.yacy.kelondro.util.OS;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 
 import de.anomic.http.server.HTTPDemon;
@@ -275,7 +276,9 @@ public class Status {
             prop.put("popup", "1");
         }
         
-        if (sb.getConfig("trayIcon", "false").equals("false")) {
+        if (!OS.isWindows) {
+        	prop.put("tray", "3");
+        } else if (sb.getConfig("trayIcon", "false").equals("false")) {
             prop.put("tray", "0");
         } else {
             prop.put("tray", "1");
