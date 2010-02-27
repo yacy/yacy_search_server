@@ -1673,18 +1673,8 @@ Release/<br />SVN==YaCy Version/<br />SVN
 Contact==Kontakt
 Last<br />Seen==Zuletzt<br />online
 Location==Ort
+>URLs for<br />Remote<br />Crawl<==>URLs zum<br />Remote<br />Crawlen<
 Offset==Versatz
-Uptime==Uptime
-Links==Links
-RWIs==RWIs
-URLs for<br />Remote<br />Crawl==URLs für<br />Remote<br />Crawl
-Sent<br />Words==Gesendete<br />Wörter
-Sent<br />URLs==Gesendete<br />URLs
-Received<br />Words==Empfangene<br />Wörter
-Received<br />URLs==Empfangene<br />URLs
-PPM==PPM
-Seeds==Seeds
-Connects<br />per hour==Verbindungen<br />pro Stunde
 Send message to peer==Sende Nachricht an Peer
 View profile of peer==Zeige Profil des Peers
 Read and edit wiki on peer==Lese und ändere Wiki des Peers
@@ -1700,6 +1690,26 @@ Network Total==Netzwerk insgesamt
 Indexing Speed: \#\[gppm\]\# Pages Per Minute \(PPM\)==Indexier Geschwindigkeit: #[gppm]# Seiten pro Minute (PPM)
 Query Frequency: \#\[gqph\]\# Queries Per Hour \(QPH\)==Suchfrequenz: #[gqph]# Suchanfragen pro Stunde (QPH) 
 Your Peer:==Ihr Peer:
+
+#>Name<==>Name<
+#>Info<==>Info<
+#>Version<==>Version<
+#>UTC<==>UTC<
+>Uptime<==>Laufzeit<
+#>Links<==>Links<
+#>RWIs<==>RWIs<
+>URLs for<br />Remote Crawl<==>URLs zum<br />Remote Crawlen<
+Sent<br />Words==Gesendete<br />Wörter
+Sent<br />URLs==Gesendete<br />URLs
+Received<br />Words==Empfangene<br />Wörter
+Received<br />URLs==Empfangene<br />URLs
+>Known Seeds<==>Bekannte Seeds<
+Connects<br />per hour==Verbindungen<br />pro Stunde
+>Indexing PPM<==>Indexierte PPM<
+>QPH<br />\(public\&nbsp;local\+remote\)<==>QPH<br />(öffentlich&nbsp;lokal+entfernt)<
+>QPH<br />\(public\&nbsp;local\)<==>QPH<br />(öffentlich&nbsp;lokal)<
+>QPH<br />\(remote\)<==>QPH<br />(entfernt)<
+
 Version==Version
 Own/Other==Eigene/Andere
 Accept Crawl==Akzeptiert Crawl
@@ -2398,6 +2408,11 @@ connected==verbunden
 #Remote Proxy==Remote Proxy
 not used==nicht benutzt
 Used for YaCy -> YaCy communication:==Benutzt zur YaCy -> YaCy Kommunikation:
+WARNING:==WARNUNG:
+You do this on your own risk.==Sie verwenden diese Einstellung auf Ihr eigenes Risiko.
+If you do this without YaCy running on a desktop-pc or without Java 6 installed, this will possibly break startup.==Wenn Sie diese Option verwenden, ohne dass YaCy auf einem Desktop PC läuft, oder ohne installiertes Java 6, wird YaCy vermutlich nicht mehr starten.
+In this case, you will have to edit the configuration manually in DATA/SETTINGS/yacy.conf==In dem Fall müssen Sie die Konfiguration manuell in der folgenden Konfigurationsdatei ändern DATA/SETTINGS/yacy.conf
+>Experimental<==>Experimentell<
 Yes==Ja
 No==Nein
 Auto-popup on start-up==Auto-Popup beim Starten
