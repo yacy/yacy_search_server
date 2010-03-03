@@ -131,7 +131,7 @@ public class tarParser extends AbstractParser implements Idiom {
                 final String entryName = entry.getName();
                 
                 // getting the entry file extension
-                final int idx = entryName.lastIndexOf(".");
+                final int idx = entryName.lastIndexOf('.');
                 final String entryExt = (idx > -1) ? entryName.substring(idx+1) : "";
                 
                 // trying to determine the mimeType per file extension   
@@ -198,7 +198,8 @@ public class tarParser extends AbstractParser implements Idiom {
                     docAbstrct.toString(),
                     ((ByteBuffer)docText).getBytes(),
                     docAnchors,
-                    docImages);
+                    docImages,
+                    false);
             } else {
                 result = new Document(
                         location,
@@ -212,7 +213,8 @@ public class tarParser extends AbstractParser implements Idiom {
                         docAbstrct.toString(),
                         outputFile,
                         docAnchors,
-                        docImages);                
+                        docImages,
+                        false);                
             }
             
             return result;

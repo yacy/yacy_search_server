@@ -118,7 +118,7 @@ public class zipParser extends AbstractParser implements Idiom {
                 
                 // Get the entry name
                 final String entryName = entry.getName();                
-                final int idx = entryName.lastIndexOf(".");
+                final int idx = entryName.lastIndexOf('.');
                 
                 // getting the file extension
                 final String entryExt = (idx > -1) ? entryName.substring(idx+1) : "";
@@ -185,7 +185,8 @@ public class zipParser extends AbstractParser implements Idiom {
                     docAbstrct.toString(),
                     ((ByteBuffer)docText).getBytes(),
                     docAnchors,
-                    docImages);
+                    docImages,
+                    false);
             } else {
                 result = new Document(
                         location,
@@ -199,7 +200,8 @@ public class zipParser extends AbstractParser implements Idiom {
                         docAbstrct.toString(),
                         outputFile,
                         docAnchors,
-                        docImages);                
+                        docImages,
+                        false);                
             }
             
             return result;

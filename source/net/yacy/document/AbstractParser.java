@@ -240,4 +240,5 @@ public abstract class AbstractParser implements Idiom {
     public int hashCode() {
         return this.getName().hashCode();
     }
+
 }

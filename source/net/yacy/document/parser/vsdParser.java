@@ -132,7 +132,8 @@ public class vsdParser extends AbstractParser implements Idiom {
                     abstrct,      // an abstract
                     contents.getBytes("UTF-8"),     // the parsed document text
                     null,         // a map of extracted anchors
-                    null);        // a treeset of image URLs
+                    null,         // a treeset of image URLs
+                    false);
             return theDoc;
         } catch (final Exception e) { 
             if (e instanceof InterruptedException) throw (InterruptedException) e;

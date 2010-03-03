@@ -187,7 +187,8 @@ public class rssParser extends AbstractParser implements Idiom {
                 feedDescription,
                 text.getBytes(),
                 anchors,
-                images);            
+                images,
+                false);            
         // close streams
         try {
             text.close();

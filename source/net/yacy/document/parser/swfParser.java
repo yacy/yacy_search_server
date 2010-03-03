@@ -135,7 +135,8 @@ public class swfParser extends AbstractParser implements Idiom {
                     abstrct,     // an abstract
                     contents.getBytes("UTF-8"),     // the parsed document text
                     anchors,      // a map of extracted anchors
-                    null);      // a treeset of image URLs
+                    null,
+                    false);      // a treeset of image URLs
             return theDoc;
         } catch (final Exception e) { 
             if (e instanceof InterruptedException) throw (InterruptedException) e;

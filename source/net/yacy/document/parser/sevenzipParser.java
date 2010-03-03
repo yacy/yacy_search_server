@@ -71,7 +71,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
     
     public Document parse(final DigestURI location, final String mimeType, final String charset,
             final IInStream source, final long maxRamSize) throws ParserException, InterruptedException {
-        final Document doc = new Document(location, mimeType, charset, null);
+        final Document doc = new Document(location, mimeType, charset, null, null, null, null, null, null, (Object)null, null, null, false);
         Handler archive;
         super.theLogger.logFine("opening 7zip archive...");
         try {

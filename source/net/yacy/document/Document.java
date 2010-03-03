@@ -76,11 +76,13 @@ public class Document {
     private InputStream textStream;
     private int inboundLinks, outboundLinks; // counters for inbound and outbound links, are counted after calling notifyWebStructure
     private Set<String> languages;
+    private boolean indexingDenied;
     
-    protected Document(final DigestURI location, final String mimeType, final String charset, final Set<String> languages,
+    public Document(final DigestURI location, final String mimeType, final String charset, final Set<String> languages,
                     final String[] keywords, final String title, final String author,
                     final String[] sections, final String abstrct,
-                    final Object text, final Map<DigestURI, String> anchors, final HashMap<String, ImageEntry> images) {
+                    final Object text, final Map<DigestURI, String> anchors, final HashMap<String, ImageEntry> images,
+                    boolean indexingDenied) {
         this.source = location;
         this.mimeType = (mimeType == null) ? "application/octet-stream" : mimeType;
         this.charset = charset;
@@ -100,6 +102,7 @@ public class Document {
         this.inboundLinks = -1;
         this.outboundLinks = -1;
         this.languages = languages;
+        this.indexingDenied = indexingDenied;
         
         if (text == null) try {
             this.text = new CachedFileOutputStream(Idiom.MAX_KEEP_IN_MEMORY_SIZE);
@@ -109,31 +112,6 @@ public class Document {
         } else {
             this.text = text;
         }
-    }
-    
-    public Document(final DigestURI location, final String mimeType, final String charset, final Set<String> languages) {
-        this(location, mimeType, charset, languages, null, null, null, null, null, (Object)null, null, null);
-    }
-    
-    public Document(final DigestURI location, final String mimeType, final String charset, final Set<String> languages,
-                    final String[] keywords, final String title, final String author,
-                    final String[] sections, final String abstrct,
-                    final byte[] text, final Map<DigestURI, String> anchors, final HashMap<String, ImageEntry> images) {
-        this(location, mimeType, charset, languages, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
-    }
-    
-    public Document(final DigestURI location, final String mimeType, final String charset, final Set<String> languages,
-            final String[] keywords, final String title, final String author,
-            final String[] sections, final String abstrct,
-            final File text, final Map<DigestURI, String> anchors, final HashMap<String, ImageEntry> images) {
-        this(location, mimeType, charset, languages, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
-    }
-    
-    public Document(final DigestURI location, final String mimeType, final String charset, final Set<String> languages,
-            final String[] keywords, final String title, final String author,
-            final String[] sections, final String abstrct,
-            final CachedFileOutputStream text, final Map<DigestURI, String> anchors, final HashMap<String, ImageEntry> images) {
-        this(location, mimeType, charset, languages, keywords, title, author, sections, abstrct, (Object)text, anchors, images);
     }
     
     public void setInboundLinks(int il) {
@@ -558,6 +536,10 @@ dc_rights
     
     public int outboundLinks() {
         return (this.outboundLinks < 0) ? 0 : this.outboundLinks;
+    }
+    
+    public boolean indexingDenied() {
+        return this.indexingDenied;
     }
     
     public void writeXML(OutputStreamWriter os, Date date) throws IOException {

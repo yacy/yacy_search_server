@@ -94,7 +94,8 @@ public class csvParser extends AbstractParser implements Idiom {
                     null,
                     sb.toString().getBytes(charset),
                     null,
-                    null);
+                    null,
+                    false);
         } catch (UnsupportedEncodingException e) {
             throw new ParserException("error in csvParser, getBytes: " + e.getMessage(), location);
         }

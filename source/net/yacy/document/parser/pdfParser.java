@@ -182,7 +182,8 @@ public class pdfParser extends AbstractParser implements Idiom {
                     null,
                     contentBytes,
                     null,
-                    null);
+                    null,
+                    false);
         } else {
             theDoc = new Document(
                     location,
@@ -196,7 +197,8 @@ public class pdfParser extends AbstractParser implements Idiom {
                     null,
                     writerFile,
                     null,
-                    null);                
+                    null,
+                    false);                
         }
         
         return theDoc;

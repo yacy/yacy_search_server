@@ -152,7 +152,8 @@ public class htmlParser extends AbstractParser implements Idiom {
                 scraper.getDescription(),
                 scraper.getText(),
                 scraper.getAnchors(),
-                scraper.getImages());
+                scraper.getImages(),
+                scraper.indexingDenied());
         //scraper.close();            
         ppd.setFavicon(scraper.getFavicon());
         return ppd;
@@ -242,4 +243,7 @@ public class htmlParser extends AbstractParser implements Idiom {
         return SUPPORTED_EXTENSIONS;
     }
     
+    public boolean indexingDenied() {
+        return false;
+    }
 }

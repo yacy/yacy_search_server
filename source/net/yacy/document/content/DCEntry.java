@@ -231,7 +231,8 @@ public class DCEntry extends TreeMap<String, String> {
                 "",
                 getDescription().getBytes("UTF-8"),
                 null,
-                null);
+                null,
+                false);
         } catch (UnsupportedEncodingException e) {
             Log.logException(e);
             return null;

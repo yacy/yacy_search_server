@@ -235,7 +235,8 @@ public class vcfParser extends AbstractParser implements Idiom {
                     "vCard",                    // an abstract
                     text,                       // the parsed document text
                     anchors,                    // a map of extracted anchors
-                    null);                      // a treeset of image URLs
+                    null,                       // a treeset of image URLs
+                    false);                      
             return theDoc;
         } catch (final Exception e) { 
             if (e instanceof InterruptedException) throw (InterruptedException) e;

@@ -150,7 +150,8 @@ public class xlsParser extends AbstractParser implements Idiom {
                         null,
                         contents.getBytes("UTF-8"),
                         null,
-                        null);
+                        null,
+                        false);
                 return theDoc;
             } catch (final Exception e) { 
                 if (e instanceof InterruptedException) throw (InterruptedException) e;

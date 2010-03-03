@@ -109,7 +109,8 @@ public class docParser extends AbstractParser implements Idiom {
                       null,
                       contents.toString().getBytes("UTF-8"),
                       null,
-                      null);
+                      null,
+                      false);
         } catch (UnsupportedEncodingException e) {
             throw new ParserException("error in docParser, getBytes: " + e.getMessage(), location);
         }

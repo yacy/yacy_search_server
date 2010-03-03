@@ -1677,8 +1677,15 @@ public final class Switchboard extends serverSwitch {
     public indexingQueueEntry condenseDocument(final indexingQueueEntry in) {
         in.queueEntry.updateStatus(Response.QUEUE_STATE_CONDENSING);
         
-        // debug
-        if (log.isFinest()) log.logFinest("CONDENSE "+ in.queueEntry.toString());
+        if (in.document.indexingDenied()) {
+            if (log.isInfo()) log.logInfo("Not Condensed Resource '" + in.queueEntry.url().toNormalform(false, true) + "': denied by document-attached noindexing rule");
+            return new indexingQueueEntry(in.process, in.queueEntry, in.document, null);
+        }
+        
+        if (!in.queueEntry.profile().indexText() && !in.queueEntry.profile().indexMedia()) {
+            if (log.isInfo()) log.logInfo("Not Condensed Resource '" + in.queueEntry.url().toNormalform(false, true) + "': indexing not wanted by crawl profile");
+            return new indexingQueueEntry(in.process, in.queueEntry, in.document, null);
+        }
         
         // strip out words and generate statistics
         if (this.log.isFine()) log.logFine("Condensing for '" + in.queueEntry.url().toNormalform(false, true) + "'");
@@ -1719,10 +1726,22 @@ public final class Switchboard extends serverSwitch {
         EventOrigin processCase = queueEntry.processCase(peers.mySeed().hash);
         if (process == Segments.Process.SURROGATES) processCase = EventOrigin.SURROGATES;
 
+        if (condenser == null || document.indexingDenied()) {
+            if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by rule in document, process case=" + processCase);
+            addURLtoErrorDB(queueEntry.url(), referrerURL.hash(), queueEntry.initiator(), dc_title, "unknown indexing process case"  + processCase);
+            return;
+        }
+        
+        if (!queueEntry.profile().indexText() && !queueEntry.profile().indexMedia()) {
+            if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase);
+            addURLtoErrorDB(queueEntry.url(), referrerURL.hash(), queueEntry.initiator(), dc_title, "unknown indexing process case"  + processCase);
+            return;
+        }
+        
         // remove stopwords
         log.logInfo("Excluded " + condenser.excludeWords(stopwords) + " words in URL " + queueEntry.url());
 
-        // STORE URL TO LOADED-URL-DB
+        // STORE WORD INDEX
         URIMetadataRow newEntry = null;
         try {
             newEntry = indexSegments.segment(process).storeDocument(
@@ -1746,13 +1765,6 @@ public final class Switchboard extends serverSwitch {
                 this.peers.mySeed().hash, // executor peer hash
                 processCase               // process case
         );
-        
-        // STORE WORD INDEX
-        if ((!queueEntry.profile().indexText()) && (!queueEntry.profile().indexMedia())) {
-            if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), referrerURL.hash(), queueEntry.initiator(), dc_title, "unknown indexing process case"  + processCase);
-            return;
-        }
         
         // increment number of indexed urls
         indexedPages++;

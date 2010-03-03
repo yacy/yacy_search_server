@@ -147,7 +147,8 @@ public class bmpParser extends AbstractParser implements Idiom {
              "", // description
              sb.toString().getBytes(), // content text
              anchors, // anchors
-             images); // images
+             images,
+             false); // images
     }
 
     public static IMAGEMAP parse(final byte[] source) {

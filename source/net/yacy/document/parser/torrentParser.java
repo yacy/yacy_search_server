@@ -122,7 +122,8 @@ public class torrentParser extends AbstractParser implements Idiom {
                     null,
                     filenames.toString().getBytes(charset),
                     null,
-                    null);
+                    null,
+                    false);
         } catch (UnsupportedEncodingException e) {
             throw new ParserException("error in torrentParser, getBytes: " + e.getMessage(), location);
         }

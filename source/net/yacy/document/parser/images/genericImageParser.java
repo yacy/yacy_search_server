@@ -135,7 +135,8 @@ public class genericImageParser extends AbstractParser implements Idiom {
              "", // description
              sb.toString().getBytes(), // content text
              anchors, // anchors
-             images); // images
+             images,
+             false); // images
     }
 /*
  * Document(final DigestURI location, final String mimeType, final String charset, final Set<String> languages,

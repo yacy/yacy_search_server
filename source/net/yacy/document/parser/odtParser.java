@@ -201,7 +201,8 @@ public class odtParser extends AbstractParser implements Idiom {
                         docDescription,
                         contentBytes,
                         null,
-                        null);
+                        null,
+                        false);
             } else {
                 theDoc = new Document(
                         location,
@@ -215,7 +216,8 @@ public class odtParser extends AbstractParser implements Idiom {
                         docDescription,
                         writerFile,
                         null,
-                        null);
+                        null,
+                        false);
             }
             return theDoc;
         } catch (final Exception e) {            

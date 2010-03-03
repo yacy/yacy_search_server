@@ -357,6 +357,13 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     <meta name="DC.type" scheme="DCTERMS.DCMIType" content="Text" />
     */
     
+    public boolean indexingDenied() {
+        String s = metas.get("robots");
+        if (s == null) return false;
+        if (s.indexOf("noindex") >= 0) return true;
+        return false;
+    }
+    
     public String getDescription() {
         String s = metas.get("description");
         if (s == null) s = metas.get("dc.description");

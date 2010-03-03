@@ -131,8 +131,8 @@ public class WebStructureGraph {
         Base64Order.enhancedCoder.encodeLongSmart(document.getImages().size(), 2) + // count of Images in document
         Base64Order.enhancedCoder.encodeLongSmart(0, 2) +       // count of links to other documents
         Base64Order.enhancedCoder.encodeLongSmart(document.getTextLength(), 3) +   // length of plain text in bytes
-        Base64Order.enhancedCoder.encodeLongSmart(condenser.RESULT_NUMB_WORDS, 3) + // count of all appearing words
-        Base64Order.enhancedCoder.encodeLongSmart(condenser.words().size(), 3) + // count of all unique words
+        Base64Order.enhancedCoder.encodeLongSmart((condenser == null) ? 0 : condenser.RESULT_NUMB_WORDS, 3) + // count of all appearing words
+        Base64Order.enhancedCoder.encodeLongSmart((condenser == null) ? 0 : condenser.words().size(), 3) + // count of all unique words
         Base64Order.enhancedCoder.encodeLongSmart(0, 1); // Flags (update, popularity, attention, vote)
         
         //crl.append(head); crl.append ('|'); crl.append(cpl); crl.append((char) 13); crl.append((char) 10);
