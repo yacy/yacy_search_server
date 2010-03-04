@@ -36,7 +36,9 @@ import java.util.Map.Entry;
 
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
+import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.BDecoder;
 import net.yacy.kelondro.util.BEncoder;
@@ -79,6 +81,10 @@ public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte
             final int keylength) throws IOException {
         this.table = new Heap(location, keylength, NaturalOrder.naturalOrder, 100);
         this.columnames = new LinkedHashSet<String>();  
+    }
+    
+    public byte[] encodedKey(String key) {
+        return Base64Order.enhancedCoder.encodeSubstring(Digest.encodeMD5Raw(key), this.table.keylength);
     }
     
     public File getFile() {

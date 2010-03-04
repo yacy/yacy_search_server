@@ -144,11 +144,7 @@ public class IndexControlRWIs_p {
                 segment.clear();
                 sb.crawlQueues.clear();
                 sb.crawlStacker.clear();
-                try {
-                    sb.robots.clear();
-                } catch (final IOException e) {
-                    Log.logException(e);
-                }
+                sb.robots.clear();
                 post.remove("deletecomplete");
             }
     

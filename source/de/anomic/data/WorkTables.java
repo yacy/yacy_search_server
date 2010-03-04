@@ -47,6 +47,8 @@ public class WorkTables extends Tables {
     public final static String TABLE_API_COL_DATE = "date";
     public final static String TABLE_API_COL_URL = "url";
     
+    public final static String TABLE_ROBOTS_NAME = "robots";
+    
     
     public WorkTables(File workPath) {
         super(workPath, 12);

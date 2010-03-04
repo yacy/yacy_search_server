@@ -112,7 +112,7 @@ public class Tables {
         }
     }
     
-    BEncodedHeap getHeap(final String tablename) throws IOException {
+    public BEncodedHeap getHeap(final String tablename) throws IOException {
         final String table = tablename + suffix;
         BEncodedHeap heap = this.tables.get(tablename);
         if (heap != null) return heap;

@@ -7,7 +7,7 @@
 //
 //This file is contributed by Martin Thelian
 // [MC] moved some methods from robotsParser file that had been created by Alexander Schier to this class
-// [MC] redesign: removed entry object from RobotsTxt Class into ths separate class
+// [MC] redesign: removed entry object from RobotsTxt Class into this separate class
 
 //last major change: $LastChangedDate$ by $LastChangedBy$
 //Revision: $LastChangedRevision$
@@ -31,14 +31,17 @@ package de.anomic.crawler;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
+
+import net.yacy.kelondro.data.meta.DigestURI;
 
 public class RobotsEntry {
     
     public static final String ROBOTS_DB_PATH_SEPARATOR = ";"; 
+    public static final String HOST_NAME          = "hostname";
     public static final String ALLOW_PATH_LIST    = "allow";
     public static final String DISALLOW_PATH_LIST = "disallow";
     public static final String LOADED_DATE        = "date";
@@ -49,17 +52,17 @@ public class RobotsEntry {
     public static final String CRAWL_DELAY_MILLIS = "crawlDelayMillis";
     
     // this is a simple record structure that holds all properties of a single crawl start
-    Map<String, String> mem;
+    private Map<String, byte[]> mem;
     private LinkedList<String> allowPathList, denyPathList;
     String hostName;
     
-    public RobotsEntry(final String hostName, final Map<String, String> mem) {
+    public RobotsEntry(final String hostName, final Map<String, byte[]> mem) {
         this.hostName = hostName.toLowerCase();
         this.mem = mem; 
         
         if (this.mem.containsKey(DISALLOW_PATH_LIST)) {
             this.denyPathList = new LinkedList<String>();
-            final String csPl = this.mem.get(DISALLOW_PATH_LIST);
+            final String csPl = new String(this.mem.get(DISALLOW_PATH_LIST));
             if (csPl.length() > 0){
                 final String[] pathArray = csPl.split(ROBOTS_DB_PATH_SEPARATOR);
                 if ((pathArray != null)&&(pathArray.length > 0)) {
@@ -71,7 +74,7 @@ public class RobotsEntry {
         }
         if (this.mem.containsKey(ALLOW_PATH_LIST)) {
             this.allowPathList = new LinkedList<String>();
-            final String csPl = this.mem.get(ALLOW_PATH_LIST);
+            final String csPl = new String(this.mem.get(ALLOW_PATH_LIST));
             if (csPl.length() > 0){
                 final String[] pathArray = csPl.split(ROBOTS_DB_PATH_SEPARATOR);
                 if ((pathArray != null)&&(pathArray.length > 0)) {
@@ -84,7 +87,7 @@ public class RobotsEntry {
     }  
     
     public RobotsEntry(
-            final String hostName, 
+            final DigestURI theURL, 
             final ArrayList<String> allowPathList, 
             final ArrayList<String> disallowPathList, 
             final Date loadedDate,
@@ -93,18 +96,19 @@ public class RobotsEntry {
             final String sitemap,
             final long crawlDelayMillis
     ) {
-        if ((hostName == null) || (hostName.length() == 0)) throw new IllegalArgumentException("The hostname is missing");
+        if (theURL == null) throw new IllegalArgumentException("The url is missing");
         
-        this.hostName = hostName.trim().toLowerCase();
+        this.hostName = RobotsTxt.getHostPort(theURL).toLowerCase();
         this.allowPathList = new LinkedList<String>();
         this.denyPathList = new LinkedList<String>();
         
-        this.mem = new HashMap<String, String>(10);
-        if (loadedDate != null) this.mem.put(LOADED_DATE,Long.toString(loadedDate.getTime()));
-        if (modDate != null) this.mem.put(MOD_DATE,Long.toString(modDate.getTime()));
-        if (eTag != null) this.mem.put(ETAG,eTag);
-        if (sitemap != null) this.mem.put(SITEMAP,sitemap);
-        if (crawlDelayMillis > 0) this.mem.put(CRAWL_DELAY_MILLIS, Long.toString(crawlDelayMillis));
+        this.mem = new LinkedHashMap<String, byte[]>(10);
+        this.mem.put(HOST_NAME, this.hostName.getBytes());
+        if (loadedDate != null) this.mem.put(LOADED_DATE, Long.toString(loadedDate.getTime()).getBytes());
+        if (modDate != null) this.mem.put(MOD_DATE, Long.toString(modDate.getTime()).getBytes());
+        if (eTag != null) this.mem.put(ETAG, eTag.getBytes());
+        if (sitemap != null) this.mem.put(SITEMAP, sitemap.getBytes());
+        if (crawlDelayMillis > 0) this.mem.put(CRAWL_DELAY_MILLIS, Long.toString(crawlDelayMillis).getBytes());
         
         if (allowPathList != null && !allowPathList.isEmpty()) {
             this.allowPathList.addAll(allowPathList);
@@ -114,7 +118,7 @@ public class RobotsEntry {
                 pathListStr.append(allowPathList.get(i))
                            .append(ROBOTS_DB_PATH_SEPARATOR);
             }
-            this.mem.put(ALLOW_PATH_LIST,pathListStr.substring(0,pathListStr.length()-1));
+            this.mem.put(ALLOW_PATH_LIST, pathListStr.substring(0,pathListStr.length()-1).getBytes());
         }
         
         if (disallowPathList != null && !disallowPathList.isEmpty()) {
@@ -125,61 +129,61 @@ public class RobotsEntry {
                 pathListStr.append(disallowPathList.get(i))
                            .append(ROBOTS_DB_PATH_SEPARATOR);
             }
-            this.mem.put(DISALLOW_PATH_LIST,pathListStr.substring(0,pathListStr.length()-1));
+            this.mem.put(DISALLOW_PATH_LIST,pathListStr.substring(0, pathListStr.length()-1).getBytes());
         }
+    }
+    
+    public Map<String, byte[]> getMem() {
+        if (!this.mem.containsKey(HOST_NAME)) this.mem.put(HOST_NAME, this.hostName.getBytes());
+        return this.mem;
     }
     
     public String toString() {
         final StringBuilder str = new StringBuilder(6000);
-        str.append((this.hostName==null)?"null":this.hostName)
-           .append(": ");
-        
-        if (this.mem != null) {     
-            str.append(this.mem.toString());
-        } 
-        
+        str.append((this.hostName == null) ? "null" : this.hostName).append(": ");
+        if (this.mem != null) str.append(this.mem.toString());
         return str.toString();
     }    
     
     public String getSitemap() {
-        return this.mem.containsKey(SITEMAP)? this.mem.get(SITEMAP): null;
+        return this.mem.containsKey(SITEMAP)? new String(this.mem.get(SITEMAP)): null;
     }
     
     public Date getLoadedDate() {
         if (this.mem.containsKey(LOADED_DATE)) {
-            return new Date(Long.parseLong(this.mem.get(LOADED_DATE)));
+            return new Date(Long.parseLong(new String(this.mem.get(LOADED_DATE))));
         }
         return null;
     }
     
     public void setLoadedDate(final Date newLoadedDate) {
         if (newLoadedDate != null) {
-            this.mem.put(LOADED_DATE,Long.toString(newLoadedDate.getTime()));
+            this.mem.put(LOADED_DATE, Long.toString(newLoadedDate.getTime()).getBytes());
         }
     }
     
     public Date getModDate() {
         if (this.mem.containsKey(MOD_DATE)) {
-            return new Date(Long.parseLong(this.mem.get(MOD_DATE)));
+            return new Date(Long.parseLong(new String(this.mem.get(MOD_DATE))));
         }
         return null;
     }        
     
     public String getETag() {
         if (this.mem.containsKey(ETAG)) {
-            return this.mem.get(ETAG);
+            return new String(this.mem.get(ETAG));
         }
         return null;
     }          
     
     public long getCrawlDelayMillis() {
         if (this.mem.containsKey(CRAWL_DELAY_MILLIS)) try {
-            return Long.parseLong(this.mem.get(CRAWL_DELAY_MILLIS));
+            return Long.parseLong(new String(this.mem.get(CRAWL_DELAY_MILLIS)));
         } catch (final NumberFormatException e) {
             return 0;
         }
         if (this.mem.containsKey(CRAWL_DELAY)) try {
-            return 1000 * Integer.parseInt(this.mem.get(CRAWL_DELAY));
+            return 1000 * Integer.parseInt(new String(this.mem.get(CRAWL_DELAY)));
         } catch (final NumberFormatException e) {
             return 0;
         }

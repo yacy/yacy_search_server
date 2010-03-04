@@ -217,7 +217,7 @@ public final class Switchboard extends serverSwitch {
     public  Dispatcher                     dhtDispatcher;
     public  List<String>                   trail;
     public  yacySeedDB                     peers;
-    public  WorkTables                         tables;
+    public  WorkTables                     tables;
     
     public WorkflowProcessor<indexingQueueEntry> indexingDocumentProcessor;
     public WorkflowProcessor<indexingQueueEntry> indexingCondensementProcessor;
@@ -419,7 +419,7 @@ public final class Switchboard extends serverSwitch {
         // loading the robots.txt db
         this.log.logConfig("Initializing robots.txt DB");
         final File robotsDBFile = new File(queuesRoot, "crawlRobotsTxt.heap");
-        robots = new RobotsTxt(robotsDBFile);
+        robots = new RobotsTxt(this.tables.getHeap(WorkTables.TABLE_ROBOTS_NAME));
         this.log.logConfig("Loaded robots.txt DB from file " + robotsDBFile.getName() +
         ", " + robots.size() + " entries" +
         ", " + ppRamString(robotsDBFile.length()/1024));
@@ -775,7 +775,6 @@ public final class Switchboard extends serverSwitch {
             this.crawlStacker.announceClose();
             this.crawlStacker.close();
             this.webStructure.close();
-            this.robots.close();
             
             log.logInfo("SWITCH NETWORK: START UP OF NEW INDEX DATABASE...");
             
@@ -833,7 +832,6 @@ public final class Switchboard extends serverSwitch {
             // load the robots.txt database
             this.log.logConfig("Initializing robots.txt DB");
             final File robotsDBFile = new File(this.queuesRoot, "crawlRobotsTxt.heap");
-            this.robots = new RobotsTxt(robotsDBFile);
             this.log.logConfig("Loaded robots.txt DB from file " + robotsDBFile.getName() +
             ", " + robots.size() + " entries" +
             ", " + ppRamString(robotsDBFile.length()/1024));
@@ -1105,7 +1103,6 @@ public final class Switchboard extends serverSwitch {
         userDB.close();
         bookmarksDB.close();
         messageDB.close();
-        robots.close();
         webStructure.flushCitationReference("crg");
         webStructure.close();
         crawlQueues.close();

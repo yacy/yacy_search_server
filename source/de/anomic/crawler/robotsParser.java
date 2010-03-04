@@ -163,7 +163,7 @@ public final class robotsParser {
                     pos = line.indexOf(' ');
                     if (pos != -1) {
                         final String userAgent = line.substring(pos).trim();
-                        isRule4AllAgents |= userAgent.equals('*');
+                        isRule4AllAgents |= userAgent.equals("*");
                         isRule4YaCyAgent |= userAgent.toLowerCase().indexOf("yacy") >=0;
                         isRule4YaCyAgent |= userAgent.toLowerCase().indexOf("yacybot") >=0;
                         if (isRule4YaCyAgent) rule4YaCyFound = true;

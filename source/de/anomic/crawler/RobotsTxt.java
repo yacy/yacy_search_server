@@ -28,7 +28,6 @@ package de.anomic.crawler;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -36,14 +35,12 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import net.yacy.kelondro.blob.MapHeap;
+import net.yacy.kelondro.blob.BEncodedHeap;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
-import net.yacy.kelondro.util.kelondroException;
 
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.http.client.Client;
@@ -56,8 +53,7 @@ public class RobotsTxt {
     public static final String ROBOTS_DB_PATH_SEPARATOR = ";";    
     private static final Log log = new Log("ROBOTS");
     
-    MapHeap robotsTable;
-    private final File robotsTableFile;
+    BEncodedHeap robotsTable;
     private final ConcurrentHashMap<String, DomSync> syncObjects;
     //private static final HashSet<String> loadedRobots = new HashSet<String>(); // only for debugging
     
@@ -65,53 +61,29 @@ public class RobotsTxt {
     	public DomSync() {}
     }
     
-    public RobotsTxt(final File robotsTableFile) {
-        this.robotsTableFile = robotsTableFile;
-        robotsTableFile.getParentFile().mkdirs();
-        try {
-            robotsTable = new MapHeap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024, 100, '_');
-        } catch (final IOException e) {
-            Log.logException(e);
-        }
+    public RobotsTxt(final BEncodedHeap robotsTable) {
+        this.robotsTable = robotsTable;
         syncObjects = new ConcurrentHashMap<String, DomSync>();
     }
     
-    private void resetDatabase() {
-        // deletes the robots.txt database and creates a new one
-        if (robotsTable != null) robotsTable.close();
-        FileUtils.deletedelete(robotsTableFile);
-        robotsTableFile.getParentFile().mkdirs();
+    public void clear() {
         try {
-            robotsTable = new MapHeap(robotsTableFile, 64, NaturalOrder.naturalOrder, 1024 * 1024, 100, '_');
-        } catch (final IOException e) {
-            Log.logException(e);
+            this.robotsTable.clear();
+        } catch (IOException e) {
         }
         syncObjects.clear();
-    }
-    
-    public void clear() throws IOException {
-        this.robotsTable.clear();
-    }
-    
-    public void close() {
-        this.robotsTable.close();
     }
     
     public int size() {
         return this.robotsTable.size();
     }
     
-    private RobotsEntry getEntry(final String urlHostPort, final boolean fetchOnlineIfNotAvailableOrNotFresh) {
+    private RobotsEntry getEntry(final DigestURI theURL, final boolean fetchOnlineIfNotAvailableOrNotFresh) throws IOException {
         // this method will always return a non-null value
+        String urlHostPort = getHostPort(theURL);
         RobotsEntry robotsTxt4Host = null;
-        try {
-            final Map<String, String> record = this.robotsTable.get(urlHostPort);
-            if (record != null) robotsTxt4Host = new RobotsEntry(urlHostPort, record);
-        } catch (final kelondroException e) {
-        	resetDatabase();
-        } catch (final IOException e) {
-            resetDatabase();
-        }
+        Map<String, byte[]> record = this.robotsTable.get(this.robotsTable.encodedKey(urlHostPort));
+        if (record != null) robotsTxt4Host = new RobotsEntry(urlHostPort, record);
         
         if (fetchOnlineIfNotAvailableOrNotFresh && (
              robotsTxt4Host == null || 
@@ -133,14 +105,8 @@ public class RobotsTxt {
                 
                 // check the robots table again for all threads that come here because they waited for another one
                 // to complete a download
-                try {
-                    final Map<String, String> record = this.robotsTable.get(urlHostPort);
-                    if (record != null) robotsTxt4Host = new RobotsEntry(urlHostPort, record);
-                } catch (final kelondroException e) {
-                    resetDatabase();
-                } catch (final IOException e) {
-                    resetDatabase();
-                }
+                record = this.robotsTable.get(this.robotsTable.encodedKey(urlHostPort));
+                if (record != null) robotsTxt4Host = new RobotsEntry(urlHostPort, record);
                 if (robotsTxt4Host != null &&
                     robotsTxt4Host.getLoadedDate() != null &&
                     System.currentTimeMillis() - robotsTxt4Host.getLoadedDate().getTime() <= 1*24*60*60*1000) {
@@ -178,7 +144,7 @@ public class RobotsTxt {
                     if (robotsTxt4Host == null) {
                         // generate artificial entry
                         robotsTxt4Host = new RobotsEntry(
-                                urlHostPort, 
+                                robotsURL, 
                                 new ArrayList<String>(), 
                                 new ArrayList<String>(), 
                                 new Date(),
@@ -195,7 +161,7 @@ public class RobotsTxt {
                     addEntry(robotsTxt4Host);
                     if (this.robotsTable.size() <= sz) {
                     	Log.logSevere("RobotsTxt", "new entry in robots.txt table failed, resetting database");
-                    	this.resetDatabase();
+                    	this.clear();
                     	addEntry(robotsTxt4Host);
                     }
                 } else {
@@ -208,7 +174,7 @@ public class RobotsTxt {
                     
                     // store the data into the robots DB
                     robotsTxt4Host = addEntry(
-                            urlHostPort,
+                            robotsURL,
                             parserResult.allowList(),
                             denyPath,
                             new Date(),
@@ -224,7 +190,7 @@ public class RobotsTxt {
     }
     
     private RobotsEntry addEntry(
-    		final String hostName, 
+    		final DigestURI theURL, 
     		final ArrayList<String> allowPathList, 
     		final ArrayList<String> denyPathList, 
             final Date loadedDate, 
@@ -234,8 +200,9 @@ public class RobotsTxt {
     		final long crawlDelayMillis
     ) {
         final RobotsEntry entry = new RobotsEntry(
-                hostName, allowPathList, denyPathList, loadedDate, modDate,
-                eTag, sitemap, crawlDelayMillis);
+                                theURL, allowPathList, denyPathList,
+                                loadedDate, modDate,
+                                eTag, sitemap, crawlDelayMillis);
         addEntry(entry);
         return entry;
     }
@@ -243,7 +210,7 @@ public class RobotsTxt {
     private String addEntry(final RobotsEntry entry) {
         // writes a new page and returns key
         try {
-            this.robotsTable.put(entry.hostName, entry.mem);
+            this.robotsTable.put(this.robotsTable.encodedKey(entry.hostName), entry.getMem());
             return entry.hostName;
         } catch (final Exception e) {
             Log.logException(e);
@@ -258,7 +225,7 @@ public class RobotsTxt {
     public static final int DOWNLOAD_ETAG = 2;
     public static final int DOWNLOAD_MODDATE = 3;
     
-    private static final String getHostPort(final DigestURI theURL) {
+    static final String getHostPort(final DigestURI theURL) {
         String urlHostPort = null;
         final int port = getPort(theURL);
         urlHostPort = theURL.getHost() + ":" + port;
@@ -285,8 +252,12 @@ public class RobotsTxt {
         DigestURI sitemapURL = null;
         
         // generating the hostname:poart string needed to do a DB lookup
-        final String urlHostPort = getHostPort(theURL);
-        final RobotsEntry robotsTxt4Host = this.getEntry(urlHostPort, true);
+        RobotsEntry robotsTxt4Host;
+        try {
+            robotsTxt4Host = this.getEntry(theURL, true);
+        } catch (IOException e1) {
+            return null;
+        }
                        
         try {
             final String sitemapUrlStr = robotsTxt4Host.getSitemap();
@@ -297,9 +268,14 @@ public class RobotsTxt {
     }
     
     public Long getCrawlDelayMillis(final DigestURI theURL) {
-        if (theURL == null) throw new IllegalArgumentException(); 
-        final String urlHostPort = getHostPort(theURL);
-        final RobotsEntry robotsEntry = getEntry(urlHostPort, true);
+        if (theURL == null) throw new IllegalArgumentException();
+        RobotsEntry robotsEntry;
+        try {
+            robotsEntry = getEntry(theURL, true);
+        } catch (IOException e) {
+            Log.logException(e);
+            return new Long(0);
+        }
         return robotsEntry.getCrawlDelayMillis();
     }
     
@@ -307,9 +283,13 @@ public class RobotsTxt {
         if (nexturl == null) throw new IllegalArgumentException();               
         
         // generating the hostname:port string needed to do a DB lookup
-        final String urlHostPort = getHostPort(nexturl);
         RobotsEntry robotsTxt4Host = null;
-        robotsTxt4Host = getEntry(urlHostPort, true);
+        try {
+            robotsTxt4Host = getEntry(nexturl, true);
+        } catch (IOException e) {
+            Log.logException(e);
+            return false;
+        }
         return robotsTxt4Host.isDisallowed(nexturl.getFile());
     }
     
