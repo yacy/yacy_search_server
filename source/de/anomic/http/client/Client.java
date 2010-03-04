@@ -233,7 +233,7 @@ public class Client {
         apacheHttpClient.getParams().setIntParameter(HttpMethodParams.HEAD_BODY_CHECK_TIMEOUT, timeout);
         apacheHttpClient.setConnectionTimeout(timeout);
     }
-
+    
     /**
      * should redirects automatically be followed?
      * 
@@ -274,6 +274,14 @@ public class Client {
         final HttpMethod get = new ClientGetMethod(uri, maxfilesize);
         get.setFollowRedirects(followRedirects);
         get.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+        return execute(get);
+    }
+    
+    public ResponseContainer GET(final String uri, long maxfilesize, String realm) throws IOException {
+        final HttpMethod get = new ClientGetMethod(uri, maxfilesize);
+        get.setFollowRedirects(followRedirects);
+        get.getParams().setCookiePolicy(CookiePolicy.IGNORE_COOKIES);
+        get.setRequestHeader("Authorization", "realm=" + realm);
         return execute(get);
     }
 

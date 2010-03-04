@@ -74,7 +74,7 @@ public class Table_API_p {
                     Tables.Row row = sb.tables.select(WorkTables.TABLE_API_NAME, pk.getBytes());
                     if (row != null) {
                         String url = "http://localhost:" + sb.getConfig("port", "8080") + new String(row.from(WorkTables.TABLE_API_COL_URL));
-                        result = client.GET(url);
+                        result = client.GET(url, Long.MAX_VALUE, sb.getConfig("adminAccountBase64MD5", ""));
                         l.put(url, result.getStatusCode());
                     }
                 } catch (IOException e) {
