@@ -107,7 +107,7 @@ public class ViewFile {
         boolean pre = false;
         
         // get the url hash from which the content should be loaded
-        final String urlHash = post.get("urlHash","");
+        String urlHash = post.get("urlHash","");
         if (urlHash.length() > 0) {
             // get the urlEntry that belongs to the url hash
             URIMetadataRow urlEntry = null;
@@ -146,6 +146,7 @@ public class ViewFile {
 
             // define an url by post parameter
             url = new DigestURI(urlString, null);
+            urlHash = url.hash();
             pre = post.get("pre", "false").equals("true");
         } catch (final MalformedURLException e) {}
         
