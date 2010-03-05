@@ -41,7 +41,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
@@ -1823,7 +1825,12 @@ public final class Switchboard extends serverSwitch {
         // authorization for localhost, only if flag is set to grant localhost access as admin
         final String clientIP = requestHeader.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "");
         final String refererHost = requestHeader.refererHost();
-        final boolean accessFromLocalhost = serverCore.isLocalhost(clientIP) && (refererHost.length() == 0 || serverCore.isLocalhost(refererHost));
+        boolean accessFromLocalhost = serverCore.isLocalhost(clientIP) && (refererHost.length() == 0 || serverCore.isLocalhost(refererHost));
+        if (!accessFromLocalhost) try {
+            // the access may also be from a different IP than localhost if it is the same as the YaCy instance is running on
+            InetAddress myaddress = InetAddress.getLocalHost();
+            accessFromLocalhost = myaddress.equals(InetAddress.getByName(clientIP)) && (refererHost.length() == 0 || myaddress.equals(InetAddress.getByName(refererHost)));
+        } catch (UnknownHostException e) {}
         if (getConfigBool("adminAccountForLocalhost", false) && accessFromLocalhost) return 3; // soft-authenticated for localhost
         
         // get the authorization string from the header
