@@ -44,7 +44,6 @@ import net.yacy.kelondro.util.SetTools;
 import net.yacy.kelondro.util.SortStack;
 import net.yacy.kelondro.util.SortStore;
 
-import de.anomic.search.RankingProcess.NavigatorEntry;
 import de.anomic.search.MediaSnippet;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.graphics.ProfilingGraph;
@@ -260,20 +259,6 @@ public class ResultFetcher {
         Log.logInfo("search", "sorted out hash " + urlhash + " during search: " + reason);
     }
     
-    public ArrayList<NavigatorEntry> getHostNavigator(int maxentries) {
-        return this.rankedCache.getHostNavigator(maxentries);
-    }
-    
-    public ArrayList<NavigatorEntry> getTopicNavigator(final int maxentries) {
-        // returns a set of words that are computed as toplist
-        return this.rankedCache.getTopicNavigator(maxentries);
-    }
-    
-    public ArrayList<NavigatorEntry> getAuthorNavigator(final int maxentries) {
-        // returns a list of authors so far seen on result set
-        return this.rankedCache.getAuthorNavigator(maxentries);
-    }
-    
     public int resultCount() {
     	return this.result.size();
     }
@@ -357,7 +342,7 @@ public class ResultFetcher {
 
     public long postRanking(
             final ResultEntry rentry,
-            final Map<String, Integer> topwords) {
+            final Map<String, Navigator.Item> topwords) {
 
         long r = 0;
         
@@ -375,14 +360,14 @@ public class ResultFetcher {
         final String urlstring = rentry.url().toNormalform(true, true);
         final String[] urlcomps = DigestURI.urlComps(urlstring);
         final String[] descrcomps = DigestURI.splitpattern.split(rentry.title().toLowerCase());
-        Integer tc;
+        Navigator.Item tc;
         for (int j = 0; j < urlcomps.length; j++) {
             tc = topwords.get(urlcomps[j]);
-            if (tc != null) r += Math.max(1, tc.intValue()) << query.ranking.coeff_urlcompintoplist;
+            if (tc != null) r += Math.max(1, tc.count) << query.ranking.coeff_urlcompintoplist;
         }
         for (int j = 0; j < descrcomps.length; j++) {
             tc = topwords.get(descrcomps[j]);
-            if (tc != null) r += Math.max(1, tc) << query.ranking.coeff_descrcompintoplist;
+            if (tc != null) r += Math.max(1, tc.count) << query.ranking.coeff_descrcompintoplist;
         }
         
         // apply query-in-result matching

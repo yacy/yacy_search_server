@@ -11,7 +11,20 @@
         {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
 #{/element}#
       ]
-    },#(/nav-domains)##(nav-authors)#::
+    },#(/nav-domains)##(nav-namespace)#::
+    {
+      "facetname": "namespace",
+      "displayname": "Name Space",
+      "type": "String",
+      "min": "0",
+      "max": "0",
+      "mean": "0",
+      "elements": [
+#{element}#
+        {"name": "#[name]#", "count": "#[count]#", "modifier": "#[modifier]#", "url": "#[url-json]#"}#(nl)#::,#(/nl)#
+#{/element}#
+      ]
+    },#(/nav-namespace)##(nav-authors)#::
     {
       "facetname": "authors",
       "displayname": "Authors",

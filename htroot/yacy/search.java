@@ -31,6 +31,7 @@
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
@@ -49,6 +50,7 @@ import de.anomic.http.server.HeaderFramework;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.net.natLib;
 import de.anomic.search.ContentDomain;
+import de.anomic.search.Navigator;
 import de.anomic.search.QueryParams;
 import de.anomic.search.RankingProfile;
 import de.anomic.search.SearchEvent;
@@ -57,7 +59,6 @@ import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
 import de.anomic.search.ResultEntry;
-import de.anomic.search.RankingProcess.NavigatorEntry;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
@@ -336,9 +337,9 @@ public final class search {
             
             // prepare reference hints
             final long timer = System.currentTimeMillis();
-            final ArrayList<NavigatorEntry> ws = theSearch.getTopicNavigator(10);
+            final List<Navigator.Item> ws = theSearch.getTopicNavigator(10);
             final StringBuilder refstr = new StringBuilder(6000);
-            for (NavigatorEntry e: ws) {
+            for (Navigator.Item e: ws) {
                 refstr.append(",").append(e.name);
             }
             prop.put("references", (refstr.length() > 0) ? refstr.substring(1) : refstr.toString());

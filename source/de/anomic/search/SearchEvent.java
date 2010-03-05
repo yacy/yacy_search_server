@@ -29,6 +29,7 @@ package de.anomic.search;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -43,7 +44,6 @@ import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
 
 import de.anomic.crawler.ResultURLs;
-import de.anomic.search.RankingProcess.NavigatorEntry;
 import de.anomic.yacy.yacySearch;
 import de.anomic.yacy.yacySeedDB;
 import de.anomic.yacy.dht.FlatWordPartitionScheme;
@@ -289,16 +289,20 @@ public final class SearchEvent {
         return this.rankedCache;
     }
 
-    public ArrayList<NavigatorEntry> getHostNavigator(int maxentries) {
-    	return this.rankedCache.getHostNavigator(maxentries);
+    public ArrayList<Navigator.Item> getNamespaceNavigator(int maxentries) {
+        return this.rankedCache.getNamespaceNavigator(maxentries);
     }
     
-    public ArrayList<NavigatorEntry> getTopicNavigator(final int maxentries) {
+    public List<Navigator.Item> getHostNavigator(int maxentries) {
+        return this.rankedCache.getHostNavigator(maxentries);
+    }
+    
+    public List<Navigator.Item> getTopicNavigator(final int maxentries) {
         // returns a set of words that are computed as toplist
         return this.rankedCache.getTopicNavigator(maxentries);
     }
     
-    public ArrayList<NavigatorEntry> getAuthorNavigator(final int maxentries) {
+    public List<Navigator.Item> getAuthorNavigator(final int maxentries) {
         // returns a list of authors so far seen on result set
         return this.rankedCache.getAuthorNavigator(maxentries);
     }

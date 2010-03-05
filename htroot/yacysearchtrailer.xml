@@ -6,6 +6,20 @@
 #{/element}#
 </yacy:facet>
 #(/nav-domains)#
+#(nav-namespace)#::
+<yacy:facet name="domains" displayname="Namespace" type="String" min="0" max="0" mean="0">
+#{element}#
+<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" />
+#{/element}#
+</yacy:facet>
+#(/nav-namespace)#
+#(nav-authors)#::
+<yacy:facet name="domains" displayname="Authors" type="String" min="0" max="0" mean="0">
+#{element}#
+<yacy:element name="#[name]#" count="#[count]#" modifier="#[modifier]#" />
+#{/element}#
+</yacy:facet>
+#(/nav-authors)#
 #(nav-topics)#::
 <yacy:facet name="topwords" displayname="Topics" type="String" min="0" max="0" mean="0">
 #{element}#

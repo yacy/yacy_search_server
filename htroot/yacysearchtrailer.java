@@ -26,14 +26,15 @@
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import net.yacy.kelondro.util.EventTracker;
 
 import de.anomic.http.server.RequestHeader;
+import de.anomic.search.Navigator;
 import de.anomic.search.QueryParams;
 import de.anomic.search.SearchEvent;
 import de.anomic.search.SearchEventCache;
-import de.anomic.search.RankingProcess.NavigatorEntry;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.graphics.ProfilingGraph;
@@ -58,39 +59,61 @@ public class yacysearchtrailer {
         final QueryParams theQuery = theSearch.getQuery();
         
         // compose search navigation
+
+        // namespace navigators
+        ArrayList<Navigator.Item> namespaceNavigator = theSearch.getNamespaceNavigator(10);
+        if (namespaceNavigator == null || namespaceNavigator.isEmpty()) {
+            prop.put("nav-namespace", 0);
+        } else {
+            prop.put("nav-namespace", 1);
+            Navigator.Item entry;
+            int i;
+            for (i = 0; i < Math.min(10, namespaceNavigator.size()); i++) {
+                entry = namespaceNavigator.get(i);
+                prop.put("nav-namespace_element_" + i + "_name", entry.name);
+                prop.put("nav-namespace_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.urlMask, "inurl:" + entry.name, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
+                prop.putJSON("nav-namespace_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.urlMask, "inurl:" + entry.name, theQuery.navigators));
+                prop.put("nav-namespace_element_" + i + "_count", entry.count);
+                prop.put("nav-namespace_element_" + i + "_modifier", "inurl:" + entry.name);
+                prop.put("nav-namespace_element_" + i + "_nl", 1);
+            }
+            i--;
+            prop.put("nav-namespace_element_" + i + "_nl", 0);
+            prop.put("nav-namespace_element", namespaceNavigator.size());
+        }
         
         // host navigators
-        ArrayList<NavigatorEntry> hostNavigator = theSearch.getHostNavigator(10);
+        List<Navigator.Item> hostNavigator = theSearch.getHostNavigator(10);
         if (hostNavigator == null || hostNavigator.isEmpty()) {
-        	prop.put("nav-domains", 0);
+            prop.put("nav-domains", 0);
         } else {
-        	prop.put("nav-domains", 1);
-        	NavigatorEntry entry;
-        	int i;
-        	for (i = 0; i < hostNavigator.size(); i++) {
-        		entry = hostNavigator.get(i);
-        		prop.put("nav-domains_element_" + i + "_name", entry.name);
+            prop.put("nav-domains", 1);
+            Navigator.Item entry;
+            int i;
+            for (i = 0; i < Math.min(10, hostNavigator.size()); i++) {
+                entry = hostNavigator.get(i);
+                prop.put("nav-domains_element_" + i + "_name", entry.name);
                 prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
-        		prop.putJSON("nav-domains_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name, theQuery.navigators));
+                prop.putJSON("nav-domains_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name, theQuery.navigators));
                 prop.put("nav-domains_element_" + i + "_count", entry.count);
-        		prop.put("nav-domains_element_" + i + "_modifier", "site:" + entry.name);
+                prop.put("nav-domains_element_" + i + "_modifier", "site:" + entry.name);
                 prop.put("nav-domains_element_" + i + "_nl", 1);
-        	}
-        	i--;
-        	prop.put("nav-domains_element_" + i + "_nl", 0);
-        	prop.put("nav-domains_element", hostNavigator.size());
+            }
+            i--;
+            prop.put("nav-domains_element_" + i + "_nl", 0);
+            prop.put("nav-domains_element", hostNavigator.size());
         }
         
         // author navigators
-        ArrayList<NavigatorEntry> authorNavigator = theSearch.getAuthorNavigator(10);
+        List<Navigator.Item> authorNavigator = theSearch.getAuthorNavigator(10);
         if (authorNavigator == null || authorNavigator.isEmpty()) {
             prop.put("nav-authors", 0);
         } else {
             prop.put("nav-authors", 1);
-            NavigatorEntry entry;
+            Navigator.Item entry;
             int i;
             String anav;
-            for (i = 0; i < authorNavigator.size(); i++) {
+            for (i = 0; i < Math.min(10, authorNavigator.size()); i++) {
                 entry = authorNavigator.get(i);
                 anav = (entry.name.indexOf(' ') < 0) ? "author:" + entry.name : "author:'" + entry.name + "'";
                 prop.put("nav-authors_element_" + i + "_name", entry.name);
@@ -106,15 +129,15 @@ public class yacysearchtrailer {
         }
 
         // topics navigator
-        ArrayList<NavigatorEntry> topicNavigator = theSearch.getTopicNavigator(10);
+        List<Navigator.Item> topicNavigator = theSearch.getTopicNavigator(10);
         if (topicNavigator == null || topicNavigator.isEmpty()) {
-            topicNavigator = new ArrayList<NavigatorEntry>(); 
+            topicNavigator = new ArrayList<Navigator.Item>(); 
             prop.put("nav-topics", "0");
         } else {
             prop.put("nav-topics", "1");
             int i = 0;
-            NavigatorEntry e;
-            Iterator<NavigatorEntry> iter = topicNavigator.iterator();
+            Navigator.Item e;
+            Iterator<Navigator.Item> iter = topicNavigator.iterator();
             while (iter.hasNext()) {
                 e = iter.next();
                 if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;

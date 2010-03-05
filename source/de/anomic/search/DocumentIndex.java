@@ -29,6 +29,7 @@ package de.anomic.search;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
@@ -54,18 +55,24 @@ public class DocumentIndex extends Segment {
     private static final RankingProfile textRankingDefault = new RankingProfile(ContentDomain.TEXT);
     //private Bitfield zeroConstraint = new Bitfield(4);
     
-    final static File poison = new File(".");
-    BlockingQueue<File> queue;
+    private static DigestURI poison;
+    static {
+        try {
+            poison = new DigestURI("file://.");
+        } catch (MalformedURLException e) {}
+    }
+    BlockingQueue<DigestURI> queue; // a queue of document ID's
     private Worker[] worker;
     CallbackListener callback;
 
     static final ThreadGroup workerThreadGroup = new ThreadGroup("workerThreadGroup");
     
+    
     public DocumentIndex(final File segmentPath, CallbackListener callback, int cachesize) throws IOException {
         super(new Log("DocumentIndex"), segmentPath, cachesize, targetFileSize * 4 - 1, false, false);
         int cores = Runtime.getRuntime().availableProcessors() + 1;
         this.callback = callback;
-        this.queue = new LinkedBlockingQueue<File>(cores * 300);
+        this.queue = new LinkedBlockingQueue<DigestURI>(cores * 300);
         this.worker = new Worker[cores];
         for (int i = 0; i < cores; i++) {
             this.worker[i] = new Worker(i);
@@ -79,7 +86,7 @@ public class DocumentIndex extends Segment {
         }
         
         public void run() {
-            File f;
+            DigestURI f;
             URIMetadataRow resultRow;
             try {
                 while ((f = queue.take()) != poison) try {
@@ -110,31 +117,24 @@ public class DocumentIndex extends Segment {
         this.queue.clear();
     }
     
-    /**
-     * put a single file into the index
-     * @param file
-     * @return a metadata object that has been generated to identify the file
-     * @throws IOException in case that the file does not exist or cannot be parsed
-     */
-    public URIMetadataRow add(File file) throws IOException {
-        if (file == null) throw new IOException("file = null");
-        if (file.isDirectory()) throw new IOException("file should be a document, not a path");
-        if (!file.canRead()) throw new IOException("cannot read file");
-    	DigestURI url = new DigestURI("file:" + file.getAbsolutePath());
-    	Document document;
+    public URIMetadataRow add(DigestURI url) throws IOException {
+        if (url == null) throw new IOException("file = null");
+        if (url.isDirectory()) throw new IOException("file should be a document, not a path");
+        if (!url.canRead()) throw new IOException("cannot read file");
+        Document document;
         try {
-            document = TextParser.parseSource(url, null, null, file);
+            document = TextParser.parseSource(url, null, null, url.length(), url.getInputStream());
         } catch (InterruptedException e) {
-            throw new IOException("cannot parse " + file.toString() + ": " + e.getMessage());
+            throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
         } catch (ParserException e) {
-            throw new IOException("cannot parse " + file.toString() + ": " + e.getMessage());
+            throw new IOException("cannot parse " + url.toString() + ": " + e.getMessage());
         }
         final Condenser condenser = new Condenser(document, true, true);
         return super.storeDocument(
                 url,
                 null,
-                new Date(file.lastModified()),
-                file.length(),
+                new Date(url.lastModified()),
+                url.length(),
                 document,
                 condenser
                 );
@@ -145,7 +145,7 @@ public class DocumentIndex extends Segment {
      * If the given file is a path to a directory, the complete sub-tree is indexed
      * @param start
      */
-    public void addConcurrent(File start) {
+    public void addConcurrent(DigestURI start) {
         assert (start != null);
         assert (start.canRead()) : start.toString();
         if (!start.isDirectory()) {
@@ -155,17 +155,21 @@ public class DocumentIndex extends Segment {
             return;
         }
         String[] s = start.list();
-        File w;
+        DigestURI w;
         for (String t: s) {
-            w = new File(start, t);
-            if (w.canRead() && !w.isHidden()) {
-                if (w.isDirectory()) {
-                    addConcurrent(w);
-                } else {
-                    try {
-                        this.queue.put(w);
-                    } catch (InterruptedException e) {}
+            try {
+                w = new DigestURI(start, t);
+                if (w.canRead() && !w.isHidden()) {
+                    if (w.isDirectory()) {
+                        addConcurrent(w);
+                    } else {
+                        try {
+                            this.queue.put(w);
+                        } catch (InterruptedException e) {}
+                    }
                 }
+            } catch (MalformedURLException e1) {
+                Log.logException(e1);
             }
         }
     }
@@ -177,14 +181,14 @@ public class DocumentIndex extends Segment {
      * @param count
      * @return a list of files that contain the given string
      */    
-    public ArrayList<File> find(String querystring, int pos, int count) {
+    public ArrayList<DigestURI> find(String querystring, int pos, int count) {
         ArrayList<URIMetadataRow> result = findMetadata(querystring, this);
-        ArrayList<File> files = new ArrayList<File>();
+        ArrayList<DigestURI> files = new ArrayList<DigestURI>();
         Components metadata;
         for (URIMetadataRow row : result) {
             metadata = row.metadata();
             if (metadata == null) continue;
-            files.add(metadata.url().getLocalFile());
+            files.add(metadata.url());
             count--;
             if (count == 0) break;
         }
@@ -216,7 +220,7 @@ public class DocumentIndex extends Segment {
      * @param querystring
      * @return a list of files that contain the word
      */
-    public ArrayList<File> find(String querystring) {
+    public ArrayList<DigestURI> find(String querystring) {
         return find(querystring, 0, 100);
     }
     
@@ -242,8 +246,8 @@ public class DocumentIndex extends Segment {
     }
     
     public interface CallbackListener {
-        public void commit(File f, URIMetadataRow resultRow);
-        public void fail(File f, String failReason);
+        public void commit(DigestURI f, URIMetadataRow resultRow);
+        public void fail(DigestURI f, String failReason);
     }
     
     public static void main(String[] args) {
@@ -259,16 +263,16 @@ public class DocumentIndex extends Segment {
         File segmentPath = new File(args[0]);
         System.out.println("using index files at " + segmentPath.getAbsolutePath());
         CallbackListener callback = new CallbackListener() {
-            public void commit(File f, URIMetadataRow resultRow) {
+            public void commit(DigestURI f, URIMetadataRow resultRow) {
                 System.out.println("indexed: " + f.toString());
             }
-            public void fail(File f, String failReason) {
+            public void fail(DigestURI f, String failReason) {
                 System.out.println("not indexed " + f.toString() + ": " + failReason);
             }
         };
         try {
             if (args[1].equals("add")) {
-                File f = new File(args[2]);
+                DigestURI f = new DigestURI(args[2]);
                 DocumentIndex di = new DocumentIndex(segmentPath, callback, 100000);
                 di.addConcurrent(f);
                 di.close();
@@ -277,8 +281,8 @@ public class DocumentIndex extends Segment {
                 for (int i = 2; i < args.length; i++) query += args[i];
                 query.trim();
                 DocumentIndex di = new DocumentIndex(segmentPath, callback, 100000);
-                ArrayList<File> results = di.find(query);
-                for (File f: results) {
+                ArrayList<DigestURI> results = di.find(query);
+                for (DigestURI f: results) {
                     if (f != null) System.out.println(f.toString());
                 }
                 di.close();

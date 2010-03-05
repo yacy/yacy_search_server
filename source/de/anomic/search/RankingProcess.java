@@ -1,4 +1,4 @@
-// plasmaSearchRankingProcess.java
+// RankingProcess.java
 // (C) 2007 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 07.11.2007 on http://yacy.net
 //
@@ -29,12 +29,12 @@ package de.anomic.search;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
@@ -81,9 +81,10 @@ public final class RankingProcess extends Thread {
     private final ConcurrentHashMap<String, SortStack<WordReferenceVars>> doubleDomCache; // key = domhash (6 bytes); value = like stack
     private final HashSet<String> handover; // key = urlhash; used for double-check of urls that had been handed over to search process
     
-    private final ConcurrentHashMap<String, Integer> ref;  // reference score computation for the commonSense heuristic
-    private final ConcurrentHashMap<String, HostInfo> hostNavigator;
-    private final ConcurrentHashMap<String, AuthorInfo> authorNavigator;
+    private final Navigator ref;  // reference score computation for the commonSense heuristic
+    private final Navigator hostNavigator;
+    private final Navigator authorNavigator;
+    private final Navigator namespaceNavigator;
     private final ReferenceOrder order;
     
     public RankingProcess(final QueryParams query, final ReferenceOrder order, final int maxentries, final int concurrency) {
@@ -106,9 +107,10 @@ public final class RankingProcess extends Thread {
         this.misses = new TreeSet<String>();
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
-        this.hostNavigator = new ConcurrentHashMap<String, HostInfo>();
-        this.authorNavigator = new ConcurrentHashMap<String, AuthorInfo>();
-        this.ref = new ConcurrentHashMap<String, Integer>();
+        this.hostNavigator = new Navigator();
+        this.authorNavigator = new Navigator();
+        this.namespaceNavigator = new Navigator();
+        this.ref = new Navigator();
         //this.domZones = new int[8];
         //for (int i = 0; i < 8; i++) {this.domZones[i] = 0;}
         this.feeders = concurrency;
@@ -172,7 +174,6 @@ public final class RankingProcess extends Thread {
         
         // iterate over normalized entries and select some that are better than currently stored
         timer = System.currentTimeMillis();
-        HostInfo hs;
         String domhash;
         boolean nav_hosts = this.query.navigators.equals("all") || this.query.navigators.indexOf("hosts") >= 0;
         Long r;
@@ -221,12 +222,7 @@ public final class RankingProcess extends Thread {
 			    // get statistics for host navigator
 			    if (nav_hosts) {
 			        domhash = iEntry.urlHash.substring(6);
-			        hs = this.hostNavigator.get(domhash);
-			        if (hs == null) {
-			        	this.hostNavigator.put(domhash, new HostInfo(iEntry.urlHash));
-			        } else {
-			        	hs.inc();
-			        }
+			        this.hostNavigator.inc(domhash, iEntry.urlHash);
 			    }
 			    
 			    // accept
@@ -377,6 +373,7 @@ public final class RankingProcess extends Thread {
     public URIMetadataRow takeURL(final boolean skipDoubleDom, final int timeout) {
         // returns from the current RWI list the best URL entry and removes this entry from the list
     	long timeLimit = System.currentTimeMillis() + timeout;
+    	int p = -1;
     	while (System.currentTimeMillis() < timeLimit) {
             final SortStack<WordReferenceVars>.stackElement obrwi = takeRWI(skipDoubleDom);
             if (obrwi == null) {
@@ -444,15 +441,20 @@ public final class RankingProcess extends Thread {
             	}
             	
             	// add author to the author navigator
-                AuthorInfo in = this.authorNavigator.get(authorhash);
-                if (in == null) {
-                    this.authorNavigator.put(authorhash, new AuthorInfo(pageauthor));
-                } else {
-                    in.inc();
-                    this.authorNavigator.put(authorhash, in);
-                }
+                this.authorNavigator.inc(authorhash, pageauthor);
             } else if (this.query.authorhash != null) {
             	continue;
+            }
+            
+            // namespace navigation
+            String pagepath = metadata.url().getPath();
+            if ((p = pagepath.indexOf(':')) >= 0) {
+                pagepath = pagepath.substring(0,p);
+                p = pagepath.lastIndexOf('/');
+                if (p >= 0) {
+                    pagepath = pagepath.substring(p + 1);
+                    this.namespaceNavigator.inc(pagepath, pagepath);
+                }
             }
             
             // accept url
@@ -525,68 +527,32 @@ public final class RankingProcess extends Thread {
         return this.misses.iterator();
     }
     
-    public class HostInfo {
-        public int count;
-        public String hashsample;
-        public HostInfo(String urlhash) {
-            this.count = 1;
-            this.hashsample = urlhash;
-        }
-        public void inc() {
-            this.count++;
-        }
-    }
-    
-    public class AuthorInfo {
-        public int count;
-        public String author;
-        public AuthorInfo(String author) {
-            this.count = 1;
-            this.author = author;
-        }
-        public void inc() {
-            this.count++;
-        }
-    }
-    
-    public static final Comparator<HostInfo> hscomp = new Comparator<HostInfo>() {
-        public int compare(HostInfo o1, HostInfo o2) {
-            if (o1.count < o2.count) return 1;
-            if (o2.count < o1.count) return -1;
-            return 0;
-        }
-    };
-    
-    public static final Comparator<AuthorInfo> aicomp = new Comparator<AuthorInfo>() {
-        public int compare(AuthorInfo o1, AuthorInfo o2) {
-            if (o1.count < o2.count) return 1;
-            if (o2.count < o1.count) return -1;
-            return 0;
-        }
-    };
-    
-    public class NavigatorEntry {
-        public int count;
-        public String name;
-        public NavigatorEntry(String name, int count) {
-            this.name = name;
-            this.count = count;
-        }
-    }
-    
-    public ArrayList<NavigatorEntry> getHostNavigator(int count) {
-    	if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("hosts") < 0) return new ArrayList<NavigatorEntry>(0);
+    public ArrayList<Navigator.Item> getNamespaceNavigator(int count) {
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("namespace") < 0) return new ArrayList<Navigator.Item>(0);
         
-    	HostInfo[] hsa = this.hostNavigator.values().toArray(new HostInfo[this.hostNavigator.size()]);
-        Arrays.sort(hsa, hscomp);
+        Navigator.Item[] hsa = this.namespaceNavigator.entries();
         int rc = Math.min(count, hsa.length);
-        ArrayList<NavigatorEntry> result = new ArrayList<NavigatorEntry>();
+        ArrayList<Navigator.Item> result = new ArrayList<Navigator.Item>();
+        for (int i = 0; i < rc; i++) result.add(hsa[i]);
+        return result;
+    }
+    
+    public List<Navigator.Item> getHostNavigators(int count) {
+    	if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("hosts") < 0) return new ArrayList<Navigator.Item>(0);
+        
+    	return this.hostNavigator.entries(10);
+    }
+    public List<Navigator.Item> getHostNavigator(int count) {
+        List<Navigator.Item> result = new ArrayList<Navigator.Item>();
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("hosts") < 0) return result;
+        
+        List<Navigator.Item> hsa = this.hostNavigator.entries(10);
         URIMetadataRow mr;
         DigestURI url;
         String hostname;
         Components metadata;
-        loop: for (int i = 0; i < rc; i++) {
-            mr = this.query.getSegment().urlMetadata().load(hsa[i].hashsample, null, 0);
+        loop: for (Navigator.Item item: hsa) {
+            mr = this.query.getSegment().urlMetadata().load(item.name, null, 0);
             if (mr == null) continue;
             metadata = mr.metadata();
             if (metadata == null) continue;
@@ -595,11 +561,12 @@ public final class RankingProcess extends Thread {
             hostname = url.getHost();
             if (hostname == null) continue;
             if (query.tenant != null && !hostname.contains(query.tenant) && !url.toNormalform(true, true).contains(query.tenant)) continue;
-            for (NavigatorEntry entry: result) if (entry.name.equals(hostname)) continue loop; // check if one entry already exists
-            result.add(new NavigatorEntry(hostname, hsa[i].count));
+            for (Navigator.Item entry: result) if (entry.name.equals(hostname)) continue loop; // check if one entry already exists
+            result.add(new Navigator.Item(hostname, item.count));
         }
         return result;
     }
+
 
     public static final Comparator<Map.Entry<String, Integer>> mecomp = new Comparator<Map.Entry<String, Integer>>() {
         public int compare(Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2) {
@@ -609,44 +576,29 @@ public final class RankingProcess extends Thread {
         }
     };
     
-    public Map<String, Integer> getTopics() {
-        return this.ref;
+    public Map<String, Navigator.Item> getTopics() {
+        return this.ref.map();
     }
     
-    @SuppressWarnings("unchecked")
-    public ArrayList<NavigatorEntry> getTopicNavigator(final int count) {
+    public List<Navigator.Item> getTopicNavigator(final int count) {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
-        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("topics") < 0) return new ArrayList<NavigatorEntry>(0);
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("topics") < 0) return new ArrayList<Navigator.Item>(0);
         
-        Map.Entry<String, Integer>[] a = this.ref.entrySet().toArray(new Map.Entry[this.ref.size()]);
-        Arrays.sort(a, mecomp);
-        int rc = Math.min(count, a.length);
-        ArrayList<NavigatorEntry> result = new ArrayList<NavigatorEntry>();
-        Map.Entry<String, Integer> e;
-        int c;
-        for (int i = 0; i < rc; i++) {
-            e = a[i];
-            c = e.getValue().intValue();
-            if (c == 0) break;
-            result.add(new NavigatorEntry(e.getKey(), c));
-        }
-        return result;
+        return this.ref.entries(10);
     }
     
     public void addTopic(final String[] words) {
         String word;
         for (int i = 0; i < words.length; i++) {
             word = words[i].toLowerCase();
-            Integer c;
             if (word.length() > 2 &&
                 "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_".indexOf(word) < 0 &&
                 !query.queryHashes.contains(Word.word2hash(word)) &&
                 word.matches("[a-z]+") &&
                 !Switchboard.badwords.contains(word) &&
                 !Switchboard.stopwords.contains(word)) {
-                c = ref.get(word);
-                if (c == null) ref.put(word, 1); else ref.put(word, c.intValue() + 1);
+                ref.inc(word, word);
             }
         }
     }
@@ -662,22 +614,12 @@ public final class RankingProcess extends Thread {
         addTopic(descrcomps);
     }
     
-    public ArrayList<NavigatorEntry> getAuthorNavigator(final int count) {
+    public List<Navigator.Item> getAuthorNavigator(final int count) {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
-        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("authors") < 0) return new ArrayList<NavigatorEntry>(0);
+        if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("authors") < 0) return new ArrayList<Navigator.Item>(0);
         
-        AuthorInfo[] a = this.authorNavigator.values().toArray(new AuthorInfo[this.authorNavigator.size()]);
-        Arrays.sort(a, aicomp);
-        int rc = Math.min(count, a.length);
-        ArrayList<NavigatorEntry> result = new ArrayList<NavigatorEntry>();
-        AuthorInfo e;
-        for (int i = 0; i < rc; i++) {
-            e = a[i];
-            //System.out.println("*** DEBUG Author = " + e.author + ", count = " + e.count);
-            result.add(new NavigatorEntry(e.author, e.count));
-        }
-        return result;
+        return this.authorNavigator.entries(count);
     }
     
     public static void loadYBR(final File rankingPath, final int count) {
@@ -733,12 +675,3 @@ public final class RankingProcess extends Thread {
     }
 
 }
-/*
-Thread= Thread-937 id=4224 BLOCKED
-Thread= Thread-919 id=4206 BLOCKED
-Thread= Thread-936 id=4223 BLOCKED
-at net.yacy.kelondro.util.SortStack.pop(SortStack.java:118)
-at de.anomic.search.RankingProcess.takeRWI(RankingProcess.java:310)
-at de.anomic.search.RankingProcess.takeURL(RankingProcess.java:371)
-at de.anomic.search.ResultFetcher$Worker.run(ResultFetcher.java:161)
-*/

@@ -65,7 +65,7 @@ public class ListAccumulator {
 
     /**
      * Adds a new entry to a list identified by a given name.
-     * @param name The name of the list the entry is to be added to.
+     * @param key The name of the list the entry is to be added to.
      * @param entry The new entry.
      * @return True if the entry has been added, else false (if list does not exists).
      */

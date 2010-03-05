@@ -105,7 +105,7 @@ public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte
     
     /**
      * insert a map into the table
-     * @param key
+     * @param name
      * @param map
      * @throws RowSpaceExceededException
      * @throws IOException
@@ -175,7 +175,7 @@ public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte
     
     /**
      * select a map from the table
-     * @param key
+     * @param name
      * @return the map if one found or NULL if no entry exists or the entry is corrupt
      * @throws IOException
      */
@@ -209,7 +209,7 @@ public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte
     
     /**
      * delete a map from the table
-     * @param key
+     * @param name
      * @throws IOException
      */
     public void delete(byte[] pk) throws IOException {
@@ -218,7 +218,7 @@ public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte
     
     /**
      * check if a row with given key exists in the table
-     * @param key
+     * @param name
      * @return true if the row exists
      */
     public boolean has(byte[] pk) {
