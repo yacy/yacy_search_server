@@ -11,6 +11,12 @@
     function setall(name, check){
         var selectForm = document.forms.namedItem(name);
         var count = selectForm.elements["num"].value;
+        if (check) for(i = 0; i < count; i++) {
+            if (selectForm.elements["item_" + i].checked) {
+                check = false;
+                break;
+            }
+        }
         for(i = 0; i < count; i++){
     	    selectForm.elements["item_" + i].checked = check;
         }
