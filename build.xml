@@ -189,6 +189,7 @@
     	<pathelement location="${lib}/commons-jxpath-1.3.jar" />
     	<pathelement location="${lib}/commons-logging-1.1.1.jar" />
     	<pathelement location="${lib}/jakarta-oro-2.0.7.jar" />
+    	<pathelement location="${lib}/jcifs-1.3.14.jar" />
     	<pathelement location="${lib}/jsch-0.1.42.jar" />
     	<pathelement location="${lib}/log4j-1.2.9.jar" />
     	<pathelement location="${lib}/mysql-connector-java-5.1.7-bin.jar" />

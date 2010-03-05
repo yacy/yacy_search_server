@@ -28,14 +28,22 @@ package net.yacy.kelondro.data.meta;
 // and to prevent that java.net.URL usage causes DNS queries which are used in java.net.
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.UnknownHostException;
 import java.text.Collator;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import jcifs.smb.SmbException;
+import jcifs.smb.SmbFile;
+import jcifs.smb.SmbFileInputStream;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -104,11 +112,37 @@ public class DigestURI implements Serializable {
         parseURLString(url);
         this.hash = hash;
     }
+    
+    public static final boolean isHTTP(String s) { return s.startsWith("http://"); }
+    public static final boolean isHTTPS(String s) { return s.startsWith("https://"); }
+    public static final boolean isFTP(String s) { return s.startsWith("ftp://"); }
+    public static final boolean isFile(String s) { return s.startsWith("file://"); }
+    public static final boolean isSMB(String s) { return s.startsWith("smb://") || s.startsWith("\\\\"); }
+
+    public final boolean isHTTP()  { return this.protocol.equals("http"); }
+    public final boolean isHTTPS() { return this.protocol.equals("https"); }
+    public final boolean isFTP()   { return this.protocol.equals("ftp"); }
+    public final boolean isFile()  { return this.protocol.equals("file"); }
+    public final boolean isSMB()   { return this.protocol.equals("smb"); }
 
     private void parseURLString(String url) throws MalformedURLException {
         // identify protocol
         assert (url != null);
         url = url.trim();
+        if (url.startsWith("\\\\")) {
+            url = "smb://" + url.substring(2).replaceAll("\\\\", "/");
+        }
+        
+        if (url.charAt(1) == ':') {
+            // maybe a DOS drive path
+            url = "file://" + url;
+        }
+        
+        if (url.charAt(0) == '/') {
+            // maybe a unix/linux absolute path
+            url = "file://" + url;
+        }
+        
         int p = url.indexOf(':');
         if (p < 0) {
             url = "http://" + url;
@@ -142,7 +176,7 @@ public class DigestURI implements Serializable {
             if (host.length() < 4 && !protocol.equals("file")) throw new MalformedURLException("host too short: '" + host + "'");
             if (host.indexOf('&') >= 0) throw new MalformedURLException("invalid '&' in host");
             path = resolveBackpath(path);
-            identPort(url, (protocol.equals("http") ? 80 : ((protocol.equals("https")) ? 443 : ((protocol.equals("ftp")) ? 21 : -1))));
+            identPort(url, (isHTTP() ? 80 : (isHTTPS() ? 443 : (isFTP() ? 21 : (isSMB() ? 445 : -1)))));
             identRef();
             identQuest();
             escape();
@@ -209,7 +243,7 @@ public class DigestURI implements Serializable {
         if (!Punycode.isBasic(host)) try {
             final String[] domainParts = patternDot.split(host, 0);
             StringBuilder buffer = new StringBuilder();
-            // encode each domainpart seperately
+            // encode each domain-part separately
             for(int i=0; i<domainParts.length; i++) {
             final String part = domainParts[i];
             if(!Punycode.isBasic(part)) {
@@ -227,11 +261,11 @@ public class DigestURI implements Serializable {
 
     public static DigestURI newURL(final String baseURL, final String relPath) throws MalformedURLException {
         if ((baseURL == null) ||
-            (relPath.startsWith("http://")) ||
-            (relPath.startsWith("https://")) ||
-            (relPath.startsWith("ftp://")) ||
-            (relPath.startsWith("file://")) ||
-            (relPath.startsWith("smb://")) /*||
+            isHTTP(relPath) ||
+            isHTTPS(relPath) ||
+            isFTP(relPath) ||
+            isFile(relPath) ||
+            isSMB(relPath)/*||
             relPath.contains(":") && patternMail.matcher(relPath.toLowerCase()).find()*/) {
             return new DigestURI(relPath, null);
         }
@@ -240,18 +274,18 @@ public class DigestURI implements Serializable {
     
     public static DigestURI newURL(final DigestURI baseURL, final String relPath) throws MalformedURLException {
         if ((baseURL == null) ||
-            (relPath.startsWith("http://")) ||
-            (relPath.startsWith("https://")) ||
-            (relPath.startsWith("ftp://")) ||
-            (relPath.startsWith("file://")) ||
-            (relPath.startsWith("smb://")) /*||
+            isHTTP(relPath) ||
+            isHTTPS(relPath) ||
+            isFTP(relPath) ||
+            isFile(relPath) ||
+            isSMB(relPath)/*||
             relPath.contains(":") && patternMail.matcher(relPath.toLowerCase()).find()*/) {
             return new DigestURI(relPath, null);
         }
         return new DigestURI(baseURL, relPath);
     }
     
-    private DigestURI(final DigestURI baseURL, String relPath) throws MalformedURLException {
+    public DigestURI(final DigestURI baseURL, String relPath) throws MalformedURLException {
         if (baseURL == null) throw new MalformedURLException("base URL is null");
         if (relPath == null) throw new MalformedURLException("relPath is null");
 
@@ -268,11 +302,11 @@ public class DigestURI implements Serializable {
         if (relPath.toLowerCase().startsWith("javascript:")) {
             this.path = baseURL.path;
         } else if (
-                (relPath.startsWith("http://")) ||
-                (relPath.startsWith("https://")) ||
-                (relPath.startsWith("ftp://")) ||
-                (relPath.startsWith("file://")) ||
-                (relPath.startsWith("smb://"))) {
+                isHTTP(relPath) ||
+                isHTTPS(relPath) ||
+                isFTP(relPath) ||
+                isFile(relPath) ||
+                isSMB(relPath)) {
             this.path = baseURL.path;
         } else if (relPath.contains(":") && patternMail.matcher(relPath.toLowerCase()).find()) { // discards also any unknown protocol from previous if
             throw new MalformedURLException("relative path malformed: " + relPath);
@@ -319,15 +353,6 @@ public class DigestURI implements Serializable {
     //  resolve '..'
     public String resolveBackpath(final String path) {
         String p = path;
-
-        /* original version by [MC]
-        int p;
-        while ((p = path.indexOf("/..")) >= 0) {
-            String head = path.substring(0, p);
-            int q = head.lastIndexOf('/');
-            if (q < 0) throw new MalformedURLException("backpath cannot be resolved in path = " + path);
-            path = head.substring(0, q) + path.substring(p + 3);
-        }*/
         
         /* by [MT] */
         if (p.length() == 0 || p.charAt(0) != '/') { p = "/" + p; }
@@ -692,21 +717,23 @@ public class DigestURI implements Serializable {
         boolean defaultPort = false;
         if (this.protocol.equals("mailto")) {
             return this.protocol + ":" + this.userInfo + "@" + this.host;
-        } else if (this.protocol.equals("http")) {
+        } else if (isHTTP()) {
             if (this.port < 0 || this.port == 80)  { defaultPort = true; }
-        } else if (this.protocol.equals("ftp")) {
-            if (this.port < 0 || this.port == 21)  { defaultPort = true; }
-        } else if (this.protocol.equals("https")) {
+        } else if (isHTTPS()) {
             if (this.port < 0 || this.port == 443) { defaultPort = true; }
-        } else if (this.protocol.equals("file")) {
+        } else if (isFTP()) {
+            if (this.port < 0 || this.port == 21)  { defaultPort = true; }
+        } else if (isSMB()) {
+            if (this.port < 0 || this.port == 445)  { defaultPort = true; }
+        } else if (isFile()) {
             defaultPort = true;
         }
         final String path = this.getFile(excludeReference, removeSessionID);
         
         if (defaultPort) {
             return
-              this.protocol + ":" +
-              ((this.getHost() == null) ? "" : "//" + ((this.userInfo != null) ? (this.userInfo + "@") : ("")) + this.getHost().toLowerCase()) +
+              this.protocol + "://" +
+              ((this.getHost() == null) ? "" : ((this.userInfo != null) ? (this.userInfo + "@") : ("")) + this.getHost().toLowerCase()) +
               path;
         }
         return this.protocol + "://" +
@@ -806,7 +833,7 @@ public class DigestURI implements Serializable {
         assert this.hash == null; // should only be called if the hash was not computed before
 
         final int id = Domains.getDomainID(this.host); // id=7: tld is local
-        final boolean isHTTP = this.protocol.equals("http");
+        final boolean isHTTP = isHTTP();
         int p = (host == null) ? -1 : this.host.lastIndexOf('.');
         String dom = (p > 0) ? dom = host.substring(0, p) : "";
         p = dom.lastIndexOf('.'); // locate subdomain
@@ -989,6 +1016,156 @@ public class DigestURI implements Serializable {
         return language;
     }
 
+    // The DigestURI may be used to integrate File- and SMB accessed into one object
+    // some extraction methods that generate File/SmbFile objects from the DigestURI
+    
+    /**
+     * create a standard java URL.
+     * Please call isHTTP(), isHTTPS() and isFTP() before using this class
+     */
+    public java.net.URL getURL() {
+        if (!(isHTTP() || isHTTPS() || isFTP())) throw new UnsupportedOperationException();
+        try {
+            return new java.net.URL(this.toNormalform(false, true));
+        } catch (MalformedURLException e) {
+            // this should never happen because this class returns proper url objects
+            Log.logException(e);
+            return null;
+        }
+    }
+    
+    /**
+     * create a standard java File.
+     * Please call isFile() before using this class
+     */
+    public java.io.File getFSFile() {
+        if (!isFile()) throw new UnsupportedOperationException();
+        return new java.io.File(this.toNormalform(false, true).substring(7));
+    }
+    
+    /**
+     * create a smb File
+     * Please call isSMB() before using this class
+     * @throws MalformedURLException 
+     */
+    public SmbFile getSmbFile() throws MalformedURLException {
+        if (!isSMB()) throw new UnsupportedOperationException();
+        return new SmbFile(this.toNormalform(false, true));
+    }
+    
+    // some methods that let the DigestURI look like a java.io.File object
+    // to use these methods the object must be either of type isFile() or isSMB() 
+    
+    public boolean exists() {
+        if (isFile()) return getFSFile().exists();
+        if (isSMB()) try {return getSmbFile().exists();}
+            catch (SmbException e) {return false;}
+            catch (MalformedURLException e) {return false;}
+        return false;
+    }
+    
+    public boolean canRead() {
+        if (isFile()) return getFSFile().canRead();
+        if (isSMB()) try {return getSmbFile().canRead();}
+            catch (SmbException e) {return false;}
+            catch (MalformedURLException e) {return false;}
+        return false;
+    }
+    
+    public boolean canWrite() {
+        if (isFile()) return getFSFile().canWrite();
+        if (isSMB()) try {return getSmbFile().canWrite();}
+            catch (SmbException e) {return false;}
+            catch (MalformedURLException e) {return false;}
+        return false;
+    }
+    
+    public boolean canExecute() {
+        if (isFile()) return getFSFile().canExecute();
+        if (isSMB()) return false; // no execute over smb
+        return false;
+    }
+    
+    public boolean isHidden() {
+        if (isFile()) return getFSFile().isHidden();
+        if (isSMB()) try {return getSmbFile().isHidden();}
+            catch (SmbException e) {return false;}
+            catch (MalformedURLException e) {return false;}
+        return false;
+    }
+    
+    public boolean isDirectory() {
+        if (isFile()) return getFSFile().isDirectory();
+        if (isSMB()) try {return getSmbFile().isDirectory();}
+            catch (SmbException e) {return false;}
+            catch (MalformedURLException e) {return false;}
+        return false;
+    }
+    
+    public long length() {
+        if (isFile()) return getFSFile().length();
+        if (isSMB()) try {return getSmbFile().length();}
+            catch (SmbException e) {return 0;}
+            catch (MalformedURLException e) {return 0;}
+        return 0;
+    }
+    
+    public long lastModified() {
+        if (isFile()) return getFSFile().lastModified();
+        if (isSMB()) try {return getSmbFile().lastModified();}
+            catch (SmbException e) {return 0;}
+            catch (MalformedURLException e) {return 0;}
+        return 0;
+    }
+    
+    public String getName() {
+        if (isFile()) return getFSFile().getName();
+        if (isSMB()) try {return getSmbFile().getName();} catch (MalformedURLException e) {return null;}
+        return null;
+    }
+    
+    public String[] list() {
+        if (isFile()) return getFSFile().list();
+        if (isSMB()) try {return getSmbFile().list();}
+            catch (SmbException e) {return null;}
+            catch (MalformedURLException e) {return null;}
+        return null;
+    }
+    
+    public InputStream getInputStream() throws IOException {
+        if (isFile()) return new MultiProtocolInputStream(getFSFile());
+        if (isSMB()) return new MultiProtocolInputStream(getSmbFile());
+        return null;
+    }
+    
+    public class MultiProtocolInputStream extends InputStream {
+        private InputStream is;
+        
+        public MultiProtocolInputStream(File jf) throws IOException {
+            this.is = new FileInputStream(jf);
+        }
+        
+        public MultiProtocolInputStream(SmbFile sf) throws IOException {
+            try {
+                this.is = new SmbFileInputStream(sf);
+            } catch (SmbException e) {
+                throw new IOException(e);
+            } catch (MalformedURLException e) {
+                throw new IOException(e);
+            } catch (UnknownHostException e) {
+                throw new IOException(e);
+            }
+        }
+        
+        @Override
+        public int read() throws IOException {
+            return this.is.read();
+        }
+
+    }
+    
+    //---------------------
+    
     private static final String splitrex = " |/|\\(|\\)|-|\\:|_|\\.|,|\\?|!|'|" + '"';
     public static final Pattern splitpattern = Pattern.compile(splitrex);
     public static String[] urlComps(String normalizedURL) {
@@ -999,6 +1176,7 @@ public class DigestURI implements Serializable {
 
     public static void main(final String[] args) {
         final String[][] test = new String[][]{
+          new String[]{null, "C:WINDOWS\\CMD0.EXE"},
           new String[]{null, "file://C:WINDOWS\\CMD0.EXE"},
           new String[]{null, "file:/bin/yacy1"}, // file://<host>/<path> may have many '/' if the host is omitted and the path starts with '/'
           new String[]{null, "file:///bin/yacy2"}, // file://<host>/<path> may have many '/' if the host is omitted and the path starts with '/'
@@ -1036,7 +1214,12 @@ public class DigestURI implements Serializable {
           new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&showuser=23585"},
           new String[]{null, "http://diskusjion.no/index.php?s=5bad5f431a106d9a8355429b81bb0ca5&amp;showuser=23585"},
           new String[]{null, "http://www.scc.kit.edu/publikationen/80.php?PHPSESSID=5f3624d3e1c33d4c086ab600d4d5f5a1"},
-          new String[]{null, "http://www.scc.kit.edu/publikationen/80.php"}
+          new String[]{null, "smb://localhost/"},
+          new String[]{null, "smb://localhost/repository"}, // paths must end with '/'
+          new String[]{null, "smb://localhost/repository/"},
+          new String[]{null, "\\\\localhost\\"}, // Windows-like notion of smb shares
+          new String[]{null, "\\\\localhost\\repository"},
+          new String[]{null, "\\\\localhost\\repository\\"}
           };
         DigestURI.initSessionIDNames(new File("defaults/sessionid.names"));
         String environment, url;
