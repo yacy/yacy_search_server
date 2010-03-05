@@ -69,8 +69,8 @@ public class Tables_p {
         
         if (post != null && post.get("deleterows", "").length() > 0) {
             for (Map.Entry<String, String> entry: post.entrySet()) {
-                if (entry.getKey().startsWith("mark_") && entry.getValue().equals("on")) try {
-                    sb.tables.delete(table, entry.getKey().substring(5).getBytes());
+                if (entry.getValue().startsWith("mark_")) try {
+                    sb.tables.delete(table, entry.getValue().substring(5).getBytes());
                 } catch (IOException e) {
                     Log.logException(e);
                 }
@@ -125,7 +125,8 @@ public class Tables_p {
                     row = mapIterator.next();
                     if (row == null) continue;
                     prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
-                    prop.put("showtable_list_" + count + "_pk",  new String(row.getPK()));
+                    prop.put("showtable_list_" + count + "_pk", new String(row.getPK()));
+                    prop.put("showtable_list_" + count + "_count", count);
                     for (int i = 0; i < columns.size(); i++) {
                         cell = row.from(columns.get(i));
                         prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cell == null ? "" : new String(cell));
@@ -138,6 +139,7 @@ public class Tables_p {
                 Log.logException(e);
             }
             prop.put("showtable_list", count);
+            prop.put("showtable_num", count);
         }
         
         if (post != null && table != null && post.containsKey("editrow")) {

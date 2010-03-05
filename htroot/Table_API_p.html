@@ -8,22 +8,16 @@
     #%env/templates/metas.template%#
     <script>
     <!--
-    function selectall(name){
+    function setall(name, check){
         var selectForm = document.forms.namedItem(name);
         var count = selectForm.elements["num"].value;
         for(i = 0; i < count; i++){
-    	    selectForm.elements["item_" + i].checked = true;
-        }
-    }
-    function deselectall(name){
-        var selectForm = document.forms.namedItem(name);
-        var count = selectForm.elements["num"].value;
-        for(i = 0; i < count; i++){
-            selectForm.elements["item_" + i].checked = false;
+    	    selectForm.elements["item_" + i].checked = check;
         }
     }
     -->
-    </script> </head>
+    </script>
+  </head>
   <body id="Tables">
     #%env/templates/header.template%#
     
@@ -39,7 +33,7 @@
       <legend><label for="table">Recorded Actions</label></legend>
       <table border="0" cellpadding="2" cellspacing="1">
         <tr class="TableHeader" valign="bottom">
-          <td><input type="checkbox" name="allswitch" onselect="selectall(this.form.name)" ondeselect="deselectall(this.form.name)"/></td>
+          <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name, this.value)" /></td>
           <td>Date</td>
           <td>Type</td>
           <td>Comment</td>
@@ -57,8 +51,6 @@
       </table>
       <p>
       <input type="hidden" name="num" value="#[num]#" />
-      <input type="button" onclick="selectall(this.form.name)" value="Select All" />
-      <input type="button" onclick="deselectall(this.form.name)" value="Deselect All" />&nbsp;&nbsp;&nbsp;&nbsp;
       <input type="submit" name="execrows" value="Execute Selected Actions" />
       <input type="submit" name="deleterows" value="Delete Selected Actions" />
       </p>

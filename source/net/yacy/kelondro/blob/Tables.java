@@ -361,9 +361,12 @@ public class Tables {
         TreeMap<String, Row> sortTree = new TreeMap<String, Row>();
         Iterator<Row> i = iterator(table, whereKey, whereValue);
         Row row;
+        byte[] r;
         while ((maxcount < 0 || maxcount-- > 0) && i.hasNext()) {
             row = i.next();
-            sortTree.put(new String(row.from(sortField)) + new String(row.pk), row);
+            r = row.from(sortField);
+            if (r == null) continue;
+            sortTree.put(new String(r) + new String(row.pk), row);
         }
         return sortTree.values();
     }
@@ -439,6 +442,12 @@ public class Tables {
         
         public byte[] from(String colname) {
             return this.map.get(colname);
+        }
+        
+        public byte[] from(String colname, byte[] dflt) {
+            byte[] r = this.map.get(colname);
+            if (r == null) return dflt;
+            return r;
         }
         
         public String toString() {

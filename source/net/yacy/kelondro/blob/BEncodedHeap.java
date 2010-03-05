@@ -80,7 +80,7 @@ public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte
             final File location,
             final int keylength) throws IOException {
         this.table = new Heap(location, keylength, NaturalOrder.naturalOrder, 100);
-        this.columnames = new LinkedHashSet<String>();  
+        this.columnames = new LinkedHashSet<String>();
     }
     
     public byte[] encodedKey(String key) {

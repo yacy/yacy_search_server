@@ -6,6 +6,17 @@
     <link rel="alternate" type="application/xml" title="Tables" href="Tables.rss?table=#[table]#" />
     #(/showtable)#
     #%env/templates/metas.template%#
+    <script>
+    <!--
+    function setall(name, check){
+        var selectForm = document.forms.namedItem(name);
+        var count = selectForm.elements["num"].value;
+        for(i = 0; i < count; i++){
+    	    selectForm.elements["item_" + i].checked = check;
+        }
+    }
+    -->
+    </script>
   </head>
   <body id="Tables">
     #%env/templates/header.template%#
@@ -28,12 +39,12 @@
     </fieldset>
     </form>
     #(showtable)#::
-    <form action="Tables_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8">
+    <form action="Tables_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" name="tablelisting">
       <fieldset>
       <legend><label for="table">Table Editor: showing table '#[table]#'</label></legend>
       <table border="0" cellpadding="2" cellspacing="1">
         <tr class="TableHeader" valign="bottom">
-          <td>&nbsp;</td>
+          <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name, this.value)" /></td>
           <td>PK</td>
           #{columns}#
           <td>#[header]#</td>
@@ -41,7 +52,7 @@
         </tr>
         #{list}#
         <tr class="TableCell#(dark)#Light::Dark::Summary#(/dark)#">
-          <td align="left"><input type="checkbox" name="mark_#[pk]#" /></td>
+          <td align="left"><input type="checkbox" name="item_#[count]#" value="mark_#[pk]#" /></td>
           <td>#[pk]#</td>
           #{columns}#
           <td align="left">#[cell]#</td>
@@ -51,6 +62,7 @@
       </table>
       <p>
       <input type="hidden" name="table" value="#[table]#" />
+      <input type="hidden" name="num" value="#[num]#" />
       <input type="submit" name="editrow" value="Edit Selected Row" />
       <input type="submit" name="addrow" value="Add a new Row" />&nbsp;&nbsp;&nbsp;&nbsp;
       <input type="submit" name="deleterows" value="Delete Selected Rows" />

@@ -9,17 +9,29 @@
     #%env/templates/simpleheader.template%#
     ::
     #%env/templates/header.template%#
+    #%env/templates/submenuIndexControl.template%#
     ::
     #%env/templates/embeddedheader.template%#
     #(/display)#
     <h2>View URL Content</h2>
 
+    <form method="get" action="ViewFile.html" accept-charset="ascii">
+      <fieldset><legend>Get URL Viewer</legend>
+        <dl>
+          <dt>URL:</dt><dd><input type="text" size="60" name="url" value="#[url]#" />&nbsp;<input type="submit" name="show" value="Show" /></dd>
+          </dd>
+        </dl>
+        <input type="hidden" name="display" value="#[display]#" />
+      </fieldset>
+    </form>
     #(error)#
     <form method="get" action="ViewFile.html" accept-charset="ascii">
-      <fieldset><legend>View URL Content</legend>
+      <fieldset><legend>URL Metadata</legend>
         <dl>
           <dt>URL:</dt>        <dd><a href="#[url]#">#[url]#</a></dd>
           <dt>Hash:</dt>       <dd><a href="/api/yacydoc.html?urlhash=#[hash]#">#[hash]#</a></dd>
+          <dt>In URL-DB:</dt>  <dd>#(inurldb)#no::yes#(/inurldb)#</dd>
+          <dt>In Cache:</dt>   <dd>#(incache)#no::yes#(/incache)#</dd>
           <dt>Word Count:</dt> <dd>#[wordCount]#</dd>
           <dt>Description:</dt><dd>#[desc]#</dd>
           <dt>Size:</dt>       <dd>#[size]# Bytes</dd>#(mimeTypeAvailable)#::
@@ -40,10 +52,10 @@
         <input type="hidden" name="words" value="#[words]#" />
         <input type="hidden" name="urlHash" value="#[hash]#" />
         <input type="hidden" name="display" value="#[display]#" />
+        <input type="hidden" name="url" value="#[url]#" />
       </fieldset>
     </form>
 :: <!-- 1 -->
-<span class="error">No URL hash submitted.</span>
 :: <!-- 2 -->
 <span class="error">Unable to find URL Entry in DB</span>
 :: <!-- 3 -->
@@ -61,25 +73,25 @@
 <p>
 #(viewMode)#
 :: <!-- 1 -->
-	<fieldset><legend>Plain Resource Content</legend>
+	<fieldset><legend>Plain Content</legend>
 	  <p class="tt">
 	    #[plainText]#
 	  </p>
 	</fieldset>
 :: <!-- 2 -->
-	<fieldset><legend>Parsed Resource Content</legend>
+	<fieldset><legend>Parsed Content</legend>
 	  <p class="tt">
 	    #[parsedText]#
 	  </p>
 	</fieldset>
 :: <!-- 3 -->
-	<fieldset><legend>Parsed Resource Sentences</legend>
+	<fieldset><legend>Parsed Sentences</legend>
 	  <ol>#{sentences}#
 		<li class="tt">#[text]#</li>#{/sentences}#
 	  </ol>
 	</fieldset>
 :: <!-- 4 -->
-	<fieldset><legend>Original Resource Content</legend>
+	<fieldset><legend>Original Content</legend>
 	  <iframe src="#[url]#" width="800" height="400" />
 	</fieldset>
 :: <!-- 5 -->

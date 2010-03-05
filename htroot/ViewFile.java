@@ -74,11 +74,23 @@ public class ViewFile {
         final serverObjects prop = new serverObjects();
         final Switchboard sb = (Switchboard)env;
         
-        final int display = (post == null) ? 0 : post.getInt("display", 0);
+        if (post == null) {
+            prop.put("display", 1);
+            prop.put("error_display", 0);
+            prop.putHTML("error_words", "");
+            prop.put("error_vMode-sentences", "1");
+            prop.put("error", "1");
+            prop.put("url", "");
+            prop.put("viewMode", VIEW_MODE_NO_TEXT);
+            return prop;
+        }
+        
+        
+        final int display = post.getInt("display", 1);
         
         // get segment
         Segment indexSegment = null;
-        if (post != null && post.containsKey("segment")) {
+        if (post.containsKey("segment")) {
             String segmentName = post.get("segment");
             if (sb.indexSegments.segmentExist(segmentName)) {
                 indexSegment = sb.indexSegments.segment(segmentName);
@@ -91,7 +103,7 @@ public class ViewFile {
         prop.put("display", display);
         prop.put("error_display", display);
 
-        if (post != null && post.containsKey("words"))
+        if (post.containsKey("words"))
             prop.putHTML("error_words", post.get("words"));
         else {
             prop.putHTML("error_words", "");
@@ -108,17 +120,10 @@ public class ViewFile {
         
         // get the url hash from which the content should be loaded
         String urlHash = post.get("urlHash","");
-        if (urlHash.length() > 0) {
-            // get the urlEntry that belongs to the url hash
-            URIMetadataRow urlEntry = null;
-            urlEntry = indexSegment.urlMetadata().load(urlHash, null, 0);
-            if (urlEntry == null) {
-                prop.put("error", "2");
-                prop.put("viewMode",VIEW_MODE_NO_TEXT);
-                return prop;
-            }            
-            
-                // getting the url that belongs to the entry
+        URIMetadataRow urlEntry = null;
+        // get the urlEntry that belongs to the url hash
+        if (urlHash.length() > 0 && (urlEntry = indexSegment.urlMetadata().load(urlHash, null, 0)) != null) {
+            // get the url that belongs to the entry
             final URIMetadataRow.Components metadata = urlEntry.metadata();
             if ((metadata == null) || (metadata.url() == null)) {
                 prop.put("error", "3");
@@ -132,6 +137,8 @@ public class ViewFile {
             pre = urlEntry.flags().get(Condenser.flag_cat_indexof);
         }
 
+        prop.put("error_inurldb", urlEntry == null ? 0 : 1);
+        
         // alternatively, get the url simply from a url String
         // this can be used as a simple tool to test the text parser
         final String urlString = post.get("url", "");
@@ -154,10 +161,15 @@ public class ViewFile {
         if (url == null) {
             prop.put("error", "1");
             prop.put("viewMode", VIEW_MODE_NO_TEXT);
+            prop.put("url", "");
             return prop;
+        } else {
+            prop.put("url", url.toNormalform(false, true));
         }
 
         // loading the resource content as byte array
+        prop.put("error_incache", Cache.has(url) ? 1 : 0);
+        
         byte[] resource = null;
         ResponseHeader responseHeader = null;
         String resMime = null;
