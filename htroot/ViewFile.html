@@ -39,7 +39,8 @@
           <dt><label for="viewMode">View as</label>:</dt>
           <dd>
             <select id="viewMode" name="viewMode">
-              <option value="iframe"#(vMode-iframe)#:: selected="selected"#(/vMode-iframe)#>Original</option>
+              <option value="iframeWeb"#(vMode-iframeWeb)#:: selected="selected"#(/vMode-iframeWeb)#>Original from Web</option>
+              <option value="iframeCache"#(vMode-iframeCache)#:: selected="selected"#(/vMode-iframeCache)#>Original from Cache</option>
               <option value="plain"#(vMode-plain)#:: selected="selected"#(/vMode-plain)#>Plain Text</option>
               <option value="parsed"#(vMode-parsed)#:: selected="selected"#(/vMode-parsed)#>Parsed Text</option>
               <option value="sentences"#(vMode-sentences)#:: selected="selected"#(/vMode-sentences)#>Parsed Sentences</option>
@@ -73,7 +74,7 @@
 <p>
 #(viewMode)#
 :: <!-- 1 -->
-	<fieldset><legend>Plain Content</legend>
+	<fieldset><legend>Original Content from Web</legend>
 	  <p class="tt">
 	    #[plainText]#
 	  </p>
@@ -91,10 +92,14 @@
 	  </ol>
 	</fieldset>
 :: <!-- 4 -->
-	<fieldset><legend>Original Content</legend>
+	<fieldset><legend>Original from Web</legend>
 	  <iframe src="#[url]#" width="800" height="400" />
 	</fieldset>
 :: <!-- 5 -->
+	<fieldset><legend>Original from Cache</legend>
+	  <iframe src="/CacheResource_p.html?url=#[url]#" width="800" height="400" />
+	</fieldset>
+:: <!-- 6 -->
 	<h3>Link List</h3><br>
 	<table border="0" cellpadding="2" cellspacing="1">
 		#{links}#
@@ -106,7 +111,7 @@
 			<td class="tt">#[attr]#</tt></td>
 		</tr>#{/links}#
 	</table>	
-:: <!-- 6 -->
+:: <!-- 7 -->
 	<fieldset><legend>Parsed Tokens</legend>
 	  <ol>#{words}#
 		<li class="tt">#[word]#</li>#{/words}#

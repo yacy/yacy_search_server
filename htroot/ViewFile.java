@@ -62,9 +62,10 @@ public class ViewFile {
     public static final int VIEW_MODE_AS_PLAIN_TEXT = 1;
     public static final int VIEW_MODE_AS_PARSED_TEXT = 2;
     public static final int VIEW_MODE_AS_PARSED_SENTENCES = 3;
-    public static final int VIEW_MODE_AS_IFRAME = 4;
-    public static final int VIEW_MODE_AS_LINKLIST = 5;
-    public static final int VIEW_MODE_AS_PARSED_WORDS = 6;
+    public static final int VIEW_MODE_AS_IFRAME_FROM_WEB = 4;
+    public static final int VIEW_MODE_AS_IFRAME_FROM_CACHE = 5;
+    public static final int VIEW_MODE_AS_LINKLIST = 6;
+    public static final int VIEW_MODE_AS_PARSED_WORDS = 7;
     
     private static final String HIGHLIGHT_CSS = "searchHighlight";
     private static final int MAX_HIGHLIGHTS = 6;
@@ -259,8 +260,12 @@ public class ViewFile {
             prop.put("viewMode", VIEW_MODE_AS_PLAIN_TEXT);
             prop.put("viewMode_plainText", markup(wordArray, content).replaceAll("\n", "<br />").replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;"));
             
-        } else if (viewMode.equals("iframe")) {
-            prop.put("viewMode", VIEW_MODE_AS_IFRAME);
+        } else if (viewMode.equals("iframeWeb")) {
+            prop.put("viewMode", VIEW_MODE_AS_IFRAME_FROM_WEB);
+            prop.put("viewMode_url", url.toNormalform(false, true));
+            
+        } else if (viewMode.equals("iframeCache")) {
+            prop.put("viewMode", VIEW_MODE_AS_IFRAME_FROM_CACHE);
             prop.put("viewMode_url", url.toNormalform(false, true));
             
         } else if (viewMode.equals("parsed") || viewMode.equals("sentences")  || viewMode.equals("words") || viewMode.equals("links")) {

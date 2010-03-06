@@ -334,6 +334,9 @@ public final class LoaderDispatcher {
                     } else {
                         resContent = Cache.getContent(url); 
                     }
+                    
+                    // read a fresh header
+                    responseHeader = entry.getResponseHeader();
                 }
                 
                 // if it is still not available, report an error

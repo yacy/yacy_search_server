@@ -1,6 +1,5 @@
 // CacheResource_p.java 
 // -----------------------
-// part of the AnomicHTTPD caching proxy
 // (C) by Michael Peter Christen; mc@yacy.net
 // first published on http://www.anomic.de
 // Frankfurt, Germany, 2004
@@ -23,41 +22,48 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-// You must compile this file with
-// javac -classpath .:../classes CacheResource_p.java
-// if the shell's current path is HTROOT
 
-import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
 
-import net.yacy.kelondro.util.FileUtils;
+import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.logging.Log;
 
+import de.anomic.http.client.Cache;
 import de.anomic.http.server.RequestHeader;
-import de.anomic.search.Switchboard;
-import de.anomic.search.SwitchboardConstants;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
 public class CacheResource_p {
 
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
-        final Switchboard switchboard = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-
-        final String path = ((post == null) ? "" : post.get("path", ""));
-
-        // we dont need check the path, because we have do that in plasmaSwitchboard.java - Borg-0300
-        final File cache = switchboard.getConfigPath(SwitchboardConstants.HTCACHE_PATH, SwitchboardConstants.HTCACHE_PATH_DEFAULT);
-
-        final File f = new File(cache, path);
-        byte[] resource;
-
+        prop.put("resource", new byte[0]);
+        
+        if (post == null) return prop;
+        
+        final String u = post.get("url", "");
+        DigestURI url;
         try {
-            resource = FileUtils.read(f);
-            prop.put("resource", resource);
-        } catch (final IOException e) {
-            prop.put("resource", new byte[0]);
+            url = new DigestURI(u, null);
+        } catch (MalformedURLException e) {
+            Log.logException(e);
+            return prop;
         }
+        
+        byte[] resource = null;
+        // trying to load the resource body
+        try {
+            resource = Cache.getContent(url);
+        } catch (IOException e) {
+            Log.logException(e);
+            return prop;
+        }
+        if (resource == null) return prop;
+        //ResponseHeader responseHeader = Cache.getResponseHeader(url);
+        //String resMime = responseHeader.mime();
+        
+        prop.put("resource", resource);
         return prop;
     }
 }

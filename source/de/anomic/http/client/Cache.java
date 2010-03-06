@@ -182,22 +182,6 @@ public final class Cache {
         return new ResponseHeader(null, hdb);
     }
     
-    /**
-     * Returns the content of a cached resource as {@link InputStream}
-     * @param url the requested resource
-     * @return the resource content as {@link InputStream}. In no data
-     * is available or the cached file is not readable, <code>null</code>
-     * is returned.
-     * @throws IOException 
-     */
-    /*
-    public static InputStream getContentStream(final DigestURI url) throws IOException {
-        // load the url as resource from the cache
-        byte[] b = getContent(url);
-        if (b == null) return null;
-        return new ByteArrayInputStream(b);
-    }
-    */
     
     /**
      * Returns the content of a cached resource as byte[]
@@ -217,33 +201,6 @@ public final class Cache {
         }
     }
     
-    /**
-     * requesting the content length of a resource is discouraged since it may
-     * be performed by loading of the resource from the cache and then measuring the
-     * size after decompression of the content. This may use a lot of CPU resources
-     * and maybe cause also high IO. Please omit usage of this method as much as possible.
-     * @param url
-     * @return the size of the cached content
-     */
-    /*
-    public static long getResourceContentLength(final DigestURI url) {
-        // first try to get the length from the response header,
-        // this is less costly than loading the content from its gzipped cache
-        ResponseHeader responseHeader = getResponseHeader(url);
-        if (responseHeader != null) {
-            long length = responseHeader.getContentLength();
-            if (length > 0) return length; 
-        }
-        // load the url as resource from the cache (possibly decompress it),
-        // and get the length from the content array size
-        try {
-            return fileDB.length(url.hash().getBytes("UTF-8"));
-        } catch (IOException e) {
-            Log.logException(e);
-            return -1;
-        }
-    }
-     */
     
     /**
      * removed response header and cached content from the database
