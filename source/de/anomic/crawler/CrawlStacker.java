@@ -266,11 +266,11 @@ public final class CrawlStacker {
             // do double-check
             if ((dbocc != null) && (!recrawl)) {
                 if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
-                return "double " + dbocc;
+                return "double in: " + dbocc;
             }
             if ((oldEntry != null) && (!recrawl)) {
                 if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in 'LURL'. " + "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
-                return "double LURL";
+                return "double in: LURL";
             }
 
             // show potential re-crawl
