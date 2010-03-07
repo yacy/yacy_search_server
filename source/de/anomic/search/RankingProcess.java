@@ -64,7 +64,7 @@ public final class RankingProcess extends Thread {
     public  static BinSearch[] ybrTables = null; // block-rank tables
     public  static final int maxYBR = 3; // the lower this value, the faster the search
     private static boolean useYBR = true;
-    private static final int maxDoubleDomAll = 20, maxDoubleDomSpecial = 10000;
+    private static final int maxDoubleDomAll = 100, maxDoubleDomSpecial = 10000;
     
     private final QueryParams query;
     private final int maxentries;
