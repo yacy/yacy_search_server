@@ -343,12 +343,14 @@ public class Client {
             parts = new Part[0];
         }
         RequestEntity data = new MultipartRequestEntity(parts, post.getParams());
+        /*
         if (gzipBody) {
             data = zipRequest(data);
 
             post.setRequestHeader(HeaderFramework.CONTENT_ENCODING, HeaderFramework.CONTENT_ENCODING_GZIP);
             post.setContentChunked(true);
         }
+        */
         post.setRequestEntity(data);
         // redirects in POST cause a "Entity enclosing requests cannot be redirected without user intervention" -
         // exception
