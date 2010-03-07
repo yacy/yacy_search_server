@@ -73,7 +73,7 @@ public class IndexCreateParserErrors_p {
             String initiatorHash, executorHash;
             yacySeed initiatorSeed, executorSeed;
             int j=0;
-            ArrayList<ZURL.Entry> l = sb.crawlQueues.errorURL.list(100);
+            ArrayList<ZURL.Entry> l = sb.crawlQueues.errorURL.list(showRejectedCount);
             ZURL.Entry entry;
             for (int i = l.size() - 1; i >= 0; i--) {
                 entry = l.get(i);

@@ -628,7 +628,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                 // listen for commands
                 listen();
             } catch (final IOException e) {
-                System.err.println("ERROR: (internal) " + e);        
+                Log.logException(e);
             } catch (final Exception e) {
                 Log.logException(e);
             } finally {

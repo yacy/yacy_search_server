@@ -376,7 +376,7 @@ public final class yacyClient {
                 return -1;
             }
         } catch (final IOException e) {
-            yacyCore.log.logSevere("yacyClient.queryUrlCount error asking peer '" + target.getName() + "':" + e.toString());
+            if (yacyCore.log.isFine()) yacyCore.log.logFine("yacyClient.queryUrlCount error asking peer '" + target.getName() + "':" + e.toString());
             return -1;
         }
     }
