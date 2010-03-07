@@ -2510,8 +2510,6 @@ to a scheduler for a periodic execution.==einem Scheduler für periodische Ausf�
 >Type==>Typ
 >Comment==>Kommentar
 #>URL==>URL
-"Select All"=="Alles auswählen"
-"Deselect All"=="Alles abwählen"
 "Execute Selected Actions"=="Führe ausgewählte Aktionen aus"
 "Delete Selected Actions"=="Lösche ausgewählte Aktionen"
 >Result of API execution==>Ergebnis der API Ausführung
@@ -2593,6 +2591,8 @@ New Password is empty.==Das neue Passwort ist leer.
 #---------------------------
 YaCy \'\#\[clientname\]\#\': View URL Content==YaCy '#[clientname]#': Zeige URL Inhalte
 View URL Content==Zeige URL Inhalte
+>Get URL Viewer<==>URL Betrachter<
+>URL Metadata<==>URL Metadaten<
 #URL==URL
 #Hash==Hash
 Word Count==Anzahl Wörter
@@ -2606,15 +2606,16 @@ Parsed Sentences==Geparste Sätze
 Parsed Tokens/Words==Geparste Zeichen/Wörter
 Link List==Linkliste
 "Show"=="Anzeigen"
-No URL hash submitted.==Es wurde kein URL Hash übertragen.
 Unable to find URL Entry in DB==Es war nicht möglich den URL Eintrag in der DB zu finden.
 Invalid URL==Ungültige URL
 Unable to download resource content.==Es war nicht möglich den Inhalt der Quelle runterzuladen.
 Unable to parse resource content.==Es war nicht möglich den Inhalt der Quelle zu parsen.
-Plain Resource Content==Reiner Quellen Inhalt
-Parsed Resource Content==Geparster Quellen Inhalt
-Parsed Resource Sentences==Geparste Quellen Sätze
-Original Resource Content==Original Quellen Inhalt
+Unsupported protocol.==Nicht unterstütztes Protokoll.
+>Original Content from Web<==>Quelltext aus dem Web<
+Parsed Content==Geparster Quellen Inhalt
+>Original from Web<==>Original aus dem Web<
+>Original from Cache<==>Original aus dem Cache<
+>Parsed Tokens<==>Geparste Zeichen/Wörter<
 #-----------------------------
 
 #File: ViewLog_p.html
@@ -2851,7 +2852,8 @@ Pictures==Bilder
 
 #File: yacysearchtrailer.html
 #---------------------------
->Domain Navigator==>Domain Navigator
+#>Domain Navigator==>Domain Navigator
+>Name Space Navigator==>Namespace Navigator
 >Author Navigator==>Autoren Navigator
 >Topic Navigator==>Themen Navigator
 #-----------------------------
@@ -2999,6 +3001,7 @@ User Profile==Benutzerprofil
 #Index Administration==Index Administration
 #RWI Admin==RWI Admin
 URL Reference Admin==URL Referenzen Admin
+URL Viewer==URL Betrachter
 #-----------------------------
 
 #File: env/templates/submenuIndexCreate.template
