@@ -138,10 +138,12 @@ public class CrawlQueues {
     public String urlExists(final String hash) {
         if (delegatedURL.exists(hash)) return "delegated";
         if (errorURL.exists(hash)) return "errors";
+        /*
+        if (noticeURL.existsInStack(hash)) return "crawler";
         for (final crawlWorker worker: workers.values()) {
             if (worker.request.url().hash().equals(hash)) return "worker";
         }
-        if (noticeURL.existsInStack(hash)) return "crawler";
+        */
         return null;
     }
     
@@ -154,9 +156,9 @@ public class CrawlQueues {
     public DigestURI getURL(final String urlhash) {
         assert urlhash != null;
         if (urlhash == null || urlhash.length() == 0) return null;
-        ZURL.Entry ee = delegatedURL.getEntry(urlhash);
+        ZURL.Entry ee = delegatedURL.get(urlhash);
         if (ee != null) return ee.url();
-        ee = errorURL.getEntry(urlhash);
+        ee = errorURL.get(urlhash);
         if (ee != null) return ee.url();
         for (final crawlWorker w: workers.values()) {
             if (w.request.url().hash().equals(urlhash)) return w.request.url();

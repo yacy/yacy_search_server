@@ -260,23 +260,36 @@ public final class CrawlStacker {
 
         // check if the url is double registered
         final String dbocc = nextQueue.urlExists(entry.url().hash()); // returns the name of the queue if entry exists
-        URIMetadataRow oldEntry = null;
-        if (dbocc != null || (oldEntry = indexSegment.urlMetadata().load(entry.url().hash(), null, 0)) != null) {
-            final boolean recrawl = (oldEntry != null) && (profile.recrawlIfOlder() > oldEntry.loaddate().getTime());
-            // do double-check
-            if ((dbocc != null) && (!recrawl)) {
+        URIMetadataRow oldEntry = indexSegment.urlMetadata().load(entry.url().hash(), null, 0);
+        if (oldEntry == null) {
+            if (dbocc != null) {
+                // do double-check
                 if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
-                return "double in: " + dbocc;
+                if (dbocc.equals("errors")) {
+                    ZURL.Entry errorEntry = nextQueue.errorURL.get(entry.url().hash());
+                    return "double in: errors (" + errorEntry.anycause() + ")";
+                } else {
+                    return "double in: " + dbocc;
+                }
             }
-            if ((oldEntry != null) && (!recrawl)) {
-                if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in 'LURL'. " + "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
-                return "double in: LURL";
-            }
-
-            // show potential re-crawl
-            if (recrawl && oldEntry != null) {
-                if (this.log.isFine()) this.log.logFine("RE-CRAWL of URL '" + entry.url().toString() + "': this url was crawled " +
+        } else {
+            final boolean recrawl = profile.recrawlIfOlder() > oldEntry.loaddate().getTime();
+            if (recrawl) {
+                if (this.log.isFine()) 
+                    this.log.logFine("RE-CRAWL of URL '" + entry.url().toString() + "': this url was crawled " +
                         ((System.currentTimeMillis() - oldEntry.loaddate().getTime()) / 60000 / 60 / 24) + " days ago.");
+            } else {
+                if (dbocc == null) {
+                    return "double in: LURL-DB";
+                } else {
+                    if (this.log.isFine()) this.log.logFine("URL '" + entry.url().toString() + "' is double registered in '" + dbocc + "'. " + "Stack processing time: " + (System.currentTimeMillis() - startTime) + "ms");
+                    if (dbocc.equals("errors")) {
+                        ZURL.Entry errorEntry = nextQueue.errorURL.get(entry.url().hash());
+                        return "double in: errors (" + errorEntry.anycause() + ")";
+                    } else {
+                        return "double in: " + dbocc;
+                    }
+                }
             }
         }
 

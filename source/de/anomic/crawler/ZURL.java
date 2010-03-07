@@ -127,9 +127,10 @@ public class ZURL implements Iterable<ZURL.Entry> {
             final int workcount,
             String anycause) {
         assert executor != null;
+        if (exists(bentry.url().hash())) return; // don't insert double causes
         if (anycause == null) anycause = "unknown";
         Entry entry = new Entry(bentry, executor, workdate, workcount, anycause);
-        entry.store();
+        put(entry);
         stack.add(entry.hash());
         while (stack.size() > maxStackSize) stack.poll();
     }
@@ -157,7 +158,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         }
 
         public ZURL.Entry next() {
-            return getEntry(hi.next());
+            return get(hi.next());
         }
 
         public void remove() {
@@ -166,7 +167,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         
     }
    
-    public ZURL.Entry getEntry(final String urlhash) {
+    public ZURL.Entry get(final String urlhash) {
         try {
             if (urlIndex == null) return null;
             //System.out.println("*** DEBUG ZURL " + this.urlIndex.filename() + " get " + urlhash);
@@ -179,6 +180,29 @@ public class ZURL implements Iterable<ZURL.Entry> {
         }
     }
 
+    /**
+     * private put (use push instead)
+     * @param entry
+     */
+    private void put(Entry entry) {
+        // stores the values from the object variables into the database
+        if (entry.stored) return;
+        if (entry.bentry == null) return;
+        final Row.Entry newrow = rowdef.newEntry();
+        newrow.setCol(0, entry.bentry.url().hash().getBytes());
+        newrow.setCol(1, entry.executor.getBytes());
+        newrow.setCol(2, entry.workdate.getTime());
+        newrow.setCol(3, entry.workcount);
+        newrow.setCol(4, entry.anycause.getBytes());
+        newrow.setCol(5, entry.bentry.toRow().bytes());
+        try {
+            if (urlIndex != null) urlIndex.put(newrow);
+            entry.stored = true;
+        } catch (final Exception e) {
+            Log.logException(e);
+        }
+    }
+    
     public boolean exists(final String urlHash) {
         return urlIndex.has(urlHash.getBytes());
     }
@@ -227,26 +251,6 @@ public class ZURL implements Iterable<ZURL.Entry> {
             assert ((new String(entry.getColBytes(0))).equals(bentry.url().hash()));
             this.stored = true;
             return;
-        }
-        
-        protected void store() {
-            // stores the values from the object variables into the database
-            if (this.stored) return;
-            if (this.bentry == null) return;
-            final Row.Entry newrow = rowdef.newEntry();
-            newrow.setCol(0, this.bentry.url().hash().getBytes());
-            newrow.setCol(1, this.executor.getBytes());
-            newrow.setCol(2, this.workdate.getTime());
-            newrow.setCol(3, this.workcount);
-            newrow.setCol(4, this.anycause.getBytes());
-            newrow.setCol(5, this.bentry.toRow().bytes());
-            try {
-            	//System.out.println("*** DEBUG ZURL " + urlIndex.filename() + " store " + newrow.getColString(0, "UTF-8"));
-                if (urlIndex != null) urlIndex.put(newrow);
-                this.stored = true;
-            } catch (final Exception e) {
-                Log.logException(e);
-            }
         }
 
         public DigestURI url() {
