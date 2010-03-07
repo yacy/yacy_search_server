@@ -40,7 +40,6 @@ import net.yacy.document.content.RSSMessage;
 import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
-import net.yacy.kelondro.table.SplitTable;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.WorkflowJob;
@@ -55,6 +54,9 @@ import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.dht.PeerSelection;
 
 public class CrawlQueues {
+
+    private static final String ERROR_DB_FILENAME = "urlError3.db";
+    private static final String DELEGATED_DB_FILENAME = "urlDelegated3.db";
 
     protected Switchboard sb;
     protected Log log;
@@ -73,15 +75,9 @@ public class CrawlQueues {
         // start crawling management
         log.logConfig("Starting Crawling Management");
         noticeURL = new NoticedURL(queuePath, sb.useTailCache, sb.exceed134217727);
-        //errorURL = new plasmaCrawlZURL(); // fresh error DB each startup; can be hold in RAM and reduces IO;
-        final File errorDBFile = new File(queuePath, "urlError2.db");
-        if (errorDBFile.exists()) {
-            // delete the error db to get a fresh each time on startup
-            // this is useful because there is currently no re-use of the data in this table.
-            if (errorDBFile.isDirectory()) SplitTable.delete(queuePath, "urlError2.db"); else FileUtils.deletedelete(errorDBFile);
-        }
-        errorURL = new ZURL(queuePath, "urlError3.db", false, sb.useTailCache, sb.exceed134217727);
-        delegatedURL = new ZURL(queuePath, "urlDelegated3.db", true, sb.useTailCache, sb.exceed134217727);
+        FileUtils.deletedelete(new File(queuePath, ERROR_DB_FILENAME));
+        errorURL = new ZURL(queuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
+        delegatedURL = new ZURL(queuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
     }
     
     public void relocate(final File newQueuePath) {
@@ -91,12 +87,9 @@ public class CrawlQueues {
         this.remoteCrawlProviderHashes.clear();
         
         noticeURL = new NoticedURL(newQueuePath, sb.useTailCache, sb.exceed134217727);
-        final File errorDBFile = new File(newQueuePath, "urlError2.db");
-        if (errorDBFile.exists()) {
-            if (errorDBFile.isDirectory()) SplitTable.delete(newQueuePath, "urlError2.db"); else FileUtils.deletedelete(errorDBFile);
-        }
-        errorURL = new ZURL(newQueuePath, "urlError3.db", false, sb.useTailCache, sb.exceed134217727);
-        delegatedURL = new ZURL(newQueuePath, "urlDelegated3.db", true, sb.useTailCache, sb.exceed134217727);
+        FileUtils.deletedelete(new File(newQueuePath, ERROR_DB_FILENAME));
+        errorURL = new ZURL(newQueuePath, ERROR_DB_FILENAME, false, sb.useTailCache, sb.exceed134217727);
+        delegatedURL = new ZURL(newQueuePath, DELEGATED_DB_FILENAME, true, sb.useTailCache, sb.exceed134217727);
     }
     
     public void close() {
