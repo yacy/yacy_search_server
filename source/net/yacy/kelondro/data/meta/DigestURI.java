@@ -133,12 +133,12 @@ public class DigestURI implements Serializable {
             url = "smb://" + url.substring(2).replaceAll("\\\\", "/");
         }
         
-        if (url.charAt(1) == ':') {
+        if (url.length() > 1 && url.charAt(1) == ':') {
             // maybe a DOS drive path
             url = "file://" + url;
         }
         
-        if (url.charAt(0) == '/') {
+        if (url.length() > 0 && url.charAt(0) == '/') {
             // maybe a unix/linux absolute path
             url = "file://" + url;
         }
