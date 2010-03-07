@@ -210,7 +210,7 @@ public class DocumentIndex extends Segment {
         
         ArrayList<URIMetadataRow> result = new ArrayList<URIMetadataRow>();
         URIMetadataRow r;
-        while ((r = rankedCache.takeURL(false, 1)) != null) result.add(r);
+        while ((r = rankedCache.takeURL(false, 100)) != null) result.add(r);
         
         return result;
     }

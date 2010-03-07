@@ -183,7 +183,7 @@ public final class SearchEvent {
             }
             
             // start worker threads to fetch urls and snippets
-            this.results = new ResultFetcher(rankedCache, query, peers, 10);
+            this.results = new ResultFetcher(rankedCache, query, peers, 300);
         }
          
         // clean up events
