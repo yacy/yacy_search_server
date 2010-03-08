@@ -133,7 +133,6 @@ public final class HTTPDemon implements serverHandler, Cloneable {
     // for authentication
     private boolean use_proxyAccounts = false;
     private boolean proxyAccounts_init = false; // is use_proxyAccounts set?
-    private String serverAccountBase64MD5;
     private String clientIP;
     private boolean allowProxy;
     private boolean allowServer;
@@ -156,7 +155,6 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         
         // authentication: by default none
         this.proxyAccounts_init = false;
-        this.serverAccountBase64MD5 = null;
         this.clientIP = null;
         
         // configuring keep alive support
@@ -179,7 +177,6 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         this.allowServer = false;
         this.allowYaCyHop = false;
         this.proxyAccounts_init = false;
-        this.serverAccountBase64MD5 = null;
         this.clientIP = null;
         this.prop.clear();
         
@@ -214,7 +211,6 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         }
 
         this.proxyAccounts_init = false;
-        this.serverAccountBase64MD5 = null;
     }
 
     private static boolean match(final String key, final String latch) {
@@ -302,39 +298,6 @@ public final class HTTPDemon implements serverHandler, Cloneable {
         if (adminAccountBase64MD5.length() == 0) return 2; // no password stored
         if (adminAccountBase64MD5.equals(Digest.encodeMD5Hex(authorization))) return 4; // hard-authenticated, all ok
         return 1;
-    }
-    
-    private boolean handleServerAuthentication(final RequestHeader header) throws IOException {
-        // getting the http version that is used by the client
-        final String httpVersion = this.prop.getProperty(HeaderFramework.CONNECTION_PROP_HTTP_VER, "HTTP/0.9");        
-        
-        // reading the authentication settings from switchboard
-        if (this.serverAccountBase64MD5 == null) 
-            this.serverAccountBase64MD5 = switchboard.getConfig("serverAccountBase64MD5", "");
-        
-        if (this.serverAccountBase64MD5.length() > 0) {
-            final String auth = header.get(RequestHeader.AUTHORIZATION);
-            if (auth == null) {
-                // authorization requested, but no authorizeation given in header. Ask for authenticate:
-                this.session.out.write((httpVersion + " 401 log-in required" + serverCore.CRLF_STRING +
-                        RequestHeader.WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + serverCore.CRLF_STRING +
-                        serverCore.CRLF_STRING).getBytes());
-                this.session.out.write((HeaderFramework.CONTENT_LENGTH + ": 0\r\n").getBytes());
-                this.session.out.write("\r\n".getBytes());
-                return false;
-            } else if (!this.serverAccountBase64MD5.equals(Digest.encodeMD5Hex(auth.trim().substring(6)))) {
-                // wrong password given: ask for authenticate again
-                log.logInfo("Wrong log-in for account 'server' in HTTPD.GET " + this.prop.getProperty("PATH") + " from IP " + this.clientIP);
-                this.session.out.write((httpVersion + " 401 log-in required" + serverCore.CRLF_STRING +
-                        RequestHeader.WWW_AUTHENTICATE + ": Basic realm=\"log-in\"" + 
-                        serverCore.CRLF_STRING).getBytes());
-                this.session.out.write((HeaderFramework.CONTENT_LENGTH + ": 0\r\n").getBytes());
-                this.session.out.write("\r\n".getBytes());                
-                this.session.out.flush();
-                return false;
-            }
-        }
-        return true;
     }
     
     private boolean handleYaCyHopAuthentication(final RequestHeader header) {
@@ -488,9 +451,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             if (this.prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
                 if (this.allowServer) {
-                    if (this.handleServerAuthentication(header)) {
-                       HTTPDFileHandler.doGet(this.prop, header, this.session.out);
-                    }
+                    HTTPDFileHandler.doGet(this.prop, header, this.session.out);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     this.session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this server, because you are using a non-granted IP. allowed are only connections that match with the following filter: " + switchboard.getConfig("serverClient", "*") + serverCore.CRLF_STRING).getBytes());
@@ -557,9 +518,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             if (this.prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
                 if (allowServer) {
-                    if (handleServerAuthentication(header)) {
-                        HTTPDFileHandler.doHead(prop, header, this.session.out);
-                    }
+                    HTTPDFileHandler.doHead(prop, header, this.session.out);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     session.out.write((httpVersion + " 403 refused (IP not granted)" +
@@ -625,9 +584,7 @@ public final class HTTPDemon implements serverHandler, Cloneable {
             if (prop.getProperty(HeaderFramework.CONNECTION_PROP_HOST).equals(virtualHost)) {
                 // pass to server
                 if (allowServer) {
-                    if (handleServerAuthentication(header)) {
-                        HTTPDFileHandler.doPost(prop, header, this.session.out, sessionIn);
-                    }
+                    HTTPDFileHandler.doPost(prop, header, this.session.out, sessionIn);
                 } else {
                     // not authorized through firewall blocking (ip does not match filter)
                     session.out.write((httpVersion + " 403 refused (IP not granted)" + serverCore.CRLF_STRING + serverCore.CRLF_STRING + "you are not allowed to connect to this server, because you are using the non-granted IP " + clientIP + ". allowed are only connections that match with the following filter: " + switchboard.getConfig("serverClient", "*") + serverCore.CRLF_STRING).getBytes());

@@ -276,8 +276,6 @@ public class SettingsAck_p {
             
             // check passed. set account:
             env.setConfig("serverClient", filter);
-            //env.setConfig("serverAccountBase64MD5", serverCodings.encodeMD5Hex(kelondroBase64Order.standardCoder.encodeString(user + ":" + pw1)));
-            env.setConfig("serverAccount", "");
             
             prop.put("info", "8");//server access filter updated
             //prop.put("info_user", user);

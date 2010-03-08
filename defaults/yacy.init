@@ -373,18 +373,6 @@ serverClient=*
 #use User_p.html to create some Users.
 use_proxyAccounts=false
 
-# serverAccount: a user:password - pair for web server access
-# this is the access to the 'public' pages on the server
-# should be always open, but you get the option here
-# if set to a user:password, you get a conflict with the administration account
-# future versions will check if the server is unprotected,
-# because the p2p-index-sharing function will use the http server for
-# data exchange.
-# example
-#serverAccount=admin:mysecretpassword
-serverAccount=
-serverAccountBase64MD5=
-
 # adminAccount: a user:password - pair for administration of
 # settings through the web interface
 # should be set to a secret. By default it is without a password

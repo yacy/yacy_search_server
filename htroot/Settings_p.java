@@ -142,18 +142,7 @@ public final class Settings_p {
         prop.putHTML("serverfilter", env.getConfig("serverClient", "*"));
         
         // server password
-        if (env.getConfig("serverAccountBase64", "").length() == 0) {
-            // no password has been specified
-            prop.put("serveruser","server");
-        } else {
-            s = env.getConfig("serverAccount", "server:void");
-            pos = s.indexOf(":");
-            if (pos < 0) {
-                prop.put("serveruser","server");
-            } else {
-                prop.put("serveruser",s.substring(0, pos));
-            }
-        }
+        prop.put("serveruser","server");
         
         // clientIP
         prop.putXML("clientIP", header.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "<unknown>")); // read an artificial header addendum

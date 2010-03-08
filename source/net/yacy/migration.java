@@ -204,10 +204,6 @@ public class migration {
     public static void presetPasswords(final Switchboard sb) {
         // set preset accounts/passwords
         String acc;
-        if ((acc = sb.getConfig("serverAccount", "")).length() > 0) {
-            sb.setConfig("serverAccountBase64MD5", Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(acc)));
-            sb.setConfig("serverAccount", "");
-        }
         if ((acc = sb.getConfig("adminAccount", "")).length() > 0) {
             sb.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(Base64Order.standardCoder.encodeString(acc)));
             sb.setConfig("adminAccount", "");
@@ -217,10 +213,6 @@ public class migration {
         if ((acc = sb.getConfig("proxyAccountBase64", "")).length() > 0) {
             sb.setConfig("proxyAccountBase64MD5", Digest.encodeMD5Hex(acc));
             sb.setConfig("proxyAccountBase64", "");
-        }
-        if ((acc = sb.getConfig("serverAccountBase64", "")).length() > 0) {
-            sb.setConfig("serverAccountBase64MD5", Digest.encodeMD5Hex(acc));
-            sb.setConfig("serverAccountBase64", "");
         }
         if ((acc = sb.getConfig("adminAccountBase64", "")).length() > 0) {
             sb.setConfig(HTTPDemon.ADMIN_ACCOUNT_B64MD5, Digest.encodeMD5Hex(acc));
