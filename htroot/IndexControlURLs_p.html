@@ -4,13 +4,66 @@
   <head>
     <title>YaCy '#[clientname]#': Index Control</title>
     #%env/templates/metas.template%#
+  <script language="Javascript">
+//<![CDATA[
+function xmlhttpPost() {
+    var searchform = document.forms['searchform'];
+    search(searchform.urlstring.value);
+}
+
+function search(query) {
+    var xmlHttpReq = false;
+    var self = this;
+    if (window.XMLHttpRequest) { // Mozilla/Safari
+        self.xmlHttpReq = new XMLHttpRequest(); 
+    }
+    else if (window.ActiveXObject) { // IE
+        self.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    self.xmlHttpReq.open('GET', "yacysearch.json?verify=false&resource=local&maximumRecords=100&nav=none&query=" + query + "+inurl:" + query, true);
+    self.xmlHttpReq.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    self.xmlHttpReq.onreadystatechange = function() {
+        if (self.xmlHttpReq.readyState == 4) {
+            updatepage(self.xmlHttpReq.responseText);
+        }
+    }
+    self.xmlHttpReq.send(null);
+}
+
+function updatepage(str) {
+  var raw = document.getElementById("raw");
+  if (raw != null) raw.innerHTML = str;
+  var rsp = eval("("+str+")");
+  var firstChannel = rsp.channels[0];
+  var totalResults = firstChannel.totalResults.replace(/[,.]/,"");
+  var startIndex = firstChannel.startIndex;
+  var itemsPerPage = firstChannel.itemsPerPage;
+  var navigation = firstChannel.navigation;
+  
+  var html = "";
+  
+  if (totalResults > 0 && firstChannel.items.length > 0) {
+    var item;
+    html += "<table class=\"networkTable\" border=\"0\" cellpadding=\"2\" cellspacing=\"1\" width=\"99%\">";
+    html += "<tr class=\"TableHeader\" valign=\"bottom\">";
+    html += "<td>URL from index (total results = " + totalResults + ")</td>";
+    for (var i = 0; i < firstChannel.items.length; i++) {
+        item = firstChannel.items[i];
+        html += "<tr class=\"TableCellLight\"><td align=\"left\"><a href=\"IndexControlURLs_p.html?urlstringsearch=&urlstring=" + item.link + "\">" + item.link + "</a></td>";
+    }
+    html += "</table>";
+  }
+  document.getElementById("searchresults").innerHTML = html;
+}
+//]]>
+</script>
   </head>
   <body id="IndexControl">
     #%env/templates/header.template%#
     #%env/templates/submenuIndexControl.template%#
     <h2>Index Administration</h2>
     <p>The local index currently contains #[ucount]# URL references</p>
-    <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">
+    <form action="IndexControlURLs_p.html" name="searchform" method="post" enctype="multipart/form-data" onkeyup="xmlhttpPost(); return false;">
     <fieldset><legend>URL Retrieval</legend>
       <dl>
         <dt class="TableCellDark">Select Segment:</dt>
@@ -24,7 +77,8 @@
         
         <dt class="TableCellDark">Retrieve by URL:</dt>
         <dd><input type="text" name="urlstring" value="#[urlstring]#" size="40" maxlength="250" />
-            <input type="submit" name="urlstringsearch" value="Show Details for URL" />
+            <input type="submit" name="urlstringsearch" value="Show Details for URL" /><br />
+            <div id="searchresults"></div>
         </dd>
         
         <dt class="TableCellDark">Retrieve by URL-Hash:</dt>
@@ -35,6 +89,8 @@
       </dl>
     </fieldset>
     </form>
+    
+    
     
     #(statistics)#::
     <form action="IndexControlURLs_p.html" method="post" enctype="multipart/form-data">

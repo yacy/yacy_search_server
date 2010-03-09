@@ -57,7 +57,7 @@ public class table_p {
         for (int i = 0; i < row.length; i++) {
             if (columns.contains(row[i])) {
                 columns.remove(row[i]);
-                columns.add(i, row[i]);
+                if (i < columns.size()) columns.add(i, row[i]);
             }
         }
         
