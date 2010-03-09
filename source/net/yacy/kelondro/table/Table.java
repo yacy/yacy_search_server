@@ -69,29 +69,31 @@ import net.yacy.kelondro.util.kelondroException;
 public class Table implements ObjectIndex, Iterable<Row.Entry> {
 
     // static tracker objects
-    private static TreeMap<String, Table> tableTracker = new TreeMap<String, Table>();
+    private final static TreeMap<String, Table> tableTracker = new TreeMap<String, Table>();
+    public  final static long maxarraylength = 134217727L; // that may be the maxmimum size of array length in some JVMs
     
-    public    static final long maxarraylength = 134217727L; // that may be the maxmimum size of array length in some JVMs
-    private   static final long minmemremaining = 20 * 1024 * 1024; // if less than this memory is remaininig, the memory copy of a table is abandoned
-    //private   int fail;
+    private   final long minmemremaining; // if less than this memory is remaininig, the memory copy of a table is abandoned
     private   final int buffersize;
-    protected HandleMap index;
-    protected BufferedRecords file;
-    protected Row rowdef;
-    protected File tablefile;
-    protected RowSet table;
-    protected Row taildef;
+    protected final Row rowdef;
+    protected final File tablefile;
+    protected final Row taildef;
+    protected       HandleMap index;
+    protected       BufferedRecords file;
+    protected       RowSet table;
     
     public Table(
     		final File tablefile,
     		final Row rowdef,
     		final int buffersize,
     		final int initialSpace,
-    		final boolean useTailCache,
+    		boolean useTailCache,
     		final boolean exceed134217727) throws RowSpaceExceededException {
+        useTailCache = true; // fixed for testing
+        
         this.tablefile = tablefile;
         this.rowdef = rowdef;
         this.buffersize = buffersize;
+        this.minmemremaining = Math.max(20 * 1024 * 1024, MemoryControl.available() / 10);
         //this.fail = 0;
         // define the taildef, a row like the rowdef but without the first column
         final Column[] cols = new Column[rowdef.columns() - 1];
@@ -475,6 +477,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
             } catch (RowSpaceExceededException e) {
                 table = null;
             }
+            if (abandonTable()) table = null;
             file.put(i, row.bytes(), 0);
         }
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
@@ -511,6 +514,7 @@ public class Table implements ObjectIndex, Iterable<Row.Entry> {
             } catch (RowSpaceExceededException e) {
                 table = null;
             }
+            if (abandonTable()) table = null;
             file.put(i, row.bytes(), 0);
         }
         assert file.size() == index.size() : "file.size() = " + file.size() + ", index.size() = " + index.size();
