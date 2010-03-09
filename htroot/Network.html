@@ -17,7 +17,8 @@
 document.write("\<a href=\"Network.xml?" + window.location.search.substring(1) + "\"\>")
 //]]>
 </script>
-<img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<script src="/js/sorttable.js"></script>
+<img src="/env/grafics/api.png" width="60" height="40" alt="API"/></a>
 <span>The information that is presented on this page can also be retrieved as XML
 Click the API icon to see the XML.
 To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
@@ -60,34 +61,34 @@ To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de
         <input type="submit" name="search" value="Search" />
       </fieldset>
     </form>
-    <table class="networkTable" border="0" cellpadding="2" cellspacing="1">
+    <table class="sortable" border="0" cellpadding="2" cellspacing="1">
       <tr class="TableHeader" valign="bottom">
-        <td>send&nbsp;<strong>M</strong>essage/<br />show&nbsp;<strong>P</strong>rofile/<br />edit&nbsp;<strong>W</strong>iki<br />&nbsp;</td>
-        <td><strong>Name</strong><br />&nbsp;</td>
-        <td style="width:44px;"><strong>Info</strong><br />&nbsp;</td>
-        <td><strong>Release/<br />SVN</strong><br />&nbsp;</td>
-        <td><strong>PPM</strong><br />&nbsp;</td>
-        <td><strong>QPH</strong><br />&nbsp;</td>
-        <td><strong>Last<br />Seen</strong><br />&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=LastSeen&amp;order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=LastSeen&amp;order=down">&gt;</a></td>
-        <td><strong>UTC</strong><br />Offset<br />&nbsp;</td>
-        <td><strong>Location</strong><br /><br />&nbsp;</td>
-        <td style="width:70px;"><strong>Uptime</strong><br />&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=Uptime&amp;order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=Uptime&amp;order=down">&gt;</a></td>
-        <td><strong>Links</strong><br />&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=LCount&amp;order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=LCount&amp;order=down">&gt;</a></td>
-        <td><strong>RWIs</strong><br />&nbsp;&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=ICount&amp;order=up">&lt;</a>&nbsp;<a href="/Network.html?page=#[page]#&amp;sort=ICount&amp;order=down">&gt;</a></td>
-        <td><strong>URLs for<br />Remote<br />Crawl</strong><br />&nbsp;</td>
-        <td><strong>Sent<br />Words</strong><br />&nbsp;</td>
-        <td><strong>Sent<br />URLs</strong><br />&nbsp;</td>
-        <td><strong>Received<br />Words</strong><br />&nbsp;</td>
-        <td><strong>Received<br />URLs</strong><br />&nbsp;</td>
+        <td>send&nbsp;<strong>M</strong>essage/<br />show&nbsp;<strong>P</strong>rofile/<br />edit&nbsp;<strong>W</strong>iki<br />q</td>
+        <td><strong>Name</strong><br /></td>
+        <td style="width:44px;"><strong>Info</strong></td>
+        <td><strong>Release/<br />SVN</strong></td>
+        <td><strong>PPM</strong></td>
+        <td><strong>QPH</strong></td>
+        <td><strong>Last<br />Seen</strong></td>
+        <td><strong>UTC</strong><br />Offset</td>
+        <td><strong>Location</strong><br /></td>
+        <td style="width:70px;"><strong>Uptime</strong>/td>
+        <td><strong>Links</strong></td>
+        <td><strong>RWIs</strong></td>
+        <td><strong>URLs for<br />Remote<br />Crawl</strong></td>
+        <td><strong>Sent<br />Words</strong></td>
+        <td><strong>Sent<br />URLs</strong></td>
+        <td><strong>Received<br />Words</strong></td>
+        <td><strong>Received<br />URLs</strong></td>
         #(complete)#::
-        <td><strong>Address</strong><br />&nbsp;</td>
-        <td><strong>Hash</strong><br />&nbsp;</td>
+        <td><strong>Address</strong></td>
+        <td><strong>Hash</strong></td>
         <td><strong>#CR-<br />Files</strong><br />Own/Other</td>
-        <td><strong>Age</strong><br />&nbsp;</td>
-        <td><strong>#Seeds</strong><br />&nbsp;</td>
-        <td><strong>con/h<br /></strong><br />&nbsp;</td>
-        <td><strong>user agent<br /></strong><br />&nbsp;</td>
-        <td><strong>Peer<br />Ping</strong><br />&nbsp;</td>
+        <td><strong>Age</strong></td>
+        <td><strong>#Seeds</strong></td>
+        <td><strong>con/h<br /></strong></td>
+        <td><strong>user agent<br /></strong></td>
+        <td><strong>Peer<br />Ping</strong></td>
         #(/complete)#
       </tr>
       #{list}#

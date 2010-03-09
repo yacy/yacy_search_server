@@ -265,11 +265,10 @@ public class Network {
                     final boolean complete = (post != null && post.containsKey("ip"));
                     Iterator<yacySeed> e = null;
                     final boolean order = (post != null && post.get("order", "down").equals("up"));
-                    final String sort = (post == null ? null : post.get("sort", null));
                     switch (page) {
-                        case 1 : e = sb.peers.seedsSortedConnected(order, (sort == null ? yacySeed.LCOUNT : sort)); break;
-                        case 2 : e = sb.peers.seedsSortedDisconnected(order, (sort == null ? yacySeed.LASTSEEN : sort)); break;
-                        case 3 : e = sb.peers.seedsSortedPotential(order, (sort == null ? yacySeed.LASTSEEN : sort)); break;
+                        case 1 : e = sb.peers.seedsSortedConnected(order, yacySeed.LCOUNT ); break;
+                        case 2 : e = sb.peers.seedsSortedDisconnected(order, yacySeed.LASTSEEN); break;
+                        case 3 : e = sb.peers.seedsSortedPotential(order, yacySeed.LASTSEEN); break;
                         default: break;
                     }
                     String startURL;
