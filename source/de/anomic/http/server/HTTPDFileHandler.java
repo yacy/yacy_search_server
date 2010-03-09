@@ -71,7 +71,9 @@ import java.io.UnsupportedEncodingException;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.InetAddress;
 import java.net.URLDecoder;
+import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -293,12 +295,18 @@ public final class HTTPDFileHandler {
             
             final boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
             final String refererHost = requestHeader.refererHost();
-            final boolean accessFromLocalhost = serverCore.isLocalhost(clientIP) && (refererHost.length() == 0 || serverCore.isLocalhost(refererHost));
+            boolean accessFromLocalhost = serverCore.isLocalhost(clientIP) && (refererHost.length() == 0 || serverCore.isLocalhost(refererHost));
+            if (!accessFromLocalhost) try {
+                // the access may also be from a different IP than localhost if it is the same as the YaCy instance is running on
+                InetAddress myaddress = InetAddress.getLocalHost();
+                accessFromLocalhost = myaddress.equals(InetAddress.getByName(clientIP)) && (refererHost.length() == 0 || myaddress.equals(InetAddress.getByName(refererHost)));
+            } catch (UnknownHostException e) {}
             final boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
             final boolean protectedPage = path.indexOf("_p.") > 0;
             final boolean accountEmpty = adminAccountBase64MD5.length() == 0;
-            
-            if (!grantedForLocalhost && protectedPage && !accountEmpty) {
+            final boolean softauth = accessFromLocalhost && authorization != null && authorization.length() > 6 && (adminAccountBase64MD5.equals(authorization.substring(6)));
+
+            if (!softauth && !grantedForLocalhost && protectedPage && !accountEmpty) {
                 // authentication required
                 if (authorization == null) {
                     // no authorization given in response. Ask for that
