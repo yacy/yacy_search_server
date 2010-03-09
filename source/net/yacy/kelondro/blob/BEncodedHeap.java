@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -314,13 +313,13 @@ public class BEncodedHeap implements Iterable<Map.Entry<byte[], Map<String, byte
         }
     }
     
-    public List<String> columns() {
+    public ArrayList<String> columns() {
         if (this.columnames.size() == 0) {
             for (Map.Entry<byte[], Map<String, byte[]>> row: this) {
                 this.columnames.addAll(row.getValue().keySet());
             }
         }
-        List<String> l = new ArrayList<String>();
+        ArrayList<String> l = new ArrayList<String>();
         l.addAll(this.columnames);
         return l;
     }

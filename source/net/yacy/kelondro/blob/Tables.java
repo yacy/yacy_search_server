@@ -29,10 +29,10 @@ package net.yacy.kelondro.blob;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
@@ -371,7 +371,7 @@ public class Tables {
         return sortTree.values();
     }
     
-    public List<String> columns(String table) throws IOException {
+    public ArrayList<String> columns(String table) throws IOException {
         BEncodedHeap heap = getHeap(table);
         return heap.columns();
     }

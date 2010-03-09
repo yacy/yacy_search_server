@@ -1,0 +1,18 @@
+#(showtable)#::
+<table name="#[table]#" count="#[num]#">
+  <columns>
+    #{columns}#
+    <column name="#[header]#" />
+    #{/columns}#
+  </columns>
+  <rows>
+  #{list}#
+    <row#(showpk)#:: key="#[pk]#"#(/showpk)#>
+      #{columns}#
+      <column name="#[column]#">#[cell]#</column>
+      #{/columns}#
+    </row>
+  #{/list}#
+  </rows>
+</table>
+#(/showtable)#

@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <title>YaCy '#[clientname]#': Table Viewer</title>
+    <link rel="alternate" type="application/xml" title="robots.txt Table" href="/api/table_p.xml?table=robots&pk=" />
+    #%env/templates/metas.template%#
+  </head>
+  <body id="Tables">
+  
+<div id="api">
+<script type="text/javascript">
+//<![CDATA[
+document.write("\<a href=\"/api/table_p.xml?table=robots&pk=\"\>")
+//]]>
+</script>
+<img src="env/grafics/api.png" width="60" height="40" alt="API"/></a>
+<span>The information that is presented on this page can also be retrieved as XML
+Click the API icon to see the XML.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.</span>
+</div>
+
+    #%env/templates/header.template%#
+    #%env/templates/submenuCrawlMonitor.template%#
+    
+    <h2>robots.txt table</h2>
+    <iframe src="/api/table_p.html?table=robots&row=hostname,modDate,date,disallow,etag,sitemap" width="100%" height="600" frameborder="0" scrolling="auto"></iframe><br />
+
+    #%env/templates/footer.template%#
+  </body>
+</html>

@@ -146,8 +146,8 @@ public class Tables_p {
             // check if we can find a key
             String pk = null;
             for (Map.Entry<String, String> entry: post.entrySet()) {
-                if (entry.getKey().startsWith("mark_") && entry.getValue().equals("on")) {
-                    pk = entry.getKey().substring(5);
+                if (entry.getValue().startsWith("mark_")) {
+                    pk = entry.getValue().substring(5);
                     break;
                 }
             }

@@ -24,6 +24,7 @@
     <h3>Crawler Steering</h3>
     <ul class="SubMenu">
       <li><a href="/CrawlProfileEditor_p.html" class="MenuItemLink lock">Crawl Profile Editor</a></li>
+      <li><a href="/Table_RobotsTxt_p.html" class="MenuItemLink lock">robots.txt Monitor</a></li>
     </ul>
   </div>
 </div>
