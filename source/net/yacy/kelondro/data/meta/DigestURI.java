@@ -1058,25 +1058,43 @@ public class DigestURI implements Serializable {
     
     public boolean exists() {
         if (isFile()) return getFSFile().exists();
-        if (isSMB()) try {return getSmbFile().exists();}
-            catch (SmbException e) {return false;}
-            catch (MalformedURLException e) {return false;}
+        if (isSMB()) try {
+            return getSmbFile().exists();
+        } catch (SmbException e) {
+            Log.logWarning("DigestURI", "SMB.exists SmbException for " + this.toString() + ": " + e.getMessage());
+            return false;
+        } catch (MalformedURLException e) {
+            Log.logWarning("DigestURI", "SMB.exists MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            return false;
+        }
         return false;
     }
     
     public boolean canRead() {
         if (isFile()) return getFSFile().canRead();
-        if (isSMB()) try {return getSmbFile().canRead();}
-            catch (SmbException e) {return false;}
-            catch (MalformedURLException e) {return false;}
+        if (isSMB()) try {
+            return getSmbFile().canRead();
+        } catch (SmbException e) {
+            Log.logWarning("DigestURI", "SMB.canRead SmbException for " + this.toString() + ": " + e.getMessage());
+            return false;
+        } catch (MalformedURLException e) {
+            Log.logWarning("DigestURI", "SMB.canRead MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            return false;
+        }
         return false;
     }
     
     public boolean canWrite() {
         if (isFile()) return getFSFile().canWrite();
-        if (isSMB()) try {return getSmbFile().canWrite();}
-            catch (SmbException e) {return false;}
-            catch (MalformedURLException e) {return false;}
+        if (isSMB()) try {
+            return getSmbFile().canWrite();
+        } catch (SmbException e) {
+            Log.logWarning("DigestURI", "SMB.canWrite SmbException for " + this.toString() + ": " + e.getMessage());
+            return false;
+        } catch (MalformedURLException e) {
+            Log.logWarning("DigestURI", "SMB.canWrite MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            return false;
+        }
         return false;
     }
     
@@ -1088,47 +1106,82 @@ public class DigestURI implements Serializable {
     
     public boolean isHidden() {
         if (isFile()) return getFSFile().isHidden();
-        if (isSMB()) try {return getSmbFile().isHidden();}
-            catch (SmbException e) {return false;}
-            catch (MalformedURLException e) {return false;}
+        if (isSMB()) try {
+            return getSmbFile().isHidden();
+        } catch (SmbException e) {
+            Log.logWarning("DigestURI", "SMB.isHidden SmbException for " + this.toString() + ": " + e.getMessage());
+            return false;
+        } catch (MalformedURLException e) {
+            Log.logWarning("DigestURI", "SMB.isHidden MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            return false;
+        }
         return false;
     }
     
     public boolean isDirectory() {
         if (isFile()) return getFSFile().isDirectory();
-        if (isSMB()) try {return getSmbFile().isDirectory();}
-            catch (SmbException e) {return false;}
-            catch (MalformedURLException e) {return false;}
+        if (isSMB()) try {
+            return getSmbFile().isDirectory();
+        } catch (SmbException e) {
+            Log.logWarning("DigestURI", "SMB.isDirectory SmbException for " + this.toString() + ": " + e.getMessage());
+            return false;
+        } catch (MalformedURLException e) {
+            Log.logWarning("DigestURI", "SMB.isDirectory MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            return false;
+        }
         return false;
     }
     
     public long length() {
         if (isFile()) return getFSFile().length();
-        if (isSMB()) try {return getSmbFile().length();}
-            catch (SmbException e) {return 0;}
-            catch (MalformedURLException e) {return 0;}
+        if (isSMB()) try {
+            return getSmbFile().length();
+        } catch (SmbException e) {
+            Log.logWarning("DigestURI", "SMB.length SmbException for " + this.toString() + ": " + e.getMessage());
+            return 0;
+        } catch (MalformedURLException e) {
+            Log.logWarning("DigestURI", "SMB.length MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            return 0;
+        }
         return 0;
     }
     
     public long lastModified() {
         if (isFile()) return getFSFile().lastModified();
-        if (isSMB()) try {return getSmbFile().lastModified();}
-            catch (SmbException e) {return 0;}
-            catch (MalformedURLException e) {return 0;}
+        if (isSMB()) try {
+            return getSmbFile().lastModified();
+        } catch (SmbException e) {
+            Log.logWarning("DigestURI", "SMB.lastModified SmbException for " + this.toString() + ": " + e.getMessage());
+            return 0;
+        } catch (MalformedURLException e) {
+            Log.logWarning("DigestURI", "SMB.lastModified MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            return 0;
+        }
         return 0;
     }
     
     public String getName() {
         if (isFile()) return getFSFile().getName();
-        if (isSMB()) try {return getSmbFile().getName();} catch (MalformedURLException e) {return null;}
+        if (isSMB()) try {
+            return getSmbFile().getName();
+        } catch (MalformedURLException e) {
+            Log.logWarning("DigestURI", "SMB.getName MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            return null;
+        }
         return null;
     }
     
     public String[] list() {
         if (isFile()) return getFSFile().list();
-        if (isSMB()) try {return getSmbFile().list();}
-            catch (SmbException e) {return null;}
-            catch (MalformedURLException e) {return null;}
+        if (isSMB()) try {
+            return getSmbFile().list();
+        } catch (SmbException e) {
+            Log.logWarning("DigestURI", "SMB.list SmbException for " + this.toString() + ": " + e.getMessage());
+            return null;
+        } catch (MalformedURLException e) {
+            Log.logWarning("DigestURI", "SMB.list MalformedURLException for " + this.toString() + ": " + e.getMessage());
+            return null;
+        }
         return null;
     }
     
