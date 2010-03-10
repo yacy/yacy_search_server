@@ -7,12 +7,13 @@
     #(/showtable)#
     #%env/templates/metas.template%#
   </head>
+  <script src="/js/sorttable.js"></script>
   <body id="Table">
     #(showtable)#::
     <form action="/Tables_p.html" method="post" target="_parent" enctype="multipart/form-data" accept-charset="UTF-8" name="tablelisting">
       <fieldset>
       <legend><label for="table">Table: '#[table]#'</label></legend>
-      <table border="0" cellpadding="2" cellspacing="1">
+      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
         <tr class="TableHeader" valign="bottom">
           #(showpk)#::<td>PK</td>#(/showpk)#
           #{columns}#

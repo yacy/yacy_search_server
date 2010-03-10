@@ -23,6 +23,7 @@
     }
     -->
     </script>
+    <script src="/js/sorttable.js"></script>
   </head>
   <body id="Tables">
     #%env/templates/header.template%#
@@ -37,7 +38,7 @@
     <form action="Table_API_p.html" method="post" enctype="multipart/form-data" accept-charset="UTF-8" name="apilist">
       <fieldset>
       <legend><label for="table">Recorded Actions</label></legend>
-      <table border="0" cellpadding="2" cellspacing="1">
+      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
         <tr class="TableHeader" valign="bottom">
           <td><input type="checkbox" name="allswitch" onclick="setall(this.form.name, this.value)" /></td>
           <td>Date</td>
@@ -67,7 +68,7 @@
     <form action="#">
       <fieldset>
       <legend><label for="table">Result of API execution</label></legend>
-      <table border="0" cellpadding="2" cellspacing="1">
+      <table class="sortable" border="0" cellpadding="2" cellspacing="1">
         <tr class="TableHeader" valign="bottom">
           <td>Status</td>
           <td>URL</td>
