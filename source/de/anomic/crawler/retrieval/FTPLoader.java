@@ -54,7 +54,7 @@ public class FTPLoader {
     public FTPLoader(final Switchboard sb, final Log log) {
         this.sb = sb;
         this.log = log;
-        maxFileSize = (int) sb.getConfigLong("crawler.ftp.maxFileSize", -1l);
+        this.maxFileSize = (int) sb.getConfigLong("crawler.ftp.maxFileSize", -1l);
     }
 
     /**

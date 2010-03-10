@@ -467,7 +467,7 @@ public class SettingsAck_p {
             
             // get maximum http file size
             String maxSizeStr = post.get("crawler.http.maxFileSize");
-            if (maxSizeStr==null||maxSizeStr.length()==0) timeoutStr = "-1";
+            if (maxSizeStr==null||maxSizeStr.length()==0) maxSizeStr = "-1";
             
             long maxHttpSize;
             try {
@@ -484,7 +484,7 @@ public class SettingsAck_p {
             
             // get maximum ftp file size
             maxSizeStr = post.get("crawler.ftp.maxFileSize");
-            if (maxSizeStr==null||maxSizeStr.length()==0) timeoutStr = "-1";
+            if (maxSizeStr==null||maxSizeStr.length()==0) maxSizeStr = "-1";
             
             long maxFtpSize;
             try {
@@ -496,10 +496,24 @@ public class SettingsAck_p {
                 return prop;
             }                        
             
+            maxSizeStr = post.get("crawler.smb.maxFileSize");
+            if (maxSizeStr==null||maxSizeStr.length()==0) maxSizeStr = "-1";
+            
+            long maxSmbSize;
+            try {
+                maxSmbSize = Integer.parseInt(maxSizeStr);
+                env.setConfig("crawler.smb.maxFileSize", Long.toString(maxFtpSize));
+            } catch (final NumberFormatException e) {
+                prop.put("info", "31");
+                prop.putHTML("info_crawler.smb.maxFileSize",post.get("crawler.smb.maxFileSize"));
+                return prop;
+            }                        
+            
             // everything is ok
             prop.put("info_crawler.clientTimeout",(crawlerTimeout==0) ? "0" :DateFormatter.formatInterval(crawlerTimeout));
             prop.put("info_crawler.http.maxFileSize",(maxHttpSize==-1)? "-1":Formatter.bytesToString(maxHttpSize));
             prop.put("info_crawler.ftp.maxFileSize", (maxFtpSize==-1) ? "-1":Formatter.bytesToString(maxFtpSize));
+            prop.put("info_crawler.smb.maxFileSize", (maxFtpSize==-1) ? "-1":Formatter.bytesToString(maxSmbSize));
             prop.put("info", "28");
             return prop;
         }

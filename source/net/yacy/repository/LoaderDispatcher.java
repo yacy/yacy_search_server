@@ -52,6 +52,7 @@ import de.anomic.crawler.retrieval.FTPLoader;
 import de.anomic.crawler.retrieval.HTTPLoader;
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.crawler.retrieval.Response;
+import de.anomic.crawler.retrieval.SMBLoader;
 import de.anomic.http.client.Cache;
 import de.anomic.http.client.Client;
 import de.anomic.http.server.HeaderFramework;
@@ -70,16 +71,18 @@ public final class LoaderDispatcher {
     private final HashSet<String> supportedProtocols;
     private final HTTPLoader httpLoader;
     private final FTPLoader ftpLoader;
+    private final SMBLoader smbLoader;
     private final Log log;
     
     public LoaderDispatcher(final Switchboard sb) {
         this.sb = sb;
-        this.supportedProtocols = new HashSet<String>(Arrays.asList(new String[]{"http","https","ftp"}));
+        this.supportedProtocols = new HashSet<String>(Arrays.asList(new String[]{"http","https","ftp","smb"}));
         
         // initiate loader objects
         this.log = new Log("LOADER");
         httpLoader = new HTTPLoader(sb, log);
         ftpLoader = new FTPLoader(sb, log);
+        smbLoader = new SMBLoader(sb, log);
     }
     
     public boolean isSupportedProtocol(final String protocol) {
@@ -254,6 +257,7 @@ public final class LoaderDispatcher {
         Response response = null;
         if ((protocol.equals("http") || (protocol.equals("https")))) response = httpLoader.load(request, acceptOnlyParseable);
         if (protocol.equals("ftp")) response = ftpLoader.load(request);
+        if (protocol.equals("smb")) response = smbLoader.load(request, true);
         if (response != null) {
             // we got something. Now check if we want to store that to the cache
             String storeError = response.shallStoreCacheForCrawler();

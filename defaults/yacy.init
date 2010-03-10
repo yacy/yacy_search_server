@@ -684,6 +684,9 @@ crawler.http.maxFileSize=1048576
 # ftp crawler specific settings; size in bytes
 crawler.ftp.maxFileSize=1048576
 
+# smb crawler specific settings: maximum size
+crawler.smb.maxFileSize=50000000
+
 # maximum number of crawler threads
 crawler.MaxActiveThreads = 200
 

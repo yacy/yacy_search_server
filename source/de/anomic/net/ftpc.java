@@ -1113,7 +1113,7 @@ public class ftpc {
      * @param line
      * @return null if not parseable
      */
-    private entryInfo parseListData(final String line) {
+    private static entryInfo parseListData(final String line) {
         final Pattern lsStyle = Pattern
                 .compile("^([-\\w]{10}).\\s*\\d+\\s+[-\\w]+\\s+[-\\w]+\\s+(\\d+)\\s+(\\w{3})\\s+(\\d+)\\s+(\\d+:?\\d*)\\s+(.*)$");
         // groups: 1: rights, 2: size, 3: month, 4: day, 5: time or year, 6:
@@ -1125,7 +1125,7 @@ public class ftpc {
             try {
                 size = Integer.parseInt(tokens.group(2));
             } catch (final NumberFormatException e) {
-                errPrintln("Error: not a number in list-entry: " + e.getMessage());
+                Log.logWarning("FTPC", "Error: not a number in list-entry: " + e.getMessage());
                 return null;
             }
             String time;
@@ -1148,7 +1148,7 @@ public class ftpc {
             		date = lsDateFormat.parse(dateString);
             	}
             } catch (final ParseException e) {
-                errPrintln(logPrefix + "---- Error: not ls date-format '" + dateString + "': " + e.getMessage());
+                Log.logWarning("FTPC", "---- Error: not ls date-format '" + dateString + "': " + e.getMessage());
                 date = new Date();
             }
             return new entryInfo(isDir, size, date, tokens.group(6));
@@ -2594,7 +2594,7 @@ public class ftpc {
     public StringBuilder dirhtml(String remotePath) {
         // returns a directory listing using an existing connection
         try {
-            if(isFolder(remotePath) && '/' != remotePath.charAt(remotePath.length()-1)) {
+            if (isFolder(remotePath) && '/' != remotePath.charAt(remotePath.length()-1)) {
                 remotePath += '/';
             }
             final List<String> list = list(remotePath, true);
@@ -2605,7 +2605,7 @@ public class ftpc {
                     + host + ((port == 21) ? "" : (":" + port)) + ((remotePath.length() > 0 && remotePath.charAt(0) == '/') ? "" : pwd() + "/")
                     + remotePath;
 
-            return dirhtml(base, remotemessage, remotegreeting, remotesystem, list);
+            return dirhtml(base, remotemessage, remotegreeting, remotesystem, list, true);
         } catch (final java.security.AccessControlException e) {
             return null;
         } catch (final IOException e) {
@@ -2613,7 +2613,8 @@ public class ftpc {
         }
     }
 
-    public static StringBuilder dirhtml(final String host, final int port, final String remotePath,
+    public static StringBuilder dirhtml(
+            final String host, final int port, final String remotePath,
             final String account, final String password) {
         // opens a new connection and returns a directory listing as html
         try {
@@ -2631,8 +2632,10 @@ public class ftpc {
         }
     }
 
-    public StringBuilder dirhtml(final String base, final String servermessage, final String greeting,
-            final String system, final List<String> list) {
+    public static StringBuilder dirhtml(
+            final String base, final String servermessage, final String greeting,
+            final String system, final List<String> list,
+            final boolean metaRobotNoindex) {
         // this creates the html output from collected strings
         final StringBuilder page = new StringBuilder(1024);
         final String title = "Index of " + base;
@@ -2641,14 +2644,19 @@ public class ftpc {
         page.append("<html><head>\n");
         page.append("  <title>" + title + "</title>\n");
         page.append("  <meta name=\"generator\" content=\"YaCy ftpc dirlisting\">\n");
+        if (metaRobotNoindex) {
+            page.append("  <meta name=\"robots\" content=\"noindex\">\n");
+        }
         page.append("  <base href=\"" + base + "\">\n");
         page.append("</head><body>\n");
         page.append("  <h1>" + title + "</h1>\n");
-        page.append("  <p><pre>Server \"" + servermessage + "\" responded:\n");
-        page.append("  \n");
-        page.append(greeting);
-        page.append("\n");
-        page.append("  </pre></p>\n");
+        if (servermessage != null && greeting != null) {
+            page.append("  <p><pre>Server \"" + servermessage + "\" responded:\n");
+            page.append("  \n");
+            page.append(greeting);
+            page.append("\n");
+            page.append("  </pre></p>\n");
+        }
         page.append("  <hr>\n");
         page.append("  <pre>\n");
         int nameStart, nameEnd;
@@ -2661,7 +2669,7 @@ public class ftpc {
                 page.append(line.substring(0, nameStart));
                 page.append("<a href=\"" + base + info.name + ((info.isDir) ? "/" : "") + "\">" + info.name + "</a>");
                 nameEnd = nameStart + info.name.length();
-                if(line.length() > nameEnd) {
+                if (line.length() > nameEnd) {
                     page.append(line.substring(nameEnd));
                 }
             } else {
@@ -2672,7 +2680,7 @@ public class ftpc {
         }
         page.append("  </pre>\n");
         page.append("  <hr>\n");
-        page.append("  <pre>System info: \"" + system + "\"</pre>\n");
+        if (system != null) page.append("  <pre>System info: \"" + system + "\"</pre>\n");
         page.append("</body></html>\n");
 
         return page;

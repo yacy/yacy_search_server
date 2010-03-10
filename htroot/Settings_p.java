@@ -201,6 +201,7 @@ public final class Settings_p {
         prop.putHTML("crawler.clientTimeout",sb.getConfig("crawler.clientTimeout", "10000"));
         prop.putHTML("crawler.http.maxFileSize",sb.getConfig("crawler.http.maxFileSize", "-1"));
         prop.putHTML("crawler.ftp.maxFileSize",sb.getConfig("crawler.ftp.maxFileSize", "-1"));
+        prop.putHTML("crawler.smb.maxFileSize",sb.getConfig("crawler.smb.maxFileSize", "-1"));
         
         // return rewrite properties
         return prop;
