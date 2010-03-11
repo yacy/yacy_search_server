@@ -38,7 +38,11 @@ public class getpageinfo_p {
 				prop.put("robots-allowed", "1");
 				prop.putXML("title", "FTP: "+url);
                 return prop;
-			} else if (!(url.toLowerCase().startsWith("http://") || url.toLowerCase().startsWith("https://"))) {
+			} else if (!url.startsWith("http://") &&
+		               !url.startsWith("https://") &&
+		               !url.startsWith("ftp://") &&
+		               !url.startsWith("smb://") &&
+		              !url.startsWith("file://")) {
                 url = "http://" + url;
             }
             if (actions.indexOf("title")>=0) {

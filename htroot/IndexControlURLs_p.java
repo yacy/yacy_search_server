@@ -130,7 +130,10 @@ public class IndexControlURLs_p {
         String urlhash = post.get("urlhash", "").trim();
         
         if (!urlstring.startsWith("http://") &&
-            !urlstring.startsWith("https://")) { urlstring = "http://" + urlstring; }
+            !urlstring.startsWith("https://") &&
+            !urlstring.startsWith("ftp://") &&
+            !urlstring.startsWith("smb://") &&
+            !urlstring.startsWith("file://")) { urlstring = "http://" + urlstring; }
 
         prop.putHTML("urlstring", urlstring);
         prop.putHTML("urlhash", urlhash);
@@ -180,14 +183,15 @@ public class IndexControlURLs_p {
                 prop.put("urlhash", urlhash);
                 final URIMetadataRow entry = segment.urlMetadata().load(urlhash, null, 0);
                 if (entry == null) {
-                    prop.putHTML("urlstring", "unknown url: " + urlstring);
+                    prop.putHTML("result", "No Entry for URL " + url.toNormalform(true, true));
+                    prop.putHTML("urlstring", urlstring);
                     prop.put("urlhash", "");
                 } else {
                     prop.putAll(genUrlProfile(segment, entry, urlhash));
                     prop.put("statistics", 0);
                 }
             } catch (final MalformedURLException e) {
-                prop.putHTML("urlstring", "bad url: " + urlstring);
+                prop.putHTML("result", "bad url: " + urlstring);
                 prop.put("urlhash", "");
             }
             prop.put("lurlexport", 0);

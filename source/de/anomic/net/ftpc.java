@@ -1037,7 +1037,7 @@ public class ftpc {
              * analogous to the "list" command except that data shall be
              * transferred over the control connection.
              */
-            send("STAT \"path\"");
+            send("STAT " +  path);
 
             final String reply = receive();
             if (isNotPositiveCompletion(reply)) {

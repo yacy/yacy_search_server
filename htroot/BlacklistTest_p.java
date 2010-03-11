@@ -56,10 +56,11 @@ public class BlacklistTest_p {
         if(post != null && post.containsKey("testList")) {
             prop.put("testlist", "1");
             String urlstring = post.get("testurl", "");
-            if(!urlstring.startsWith("http://") &&
-                    !urlstring.startsWith("https://")&&
-                    !urlstring.startsWith("ftp://")
-                    ) urlstring = "http://"+urlstring;
+            if (!urlstring.startsWith("http://") &&
+                    !urlstring.startsWith("https://") &&
+                    !urlstring.startsWith("ftp://") &&
+                    !urlstring.startsWith("smb://") &&
+                    !urlstring.startsWith("file://")) urlstring = "http://" + urlstring;
             DigestURI testurl = null;
             try {
                 testurl = new DigestURI(urlstring, null);

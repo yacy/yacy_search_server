@@ -63,7 +63,7 @@ public class FTPLoader {
      * @param request
      * @return
      */
-    public Response load(final Request request) throws IOException {
+    public Response load(final Request request, boolean acceptOnlyParseable) throws IOException {
         
         long start = System.currentTimeMillis();
         final DigestURI entryUrl = request.url();
@@ -91,55 +91,58 @@ public class FTPLoader {
 
         // stream for ftp-client errors
         final ByteArrayOutputStream berr = new ByteArrayOutputStream();
-        final ftpc ftpClient = createFTPClient(berr);
 
+        // create new ftp client
+        final PrintStream err = new PrintStream(berr);
+        final ftpc ftpClient = new ftpc(System.in, null, err);
+        ftpClient.setDataTimeoutByMaxFilesize(maxFileSize);
+        
+        // get a connection
         if (openConnection(ftpClient, entryUrl)) {
-            // ftp stuff
-            //try {
-                // testing if the specified file is a directory
-                if (file.length() > 0) {
-                    ftpClient.exec("cd \"" + path + "\"", false);
+            // test if the specified file is a directory
+            if (file.length() > 0) {
+                ftpClient.exec("cd \"" + path + "\"", false);
 
-                    final boolean isFolder = ftpClient.isFolder(file);
-                    if (isFolder) {
-                        path = fullPath + "/";
-                        file = "";
-                    }
+                final boolean isFolder = ftpClient.isFolder(file);
+                if (isFolder) {
+                    path = fullPath + "/";
+                    file = "";
                 }
+            }
 
-                if (file.length() == 0) {
-                    // directory -> get list of files
-                    RequestHeader requestHeader = new RequestHeader();
-                    if (request.referrerhash() != null) {
-                        DigestURI u = sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
-                        if (u != null) requestHeader.put(RequestHeader.REFERER, u.toNormalform(true, false));
-                    }
-                    
-                    byte[] dirList = generateDirlist(ftpClient, request, path);
+            if (file.length() == 0) {
+                // directory -> get list of files
+                RequestHeader requestHeader = new RequestHeader();
+                if (request.referrerhash() != null) {
+                    DigestURI u = sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash());
+                    if (u != null) requestHeader.put(RequestHeader.REFERER, u.toNormalform(true, false));
+                }
+                
+                StringBuilder dirList = ftpClient.dirhtml(path);
 
-                    if (dirList == null) {
-                        response = null;
-                    } else {
-                        ResponseHeader responseHeader = new ResponseHeader();
-                        responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(new Date()));
-                        responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
-                        response = new Response(
-                                request, 
-                                requestHeader,
-                                responseHeader,
-                                "OK",
-                                sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
-                                dirList);
-                    }
+                if (dirList == null) {
+                    response = null;
                 } else {
-                    // file -> download
-                    try {
-                        response = getFile(ftpClient, request);
-                    } catch (final Exception e) {
-                        // add message to errorLog
-                        (new PrintStream(berr)).print(e.getMessage());
-                    }
+                    ResponseHeader responseHeader = new ResponseHeader();
+                    responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(new Date()));
+                    responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/html");
+                    response = new Response(
+                            request, 
+                            requestHeader,
+                            responseHeader,
+                            "200",
+                            sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
+                            dirList.toString().getBytes());
                 }
+            } else {
+                // file -> download
+                try {
+                    response = getFile(ftpClient, request, acceptOnlyParseable);
+                } catch (final Exception e) {
+                    // add message to errorLog
+                    (new PrintStream(berr)).print(e.getMessage());
+                }
+            }
             closeConnection(ftpClient);
         }
 
@@ -166,11 +169,6 @@ public class FTPLoader {
 
     /**
      * establish a connection to the ftp server (open, login, set transfer mode)
-     * 
-     * @param ftpClient
-     * @param hostname
-     * @param port
-     * @return success
      */
     private boolean openConnection(final ftpc ftpClient, final DigestURI entryUrl) {
         // get username and password
@@ -209,61 +207,62 @@ public class FTPLoader {
         return true;
     }
 
-    /**
-     * @param ftpClient
-     * @param request
-     * @param htCache
-     * @param cacheFile
-     * @return
-     * @throws Exception
-     */
-    private Response getFile(final ftpc ftpClient, final Request request) throws Exception {
+    private Response getFile(final ftpc ftpClient, final Request request, boolean acceptOnlyParseable) throws Exception {
         // determine the mimetype of the resource
-        final DigestURI entryUrl = request.url();
-        final String mimeType = TextParser.mimeOf(entryUrl);
-        final String path = getPath(entryUrl);
+        final DigestURI url = request.url();
+        final String mime = TextParser.mimeOf(url);
+        final String path = getPath(url);
 
-        // if the mimetype and file extension is supported we start to download
-        // the file
-        Response response = null;
-        String supportError = TextParser.supports(entryUrl, mimeType);
-        if (supportError != null) {
-            // reject file
-            log.logInfo("PARSER REJECTED URL " + request.url().toString() + ": " + supportError);
-            sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash, new Date(), 1, supportError);
-            throw new Exception(supportError);
-        } else {
-            // abort the download if content is too long
-            final int size = ftpClient.fileSize(path);
-            if (size <= maxFileSize || maxFileSize == -1) {
-                // timeout for download
-                ftpClient.setDataTimeoutByMaxFilesize(size);
-
-                // determine the file date
-                final Date fileDate = ftpClient.entryDate(path);
-
-                // download the remote file
-                byte[] b = ftpClient.get(path);
-                
-                // create a cache entry
-                RequestHeader requestHeader = new RequestHeader();
-                if (request.referrerhash() != null) requestHeader.put(RequestHeader.REFERER, sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash()).toNormalform(true, false));
-                ResponseHeader responseHeader = new ResponseHeader();
-                responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(fileDate));
-                responseHeader.put(HeaderFramework.CONTENT_TYPE, mimeType);
-                response = new Response(
-                        request, 
-                        requestHeader,
-                        responseHeader,
-                        "OK",
-                        sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
-                        b);
+        // determine the file date
+        final Date fileDate = ftpClient.entryDate(path);
+        
+        // create response header
+        RequestHeader requestHeader = new RequestHeader();
+        if (request.referrerhash() != null) requestHeader.put(RequestHeader.REFERER, sb.getURL(Segments.Process.LOCALCRAWLING, request.referrerhash()).toNormalform(true, false));
+        ResponseHeader responseHeader = new ResponseHeader();
+        responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(fileDate));
+        responseHeader.put(HeaderFramework.CONTENT_TYPE, mime);
+        
+        // if the mimetype and file extension is supported we start to download the file
+        final int size = ftpClient.fileSize(path);
+        String parserError = null;
+        if ((acceptOnlyParseable && (parserError = TextParser.supports(url, mime)) != null) ||
+            (size > maxFileSize && maxFileSize >= 0)) {
+            // we know that we cannot process that file before loading
+            // only the metadata is returned
+            
+            if (parserError != null) {
+                log.logInfo("No parser available in FTP crawler: '" + parserError + "' for URL " + request.url().toString() + ": parsing only metadata");
             } else {
-                log.logInfo("REJECTED TOO BIG FILE with size " + size + " Bytes for URL " + request.url().toString());
-                sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");
-                throw new Exception("file size exceeds limit");
+                log.logInfo("Too big file in FTP crawler with size = " + size + " Bytes for URL " + request.url().toString() + ": parsing only metadata");
             }
+            
+            // create response with metadata only
+            responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/plain");
+            Response response = new Response(
+                    request, 
+                    requestHeader,
+                    responseHeader,
+                    "200",
+                    sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
+                    url.toNormalform(true, true).getBytes());
+            return response;
         }
+
+        // timeout for download
+        ftpClient.setDataTimeoutByMaxFilesize(size);
+        
+        // download the remote file
+        byte[] b = ftpClient.get(path);
+        
+        // create a response
+        Response response = new Response(
+                request, 
+                requestHeader,
+                responseHeader,
+                "200",
+                sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
+                b);
         return response;
     }
 
@@ -275,47 +274,6 @@ public class FTPLoader {
      */
     private String getPath(final DigestURI entryUrl) {
         return DigestURI.unescape(entryUrl.getPath()).replace("\"", "\"\"");
-    }
-
-    /**
-     * @param ftpClient
-     * @param entry
-     * @param cacheFile
-     * @return
-     */
-    private byte[] generateDirlist(final ftpc ftpClient, final Request entry, final String path) {
-        // getting the dirlist
-        final DigestURI entryUrl = entry.url();
-
-        // generate the dirlist
-        final StringBuilder dirList = ftpClient.dirhtml(path);
-
-        if (dirList != null && dirList.length() > 0) {
-            try {
-                return dirList.toString().getBytes();
-            } catch (final Exception e) {
-                log.logInfo("Unable to write dirlist for URL " + entryUrl.toString());
-            }
-        }
-        return null;
-    }
-
-    /**
-     * create a new ftp client
-     * 
-     * @param berr
-     * @return
-     */
-    private ftpc createFTPClient(final ByteArrayOutputStream berr) {
-        // error
-        final PrintStream err = new PrintStream(berr);
-
-        final ftpc ftpClient = new ftpc(System.in, null, err);
-
-        // set timeout
-        ftpClient.setDataTimeoutByMaxFilesize(maxFileSize);
-
-        return ftpClient;
     }
 
 }

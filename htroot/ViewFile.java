@@ -110,7 +110,7 @@ public class ViewFile {
             prop.putHTML("error_words", "");
         }
 
-        final String viewMode = post.get("viewMode","sentences");
+        final String viewMode = post.get("viewMode","parsed");
         prop.put("error_vMode-" + viewMode, "1");
         
         DigestURI url = null;

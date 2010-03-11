@@ -70,7 +70,7 @@ public class SMBLoader {
             if (ur != null) requestHeader.put(RequestHeader.REFERER, ur.toNormalform(true, false));
         }
         
-        
+        // process directories: transform them to html with meta robots=noindex (using the ftpc lib)
         if (url.isDirectory()) {
             List<String> list = new ArrayList<String>();
             String u = url.toNormalform(true, true);
@@ -92,29 +92,44 @@ public class SMBLoader {
                     request, 
                     requestHeader,
                     responseHeader,
-                    "OK",
+                    "200",
                     sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
                     content.toString().getBytes());
             
             return response;
         }
         
-        // check mime type and availability of parsers
+        // create response header
         String mime = MimeTable.ext2mime(url.getFileExtension());
-        String parserError = null;
-        if (acceptOnlyParseable && (parserError = TextParser.supports(url, mime)) != null) {
-            // we know that we cannot process that file before loading
-            log.logInfo("no parser available (" + parserError + ") for url = " + request.url().toString());
-            sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash, new Date(), 1, "no parser available (" + parserError + ") for url = " + request.url().toString());
-            throw new IOException("no parser available (" + parserError + ") for url = " + request.url().toString());
-        }
+        ResponseHeader responseHeader = new ResponseHeader();
+        responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(new Date(url.lastModified())));
+        responseHeader.put(HeaderFramework.CONTENT_TYPE, mime);
         
-        // check resource size
+        // check mime type and availability of parsers
+        // and also check resource size and limitation of the size
         long size = url.length();
-        if (size > maxFileSize && maxFileSize >= 0) {
-            log.logInfo("REJECTED TOO BIG FILE with size " + size + " Bytes for URL " + request.url().toString());
-            sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");
-            throw new IOException("file size = " + size + " exceeds limit");
+        String parserError = null;
+        if ((acceptOnlyParseable && (parserError = TextParser.supports(url, mime)) != null) ||
+            (size > maxFileSize && maxFileSize >= 0)) {
+            // we know that we cannot process that file before loading
+            // only the metadata is returned
+            
+            if (parserError != null) {
+                log.logInfo("No parser available in SMB crawler: '" + parserError + "' for URL " + request.url().toString() + ": parsing only metadata");
+            } else {
+                log.logInfo("Too big file in SMB crawler with size = " + size + " Bytes for URL " + request.url().toString() + ": parsing only metadata");
+            }
+            
+            // create response with metadata only
+            responseHeader.put(HeaderFramework.CONTENT_TYPE, "text/plain");
+            Response response = new Response(
+                    request, 
+                    requestHeader,
+                    responseHeader,
+                    "200",
+                    sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
+                    url.toNormalform(true, true).getBytes());
+            return response;
         }
         
         // load the resource
@@ -122,15 +137,12 @@ public class SMBLoader {
         byte[] b = FileUtils.read(is);
         is.close();
         
-        // create response object
-        ResponseHeader responseHeader = new ResponseHeader();
-        responseHeader.put(HeaderFramework.LAST_MODIFIED, DateFormatter.formatRFC1123(new Date(url.lastModified())));
-        responseHeader.put(HeaderFramework.CONTENT_TYPE, mime);
+        // create response with loaded content
         Response response = new Response(
                 request, 
                 requestHeader,
                 responseHeader,
-                "OK",
+                "200",
                 sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle()),
                 b);
         return response;

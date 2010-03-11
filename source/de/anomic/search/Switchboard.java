@@ -1727,13 +1727,13 @@ public final class Switchboard extends serverSwitch {
 
         if (condenser == null || document.indexingDenied()) {
             if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by rule in document, process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), referrerURL.hash(), queueEntry.initiator(), dc_title, "unknown indexing process case"  + processCase);
+            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? "" : referrerURL.hash(), queueEntry.initiator(), dc_title, "unknown indexing process case"  + processCase);
             return;
         }
         
         if (!queueEntry.profile().indexText() && !queueEntry.profile().indexMedia()) {
             if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), referrerURL.hash(), queueEntry.initiator(), dc_title, "unknown indexing process case"  + processCase);
+            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? "" : referrerURL.hash(), queueEntry.initiator(), dc_title, "unknown indexing process case"  + processCase);
             return;
         }
         
@@ -1753,7 +1753,7 @@ public final class Switchboard extends serverSwitch {
             RSSFeed.channels((queueEntry.initiator().equals(peers.mySeed().hash)) ? RSSFeed.LOCALINDEXING : RSSFeed.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
         } catch (final IOException e) {
             if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), referrerURL.hash(), queueEntry.initiator(), dc_title, "error storing url: " + e.getMessage());
+            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? "" : referrerURL.hash(), queueEntry.initiator(), dc_title, "error storing url: " + e.getMessage());
             return;
         }
         

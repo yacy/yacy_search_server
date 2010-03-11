@@ -256,7 +256,7 @@ public final class LoaderDispatcher {
         // load resource from the internet
         Response response = null;
         if ((protocol.equals("http") || (protocol.equals("https")))) response = httpLoader.load(request, acceptOnlyParseable);
-        if (protocol.equals("ftp")) response = ftpLoader.load(request);
+        if (protocol.equals("ftp")) response = ftpLoader.load(request, true);
         if (protocol.equals("smb")) response = smbLoader.load(request, true);
         if (response != null) {
             // we got something. Now check if we want to store that to the cache

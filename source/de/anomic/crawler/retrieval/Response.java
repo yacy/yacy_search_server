@@ -336,7 +336,7 @@ public class Response {
         
         // check status code
         if (!validResponseStatus()) {
-            return "bad_status_" + this.responseStatus.substring(0, 3);
+            return "bad_status_" + this.responseStatus;
         }
 
         if (requestHeader != null) {
@@ -737,7 +737,9 @@ public class Response {
     public DigestURI referrerURL() {
         if (requestHeader == null) return null;
         try {
-            return new DigestURI(requestHeader.get(RequestHeader.REFERER, ""), null);
+            String r = requestHeader.get(RequestHeader.REFERER, null);
+            if (r == null) return null;
+            return new DigestURI(r, null);
         } catch (final Exception e) {
             return null;
         }
