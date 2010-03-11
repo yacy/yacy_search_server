@@ -244,7 +244,6 @@ public class ContentScraper extends AbstractScraper implements Scraper {
             if (h.length() > 0) headlines[1].add(h);
         }
         if ((tagname.equalsIgnoreCase("h3")) && (text.length < 1024)) {
-            System.out.println("TTT " + new String(text));
             h = recursiveParse(text);
             if (h.length() > 0) headlines[2].add(h);
         }
