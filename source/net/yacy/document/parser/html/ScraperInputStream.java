@@ -63,14 +63,14 @@ public class ScraperInputStream extends InputStream implements ScraperListener {
             final boolean passbyIfBinarySuspect
     ) {
         // create a input stream for buffereing
-        this.bufferedIn = new BufferedInputStream(inStream,(int) preBufferSize);
+        this.bufferedIn = new BufferedInputStream(inStream, (int) preBufferSize);
         this.bufferedIn.mark((int) preBufferSize);
         
         final ContentScraper scraper = new ContentScraper(rooturl);
         scraper.registerHtmlFilterEventListener(this);
         
         try {
-	    this.reader = new InputStreamReader(this,inputStreamCharset);
+	    this.reader = (inputStreamCharset == null) ? new InputStreamReader(this) : new InputStreamReader(this,inputStreamCharset);
 	} catch (UnsupportedEncodingException e) {
 	    try {
 		this.reader = new InputStreamReader(this, "UTF-8");

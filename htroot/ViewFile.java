@@ -381,7 +381,7 @@ public class ViewFile {
                     i++;
                 }
                 i += putMediaInfo(prop, wordArray, i, document.getApplinks(), "app", (i % 2 == 0));
-                i += putMediaInfo(prop, wordArray, i, document.getHyperlinks(), "href", (i % 2 == 0));
+                i += putMediaInfo(prop, wordArray, i, document.getHyperlinks(), "link", (i % 2 == 0));
                 prop.put("viewMode_links", i);
 
             }

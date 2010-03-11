@@ -121,6 +121,11 @@ public final class FileUtils {
         }
     }    
     
+    public static int copy(final InputStream source, final Writer dest) throws IOException {
+        final InputStreamReader reader = new InputStreamReader(source);
+        return copy(reader,dest);
+    }
+    
     public static int copy(final InputStream source, final Writer dest, final Charset inputCharset) throws IOException {
         final InputStreamReader reader = new InputStreamReader(source,inputCharset);
         return copy(reader,dest);

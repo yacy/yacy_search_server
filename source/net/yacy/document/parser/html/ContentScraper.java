@@ -27,6 +27,7 @@
 package net.yacy.document.parser.html;
 
 import java.io.ByteArrayInputStream;
+import java.io.CharArrayReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -46,6 +47,7 @@ import javax.swing.event.EventListenerList;
 import net.yacy.document.parser.htmlParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.io.CharBuffer;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.ISO639;
 
@@ -118,7 +120,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     
     public void scrapeText(final char[] newtext, final String insideTag) {
         // System.out.println("SCRAPE: " + new String(newtext));
-        String b = super.stripAll(new String(newtext)).trim();
+        String b = cleanLine(super.stripAll(new String(newtext)));
         if ((insideTag != null) && (!(insideTag.equals("a")))) {
             // texts inside tags sometimes have no punctuation at the line end
             // this is bad for the text sematics, because it is not possible for the
@@ -216,7 +218,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     
     public void scrapeTag1(final String tagname, final Properties tagopts, final char[] text) {
         // System.out.println("ScrapeTag1: tagname=" + tagname + ", opts=" + tagopts.toString() + ", text=" + new String(text));
-        if ((tagname.equalsIgnoreCase("a")) && (text.length < 2048)) {
+        if (tagname.equalsIgnoreCase("a") && text.length < 2048) {
             final String href = tagopts.getProperty("href", "");
             DigestURI url;
             if ((href.length() > 0) && ((url = absolutePath(href)) != null)) {
@@ -225,38 +227,59 @@ public class ContentScraper extends AbstractScraper implements Scraper {
                 final String type = (p < 0) ? "" : f.substring(p + 1);
                 if (type.equals("png") || type.equals("gif") || type.equals("jpg") || type.equals("jpeg")) {
                     // special handling of such urls: put them to the image urls
-                    final ImageEntry ie = new ImageEntry(url, super.stripAll(new String(text)).trim(), -1, -1, -1);
+                    final ImageEntry ie = new ImageEntry(url, recursiveParse(text), -1, -1, -1);
                     addImage(images, ie);
                 } else {
-                    anchors.put(url, super.stripAll(new String(text)).trim());
+                    anchors.put(url, recursiveParse(text));
                 }
             }
         }
         String h;
         if ((tagname.equalsIgnoreCase("h1")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new String(text)));
+            h = recursiveParse(text);
             if (h.length() > 0) headlines[0].add(h);
         }
         if ((tagname.equalsIgnoreCase("h2")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new String(text)));
+            h = recursiveParse(text);
             if (h.length() > 0) headlines[1].add(h);
         }
         if ((tagname.equalsIgnoreCase("h3")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new String(text)));
+            System.out.println("TTT " + new String(text));
+            h = recursiveParse(text);
             if (h.length() > 0) headlines[2].add(h);
         }
         if ((tagname.equalsIgnoreCase("h4")) && (text.length < 1024)) {
-            h = cleanLine(super.stripAll(new String(text)));
+            h = recursiveParse(text);
             if (h.length() > 0) headlines[3].add(h);
         }
         if ((tagname.equalsIgnoreCase("title")) && (text.length < 1024)) {
-            title = cleanLine(super.stripAll(new String(text)));
+            title = recursiveParse(text);
         }
 
         // fire event
         fireScrapeTag1(tagname, tagopts, text);
     }
 
+    private String recursiveParse(char[] inlineHtml) {
+        if (inlineHtml.length < 14) return cleanLine(super.stripAll(new String(inlineHtml)));
+        
+        // start a new scraper to parse links inside this text
+        // parsing the content
+        final ContentScraper scraper = new ContentScraper(this.root);        
+        final TransformerWriter writer = new TransformerWriter(null, null, scraper, null, false);
+        try {
+            FileUtils.copy(new CharArrayReader(inlineHtml), writer);
+            writer.close();
+        } catch (IOException e) {
+            Log.logException(e);
+            return cleanLine(super.stripAll(new String(inlineHtml)));
+        }
+        this.anchors.putAll(scraper.getAnchors());
+        this.images.putAll(scraper.images);
+        
+        return cleanLine(super.stripAll(new String(scraper.content.getChars())));
+    }
+    
     private static String cleanLine(String s) {
         // may contain too many funny symbols
         for (int i = 0; i < s.length(); i++)
