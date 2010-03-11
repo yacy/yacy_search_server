@@ -81,9 +81,19 @@
 	</fieldset>
 :: <!-- 2 -->
 	<fieldset><legend>Parsed Content</legend>
-	  <p class="tt">
-	    #[parsedText]#
-	  </p>
+	  <form>
+	  <dl>
+	  <dt>dc:title</dt><dd>#[title]#</dd>
+	  <dt>dc:creator</dt><dd>#[creator]#</dd>
+	  <dt>dc:subject</dt><dd>#[subject]#</dd>
+	  <dt>dc:description</dt><dd>#[description]#</dd>
+	  <dt>dc:publisher</dt><dd>#[publisher]#</dd>
+	  <dt>dc:format</dt><dd>#[format]#</dd>
+	  <dt>dc:identifier</dt><dd>#[identifier]#</dd>
+	  <dt>dc:source</dt><dd>#[source]#</dd>
+	  </dl>
+	  </form>
+	  <p class="tt">#[parsedText]#</p>
 	</fieldset>
 :: <!-- 3 -->
 	<fieldset><legend>Parsed Sentences</legend>
