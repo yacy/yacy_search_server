@@ -85,6 +85,7 @@ public class genericImageParser extends AbstractParser implements Idiom {
         super("Generic Image Parser"); 
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public Document parse(
             final DigestURI location, 
