@@ -25,27 +25,16 @@
 package net.yacy.document.parser.images;
 
 import java.awt.image.BufferedImage;
-import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import javax.imageio.ImageIO;
 
-import net.yacy.document.AbstractParser;
-import net.yacy.document.Document;
-import net.yacy.document.Idiom;
-import net.yacy.document.ParserException;
-import net.yacy.document.parser.html.ImageEntry;
-import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 
-public class bmpParser extends AbstractParser implements Idiom {
+public class bmpParser {
 
     // this is a implementation of http://de.wikipedia.org/wiki/Windows_Bitmap
     
@@ -60,97 +49,12 @@ public class bmpParser extends AbstractParser implements Idiom {
     //private static int BI_RLE4 = 2;
     //private static int BI_BITFIELDS = 3;
     
-    //boolean debugmode = false;
-    
-    public static final Set<String> SUPPORTED_MIME_TYPES = new HashSet<String>();
-    public static final Set<String> SUPPORTED_EXTENSIONS = new HashSet<String>();
-    static {
-        SUPPORTED_EXTENSIONS.add("bmp");
-        SUPPORTED_MIME_TYPES.add("image/bmp");
-    }
-    
-    public bmpParser() {
-        super("BMP Image Parser"); 
-    }
-
-    public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
-    }
-    
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
-    }
     
     public static final boolean isBMP(final byte[] source) {
         // check the file magic
         return (source != null) && (source.length >= 2) && (source[0] == 'B') && (source[1] == 'M');
     }
     
-    @Override
-    public Document parse(
-            final DigestURI location, 
-            final String mimeType, 
-            final String documentCharset, 
-            final InputStream sourceStream) throws ParserException, InterruptedException {
-        BufferedImage image = null;
-        try {
-            image = ImageIO.read(sourceStream);
-        } catch (final EOFException e) {
-            Log.logException(e);
-            throw new ParserException(e.getMessage(), location);
-        } catch (final IOException e) {
-            Log.logException(e);
-            throw new ParserException(e.getMessage(), location);
-        }
-        if (image == null) throw new ParserException("ImageIO returned NULL", location);
-        
-        // scan the image
-        int height = image.getHeight();
-        int width = image.getWidth();
-        /*
-        Raster raster = image.getData();
-        int[] pixel = raster.getPixel(0, 0, (int[])null);
-        long[] average = new long[pixel.length];
-        for (int i = 0; i < average.length; i++) average[i] = 0L;
-        int pc = 0;
-        for (int x = width / 4; x < 3 * width / 4; x = x + 2) {
-            for (int y = height / 4; y < 3 * height / 4; y = y + 2) {
-                pixel = raster.getPixel(x, y, pixel);
-                for (int i = 0; i < average.length; i++) average[i] += pixel[i];
-                pc++;
-            }
-        }
-        */
-        // get image properties
-        String [] propNames = image.getPropertyNames();
-        if (propNames == null) propNames = new String[0];
-        StringBuilder sb = new StringBuilder(propNames.length * 80);
-        for (String propName: propNames) {
-            sb.append(propName).append(" = ").append(image.getProperty(propName)).append(" .\n");
-        }
-        
-        final HashSet<String> languages = new HashSet<String>();
-        final HashMap<DigestURI, String> anchors = new HashMap<DigestURI, String>();
-        final HashMap<String, ImageEntry> images  = new HashMap<String, ImageEntry>();
-        // add this image to the map of images
-        images.put(sb.toString(), new ImageEntry(location, "", width, height, -1));
-        
-         return new Document(
-             location,
-             mimeType,
-             "UTF-8",
-             languages,
-             new String[]{}, // keywords
-             "", // title
-             "", // author
-             new String[]{}, // sections
-             "", // description
-             sb.toString().getBytes(), // content text
-             anchors, // anchors
-             images,
-             false); // images
-    }
-
     public static IMAGEMAP parse(final byte[] source) {
         // read info-header
         final int bfOffBits  = DWORD(source, FILEHEADER_offset + 10);

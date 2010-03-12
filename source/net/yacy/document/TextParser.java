@@ -86,7 +86,6 @@ public final class TextParser {
     private static final Set<String> denyExtension = new TreeSet<String>(insensitiveCollator);
     
     static {
-        initParser(new bmpParser());
         initParser(new bzipParser());
         initParser(new csvParser());
         initParser(new docParser());

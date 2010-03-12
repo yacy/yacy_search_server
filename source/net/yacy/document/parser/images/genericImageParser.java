@@ -35,17 +35,30 @@ import java.io.IOException;
 import java.io.InputStream;import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import javax.imageio.ImageIO;
+
+import com.drew.imaging.jpeg.JpegMetadataReader;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.Tag;
+import com.sun.image.codec.jpeg.ImageFormatException;
+import com.sun.image.codec.jpeg.JPEGCodec;
+import com.sun.image.codec.jpeg.JPEGDecodeParam;
+import com.sun.image.codec.jpeg.JPEGImageDecoder;
 
 import net.yacy.document.AbstractParser;
 import net.yacy.document.Document;
 import net.yacy.document.Idiom;
 import net.yacy.document.ParserException;
 import net.yacy.document.parser.html.ImageEntry;
+import net.yacy.document.parser.images.bmpParser.IMAGEMAP;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.FileUtils;
 
 public class genericImageParser extends AbstractParser implements Idiom {
 
@@ -61,9 +74,11 @@ public class genericImageParser extends AbstractParser implements Idiom {
         SUPPORTED_EXTENSIONS.add("jpg");
         SUPPORTED_EXTENSIONS.add("jpeg");
         SUPPORTED_EXTENSIONS.add("jpe");
+        SUPPORTED_EXTENSIONS.add("bmp");
         SUPPORTED_MIME_TYPES.add("image/png");
         SUPPORTED_MIME_TYPES.add("image/gif");
         SUPPORTED_MIME_TYPES.add("image/jpg");
+        SUPPORTED_MIME_TYPES.add("image/bmp");
     }
     
     public genericImageParser() {
@@ -76,6 +91,119 @@ public class genericImageParser extends AbstractParser implements Idiom {
             final String mimeType, 
             final String documentCharset, 
             final InputStream sourceStream) throws ParserException, InterruptedException {
+        
+        ImageInfo ii = null;
+        String title = null;
+        String author = null;
+        String keywords = null;
+        String description = null;
+        if (mimeType.equals("image/bmp") ||
+            location.getFileExtension().equals("bmp")) {
+            byte[] b;
+            try {
+                b = FileUtils.read(sourceStream);
+            } catch (IOException e) {
+                Log.logException(e);
+                throw new ParserException(e.getMessage(), location);
+            }
+            IMAGEMAP imap = bmpParser.parse(b);
+            ii = parseJavaImage(location, imap.getImage());
+        } else if (mimeType.equals("image/jpg") ||
+                   location.getFileExtension().equals("jpg") ||
+                   location.getFileExtension().equals("jpeg") ||
+                   location.getFileExtension().equals("jpe")) {
+            // use the exif parser from
+            // http://www.drewnoakes.com/drewnoakes.com/code/exif/
+            // javadoc is at: http://www.drewnoakes.com/drewnoakes.com/code/exif/javadoc/
+            // a tutorial is at: http://www.drewnoakes.com/drewnoakes.com/code/exif/sampleUsage.html
+            JPEGImageDecoder jpegDecoder = JPEGCodec.createJPEGDecoder(sourceStream);
+            BufferedImage image = null;
+            try {
+                image = jpegDecoder.decodeAsBufferedImage();
+            } catch (ImageFormatException e) {
+                Log.logException(e);
+                throw new ParserException(e.getMessage(), location);
+            } catch (IOException e) {
+                Log.logException(e);
+                throw new ParserException(e.getMessage(), location);
+            }
+            JPEGDecodeParam decodeParam = jpegDecoder.getJPEGDecodeParam();
+            Metadata metadata = JpegMetadataReader.readMetadata(decodeParam);
+            ii = parseJavaImage(location, image);
+            
+            Iterator<Directory> directories = (Iterator<Directory>) metadata.getDirectoryIterator();
+            HashMap<String, String> props = new HashMap<String, String>();
+            while (directories.hasNext()) {
+                Directory directory = directories.next();
+                Iterator<Tag> tags = (Iterator<Tag>) directory.getTagIterator();
+                while (tags.hasNext()) {
+                    Tag tag = tags.next();
+                    try {
+                        props.put(tag.getTagName(), tag.getDescription());
+                        ii.info.append(tag.getTagName() + ": " + tag.getDescription() + " .\n");
+                    } catch (MetadataException e) {
+                        Log.logException(e);
+                    }
+                }
+                title = props.get("Image Description");
+                if (title == null || title.length() == 0) title = props.get("Headline");
+                if (title == null || title.length() == 0) title = props.get("Object Name");
+                
+                author = props.get("Artist");
+                if (author == null || author.length() == 0) author = props.get("Writer/Editor");
+                if (author == null || author.length() == 0) author = props.get("By-line");
+                if (author == null || author.length() == 0) author = props.get("Credit");
+                if (author == null || author.length() == 0) author = props.get("Make");
+                
+                keywords = props.get("Keywords");
+                if (keywords == null || keywords.length() == 0) keywords = props.get("Category");
+                if (keywords == null || keywords.length() == 0) keywords = props.get("Supplemental Category(s)");
+                
+                description = props.get("Caption/Abstract");
+                if (description == null || description.length() == 0) description = props.get("Country/Primary Location");
+                if (description == null || description.length() == 0) description = props.get("Province/State");
+                if (description == null || description.length() == 0) description = props.get("Copyright Notice");
+            }
+        } else {
+            ii = parseJavaImage(location, sourceStream);
+        }        
+        
+        final HashSet<String> languages = new HashSet<String>();
+        final HashMap<DigestURI, String> anchors = new HashMap<DigestURI, String>();
+        final HashMap<String, ImageEntry> images  = new HashMap<String, ImageEntry>();
+        // add this image to the map of images
+        String infoString = ii.info.toString();
+        images.put(infoString, new ImageEntry(location, "", ii.width, ii.height, -1));
+        
+        if (title == null) title = location.toNormalform(true, true);
+        
+        return new Document(
+             location,
+             mimeType,
+             "UTF-8",
+             languages,
+             keywords == null ? new String[]{} : keywords.split(keywords.indexOf(',') > 0 ? "," : " "), // keywords
+             title, // title
+             author == null ? location.getHost() : author, // author
+             new String[]{}, // sections
+             description == null ? "" : description, // description
+             infoString.getBytes(), // content text
+             anchors, // anchors
+             images,
+             false); // images
+    }
+    
+    public Set<String> supportedMimeTypes() {
+        return SUPPORTED_MIME_TYPES;
+    }
+    
+    public Set<String> supportedExtensions() {
+        return SUPPORTED_EXTENSIONS;
+    }
+    
+    public static ImageInfo parseJavaImage(
+                            final DigestURI location,
+                            final InputStream sourceStream) throws ParserException {
         BufferedImage image = null;
         try {
             image = ImageIO.read(sourceStream);
@@ -87,10 +215,18 @@ public class genericImageParser extends AbstractParser implements Idiom {
             throw new ParserException(e.getMessage(), location);
         }
         if (image == null) throw new ParserException("ImageIO returned NULL", location);
+        return parseJavaImage(location, image);
+    }
+    
+    public static ImageInfo parseJavaImage(
+                            final DigestURI location,
+                            final BufferedImage image) throws ParserException {
+        ImageInfo ii = new ImageInfo(location);
+        ii.image = image;
         
         // scan the image
-        int height = image.getHeight();
-        int width = image.getWidth();
+        ii.height = ii.image.getHeight();
+        ii.width = ii.image.getWidth();
         /*
         Raster raster = image.getData();
         int[] pixel = raster.getPixel(0, 0, (int[])null);
@@ -106,52 +242,35 @@ public class genericImageParser extends AbstractParser implements Idiom {
         }
         */
         // get image properties
-        String [] propNames = image.getPropertyNames();
+        String [] propNames = ii.image.getPropertyNames();
         if (propNames == null) propNames = new String[0];
-        StringBuilder sb = new StringBuilder(propNames.length * 80);
-        sb.append("\n");
+        ii.info.append("\n");
         for (String propName: propNames) {
-            sb.append(propName).append(" = ").append(image.getProperty(propName)).append(" .\n");
+            ii.info.append(propName).append(" = ").append(ii.image.getProperty(propName)).append(" .\n");
         }
         // append also properties that we measured
-        sb.append("width").append(" = ").append(Integer.toString(width)).append(" .\n");
-        sb.append("height").append(" = ").append(Integer.toString(height)).append(" .\n");
+        ii.info.append("width").append(": ").append(Integer.toString(ii.width)).append(" .\n");
+        ii.info.append("height").append(": ").append(Integer.toString(ii.height)).append(" .\n");
         
-        final HashSet<String> languages = new HashSet<String>();
-        final HashMap<DigestURI, String> anchors = new HashMap<DigestURI, String>();
-        final HashMap<String, ImageEntry> images  = new HashMap<String, ImageEntry>();
-        // add this image to the map of images
-        images.put(sb.toString(), new ImageEntry(location, "", width, height, -1));
-        
-         return new Document(
-             location,
-             mimeType,
-             "UTF-8",
-             languages,
-             new String[]{}, // keywords
-             "", // title
-             "", // author
-             new String[]{}, // sections
-             "", // description
-             sb.toString().getBytes(), // content text
-             anchors, // anchors
-             images,
-             false); // images
-    }
-/*
- * Document(final DigestURI location, final String mimeType, final String charset, final Set<String> languages,
-                    final String[] keywords, final String title, final String author,
-                    final String[] sections, final String abstrct,
-                    final Object text, final Map<DigestURI, String> anchors, final HashMap<String, ImageEntry> images) {(non-Javadoc)
- * @see net.yacy.document.Idiom#supportedMimeTypes()
- */
-    public Set<String> supportedMimeTypes() {
-        return SUPPORTED_MIME_TYPES;
+        return ii;
     }
     
-    public Set<String> supportedExtensions() {
-        return SUPPORTED_EXTENSIONS;
+    public static class ImageInfo {
+        public DigestURI location;
+        public BufferedImage image;
+        public StringBuilder info;
+        public int height;
+        public int width;
+        public ImageInfo(final DigestURI location) {
+            this.location = location;
+            this.image = null;
+            this.info = new StringBuilder();
+            this.height = -1;
+            this.width = -1;
+        }
     }
+    
+    
     
     public static void main(final String[] args) {
         File image = new File(args[0]);
