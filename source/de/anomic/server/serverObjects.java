@@ -64,6 +64,8 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
 
     private static final long serialVersionUID = 1L;
     private boolean localized = true; 
+    
+    private final static char BOM = '\uFEFF'; // ByteOrderMark character that may appear at beginnings of Strings (Browser may append that)
 
     public serverObjects() {
         super();
@@ -75,6 +77,12 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
 
     public serverObjects(final Map<String, String> input) {
         super(input);
+    }
+    
+    private static final String removeBOM(String s) {
+        if (s == null || s.length() == 0) return s;
+        if (s.charAt(0) == BOM) return s.substring(1);
+        return s;
     }
 
     /**
@@ -253,13 +261,13 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
 
     // string variant
     public String get(final String key, final String dflt) {
-        final Object result = super.get(key);
+        final String result = removeBOM(super.get(key));
         if (result == null) return dflt;
-        return (String) result;
+        return result;
     }
 
     public int getInt(final String key, final int dflt) {
-        final String s = super.get(key);
+        final String s = removeBOM(super.get(key));
         if (s == null) return dflt;
         try {
             return Integer.parseInt(s);
@@ -269,7 +277,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     public long getLong(final String key, final long dflt) {
-        final String s = super.get(key);
+        final String s = removeBOM(super.get(key));
         if (s == null) return dflt;
         try {
             return Long.parseLong(s);
@@ -279,7 +287,7 @@ public class serverObjects extends HashMap<String, String> implements Cloneable 
     }
 
     public double getDouble(final String key, final double dflt) {
-        final String s = super.get(key);
+        final String s = removeBOM(super.get(key));
         if (s == null) return dflt;
         try {
             return Double.parseDouble(s);
