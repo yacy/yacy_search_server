@@ -585,21 +585,69 @@ public final class Switchboard extends serverSwitch {
         MemoryControl.gc(10000, "plasmaSwitchboard, help for profiler"); // help for profiler - thq
         
         deployThread(SwitchboardConstants.CLEANUP, "Cleanup", "simple cleaning process for monitoring information", null,
-                     new InstantBusyThread(this, SwitchboardConstants.CLEANUP_METHOD_START, SwitchboardConstants.CLEANUP_METHOD_JOBCOUNT, SwitchboardConstants.CLEANUP_METHOD_FREEMEM), 600000); // all 5 Minutes, wait 10 minutes until first run
+                     new InstantBusyThread(
+                         this,
+                         SwitchboardConstants.CLEANUP_METHOD_START,
+                         SwitchboardConstants.CLEANUP_METHOD_JOBCOUNT,
+                         SwitchboardConstants.CLEANUP_METHOD_FREEMEM,
+                         60000, Long.MAX_VALUE, 10000, Long.MAX_VALUE),
+                     600000); // all 5 Minutes, wait 10 minutes until first run
         deployThread(SwitchboardConstants.SURROGATES, "Surrogates", "A thread that polls the SURROGATES path and puts all Documents in one surroagte file into the indexing queue.", null,
-                     new InstantBusyThread(this, SwitchboardConstants.SURROGATES_METHOD_START, SwitchboardConstants.SURROGATES_METHOD_JOBCOUNT, SwitchboardConstants.SURROGATES_METHOD_FREEMEM), 10000);
+                     new InstantBusyThread(
+                         this,
+                         SwitchboardConstants.SURROGATES_METHOD_START,
+                         SwitchboardConstants.SURROGATES_METHOD_JOBCOUNT,
+                         SwitchboardConstants.SURROGATES_METHOD_FREEMEM,
+                         20000, Long.MAX_VALUE, 0, Long.MAX_VALUE),
+                     10000);
         deployThread(SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL, "Remote Crawl Job", "thread that performes a single crawl/indexing step triggered by a remote peer", null,
-                     new InstantBusyThread(crawlQueues, SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START, SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT, SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM), 30000);
+                     new InstantBusyThread(
+                         crawlQueues,
+                         SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_START,
+                         SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_JOBCOUNT,
+                         SwitchboardConstants.CRAWLJOB_REMOTE_TRIGGERED_CRAWL_METHOD_FREEMEM,
+                         0, Long.MAX_VALUE, 0, Long.MAX_VALUE),
+                     30000);
         deployThread(SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER, "Remote Crawl URL Loader", "thread that loads remote crawl lists from other peers", "",
-                     new InstantBusyThread(crawlQueues, SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_START, SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT, SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_FREEMEM), 30000); // error here?
+                     new InstantBusyThread(
+                         crawlQueues,
+                         SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_START,
+                         SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_JOBCOUNT,
+                         SwitchboardConstants.CRAWLJOB_REMOTE_CRAWL_LOADER_METHOD_FREEMEM,
+                         10000, Long.MAX_VALUE, 10000, Long.MAX_VALUE),
+                     30000); // error here?
         deployThread(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL, "Local Crawl", "thread that performes a single crawl step from the local crawl queue", "/IndexCreateWWWLocalQueue_p.html",
-                     new InstantBusyThread(crawlQueues, SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_START, SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT, SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM), 10000);
+                     new InstantBusyThread(
+                         crawlQueues,
+                         SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_START,
+                         SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_JOBCOUNT,
+                         SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL_METHOD_FREEMEM,
+                         0, Long.MAX_VALUE, 0, Long.MAX_VALUE),
+                     10000);
         deployThread(SwitchboardConstants.SEED_UPLOAD, "Seed-List Upload", "task that a principal peer performes to generate and upload a seed-list to a ftp account", null,
-                     new InstantBusyThread(yc, SwitchboardConstants.SEED_UPLOAD_METHOD_START, SwitchboardConstants.SEED_UPLOAD_METHOD_JOBCOUNT, SwitchboardConstants.SEED_UPLOAD_METHOD_FREEMEM), 180000);
+                     new InstantBusyThread(
+                         yc,
+                         SwitchboardConstants.SEED_UPLOAD_METHOD_START,
+                         SwitchboardConstants.SEED_UPLOAD_METHOD_JOBCOUNT,
+                         SwitchboardConstants.SEED_UPLOAD_METHOD_FREEMEM,
+                         600000, Long.MAX_VALUE, 300000, Long.MAX_VALUE),
+                     180000);
         deployThread(SwitchboardConstants.PEER_PING, "YaCy Core", "this is the p2p-control and peer-ping task", null,
-                     new InstantBusyThread(yc, SwitchboardConstants.PEER_PING_METHOD_START, SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT, SwitchboardConstants.PEER_PING_METHOD_FREEMEM), 2000);
+                     new InstantBusyThread(
+                         yc,
+                         SwitchboardConstants.PEER_PING_METHOD_START,
+                         SwitchboardConstants.PEER_PING_METHOD_JOBCOUNT,
+                         SwitchboardConstants.PEER_PING_METHOD_FREEMEM,
+                         60000, Long.MAX_VALUE, 60000, Long.MAX_VALUE),
+                     2000);
         deployThread(SwitchboardConstants.INDEX_DIST, "DHT Distribution", "selection, transfer and deletion of index entries that are not searched on your peer, but on others", null,
-            new InstantBusyThread(this, SwitchboardConstants.INDEX_DIST_METHOD_START, SwitchboardConstants.INDEX_DIST_METHOD_JOBCOUNT, SwitchboardConstants.INDEX_DIST_METHOD_FREEMEM), 5000,
+                     new InstantBusyThread(
+                         this,
+                         SwitchboardConstants.INDEX_DIST_METHOD_START,
+                         SwitchboardConstants.INDEX_DIST_METHOD_JOBCOUNT,
+                         SwitchboardConstants.INDEX_DIST_METHOD_FREEMEM,
+                         10000, Long.MAX_VALUE, 1000, Long.MAX_VALUE),
+                     5000,
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_IDLESLEEP , "5000")),
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_BUSYSLEEP , "0")),
             Long.parseLong(getConfig(SwitchboardConstants.INDEX_DIST_MEMPREREQ , "1000000")));

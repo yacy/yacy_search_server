@@ -181,6 +181,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             final serverSwitch switchboard,
             final int commandMaxLength
     ) {
+        super(Long.MIN_VALUE, Long.MAX_VALUE, Long.MIN_VALUE, Long.MAX_VALUE);
         this.timeout = timeout;
         
         this.commandMaxLength = commandMaxLength;

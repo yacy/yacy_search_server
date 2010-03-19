@@ -385,8 +385,9 @@ public class serverSwitch {
     public void setThreadPerformance(final String threadName, final long idleMillis, final long busyMillis, final long memprereqBytes) {
         final BusyThread thread = workerThreads.get(threadName);
         if (thread != null) {
-            thread.setIdleSleep(idleMillis);
-            thread.setBusySleep(busyMillis);
+            setConfig(threadName + "_idlesleep", thread.setIdleSleep(idleMillis));
+            setConfig(threadName + "_busysleep", thread.setBusySleep(busyMillis));
+            setConfig(threadName + "_memprereq", memprereqBytes);
             thread.setMemPreReqisite(memprereqBytes);
         }
     }

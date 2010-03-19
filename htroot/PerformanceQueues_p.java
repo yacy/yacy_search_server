@@ -202,8 +202,11 @@ public class PerformanceQueues_p {
                 if (idlesleep < 1000) idlesleep = 1000;
                 if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
                 
-                onTheFlyReconfiguration(sb, threadName, idlesleep, busysleep, memprereq);
-            } if (setProfile) {
+                sb.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);
+                idlesleep = sb.getConfigLong(threadName + "_idlesleep", idlesleep);
+                busysleep = sb.getConfigLong(threadName + "_busysleep", busysleep);
+            }
+            if (setProfile) {
                 if (threadName.equals(SwitchboardConstants.PEER_PING)
                 		|| threadName.equals(SwitchboardConstants.SEED_UPLOAD)
                 		|| threadName.equals(SwitchboardConstants.CLEANUP)
@@ -223,8 +226,7 @@ public class PerformanceQueues_p {
                     if (idlesleep < 1000) idlesleep = 1000;
                     if (threadName.equals("10_httpd")) { idlesleep = 0; busysleep = 0; memprereq = 0; }
                     //if (threadName.equals(plasmaSwitchboardConstants.CRAWLJOB_LOCAL_CRAWL) && (busysleep < 50)) busysleep = 50;
-                    
-                	onTheFlyReconfiguration(sb, threadName, idlesleep, busysleep, memprereq);
+                    sb.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);
                 }
             }
             prop.put("table_" + c + "_idlesleep", idlesleep);
@@ -367,22 +369,6 @@ public class PerformanceQueues_p {
         
         // return rewrite values for templates
         return prop;
-    }
-
-    /**
-     * @param switchboard
-     * @param threadName
-     * @param idlesleep
-     * @param busysleep
-     * @param memprereq
-     */
-    private static void onTheFlyReconfiguration(final Switchboard switchboard, final String threadName, final long idlesleep,
-            final long busysleep, final long memprereq) {
-        // on-the-fly re-configuration
-        switchboard.setThreadPerformance(threadName, idlesleep, busysleep, memprereq);
-        switchboard.setConfig(threadName + "_idlesleep", idlesleep);
-        switchboard.setConfig(threadName + "_busysleep", busysleep);
-        switchboard.setConfig(threadName + "_memprereq", memprereq);
     }
     
     private static String d(final String a, final String b) {

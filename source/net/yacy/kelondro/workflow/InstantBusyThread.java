@@ -38,7 +38,17 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
     public static int instantThreadCounter = 0;
     public static final TreeMap<Long, String> jobs = new TreeMap<Long, String>();
     
-    public InstantBusyThread(final Object env, final String jobExec, final String jobCount, final String freemem) {
+    public InstantBusyThread(
+              final Object env,
+              final String jobExec,
+              final String jobCount,
+              final String freemem,
+              long minIdleSleep,
+              long maxIdleSleep,
+              long minBusySleep,
+              long maxBusySleep) {
+        super(minIdleSleep, maxIdleSleep, minBusySleep, maxBusySleep);
+        
         // jobExec is the name of a method of the object 'env' that executes the one-step-run
         // jobCount is the name of a method that returns the size of the job
         // freemem is the name of a method that tries to free memory and returns void
@@ -146,7 +156,8 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
     
     public static BusyThread oneTimeJob(final Object env, final String jobExec, final Log log, final long startupDelay) {
         // start the job and execute it once as background process
-        final BusyThread thread = new InstantBusyThread(env, jobExec, null, null);
+        final BusyThread thread = new InstantBusyThread(
+                env, jobExec, null, null, Long.MIN_VALUE, Long.MAX_VALUE, Long.MIN_VALUE, Long.MAX_VALUE);
         thread.setStartupSleep(startupDelay);
         thread.setIdleSleep(-1);
         thread.setBusySleep(-1);

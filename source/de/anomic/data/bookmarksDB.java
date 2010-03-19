@@ -123,7 +123,7 @@ public class bookmarksDB {
 
         // autoReCrawl
         Switchboard sb = Switchboard.getSwitchboard();
-        this.autoReCrawl = new InstantBusyThread(this, "autoReCrawl", null, null);
+        this.autoReCrawl = new InstantBusyThread(this, "autoReCrawl", null, null, Long.MIN_VALUE, Long.MAX_VALUE, Long.MIN_VALUE, Long.MAX_VALUE);
         long sleepTime = Long.parseLong(sb.getConfig("autoReCrawl_idlesleep" , SLEEP_TIME));
         sb.deployThread("autoReCrawl", "autoReCrawl Scheduler", "simple scheduler for automatic re-crawls of bookmarked urls", null, autoReCrawl, 120000,
                 sleepTime, sleepTime, Long.parseLong(sb.getConfig("autoReCrawl_memprereq" , "-1"))
