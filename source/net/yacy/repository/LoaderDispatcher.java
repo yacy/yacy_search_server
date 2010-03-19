@@ -45,6 +45,7 @@ import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.TransformerWriter;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
 
 import de.anomic.crawler.CrawlProfile;
@@ -60,7 +61,6 @@ import de.anomic.http.server.RequestHeader;
 import de.anomic.http.server.ResponseHeader;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;
-import de.anomic.server.serverCore;
 
 public final class LoaderDispatcher {
 
@@ -174,7 +174,7 @@ public final class LoaderDispatcher {
         
         // check if this loads a page from localhost, which must be prevented to protect the server
         // against attacks to the administration interface when localhost access is granted
-        if (serverCore.isLocalhost(host) && sb.getConfigBool("adminAccountForLocalhost", false)) throw new IOException("access to localhost not granted for url " + request.url());
+        if (Domains.isLocal(host) && sb.getConfigBool("adminAccountForLocalhost", false)) throw new IOException("access to localhost not granted for url " + request.url());
         
         // check if we have the page in the cache
 

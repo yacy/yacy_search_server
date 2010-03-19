@@ -518,32 +518,27 @@ public class Domains {
          if (nameCacheMiss.size() > maxNameCacheMissSize) nameCacheMiss.clear();
     }
 
-    public static InetAddress localHostAddress;
-    public static String localHostName; 
-    public static InetAddress[] localHostAddresses;
+    private static InetAddress localHostAddress;
+    private static final String localHostName = "127.0.0.1"; 
+    public static InetAddress[] localHostAddresses = new InetAddress[0];
     static {
-        localHostName = "127.0.0.1";
         try {
-            localHostAddress = InetAddress.getByName(localHostName);
-        } catch (UnknownHostException e1) {}
+            localHostAddress = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {}
         try {
             localHostAddresses = InetAddress.getAllByName(localHostName);
-        } catch (UnknownHostException e) {
-            localHostAddresses = new InetAddress[0];
-        }
+        } catch (UnknownHostException e) {}
         new localHostAddressLookup().start();
     }
     
     public static class localHostAddressLookup extends Thread {
         public void run() {
+            String lhn = localHostName;
             try {
-                localHostAddress = InetAddress.getLocalHost();
-                localHostName = localHostAddress.getHostName();
-            } catch (UnknownHostException e) {
-                localHostName = "127.0.0.1";
-            }
+                lhn = InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {}
             try {
-                localHostAddresses = InetAddress.getAllByName(localHostName);
+                localHostAddresses = InetAddress.getAllByName(lhn);
             } catch (UnknownHostException e) {
                 localHostAddresses = new InetAddress[0];
             }
@@ -552,38 +547,37 @@ public class Domains {
     
     public static InetAddress myPublicLocalIP() {
         // list all addresses
-        final InetAddress[] ia = Domains.localHostAddresses;
         // for (int i = 0; i < ia.length; i++) System.out.println("IP: " +
         // ia[i].getHostAddress()); // DEBUG
-        if (ia.length == 0) {
-            return Domains.localHostAddress;
+        if (localHostAddresses.length == 0) {
+            return localHostAddress;
         }
-        if (ia.length == 1) {
+        if (localHostAddresses.length == 1) {
             // only one network connection available
-            return ia[0];
+            return localHostAddresses[0];
         }
         // we have more addresses, find an address that is not local
         int b0, b1;
-        for (int i = 0; i < ia.length; i++) {
-            b0 = 0Xff & ia[i].getAddress()[0];
-            b1 = 0Xff & ia[i].getAddress()[1];
-            if ((b0 != 10) && // class A reserved
-                    (b0 != 127) && // loopback
-                    ((b0 != 172) || (b1 < 16) || (b1 > 31)) && // class B reserved
-                    ((b0 != 192) || (b1 != 168)) && // class C reserved
-                    (ia[i].getHostAddress().indexOf(":") < 0))
-                return ia[i];
+        for (int i = 0; i < localHostAddresses.length; i++) {
+            b0 = 0Xff & localHostAddresses[i].getAddress()[0];
+            b1 = 0Xff & localHostAddresses[i].getAddress()[1];
+            if (b0 != 10 && // class A reserved
+                b0 != 127 && // loopback
+                (b0 != 172 || b1 < 16 || b1 > 31) && // class B reserved
+                (b0 != 192 || b1 != 168) && // class C reserved
+                (localHostAddresses[i].getHostAddress().indexOf(":") < 0))
+                return localHostAddresses[i];
         }
         // there is only a local address, we filter out the possibly
         // returned loopback address 127.0.0.1
-        for (int i = 0; i < ia.length; i++) {
-            if (((0Xff & ia[i].getAddress()[0]) != 127) && (ia[i].getHostAddress().indexOf(":") < 0)) return ia[i];
+        for (int i = 0; i < localHostAddresses.length; i++) {
+            if (((0Xff & localHostAddresses[i].getAddress()[0]) != 127) && (localHostAddresses[i].getHostAddress().indexOf(":") < 0)) return localHostAddresses[i];
         }
         // if all fails, give back whatever we have
-        for (int i = 0; i < ia.length; i++) {
-            if (ia[i].getHostAddress().indexOf(":") < 0) return ia[i];
+        for (int i = 0; i < localHostAddresses.length; i++) {
+            if (localHostAddresses[i].getHostAddress().indexOf(":") < 0) return localHostAddresses[i];
         }
-        return ia[0];
+        return localHostAddresses[0];
     }
     
     public static int getDomainID(final String host) {
@@ -601,35 +595,18 @@ public class Domains {
     }
      
     public static boolean isLocal(final String host) {
-
-        // attention! because this method does a dns resolve to look up an IP address,
-        // the result may be very slow. Consider 100 milliseconds per access
-        
         assert (host != null);
 
         // FIXME IPv4 only
         // check local ip addresses
         if (matchesList(host, localhostPatterns)) return true;
+        if (host.startsWith("0:0:0:0:0:0:0:1")) return true;
         
-        // check the tld list
-        final int p = host.lastIndexOf('.');
-        String tld = "";
-        if (p > 0) {
-            tld = host.substring(p + 1);
-        }
-        if (TLDID.get(tld) == null) return true;
-
-        // make a dns resolve if a hostname is given and check again
-        final InetAddress clientAddress = dnsResolve(host);
-        if (clientAddress != null) {
-            if ((clientAddress.isAnyLocalAddress()) || (clientAddress.isLoopbackAddress())) return true;
-            // FIXME !!host is not read after this!!: if (host.charAt(0) > '9') host = clientAddress.getHostAddress();
-        }
-
         // finally check if there are other local IP adresses that are not in
         // the standard IP range
         for (int i = 0; i < localHostAddresses.length; i++) {
-            if (localHostAddresses[i].equals(clientAddress)) return true;
+            if (localHostAddresses[i].getHostName().equals(host)) return true;
+            if (localHostAddresses[i].getHostAddress().equals(host)) return true;
         }
 
         // the address must be a global address

@@ -72,7 +72,7 @@ public class UPnP {
 		boolean init = true;
 		try {
 			if (IGDs == null) IGDs = InternetGatewayDevice.getDevices(discoveryTimeout);
-			localHostIP = Domains.localHostAddress.getHostAddress();
+			localHostIP = Domains.myPublicLocalIP().getHostAddress();
 		} catch (IOException e) {
 			init = false;
 		}

@@ -71,9 +71,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.ref.SoftReference;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.InetAddress;
 import java.net.URLDecoder;
-import java.net.UnknownHostException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -90,6 +88,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.ByteBuffer;
 import net.yacy.kelondro.util.DateFormatter;
+import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.visualization.RasterPlotter;
@@ -295,12 +294,7 @@ public final class HTTPDFileHandler {
             
             final boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
             final String refererHost = requestHeader.refererHost();
-            boolean accessFromLocalhost = serverCore.isLocalhost(clientIP) && (refererHost.length() == 0 || serverCore.isLocalhost(refererHost));
-            if (!accessFromLocalhost) try {
-                // the access may also be from a different IP than localhost if it is the same as the YaCy instance is running on
-                InetAddress myaddress = InetAddress.getLocalHost();
-                accessFromLocalhost = myaddress.equals(InetAddress.getByName(clientIP)) && (refererHost.length() == 0 || myaddress.equals(InetAddress.getByName(refererHost)));
-            } catch (UnknownHostException e) {}
+            boolean accessFromLocalhost = Domains.isLocal(clientIP) && (refererHost.length() == 0 || Domains.isLocal(refererHost));
             final boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
             final boolean protectedPage = path.indexOf("_p.") > 0;
             final boolean accountEmpty = adminAccountBase64MD5.length() == 0;

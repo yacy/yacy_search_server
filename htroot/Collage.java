@@ -25,11 +25,11 @@
 import java.util.Random;
 
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.util.Domains;
 
 import de.anomic.crawler.ResultImages;
 import de.anomic.http.server.RequestHeader;
 import de.anomic.search.Switchboard;
-import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 
@@ -95,7 +95,7 @@ public class Collage {
                 
                 // check if this loads a page from localhost, which must be prevented to protect the server
                 // against attacks to the administration interface when localhost access is granted
-                if ((serverCore.isLocalhost(baseURL.getHost()) || serverCore.isLocalhost(imageURL.getHost())) &&
+                if ((Domains.isLocal(baseURL.getHost()) || Domains.isLocal(imageURL.getHost())) &&
                     sb.getConfigBool("adminAccountForLocalhost", false)) continue;
                 
                 final long z = imgZIndex[i];
