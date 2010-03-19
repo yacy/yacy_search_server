@@ -30,6 +30,7 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.Collator;
 import java.util.ArrayList;
@@ -62,10 +63,10 @@ import net.yacy.document.parser.vcfParser;
 import net.yacy.document.parser.vsdParser;
 import net.yacy.document.parser.xlsParser;
 import net.yacy.document.parser.zipParser;
-import net.yacy.document.parser.images.bmpParser;
 import net.yacy.document.parser.images.genericImageParser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.util.FileUtils;
 
 
 public final class TextParser {
@@ -141,38 +142,8 @@ public final class TextParser {
             ext2parser.put(ext, parser);
             Log.logInfo("PARSER", "Parser for extension '" + ext + "': " + parser.getName());
         }
-       
     }
-
-    public static Document parseSource(
-            final DigestURI location,
-            final String mimeType,
-            final String charset,
-            final byte[] sourceArray
-        ) throws InterruptedException, ParserException {
-        
-        ByteArrayInputStream byteIn = null;
-        try {
-            if (log.isFine()) log.logFine("Parsing '" + location + "' from byte-array");
-            if (sourceArray == null || sourceArray.length == 0) {
-                final String errorMsg = "No resource content available (1) " + (((sourceArray == null) ? "source == null" : "source.length() == 0") + ", url = " + location.toNormalform(true, false));
-                log.logInfo("Unable to parse '" + location + "'. " + errorMsg);
-                throw new ParserException(errorMsg, location);
-            }
-            byteIn = new ByteArrayInputStream(sourceArray);
-            return parseSource(location, mimeType, charset, sourceArray.length, byteIn);
-        } catch (final Exception e) {
-            if (e instanceof InterruptedException) throw (InterruptedException) e;
-            if (e instanceof ParserException) throw (ParserException) e;
-            log.logSevere("Unexpected exception in parseSource from byte-array: " + e.getMessage(), e);
-            throw new ParserException("Unexpected exception: " + e.getMessage(), location);
-        } finally {
-            if (byteIn != null) try {
-                byteIn.close();
-            } catch (final Exception ex) { }
-        }
-    }
-
+    
     public static Document parseSource(
             final DigestURI location,
             final String mimeType,
@@ -201,7 +172,16 @@ public final class TextParser {
             } catch (final Exception ex) {}
         }
     }
-
+    
+    public static Document parseSource(
+            final DigestURI location,
+            String mimeType,
+            final String charset,
+            final byte[] content
+        ) throws InterruptedException, ParserException {
+        return parseSource(location, mimeType, charset, content.length, new ByteArrayInputStream(content));
+    }
+    
     public static Document parseSource(
             final DigestURI location,
             String mimeType,
@@ -211,8 +191,6 @@ public final class TextParser {
         ) throws InterruptedException, ParserException {
         if (log.isFine()) log.logFine("Parsing '" + location + "' from stream");
         mimeType = normalizeMimeType(mimeType);
-        final String fileExt = location.getFileExtension();
-        final String documentCharset = htmlParser.patchCharsetEncoding(charset);
         List<Idiom> idioms = null;
         try {
             idioms = idiomParser(location, mimeType);
@@ -223,14 +201,62 @@ public final class TextParser {
         }
         assert !idioms.isEmpty();
         
-        if (log.isFine()) log.logInfo("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "'.");
+        // if we do not have more than one parser or the content size is over MaxInt
+        // then we use only one stream-oriented parser.
+        if (idioms.size() == 1 || contentLength > Integer.MAX_VALUE) {
+            // use a specific stream-oriented parser
+            return parseSource(location, mimeType, idioms.get(0), charset, contentLength, sourceStream);
+        }
         
+        // in case that we know more parsers we first transform the content into a byte[] and use that as base
+        // for a number of different parse attempts.
+        try {
+            return parseSource(location, mimeType, idioms, charset, FileUtils.read(sourceStream, (int) contentLength));
+        } catch (IOException e) {
+            throw new ParserException(e.getMessage(), location);
+        }
+    }
+
+    private static Document parseSource(
+            final DigestURI location,
+            String mimeType,
+            Idiom idiom,
+            final String charset,
+            final long contentLength,
+            final InputStream sourceStream
+        ) throws InterruptedException, ParserException {
+        if (log.isFine()) log.logFine("Parsing '" + location + "' from stream");
+        final String fileExt = location.getFileExtension();
+        final String documentCharset = htmlParser.patchCharsetEncoding(charset);
+        assert idiom != null;
+
+        if (log.isFine()) log.logInfo("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "'.");
+        idiom.setContentLength(contentLength);
+        try {
+            return idiom.parse(location, mimeType, documentCharset, sourceStream);
+        } catch (ParserException e) {
+            throw new ParserException("parser failed: " + idiom.getName(), location);
+        }
+    }
+
+    private static Document parseSource(
+            final DigestURI location,
+            String mimeType,
+            List<Idiom> idioms,
+            final String charset,
+            final byte[] sourceArray
+        ) throws InterruptedException, ParserException {
+        final String fileExt = location.getFileExtension();
+        if (log.isFine()) log.logInfo("Parsing " + location + " with mimeType '" + mimeType + "' and file extension '" + fileExt + "' from byte[]");
+        final String documentCharset = htmlParser.patchCharsetEncoding(charset);
+        assert !idioms.isEmpty();
+
         Document doc = null;
         HashMap<Idiom, ParserException> failedParser = new HashMap<Idiom, ParserException>();
         for (Idiom parser: idioms) {
-            parser.setContentLength(contentLength);
+            parser.setContentLength(sourceArray.length);
             try {
-                doc = parser.parse(location, mimeType, documentCharset, sourceStream);
+                doc = parser.parse(location, mimeType, documentCharset, new ByteArrayInputStream(sourceArray));
             } catch (ParserException e) {
                 failedParser.put(parser, e);
                 //log.logWarning("tried parser '" + parser.getName() + "' to parse " + location.toNormalform(true, false) + " but failed: " + e.getMessage(), e);
