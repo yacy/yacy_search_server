@@ -248,7 +248,8 @@ public class RobotsTxt {
     }
    
     public DigestURI getSitemapURL(final DigestURI theURL) {
-        if (theURL == null) throw new IllegalArgumentException(); 
+        if (theURL == null) throw new IllegalArgumentException();
+        if (!theURL.getProtocol().startsWith("http")) return null;
         DigestURI sitemapURL = null;
         
         // generating the hostname:poart string needed to do a DB lookup
@@ -267,20 +268,23 @@ public class RobotsTxt {
         return sitemapURL;
     }
     
-    public Long getCrawlDelayMillis(final DigestURI theURL) {
+    public long getCrawlDelayMillis(final DigestURI theURL) {
         if (theURL == null) throw new IllegalArgumentException();
+        if (!theURL.getProtocol().startsWith("http")) return 0;
+        
         RobotsEntry robotsEntry;
         try {
             robotsEntry = getEntry(theURL, true);
         } catch (IOException e) {
             Log.logException(e);
-            return new Long(0);
+            return 0;
         }
         return robotsEntry.getCrawlDelayMillis();
     }
     
     public boolean isDisallowed(final DigestURI nexturl) {
-        if (nexturl == null) throw new IllegalArgumentException();               
+        if (nexturl == null) throw new IllegalArgumentException();
+        if (!nexturl.getProtocol().startsWith("http")) return false;
         
         // generating the hostname:port string needed to do a DB lookup
         RobotsEntry robotsTxt4Host = null;
@@ -294,6 +298,7 @@ public class RobotsTxt {
     }
     
     private static Object[] downloadRobotsTxt(final DigestURI robotsURL, int redirectionCount, final RobotsEntry entry) throws Exception {
+        if (robotsURL == null || !robotsURL.getProtocol().startsWith("http")) return null;
         
         if (redirectionCount < 0) return new Object[]{Boolean.FALSE,null,null};
         redirectionCount--;
