@@ -278,7 +278,7 @@ public final class search {
             RSSFeed.channels(RSSFeed.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.queryHashes), ""));
             
             // make event
-            theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.crawlResults, null, true);
+            theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.crawlResults, null, true, sb.loader);
             
             // set statistic details of search result and find best result index set
             if (theSearch.getRankingResult().getLocalIndexCount() == 0) {

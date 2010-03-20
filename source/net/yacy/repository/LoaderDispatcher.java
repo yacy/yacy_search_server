@@ -102,6 +102,15 @@ public final class LoaderDispatcher {
         return load(request(url, forText, global), forText);
     }
     
+    /**
+     * load a resource from the web, from ftp, from smb or a file
+     * @param url
+     * @param forText
+     * @param global
+     * @param cacheStratgy strategy according to CACHE_STRATEGY_NOCACHE,CACHE_STRATEGY_IFFRESH,CACHE_STRATEGY_IFEXIST,CACHE_STRATEGY_CACHEONLY
+     * @return the loaded entity in a Response object
+     * @throws IOException
+     */
     public Response load(
             final DigestURI url,
             final boolean forText,
@@ -112,7 +121,7 @@ public final class LoaderDispatcher {
     
     public void load(final DigestURI url, int cacheStratgy, File targetFile) throws IOException {
 
-        byte[] b = load(url, cacheStratgy);
+        byte[] b = load(request(url, false, true), false, cacheStratgy).getContent();
         if (b == null) throw new IOException("load == null");
         File tmp = new File(targetFile.getAbsolutePath() + ".tmp");
         
@@ -121,11 +130,6 @@ public final class LoaderDispatcher {
         if (!parent.exists()) parent.mkdirs();
         FileUtils.copy(b, tmp);
         tmp.renameTo(targetFile);
-    }
-    
-    public byte[] load(final DigestURI url, int cacheStratgy) throws IOException {
-        Response response = load(request(url, false, true), false, cacheStratgy);
-        return response.getContent();
     }
     
     /**
@@ -162,7 +166,7 @@ public final class LoaderDispatcher {
     
     public Response load(final Request request, final boolean acceptOnlyParseable) throws IOException {
         CrawlProfile.entry crawlProfile = sb.crawler.profilesActiveCrawls.getEntry(request.profileHandle());
-        int cacheStrategy = CrawlProfile.CACHE_STRATEGY_IFFRESH;
+        int cacheStrategy = CrawlProfile.CACHE_STRATEGY_IFEXIST;
         if (crawlProfile != null) cacheStrategy = crawlProfile.cacheStrategy();
         return load(request, acceptOnlyParseable, cacheStrategy);
     }

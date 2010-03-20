@@ -43,6 +43,7 @@ import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.kelondro.util.SortStack;
 import net.yacy.kelondro.util.SortStore;
+import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.search.MediaSnippet;
 import de.anomic.yacy.yacySeedDB;
@@ -56,6 +57,7 @@ public class ResultFetcher {
     private final yacySeedDB      peers;
     
     // result values
+    protected final LoaderDispatcher        loader;
     protected       Worker[]                workerThreads;
     protected final SortStore<ResultEntry>  result;
     protected final SortStore<MediaSnippet> images; // container to sort images by size
@@ -67,11 +69,13 @@ public class ResultFetcher {
     
     @SuppressWarnings("unchecked")
     public ResultFetcher(
+            final LoaderDispatcher loader,
             RankingProcess rankedCache,
             final QueryParams query,
             final yacySeedDB peers,
             final int taketimeout) {
     	
+        this.loader = loader;
     	this.rankedCache = rankedCache;
     	this.query = query;
         this.peers = peers;
@@ -211,7 +215,15 @@ public class ResultFetcher {
         if (query.contentdom == ContentDomain.TEXT) {
             // attach text snippet
             startTime = System.currentTimeMillis();
-            final TextSnippet snippet = TextSnippet.retrieveTextSnippet(metadata, snippetFetchWordHashes, (snippetMode == 2), ((query.constraint != null) && (query.constraint.get(Condenser.flag_cat_indexof))), 180, (snippetMode == 2) ? Integer.MAX_VALUE : 30000, query.isGlobal());
+            final TextSnippet snippet = TextSnippet.retrieveTextSnippet(
+                    this.loader,
+                    metadata,
+                    snippetFetchWordHashes,
+                    (snippetMode == 2),
+                    ((query.constraint != null) && (query.constraint.get(Condenser.flag_cat_indexof))),
+                    180,
+                    (snippetMode == 2) ? Integer.MAX_VALUE : 30000,
+                    query.isGlobal());
             final long snippetComputationTime = System.currentTimeMillis() - startTime;
             Log.logInfo("SEARCH_EVENT", "text snippet load time for " + metadata.url() + ": " + snippetComputationTime + ", " + ((snippet.getErrorCode() < 11) ? "snippet found" : ("no snippet found (" + snippet.getError() + ")")));
             

@@ -30,6 +30,8 @@ import java.util.Iterator;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+import net.yacy.repository.LoaderDispatcher;
+
 import de.anomic.crawler.ResultURLs;
 import de.anomic.yacy.yacySeedDB;
 
@@ -69,7 +71,8 @@ public class SearchEventCache {
             final yacySeedDB peers,
             final ResultURLs crawlResults,
             final TreeMap<byte[], String> preselectedPeerHashes,
-            final boolean generateAbstracts) {
+            final boolean generateAbstracts,
+            final LoaderDispatcher loader) {
         
         String id = query.id(false);
         SearchEvent event = SearchEventCache.lastEvents.get(id);
@@ -89,7 +92,7 @@ public class SearchEventCache {
         }
         if (event == null) {
             // start a new event
-            event = new SearchEvent(query, peers, crawlResults, preselectedPeerHashes, generateAbstracts);
+            event = new SearchEvent(query, peers, crawlResults, preselectedPeerHashes, generateAbstracts, loader);
         }
     
         return event;

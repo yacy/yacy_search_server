@@ -307,7 +307,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     }
     
     @SuppressWarnings("unchecked")
-    public static TextSnippet retrieveTextSnippet(final URIMetadataRow.Components comp, final TreeSet<byte[]> queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int maxDocLen, final boolean reindexing) {
+    public static TextSnippet retrieveTextSnippet(final LoaderDispatcher loader, final URIMetadataRow.Components comp, final TreeSet<byte[]> queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int maxDocLen, final boolean reindexing) {
         // heise = "0OQUNU3JSs05"
         final DigestURI url = comp.url();
         if (queryhashes.isEmpty()) {
@@ -323,6 +323,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             // found the snippet
             return new TextSnippet(url, line, source, null, null, faviconCache.get(url.hash()));
         }
+        
         
         /* ===========================================================================
          * LOADING RESOURCE DATA
@@ -346,6 +347,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                 // try to create the snippet from information given in the subject metadata
                 return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
             } else {
+                        
                 // trying to load the resource from the cache
                 resContent = Cache.getContent(url);
                 responseHeader = Cache.getResponseHeader(url);
@@ -356,9 +358,9 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
                     // if not found try to download it
                     
                     // download resource using the crawler and keep resource in memory if possible
-                    final Response entry = Switchboard.getSwitchboard().loader.load(url, true, reindexing);
+                    final Response entry = loader.load(url, true, reindexing);
                     
-                    // getting resource metadata (e.g. the http headers for http resources)
+                    // get resource metadata (e.g. the http headers for http resources)
                     if (entry != null) {
                         // place entry on indexing queue
                         Switchboard.getSwitchboard().toIndexer(entry);

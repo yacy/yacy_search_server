@@ -42,6 +42,7 @@ import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.EventTracker;
 import net.yacy.kelondro.util.MemoryControl;
 import net.yacy.kelondro.util.SetTools;
+import net.yacy.repository.LoaderDispatcher;
 
 import de.anomic.crawler.ResultURLs;
 import de.anomic.yacy.yacySearch;
@@ -85,7 +86,8 @@ public final class SearchEvent {
                              final yacySeedDB peers,
                              final ResultURLs crawlResults,
                              final TreeMap<byte[], String> preselectedPeerHashes,
-                             final boolean generateAbstracts) {
+                             final boolean generateAbstracts,
+                             final LoaderDispatcher loader) {
         this.eventTime = System.currentTimeMillis(); // for lifetime check
         this.peers = peers;
         this.crawlResults = crawlResults;
@@ -148,7 +150,7 @@ public final class SearchEvent {
             }
             
             // start worker threads to fetch urls and snippets
-            this.results = new ResultFetcher(rankedCache, query, peers, 10000);
+            this.results = new ResultFetcher(loader, rankedCache, query, peers, 10000);
         } else {
             // do a local search
             this.rankedCache = new RankingProcess(this.query, this.order, max_results_preparation, 2);
@@ -183,7 +185,7 @@ public final class SearchEvent {
             }
             
             // start worker threads to fetch urls and snippets
-            this.results = new ResultFetcher(rankedCache, query, peers, 300);
+            this.results = new ResultFetcher(loader, rankedCache, query, peers, 300);
         }
          
         // clean up events
