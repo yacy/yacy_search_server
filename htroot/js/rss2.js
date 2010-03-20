@@ -152,7 +152,7 @@ function getRSS(url){
 function processRSS() {
   if (xhr.readyState == 4) {
     if (xhr.status == 200) {
-      if (xhr.responseText != null) {
+      if ((xhr.responseText != null) && (xhr.responseXML != null)) {
         RSS = new RSS2Channel(xhr.responseXML);
         showRSS(RSS);
       } else {
