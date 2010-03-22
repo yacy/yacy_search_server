@@ -280,16 +280,21 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
     
     private static String cleanLine(String s) {
-        // may contain too many funny symbols
-        for (int i = 0; i < s.length(); i++)
-            if (s.charAt(i) < ' ') s = s.substring(0, i) + " " + s.substring(i + 1);
-
-        // remove double-spaces
-        int p;
-        while ((p = s.indexOf("  ")) >= 0) s = s.substring(0, p) + s.substring(p + 1);
-
+        StringBuilder sb = new StringBuilder(s.length());
+        char c, l = ' ';
+        for (int i = 0; i < s.length(); i++) {
+            c = s.charAt(i);
+            if (c < ' ') c = ' ';
+            if (c == ' ') {
+                if (l != ' ') sb.append(c);
+            } else {
+                sb.append(c);
+            }
+            l = c;
+        }
+        
         // return result
-        return s.trim();
+        return sb.toString().trim();
     }
     
     public String getTitle() {
