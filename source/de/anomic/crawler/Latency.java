@@ -158,6 +158,7 @@ public class Latency {
         
         // find the minimum waiting time based on the network domain (local or global)
         final boolean local = url.isLocal();
+        if (local) return minimumLocalDelta;
         long waiting = (local) ? minimumLocalDelta : minimumGlobalDelta;
         
         // the time since last access to the domain is the basis of the remaining calculation

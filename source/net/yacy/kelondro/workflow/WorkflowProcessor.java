@@ -151,7 +151,14 @@ public class WorkflowProcessor<J extends WorkflowJob> {
             return;
         }
         // execute concurrent in thread
-        this.input.put(in);
+        while (this.input != null) {
+            try {
+                this.input.put(in);
+                break;
+            } catch (InterruptedException e) {
+                try {Thread.sleep(10);} catch (InterruptedException ee) {}
+            }
+        }
     }
     
     @SuppressWarnings("unchecked")
