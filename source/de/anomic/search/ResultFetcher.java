@@ -365,8 +365,8 @@ public class ResultFetcher {
         if (query.contentdom == ContentDomain.APP  ) r += rentry.lapp()   << query.ranking.coeff_cathasapp;
         
         // prefer hit with 'prefer' pattern
-        if (rentry.url().toNormalform(true, true).matches(query.prefer)) r += 256 << query.ranking.coeff_prefer;
-        if (rentry.title().matches(query.prefer)) r += 256 << query.ranking.coeff_prefer;
+        if (query.prefer.matcher(rentry.url().toNormalform(true, true)).matches()) r += 256 << query.ranking.coeff_prefer;
+        if (query.prefer.matcher(rentry.title()).matches()) r += 256 << query.ranking.coeff_prefer;
         
         // apply 'common-sense' heuristic using references
         final String urlstring = rentry.url().toNormalform(true, true);

@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
@@ -58,7 +59,8 @@ public class yacySearch extends Thread {
     private String[] urls;
     private final int count, maxDistance;
     final private RankingProfile rankingProfile;
-    final private String prefer, filter, language;
+    final private Pattern prefer, filter;
+    final private String language;
     final private Bitfield constraint;
     final private yacySeedDB peers;
     
@@ -67,9 +69,9 @@ public class yacySearch extends Thread {
     public yacySearch(
               final String wordhashes, final String excludehashes,
               final String urlhashes,
-              final String prefer, final String filter, final String language,
-              final String sitehash,
-              final String authorhash,
+              final Pattern prefer, final Pattern filter,
+              final String language,
+              final String sitehash, final String authorhash,
               final int count, final int maxDistance, 
               final boolean global, final int partitions,
               final yacySeed targetPeer,
@@ -251,7 +253,7 @@ public class yacySearch extends Thread {
 
     public static yacySearch[] primaryRemoteSearches(
             final String wordhashes, final String excludehashes, final String urlhashes,
-            final String prefer, final String filter, String language,
+            final Pattern prefer, final Pattern filter, String language,
             final String sitehash,
             final String authorhash,
             final int count, final int maxDist,
@@ -314,7 +316,7 @@ public class yacySearch extends Thread {
         if (targetPeer == null || targetPeer.hash == null) return null;
         if (clusterselection != null) targetPeer.setAlternativeAddress(clusterselection.get(targetPeer.hash.getBytes()));
         final yacySearch searchThread = new yacySearch(
-                wordhashes, excludehashes, urlhashes, "", "", "", "", "", 0, 9999, true, 0, targetPeer,
+                wordhashes, excludehashes, urlhashes, Pattern.compile(""), Pattern.compile(".*"), "", "", "", 0, 9999, true, 0, targetPeer,
                 indexSegment, peers, crawlResults, containerCache, new TreeMap<String, TreeMap<String, String>>(), blacklist, rankingProfile, constraint);
         searchThread.start();
         return searchThread;

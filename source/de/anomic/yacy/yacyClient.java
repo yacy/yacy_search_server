@@ -54,6 +54,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.regex.Pattern;
 
 import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.document.parser.xml.RSSReader;
@@ -427,8 +428,8 @@ public final class yacyClient {
             final String wordhashes,
             final String excludehashes,
             final String urlhashes,
-            final String prefer,
-            final String filter,
+            final Pattern prefer,
+            final Pattern filter,
             final String language,
             final String sitehash,
             final String authorhash,
@@ -472,8 +473,8 @@ public final class yacyClient {
         post.add(new DefaultCharsetStringPart("exclude", excludehashes));
         post.add(new DefaultCharsetStringPart("duetime", "1000"));
         post.add(new DefaultCharsetStringPart("urls", urlhashes));
-        post.add(new DefaultCharsetStringPart("prefer", prefer));
-        post.add(new DefaultCharsetStringPart("filter", filter));
+        post.add(new DefaultCharsetStringPart("prefer", prefer.toString()));
+        post.add(new DefaultCharsetStringPart("filter", filter.toString()));
         post.add(new DefaultCharsetStringPart("language", language));
         post.add(new DefaultCharsetStringPart("sitehash", sitehash));
         post.add(new DefaultCharsetStringPart("authorhash", authorhash));

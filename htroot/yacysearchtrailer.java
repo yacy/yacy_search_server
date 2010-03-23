@@ -71,8 +71,8 @@ public class yacysearchtrailer {
             for (i = 0; i < Math.min(10, namespaceNavigator.size()); i++) {
                 entry = namespaceNavigator.get(i);
                 prop.put("nav-namespace_element_" + i + "_name", entry.name);
-                prop.put("nav-namespace_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.urlMask, "inurl:" + entry.name, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
-                prop.putJSON("nav-namespace_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.urlMask, "inurl:" + entry.name, theQuery.navigators));
+                prop.put("nav-namespace_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.urlMask.toString(), "inurl:" + entry.name, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
+                prop.putJSON("nav-namespace_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.urlMask.toString(), "inurl:" + entry.name, theQuery.navigators));
                 prop.put("nav-namespace_element_" + i + "_count", entry.count);
                 prop.put("nav-namespace_element_" + i + "_modifier", "inurl:" + entry.name);
                 prop.put("nav-namespace_element_" + i + "_nl", 1);
@@ -93,8 +93,8 @@ public class yacysearchtrailer {
             for (i = 0; i < Math.min(10, hostNavigator.size()); i++) {
                 entry = hostNavigator.get(i);
                 prop.put("nav-domains_element_" + i + "_name", entry.name);
-                prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
-                prop.putJSON("nav-domains_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.urlMask, "site:" + entry.name, theQuery.navigators));
+                prop.put("nav-domains_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.urlMask.toString(), "site:" + entry.name, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
+                prop.putJSON("nav-domains_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.urlMask.toString(), "site:" + entry.name, theQuery.navigators));
                 prop.put("nav-domains_element_" + i + "_count", entry.count);
                 prop.put("nav-domains_element_" + i + "_modifier", "site:" + entry.name);
                 prop.put("nav-domains_element_" + i + "_nl", 1);
@@ -117,8 +117,8 @@ public class yacysearchtrailer {
                 entry = authorNavigator.get(i);
                 anav = (entry.name.indexOf(' ') < 0) ? "author:" + entry.name : "author:'" + entry.name + "'";
                 prop.put("nav-authors_element_" + i + "_name", entry.name);
-                prop.put("nav-authors_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.urlMask, anav, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
-                prop.putJSON("nav-authors_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.urlMask, anav, theQuery.navigators));
+                prop.put("nav-authors_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.urlMask.toString(), anav, theQuery.navigators) + "\">" + entry.name + " (" + entry.count + ")</a>");
+                prop.putJSON("nav-authors_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.urlMask.toString(), anav, theQuery.navigators));
                 prop.put("nav-authors_element_" + i + "_count", entry.count);
                 prop.put("nav-authors_element_" + i + "_modifier", "author:'" + entry.name + "'");
                 prop.put("nav-authors_element_" + i + "_nl", 1);
@@ -143,8 +143,8 @@ public class yacysearchtrailer {
                 if (/*(theQuery == null) ||*/ (theQuery.queryString == null)) break;
                 if (e != null && e.name != null) {
                     prop.putHTML("nav-topics_element_" + i + "_name", e.name);
-                    prop.put("nav-topics_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators) + "\">" + e.name + " (" + e.count + ")</a>");
-                    prop.putJSON("nav-topics_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.urlMask, e.name, theQuery.navigators));
+                    prop.put("nav-topics_element_" + i + "_url", "<a href=\"" + QueryParams.navurl("html", 0, display, theQuery, theQuery.urlMask.toString(), e.name, theQuery.navigators) + "\">" + e.name + " (" + e.count + ")</a>");
+                    prop.putJSON("nav-topics_element_" + i + "_url-json", QueryParams.navurl("json", 0, display, theQuery, theQuery.urlMask.toString(), e.name, theQuery.navigators));
                     prop.put("nav-topics_element_" + i + "_count", e.count);
                     prop.put("nav-topics_element_" + i + "_modifier", e.name);
                     prop.put("nav-topics_element_" + i + "_nl", (iter.hasNext() && i < MAX_TOPWORDS) ? 1 : 0);

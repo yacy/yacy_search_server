@@ -32,6 +32,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
@@ -369,19 +370,14 @@ public class URIMetadataRow implements URIMetadata {
         if (this.comp != null) return this.comp;
         // parse elements from comp string;
         final Iterator<String> cl = FileUtils.strings(this.entry.getCol("comp", null));
-        try {
-            this.comp = new Components(
+        this.comp = new Components(
                     (cl.hasNext()) ? cl.next() : "",
                     hash(),
                     (cl.hasNext()) ? cl.next() : "",
                     (cl.hasNext()) ? cl.next() : "",
                     (cl.hasNext()) ? cl.next() : "",
                     (cl.hasNext()) ? cl.next() : "");
-            return this.comp;
-        } catch (MalformedURLException e) {
-            Log.logWarning("URLMetadataRow", "corrupted component / url: " + e.getMessage(), e);
-            return null;
-        }
+        return this.comp;
     }
     
     public Date moddate() {
@@ -521,11 +517,14 @@ public class URIMetadataRow implements URIMetadata {
     }
     
     public class Components {
-        private final DigestURI url;
+        private DigestURI url;
+        private String urlRaw, urlHash;
         private final String dc_title, dc_creator, dc_subject, ETag;
         
-        public Components(final String url, final String urlhash, final String title, final String author, final String tags, final String ETag) throws MalformedURLException {
-            this.url = new DigestURI(url, urlhash);
+        public Components(final String urlRaw, final String urlhash, final String title, final String author, final String tags, final String ETag) {
+            this.url = null;
+            this.urlRaw = urlRaw;
+            this.urlHash = urlhash;
             this.dc_title = title;
             this.dc_creator = author;
             this.dc_subject = tags;
@@ -533,12 +532,30 @@ public class URIMetadataRow implements URIMetadata {
         }
         public Components(final DigestURI url, final String descr, final String author, final String tags, final String ETag) {
             this.url = url;
+            this.urlRaw = null;
+            this.urlHash = null;
             this.dc_title = descr;
             this.dc_creator = author;
             this.dc_subject = tags;
             this.ETag = ETag;
         }
-        public DigestURI url()    { return this.url; }
+        public boolean matches(Pattern matcher) {
+            if (this.urlRaw != null) return matcher.matcher(this.urlRaw).matches();
+            if (this.url != null) return matcher.matcher(this.url.toNormalform(true, true)).matches();
+            return false;
+        }
+        public DigestURI url() {
+            if (this.url == null) {
+                try {
+                    this.url = new DigestURI(this.urlRaw, this.urlHash);
+                } catch (MalformedURLException e) {
+                    this.url = null;
+                }
+                this.urlRaw = null;
+                this.urlHash = null;
+            }
+            return this.url;
+        }
         public String  dc_title()  { return this.dc_title; }
         public String  dc_creator() { return this.dc_creator; }
         public String  dc_subject()   { return this.dc_subject; }

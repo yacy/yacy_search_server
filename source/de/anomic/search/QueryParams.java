@@ -29,6 +29,7 @@ package de.anomic.search;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import net.yacy.document.Condenser;
 import net.yacy.document.parser.html.AbstractScraper;
@@ -62,9 +63,8 @@ public final class QueryParams {
     public String queryString;
     public TreeSet<byte[]> fullqueryHashes, queryHashes, excludeHashes;
     public int itemsPerPage, offset;
-    public String prefer;
+    public Pattern urlMask, prefer;
     public ContentDomain contentdom;
-    public String urlMask;
     public String targetlang;
     public String navigators;
     public int domType;
@@ -107,11 +107,11 @@ public final class QueryParams {
     	this.ranking = ranking;
     	this.tenant = null;
         this.maxDistance = Integer.MAX_VALUE;
-        this.prefer = "";
+        this.prefer = Pattern.compile("");
         this.contentdom = ContentDomain.ALL;
         this.itemsPerPage = itemsPerPage;
         this.offset = 0;
-        this.urlMask = ".*";
+        this.urlMask = Pattern.compile(".*");
         this.targetlang = "en";
         this.domType = SEARCHDOM_LOCAL;
         this.zonecode = DigestURI.TLD_any_zone_filter;
@@ -155,11 +155,11 @@ public final class QueryParams {
 		this.tenant = (tenant != null && tenant.length() == 0) ? null : tenant;
 		this.ranking = ranking;
 		this.maxDistance = maxDistance;
-		this.prefer = prefer;
+		this.prefer = Pattern.compile(prefer);
 		this.contentdom = contentdom;
 		this.itemsPerPage = Math.min((specialRights) ? 1000 : 50, itemsPerPage);
 		this.offset = Math.min((specialRights) ? 10000 : 100, offset);
-		this.urlMask = urlMask;
+		this.urlMask = Pattern.compile(urlMask);
 		assert language != null;
         this.targetlang = language;
         this.navigators = navigators;

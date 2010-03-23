@@ -390,24 +390,29 @@ public final class RankingProcess extends Thread {
             // prepare values for constraint check
             final URIMetadataRow.Components metadata = page.metadata();
             
-            // check url constraints
-            if (metadata == null || metadata.url() == null) {
+            // check errors
+            if (metadata == null) {
                 continue; // rare case where the url is corrupted
             }
             
+            // check url mask
+            if (!metadata.matches(query.urlMask)) {
+                continue;
+            }
+            
+             // check for more errors
+            if (metadata.url() == null) {
+                continue; // rare case where the url is corrupted
+            }
+
             final String pageurl = metadata.url().toNormalform(true, true);
             final String pageauthor = metadata.dc_creator();
             final String pagetitle = metadata.dc_title().toLowerCase();
-            
+
             // check exclusion
             if ((QueryParams.matches(pagetitle, query.excludeHashes)) ||
                 (QueryParams.matches(pageurl.toLowerCase(), query.excludeHashes)) ||
                 (QueryParams.matches(pageauthor.toLowerCase(), query.excludeHashes))) {
-                continue;
-            }
-            
-            // check url mask
-            if (!(pageurl.matches(query.urlMask))) {
                 continue;
             }
             
