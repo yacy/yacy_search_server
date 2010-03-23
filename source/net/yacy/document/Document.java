@@ -55,7 +55,7 @@ import net.yacy.kelondro.util.FileUtils;
 
 public class Document {
     
-    private final DigestURI source;               // the source url
+    private final DigestURI source;             // the source url
     private final String mimeType;              // mimeType as taken from http header
     private final String charset;               // the charset of the document
     private final List<String> keywords;        // most resources provide a keyword field

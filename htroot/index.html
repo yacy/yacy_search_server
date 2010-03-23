@@ -31,7 +31,6 @@
         <input type="hidden" name="display" value="#[display]#" />
         <input name="query" id="search" type="text" size="52" maxlength="80" value="#[former]#" />
         <input type="submit" name="Enter" value="Search" />
-        <!-- <input type="hidden" name="former" value="#[former]#" /> uncommented to detect newsearch //-->
         <input type="hidden" name="verify" value="true" />
         <div class="yacysearch">
 	        #(searchtext)#::<input type="radio" id="text" name="contentdom" value="text" #(check)#::checked="checked"#(/check)# /><label for="text">Text</label>&nbsp;&nbsp;#(/searchtext)#
@@ -40,11 +39,11 @@
 	        #(searchvideo)#::<input type="radio" id="video" name="contentdom" value="video" #(check)#::checked="checked"#(/check)# /><label for="video">Video</label>&nbsp;&nbsp;#(/searchvideo)#
 	        #(searchapp)#::<input type="radio" id="app" name="contentdom" value="app" #(check)#::checked="checked"#(/check)# /><label for="app">Applications</label>#(/searchapp)#
         </div>
+        <input type="hidden" name="nav" value="all" />
       #(searchoptions)#
         <input type="hidden" name="maximumRecords" value="#[maximumRecords]#" />
         <input type="hidden" name="startRecord" value="0" />
         <input type="hidden" name="resource" value="global" />
-        <input type="hidden" name="nav" value="all" />
         <input type="hidden" name="urlmaskfilter" value=".*" />
         <input type="hidden" name="prefermaskfilter" value="" />
         <input type="hidden" name="indexof" value="off" />

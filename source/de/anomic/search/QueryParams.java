@@ -59,29 +59,33 @@ public final class QueryParams {
     
     public static final Bitfield empty_constraint    = new Bitfield(4, "AAAAAA");
     public static final Bitfield catchall_constraint = new Bitfield(4, "______");
+    public static final Pattern catchall_pattern = Pattern.compile(".*");
+    public static final Pattern matchnothing_pattern = Pattern.compile("");
     
-    public String queryString;
+    public final String queryString;
     public TreeSet<byte[]> fullqueryHashes, queryHashes, excludeHashes;
-    public int itemsPerPage, offset;
-    public Pattern urlMask, prefer;
-    public ContentDomain contentdom;
-    public String targetlang;
-    public String navigators;
-    public int domType;
-    public int zonecode;
-    public int domMaxTargets;
-    public int maxDistance;
-    public Bitfield constraint;
-    public boolean allofconstraint;
-    public boolean onlineSnippetFetch;
-    public RankingProfile ranking;
+    public final int itemsPerPage;
+    public int offset;
+    public final Pattern urlMask, prefer;
+    public final boolean urlMask_isCatchall, prefer_isMatchnothing;
+    public final ContentDomain contentdom;
+    public final String targetlang;
+    public final String navigators;
+    public final int domType;
+    public final int zonecode;
+    public final int domMaxTargets;
+    public final int maxDistance;
+    public final Bitfield constraint;
+    public final boolean allofconstraint;
+    public final boolean onlineSnippetFetch;
+    public final RankingProfile ranking;
     private final Segment indexSegment;
-    public String host; // this is the client host that starts the query, not a site operator
-    public String sitehash; // this is a domain hash, 6 bytes long or null
-    public String authorhash;
-    public String tenant; 
+    public final String host; // this is the client host that starts the query, not a site operator
+    public final String sitehash; // this is a domain hash, 6 bytes long or null
+    public final String authorhash;
+    public final String tenant; 
     public yacySeed remotepeer;
-    public Long handle;
+    public final Long handle;
     // values that are set after a search:
     public int resultcount; // number of found results
     public long searchtime, urlretrievaltime, snippetcomputationtime; // time to perform the search, to get all the urls, and to compute the snippets
@@ -107,11 +111,13 @@ public final class QueryParams {
     	this.ranking = ranking;
     	this.tenant = null;
         this.maxDistance = Integer.MAX_VALUE;
-        this.prefer = Pattern.compile("");
+        this.urlMask = catchall_pattern;
+        this.urlMask_isCatchall = true;
+        this.prefer = matchnothing_pattern;
+        this.prefer_isMatchnothing = true;
         this.contentdom = ContentDomain.ALL;
         this.itemsPerPage = itemsPerPage;
         this.offset = 0;
-        this.urlMask = Pattern.compile(".*");
         this.targetlang = "en";
         this.domType = SEARCHDOM_LOCAL;
         this.zonecode = DigestURI.TLD_any_zone_filter;
@@ -155,11 +161,13 @@ public final class QueryParams {
 		this.tenant = (tenant != null && tenant.length() == 0) ? null : tenant;
 		this.ranking = ranking;
 		this.maxDistance = maxDistance;
-		this.prefer = Pattern.compile(prefer);
 		this.contentdom = contentdom;
 		this.itemsPerPage = Math.min((specialRights) ? 1000 : 50, itemsPerPage);
 		this.offset = Math.min((specialRights) ? 10000 : 100, offset);
 		this.urlMask = Pattern.compile(urlMask);
+        this.urlMask_isCatchall = this.urlMask.toString().equals(catchall_pattern.toString());
+		this.prefer = Pattern.compile(prefer);
+        this.prefer_isMatchnothing = this.prefer.toString().equals(matchnothing_pattern.toString());;
 		assert language != null;
         this.targetlang = language;
         this.navigators = navigators;

@@ -219,7 +219,6 @@ public final class search {
                     indexSegment,
                     rankingProfile
                     );
-            theQuery.domType = QueryParams.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (abstracts only): " + QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
 
             final long timer = System.currentTimeMillis();
@@ -273,7 +272,6 @@ public final class search {
                     sb.indexSegments.segment(Segments.Process.PUBLIC),
                     rankingProfile
                     );
-            theQuery.domType = QueryParams.SEARCHDOM_LOCAL;
             yacyCore.log.logInfo("INIT HASH SEARCH (query-" + abstracts + "): " + QueryParams.anonymizedQueryHashes(theQuery.queryHashes) + " - " + theQuery.displayResults() + " links");
             RSSFeed.channels(RSSFeed.REMOTESEARCH).addMessage(new RSSMessage("Remote Search Request from " + ((remoteSeed == null) ? "unknown" : remoteSeed.getName()), QueryParams.anonymizedQueryHashes(theQuery.queryHashes), ""));
             

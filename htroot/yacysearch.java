@@ -541,8 +541,8 @@ public class yacysearch {
     	                "&resource=" + ((theQuery.isLocal()) ? "local" : "global") +
     	                "&verify=" + ((theQuery.onlineSnippetFetch) ? "true" : "false") +
     	                "&nav=" + theQuery.navigators +
-    	                "&urlmaskfilter=" + originalUrlMask +
-    	                "&prefermaskfilter=" + theQuery.prefer +
+    	                "&urlmaskfilter=" + originalUrlMask.toString() +
+    	                "&prefermaskfilter=" + theQuery.prefer.toString() +
     	                "&cat=href&amp;constraint=" + ((theQuery.constraint == null) ? "" : theQuery.constraint.exportB64()) +
     	                "&contentdom=" + theQuery.contentdom() +
     	                "&former=" + theQuery.queryString(true) +

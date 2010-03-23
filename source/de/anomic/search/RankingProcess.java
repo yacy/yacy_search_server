@@ -220,7 +220,7 @@ public final class RankingProcess extends Thread {
 			    //this.domZones[DigestURI.domDomain(iEntry.metadataHash())]++;
 			    
 			    // get statistics for host navigator
-			    if (nav_hosts) {
+			    if (nav_hosts && query.urlMask_isCatchall) {
 			        domhash = iEntry.urlHash.substring(6);
 			        this.hostNavigator.inc(domhash, iEntry.urlHash);
 			    }
@@ -374,6 +374,7 @@ public final class RankingProcess extends Thread {
         // returns from the current RWI list the best URL entry and removes this entry from the list
     	long timeLimit = System.currentTimeMillis() + timeout;
     	int p = -1;
+    	String urlhash;
     	while (System.currentTimeMillis() < timeLimit) {
             final SortStack<WordReferenceVars>.stackElement obrwi = takeRWI(skipDoubleDom);
             if (obrwi == null) {
@@ -381,7 +382,8 @@ public final class RankingProcess extends Thread {
             	try {Thread.sleep(50);} catch (final InterruptedException e1) {}
             	continue;
             }
-            final URIMetadataRow page = this.query.getSegment().urlMetadata().load(obrwi.element.metadataHash(), obrwi.element, obrwi.weight.longValue());
+            urlhash = obrwi.element.metadataHash();
+            final URIMetadataRow page = this.query.getSegment().urlMetadata().load(urlhash, obrwi.element, obrwi.weight.longValue());
             if (page == null) {
             	misses.add(obrwi.element.metadataHash());
             	continue;
@@ -395,12 +397,18 @@ public final class RankingProcess extends Thread {
                 continue; // rare case where the url is corrupted
             }
             
-            // check url mask
-            if (!metadata.matches(query.urlMask)) {
-                continue;
+            if (!query.urlMask_isCatchall) {
+                // check url mask
+                if (!metadata.matches(query.urlMask)) {
+                    continue;
+                }
+                
+                // in case that we do not have e catchall filter for urls
+                // we must also construct the domain navigator here
+                this.hostNavigator.inc(urlhash.substring(6), urlhash);
             }
             
-             // check for more errors
+            // check for more errors
             if (metadata.url() == null) {
                 continue; // rare case where the url is corrupted
             }
@@ -539,14 +547,10 @@ public final class RankingProcess extends Thread {
         int rc = Math.min(count, hsa.length);
         ArrayList<Navigator.Item> result = new ArrayList<Navigator.Item>();
         for (int i = 0; i < rc; i++) result.add(hsa[i]);
+        if (result.size() < 2) result.clear(); // navigators with one entry are not useful
         return result;
     }
     
-    public List<Navigator.Item> getHostNavigators(int count) {
-    	if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("hosts") < 0) return new ArrayList<Navigator.Item>(0);
-        
-    	return this.hostNavigator.entries(10);
-    }
     public List<Navigator.Item> getHostNavigator(int count) {
         List<Navigator.Item> result = new ArrayList<Navigator.Item>();
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("hosts") < 0) return result;
@@ -569,6 +573,7 @@ public final class RankingProcess extends Thread {
             for (Navigator.Item entry: result) if (entry.name.equals(hostname)) continue loop; // check if one entry already exists
             result.add(new Navigator.Item(hostname, item.count));
         }
+        if (result.size() < 2) result.clear(); // navigators with one entry are not useful
         return result;
     }
 
@@ -589,8 +594,9 @@ public final class RankingProcess extends Thread {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("topics") < 0) return new ArrayList<Navigator.Item>(0);
-        
-        return this.ref.entries(10);
+        List<Navigator.Item> result = this.ref.entries(10);
+        if (result.size() < 2) result.clear(); // navigators with one entry are not useful
+        return result;
     }
     
     public void addTopic(final String[] words) {
@@ -623,8 +629,9 @@ public final class RankingProcess extends Thread {
         // create a list of words that had been computed by statistics over all
         // words that appeared in the url or the description of all urls
         if (!this.query.navigators.equals("all") && this.query.navigators.indexOf("authors") < 0) return new ArrayList<Navigator.Item>(0);
-        
-        return this.authorNavigator.entries(count);
+        List<Navigator.Item> result = this.authorNavigator.entries(count);
+        if (result.size() < 2) result.clear(); // navigators with one entry are not useful
+        return result;
     }
     
     public static void loadYBR(final File rankingPath, final int count) {
