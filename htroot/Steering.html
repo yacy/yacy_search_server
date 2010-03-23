@@ -1,31 +1,37 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
   <head>
+    <script type="text/javascript" src="js/ajax.js"></script>
     <title>YaCy '#[clientname]#': Steering</title>
     #%env/templates/metas.template%#
   </head>
   <body style="margin:40px;text-align:center;">
 
-      <script type="text/javascript" language="JavaScript">
+      <script type="text/javascript">
         <!--
-
+        var ro;
         function online() {
-            if(!document.images) return
-            var url = "env/grafics/kaskelix_exit.png" + '?' + Math.random();
-            var img = new Image();
-            img.onload = function () {
-                 window.location.replace('Status.html');
-            };
-            img.onerror = function () {
-                 setTimeout('online()', 10000);
+            ro = createRequestObject();
+            var url = "yacy/hello.html" + '?' + Math.random();
+            ro.open("Get",url,true);
+            ro.onreadystatechange = callback;
+            ro.send(null);
+        }
+
+        function callback() {
+            if (ro.readyState == 4) {
+                if(ro.status == 200) {
+                    window.location.replace('Status.html');
+                }
+            } else {
+                setTimeout('online()', 10000);
             }
-            img.src = url;
         }
         //-->
       </script>
 
 
-      <p><img src="env/grafics/kaskelix_exit.png"></p>
+      <p><img src="env/grafics/kaskelix_exit.png" alt="Kaskelix"/></p>
       #(info)#
       <b>No action submitted</b><br />
       <p>Go back to the <a href="Settings_p.html">Settings</a> page</p>
@@ -44,12 +50,12 @@
       Application will terminate after working off all scheduled tasks.<br />
       Then YaCy will restart.<br />
       If you can't reach YaCy's interface after 5 minutes restart failed.
-      <script type="text/javascript" language="JavaScript">setTimeout('online()', 60000);</script>
+      <script type="text/javascript">setTimeout('online()', 60000);</script>
 ::
       <h2>Just a moment, please!</h2>
       <b>Installing release #[release]#</b><br />
       <p>YaCy will be restarted after installation</p>
-      <script type="text/javascript" language="JavaScript">setTimeout('online()', 60000);</script>
+      <script type="text/javascript">setTimeout('online()', 60000);</script>
       #(/info)#
     </p>
   </body>

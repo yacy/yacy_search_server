@@ -1,10 +1,9 @@
 function createRequestObject() {
     var ro;
-    var browser = navigator.appName;
-    if(browser == "Microsoft Internet Explorer"){
-        ro = new ActiveXObject("Microsoft.XMLHTTP");
-    }else{
+    if (window.XMLHttpRequest) {
         ro = new XMLHttpRequest();
+    } else if (window.ActiveXObject) {
+        ro = new ActiveXObject("Microsoft.XMLHTTP");
     }
     return ro;
 }
