@@ -38,10 +38,25 @@
             #{tables}#
             <option value="#[name]#" #(selected)#::selected="selected"#(/selected)#>#[name]#</option>
             #{/tables}#
-          </select></dt>
-        <dd>
-          <input type="submit" name="edittable" value="Show Table" />
-        </dd>
+          </select>
+        </dt>
+        <dd><input type="submit" name="edittable" value="Show Table" /></dd>
+        <dt>
+          show max.
+          <select name="count" size="1">
+            <option value="10">10</option>
+            <option value="100" selected="selected">100</option>
+            <option value="1000">1000</option>
+            <option value="all">all</option>
+          </select>
+          entries,
+        </dt>
+        <dd></dd>
+        <dt>
+          search rows for
+          <input type="text" name="search" value="#[pattern]#" />
+        </dt>
+        <dd></dd>
       </dl>
     </fieldset>
     </form>

@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import net.yacy.kelondro.blob.Tables;
 import net.yacy.kelondro.logging.Log;
@@ -37,9 +38,41 @@ public class Tables_p {
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
         final serverObjects prop = new serverObjects();
-        String table = (post == null) ? null : post.get("table", null);
+        
+        if (post == null) {
+            prop.put("pattern", "");
+            
+            // show table selection
+            int count = 0;
+            Iterator<String> ti = sb.tables.tables();
+            String tablename;
+            while (ti.hasNext()) {
+                tablename = ti.next();
+                prop.put("tables_" + count + "_name", tablename);
+                prop.put("tables_" + count + "_selected", 0);
+                count++;
+            }
+            prop.put("tables", count);
+            
+            // generate table
+            prop.put("showtable", 0);
+            prop.put("showedit", 0);
+            
+            // the peer address
+            prop.put("address", sb.peers.mySeed().getPublicAddress());
+            
+            // return rewrite properties
+            return prop;
+        }
+        
+        String table = post.get("table", null);
         if (table != null && !sb.tables.hasHeap(table)) table = null;
-
+        String counts = post.get("count", null);
+        int maxcount = (counts == null || counts.equals("all")) ? Integer.MAX_VALUE : Integer.parseInt(counts);
+        String pattern = post.get("search", "");
+        Pattern matcher = (pattern.length() == 0 || pattern.equals(".*")) ? null : Pattern.compile(".*" + pattern + ".*");
+        prop.put("pattern", pattern);
+        
         // show table selection
         int count = 0;
         Iterator<String> ti = sb.tables.tables();
@@ -61,13 +94,13 @@ public class Tables_p {
         }
         
         // apply deletion requests
-        if (post != null && post.get("deletetable", "").length() > 0) try {
+        if (post.get("deletetable", "").length() > 0) try {
             sb.tables.clear(table);
         } catch (IOException e) {
             Log.logException(e);
         }
         
-        if (post != null && post.get("deleterows", "").length() > 0) {
+        if (post.get("deleterows", "").length() > 0) {
             for (Map.Entry<String, String> entry: post.entrySet()) {
                 if (entry.getValue().startsWith("mark_")) try {
                     sb.tables.delete(table, entry.getValue().substring(5).getBytes());
@@ -77,7 +110,7 @@ public class Tables_p {
             }
         }
         
-        if (post != null && post.get("commitrow", "").length() > 0) {
+        if (post.get("commitrow", "").length() > 0) {
             String pk = post.get("pk");
             Map<String, byte[]> map = new HashMap<String, byte[]>();
             for (Map.Entry<String, String> entry: post.entrySet()) {
@@ -96,76 +129,88 @@ public class Tables_p {
         prop.put("showtable", 0);
         prop.put("showedit", 0);
         
-        if (table != null && !post.containsKey("editrow") && !post.containsKey("addrow")) {
-            prop.put("showtable", 1);
-            prop.put("showtable_table", table);
+        if (table != null) {
             
-            // insert the columns
-            
-            for (int i = 0; i < columns.size(); i++) {
-                prop.putHTML("showtable_columns_" + i + "_header", columns.get(i));
-            }
-            prop.put("showtable_columns", columns.size());
-            
-            // insert all rows
-            int maxCount;
-            try {
-                maxCount = Math.min(1000, sb.tables.size(table));
-            } catch (IOException e) {
-                Log.logException(e);
-                maxCount = 0;
-            }
-            count = 0;
-            try {
-                final Iterator<Tables.Row> mapIterator = sb.tables.orderByPK(table, maxCount).iterator();
-                Tables.Row row;
-                boolean dark = true;
-                byte[] cell;
-                while ((mapIterator.hasNext()) && (count < maxCount)) {
-                    row = mapIterator.next();
-                    if (row == null) continue;
-                    prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
-                    prop.put("showtable_list_" + count + "_pk", new String(row.getPK()));
-                    prop.put("showtable_list_" + count + "_count", count);
-                    for (int i = 0; i < columns.size(); i++) {
-                        cell = row.from(columns.get(i));
-                        prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cell == null ? "" : new String(cell));
+            if (post.containsKey("editrow")) {
+                // check if we can find a key
+                String pk = null;
+                for (Map.Entry<String, String> entry: post.entrySet()) {
+                    if (entry.getValue().startsWith("mark_")) {
+                        pk = entry.getValue().substring(5);
+                        break;
                     }
-                    prop.put("showtable_list_" + count + "_columns", columns.size());
-                    
-                    count++;
                 }
+                try {
+                    if (pk != null && sb.tables.has(table, pk.getBytes())) {
+                        setEdit(sb, prop, table, pk, columns);
+                    }
+                } catch (IOException e) {
+                    Log.logException(e);
+                }
+            } else if (post.containsKey("addrow")) try {
+                // get a new key
+                String pk = new String(sb.tables.createRow(table));
+                setEdit(sb, prop, table, pk, columns);
             } catch (IOException e) {
                 Log.logException(e);
-            }
-            prop.put("showtable_list", count);
-            prop.put("showtable_num", count);
-        }
-        
-        if (post != null && table != null && post.containsKey("editrow")) {
-            // check if we can find a key
-            String pk = null;
-            for (Map.Entry<String, String> entry: post.entrySet()) {
-                if (entry.getValue().startsWith("mark_")) {
-                    pk = entry.getValue().substring(5);
-                    break;
+            } else {
+                prop.put("showtable", 1);
+                prop.put("showtable_table", table);
+                
+                // insert the columns
+                
+                for (int i = 0; i < columns.size(); i++) {
+                    prop.putHTML("showtable_columns_" + i + "_header", columns.get(i));
                 }
-            }
-            try {
-                if (pk != null && sb.tables.has(table, pk.getBytes())) {
-                    setEdit(sb, prop, table, pk, columns);
+                prop.put("showtable_columns", columns.size());
+                
+                // insert all rows
+                try {
+                    maxcount = Math.min(maxcount, sb.tables.size(table));
+                } catch (IOException e) {
+                    Log.logException(e);
+                    maxcount = 0;
                 }
-            } catch (IOException e) {
-                Log.logException(e);
+                count = 0;
+                try {
+                    final Iterator<Tables.Row> mapIterator = sb.tables.orderByPK(table, (matcher == null) ? maxcount : -1).iterator();
+                    Tables.Row row;
+                    boolean dark = true;
+                    byte[] cell;
+                    tableloop: while (mapIterator.hasNext() && count < maxcount) {
+                        row = mapIterator.next();
+                        if (row == null) continue;
+                        
+                        // check matcher
+                        boolean matched = matcher == null;
+                        if (matcher != null) checkloop: for (int i = 0; i < columns.size(); i++) {
+                            cell = row.from(columns.get(i));
+                            if (cell == null) continue checkloop;
+                            if (matcher.matcher(new String(cell)).matches()) {
+                                matched = true;
+                                break checkloop;
+                            }
+                        }
+                        if (!matched) continue tableloop;
+                        
+                        // write table content
+                        prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;
+                        prop.put("showtable_list_" + count + "_pk", new String(row.getPK()));
+                        prop.put("showtable_list_" + count + "_count", count);
+                        for (int i = 0; i < columns.size(); i++) {
+                            cell = row.from(columns.get(i));
+                            prop.putHTML("showtable_list_" + count + "_columns_" + i + "_cell", cell == null ? "" : new String(cell));
+                        }
+                        prop.put("showtable_list_" + count + "_columns", columns.size());
+                        count++;
+                    }
+                } catch (IOException e) {
+                    Log.logException(e);
+                }
+                prop.put("showtable_list", count);
+                prop.put("showtable_num", count);
             }
-        }
-        
-        if (post != null && table != null && post.containsKey("addrow")) try {
-            // get a new key
-            String pk = new String(sb.tables.createRow(table));
-            setEdit(sb, prop, table, pk, columns);
-        } catch (IOException e) {
-            Log.logException(e);
+            
         }
         
         // adding the peer address
