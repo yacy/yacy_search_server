@@ -100,7 +100,7 @@ public class Segment {
         this.log = log;
         this.segmentPath = segmentPath;
         
-        this.merger = new IODispatcher(1, 1, writeBufferSize);
+        this.merger = new IODispatcher(2, 2, writeBufferSize);
         this.merger.start();
         
         this.termIndex = new IndexCell<WordReference>(
