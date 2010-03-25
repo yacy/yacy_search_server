@@ -560,6 +560,8 @@ public final class yacyRelease extends yacyVersion {
                             ""
                     ) +*/
                     "cd " + apphome + serverCore.LF_STRING +
+                    "chmod 755 *.sh" + serverCore.LF_STRING + // tarTools does not keep access/execute right
+                    "chmod 755 bin/*.sh" + serverCore.LF_STRING +
                     "nohup ./startYACY.sh > /dev/null" + serverCore.LF_STRING;
                 scriptFileName = "update.sh";
             }
