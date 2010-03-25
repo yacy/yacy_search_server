@@ -30,6 +30,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.Semaphore;
 
 import de.anomic.yacy.graphics.ProfilingGraph;
 
@@ -71,7 +72,8 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
     private final long                                   targetFileSize, maxFileSize;
     private final int                                    writeBufferSize;
     private final ARC<ByteArray, Integer>                countCache;
-    private       boolean                                cleanerRunning = false;
+    private       Semaphore                              dumperSemaphore = new Semaphore(1);
+    private       Semaphore                              cleanerSemaphore = new Semaphore(1);
     
     public IndexCell(
             final File cellPath,
@@ -382,29 +384,41 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         this.countCache.clear();
         
         // dump the cache if necessary
-        if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false))) synchronized (this) {
-            if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false))) {
-                // dump the ram
-                File dumpFile = this.array.newContainerBLOBFile();
-                // a critical point: when the ram is handed to the dump job,
-                // dont write into it any more. Use a fresh one instead
-                ReferenceContainerCache<ReferenceType> ramdump = this.ram;
-                // get a fresh ram cache
-                this.ram = new ReferenceContainerCache<ReferenceType>(factory, this.array.rowdef(), this.array.ordering());
-                // dump the buffer
-                merger.dump(ramdump, dumpFile, array);
+        if (this.dumperSemaphore.availablePermits() > 0 &&
+            (this.ram.size() >= this.maxRamEntries ||
+             (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false)))) {
+            try {
+                this.dumperSemaphore.acquire(); // only one may pass
+                if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false))) {
+                    // dump the ram
+                    File dumpFile = this.array.newContainerBLOBFile();
+                    // a critical point: when the ram is handed to the dump job,
+                    // dont write into it any more. Use a fresh one instead
+                    ReferenceContainerCache<ReferenceType> ramdump = this.ram;
+                    // get a fresh ram cache
+                    this.ram = new ReferenceContainerCache<ReferenceType>(factory, this.array.rowdef(), this.array.ordering());
+                    // dump the buffer
+                    merger.dump(ramdump, dumpFile, array);
+                }
+                this.dumperSemaphore.release();
+            } catch (InterruptedException e) {
+                Log.logException(e);
             }
         }
         
         // clean-up the cache
-        if (!this.cleanerRunning && (this.array.entries() > 50 || this.lastCleanup + cleanupCycle < System.currentTimeMillis())) synchronized (this) {
-            if (this.array.entries() > 50 || (this.lastCleanup + cleanupCycle < System.currentTimeMillis())) try {
-                this.cleanerRunning = true;
-                //System.out.println("----cleanup check");
-                this.array.shrink(this.targetFileSize, this.maxFileSize);
-                this.lastCleanup = System.currentTimeMillis();
-            } finally {
-                this.cleanerRunning = false;
+        if (this.cleanerSemaphore.availablePermits() > 0 &&
+            (this.array.entries() > 50 ||
+             this.lastCleanup + cleanupCycle < System.currentTimeMillis())) {
+            try {
+                this.cleanerSemaphore.acquire();
+                if (this.array.entries() > 50 || (this.lastCleanup + cleanupCycle < System.currentTimeMillis())) {
+                    this.array.shrink(this.targetFileSize, this.maxFileSize);
+                    this.lastCleanup = System.currentTimeMillis();
+                }
+                this.cleanerSemaphore.release();
+            } catch (InterruptedException e) {
+                Log.logException(e);
             }
         }
     }
