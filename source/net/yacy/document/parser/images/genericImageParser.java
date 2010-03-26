@@ -207,6 +207,7 @@ public class genericImageParser extends AbstractParser implements Idiom {
                             final InputStream sourceStream) throws ParserException {
         BufferedImage image = null;
         try {
+            ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
             image = ImageIO.read(sourceStream);
         } catch (final EOFException e) {
             Log.logException(e);

@@ -105,6 +105,7 @@ public class Banner {
         }
 
         if (!NetworkGraph.logoIsLoaded()) {
+            ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
             final BufferedImage logo = ImageIO.read(new File(IMAGE));
             return NetworkGraph.getBannerPicture(1000, width, height, bgcolor, textcolor, bordercolor, name, links, words, type, myppm, network, peers, nlinks, nwords, nqph, nppm, logo);
         }

@@ -99,6 +99,7 @@ public class OSMTile {
             if (entry == null) return null;
         }
         try {
+            ImageIO.setUseCache(false); // do not write a cache to disc; keep in RAM
             return ImageIO.read(new ByteArrayInputStream(tileb));
         } catch (final EOFException e) {
             return null;
