@@ -82,7 +82,8 @@ public class table_p {
         }
         int count = 0;
         try {
-            final Iterator<Tables.Row> mapIterator = sb.tables.orderByPK(table, maxCount).iterator();
+            final Iterator<Tables.Row> plainIterator = sb.tables.iterator(table);
+            final Iterator<Tables.Row> mapIterator = sb.tables.orderByPK(plainIterator, maxCount).iterator();
             Tables.Row trow;
             boolean dark = true;
             byte[] cell;

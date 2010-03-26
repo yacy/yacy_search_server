@@ -173,25 +173,14 @@ public class Tables_p {
                 }
                 count = 0;
                 try {
-                    final Iterator<Tables.Row> mapIterator = sb.tables.orderByPK(table, (matcher == null) ? maxcount : -1).iterator();
+                    final Iterator<Tables.Row> plainIterator = sb.tables.iterator(table, matcher);
+                    final Iterator<Tables.Row> mapIterator = sb.tables.orderByPK(plainIterator, maxcount).iterator();
                     Tables.Row row;
                     boolean dark = true;
                     byte[] cell;
-                    tableloop: while (mapIterator.hasNext() && count < maxcount) {
+                    while (mapIterator.hasNext() && count < maxcount) {
                         row = mapIterator.next();
                         if (row == null) continue;
-                        
-                        // check matcher
-                        boolean matched = matcher == null;
-                        if (matcher != null) checkloop: for (int i = 0; i < columns.size(); i++) {
-                            cell = row.from(columns.get(i));
-                            if (cell == null) continue checkloop;
-                            if (matcher.matcher(new String(cell)).matches()) {
-                                matched = true;
-                                break checkloop;
-                            }
-                        }
-                        if (!matched) continue tableloop;
                         
                         // write table content
                         prop.put("showtable_list_" + count + "_dark", ((dark) ? 1 : 0) ); dark=!dark;

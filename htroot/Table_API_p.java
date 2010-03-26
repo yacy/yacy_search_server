@@ -106,7 +106,8 @@ public class Table_API_p {
         // insert rows
         int count = 0;
         try {
-            final Iterator<Tables.Row> mapIterator = sb.tables.orderBy(WorkTables.TABLE_API_NAME, -1, WorkTables.TABLE_API_COL_DATE).iterator();
+            final Iterator<Tables.Row> plainIterator = sb.tables.iterator(WorkTables.TABLE_API_NAME);
+            final Iterator<Tables.Row> mapIterator = sb.tables.orderBy(plainIterator, -1, WorkTables.TABLE_API_COL_DATE).iterator();
             Tables.Row row;
             boolean dark = true;
             while (mapIterator.hasNext()) {

@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -334,37 +335,35 @@ public class Tables {
         return new RowIterator(table);
     }
     
-    public Iterator<Row> iterator(String table, String whereKey, byte[] whereValue) throws IOException {
-        return new RowIterator(table, whereKey, whereValue);
+    public Iterator<Row> iterator(String table, String whereColumn, byte[] whereValue) throws IOException {
+        return new RowIterator(table, whereColumn, whereValue);
     }
     
-    public Collection<Row> orderByPK(String table, int maxcount) throws IOException {
-        return orderByPK(table, maxcount, null, null);
+    public Iterator<Row> iterator(String table, String whereColumn, Pattern wherePattern) throws IOException {
+        return new RowIterator(table, whereColumn, wherePattern);
     }
     
-    public Collection<Row> orderByPK(String table, int maxcount, String whereKey, byte[] whereValue) throws IOException {
+    public Iterator<Row> iterator(String table, Pattern wherePattern) throws IOException {
+        return new RowIterator(table, wherePattern);
+    }
+    
+    public Collection<Row> orderByPK(Iterator<Row> rowIterator, int maxcount) throws IOException {
         TreeMap<String, Row> sortTree = new TreeMap<String, Row>();
-        Iterator<Row> i = iterator(table, whereKey, whereValue);
         Row row;
-        while ((maxcount < 0 || maxcount-- > 0) && i.hasNext()) {
-            row = i.next();
+        while ((maxcount < 0 || maxcount-- > 0) && rowIterator.hasNext()) {
+            row = rowIterator.next();
             sortTree.put(new String(row.pk), row);
         }
         return sortTree.values();
     }
     
-    public Collection<Row> orderBy(String table, int maxcount, String sortField) throws IOException {
-        return orderBy(table, maxcount, sortField, null, null);
-    }
-    
-    public Collection<Row> orderBy(String table, int maxcount, String sortField, String whereKey, byte[] whereValue) throws IOException {
+    public Collection<Row> orderBy(Iterator<Row> rowIterator, int maxcount, String sortColumn) throws IOException {
         TreeMap<String, Row> sortTree = new TreeMap<String, Row>();
-        Iterator<Row> i = iterator(table, whereKey, whereValue);
         Row row;
         byte[] r;
-        while ((maxcount < 0 || maxcount-- > 0) && i.hasNext()) {
-            row = i.next();
-            r = row.from(sortField);
+        while ((maxcount < 0 || maxcount-- > 0) && rowIterator.hasNext()) {
+            row = rowIterator.next();
+            r = row.from(sortColumn);
             if (r == null) continue;
             sortTree.put(new String(r) + new String(row.pk), row);
         }
@@ -378,20 +377,68 @@ public class Tables {
 
     public class RowIterator extends LookAheadIterator<Row> implements Iterator<Row> {
 
-        private final String whereKey;
+        private final String whereColumn;
         private final byte[] whereValue;
+        private final Pattern wherePattern;
         private final Iterator<Map.Entry<byte[], Map<String, byte[]>>> i;
         
+        /**
+         * iterator that iterates all elements in the given table
+         * @param table
+         * @throws IOException
+         */
         public RowIterator(String table) throws IOException {
-            this.whereKey = null;
+            this.whereColumn = null;
             this.whereValue = null;
+            this.wherePattern = null;
             BEncodedHeap heap = getHeap(table);
             i = heap.iterator();
         }
         
-        public RowIterator(String table, String whereKey, byte[] whereValue) throws IOException {
-            this.whereKey = whereKey;
+        /**
+         * iterator that iterates all elements in the given table
+         * where a given column is equal to a given value
+         * @param table
+         * @param whereColumn
+         * @param whereValue
+         * @throws IOException
+         */
+        public RowIterator(String table, String whereColumn, byte[] whereValue) throws IOException {
+            assert whereColumn != null || whereValue == null;
+            this.whereColumn = whereColumn;
             this.whereValue = whereValue;
+            this.wherePattern = null;
+            BEncodedHeap heap = getHeap(table);
+            i = heap.iterator();
+        }
+        
+        /**
+         * iterator that iterates all elements in the given table
+         * where a given column matches with a given value
+         * @param table
+         * @param whereColumn
+         * @param wherePattern
+         * @throws IOException
+         */
+        public RowIterator(String table, String whereColumn, Pattern wherePattern) throws IOException {
+            this.whereColumn = whereColumn;
+            this.whereValue = null;
+            this.wherePattern = wherePattern;
+            BEncodedHeap heap = getHeap(table);
+            i = heap.iterator();
+        }
+        
+        /**
+         * iterator that iterates all elements in the given table
+         * where any column matches with a given value
+         * @param table
+         * @param pattern
+         * @throws IOException
+         */
+        public RowIterator(String table, Pattern pattern) throws IOException {
+            this.whereColumn = null;
+            this.whereValue = null;
+            this.wherePattern = pattern;
             BEncodedHeap heap = getHeap(table);
             i = heap.iterator();
         }
@@ -399,8 +446,21 @@ public class Tables {
         protected Row next0() {
             while (i.hasNext()) {
                 Row r = new Row(i.next());
-                if (this.whereKey == null) return r;
-                if (ByteBuffer.equals(r.from(this.whereKey), this.whereValue)) return r;
+                if (this.whereValue != null) {
+                    if (ByteBuffer.equals(r.from(this.whereColumn), this.whereValue)) return r;
+                } else if (this.wherePattern != null) {
+                    if (this.whereColumn == null) {
+                        // shall match any column
+                        for (byte[] b: r.values()) {
+                            if (this.wherePattern.matcher(new String(b)).matches()) return r;
+                        }
+                    } else {
+                        // must match the given column
+                        if (this.wherePattern.matcher(new String(r.from(this.whereColumn))).matches()) return r;
+                    }
+                } else {
+                    return r;
+                }                
             }
             return null;
         }
@@ -448,6 +508,10 @@ public class Tables {
             byte[] r = this.map.get(colname);
             if (r == null) return dflt;
             return r;
+        }
+        
+        protected Collection<byte[]> values() {
+            return this.map.values();
         }
         
         public String toString() {
