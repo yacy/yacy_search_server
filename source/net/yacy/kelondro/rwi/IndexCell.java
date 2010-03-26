@@ -389,16 +389,19 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
              (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false)))) {
             try {
                 this.dumperSemaphore.acquire(); // only one may pass
-                if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false))) {
+                if (this.ram.size() >= this.maxRamEntries || (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false))) try {
                     // dump the ram
                     File dumpFile = this.array.newContainerBLOBFile();
                     // a critical point: when the ram is handed to the dump job,
-                    // dont write into it any more. Use a fresh one instead
+                    // don't write into it any more. Use a fresh one instead
                     ReferenceContainerCache<ReferenceType> ramdump = this.ram;
                     // get a fresh ram cache
                     this.ram = new ReferenceContainerCache<ReferenceType>(factory, this.array.rowdef(), this.array.ordering());
                     // dump the buffer
                     merger.dump(ramdump, dumpFile, array);
+                } catch (Exception e) {
+                    // catch all exceptions to prevent that no semaphore is released
+                    Log.logException(e);
                 }
                 this.dumperSemaphore.release();
             } catch (InterruptedException e) {
@@ -412,9 +415,13 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
              this.lastCleanup + cleanupCycle < System.currentTimeMillis())) {
             try {
                 this.cleanerSemaphore.acquire();
-                if (this.array.entries() > 50 || (this.lastCleanup + cleanupCycle < System.currentTimeMillis())) {
+                if (this.array.entries() > 50 || (this.lastCleanup + cleanupCycle < System.currentTimeMillis())) try {
+                    this.lastCleanup = System.currentTimeMillis(); // set time to prevent that this is called to soo again
                     this.array.shrink(this.targetFileSize, this.maxFileSize);
-                    this.lastCleanup = System.currentTimeMillis();
+                    this.lastCleanup = System.currentTimeMillis(); // set again to mark end of procedure
+                } catch (Exception e) {
+                    // catch all exceptions to prevent that no semaphore is released
+                    Log.logException(e);
                 }
                 this.cleanerSemaphore.release();
             } catch (InterruptedException e) {
