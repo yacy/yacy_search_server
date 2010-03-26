@@ -110,7 +110,7 @@ public final class HeapWriter {
         os.write(blob);
         //assert (this.doublecheck.add(new String(key))) : "doublecheck failed for " + new String(key);
         this.seek += chunkl + 4;
-        os.flush(); // necessary? may cause bad IO performance :-(
+        //os.flush(); // necessary? may cause bad IO performance :-(
     }
     
     protected static File fingerprintIndexFile(File f, String fingerprint) {
