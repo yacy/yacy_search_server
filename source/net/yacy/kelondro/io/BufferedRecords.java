@@ -54,7 +54,7 @@ public final class BufferedRecords {
 
     /**
      * flush the buffer: this shall be called before any file-based iterations
-     * on data structures on rescords are made
+     * on data structures on records are made
      * @throws IOException
      */
     public synchronized void flushBuffer() throws IOException {
@@ -68,11 +68,10 @@ public final class BufferedRecords {
             efs.put(entry.getKey().intValue(), entry.getValue(), 0);
         }
         buffer.clear();
-        efs.flushBuffer();
     }
     
     public final synchronized long size() throws IOException {
-        return efs == null ? 0 : efs.size(); // stuck
+        return efs == null ? 0 : efs.size();
     }
     
     public final File filename() {
@@ -127,7 +126,7 @@ public final class BufferedRecords {
         assert b.length - start >= efs.recordsize;
         final byte[] bb = buffer.remove(Long.valueOf(size() - 1));
         if (bb == null) {
-            efs.cleanLast(b, start); // stuck
+            efs.cleanLast(b, start);
         } else {
             System.arraycopy(bb, 0, b, start, efs.recordsize);
             efs.cleanLast();
