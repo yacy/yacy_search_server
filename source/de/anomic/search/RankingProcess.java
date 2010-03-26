@@ -472,7 +472,7 @@ public final class RankingProcess extends Thread {
             
             // accept url
             //System.out.println("handing over hash " + page.hash());
-            this.handover.add(page.hash()); // remember that we handed over this url
+            this.handover.add(new String(page.hash())); // remember that we handed over this url
             return page;
         }
         return null;

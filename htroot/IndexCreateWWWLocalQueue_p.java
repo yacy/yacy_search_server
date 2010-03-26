@@ -134,7 +134,7 @@ public class IndexCreateWWWLocalQueue_p {
                                 if (value != null) {
                                     final Matcher matcher = compiledPattern.matcher(value);
                                     if (matcher.find()) {
-                                        sb.crawlQueues.noticeURL.removeByURLHash(entry.url().hash());
+                                        sb.crawlQueues.noticeURL.removeByURLHash(entry.url().hash().getBytes());
                                     }                                    
                                 }
                             }
@@ -148,7 +148,7 @@ public class IndexCreateWWWLocalQueue_p {
                 prop.putNum("info_numEntries", c);
             } else if (post.containsKey("deleteEntry")) {
                 final String urlHash = post.get("deleteEntry");
-                sb.crawlQueues.noticeURL.removeByURLHash(urlHash);
+                sb.crawlQueues.noticeURL.removeByURLHash(urlHash.getBytes());
                 prop.put("LOCATION","");
                 return prop;
             }

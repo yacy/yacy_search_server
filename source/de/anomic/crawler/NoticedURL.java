@@ -180,9 +180,9 @@ public class NoticedURL {
      * @param urlhash
      * @return true, if the entry was removed; false if not
      */
-    public boolean removeByURLHash(final String urlhash) {
+    public boolean removeByURLHash(final byte[] urlhashBytes) {
         final HashSet<String> urlHashes = new HashSet<String>();
-        urlHashes.add(urlhash);
+        urlHashes.add(new String(urlhashBytes));
         try {return coreStack.remove(urlHashes) > 0;} catch (final IOException e) {}
         try {return limitStack.remove(urlHashes) > 0;} catch (final IOException e) {}
         try {return remoteStack.remove(urlHashes) > 0;} catch (final IOException e) {}

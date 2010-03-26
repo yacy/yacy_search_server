@@ -45,13 +45,13 @@ public abstract class AbstractIndex <ReferenceType extends Reference> implements
         this.factory = factory;
     }
     
-    public int remove(final TreeSet<byte[]> termHashes, final String urlHash) throws IOException {
+    public int remove(final TreeSet<byte[]> termHashes, final byte[] urlHashBytes) throws IOException {
         // remove the same url hashes for multiple words
         // this is mainly used when correcting a index after a search
         final Iterator<byte[]> i = termHashes.iterator();
         int c = 0;
         while (i.hasNext()) {
-            if (remove(i.next(), urlHash)) c++;
+            if (remove(i.next(), urlHashBytes)) c++;
         }
         return c;
     }

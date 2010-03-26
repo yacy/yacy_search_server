@@ -38,7 +38,7 @@ public interface URIMetadata {
     
     public Row.Entry toRowEntry();
 
-    public String hash();
+    public byte[] hash();
 
     public long ranking();
     

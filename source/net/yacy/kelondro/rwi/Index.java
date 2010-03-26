@@ -105,7 +105,7 @@ public interface Index <ReferenceType extends Reference> {
 	 * @return
 	 * @throws IOException
 	 */
-    public boolean remove(byte[] termHash, String referenceHash) throws IOException;
+    public boolean remove(byte[] termHash, byte[] referenceHash) throws IOException;
     
     /**
      * remove a set of reference entries for a given word
@@ -115,7 +115,7 @@ public interface Index <ReferenceType extends Reference> {
      * @throws IOException
      */
     public int remove(final byte[] termHash, Set<String> referenceHashes) throws IOException;
-    public int remove(final TreeSet<byte[]> termHashes, final String urlHash) throws IOException;
+    public int remove(final TreeSet<byte[]> termHashes, final byte[] urlHashBytes) throws IOException;
     
     /**
      * iterate all references from the beginning of a specific word hash

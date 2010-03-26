@@ -116,9 +116,9 @@ public class yacysearchitem {
             
             prop.put("content_authorized", authenticated ? "1" : "0");
             prop.put("content_authorized_recommend", (sb.peers.newsPool.getSpecific(yacyNewsPool.OUTGOING_DB, yacyNewsPool.CATEGORY_SURFTIPP_ADD, "url", result.urlstring()) == null) ? "1" : "0");
-            prop.putHTML("content_authorized_recommend_deletelink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + result.hash() + "&urlmaskfilter=.*");
-            prop.putHTML("content_authorized_recommend_recommendlink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + result.hash() + "&urlmaskfilter=.*");
-            prop.put("content_authorized_urlhash", result.hash());
+            prop.putHTML("content_authorized_recommend_deletelink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&deleteref=" + new String(result.hash()) + "&urlmaskfilter=.*");
+            prop.putHTML("content_authorized_recommend_recommendlink", "/yacysearch.html?search=" + theQuery.queryString + "&Enter=Search&count=" + theQuery.displayResults() + "&offset=" + (theQuery.neededResults() - theQuery.displayResults()) + "&order=" + crypt.simpleEncode(theQuery.ranking.toExternalString()) + "&resource=local&time=3&recommendref=" + new String(result.hash()) + "&urlmaskfilter=.*");
+            prop.put("content_authorized_urlhash", new String(result.hash()));
 
             prop.putHTML("content_title", result.title());
             prop.putXML("content_title-xml", result.title());
@@ -126,12 +126,12 @@ public class yacysearchitem {
             prop.putHTML("content_link", result.urlstring());
             prop.put("content_display", display);
             prop.putHTML("content_faviconCode", sb.licensedURLs.aquireLicense(faviconURL)); // aquire license for favicon url loading
-            prop.put("content_urlhash", result.hash());
-            prop.put("content_urlhexhash", yacySeed.b64Hash2hexHash(result.hash()));
+            prop.put("content_urlhash", new String(result.hash()));
+            prop.put("content_urlhexhash", yacySeed.b64Hash2hexHash(new String(result.hash())));
             prop.putHTML("content_urlname", nxTools.shortenURLString(result.urlname(), urllength));
             prop.put("content_date", Switchboard.dateString(result.modified()));
             prop.put("content_date822", Switchboard.dateString822(result.modified()));
-            prop.put("content_ybr", RankingProcess.ybr(result.hash()));
+            prop.put("content_ybr", RankingProcess.ybr(new String(result.hash())));
             prop.putHTML("content_size", Integer.toString(result.filesize())); // we don't use putNUM here because that number shall be usable as sorting key. To print the size, use 'sizename'
             prop.putHTML("content_sizename", sizename(result.filesize()));
             prop.putHTML("content_host", result.url().getHost());
@@ -146,8 +146,8 @@ public class yacysearchitem {
             } catch (final UnsupportedEncodingException e) {}
             prop.putHTML("content_former", theQuery.queryString);
             prop.put("content_rankingprops", result.word().toPropertyForm() + ", domLengthEstimated=" + DigestURI.domLengthEstimation(result.hash()) +
-                    ((DigestURI.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
-                    (((wordURL = DigestURI.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
+                    ((DigestURI.probablyRootURL(new String(result.hash()))) ? ", probablyRootURL" : "") + 
+                    (((wordURL = DigestURI.probablyWordURL(new String(result.hash()), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
             final TextSnippet snippet = result.textSnippet();
             final String desc = (snippet == null) ? "" : snippet.getLineMarked(theQuery.fullqueryHashes);
             prop.put("content_description", desc);

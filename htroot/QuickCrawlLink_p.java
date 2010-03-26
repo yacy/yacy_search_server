@@ -137,7 +137,7 @@ public class QuickCrawlLink_p {
                 return prop;
             }
                     
-            final String urlhash = crawlingStartURL.hash();
+            final byte[] urlhash = crawlingStartURL.hash().getBytes();
             indexSegment.urlMetadata().remove(urlhash);
             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
             sb.crawlQueues.errorURL.remove(urlhash);

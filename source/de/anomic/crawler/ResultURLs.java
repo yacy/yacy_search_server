@@ -71,7 +71,7 @@ public final class ResultURLs {
         try {
             final LinkedHashMap<String, InitExecEntry> resultStack = getStack(stackType);
             if (resultStack != null) {
-                resultStack.put(e.hash(), new InitExecEntry(initiatorHash, executorHash));
+                resultStack.put(new String(e.hash()), new InitExecEntry(initiatorHash, executorHash));
             }
         } catch (final Exception ex) {
             System.out.println("INTERNAL ERROR in newEntry/2: " + ex.toString());
@@ -188,7 +188,7 @@ public final class ResultURLs {
             EventOrigin stackNo = EventOrigin.LOCAL_CRAWLING;
             System.out.println("valid test:\n=======");
             // add
-            results.stack(urlRef, urlRef.hash(), url.hash(), stackNo);
+            results.stack(urlRef, new String(urlRef.hash()), url.hash(), stackNo);
             // size
             System.out.println("size of stack:\t"+ results.getStackSize(stackNo));
         } catch (final MalformedURLException e) {

@@ -384,7 +384,7 @@ public class Segment {
             }
             if (resourceb == null) {
                 // delete just the url entry
-                urlMetadata().remove(urlhash);
+                urlMetadata().remove(urlhash.getBytes());
                 return 0;
             } else {
                 resourceContent = new ByteArrayInputStream(resourceb);
@@ -403,10 +403,10 @@ public class Segment {
                 
                 // delete all word references
                 int count = 0;
-                if (words != null) count = termIndex().remove(Word.words2hashes(words), urlhash);
+                if (words != null) count = termIndex().remove(Word.words2hashes(words), urlhash.getBytes());
                 
                 // finally delete the url entry itself
-                urlMetadata().remove(urlhash);
+                urlMetadata().remove(urlhash.getBytes());
                 return count;
             }
         } catch (final ParserException e) {

@@ -145,7 +145,7 @@ public class ReferenceOrder {
         int maxmaxpos = max.maxposition();
         int minminpos = min.minposition();
         final long r =
-             ((256 - DigestURI.domLengthNormalized(t.metadataHash())) << ranking.coeff_domlength)
+             ((256 - DigestURI.domLengthNormalized(t.metadataHash().getBytes())) << ranking.coeff_domlength)
            + ((ranking.coeff_ybr > 12) ? ((256 - (RankingProcess.ybr(t.metadataHash()) << 4)) << ranking.coeff_ybr) : 0)
            + ((max.urlcomps()      == min.urlcomps()   )   ? 0 : (256 - (((t.urlcomps()     - min.urlcomps()     ) << 8) / (max.urlcomps()     - min.urlcomps())     )) << ranking.coeff_urlcomps)
            + ((max.urllength()     == min.urllength()  )   ? 0 : (256 - (((t.urllength()    - min.urllength()    ) << 8) / (max.urllength()    - min.urllength())    )) << ranking.coeff_urllength)

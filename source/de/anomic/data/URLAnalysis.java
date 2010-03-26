@@ -461,7 +461,7 @@ public class URLAnalysis {
         HandleSet hs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, new File(diffFile), 0);
         System.out.println("URL DELETE loaded dump, starting deletion of " + hs.size() + " entries from " + mrSize);
         for (byte[] refhash: hs) {
-            mr.remove(new String(refhash));
+            mr.remove(refhash);
         }
         System.out.println("URL DELETE finished deletions, " + mr.size() + " entries left in URL database");
     }

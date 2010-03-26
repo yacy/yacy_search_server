@@ -228,7 +228,7 @@ public class Crawler_p {
                             // stack request
                             // first delete old entry, if exists
                             final DigestURI url = new DigestURI(crawlingStart, null);
-                            final String urlhash = url.hash();
+                            final byte[] urlhash = url.hash().getBytes();
                             indexSegment.urlMetadata().remove(urlhash);
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             sb.crawlQueues.errorURL.remove(urlhash);

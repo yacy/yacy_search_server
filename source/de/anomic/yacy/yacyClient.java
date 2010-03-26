@@ -554,32 +554,32 @@ public final class yacyClient {
 			// get one single search result
 			urlEntry = URIMetadataRow.importEntry(result.get("resource" + n));
 			if (urlEntry == null) continue;
-			assert (urlEntry.hash().length() == 12) : "urlEntry.hash() = " + urlEntry.hash();
-			if (urlEntry.hash().length() != 12) continue; // bad url hash
+			assert (urlEntry.hash().length == 12) : "urlEntry.hash() = " + new String(urlEntry.hash());
+			if (urlEntry.hash().length != 12) continue; // bad url hash
 			final URIMetadataRow.Components metadata = urlEntry.metadata();
 			if (metadata == null) continue;
 			if (blacklist.isListed(Blacklist.BLACKLIST_SEARCH, metadata.url())) {
-				yacyCore.log.logInfo("remote search (client): filtered blacklisted url " + metadata.url() + " from peer " + target.getName());
+			    if (yacyCore.log.isInfo()) yacyCore.log.logInfo("remote search (client): filtered blacklisted url " + metadata.url() + " from peer " + target.getName());
 				continue; // block with backlist
 			}
             
 			final String urlRejectReason = Switchboard.getSwitchboard().crawlStacker.urlInAcceptedDomain(metadata.url());
             if (urlRejectReason != null) {
-                yacyCore.log.logInfo("remote search (client): rejected url '" + metadata.url() + "' (" + urlRejectReason + ") from peer " + target.getName());
+                if (yacyCore.log.isInfo()) yacyCore.log.logInfo("remote search (client): rejected url '" + metadata.url() + "' (" + urlRejectReason + ") from peer " + target.getName());
                 continue; // reject url outside of our domain
             }
 
 			// save the url entry
 			Reference entry;
 			if (urlEntry.word() == null) {
-				yacyCore.log.logWarning("remote search (client): no word attached from peer " + target.getName() + ", version " + target.getVersion());
+			    if (yacyCore.log.isWarning()) yacyCore.log.logWarning("remote search (client): no word attached from peer " + target.getName() + ", version " + target.getVersion());
 				continue; // no word attached
 			}
 
 			// the search-result-url transports all the attributes of word indexes
 			entry = urlEntry.word();
-			if (!(entry.metadataHash().equals(urlEntry.hash()))) {
-				yacyCore.log.logInfo("remote search (client): url-hash " + urlEntry.hash() + " does not belong to word-attached-hash " + entry.metadataHash() + "; url = " + metadata.url() + " from peer " + target.getName());
+			if (!Base64Order.enhancedCoder.equal(entry.metadataHash().getBytes(), urlEntry.hash())) {
+				if (yacyCore.log.isInfo()) yacyCore.log.logInfo("remote search (client): url-hash " + new String(urlEntry.hash()) + " does not belong to word-attached-hash " + entry.metadataHash() + "; url = " + metadata.url() + " from peer " + target.getName());
 				continue; // spammed
 			}
 
@@ -597,7 +597,7 @@ public final class yacyClient {
                 // because they are search-specific.
 				// instead, they are placed in a snipped-search cache.
 				// System.out.println("--- RECEIVED SNIPPET '" + link.snippet() + "'");
-			    TextSnippet.storeToCache(wordhashes, urlEntry.hash(), urlEntry.snippet());
+			    TextSnippet.storeToCache(wordhashes, new String(urlEntry.hash()), urlEntry.snippet());
 			}
             
 			// add the url entry to the word indexes
@@ -611,7 +611,7 @@ public final class yacyClient {
 			}
             
 			// store url hash for statistics
-			urls[n] = urlEntry.hash();
+			urls[n] = new String(urlEntry.hash());
 		}
 
         // store remote result to local result container
@@ -846,7 +846,7 @@ public final class yacyClient {
         final String salt = crypt.randomSalt();
         final List<Part> post = yacyNetwork.basicRequestPost(Switchboard.getSwitchboard(), target.hash, salt);
         post.add(new DefaultCharsetStringPart("process", process));
-        post.add(new DefaultCharsetStringPart("urlhash", ((entry == null) ? "" : entry.hash())));
+        post.add(new DefaultCharsetStringPart("urlhash", ((entry == null) ? "" : new String(entry.hash()))));
         post.add(new DefaultCharsetStringPart("result", result));
         post.add(new DefaultCharsetStringPart("reason", reason));
         post.add(new DefaultCharsetStringPart("wordh", wordhashes));

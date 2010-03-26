@@ -950,11 +950,11 @@ public class DigestURI implements Serializable {
         return false;
     }
 
-    public static final int domLengthEstimation(final String urlHash) {
+    public static final int domLengthEstimation(final byte[] urlHashBytes) {
         // generates an estimation of the original domain length
-        assert (urlHash != null);
-        assert (urlHash.length() == 12) : "urlhash = " + urlHash;
-        final int flagbyte = Base64Order.enhancedCoder.decodeByte(urlHash.charAt(11));
+        assert (urlHashBytes != null);
+        assert (urlHashBytes.length == 12) : "urlhash = " + new String(urlHashBytes);
+        final int flagbyte = Base64Order.enhancedCoder.decodeByte(urlHashBytes[11]);
         final int domLengthKey = flagbyte & 3;
         switch (domLengthKey) {
         case 0:
@@ -969,8 +969,8 @@ public class DigestURI implements Serializable {
         return 20;
     }
 
-    public static int domLengthNormalized(final String urlHash) {
-        return domLengthEstimation(urlHash) << 8 / 20;
+    public static int domLengthNormalized(final byte[] urlHashBytes) {
+        return domLengthEstimation(urlHashBytes) << 8 / 20;
     }
 
     public static final int domDomain(final String urlHash) {

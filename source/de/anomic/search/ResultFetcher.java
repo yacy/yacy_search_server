@@ -162,7 +162,7 @@ public class ResultFetcher {
                     // get next entry
                     page = rankedCache.takeURL(true, taketimeout);
                     if (page == null) break;
-                    if (failedURLs.get(page.hash()) != null) continue;
+                    if (failedURLs.get(new String(page.hash())) != null) continue;
                     
                     final ResultEntry resultEntry = fetchSnippet(page, snippetMode); // does not fetch snippets if snippetMode == 0
 
@@ -236,7 +236,7 @@ public class ResultFetcher {
                 return new ResultEntry(page, query.getSegment(), peers, null, null, dbRetrievalTime, snippetComputationTime); // result without snippet
             } else {
                 // problems with snippet fetch
-                registerFailure(page.hash(), "no text snippet for URL " + metadata.url());
+                registerFailure(new String(page.hash()), "no text snippet for URL " + metadata.url());
                 if (!peers.mySeed().isVirgin())
                     try {
                         TextSnippet.failConsequences(query.getSegment(), page.word(), snippet, query.id(false));
@@ -259,7 +259,7 @@ public class ResultFetcher {
                 return new ResultEntry(page, query.getSegment(), peers, null, null, dbRetrievalTime, snippetComputationTime);
             } else {
                 // problems with snippet fetch
-                registerFailure(page.hash(), "no media snippet for URL " + metadata.url());
+                registerFailure(new String(page.hash()), "no media snippet for URL " + metadata.url());
                 return null;
             }
         }

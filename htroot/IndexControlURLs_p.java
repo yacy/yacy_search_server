@@ -153,7 +153,7 @@ public class IndexControlURLs_p {
             } else {
                 urlstring = entry.metadata().url().toNormalform(false, true);
                 prop.put("urlstring", "");
-                sb.urlRemove(segment, urlhash);
+                sb.urlRemove(segment, urlhash.getBytes());
                 prop.putHTML("result", "Removed URL " + urlstring);
             }
             prop.put("lurlexport", 0);
@@ -169,7 +169,7 @@ public class IndexControlURLs_p {
             if ((urlhash == null) || (urlstring == null)) {
                 prop.put("result", "No input given; nothing deleted.");
             } else {
-                sb.urlRemove(segment, urlhash);
+                sb.urlRemove(segment, urlhash.getBytes());
                 prop.putHTML("result", "Removed URL " + urlstring);
             }
             prop.put("lurlexport", 0);
@@ -223,7 +223,7 @@ public class IndexControlURLs_p {
                 while (entryIt.hasNext() && i < 256) {
                     entry = entryIt.next();
                     if (entry == null) break;
-                    prop.put("urlhashsimilar_rows_"+rows+"_cols_"+cols+"_urlHash", entry.hash());
+                    prop.put("urlhashsimilar_rows_"+rows+"_cols_"+cols+"_urlHash", new String(entry.hash()));
                     cols++;
                     if (cols==8) {
                         prop.put("urlhashsimilar_rows_"+rows+"_cols", cols);
@@ -340,7 +340,7 @@ public class IndexControlURLs_p {
         prop.put("genUrlProfile_loaddate", entry.loaddate().toString());
         prop.put("genUrlProfile_referrer", (le == null) ? 0 : 1);
         prop.putHTML("genUrlProfile_referrer_url", (le == null) ? "<unknown>" : le.metadata().url().toNormalform(false, true));
-        prop.put("genUrlProfile_referrer_hash", (le == null) ? "" : le.hash());
+        prop.put("genUrlProfile_referrer_hash", (le == null) ? "" : new String(le.hash()));
         prop.put("genUrlProfile_doctype", String.valueOf(entry.doctype()));
         prop.put("genUrlProfile_language", entry.language());
         prop.put("genUrlProfile_size", entry.size());

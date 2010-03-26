@@ -113,7 +113,7 @@ public class CrawlResults {
             final String hash = post.get("hash", null);
             if (hash != null) {
                 // delete from database
-                sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).remove(hash);
+                sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).remove(hash.getBytes());
             }
         }
         

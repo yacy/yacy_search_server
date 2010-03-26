@@ -132,6 +132,10 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
         return alpha[b];
     }
 
+    public final byte decodeByte(final byte b) {
+        return ahpla[b];
+    }
+
     public final byte decodeByte(final char b) {
         return ahpla[b];
     }

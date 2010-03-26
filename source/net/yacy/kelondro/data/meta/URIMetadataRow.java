@@ -311,7 +311,7 @@ public class URIMetadataRow implements URIMetadata {
         if (metadata == null) return null;
         //System.out.println("author=" + comp.author());
         try {
-            s.append("hash=").append(hash());
+            s.append("hash=").append(new String(hash()));
             s.append(",url=").append(crypt.simpleEncode(metadata.url().toNormalform(false, true)));
             s.append(",descr=").append(crypt.simpleEncode(metadata.dc_title()));
             s.append(",author=").append(crypt.simpleEncode(metadata.dc_creator()));
@@ -353,12 +353,12 @@ public class URIMetadataRow implements URIMetadata {
         return this.entry;
     }
 
-    public String hash() {
+    public byte[] hash() {
         // return a url-hash, based on the md5 algorithm
         // the result is a String of 12 bytes within a 72-bit space
         // (each byte has an 6-bit range)
         // that should be enough for all web pages on the world
-        return new String(this.entry.getPrimaryKeyBytes());
+        return this.entry.getPrimaryKeyBytes();
     }
 
     public long ranking() {
@@ -372,7 +372,7 @@ public class URIMetadataRow implements URIMetadata {
         final Iterator<String> cl = FileUtils.strings(this.entry.getCol("comp", null));
         this.comp = new Components(
                     (cl.hasNext()) ? cl.next() : "",
-                    hash(),
+                    new String(hash()),
                     (cl.hasNext()) ? cl.next() : "",
                     (cl.hasNext()) ? cl.next() : "",
                     (cl.hasNext()) ? cl.next() : "",

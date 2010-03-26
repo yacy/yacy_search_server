@@ -102,7 +102,7 @@ public class yacydoc {
         prop.putXML("dc_language", entry.language());
 
         prop.putXML("yacy_loaddate", entry.loaddate().toString());
-        prop.putXML("yacy_referrer_hash", (le == null) ? "" : le.hash());
+        prop.putXML("yacy_referrer_hash", (le == null) ? "" : new String(le.hash()));
         prop.putXML("yacy_referrer_url", (le == null) ? "" : le.metadata().url().toNormalform(false, true));
         prop.put("yacy_size", entry.size());
         prop.put("yacy_words",entry.wordCount());

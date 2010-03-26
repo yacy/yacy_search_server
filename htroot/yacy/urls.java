@@ -124,7 +124,7 @@ public class urls {
                 prop.putXML("item_" + c + "_description", metadata.dc_title());
                 prop.put("item_" + c + "_author", metadata.dc_creator());
                 prop.put("item_" + c + "_pubDate", DateFormatter.formatShortSecond(entry.moddate()));
-                prop.put("item_" + c + "_guid", entry.hash());
+                prop.put("item_" + c + "_guid", new String(entry.hash()));
                 c++;
             }
             prop.put("item", c);

@@ -101,16 +101,16 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         }
     }
     public int hashCode() {
-        return urlentry.hash().hashCode();
+        return new String(urlentry.hash()).hashCode();
     }
     public boolean equals(final Object obj) {
         if (this == obj) return true;
         if (obj == null) return false;
         if (!(obj instanceof ResultEntry)) return false;
         ResultEntry other = (ResultEntry) obj;
-        return urlentry.hash().equals(other.urlentry.hash());
+        return Base64Order.enhancedCoder.equal(urlentry.hash(), other.urlentry.hash());
     }
-    public String hash() {
+    public byte[] hash() {
         return urlentry.hash();
     }
     public DigestURI url() {
@@ -171,9 +171,9 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         return urlentry.toString(textSnippet.getLineRaw());
     }
     public int compareTo(ResultEntry o) {
-        return Base64Order.enhancedCoder.compare(this.urlentry.hash().getBytes(), o.urlentry.hash().getBytes());
+        return Base64Order.enhancedCoder.compare(this.urlentry.hash(), o.urlentry.hash());
     }
     public int compare(ResultEntry o1, ResultEntry o2) {
-        return Base64Order.enhancedCoder.compare(o1.urlentry.hash().getBytes(), o2.urlentry.hash().getBytes());
+        return Base64Order.enhancedCoder.compare(o1.urlentry.hash(), o2.urlentry.hash());
     }
 }

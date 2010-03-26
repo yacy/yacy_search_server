@@ -147,7 +147,7 @@ public class CrawlQueues {
         return null;
     }
     
-    public void urlRemove(final String hash) {
+    public void urlRemove(final byte[] hash) {
         noticeURL.removeByURLHash(hash);
         delegatedURL.remove(hash);
         errorURL.remove(hash);

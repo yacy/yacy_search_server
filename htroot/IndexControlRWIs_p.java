@@ -170,7 +170,7 @@ public class IndexControlRWIs_p {
                 // now delete all urls if demanded
                 if (delurl || delurlref) {
                     for (i = 0; i < urlx.length; i++) {
-                        sb.urlRemove(segment, urlx[i]);
+                        sb.urlRemove(segment, urlx[i].getBytes());
                     }
                 }
                 post.remove("keyhashdeleteall");
@@ -186,7 +186,7 @@ public class IndexControlRWIs_p {
                 }
                 if (delurl || delurlref) {
                     for (i = 0; i < urlx.length; i++) {
-                        sb.urlRemove(segment, urlx[i]);
+                        sb.urlRemove(segment, urlx[i].getBytes());
                     }
                 }
                 final Set<String> urlHashes = new HashSet<String>();
@@ -313,7 +313,7 @@ public class IndexControlRWIs_p {
                         for (i = 0; i < urlx.length; i++) {
                             urlHashes.add(urlx[i]);
                             final URIMetadataRow e = segment.urlMetadata().load(urlx[i], null, 0);
-                            segment.urlMetadata().remove(urlx[i]);
+                            segment.urlMetadata().remove(urlx[i].getBytes());
                             if (e != null) {
                                 url = e.metadata().url();
                                 pw.println(url.getHost() + "/" + url.getFile());
@@ -342,7 +342,7 @@ public class IndexControlRWIs_p {
                         for (i = 0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
                             final URIMetadataRow e = segment.urlMetadata().load(urlx[i], null, 0);
-                            segment.urlMetadata().remove(urlx[i]);
+                            segment.urlMetadata().remove(urlx[i].getBytes());
                             if (e != null) {
                                 url = e.metadata().url();
                                 pw.println(url.getHost() + "/.*");
@@ -409,9 +409,9 @@ public class IndexControlRWIs_p {
                 prop.put("genUrlList_urlList_"+i+"_urlExists_urlStringShort", (us.length() > 40) ? (us.substring(0, 20) + "<br>" + us.substring(20,  40) + "...") : ((us.length() > 30) ? (us.substring(0, 20) + "<br>" + us.substring(20)) : us));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_ranking", (entry.ranking() - rn));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_domlength", DigestURI.domLengthEstimation(entry.hash()));
-                prop.putNum("genUrlList_urlList_"+i+"_urlExists_ybr", RankingProcess.ybr(entry.hash()));
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_ybr", RankingProcess.ybr(new String(entry.hash())));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_tf", 1000.0 * entry.word().termFrequency());
-                prop.putNum("genUrlList_urlList_"+i+"_urlExists_authority", (ranked.getOrder() == null) ? -1 : ranked.getOrder().authority(entry.hash()));
+                prop.putNum("genUrlList_urlList_"+i+"_urlExists_authority", (ranked.getOrder() == null) ? -1 : ranked.getOrder().authority(new String(entry.hash())));
                 prop.put("genUrlList_urlList_"+i+"_urlExists_date", DateFormatter.formatShortDay(new Date(entry.word().lastModified())));
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_wordsintitle", entry.word().wordsintitle());
                 prop.putNum("genUrlList_urlList_"+i+"_urlExists_wordsintext", entry.word().wordsintext());

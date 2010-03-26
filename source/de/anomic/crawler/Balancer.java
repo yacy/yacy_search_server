@@ -46,7 +46,7 @@ import de.anomic.http.client.Cache;
 public class Balancer {
     
     private static final String indexSuffix = "9.db";
-    private static final int EcoFSBufferSize = 200;
+    private static final int EcoFSBufferSize = 1000;
 
     // class variables
     private final ConcurrentHashMap<String, LinkedList<String>> domainStacks;    // a map from domain name part to Lists with url hashs

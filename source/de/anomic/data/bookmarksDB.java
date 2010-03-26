@@ -245,7 +245,7 @@ public class bookmarksDB {
 					// check if the crawl filter works correctly    			
 	    			Pattern.compile(newcrawlingMustMatch);	    			
                     
-                    String urlhash = crawlingStartURL.hash();
+                    byte[] urlhash = crawlingStartURL.hash().getBytes();
                     sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).remove(urlhash);
                     sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                     sb.crawlQueues.errorURL.remove(urlhash);

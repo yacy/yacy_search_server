@@ -268,9 +268,9 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         return removed + (reduced / this.array.rowdef().objectsize);
     }
 
-    public boolean remove(byte[] termHash, String urlHash) throws IOException {
-        boolean removed = this.ram.remove(termHash, urlHash);
-        int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHash));
+    public boolean remove(byte[] termHash, byte[] urlHashBytes) throws IOException {
+        boolean removed = this.ram.remove(termHash, urlHashBytes);
+        int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHashBytes));
         this.countCache.remove(new ByteArray(termHash));
         return removed || (reduced > 0);
     }
@@ -283,9 +283,9 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
             this.urlHashes = urlHashes;
         }
         
-        public RemoveRewriter(String urlHash) {
+        public RemoveRewriter(byte[] urlHashBytes) {
             this.urlHashes = new HashSet<String>();
-            this.urlHashes.add(urlHash);
+            this.urlHashes.add(new String(urlHashBytes));
         }
         
         public ReferenceContainer<ReferenceType> rewrite(ReferenceContainer<ReferenceType> container) {

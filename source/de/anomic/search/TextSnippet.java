@@ -579,7 +579,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     
     public static String failConsequences(Segment indexSegment, final WordReferenceVars word, final TextSnippet snippet, final String eventID) throws IOException {
         // problems with snippet fetch
-        final String urlHash = snippet.getUrl().hash();
+        final byte[] urlHash = snippet.getUrl().hash().getBytes();
         final String querystring = SetTools.setToString(snippet.getRemainingHashes(), ' ');
         if ((snippet.getErrorCode() == ERROR_SOURCE_LOADING) ||
             (snippet.getErrorCode() == ERROR_RESOURCE_LOADING) ||

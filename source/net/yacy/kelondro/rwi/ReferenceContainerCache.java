@@ -328,12 +328,12 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         return cache.remove(new ByteArray(termHash));
     }
 
-    public boolean remove(final byte[] termHash, final String urlHash) {
+    public boolean remove(final byte[] termHash, final byte[] urlHashBytes) {
         assert this.cache != null;
         ByteArray tha = new ByteArray(termHash);
         synchronized (cache) {
 	        final ReferenceContainer<ReferenceType> c = cache.get(tha);
-	        if ((c != null) && (c.remove(urlHash) != null)) {
+	        if ((c != null) && (c.remove(urlHashBytes) != null)) {
 	            // removal successful
 	            if (c.isEmpty()) {
 	                delete(termHash);

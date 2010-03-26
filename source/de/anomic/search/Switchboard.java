@@ -1031,15 +1031,15 @@ public final class Switchboard extends serverSwitch {
         return this.crawlQueues.urlExists(hash);
     }
     
-    public void urlRemove(final Segment segment, final String hash) {
+    public void urlRemove(final Segment segment, final byte[] hash) {
         segment.urlMetadata().remove(hash);
-        crawlResults.remove(hash);
+        crawlResults.remove(new String(hash));
         crawlQueues.urlRemove(hash);
     }
     
-    public void urlRemove(final Segments.Process process, final String hash) {
+    public void urlRemove(final Segments.Process process, final byte[] hash) {
         indexSegments.urlMetadata(process).remove(hash);
-        crawlResults.remove(hash);
+        crawlResults.remove(new String(hash));
         crawlQueues.urlRemove(hash);
     }
     

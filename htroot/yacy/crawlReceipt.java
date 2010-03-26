@@ -117,14 +117,14 @@ public final class crawlReceipt {
         // generating a new loaded URL entry
         final URIMetadataRow entry = URIMetadataRow.importEntry(propStr);
         if (entry == null) {
-            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + iam + "\n\tURL properties: "+ propStr);
+            if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (entry null) from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");
             return prop;
         }
         
         final URIMetadataRow.Components metadata = entry.metadata();
         if (metadata.url() == null) {
-            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
+            if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (url null) for hash " + new String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "3600");
             return prop;
         }
@@ -132,7 +132,7 @@ public final class crawlReceipt {
         // check if the entry is in our network domain
         final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomain(metadata.url());
         if (urlRejectReason != null) {
-            log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + entry.hash() + " from peer " + iam + "\n\tURL properties: "+ propStr);
+            if (log.isWarning()) log.logWarning("crawlReceipt: RECEIVED wrong RECEIPT (" + urlRejectReason + ") for hash " + new String(entry.hash()) + " from peer " + iam + "\n\tURL properties: "+ propStr);
             prop.put("delay", "9999");
             return prop;
         }
@@ -142,7 +142,7 @@ public final class crawlReceipt {
             sb.indexSegments.urlMetadata(Segments.Process.RECEIPTS).store(entry);
             sb.crawlResults.stack(entry, youare, iam, EventOrigin.REMOTE_RECEIPTS);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
-            log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + entry.hash() + ":" + metadata.url().toNormalform(false, true));
+            if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + new String(entry.hash()) + ":" + metadata.url().toNormalform(false, true));
 
             // ready for more
             prop.put("delay", "10");
