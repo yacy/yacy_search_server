@@ -715,9 +715,18 @@ public final class Switchboard extends serverSwitch {
         // or independently using a bootstrap URL
         Map<String, String> initProps;
         if (networkUnitDefinition.startsWith("http://")) {
-            try {
-            	setConfig(Switchboard.loadHashMap(new DigestURI(networkUnitDefinition, null)));
-            } catch (final MalformedURLException e) { }
+            // multiple definitions may be given, split the definition line in multiple addresses
+            String[] netdefs = networkUnitDefinition.split(",");
+            Map<String, String> netdefmap;
+            netload: for (String netdef: netdefs) {
+                netdef = netdef.trim();
+                try {
+                    netdefmap = Switchboard.loadHashMap(new DigestURI(netdef, null));
+                    if (netdefmap == null || netdefmap.size() == 0) continue netload;
+                    setConfig(netdefmap);
+                    break netload;
+                } catch (final MalformedURLException e) {}
+            }
         } else {
             final File networkUnitDefinitionFile = (networkUnitDefinition.length() > 0 && networkUnitDefinition.charAt(0) == '/') ? new File(networkUnitDefinition) : new File(getRootPath(), networkUnitDefinition);
             if (networkUnitDefinitionFile.exists()) {
@@ -2229,6 +2238,7 @@ public final class Switchboard extends serverSwitch {
             if (result == null) return new HashMap<String, String>();
             return result;
         } catch (final Exception e) {
+            Log.logException(e);
             return new HashMap<String, String>();
         }
     }
