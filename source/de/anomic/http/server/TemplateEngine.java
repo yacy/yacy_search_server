@@ -143,82 +143,7 @@ public final class TemplateEngine {
     public final static byte[] iOpen  = {hashChar, pcChar};
     public final static byte[] iClose = {pcChar, hashChar};
     
-    /*
-    private final static Object[] meta_quotation = new Object[] {
-        new Object[] {pOpen, pClose},
-        new Object[] {mOpen, mClose},
-        new Object[] {aOpen, aClose},
-        new Object[] {iOpen, iClose}
-    };
-    
-    public ArrayList<String> getStrings(final byte[] text){
-        final ArrayList<String> result = new ArrayList<String>();
-        
-        final ByteBuffer sbb = new ByteBuffer(text);
-        final ByteBuffer[] sbbs = splitQuotations(sbb);
-        for (int i = 0; i < sbbs.length; i++) {
-            // TODO: avoid empty if statements
-            if (sbbs[i].isWhitespace(true)) {
-                //sbb.append(sbbs[i]);
-            } else if ((sbbs[i].byteAt(0) == hashChar) ||
-                       (sbbs[i].startsWith(dpdpa))) {
-                // this is a template or a part of a template
-                //sbb.append(sbbs[i]);
-            } else {
-                // this is a text fragment, generate gettext quotation
-                final int ws = sbbs[i].whitespaceStart(true);
-                final int we = sbbs[i].whitespaceEnd(true);
-                result.add(new String(sbbs[i].getBytes(ws, we - ws)));
-            }
-        }
-        return result;
-    }
-    
-    public final static ByteBuffer[] splitQuotations(final ByteBuffer text) {
-        final List<ByteBuffer> l = splitQuotation(text, 0);
-        final ByteBuffer[] sbbs = new ByteBuffer[l.size()];
-        for (int i = 0; i < l.size(); i++) sbbs[i] = l.get(i);
-        return sbbs;
-    }
- 
-    private final static List<ByteBuffer> splitQuotation(ByteBuffer text, int qoff) {
-        final ArrayList<ByteBuffer> l = new ArrayList<ByteBuffer>();
-        if (qoff >= meta_quotation.length) {
-            if (text.length() > 0) l.add(text);
-            return l;
-        }
-        int p = -1, q;
-        final byte[] left = (byte[]) ((Object[]) meta_quotation[qoff])[0];
-        final byte[] right = (byte[]) ((Object[]) meta_quotation[qoff])[1];
-        qoff++;
-        while ((text.length() > 0) && ((p = text.indexOf(left)) >= 0)) {
-            q = text.indexOf(right, p + 1);
-            if (q >= 0) {
-                // found a pattern
-                l.addAll(splitQuotation(new ByteBuffer(text.getBytes(0, p)), qoff));
-                l.add(new ByteBuffer(text.getBytes(p, q + right.length - p)));
-                text = new ByteBuffer(text.getBytes(q + right.length));
-            } else {
-                // found only pattern start, no closing parantesis (a syntax error that is silently accepted here)
-                l.addAll(splitQuotation(new ByteBuffer(text.getBytes(0, p)), qoff));
-                l.addAll(splitQuotation(new ByteBuffer(text.getBytes(p)), qoff));
-                text.clear();
-            }
-        }
-
-        // find double-points
-        while ((text.length() > 0) && ((p = text.indexOf(dpdpa)) >= 0)) {
-            l.addAll(splitQuotation(new ByteBuffer(text.getBytes(0, p)), qoff));
-            l.add(new ByteBuffer(dpdpa));
-            l.addAll(splitQuotation(new ByteBuffer(text.getBytes(p + 2)), qoff));
-            text.clear();
-        }
-
-        // add remaining
-        if (text.length() > 0) l.addAll(splitQuotation(text, qoff));
-        return l;
-    }
-    */
+    public final static byte[] ul = "_".getBytes();
     
     /**
      * transfer until a specified pattern is found; everything but the pattern is transfered so far
@@ -515,10 +440,8 @@ public final class TemplateEngine {
     }
 
     private final static byte[] newPrefix(final byte[] oldPrefix, final byte[] key) {
-        final ByteBuffer newPrefix = new ByteBuffer();
-        newPrefix.append(oldPrefix)
-        .append(key)
-        .append("_".getBytes());
+        final ByteBuffer newPrefix = new ByteBuffer(oldPrefix.length + key.length + 1);
+        newPrefix.append(oldPrefix).append(key).append(ul);
         byte[] result = newPrefix.getBytes();
         try {
             newPrefix.close();
@@ -529,12 +452,8 @@ public final class TemplateEngine {
     }
 
     private final static byte[] newPrefix(final byte[] oldPrefix, final byte[] multi_key, final int i) {
-        final ByteBuffer newPrefix = new ByteBuffer();
-        newPrefix.append(oldPrefix)
-        .append(multi_key)
-        .append("_".getBytes())
-        .append(Integer.toString(i).getBytes())
-        .append("_".getBytes());
+        final ByteBuffer newPrefix = new ByteBuffer(oldPrefix.length + multi_key.length + 8);
+        newPrefix.append(oldPrefix).append(multi_key).append(ul).append(Integer.toString(i).getBytes()).append(ul);
         try {
             newPrefix.close();
         } catch (IOException e) {
@@ -544,7 +463,7 @@ public final class TemplateEngine {
     }
 
     private final static String getPatternKey(final byte[] prefix, final byte[] key) {
-        final ByteBuffer patternKey = new ByteBuffer();
+        final ByteBuffer patternKey = new ByteBuffer(prefix.length + key.length);
         patternKey.append(prefix).append(key);
         try {
             return new String(patternKey.getBytes(),"UTF-8");
@@ -560,9 +479,8 @@ public final class TemplateEngine {
     }
     
     private final static byte[] appendBytes(final byte[] b1, final byte[] b2, final byte[] b3, final byte[] b4) {
-        final ByteBuffer byteArray = new ByteBuffer();
-        byteArray.append(b1)
-                 .append(b2);
+        final ByteBuffer byteArray = new ByteBuffer(b1.length + b2.length + (b3 == null ? 0 : b3.length) + (b4 == null ? 0 : b4.length));
+        byteArray.append(b1).append(b2);
         if (b3 != null) byteArray.append(b3);
         if (b4 != null) byteArray.append(b4);
         final byte[] result = byteArray.getBytes();
