@@ -29,7 +29,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -171,16 +170,16 @@ public class RequestHeader extends HeaderFramework {
         }
         
         // replacing spaces in the url string correctly
-        args = P_20.matcher(args).replaceAll(Matcher.quoteReplacement("%20"));
+        args = P_20.matcher(args).replaceAll("%20");
         // replace unwise characters (see RFC 2396, 2.4.3), which may not be escaped
-        args = P_7B.matcher(args).replaceAll(Matcher.quoteReplacement("%7B"));
-        args = P_7D.matcher(args).replaceAll(Matcher.quoteReplacement("%7D"));
-        args = P_7C.matcher(args).replaceAll(Matcher.quoteReplacement("%7C"));
-        args = P_5C.matcher(args).replaceAll(Matcher.quoteReplacement("%5C"));
-        args = P_5E.matcher(args).replaceAll(Matcher.quoteReplacement("%5E"));
-        args = P_5B.matcher(args).replaceAll(Matcher.quoteReplacement("%5B"));
-        args = P_5D.matcher(args).replaceAll(Matcher.quoteReplacement("%5D"));
-        args = P_60.matcher(args).replaceAll(Matcher.quoteReplacement("%60"));
+        args = P_7B.matcher(args).replaceAll("%7B");
+        args = P_7D.matcher(args).replaceAll("%7D");
+        args = P_7C.matcher(args).replaceAll("%7C");
+        args = P_5C.matcher(args).replaceAll("%5C");
+        args = P_5E.matcher(args).replaceAll("%5E");
+        args = P_5B.matcher(args).replaceAll("%5B");
+        args = P_5D.matcher(args).replaceAll("%5D");
+        args = P_60.matcher(args).replaceAll("%60");
         
         // properties of the query are stored with the prefix "&"
         // additionally, the values URL and ARGC are computed
