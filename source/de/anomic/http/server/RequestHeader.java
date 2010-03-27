@@ -29,6 +29,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.util.DateFormatter;
@@ -62,6 +64,16 @@ public class RequestHeader extends HeaderFramework {
     
     private static final long serialVersionUID = 0L;
 
+    private static final Pattern P_20 = Pattern.compile(" ", Pattern.LITERAL);
+    private static final Pattern P_7B = Pattern.compile("{", Pattern.LITERAL);
+    private static final Pattern P_7D = Pattern.compile("}", Pattern.LITERAL);
+    private static final Pattern P_7C = Pattern.compile("|", Pattern.LITERAL);
+    private static final Pattern P_5C = Pattern.compile("\\", Pattern.LITERAL);
+    private static final Pattern P_5E = Pattern.compile("^", Pattern.LITERAL);
+    private static final Pattern P_5B = Pattern.compile("[", Pattern.LITERAL);
+    private static final Pattern P_5D = Pattern.compile("]", Pattern.LITERAL);
+    private static final Pattern P_60 = Pattern.compile("`", Pattern.LITERAL);
+    
     public RequestHeader() {
         super();
     }
@@ -159,11 +171,16 @@ public class RequestHeader extends HeaderFramework {
         }
         
         // replacing spaces in the url string correctly
-        args = args.replace(" ","%20");
+        args = P_20.matcher(args).replaceAll(Matcher.quoteReplacement("%20"));
         // replace unwise characters (see RFC 2396, 2.4.3), which may not be escaped
-        args = args.replace("{", "%7B").replace("}", "%7D").replace("|", "%7C").replace("\\", "%5C")
-                .replace("^", "%5E").replace("[", "%5B").replace("]", "%5D").replace("`", "%60");
-        
+        args = P_7B.matcher(args).replaceAll(Matcher.quoteReplacement("%7B"));
+        args = P_7D.matcher(args).replaceAll(Matcher.quoteReplacement("%7D"));
+        args = P_7C.matcher(args).replaceAll(Matcher.quoteReplacement("%7C"));
+        args = P_5C.matcher(args).replaceAll(Matcher.quoteReplacement("%5C"));
+        args = P_5E.matcher(args).replaceAll(Matcher.quoteReplacement("%5E"));
+        args = P_5B.matcher(args).replaceAll(Matcher.quoteReplacement("%5B"));
+        args = P_5D.matcher(args).replaceAll(Matcher.quoteReplacement("%5D"));
+        args = P_60.matcher(args).replaceAll(Matcher.quoteReplacement("%60"));
         
         // properties of the query are stored with the prefix "&"
         // additionally, the values URL and ARGC are computed
