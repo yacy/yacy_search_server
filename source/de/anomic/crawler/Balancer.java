@@ -250,7 +250,7 @@ public class Balancer {
             // add to index
             final int s = urlFileIndex.size();
 	        urlFileIndex.put(entry.toRow());
-	        assert s < urlFileIndex.size() : "hash = " + hash;
+	        assert s < urlFileIndex.size() : "hash = " + hash + ", s = " + s + ", size = " + urlFileIndex.size();
 	        assert urlFileIndex.has(hash.getBytes()) : "hash = " + hash;
 	        
 	        // add the hash to a queue
