@@ -10,23 +10,33 @@
       <script type="text/javascript">
         <!--
         var ro;
-        function online() {
+
+        function pingPeer() {
             ro = createRequestObject();
             var url = "yacy/hello.html" + '?' + Math.random();
             ro.open("Get",url,true);
             ro.onreadystatechange = callback;
             ro.send(null);
+            document.getElementById("status").innerHTML = 'Checking peer status...';
         }
 
         function callback() {
             if (ro.readyState == 4) {
                 if(ro.status == 200) {
+                    document.getElementById("status").innerHTML = 'Peer is online again, forwarding to status page...';
                     window.location.replace('Status.html');
+                } else {
+                    isDown = true;
+                    document.getElementById("status").innerHTML = 'Peer is not online yet, will check again in a few seconds...';
                 }
-            } else {
-                setTimeout('online()', 10000);
             }
         }
+
+        function setPingInterval() {
+            window.setInterval('pingPeer()', 5000);
+            pingPeer();
+        }
+        
         //-->
       </script>
 
@@ -50,12 +60,14 @@
       Application will terminate after working off all scheduled tasks.<br />
       Then YaCy will restart.<br />
       If you can't reach YaCy's interface after 5 minutes restart failed.
-      <script type="text/javascript">setTimeout('online()', 60000);</script>
+      <script type="text/javascript">window.setTimeout('setPingInterval()', 60000);</script>
+      <div id="status"></div>
 ::
       <h2>Just a moment, please!</h2>
       <b>Installing release #[release]#</b><br />
-      <p>YaCy will be restarted after installation</p>
-      <script type="text/javascript">setTimeout('online()', 60000);</script>
+      YaCy will be restarted after installation.
+      <script type="text/javascript">window.setTimeout('setPingInterval()', 60000);</script>
+      <div id="status"></div>
       #(/info)#
     </p>
   </body>
