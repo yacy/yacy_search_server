@@ -2366,6 +2366,9 @@ A possible reason is that you are behind a firewall, NAT or Router.==Ein möglic
 But you can <a href="index.html">search the internet</a> using the other peers'==Trotzdem können Sie <a href="index.html">das Internet durchsuchen</a>, indem Sie den globalen Index
 global index on your own search page.==der anderen Peers von Ihrer Suchseite aus benutzen.
 "bad"=="schlecht"
+"idea"="idee"
+"good"="gut"
+"Follow YaCy on Twitter"=="Folge YaCy auf Twitter"
 We encourage you to open your firewall for the port you configured \(usually: 8080\),==Wir möchten Sie ermutigen den Port, den Sie für YaCy eingestellt haben (Vorgabe: 8080) in Ihrer Firewall zu öffnen,
 or to set up a 'virtual server' in your router settings \(often called DMZ\).==oder einen "virtuellen Server" in Ihrem Router aufzusetzten (oft auch DMZ genannt).
 Please be fair, contribute your own index to the global index.==Bitte seien Sie fair und tragen Sie Ihren Teil zum globalen Index bei!
@@ -2517,6 +2520,15 @@ to a scheduler for a periodic execution.==einem Scheduler für periodische Ausf�
 #>URL<==>URL<
 #-----------------------------
 
+#File: Table_RobotsTxt_p.html
+#---------------------------
+Table Viewer==Tabellenanzeige
+The information that is presented on this page can also be retrieved as XML==Die Informationen auf dieser Seite können auch im XML Format abgerufen werden
+Click the API icon to see the XML.==Klicken Sie auf das API Symbol, um das XML anzeigen zu lassen.
+To see a list of all APIs, please visit the <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API wiki page</a>.==Um eine Liste aller APIs zu sehen, besuchen Sie die <a href="http://www.yacy-websuche.de/wiki/index.php/Dev:API">API Seite im Wiki</a>.
+>robots.txt table<==>robots.txt Tabelle<
+#-----------------------------
+
 ### This Tables section is removed in current SVN Versions
 #File: Tables_p.html
 #---------------------------
@@ -2524,6 +2536,10 @@ Table Administration==Administration der Datenbank Tabellen
 Table Selection==Tabellenauswahl
 Select Table:==Auswahl Tabelle:
 "Show Table"=="Zeige Tabelle"
+show max.==Zeige max.
+>all<==>alle<
+entries,==Einträge,
+search rows for==filtere Zeilen nach
 Table Editor: showing table==Tabellen Editor: zeige Tabelle
 #PK==Primärschlüssel
 "Edit Selected Row"=="Bearbeite ausgwählte Zeile"
@@ -2858,6 +2874,33 @@ Pictures==Bilder
 >Topic Navigator==>Themen Navigator
 #-----------------------------
 
+### Subdirectory api ###
+#File: api/table_p.html
+#---------------------------
+Table Viewer==Tabellen Betrachter
+#>PK<==>Primärschlüssel<
+"Edit Table"=="Tabelle bearbeiten"
+#-----------------------------
+
+#File: api/yacydoc.html
+#---------------------------
+>Author<==>Autor<
+>Description<==>Beschreibung<
+>Subject<==>Betreff<
+#>Publisher<==>Veröffentlicher<
+#>Contributor<==>Beiträger<
+>Date<==>Datum<
+>Type<==>Typ<
+>Identifier<==>Identifizierer<
+>Language<==>Sprache<
+>Load Date<==>Lade Datum<
+>Referrer Identifier<==>Referrer Identifizierer<
+#>Referrer URL<==>Referrer URL<
+>Document size<==>Dokument Größe<
+>Number of Words<==>Anzahl der Wörter<
+#-----------------------------
+
+### Subdirectory env/templates ###
 #File: env/templates/header.template
 #---------------------------
 YaCy - Distributed Search Engine==YaCy - Verteilte Suchmaschine
@@ -2986,6 +3029,7 @@ Local<==Lokal<
 #Remote==Remote
 Crawler Steering==Crawl Steuerung
 Crawl Profile Editor==Crawl Profil Editor
+#robots.txt Monitor==robots.txt Monitor
 #-----------------------------
 
 #File: env/templates/submenuCustomization.template
