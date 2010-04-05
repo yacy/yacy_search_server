@@ -1,4 +1,4 @@
-function status() {
+function statuscheck() {
 	if(load_status < 4) {
 		return;
 	} else {
@@ -72,7 +72,7 @@ $(document).ready(function() {
 	}
 
 	load_status = 0;
-	loading = window.setInterval("status()", 200);    
+	loading = window.setInterval("statuscheck()", 200);    
     if(yconf.load_js) {
 		var script1 = yconf.url + '/yacy/ui/js/jquery.query.js';
 		var script2 = yconf.url + '/yacy/ui/js/jquery.form.js';
