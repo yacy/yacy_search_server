@@ -28,12 +28,11 @@
 
 package de.anomic.crawler;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -53,7 +52,7 @@ public class RobotsEntry {
     
     // this is a simple record structure that holds all properties of a single crawl start
     private Map<String, byte[]> mem;
-    private LinkedList<String> allowPathList, denyPathList;
+    private List<String> allowPathList, denyPathList;
     String hostName;
     
     public RobotsEntry(final String hostName, final Map<String, byte[]> mem) {
@@ -88,8 +87,8 @@ public class RobotsEntry {
     
     public RobotsEntry(
             final DigestURI theURL, 
-            final ArrayList<String> allowPathList, 
-            final ArrayList<String> disallowPathList, 
+            final List<String> allowPathList, 
+            final List<String> disallowPathList, 
             final Date loadedDate,
             final Date modDate,
             final String eTag,
@@ -114,8 +113,8 @@ public class RobotsEntry {
             this.allowPathList.addAll(allowPathList);
             
             final StringBuilder pathListStr = new StringBuilder(allowPathList.size() * 30);
-            for (int i=0; i<allowPathList.size();i++) {
-                pathListStr.append(allowPathList.get(i))
+            for (String element : allowPathList) {
+                pathListStr.append(element)
                            .append(ROBOTS_DB_PATH_SEPARATOR);
             }
             this.mem.put(ALLOW_PATH_LIST, pathListStr.substring(0,pathListStr.length()-1).getBytes());
@@ -125,8 +124,8 @@ public class RobotsEntry {
             this.denyPathList.addAll(disallowPathList);
             
             final StringBuilder pathListStr = new StringBuilder(disallowPathList.size() * 30);
-            for (int i=0; i<disallowPathList.size();i++) {
-                pathListStr.append(disallowPathList.get(i))
+            for (String element : disallowPathList) {
+                pathListStr.append(element)
                            .append(ROBOTS_DB_PATH_SEPARATOR);
             }
             this.mem.put(DISALLOW_PATH_LIST,pathListStr.substring(0, pathListStr.length()-1).getBytes());
@@ -138,6 +137,7 @@ public class RobotsEntry {
         return this.mem;
     }
     
+    @Override
     public String toString() {
         final StringBuilder str = new StringBuilder(6000);
         str.append((this.hostName == null) ? "null" : this.hostName).append(": ");
@@ -198,12 +198,10 @@ public class RobotsEntry {
         // escaping all occurences of ; because this char is used as special char in the Robots DB
         else  path = path.replaceAll(ROBOTS_DB_PATH_SEPARATOR,"%3B");
         
-        final Iterator<String> pathIter = this.denyPathList.iterator();
-        while (pathIter.hasNext()) {
-            final String nextPath = pathIter.next();
+        for (String element : this.denyPathList) {
                 
             // disallow rule
-            if (path.startsWith(nextPath)) {
+            if (path.startsWith(element)) {
                 return true;
             }
         }

@@ -85,6 +85,7 @@ public class CrawlProfile {
         this.profileTable = null;
     }
     
+    @Override
     public void finalize() {
         this.close();
     }
@@ -319,6 +320,7 @@ public class CrawlProfile {
             doms = new ConcurrentHashMap<String, DomProfile>();
         }
         
+        @Override
         public String toString() {
             final StringBuilder str = new StringBuilder();
             

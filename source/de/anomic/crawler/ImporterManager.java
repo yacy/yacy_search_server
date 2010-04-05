@@ -30,7 +30,7 @@ public class ImporterManager {
         final Thread[] importThreads = new Thread[this.runningJobs.activeCount()*2];
         final int activeCount = this.runningJobs.enumerate(importThreads);
         final Importer[] importers = new Importer[activeCount];
-        for (int i=0; i<activeCount; i++) {
+        for (int i = 0; i < activeCount; i++) {
             importers[i] = (Importer) importThreads[i];
         }
         return importers;
@@ -43,10 +43,9 @@ public class ImporterManager {
     public Importer getImporterByID(final int jobID) {
 
         final Thread[] importThreads = new Thread[this.runningJobs.activeCount()*2];
-        final int activeCount = this.runningJobs.enumerate(importThreads);
-        
-        for (int i=0; i < activeCount; i++) {
-            final Importer currThread = (Importer) importThreads[i];
+
+        for(final Thread importThread : importThreads) {
+            final Importer currThread = (Importer) importThread;
             if (currThread.getJobID() == jobID) {
                 return currThread;
             }                    
@@ -73,8 +72,7 @@ public class ImporterManager {
         try {
             // trying to gracefull stop all still running sessions ...
             log.logInfo("Signaling shutdown to " + threadCount + " remaining dbImporter threads ...");
-            for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                final Thread currentThread = threadList[currentThreadIdx];
+            for (final Thread currentThread : threadList)  {
                 if (currentThread.isAlive()) {
                     ((Importer)currentThread).stopIt();
                 }
@@ -89,10 +87,10 @@ public class ImporterManager {
             
             // we need to use a timeout here because of missing interruptable session threads ...
             if (log.isFine()) log.logFine("Waiting for " + runningJobs.activeCount() + " remaining dbImporter threads to finish shutdown ...");
-            for ( int currentThreadIdx = 0; currentThreadIdx < threadCount; currentThreadIdx++ )  {
-                final Thread currentThread = threadList[currentThreadIdx];
+            int currentThreadIdx = 0;
+            for (final Thread currentThread : threadList)  {
                 if (currentThread.isAlive()) {
-                    if (log.isFine()) log.logFine("Waiting for dbImporter thread '" + currentThread.getName() + "' [" + currentThreadIdx + "] to finish shutdown.");
+                    if (log.isFine()) log.logFine("Waiting for dbImporter thread '" + currentThread.getName() + "' [" + currentThreadIdx++ + "] to finish shutdown.");
                     try { currentThread.join(500); } catch (final InterruptedException ex) {}
                 }
             }
