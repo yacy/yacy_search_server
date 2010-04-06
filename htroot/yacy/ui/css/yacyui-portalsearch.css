@@ -11,7 +11,7 @@
 	background-repeat: no-repeat;
 	background-position: 2px 1px;
 	padding-left: 20px;
-	border-width: small;
+	border-width: thin;
 	border-color: #239AFF;
 	border-style: solid;
 	-moz-border-radius: 5px; 
@@ -90,7 +90,7 @@
 ul.nav {
 	inherit: none;
 	padding-left: 0px;
-	margin-botton: 0px;
+	margin-bottom: 0px;
 	margin-top: 5px;
 	margin-left: -5px;
 }
