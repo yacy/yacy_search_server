@@ -64,7 +64,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
 
     // the class object
     protected ObjectIndex urlIndex;
-    protected final ConcurrentLinkedQueue<String> stack;
+    protected final ConcurrentLinkedQueue<byte[]> stack;
     
     public ZURL(
     		final File cachePath,
@@ -90,13 +90,13 @@ public class ZURL implements Iterable<ZURL.Entry> {
             }
         }
         //urlIndex = new kelondroFlexTable(cachePath, tablename, -1, rowdef, 0, true);
-        this.stack = new ConcurrentLinkedQueue<String>();
+        this.stack = new ConcurrentLinkedQueue<byte[]>();
     }
     
     public ZURL() {
         // creates a new ZUR in RAM
         this.urlIndex = new RowSet(rowdef);
-        this.stack = new ConcurrentLinkedQueue<String>();
+        this.stack = new ConcurrentLinkedQueue<byte[]>();
     }
     
     public void clear() throws IOException {
@@ -122,7 +122,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
     
     public void push(
             final Request bentry,
-            final String executor,
+            final byte[] executor,
             final Date workdate,
             final int workcount,
             String anycause) {
@@ -131,7 +131,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         if (anycause == null) anycause = "unknown";
         Entry entry = new Entry(bentry, executor, workdate, workcount, anycause);
         put(entry);
-        stack.add(entry.hash());
+        stack.add(entry.hashb());
         while (stack.size() > maxStackSize) stack.poll();
     }
     
@@ -149,7 +149,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
     }
     
     private class EntryIterator implements Iterator<ZURL.Entry> {
-        private final Iterator<String> hi;
+        private final Iterator<byte[]> hi;
         public EntryIterator() {
             this.hi = stack.iterator();
         }
@@ -167,11 +167,11 @@ public class ZURL implements Iterable<ZURL.Entry> {
         
     }
    
-    public ZURL.Entry get(final String urlhash) {
+    public ZURL.Entry get(final byte[] urlhash) {
         try {
             if (urlIndex == null) return null;
             //System.out.println("*** DEBUG ZURL " + this.urlIndex.filename() + " get " + urlhash);
-            final Row.Entry entry = urlIndex.get(urlhash.getBytes());
+            final Row.Entry entry = urlIndex.get(urlhash);
             if (entry == null) return null;
             return new Entry(entry);
         } catch (final IOException e) {
@@ -189,8 +189,8 @@ public class ZURL implements Iterable<ZURL.Entry> {
         if (entry.stored) return;
         if (entry.bentry == null) return;
         final Row.Entry newrow = rowdef.newEntry();
-        newrow.setCol(0, entry.bentry.url().hash().getBytes());
-        newrow.setCol(1, entry.executor.getBytes());
+        newrow.setCol(0, entry.bentry.url().hash());
+        newrow.setCol(1, entry.executor);
         newrow.setCol(2, entry.workdate.getTime());
         newrow.setCol(3, entry.workcount);
         newrow.setCol(4, entry.anycause.getBytes());
@@ -203,8 +203,8 @@ public class ZURL implements Iterable<ZURL.Entry> {
         }
     }
     
-    public boolean exists(final String urlHash) {
-        return urlIndex.has(urlHash.getBytes());
+    public boolean exists(final byte[] urlHash) {
+        return urlIndex.has(urlHash);
     }
     
     public void clearStack() {
@@ -218,7 +218,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
     public class Entry {
 
         Request bentry;    // the balancer entry
-        private final String   executor;  // the crawling executor
+        private final byte[]   executor;  // the crawling executor
         private final Date     workdate;  // the time when the url was last time tried to load
         private final int      workcount; // number of tryings
         private final String   anycause;  // string describing reason for load fail
@@ -226,7 +226,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
 
         protected Entry(
                 final Request bentry,
-                final String executor,
+                final byte[] executor,
                 final Date workdate,
                 final int workcount,
                 final String anycause) {
@@ -243,12 +243,12 @@ public class ZURL implements Iterable<ZURL.Entry> {
 
         protected Entry(final Row.Entry entry) throws IOException {
             assert (entry != null);
-            this.executor = entry.getColString(1, "UTF-8");
+            this.executor = entry.getColBytes(1, true);
             this.workdate = new Date(entry.getColLong(2));
             this.workcount = (int) entry.getColLong(3);
             this.anycause = entry.getColString(4, "UTF-8");
-            this.bentry = new Request(Request.rowdef.newEntry(entry.getColBytes(5)));
-            assert ((new String(entry.getColBytes(0))).equals(bentry.url().hash()));
+            this.bentry = new Request(Request.rowdef.newEntry(entry.getColBytes(5, false)));
+            assert (Base64Order.enhancedCoder.equal(entry.getColBytes(0, false), bentry.url().hash()));
             this.stored = true;
             return;
         }
@@ -257,11 +257,11 @@ public class ZURL implements Iterable<ZURL.Entry> {
             return this.bentry.url();
         }
         
-        public String initiator() {
+        public byte[] initiator() {
             return this.bentry.initiator();
         }
         
-        public String hash() {
+        public byte[] hashb() {
             // return a url-hash, based on the md5 algorithm
             // the result is a String of 12 bytes within a 72-bit space
             // (each byte has an 6-bit range)
@@ -273,7 +273,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             return workdate;
         }
         
-        public String executor() {
+        public byte[] executor() {
             // return the creator's hash
             return executor;
         }

@@ -40,6 +40,7 @@ import net.yacy.document.content.RSSMessage;
 import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.WorkflowJob;
@@ -135,7 +136,7 @@ public class CrawlQueues {
      * @param hash
      * @return if the hash exists, the name of the database is returned, otherwise null is returned
      */
-    public String urlExists(final String hash) {
+    public String urlExists(final byte[] hash) {
         if (delegatedURL.exists(hash)) return "delegated";
         if (errorURL.exists(hash)) return "errors";
         /*
@@ -153,15 +154,15 @@ public class CrawlQueues {
         errorURL.remove(hash);
     }
     
-    public DigestURI getURL(final String urlhash) {
+    public DigestURI getURL(final byte[] urlhash) {
         assert urlhash != null;
-        if (urlhash == null || urlhash.length() == 0) return null;
+        if (urlhash == null || urlhash.length == 0) return null;
         ZURL.Entry ee = delegatedURL.get(urlhash);
         if (ee != null) return ee.url();
         ee = errorURL.get(urlhash);
         if (ee != null) return ee.url();
         for (final crawlWorker w: workers.values()) {
-            if (w.request.url().hash().equals(urlhash)) return w.request.url();
+            if (Base64Order.enhancedCoder.equal(w.request.url().hash(), urlhash)) return w.request.url();
         }
         final Request ne = noticeURL.get(urlhash);
         if (ne != null) return ne.url();
@@ -260,7 +261,7 @@ public class CrawlQueues {
 
                 if (this.log.isFine())
                     log.logFine(stats + ": URL=" + urlEntry.url()
-                            + ", initiator=" + urlEntry.initiator()
+                            + ", initiator=" + new String(urlEntry.initiator())
                             + ", crawlOrder=" + ((profile.remoteIndexing()) ? "true" : "false")
                             + ", depth=" + urlEntry.depth()
                             + ", crawlDepth=" + profile.depth()
@@ -440,7 +441,7 @@ public class CrawlQueues {
                 // stack url
                 if (sb.getLog().isFinest()) sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
                 sb.crawlStacker.enqueueEntry(new Request(
-                        hash,
+                        hash.getBytes(),
                         url,
                         (referrer == null) ? null : referrer.hash(),
                         item.getDescription(),
@@ -544,7 +545,7 @@ public class CrawlQueues {
                     if (log.isFine()) log.logFine("Crawling of URL '" + request.url().toString() + "' disallowed by robots.txt.");
                     errorURL.push(
                             this.request,
-                            sb.peers.mySeed().hash,
+                            sb.peers.mySeed().hash.getBytes(),
                             new Date(),
                             1,
                             "denied by robots.txt");
@@ -578,7 +579,7 @@ public class CrawlQueues {
                     if (result != null) {
                         errorURL.push(
                                 this.request,
-                                sb.peers.mySeed().hash,
+                                sb.peers.mySeed().hash.getBytes(),
                                 new Date(),
                                 1,
                                 "cannot load: " + result);
@@ -590,7 +591,7 @@ public class CrawlQueues {
             } catch (final Exception e) {
                 errorURL.push(
                         this.request,
-                        sb.peers.mySeed().hash,
+                        sb.peers.mySeed().hash.getBytes(),
                         new Date(),
                         1,
                         e.getMessage() + " - in worker");

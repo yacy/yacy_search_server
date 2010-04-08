@@ -74,21 +74,21 @@ public class yacydoc {
 
         if (urlstring.length() > 0 && urlhash.length() == 0) {
             try {
-                urlhash = (new DigestURI(urlstring, null)).hash();
+                urlhash = new String((new DigestURI(urlstring, null)).hash());
             } catch (MalformedURLException e) {
                 Log.logException(e);
             }
         }
         if (urlhash == null || urlhash.length() == 0) return prop;
         
-        final URIMetadataRow entry = segment.urlMetadata().load(urlhash, null, 0);
+        final URIMetadataRow entry = segment.urlMetadata().load(urlhash.getBytes(), null, 0);
         if (entry == null) return prop;
 
         final URIMetadataRow.Components metadata = entry.metadata();
         if (metadata.url() == null) {
             return prop;
         }
-        final URIMetadataRow le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != Word.commonHashLength)) ? null : segment.urlMetadata().load(entry.referrerHash(), null, 0);
+        final URIMetadataRow le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash(), null, 0);
         
         prop.putXML("dc_title", metadata.dc_title());
         prop.putXML("dc_creator", metadata.dc_creator());

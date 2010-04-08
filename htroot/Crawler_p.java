@@ -228,7 +228,7 @@ public class Crawler_p {
                             // stack request
                             // first delete old entry, if exists
                             final DigestURI url = new DigestURI(crawlingStart, null);
-                            final byte[] urlhash = url.hash().getBytes();
+                            final byte[] urlhash = url.hash();
                             indexSegment.urlMetadata().remove(urlhash);
                             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                             sb.crawlQueues.errorURL.remove(urlhash);
@@ -246,7 +246,7 @@ public class Crawler_p {
                                     indexText, indexMedia,
                                     storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw, cachePolicy);
                             final String reasonString = sb.crawlStacker.stackCrawl(new Request(
-                                    sb.peers.mySeed().hash,
+                                    sb.peers.mySeed().hash.getBytes(),
                                     url,
                                     null,
                                     "CRAWLING-ROOT",
@@ -300,9 +300,9 @@ public class Crawler_p {
                                 
                                 sb.crawlQueues.errorURL.push(
                                         new Request(
-                                                sb.peers.mySeed().hash, 
+                                                sb.peers.mySeed().hash.getBytes(), 
                                                 crawlingStartURL, 
-                                                "", 
+                                                null, 
                                                 "", 
                                                 new Date(),
                                                 null,
@@ -310,7 +310,7 @@ public class Crawler_p {
                                                 0, 
                                                 0, 
                                                 0),
-                                        sb.peers.mySeed().hash,
+                                        sb.peers.mySeed().hash.getBytes(),
                                         new Date(),
                                         1,
                                         reasonString);
@@ -383,9 +383,9 @@ public class Crawler_p {
                                     
                                     // enqueuing the url for crawling
                                     sb.crawlStacker.enqueueEntry(new Request(
-                                            sb.peers.mySeed().hash, 
+                                            sb.peers.mySeed().hash.getBytes(), 
                                             nexturl, 
-                                            "", 
+                                            null, 
                                             e.getValue(), 
                                             new Date(),
                                             null,

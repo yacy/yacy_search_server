@@ -30,7 +30,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 
+import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 
 import de.anomic.crawler.retrieval.Request;
 
@@ -166,7 +169,7 @@ public class NoticedURL {
         }
     }
 
-    public Request get(final String urlhash) {
+    public Request get(final byte[] urlhash) {
         Request entry = null;
         try {if ((entry = coreStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
         try {if ((entry = limitStack.get(urlhash)) != null) return entry;} catch (final IOException e) {}
@@ -181,15 +184,21 @@ public class NoticedURL {
      * @return true, if the entry was removed; false if not
      */
     public boolean removeByURLHash(final byte[] urlhashBytes) {
-        final HashSet<String> urlHashes = new HashSet<String>();
-        urlHashes.add(new String(urlhashBytes));
-        try {return coreStack.remove(urlHashes) > 0;} catch (final IOException e) {}
-        try {return limitStack.remove(urlHashes) > 0;} catch (final IOException e) {}
-        try {return remoteStack.remove(urlHashes) > 0;} catch (final IOException e) {}
-        return false;
+        try {
+            HandleSet urlHashes = Base64Order.enhancedCoder.getHandleSet(12, 1);
+            urlHashes.put(urlhashBytes);
+            try {return coreStack.remove(urlHashes) > 0;} catch (final IOException e) {}
+            try {return limitStack.remove(urlHashes) > 0;} catch (final IOException e) {}
+            try {return remoteStack.remove(urlHashes) > 0;} catch (final IOException e) {}
+            return false;
+        } catch (RowSpaceExceededException e) {
+            return false;
+        } catch (IOException e) {
+            return false;
+        }
     }
     
-    public int removeByProfileHandle(final String handle, final long timeout) {
+    public int removeByProfileHandle(final String handle, final long timeout) throws RowSpaceExceededException {
         int removed = 0;
         try {removed += coreStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}
         try {removed += limitStack.removeAllByProfileHandle(handle, timeout);} catch (final IOException e) {}

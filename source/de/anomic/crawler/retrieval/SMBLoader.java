@@ -78,7 +78,7 @@ public class SMBLoader {
             if (l == null) {
                 // this can only happen if there is no connection or the directory does not exist
                 log.logInfo("directory listing not available. URL = " + request.url().toString());
-                sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash, new Date(), 1, "directory listing not available. URL = " + request.url().toString());
+                sb.crawlQueues.errorURL.push(request, this.sb.peers.mySeed().hash.getBytes(), new Date(), 1, "directory listing not available. URL = " + request.url().toString());
                 throw new IOException("directory listing not available. URL = " + request.url().toString());
             }
             for (String s: l) list.add(u + s);

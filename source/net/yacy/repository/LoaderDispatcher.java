@@ -145,9 +145,9 @@ public final class LoaderDispatcher {
             final boolean global
                     ) {
         return new Request(
-                    sb.peers.mySeed().hash, 
+                    sb.peers.mySeed().hash.getBytes(), 
                     url, 
-                    "", 
+                    null, 
                     "", 
                     new Date(),
                     new Date(),

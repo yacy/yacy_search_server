@@ -304,13 +304,13 @@ public class Surftips {
             // add/subtract votes and write record
             if (entry != null) {
                 try {
-                    urlhash = (new DigestURI(url, null)).hash();
+                    urlhash = new String((new DigestURI(url, null)).hash());
                 } catch (final MalformedURLException e) {
                     urlhash = null;
                 }
                 if (urlhash == null)
                     try {
-                        urlhash = (new DigestURI("http://"+url, null)).hash();
+                        urlhash = new String((new DigestURI("http://"+url, null)).hash());
                     } catch (final MalformedURLException e) {
                         urlhash = null;
                     }

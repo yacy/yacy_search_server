@@ -85,20 +85,20 @@ public class RequestHeader extends HeaderFramework {
         super(reverseMappingCache, othermap);
     }
     
-    public String referer() {
-        return get(REFERER, "");
+    public DigestURI referer() {
+        String referer = get(REFERER, null);
+        if (referer == null) return null;
+        try {
+            return new DigestURI(referer, null);
+        } catch (MalformedURLException e) {
+            return null;
+        }
     }
     
     public String refererHost() {
-        final String referer = referer();
-        if (referer.length() == 0) return referer;
-        DigestURI url;
-        try {
-            url = new DigestURI(referer, null);
-            return url.getHost();
-        } catch (MalformedURLException e1) {
-            return referer;
-        }
+        final DigestURI url = referer();
+        if (url == null) return null;
+        return url.getHost();
     }
     
     public Date ifModifiedSince() {

@@ -137,7 +137,7 @@ public class QuickCrawlLink_p {
                 return prop;
             }
                     
-            final byte[] urlhash = crawlingStartURL.hash().getBytes();
+            final byte[] urlhash = crawlingStartURL.hash();
             indexSegment.urlMetadata().remove(urlhash);
             sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
             sb.crawlQueues.errorURL.remove(urlhash);
@@ -176,7 +176,7 @@ public class QuickCrawlLink_p {
             // stack URL
             String reasonString = null;
             reasonString = sb.crawlStacker.stackCrawl(new Request(
-                    sb.peers.mySeed().hash, 
+                    sb.peers.mySeed().hash.getBytes(), 
                     crawlingStartURL,
                     null, 
                     (title==null)?"CRAWLING-ROOT":title, 

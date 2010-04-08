@@ -126,7 +126,7 @@ public class Supporter {
                 
                 url = row.getColString(0, null);
                 try {
-                    if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS ,new DigestURI(url, urlhash))) continue;
+                    if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_SURFTIPS, new DigestURI(url, urlhash.getBytes()))) continue;
                 } catch(final MalformedURLException e) {continue;}
                 title = row.getColString(1,"UTF-8");
                 description = row.getColString(2,"UTF-8");
@@ -242,13 +242,13 @@ public class Supporter {
             // add/subtract votes and write record
             if (entry != null) {
                 try {
-                    urlhash = (new DigestURI(url, null)).hash();
+                    urlhash = new String((new DigestURI(url, null)).hash());
                 } catch (final MalformedURLException e) {
                     urlhash = null;
                 }
                 if (urlhash == null)
                     try {
-                        urlhash = (new DigestURI("http://" + url, null)).hash();
+                        urlhash = new String((new DigestURI("http://" + url, null)).hash());
                     } catch (final MalformedURLException e) {
                         urlhash = null;
                     }

@@ -140,7 +140,7 @@ public final class crawlReceipt {
         if (result.equals("fill")) try {
             // put new entry into database
             sb.indexSegments.urlMetadata(Segments.Process.RECEIPTS).store(entry);
-            sb.crawlResults.stack(entry, youare, iam, EventOrigin.REMOTE_RECEIPTS);
+            sb.crawlResults.stack(entry, youare.getBytes(), iam.getBytes(), EventOrigin.REMOTE_RECEIPTS);
             sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work has been done
             if (log.isInfo()) log.logInfo("crawlReceipt: RECEIVED RECEIPT from " + otherPeerName + " for URL " + new String(entry.hash()) + ":" + metadata.url().toNormalform(false, true));
 
@@ -156,7 +156,7 @@ public final class crawlReceipt {
         sb.crawlQueues.delegatedURL.remove(entry.hash()); // the delegated work is transformed into an error case
         sb.crawlQueues.errorURL.push(
                 entry.toBalancerEntry(iam),
-                youare,
+                youare.getBytes(),
                 null,
                 0,
                 result + ":" + reason);

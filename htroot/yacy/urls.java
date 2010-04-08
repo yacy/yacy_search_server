@@ -82,7 +82,7 @@ public class urls {
                 // place url to notice-url db
                 sb.crawlQueues.delegatedURL.push(
                                 entry,
-                                sb.peers.mySeed().hash,
+                                sb.peers.mySeed().hash.getBytes(),
                                 new Date(),
                                 0,
                                 "client=____________");
@@ -112,7 +112,7 @@ public class urls {
         	URIMetadataRow.Components metadata;
             DigestURI referrer;
             for (int i = 0; i < count; i++) {
-                entry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(urlhashes.substring(12 * i, 12 * (i + 1)), null, 0);
+                entry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(urlhashes.substring(12 * i, 12 * (i + 1)).getBytes(), null, 0);
                 if (entry == null) continue;
                 // find referrer, if there is one
                 referrer = sb.getURL(Segments.Process.PUBLIC, entry.referrerHash());

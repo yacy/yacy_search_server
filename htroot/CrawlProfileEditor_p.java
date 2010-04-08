@@ -28,6 +28,7 @@ import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.CrawlProfile;
@@ -91,13 +92,17 @@ public class CrawlProfileEditor_p {
                 // termination of a crawl: shift the crawl from active to passive
                 final CrawlProfile.entry entry = sb.crawler.profilesActiveCrawls.getEntry(handle);
                 if (entry != null) sb.crawler.profilesPassiveCrawls.newEntry(entry.map());
-                sb.crawler.profilesActiveCrawls.removeEntry(handle);
+                sb.crawler.profilesActiveCrawls.removeEntry(handle.getBytes());
                 // delete all entries from the crawl queue that are deleted here
-                sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000);
+                try {
+                    sb.crawlQueues.noticeURL.removeByProfileHandle(handle, 10000);
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                }
             }
             if (post.containsKey("delete")) {
                 // deletion of a terminated crawl profile
-                sb.crawler.profilesPassiveCrawls.removeEntry(handle);
+                sb.crawler.profilesPassiveCrawls.removeEntry(handle.getBytes());
             }
             if (post.containsKey("deleteTerminatedProfiles")) {
                 Iterator<CrawlProfile.entry> profiles = sb.crawler.profilesPassiveCrawls.profiles(false);

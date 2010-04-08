@@ -35,6 +35,7 @@ import java.util.StringTokenizer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.DateFormatter;
@@ -62,8 +63,8 @@ public class SettingsAck_p {
         final Switchboard sb = (Switchboard) env;
         
         // get referer for backlink
-        final String referer = header.referer();
-        prop.put("referer", (referer == null) ? "Settings_p.html" : referer); 
+        final DigestURI referer = header.referer();
+        prop.put("referer", (referer == null) ? "Settings_p.html" : referer.toNormalform(true, true)); 
         //if (post == null) System.out.println("POST: NULL"); else System.out.println("POST: " + post.toString());
         
         if (post == null) {

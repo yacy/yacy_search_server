@@ -205,7 +205,7 @@ public final class RankingProcess extends Thread {
 			    }
 
 			    // check tld domain
-			    if (!DigestURI.matchesAnyDomDomain(iEntry.metadataHash(), this.query.zonecode)) {
+			    if (!DigestURI.matchesAnyDomDomain(iEntry.metadataHash().getBytes(), this.query.zonecode)) {
 			        // filter out all tld that do not match with wanted tld domain
 			        continue;
 			    }
@@ -383,7 +383,7 @@ public final class RankingProcess extends Thread {
             	continue;
             }
             urlhash = obrwi.element.metadataHash();
-            final URIMetadataRow page = this.query.getSegment().urlMetadata().load(urlhash, obrwi.element, obrwi.weight.longValue());
+            final URIMetadataRow page = this.query.getSegment().urlMetadata().load(urlhash.getBytes(), obrwi.element, obrwi.weight.longValue());
             if (page == null) {
             	misses.add(obrwi.element.metadataHash());
             	continue;
@@ -561,7 +561,7 @@ public final class RankingProcess extends Thread {
         String hostname;
         Components metadata;
         loop: for (Navigator.Item item: hsa) {
-            mr = this.query.getSegment().urlMetadata().load(item.name, null, 0);
+            mr = this.query.getSegment().urlMetadata().load(item.name.getBytes(), null, 0);
             if (mr == null) continue;
             metadata = mr.metadata();
             if (metadata == null) continue;

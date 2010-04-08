@@ -79,7 +79,7 @@ public class rct_p {
                             // stack url
                             if (sb.getLog().isFinest()) sb.getLog().logFinest("crawlOrder: stack: url='" + url + "'");
                             sb.crawlStacker.enqueueEntry(new Request(
-                                    peerhash,
+                                    peerhash.getBytes(),
                                     url,
                                     (referrer == null) ? null : referrer.hash(),
                                     "REMOTE-CRAWLING",

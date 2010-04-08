@@ -30,6 +30,8 @@ package net.yacy.kelondro.order;
 import java.io.UnsupportedEncodingException;
 import java.util.Comparator;
 
+import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 
 
@@ -81,9 +83,13 @@ public class Base64Order extends AbstractOrder<byte[]> implements ByteOrder, Com
                 if (acc < bcc) c = -1;
                 
                 ab[(ac << 7) | bc] = c;
-            } 
+            }
         }
         this.log = new Log("BASE64");
+    }
+    
+    public HandleSet getHandleSet(final int keylength, final int space) throws RowSpaceExceededException {
+        return new HandleSet(keylength, this, space, space);
     }
 
     public static byte[] zero(int length) {

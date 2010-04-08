@@ -79,12 +79,12 @@ public final class ObjectArrayCache {
                 index1 = new RowSet(rowdef); 
             }
             final Row.Entry indexentry = index0.get(key);
-            if (indexentry != null) return indexentry.getColBytes(1);
+            if (indexentry != null) return indexentry.getColBytes(1, false);
         }
         assert (index1 != null);
         final Row.Entry indexentry = index1.get(key);
         if (indexentry == null) return null;
-        return indexentry.getColBytes(1);
+        return indexentry.getColBytes(1, false);
     }
     
     public final byte[] putb(final int ii, final byte[] value) throws RowSpaceExceededException {
@@ -100,7 +100,7 @@ public final class ObjectArrayCache {
             }
             final Row.Entry indexentry = index0.get(key);
             if (indexentry != null) {
-                final byte[] oldv = indexentry.getColBytes(1);
+                final byte[] oldv = indexentry.getColBytes(1, false);
                 indexentry.setCol(0, key);
                 indexentry.setCol(1, value);
                 index0.put(indexentry);
@@ -116,7 +116,7 @@ public final class ObjectArrayCache {
         newentry.setCol(1, value);
         final Row.Entry oldentry = index1.replace(newentry);
         if (oldentry == null) return null;
-        return oldentry.getColBytes(1);
+        return oldentry.getColBytes(1, false);
     }
 
     public final void addb(final int ii, final byte[] value) throws RowSpaceExceededException {
@@ -142,7 +142,7 @@ public final class ObjectArrayCache {
             }
             final Row.Entry indexentry = index0.remove(key);
             if (indexentry != null) {
-                return indexentry.getColBytes(1);
+                return indexentry.getColBytes(1, false);
             }
             // else remove it from the index1
         }
@@ -151,7 +151,7 @@ public final class ObjectArrayCache {
         if (index1.isEmpty()) return null;
         final Row.Entry indexentry = index1.remove(key);
         if (indexentry == null) return null;
-        return indexentry.getColBytes(1);
+        return indexentry.getColBytes(1, false);
     }
     
     public final byte[] removeoneb() {
@@ -160,14 +160,14 @@ public final class ObjectArrayCache {
             assert (indexentry != null);
             if (indexentry == null) return null;
             //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
-            return indexentry.getColBytes(1);
+            return indexentry.getColBytes(1, false);
         }
         if (index0 != null && !index0.isEmpty()) {
             final Row.Entry indexentry = index0.removeOne();
             assert (indexentry != null);
             if (indexentry == null) return null;
             //assert consistencyAnalysis0() : "consistency problem: " + consistencyAnalysis();
-            return indexentry.getColBytes(1);
+            return indexentry.getColBytes(1, false);
         }
         return null;
     }

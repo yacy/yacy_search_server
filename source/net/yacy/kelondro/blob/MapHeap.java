@@ -173,6 +173,25 @@ public class MapHeap {
      * @param key  the primary key
      * @throws IOException
      */
+    public void remove(byte[] key) throws IOException {
+        // update elementCount
+        if (key == null) return;
+        key = normalizeKey(key);
+        
+        synchronized (this) {
+            // remove from cache
+            cache.remove(new String(key, "UTF-8"));
+    
+            // remove from file
+            blob.remove(key);
+        }
+    }
+
+    /**
+     * remove a Map
+     * @param key  the primary key
+     * @throws IOException
+     */
     public void remove(String key) throws IOException {
         // update elementCount
         if (key == null) return;
@@ -219,8 +238,24 @@ public class MapHeap {
     
     private String normalizeKey(String key) {
         if (blob == null || key == null) return key;
-    	if (key.length() > blob.keylength()) key = key.substring(0, blob.keylength());
+        if (key.length() > blob.keylength()) key = key.substring(0, blob.keylength());
         while (key.length() < blob.keylength()) key += fillchar;
+        return key;
+    }
+
+    private byte[] normalizeKey(byte[] key) {
+        if (blob == null || key == null) return key;
+        if (key.length > blob.keylength()) {
+            byte[] b = new byte[blob.keylength()];
+            System.arraycopy(key, 0, b, 0, blob.keylength());
+            key = b;
+        }
+        if (key.length < blob.keylength()) {
+            byte[] b = new byte[blob.keylength()];
+            System.arraycopy(key, 0, b, 0, key.length);
+            for (int i = key.length; i < blob.keylength(); i++) b[i] = (byte) fillchar;
+            key = b;
+        }
         return key;
     }
 

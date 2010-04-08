@@ -60,6 +60,28 @@ public class CRProcess {
     header.append("# ---"); header.append((char) 13); header.append((char) 10);
     */
     
+    /*
+    private static final int Col_Referee =  0;
+    private static final int Col_UDate   =  1;
+    private static final int Col_VDate   =  2;
+    private static final int Col_LCount  =  3;
+    private static final int Col_GCount  =  4;
+    private static final int Col_ICount  =  5;
+    private static final int Col_DCount  =  6;
+    private static final int Col_TLength =  7;
+    private static final int Col_WACount =  8;
+    private static final int Col_WUCount =  9;
+    */
+    private static final int Col_Flags   = 10;
+    private static final int Col_FUDate  = 11;
+    private static final int Col_FDDate  = 12;
+    private static final int Col_LUDate  = 13;
+    private static final int Col_UCount  = 14;
+    private static final int Col_PCount  = 15;
+    private static final int Col_ACount  = 16;
+    private static final int Col_VCount  = 17;
+    private static final int Col_Vita    = 18;
+    
     public static final Row CRG_accrow = new Row(
             "byte[] Referee-12," +
             "Cardinal UDate-3 {b64e}, Cardinal VDate-3 {b64e}, " +
@@ -169,14 +191,14 @@ public class CRProcess {
             new_flags = new Bitfield(Base64Order.enhancedCoder.encodeLong(new_entry.getAttr("Flags", 0), 1).getBytes());
             // enrich information with additional values
             if ((acc_entry = acc.get(key.getBytes())) != null) {
-                FUDate = (int) acc_entry.getColLong("FUDate", 0);
-                FDDate = (int) acc_entry.getColLong("FDDate", 0);
-                LUDate = (int) acc_entry.getColLong("LUDate", 0);
-                UCount = (int) acc_entry.getColLong("UCount", 0);
-                PCount = (int) acc_entry.getColLong("PCount", 0);
-                ACount = (int) acc_entry.getColLong("ACount", 0);
-                VCount = (int) acc_entry.getColLong("VCount", 0);
-                Vita   = (int) acc_entry.getColLong("Vita", 0);
+                FUDate = (int) acc_entry.getColLong(Col_FUDate);
+                FDDate = (int) acc_entry.getColLong(Col_FDDate);
+                LUDate = (int) acc_entry.getColLong(Col_LUDate);
+                UCount = (int) acc_entry.getColLong(Col_UCount);
+                PCount = (int) acc_entry.getColLong(Col_PCount);
+                ACount = (int) acc_entry.getColLong(Col_ACount);
+                VCount = (int) acc_entry.getColLong(Col_VCount);
+                Vita   = (int) acc_entry.getColLong(Col_Vita);
                 
                 // update counters and dates
                 //seq.add(key.getBytes(), new_entry.getSeqCollection());
@@ -187,11 +209,11 @@ public class CRProcess {
                 VCount += (new_flags.get(3)) ? 1 : 0;
                 
                 // 'OR' the flags
-                acc_flags = new Bitfield(Base64Order.enhancedCoder.encodeLong(acc_entry.getColLong("Flags", 0), 1).getBytes());
+                acc_flags = new Bitfield(Base64Order.enhancedCoder.encodeLong(acc_entry.getColLong(Col_Flags), 1).getBytes());
                 for (int i = 0; i < 6; i++) {
                     if (new_flags.get(i)) acc_flags.set(i, true);
                 }
-                acc_entry.setCol("Flags", (int) Base64Order.enhancedCoder.decodeLong(acc_flags.exportB64()));
+                acc_entry.setCol(Col_Flags, (int) Base64Order.enhancedCoder.decodeLong(acc_flags.exportB64()));
             } else {
                 // initialize counters and dates
                 acc_entry = acc.row().newEntry();
@@ -212,14 +234,14 @@ public class CRProcess {
             // make plausibility check?
             
             // insert into accumulator
-            acc_entry.setCol("FUDate", FUDate);
-            acc_entry.setCol("FDDate", FDDate);
-            acc_entry.setCol("LUDate", LUDate);
-            acc_entry.setCol("UCount", UCount);
-            acc_entry.setCol("PCount", PCount);
-            acc_entry.setCol("ACount", ACount);
-            acc_entry.setCol("VCount", VCount);
-            acc_entry.setCol("Vita", Vita);
+            acc_entry.setCol(Col_FUDate, FUDate);
+            acc_entry.setCol(Col_FDDate, FDDate);
+            acc_entry.setCol(Col_LUDate, LUDate);
+            acc_entry.setCol(Col_UCount, UCount);
+            acc_entry.setCol(Col_PCount, PCount);
+            acc_entry.setCol(Col_ACount, ACount);
+            acc_entry.setCol(Col_VCount, VCount);
+            acc_entry.setCol(Col_Vita, Vita);
             acc.put(acc_entry);
         }
         

@@ -57,8 +57,9 @@ public class ResultImages {
         final HashMap<String, ImageEntry> images = document.getImages();
         for (final ImageEntry image: images.values()) {
             // do a double-check; attention: this can be time-consuming since this possibly needs a DNS-lookup
-            if (doubleCheck.containsKey(image.url().hash())) continue;
-            doubleCheck.put(image.url().hash(), System.currentTimeMillis());
+            String hashstring = new String(image.url().hash());
+            if (doubleCheck.containsKey(hashstring)) continue;
+            doubleCheck.put(hashstring, System.currentTimeMillis());
             
             final String name = image.url().getFile();
             boolean good = false;

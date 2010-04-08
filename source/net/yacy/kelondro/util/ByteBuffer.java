@@ -27,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Collection;
 import java.util.Properties;
 
 public final class ByteBuffer extends OutputStream {
@@ -502,6 +503,13 @@ public final class ByteBuffer extends OutputStream {
     public void writeTo(final OutputStream dest) throws IOException {
     	dest.write(this.buffer, this.offset, this.length);
         dest.flush();
+    }
+
+    public static boolean contains(Collection<byte[]> collection, byte[] key) {
+        for (byte[] v: collection) {
+            if (equals(v, key)) return true;
+        }
+        return false;
     }
         
 }

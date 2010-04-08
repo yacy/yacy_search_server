@@ -150,11 +150,11 @@ public class FTPLoader {
         if (berr.size() > 0 || response == null) {
             // some error logging
             final String detail = (berr.size() > 0) ? "\n    Errorlog: " + berr.toString() : "";
-            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash, new Date(), 1, "server download" + detail);
+            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "server download" + detail);
             throw new IOException("FTPLoader: Unable to download URL " + request.url().toString() + detail);
         }
         
-        Latency.update(request.url().hash().substring(6), request.url().getHost(), System.currentTimeMillis() - start);
+        Latency.update(new String(request.url().hash()).substring(6), request.url().getHost(), System.currentTimeMillis() - start);
         return response;
     }
 

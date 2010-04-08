@@ -126,7 +126,7 @@ public class RowCollection implements Iterable<Row.Entry> {
             Log.logWarning("RowCollection", "corrected wrong sortBound; sortBound = " + sortBound + ", chunkcount = " + chunkcount);
             this.sortBound = chunkcount;
         }
-        this.chunkcache = exportedCollection.getColBytes(exp_collection);        
+        this.chunkcache = exportedCollection.getColBytes(exp_collection, false);        
     }
 
 	public void reset() {
@@ -1016,7 +1016,7 @@ public class RowCollection implements Iterable<Row.Entry> {
     	System.out.println("create c   : " + (t1 - t0) + " nanoseconds, " + d(testsize, (t1 - t0)) + " entries/nanoseconds");
     	final RowCollection d = new RowCollection(r, testsize);
     	for (int i = 0; i < testsize; i++) {
-    		d.add(c.get(i, false).getColBytes(0));
+    		d.add(c.get(i, false).getColBytes(0, false));
     	}
     	final long t2 = System.nanoTime();
     	System.out.println("copy c -> d: " + (t2 - t1) + " nanoseconds, " + d(testsize, (t2 - t1)) + " entries/nanoseconds");

@@ -512,7 +512,7 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         Row.Entry entry;
         while (ii.hasNext()) {
             entry = ii.next();
-            s = new String(entry.getColBytes(0)).trim();
+            s = new String(entry.getColBytes(0, true)).trim();
             System.out.print(s + ", ");
             if (s.equals("drei")) ii.remove();
         }

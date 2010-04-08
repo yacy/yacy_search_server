@@ -151,7 +151,7 @@ public class Relations {
         entry.setCol(3, value);
         final Row.Entry oldentry = table.replace(entry);
         if (oldentry == null) return null;
-        return oldentry.getColBytes(3);
+        return oldentry.getColBytes(3, true);
     }
     
     public String getRelation(final String name, final String key) throws IOException, RowSpaceExceededException {
@@ -165,7 +165,7 @@ public class Relations {
         if (table == null) return null;
         final Row.Entry entry = table.get(key);
         if (entry == null) return null;
-        return entry.getColBytes(3);
+        return entry.getColBytes(3, true);
     }
     
     public boolean hasRelation(final String name, final byte[] key) throws RowSpaceExceededException {
@@ -179,7 +179,7 @@ public class Relations {
         if (table == null) return null;
         final Row.Entry entry = table.remove(key);
         if (entry == null) return null;
-        return entry.getColBytes(3);
+        return entry.getColBytes(3, true);
     }
     
     public static void main(final String args[]) {

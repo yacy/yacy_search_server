@@ -98,8 +98,8 @@ public class IndexCreateWWWGlobalQueue_p {
             int i, showNum = 0;
             for (i = 0; (i < crawlerList.size()) && (showNum < showLimit); i++) {
                 urle = crawlerList.get(i);
-                if ((urle != null)&&(urle.url()!=null)) {
-                    initiator = sb.peers.getConnected(urle.initiator());
+                if (urle != null && urle.url() != null) {
+                    initiator = sb.peers.getConnected(urle.initiator() == null ? "" : new String(urle.initiator()));
                     profileHandle = urle.profileHandle();
                     profileEntry = (profileHandle == null) ? null : sb.crawler.profilesActiveCrawls.getEntry(profileHandle);
                     prop.put("crawler-queue_list_"+showNum+"_dark", dark ? "1" : "0");

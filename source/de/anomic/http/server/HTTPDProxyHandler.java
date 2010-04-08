@@ -385,7 +385,7 @@ public final class HTTPDProxyHandler {
             	final Request request = new Request(
             			null, 
                         url, 
-                        requestHeader.referer(), 
+                        requestHeader.referer() == null ? null : requestHeader.referer().hash(), 
                         "", 
                         new Date(),
                         new Date(),
@@ -508,7 +508,7 @@ public final class HTTPDProxyHandler {
                 final Request request = new Request(
             			null, 
                         url, 
-                        requestHeader.referer(), 
+                        requestHeader.referer() == null ? null : requestHeader.referer().hash(), 
                         "", 
                         new Date(),
                         new Date(),

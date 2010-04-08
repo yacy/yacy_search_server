@@ -58,7 +58,7 @@ public class queues_p {
             for (int i = 0; i < w.length; i++)  {
                 if (w[i] == null) continue;
                 prop.put("list-loader_"+count+"_profile", w[i].profileHandle());
-                initiator = sb.peers.getConnected(w[i].initiator());
+                initiator = sb.peers.getConnected(new String(w[i].initiator()));
                 prop.putHTML("list-loader_"+count+"_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put("list-loader_"+count+"_depth", w[i].depth());
                 prop.putXML("list-loader_"+count+"_url", w[i].url().toString());
@@ -102,7 +102,7 @@ public class queues_p {
         for (int i = 0; i < crawlerList.size(); i++) {
             urle = crawlerList.get(i);
             if ((urle != null) && (urle.url() != null)) {
-                initiator = sb.peers.getConnected(urle.initiator());
+                initiator = sb.peers.getConnected(urle.initiator() == null ? "" : new String(urle.initiator()));
                 prop.put(tableName + "_" + showNum + "_profile", urle.profileHandle());
                 prop.put(tableName + "_" + showNum + "_initiator", ((initiator == null) ? "proxy" : initiator.getName()));
                 prop.put(tableName + "_" + showNum + "_depth", urle.depth());

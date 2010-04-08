@@ -483,11 +483,11 @@ public final class FileUtils {
             final Iterator<Row.Entry> i = set.iterator();
             String key;
             if (i.hasNext()) {
-                key = new String(i.next().getColBytes(0));
+                key = new String(i.next().getColBytes(0, false));
                 os.write(key.getBytes("UTF-8"));
             }
             while (i.hasNext()) {
-                key = new String((i.next()).getColBytes(0));
+                key = new String(i.next().getColBytes(0, false));
                 if (sep != null) os.write(sep.getBytes("UTF-8"));
                 os.write(key.getBytes("UTF-8"));
             }

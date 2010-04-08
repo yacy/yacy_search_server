@@ -294,7 +294,7 @@ public final class HTTPDFileHandler {
             
             final boolean adminAccountForLocalhost = sb.getConfigBool("adminAccountForLocalhost", false);
             final String refererHost = requestHeader.refererHost();
-            boolean accessFromLocalhost = Domains.isLocal(clientIP) && (refererHost.length() == 0 || Domains.isLocal(refererHost));
+            boolean accessFromLocalhost = Domains.isLocal(clientIP) && (refererHost == null || refererHost.length() == 0 || Domains.isLocal(refererHost));
             final boolean grantedForLocalhost = adminAccountForLocalhost && accessFromLocalhost;
             final boolean protectedPage = path.indexOf("_p.") > 0;
             final boolean accountEmpty = adminAccountBase64MD5.length() == 0;

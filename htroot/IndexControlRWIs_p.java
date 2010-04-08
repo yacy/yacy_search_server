@@ -163,7 +163,7 @@ public class IndexControlRWIs_p {
                     index = null;
                 }
                 if (delurlref) {
-                    for (i = 0; i < urlx.length; i++) segment.removeAllUrlReferences(urlx[i], sb.loader, true);
+                    for (i = 0; i < urlx.length; i++) segment.removeAllUrlReferences(urlx[i].getBytes(), sb.loader, true);
                 }
                 // delete the word first because that is much faster than the deletion of the urls from the url database
                 segment.termIndex().delete(keyhash);
@@ -182,7 +182,7 @@ public class IndexControlRWIs_p {
             // delete selected URLs
             if (post.containsKey("keyhashdelete")) try {
                 if (delurlref) {
-                    for (i = 0; i < urlx.length; i++) segment.removeAllUrlReferences(urlx[i], sb.loader, true);
+                    for (i = 0; i < urlx.length; i++) segment.removeAllUrlReferences(urlx[i].getBytes(), sb.loader, true);
                 }
                 if (delurl || delurlref) {
                     for (i = 0; i < urlx.length; i++) {
@@ -244,7 +244,7 @@ public class IndexControlRWIs_p {
                 URIMetadataRow lurl;
                 while (urlIter.hasNext()) {
                     iEntry = urlIter.next();
-                    lurl = segment.urlMetadata().load(iEntry.metadataHash(), null, 0);
+                    lurl = segment.urlMetadata().load(iEntry.metadataHash().getBytes(), null, 0);
                     if (lurl == null) {
                         unknownURLEntries.add(iEntry.metadataHash());
                         urlIter.remove();
@@ -312,7 +312,7 @@ public class IndexControlRWIs_p {
                         DigestURI url;
                         for (i = 0; i < urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final URIMetadataRow e = segment.urlMetadata().load(urlx[i], null, 0);
+                            final URIMetadataRow e = segment.urlMetadata().load(urlx[i].getBytes(), null, 0);
                             segment.urlMetadata().remove(urlx[i].getBytes());
                             if (e != null) {
                                 url = e.metadata().url();
@@ -341,7 +341,7 @@ public class IndexControlRWIs_p {
                         DigestURI url;
                         for (i = 0; i<urlx.length; i++) {
                             urlHashes.add(urlx[i]);
-                            final URIMetadataRow e = segment.urlMetadata().load(urlx[i], null, 0);
+                            final URIMetadataRow e = segment.urlMetadata().load(urlx[i].getBytes(), null, 0);
                             segment.urlMetadata().remove(urlx[i].getBytes());
                             if (e != null) {
                                 url = e.metadata().url();
@@ -437,7 +437,7 @@ public class IndexControlRWIs_p {
                         ((entry.word().flags().get(WordReferenceRow.flag_app_dc_subject)) ? "appears in subject, " : "") +
                         ((entry.word().flags().get(WordReferenceRow.flag_app_dc_description)) ? "appears in description, " : "") +
                         ((entry.word().flags().get(WordReferenceRow.flag_app_emphasized)) ? "appears emphasized, " : "") +
-                        ((DigestURI.probablyRootURL(entry.word().metadataHash())) ? "probably root url" : "")
+                        ((DigestURI.probablyRootURL(entry.word().metadataHash().getBytes())) ? "probably root url" : "")
                 );
                 if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, url)) {
                     prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxChecked", "1");

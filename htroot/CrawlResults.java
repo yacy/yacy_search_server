@@ -186,7 +186,7 @@ public class CrawlResults {
             while (i.hasNext()) {
                 entry = i.next();
                 try {
-                    urle = sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(entry.getKey(), null, 0);
+                    urle = sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).load(entry.getKey().getBytes(), null, 0);
                     if(urle == null) {
                         Log.logWarning("PLASMA", "CrawlResults: URL not in index for crawl result "+ i +" with hash "+ entry.getKey());
                         urlstr = null;
@@ -197,8 +197,8 @@ public class CrawlResults {
                         urlstr = metadata.url().toNormalform(false, true);
                         urltxt = nxTools.shortenURLString(urlstr, 72); // shorten the string text like a URL
                     }
-                    initiatorSeed = sb.peers.getConnected(entry.getValue().initiatorHash);
-                    executorSeed = sb.peers.getConnected(entry.getValue().executorHash);
+                    initiatorSeed = sb.peers.getConnected(new String(entry.getValue().initiatorHashb));
+                    executorSeed = sb.peers.getConnected(new String(entry.getValue().executorHashb));
 
                     prop.put("table_indexed_" + cnt + "_dark", (dark) ? "1" : "0");
                     prop.put("table_indexed_" + cnt + "_feedbackpage", "CrawlResults.html");

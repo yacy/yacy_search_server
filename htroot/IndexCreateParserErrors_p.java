@@ -70,7 +70,7 @@ public class IndexCreateParserErrors_p {
             }
             dark = true;
             DigestURI url; 
-            String initiatorHash, executorHash;
+            byte[] initiatorHash, executorHash;
             yacySeed initiatorSeed, executorSeed;
             int j=0;
             ArrayList<ZURL.Entry> l = sb.crawlQueues.errorURL.list(showRejectedCount);
@@ -83,8 +83,8 @@ public class IndexCreateParserErrors_p {
                 
                 initiatorHash = entry.initiator();
                 executorHash = entry.executor();
-                initiatorSeed = sb.peers.getConnected(initiatorHash);
-                executorSeed = sb.peers.getConnected(executorHash);
+                initiatorSeed = sb.peers.getConnected(new String(initiatorHash));
+                executorSeed = sb.peers.getConnected(new String(executorHash));
                 prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
                 prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
                 prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false, true));

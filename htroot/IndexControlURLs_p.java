@@ -140,14 +140,14 @@ public class IndexControlURLs_p {
         prop.put("result", " ");
 
         if (post.containsKey("urlhashdeleteall")) {
-            i = segment.removeAllUrlReferences(urlhash, sb.loader, true);
+            i = segment.removeAllUrlReferences(urlhash.getBytes(), sb.loader, true);
             prop.put("result", "Deleted URL and " + i + " references from " + i + " word indexes.");
             prop.put("lurlexport", 0);
             prop.put("reload", 0);
         }
 
         if (post.containsKey("urlhashdelete")) {
-            final URIMetadataRow entry = segment.urlMetadata().load(urlhash, null, 0);
+            final URIMetadataRow entry = segment.urlMetadata().load(urlhash.getBytes(), null, 0);
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash + "; nothing deleted.");
             } else {
@@ -162,7 +162,7 @@ public class IndexControlURLs_p {
 
         if (post.containsKey("urldelete")) {
             try {
-                urlhash = (new DigestURI(urlstring, null)).hash();
+                urlhash = new String((new DigestURI(urlstring, null)).hash());
             } catch (final MalformedURLException e) {
                 urlhash = null;
             }
@@ -179,9 +179,9 @@ public class IndexControlURLs_p {
         if (post.containsKey("urlstringsearch")) {
             try {
                 final DigestURI url = new DigestURI(urlstring, null);
-                urlhash = url.hash();
+                urlhash = new String(url.hash());
                 prop.put("urlhash", urlhash);
-                final URIMetadataRow entry = segment.urlMetadata().load(urlhash, null, 0);
+                final URIMetadataRow entry = segment.urlMetadata().load(urlhash.getBytes(), null, 0);
                 if (entry == null) {
                     prop.putHTML("result", "No Entry for URL " + url.toNormalform(true, true));
                     prop.putHTML("urlstring", urlstring);
@@ -199,7 +199,7 @@ public class IndexControlURLs_p {
         }
 
         if (post.containsKey("urlhashsearch")) {
-            final URIMetadataRow entry = segment.urlMetadata().load(urlhash, null, 0);
+            final URIMetadataRow entry = segment.urlMetadata().load(urlhash.getBytes(), null, 0);
             if (entry == null) {
                 prop.putHTML("result", "No Entry for URL hash " + urlhash);
             } else {
@@ -326,7 +326,7 @@ public class IndexControlURLs_p {
             return prop;
         }
         final URIMetadataRow.Components metadata = entry.metadata();
-        final URIMetadataRow le = ((entry.referrerHash() == null) || (entry.referrerHash().length() != Word.commonHashLength)) ? null : segment.urlMetadata().load(entry.referrerHash(), null, 0);
+        final URIMetadataRow le = (entry.referrerHash() == null || entry.referrerHash().length != Word.commonHashLength) ? null : segment.urlMetadata().load(entry.referrerHash(), null, 0);
         if (metadata == null || metadata.url() == null) {
             prop.put("genUrlProfile", "1");
             prop.put("genUrlProfile_urlhash", urlhash);

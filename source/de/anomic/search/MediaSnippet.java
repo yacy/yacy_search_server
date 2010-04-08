@@ -85,11 +85,11 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     
     @Override
     public int hashCode() {
-        return href.hash().hashCode();
+        return new String(href.hash()).hashCode();
     }
     
     public String toString() {
-        return href.hash();
+        return new String(href.hash());
     }
     
     public boolean equals(final Object obj) {
@@ -97,11 +97,11 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         if (obj == null) return false;
         if (!(obj instanceof MediaSnippet)) return false;
         MediaSnippet other = (MediaSnippet) obj;
-        return this.href.hash().equals(other.href.hash());
+        return Base64Order.enhancedCoder.equal(this.href.hash(), other.href.hash());
     }
     
     public int compareTo(MediaSnippet o) {
-        return Base64Order.enhancedCoder.compare(this.href.hash().getBytes(), o.href.hash().getBytes());
+        return Base64Order.enhancedCoder.compare(this.href.hash(), o.href.hash());
     }
     
     public int compare(MediaSnippet o1, MediaSnippet o2) {

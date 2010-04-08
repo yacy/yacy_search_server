@@ -245,7 +245,7 @@ public class bookmarksDB {
 					// check if the crawl filter works correctly    			
 	    			Pattern.compile(newcrawlingMustMatch);	    			
                     
-                    byte[] urlhash = crawlingStartURL.hash().getBytes();
+                    byte[] urlhash = crawlingStartURL.hash();
                     sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).remove(urlhash);
                     sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                     sb.crawlQueues.errorURL.remove(urlhash);
@@ -262,7 +262,7 @@ public class bookmarksDB {
 	                        indexText, indexMedia,
 	                        storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw, cacheStrategy);
 	                sb.crawlStacker.enqueueEntry(new Request(
-	                        sb.peers.mySeed().hash,
+	                        sb.peers.mySeed().hash.getBytes(),
                             crawlingStartURL,
 	                        null,
 	                        "CRAWLING-ROOT",
@@ -667,7 +667,7 @@ public class bookmarksDB {
                 url="http://"+url;
             }
             try {
-                this.urlHash=(new DigestURI(url, null)).hash();
+                this.urlHash = new String((new DigestURI(url, null)).hash());
             } catch (final MalformedURLException e) {
                 this.urlHash = null;
             }
@@ -704,7 +704,7 @@ public class bookmarksDB {
         }
 
         public Bookmark(final Map<String, String> map) throws MalformedURLException {
-            this((new DigestURI(map.get(BOOKMARK_URL), null)).hash(), map);
+            this(new String((new DigestURI(map.get(BOOKMARK_URL), null)).hash()), map);
         }
         
         Map<String, String> toMap() {

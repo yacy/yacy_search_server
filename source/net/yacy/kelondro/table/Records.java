@@ -603,7 +603,7 @@ public class Records {
     
     protected void printChunk(final Row.Entry chunk) {
         for (int j = 0; j < chunk.columns(); j++)
-            System.out.print(new String(chunk.getColBytes(j)) + ", ");
+            System.out.print(new String(chunk.getColBytes(j, false)) + ", ");
     }
 
     public final Row row() {

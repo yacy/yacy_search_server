@@ -189,7 +189,7 @@ public final class transferRWI {
 
                 // check if we need to ask for the corresponding URL
                 if (!(knownURL.contains(urlHash)||unknownURL.contains(urlHash)))  try {
-                    if (sb.indexSegments.urlMetadata(Segments.Process.DHTIN).exists(urlHash)) {
+                    if (sb.indexSegments.urlMetadata(Segments.Process.DHTIN).exists(urlHash.getBytes())) {
                         knownURL.add(urlHash);
                     } else {
                         unknownURL.add(urlHash);

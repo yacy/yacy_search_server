@@ -185,7 +185,7 @@ public class Bookmarks {
                     final bookmarksDB.Bookmark bookmark = sb.bookmarksDB.getBookmark(urlHash);
                     if (bookmark == null) {
                         // try to get the bookmark from the LURL database
-                        final URIMetadataRow urlentry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(urlHash, null, 0);
+                        final URIMetadataRow urlentry = sb.indexSegments.urlMetadata(Segments.Process.PUBLIC).load(urlHash.getBytes(), null, 0);
                         Document document = null;
                         if (urlentry != null) {
                             final URIMetadataRow.Components metadata = urlentry.metadata();

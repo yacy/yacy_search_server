@@ -184,7 +184,7 @@ public class SQLTable implements ObjectIndex, Iterable<Row.Entry> {
 
     public Row.Entry replace(final Row.Entry row) throws IOException {
         try {
-            final Row.Entry oldEntry = remove(row.getColBytes(0));
+            final Row.Entry oldEntry = remove(row.getColBytes(0, false));
             final String sqlQuery = "INSERT INTO test (" +
                     "hash, " +
                     "value) " +

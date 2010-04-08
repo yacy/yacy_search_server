@@ -256,7 +256,7 @@ public final class ImageReferenceRow extends AbstractReference implements /*Imag
     }
     
     public Bitfield flags() {
-        return new Bitfield(this.entry.getColBytes(col_flags));
+        return new Bitfield(this.entry.getColBytes(col_flags, true));
     }
     
     public String toString() {

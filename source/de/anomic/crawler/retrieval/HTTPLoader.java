@@ -77,14 +77,14 @@ public final class HTTPLoader {
     public Response load(final Request entry, final boolean acceptOnlyParseable) throws IOException {
         long start = System.currentTimeMillis();
         Response doc = load(entry, acceptOnlyParseable, DEFAULT_CRAWLING_RETRY_COUNT);
-        Latency.update(entry.url().hash().substring(6), entry.url().getHost(), System.currentTimeMillis() - start);
+        Latency.update(new String(entry.url().hash()).substring(6), entry.url().getHost(), System.currentTimeMillis() - start);
         return doc;
     }
     
     private Response load(final Request request, boolean acceptOnlyParseable, final int retryCount) throws IOException {
 
         if (retryCount < 0) {
-            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash, new Date(), 1, "redirection counter exceeded");
+            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "redirection counter exceeded");
             throw new IOException("Redirection counter exceeded for URL " + request.url().toString() + ". Processing aborted.");
         }
         
@@ -99,7 +99,7 @@ public final class HTTPLoader {
         if (acceptOnlyParseable) {
             String supportError = TextParser.supportsExtension(request.url());
             if (supportError != null) {
-                sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash, new Date(), 1, supportError);
+                sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, supportError);
                 throw new IOException("REJECTED WRONG EXTENSION TYPE: " + supportError);
             }
         }
@@ -107,7 +107,7 @@ public final class HTTPLoader {
         // check if url is in blacklist
         final String hostlow = host.toLowerCase();
         if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, hostlow, path)) {
-            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash, new Date(), 1, "url in blacklist");
+            sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "url in blacklist");
             throw new IOException("CRAWLER Rejecting URL '" + request.url().toString() + "'. URL is in blacklist.");
         }
         
@@ -142,7 +142,7 @@ public final class HTTPLoader {
                 	// if the response has not the right file type then reject file
                     String supportError = TextParser.supports(request.url(), res.getResponseHeader().mime());
                     if (supportError != null) {
-                    	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash, new Date(), 1, supportError);
+                    	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, supportError);
                         throw new IOException("REJECTED WRONG MIME TYPE, mime = " + res.getResponseHeader().mime() + ": " + supportError);
                     }
                 }
@@ -154,7 +154,7 @@ public final class HTTPLoader {
 
                 // check length again in case it was not possible to get the length before loading
                 if (maxFileSize > 0 && contentLength > maxFileSize) {
-                	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash, new Date(), 1, "file size limit exceeded");                    
+                	sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "file size limit exceeded");                    
                 	throw new IOException("REJECTED URL " + request.url() + " because file size '" + contentLength + "' exceeds max filesize limit of " + maxFileSize + " bytes. (GET)");
                 }
 
@@ -176,7 +176,7 @@ public final class HTTPLoader {
                     redirectionUrlString = redirectionUrlString.trim();
 
                     if (redirectionUrlString.length() == 0) {
-                        sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash, new Date(), 1, "redirection header empy");
+                        sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "redirection header empy");
                         throw new IOException("CRAWLER Redirection of URL=" + request.url().toString() + " aborted. Location header is empty.");
                     }
                     
@@ -189,17 +189,14 @@ public final class HTTPLoader {
 
                     // if we are already doing a shutdown we don't need to retry crawling
                     if (Thread.currentThread().isInterrupted()) {
-                        sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash, new Date(), 1, "server shutdown");
+                        sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "server shutdown");
                         throw new IOException("CRAWLER Retry of URL=" + request.url().toString() + " aborted because of server shutdown.");
                     }
-
-                    // generating url hash
-                    final String urlhash = redirectionUrl.hash();
                     
                     // check if the url was already indexed
-                    final String dbname = sb.urlExists(Segments.Process.LOCALCRAWLING, urlhash);
+                    final String dbname = sb.urlExists(Segments.Process.LOCALCRAWLING, redirectionUrl.hash());
                     if (dbname != null) {
-                        sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash, new Date(), 1, "redirection to double content");
+                        sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "redirection to double content");
                         throw new IOException("CRAWLER Redirection of URL=" + request.url().toString() + " ignored. The url appears already in db " + dbname);
                     }
                     
@@ -209,7 +206,7 @@ public final class HTTPLoader {
                 }
             } else {
                 // if the response has not the right response type then reject file
-                sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash, new Date(), 1, "wrong http status code " + res.getStatusCode() +  ")");
+                sb.crawlQueues.errorURL.push(request, sb.peers.mySeed().hash.getBytes(), new Date(), 1, "wrong http status code " + res.getStatusCode() +  ")");
                 throw new IOException("REJECTED WRONG STATUS TYPE '" + res.getStatusLine() + "' for URL " + request.url().toString());
             }
         } finally {

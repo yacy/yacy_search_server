@@ -51,7 +51,7 @@ public class cytag {
         StringBuilder connect = new StringBuilder();
         connect.append('{');
         addJSON(connect, "time", DateFormatter.formatShortMilliSecond(new Date()));
-        addJSON(connect, "trail", header.referer());
+        addJSON(connect, "trail", header.referer().toNormalform(false, false));
         addJSON(connect, "nick",  (post == null) ? "" : post.get("nick", ""));
         addJSON(connect, "tag",   (post == null) ? "" : post.get("tag", ""));
         addJSON(connect, "icon",  (post == null) ? "" : post.get("icon", ""));

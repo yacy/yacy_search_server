@@ -193,7 +193,7 @@ public class ContentScraper extends AbstractScraper implements Scraper {
 
                 if (type.equalsIgnoreCase("shortcut icon")) {
                     final ImageEntry ie = new ImageEntry(newLink, linktitle, -1, -1, -1);
-                    images.put(ie.url().hash(), ie);    
+                    images.put(new String(ie.url().hash()), ie);    
                     this.favicon = newLink;
                 } else if (!type.equalsIgnoreCase("stylesheet") && !type.equalsIgnoreCase("alternate stylesheet")) {
                     anchors.put(newLink, linktitle);
@@ -551,11 +551,11 @@ public class ContentScraper extends AbstractScraper implements Scraper {
     }
     
     public static void addImage(final HashMap<String, ImageEntry> a, final ImageEntry ie) {
-        if (a.containsKey(ie.url().hash())) {
+        if (a.containsKey(new String(ie.url().hash()))) {
             // in case of a collision, take that image that has the better image size tags
-            if ((ie.height() > 0) && (ie.width() > 0)) a.put(ie.url().hash(), ie);
+            if ((ie.height() > 0) && (ie.width() > 0)) a.put(new String(ie.url().hash()), ie);
         } else {
-            a.put(ie.url().hash(), ie);
+            a.put(new String(ie.url().hash()), ie);
         }
     }
     

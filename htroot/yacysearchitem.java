@@ -146,8 +146,8 @@ public class yacysearchitem {
             } catch (final UnsupportedEncodingException e) {}
             prop.putHTML("content_former", theQuery.queryString);
             prop.put("content_rankingprops", result.word().toPropertyForm() + ", domLengthEstimated=" + DigestURI.domLengthEstimation(result.hash()) +
-                    ((DigestURI.probablyRootURL(new String(result.hash()))) ? ", probablyRootURL" : "") + 
-                    (((wordURL = DigestURI.probablyWordURL(new String(result.hash()), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
+                    ((DigestURI.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
+                    (((wordURL = DigestURI.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
             final TextSnippet snippet = result.textSnippet();
             final String desc = (snippet == null) ? "" : snippet.getLineMarked(theQuery.fullqueryHashes);
             prop.put("content_description", desc);
@@ -175,7 +175,7 @@ public class yacysearchitem {
                 prop.put("content_item_width", ms.width);
                 prop.put("content_item_height", ms.height);
                 prop.put("content_item_attr", (ms.attr.equals("-1 x -1")) ? "" : "(" + ms.attr + ")"); // attributes, here: original size of image
-                prop.put("content_item_urlhash", ms.source.hash());
+                prop.put("content_item_urlhash", new String(ms.source.hash()));
                 prop.put("content_item_source", ms.source.toNormalform(true, false));
                 prop.putXML("content_item_source-xml", ms.source.toNormalform(true, false));
                 prop.put("content_item_sourcedom", ms.source.getHost());

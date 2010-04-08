@@ -34,6 +34,7 @@ import java.util.Date;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.workflow.WorkflowProcessor;
 import net.yacy.repository.Blacklist;
@@ -142,7 +143,7 @@ public final class CrawlStacker {
 
             // if the url was rejected we store it into the error URL db
             if (rejectReason != null) {
-                nextQueue.errorURL.push(entry, peers.mySeed().hash, new Date(), 1, rejectReason);
+                nextQueue.errorURL.push(entry, peers.mySeed().hash.getBytes(), new Date(), 1, rejectReason);
             }
         } catch (final Exception e) {
             CrawlStacker.this.log.logWarning("Error while processing stackCrawl entry.\n" + "Entry: " + entry.toString() + "Error: " + e.toString(), e);
@@ -154,7 +155,7 @@ public final class CrawlStacker {
     public void enqueueEntry(final Request entry) {
 
         // DEBUG
-        if (log.isFinest()) log.logFinest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + entry.initiator() + ", name=" + entry.name() + ", load=" + entry.loaddate() + ", depth=" + entry.depth());
+        if (log.isFinest()) log.logFinest("ENQUEUE " + entry.url() + ", referer=" + entry.referrerhash() + ", initiator=" + new String(entry.initiator()) + ", name=" + entry.name() + ", load=" + entry.loaddate() + ", depth=" + entry.depth());
 
         if (prefetchHost(entry.url().getHost())) {
             try {
@@ -237,7 +238,7 @@ public final class CrawlStacker {
             return "post url not allowed";
         }
 
-        final DigestURI referrerURL = (entry.referrerhash() == null || entry.referrerhash().length() == 0) ? null : nextQueue.getURL(entry.referrerhash());
+        final DigestURI referrerURL = (entry.referrerhash() == null || entry.referrerhash().length == 0) ? null : nextQueue.getURL(entry.referrerhash());
 
         // add domain to profile domain list
         if ((profile.domFilterDepth() != Integer.MAX_VALUE) || (profile.domMaxPages() != Integer.MAX_VALUE)) {
@@ -294,8 +295,8 @@ public final class CrawlStacker {
         }
 
         // store information
-        final boolean local = entry.initiator().equals(peers.mySeed().hash);
-        final boolean proxy = (entry.initiator() == null || entry.initiator().length() == 0 || entry.initiator().equals("------------")) && profile.handle().equals(crawler.defaultProxyProfile.handle());
+        final boolean local = Base64Order.enhancedCoder.equal(entry.initiator(), peers.mySeed().hash.getBytes());
+        final boolean proxy = (entry.initiator() == null || entry.initiator().length == 0 || new String(entry.initiator()).equals("------------")) && profile.handle().equals(crawler.defaultProxyProfile.handle());
         final boolean remote = profile.handle().equals(crawler.defaultRemoteProfile.handle());
         final boolean global =
             (profile.remoteIndexing()) /* granted */ &&
@@ -307,28 +308,28 @@ public final class CrawlStacker {
             ) /* qualified */;
 
         if (!local && !global && !remote && !proxy) {
-            String error = "URL '" + entry.url().toString() + "' cannot be crawled. initiator = " + entry.initiator() + ", profile.handle = " + profile.handle();
+            String error = "URL '" + entry.url().toString() + "' cannot be crawled. initiator = " + new String(entry.initiator()) + ", profile.handle = " + profile.handle();
             this.log.logSevere(error);
             return error;
         }
         
         if (global) {
             // it may be possible that global == true and local == true, so do not check an error case against it
-            if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
-            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
+            if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, proxy = true, initiator = " + new String(entry.initiator()) + ", profile.handle = " + profile.handle());
+            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: global = true, remote = true, initiator = " + new String(entry.initiator()) + ", profile.handle = " + profile.handle());
             //int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
             nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_LIMIT, entry);
             //assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT);
             //this.log.logInfo("stacked/global: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_LIMIT));
         } else if (local) {
-            if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
-            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
+            if (proxy) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, proxy = true, initiator = " + new String(entry.initiator()) + ", profile.handle = " + profile.handle());
+            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: local = true, remote = true, initiator = " + new String(entry.initiator()) + ", profile.handle = " + profile.handle());
             //int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
             nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_CORE, entry);
             //assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
             //this.log.logInfo("stacked/local: " + entry.url().toString() + ", stacksize = " + nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE));
         } else if (proxy) {
-            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + entry.initiator() + ", profile.handle = " + profile.handle());
+            if (remote) this.log.logWarning("URL '" + entry.url().toString() + "' has conflicting initiator properties: proxy = true, remote = true, initiator = " + new String(entry.initiator()) + ", profile.handle = " + profile.handle());
             //int b = nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
             nextQueue.noticeURL.push(NoticedURL.STACK_TYPE_CORE, entry);
             //assert b < nextQueue.noticeURL.stackSize(NoticedURL.STACK_TYPE_CORE);
@@ -371,7 +372,7 @@ public final class CrawlStacker {
         if (this.acceptGlobalURLs && this.acceptLocalURLs) return null; // fast shortcut to avoid dnsResolve
         // check if this is a local address and we are allowed to index local pages:
         //boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
-        final boolean local = DigestURI.isLocal(urlhash);
+        final boolean local = DigestURI.isLocal(urlhash.getBytes());
         //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
         if ((this.acceptGlobalURLs && !local) || (this.acceptLocalURLs && local)) return null;
         return (local) ?

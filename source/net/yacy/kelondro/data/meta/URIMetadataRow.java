@@ -233,7 +233,7 @@ public class URIMetadataRow implements URIMetadata {
         //System.out.println("DEBUG-ENTRY: prop=" + prop.toString());
         DigestURI url;
         try {
-            url = new DigestURI(crypt.simpleDecode(prop.getProperty("url", ""), null), prop.getProperty("hash"));
+            url = new DigestURI(crypt.simpleDecode(prop.getProperty("url", ""), null), prop.getProperty("hash").getBytes());
         } catch (final MalformedURLException e) {
             url = null;
         }
@@ -243,7 +243,7 @@ public class URIMetadataRow implements URIMetadata {
         String ETag = crypt.simpleDecode(prop.getProperty("ETag", ""), null); if (ETag == null) ETag = "";
         
         this.entry = rowdef.newEntry();
-        this.entry.setCol(col_hash, url.hash(), null); // FIXME potential null pointer access
+        this.entry.setCol(col_hash, url.hash()); // FIXME potential null pointer access
         this.entry.setCol(col_comp, encodeComp(url, descr, dc_creator, tags, ETag));
         try {
             encodeDate(col_mod, DateFormatter.parseShortDay(prop.getProperty("mod", "20000101")));
@@ -312,32 +312,55 @@ public class URIMetadataRow implements URIMetadata {
         //System.out.println("author=" + comp.author());
         try {
             s.append("hash=").append(new String(hash()));
+            assert (s.toString().indexOf(0) < 0);
             s.append(",url=").append(crypt.simpleEncode(metadata.url().toNormalform(false, true)));
+            assert (s.toString().indexOf(0) < 0);
             s.append(",descr=").append(crypt.simpleEncode(metadata.dc_title()));
+            assert (s.toString().indexOf(0) < 0);
             s.append(",author=").append(crypt.simpleEncode(metadata.dc_creator()));
+            assert (s.toString().indexOf(0) < 0);
             s.append(",tags=").append(crypt.simpleEncode(metadata.dc_subject()));
+            assert (s.toString().indexOf(0) < 0);
             s.append(",ETag=").append(crypt.simpleEncode(metadata.ETag()));
+            assert (s.toString().indexOf(0) < 0);
             s.append(",mod=").append(DateFormatter.formatShortDay(moddate()));
+            assert (s.toString().indexOf(0) < 0);
             s.append(",load=").append(DateFormatter.formatShortDay(loaddate()));
+            assert (s.toString().indexOf(0) < 0);
             s.append(",fresh=").append(DateFormatter.formatShortDay(freshdate()));
-            s.append(",referrer=").append(referrerHash());
+            assert (s.toString().indexOf(0) < 0);
+            s.append(",referrer=").append(referrerHash() == null ? "" : new String(referrerHash()));
+            assert (s.toString().indexOf(0) < 0);
             s.append(",md5=").append(md5());
+            assert (s.toString().indexOf(0) < 0);
             s.append(",size=").append(size());
+            assert (s.toString().indexOf(0) < 0);
             s.append(",wc=").append(wordCount());
+            assert (s.toString().indexOf(0) < 0);
             s.append(",dt=").append(doctype());
+            assert (s.toString().indexOf(0) < 0);
             s.append(",flags=").append(flags().exportB64());
+            assert (s.toString().indexOf(0) < 0);
             s.append(",lang=").append(language());
+            assert (s.toString().indexOf(0) < 0);
             s.append(",llocal=").append(llocal());
+            assert (s.toString().indexOf(0) < 0);
             s.append(",lother=").append(lother());
+            assert (s.toString().indexOf(0) < 0);
             s.append(",limage=").append(limage());
+            assert (s.toString().indexOf(0) < 0);
             s.append(",laudio=").append(laudio());
+            assert (s.toString().indexOf(0) < 0);
             s.append(",lvideo=").append(lvideo());
+            assert (s.toString().indexOf(0) < 0);
             s.append(",lapp=").append(lapp());
+            assert (s.toString().indexOf(0) < 0);
             
             if (this.word != null) {
                 // append also word properties
                 s.append(",wi=").append(Base64Order.enhancedCoder.encodeString(word.toPropertyForm()));
             }
+            assert (s.toString().indexOf(0) < 0);
             return s;
 
         } catch (final Exception e) {
@@ -372,7 +395,7 @@ public class URIMetadataRow implements URIMetadata {
         final Iterator<String> cl = FileUtils.strings(this.entry.getCol("comp", null));
         this.comp = new Components(
                     (cl.hasNext()) ? cl.next() : "",
-                    new String(hash()),
+                    hash(),
                     (cl.hasNext()) ? cl.next() : "",
                     (cl.hasNext()) ? cl.next() : "",
                     (cl.hasNext()) ? cl.next() : "",
@@ -392,14 +415,14 @@ public class URIMetadataRow implements URIMetadata {
         return decodeDate(col_fresh);
     }
 
-    public String referrerHash() {
+    public byte[] referrerHash() {
         // return the creator's hash
-        return entry.getColString(col_referrer, null);
+        return entry.getColBytes(col_referrer, true);
     }
 
     public String md5() {
         // returns the md5 in hex representation
-        return Digest.encodeHex(entry.getColBytes(col_md5));
+        return Digest.encodeHex(entry.getColBytes(col_md5, true));
     }
 
     public char doctype() {
@@ -415,7 +438,7 @@ public class URIMetadataRow implements URIMetadata {
     }
 
     public Bitfield flags() {
-        return new Bitfield(this.entry.getColBytes(col_flags));
+        return new Bitfield(this.entry.getColBytes(col_flags, true));
     }
 
     public int wordCount() {
@@ -487,7 +510,7 @@ public class URIMetadataRow implements URIMetadata {
 
     public Request toBalancerEntry(final String initiatorHash) {
         return new Request(
-                initiatorHash, 
+                initiatorHash.getBytes(), 
                 metadata().url(), 
                 referrerHash(), 
                 metadata().dc_title(),
@@ -512,16 +535,17 @@ public class URIMetadataRow implements URIMetadata {
         core.insert(0, "{");
         core.append("}");
 
-        return new String(core);
+        return core.toString();
         //return "{" + core + "}";
     }
     
     public class Components {
         private DigestURI url;
-        private String urlRaw, urlHash;
+        private String urlRaw;
+        private byte[] urlHash;
         private final String dc_title, dc_creator, dc_subject, ETag;
         
-        public Components(final String urlRaw, final String urlhash, final String title, final String author, final String tags, final String ETag) {
+        public Components(final String urlRaw, final byte[] urlhash, final String title, final String author, final String tags, final String ETag) {
             this.url = null;
             this.urlRaw = urlRaw;
             this.urlHash = urlhash;

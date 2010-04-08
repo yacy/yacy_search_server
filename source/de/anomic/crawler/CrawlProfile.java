@@ -133,7 +133,7 @@ public class CrawlProfile {
         }
         public void remove() {
             if (lastkey != null) try {
-                removeEntry(lastkey);
+                removeEntry(lastkey.getBytes());
             } catch (final kelondroException e) {
                 Log.logException(e);
                 clear();
@@ -141,7 +141,7 @@ public class CrawlProfile {
         }
     }
    
-    public void removeEntry(final String handle) {
+    public void removeEntry(final byte[] handle) {
         try {
             profileTable.remove(handle);
         } catch (final IOException e) {
@@ -296,7 +296,7 @@ public class CrawlProfile {
                      final boolean xsstopw, final boolean xdstopw, final boolean xpstopw,
                      final int cacheStrategy) {
             if (name == null || name.length() == 0) throw new NullPointerException("name must not be null");
-            final String handle = (startURL == null) ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, Word.commonHashLength) : startURL.hash();
+            final String handle = (startURL == null) ? Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(Long.toString(System.currentTimeMillis()))).substring(0, Word.commonHashLength) : new String(startURL.hash());
             mem = new HashMap<String, String>(40);
             mem.put(HANDLE,           handle);
             mem.put(NAME,             name);

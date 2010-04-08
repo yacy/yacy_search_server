@@ -109,9 +109,9 @@ public class Latency {
      * @return the remaining waiting time in milliseconds. The return value may be negative
      *         which expresses how long the time is over the minimum waiting time.
      */
-    public static long waitingRemainingGuessed(String hosthash, final long minimumLocalDelta, final long minimumGlobalDelta) {
-        assert hosthash.length() == 12 || hosthash.length() == 6;
-        Host host = Latency.host((hosthash.length() == 6) ? hosthash : hosthash.substring(6));
+    public static long waitingRemainingGuessed(byte[] hosthash, final long minimumLocalDelta, final long minimumGlobalDelta) {
+        assert hosthash.length == 12 || hosthash.length == 6;
+        Host host = Latency.host((hosthash.length == 6) ? new String(hosthash) : new String(hosthash).substring(6));
         if (host == null) return Long.MIN_VALUE;
         
         // the time since last access to the domain is the basis of the remaining calculation
@@ -152,7 +152,7 @@ public class Latency {
     public static long waitingRemaining(DigestURI url, final long minimumLocalDelta, final long minimumGlobalDelta) {
 
         // first check if the domain was _ever_ accessed before
-        String hosthash = url.hash().substring(6);
+        String hosthash = new String(url.hash()).substring(6);
         Host host = host(hosthash);
         if (host == null) return Long.MIN_VALUE; // no delay if host is new
         
@@ -193,7 +193,7 @@ public class Latency {
     public static String waitingRemainingExplain(DigestURI url, final long minimumLocalDelta, final long minimumGlobalDelta) {
         
         // first check if the domain was _ever_ accessed before
-        String hosthash = url.hash().substring(6);
+        String hosthash = new String(url.hash()).substring(6);
         Host host = host(hosthash);
         if (host == null) return "host " + hosthash + "/" + url.getHost() + " never accessed before -> 0"; // no delay if host is new
         

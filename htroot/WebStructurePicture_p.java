@@ -93,7 +93,7 @@ public class WebStructurePicture_p {
             // find start hash
             String hash = null;
             try {
-                hash = (new DigestURI("http://" + host, null)).hash().substring(6);
+                hash = new String((new DigestURI("http://" + host, null)).hash()).substring(6);
             } catch (final MalformedURLException e) {Log.logException(e);}
             //assert (sb.webStructure.outgoingReferences(hash) != null);
             

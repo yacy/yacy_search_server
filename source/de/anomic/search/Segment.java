@@ -205,7 +205,7 @@ public class Segment {
         Map.Entry<String, Word> wentry;
         String word;
         int len = (document == null) ? urlLength : document.dc_title().length();
-        WordReferenceRow ientry = new WordReferenceRow(url.hash(),
+        WordReferenceRow ientry = new WordReferenceRow(new String(url.hash()),
                                 urlLength, urlComps, len,
                                 condenser.RESULT_NUMB_WORDS,
                                 condenser.RESULT_NUMB_SENTENCES,
@@ -305,7 +305,7 @@ public class Segment {
                 docDate,                                   // modification date
                 new Date(),                                // loaded date
                 new Date(ldate + Math.max(0, ldate - docDate.getTime()) / 2), // freshdate, computed with Proxy-TTL formula 
-                (referrerURL == null) ? null : referrerURL.hash(),            // referer hash
+                (referrerURL == null) ? null : new String(referrerURL.hash()),            // referer hash
                 new byte[0],                               // md5
                 (int) sourcesize,                          // size
                 condenser.RESULT_NUMB_WORDS,               // word count
@@ -343,7 +343,7 @@ public class Segment {
             // TODO: UTF-8 docDescription seems not to be displayed correctly because
             // of string concatenation
             log.logInfo("*Indexed " + words + " words in URL " + url +
-                    " [" + url.hash() + "]" +
+                    " [" + new String(url.hash()) + "]" +
                     "\n\tDescription:  " + dc_title +
                     "\n\tMimeType: "  + document.dc_format() + " | Charset: " + document.getCharset() + " | " +
                     "Size: " + document.getTextLength() + " bytes | " +
@@ -362,7 +362,7 @@ public class Segment {
         return removeAllUrlReferences(url.hash(), loader, fetchOnline);
     }
     
-    public int removeAllUrlReferences(final String urlhash, LoaderDispatcher loader, final boolean fetchOnline) {
+    public int removeAllUrlReferences(final byte[] urlhash, LoaderDispatcher loader, final boolean fetchOnline) {
         // find all the words in a specific resource and remove the url reference from every word index
         // finally, delete the url entry
         
@@ -384,7 +384,7 @@ public class Segment {
             }
             if (resourceb == null) {
                 // delete just the url entry
-                urlMetadata().remove(urlhash.getBytes());
+                urlMetadata().remove(urlhash);
                 return 0;
             } else {
                 resourceContent = new ByteArrayInputStream(resourceb);
@@ -403,10 +403,10 @@ public class Segment {
                 
                 // delete all word references
                 int count = 0;
-                if (words != null) count = termIndex().remove(Word.words2hashes(words), urlhash.getBytes());
+                if (words != null) count = termIndex().remove(Word.words2hashes(words), urlhash);
                 
                 // finally delete the url entry itself
-                urlMetadata().remove(urlhash.getBytes());
+                urlMetadata().remove(urlhash);
                 return count;
             }
         } catch (final ParserException e) {
@@ -458,7 +458,7 @@ public class Segment {
                         entry = new WordReferenceVars(containerIterator.next());
                         // System.out.println("Wordhash: "+wordHash+" UrlHash:
                         // "+entry.getUrlHash());
-                        final URIMetadataRow ue = urlMetadata.load(entry.metadataHash(), entry, 0);
+                        final URIMetadataRow ue = urlMetadata.load(entry.metadataHash().getBytes(), entry, 0);
                         if (ue == null) {
                             urlHashs.add(entry.metadataHash());
                         } else {

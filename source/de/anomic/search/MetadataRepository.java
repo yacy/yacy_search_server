@@ -115,13 +115,13 @@ public final class MetadataRepository implements Iterable<byte[]> {
         return 0;
     }
 
-    public synchronized URIMetadataRow load(final String urlHash, final WordReferenceVars searchedWord, final long ranking) {
+    public synchronized URIMetadataRow load(final byte[] urlHash, final WordReferenceVars searchedWord, final long ranking) {
         // generates an plasmaLURLEntry using the url hash
         // if the url cannot be found, this returns null
         if (urlHash == null) return null;
-        assert urlIndexFile != null : "urlHash = " + urlHash;
+        assert urlIndexFile != null : "urlHash = " + new String(urlHash);
         try {
-            final Row.Entry entry = urlIndexFile.get(urlHash.getBytes());
+            final Row.Entry entry = urlIndexFile.get(urlHash);
             if (entry == null) return null;
             return new URIMetadataRow(entry, searchedWord, ranking);
         } catch (final IOException e) {
@@ -167,9 +167,9 @@ public final class MetadataRepository implements Iterable<byte[]> {
         }
     }
 
-    public boolean exists(final String urlHash) {
+    public boolean exists(final byte[] urlHash) {
         if (urlIndexFile == null) return false; // case may happen during shutdown
-        return urlIndexFile.has(urlHash.getBytes());
+        return urlIndexFile.has(urlHash);
     }
 
     public CloneableIterator<byte[]> keys(boolean up, byte[] firstKey) {
@@ -589,7 +589,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         TreeSet<String> set = new TreeSet<String>();
         for (hashStat hs: map.values()) {
             if (hs == null) continue;
-            urlref = this.load(hs.urlhash, null, 0);
+            urlref = this.load(hs.urlhash.getBytes(), null, 0);
             if (urlref == null || urlref.metadata() == null || urlref.metadata().url() == null || urlref.metadata().url().getHost() == null) continue;
             set.add(urlref.metadata().url().getHost());
             count--;
@@ -623,7 +623,7 @@ public final class MetadataRepository implements Iterable<byte[]> {
         while (j.hasNext()) {
             urlhash = j.next();
             if (urlhash == null) continue;
-            urlref = this.load(urlhash, null, 0);
+            urlref = this.load(urlhash.getBytes(), null, 0);
             if (urlref == null || urlref.metadata() == null || urlref.metadata().url() == null || urlref.metadata().url().getHost() == null) continue;
             if (statsDump == null) return new ArrayList<hostStat>().iterator(); // some other operation has destroyed the object
             comps = urlref.metadata();

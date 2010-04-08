@@ -170,7 +170,7 @@ public class dbtest {
             try {
                 Row.Entry entryBytes = getTable_test().get(entry.getKey());
                 if (entryBytes != null) {
-                    final STEntry dbEntry = new STEntry(entryBytes.getColBytes(0), entryBytes.getColBytes(1));
+                    final STEntry dbEntry = new STEntry(entryBytes.getColBytes(0, true), entryBytes.getColBytes(1, true));
                     if (!dbEntry.isValid()) {
                         System.out.println("INVALID table_test: " + dbEntry);
                     } /* else {
@@ -181,7 +181,7 @@ public class dbtest {
                 if (getTable_reference() != null) {
                 entryBytes = getTable_reference().get(entry.getKey());
                 if (entryBytes != null) {
-                    final STEntry dbEntry = new STEntry(entryBytes.getColBytes(0), entryBytes.getColBytes(1));
+                    final STEntry dbEntry = new STEntry(entryBytes.getColBytes(0, true), entryBytes.getColBytes(1, true));
                     if (!dbEntry.isValid()) {
                         System.out.println("INVALID table_reference: " + dbEntry);
                     } /* else {
@@ -336,13 +336,13 @@ public class dbtest {
                     if (entry == null)
                         System.out.println("missing value for entry " + new String(key) + " in test table");
                     else
-                        if (!(new String(entry.getColBytes(1)).equals(new String(key)))) System.out.println("wrong value for entry " + new String(key) + ": " + new String(entry.getColBytes(1)) + " in test table");
+                        if (!(new String(entry.getColBytes(1, false)).equals(new String(key)))) System.out.println("wrong value for entry " + new String(key) + ": " + new String(entry.getColBytes(1, false)) + " in test table");
                     if (table_reference != null) {
                         entry = table_reference.get(key);
                         if (entry == null)
                             System.out.println("missing value for entry " + new String(key) + " in reference table");
                         else
-                            if (!(new String(entry.getColBytes(1)).equals(new String(key)))) System.out.println("wrong value for entry " + new String(key) + ": " + new String(entry.getColBytes(1)) + " in reference table");
+                            if (!(new String(entry.getColBytes(1, false)).equals(new String(key)))) System.out.println("wrong value for entry " + new String(key) + ": " + new String(entry.getColBytes(1, false)) + " in reference table");
                     }
                     
                     if (i % 1000 == 0) {

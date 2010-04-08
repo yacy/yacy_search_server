@@ -117,14 +117,14 @@ public final class Cache {
         hm.putAll(responseHeader);
         hm.put("@@URL", url.toNormalform(true, false));
         try {
-            responseHeaderDB.put(url.hash(), hm);
+            responseHeaderDB.put(new String(url.hash()), hm);
         } catch (Exception e) {
             throw new IOException("Cache.store: cannot write to headerDB: " + e.getMessage());
         }
         
         // store the file
         try {
-            fileDB.put(url.hash().getBytes("UTF-8"), file);
+            fileDB.put(url.hash(), file);
         } catch (UnsupportedEncodingException e) {
             throw new IOException("Cache.store: cannot write to fileDB (1): " + e.getMessage());
         } catch (IOException e) {
@@ -141,20 +141,20 @@ public final class Cache {
     public static boolean has(final DigestURI url) {
         boolean headerExists;
         try {
-            headerExists = responseHeaderDB.has(url.hash());
+            headerExists = responseHeaderDB.has(new String(url.hash()));
         } catch (IOException e1) {
             try {
-                fileDB.remove(url.hash().getBytes());
+                fileDB.remove(url.hash());
             } catch (IOException e) {}
             return false;
         }
-        boolean fileExists = fileDB.has(url.hash().getBytes());
+        boolean fileExists = fileDB.has(url.hash());
         if (headerExists && fileExists) return true;
         if (headerExists) try {
-            responseHeaderDB.remove(url.hash());
+            responseHeaderDB.remove(new String(url.hash()));
         } catch (IOException e) {}
         if (fileExists) try {
-            fileDB.remove(url.hash().getBytes());
+            fileDB.remove(url.hash());
         } catch (IOException e) {}
         return false;
     }
@@ -173,7 +173,7 @@ public final class Cache {
         // loading data from database
         Map<String, String> hdb;
         try {
-            hdb = responseHeaderDB.get(url.hash());
+            hdb = responseHeaderDB.get(new String(url.hash()));
         } catch (final IOException e) {
             return null;
         }
@@ -194,7 +194,7 @@ public final class Cache {
     public static byte[] getContent(final DigestURI url) throws IOException {
         // load the url as resource from the cache
         try {
-            return fileDB.get(url.hash().getBytes("UTF-8"));
+            return fileDB.get(url.hash());
         } catch (UnsupportedEncodingException e) {
             Log.logException(e);
             return null;
@@ -208,7 +208,7 @@ public final class Cache {
      * @throws IOException
      */
     public static void delete(final DigestURI url) throws IOException {
-        responseHeaderDB.remove(url.hash());
-        fileDB.remove(url.hash().getBytes("UTF-8"));
+        responseHeaderDB.remove(new String(url.hash()));
+        fileDB.remove(url.hash());
     }
 }

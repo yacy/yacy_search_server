@@ -307,7 +307,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     }
     
     public Bitfield flags() {
-        return new Bitfield(this.entry.getColBytes(col_flags));
+        return new Bitfield(this.entry.getColBytes(col_flags, false));
     }
     
     public double termFrequency() {

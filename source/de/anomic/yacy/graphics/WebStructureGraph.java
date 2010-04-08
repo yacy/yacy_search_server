@@ -100,15 +100,19 @@ public class WebStructureGraph {
         // generate citation reference
         final Map<DigestURI, String> hl = document.getHyperlinks();
         final Iterator<DigestURI> it = hl.keySet().iterator();
+        byte[] nexturlhashb;
         String nexturlhash;
         final StringBuilder cpg = new StringBuilder(12 * (hl.size() + 1) + 1);
+        assert cpg.length() % 12 == 0 : "cpg.length() = " + cpg.length() + ", cpg = " + cpg.toString();
         final StringBuilder cpl = new StringBuilder(12 * (hl.size() + 1) + 1);
-        final String lhp = url.hash().substring(6); // local hash part
+        final String lhp = new String(url.hash()).substring(6); // local hash part
         int GCount = 0;
         int LCount = 0;
         while (it.hasNext()) {
-            nexturlhash = it.next().hash();
-            if (nexturlhash != null) {
+            nexturlhashb = it.next().hash();
+            if (nexturlhashb != null) {
+                nexturlhash = new String(nexturlhashb);
+                assert nexturlhash.length() == 12 : "nexturlhash.length() = " + nexturlhash.length() + ", nexturlhash = " + nexturlhash;
                 if (nexturlhash.substring(6).equals(lhp)) {
                     // this is a local link
                     cpl.append(nexturlhash.substring(0, 6)); // store only local part
@@ -116,6 +120,7 @@ public class WebStructureGraph {
                 } else {
                     // this is a global link
                     cpg.append(nexturlhash); // store complete hash
+                    assert cpg.length() % 12 == 0 : "cpg.length() = " + cpg.length() + ", cpg = " + cpg.toString();
                     GCount++;
                 }
             }
@@ -123,7 +128,7 @@ public class WebStructureGraph {
         
         // append this reference to buffer
         // generate header info
-        final String head = url.hash() + "=" +
+        final String head = new String(url.hash()) + "=" +
         MicroDate.microDateHoursStr(docDate.getTime()) +          // latest update timestamp of the URL
         MicroDate.microDateHoursStr(System.currentTimeMillis()) + // last visit timestamp of the URL
         Base64Order.enhancedCoder.encodeLongSmart(LCount, 2) +  // count of links to local resources
@@ -137,7 +142,8 @@ public class WebStructureGraph {
         
         //crl.append(head); crl.append ('|'); crl.append(cpl); crl.append((char) 13); crl.append((char) 10);
         crg.append(head); crg.append('|'); crg.append(cpg); crg.append((char) 13); crg.append((char) 10);
-        
+
+        assert cpg.length() % 12 == 0 : "cpg.length() = " + cpg.length() + ", cpg = " + cpg.toString();
         learn(url, cpg);
         
         // if buffer is full, flush it.
@@ -355,12 +361,12 @@ public class WebStructureGraph {
     }
     
     private void learn(final DigestURI url, final StringBuilder reference /*string of b64(12digits)-hashes*/) {
-        final String domhash = url.hash().substring(6);
+        final String domhash = new String(url.hash()).substring(6);
 
         // parse the new reference string and join it with the stored references
         structureEntry structure = outgoingReferences(domhash);
         final Map<String, Integer> refs = (structure == null) ? new HashMap<String, Integer>() : structure.references;
-        assert reference.length() % 12 == 0;
+        assert reference.length() % 12 == 0 : "reference.length() = " + reference.length() + ", reference = " + reference.toString();
         String dom;
         int c;
         for (int i = 0; i < reference.length() / 12; i++) {

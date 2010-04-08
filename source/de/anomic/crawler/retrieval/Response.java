@@ -216,7 +216,7 @@ public class Response {
         return this.profile;
     }
 
-    public String initiator() {
+    public byte[] initiator() {
         return this.request.initiator();
     }
 
@@ -745,7 +745,7 @@ public class Response {
         }
     }
     
-    public String referrerHash() {
+    public byte[] referrerHash() {
         if (requestHeader == null) return null;
         String u = requestHeader.get(RequestHeader.REFERER, "");
         if (u == null || u.length() == 0) return null;
@@ -785,10 +785,10 @@ public class Response {
         // 6) local fetching for global crawling (other known or unknwon initiator)
         EventOrigin processCase = EventOrigin.UNKNOWN;
         // FIXME the equals seems to be incorrect: String.equals(boolean)
-        if ((initiator() == null) || initiator().length() == 0 || initiator().equals("------------")) {
+        if ((initiator() == null) || initiator().length == 0 || new String(initiator()).equals("------------")) {
             // proxy-load
             processCase = EventOrigin.PROXY_LOAD;
-        } else if (initiator().equals(mySeedHash)) {
+        } else if (new String(initiator()).equals(mySeedHash)) {
             // normal crawling
             processCase = EventOrigin.LOCAL_CRAWLING;
         } else {

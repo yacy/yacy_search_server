@@ -83,7 +83,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     
     public static boolean existsInCache(final DigestURI url, final TreeSet<byte[]> queryhashes) {
         final String hashes = yacySearch.set2string(queryhashes);
-        return retrieveFromCache(hashes, url.hash()) != null;
+        return retrieveFromCache(hashes, new String(url.hash())) != null;
     }
 
     public static void storeToCache(final String wordhashes, final String urlhash, final String snippet) {
@@ -170,13 +170,13 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         return line != null;
     }
     public int compareTo(TextSnippet o) {
-        return Base64Order.enhancedCoder.compare(this.url.hash().getBytes(), o.url.hash().getBytes());
+        return Base64Order.enhancedCoder.compare(this.url.hash(), o.url.hash());
     }
     public int compare(TextSnippet o1, TextSnippet o2) {
         return o1.compareTo(o2);
     }
     public int hashCode() {
-        return this.url.hash().hashCode();
+        return new String(this.url.hash()).hashCode();
     }
     
     @Override
@@ -318,10 +318,10 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         // try to get snippet from snippetCache
         int source = SOURCE_CACHE;
         final String wordhashes = yacySearch.set2string(queryhashes);
-        String line = retrieveFromCache(wordhashes, url.hash());
+        String line = retrieveFromCache(wordhashes, new String(url.hash()));
         if (line != null) {
             // found the snippet
-            return new TextSnippet(url, line, source, null, null, faviconCache.get(url.hash()));
+            return new TextSnippet(url, line, source, null, null, faviconCache.get(new String(url.hash())));
         }
         
         
@@ -336,16 +336,16 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             String loc;
             if (containsAllHashes(loc = comp.dc_title(), queryhashes)) {
                 // try to create the snippet from information given in the url itself
-                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
+                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(new String(url.hash())));
             } else if (containsAllHashes(loc = comp.dc_creator(), queryhashes)) {
                 // try to create the snippet from information given in the creator metadata
-                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
+                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(new String(url.hash())));
             } else if (containsAllHashes(loc = comp.dc_subject(), queryhashes)) {
                 // try to create the snippet from information given in the subject metadata
-                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
+                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(new String(url.hash())));
             } else if (containsAllHashes(loc = comp.url().toNormalform(true, true).replace('-', ' '), queryhashes)) {
                 // try to create the snippet from information given in the subject metadata
-                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(url.hash()));
+                return new TextSnippet(url, loc, SOURCE_METADATA, null, null, faviconCache.get(new String(url.hash())));
             } else {
                         
                 // trying to load the resource from the cache
@@ -405,7 +405,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
          * COMPUTE SNIPPET
          * =========================================================================== */    
         final DigestURI resFavicon = document.getFavicon();
-        if (resFavicon != null) faviconCache.put(url.hash(), resFavicon);
+        if (resFavicon != null) faviconCache.put(new String(url.hash()), resFavicon);
         // we have found a parseable non-empty file: use the lines
 
         // compute snippet from text
@@ -433,7 +433,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         if (line.length() > snippetMaxLength) line = line.substring(0, snippetMaxLength);
 
         // finally store this snippet in our own cache
-        storeToCache(wordhashes, url.hash(), line);
+        storeToCache(wordhashes, new String(url.hash()), line);
         
         document.close();
         return new TextSnippet(url, line, source, null, null, resFavicon);
@@ -579,7 +579,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     
     public static String failConsequences(Segment indexSegment, final WordReferenceVars word, final TextSnippet snippet, final String eventID) throws IOException {
         // problems with snippet fetch
-        final byte[] urlHash = snippet.getUrl().hash().getBytes();
+        final byte[] urlHash = snippet.getUrl().hash();
         final String querystring = SetTools.setToString(snippet.getRemainingHashes(), ' ');
         if ((snippet.getErrorCode() == ERROR_SOURCE_LOADING) ||
             (snippet.getErrorCode() == ERROR_RESOURCE_LOADING) ||

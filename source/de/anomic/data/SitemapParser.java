@@ -250,7 +250,7 @@ public class SitemapParser extends DefaultHandler {
                 return;
 
             // get the url hash
-            String nexturlhash = null;
+            byte[] nexturlhash = null;
             DigestURI url = null;
             try {
                 url = new DigestURI(this.nextURL, null);
@@ -275,7 +275,7 @@ public class SitemapParser extends DefaultHandler {
 
             // URL needs to crawled
             this.sb.crawlStacker.enqueueEntry(new Request(
-                    this.sb.peers.mySeed().hash,
+                    this.sb.peers.mySeed().hash.getBytes(),
                     url,
                     null, // this.siteMapURL.toString(),
                     this.nextURL,

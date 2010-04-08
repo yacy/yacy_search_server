@@ -25,7 +25,6 @@ package de.anomic.crawler;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
@@ -33,12 +32,15 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.CloneableIterator;
 import net.yacy.kelondro.table.Table;
+import net.yacy.kelondro.util.ByteBuffer;
 
 import de.anomic.crawler.retrieval.Request;
 import de.anomic.http.client.Cache;
@@ -49,9 +51,9 @@ public class Balancer {
     private static final int EcoFSBufferSize = 1000;
 
     // class variables
-    private final ConcurrentHashMap<String, LinkedList<String>> domainStacks;    // a map from domain name part to Lists with url hashs
-    private   final ConcurrentLinkedQueue<String> top;
-    private   final TreeMap<Long, String> delayed;
+    private final ConcurrentHashMap<String, LinkedList<byte[]>> domainStacks;    // a map from domain name part to Lists with url hashs
+    private   final ConcurrentLinkedQueue<byte[]> top;
+    private   final TreeMap<Long, byte[]> delayed;
     protected ObjectIndex  urlFileIndex;
     private   final File   cacheStacksPath;
     private   long         minimumLocalDelta;
@@ -67,9 +69,9 @@ public class Balancer {
             final boolean useTailCache,
             final boolean exceed134217727) {
         this.cacheStacksPath = cachePath;
-        this.domainStacks   = new ConcurrentHashMap<String, LinkedList<String>>();
-        this.top = new ConcurrentLinkedQueue<String>();
-        this.delayed = new TreeMap<Long, String>();
+        this.domainStacks   = new ConcurrentHashMap<String, LinkedList<byte[]>>();
+        this.top = new ConcurrentLinkedQueue<byte[]>();
+        this.delayed = new TreeMap<Long, byte[]>();
         this.minimumLocalDelta = minimumLocalDelta;
         this.minimumGlobalDelta = minimumGlobalDelta;
         this.domStackInitSize = Integer.MAX_VALUE;
@@ -125,21 +127,21 @@ public class Balancer {
         }
     }
     
-    public Request get(final String urlhash) throws IOException {
+    public Request get(final byte[] urlhash) throws IOException {
         assert urlhash != null;
         if (urlFileIndex == null) return null; // case occurs during shutdown
-        final Row.Entry entry = urlFileIndex.get(urlhash.getBytes());
+        final Row.Entry entry = urlFileIndex.get(urlhash);
         if (entry == null) return null;
         return new Request(entry);
     }
     
-    public int removeAllByProfileHandle(final String profileHandle, final long timeout) throws IOException {
+    public int removeAllByProfileHandle(final String profileHandle, final long timeout) throws IOException, RowSpaceExceededException {
         // removes all entries with a specific profile hash.
         // this may last some time
         // returns number of deletions
         
         // first find a list of url hashes that shall be deleted
-        final HashSet<String> urlHashes = new HashSet<String>();
+        final HandleSet urlHashes = Base64Order.enhancedCoder.getHandleSet(this.urlFileIndex.row().primaryKeyLength, 100);
         final long terminate = (timeout > 0) ? System.currentTimeMillis() + timeout : Long.MAX_VALUE;
         synchronized (this) {
             final Iterator<Row.Entry> i = urlFileIndex.rows();
@@ -149,7 +151,7 @@ public class Balancer {
                 rowEntry = i.next();
                 crawlEntry = new Request(rowEntry);
                 if (crawlEntry.profileHandle().equals(profileHandle)) {
-                    urlHashes.add(crawlEntry.url().hash());
+                    urlHashes.put(crawlEntry.url().hash());
                 }
             }
         }
@@ -166,42 +168,42 @@ public class Balancer {
      * @return number of entries that had been removed
      * @throws IOException
      */
-    public synchronized int remove(final HashSet<String> urlHashes) throws IOException {
+    public synchronized int remove(final HandleSet urlHashes) throws IOException {
         final int s = urlFileIndex.size();
         int removedCounter = 0;
-        for (final String urlhash: urlHashes) {
-            final Row.Entry entry = urlFileIndex.remove(urlhash.getBytes());
+        for (final byte[] urlhash: urlHashes) {
+            final Row.Entry entry = urlFileIndex.remove(urlhash);
             if (entry != null) removedCounter++;
         }
         if (removedCounter == 0) return 0;
         assert urlFileIndex.size() + removedCounter == s : "urlFileIndex.size() = " + urlFileIndex.size() + ", s = " + s;
 
         // iterate through the top list
-        final Iterator<String> j = top.iterator();
-        String urlhash;
+        final Iterator<byte[]> j = top.iterator();
+        byte[] urlhash;
         while (j.hasNext()) {
         	urlhash = j.next();
-        	if (urlHashes.contains(urlhash)) j.remove();
+        	if (urlHashes.has(urlhash)) j.remove();
         }
         
         // remove from delayed
         synchronized (this.delayed) {
-        	final Iterator<Map.Entry<Long, String>> k = this.delayed.entrySet().iterator();
+        	final Iterator<Map.Entry<Long, byte[]>> k = this.delayed.entrySet().iterator();
         	while (k.hasNext()) {
-        		if (urlHashes.contains(k.next().getValue())) k.remove();
+        		if (urlHashes.has(k.next().getValue())) k.remove();
         	}
         }
         
         // iterate through the domain stacks
-        final Iterator<Map.Entry<String, LinkedList<String>>> q = domainStacks.entrySet().iterator();
-        Map.Entry<String, LinkedList<String>> se;
-        LinkedList<String> stack;
+        final Iterator<Map.Entry<String, LinkedList<byte[]>>> q = domainStacks.entrySet().iterator();
+        Map.Entry<String, LinkedList<byte[]>> se;
+        LinkedList<byte[]> stack;
         while (q.hasNext()) {
             se = q.next();
             stack = se.getValue();
-            final Iterator<String> i = stack.iterator();
+            final Iterator<byte[]> i = stack.iterator();
             while (i.hasNext()) {
-                if (urlHashes.contains(i.next())) i.remove();
+                if (urlHashes.has(i.next())) i.remove();
             }
             if (stack.isEmpty()) q.remove();
         }
@@ -230,7 +232,7 @@ public class Balancer {
     private boolean domainStacksNotEmpty() {
         if (domainStacks == null) return false;
         synchronized (domainStacks) {
-            final Iterator<LinkedList<String>> i = domainStacks.values().iterator();
+            final Iterator<LinkedList<byte[]>> i = domainStacks.values().iterator();
             while (i.hasNext()) {
                 if (!i.next().isEmpty()) return true;
             }
@@ -240,31 +242,30 @@ public class Balancer {
     
     public void push(final Request entry) throws IOException, RowSpaceExceededException {
         assert entry != null;
-        final String hash = entry.url().hash();
+        final byte[] hash = entry.url().hash();
         synchronized (this) {
-    	    if (urlFileIndex.has(hash.getBytes())) {
-                //Log.logWarning("BALANCER", "double-check has failed for urlhash " + entry.url().hash()  + " in " + stackname + " - fixed");
+    	    if (urlFileIndex.has(hash)) {
                 return;
             }
         
             // add to index
             final int s = urlFileIndex.size();
 	        urlFileIndex.put(entry.toRow());
-	        assert s < urlFileIndex.size() : "hash = " + hash + ", s = " + s + ", size = " + urlFileIndex.size();
-	        assert urlFileIndex.has(hash.getBytes()) : "hash = " + hash;
-	        
+	        assert s < urlFileIndex.size() : "hash = " + new String(hash) + ", s = " + s + ", size = " + urlFileIndex.size();
+	        assert urlFileIndex.has(hash) : "hash = " + new String(hash);
+
 	        // add the hash to a queue
 	        pushHashToDomainStacks(entry.url().hash(), 50);
         }
     }
     
-    private void pushHashToDomainStacks(final String hash, final int maxstacksize) {
+    private void pushHashToDomainStacks(final byte[] hash, final int maxstacksize) {
         // extend domain stack
-        final String dom = hash.substring(6);
-        LinkedList<String> domainList = domainStacks.get(dom);
+        final String dom = new String(hash).substring(6);
+        LinkedList<byte[]> domainList = domainStacks.get(dom);
         if (domainList == null) {
             // create new list
-            domainList = new LinkedList<String>();
+            domainList = new LinkedList<byte[]>();
             domainList.add(hash);
             domainStacks.put(dom, domainList);
         } else {
@@ -273,21 +274,21 @@ public class Balancer {
         }
     }
     
-    private void removeHashFromDomainStacks(final String hash) {
+    private void removeHashFromDomainStacks(final byte[] hash) {
         // extend domain stack
-        final String dom = hash.substring(6);
-        final LinkedList<String> domainList = domainStacks.get(dom);
+        final String dom = new String(hash).substring(6);
+        final LinkedList<byte[]> domainList = domainStacks.get(dom);
         if (domainList == null) return;
-        final Iterator<String> i = domainList.iterator();
+        final Iterator<byte[]> i = domainList.iterator();
         while (i.hasNext()) {
-        	if (i.next().equals(hash)) {
+        	if (Base64Order.enhancedCoder.equal(i.next(), hash)) {
         		i.remove();
         		return;
         	}
         }
     }
     
-    private String nextFromDelayed() {
+    private byte[] nextFromDelayed() {
 		if (this.delayed.isEmpty()) return null;
 		final Long first = this.delayed.firstKey();
 		if (first.longValue() < System.currentTimeMillis()) {
@@ -296,7 +297,7 @@ public class Balancer {
     	return null;
     }
     
-    private String anyFromDelayed() {
+    private byte[] anyFromDelayed() {
         if (this.delayed.isEmpty()) return null;
         final Long first = this.delayed.firstKey();
         return this.delayed.remove(first);
@@ -338,29 +339,29 @@ public class Balancer {
     	long sleeptime = 0;
     	Request crawlEntry = null;
     	synchronized (this) {
-    	    String failhash = null;
+    	    byte[] failhashb = null;
     		while (!this.urlFileIndex.isEmpty()) {
 		    	// first simply take one of the entries in the top list, that should be one without any delay
-		        String nexthash = nextFromDelayed();
+    		    byte[] nexthashb = nextFromDelayed();
 		        //System.out.println("*** nextFromDelayed=" + nexthash);
-		        if (nexthash == null && !this.top.isEmpty()) {
-		            nexthash = top.remove();
+		        if (nexthashb == null && !this.top.isEmpty()) {
+		            nexthashb = top.remove();
 		            //System.out.println("*** top.remove()=" + nexthash);
 		        }
-		        if (nexthash == null) {
-		            nexthash = anyFromDelayed();
+		        if (nexthashb == null) {
+		            nexthashb = anyFromDelayed();
 		        }
 		        
 		        // check minimumDelta and if necessary force a sleep
 		        //final int s = urlFileIndex.size();
-		        Row.Entry rowEntry = (nexthash == null) ? null : urlFileIndex.remove(nexthash.getBytes());
+		        Row.Entry rowEntry = (nexthashb == null) ? null : urlFileIndex.remove(nexthashb);
 		        if (rowEntry == null) {
 		            //System.out.println("*** rowEntry=null, nexthash=" + nexthash);
 		        	rowEntry = urlFileIndex.removeOne();
 		        	if (rowEntry == null) {
-		        	    nexthash = null;
+		        	    nexthashb = null;
 		        	} else {
-		        	    nexthash = new String(rowEntry.getPrimaryKeyBytes());
+		        	    nexthashb = rowEntry.getPrimaryKeyBytes();
 		        	    //System.out.println("*** rowEntry.getPrimaryKeyBytes()=" + nexthash);
 		        	}
 		        	
@@ -374,7 +375,7 @@ public class Balancer {
 		        crawlEntry = new Request(rowEntry);
 		        //Log.logInfo("Balancer", "fetched next url: " + crawlEntry.url().toNormalform(true, false));
 		        
-		        // at this point we must check if the crawlEntry has relevancy because the crawl profile still exists
+		        // at this point we must check if the crawlEntry has relevance because the crawl profile still exists
 		        // if not: return null. A calling method must handle the null value and try again
 		        final CrawlProfile.entry profileEntry = (profile == null) ? null : profile.getEntry(crawlEntry.profileHandle());
 		        if (profileEntry == null) {
@@ -387,22 +388,22 @@ public class Balancer {
 		                (profileEntry.cacheStrategy() == CrawlProfile.CACHE_STRATEGY_IFEXIST && Cache.has(crawlEntry.url()))
 		                ) ? 0 : Latency.waitingRemaining(crawlEntry.url(), minimumLocalDelta, minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
 		        
-		        assert nexthash.equals(new String(rowEntry.getPrimaryKeyBytes())) : "result = " + nexthash + ", rowEntry.getPrimaryKeyBytes() = " + new String(rowEntry.getPrimaryKeyBytes());
-		        assert nexthash.equals(crawlEntry.url().hash()) : "result = " + nexthash + ", crawlEntry.url().hash() = " + crawlEntry.url().hash();
+		        assert Base64Order.enhancedCoder.equal(nexthashb, rowEntry.getPrimaryKeyBytes()) : "result = " + new String(nexthashb) + ", rowEntry.getPrimaryKeyBytes() = " + new String(rowEntry.getPrimaryKeyBytes());
+		        assert Base64Order.enhancedCoder.equal(nexthashb, crawlEntry.url().hash()) : "result = " + new String(nexthashb) + ", crawlEntry.url().hash() = " + new String(crawlEntry.url().hash());
 		        
-		        if (failhash != null && failhash.equals(nexthash)) break; // prevent endless loops
+		        if (failhashb != null && Base64Order.enhancedCoder.equal(failhashb, nexthashb)) break; // prevent endless loops
 		        
 		        if (delay && sleeptime > 0 && this.domStackInitSize > 1) {
 		            //System.out.println("*** putback: nexthash=" + nexthash + ", failhash="+failhash);
 		        	// put that thing back to omit a delay here
-		            if (!delayed.values().contains(nexthash)) {
+		            if (!ByteBuffer.contains(delayed.values(), nexthashb)) {
 		                //System.out.println("*** delayed +=" + nexthash);
-		                this.delayed.put(Long.valueOf(System.currentTimeMillis() + sleeptime + 1), nexthash);
+		                this.delayed.put(Long.valueOf(System.currentTimeMillis() + sleeptime + 1), nexthashb);
 		            }
 		        	try {
                         this.urlFileIndex.put(rowEntry);
-                        this.domainStacks.remove(nexthash.substring(6));
-                        failhash = nexthash;
+                        this.domainStacks.remove(new String(nexthashb).substring(6));
+                        failhashb = nexthashb;
                     } catch (RowSpaceExceededException e) {
                         Log.logException(e);
                     }
@@ -431,7 +432,7 @@ public class Balancer {
                 try {synchronized(this) { this.wait(3000); }} catch (final InterruptedException e) {}
             }
         }
-        Latency.update(crawlEntry.url().hash().substring(6), crawlEntry.url().getHost());
+        Latency.update(new String(crawlEntry.url().hash()).substring(6), crawlEntry.url().getHost());
         return crawlEntry;
     }
     
@@ -448,10 +449,10 @@ public class Balancer {
 		}
     	
     	// iterate over the domain stacks
-    	final Iterator<Map.Entry<String, LinkedList<String>>> i = this.domainStacks.entrySet().iterator();
-    	Map.Entry<String, LinkedList<String>> entry;
+    	final Iterator<Map.Entry<String, LinkedList<byte[]>>> i = this.domainStacks.entrySet().iterator();
+    	Map.Entry<String, LinkedList<byte[]>> entry;
     	long smallestWaiting = Long.MAX_VALUE;
-    	String besthash = null;
+    	byte[] besthashb = null;
     	while (i.hasNext()) {
     		entry = i.next();
     		
@@ -461,13 +462,13 @@ public class Balancer {
     			continue;
     		}
     		
-    		String n = entry.getValue().getFirst();
+    		byte[] n = entry.getValue().getFirst();
     		if (delay) {
     			final long w = Latency.waitingRemainingGuessed(n, minimumLocalDelta, minimumGlobalDelta);
     			if (w > maximumwaiting) {
     				if (w < smallestWaiting) {
     					smallestWaiting = w;
-    					besthash = n;
+    					besthashb = n;
     				}
     				continue;
     			}
@@ -479,9 +480,9 @@ public class Balancer {
     	}
     	
     	// if we could not find any entry, then take the best we have seen so far
-    	if (acceptonebest && !this.top.isEmpty() && besthash != null) {
-    		removeHashFromDomainStacks(besthash);
-    		this.top.add(besthash);
+    	if (acceptonebest && !this.top.isEmpty() && besthashb != null) {
+    		removeHashFromDomainStacks(besthashb);
+    		this.top.add(besthashb);
     	}
     }
     
@@ -492,7 +493,7 @@ public class Balancer {
     	this.lastDomainStackFill = System.currentTimeMillis();
     	final CloneableIterator<byte[]> i = this.urlFileIndex.keys(true, null);
     	while (i.hasNext()) {
-    		pushHashToDomainStacks(new String(i.next()), 50);
+    		pushHashToDomainStacks(i.next(), 50);
     		if (this.domainStacks.size() > maxdomstacksize) break;
     	}
     	Log.logInfo("BALANCER", "re-fill of domain stacks; fileIndex.size() = " + this.urlFileIndex.size() + ", domainStacks.size = " + domainStacks.size() + ", collection time = " + (System.currentTimeMillis() - this.lastDomainStackFill) + " ms");
@@ -504,9 +505,9 @@ public class Balancer {
     	final ArrayList<Request> cel = new ArrayList<Request>();
     	if (count == 0) return cel;
     	synchronized (this) {
-	    	for (String n: top) {
+	    	for (byte[] n: top) {
 	    		try {
-					final Row.Entry rowEntry = urlFileIndex.get(n.getBytes());
+					final Row.Entry rowEntry = urlFileIndex.get(n);
 					if (rowEntry == null) continue;
 					final Request crawlEntry = new Request(rowEntry);
 					cel.add(crawlEntry);
@@ -518,11 +519,11 @@ public class Balancer {
 	    	int depth = 0;
 	    	loop: while (count > 0) {
     	    	// iterate over the domain stacks
-    	        for (LinkedList<String> list: this.domainStacks.values()) {
+    	        for (LinkedList<byte[]> list: this.domainStacks.values()) {
     	            if (list.size() <= depth) continue loop;
-    	            String n = list.get(depth);
+    	            byte[] n = list.get(depth);
                     try {
-                        Row.Entry rowEntry = urlFileIndex.get(n.getBytes());
+                        Row.Entry rowEntry = urlFileIndex.get(n);
                         if (rowEntry == null) continue;
                         final Request crawlEntry = new Request(rowEntry);
                         cel.add(crawlEntry);

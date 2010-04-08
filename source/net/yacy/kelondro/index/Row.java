@@ -159,8 +159,8 @@ public final class Row {
     
     public final Entry newEntry(final Entry oldrow, final int fromColumn) {
         if (oldrow == null) return null;
-        assert (oldrow.getColBytes(0)[0] != 0);
-        assert (this.objectOrder.wellformed(oldrow.getColBytes(0), 0, row[0].cellwidth));
+        assert (oldrow.getColBytes(0, false)[0] != 0);
+        assert (this.objectOrder.wellformed(oldrow.getColBytes(0, false), 0, row[0].cellwidth));
         return new Entry(oldrow, fromColumn, false);
     }
     
@@ -387,6 +387,7 @@ public final class Row {
             return rowinstance[offset + colstart[column]] == 0;
         }
         
+        @Deprecated
         public final void setCol(final String nickname, final char c) {
             if (nickref == null) genNickRef();
             final Object[] ref = nickref.get(nickname);
@@ -394,6 +395,7 @@ public final class Row {
             rowinstance[offset + ((Integer) ref[1]).intValue()] = (byte) c;
         }
         
+        @Deprecated
         public final void setCol(final String nickname, final byte[] cell) {
             if (nickref == null) genNickRef();
             final Object[] ref = nickref.get(nickname);
@@ -456,6 +458,7 @@ public final class Row {
                 }
         }
         
+        @Deprecated
         public final void setCol(final String nickname, final long cell) {
             if (nickref == null) genNickRef();
             final Object[] ref = nickref.get(nickname);
@@ -502,6 +505,7 @@ public final class Row {
             throw new kelondroException("ROW", "addCol did not find appropriate encoding");
         }
         
+        @Deprecated
         public final byte[] getCol(final String nickname, final byte[] dflt) {
             if (nickref == null) genNickRef();
             final Object[] ref = nickref.get(nickname);
@@ -512,6 +516,7 @@ public final class Row {
             return cell;
         }
         
+        @Deprecated
         public final String getColString(final String nickname, final String dflt, final String encoding) {
             if (nickref == null) genNickRef();
             final Object[] ref = nickref.get(nickname);
@@ -526,6 +531,7 @@ public final class Row {
         
         private final String getColString(final int clstrt, int length, final String encoding) {
             if (rowinstance[offset + clstrt] == 0) return null;
+            assert length <= rowinstance.length - offset - clstrt;
             if (length > rowinstance.length - offset - clstrt) length = rowinstance.length - offset - clstrt;
             while ((length > 0) && (rowinstance[offset + clstrt + length - 1] == 0)) length--;
             if (length == 0) return null;
@@ -538,6 +544,7 @@ public final class Row {
             }
         }
         
+        @Deprecated
         public final long getColLong(final String nickname, final long dflt) {
             if (nickref == null) genNickRef();
             final Object[] ref = nickref.get(nickname);
@@ -574,6 +581,7 @@ public final class Row {
             throw new kelondroException("ROW", "getColLong did not find appropriate encoding");
         }
         
+        @Deprecated
         public final byte getColByte(final String nickname, final byte dflt) {
             if (nickref == null) genNickRef();
             final Object[] ref = nickref.get(nickname);
@@ -595,12 +603,18 @@ public final class Row {
             return primaryKeyLength;
         }
         
-        public final byte[] getColBytes(final int column) {
+        public final byte[] getColBytes(final int column, boolean nullIfEmpty) {
             assert offset + colstart[column] + row[column].cellwidth <= rowinstance.length :
                 "column = " + column + ", offset = " + offset + ", colstart[column] = " + colstart[column] + ", row[column].cellwidth() = " + row[column].cellwidth + ", rowinstance.length = " + rowinstance.length;
+            int clstrt = colstart[column];
             final int w = row[column].cellwidth;
+            if (nullIfEmpty) {
+                int length = w;
+                while (length > 0 && rowinstance[offset + clstrt + length - 1] == 0) length--;
+                if (length == 0) return null;
+            }
             final byte[] c = new byte[w];
-            System.arraycopy(rowinstance, offset + colstart[column], c, 0, w);
+            System.arraycopy(rowinstance, offset + clstrt, c, 0, w);
             return c;
         }
         
@@ -618,7 +632,7 @@ public final class Row {
         }
         
         public final String toPropertyForm(final boolean includeBraces, final boolean decimalCardinal, final boolean longname) {
-            final ByteBuffer bb = new ByteBuffer();
+            final ByteBuffer bb = new ByteBuffer(objectsize() * 2);
             if (includeBraces) bb.append('{');
             for (int i = 0; i < row.length; i++) {
                 bb.append((longname) ? row[i].description : row[i].nickname);
@@ -626,7 +640,7 @@ public final class Row {
                 if ((decimalCardinal) && (row[i].celltype == Column.celltype_cardinal)) {
                     bb.append(Long.toString(getColLong(i)));
                 } else if ((decimalCardinal) && (row[i].celltype == Column.celltype_bitfield)) {
-                    bb.append((new Bitfield(getColBytes(i))).exportB64());
+                    bb.append((new Bitfield(getColBytes(i, true))).exportB64());
                 } else if ((decimalCardinal) && (row[i].celltype == Column.celltype_binary)) {
                     assert row[i].cellwidth == 1;
                     bb.append(Integer.toString((0xff & getColByte(i))));

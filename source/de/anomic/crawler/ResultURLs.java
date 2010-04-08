@@ -47,10 +47,10 @@ public final class ResultURLs {
     private final Map<EventOrigin, ScoreCluster<String>> resultDomains;
 
     public class InitExecEntry {
-        public String initiatorHash, executorHash;
-        public InitExecEntry(final String initiatorHash, final String executorHash) {
-            this.initiatorHash = initiatorHash;
-            this.executorHash = executorHash;
+        public byte[] initiatorHashb, executorHashb;
+        public InitExecEntry(final byte[] initiatorHash, final byte[] executorHash) {
+            this.initiatorHashb = initiatorHash;
+            this.executorHashb = executorHash;
         }
     }
     
@@ -64,7 +64,11 @@ public final class ResultURLs {
         }
     }
 
-    public synchronized void stack(final URIMetadataRow e, final String initiatorHash, final String executorHash, final EventOrigin stackType) {
+    public synchronized void stack(
+            final URIMetadataRow e,
+            final byte[] initiatorHash,
+            final byte[] executorHash,
+            final EventOrigin stackType) {
         assert initiatorHash != null;
         assert executorHash != null;
         if (e == null) { return; }
@@ -188,7 +192,7 @@ public final class ResultURLs {
             EventOrigin stackNo = EventOrigin.LOCAL_CRAWLING;
             System.out.println("valid test:\n=======");
             // add
-            results.stack(urlRef, new String(urlRef.hash()), url.hash(), stackNo);
+            results.stack(urlRef, urlRef.hash(), url.hash(), stackNo);
             // size
             System.out.println("size of stack:\t"+ results.getStackSize(stackNo));
         } catch (final MalformedURLException e) {

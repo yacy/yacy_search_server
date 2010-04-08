@@ -163,4 +163,5 @@ public final class HandleSet implements Iterable<byte[]> {
         index.close();
         index = null;
     }
+
 }

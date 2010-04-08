@@ -326,7 +326,7 @@ public final class RecordStack extends Records {
 		} else if (args[0].equals("-g")) {
 		    fm = new RecordStack(new File(args[1]), lens);
 		    final Row.Entry ret2 = fm.pop();
-		    ret = ((ret2 == null) ? null : ret2.getColBytes(1)); 
+		    ret = ((ret2 == null) ? null : ret2.getColBytes(1, true)); 
 		    fm.close();
 		}
 		fm.close();
@@ -358,7 +358,7 @@ public final class RecordStack extends Records {
 		} else if (args[0].equals("-g")) {
 		    final RecordStack fm = new RecordStack(new File(args[2]), lens);
             final Row.Entry ret2 = fm.pop();
-		    ret = ((ret2 == null) ? null : ret2.getColBytes(1)); 
+		    ret = ((ret2 == null) ? null : ret2.getColBytes(1, true)); 
 		    fm.close();
 		}
 	    } else if (args.length == 4) {

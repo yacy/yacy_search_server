@@ -109,7 +109,7 @@ public class IndexCreateWWWLocalQueue_p {
                                         name.equals(CrawlSwitchboard.CRAWL_PROFILE_SURROGATE))
                                     continue;
                                 if (compiledPattern.matcher(name).find()) {
-                                    sb.crawler.profilesActiveCrawls.removeEntry(entry.handle());
+                                    sb.crawler.profilesActiveCrawls.removeEntry(entry.handle().getBytes());
                                 }
                             }
                         } else {
@@ -125,7 +125,7 @@ public class IndexCreateWWWLocalQueue_p {
                                     case ANCHOR:    value = entry.name(); break;
                                     case DEPTH:     value = Integer.toString(entry.depth()); break;
                                     case INITIATOR:
-                                        value = (entry.initiator() == null || entry.initiator().length() == 0) ? "proxy" : entry.initiator();
+                                        value = (entry.initiator() == null || entry.initiator().length == 0) ? "proxy" : new String(entry.initiator());
                                         break;
                                     case MODIFIED:  value = daydate(entry.loaddate()); break;
                                     default: value = null;
@@ -134,7 +134,7 @@ public class IndexCreateWWWLocalQueue_p {
                                 if (value != null) {
                                     final Matcher matcher = compiledPattern.matcher(value);
                                     if (matcher.find()) {
-                                        sb.crawlQueues.noticeURL.removeByURLHash(entry.url().hash().getBytes());
+                                        sb.crawlQueues.noticeURL.removeByURLHash(entry.url().hash());
                                     }                                    
                                 }
                             }
@@ -170,7 +170,7 @@ public class IndexCreateWWWLocalQueue_p {
             for (i = 0; (i < crawlerList.size()) && (showNum < showLimit); i++) {
                 urle = crawlerList.get(i);
                 if ((urle != null)&&(urle.url()!=null)) {
-                    initiator = sb.peers.getConnected(urle.initiator());
+                    initiator = sb.peers.getConnected(urle.initiator() == null ? "" : new String(urle.initiator()));
                     profileHandle = urle.profileHandle();
                     profileEntry = (profileHandle == null) ? null : sb.crawler.profilesActiveCrawls.getEntry(profileHandle);
                     prop.put("crawler-queue_list_"+showNum+"_dark", dark ? "1" : "0");

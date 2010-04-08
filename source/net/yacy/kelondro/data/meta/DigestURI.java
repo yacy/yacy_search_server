@@ -82,7 +82,8 @@ public class DigestURI implements Serializable {
     }
     
     // class variables
-    private String protocol, host, userInfo, path, quest, ref, hash;
+    private String protocol, host, userInfo, path, quest, ref;
+    private byte[] hash;
     private int port;
     
     public static String domhash(final String host) {
@@ -95,7 +96,7 @@ public class DigestURI implements Serializable {
             Log.logException(e);
             return null;
         }
-        return (url == null) ? null : url.hash().substring(6);
+        return (url == null) ? null : new String(url.hash()).substring(6);
     }
     
     public DigestURI(final File file) throws MalformedURLException {
@@ -106,7 +107,7 @@ public class DigestURI implements Serializable {
         this(url, null);
     }
     
-    public DigestURI(final String url, final String hash) throws MalformedURLException {
+    public DigestURI(final String url, final byte[] hash) throws MalformedURLException {
         if (url == null) throw new MalformedURLException("url string is null");
         
         parseURLString(url);
@@ -746,7 +747,7 @@ public class DigestURI implements Serializable {
      */
     @Override
     public int hashCode() {
-        return this.hash().hashCode();
+        return new String(this.hash()).hashCode();
     }
 
     /* (non-Javadoc)
@@ -818,7 +819,7 @@ public class DigestURI implements Serializable {
         return (Base64Order.enhancedCoder.decodeByte(hash.charAt(11)) & 3);
     }
 
-    public final String hash() {
+    public final byte[] hash() {
         // in case that the object was initialized without a known url hash, compute it now
         synchronized (this) {
             if (this.hash == null) this.hash = urlHashComputation();
@@ -826,7 +827,7 @@ public class DigestURI implements Serializable {
         return this.hash;
     }
 
-    private final String urlHashComputation() {
+    private final byte[] urlHashComputation() {
         // the url hash computation needs a DNS lookup to check if the addresses domain is local
         // that causes that this method may be very slow
         
@@ -863,19 +864,26 @@ public class DigestURI implements Serializable {
         final byte flagbyte = (byte) (((isHTTP) ? 0 : 32) | (id << 2) | domlengthKey);
 
         // combine the attributes
-        final StringBuilder hash = new StringBuilder(12);
+        final StringBuilder hashs = new StringBuilder(12);
+        assert hashs.length() == 0;
         // form the 'local' part of the hash
         String normalform = toNormalform(true, true, true);
         String b64l = Base64Order.enhancedCoder.encode(Digest.encodeMD5Raw(normalform));
         if (b64l.length() < 5) return null;
-        hash.append(b64l.substring(0, 5)); // 5 chars
-        hash.append(subdomPortPath(subdom, port, rootpath)); // 1 char
+        hashs.append(b64l.substring(0, 5)); // 5 chars
+        assert hashs.length() == 5;
+        hashs.append(subdomPortPath(subdom, port, rootpath)); // 1 char
+        assert hashs.length() == 6;
         // form the 'global' part of the hash
-        hash.append(hosthash5(this.protocol, host, port)); // 5 chars
-        hash.append(Base64Order.enhancedCoder.encodeByte(flagbyte)); // 1 char
+        hashs.append(hosthash5(this.protocol, host, port)); // 5 chars
+        assert hashs.length() == 11;
+        hashs.append(Base64Order.enhancedCoder.encodeByte(flagbyte)); // 1 char
+        assert hashs.length() == 12;
 
         // return result hash
-        return hash.toString();
+        byte[] b = hashs.toString().getBytes();
+        assert b.length == 12;
+        return b;
     }
     
     private static char subdomPortPath(final String subdom, final int port, final String rootpath) {
@@ -885,8 +893,8 @@ public class DigestURI implements Serializable {
     private static final char rootURLFlag0 = subdomPortPath("", 80, "");
     private static final char rootURLFlag1 = subdomPortPath("www", 80, "");
 
-    public static final boolean probablyRootURL(final String urlHash) {
-        return (urlHash.charAt(5) == rootURLFlag0) || (urlHash.charAt(5) == rootURLFlag1);
+    public static final boolean probablyRootURL(final byte[] urlHash) {
+        return (urlHash[5] == rootURLFlag0) || (urlHash[5] == rootURLFlag1);
     }
 
     private static final String hosthash5(final String protocol, final String host, final int port) {
@@ -923,13 +931,13 @@ public class DigestURI implements Serializable {
     
     private static String[] testTLDs = new String[] { "com", "net", "org", "uk", "fr", "de", "es", "it" };
 
-    public static final DigestURI probablyWordURL(final String urlHash, final TreeSet<String> words) {
+    public static final DigestURI probablyWordURL(final byte[] urlHash, final TreeSet<String> words) {
         final Iterator<String> wi = words.iterator();
         String word;
         while (wi.hasNext()) {
             word = wi.next();
             if ((word == null) || (word.length() == 0)) continue;
-            final String pattern = urlHash.substring(6, 11);
+            final String pattern = new String(urlHash).substring(6, 11);
             for (int i = 0; i < testTLDs.length; i++) {
                 if (pattern.equals(hosthash5("http", "www." + word.toLowerCase() + "." + testTLDs[i], 80)))
                     try {
@@ -942,11 +950,11 @@ public class DigestURI implements Serializable {
         return null;
     }
 
-    public static final boolean isWordRootURL(final String givenURLHash, final TreeSet<String> words) {
+    public static final boolean isWordRootURL(final byte[] givenURLHash, final TreeSet<String> words) {
         if (!(probablyRootURL(givenURLHash))) return false;
         final DigestURI wordURL = probablyWordURL(givenURLHash, words);
         if (wordURL == null) return false;
-        if (wordURL.hash().equals(givenURLHash)) return true;
+        if (Base64Order.enhancedCoder.equal(wordURL.hash(), givenURLHash)) return true;
         return false;
     }
 
@@ -973,19 +981,19 @@ public class DigestURI implements Serializable {
         return domLengthEstimation(urlHashBytes) << 8 / 20;
     }
 
-    public static final int domDomain(final String urlHash) {
+    public static final int domDomain(final byte[] urlHash) {
         // returns the ID of the domain of the domain
         assert (urlHash != null);
-        assert (urlHash.length() == 12 || urlHash.length() == 6) : "urlhash = " + urlHash;
-        return (Base64Order.enhancedCoder.decodeByte(urlHash.charAt((urlHash.length() == 12) ? 11 : 5)) & 28) >> 2;
+        assert (urlHash.length == 12 || urlHash.length == 6) : "urlhash = " + new String(urlHash);
+        return (Base64Order.enhancedCoder.decodeByte(urlHash[(urlHash.length == 12) ? 11 : 5]) & 28) >> 2;
     }
 
 
-    public static boolean isDomDomain(final String urlHash, final int id) {
+    public static boolean isDomDomain(final byte[] urlHash, final int id) {
         return domDomain(urlHash) == id;
     }
     
-    public static boolean matchesAnyDomDomain(final String urlHash, final int idset) {
+    public static boolean matchesAnyDomDomain(final byte[] urlHash, final int idset) {
         // this is a boolean matching on a set of domDomains
         return (domDomain(urlHash) | idset) != 0;
     }
@@ -1002,7 +1010,7 @@ public class DigestURI implements Serializable {
         return domDomain(this.hash) == 7;
     }
 
-    public static final boolean isLocal(final String urlhash) {
+    public static final boolean isLocal(final byte[] urlhash) {
         return domDomain(urlhash) == 7;
     }
 
@@ -1282,7 +1290,7 @@ public class DigestURI implements Serializable {
             environment = test[i][0];
             url = test[i][1];
             try {aURL = DigestURI.newURL(environment, url);} catch (final MalformedURLException e) {Log.logException(e); aURL = null;}
-            if (aURL != null) System.out.println("normalized: " + aURL.toNormalform(true, true,  true) + " - hash=" + aURL.hash());
+            if (aURL != null) System.out.println("normalized: " + aURL.toNormalform(true, true,  true) + " - hash=" + new String(aURL.hash()));
             if (environment == null) {
                 try {jURL = new java.net.URL(url);} catch (final MalformedURLException e) {jURL = null;}
             } else {

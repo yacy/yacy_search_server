@@ -586,7 +586,7 @@ public final class yacyClient {
 			// passed all checks, store url
 			try {
 			    indexSegment.urlMetadata().store(urlEntry);
-				crawlResults.stack(urlEntry, mySeed.hash, target.hash, EventOrigin.QUERIES);
+				crawlResults.stack(urlEntry, mySeed.hash.getBytes(), target.hash.getBytes(), EventOrigin.QUERIES);
 			} catch (final IOException e) {
 				yacyCore.log.logSevere("could not store search result", e);
 				continue; // db-error
@@ -1036,12 +1036,13 @@ public final class yacyClient {
             gzipBody = false;
         }
         
-        String resource = "";
+        String resource;
         int urlc = 0;
         int urlPayloadSize = 0;
         for (int i = 0; i < urls.length; i++) {
             if (urls[i] != null) {
-                resource = urls[i].toString();                
+                resource = urls[i].toString();
+                //System.out.println("*** DEBUG resource = " + resource);
                 if (resource != null) {
                     post.add(new DefaultCharsetStringPart("url" + urlc, resource));
                     urlPayloadSize += resource.length();

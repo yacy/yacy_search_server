@@ -1032,7 +1032,7 @@ public final class Switchboard extends serverSwitch {
     	}
     }
 
-    public String urlExists(final Segments.Process process, final String hash) {
+    public String urlExists(final Segments.Process process, final byte[] hash) {
         // tests if hash occurrs in any database
         // if it exists, the name of the database is returned,
         // if it not exists, null is returned
@@ -1052,9 +1052,9 @@ public final class Switchboard extends serverSwitch {
         crawlQueues.urlRemove(hash);
     }
     
-    public DigestURI getURL(final Segments.Process process, final String urlhash) {
+    public DigestURI getURL(final Segments.Process process, final byte[] urlhash) {
         if (urlhash == null) return null;
-        if (urlhash.length() == 0) return null;
+        if (urlhash.length == 0) return null;
         final DigestURI ne = crawlQueues.getURL(urlhash);
         if (ne != null) return ne;
         final URIMetadataRow le = indexSegments.urlMetadata(process).load(urlhash, null, 0);
@@ -1224,7 +1224,7 @@ public final class Switchboard extends serverSwitch {
             // log cause and close queue
             final DigestURI referrerURL = response.referrerURL();
             if (log.isFine()) log.logFine("deQueue: not indexed any word in URL " + response.url() + "; cause: " + noIndexReason);
-            addURLtoErrorDB(response.url(), (referrerURL == null) ? "" : referrerURL.hash(), response.initiator(), response.name(), noIndexReason);
+            addURLtoErrorDB(response.url(), (referrerURL == null) ? null : referrerURL.hash(), response.initiator(), response.name(), noIndexReason);
             // finish this entry
             return "not allowed: " + noIndexReason;
         }
@@ -1265,7 +1265,7 @@ public final class Switchboard extends serverSwitch {
                 // create a queue entry
                 Document document = surrogate.document();
                 Request request = new Request(
-                        peers.mySeed().hash, 
+                        peers.mySeed().hash.getBytes(), 
                         surrogate.getIdentifier(), 
                         null, 
                         "", 
@@ -1638,7 +1638,7 @@ public final class Switchboard extends serverSwitch {
                 ", maxDepth=" + ((response.profile() == null) ? "null" : Integer.toString(response.profile().depth())) +
                 ", must-match=" + ((response.profile() == null) ? "null" : response.profile().mustMatchPattern().toString()) +
                 ", must-not-match=" + ((response.profile() == null) ? "null" : response.profile().mustNotMatchPattern().toString()) +
-                ", initiatorHash=" + response.initiator() +
+                ", initiatorHash=" + new String(response.initiator()) +
                 //", responseHeader=" + ((entry.responseHeader() == null) ? "null" : entry.responseHeader().toString()) +
                 ", url=" + response.url()); // DEBUG
         
@@ -1782,13 +1782,13 @@ public final class Switchboard extends serverSwitch {
 
         if (condenser == null || document.indexingDenied()) {
             if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by rule in document, process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? "" : referrerURL.hash(), queueEntry.initiator(), dc_title, "unknown indexing process case"  + processCase);
+            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "unknown indexing process case"  + processCase);
             return;
         }
         
         if (!queueEntry.profile().indexText() && !queueEntry.profile().indexMedia()) {
             if (this.log.isInfo()) log.logInfo("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': denied by profile rule, process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? "" : referrerURL.hash(), queueEntry.initiator(), dc_title, "unknown indexing process case"  + processCase);
+            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "unknown indexing process case"  + processCase);
             return;
         }
         
@@ -1805,19 +1805,19 @@ public final class Switchboard extends serverSwitch {
                     queueEntry.size(),
                     document,
                     condenser);
-            RSSFeed.channels((queueEntry.initiator().equals(peers.mySeed().hash)) ? RSSFeed.LOCALINDEXING : RSSFeed.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
+            RSSFeed.channels(Base64Order.enhancedCoder.equal(queueEntry.initiator(), peers.mySeed().hash.getBytes()) ? RSSFeed.LOCALINDEXING : RSSFeed.REMOTEINDEXING).addMessage(new RSSMessage("Indexed web page", dc_title, queueEntry.url().toNormalform(true, false)));
         } catch (final IOException e) {
             if (this.log.isFine()) log.logFine("Not Indexed Resource '" + queueEntry.url().toNormalform(false, true) + "': process case=" + processCase);
-            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? "" : referrerURL.hash(), queueEntry.initiator(), dc_title, "error storing url: " + e.getMessage());
+            addURLtoErrorDB(queueEntry.url(), (referrerURL == null) ? null : referrerURL.hash(), queueEntry.initiator(), dc_title, "error storing url: " + e.getMessage());
             return;
         }
         
         // update url result list statistics
         crawlResults.stack(
-                newEntry,                 // loaded url db entry
-                queueEntry.initiator(),   // initiator peer hash
-                this.peers.mySeed().hash, // executor peer hash
-                processCase               // process case
+                newEntry,                            // loaded url db entry
+                queueEntry.initiator(),              // initiator peer hash
+                this.peers.mySeed().hash.getBytes(), // executor peer hash
+                processCase                          // process case
         );
         
         // increment number of indexed urls
@@ -1834,12 +1834,12 @@ public final class Switchboard extends serverSwitch {
         
         // if this was performed for a remote crawl request, notify requester
         if ((processCase == EventOrigin.GLOBAL_CRAWLING) && (queueEntry.initiator() != null)) {
-            final yacySeed initiatorPeer = peers.get(queueEntry.initiator());
+            final yacySeed initiatorPeer = peers.get(new String(queueEntry.initiator()));
             if (initiatorPeer != null) {
                 log.logInfo("Sending crawl receipt for '" + queueEntry.url().toNormalform(false, true) + "' to " + initiatorPeer.getName());
-                if (clusterhashes != null) initiatorPeer.setAlternativeAddress(clusterhashes.get(queueEntry.initiator().getBytes()));
+                if (clusterhashes != null) initiatorPeer.setAlternativeAddress(clusterhashes.get(queueEntry.initiator()));
                 // start a thread for receipt sending to avoid a blocking here
-                new Thread(new receiptSending(initiatorPeer, newEntry), "sending receipt to " + queueEntry.initiator()).start();
+                new Thread(new receiptSending(initiatorPeer, newEntry), "sending receipt to " + new String(queueEntry.initiator())).start();
             }
         }
     }
@@ -1880,7 +1880,7 @@ public final class Switchboard extends serverSwitch {
         // authorization for localhost, only if flag is set to grant localhost access as admin
         final String clientIP = requestHeader.get(HeaderFramework.CONNECTION_PROP_CLIENTIP, "");
         final String refererHost = requestHeader.refererHost();
-        boolean accessFromLocalhost = Domains.isLocal(clientIP) && (refererHost.length() == 0 || Domains.isLocal(refererHost));
+        boolean accessFromLocalhost = Domains.isLocal(clientIP) && (refererHost == null || refererHost.length() == 0 || Domains.isLocal(refererHost));
         if (getConfigBool("adminAccountForLocalhost", false) && accessFromLocalhost) return 3; // soft-authenticated for localhost
         
         // get the authorization string from the header
@@ -2041,8 +2041,8 @@ public final class Switchboard extends serverSwitch {
 
     private void addURLtoErrorDB(
             final DigestURI url, 
-            final String referrerHash, 
-            final String initiator, 
+            final byte[] referrerHash, 
+            final byte[] initiator, 
             final String name, 
             final String failreason
     ) {

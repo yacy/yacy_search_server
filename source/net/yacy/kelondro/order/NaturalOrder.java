@@ -29,6 +29,9 @@ package net.yacy.kelondro.order;
 import java.util.Comparator;
 import java.util.Iterator;
 
+import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
+
 public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrder, Comparator<byte[]>, Cloneable {
     
     public static final ByteOrder naturalOrder = new NaturalOrder(true);
@@ -36,6 +39,10 @@ public final class NaturalOrder extends AbstractOrder<byte[]> implements ByteOrd
     public NaturalOrder(final boolean ascending) {
         this.asc = ascending;
         this.zero = null;
+    }
+    
+    public HandleSet getHandleSet(final int keylength, final int space) throws RowSpaceExceededException {
+        return new HandleSet(keylength, this, space, space);
     }
     
     public boolean wellformed(final byte[] a) {

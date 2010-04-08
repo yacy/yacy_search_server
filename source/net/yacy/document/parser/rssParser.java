@@ -112,7 +112,7 @@ public class rssParser extends AbstractParser implements Idiom {
         if (feed.getImage() != null) {
             try {
                 DigestURI imgURL = new DigestURI(feed.getImage(), null);
-                images.put(imgURL.hash(), new ImageEntry(imgURL, feedTitle, -1, -1, -1));
+                images.put(new String(imgURL.hash()), new ImageEntry(imgURL, feedTitle, -1, -1, -1));
             } catch (MalformedURLException e) {}
         }            
         

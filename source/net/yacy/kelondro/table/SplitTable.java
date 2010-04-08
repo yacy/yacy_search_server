@@ -333,7 +333,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     
     public synchronized Row.Entry replace(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
-        ObjectIndex keeper = keeperOf(row.getColBytes(0));
+        ObjectIndex keeper = keeperOf(row.getColBytes(0, true));
         if (keeper != null) return keeper.replace(row);
         keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
         keeper.put(row);
@@ -342,7 +342,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     
     public synchronized void put(final Row.Entry row) throws IOException, RowSpaceExceededException {
         assert row.objectsize() <= this.rowdef.objectsize;
-        ObjectIndex keeper = keeperOf(row.getColBytes(0));
+        ObjectIndex keeper = keeperOf(row.getColBytes(0, true));
         if (keeper != null) {keeper.put(row); return;}
         assert this.current == null || this.tables.get(this.current) != null : "this.current = " + this.current;
         keeper = (this.current == null) ? newTable() : checkTable(this.tables.get(this.current));
@@ -464,6 +464,7 @@ public class SplitTable implements ObjectIndex, Iterable<Row.Entry> {
     private ObjectIndex keeperOf(final byte[] key) {
         //if (!discoveriesAlive()) {
             //synchronized (tables) {
+        if (key == null) return null;
                 for (ObjectIndex oi: tables.values()) {
                     if (oi.has(key)) return oi;
                 }

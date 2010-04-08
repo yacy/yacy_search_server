@@ -48,7 +48,7 @@ public interface URIMetadata {
 
     public Date freshdate();
 
-    public String referrerHash();
+    public byte[] referrerHash();
 
     public String md5();
 
