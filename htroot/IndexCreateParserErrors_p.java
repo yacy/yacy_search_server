@@ -83,8 +83,8 @@ public class IndexCreateParserErrors_p {
                 
                 initiatorHash = entry.initiator();
                 executorHash = entry.executor();
-                initiatorSeed = sb.peers.getConnected(new String(initiatorHash));
-                executorSeed = sb.peers.getConnected(new String(executorHash));
+                initiatorSeed = (initiatorHash == null) ? null : sb.peers.getConnected(new String(initiatorHash));
+                executorSeed = (executorHash == null) ? null : sb.peers.getConnected(new String(executorHash));
                 prop.putHTML("rejected_list_"+j+"_initiator", ((initiatorSeed == null) ? "proxy" : initiatorSeed.getName()));
                 prop.putHTML("rejected_list_"+j+"_executor", ((executorSeed == null) ? "proxy" : executorSeed.getName()));
                 prop.putHTML("rejected_list_"+j+"_url", url.toNormalform(false, true));

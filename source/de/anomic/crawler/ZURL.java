@@ -126,7 +126,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             final Date workdate,
             final int workcount,
             String anycause) {
-        assert executor != null;
+        // assert executor != null; // null == proxy !
         if (exists(bentry.url().hash())) return; // don't insert double causes
         if (anycause == null) anycause = "unknown";
         Entry entry = new Entry(bentry, executor, workdate, workcount, anycause);
@@ -232,7 +232,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
                 final String anycause) {
             // create new entry
             assert bentry != null;
-            assert executor != null;
+            // assert executor != null; // null == proxy !
             this.bentry = bentry;
             this.executor = executor;
             this.workdate = (workdate == null) ? new Date() : workdate;
