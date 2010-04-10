@@ -1043,7 +1043,7 @@ public final class yacyClient {
             if (urls[i] != null) {
                 resource = urls[i].toString();
                 //System.out.println("*** DEBUG resource = " + resource);
-                if (resource != null) {
+                if (resource != null && resource.indexOf(0) == -1) {
                     post.add(new DefaultCharsetStringPart("url" + urlc, resource));
                     urlPayloadSize += resource.length();
                     urlc++;
