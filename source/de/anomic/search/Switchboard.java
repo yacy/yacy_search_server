@@ -2046,7 +2046,7 @@ public final class Switchboard extends serverSwitch {
             final String name, 
             final String failreason
     ) {
-        assert initiator != null;
+        // assert initiator != null; // null == proxy
         // create a new errorURL DB entry
         final Request bentry = new Request(
                 initiator, 

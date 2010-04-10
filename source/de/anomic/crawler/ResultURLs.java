@@ -69,7 +69,7 @@ public final class ResultURLs {
             final byte[] initiatorHash,
             final byte[] executorHash,
             final EventOrigin stackType) {
-        assert initiatorHash != null;
+        // assert initiatorHash != null; // null == proxy !
         assert executorHash != null;
         if (e == null) { return; }
         try {
