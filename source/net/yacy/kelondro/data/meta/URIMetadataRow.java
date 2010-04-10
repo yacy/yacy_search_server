@@ -416,8 +416,16 @@ public class URIMetadataRow implements URIMetadata {
     }
 
     public byte[] referrerHash() {
-        // return the creator's hash
-        return entry.getColBytes(col_referrer, true);
+        // return the creator's hash or null if there is none
+        // FIXME: There seem to be some malformed entries in the databasees like "null\0\0\0\0\0\0\0\0"
+        final byte[] r = entry.getColBytes(col_referrer, true);
+        if (r != null) {
+            int i = r.length;
+            while (i > 0) {
+                if (r[--i] == 0) return null;
+            }
+        }
+        return r;
     }
 
     public String md5() {
