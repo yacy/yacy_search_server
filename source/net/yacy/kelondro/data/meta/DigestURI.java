@@ -893,8 +893,14 @@ public class DigestURI implements Serializable {
     private static final char rootURLFlag0 = subdomPortPath("", 80, "");
     private static final char rootURLFlag1 = subdomPortPath("www", 80, "");
 
+    public static final boolean probablyRootURL(String urlHash) {
+    	char c = urlHash.charAt(5);
+        return c == rootURLFlag0 || c == rootURLFlag1;
+    }
+
     public static final boolean probablyRootURL(final byte[] urlHash) {
-        return (urlHash[5] == rootURLFlag0) || (urlHash[5] == rootURLFlag1);
+    	char c = (char) urlHash[5];
+        return c == rootURLFlag0 || c == rootURLFlag1;
     }
 
     private static final String hosthash5(final String protocol, final String host, final int port) {

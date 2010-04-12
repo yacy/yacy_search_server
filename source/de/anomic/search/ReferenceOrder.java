@@ -173,8 +173,8 @@ public class ReferenceOrder {
            + ((flags.get(Condenser.flag_cat_hasaudio))     ? 255 << ranking.coeff_cathasaudio        : 0)
            + ((flags.get(Condenser.flag_cat_hasvideo))     ? 255 << ranking.coeff_cathasvideo        : 0)
            + ((flags.get(Condenser.flag_cat_hasapp))       ? 255 << ranking.coeff_cathasapp          : 0)
-           + ((patchUK(t.language).equals(this.language))        ? 255 << ranking.coeff_language           : 0)
-           + ((DigestURI.probablyRootURL(t.metadataHash().getBytes()))             ?  15 << ranking.coeff_urllength          : 0);
+           + ((patchUK(t.language).equals(this.language))  ? 255 << ranking.coeff_language           : 0)
+           + ((DigestURI.probablyRootURL(t.metadataHash())) ?  15 << ranking.coeff_urllength          : 0);
         //if (searchWords != null) r += (yacyURL.probablyWordURL(t.urlHash(), searchWords) != null) ? 256 << ranking.coeff_appurl : 0;
 
         return Long.MAX_VALUE - r; // returns a reversed number: the lower the number the better the ranking. This is used for simple sorting with a TreeMap

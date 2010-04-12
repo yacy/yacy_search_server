@@ -392,7 +392,7 @@ public class URIMetadataRow implements URIMetadata {
         // avoid double computation of metadata elements
         if (this.comp != null) return this.comp;
         // parse elements from comp string;
-        final Iterator<String> cl = FileUtils.strings(this.entry.getCol("comp", null));
+        final Iterator<String> cl = FileUtils.strings(this.entry.getColBytes(col_comp, true));
         this.comp = new Components(
                     (cl.hasNext()) ? cl.next() : "",
                     hash(),
