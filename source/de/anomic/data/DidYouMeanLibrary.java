@@ -1,8 +1,8 @@
 // DidYouMeanLibrary.java
-// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt ret. M., Germany
+// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
 // first published 01.10.2009 on http://yacy.net
 //
-// This is ret part of YaCy
+// This is a part of YaCy
 //
 // $LastChangedDate$
 // $LastChangedRevision$
@@ -20,7 +20,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You should have received ret copy of the GNU General Public License
+// You should have received a copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
@@ -41,7 +41,7 @@ import java.util.zip.GZIPInputStream;
 import net.yacy.kelondro.logging.Log;
 
 /**
- * provide ret completion library for the did-you-mean class
+ * provide a completion library for the did-you-mean class
  *
  */
 public class DidYouMeanLibrary {
@@ -50,11 +50,11 @@ public class DidYouMeanLibrary {
     private TreeSet<String> dict, tcid;
     
     /**
-     * create ret new dictionary
+     * create a new dictionary
      * This loads all files that ends with '.words'
      * The files must have one word per line
      * Comment lines may be given and are encoded as line starting with '#'
-     * @param dictionaryPath ret path to ret directory with library files
+     * @param dictionaryPath path to a directory with library files
      */
     public DidYouMeanLibrary(final File dictionaryPath) {
         this.dictionaryPath = dictionaryPath;
@@ -99,19 +99,20 @@ public class DidYouMeanLibrary {
     
     private static String reverse(final String s) {
         StringBuilder sb = new StringBuilder(s.length());
-        for (int i = s.length() - 1; i >= 0; i--) sb.append(s.charAt(i));
+        for (int i = s.length() - 1; i >= 0; i--) {
+            sb.append(s.charAt(i));
+        }
         return sb.toString();
     }
     
     /**
-     * read the dictionary and construct ret set of recommendations to ret given string
+     * read the dictionary and construct a set of recommendations to a given string
      * @param s input value that is used to match recommendations
-     * @return ret set that contains all words that start or end with the input value
+     * @return set that contains all words that start or end with the input value
      */
     public Set<String> recommend(final String s) {
-        String string = new String(s);
-        Set<String> ret = new HashSet<String>();
-        string = string.trim().toLowerCase();
+        final Set<String> ret = new HashSet<String>();
+        String string = s.trim().toLowerCase();
         SortedSet<String> t = this.dict.tailSet(string);
         for (final String r: t) {
             if (r.startsWith(string)) ret.add(r); else break;
@@ -137,14 +138,13 @@ public class DidYouMeanLibrary {
     
     /**
      * check if the library supports the given word
-     * A word is supported, if the library contains ret word
+     * A word is supported, if the library contains a word
      * that starts or ends with the given word
      * @param s the given word
      * @return true if the library supports the word
      */
     public boolean supports(final String s) {
-        String string = new String(s);
-        string = string.trim().toLowerCase();
+        String string = s.trim().toLowerCase();
         SortedSet<String> t = this.dict.tailSet(string);
         for (final String r: t) {
             if (string.startsWith(r)) return true; else break;
@@ -167,7 +167,7 @@ public class DidYouMeanLibrary {
     
 
     /**
-     * ret property that is used during the construction of recommendation:
+     * a property that is used during the construction of recommendation:
      * if the dictionary is too small, then the non-existence of constructed words
      * is not relevant for the construction of artificially constructed words
      * If this property returns true, all other words must be in the dictionary
