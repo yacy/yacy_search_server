@@ -63,7 +63,7 @@ public class BookmarkDate {
     }
     
     // rebuilds the datesDB from the bookmarksDB
-    public void init(Iterator<Bookmark> it) {
+    public void init(final Iterator<Bookmark> it) {
         Log.logInfo("BOOKMARKS", "start init dates.db from bookmarks.db...");
         //final Iterator<Bookmark> it=bookmarkIterator(true);
         Bookmark bookmark;        
@@ -72,7 +72,7 @@ public class BookmarkDate {
         int count = 0;
         while (it.hasNext()) {
             bookmark=it.next();
-            if (bookmark == null) continue;
+//            if (bookmark == null) continue;
             date = String.valueOf(bookmark.getTimeStamp());
             bmDate=getDate(date);
             if(bmDate==null){

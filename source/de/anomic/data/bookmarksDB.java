@@ -49,7 +49,6 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.NaturalOrder;
 import net.yacy.kelondro.util.DateFormatter;
-import net.yacy.kelondro.util.kelondroException;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.InstantBusyThread;
 
@@ -102,7 +101,7 @@ public class bookmarksDB {
         String[] tagArray;
         while(it.hasNext()){
             bookmark = it.next();
-            if (bookmark == null) continue;
+//            if (bookmark == null) continue;
             tagArray = BookmarkHelper.cleanTagsString(bookmark.getTagsString() + bookmark.getFoldersString()).split(",");
             tag = null;
             for (final String element : tagArray) {
@@ -374,7 +373,7 @@ public class bookmarksDB {
         Bookmark bm;
         while(it.hasNext()){
             bm=it.next();
-            if (bm == null) continue;
+//            if (bm == null) continue;
             if(priv || bm.getPublic()){
             	set.add(bm.getUrlHash());
             }
@@ -391,16 +390,16 @@ public class bookmarksDB {
             hashes=getTag(tagHash).getUrlHashes();
         }
         if(priv){
-        	set.addAll(hashes);
+            set.addAll(hashes);
         }else{
         	final Iterator<String> it=hashes.iterator();
-        	Bookmark bm;
-        	while(it.hasNext()){
-        		bm = getBookmark(it.next());
-        		if (bm != null && bm.getPublic()) {
-        			set.add(bm.getUrlHash());
-        		}
-        	}
+            Bookmark bm;
+            while(it.hasNext()){
+                bm = getBookmark(it.next());
+                if (bm != null && bm.getPublic()) {
+                    set.add(bm.getUrlHash());
+                }
+            }
         }
     	return set.iterator();
     }
@@ -448,11 +447,11 @@ public class bookmarksDB {
     	final Iterator<Tag> it = this.tags.values().iterator();
     	Tag tag;
     	while (it.hasNext()) {
-    		tag=it.next();
-    		if (tag == null) continue;
+            tag=it.next();
+            if (tag == null) continue;
     		if (priv ||tag.hasPublicItems()) {
-    			set.add(tag);
-    		}
+                set.add(tag);
+            }
     	}    	  		
     	return set.iterator();
     }
@@ -464,8 +463,8 @@ public class bookmarksDB {
     	final TreeSet<Tag> set=new TreeSet<Tag>((comp == SORT_SIZE) ? tagSizeComparator : tagComparator);
     	int count = 0;
     	while (it.hasNext() && count<=max) {
-    		set.add(it.next());
-    		count++;    		
+            set.add(it.next());
+            count++;
     	}    	
     	return set.iterator();
     }
@@ -478,28 +477,28 @@ public class bookmarksDB {
     	Tag tag;
     	Set<String> tagSet;
     	while(bit.hasNext()){
-    		bm=getBookmark(bit.next());
-    		tagSet = bm.getTags();
-    		it = tagSet.iterator();
-    		while (it.hasNext()) {
-    			tag=getTag(BookmarkHelper.tagHash(it.next()) );
-        		if(priv ||tag.hasPublicItems()){
-        			set.add(tag);
-        		}
-    		}
+            bm=getBookmark(bit.next());
+            tagSet = bm.getTags();
+            it = tagSet.iterator();
+            while (it.hasNext()) {
+                tag=getTag(BookmarkHelper.tagHash(it.next()) );
+                if((priv ||tag.hasPublicItems()) && tag != null){
+                        set.add(tag);
+                }
+            }
     	}
     	return set.iterator();
     }
     
     public Iterator<Tag> getTagIterator(final String tagName, final boolean priv, final int comp, final int max) {
     	if (max==SHOW_ALL) return getTagIterator(priv, comp);
-   		final Iterator<Tag> it = getTagIterator(tagName, priv, SORT_SIZE); 		
-   		final TreeSet<Tag> set=new TreeSet<Tag>((comp == SORT_SIZE) ? tagSizeComparator : tagComparator);
-   		int count = 0;
-   		while (it.hasNext() && count<=max) {
-   			set.add(it.next());
-   			count++;    		
-   		}
+            final Iterator<Tag> it = getTagIterator(tagName, priv, SORT_SIZE);
+            final TreeSet<Tag> set=new TreeSet<Tag>((comp == SORT_SIZE) ? tagSizeComparator : tagComparator);
+            int count = 0;
+            while (it.hasNext() && count<=max) {
+                set.add(it.next());
+                count++;
+            }
     	return set.iterator();
     }    
 
@@ -534,9 +533,9 @@ public class bookmarksDB {
     
     	Bookmark bookmark;
     	for (final String urlHash : getTag(BookmarkHelper.tagHash(selectTag)).getUrlHashes()) {	// looping through all bookmarks which were tagged with selectTag
-    		bookmark = getBookmark(urlHash);
-    		bookmark.addTag(newTag);
-    		saveBookmark(bookmark);
+            bookmark = getBookmark(urlHash);
+            bookmark.addTag(newTag);
+            saveBookmark(bookmark);
         }
     }
     
@@ -865,22 +864,11 @@ public class bookmarksDB {
         }
         
         public boolean hasNext() {
-            try {
-                return this.bookmarkIter.hasNext();
-            } catch (final kelondroException e) {
-            	Log.logException(e);
-                return false;
-            }
+            return this.bookmarkIter.hasNext();
         }
         
         public Bookmark next() {
-        	try {
-                String s = new String(this.bookmarkIter.next());
-                return getBookmark(s);
-        	} catch (final kelondroException e) {
-                Log.logException(e);
-                return null;
-            }
+            return getBookmark(new String(this.bookmarkIter.next()));
         }
         
         public void remove() {
