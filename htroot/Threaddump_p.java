@@ -85,12 +85,15 @@ public class Threaddump_p {
                 traces.add(Thread.getAllStackTraces());
                 if (MemoryControl.available() < 20 * 1024 * 1024) break;
             }
+            appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, null);
+            /*
             appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.BLOCKED);
             appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.RUNNABLE);
             appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.TIMED_WAITING);
             appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.WAITING);
             appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.NEW);
             appendStackTraceStats(sb.getRootPath(), buffer, traces, plain, Thread.State.TERMINATED);
+            */
         } else {
             // generate a single thread dump
             final Map<Thread,StackTraceElement[]> stackTraces = Thread.getAllStackTraces();
@@ -128,8 +131,10 @@ public class Threaddump_p {
     }
     
     private static void appendStackTraceStats(final File rootPath, final StringBuilder buffer, final ArrayList<Map<Thread,StackTraceElement[]>> traces, final boolean plain, final Thread.State stateIn) {
-        bufferappend(buffer, plain, "THREADS WITH STATES: " + stateIn.toString());
-        bufferappend(buffer, plain, "");
+        if (stateIn != null) {
+        	bufferappend(buffer, plain, "THREADS WITH STATES: " + stateIn.toString());
+        	bufferappend(buffer, plain, "");
+        }
         // collect single dumps
         HashMap<String, Integer> dumps = dumpStatistic(rootPath, traces, plain, stateIn);
         
@@ -188,7 +193,7 @@ public class Threaddump_p {
             String line;
             String tracename = "";
             File classFile;
-            if ((stateIn.equals(thread.getState())) && (stackTraceElements.length > 0)) {
+            if ((stateIn == null || stateIn.equals(thread.getState())) && stackTraceElements.length > 0) {
                 StringBuilder sb = new StringBuilder(3000);
                 if (plain) {
                     classFile = getClassFile(classPath, stackTraceElements[stackTraceElements.length - 1].getClassName());
