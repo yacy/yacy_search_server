@@ -141,7 +141,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     public final void terminateOldSessions(long minage) {
         if (System.currentTimeMillis() - lastAutoTermination < 3000) return;
         this.lastAutoTermination = System.currentTimeMillis();
-        //if (serverCore.sessionThreadGroup.activeCount() < maxBusySessions - 10) return; // don't panic
+        //if (serverCore.getJobCount() < maxBusySessions - 10) return; // don't panic
         
         for (Session s: getJobList()) {
             if (!s.isAlive()) continue;
@@ -309,8 +309,8 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         try {
             // prepare for new connection
             // idleThreadCheck();
-            this.switchboard.handleBusyState(sessionThreadGroup.activeCount());
-            if (this.log.isFinest()) this.log.logFinest("* waiting for connections, " + sessionThreadGroup.activeCount() + " sessions running");
+            this.switchboard.handleBusyState(getJobCount());
+            if (this.log.isFinest()) this.log.logFinest("* waiting for connections, " + getJobCount() + " sessions running");
             
             announceThreadBlockApply();
             
@@ -320,17 +320,17 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
             announceThreadBlockRelease();
             
             int pp, trycount = 0;
-            while ((pp = sessionThreadGroup.activeCount()) >= this.maxBusySessions) {
+            while ((pp = getJobCount()) >= this.maxBusySessions) {
                 terminateOldSessions(3000);
-                this.log.logInfo("termination of old sessions: before = " + pp + ", after = " + sessionThreadGroup.activeCount());
-                if (sessionThreadGroup.activeCount() < this.maxBusySessions) break;
+                this.log.logInfo("termination of old sessions: before = " + pp + ", after = " + getJobCount());
+                if (getJobCount() < this.maxBusySessions) break;
                 if (trycount++ > 5) break;
                 Thread.sleep(1000); // lets try again after a short break
             }
             
-            if (sessionThreadGroup.activeCount() >= this.maxBusySessions) {
+            if (getJobCount() >= this.maxBusySessions) {
                 // immediately close connection if too much sessions are still running
-                this.log.logWarning("* connections (" + sessionThreadGroup.activeCount() + ") exceeding limit (" + this.maxBusySessions + ")" + ", closing new incoming connection from "+ controlSocket.getRemoteSocketAddress());
+                this.log.logWarning("* connections (" + getJobCount() + ") exceeding limit (" + this.maxBusySessions + ")" + ", closing new incoming connection from "+ controlSocket.getRemoteSocketAddress());
                 
                 controlSocket.close();
                 return false;
@@ -454,7 +454,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     }
     
     public int getJobCount() {
-        return sessionThreadGroup.activeCount();
+        return getJobList().size();
     }
     
     public int getMaxSessionCount() {
@@ -468,7 +468,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     // idle sensor: the thread is idle if there are no sessions running
     public boolean idle() {
         // idleThreadCheck();
-        return (sessionThreadGroup.activeCount() == 0);
+        return (getJobCount() == 0);
     }
 
     public final class Session extends Thread {
@@ -558,7 +558,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
     
     	public void log(final boolean outgoing, final String request) {
     	    if (log.isFine()) log.logFine(this.userAddress.getHostAddress() + "/" + this.identity + " " +
-    		     "[" + sessionThreadGroup.activeCount() + ", " + this.commandCounter +
+    		     "[" + getJobCount() + ", " + this.commandCounter +
     		     ((outgoing) ? "] > " : "] < ") +
     		     request);
     	}
@@ -794,9 +794,9 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
                     // check if we should still keep this alive:
                     break; // no more keep-alive, not needed for speed and causes only trouble
                     /*
-                    if (sessionThreadGroup.activeCount() > maxBusySessions / 2) break;
+                    if (getJobCount() > maxBusySessions / 2) break;
                     // the more connections are alive, the shorter the keep alive timeout
-                    situationDependentKeepAliveTimeout = keepAliveTimeout / Math.max(1, sessionThreadGroup.activeCount() - 20);
+                    situationDependentKeepAliveTimeout = keepAliveTimeout / Math.max(1, getJobCount() - 20);
                     */
                 } // end of while
             } catch (final IOException e) {
