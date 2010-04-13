@@ -563,22 +563,22 @@ public final class Switchboard extends serverSwitch {
                 "storeDocumentIndex",
                 "This is the sequencing step of the indexing queue. Files are written as streams, too much councurrency would destroy IO performance. In this process the words are written to the RWI cache, which flushes if it is full.",
                 new String[]{"RWI/Cache/Collections"},
-                this, "storeDocumentIndex", WorkflowProcessor.useCPU + 40, null, indexerThreads);
+                this, "storeDocumentIndex", 2 * WorkflowProcessor.useCPU, null, indexerThreads);
         this.indexingAnalysisProcessor     = new WorkflowProcessor<indexingQueueEntry>(
                 "webStructureAnalysis",
                 "This just stores the link structure of the document into a web structure database.",
                 new String[]{"storeDocumentIndex"},
-                this, "webStructureAnalysis", WorkflowProcessor.useCPU + 20, indexingStorageProcessor, WorkflowProcessor.useCPU + 1);
+                this, "webStructureAnalysis", 2 * WorkflowProcessor.useCPU, indexingStorageProcessor, WorkflowProcessor.useCPU + 1);
         this.indexingCondensementProcessor = new WorkflowProcessor<indexingQueueEntry>(
                 "condenseDocument",
                 "This does a structural analysis of plain texts: markup of headlines, slicing into phrases (i.e. sentences), markup with position, counting of words, calculation of term frequency.",
                 new String[]{"webStructureAnalysis"},
-                this, "condenseDocument", WorkflowProcessor.useCPU + 10, indexingAnalysisProcessor, WorkflowProcessor.useCPU + 1);
+                this, "condenseDocument", 4 * WorkflowProcessor.useCPU, indexingAnalysisProcessor, WorkflowProcessor.useCPU + 1);
         this.indexingDocumentProcessor     = new WorkflowProcessor<indexingQueueEntry>(
                 "parseDocument",
                 "This does the parsing of the newly loaded documents from the web. The result is not only a plain text document, but also a list of URLs that are embedded into the document. The urls are handed over to the CrawlStacker. This process has two child process queues!",
                 new String[]{"condenseDocument", "CrawlStacker"},
-                this, "parseDocument", 2 * WorkflowProcessor.useCPU + 1, indexingCondensementProcessor, 2 * WorkflowProcessor.useCPU + 1);
+                this, "parseDocument", 4 * WorkflowProcessor.useCPU, indexingCondensementProcessor, WorkflowProcessor.useCPU + 1);
         
         // deploy busy threads
         log.logConfig("Starting Threads");
@@ -1925,8 +1925,8 @@ public final class Switchboard extends serverSwitch {
         // 10   <  wantedPPM <  1000: custom performance
         // 1000 <= wantedPPM        : maximum performance
         if (wPPM <= 10) wPPM = 10;
-        if (wPPM >= 6000) wPPM = 6000;
-        final int newBusySleep = 60000 / wPPM; // for wantedPPM = 10: 6000; for wantedPPM = 1000: 60
+        if (wPPM >= 30000) wPPM = 30000;
+        final int newBusySleep = 30000 / wPPM; // for wantedPPM = 10: 6000; for wantedPPM = 1000: 60
 
         BusyThread thread;
         

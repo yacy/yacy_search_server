@@ -28,13 +28,12 @@ package net.yacy.kelondro.util;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class EventTracker {
     
-    private final static Map<String, Queue<Event>> historyMaps = new ConcurrentHashMap<String, Queue<Event>>();
+    private final static Map<String, ConcurrentLinkedQueue<Event>> historyMaps = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Event>>();
     private final static Map<String, Long> eventAccess = new ConcurrentHashMap<String, Long>(); // value: last time when this was accessed
     
     public final static void update(
@@ -58,7 +57,7 @@ public class EventTracker {
         }
         
         // get event history container
-        Queue<Event> history = historyMaps.get(eventName);
+        ConcurrentLinkedQueue<Event> history = historyMaps.get(eventName);
         
         // create history
         if (history == null) {
@@ -73,28 +72,28 @@ public class EventTracker {
         }
         
         // update history
-        synchronized (history) {
-
-            // update entry
-            history.offer(new Event(eventPayload));
-            
-            // clean up too old entries
-            int tp = history.size() - maxQueueSize;
-            while (tp-- > 0) history.poll();
-            if (history.size() % 10 == 0) { // reduce number of System.currentTimeMillis() calls
-                Event e;
-                final long now = System.currentTimeMillis();
-                while (history.size() > 0) {
-                    e = history.peek();
-                    if (now - e.time < maxQueueAge) break;
-                    history.poll();
+        history.offer(new Event(eventPayload));
+        
+        // clean up too old entries
+        int tp = history.size() - maxQueueSize;
+        while (tp-- > 0) history.poll();
+        if (history.size() % 10 == 0) { // reduce number of System.currentTimeMillis() calls
+            synchronized (history) {
+                if (history.size() % 10 == 0) { // check again
+                    Event e;
+                    final long now = System.currentTimeMillis();
+                    while (history.size() > 0) {
+                        e = history.peek();
+                        if (now - e.time < maxQueueAge) break;
+                        history.poll();
+                    }
                 }
             }
         }
     }
     
     public final static Iterator<Event> getHistory(final String eventName) {
-        Queue<Event> list = historyMaps.get(eventName);
+        ConcurrentLinkedQueue<Event> list = historyMaps.get(eventName);
         if (list == null) return null;
         return list.iterator();
     }

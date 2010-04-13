@@ -163,7 +163,7 @@ public abstract class AbstractBusyThread extends AbstractThread implements BusyT
                 if (isBusy) {
                     memstamp1 = MemoryControl.used();
                     if (memstamp1 >= memstamp0) {
-                        // no GC in between. this is not shure but most probable
+                        // no GC in between. this is not sure but most probable
                         memuse += memstamp1 - memstamp0;
                     } else {
                         // GC was obviously in between. Add an average as simple heuristic

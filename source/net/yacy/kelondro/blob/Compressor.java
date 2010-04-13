@@ -32,7 +32,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -52,7 +52,7 @@ public class Compressor implements BLOB {
     static byte[] plainMagic = {(byte) 'p', (byte) '|'}; // magic for plain content (no encoding)
     
     private final BLOB backend;
-    private LinkedHashMap<String, byte[]> buffer; // entries which are not yet compressed, format is RAW (without magic)
+    private HashMap<String, byte[]> buffer; // entries which are not yet compressed, format is RAW (without magic)
     private BlockingQueue<Entity> writeQueue;
     private long bufferlength;
     private final long maxbufferlength;
@@ -131,22 +131,7 @@ public class Compressor implements BLOB {
     }
     
     private void initBuffer() {
-        this.buffer = new LinkedHashMap<String, byte[]>(100, 0.1f, false) {
-            private static final long serialVersionUID = 1L;
-            @Override
-            protected boolean removeEldestEntry(final Map.Entry<String, byte[]> eldest) {
-                if (size() > 100) {
-                    try {
-                        Compressor.this.writeQueue.put(new Entity(eldest.getKey(), eldest.getValue()));
-                    } catch (InterruptedException e) {
-                        Log.logException(e);
-                    }
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        };
+        this.buffer = new HashMap<String, byte[]>();
         this.bufferlength = 0;
     }
 
@@ -300,16 +285,17 @@ public class Compressor implements BLOB {
         return 0;
     }
     
-    public synchronized void put(byte[] key, byte[] b) throws IOException {
+    public void put(byte[] key, byte[] b) throws IOException {
         
         // first ensure that the files do not exist anywhere
         remove(key);
         
         // check if the buffer is full or could be full after this write
-        if (this.bufferlength + b.length * 2 > this.maxbufferlength) {
+        if (this.bufferlength + b.length * 2 > this.maxbufferlength) synchronized (this) {
             // in case that we compress, just compress as much as is necessary to get enough room
-            while (this.bufferlength + b.length * 2 > this.maxbufferlength && !this.buffer.isEmpty()) {
-                try {
+            while (this.bufferlength + b.length * 2 > this.maxbufferlength) {
+                try  {
+                    if (this.buffer.isEmpty()) break;
                     flushOne();
                 } catch (RowSpaceExceededException e) {
                     Log.logException(e);
@@ -323,8 +309,10 @@ public class Compressor implements BLOB {
         // files are written uncompressed to the uncompressed-queue
         // they are either written uncompressed to the database
         // or compressed later
-        this.buffer.put(new String(key), b);
-        this.bufferlength += b.length;
+        synchronized (this) {
+            this.buffer.put(new String(key), b);
+            this.bufferlength += b.length;
+        }
     }
 
     public synchronized void remove(byte[] key) throws IOException {

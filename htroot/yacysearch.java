@@ -480,7 +480,7 @@ public class yacysearch {
             EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.INITIALIZATION, 0, 0), false, 30000, ProfilingGraph.maxTime);
             
             // tell all threads to do nothing for a specific time
-            sb.intermissionAllThreads(10000);
+            sb.intermissionAllThreads(3000);
         
             // filter out words that appear in bluelist
             theQuery.filterOut(Switchboard.blueList);
@@ -496,7 +496,7 @@ public class yacysearch {
                 offset = 0;
             }
             final SearchEvent theSearch = SearchEventCache.getEvent(theQuery, sb.peers, sb.crawlResults, (sb.isRobinsonMode()) ? sb.clusterhashes : null, false, sb.loader);
-            try {Thread.sleep(100);} catch (InterruptedException e1) {} // wait a little time to get first results in the search
+            try {Thread.sleep(global ? 100 : 10);} catch (InterruptedException e1) {} // wait a little time to get first results in the search
             
             // generate result object
             //serverLog.logFine("LOCAL_SEARCH", "SEARCH TIME AFTER ORDERING OF SEARCH RESULTS: " + (System.currentTimeMillis() - timestamp) + " ms");

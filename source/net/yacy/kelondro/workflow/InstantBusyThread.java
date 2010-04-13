@@ -125,6 +125,9 @@ public final class InstantBusyThread extends AbstractBusyThread implements BusyT
             Log.logSevere("BUSYTHREAD", "OutOfMemory Error in serverInstantThread.job, thread '" + this.getName() + "': " + e.getMessage());
             Log.logException(e);
             freemem();
+        } catch (final Exception e) {
+            Log.logSevere("BUSYTHREAD", "Generic Exception, thread '" + this.getName() + "': " + e.getMessage());
+            Log.logException(e);
         }
         instantThreadCounter--;
         synchronized(jobs) {jobs.remove(this.handle);}

@@ -301,7 +301,7 @@ public class ResultFetcher {
         // finally wait until enough results are there produced from the
         // snippet fetch process
         while ((anyWorkerAlive()) && (result.size() <= item)) {
-            try {Thread.sleep((item % query.itemsPerPage) * 50L);} catch (final InterruptedException e) {}
+            try {Thread.sleep((item % query.itemsPerPage) * 10L);} catch (final InterruptedException e) {}
         }
 
         // finally, if there is something, return the result

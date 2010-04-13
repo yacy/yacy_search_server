@@ -192,11 +192,11 @@ public class CrawlQueues {
     
     public boolean coreCrawlJob() {
         
-        final boolean robinsonPrivateCase = ((sb.isRobinsonMode()) && 
-                (!sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER)) &&
-                (!sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PRIVATE_CLUSTER)));
+        final boolean robinsonPrivateCase = (sb.isRobinsonMode() && 
+                !sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PUBLIC_CLUSTER) &&
+                !sb.getConfig(SwitchboardConstants.CLUSTER_MODE, "").equals(SwitchboardConstants.CLUSTER_MODE_PRIVATE_CLUSTER));
         
-        if (((robinsonPrivateCase) || (coreCrawlJobSize() <= 20)) && (limitCrawlJobSize() > 0)) {
+        if ((robinsonPrivateCase || coreCrawlJobSize() <= 20) && limitCrawlJobSize() > 0) {
             // move some tasks to the core crawl job so we have something to do
             final int toshift = Math.min(10, limitCrawlJobSize()); // this cannot be a big number because the balancer makes a forced waiting if it cannot balance
             for (int i = 0; i < toshift; i++) {
@@ -209,12 +209,12 @@ public class CrawlQueues {
         
         String queueCheck = crawlIsPossible(NoticedURL.STACK_TYPE_CORE);
         if (queueCheck != null) {
-            log.logInfo("omitting de-queue/local: " + queueCheck);
+            if (log.isFine()) log.logFine("omitting de-queue/local: " + queueCheck);
             return false;
         }
         
         if (isPaused(SwitchboardConstants.CRAWLJOB_LOCAL_CRAWL)) {
-            log.logInfo("omitting de-queue/local: paused");
+            if (log.isFine()) log.logFine("omitting de-queue/local: paused");
             return false;
         }
         

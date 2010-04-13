@@ -445,7 +445,7 @@ public final class serverCore extends AbstractBusyThread implements BusyThread {
         for (Thread t: threadList) {
             if (t == null) continue;
             if (!(t instanceof Session)) {
-                log.logSevere("serverCore.getJobList - thread is not Session: " + t.getClass().getName());
+                //log.logSevere("serverCore.getJobList - thread is not Session: " + t.getClass().getName());
                 continue;
             }
             l.add((Session) t);
