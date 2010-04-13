@@ -41,12 +41,7 @@ import net.yacy.kelondro.rwi.Reference;
  */
 public final class WordReferenceRow extends AbstractReference implements WordReference, Cloneable {
 
-	/**
-	 * object for termination of concurrent blocking queue processing
-	 */
-	public static final WordReferenceRow poison = new WordReferenceRow((Row.Entry) null);
-    
-    
+	
     public static final Row urlEntryRow = new Row(new Column[]{
             new Column("h", Column.celltype_string,    Column.encoder_bytes, Word.commonHashLength, "urlhash"),
             new Column("a", Column.celltype_cardinal,  Column.encoder_b256,  2, "lastModified"),
@@ -72,6 +67,13 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         Base64Order.enhancedCoder
     );
     // available chars: b,e,j,q
+    
+    /**
+	 * object for termination of concurrent blocking queue processing
+	 */
+    public static final Row.Entry poisonRowEntry = urlEntryRow.newEntry();
+	public static final WordReferenceRow poison = new WordReferenceRow(poisonRowEntry);
+    
     
     // static properties
     private static final int col_urlhash       =  0; // h 12 the url hash b64-encoded
