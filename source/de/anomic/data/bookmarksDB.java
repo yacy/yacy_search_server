@@ -102,6 +102,7 @@ public class bookmarksDB {
         String[] tagArray;
         while(it.hasNext()){
             bookmark = it.next();
+            if (bookmark == null) continue;
             tagArray = BookmarkHelper.cleanTagsString(bookmark.getTagsString() + bookmark.getFoldersString()).split(",");
             tag = null;
             for (final String element : tagArray) {
@@ -332,7 +333,7 @@ public class bookmarksDB {
     public Bookmark getBookmark(final String urlHash){
         try {
             final Map<String, String> map = bookmarks.get(urlHash);
-            return (map == null) ? new Bookmark(map) : null;
+            return (map == null) ? null : new Bookmark(map);
         } catch (final IOException e) {
             return null;
         }
@@ -373,6 +374,7 @@ public class bookmarksDB {
         Bookmark bm;
         while(it.hasNext()){
             bm=it.next();
+            if (bm == null) continue;
             if(priv || bm.getPublic()){
             	set.add(bm.getUrlHash());
             }
@@ -866,17 +868,17 @@ public class bookmarksDB {
             try {
                 return this.bookmarkIter.hasNext();
             } catch (final kelondroException e) {
-                //resetDatabase();
+            	Log.logException(e);
                 return false;
             }
         }
         
         public Bookmark next() {
-            if (hasNext()) {
+        	try {
                 String s = new String(this.bookmarkIter.next());
                 return getBookmark(s);
-            } else {
-                //resetDatabase();
+        	} catch (final kelondroException e) {
+                Log.logException(e);
                 return null;
             }
         }

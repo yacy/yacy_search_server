@@ -72,6 +72,7 @@ public class BookmarkDate {
         int count = 0;
         while (it.hasNext()) {
             bookmark=it.next();
+            if (bookmark == null) continue;
             date = String.valueOf(bookmark.getTimeStamp());
             bmDate=getDate(date);
             if(bmDate==null){
