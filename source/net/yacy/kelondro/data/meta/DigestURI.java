@@ -938,6 +938,7 @@ public class DigestURI implements Serializable {
     private static String[] testTLDs = new String[] { "com", "net", "org", "uk", "fr", "de", "es", "it" };
 
     public static final DigestURI probablyWordURL(final byte[] urlHash, final TreeSet<String> words) {
+    	assert urlHash != null;
         final Iterator<String> wi = words.iterator();
         String word;
         while (wi.hasNext()) {

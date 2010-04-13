@@ -47,7 +47,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 	 * object for termination of concurrent blocking queue processing
 	 */
 	public static final WordReferenceVars poison = new WordReferenceVars();
-	public static int cores = Runtime.getRuntime().availableProcessors();
+	private static int cores = Runtime.getRuntime().availableProcessors();
 	
     public Bitfield flags;
     public long lastModified;
@@ -387,56 +387,6 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
      * transform a reference container into a stream of parsed entries
      * @param container
      * @return a blocking queue filled with WordReferenceVars that is still filled when the object is returned
-     */
-    /*
-    public static BlockingQueue<WordReferenceVars> transform(ReferenceContainer<WordReference> container) {
-    	LinkedBlockingQueue<WordReferenceRow> in = new LinkedBlockingQueue<WordReferenceRow>();
-    	LinkedBlockingQueue<WordReferenceVars> out = new LinkedBlockingQueue<WordReferenceVars>();
-
-    	// start the transformation threads
-    	int cores = Math.min(Runtime.getRuntime().availableProcessors(), container.size() / 200 + 1);
-    	for (int i = 0; i < cores; i++) new Transformer(in, out).start();
-    	
-    	// fill the queue
-    	int p = 0;
-    	try {
-    		while (p < container.size()) {
-				in.put(new WordReferenceRow(container.get(p++, false)));
-            }
-    	} catch (InterruptedException e) {}
-    	
-    	// insert poison to stop the queues
-    	try {
-    	    for (int i = 0; i < cores; i++) in.put(WordReferenceRow.poison);
-    	} catch (InterruptedException e) {}
-
-    	// return the resulting queue while the processing queues are still working
-    	return out;
-    }
-
-    public static class Transformer extends Thread {
-
-    	BlockingQueue<WordReferenceRow> in;
-    	BlockingQueue<WordReferenceVars> out;
-    	
-    	public Transformer(final BlockingQueue<WordReferenceRow> in, final BlockingQueue<WordReferenceVars> out) {
-    		this.in = in;
-    		this.out = out;
-    	}
-    	
-        @Override
-    	public void run() {
-    		WordReferenceRow row;
-    		try {
-				while ((row = in.take()) != WordReferenceRow.poison) out.put(new WordReferenceVars(row));
-			} catch (InterruptedException e) {}
-
-			// insert poison to signal the termination to next queue
-	    	try {
-	    	    out.put(WordReferenceVars.poison);
-	    	} catch (InterruptedException e) {}
-    	}
-    }
      */
     
     public static BlockingQueue<WordReferenceVars> transform(ReferenceContainer<WordReference> container) {
