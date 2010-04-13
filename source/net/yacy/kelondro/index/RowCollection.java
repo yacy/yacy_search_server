@@ -234,7 +234,15 @@ public class RowCollection implements Iterable<Row.Entry> {
             System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
             chunkcache = newChunkcache;
         } catch (OutOfMemoryError e) {
-            throw new RowSpaceExceededException(allocram, "RowCollection grow after OutOfMemoryError " + e.getMessage());
+        	// lets try again after a forced gc()
+        	System.gc();
+        	try {
+                final byte[] newChunkcache = new byte[(int) allocram]; // increase space
+                System.arraycopy(chunkcache, 0, newChunkcache, 0, chunkcache.length);
+                chunkcache = newChunkcache;
+            } catch (OutOfMemoryError ee) {
+                throw new RowSpaceExceededException(allocram, "RowCollection grow after OutOfMemoryError " + ee.getMessage());
+            }
         }
     }
     
