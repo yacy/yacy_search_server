@@ -73,8 +73,7 @@ public class DidYouMean {
      */
     public String getSuggestion(final String word, long timeout) {
         Set<String> s = getSuggestions(word, timeout);
-        if (s == null || s.isEmpty()) return null;
-        return s.iterator().next();
+        return (s == null || s.isEmpty()) ? null : s.iterator().next();
     }
 	
     /**
@@ -85,8 +84,7 @@ public class DidYouMean {
      */
     public String getSuggestion(final String word, long timeout, int preSortSelection) {
         Set<String> s = getSuggestions(word, timeout, preSortSelection);
-        if (s == null || s.isEmpty()) return null;
-        return s.iterator().next();
+        return (s == null || s.isEmpty()) ? null : s.iterator().next();
     }
 	
     /**
@@ -106,7 +104,7 @@ public class DidYouMean {
         SortedSet<String> countSorted = Collections.synchronizedSortedSet(new TreeSet<String>(new indexSizeComparator()));
         int wc = index.count(Word.word2hash(word)); // all counts must be greater than this
         int c0;
-        for (String s: preSorted) {
+        for (final String s: preSorted) {
             if (System.currentTimeMillis() > timelimit) break;
             if (preSortSelection <= 0) break;
             c0 = index.count(Word.word2hash(s));
@@ -125,12 +123,12 @@ public class DidYouMean {
      */
     @SuppressWarnings("unchecked")
     public static SortedSet<String> getSuggestions(final String[] words, long timeout, int preSortSelection, final IndexCell<WordReference> index) {
-        SortedSet<String>[] s = new SortedSet[words.length];
+        final SortedSet<String>[] s = new SortedSet[words.length];
         for (int i = 0; i < words.length; i++) {
             s[i] = new DidYouMean(index).getSuggestions(words[i], timeout / words.length, preSortSelection);
         }
         // make all permutations
-        SortedSet<String> result = new TreeSet<String>();
+        final SortedSet<String> result = new TreeSet<String>();
         StringBuilder sb;
         for (int i = 0; i < words.length; i++) {
             if (s[i].isEmpty()) continue;
@@ -165,7 +163,7 @@ public class DidYouMean {
 
         // get a single recommendation for the word without altering the word
         Set<String> libr = LibraryProvider.dymLib.recommend(word);
-        for (String t: libr) {
+        for (final String t: libr) {
             if (!t.equals(word)) try {
                 createGen = false;
                 guessLib.put(t);
@@ -181,7 +179,7 @@ public class DidYouMean {
         producers[1] = new AddingOneLetter();
         producers[2] = new DeletingOneLetter();
         producers[3] = new ReversingTwoConsecutiveLetters();
-        for (Thread t: producers) t.start();
+        for (final Thread t: producers) t.start();
 	    
         // start more consumers if there are more cores
         if (consumers.length > 1) for (int i = 1; i < consumers.length; i++) {
@@ -192,7 +190,7 @@ public class DidYouMean {
         // now decide which kind of guess is better
         // we take guessLib entries as long as there is any entry in it
         // to see if this is the case, we must wait for termination of the producer
-        for (Thread t: producers) try { t.join(); } catch (InterruptedException e) {}
+        for (final Thread t: producers) try { t.join(); } catch (InterruptedException e) {}
         
         // if there is not any entry in guessLib, then transfer all entries from the
         // guessGen to guessLib
@@ -203,11 +201,11 @@ public class DidYouMean {
         } catch (InterruptedException e) {}
         
         // put poison into guessLib to terminate consumers
-        for (@SuppressWarnings("unused") Consumer c: consumers)
+        for (@SuppressWarnings("unused") final Consumer c: consumers)
             try { guessLib.put(POISON_STRING); } catch (InterruptedException e) {}
         
         // wait for termination of consumer
-        for (Consumer c: consumers)
+        for (final Consumer c: consumers)
             try { c.join(); } catch (InterruptedException e) {}
 	    
         // we don't want the given word in the result
@@ -225,8 +223,12 @@ public class DidYouMean {
         Set<String> libr = LibraryProvider.dymLib.recommend(s);
         libr.addAll(LibraryProvider.geoDB.recommend(s));
         if (!libr.isEmpty()) createGen = false;
-        for (String t: libr) guessLib.put(t);
-        if (createGen) guessGen.put(s);
+        for (final String t: libr) {
+            guessLib.put(t);
+        }
+        if (createGen) {
+            guessGen.put(s);
+        }
     }
 
     /**
@@ -274,7 +276,7 @@ public class DidYouMean {
             @Override
             public void run() {
                 for (int i = 0; i <= wordLen; i++) try {
-                    for (char c: ALPHABET) {
+                    for (final char c: ALPHABET) {
                         test(word.substring(0, i) + c + word.substring(i));
                          if (System.currentTimeMillis() > timeLimit) return;
                     }
