@@ -11,7 +11,7 @@ public class MimeTable {
 
     private static final Properties mimeTable = new Properties();
     
-    public static void init(File mimeFile) {
+    public static void init(final File mimeFile) {
         if (mimeTable.isEmpty()) {
             // load the mime table
             BufferedInputStream mimeTableInputStream = null;
@@ -34,19 +34,19 @@ public class MimeTable {
         return mimeTable.isEmpty();
     }
     
-    public static String ext2mime(String ext) {
+    public static String ext2mime(final String ext) {
         return mimeTable.getProperty(ext, "application/" + ext);
     }
     
-    public static String ext2mime(String ext, String dfltMime) {
+    public static String ext2mime(final String ext, final String dfltMime) {
         return mimeTable.getProperty(ext, dfltMime);
     }
     
-    public static String url2mime(DigestURI url, String dfltMime) {
+    public static String url2mime(final DigestURI url, final String dfltMime) {
         return ext2mime(url.getFileExtension(), dfltMime);
     }
     
-    public static String url2mime(DigestURI url) {
+    public static String url2mime(final DigestURI url) {
         return ext2mime(url.getFileExtension());
     }
 }

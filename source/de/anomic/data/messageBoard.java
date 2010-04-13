@@ -43,13 +43,13 @@ public class messageBoard {
     private static final int categoryLength = 12;
     private static final String dateFormat = "yyyyMMddHHmmss";
 
-    static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat, Locale.US);
+    private static final SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat, Locale.US);
 
     static {
         SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
 
-    MapHeap database = null;
+    private MapHeap database = null;
     private int sn = 0;
 
     public messageBoard(final File path) throws IOException {
@@ -93,7 +93,7 @@ public class messageBoard {
     public class entry {
 	
 	String key; // composed by category and date
-    Map<String, String> record; // contains author, target hash, subject and message
+        Map<String, String> record; // contains author, target hash, subject and message
 
 	public entry(final String category,
                      String authorName, String authorHash,
@@ -104,20 +104,12 @@ public class messageBoard {
 	    if (key.length() > categoryLength) key = key.substring(0, categoryLength);
 	    while (key.length() < categoryLength) key += "_";
 	    key += dateString() + snString();
-	    if ((authorName == null) || (authorName.length() == 0)) authorName = "anonymous";
-	    record.put("author", authorName);
-	    if ((recName == null) || (recName.length() == 0)) recName = "anonymous";
-	    record.put("recipient", recName);
-	    if (authorHash == null) authorHash = "";
-	    record.put("ahash", authorHash);
-	    if (recHash == null) recHash = "";
-	    record.put("rhash", recHash);
-            if (subject == null) subject = "";
-	    record.put("subject", subject);
-            if (message == null)
-		record.put("message", "");
-	    else
-		record.put("message", Base64Order.enhancedCoder.encode(message));
+	    record.put("author", ((authorName == null) || (authorName.length() == 0)) ? authorName : "anonymous");
+	    record.put("recipient", ((recName == null) || (recName.length() == 0)) ? recName : "anonymous");
+	    record.put("ahash", (authorHash == null) ? authorHash : "");
+	    record.put("rhash", (recHash == null) ? recHash : "");
+	    record.put("subject", (subject == null) ? subject : "");
+            record.put("message", (message == null) ?  "" : Base64Order.enhancedCoder.encode(message));
             record.put("read", "false");
 	}
 
@@ -147,31 +139,29 @@ public class messageBoard {
 	public String author() {
 	    final String a = record.get("author");
 	    if (a == null) return "anonymous";
-        return a;
+            return a;
 	}
 
 	public String recipient() {
 	    final String a = record.get("recipient");
 	    if (a == null) return "anonymous";
-        return a;
+            return a;
 	}
 
 	public String authorHash() {
 	    final String a = record.get("ahash");
-	    if (a == null) return null;
-        return a;
+            return a;
 	}
 
 	public String recipientHash() {
 	    final String a = record.get("rhash");
-	    if (a == null) return null;
-        return a;
+            return a;
 	}
 
         public String subject() {
 	    final String s = record.get("subject");
 	    if (s == null) return "";
-        return s;
+            return s;
 	}
 
 	public byte[] message() {
@@ -224,9 +214,9 @@ public class messageBoard {
 
     public class catIter implements Iterator<String> {
     
-        Iterator<byte[]> allIter = null;
-        String nextKey = null;
-        String category = "";
+        private Iterator<byte[]> allIter = null;
+        private String nextKey = null;
+        private String category = "";
         
         public catIter(final String category, final boolean up) throws IOException {
             this.allIter = database.keys(up, false);
@@ -237,7 +227,7 @@ public class messageBoard {
         public void findNext() {
             while (allIter.hasNext()) {
                 nextKey = new String(allIter.next());
-                if (this.category==null || nextKey.startsWith(this.category)) return;
+                if (this.category == null || nextKey.startsWith(this.category)) return;
             }
             nextKey = null;
         }

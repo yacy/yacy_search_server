@@ -39,6 +39,7 @@ import net.yacy.repository.BlacklistFile;
 
 import de.anomic.search.SearchEventCache;
 import de.anomic.search.Switchboard;
+import java.util.List;
 
 // The Naming of the functions is a bit strange...
 
@@ -101,17 +102,14 @@ public class listManager {
      *         "listName", <code>false</code> otherwise.
      */
     public static boolean listSetContains(final String setName, final String listName) {
-        final Set<String> Lists =  getListSet(setName);
-
-        return Lists.contains(listName);
+        return getListSet(setName).contains(listName);
     }
 
 
 //================general Lists==================
 
     public static String getListString(final String filename, final boolean withcomments) {        
-        final File listFile = new File(listsPath ,filename);
-        return FileUtils.getListString(listFile, withcomments);
+        return FileUtils.getListString(new File(listsPath ,filename), withcomments);
     }
     
 //================Helper functions for collection conversion==================
@@ -142,15 +140,15 @@ public class listManager {
      * @see listManager#string2vector(String)
      */
     public static ArrayList<String> string2arraylist(final String string){
-        ArrayList<String> l;
+        ArrayList<String> list;
 
         if (string != null && string.length() > 0) {
-            l = new ArrayList<String>(Arrays.asList(string.split(",")));
+            list = new ArrayList<String>(Arrays.asList(string.split(",")));
         } else {
-            l = new ArrayList<String>();
+            list = new ArrayList<String>();
         }
 
-        return l;
+        return list;
     }
 
     /**
@@ -199,12 +197,12 @@ public class listManager {
         final String supportedBlacklistTypesStr = Blacklist.BLACKLIST_TYPES_STRING;
         final String[] supportedBlacklistTypes = supportedBlacklistTypesStr.split(",");
         
-        final ArrayList<BlacklistFile> blacklistFiles = new ArrayList<BlacklistFile>(supportedBlacklistTypes.length);
-        for (int i=0; i < supportedBlacklistTypes.length; i++) {
+        final List<BlacklistFile> blacklistFiles = new ArrayList<BlacklistFile>(supportedBlacklistTypes.length);
+        for (String supportedBlacklistType : supportedBlacklistTypes) {
             final BlacklistFile blFile = new BlacklistFile(
                     switchboard.getConfig(
-                    supportedBlacklistTypes[i] + ".BlackLists", switchboard.getConfig("BlackLists.DefaultList", "url.default.black")),
-                    supportedBlacklistTypes[i]);
+                    supportedBlacklistType + ".BlackLists", switchboard.getConfig("BlackLists.DefaultList", "url.default.black")),
+                    supportedBlacklistType);
             blacklistFiles.add(blFile);
         }
         

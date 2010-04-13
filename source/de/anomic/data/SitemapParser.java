@@ -224,6 +224,7 @@ public class SitemapParser extends DefaultHandler {
      * @param qName qualified name
      * @see DefaultHandler#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
      */
+    @Override
     public void startElement(final String namespaceURI, final String localName, final String qName, final Attributes attrs) throws SAXException {
         this.currentElement = qName;
 
@@ -242,6 +243,7 @@ public class SitemapParser extends DefaultHandler {
      * @throws SAXException
      * @see DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
      */
+    @Override
     public void endElement(final String namespaceURI, final String localName, final String qName) throws SAXException {
         this.currentElement = "";
 
@@ -291,6 +293,7 @@ public class SitemapParser extends DefaultHandler {
         }
     }
 
+    @Override
     public void characters(final char[] buf, final int offset, final int len) throws SAXException {
         if (this.currentElement.equalsIgnoreCase(SITEMAP_URL_LOC)) {
             // TODO: we need to decode the URL here

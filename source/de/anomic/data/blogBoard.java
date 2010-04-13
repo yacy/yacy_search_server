@@ -43,6 +43,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
 import net.yacy.kelondro.blob.MapHeap;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -55,19 +56,19 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import de.anomic.data.wiki.wikiBoard;
+import java.util.List;
+import java.util.Set;
 
 public class blogBoard {
     
-    public  static final int keyLength = 64;
+    private static final int KEY_LENGTH = 64;
     
-    MapHeap database = null;
+    private MapHeap database = null;
     
     public blogBoard(final File actpath) throws IOException {
         new File(actpath.getParent()).mkdir();
-        if (database == null) {
-            //database = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, newFile), 500, '_');
-            database = new MapHeap(actpath, keyLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
-        }
+        //database = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, newFile), 500, '_');
+        database = new MapHeap(actpath, KEY_LENGTH, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
     }
     
     public int size() {
@@ -92,17 +93,11 @@ public class blogBoard {
     }
     
     private static String normalize(final String key) {
-        if (key == null) return "null";
-        return key.trim().toLowerCase();
+        return (key == null) ? "null" : key.trim().toLowerCase();
     }
     
-    public static String webalize(String key) {
-        if (key == null) return "null";
-        key = key.trim().toLowerCase();
-        int p;
-        while ((p = key.indexOf(" ")) >= 0)
-            key = key.substring(0, p) + "%20" + key.substring(p +1);
-        return key;
+    public static String webalize(final String key) {
+        return (key == null) ? "null": key.trim().toLowerCase().replaceAll(" ", "%20");
     }
     
     public String guessAuthor(final String ip) {
@@ -110,7 +105,7 @@ public class blogBoard {
     }
     
     /**
-     * Create a new BlogEntry an return it
+     * Create a new BlogEntry and return it
      * @param key
      * @param subject
      * @param author
@@ -121,7 +116,7 @@ public class blogBoard {
      * @param commentMode possible params are: 0 - no comments allowed, 1 - comments allowed, 2 - comments moderated
      * @return BlogEntry
      */
-    public BlogEntry newEntry(final String key, final byte[] subject, final byte[] author, final String ip, final Date date, final byte[] page, final ArrayList<String> comments, final String commentMode) {
+    public BlogEntry newEntry(final String key, final byte[] subject, final byte[] author, final String ip, final Date date, final byte[] page, final List<String> comments, final String commentMode) {
         return new BlogEntry(normalize(key), subject, author, ip, date, page, comments, commentMode);
     }
 
@@ -129,115 +124,124 @@ public class blogBoard {
      * writes a new page and return the key
      */
     public String writeBlogEntry(final BlogEntry page) {
+        String ret = null;
         try {
             database.put(page.key, page.record);
-            return page.key;
-        } catch (final Exception e) {
-            Log.logException(e);
-            return null;
+            ret = page.key;
+        } catch (IOException ex) {
+            Log.logException(ex);
+        } catch (RowSpaceExceededException ex) {
+            Log.logException(ex);
         }
+        return ret;
     }
     
     public BlogEntry readBlogEntry(final String key) {
         return readBlogEntry(key, database);
     }
     
-    private BlogEntry readBlogEntry(String key, final MapHeap base) {
-    	key = normalize(key);
-        if (key.length() > keyLength) key = key.substring(0, keyLength);
+    private BlogEntry readBlogEntry(final String key, final MapHeap base) {
+        final String normalized = normalize(key);
         Map<String, String> record;
         try {
-            record = base.get(key);
+            record = base.get(normalized.substring(0, Math.min(normalized.length(), KEY_LENGTH)));
         } catch (final IOException e) {
             record = null;
         }
-        if (record == null) 
-            return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new Date(), "".getBytes(), null, null);
-        return new BlogEntry(key, record);
+        return (record == null) ?
+            newEntry(key, new byte[0], "anonymous".getBytes(), "127.0.0.1", new Date(), new byte[0], null, null) :
+            new BlogEntry(key, record);
     }
     
     public boolean importXML(final String input) {
     	final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     	try {
-			final DocumentBuilder builder = factory.newDocumentBuilder();
-			final Document doc = builder.parse(new ByteArrayInputStream(input.getBytes("UTF-8")));
-			return parseXMLimport(doc);
-		} catch (final ParserConfigurationException e) {
-		} catch (final SAXException e) {
-		} catch (final IOException e) {}
+            final DocumentBuilder builder = factory.newDocumentBuilder();
+            return parseXMLimport(builder.parse(new ByteArrayInputStream(input.getBytes("UTF-8"))));
+        } catch (final ParserConfigurationException ex) {
+            Log.logException(ex);
+        } catch (final SAXException ex) {
+            Log.logException(ex);
+        } catch (final IOException ex) {
+            Log.logException(ex);
+        }
 		
     	return false;
     }
     
     private boolean parseXMLimport(final Document doc) {
-    	if(!doc.getDocumentElement().getTagName().equals("blog"))
-    		return false;
+    	if(!doc.getDocumentElement().getTagName().equals("blog")) {
+            return false;
+        }
     	
     	final NodeList items = doc.getDocumentElement().getElementsByTagName("item");
-    	if(items.getLength() == 0)
-    		return false; 
+    	if(items.getLength() == 0) {
+            return false;
+        }
     	
-    	for(int i=0;i<items.getLength();++i) {
-    		String key = null, ip = null, StrSubject = null, StrAuthor = null, StrPage = null, StrDate = null;
-    		Date date = null;
-    		
-    		if(!items.item(i).getNodeName().equals("item"))
-    			continue;
-    		
-    		final NodeList currentNodeChildren = items.item(i).getChildNodes();
-    		
-    		for(int j=0;j<currentNodeChildren.getLength();++j) {
-    			final Node currentNode = currentNodeChildren.item(j);
-    			if(currentNode.getNodeName().equals("id"))
-    				key = currentNode.getFirstChild().getNodeValue();
-    			else if(currentNode.getNodeName().equals("ip"))
-    				ip = currentNode.getFirstChild().getNodeValue();
-    			else if(currentNode.getNodeName().equals("timestamp"))
-    				StrDate = currentNode.getFirstChild().getNodeValue();
-    			else if(currentNode.getNodeName().equals("subject"))
-    				StrSubject = currentNode.getFirstChild().getNodeValue();
-    			else if(currentNode.getNodeName().equals("author"))
-    				StrAuthor = currentNode.getFirstChild().getNodeValue();
-    			else if(currentNode.getNodeName().equals("content"))
-    				StrPage = currentNode.getFirstChild().getNodeValue();
-    		}
-    		
-    		try {
-				date = DateFormatter.parseShortSecond(StrDate);
-			} catch (final ParseException e1) {
-				date = new Date();
-			}
-    		
-    		if(key == null || ip == null || StrSubject == null || StrAuthor == null || StrPage == null || date == null)
-    			return false;
-    		
-    		byte[] subject,author,page;
-    		try {
-				subject = StrSubject.getBytes("UTF-8");
-			} catch (final UnsupportedEncodingException e1) {
-				subject = StrSubject.getBytes();
-			}
-			try {
-				author = StrAuthor.getBytes("UTF-8");
-			} catch (final UnsupportedEncodingException e1) {
-				author = StrAuthor.getBytes();
-			}
-			try {
-				page = StrPage.getBytes("UTF-8");
-			} catch (final UnsupportedEncodingException e1) {
-				page = StrPage.getBytes();
-			}
+    	for (int i = 0, n = items.getLength(); i < n; ++i) {
+            String key = null, ip = null, StrSubject = null, StrAuthor = null, StrPage = null, StrDate = null;
+            Date date = null;
 
-		writeBlogEntry (newEntry(key, subject, author, ip, date, page, null, null));
+            if(!items.item(i).getNodeName().equals("item")) continue;
+
+            final NodeList currentNodeChildren = items.item(i).getChildNodes();
+
+            for (int j = 0, m = currentNodeChildren.getLength(); j < m; ++j) {
+                final Node currentNode = currentNodeChildren.item(j);
+                if (currentNode.getNodeName().equals("id")) {
+                    key = currentNode.getFirstChild().getNodeValue();
+                } else if (currentNode.getNodeName().equals("ip")) {
+                    ip = currentNode.getFirstChild().getNodeValue();
+                } else if (currentNode.getNodeName().equals("timestamp")) {
+                    StrDate = currentNode.getFirstChild().getNodeValue();
+                } else if (currentNode.getNodeName().equals("subject")) {
+                    StrSubject = currentNode.getFirstChild().getNodeValue();
+                } else if (currentNode.getNodeName().equals("author")) {
+                    StrAuthor = currentNode.getFirstChild().getNodeValue();
+                } else if (currentNode.getNodeName().equals("content")) {
+                    StrPage = currentNode.getFirstChild().getNodeValue();
+                }
+            }
+    		
+            try {
+                date = DateFormatter.parseShortSecond(StrDate);
+            } catch (final ParseException e1) {
+                date = new Date();
+            }
+
+            if(key == null || ip == null || StrSubject == null || StrAuthor == null || StrPage == null || date == null) {
+                return false;
+            }
+
+            byte[] subject,author,page;
+            try {
+                subject = StrSubject.getBytes("UTF-8");
+            } catch (final UnsupportedEncodingException e1) {
+                subject = StrSubject.getBytes();
+            }
+
+            try {
+                author = StrAuthor.getBytes("UTF-8");
+            } catch (final UnsupportedEncodingException e1) {
+                author = StrAuthor.getBytes();
+            }
+
+            try {
+                page = StrPage.getBytes("UTF-8");
+            } catch (final UnsupportedEncodingException e1) {
+                page = StrPage.getBytes();
+            }
+
+            writeBlogEntry (newEntry(key, subject, author, ip, date, page, null, null));
     	}
     	return true;
     }
     
-    public void deleteBlogEntry(String key) {
-    	key = normalize(key);
+    public void deleteBlogEntry(final String key) {
     	try {
-			database.remove(key);
-		} catch (final IOException e) { }
+            database.remove(normalize(key));
+        } catch (final IOException e) { }
     }
     
     public Iterator<byte[]> keys(final boolean up) throws IOException {
@@ -261,26 +265,28 @@ public class blogBoard {
         public int compare(final String obj1, final String obj2) {
             final BlogEntry blogEntry1 = readBlogEntry(obj1);
             final BlogEntry blogEntry2 = readBlogEntry(obj2);
-            if(blogEntry1 == null || blogEntry2 == null)
+            if (blogEntry1 == null || blogEntry2 == null)
                 return 0;
             if (this.newestFirst) {
-                if (Long.parseLong(blogEntry2.getTimestamp()) - Long.parseLong(blogEntry1.getTimestamp()) > 0) 
+                if (Long.parseLong(blogEntry2.getTimestamp()) - Long.parseLong(blogEntry1.getTimestamp()) > 0) {
                     return 1;
+                }
                 return -1;
             }
-            if (Long.parseLong(blogEntry1.getTimestamp()) - Long.parseLong(blogEntry2.getTimestamp()) > 0) 
+            if (Long.parseLong(blogEntry1.getTimestamp()) - Long.parseLong(blogEntry2.getTimestamp()) > 0) {
                 return 1;
+            }
             return -1;
         }
     }
     
     public Iterator<String> getBlogIterator(final boolean priv){
-        final TreeSet<String> set = new TreeSet<String>(new BlogComparator(true));
+        final Set<String> set = new TreeSet<String>(new BlogComparator(true));
         final Iterator<BlogEntry> iterator = blogIterator(true);
         BlogEntry blogEntry;
-        while(iterator.hasNext()){
-            blogEntry=iterator.next();
-            if(priv || blogEntry.isPublic()){
+        while (iterator.hasNext()) {
+            blogEntry = iterator.next();
+            if (priv || blogEntry.isPublic()) {
                 set.add(blogEntry.getKey());
             }
         }
@@ -333,6 +339,7 @@ public class blogBoard {
 //                    //resetDatabase();
 //                }
 //            }
+            throw new UnsupportedOperationException("Method not implemented yet.");
         }
     }
  
@@ -341,7 +348,7 @@ public class blogBoard {
         String key;
         Map<String, String> record;
     
-        public BlogEntry(final String nkey, final byte[] subject, final byte[] author, final String ip, final Date date, final byte[] page, final ArrayList<String> comments, final String commentMode) {
+        public BlogEntry(final String nkey, final byte[] subject, final byte[] author, final String ip, final Date date, final byte[] page, final List<String> comments, final String commentMode) {
             record = new HashMap<String, String>();
             setKey(nkey);
             setDate(date);
@@ -361,14 +368,16 @@ public class blogBoard {
         BlogEntry(final String key, final Map<String, String> record) {
             this.key = key;
             this.record = record;
-            if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
-            if (this.record.get("commentMode")==null || this.record.get("commentMode").equals("")) this.record.put("commentMode", "2");
+            if (this.record.get("comments") == null) {
+                this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
+            }
+            if (this.record.get("commentMode") == null || this.record.get("commentMode").equals("")) {
+                this.record.put("commentMode", "2");
+            }
         }
         
         private void setKey(final String key) {
-            if (key.length() > keyLength) 
-                this.key = key.substring(0, keyLength);
-            this.key = key;
+            this.key = key.substring(0, Math.min(key.length(), KEY_LENGTH));
         }
         
         public String getKey() {
@@ -377,42 +386,50 @@ public class blogBoard {
         
         public byte[] getSubject() {
             final String m = record.get("subject");
-            if (m == null) return new byte[0];
+            if (m == null) {
+                return new byte[0];
+            }
             final byte[] b = Base64Order.enhancedCoder.decode(m);
-            if (b == null) return "".getBytes();
-            return b;
+            return (b == null) ? new byte[0] : b;
         }
         
         private void setSubject(final byte[] subject) {
-            if (subject == null) 
+            if (subject == null) {
                 record.put("subject","");
-            else 
+            } else {
                 record.put("subject", Base64Order.enhancedCoder.encode(subject));
+            }
         }
         
         public Date getDate() {
             try {
                 final String date = record.get("date");
                 if (date == null) {
-                    if (Log.isFinest("Blog")) Log.logFinest("Blog", "ERROR: date field missing in blogBoard");
+                    if (Log.isFinest("Blog")) {
+                        Log.logFinest("Blog", "ERROR: date field missing in blogBoard");
+                    }
                     return new Date();
                 }
                 return DateFormatter.parseShortSecond(date);
-            } catch (final ParseException e) {
+            } catch (final ParseException ex) {
                 return new Date();
             }
         }
         
-        private void setDate(Date date) {
-            if(date == null) 
-                date = new Date();
-            record.put("date", DateFormatter.formatShortSecond(date));
+        private void setDate(final Date date) {
+            Date ret = date;
+            if (ret == null) {
+                ret = new Date();
+            }
+            record.put("date", DateFormatter.formatShortSecond(ret));
         }
         
         public String getTimestamp() {
             final String timestamp = record.get("date");
             if (timestamp == null) {
-                if (Log.isFinest("Blog")) Log.logFinest("Blog", "ERROR: date field missing in blogBoard");
+                if (Log.isFinest("Blog")) {
+                    Log.logFinest("Blog", "ERROR: date field missing in blogBoard");
+                }
                 return DateFormatter.formatShortSecond();
             }
             return timestamp;
@@ -420,76 +437,79 @@ public class blogBoard {
         
         public byte[] getAuthor() {
             final String author = record.get("author");
-            if (author == null) return new byte[0];
+            if (author == null) {
+                return new byte[0];
+            }
             final byte[] b = Base64Order.enhancedCoder.decode(author);
-            if (b == null) return "".getBytes();
-            return b;
+            return (b == null) ? new byte[0] : b;
         }
         
         private void setAuthor(final byte[] author) {
-            if (author == null) 
+            if (author == null)
                 record.put("author","");
-            else 
-                record.put("author", Base64Order.enhancedCoder.encode(author));
+            else
+            record.put("author", Base64Order.enhancedCoder.encode(author));
         }
         
         public int getCommentsSize() {
             // This ist a Bugfix for Version older than 4443.
-            if(record.get("comments").startsWith(",")) {
+            if (record.get("comments").startsWith(",")) {
                     record.put("comments", record.get("comments").substring(1));
                     writeBlogEntry(this);
             }
-            final ArrayList<String> commentsize = listManager.string2arraylist(record.get("comments"));
+            final List<String> commentsize = listManager.string2arraylist(record.get("comments"));
             return commentsize.size();
         }
         
-        public ArrayList<String> getComments() {
-            final ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
-            return comments;
+        public List<String> getComments() {
+            return listManager.string2arraylist(record.get("comments"));
         }
         
-        private void setComments(final ArrayList<String> comments) {
-            if (comments == null) 
+        private void setComments(final List<String> comments) {
+            if (comments == null) {
                 record.put("comments", listManager.collection2string(new ArrayList<String>()));
-            else 
+            } else {
                 record.put("comments", listManager.collection2string(comments));
+            }
         }
         
         public String getIp() {
             final String ip = record.get("ip");
-            if (ip == null) return "127.0.0.1";
-            return ip;
+            return (ip == null) ? "127.0.0.1" : ip;
         }
         
-        private void setIp(String ip) {
-            if ((ip == null) || (ip.length() == 0)) 
-                ip = "";
-            record.put("ip", ip);
+        private void setIp(final String ip) {
+            String ret = ip;
+            if ((ret == null) || (ret.length() == 0))
+                ret = "";
+            record.put("ip", ret);
         }
         
         public byte[] getPage() {
             final String page = record.get("page");
-            if (page == null) return new byte[0];
+            if (page == null) {
+                return new byte[0];
+            }
             final byte[] page_as_byte = Base64Order.enhancedCoder.decode(page);
-            if (page_as_byte == null) return "".getBytes();
-            return page_as_byte;
+            return (page_as_byte == null) ? new byte[0] : page_as_byte;
         }  
         
         private void setPage(final byte[] page) {
-            if (page == null) 
+            if (page == null) {
                 record.put("page", "");
-            else 
+            } else {
                 record.put("page", Base64Order.enhancedCoder.encode(page));
+            }
         }
         
         public void addComment(final String commentID) {
-            final ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
+            final List<String> comments = listManager.string2arraylist(record.get("comments"));
             comments.add(commentID);
             record.put("comments", listManager.collection2string(comments));
         }
         
         public boolean removeComment(final String commentID) {
-            final ArrayList<String> comments = listManager.string2arraylist(record.get("comments"));
+            final List<String> comments = listManager.string2arraylist(record.get("comments"));
             final boolean success = comments.remove(commentID);
             record.put("comments", listManager.collection2string(comments));
             return success;
@@ -507,19 +527,16 @@ public class blogBoard {
         }
         
         private void setCommentMode(final String mode) {
-            if (mode == null) 
+            if (mode == null) {
                 record.put("commentMode", "2");
-            else 
+            } else {
                 record.put("commentMode", mode);
+            }
         }
         
         public boolean isPublic() {
             final String privacy = record.get("privacy");
-            if (privacy == null)
-                return true;
-            if(privacy.equalsIgnoreCase("public"))
-                return true;
-            return false;
+            return (privacy == null || privacy.equalsIgnoreCase("public")) ? true : false;
         }
         
     }

@@ -65,21 +65,21 @@ public class bookmarksDB {
 	// Declaration of Class-Attributes
 	// ------------------------------------
 
-	final static int SORT_ALPHA = 1;
-	final static int SORT_SIZE = 2;
-	final static int SHOW_ALL = -1;
-	final static String SLEEP_TIME = "3600000"; // default sleepTime: check for recrawls every hour
-	
-	// bookmarks
-    MapHeap bookmarks;
+	//final static int SORT_ALPHA = 1;
+	private final static int SORT_SIZE = 2;
+	private final static int SHOW_ALL = -1;
+	private final static String SLEEP_TIME = "3600000"; // default sleepTime: check for recrawls every hour
+
+    // bookmarks
+    private MapHeap bookmarks;
     
     // tags
-    ConcurrentHashMap<String, Tag> tags;
+    private ConcurrentHashMap<String, Tag> tags;
     
     // autoReCrawl    
     private final BusyThread autoReCrawl;
     
-    BookmarkDate dates;
+    private BookmarkDate dates;
     
 	// ------------------------------------
 	// bookmarksDB's class constructor
@@ -99,15 +99,15 @@ public class bookmarksDB {
         final Iterator<Bookmark> it = new bookmarkIterator(true);
         Bookmark bookmark;
         Tag tag;
-        String[] tags;
+        String[] tagArray;
         while(it.hasNext()){
-            bookmark=it.next();            
-            tags = BookmarkHelper.cleanTagsString(bookmark.getTagsString() + bookmark.getFoldersString()).split(",");
+            bookmark = it.next();
+            tagArray = BookmarkHelper.cleanTagsString(bookmark.getTagsString() + bookmark.getFoldersString()).split(",");
             tag = null;
-            for (int i = 0; i < tags.length; i++) {
-                tag = getTag(BookmarkHelper.tagHash(tags[i]));
+            for (final String element : tagArray) {
+                tag = getTag(BookmarkHelper.tagHash(element));
                 if (tag == null) {
-                    tag = new Tag(tags[i]);
+                    tag = new Tag(element);
                 }
                 tag.addUrl(bookmark.getUrlHash());
                 putTag(tag);
@@ -122,9 +122,9 @@ public class bookmarksDB {
         if (!datesExisted) this.dates.init(new bookmarkIterator(true));
 
         // autoReCrawl
-        Switchboard sb = Switchboard.getSwitchboard();
+        final Switchboard sb = Switchboard.getSwitchboard();
         this.autoReCrawl = new InstantBusyThread(this, "autoReCrawl", null, null, Long.MIN_VALUE, Long.MAX_VALUE, Long.MIN_VALUE, Long.MAX_VALUE);
-        long sleepTime = Long.parseLong(sb.getConfig("autoReCrawl_idlesleep" , SLEEP_TIME));
+        final long sleepTime = Long.parseLong(sb.getConfig("autoReCrawl_idlesleep" , SLEEP_TIME));
         sb.deployThread("autoReCrawl", "autoReCrawl Scheduler", "simple scheduler for automatic re-crawls of bookmarked urls", null, autoReCrawl, 120000,
                 sleepTime, sleepTime, Long.parseLong(sb.getConfig("autoReCrawl_memprereq" , "-1"))
         );
@@ -132,8 +132,8 @@ public class bookmarksDB {
     }
 
     // -----------------------------------------------------
-	// bookmarksDB's functions for 'destructing' the class
-	// ----------------------------------------------------- 
+    // bookmarksDB's functions for 'destructing' the class
+    // -----------------------------------------------------
         
     public void close(){
         bookmarks.close();
@@ -142,63 +142,64 @@ public class bookmarksDB {
     }
     
     // -----------------------------------------------------
-	// bookmarksDB's functions for autoReCrawl
-	// ----------------------------------------------------- 
+    // bookmarksDB's functions for autoReCrawl
+    // -----------------------------------------------------
     
     public boolean autoReCrawl() {
     	
     	// read crontab
-        File f = new File (Switchboard.getSwitchboard().getRootPath(),"DATA/SETTINGS/autoReCrawl.conf");
+        final File file = new File (Switchboard.getSwitchboard().getRootPath(),"DATA/SETTINGS/autoReCrawl.conf");
         String s;
         try {                    	
-        	BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
-        	Log.logInfo("BOOKMARKS", "autoReCrawl - reading schedules from " + f);
-        	while( null != (s = in.readLine()) ) {
-        		if (s.length() > 0 && s.charAt(0) != '#') {        			
-        			String parser[] = s.split("\t");
-        			if (parser.length == 13) {        				
-        				folderReCrawl(Long.parseLong(parser[0]), parser[1], parser[2], Integer.parseInt(parser[3]), Long.parseLong(parser[4]), 
-           								Integer.parseInt(parser[5]), Integer.parseInt(parser[6]), Boolean.parseBoolean(parser[7]), 
-           								Boolean.parseBoolean(parser[8]), Boolean.parseBoolean(parser[9]), 
-           								Boolean.parseBoolean(parser[10]), Boolean.parseBoolean(parser[11]), 
-           								Boolean.parseBoolean(parser[12]), CrawlProfile.CACHE_STRATEGY_IFFRESH
-           				);
-        			}
-        			if (parser.length == 14) {                       
-                        folderReCrawl(Long.parseLong(parser[0]), parser[1], parser[2], Integer.parseInt(parser[3]), Long.parseLong(parser[4]), 
-                                        Integer.parseInt(parser[5]), Integer.parseInt(parser[6]), Boolean.parseBoolean(parser[7]), 
-                                        Boolean.parseBoolean(parser[8]), Boolean.parseBoolean(parser[9]), 
-                                        Boolean.parseBoolean(parser[10]), Boolean.parseBoolean(parser[11]), 
-                                        Boolean.parseBoolean(parser[12]), Integer.parseInt(parser[13])
-                        ); 
+            final BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
+            Log.logInfo("BOOKMARKS", "autoReCrawl - reading schedules from " + file);
+            while( null != (s = in.readLine()) ) {
+                if (s.length() > 0 && s.charAt(0) != '#') {
+                    final String parser[] = s.split("\t");
+                    if (parser.length == 13) {
+                        folderReCrawl(Long.parseLong(parser[0]), parser[1], parser[2], Integer.parseInt(parser[3]), Long.parseLong(parser[4]),
+                                Integer.parseInt(parser[5]), Integer.parseInt(parser[6]), Boolean.parseBoolean(parser[7]),
+                                Boolean.parseBoolean(parser[8]), Boolean.parseBoolean(parser[9]),
+                                Boolean.parseBoolean(parser[10]), Boolean.parseBoolean(parser[11]),
+                                Boolean.parseBoolean(parser[12]), CrawlProfile.CACHE_STRATEGY_IFFRESH
+                                );
                     }
-        		}        		
-        	}
-        	in.close();
+                    if (parser.length == 14) {
+                        folderReCrawl(Long.parseLong(parser[0]), parser[1], parser[2], Integer.parseInt(parser[3]), Long.parseLong(parser[4]), 
+                                Integer.parseInt(parser[5]), Integer.parseInt(parser[6]), Boolean.parseBoolean(parser[7]),
+                                Boolean.parseBoolean(parser[8]), Boolean.parseBoolean(parser[9]),
+                                Boolean.parseBoolean(parser[10]), Boolean.parseBoolean(parser[11]),
+                                Boolean.parseBoolean(parser[12]), Integer.parseInt(parser[13])
+                                );
+                    }
+                }
+            }
+            in.close();
         } catch( FileNotFoundException ex ) {        	
-        	try {
-        		Log.logInfo("BOOKMARKS", "autoReCrawl - creating new autoReCrawl.conf"); 
-        		File inputFile = new File(Switchboard.getSwitchboard().getRootPath(),"defaults/autoReCrawl.conf");
-	            File outputFile = new File(Switchboard.getSwitchboard().getRootPath(),"DATA/SETTINGS/autoReCrawl.conf");	
-	            FileReader i = new FileReader(inputFile);
-	            FileWriter o = new FileWriter(outputFile);
-	            int c;	
-	            while ((c = i.read()) != -1)
-	              o.write(c);	
-	            i.close();
-	            o.close();
-	            autoReCrawl();
-	        	return true;
-        	} catch( FileNotFoundException e ) {
-        		 Log.logSevere("BOOKMARKS", "autoReCrawl - file not found error: defaults/autoReCrawl.conf", e);
-        		 return false;
-        	} catch (IOException e) {
-        		Log.logSevere("BOOKMARKS", "autoReCrawl - IOException: defaults/autoReCrawl.conf", e);
-       		 	return false;
-        	}
+            try {
+                Log.logInfo("BOOKMARKS", "autoReCrawl - creating new autoReCrawl.conf");
+                final File inputFile = new File(Switchboard.getSwitchboard().getRootPath(),"defaults/autoReCrawl.conf");
+                final File outputFile = new File(Switchboard.getSwitchboard().getRootPath(),"DATA/SETTINGS/autoReCrawl.conf");
+                final FileReader i = new FileReader(inputFile);
+                final FileWriter o = new FileWriter(outputFile);
+                int c;
+                while ((c = i.read()) != -1) {
+                    o.write(c);
+                }
+                i.close();
+                o.close();
+                autoReCrawl();
+                return true;
+            } catch( FileNotFoundException e ) {
+                 Log.logSevere("BOOKMARKS", "autoReCrawl - file not found error: defaults/autoReCrawl.conf", e);
+                 return false;
+            } catch (IOException e) {
+                Log.logSevere("BOOKMARKS", "autoReCrawl - IOException: defaults/autoReCrawl.conf", e);
+                return false;
+            }
         } catch( Exception ex ) {
-        	Log.logSevere("BOOKMARKS", "autoReCrawl - error reading " + f, ex);
-        	return false;
+            Log.logSevere("BOOKMARKS", "autoReCrawl - error reading " + file, ex);
+            return false;
         }
     	return true;
     }    
@@ -207,30 +208,30 @@ public class bookmarksDB {
     		int crawlingDomFilterDepth, int crawlingDomMaxPages, boolean crawlingQ, boolean indexText, boolean indexMedia, 
     		boolean crawlOrder, boolean xsstopw, boolean storeHTCache, int cacheStrategy) {
 
-	    Switchboard sb = Switchboard.getSwitchboard();
-	    Iterator<String> bit=getBookmarksIterator(folder, true);    		
-		Log.logInfo("BOOKMARKS", "autoReCrawl - processing: "+folder);
+        final Switchboard sb = Switchboard.getSwitchboard();
+        final Iterator<String> bit = getBookmarksIterator(folder, true);
+        Log.logInfo("BOOKMARKS", "autoReCrawl - processing: "+folder);
 		 
-		boolean xdstopw = xsstopw;
-		boolean xpstopw = xsstopw;
+        final boolean xdstopw = xsstopw;
+        final boolean xpstopw = xsstopw;
 				
-		while(bit.hasNext()) {
+        while(bit.hasNext()) {
 			
-			Bookmark bm = getBookmark(bit.next());			
-			long sleepTime = Long.parseLong(sb.getConfig("autoReCrawl_idlesleep" , SLEEP_TIME));			
-			long interTime = (System.currentTimeMillis()-bm.getTimeStamp())%schedule;
+            final Bookmark bm = getBookmark(bit.next());
+            final long sleepTime = Long.parseLong(sb.getConfig("autoReCrawl_idlesleep" , SLEEP_TIME));
+            final long interTime = (System.currentTimeMillis()-bm.getTimeStamp())%schedule;
 			
-			Date date=new Date(bm.getTimeStamp());
-			Log.logInfo("BOOKMARKS", "autoReCrawl - checking schedule for: "+"["+DateFormatter.formatISO8601(date)+"] "+bm.getUrl());
+            final Date date = new Date(bm.getTimeStamp());
+            Log.logInfo("BOOKMARKS", "autoReCrawl - checking schedule for: "+"["+DateFormatter.formatISO8601(date)+"] "+bm.getUrl());
 			
-			if (interTime >= 0 && interTime < sleepTime) {			
-				try {
-	    			int pos = 0;					
-					// set crawlingStart to BookmarkUrl    			
-	    			String crawlingStart = bm.getUrl();                    
-	    			String newcrawlingMustMatch = crawlingfilter;
+            if (interTime >= 0 && interTime < sleepTime) {
+                try {
+                    int pos = 0;
+                    // set crawlingStart to BookmarkUrl
+                    final String crawlingStart = bm.getUrl();
+                    String newcrawlingMustMatch = crawlingfilter;
 	    			
-                    DigestURI crawlingStartURL = new DigestURI(crawlingStart, null);
+                    final DigestURI crawlingStartURL = new DigestURI(crawlingStart, null);
                     
                     // set the crawling filter                    
                     if (newcrawlingMustMatch.length() < 2) newcrawlingMustMatch = ".*"; // avoid that all urls are filtered out if bad value was submitted
@@ -241,18 +242,19 @@ public class bookmarksDB {
                     if (crawlingStart!= null && newcrawlingMustMatch.equals("sub") && (pos = crawlingStart.lastIndexOf("/")) > 0) {
                         newcrawlingMustMatch = crawlingStart.substring(0, pos + 1) + ".*";
                     }                    				
-					
-					// check if the crawl filter works correctly    			
-	    			Pattern.compile(newcrawlingMustMatch);	    			
+
+                    // check if the crawl filter works correctly
+                    Pattern.compile(newcrawlingMustMatch);
                     
-                    byte[] urlhash = crawlingStartURL.hash();
+                    final byte[] urlhash = crawlingStartURL.hash();
+
                     sb.indexSegments.urlMetadata(Segments.Process.LOCALCRAWLING).remove(urlhash);
                     sb.crawlQueues.noticeURL.removeByURLHash(urlhash);
                     sb.crawlQueues.errorURL.remove(urlhash);
 	               
 	                // stack url
 	                sb.crawler.profilesPassiveCrawls.removeEntry(crawlingStartURL.hash()); // if there is an old entry, delete it
-	                CrawlProfile.entry pe = sb.crawler.profilesActiveCrawls.newEntry(
+	                final CrawlProfile.entry pe = sb.crawler.profilesActiveCrawls.newEntry(
 	                        folder+"/"+crawlingStartURL, crawlingStartURL,
 	                        newcrawlingMustMatch,
 	                        CrawlProfile.MATCH_BAD_URL,
@@ -263,19 +265,19 @@ public class bookmarksDB {
 	                        storeHTCache, true, crawlOrder, xsstopw, xdstopw, xpstopw, cacheStrategy);
 	                sb.crawlStacker.enqueueEntry(new Request(
 	                        sb.peers.mySeed().hash.getBytes(),
-                            crawlingStartURL,
-	                        null,
-	                        "CRAWLING-ROOT",
-	                        new Date(),
-	                        null,
-	                        pe.handle(),
-	                        0,
-	                        0,
-	                        0
-	                        ));
-                	Log.logInfo("BOOKMARKS", "autoReCrawl - adding crawl profile for: " + crawlingStart);
-                	// serverLog.logInfo("BOOKMARKS", "autoReCrawl - crawl filter is set to: " + newcrawlingfilter);
-                	// generate a YaCyNews if the global flag was set
+                                crawlingStartURL,
+                                null,
+                                "CRAWLING-ROOT",
+                                new Date(),
+                                null,
+                                pe.handle(),
+                                0,
+                                0,
+                                0
+                                ));
+                    Log.logInfo("BOOKMARKS", "autoReCrawl - adding crawl profile for: " + crawlingStart);
+                    // serverLog.logInfo("BOOKMARKS", "autoReCrawl - crawl filter is set to: " + newcrawlingfilter);
+                    // generate a YaCyNews if the global flag was set
                     if (crawlOrder) {
                         Map<String, String> m = new HashMap<String, String>(pe.map()); // must be cloned
                         m.remove("specificDepth");
@@ -292,15 +294,14 @@ public class bookmarksDB {
                         m.put("intention", "Automatic ReCrawl!");
                         sb.peers.newsPool.publishMyNews(yacyNewsRecord.newRecord(sb.peers.mySeed(), yacyNewsPool.CATEGORY_CRAWL_START, m));	                      
                     }
-	    		} catch (MalformedURLException e1) {}
-			} // if
-		} // while(bit.hasNext())    	
-       	return;
+                } catch (MalformedURLException e1) {}
+            } // if
+        } // while(bit.hasNext())
     } // } autoReCrawl() 
     
     // -----------------------------------------------------------
-	// bookmarksDB's functions for bookmarksTable / bookmarkCache
-	// ----------------------------------------------------------- 
+    // bookmarksDB's functions for bookmarksTable / bookmarkCache
+    // -----------------------------------------------------------
     
     public Bookmark createBookmark(final String url, final String user){
         if (url == null || url.length() == 0) return null;
@@ -317,13 +318,13 @@ public class bookmarksDB {
     // adding a bookmark to the bookmarksDB
     public void saveBookmark(final Bookmark bookmark){
     	try {
-    		bookmarks.put(bookmark.getUrlHash(), bookmark.entry);
+            bookmarks.put(bookmark.getUrlHash(), bookmark.entry);
         } catch (final Exception e) {
             Log.logException(e);
         }
     }
     public String addBookmark(final Bookmark bookmark){
-        saveBookmark(bookmark);
+        this.saveBookmark(bookmark);
         return bookmark.getUrlHash();
  
     }
@@ -331,8 +332,7 @@ public class bookmarksDB {
     public Bookmark getBookmark(final String urlHash){
         try {
             final Map<String, String> map = bookmarks.get(urlHash);
-            if (map == null) return null;
-            return new Bookmark(map);
+            return (map == null) ? new Bookmark(map) : null;
         } catch (final IOException e) {
             return null;
         }
@@ -340,10 +340,10 @@ public class bookmarksDB {
     
     public boolean removeBookmark(final String urlHash){
         final Bookmark bookmark = getBookmark(urlHash);
-        if(bookmark == null) return false; //does not exist
-        final Set<String> tags = bookmark.getTags();
+        if (bookmark == null) return false; //does not exist
+        final Set<String> tagSet = bookmark.getTags();
         bookmarksDB.Tag tag=null;
-        final Iterator<String> it=tags.iterator();
+        final Iterator<String> it=tagSet.iterator();
         while(it.hasNext()){
             tag=getTag(BookmarkHelper.tagHash(it.next()));
             if(tag!=null){
@@ -442,7 +442,7 @@ public class bookmarksDB {
     }
     
     private Iterator<Tag> getTagIterator(final boolean priv, final int c) {
-    	final TreeSet<Tag> set=new TreeSet<Tag>((c == SORT_SIZE) ? tagSizeComparator : tagComparator);
+    	final Set<Tag> set = new TreeSet<Tag>((c == SORT_SIZE) ? tagSizeComparator : tagComparator);
     	final Iterator<Tag> it = this.tags.values().iterator();
     	Tag tag;
     	while (it.hasNext()) {
@@ -474,11 +474,11 @@ public class bookmarksDB {
     	final Iterator<String> bit=getBookmarksIterator(tagName, priv);
     	Bookmark bm;
     	Tag tag;
-    	Set<String> tags;
+    	Set<String> tagSet;
     	while(bit.hasNext()){
     		bm=getBookmark(bit.next());
-    		tags = bm.getTags();
-    		it = tags.iterator();
+    		tagSet = bm.getTags();
+    		it = tagSet.iterator();
     		while (it.hasNext()) {
     			tag=getTag(BookmarkHelper.tagHash(it.next()) );
         		if(priv ||tag.hasPublicItems()){
@@ -510,16 +510,16 @@ public class bookmarksDB {
  	
     	final Tag oldTag=getTag(BookmarkHelper.tagHash(oldName));
     	if (oldTag != null) {
-    		final Set<String> urlHashes = oldTag.getUrlHashes();	// preserve urlHashes of oldTag
-    		removeTag(BookmarkHelper.tagHash(oldName));							// remove oldHash from TagsDB
-    		final Iterator<String> it = urlHashes.iterator();		
+            final Set<String> urlHashes = oldTag.getUrlHashes();	// preserve urlHashes of oldTag
+            removeTag(BookmarkHelper.tagHash(oldName));							// remove oldHash from TagsDB
+	
             Bookmark bookmark;
-            Set<String> tags = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-            while (it.hasNext()) {									// looping through all bookmarks which were tagged with oldName
-                bookmark = getBookmark(it.next());
-                tags = bookmark.getTags();
-                tags.remove(oldName);
-                bookmark.setTags(tags, true);						// might not be needed, but doesn't hurt
+            Set<String> tagSet = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
+            for (String urlHash : urlHashes) {									// looping through all bookmarks which were tagged with oldName
+                bookmark = getBookmark(urlHash);
+                tagSet = bookmark.getTags();
+                tagSet.remove(oldName);
+                bookmark.setTags(tagSet, true);						// might not be needed, but doesn't hurt
                 if(!newName.equals("")) bookmark.addTag(newName);                
                 saveBookmark(bookmark);
             }
@@ -529,10 +529,10 @@ public class bookmarksDB {
     }
     
     public void addTag(final String selectTag, final String newTag) {    		
-    	final Iterator<String> it = getTag(BookmarkHelper.tagHash(selectTag)).getUrlHashes().iterator();	// get urlHashes for selectTag        
+    
     	Bookmark bookmark;
-    	while (it.hasNext()) {	// looping through all bookmarks which were tagged with selectTag
-    		bookmark = getBookmark(it.next());
+    	for (final String urlHash : getTag(BookmarkHelper.tagHash(selectTag)).getUrlHashes()) {	// looping through all bookmarks which were tagged with selectTag
+    		bookmark = getBookmark(urlHash);
     		bookmark.addTag(newTag);
     		saveBookmark(bookmark);
         }
@@ -546,36 +546,34 @@ public class bookmarksDB {
      * Subclass of bookmarksDB, which provides the Tag object-type
      */
     public class Tag {
-        public static final String URL_HASHES="urlHashes";
-        public static final String TAG_NAME="tagName";
+        public static final String URL_HASHES = "urlHashes";
+        public static final String TAG_NAME =  "tagName";
         private final String tagHash;
         private final Map<String, String> mem;
         private Set<String> urlHashes;
 
         public Tag(final String hash, final Map<String, String> map){
-        	tagHash=hash;
-            mem=map;
-            if(mem.containsKey(URL_HASHES))
+            tagHash = hash;
+            mem = map;
+            if (mem.containsKey(URL_HASHES)) {
                 urlHashes = listManager.string2set(mem.get(URL_HASHES));
-            else
+            } else {
                 urlHashes = new HashSet<String>();
+            }
         }
         
         public Tag(final String name, final HashSet<String> entries){
-            tagHash=BookmarkHelper.tagHash(name);
-            mem=new HashMap<String, String>();
+            tagHash = BookmarkHelper.tagHash(name);
+            mem = new HashMap<String, String>();
             //mem.put(URL_HASHES, listManager.arraylist2string(entries));
-            urlHashes=entries;
+            urlHashes = entries;
             mem.put(TAG_NAME, name);
         }
         
         public Tag(final String name){
-            tagHash=BookmarkHelper.tagHash(name);
-            mem=new HashMap<String, String>();
-            //mem.put(URL_HASHES, "");
-            urlHashes=new HashSet<String>();
-            mem.put(TAG_NAME, name);
+            this(name, new HashSet<String>());
         }
+        
         public Map<String, String> getMap(){
             mem.put(URL_HASHES, listManager.collection2string(this.urlHashes));
             return mem;
@@ -615,11 +613,7 @@ public class bookmarksDB {
         }
         
         public boolean hasPublicItems(){
-        	final Iterator<String> it=getBookmarksIterator(this.getTagName(), false);
-        	if(it.hasNext()){
-        		return true;
-        	}
-        	return false;
+            return getBookmarksIterator(this.getTagName(), false).hasNext();
         }
         
         public void addUrl(final String urlHash){
@@ -640,30 +634,42 @@ public class bookmarksDB {
      */
     public class Bookmark {
         
-        public static final String BOOKMARK_URL="bookmarkUrl";
-        public static final String BOOKMARK_TITLE="bookmarkTitle";
-        public static final String BOOKMARK_DESCRIPTION="bookmarkDesc";
-        public static final String BOOKMARK_TAGS="bookmarkTags";
-        public static final String BOOKMARK_PUBLIC="bookmarkPublic";
-        public static final String BOOKMARK_TIMESTAMP="bookmarkTimestamp";
-        public static final String BOOKMARK_OWNER="bookmarkOwner";
-        public static final String BOOKMARK_IS_FEED="bookmarkIsFeed";
+        public static final String BOOKMARK_URL = "bookmarkUrl";
+        public static final String BOOKMARK_TITLE = "bookmarkTitle";
+        public static final String BOOKMARK_DESCRIPTION = "bookmarkDesc";
+        public static final String BOOKMARK_TAGS = "bookmarkTags";
+        public static final String BOOKMARK_PUBLIC = "bookmarkPublic";
+        public static final String BOOKMARK_TIMESTAMP = "bookmarkTimestamp";
+        public static final String BOOKMARK_OWNER = "bookmarkOwner";
+        public static final String BOOKMARK_IS_FEED = "bookmarkIsFeed";
         private String urlHash;
         private Set<String> tagNames;
         private long timestamp;
-        Map<String, String> entry;
+        private Map<String, String> entry;
         
         public Bookmark(final String urlHash, final Map<String, String> map) {
-            this.entry = map;
-            this.urlHash=urlHash;    
+            entry = map;
+            this.urlHash = urlHash;
             tagNames = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
             if (map.containsKey(BOOKMARK_TAGS)) tagNames.addAll(listManager.string2set(map.get(BOOKMARK_TAGS)));
             loadTimestamp();
         }
-        
+
+        public Bookmark(final String urlHash, final String url) {
+            entry = new HashMap<String, String>();
+            this.urlHash = urlHash;
+            entry.put(BOOKMARK_URL, url);
+            tagNames = new HashSet<String>();
+            timestamp = System.currentTimeMillis();
+        }
+
+        public Bookmark(final String urlHash, final DigestURI url) {
+            this(urlHash, url.toNormalform(false, true));
+        }
+
         public Bookmark(String url){
             entry = new HashMap<String, String>();
-            if(!url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")){
+            if (!url.toLowerCase().startsWith("http://") && !url.toLowerCase().startsWith("https://")) {
                 url="http://"+url;
             }
             try {
@@ -687,22 +693,6 @@ public class bookmarksDB {
             removeBookmark(this.urlHash); //prevent empty tags
         }
         
-        public Bookmark(final String urlHash, final DigestURI url) {
-            entry = new HashMap<String, String>();
-            this.urlHash=urlHash;
-            entry.put(BOOKMARK_URL, url.toNormalform(false, true));
-            tagNames=new HashSet<String>();
-            timestamp=System.currentTimeMillis();
-        }
-        
-        public Bookmark(final String urlHash, final String url) {
-            entry = new HashMap<String, String>();
-            this.urlHash=urlHash;
-            entry.put(BOOKMARK_URL, url);
-            tagNames=new HashSet<String>();
-            timestamp=System.currentTimeMillis();
-        }
-
         public Bookmark(final Map<String, String> map) throws MalformedURLException {
             this(new String((new DigestURI(map.get(BOOKMARK_URL), null)).hash()), map);
         }
@@ -731,25 +721,27 @@ public class bookmarksDB {
         }
         
         public String getTagsString() {        	
-        	final String s[] = listManager.collection2string(getTags()).split(",");
-        	String tagsString="";        	
-        	for (int i=0; i<s.length; i++){
-        		if(!s[i].startsWith("/")){
-        			tagsString += s[i]+",";
-        		}
-        	}
-        	return tagsString;
+            final String s[] = listManager.collection2string(getTags()).split(",");
+            final StringBuilder stringBuilder = new StringBuilder();
+            for (final String element : s){
+                if(!element.startsWith("/")){
+                    stringBuilder.append(element);
+                    stringBuilder.append(",");
+                }
+            }
+            return stringBuilder.toString();
         }
         
         public String getFoldersString(){
-        	final String s[] = listManager.collection2string(getTags()).split(",");
-        	String foldersString="";        	
-        	for (int i=0; i<s.length; i++){
-        		if(s[i].startsWith("/")){
-        			foldersString += s[i]+",";
-        		}
-        	}
-        	return foldersString;
+            final String s[] = listManager.collection2string(getTags()).split(",");
+            final StringBuilder stringBuilder = new StringBuilder();
+            for (final String element : s){
+                if(!element.startsWith("/")){
+                    stringBuilder.append(element);
+                    stringBuilder.append(",");
+                }
+            }
+            return stringBuilder.toString();
         }
         
         public String getDescription(){
@@ -792,19 +784,19 @@ public class bookmarksDB {
         }
         
         public void setPublic(final boolean isPublic){
-        	if(isPublic){
+            if(isPublic){
                 entry.put(BOOKMARK_PUBLIC, "public");
-        	}else{
+            } else {
                 entry.put(BOOKMARK_PUBLIC, "private");
-        	}
+            }
         }
         
         public void setFeed(final boolean isFeed){
-        	if(isFeed){
+            if(isFeed){
                 entry.put(BOOKMARK_IS_FEED, "true");
-        	}else{
+            }else{
                 entry.put(BOOKMARK_IS_FEED, "false");
-        	}
+            }
         }
         
         public void setProperty(final String name, final String value){
@@ -834,15 +826,13 @@ public class bookmarksDB {
         public void setTags(final Set<String> tags2, final boolean local){
             tagNames = tags2;			// TODO: check if this is safe
         	// tags.addAll(tags2);	// in order for renameTag() to work I had to change this form 'add' to 'set'
-            final Iterator<String> it=tagNames.iterator();
-            while(it.hasNext()){
-                final String tagName=it.next();
-                Tag tag=getTag(BookmarkHelper.tagHash(tagName));
-                if(tag == null){
-                    tag=new Tag(tagName);
+            for (final String tagName : tagNames) {
+                Tag tag = getTag(BookmarkHelper.tagHash(tagName));
+                if (tag == null) {
+                    tag = new Tag(tagName);
                 }
                 tag.addUrl(getUrlHash());
-                if(local){
+                if (local) {
                     putTag(tag);
                 }
             }
@@ -854,7 +844,7 @@ public class bookmarksDB {
         }
         
         public void setTimeStamp(final long ts){
-        	this.timestamp=ts;
+        	this.timestamp = ts;
         }
     }
     
@@ -882,10 +872,10 @@ public class bookmarksDB {
         }
         
         public Bookmark next() {
-            try {
+            if (hasNext()) {
                 String s = new String(this.bookmarkIter.next());
                 return getBookmark(s);
-            } catch (final kelondroException e) {
+            } else {
                 //resetDatabase();
                 return null;
             }
@@ -907,19 +897,20 @@ public class bookmarksDB {
          * @param newestFirst newest first, or oldest first?
          */
         public bookmarkComparator(final boolean newestFirst){
-            this.newestFirst=newestFirst;
+            this.newestFirst = newestFirst;
         }
         
         public int compare(final String obj1, final String obj2) {
-            final Bookmark bm1=getBookmark(obj1);
-            final Bookmark bm2=getBookmark(obj2);
-			if(bm1==null || bm2==null)
-				return 0; //XXX: i think this should not happen? maybe this needs further tracing of the bug
-            if(this.newestFirst){
-                if(bm2.getTimeStamp() - bm1.getTimeStamp() >0) return 1;
+            final Bookmark bm1 = getBookmark(obj1);
+            final Bookmark bm2 = getBookmark(obj2);
+            if (bm1 == null || bm2 == null) {
+                return 0; //XXX: i think this should not happen? maybe this needs further tracing of the bug
+            }
+            if (this.newestFirst){
+                if (bm2.getTimeStamp() - bm1.getTimeStamp() >0) return 1;
                 return -1;
             }
-            if(bm1.getTimeStamp() - bm2.getTimeStamp() >0) return 1;
+            if  (bm1.getTimeStamp() - bm2.getTimeStamp() > 0) return 1;
             return -1;
         }
     }
@@ -933,12 +924,12 @@ public class bookmarksDB {
     public static class TagComparator implements Comparator<Tag>, Serializable {
         
     	/**
-		 * generated serial
-		 */
-		private static final long serialVersionUID = 3105057490088903930L;
+         * generated serial
+         */
+        private static final long serialVersionUID = 3105057490088903930L;
 
-		public int compare(final Tag obj1, final Tag obj2){
-    		return obj1.getTagName().compareTo(obj2.getTagName());
+        public int compare(final Tag obj1, final Tag obj2){
+            return obj1.getTagName().compareTo(obj2.getTagName());
     	}
     	
     }
@@ -946,14 +937,18 @@ public class bookmarksDB {
     public static class TagSizeComparator implements Comparator<Tag>, Serializable {
         
     	/**
-		 * generated serial
-		 */
-		private static final long serialVersionUID = 4149185397646373251L;
+         * generated serial
+         */
+        private static final long serialVersionUID = 4149185397646373251L;
 
-		public int compare(final Tag obj1, final Tag obj2) {
-    		if (obj1.size() < obj2.size()) return 1;
-    		else if (obj1.getTagName().equals(obj2.getTagName())) return 0;
-    		else return -1;
+        public int compare(final Tag obj1, final Tag obj2) {
+            if (obj1.size() < obj2.size()) {
+                return 1;
+            } else if (obj1.getTagName().equals(obj2.getTagName())) {
+                return 0;
+            } else {
+                return -1;
+            }
     	}
     	
     }

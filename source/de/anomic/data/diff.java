@@ -39,42 +39,42 @@ import net.yacy.document.parser.html.CharacterCoding;
 public class diff {
     
     private   final ArrayList <Part> parts = new ArrayList<Part>();
-    protected final Object[] o;
-    protected final Object[] n;
+    protected final Object[] original;
+    protected final Object[] changed;
     
     /**
-     * @param o the original <code>String</code>
-     * @param n the new <code>String</code>
+     * @param original the original <code>String</code>
+     * @param changed the new <code>String</code>
      * @throws NullPointerException if one of the arguments is <code>null</code>
      */
-    public diff(final String o, final String n) {
-        this(o, n, 1);
+    public diff(final String original, final String changed) {
+        this(original, changed, 1);
     }
     
     /**
-     * @param o the original <code>String</code>
-     * @param n the new <code>String</code>
+     * @param original the original <code>String</code>
+     * @param changed the new <code>String</code>
      * @param minConsecutive the minimum number of consecutive equal characters in
      * both Strings. Smaller seperations will only be performed on the end of either
      * String if needed
-     * @throws NullPointerException if <code>o</code> or <code>n</code> is
+     * @throws NullPointerException if <code>original</code> or <code>changed</code> is
      * <code>null</code>
      */
-    public diff(final String o, final String n, final int minConsecutive) {
-        if (o == null || n == null) throw new NullPointerException("neither o nor n must be null");
-        this.o = new Comparable[o.length()];
-        for (int i=0; i<o.length(); i++)
-            this.o[i] = Character.valueOf(o.charAt(i));
-        this.n = new Comparable[n.length()];
-        for (int i=0; i<n.length(); i++)
-            this.n[i] = Character.valueOf(n.charAt(i));
+    public diff(final String original, final String changed, final int minConsecutive) {
+        if (original == null || changed == null) throw new NullPointerException("input Strings must be null");
+        this.original = new Comparable[original.length()];
+        for (int i=0; i<original.length(); i++)
+            this.original[i] = Character.valueOf(original.charAt(i));
+        this.changed = new Comparable[changed.length()];
+        for (int i=0; i<changed.length(); i++)
+            this.changed[i] = Character.valueOf(changed.charAt(i));
         parse((minConsecutive > 0) ? minConsecutive : 1);
     }
     
-    public diff(final Object[] o, final Object[] n, final int minConsecutive) {
-        if (o == null || n == null) throw new NullPointerException("neither o nor n must be null");
-        this.o = o;
-        this.n = n;
+    public diff(final Object[] original, final Object[] changed, final int minConsecutive) {
+        if (original == null || changed == null) throw new NullPointerException("input Objects must be null");
+        this.original = original;
+        this.changed = changed;
         parse((minConsecutive > 0) ? minConsecutive : 1);
     }
     
@@ -102,10 +102,10 @@ public class diff {
          *    C| | | | | | | | | | | | | | | | |#| |
          *    E| | |#| | | | | | | | |#| | |#| | |#|
          */
-        final boolean[][] matrix = new boolean[this.n.length][this.o.length];
-        for (int y=0; y<this.n.length; y++)
-            for (int x=0; x<this.o.length; x++)
-                matrix[y][x] = this.o[x].equals(this.n[y]);
+        final boolean[][] matrix = new boolean[this.changed.length][this.original.length];
+        for (int y=0; y<this.changed.length; y++)
+            for (int x=0; x<this.original.length; x++)
+                matrix[y][x] = this.original[x].equals(this.changed[y]);
         
         int s = 0, t = 0;
         int[] tmp;
@@ -114,7 +114,7 @@ public class diff {
             this.parts.add(new Part(Part.UNCHANGED, tmp[0], s = tmp[0] + tmp[2]));
             t = tmp[1] + tmp[2];
         }
-        addReplacementParts(s, t, this.o.length, this.n.length);
+        addReplacementParts(s, t, this.original.length, this.changed.length);
     }
     
     private void addReplacementParts(final int startx, final int starty, final int endx, final int endy) {
@@ -161,12 +161,12 @@ public class diff {
     /**
      * @return the original <code>Object[]</code> passed to this class on instantiation
      */
-    public Object[] getOriginal() { return this.o; }
+    public Object[] getOriginal() { return this.original; }
     
     /**
      * @return the new <code>Object[]</code> passed to this class on instantiation
      */
-    public Object[] getNew() { return this.n; }
+    public Object[] getNew() { return this.changed; }
     
     /**
      * A diff is composed of different parts. Each of these parts stands for an
@@ -177,11 +177,12 @@ public class diff {
      */
     public Part[] getParts() { return this.parts.toArray(new Part[this.parts.size()]); }
     
+    @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder(this.parts.size() * 20);
-        for (int j=0; j<this.parts.size(); j++)
-            sb.append(this.parts.get(j).toString()).append("\n");
-        return new String(sb);
+        for (final Part part :parts)
+            sb.append(part.toString()).append("\n");
+        return sb.toString();
     }
     
     /**
@@ -220,13 +221,13 @@ public class diff {
         public String getString() {
             final StringBuilder sb = new StringBuilder(this.posNew - this.posOld);
             if (this.action == ADDED) {
-                for (int i=this.posOld; i<this.posNew; i++)
-                    sb.append(diff.this.n[i]);
+                for (int i = this.posOld; i < this.posNew; i++)
+                    sb.append(diff.this.changed[i]);
             } else {
-                for (int i=this.posOld; i<this.posNew; i++)
-                    sb.append(diff.this.o[i]);
+                for (int i = this.posOld; i < this.posNew; i++)
+                    sb.append(diff.this.original[i]);
             }
-            return new String(sb);
+            return sb.toString();
         }
         
         /**
@@ -237,6 +238,7 @@ public class diff {
          * <dt>deleted</dt><dd>"<code>- STRING</code>"</dd>
          * </dl>
          */
+        @Override
         public String toString() {
             return ((this.action == UNCHANGED) ? " " :
                     (this.action == ADDED) ? "+" : "-") + " " + getString();
@@ -246,21 +248,21 @@ public class diff {
     public static String toHTML(final diff[] diffs) {
         final StringBuilder sb = new StringBuilder(diffs.length * 60);
         diff.Part[] ps;
-        for (int i=0; i<diffs.length; i++) {
+        for (diff d : diffs) {
             sb.append("<p class=\"diff\">\n");
-            ps = diffs[i].getParts();
-            for (int j=0; j<ps.length; j++) {
+            ps = d.getParts();
+            for (diff.Part part :ps) {
                 sb.append("<span\nclass=\"");
-                switch (ps[j].getAction()) {
-                case diff.Part.UNCHANGED: sb.append("unchanged"); break;
-                case diff.Part.ADDED: sb.append("added"); break;
-                case diff.Part.DELETED: sb.append("deleted"); break;
+                switch (part.getAction()) {
+                    case diff.Part.UNCHANGED: sb.append("unchanged"); break;
+                    case diff.Part.ADDED: sb.append("added"); break;
+                    case diff.Part.DELETED: sb.append("deleted"); break;
                 }
-                sb.append("\">").append(CharacterCoding.unicode2html(ps[j].getString(), true).replaceAll("\n", "<br />"));
+                sb.append("\">").append(CharacterCoding.unicode2html(part.getString(), true).replaceAll("\n", "<br />"));
                 sb.append("</span>");
             }
             sb.append("</p>");
         }
-        return new String(sb);
+        return sb.toString();
     }
 }

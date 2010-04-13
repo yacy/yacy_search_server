@@ -162,7 +162,7 @@ public class BookmarkHelper {
     }
     
     
-    public static int importFromXML(bookmarksDB db, final String input, final boolean importPublic){        
+    public static int importFromXML(bookmarksDB db, final String input, final boolean importPublic){
         try {
             // convert string to input stream
             final ByteArrayInputStream byteIn = new ByteArrayInputStream(input.getBytes("UTF-8"));

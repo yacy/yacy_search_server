@@ -50,12 +50,12 @@ public class WorkTables extends Tables {
     public final static String TABLE_ROBOTS_NAME = "robots";
     
     
-    public WorkTables(File workPath) {
+    public WorkTables(final File workPath) {
         super(workPath, 12);
     }
     
-    public void recordAPICall(final serverObjects post, final String servletName, String type, String comment) {
-        String apiurl = /*"http://localhost:" + getConfig("port", "8080") +*/ "/" + servletName + "?" + post.toString();
+    public void recordAPICall(final serverObjects post, final String servletName, final String type, final String comment) {
+        final String apiurl = /*"http://localhost:" + getConfig("port", "8080") +*/ "/" + servletName + "?" + post.toString();
         try {
             super.insert(
                     TABLE_API_NAME,

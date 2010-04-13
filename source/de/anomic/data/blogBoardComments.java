@@ -56,22 +56,20 @@ import de.anomic.data.wiki.wikiBoard;
 
 public class blogBoardComments {
     
-    public  static final int keyLength = 64;
-    private static final String dateFormat = "yyyyMMddHHmmss";
+    private final static int KEY_LENGTH = 64;
+    private final static String DATE_FORMAT = "yyyyMMddHHmmss";
 
-    static SimpleDateFormat SimpleFormatter = new SimpleDateFormat(dateFormat, Locale.US);
+    private final static SimpleDateFormat SIMPLE_DATE_FORMATTER = new SimpleDateFormat(DATE_FORMAT, Locale.US);
     static {
-        SimpleFormatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+        SIMPLE_DATE_FORMATTER.setTimeZone(TimeZone.getTimeZone("GMT"));
     }
     
     private MapHeap database = null;
     
     public blogBoardComments(final File actpath) throws IOException {
         new File(actpath.getParent()).mkdir();
-        if (database == null) {
-            //database = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, newFile), 500, '_');
-            database = new MapHeap(actpath, keyLength, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
-        }
+        //database = new MapView(BLOBTree.toHeap(actpath, true, true, keyLength, recordSize, '_', NaturalOrder.naturalOrder, newFile), 500, '_');
+        database = new MapHeap(actpath, KEY_LENGTH, NaturalOrder.naturalOrder, 1024 * 64, 500, '_');
     }
     
     public int size() {
@@ -83,29 +81,33 @@ public class blogBoardComments {
     }
     
     static String dateString(final Date date) {
-        synchronized (SimpleFormatter) {
-            return SimpleFormatter.format(date);
+        synchronized (SIMPLE_DATE_FORMATTER) {
+            return SIMPLE_DATE_FORMATTER.format(date);
         }
     }
     
     private static String normalize(final String key) {
-        if (key == null) return "null";
-        return key.trim().toLowerCase();
+        return (key == null) ? "null" : key.trim().toLowerCase();
     }
-    public static String webalize(String key) {
-        if (key == null) return "null";
-        key = key.trim().toLowerCase();
+    public static String webalize(final String key) {
+        if (key == null) {
+            return "null";
+        }
+        String ret = key.trim().toLowerCase();
         int p;
-        while ((p = key.indexOf(" ")) >= 0)
-            key = key.substring(0, p) + "%20" + key.substring(p +1);
-        return key;
+        while ((p = ret.indexOf(" ")) >= 0)
+            ret = ret.substring(0, p) + "%20" + key.substring(p +1);
+        return ret;
     }
+
     public String guessAuthor(final String ip) {
         return wikiBoard.guessAuthor(ip);
     }
+
     public CommentEntry newEntry(final String key, final byte[] subject, final byte[] author, final String ip, final Date date, final byte[] page) {
         return new CommentEntry(normalize(key), subject, author, ip, date, page);
     }
+
     public String write(final CommentEntry page) {
         // writes a new page and returns key
     	try {
@@ -120,99 +122,115 @@ public class blogBoardComments {
         //System.out.println("DEBUG: read from blogBoardComments");
         return read(key, database);
     }
-    private CommentEntry read(String key, final MapHeap base) {
-        key = normalize(key);
-        if (key.length() > keyLength) key = key.substring(0, keyLength);
+
+    private CommentEntry read(final String key, final MapHeap base) {
+        String copyOfKey = normalize(key);
+        copyOfKey = copyOfKey.substring(0, Math.min(copyOfKey.length(), KEY_LENGTH));
         Map<String, String> record;
         try {
-            record = base.get(key);
+            record = base.get(copyOfKey);
         } catch (final IOException e) {
             record = null;
         }
-        if (record == null) return newEntry(key, "".getBytes(), "anonymous".getBytes(), "127.0.0.1", new Date(), "".getBytes());
-        return new CommentEntry(key, record);
+        return (record == null) ?
+            newEntry(copyOfKey, new byte[0], "anonymous".getBytes(), "127.0.0.1", new Date(), new byte[0]) :
+            new CommentEntry(copyOfKey, record);
     }
+
     public boolean importXML(final String input) {
+        boolean ret = false;
     	final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     	try {
-			final DocumentBuilder builder = factory.newDocumentBuilder();
-			final Document doc = builder.parse(new ByteArrayInputStream(input.getBytes()));
-			return parseXMLimport(doc);
-		} catch (final ParserConfigurationException e) {
-		} catch (final SAXException e) {
-		} catch (final IOException e) {}
+            final DocumentBuilder builder = factory.newDocumentBuilder();
+            final Document doc = builder.parse(new ByteArrayInputStream(input.getBytes()));
+            ret = parseXMLimport(doc);
+        }
+        catch (final ParserConfigurationException e) {}
+        catch (final SAXException e) {}
+        catch (final IOException e) {}
 		
-    	return false;
+    	return ret;
     }
+    
     private boolean parseXMLimport(final Document doc) {
-    	if(!doc.getDocumentElement().getTagName().equals("blog"))
-    		return false;
+    	if(!doc.getDocumentElement().getTagName().equals("blog")) {
+            return false;
+        }
     	
     	final NodeList items = doc.getDocumentElement().getElementsByTagName("item");
-    	if(items.getLength() == 0)
-    		return false; 
+    	if(items.getLength() == 0) {
+            return false;
+        }
     	
-    	for(int i=0;i<items.getLength();++i) {
-    		String key = null, ip = null, StrSubject = null, StrAuthor = null, StrPage = null, StrDate = null;
-    		Date date = null;
-    		
-    		if(!items.item(i).getNodeName().equals("item"))
-    			continue;
-    		
-    		final NodeList currentNodeChildren = items.item(i).getChildNodes();
-    		
-    		for(int j=0;j<currentNodeChildren.getLength();++j) {
-    			final Node currentNode = currentNodeChildren.item(j);
-    			if(currentNode.getNodeName().equals("id"))
-    				key = currentNode.getFirstChild().getNodeValue();
-    			else if(currentNode.getNodeName().equals("ip"))
-    				ip = currentNode.getFirstChild().getNodeValue();
-    			else if(currentNode.getNodeName().equals("timestamp"))
-    				StrDate = currentNode.getFirstChild().getNodeValue();
-    			else if(currentNode.getNodeName().equals("subject"))
-    				StrSubject = currentNode.getFirstChild().getNodeValue();
-    			else if(currentNode.getNodeName().equals("author"))
-    				StrAuthor = currentNode.getFirstChild().getNodeValue();
-    			else if(currentNode.getNodeName().equals("content"))
-    				StrPage = currentNode.getFirstChild().getNodeValue();
-    		}
-    		
-    		try {
-				date = SimpleFormatter.parse(StrDate);
-			} catch (final ParseException e1) {
-				date = new Date();
-			}
-    		
-    		if(key == null || ip == null || StrSubject == null || StrAuthor == null || StrPage == null || date == null)
-    			return false;
-    		
-    		byte[] subject,author,page;
-    		try {
-				subject = StrSubject.getBytes("UTF-8");
-			} catch (final UnsupportedEncodingException e1) {
-				subject = StrSubject.getBytes();
-			}
-			try {
-				author = StrAuthor.getBytes("UTF-8");
-			} catch (final UnsupportedEncodingException e1) {
-				author = StrAuthor.getBytes();
-			}
-			try {
-				page = StrPage.getBytes("UTF-8");
-			} catch (final UnsupportedEncodingException e1) {
-				page = StrPage.getBytes();
-			}
+    	for(int i = 0, n = items.getLength(); i < n; ++i) {
+            String key = null, ip = null, StrSubject = null, StrAuthor = null, StrPage = null, StrDate = null;
+            Date date = null;
 
-		write (newEntry(key, subject, author, ip, date, page));
+            if(!items.item(i).getNodeName().equals("item"))
+                continue;
+
+            final NodeList currentNodeChildren = items.item(i).getChildNodes();
+
+            for(int j=0, m = currentNodeChildren.getLength(); j < m; ++j) {
+
+                final Node currentNode = currentNodeChildren.item(j);
+                if (currentNode.getNodeName().equals("id")) {
+                    key = currentNode.getFirstChild().getNodeValue();
+                } else if(currentNode.getNodeName().equals("ip")) {
+                    ip = currentNode.getFirstChild().getNodeValue();
+                } else if(currentNode.getNodeName().equals("timestamp")) {
+                    StrDate = currentNode.getFirstChild().getNodeValue();
+                } else if(currentNode.getNodeName().equals("subject")) {
+                    StrSubject = currentNode.getFirstChild().getNodeValue();
+                } else if(currentNode.getNodeName().equals("author")) {
+                    StrAuthor = currentNode.getFirstChild().getNodeValue();
+                } else if(currentNode.getNodeName().equals("content")) {
+                    StrPage = currentNode.getFirstChild().getNodeValue();
+                }
+            }
+    		
+            try {
+                date = SIMPLE_DATE_FORMATTER.parse(StrDate);
+            } catch (final ParseException ex) {
+                    date = new Date();
+            }
+    		
+            if (key == null || ip == null || StrSubject == null || StrAuthor == null || StrPage == null || date == null)
+                return false;
+    		
+            byte[] subject,author,page;
+            try {
+                subject = StrSubject.getBytes("UTF-8");
+            }
+            catch (final UnsupportedEncodingException ex) {
+                subject = StrSubject.getBytes();
+            }
+            try {
+                author = StrAuthor.getBytes("UTF-8");
+            }
+            catch (final UnsupportedEncodingException ex) {
+                author = StrAuthor.getBytes();
+            }
+            try {
+                page = StrPage.getBytes("UTF-8");
+            }
+            catch (final UnsupportedEncodingException ex) {
+                page = StrPage.getBytes();
+            }
+
+            write (newEntry(key, subject, author, ip, date, page));
     	}
+        
     	return true;
     }
-    public void delete(String key) {
-    	key = normalize(key);
+
+    public void delete(final String key) {
     	try {
-			database.remove(key);
-		} catch (final IOException e) { }
+            database.remove(normalize(key));
+        }
+        catch (final IOException e) { }
     }
+    
     public Iterator<byte[]> keys(final boolean up) throws IOException {
         return database.keys(up, false);
     }
@@ -238,17 +256,19 @@ public class blogBoardComments {
         CommentEntry(final String key, final Map<String, String> record) {
             this.key = key;
             this.record = record;
-            if (this.record.get("comments")==null) this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
+            if (this.record.get("comments") == null) {
+                this.record.put("comments", listManager.collection2string(new ArrayList<String>()));
+            }
         }
         
         public String getKey() {
             return key;
         }
+        
         private void setKey(final String var) {
-            key = var;
-            if (key.length() > keyLength) 
-                key = var.substring(0, keyLength);
+            key = var.substring(0, Math.min(var.length(), KEY_LENGTH));
         }
+        
         private void setSubject(final byte[] subject) {
             if (subject == null) 
                 record.put("subject","");
@@ -259,7 +279,7 @@ public class blogBoardComments {
             final String subject = record.get("subject");
             if (subject == null) return new byte[0];
             final byte[] subject_bytes = Base64Order.enhancedCoder.decode(subject);
-            if (subject_bytes == null) return "".getBytes();
+            if (subject_bytes == null) return new byte[0];
             return subject_bytes;
         }
         private void setDate(Date date) {
@@ -274,8 +294,8 @@ public class blogBoardComments {
                     if (Log.isFinest("Blog")) Log.logFinest("Blog", "ERROR: date field missing in blogBoard");
                     return new Date();
                 }
-                synchronized (SimpleFormatter) {
-                    return SimpleFormatter.parse(date);
+                synchronized (SIMPLE_DATE_FORMATTER) {
+                    return SIMPLE_DATE_FORMATTER.parse(date);
                 }
             } catch (final ParseException e) {
                 return new Date();
@@ -302,7 +322,7 @@ public class blogBoardComments {
                 return new byte[0];
             final byte[] author_byte = Base64Order.enhancedCoder.decode(author);
             if (author_byte == null) 
-                return "".getBytes();
+                return new byte[0];
             return author_byte;
         }
         private void setIp(String ip) {
@@ -328,7 +348,7 @@ public class blogBoardComments {
                 return new byte[0];
             final byte[] page_byte = Base64Order.enhancedCoder.decode(page);
             if (page_byte == null) 
-                return "".getBytes();
+                return new byte[0];
             return page_byte;
         }        
         /**

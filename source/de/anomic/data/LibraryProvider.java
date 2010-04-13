@@ -49,8 +49,8 @@ public class LibraryProvider {
     
     public static DidYouMeanLibrary dymLib = new DidYouMeanLibrary(null);
     public static OpenGeoDB geoDB = new OpenGeoDB(null);
-    public static File dictSource = null;
-    public static File dictRoot = null;
+    private static File dictSource = null;
+    private static File dictRoot = null;
     
     /**
      * initialize the LibraryProvider as static class.
@@ -61,7 +61,7 @@ public class LibraryProvider {
      * @param pathToSource
      * @param pathToDICTIONARIES
      */
-    public static void initialize(File rootPath) {
+    public static void initialize(final File rootPath) {
     	dictSource = new File(rootPath, path_to_source_dictionaries);
     	if (!dictSource.exists()) dictSource.mkdirs();
     	dictRoot = rootPath;
@@ -91,21 +91,21 @@ public class LibraryProvider {
     }
     
     public static void initDidYouMean() {
-    	File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
+    	final File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
         if (!dymDict.exists()) dymDict.mkdirs();
         dymLib = new DidYouMeanLibrary(dymDict);
     }
     
     public static void integrateDeReWo() {
         // translate input files (once..)
-        File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
+        final File dymDict = new File(dictRoot, path_to_did_you_mean_dictionaries);
         if (!dymDict.exists()) dymDict.mkdirs();
-        File pathToSource = new File(dictRoot, path_to_source_dictionaries);
-        File derewoInput = new File(pathToSource, "derewo-v-30000g-2007-12-31-0.1.txt");
-        File derewoOutput = new File(dymDict, "derewo-v-30000g-2007-12-31-0.1.words");
+        final File pathToSource = new File(dictRoot, path_to_source_dictionaries);
+        final File derewoInput = new File(pathToSource, "derewo-v-30000g-2007-12-31-0.1.txt");
+        final File derewoOutput = new File(dymDict, "derewo-v-30000g-2007-12-31-0.1.words");
         if (!derewoOutput.exists() && derewoInput.exists()) {
             // create the translation of the derewo file (which is easy in this case)
-            ArrayList<String> derewo = loadDeReWo(derewoInput, true);
+            final ArrayList<String> derewo = loadDeReWo(derewoInput, true);
             try {
                 writeWords(derewoOutput, derewo);
             } catch (IOException e) {
@@ -138,20 +138,20 @@ public class LibraryProvider {
     }
     */
     
-    private static Set<String> sortUnique(List<String> list) {
-        TreeSet<String> s = new TreeSet<String>();
-        for (String t: list) s.add(t);
+    private static Set<String> sortUnique(final List<String> list) {
+        final Set<String> s = new TreeSet<String>();
+        for (final String t: list) s.add(t);
         return s;
     }
     
-    private static void writeWords(File f, ArrayList<String> list) throws IOException {
-        Set<String> s = sortUnique(list);
-        PrintWriter w = new PrintWriter(new BufferedWriter(new FileWriter(f)));
-        for (String t: s) w.println(t);
+    private static void writeWords(final File f, final ArrayList<String> list) throws IOException {
+        final Set<String> s = sortUnique(list);
+        final PrintWriter w = new PrintWriter(new BufferedWriter(new FileWriter(f)));
+        for (final String t: s) w.println(t);
         w.close();
     }
     
-    private static ArrayList<String> loadDeReWo(final File file, boolean toLowerCase) {
+    private static ArrayList<String> loadDeReWo(final File file, final boolean toLowerCase) {
         final ArrayList<String> list = new ArrayList<String>();
         BufferedReader reader = null;
         try {

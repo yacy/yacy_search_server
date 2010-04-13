@@ -34,7 +34,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -51,6 +50,7 @@ import de.anomic.search.Switchboard;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import java.util.Collections;
+import java.util.Map;
 
 
 public class ConfigLanguage_p {
@@ -134,7 +134,7 @@ public class ConfigLanguage_p {
         //reread language files
         langFiles = FileUtils.getDirListing(langPath, LANG_FILENAME_FILTER);
         Collections.sort(langFiles);
-        final HashMap<String, String> langNames = translator.langMap(env);
+        final Map<String, String> langNames = translator.langMap(env);
         String langKey, langName;
 
         //virtual entry
@@ -143,7 +143,7 @@ public class ConfigLanguage_p {
         prop.put("langlist_0_selected", "selected=\"selected\"");
 
         int count = 0;
-        for(String langFile : langFiles){
+        for(final String langFile : langFiles){
             //+1 because of the virtual entry "default" at top
             langKey = langFile.substring(0, langFile.length() -4);
             langName = langNames.get(langKey);

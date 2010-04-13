@@ -56,10 +56,10 @@ public class URLLicense {
     
     public String aquireLicense(final DigestURI url) {
         // generate license key
-        String license = "";
-        if (url == null) return license;
-        while (license.length() < keylen) license += Integer.toHexString(random.nextInt());
-        license = license.substring(0, keylen);
+        StringBuilder stringBuilder = new StringBuilder();
+        if (url == null) return stringBuilder.toString();
+        while (stringBuilder.length() < keylen) stringBuilder.append(Integer.toHexString(random.nextInt()));
+        String license = stringBuilder.substring(0, keylen);
         // store reference to url with license key
         permissions.put(license, url);
         aging.add(license);

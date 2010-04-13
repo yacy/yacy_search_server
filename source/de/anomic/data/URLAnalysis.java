@@ -71,7 +71,7 @@ public class URLAnalysis {
      * processes to analyse URL lists
      */
 
-    public static DigestURI poison = null;
+    private static DigestURI poison = null;
     static {
         try {
             poison = new DigestURI("http://poison.org/poison", null);
@@ -82,18 +82,19 @@ public class URLAnalysis {
     
     public static class splitter extends Thread {
         
-        ArrayBlockingQueue<DigestURI> in;
-        ConcurrentHashMap<String, Integer> out;
+        private ArrayBlockingQueue<DigestURI> in;
+        private ConcurrentHashMap<String, Integer> out;
 
-        public splitter(ArrayBlockingQueue<DigestURI> in, ConcurrentHashMap<String, Integer> out) {
+        public splitter(final ArrayBlockingQueue<DigestURI> in, final ConcurrentHashMap<String, Integer> out) {
             this.in = in;
             this.out = out;
         }
         
+        @Override
         public void run() {
             try {
                 DigestURI url;
-                Pattern p = Pattern.compile("~|\\(|\\)|\\+|-|@|:|%|\\.|;|_");
+                final Pattern p = Pattern.compile("~|\\(|\\)|\\+|-|@|:|%|\\.|;|_");
                 while (true) {
                     try {
                         url = in.take();
@@ -109,9 +110,9 @@ public class URLAnalysis {
             }
         }
         
-        private void update(String[] s) {
+        private void update(final String[] s) {
             Integer c;
-            for (String t: s) {
+            for (final String t: s) {
                 if (t.length() == 0) continue;
                 c = out.get(t);
                 out.put(t, (c == null) ? 1 : c.intValue() + 1);
@@ -119,46 +120,46 @@ public class URLAnalysis {
         }
     }
     
-    public static void cleanup(ConcurrentHashMap<String, Integer> stat) {
+    public static void cleanup(final ConcurrentHashMap<String, Integer> stat) {
     	Map.Entry<String, Integer> entry;
     	int c, low = Integer.MAX_VALUE;
     	Iterator<Map.Entry<String, Integer>> i = stat.entrySet().iterator();
     	while (i.hasNext()) {
-    		entry = i.next();
-    		c = entry.getValue().intValue();
-    		if (c == 1) {
-    			i.remove();
-    		} else {
-    			if (c < low) low = c;
-    		}
+            entry = i.next();
+            c = entry.getValue().intValue();
+            if (c == 1) {
+                i.remove();
+            } else {
+                if (c < low) low = c;
+            }
     	}
     	i = stat.entrySet().iterator();
     	while (i.hasNext()) {
-    		entry = i.next();
-    		c = entry.getValue().intValue();
-    		if (c == low) {
-    			i.remove();
-    		}
+            entry = i.next();
+            c = entry.getValue().intValue();
+            if (c == low) {
+                i.remove();
+            }
     	}
     	Runtime.getRuntime().gc();
     }
     
-    public static void genstat(String urlfile) {
+    public static void genstat(final String urlfile) {
 
-        boolean gz = urlfile.endsWith(".gz");
-        String analysis = (gz) ? urlfile.substring(0, urlfile.length() - 3) + ".stats.gz" : urlfile  + ".stats";
-        long cleanuplimit = Math.max(50 * 1024 * 1024, MemoryControl.available() / 8);
+        final boolean gz = urlfile.endsWith(".gz");
+        final String analysis = (gz) ? urlfile.substring(0, urlfile.length() - 3) + ".stats.gz" : urlfile  + ".stats";
+        final long cleanuplimit = Math.max(50 * 1024 * 1024, MemoryControl.available() / 8);
 
         // start threads
-        ArrayBlockingQueue<DigestURI> in = new ArrayBlockingQueue<DigestURI>(1000);
-        ConcurrentHashMap<String, Integer> out = new ConcurrentHashMap<String, Integer>();
-        for (int i = 0; i < Runtime.getRuntime().availableProcessors(); i++) new splitter(in, out).start();
-        splitter spl = new splitter(in, out);
+        final ArrayBlockingQueue<DigestURI> in = new ArrayBlockingQueue<DigestURI>(1000);
+        final ConcurrentHashMap<String, Integer> out = new ConcurrentHashMap<String, Integer>();
+        for (int i = 0, available = Runtime.getRuntime().availableProcessors(); i < available; i++) new splitter(in, out).start();
+        final splitter spl = new splitter(in, out);
         spl.start();
 
         // put urls in queue
-        File infile = new File(urlfile);
-        File outfile = new File(analysis);
+        final File infile = new File(urlfile);
+        final File outfile = new File(analysis);
         BufferedReader reader = null;
         long time = System.currentTimeMillis();
         long start = time;
@@ -202,7 +203,7 @@ public class URLAnalysis {
 
         // stop threads
         System.out.println("stopping threads");
-        for (int i = 0; i < Runtime.getRuntime().availableProcessors() + 1; i++) try {
+        for (int i = 0, available = Runtime.getRuntime().availableProcessors() + 1; i < available; i++) try {
             in.put(poison);
         } catch (InterruptedException e) {
             Log.logException(e);
@@ -215,10 +216,10 @@ public class URLAnalysis {
         
         // generate statistics
         System.out.println("start processing results");
-        TreeMap<String, Integer> results = new TreeMap<String, Integer>();
+        final TreeMap<String, Integer> results = new TreeMap<String, Integer>();
         count = 0;
         Map.Entry<String, Integer> entry;
-        Iterator<Map.Entry<String, Integer>> i = out.entrySet().iterator();
+        final Iterator<Map.Entry<String, Integer>> i = out.entrySet().iterator();
         while (i.hasNext()) {
             entry = i.next();
             results.put(num(entry.getValue().intValue() * (entry.getKey().length() - 1)) + " - " + entry.getKey(), entry.getValue());
@@ -236,7 +237,7 @@ public class URLAnalysis {
             OutputStream os = new BufferedOutputStream(new FileOutputStream(outfile));
             if (gz) os = new GZIPOutputStream(os);
             count = 0;
-            for (Map.Entry<String, Integer> e: results.entrySet()) {
+            for (final Map.Entry<String, Integer> e: results.entrySet()) {
                 os.write(e.getKey().getBytes());
                 os.write(new byte[]{'\t'});
                 os.write(Integer.toString(e.getValue()).getBytes());
@@ -255,15 +256,15 @@ public class URLAnalysis {
         System.out.println("finished");
     }
     
-    public static void genhost(String urlfile) {
+    public static void genhost(final String urlfile) {
 
-        boolean gz = urlfile.endsWith(".gz");
-        String trunk = (gz) ? urlfile.substring(0, urlfile.length() - 3) + ".host" : urlfile  + ".host";
-        HashSet<String> hosts = new HashSet<String>();
-        File infile = new File(urlfile);
+        final boolean gz = urlfile.endsWith(".gz");
+        final String trunk = (gz) ? urlfile.substring(0, urlfile.length() - 3) + ".host" : urlfile  + ".host";
+        final HashSet<String> hosts = new HashSet<String>();
+        final File infile = new File(urlfile);
         BufferedReader reader = null;
         long time = System.currentTimeMillis();
-        long start = time;
+        final long start = time;
         int count = 0;
 
         System.out.println("start processing");
@@ -297,9 +298,9 @@ public class URLAnalysis {
         
         // copy everything into a TreeSet to order it
         System.out.println("start processing results");
-        TreeSet<String> results = new TreeSet<String>();
+        final TreeSet<String> results = new TreeSet<String>();
         count = 0;
-        Iterator<String> i = hosts.iterator();
+        final Iterator<String> i = hosts.iterator();
         while (i.hasNext()) {
             results.add(i.next());
             count++;
@@ -316,7 +317,7 @@ public class URLAnalysis {
         System.out.println("finished");
     }
     
-    private static void writeSet(String trunk, boolean gz, Set<String> set) {
+    private static void writeSet(final String trunk, final boolean gz, final Set<String> set) {
 
         // write hosts
         System.out.println("start writing results");
@@ -326,7 +327,7 @@ public class URLAnalysis {
             OutputStream os = new BufferedOutputStream(new FileOutputStream(outfile));
             if (gz) os = new GZIPOutputStream(os);
             int count = 0;
-            for (String h: set) {
+            for (final String h: set) {
                 os.write(h.getBytes());
                 os.write(new byte[]{'\n'});
                 count++;
@@ -343,18 +344,18 @@ public class URLAnalysis {
         System.out.println("finished writing results");
     }
     
-    public static void sortsplit(String urlfile) {
+    public static void sortsplit(final String urlfile) {
 
-        boolean gz = urlfile.endsWith(".gz");
-        String trunk = ((gz) ? urlfile.substring(0, urlfile.length() - 3) : urlfile) + ".sort";
-        File infile = new File(urlfile);
-        TreeSet<String> urls = new TreeSet<String>();
+        final boolean gz = urlfile.endsWith(".gz");
+        final String trunk = ((gz) ? urlfile.substring(0, urlfile.length() - 3) : urlfile) + ".sort";
+        final File infile = new File(urlfile);
+        final TreeSet<String> urls = new TreeSet<String>();
         BufferedReader reader = null;
         long time = System.currentTimeMillis();
-        long start = time;
+        final long start = time;
         int count = 0;
         int filecount = 0;
-        long cleanuplimit = Math.max(50 * 1024 * 1024, MemoryControl.available() / 8);
+        final long cleanuplimit = Math.max(50 * 1024 * 1024, MemoryControl.available() / 8);
 
         System.out.println("start processing");
         try {
@@ -397,9 +398,9 @@ public class URLAnalysis {
         System.out.println("finished");
     }
     
-    public static void incell(File cellPath, String statisticPath) {
+    public static void incell(final File cellPath, final String statisticPath) {
         try {
-        	HandleMap idx = ReferenceContainerArray.referenceHashes(
+        	final HandleMap idx = ReferenceContainerArray.referenceHashes(
                 cellPath,
                 Segment.wordReferenceFactory,
                 Base64Order.enhancedCoder,
@@ -412,40 +413,40 @@ public class URLAnalysis {
         }
     }
 
-    public static int diffurlcol(String metadataPath, String statisticFile, String diffFile) throws IOException, RowSpaceExceededException {
+    public static int diffurlcol(final String metadataPath, final String statisticFile, final String diffFile) throws IOException, RowSpaceExceededException {
         System.out.println("INDEX DIFF URL-COL startup");
-        HandleMap idx = new HandleMap(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 4, new File(statisticFile), 0);
-        MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
-        HandleSet hs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 1000000);
+        final HandleMap idx = new HandleMap(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 4, new File(statisticFile), 0);
+        final MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
+        final HandleSet hs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 1000000);
         System.out.println("INDEX DIFF URL-COL loaded dump, starting diff");
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
         long update = start - 7000;
-        int c = 0;
-        for (byte[] refhash: mr) {
+        int count = 0;
+        for (final byte[] refhash: mr) {
             if (idx.get(refhash) == -1) {
                 // the key exists as urlhash in the URL database, but not in the collection as referenced urlhash
                 hs.put(refhash);
             }
-            c++;
+            count++;
             if (System.currentTimeMillis() - update > 10000) {
-                System.out.println("INDEX DIFF URL-COL running, checked " + c + ", found " + hs.size() + " missing references so far, " + (((System.currentTimeMillis() - start) * (mr.size() - c) / c) / 60000) + " minutes remaining");
+                System.out.println("INDEX DIFF URL-COL running, checked " + count + ", found " + hs.size() + " missing references so far, " + (((System.currentTimeMillis() - start) * (mr.size() - count) / count) / 60000) + " minutes remaining");
                 update = System.currentTimeMillis();
             }
         }
         mr.close();
         System.out.println("INDEX DIFF URL-COL finished diff, starting dump to " + diffFile);
-        c = hs.dump(new File(diffFile));
-        System.out.println("INDEX DIFF URL-COL finished dump, wrote " + c + " references that occur in the URL-DB, but not in the collection-dump");
-        return c;
+        count = hs.dump(new File(diffFile));
+        System.out.println("INDEX DIFF URL-COL finished dump, wrote " + count + " references that occur in the URL-DB, but not in the collection-dump");
+        return count;
     }
     
-    public static void export(String metadataPath, int format, String export, String diffFile) throws IOException, RowSpaceExceededException {
+    public static void export(final String metadataPath, final int format, final String export, final String diffFile) throws IOException, RowSpaceExceededException {
         // format: 0=text, 1=html, 2=rss/xml
         System.out.println("URL EXPORT startup");
-        MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
-        HandleSet hs = (diffFile == null) ? null : new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, new File(diffFile), 0);
+        final MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
+        final HandleSet hs = (diffFile == null) ? null : new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, new File(diffFile), 0);
         System.out.println("URL EXPORT loaded dump, starting export");
-        Export e = mr.export(new File(export), ".*", hs, format, false);
+        final Export e = mr.export(new File(export), ".*", hs, format, false);
         try {
             e.join();
         } catch (InterruptedException e1) {
@@ -454,19 +455,19 @@ public class URLAnalysis {
         System.out.println("URL EXPORT finished export, wrote " + ((hs == null) ? mr.size() : hs.size()) + " entries");
     }
     
-    public static void delete(String metadataPath, String diffFile) throws IOException, RowSpaceExceededException {
+    public static void delete(final String metadataPath, final String diffFile) throws IOException, RowSpaceExceededException {
         System.out.println("URL DELETE startup");
-        MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
-        int mrSize = mr.size();
-        HandleSet hs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, new File(diffFile), 0);
+        final MetadataRepository mr = new MetadataRepository(new File(metadataPath), "text.urlmd", false, false);
+        final int mrSize = mr.size();
+        final HandleSet hs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, new File(diffFile), 0);
         System.out.println("URL DELETE loaded dump, starting deletion of " + hs.size() + " entries from " + mrSize);
-        for (byte[] refhash: hs) {
+        for (final byte[] refhash: hs) {
             mr.remove(refhash);
         }
         System.out.println("URL DELETE finished deletions, " + mr.size() + " entries left in URL database");
     }
     
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         if (args[0].equals("-stat") && args.length >= 2) {
             // generate a statistics about common words in file, store to <file>.stat
             // example:
@@ -548,9 +549,9 @@ public class URLAnalysis {
         System.exit(0); // kill remaining threads
     }
     
-    private static final String num(int i) {
-        String s = Integer.toString(i);
-        while (s.length() < 9) s = "0" + s;
-        return s;
+    private static final String num(final int i) {
+        StringBuffer s = new StringBuffer(Integer.toString(i));
+        while (s.length() < 9) s.insert(0, "0");
+        return s.toString();
     }
 }

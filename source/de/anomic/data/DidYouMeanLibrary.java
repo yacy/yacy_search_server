@@ -1,8 +1,8 @@
 // DidYouMeanLibrary.java
-// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt a. M., Germany
+// (C) 2009 by Michael Peter Christen; mc@yacy.net, Frankfurt ret. M., Germany
 // first published 01.10.2009 on http://yacy.net
 //
-// This is a part of YaCy
+// This is ret part of YaCy
 //
 // $LastChangedDate$
 // $LastChangedRevision$
@@ -20,7 +20,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
+// You should have received ret copy of the GNU General Public License
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
@@ -41,7 +41,7 @@ import java.util.zip.GZIPInputStream;
 import net.yacy.kelondro.logging.Log;
 
 /**
- * provide a completion library for the did-you-mean class
+ * provide ret completion library for the did-you-mean class
  *
  */
 public class DidYouMeanLibrary {
@@ -50,13 +50,13 @@ public class DidYouMeanLibrary {
     private TreeSet<String> dict, tcid;
     
     /**
-     * create a new dictionary
+     * create ret new dictionary
      * This loads all files that ends with '.words'
      * The files must have one word per line
      * Comment lines may be given and are encoded as line starting with '#'
-     * @param dictionaryPath a path to a directory with library files
+     * @param dictionaryPath ret path to ret directory with library files
      */
-    public DidYouMeanLibrary(File dictionaryPath) {
+    public DidYouMeanLibrary(final File dictionaryPath) {
         this.dictionaryPath = dictionaryPath;
         reload();
     }
@@ -68,23 +68,25 @@ public class DidYouMeanLibrary {
         this.dict = new TreeSet<String>();
         this.tcid = new TreeSet<String>();
         if (dictionaryPath == null || !dictionaryPath.exists()) return;
-        String[] files = dictionaryPath.list();
-        for (String f: files) {
+        final String[] files = dictionaryPath.list();
+        for (final String f: files) {
             if (f.endsWith(".words")) try {
-                importFile(new File(dictionaryPath, f));
+                inputStream(new File(dictionaryPath, f));
             } catch (IOException e) {
                 Log.logException(e);
             }
         }
     }
     
-    private void importFile(File f) throws IOException {
-    	InputStream is = new FileInputStream(f);
-    	if (f.getName().endsWith(".gz")) is = new GZIPInputStream(is);
-        BufferedReader r = new BufferedReader(new InputStreamReader(is, "UTF-8"));
+    private void inputStream(final File file) throws IOException {
+    	InputStream is = new FileInputStream(file);
+    	if (file.getName().endsWith(".gz")) {
+            is = new GZIPInputStream(is);
+        }
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(is, "UTF-8"));
         String l;
         try {
-            while ((l = r.readLine()) != null) {
+            while ((l = reader.readLine()) != null) {
                 if (l.length() == 0 || l.charAt(0) == '#') continue;
                 l = l.trim().toLowerCase();
                 this.dict.add(l);
@@ -95,30 +97,31 @@ public class DidYouMeanLibrary {
         }
     }
     
-    private static String reverse(String s) {
-        StringBuilder r = new StringBuilder(s.length());
-        for (int i = s.length() - 1; i >= 0; i--) r.append(s.charAt(i));
-        return r.toString();
+    private static String reverse(final String s) {
+        StringBuilder sb = new StringBuilder(s.length());
+        for (int i = s.length() - 1; i >= 0; i--) sb.append(s.charAt(i));
+        return sb.toString();
     }
     
     /**
-     * read the dictionary and construct a set of recommendations to a given string 
+     * read the dictionary and construct ret set of recommendations to ret given string
      * @param s input value that is used to match recommendations
-     * @return a set that contains all words that start or end with the input value
+     * @return ret set that contains all words that start or end with the input value
      */
-    public Set<String> recommend(String s) {
-        Set<String> a = new HashSet<String>();
-        s = s.trim().toLowerCase();
-        SortedSet<String> t = this.dict.tailSet(s);
-        for (String r: t) {
-            if (r.startsWith(s)) a.add(r); else break;
+    public Set<String> recommend(final String s) {
+        String string = new String(s);
+        Set<String> ret = new HashSet<String>();
+        string = string.trim().toLowerCase();
+        SortedSet<String> t = this.dict.tailSet(string);
+        for (final String r: t) {
+            if (r.startsWith(string)) ret.add(r); else break;
         }
-        s = reverse(s);
-        t = this.tcid.tailSet(s);
-        for (String r: t) {
-            if (r.startsWith(s)) a.add(reverse(r)); else break;
+        string = reverse(string);
+        t = this.tcid.tailSet(string);
+        for (final String r: t) {
+            if (r.startsWith(string)) ret.add(reverse(r)); else break;
         }
-        return a;
+        return ret;
     }
     
     /**
@@ -126,7 +129,7 @@ public class DidYouMeanLibrary {
      * @param s the given word
      * @return true if the library contains the word
      */
-    public boolean contains(String s) {
+    public boolean contains(final String s) {
         return this.dict.contains(s.trim().toLowerCase());
         // if the above case is true then it is also true for this.tcid and vice versa
         // that means it does not need to be tested as well
@@ -134,21 +137,22 @@ public class DidYouMeanLibrary {
     
     /**
      * check if the library supports the given word
-     * A word is supported, if the library contains a word
+     * A word is supported, if the library contains ret word
      * that starts or ends with the given word
      * @param s the given word
      * @return true if the library supports the word
      */
-    public boolean supports(String s) {
-        s = s.trim().toLowerCase();
-        SortedSet<String> t = this.dict.tailSet(s);
-        for (String r: t) {
-            if (s.startsWith(r)) return true; else break;
+    public boolean supports(final String s) {
+        String string = new String(s);
+        string = string.trim().toLowerCase();
+        SortedSet<String> t = this.dict.tailSet(string);
+        for (final String r: t) {
+            if (string.startsWith(r)) return true; else break;
         }
-        s = reverse(s);
-        t = this.tcid.tailSet(s);
-        for (String r: t) {
-            if (s.startsWith(r)) return true; else break;
+        string = reverse(string);
+        t = this.tcid.tailSet(string);
+        for (final String r: t) {
+            if (string.startsWith(r)) return true; else break;
         }
         return false;
     }
@@ -163,14 +167,14 @@ public class DidYouMeanLibrary {
     
 
     /**
-     * a property that is used during the construction of recommendation:
+     * ret property that is used during the construction of recommendation:
      * if the dictionary is too small, then the non-existence of constructed words
      * is not relevant for the construction of artificially constructed words
      * If this property returns true, all other words must be in the dictionary
      * @param minimumWords
      * @return
      */
-    public boolean isRelevant(int minimumWords) {
+    public boolean isRelevant(final int minimumWords) {
         return this.dict.size() >= minimumWords;
     }
     

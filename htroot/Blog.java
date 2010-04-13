@@ -32,7 +32,6 @@
 
 import java.io.UnsupportedEncodingException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -49,6 +48,8 @@ import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
 import de.anomic.yacy.yacyNewsPool;
 import de.anomic.yacy.yacyNewsRecord;
+import java.util.List;
+import java.util.Map;
 
 public class Blog {
 
@@ -127,9 +128,8 @@ public class Blog {
 
         if(hasRights && post.containsKey("delete") && post.get("delete").equals("sure")) {
             page = sb.blogDB.readBlogEntry(pagename);
-            final Iterator<String> i = page.getComments().iterator();
-            while(i.hasNext()) {
-                sb.blogCommentDB.delete(i.next());
+            for (final String comment : page.getComments()) {
+                sb.blogCommentDB.delete(comment);
             }
             sb.blogDB.deleteBlogEntry(pagename);
             pagename = DEFAULT_PAGE;
@@ -149,7 +149,7 @@ public class Blog {
             }
 
             Date date = null;
-            ArrayList<String> comments = null;
+            List<String> comments = null;
 
             //set name for new entry or date for old entry
             if(pagename.equals(DEFAULT_PAGE)) {
@@ -171,7 +171,7 @@ public class Blog {
             sb.blogDB.writeBlogEntry(sb.blogDB.newEntry(pagename, subject, author, ip, date, content, comments, commentMode));
 
             // create a news message
-            final HashMap<String, String> map = new HashMap<String, String>();
+            final Map<String, String> map = new HashMap<String, String>();
             map.put("page", pagename);
             map.put("subject", StrSubject.replace(',', ' '));
             map.put("author", StrAuthor.replace(',', ' '));
@@ -195,8 +195,7 @@ public class Blog {
             else {
                 prop.put("mode", "3"); //access denied (no rights)
             }
-        }
-        else if(post.containsKey("preview")) {
+        } else if(post.containsKey("preview")) {
             //preview the page
             if(hasRights) {
                 prop.put("mode", "2");//preview
