@@ -729,17 +729,17 @@ public class DigestURI implements Serializable {
         } else if (isFile()) {
             defaultPort = true;
         }
-        final String path = this.getFile(excludeReference, removeSessionID);
+        final String urlPath = this.getFile(excludeReference, removeSessionID);
         
         if (defaultPort) {
             return
               this.protocol + "://" +
               ((this.getHost() == null) ? "" : ((this.userInfo != null) ? (this.userInfo + "@") : ("")) + this.getHost().toLowerCase()) +
-              path;
+              urlPath;
         }
         return this.protocol + "://" +
                ((this.userInfo != null) ? (this.userInfo + "@") : ("")) +
-               this.getHost().toLowerCase() + ((defaultPort) ? ("") : (":" + this.port)) + path;
+               this.getHost().toLowerCase() + ((defaultPort) ? ("") : (":" + this.port)) + urlPath;
     }
     
     /* (non-Javadoc)
@@ -1111,12 +1111,13 @@ public class DigestURI implements Serializable {
         }
         return false;
     }
-    
-    public boolean canExecute() {
-        if (isFile()) return getFSFile().canExecute();
-        if (isSMB()) return false; // no execute over smb
-        return false;
-    }
+
+    // commented out since the canExecute() method is not part of java 1.5
+//    public boolean canExecute() {
+//        if (isFile()) return getFSFile().canExecute();
+//        if (isSMB()) return false; // no execute over smb
+//        return false;
+//    }
     
     public boolean isHidden() {
         if (isFile()) return getFSFile().isHidden();
@@ -1213,14 +1214,16 @@ public class DigestURI implements Serializable {
         }
         
         public MultiProtocolInputStream(SmbFile sf) throws IOException {
+            /* TODO: Forward Exception instead of String containing message once
+             * YaCy is ported to Java 1.6 some day. */
             try {
                 this.is = new SmbFileInputStream(sf);
             } catch (SmbException e) {
-                throw new IOException(e);
+                throw new IOException(e.getMessage());
             } catch (MalformedURLException e) {
-                throw new IOException(e);
+                throw new IOException(e.getMessage());
             } catch (UnknownHostException e) {
-                throw new IOException(e);
+                throw new IOException(e.getMessage());
             }
         }
         
