@@ -68,14 +68,14 @@ public class MergeIterator<E> implements CloneableIterator<E> {
     
     private void nexta() {
         try {
-            if ((a != null) && (a.hasNext())) na = a.next(); else na = null;
+            if (a != null && a.hasNext()) na = a.next(); else na = null;
         } catch (final ConcurrentModificationException e) {
             na = null;
         }
     }
     private void nextb() {
         try {
-            if ((b != null) && (b.hasNext())) nb = b.next(); else nb = null;
+            if (b != null && b.hasNext()) nb = b.next(); else nb = null;
         } catch (final ConcurrentModificationException e) {
             nb = null;
         }
@@ -118,7 +118,7 @@ public class MergeIterator<E> implements CloneableIterator<E> {
             nexta();
             nextb();
             return s;
-        } else if (((up) && (c < 0)) || ((!(up)) && (c > 0))) {
+        } else if ((up && c < 0) || (!up && c > 0)) {
             s = na;
             nexta();
             return s;

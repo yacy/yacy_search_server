@@ -38,21 +38,21 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
     
     private final Row rowdef;
     private RowSet index0;
-    private RowSetArray index1;
+    private RowSet index1;
     private final Row.EntryComparator entryComparator;
-    private final int spread;
+    //private final int spread;
     
     public ObjectIndexCache(final Row rowdef, final int expectedspace) {
         this.rowdef = rowdef;
         this.entryComparator = new Row.EntryComparator(rowdef.objectOrder);
-        this.spread = Math.max(10, expectedspace / 3000);
+        //this.spread = Math.max(10, expectedspace / 3000);
         reset();
     }
     
     public ObjectIndexCache(final Row rowdef, final int expectedspace, final int initialspace) throws RowSpaceExceededException {
         this.rowdef = rowdef;
         this.entryComparator = new Row.EntryComparator(rowdef.objectOrder);
-        this.spread = Math.max(10, expectedspace / 3000);
+        //this.spread = Math.max(10, expectedspace / 3000);
         reset(initialspace);
     }
     
@@ -82,7 +82,7 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
             index0.sort();
             index0.uniq();
             index0.trim(false);
-            index1 = new RowSetArray(rowdef, spread);
+            index1 = new RowSet(rowdef); //new RowSetArray(rowdef, spread);
         }
     }
     
@@ -243,7 +243,7 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
             // finish initialization phase
             index0.sort();
             index0.uniq();
-            index1 = new RowSetArray(rowdef, spread);
+            index1 = new RowSet(rowdef); //new RowSetArray(rowdef, spread);
             return index0.keys(up, firstKey);
         }
         assert (index1 != null);
@@ -272,7 +272,7 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
             // finish initialization phase
             index0.sort();
             index0.uniq();
-            index1 = new RowSetArray(rowdef, spread);
+            index1 = new RowSet(rowdef); //new RowSetArray(rowdef, spread);
             return index0.rows(up, firstKey);
         }
         assert (index1 != null);
@@ -306,7 +306,7 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
             // finish initialization phase
             index0.sort();
             index0.uniq();
-            index1 = new RowSetArray(rowdef, spread);
+            index1 = new RowSet(rowdef); //new RowSetArray(rowdef, spread);
             return index0.rows();
         }
         assert (index1 != null);
