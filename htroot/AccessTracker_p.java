@@ -28,10 +28,10 @@ import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Map.Entry;
 import java.text.SimpleDateFormat;
@@ -40,23 +40,25 @@ import de.anomic.http.server.RequestHeader;
 import de.anomic.net.natLib;
 import de.anomic.search.QueryParams;
 import de.anomic.search.Switchboard;
+import de.anomic.server.serverAccessTracker;
 import de.anomic.server.serverCore;
 import de.anomic.server.serverObjects;
 import de.anomic.server.serverSwitch;
+import de.anomic.server.serverAccessTracker.Track;
 import de.anomic.yacy.yacySeed;
 
 public class AccessTracker_p {
 	
 	private static SimpleDateFormat SimpleFormatter = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss", Locale.US);
-	
-	private static final SortedMap<Long, String> treemapclone(final SortedMap<Long, String> m) {
-		final TreeMap<Long, String> accessClone = new TreeMap<Long, String>();
-		try {
-			accessClone.putAll(m);
-		} catch (final ConcurrentModificationException e) {}
-		return accessClone;
+    
+	private static final List<Track> listclone(final List<Track> m) {
+        final List<Track> accessClone = new LinkedList<Track>();
+        try {
+            accessClone.addAll(m);
+        } catch (final ConcurrentModificationException e) {}
+        return accessClone;
 	}
-	
+    
     public static serverObjects respond(final RequestHeader header, final serverObjects post, final serverSwitch env) {
         final Switchboard sb = (Switchboard) env;
      
@@ -72,17 +74,17 @@ public class AccessTracker_p {
         if (page == 0) {
             final Iterator<String> i = sb.accessHosts();
             String host;
-            SortedMap<Long, String> access;
+            List<Track> access;
             int entCount = 0;
             try {
             while ((entCount < maxCount) && (i.hasNext())) {
                 host = i.next();
                 access = sb.accessTrack(host);
                 prop.putHTML("page_list_" + entCount + "_host", host);
-                prop.putNum("page_list_" + entCount + "_countSecond", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000)).size());
-                prop.putNum("page_list_" + entCount + "_countMinute", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000 * 60)).size());
-                prop.putNum("page_list_" + entCount + "_count10Minutes", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 10)).size());
-                prop.putNum("page_list_" + entCount + "_countHour", access.tailMap(Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 60)).size());
+                prop.putNum("page_list_" + entCount + "_countSecond", serverAccessTracker.tailList(access, Long.valueOf(System.currentTimeMillis() - 1000)).size());
+                prop.putNum("page_list_" + entCount + "_countMinute", serverAccessTracker.tailList(access, Long.valueOf(System.currentTimeMillis() - 1000 * 60)).size());
+                prop.putNum("page_list_" + entCount + "_count10Minutes", serverAccessTracker.tailList(access, Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 10)).size());
+                prop.putNum("page_list_" + entCount + "_countHour", serverAccessTracker.tailList(access, Long.valueOf(System.currentTimeMillis() - 1000 * 60 * 60)).size());
                 entCount++;
             }
             } catch (final ConcurrentModificationException e) {} // we don't want to synchronize this
@@ -102,18 +104,18 @@ public class AccessTracker_p {
         if (page == 1) {
             String host = (post == null) ? "" : post.get("host", "");
             int entCount = 0;
-            SortedMap<Long, String> access;
-            Map.Entry<Long, String> entry;
+            List<Track> access;
+            Track entry;
             if (host.length() > 0) {
 				access = sb.accessTrack(host);
 				if (access != null) {
 					try {
-						final Iterator<Map.Entry<Long, String>> ii = treemapclone(access).entrySet().iterator();
+						final Iterator<Track> ii = listclone(access).iterator();
 						while (ii.hasNext()) {
 							entry = ii.next();
 							prop.putHTML("page_list_" + entCount + "_host", host);
-							prop.put("page_list_" + entCount + "_date", SimpleFormatter.format(new Date((entry.getKey()).longValue())));
-							prop.putHTML("page_list_" + entCount + "_path", entry.getValue());
+							prop.put("page_list_" + entCount + "_date", SimpleFormatter.format(new Date(entry.getTime())));
+							prop.putHTML("page_list_" + entCount + "_path", entry.getPath());
 							entCount++;
 						}
 					} catch (final ConcurrentModificationException e) {} // we don't want to synchronize this
@@ -124,12 +126,12 @@ public class AccessTracker_p {
                     while ((entCount < maxCount) && (i.hasNext())) {
 						host = i.next();
 						access = sb.accessTrack(host);
-						final Iterator<Map.Entry<Long, String>> ii = treemapclone(access).entrySet().iterator();
+						final Iterator<Track> ii = listclone(access).iterator();
 						while (ii.hasNext()) {
 							entry = ii.next();
 							prop.putHTML("page_list_" + entCount + "_host", host);
-							prop.put("page_list_" + entCount + "_date", SimpleFormatter.format(new Date((entry.getKey()).longValue())));
-							prop.putHTML("page_list_" + entCount + "_path", entry.getValue());
+							prop.put("page_list_" + entCount + "_date", SimpleFormatter.format(new Date(entry.getTime())));
+							prop.putHTML("page_list_" + entCount + "_path", entry.getPath());
 							entCount++;
 						}
 					}

@@ -22,9 +22,9 @@ package de.anomic.server;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.logging.Log;
@@ -36,14 +36,29 @@ public class serverAccessTracker {
     private final long  maxTrackingTime;
     private final int   maxTrackingCount;
     private final int   maxHostCount;
-    private final ConcurrentHashMap<String, SortedMap<Long, String>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
+    private final ConcurrentHashMap<String, List<Track>> accessTracker; // mappings from requesting host to an ArrayList of serverTrack-entries
     private long lastCleanup;
+    
+    public static class Track {
+        private long time;
+        private String path;
+        public Track(long time, String path) {
+            this.time = time;
+            this.path = path;
+        }
+        public long getTime() {
+            return this.time;
+        }
+        public String getPath() {
+            return this.path;
+        }
+    }
     
     public serverAccessTracker(long maxTrackingTime, int maxTrackingCount, int maxTrackingHostCount) {
         this.maxTrackingTime = maxTrackingTime;
         this.maxTrackingCount = maxTrackingCount;
         this.maxHostCount = maxTrackingHostCount;
-        this.accessTracker = new ConcurrentHashMap<String, SortedMap<Long, String>>();
+        this.accessTracker = new ConcurrentHashMap<String, List<Track>>();
     }
     
     /*
@@ -54,18 +69,18 @@ public class serverAccessTracker {
         if (System.currentTimeMillis() - this.lastCleanup < cleanupCycle) return;
         
         // clear entries which had no entry for the maxTrackingTime time
-        final Iterator<Map.Entry<String, SortedMap<Long, String>>> i = accessTracker.entrySet().iterator();
-        SortedMap<Long, String> track;
+        final Iterator<Map.Entry<String, List<Track>>> i = accessTracker.entrySet().iterator();
+        List<Track> track;
         while (i.hasNext()) {
             track = i.next().getValue();
-            if (track.tailMap(Long.valueOf(System.currentTimeMillis() - maxTrackingTime)).isEmpty()) {
+            if (tailList(track, Long.valueOf(System.currentTimeMillis() - maxTrackingTime)).isEmpty()) {
                 // all entries are too old. delete the whole track
                 i.remove();
             } else {
                 // check if the maxTrackingCount is exceeded
                 while (track.size() > this.maxTrackingCount) {
                     // delete the oldest entries
-                    track.remove(track.firstKey());
+                    track.remove(0);
                 }
             }
         }
@@ -78,39 +93,47 @@ public class serverAccessTracker {
 
         this.lastCleanup = System.currentTimeMillis();
     }
+    
+    public static List<Track> tailList(List<Track> timeList, long time) {
+        List<Track> t = new LinkedList<Track>();
+        for (Track l: timeList) if (l.getTime() > time) t.add(l);
+        return t;
+    }
 
-    private SortedMap<Long, String> clearTooOldAccess(final SortedMap<Long, String> access) {
+    private List<Track> clearTooOldAccess(final List<Track> access) {
         try {
-            return access.tailMap(Long.valueOf(System.currentTimeMillis() - maxTrackingTime));
+            return tailList(access, Long.valueOf(System.currentTimeMillis() - maxTrackingTime));
         } catch (IllegalArgumentException e) {
             Log.logException(e);
-            return new TreeMap<Long, String>();
+            return new LinkedList<Track>();
         }
     }
     
     public void track(final String host, String accessPath) {
         // check storage size
-        if (System.currentTimeMillis() - this.lastCleanup > cleanupCycle) {
-            cleanupAccessTracker();
-            this.lastCleanup = System.currentTimeMillis();
+        if (System.currentTimeMillis() - this.lastCleanup > cleanupCycle) synchronized (this) {
+            if (System.currentTimeMillis() - this.lastCleanup > cleanupCycle) {
+                cleanupAccessTracker();
+                this.lastCleanup = System.currentTimeMillis();
+            }
         }
         
         // learn that a specific host has accessed a specific path
         if (accessPath == null) accessPath="NULL";
-        SortedMap<Long, String> track = accessTracker.get(host);
-        if (track == null) track = new TreeMap<Long, String>();
+        List<Track> track = accessTracker.get(host);
+        if (track == null) track = new LinkedList<Track>();
         
         synchronized (track) {
-            track.put(Long.valueOf(System.currentTimeMillis()), accessPath);
+            track.add(new Track(System.currentTimeMillis(), accessPath));
             // write back to tracker
             accessTracker.put(host, clearTooOldAccess(track));
         }
     }
     
-    public SortedMap<Long, String> accessTrack(final String host) {
+    public List<Track> accessTrack(final String host) {
         // returns mapping from Long(accesstime) to path
         
-        SortedMap<Long, String> access = accessTracker.get(host);
+        List<Track> access = accessTracker.get(host);
         if (access == null) return null;
         // clear too old entries
         synchronized (access) {
@@ -128,7 +151,7 @@ public class serverAccessTracker {
     
     public Iterator<String> accessHosts() {
         // returns an iterator of hosts in tracker (String)
-        final HashMap<String, SortedMap<Long, String>> accessTrackerClone = new HashMap<String, SortedMap<Long, String>>();
+        final HashMap<String, List<Track>> accessTrackerClone = new HashMap<String, List<Track>>();
         accessTrackerClone.putAll(accessTracker);
         return accessTrackerClone.keySet().iterator();
     }

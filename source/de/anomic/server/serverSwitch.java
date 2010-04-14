@@ -27,8 +27,8 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 import net.yacy.kelondro.logging.Log;
@@ -37,6 +37,7 @@ import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.workflow.BusyThread;
 import net.yacy.kelondro.workflow.WorkflowThread;
 
+import de.anomic.server.serverAccessTracker.Track;
 import de.anomic.server.serverCore.Session;
 
 public class serverSwitch {
@@ -531,7 +532,7 @@ public class serverSwitch {
         this.accessTracker.track(host, accessPath);
     }
     
-    public SortedMap<Long, String> accessTrack(String host) {
+    public List<Track> accessTrack(String host) {
         return this.accessTracker.accessTrack(host);
     } 
     
