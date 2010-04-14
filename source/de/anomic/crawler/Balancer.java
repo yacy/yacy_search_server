@@ -443,7 +443,7 @@ public class Balancer {
     	
     	// check if we need to get entries from the file index
     	try {
-			fillDomainStacks(800);
+			fillDomainStacks(200);
 		} catch (IOException e) {
 		    Log.logException(e);
 		}
@@ -493,7 +493,7 @@ public class Balancer {
     	this.lastDomainStackFill = System.currentTimeMillis();
     	final CloneableIterator<byte[]> i = this.urlFileIndex.keys(true, null);
     	while (i.hasNext()) {
-    		pushHashToDomainStacks(i.next(), 50);
+    		pushHashToDomainStacks(i.next(), 1000);
     		if (this.domainStacks.size() > maxdomstacksize) break;
     	}
     	Log.logInfo("BALANCER", "re-fill of domain stacks; fileIndex.size() = " + this.urlFileIndex.size() + ", domainStacks.size = " + domainStacks.size() + ", collection time = " + (System.currentTimeMillis() - this.lastDomainStackFill) + " ms");
