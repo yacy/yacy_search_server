@@ -109,13 +109,13 @@ public final class MetadataRepository implements Iterable<byte[]> {
         }
     }
 
-    public synchronized int writeCacheSize() {
+    public int writeCacheSize() {
         if (urlIndexFile instanceof SplitTable) return ((SplitTable) urlIndexFile).writeBufferSize();
         if (urlIndexFile instanceof Cache) return ((Cache) urlIndexFile).writeBufferSize();
         return 0;
     }
 
-    public synchronized URIMetadataRow load(final byte[] urlHash, final WordReferenceVars searchedWord, final long ranking) {
+    public URIMetadataRow load(final byte[] urlHash, final WordReferenceVars searchedWord, final long ranking) {
         // generates an plasmaLURLEntry using the url hash
         // if the url cannot be found, this returns null
         if (urlHash == null) return null;
@@ -129,9 +129,10 @@ public final class MetadataRepository implements Iterable<byte[]> {
         }
     }
 
-    public synchronized void store(final URIMetadataRow entry) throws IOException {
+    public void store(final URIMetadataRow entry) throws IOException {
         // Check if there is a more recent Entry already in the DB
         URIMetadataRow oldEntry;
+        synchronized (this) {
         try {
             Row.Entry oe = (urlIndexFile == null) ? null : urlIndexFile.get(entry.hash());
             oldEntry = (oe == null) ? null : new URIMetadataRow(oe, null, 0);
@@ -153,10 +154,11 @@ public final class MetadataRepository implements Iterable<byte[]> {
         } catch (RowSpaceExceededException e) {
             throw new IOException("RowSpaceExceededException in " + this.urlIndexFile.filename() + ": " + e.getMessage());
         }
+        }
         statsDump = null;
     }
     
-    public synchronized boolean remove(final byte[] urlHashBytes) {
+    public boolean remove(final byte[] urlHashBytes) {
         if (urlHashBytes == null) return false;
         try {
             final Row.Entry r = urlIndexFile.remove(urlHashBytes);

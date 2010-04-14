@@ -94,40 +94,42 @@ public class HeapModifier extends HeapReader implements BLOB {
      * @param key  the primary key
      * @throws IOException
      */
-    public synchronized void remove(byte[] key) throws IOException {
+    public void remove(byte[] key) throws IOException {
         key = normalizeKey(key);
         
-        // check if the index contains the key
-        final long seek = index.get(key);
-        if (seek < 0) return;
-        
-        // check consistency of the index
-        assert (checkKey(key, seek)) : "key compare failed; key = " + new String(key) + ", seek = " + seek;
-        
-        // access the file and read the container
-        this.file.seek(seek);
-        int size = file.readInt();
-        //assert seek + size + 4 <= this.file.length() : heapFile.getName() + ": too long size " + size + " in record at " + seek;
-        long filelength = this.file.length(); // put in separate variable for debugging
-        if (seek + size + 4 > filelength) {
-            Log.logSevere("BLOBHeap", heapFile.getName() + ": too long size " + size + " in record at " + seek);
-            throw new IOException(heapFile.getName() + ": too long size " + size + " in record at " + seek);
+        synchronized (this) {
+            // check if the index contains the key
+            final long seek = index.get(key);
+            if (seek < 0) return;
+            
+            // check consistency of the index
+            assert (checkKey(key, seek)) : "key compare failed; key = " + new String(key) + ", seek = " + seek;
+            
+            // access the file and read the container
+            this.file.seek(seek);
+            int size = file.readInt();
+            //assert seek + size + 4 <= this.file.length() : heapFile.getName() + ": too long size " + size + " in record at " + seek;
+            long filelength = this.file.length(); // put in separate variable for debugging
+            if (seek + size + 4 > filelength) {
+                Log.logSevere("BLOBHeap", heapFile.getName() + ": too long size " + size + " in record at " + seek);
+                throw new IOException(heapFile.getName() + ": too long size " + size + " in record at " + seek);
+            }
+            
+            // add entry to free array
+            this.free.put(seek, size);
+            
+            // fill zeros to the content
+            int l = size; byte[] fill = new byte[size];
+            while (l-- > 0) fill[l] = 0;
+            this.file.write(fill, 0, size);
+            
+            // remove entry from index
+            this.index.remove(key);
+            
+            // recursively merge gaps
+            tryMergeNextGaps(seek, size);
+            tryMergePreviousGap(seek);
         }
-        
-        // add entry to free array
-        this.free.put(seek, size);
-        
-        // fill zeros to the content
-        int l = size; byte[] fill = new byte[size];
-        while (l-- > 0) fill[l] = 0;
-        this.file.write(fill, 0, size);
-        
-        // remove entry from index
-        this.index.remove(key);
-        
-        // recursively merge gaps
-        tryMergeNextGaps(seek, size);
-        tryMergePreviousGap(seek);
     }
     
     private void tryMergePreviousGap(final long thisSeek) throws IOException {
@@ -233,66 +235,68 @@ public class HeapModifier extends HeapReader implements BLOB {
 		throw new UnsupportedOperationException("put is not supported in BLOBHeapModifier");
 	}
 
-	public synchronized int replace(byte[] key, final Rewriter rewriter) throws IOException {
+	public int replace(byte[] key, final Rewriter rewriter) throws IOException {
 	    key = normalizeKey(key);
 	    assert key.length == this.keylength;
 	    
-	    // check if the index contains the key
-        final long pos = index.get(key);
-        if (pos < 0) return 0;
-        
-        // check consistency of the index
-        assert checkKey(key, pos) : "key compare failed; key = " + new String(key) + ", seek = " + pos;
-        
-        // access the file and read the container
-        file.seek(pos);
-        final int len = file.readInt() - this.keylength;
-        if (MemoryControl.available() < len) {
-            if (!MemoryControl.request(len, true)) return 0; // not enough memory available for this blob
-        }
-        
-        // read the key
-        final byte[] keyf = new byte[this.keylength];
-        file.readFully(keyf, 0, keyf.length);
-        assert this.ordering.equal(key, keyf);
-        
-        // read the blob
-        byte[] blob = new byte[len];
-        file.readFully(blob, 0, blob.length);
-        
-        // rewrite the entry
-        blob = rewriter.rewrite(blob);
-        int reduction = len - blob.length;
-        if (reduction == 0) {
-            // even if the reduction is zero then it is still be possible that the record has been changed
-            this.file.seek(pos + 4 + key.length);
+	    synchronized (this) {
+    	    // check if the index contains the key
+            final long pos = index.get(key);
+            if (pos < 0) return 0;
+            
+            // check consistency of the index
+            assert checkKey(key, pos) : "key compare failed; key = " + new String(key) + ", seek = " + pos;
+            
+            // access the file and read the container
+            file.seek(pos);
+            final int len = file.readInt() - this.keylength;
+            if (MemoryControl.available() < len) {
+                if (!MemoryControl.request(len, true)) return 0; // not enough memory available for this blob
+            }
+            
+            // read the key
+            final byte[] keyf = new byte[this.keylength];
+            file.readFully(keyf, 0, keyf.length);
+            assert this.ordering.equal(key, keyf);
+            
+            // read the blob
+            byte[] blob = new byte[len];
+            file.readFully(blob, 0, blob.length);
+            
+            // rewrite the entry
+            blob = rewriter.rewrite(blob);
+            int reduction = len - blob.length;
+            if (reduction == 0) {
+                // even if the reduction is zero then it is still be possible that the record has been changed
+                this.file.seek(pos + 4 + key.length);
+                file.write(blob);
+                return 0;
+            }
+            
+            // the new entry must be smaller than the old entry and must at least be 4 bytes smaller
+            // because that is the space needed to write a new empty entry record at the end of the gap
+            if (blob.length > len - 4) throw new IOException("replace of BLOB for key " + new String(key) + " failed (too large): new size = " + blob.length + ", old size = " + (len - 4));
+            
+            // replace old content
+            this.file.seek(pos);
+            file.writeInt(blob.length + key.length);
+            file.write(key);
             file.write(blob);
-            return 0;
-        }
-        
-        // the new entry must be smaller than the old entry and must at least be 4 bytes smaller
-        // because that is the space needed to write a new empty entry record at the end of the gap
-        if (blob.length > len - 4) throw new IOException("replace of BLOB for key " + new String(key) + " failed (too large): new size = " + blob.length + ", old size = " + (len - 4));
-        
-        // replace old content
-        this.file.seek(pos);
-        file.writeInt(blob.length + key.length);
-        file.write(key);
-        file.write(blob);
-        
-        // define the new empty entry
-        final int newfreereclen = reduction - 4;
-        assert newfreereclen >= 0;
-        file.writeInt(newfreereclen);
-        
-        // fill zeros to the content
-        int l = newfreereclen; byte[] fill = new byte[newfreereclen];
-        while (l-- > 0) fill[l] = 0;
-        this.file.write(fill, 0, newfreereclen);
-        
-        // add a new free entry
-        this.free.put(pos + 4 + blob.length + key.length, newfreereclen);
-        return reduction;
+            
+            // define the new empty entry
+            final int newfreereclen = reduction - 4;
+            assert newfreereclen >= 0;
+            file.writeInt(newfreereclen);
+            
+            // fill zeros to the content
+            int l = newfreereclen; byte[] fill = new byte[newfreereclen];
+            while (l-- > 0) fill[l] = 0;
+            this.file.write(fill, 0, newfreereclen);
+            
+            // add a new free entry
+            this.free.put(pos + 4 + blob.length + key.length, newfreereclen);
+            return reduction;
+	    }
     }
 
 }

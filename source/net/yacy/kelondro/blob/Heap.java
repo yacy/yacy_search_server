@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.TreeMap;
 
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.io.AbstractWriter;
@@ -42,7 +43,7 @@ import net.yacy.kelondro.order.NaturalOrder;
 
 public final class Heap extends HeapModifier implements BLOB {
     
-    private HashMap<String, byte[]> buffer;     // a write buffer to limit IO to the file; attention: Maps cannot use byte[] as key
+    private TreeMap<byte[], byte[]> buffer;     // a write buffer to limit IO to the file
     private int                     buffersize; // bytes that are buffered in buffer
     private final int               buffermax;  // maximum size of the buffer
     
@@ -83,7 +84,7 @@ public final class Heap extends HeapModifier implements BLOB {
             int buffermax) throws IOException {
         super(heapFile, keylength, ordering);
         this.buffermax = buffermax;
-        this.buffer = new HashMap<String, byte[]>();
+        this.buffer = new TreeMap<byte[], byte[]>(ordering);
         this.buffersize = 0;
         /*
         // DEBUG
@@ -119,12 +120,14 @@ public final class Heap extends HeapModifier implements BLOB {
      * @return true if the key exists, false otherwise
      */
     @Override
-    public synchronized boolean has(byte[] key) {
+    public boolean has(byte[] key) {
         assert index != null;
         key = normalizeKey(key);
-        // check the buffer
-        if (this.buffer.containsKey(new String(key))) return true;
-        return super.has(key);
+        synchronized (this) {
+            // check the buffer
+            if (this.buffer.containsKey(key)) return true;
+            return super.has(key);
+        }
     }
     
     /**
@@ -138,7 +141,6 @@ public final class Heap extends HeapModifier implements BLOB {
         assert blob.length > 0;
         if ((blob == null) || (blob.length == 0)) return;
         final int pos = (int) file.length();
-        key = normalizeKey(key);
         index.put(key, pos);
         file.seek(pos);
         file.writeInt(this.keylength + blob.length);
@@ -154,7 +156,7 @@ public final class Heap extends HeapModifier implements BLOB {
      */
     private void flushBuffer() throws IOException, RowSpaceExceededException {
         // check size of buffer
-        Iterator<Map.Entry<String, byte[]>> i = this.buffer.entrySet().iterator();
+        Iterator<Map.Entry<byte[], byte[]>> i = this.buffer.entrySet().iterator();
         int l = 0;
         while (i.hasNext()) l += i.next().getValue().length;
         assert l == this.buffersize;
@@ -162,11 +164,11 @@ public final class Heap extends HeapModifier implements BLOB {
         // simulate write: this whole code block is only here to test the assert at the end of the block; remove after testing
         i = this.buffer.entrySet().iterator();
         int posBuffer = 0;
-        Map.Entry<String, byte[]> entry;
+        Map.Entry<byte[], byte[]> entry;
         byte[] key, blob;
         while (i.hasNext()) {
             entry = i.next();
-            key = normalizeKey(entry.getKey().getBytes());
+            key = normalizeKey(entry.getKey());
             blob = entry.getValue();
             posBuffer += 4 + this.keylength + blob.length;
         }
@@ -181,7 +183,7 @@ public final class Heap extends HeapModifier implements BLOB {
         byte[] b;
         while (i.hasNext()) {
             entry = i.next();
-            key = normalizeKey(entry.getKey().getBytes());
+            key = normalizeKey(entry.getKey());
             blob = entry.getValue();
             index.put(key, posFile);
             b = AbstractWriter.int2array(this.keylength + blob.length);
@@ -211,14 +213,16 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws IOException
      */
     @Override
-    public synchronized byte[] get(byte[] key) throws IOException {
+    public byte[] get(byte[] key) throws IOException {
         key = normalizeKey(key);
         
-        // check the buffer
-        byte[] blob = this.buffer.get(new String(key));
-        if (blob != null) return blob;
-        
-        return super.get(key);
+        synchronized (this) {
+            // check the buffer
+            byte[] blob = this.buffer.get(key);
+            if (blob != null) return blob;
+            
+            return super.get(key);
+        }
     }
 
     /**
@@ -228,13 +232,16 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws IOException
      */
     @Override
-    public synchronized long length(byte[] key) throws IOException {
+    public long length(byte[] key) throws IOException {
         key = normalizeKey(key);
-        // check the buffer
-        byte[] blob = this.buffer.get(new String(key));
-        if (blob != null) return blob.length;
 
-        return super.length(key);
+        synchronized (this) {
+            // check the buffer
+            byte[] blob = this.buffer.get(key);
+            if (blob != null) return blob.length;
+    
+            return super.length(key);
+        }
     }
     
     /**
@@ -289,41 +296,41 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws RowSpaceExceededException 
      */
     @Override
-    public synchronized void put(byte[] key, final byte[] b) throws IOException, RowSpaceExceededException {
+    public void put(byte[] key, final byte[] b) throws IOException, RowSpaceExceededException {
         key = normalizeKey(key);
         
         // we do not write records of length 0 into the BLOB
         if (b.length == 0) return;
         
-        // first remove the old entry (removes from buffer and file)
-        // TODO: this can be enhanced!
-        this.remove(key);
-        
-        // then look if we can use a free entry
-        if (putToGap(key, b)) return; 
-        
-        // if there is not enough space in the buffer, flush all
-        if (this.buffersize + b.length > buffermax) {
-            // this is too big. Flush everything
-            super.shrinkWithGapsAtEnd();
-            flushBuffer();
-            if (b.length > buffermax) {
-                this.add(key, b);
-            } else {
-                this.buffer.put(new String(key), b);
-                this.buffersize += b.length;
+        synchronized (this) {
+            // first remove the old entry (removes from buffer and file)
+            // TODO: this can be enhanced!
+            this.remove(key);
+            
+            // then look if we can use a free entry
+            if (putToGap(key, b)) return; 
+            
+            // if there is not enough space in the buffer, flush all
+            if (this.buffersize + b.length > buffermax) {
+                // this is too big. Flush everything
+                super.shrinkWithGapsAtEnd();
+                flushBuffer();
+                if (b.length > buffermax) {
+                    this.add(key, b);
+                } else {
+                    this.buffer.put(key, b);
+                    this.buffersize += b.length;
+                }
+                return;
             }
-            return;
+            
+            // add entry to buffer
+            this.buffer.put(key, b);
+            this.buffersize += b.length;
         }
-        
-        // add entry to buffer
-        this.buffer.put(new String(key), b);
-        this.buffersize += b.length;
     }
     
     private boolean putToGap(byte[] key, final byte[] b) throws IOException, RowSpaceExceededException {
-        key = normalizeKey(key);
-        
         // we do not write records of length 0 into the BLOB
         if (b.length == 0) return true;
         
@@ -415,17 +422,19 @@ public final class Heap extends HeapModifier implements BLOB {
      * @throws IOException
      */
     @Override
-    public synchronized void remove(byte[] key) throws IOException {
+    public void remove(byte[] key) throws IOException {
         key = normalizeKey(key);
         
-        // check the buffer
-        byte[] blob = this.buffer.remove(new String(key));
-        if (blob != null) {
-            this.buffersize -= blob.length;
-            return;
+        synchronized (this) {
+            // check the buffer
+            byte[] blob = this.buffer.remove(key);
+            if (blob != null) {
+                this.buffersize -= blob.length;
+                return;
+            }
+            
+            super.remove(key);
         }
-        
-        super.remove(key);
     }
     
     /**

@@ -306,12 +306,14 @@ public class HeapReader {
      * @param key
      * @return true if the key exists, false otherwise
      */
-    public synchronized boolean has(byte[] key) {
+    public boolean has(byte[] key) {
         assert index != null;
         key = normalizeKey(key);
         
-        // check if the file index contains the key
-        return index.get(key) >= 0;
+        synchronized (this) {
+            // check if the file index contains the key
+            return index.get(key) >= 0;
+        }
     }
 
     public ByteOrder ordering() {
@@ -372,37 +374,39 @@ public class HeapReader {
      * @return
      * @throws IOException
      */
-    public synchronized byte[] get(byte[] key) throws IOException {
+    public byte[] get(byte[] key) throws IOException {
         key = normalizeKey(key);
        
-        // check if the index contains the key
-        final long pos = index.get(key);
-        if (pos < 0) return null;
-        
-        // access the file and read the container
-        file.seek(pos);
-        final int len = file.readInt() - index.row().primaryKeyLength;
-        if (MemoryControl.available() < len * 2 + keepFreeMem) {
-            if (!MemoryControl.request(len * 2 + keepFreeMem, true)) return null; // not enough memory available for this blob
+        synchronized (this) {
+            // check if the index contains the key
+            final long pos = index.get(key);
+            if (pos < 0) return null;
+            
+            // access the file and read the container
+            file.seek(pos);
+            final int len = file.readInt() - index.row().primaryKeyLength;
+            if (MemoryControl.available() < len * 2 + keepFreeMem) {
+                if (!MemoryControl.request(len * 2 + keepFreeMem, true)) return null; // not enough memory available for this blob
+            }
+            
+            // read the key
+            final byte[] keyf = new byte[index.row().primaryKeyLength];
+            file.readFully(keyf, 0, keyf.length);
+            if (!this.ordering.equal(key, keyf)) {
+                // verification of the indexed access failed. we must re-read the index
+                Log.logSevere("kelondroBLOBHeap", "verification indexed access for " + heapFile.toString() + " failed, re-building index");
+                // this is a severe operation, it should never happen.
+                // but if the process ends in this state, it would completely fail
+                // if the index is not rebuild now at once
+                initIndexReadFromHeap();
+            }
+            
+            // read the blob
+            byte[] blob = new byte[len];
+            file.readFully(blob, 0, blob.length);
+            
+            return blob;
         }
-        
-        // read the key
-        final byte[] keyf = new byte[index.row().primaryKeyLength];
-        file.readFully(keyf, 0, keyf.length);
-        if (!this.ordering.equal(key, keyf)) {
-            // verification of the indexed access failed. we must re-read the index
-            Log.logSevere("kelondroBLOBHeap", "verification indexed access for " + heapFile.toString() + " failed, re-building index");
-            // this is a severe operation, it should never happen.
-            // but if the process ends in this state, it would completely fail
-            // if the index is not rebuild now at once
-            initIndexReadFromHeap();
-        }
-        
-        // read the blob
-        byte[] blob = new byte[len];
-        file.readFully(blob, 0, blob.length);
-        
-        return blob;
     }
     
     protected boolean checkKey(byte[] key, final long pos) throws IOException {
@@ -422,16 +426,18 @@ public class HeapReader {
      * @return the size of the BLOB or -1 if the BLOB does not exist
      * @throws IOException
      */
-    public synchronized long length(byte[] key) throws IOException {
+    public long length(byte[] key) throws IOException {
         key = normalizeKey(key);
         
-        // check if the index contains the key
-        final long pos = index.get(key);
-        if (pos < 0) return -1;
-        
-        // access the file and read the size of the container
-        file.seek(pos);
-        return file.readInt() - index.row().primaryKeyLength;
+        synchronized (this) {
+            // check if the index contains the key
+            final long pos = index.get(key);
+            if (pos < 0) return -1;
+            
+            // access the file and read the size of the container
+            file.seek(pos);
+            return file.readInt() - index.row().primaryKeyLength;
+        }
     }
     
     /**
