@@ -47,7 +47,6 @@ import java.util.TreeSet;
 import net.yacy.document.parser.html.ContentScraper;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.io.CachedFileOutputStream;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.DateFormatter;
 import net.yacy.kelondro.util.FileUtils;
@@ -63,7 +62,7 @@ public class Document {
     private final StringBuilder creator;        // author or copyright
     private final List<String>  sections;       // if present: more titles/headlines appearing in the document
     private final StringBuilder description;    // an abstract, if present: short content description
-    private Object text;                  // the clear text, all that is visible
+    private Object text;                        // the clear text, all that is visible
     private final Map<DigestURI, String> anchors; // all links embedded as clickeable entities (anchor tags)
     private final HashMap<String, ImageEntry> images; // all visible pictures in document
     // the anchors and images - Maps are URL-to-EntityDescription mappings.
@@ -104,12 +103,9 @@ public class Document {
         this.languages = languages;
         this.indexingDenied = indexingDenied;
         
-        if (text == null) try {
-            this.text = new CachedFileOutputStream(Idiom.MAX_KEEP_IN_MEMORY_SIZE);
-        } catch (final IOException e) {
-            Log.logException(e);
-            this.text = new StringBuilder();
-        } else {
+        if (text == null)
+            this.text = new ByteArrayOutputStream();
+        else {
             this.text = text;
         }
     }
@@ -234,9 +230,9 @@ dc_rights
             if (this.text instanceof File) {
                 this.textStream = new BufferedInputStream(new FileInputStream((File)this.text));
             } else if (this.text instanceof byte[]) {
-                this.textStream =  new ByteArrayInputStream((byte[])this.text);
-            } else if (this.text instanceof CachedFileOutputStream) {
-                return ((CachedFileOutputStream)this.text).getContent();
+                this.textStream =  new ByteArrayInputStream((byte[]) this.text);
+            } else if (this.text instanceof ByteArrayOutputStream) {
+                this.textStream =  new ByteArrayInputStream(((ByteArrayOutputStream) this.text).toByteArray());
             }
             return this.textStream;
         } catch (final Exception e) {
@@ -253,12 +249,8 @@ dc_rights
                 return FileUtils.read((File)this.text);
             } else if (this.text instanceof byte[]) {
                 return (byte[])this.text;
-            } else if (this.text instanceof CachedFileOutputStream) {
-                final CachedFileOutputStream ffbaos = (CachedFileOutputStream)this.text;
-                if (ffbaos.isFallback()) {
-                    return FileUtils.read(ffbaos.getContent());
-                }
-                return ffbaos.getContentBAOS();
+            } else if (this.text instanceof ByteArrayOutputStream) {
+                return ((ByteArrayOutputStream) this.text).toByteArray();
             }
         } catch (final Exception e) {
             Log.logException(e);
@@ -268,10 +260,10 @@ dc_rights
     
     public long getTextLength() {
         if (this.text == null) return 0;
-        if (this.text instanceof File) return ((File)this.text).length();
-        else if (this.text instanceof byte[]) return ((byte[])this.text).length;
-        else if (this.text instanceof CachedFileOutputStream) {
-            return ((CachedFileOutputStream)this.text).getLength();
+        if (this.text instanceof File) return ((File) this.text).length();
+        else if (this.text instanceof byte[]) return ((byte[]) this.text).length;
+        else if (this.text instanceof ByteArrayOutputStream) {
+            return ((ByteArrayOutputStream)this.text).size();
         }
         
         return -1; 
@@ -506,11 +498,10 @@ dc_rights
         if (this.description.length() > 0) this.description.append('\n');
         this.description.append(doc.dc_description());
         
-        if (!(this.text instanceof CachedFileOutputStream)) {
-            this.text = new CachedFileOutputStream(Idiom.MAX_KEEP_IN_MEMORY_SIZE);
-            FileUtils.copy(getText(), (CachedFileOutputStream)this.text);
+        if (!(this.text instanceof ByteArrayOutputStream)) {
+            this.text = new ByteArrayOutputStream();
         }
-        FileUtils.copy(doc.getText(), (CachedFileOutputStream)this.text);
+        FileUtils.copy(doc.getText(), (ByteArrayOutputStream) this.text);
         
         anchors.putAll(doc.getAnchors());
         ContentScraper.addAllImages(images, doc.getImages());

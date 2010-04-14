@@ -133,6 +133,7 @@ public class Client {
         conManager.getParams().setMaxConnectionsPerHost(localHostConfiguration, 100);
         localHostConfiguration.setHost("127.0.0.1");
         conManager.getParams().setMaxConnectionsPerHost(localHostConfiguration, 100);
+        conManager.getParams().setReceiveBufferSize(16 * 1024 * 1024); // set this high to avoid storage in temporary files
         
         // only one retry
         apacheHttpClient.getParams().setParameter(HttpMethodParams.RETRY_HANDLER,

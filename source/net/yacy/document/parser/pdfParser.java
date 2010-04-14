@@ -28,10 +28,8 @@
 package net.yacy.document.parser;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.HashSet;
@@ -136,13 +134,8 @@ public class pdfParser extends AbstractParser implements Idiom {
         Writer writer = null;
         File writerFile = null;
         try {
-            // creating a writer for output
-            if ((this.contentLength == -1) || (this.contentLength > Idiom.MAX_KEEP_IN_MEMORY_SIZE)) {
-                writerFile = File.createTempFile("pdfParser",".prt");
-                writer = new OutputStreamWriter(new FileOutputStream(writerFile),"UTF-8");
-            } else {
-                writer = new CharBuffer(); 
-            }
+            // create a writer for output
+            writer = new CharBuffer();
             final PDFTextStripper stripper = new PDFTextStripper();
             stripper.writeText(theDocument, writer); // may throw a NPE
             theDocument.close();           

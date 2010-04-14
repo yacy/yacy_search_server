@@ -28,9 +28,7 @@
 package net.yacy.document.parser;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -122,15 +120,9 @@ public class ooxmlParser extends AbstractParser implements Idiom {
                 if (entryName.equals("word/document.xml")
                 	|| entryName.startsWith("ppt/slides/slide")
                 	|| entryName.startsWith("xl/worksheets/sheet")) {
-                    final long contentSize = zipEntry.getSize();
                     
-                    // creating a writer for output
-                    if ((contentSize == -1) || (contentSize > Idiom.MAX_KEEP_IN_MEMORY_SIZE)) {
-                        writerFile = File.createTempFile("ooxmlParser",".prt");
-                        writer = new OutputStreamWriter(new FileOutputStream(writerFile),"UTF-8");
-                    } else {
-                        writer = new CharBuffer(); 
-                    }                    
+                    // create a writer for output
+                    writer = new CharBuffer();
                     
                     // extract data
                     final InputStream zipFileEntryStream = zipFile.getInputStream(zipEntry);

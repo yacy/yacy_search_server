@@ -27,9 +27,7 @@
 
 package net.yacy.document.parser;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
@@ -91,12 +89,7 @@ public class zipParser extends AbstractParser implements Idiom {
         File outputFile = null;
         Document subDoc = null;
         try {           
-            if ((this.contentLength == -1) || (this.contentLength > Idiom.MAX_KEEP_IN_MEMORY_SIZE)) {
-                outputFile = File.createTempFile("zipParser",".prt");
-                docText = new BufferedOutputStream(new FileOutputStream(outputFile));
-            } else {
-                docText = new ByteBuffer();
-            }
+            docText = new ByteBuffer();
             
             final StringBuilder docKeywords = new StringBuilder();
             final StringBuilder docLongTitle = new StringBuilder();   

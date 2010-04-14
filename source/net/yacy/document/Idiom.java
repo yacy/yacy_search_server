@@ -39,10 +39,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
  * @version $LastChangedRevision$ / $LastChangedDate$
  */
 public interface Idiom {
-    
 
-    public static long MAX_KEEP_IN_MEMORY_SIZE = 5 * 1024 * 1024;    
-    
     /**
      * Parsing a document available as byte array
      * @param location the origin of the document 

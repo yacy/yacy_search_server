@@ -28,6 +28,7 @@
 package net.yacy.document.parser;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,7 +42,6 @@ import net.yacy.document.Idiom;
 import net.yacy.document.TextParser;
 import net.yacy.document.ParserException;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.io.CachedFileOutputStream;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 
@@ -69,8 +69,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
         super("7zip Archive Parser");
     }
     
-    public Document parse(final DigestURI location, final String mimeType, final String charset,
-            final IInStream source, final long maxRamSize) throws ParserException, InterruptedException {
+    public Document parse(final DigestURI location, final String mimeType, final String charset, final IInStream source) throws ParserException, InterruptedException {
         final Document doc = new Document(location, mimeType, charset, null, null, null, null, null, null, (Object)null, null, null, false);
         Handler archive;
         super.theLogger.logFine("opening 7zip archive...");
@@ -81,7 +80,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
         }
         checkInterruption();
         final SZParserExtractCallback aec = new SZParserExtractCallback(super.theLogger, archive,
-                maxRamSize, doc, location.getFile());
+                doc, location.getFile());
         super.theLogger.logFine("processing archive contents...");
         try {
             archive.Extract(null, -1, 0, aec);
@@ -102,14 +101,14 @@ public class sevenzipParser extends AbstractParser implements Idiom {
     @Override
     public Document parse(final DigestURI location, final String mimeType, final String charset,
             final byte[] source) throws ParserException, InterruptedException {
-        return parse(location, mimeType, charset, new ByteArrayIInStream(source), Idiom.MAX_KEEP_IN_MEMORY_SIZE - source.length);
+        return parse(location, mimeType, charset, new ByteArrayIInStream(source));
     }
     
     @Override
     public Document parse(final DigestURI location, final String mimeType, final String charset,
             final File sourceFile) throws ParserException, InterruptedException {
         try {
-            return parse(location, mimeType, charset, new MyRandomAccessFile(sourceFile, "r"), Idiom.MAX_KEEP_IN_MEMORY_SIZE);
+            return parse(location, mimeType, charset, new MyRandomAccessFile(sourceFile, "r"));
         } catch (final IOException e) {
             throw new ParserException("error processing 7zip archive: " + e.getMessage(), location);
         }
@@ -118,12 +117,9 @@ public class sevenzipParser extends AbstractParser implements Idiom {
     public Document parse(final DigestURI location, final String mimeType, final String charset,
             final InputStream source) throws ParserException, InterruptedException {
         try {
-            final CachedFileOutputStream cfos = new CachedFileOutputStream(Idiom.MAX_KEEP_IN_MEMORY_SIZE);
+            final ByteArrayOutputStream cfos = new ByteArrayOutputStream();
             FileUtils.copy(source, cfos);
-            if (cfos.isFallback()) {
-                return parse(location, mimeType, charset, cfos.getContentFile());
-            }
-            return parse(location, mimeType, charset, cfos.getContentBAOS());
+            return parse(location, mimeType, charset, new ByteArrayInputStream(cfos.toByteArray()));
         } catch (final IOException e) {
             throw new ParserException("error processing 7zip archive: " + e.getMessage(), location);
         }
@@ -143,16 +139,14 @@ public class sevenzipParser extends AbstractParser implements Idiom {
      public static class SZParserExtractCallback extends ArchiveExtractCallback {
          
          private final Log log;
-         private final long maxRamSize;
-         private CachedFileOutputStream cfos = null;
+         private ByteArrayOutputStream cfos = null;
          private final Document doc;
          private final String prefix;
          
          public SZParserExtractCallback(final Log logger, final IInArchive handler,
-                 final long maxRamSize, final Document doc, final String prefix) {
+                 final Document doc, final String prefix) {
              super.Init(handler);
              this.log = logger;
-             this.maxRamSize = maxRamSize;
              this.doc = doc;
              this.prefix = prefix;
          }
@@ -197,11 +191,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
                      // below for reversion of the effects
                      final DigestURI url = DigestURI.newURL(doc.dc_source(), this.prefix + "/" + super.filePath);
                      final String mime = TextParser.mimeOf(super.filePath.substring(super.filePath.lastIndexOf('.') + 1));
-                     if (this.cfos.isFallback()) {
-                         theDoc = TextParser.parseSource(url, mime, null, this.cfos.getContentFile());
-                     } else {
-                         theDoc = TextParser.parseSource(url, mime, null, this.cfos.getContentBAOS());
-                     }
+                     theDoc = TextParser.parseSource(url, mime, null, this.cfos.toByteArray());
                      
                      this.doc.addSubDocument(theDoc);
                  }
@@ -227,8 +217,7 @@ public class sevenzipParser extends AbstractParser implements Idiom {
                  ex.initCause(e);
                  throw ex;
              }
-             this.cfos = (item.isDirectory()) ? null
-                     : new CachedFileOutputStream(this.maxRamSize, null, true, item.getSize());
+             this.cfos = (item.isDirectory()) ? null : new ByteArrayOutputStream();
              return this.cfos;
          }
          
