@@ -38,6 +38,7 @@ import net.yacy.kelondro.order.MicroDate;
 import net.yacy.kelondro.rwi.AbstractReference;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
+import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.index.Row;
 
 
@@ -373,7 +374,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     
     @Override
     public int hashCode() {
-        return new String(this.urlHash).hashCode();
+        return ByteArray.hashCode(this.urlHash);
     }
     
     public int compareTo(final WordReferenceVars o) {

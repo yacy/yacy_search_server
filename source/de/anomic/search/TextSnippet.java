@@ -47,6 +47,7 @@ import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.SetTools;
 import net.yacy.repository.LoaderDispatcher;
 
@@ -180,7 +181,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         return o1.compareTo(o2);
     }
     public int hashCode() {
-        return new String(this.url.hash()).hashCode();
+        return ByteArray.hashCode(this.url.hash());
     }
     
     @Override

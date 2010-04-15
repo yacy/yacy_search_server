@@ -38,6 +38,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.util.ByteArray;
 import net.yacy.repository.LoaderDispatcher;
 
 
@@ -86,7 +87,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
     
     @Override
     public int hashCode() {
-        return new String(href.hash()).hashCode();
+        return ByteArray.hashCode(href.hash());
     }
     
     public String toString() {

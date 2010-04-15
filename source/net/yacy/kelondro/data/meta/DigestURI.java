@@ -48,6 +48,7 @@ import jcifs.smb.SmbFileInputStream;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
+import net.yacy.kelondro.util.ByteArray;
 import net.yacy.kelondro.util.Domains;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.Punycode;
@@ -747,7 +748,7 @@ public class DigestURI implements Serializable {
      */
     @Override
     public int hashCode() {
-        return new String(this.hash()).hashCode();
+        return ByteArray.hashCode(this.hash());
     }
 
     /* (non-Javadoc)

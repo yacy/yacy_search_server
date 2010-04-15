@@ -34,6 +34,7 @@ import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.MicroDate;
 import net.yacy.kelondro.rwi.AbstractReference;
 import net.yacy.kelondro.rwi.Reference;
+import net.yacy.kelondro.util.ByteArray;
 
 /**
  * this object stores attributes to URL references inside RWI collections
@@ -339,7 +340,7 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
     
     @Override
     public int hashCode() {
-        return new String(this.metadataHash()).hashCode();
+        return ByteArray.hashCode(this.metadataHash());
     }
 
     public void join(final Reference oe) {

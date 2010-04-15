@@ -79,15 +79,22 @@ public class ByteArray {
     }
     
     public int hashCode() {
-        if (this.hash != 0) return this.hash;
-        int l = this.buffer.length;
-        int h = 0;
-        while (--l >= 0) h = 31*h + buffer[l];
-        
-        this.hash = h;
-        return h;
+        if (this.hash != 0) return this.hash;        
+        this.hash = hashCode(this.buffer);
+        return this.hash;
     }
 
+    /**
+     * compute a hash code that is equal to the hash computation of String()
+     * @param b
+     * @return a hash number
+     */
+    public static int hashCode(byte[] b) {
+        int h = 0;
+        for (byte c: b) h = 31 * h + (c & 0xFF);
+        return h;
+    }
+    
     public boolean equals(Object other) {
         ByteArray b = (ByteArray) other;
         if (buffer == null && b == null) return true;
@@ -110,7 +117,9 @@ public class ByteArray {
         map.put(b, 2);
         System.out.println("map.size() = " + map.size());
         System.out.println("hashCode(a0) = " + a0.hashCode());
+        System.out.println("new String(a0).hashCode = " + (new String(a0.asBytes())).hashCode());
         System.out.println("hashCode(a1) = " + a1.hashCode());
+        System.out.println("new String(a1).hashCode = " + (new String(a1.asBytes())).hashCode());
         System.out.println("hashCode(b) = " + b.hashCode());
         System.out.println("a0 " + ((map.containsKey(a0)) ? "in" : "not in") + " map");
         System.out.println("a1 " + ((map.containsKey(a1)) ? "in" : "not in") + " map");

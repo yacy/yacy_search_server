@@ -33,6 +33,7 @@ import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.MicroDate;
 import net.yacy.kelondro.rwi.AbstractReference;
 import net.yacy.kelondro.rwi.Reference;
+import net.yacy.kelondro.util.ByteArray;
 
 
 public class ImageReferenceVars extends AbstractReference implements ImageReference, Reference, Cloneable {
@@ -356,7 +357,7 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
     }
 
     public int hashCode() {
-        return new String(this.urlHash).hashCode();
+        return ByteArray.hashCode(this.urlHash);
     }
 
     public void addPosition(int position) {

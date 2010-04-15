@@ -33,6 +33,7 @@ import net.yacy.kelondro.index.Row.Entry;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.MicroDate;
 import net.yacy.kelondro.rwi.Reference;
+import net.yacy.kelondro.util.ByteArray;
 
 public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
 
@@ -181,7 +182,7 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
     
     @Override
     public int hashCode() {
-        return new String(this.metadataHash()).hashCode();
+        return ByteArray.hashCode(this.metadataHash());
     }
 
     @Override

@@ -40,6 +40,7 @@ import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.Reference;
+import net.yacy.kelondro.util.ByteArray;
 
 import de.anomic.yacy.yacySeed;
 import de.anomic.yacy.yacySeedDB;
@@ -101,7 +102,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
         }
     }
     public int hashCode() {
-        return new String(urlentry.hash()).hashCode();
+        return ByteArray.hashCode(urlentry.hash());
     }
     public boolean equals(final Object obj) {
         if (this == obj) return true;
