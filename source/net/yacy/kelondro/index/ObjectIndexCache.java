@@ -56,6 +56,17 @@ public final class ObjectIndexCache implements ObjectIndex, Iterable<Row.Entry> 
         reset(initialspace);
     }
     
+    private ObjectIndexCache(final Row rowdef, RowSet index0, RowSet index1, Row.EntryComparator entryComparator) {
+        this.rowdef = rowdef;
+        this.index0 = index0;
+        this.index1 = index1;
+        this.entryComparator = entryComparator;
+    }
+    
+    public ObjectIndexCache clone() {
+        return new ObjectIndexCache(this.rowdef, index0.clone(), index1.clone(), entryComparator);
+    }
+    
     public void clear() {
 		reset();
 	}

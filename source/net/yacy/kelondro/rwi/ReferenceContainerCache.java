@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.blob.HeapWriter;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
@@ -284,7 +285,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
      * @return the indexContainer if one exist, null otherwise
      * @throws  
      */
-    public ReferenceContainer<ReferenceType> get(final byte[] key, Set<String> urlselection) {
+    public ReferenceContainer<ReferenceType> get(final byte[] key, HandleSet urlselection) {
         ReferenceContainer<ReferenceType> c = this.cache.get(new ByteArray(key));
         if (urlselection == null) return c;
         if (c == null) return null;
@@ -295,7 +296,7 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
             ReferenceType ee;
             while (e.hasNext()) {
                 ee = e.next();
-                if (urlselection.contains(ee.metadataHash())) {
+                if (urlselection.has(ee.metadataHash())) {
                     c1.add(ee);
                 }
             }
@@ -345,23 +346,43 @@ public final class ReferenceContainerCache<ReferenceType extends Reference> exte
         }
         return false;
     }
-    
+ 
+    public int remove(final byte[] termHash, final HandleSet urlHashes) {
+        assert this.cache != null;
+        if (urlHashes.isEmpty()) return 0;
+        ByteArray tha = new ByteArray(termHash);
+        int count;
+        synchronized (cache) {
+            final ReferenceContainer<ReferenceType> c = cache.get(tha);
+            if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
+                // removal successful
+                if (c.isEmpty()) {
+                    delete(termHash);
+                } else {
+                    cache.put(tha, c);
+                }
+                return count;
+            }
+        }
+        return 0;
+    }
+ 
     public int remove(final byte[] termHash, final Set<String> urlHashes) {
         assert this.cache != null;
         if (urlHashes.isEmpty()) return 0;
         ByteArray tha = new ByteArray(termHash);
         int count;
         synchronized (cache) {
-	        final ReferenceContainer<ReferenceType> c = cache.get(tha);
-	        if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
-	            // removal successful
-	            if (c.isEmpty()) {
-	                delete(termHash);
-	            } else {
-	                cache.put(tha, c);
-	            }
-	            return count;
-	        }
+            final ReferenceContainer<ReferenceType> c = cache.get(tha);
+            if ((c != null) && ((count = c.removeEntries(urlHashes)) > 0)) {
+                // removal successful
+                if (c.isEmpty()) {
+                    delete(termHash);
+                } else {
+                    cache.put(tha, c);
+                }
+                return count;
+            }
         }
         return 0;
     }

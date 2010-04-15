@@ -111,7 +111,8 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
 
     private final Row.Entry entry;
     
-    public WordReferenceRow(final String  urlHash,
+    public WordReferenceRow(
+            final byte[]   urlHash,
             final int      urlLength,     // byte-length of complete URL
             final int      urlComps,      // number of path components
             final int      titleLength,   // length of description/length (longer are better?)
@@ -130,11 +131,11 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
             final Bitfield flags  // attributes to the url and to the word according the url
     ) {
 
-        assert (urlHash.length() == 12) : "urlhash = " + urlHash;
+        assert (urlHash.length == 12) : "urlhash = " + new String(urlHash);
         this.entry = urlEntryRow.newEntry();
         final int mddlm = MicroDate.microDateDays(lastmodified);
         final int mddct = MicroDate.microDateDays(updatetime);
-        this.entry.setCol(col_urlhash, urlHash, null);
+        this.entry.setCol(col_urlhash, urlHash);
         this.entry.setCol(col_lastModified, mddlm);
         this.entry.setCol(col_freshUntil, Math.max(0, mddlm + (mddct - mddlm) * 2)); // TTL computation
         this.entry.setCol(col_wordsInTitle, titleLength / 6); // word count estimation; TODO: change value handover to number of words
@@ -235,8 +236,8 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         return this.entry;
     }
 
-    public String metadataHash() {
-        return this.entry.getColString(col_urlhash, null);
+    public byte[] metadataHash() {
+        return this.entry.getColBytes(col_urlhash, true);
     }
 
     public int virtualAge() {
@@ -333,12 +334,12 @@ public final class WordReferenceRow extends AbstractReference implements WordRef
         if (obj == null) return false;
         if (!(obj instanceof WordReferenceRow)) return false;
         WordReferenceRow other = (WordReferenceRow) obj;
-        return this.metadataHash().equals(other.metadataHash());
+        return Base64Order.enhancedCoder.equal(this.metadataHash(), other.metadataHash());
     }
     
     @Override
     public int hashCode() {
-        return this.metadataHash().hashCode();
+        return new String(this.metadataHash()).hashCode();
     }
 
     public void join(final Reference oe) {

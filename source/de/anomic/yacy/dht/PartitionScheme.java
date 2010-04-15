@@ -64,7 +64,7 @@ public interface PartitionScheme {
     
     public long dhtPosition(final byte[] wordHash, final int verticalPosition);
     
-    public int verticalPosition(final String urlHash);
+    public int verticalPosition(final byte[] urlHash);
     
     public long[] dhtPositions(final byte[] wordHash);
  

@@ -77,17 +77,14 @@ public class Compressor implements BLOB {
             this.key = key;
             this.payload = payload;
         }
-        @Override
         public String getKey() {
             return this.key;
         }
 
-        @Override
         public byte[] getValue() {
             return this.payload;
         }
 
-        @Override
         public byte[] setValue(byte[] payload) {
             byte[] payload0 = payload;
             this.payload = payload;
@@ -141,11 +138,7 @@ public class Compressor implements BLOB {
     
     public synchronized void close(boolean writeIDX) {
         // no more thread is running, flush all queues
-        try {
-            flushAll();
-        } catch (IOException e) {
-            Log.logSevere("Compressor", "", e);
-        }
+        flushAll();
         for (int i = 0; i < this.worker.length; i++) try {
             this.writeQueue.put(poisonWorkerEntry);
         } catch (InterruptedException e) {
@@ -294,13 +287,8 @@ public class Compressor implements BLOB {
         if (this.bufferlength + b.length * 2 > this.maxbufferlength) synchronized (this) {
             // in case that we compress, just compress as much as is necessary to get enough room
             while (this.bufferlength + b.length * 2 > this.maxbufferlength) {
-                try  {
-                    if (this.buffer.isEmpty()) break;
-                    flushOne();
-                } catch (RowSpaceExceededException e) {
-                    Log.logException(e);
-                    break;
-                }
+                if (this.buffer.isEmpty()) break;
+                flushOne();
             }
             // in case that this was not enough, just flush all
             if (this.bufferlength + b.length * 2 > this.maxbufferlength) flushAll();
@@ -341,7 +329,7 @@ public class Compressor implements BLOB {
         return this.backend.keys(up, firstKey);
     }
     
-    private boolean flushOne() throws IOException, RowSpaceExceededException {
+    private boolean flushOne() {
         if (this.buffer.isEmpty()) return false;
         // depending on process case, write it to the file or compress it to the other queue
         Map.Entry<String, byte[]> entry = this.buffer.entrySet().iterator().next();
@@ -356,14 +344,9 @@ public class Compressor implements BLOB {
         }
     }
 
-    private void flushAll() throws IOException {
+    private void flushAll() {
         while (!this.buffer.isEmpty()) {
-            try {
-                if (!flushOne()) break;
-            } catch (RowSpaceExceededException e) {
-                Log.logException(e);
-                break;
-            }
+            if (!flushOne()) break;
         }
         assert this.bufferlength == 0;
     }

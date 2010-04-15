@@ -32,13 +32,13 @@ import net.yacy.kelondro.rwi.Reference;
 
 public class NavigationReferenceVars  extends AbstractReference implements NavigationReference, Reference, Cloneable {
 
-    public String refhash, termhash;
+    public byte[] termhash, refhash;
     public int hitcount, position;
     byte flags;
     
     public NavigationReferenceVars(
-            final String   termhash,
-            final String   refhash,
+            final byte[]   termhash,
+            final byte[]   refhash,
             final int      count,
             final int      pos,
             final byte     flags
@@ -88,14 +88,14 @@ public class NavigationReferenceVars  extends AbstractReference implements Navig
     }
 
     public String navigationHash() {
-        return this.termhash + this.refhash;
+        return new String(this.termhash) + new String(this.refhash);
     }
     
-    public String metadataHash() {
+    public byte[] metadataHash() {
         return this.refhash;
     }
 
-    public String termHash() {
+    public byte[] termHash() {
         return this.termhash;
     }
  

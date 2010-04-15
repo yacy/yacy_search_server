@@ -109,11 +109,11 @@ public class ZURL implements Iterable<ZURL.Entry> {
         if (urlIndex != null) urlIndex.close();
     }
 
-    public boolean remove(final byte[] hashbytes) {
-        if (hashbytes == null) return false;
+    public boolean remove(final byte[] hash) {
+        if (hash == null) return false;
         //System.out.println("*** DEBUG ZURL " + this.urlIndex.filename() + " remove " + hash);
         try {
-            urlIndex.remove(hashbytes);
+            urlIndex.remove(hash);
             return true;
         } catch (final IOException e) {
             return false;
@@ -131,7 +131,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
         if (anycause == null) anycause = "unknown";
         Entry entry = new Entry(bentry, executor, workdate, workcount, anycause);
         put(entry);
-        stack.add(entry.hashb());
+        stack.add(entry.hash());
         while (stack.size() > maxStackSize) stack.poll();
     }
     
@@ -261,7 +261,7 @@ public class ZURL implements Iterable<ZURL.Entry> {
             return this.bentry.initiator();
         }
         
-        public byte[] hashb() {
+        public byte[] hash() {
             // return a url-hash, based on the md5 algorithm
             // the result is a String of 12 bytes within a 72-bit space
             // (each byte has an 6-bit range)

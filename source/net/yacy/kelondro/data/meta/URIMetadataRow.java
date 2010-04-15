@@ -512,7 +512,7 @@ public class URIMetadataRow implements URIMetadata {
         core.append(",snippet=").append(crypt.simpleEncode(snippet));
         core.append("}");
 
-        return new String(core);
+        return core.toString();
         //return "{" + core + ",snippet=" + crypt.simpleEncode(snippet) + "}";
     }
 

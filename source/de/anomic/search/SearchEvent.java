@@ -32,10 +32,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.TreeSet;
 
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceVars;
+import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -222,8 +223,12 @@ public final class SearchEvent {
        // execute deletion of failed words
        int rw = this.results.failedURLs.size();
        if (rw > 0) {
-           final TreeSet<byte[]> removeWords = query.queryHashes;
-           removeWords.addAll(query.excludeHashes);
+           final HandleSet removeWords = query.queryHashes;
+           try {
+               removeWords.putAll(query.excludeHashes);
+           } catch (RowSpaceExceededException e1) {
+               Log.logException(e1);
+           }
            try {
                final Iterator<byte[]> j = removeWords.iterator();
                // remove the same url hashes for multiple words

@@ -937,34 +937,6 @@ public class DigestURI implements Serializable {
     
     private static String[] testTLDs = new String[] { "com", "net", "org", "uk", "fr", "de", "es", "it" };
 
-    public static final DigestURI probablyWordURL(final byte[] urlHash, final TreeSet<String> words) {
-    	assert urlHash != null;
-        final Iterator<String> wi = words.iterator();
-        String word;
-        while (wi.hasNext()) {
-            word = wi.next();
-            if ((word == null) || (word.length() == 0)) continue;
-            final String pattern = new String(urlHash).substring(6, 11);
-            for (int i = 0; i < testTLDs.length; i++) {
-                if (pattern.equals(hosthash5("http", "www." + word.toLowerCase() + "." + testTLDs[i], 80)))
-                    try {
-                        return new DigestURI("http://www." + word.toLowerCase() + "." + testTLDs[i], null);
-                    } catch (final MalformedURLException e) {
-                        return null;
-                    }
-            }
-        }
-        return null;
-    }
-
-    public static final boolean isWordRootURL(final byte[] givenURLHash, final TreeSet<String> words) {
-        if (!(probablyRootURL(givenURLHash))) return false;
-        final DigestURI wordURL = probablyWordURL(givenURLHash, words);
-        if (wordURL == null) return false;
-        if (Base64Order.enhancedCoder.equal(wordURL.hash(), givenURLHash)) return true;
-        return false;
-    }
-
     public static final int domLengthEstimation(final byte[] urlHashBytes) {
         // generates an estimation of the original domain length
         assert (urlHashBytes != null);

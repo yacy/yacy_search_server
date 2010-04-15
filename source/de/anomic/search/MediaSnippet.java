@@ -35,6 +35,7 @@ import de.anomic.data.MimeTable;
 import net.yacy.document.Document;
 import net.yacy.document.parser.html.ImageEntry;
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.repository.LoaderDispatcher;
@@ -108,7 +109,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return o1.compareTo(o2);
     }
     
-    public static ArrayList<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final TreeSet<byte[]> queryhashes, final ContentDomain mediatype, final boolean fetchOnline, final int timeout, final boolean reindexing) {
+    public static ArrayList<MediaSnippet> retrieveMediaSnippets(final DigestURI url, final HandleSet queryhashes, final ContentDomain mediatype, final boolean fetchOnline, final int timeout, final boolean reindexing) {
         if (queryhashes.isEmpty()) {
             Log.logFine("snippet fetch", "no query hashes given for url " + url);
             return new ArrayList<MediaSnippet>();
@@ -125,7 +126,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return a;
     }
     
-    public static ArrayList<MediaSnippet> computeMediaSnippets(final Document document, final TreeSet<byte[]> queryhashes, final ContentDomain mediatype) {
+    public static ArrayList<MediaSnippet> computeMediaSnippets(final Document document, final HandleSet queryhashes, final ContentDomain mediatype) {
         
         if (document == null) return new ArrayList<MediaSnippet>();
         Map<DigestURI, String> media = null;
@@ -152,7 +153,7 @@ public class MediaSnippet implements Comparable<MediaSnippet>, Comparator<MediaS
         return result;
     }
     
-    public static ArrayList<MediaSnippet> computeImageSnippets(final Document document, final TreeSet<byte[]> queryhashes) {
+    public static ArrayList<MediaSnippet> computeImageSnippets(final Document document, final HandleSet queryhashes) {
         
         final TreeSet<ImageEntry> images = new TreeSet<ImageEntry>();
         images.addAll(document.getImages().values()); // iterates images in descending size order!

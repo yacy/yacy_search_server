@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
@@ -107,10 +108,6 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return termHash;
     }
     
-    public String getTermHashAsString() {
-        return new String(termHash);
-    }
-    
     public void add(final Reference entry) throws RowSpaceExceededException {
         // add without double-occurrence test
         assert entry.toKelondroEntry().objectsize() == super.rowdef.objectsize;
@@ -167,8 +164,8 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         return x;
     }
     
-    public ReferenceType get(final String urlHash) {
-        final Row.Entry entry = this.get(urlHash.getBytes());
+    public ReferenceType getReference(final byte[] urlHash) {
+        final Row.Entry entry = super.get(urlHash);
         if (entry == null) return null;
         return this.factory.produceSlow(entry);
     }
@@ -178,16 +175,23 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
      * if the url hash was found, return the entry, but delete the entry from the container
      * if the entry was not found, return null.
      */
-    public ReferenceType remove(final String urlHash) {
-        final Row.Entry entry = remove(urlHash.getBytes());
+    public ReferenceType removeReference(final byte[] urlHash) {
+        final Row.Entry entry = super.remove(urlHash);
         if (entry == null) return null;
         return this.factory.produceSlow(entry);
+    }
+
+    public int removeEntries(final HandleSet urlHashes) {
+        int count = 0;
+        final Iterator<byte[]> i = urlHashes.iterator();
+        while (i.hasNext()) count += (remove(i.next()) == null) ? 0 : 1;
+        return count;
     }
 
     public int removeEntries(final Set<String> urlHashes) {
         int count = 0;
         final Iterator<String> i = urlHashes.iterator();
-        while (i.hasNext()) count += (remove(i.next()) == null) ? 0 : 1;
+        while (i.hasNext()) count += (remove(i.next().getBytes()) == null) ? 0 : 1;
         return count;
     }
 
@@ -369,10 +373,10 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         ReferenceType ie2;
         while (se.hasNext()) {
             ie1 = se.next();
-            ie2 = large.get(ie1.metadataHash());
+            ie2 = large.getReference(ie1.metadataHash());
             if ((ie1 != null) && (ie2 != null)) {
-                assert (ie1.metadataHash().length() == keylength) : "ie0.urlHash() = " + ie1.metadataHash();
-                assert (ie2.metadataHash().length() == keylength) : "ie1.urlHash() = " + ie2.metadataHash();
+                assert (ie1.metadataHash().length == keylength) : "ie0.urlHash() = " + new String(ie1.metadataHash());
+                assert (ie2.metadataHash().length == keylength) : "ie1.urlHash() = " + new String(ie2.metadataHash());
                 // this is a hit. Calculate word distance:
                 
                 ie1 = factory.produceFast(ie2);
@@ -405,9 +409,9 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             ie2 = e2.next();
 
             while (true) {
-                assert (ie1.metadataHash().length() == keylength) : "ie1.urlHash() = " + ie1.metadataHash();
-                assert (ie2.metadataHash().length() == keylength) : "ie2.urlHash() = " + ie2.metadataHash();
-                c = ordering.compare(ie1.metadataHash().getBytes(), ie2.metadataHash().getBytes());
+                assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + new String(ie1.metadataHash());
+                assert (ie2.metadataHash().length == keylength) : "ie2.urlHash() = " + new String(ie2.metadataHash());
+                c = ordering.compare(ie1.metadataHash(), ie2.metadataHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
                     if (e1.hasNext()) ie1 = e1.next(); else break;
@@ -459,11 +463,11 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         Reference ie0, ie1;
             while (se.hasNext()) {
                 ie0 = se.next();
-                ie1 = excl.get(ie0.metadataHash());
+                ie1 = excl.getReference(ie0.metadataHash());
                 if ((ie0 != null) && (ie1 != null)) {
-                    assert (ie0.metadataHash().length() == keylength) : "ie0.urlHash() = " + ie0.metadataHash();
-                    assert (ie1.metadataHash().length() == keylength) : "ie1.urlHash() = " + ie1.metadataHash();
-                    if (iterate_pivot) se.remove(); pivot.remove(ie0.metadataHash().getBytes());
+                    assert (ie0.metadataHash().length == keylength) : "ie0.urlHash() = " + new String(ie0.metadataHash());
+                    assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + new String(ie1.metadataHash());
+                    if (iterate_pivot) se.remove(); pivot.remove(ie0.metadataHash());
                 }
             }
         return pivot;
@@ -487,9 +491,9 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
             ie2 = e2.next();
 
             while (true) {
-                assert (ie1.metadataHash().length() == keylength) : "ie1.urlHash() = " + ie1.metadataHash();
-                assert (ie2.metadataHash().length() == keylength) : "ie2.urlHash() = " + ie2.metadataHash();
-                c = pivot.rowdef.getOrdering().compare(ie1.metadataHash().getBytes(), ie2.metadataHash().getBytes());
+                assert (ie1.metadataHash().length == keylength) : "ie1.urlHash() = " + new String(ie1.metadataHash());
+                assert (ie2.metadataHash().length == keylength) : "ie2.urlHash() = " + new String(ie2.metadataHash());
+                c = pivot.rowdef.getOrdering().compare(ie1.metadataHash(), ie2.metadataHash());
                 //System.out.println("** '" + ie1.getUrlHash() + "'.compareTo('" + ie2.getUrlHash() + "')="+c);
                 if (c < 0) {
                     if (e1.hasNext()) ie1 = e1.next(); else break;
@@ -524,15 +528,16 @@ public class ReferenceContainer<ReferenceType extends Reference> extends RowSet 
         synchronized (inputContainer) {
             final Iterator<ReferenceType> i = inputContainer.entries();
             Reference iEntry;
-            String dom, paths;
+            String dom, mod, paths;
             while (i.hasNext()) {
                 iEntry = i.next();
-                if ((excludeContainer != null) && (excludeContainer.get(iEntry.metadataHash()) != null)) continue; // do not include urls that are in excludeContainer
-                dom = iEntry.metadataHash().substring(6);
+                if ((excludeContainer != null) && (excludeContainer.getReference(iEntry.metadataHash()) != null)) continue; // do not include urls that are in excludeContainer
+                dom = new String(iEntry.metadataHash()).substring(6);
+                mod = new String(iEntry.metadataHash()).substring(0, 6);
                 if ((paths = doms.get(dom)) == null) {
-                    doms.put(dom, iEntry.metadataHash().substring(0, 6));
+                    doms.put(dom, mod);
                 } else {
-                    doms.put(dom, paths + iEntry.metadataHash().substring(0, 6));
+                    doms.put(dom, paths + mod);
                 }
                 if (System.currentTimeMillis() > timeout)
                     break;

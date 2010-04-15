@@ -30,11 +30,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
+import java.util.TreeMap;
 
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
@@ -42,8 +40,10 @@ import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.Reference;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -114,7 +114,9 @@ public class IndexControlRWIs_p {
             prop.putHTML("keyhash", new String(keyhash));
 
             // read values from checkboxes
-            String[] urlx = post.getAll("urlhx.*");
+            String[] urls = post.getAll("urlhx.*");
+            HandleSet urlb = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, urls.length);
+            if (urls != null) for (String s: urls) try { urlb.put(s.getBytes()); } catch (RowSpaceExceededException e) { Log.logException(e); }
             final boolean delurl    = post.containsKey("delurl");
             final boolean delurlref = post.containsKey("delurlref");
 
@@ -155,23 +157,18 @@ public class IndexControlRWIs_p {
                     ReferenceContainer<WordReference> index = null;
                     index = segment.termIndex().get(keyhash, null);
                     final Iterator<WordReference> en = index.entries();
-                    i = 0;
-                    urlx = new String[index.size()];
-                    while (en.hasNext()) {
-                        urlx[i++] = en.next().metadataHash();
-                    }
+                    urlb = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, index.size());
+                    while (en.hasNext()) try { urlb.put(en.next().metadataHash()); } catch (RowSpaceExceededException e) { Log.logException(e); }
                     index = null;
                 }
                 if (delurlref) {
-                    for (i = 0; i < urlx.length; i++) segment.removeAllUrlReferences(urlx[i].getBytes(), sb.loader, true);
+                    segment.removeAllUrlReferences(urlb, sb.loader, true);
                 }
                 // delete the word first because that is much faster than the deletion of the urls from the url database
                 segment.termIndex().delete(keyhash);
                 // now delete all urls if demanded
                 if (delurl || delurlref) {
-                    for (i = 0; i < urlx.length; i++) {
-                        sb.urlRemove(segment, urlx[i].getBytes());
-                    }
+                    for (byte[] b: urlb) sb.urlRemove(segment, b);
                 }
                 post.remove("keyhashdeleteall");
                 post.put("urllist", "generated");
@@ -182,15 +179,13 @@ public class IndexControlRWIs_p {
             // delete selected URLs
             if (post.containsKey("keyhashdelete")) try {
                 if (delurlref) {
-                    for (i = 0; i < urlx.length; i++) segment.removeAllUrlReferences(urlx[i].getBytes(), sb.loader, true);
+                    segment.removeAllUrlReferences(urlb, sb.loader, true);
                 }
                 if (delurl || delurlref) {
-                    for (i = 0; i < urlx.length; i++) {
-                        sb.urlRemove(segment, urlx[i].getBytes());
-                    }
+                    for (byte[] b: urlb) sb.urlRemove(segment, b);
                 }
-                final Set<String> urlHashes = new HashSet<String>();
-                for (i = 0; i < urlx.length; i++) urlHashes.add(urlx[i]);
+                final HandleSet urlHashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+                for (byte[] b: urlb) try { urlHashes.put(b); } catch (RowSpaceExceededException e) { Log.logException(e); }
                 segment.termIndex().remove(keyhash, urlHashes);
                 // this shall lead to a presentation of the list; so handle that the remaining program
                 // thinks that it was called for a list presentation
@@ -238,15 +233,19 @@ public class IndexControlRWIs_p {
                 index = segment.termIndex().get(keyhash, null);
                 // built urlCache
                 final Iterator<WordReference> urlIter = index.entries();
-                final HashMap<String, URIMetadataRow> knownURLs = new HashMap<String, URIMetadataRow>();
-                final HashSet<String> unknownURLEntries = new HashSet<String>();
+                final TreeMap<byte[], URIMetadataRow> knownURLs = new TreeMap<byte[], URIMetadataRow>(Base64Order.enhancedCoder);
+                final HandleSet unknownURLEntries = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, index.size());
                 Reference iEntry;
                 URIMetadataRow lurl;
                 while (urlIter.hasNext()) {
                     iEntry = urlIter.next();
-                    lurl = segment.urlMetadata().load(iEntry.metadataHash().getBytes(), null, 0);
+                    lurl = segment.urlMetadata().load(iEntry.metadataHash(), null, 0);
                     if (lurl == null) {
-                        unknownURLEntries.add(iEntry.metadataHash());
+                        try {
+                            unknownURLEntries.put(iEntry.metadataHash());
+                        } catch (RowSpaceExceededException e) {
+                            Log.logException(e);
+                        }
                         urlIter.remove();
                     } else {
                         knownURLs.put(iEntry.metadataHash(), lurl);
@@ -270,7 +269,7 @@ public class IndexControlRWIs_p {
                              knownURLs,
                              "true".equalsIgnoreCase(gzipBody),
                              timeout);
-                prop.put("result", (error == null) ? ("Successfully transferred " + knownURLs.size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds, " + unknownURLEntries + " URL not found") : "error: " + error);
+                prop.put("result", (error == null) ? ("Successfully transferred " + knownURLs.size() + " words in " + ((System.currentTimeMillis() - starttime) / 1000) + " seconds, " + unknownURLEntries.size() + " URL not found") : "error: " + error);
                 index = null;
             } catch (IOException e) {
                 Log.logException(e);
@@ -303,17 +302,21 @@ public class IndexControlRWIs_p {
             
             if (post.containsKey("blacklist")) {
                 final String blacklist = post.get("blacklist", "");
-                final Set<String> urlHashes = new HashSet<String>();
+                final HandleSet urlHashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, urlb.size());
                 if (post.containsKey("blacklisturls")) {
                     PrintWriter pw;
                     try {
                         final String[] supportedBlacklistTypes = env.getConfig("BlackLists.types", "").split(",");
                         pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
                         DigestURI url;
-                        for (i = 0; i < urlx.length; i++) {
-                            urlHashes.add(urlx[i]);
-                            final URIMetadataRow e = segment.urlMetadata().load(urlx[i].getBytes(), null, 0);
-                            segment.urlMetadata().remove(urlx[i].getBytes());
+                        for (byte[] b: urlb) {
+                            try {
+                                urlHashes.put(b);
+                            } catch (RowSpaceExceededException e) {
+                                Log.logException(e);
+                            }
+                            final URIMetadataRow e = segment.urlMetadata().load(b, null, 0);
+                            segment.urlMetadata().remove(b);
                             if (e != null) {
                                 url = e.metadata().url();
                                 pw.println(url.getHost() + "/" + url.getFile());
@@ -339,10 +342,14 @@ public class IndexControlRWIs_p {
                         final String[] supportedBlacklistTypes = Blacklist.BLACKLIST_TYPES_STRING.split(",");
                         pw = new PrintWriter(new FileWriter(new File(listManager.listsPath, blacklist), true));
                         DigestURI url;
-                        for (i = 0; i<urlx.length; i++) {
-                            urlHashes.add(urlx[i]);
-                            final URIMetadataRow e = segment.urlMetadata().load(urlx[i].getBytes(), null, 0);
-                            segment.urlMetadata().remove(urlx[i].getBytes());
+                        for (byte[] b: urlb) {
+                            try {
+                                urlHashes.put(b);
+                            } catch (RowSpaceExceededException e) {
+                                Log.logException(e);
+                            }
+                            final URIMetadataRow e = segment.urlMetadata().load(b, null, 0);
+                            segment.urlMetadata().remove(b);
                             if (e != null) {
                                 url = e.metadata().url();
                                 pw.println(url.getHost() + "/.*");
@@ -437,7 +444,7 @@ public class IndexControlRWIs_p {
                         ((entry.word().flags().get(WordReferenceRow.flag_app_dc_subject)) ? "appears in subject, " : "") +
                         ((entry.word().flags().get(WordReferenceRow.flag_app_dc_description)) ? "appears in description, " : "") +
                         ((entry.word().flags().get(WordReferenceRow.flag_app_emphasized)) ? "appears emphasized, " : "") +
-                        ((DigestURI.probablyRootURL(entry.word().metadataHash().getBytes())) ? "probably root url" : "")
+                        ((DigestURI.probablyRootURL(entry.word().metadataHash())) ? "probably root url" : "")
                 );
                 if (Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_DHT, url)) {
                     prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxChecked", "1");
@@ -445,12 +452,13 @@ public class IndexControlRWIs_p {
                 i++;
                 if ((maxlines >= 0) && (i >= maxlines)) break;
             }
-            final Iterator<String> iter = ranked.miss(); // iterates url hash strings
+            final Iterator<byte[]> iter = ranked.miss(); // iterates url hash strings
+            byte[] b;
             while (iter.hasNext()) {
-                us = iter.next();
-                prop.put("genUrlList_urlList_"+i+"_urlExists", "0");
-                prop.put("genUrlList_urlList_"+i+"_urlExists_urlhxCount", i);
-                prop.putHTML("genUrlList_urlList_"+i+"_urlExists_urlhxValue", us);
+                b = iter.next();
+                prop.put("genUrlList_urlList_" + i + "_urlExists", "0");
+                prop.put("genUrlList_urlList_" + i + "_urlExists_urlhxCount", i);
+                prop.putHTML("genUrlList_urlList_" + i + "_urlExists_urlhxValue", b);
                 i++;
             }
             prop.put("genUrlList_urlList", i);

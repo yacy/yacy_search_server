@@ -28,12 +28,13 @@
 
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 
 import net.yacy.document.content.RSSMessage;
 import net.yacy.document.parser.xml.RSSFeed;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReferenceRow;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.repository.Blacklist;
@@ -140,10 +141,10 @@ public final class transferRWI {
             String estring;
             int p;
             String wordHash;
-            String urlHash;
+            byte[] urlHash;
             WordReferenceRow iEntry;
-            final HashSet<String> unknownURL = new HashSet<String>();
-            final HashSet<String> knownURL = new HashSet<String>();
+            final HandleSet unknownURL = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            final HandleSet knownURL = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
             final ArrayList<String> wordhashes = new ArrayList<String>();
             int received = 0;
             int blocked = 0;
@@ -165,7 +166,7 @@ public final class transferRWI {
                 
                 // block blacklisted entries
                 if ((blockBlacklist) && (Switchboard.urlBlacklist.hashInBlacklistedCache(Blacklist.BLACKLIST_DHT, urlHash))) {
-                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + urlHash + "' from peer " + otherPeerName);
+                    if (yacyCore.log.isFine()) yacyCore.log.logFine("transferRWI: blocked blacklisted URLHash '" + new String(urlHash) + "' from peer " + otherPeerName);
                     blocked++;
                     continue;
                 }
@@ -173,7 +174,7 @@ public final class transferRWI {
                 // check if the entry is in our network domain
                 final String urlRejectReason = sb.crawlStacker.urlInAcceptedDomainHash(urlHash);
                 if (urlRejectReason != null) {
-                    yacyCore.log.logWarning("transferRWI: blocked URL hash '" + urlHash + "' (" + urlRejectReason + ") from peer " + otherPeerName + "; peer is suspected to be a spam-peer (or something is wrong)");
+                    yacyCore.log.logWarning("transferRWI: blocked URL hash '" + new String(urlHash) + "' (" + urlRejectReason + ") from peer " + otherPeerName + "; peer is suspected to be a spam-peer (or something is wrong)");
                     //if (yacyCore.log.isFine()) yacyCore.log.logFine("transferRWI: blocked URL hash '" + urlHash + "' (" + urlRejectReason + ") from peer " + otherPeerName);
                     blocked++;
                     continue;
@@ -188,27 +189,27 @@ public final class transferRWI {
                 serverCore.checkInterruption();
 
                 // check if we need to ask for the corresponding URL
-                if (!(knownURL.contains(urlHash)||unknownURL.contains(urlHash)))  try {
-                    if (sb.indexSegments.urlMetadata(Segments.Process.DHTIN).exists(urlHash.getBytes())) {
-                        knownURL.add(urlHash);
+                if (!(knownURL.has(urlHash) || unknownURL.has(urlHash)))  try {
+                    if (sb.indexSegments.urlMetadata(Segments.Process.DHTIN).exists(urlHash)) {
+                        knownURL.put(urlHash);
                     } else {
-                        unknownURL.add(urlHash);
+                        unknownURL.put(urlHash);
                     }
                     receivedURL++;
                 } catch (final Exception ex) {
                     sb.getLog().logWarning(
                                 "transferRWI: DB-Error while trying to determine if URL with hash '" +
-                                urlHash + "' is known.", ex);
+                                new String(urlHash) + "' is known.", ex);
                 }
                 received++;
             }
             sb.peers.mySeed().incRI(received);
 
             // finally compose the unknownURL hash list
-            it = unknownURL.iterator();  
+            Iterator<byte[]> bit = unknownURL.iterator();  
             unknownURLs.ensureCapacity(unknownURL.size() * 25);
-            while (it.hasNext()) {
-                unknownURLs.append(",").append(it.next());
+            while (bit.hasNext()) {
+                unknownURLs.append(",").append(new String(bit.next()));
             }
             if (unknownURLs.length() > 0) { unknownURLs.delete(0, 1); }
             if (wordhashes.isEmpty() || received == 0) {

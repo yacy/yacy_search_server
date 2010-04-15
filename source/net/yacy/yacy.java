@@ -677,9 +677,9 @@ public final class yacy {
                     Reference iEntry;
                     while (wordIdxEntries.hasNext()) {
                         iEntry = wordIdxEntries.next();
-                        final String urlHash = iEntry.metadataHash();                    
-                        if ((currentUrlDB.exists(urlHash.getBytes())) && (!minimizedUrlDB.exists(urlHash.getBytes()))) try {
-                            final URIMetadataRow urlEntry = currentUrlDB.load(urlHash.getBytes(), null, 0);                       
+                        final byte[] urlHash = iEntry.metadataHash();                    
+                        if ((currentUrlDB.exists(urlHash)) && (!minimizedUrlDB.exists(urlHash))) try {
+                            final URIMetadataRow urlEntry = currentUrlDB.load(urlHash, null, 0);                       
                             urlCounter++;
                             minimizedUrlDB.store(urlEntry);
                             if (urlCounter % 500 == 0) {
@@ -689,7 +689,7 @@ public final class yacy {
                     }
                     
                     if (wordCounter%500 == 0) {
-                        wordChunkEndHash = wordIdxContainer.getTermHashAsString();
+                        wordChunkEndHash = new String(wordIdxContainer.getTermHash());
                         wordChunkEnd = System.currentTimeMillis();
                         final long duration = wordChunkEnd - wordChunkStart;
                         log.logInfo(wordCounter + " words scanned " +
@@ -871,7 +871,7 @@ public final class yacy {
                         bos.write(container.getTermHash());
                         bos.write(serverCore.CRLF);
                         if (counter % 500 == 0) {
-                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getTermHashAsString());
+                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + new String(container.getTermHash()));
                         }
                     }
                 }
@@ -888,14 +888,14 @@ public final class yacy {
                         bos.write(container.getTermHash());
                         bos.write(serverCore.CRLF);
                         if (counter % 500 == 0) {
-                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + container.getTermHashAsString());
+                            log.logInfo("Found " + counter + " Hashs until now. Last found Hash: " + new String(container.getTermHash()));
                         }
                     }
                 }
                 bos.flush();
                 bos.close();
             }
-            log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + (container == null ? "null" : container.getTermHashAsString()));
+            log.logInfo("Total number of Hashs: " + counter + ". Last found Hash: " + (container == null ? "null" : new String(container.getTermHash())));
         } catch (final IOException e) {
             log.logSevere("IOException", e);
         }

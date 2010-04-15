@@ -145,9 +145,6 @@ public class yacysearchitem {
                 prop.putHTML("content_words", URLEncoder.encode(query[0].toString(),"UTF-8"));
             } catch (final UnsupportedEncodingException e) {}
             prop.putHTML("content_former", theQuery.queryString);
-            prop.put("content_rankingprops", result.word().toPropertyForm() + ", domLengthEstimated=" + DigestURI.domLengthEstimation(result.hash()) +
-                    ((DigestURI.probablyRootURL(result.hash())) ? ", probablyRootURL" : "") + 
-                    (((wordURL = DigestURI.probablyWordURL(result.hash(), query[0])) != null) ? ", probablyWordURL=" + wordURL.toNormalform(false, true) : ""));
             final TextSnippet snippet = result.textSnippet();
             final String desc = (snippet == null) ? "" : snippet.getLineMarked(theQuery.fullqueryHashes);
             prop.put("content_description", desc);

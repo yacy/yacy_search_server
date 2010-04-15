@@ -52,14 +52,14 @@ public class Balancer {
 
     // class variables
     private final ConcurrentHashMap<String, LinkedList<byte[]>> domainStacks;    // a map from domain name part to Lists with url hashs
-    private   final ConcurrentLinkedQueue<byte[]> top;
-    private   final TreeMap<Long, byte[]> delayed;
-    protected ObjectIndex  urlFileIndex;
-    private   final File   cacheStacksPath;
-    private   long         minimumLocalDelta;
-    private   long         minimumGlobalDelta;
-    private   long         lastDomainStackFill;
-    private   int          domStackInitSize;
+    private final ConcurrentLinkedQueue<byte[]> top;
+    private final TreeMap<Long, byte[]> delayed;
+    private ObjectIndex  urlFileIndex;
+    private final File   cacheStacksPath;
+    private long         minimumLocalDelta;
+    private long         minimumGlobalDelta;
+    private long         lastDomainStackFill;
+    private int          domStackInitSize;
     
     public Balancer(
     		final File cachePath,
@@ -339,29 +339,29 @@ public class Balancer {
     	long sleeptime = 0;
     	Request crawlEntry = null;
     	synchronized (this) {
-    	    byte[] failhashb = null;
+    	    byte[] failhash = null;
     		while (!this.urlFileIndex.isEmpty()) {
 		    	// first simply take one of the entries in the top list, that should be one without any delay
-    		    byte[] nexthashb = nextFromDelayed();
+    		    byte[] nexthash = nextFromDelayed();
 		        //System.out.println("*** nextFromDelayed=" + nexthash);
-		        if (nexthashb == null && !this.top.isEmpty()) {
-		            nexthashb = top.remove();
+		        if (nexthash == null && !this.top.isEmpty()) {
+		            nexthash = top.remove();
 		            //System.out.println("*** top.remove()=" + nexthash);
 		        }
-		        if (nexthashb == null) {
-		            nexthashb = anyFromDelayed();
+		        if (nexthash == null) {
+		            nexthash = anyFromDelayed();
 		        }
 		        
 		        // check minimumDelta and if necessary force a sleep
 		        //final int s = urlFileIndex.size();
-		        Row.Entry rowEntry = (nexthashb == null) ? null : urlFileIndex.remove(nexthashb);
+		        Row.Entry rowEntry = (nexthash == null) ? null : urlFileIndex.remove(nexthash);
 		        if (rowEntry == null) {
 		            //System.out.println("*** rowEntry=null, nexthash=" + nexthash);
 		        	rowEntry = urlFileIndex.removeOne();
 		        	if (rowEntry == null) {
-		        	    nexthashb = null;
+		        	    nexthash = null;
 		        	} else {
-		        	    nexthashb = rowEntry.getPrimaryKeyBytes();
+		        	    nexthash = rowEntry.getPrimaryKeyBytes();
 		        	    //System.out.println("*** rowEntry.getPrimaryKeyBytes()=" + nexthash);
 		        	}
 		        	
@@ -388,22 +388,22 @@ public class Balancer {
 		                (profileEntry.cacheStrategy() == CrawlProfile.CACHE_STRATEGY_IFEXIST && Cache.has(crawlEntry.url()))
 		                ) ? 0 : Latency.waitingRemaining(crawlEntry.url(), minimumLocalDelta, minimumGlobalDelta); // this uses the robots.txt database and may cause a loading of robots.txt from the server
 		        
-		        assert Base64Order.enhancedCoder.equal(nexthashb, rowEntry.getPrimaryKeyBytes()) : "result = " + new String(nexthashb) + ", rowEntry.getPrimaryKeyBytes() = " + new String(rowEntry.getPrimaryKeyBytes());
-		        assert Base64Order.enhancedCoder.equal(nexthashb, crawlEntry.url().hash()) : "result = " + new String(nexthashb) + ", crawlEntry.url().hash() = " + new String(crawlEntry.url().hash());
+		        assert Base64Order.enhancedCoder.equal(nexthash, rowEntry.getPrimaryKeyBytes()) : "result = " + new String(nexthash) + ", rowEntry.getPrimaryKeyBytes() = " + new String(rowEntry.getPrimaryKeyBytes());
+		        assert Base64Order.enhancedCoder.equal(nexthash, crawlEntry.url().hash()) : "result = " + new String(nexthash) + ", crawlEntry.url().hash() = " + new String(crawlEntry.url().hash());
 		        
-		        if (failhashb != null && Base64Order.enhancedCoder.equal(failhashb, nexthashb)) break; // prevent endless loops
+		        if (failhash != null && Base64Order.enhancedCoder.equal(failhash, nexthash)) break; // prevent endless loops
 		        
 		        if (delay && sleeptime > 0 && this.domStackInitSize > 1) {
 		            //System.out.println("*** putback: nexthash=" + nexthash + ", failhash="+failhash);
 		        	// put that thing back to omit a delay here
-		            if (!ByteBuffer.contains(delayed.values(), nexthashb)) {
+		            if (!ByteBuffer.contains(delayed.values(), nexthash)) {
 		                //System.out.println("*** delayed +=" + nexthash);
-		                this.delayed.put(Long.valueOf(System.currentTimeMillis() + sleeptime + 1), nexthashb);
+		                this.delayed.put(Long.valueOf(System.currentTimeMillis() + sleeptime + 1), nexthash);
 		            }
 		        	try {
                         this.urlFileIndex.put(rowEntry);
-                        this.domainStacks.remove(new String(nexthashb).substring(6));
-                        failhashb = nexthashb;
+                        this.domainStacks.remove(new String(nexthash).substring(6));
+                        failhash = nexthash;
                     } catch (RowSpaceExceededException e) {
                         Log.logException(e);
                     }
@@ -452,7 +452,7 @@ public class Balancer {
     	final Iterator<Map.Entry<String, LinkedList<byte[]>>> i = this.domainStacks.entrySet().iterator();
     	Map.Entry<String, LinkedList<byte[]>> entry;
     	long smallestWaiting = Long.MAX_VALUE;
-    	byte[] besthashb = null;
+    	byte[] besthash = null;
     	while (i.hasNext()) {
     		entry = i.next();
     		
@@ -468,7 +468,7 @@ public class Balancer {
     			if (w > maximumwaiting) {
     				if (w < smallestWaiting) {
     					smallestWaiting = w;
-    					besthashb = n;
+    					besthash = n;
     				}
     				continue;
     			}
@@ -480,9 +480,9 @@ public class Balancer {
     	}
     	
     	// if we could not find any entry, then take the best we have seen so far
-    	if (acceptonebest && !this.top.isEmpty() && besthashb != null) {
-    		removeHashFromDomainStacks(besthashb);
-    		this.top.add(besthashb);
+    	if (acceptonebest && !this.top.isEmpty() && besthash != null) {
+    		removeHashFromDomainStacks(besthash);
+    		this.top.add(besthash);
     	}
     }
     

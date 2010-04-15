@@ -54,10 +54,10 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.util.DateFormatter;
@@ -574,13 +574,13 @@ public class yacySeed implements Cloneable {
         return MapTools.string2set(get(PEERTAGS, "*"), "|");
     }
 
-    public boolean matchPeerTags(final TreeSet<byte[]> searchHashes) {
+    public boolean matchPeerTags(final HandleSet searchHashes) {
         final String peertags = get(PEERTAGS, "");
         if (peertags.equals("*")) return true;
         final Set<String> tags = MapTools.string2set(peertags, "|");
         final Iterator<String> i = tags.iterator();
         while (i.hasNext()) {
-        	if (searchHashes.contains(Word.word2hash(i.next()))) return true;
+        	if (searchHashes.has(Word.word2hash(i.next()))) return true;
         }
         return false;
     }
@@ -836,7 +836,7 @@ public class yacySeed implements Cloneable {
     }
     
     public static final String isProperIP(final String ipString) {
-        // returns null if ipString is proper, a string with the cause otervise
+        // returns null if ipString is proper, a string with the cause otherwise
         if (ipString == null) return "IP is null";
         if (ipString.length() > 0 && ipString.length() < 8) return "IP is too short: " + ipString;
         if (!natLib.isProper(ipString)) return "IP is not proper: " + ipString; //this does not work with staticIP

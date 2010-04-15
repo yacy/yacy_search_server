@@ -45,7 +45,8 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
 	
     public Bitfield flags;
     public long lastModified;
-    public String language, urlHash;
+    public byte[] urlHash;
+    public String language;
     public char type;
     public int hitcount, llocal, lother, phrasesintext,
                posinphrase, posofphrase,
@@ -55,7 +56,7 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
     public double termFrequency;
     
     public ImageReferenceVars(
-    		final String   urlHash,
+    		final byte[]   urlHash,
             final int      urlLength,     // byte-length of complete URL
             final int      urlComps,      // number of path components
             final int      titleLength,   // length of description/length (longer are better?)
@@ -267,7 +268,7 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
         return toRowEntry().toPropertyForm();
     }
 
-    public String metadataHash() {
+    public byte[] metadataHash() {
         return urlHash;
     }
 
@@ -355,7 +356,7 @@ public class ImageReferenceVars extends AbstractReference implements ImageRefere
     }
 
     public int hashCode() {
-        return this.urlHash.hashCode();
+        return new String(this.urlHash).hashCode();
     }
 
     public void addPosition(int position) {

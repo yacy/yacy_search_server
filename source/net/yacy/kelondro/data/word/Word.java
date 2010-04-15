@@ -30,10 +30,12 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Set;
-import java.util.TreeSet;
 
 import net.yacy.kelondro.index.ARC;
 import net.yacy.kelondro.index.ConcurrentARC;
+import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.Digest;
@@ -103,22 +105,27 @@ public class Word {
         return h;
     }
     
-    public static final TreeSet<byte[]> words2hashSet(final String[] words) {
-        final TreeSet<byte[]> hashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
-        for (int i = 0; i < words.length; i++) hashes.add(word2hash(words[i]));
+    public static final HandleSet words2hashesHandles(final Set<String> words) {
+        final HandleSet hashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, words.size());
+        for (String word: words)
+            try {
+                hashes.put(word2hash(word));
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+                return hashes;
+            }
         return hashes;
     }
-
-    public static final String words2hashString(final String[] words) {
-        final StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < words.length; i++) sb.append(word2hash(words[i]));
-        return new String(sb);
-    }
-
-    public static final TreeSet<byte[]> words2hashes(final Set<String> words) {
-        final Iterator<String> i = words.iterator();
-        final TreeSet<byte[]> hashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
-        while (i.hasNext()) hashes.add(word2hash(i.next()));
+    
+    public static final HandleSet words2hashesHandles(final String[] words) {
+        final HandleSet hashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, words.length);
+        for (String word: words)
+            try {
+                hashes.put(word2hash(word));
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+                return hashes;
+            }
         return hashes;
     }
 }

@@ -32,15 +32,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
 import net.yacy.document.Condenser;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.EventTracker;
-import net.yacy.kelondro.util.SetTools;
 import net.yacy.kelondro.util.SortStack;
 import net.yacy.kelondro.util.SortStore;
 import net.yacy.repository.LoaderDispatcher;
@@ -62,12 +62,11 @@ public class ResultFetcher {
     protected final SortStore<ResultEntry>  result;
     protected final SortStore<MediaSnippet> images; // container to sort images by size
     protected final HashMap<String, String> failedURLs; // a mapping from a urlhash to a fail reason string
-    protected final TreeSet<byte[]>         snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
+    protected final HandleSet               snippetFetchWordHashes; // a set of word hashes that are used to match with the snippets
     long urlRetrievalAllTime;
     long snippetComputationAllTime;
     int taketimeout;
     
-    @SuppressWarnings("unchecked")
     public ResultFetcher(
             final LoaderDispatcher loader,
             RankingProcess rankedCache,
@@ -89,10 +88,16 @@ public class ResultFetcher {
         
         // snippets do not need to match with the complete query hashes,
         // only with the query minus the stopwords which had not been used for the search
-        final TreeSet<byte[]> filtered = SetTools.joinConstructive(query.queryHashes, Switchboard.stopwordHashes);
-        this.snippetFetchWordHashes = (TreeSet<byte[]>) query.queryHashes.clone();
+        HandleSet filtered;
+        try {
+            filtered = HandleSet.joinConstructive(query.queryHashes, Switchboard.stopwordHashes);
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+            filtered = new HandleSet(query.queryHashes.row().primaryKeyLength, query.queryHashes.comparator(), 0);
+        }
+        this.snippetFetchWordHashes = query.queryHashes.clone();
         if (filtered != null && !filtered.isEmpty()) {
-            SetTools.excludeDestructive(this.snippetFetchWordHashes, Switchboard.stopwordHashes);
+            this.snippetFetchWordHashes.excludeDestructive(Switchboard.stopwordHashes);
         }
         
         // start worker threads to fetch urls and snippets
@@ -383,14 +388,14 @@ public class ResultFetcher {
         }
         
         // apply query-in-result matching
-        final Set<byte[]> urlcomph = Word.words2hashSet(urlcomps);
-        final Set<byte[]> descrcomph = Word.words2hashSet(descrcomps);
+        final HandleSet urlcomph = Word.words2hashesHandles(urlcomps);
+        final HandleSet descrcomph = Word.words2hashesHandles(descrcomps);
         final Iterator<byte[]> shi = query.queryHashes.iterator();
         byte[] queryhash;
         while (shi.hasNext()) {
             queryhash = shi.next();
-            if (urlcomph.contains(queryhash)) r += 256 << query.ranking.coeff_appurl;
-            if (descrcomph.contains(queryhash)) r += 256 << query.ranking.coeff_app_dc_title;
+            if (urlcomph.has(queryhash)) r += 256 << query.ranking.coeff_appurl;
+            if (descrcomph.has(queryhash)) r += 256 << query.ranking.coeff_app_dc_title;
         }
         
         return r;

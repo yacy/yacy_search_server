@@ -36,7 +36,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -49,6 +48,8 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.BinSearch;
+import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Digest;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -68,9 +69,9 @@ public final class RankingProcess extends Thread {
     
     private final QueryParams query;
     private final int maxentries;
-    private final ConcurrentHashMap<String, Long> urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
+    private final HandleSet urlhashes; // map for double-check; String/Long relation, addresses ranking number (backreference for deletion)
     private final int[] flagcount; // flag counter
-    private final TreeSet<String> misses; // contains url-hashes that could not been found in the LURL-DB
+    private final HandleSet misses; // contains url-hashes that could not been found in the LURL-DB
     //private final int[] domZones;
     private HashMap<byte[], ReferenceContainer<WordReference>> localSearchInclusion;
     
@@ -103,8 +104,8 @@ public final class RankingProcess extends Thread {
         this.remote_indexCount = 0;
         this.local_resourceSize = 0;
         this.local_indexCount = 0;
-        this.urlhashes = new ConcurrentHashMap<String, Long>(0, 0.75f, concurrency);
-        this.misses = new TreeSet<String>();
+        this.urlhashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+        this.misses = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
         this.flagcount = new int[32];
         for (int i = 0; i < 32; i++) {this.flagcount[i] = 0;}
         this.hostNavigator = new Navigator();
@@ -185,7 +186,7 @@ public final class RankingProcess extends Thread {
             while (true) {
 			    iEntry = decodedEntries.poll(1, TimeUnit.SECONDS);
 			    if (iEntry == null || iEntry == WordReferenceVars.poison) break;
-			    assert (iEntry.metadataHash().length() == index.row().primaryKeyLength);
+			    assert (iEntry.metadataHash().length == index.row().primaryKeyLength);
 			    //if (iEntry.urlHash().length() != index.row().primaryKeyLength) continue;
 
 			    // increase flag counts
@@ -205,13 +206,13 @@ public final class RankingProcess extends Thread {
 			    }
 
 			    // check tld domain
-			    if (!DigestURI.matchesAnyDomDomain(iEntry.metadataHash().getBytes(), this.query.zonecode)) {
+			    if (!DigestURI.matchesAnyDomDomain(iEntry.metadataHash(), this.query.zonecode)) {
 			        // filter out all tld that do not match with wanted tld domain
 			        continue;
 			    }
 			    
 			    // check site constraints
-			    if (query.sitehash != null && !iEntry.metadataHash().substring(6).equals(query.sitehash)) {
+			    if (query.sitehash != null && !new String(iEntry.metadataHash()).substring(6).equals(query.sitehash)) {
 			        // filter out all domains that do not match with the site constraint
 			    	continue;
 			    }
@@ -221,8 +222,9 @@ public final class RankingProcess extends Thread {
 			    
 			    // get statistics for host navigator
 			    if (nav_hosts && query.urlMask_isCatchall) {
-			        domhash = iEntry.urlHash.substring(6);
-			        this.hostNavigator.inc(domhash, iEntry.urlHash);
+			        String uhb = new String(iEntry.urlHash);
+			        domhash = uhb.substring(6);
+			        this.hostNavigator.inc(domhash, uhb);
 			    }
 			    
 			    // accept
@@ -240,7 +242,7 @@ public final class RankingProcess extends Thread {
     		    assert maxentries != 0;
     
                 // double-check
-    		    if (urlhashes.containsKey(fEntry.metadataHash())) continue;
+    		    if (urlhashes.has(fEntry.metadataHash())) continue;
                 
     		    // insert
     		    if (maxentries < 0 || stack.size() < maxentries) {
@@ -254,7 +256,11 @@ public final class RankingProcess extends Thread {
     		        // to the maximum size by deletion of elements at the bottom
     		        stack.push(fEntry, r);
     		    }
-    		    urlhashes.put(fEntry.metadataHash(), r);
+    		    try {
+                    urlhashes.put(fEntry.metadataHash());
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                }
     		}
 
         } catch (InterruptedException e) {}
@@ -317,7 +323,7 @@ public final class RankingProcess extends Thread {
             if (rwi == null) continue; // in case that a synchronization problem occurred just go lazy over it
             if (!skipDoubleDom) return rwi;
             // check doubledom
-            final String domhash = rwi.element.metadataHash().substring(6);
+            final String domhash = new String(rwi.element.metadataHash()).substring(6);
             m = this.doubleDomCache.get(domhash);
             if (m == null) {
                 // first appearance of dom
@@ -355,7 +361,7 @@ public final class RankingProcess extends Thread {
         }
         if (bestEntry == null) return null;
         // finally remove the best entry from the doubledom cache
-        m = this.doubleDomCache.get(bestEntry.element.metadataHash().substring(6));
+        m = this.doubleDomCache.get(new String(bestEntry.element.metadataHash()).substring(6));
         o = m.pop();
         //assert o == null || o.element.metadataHash().equals(bestEntry.element.metadataHash()) : "bestEntry.element.metadataHash() = " + bestEntry.element.metadataHash() + ", o.element.metadataHash() = " + o.element.metadataHash();
         return bestEntry;
@@ -374,7 +380,7 @@ public final class RankingProcess extends Thread {
         // returns from the current RWI list the best URL entry and removes this entry from the list
     	long timeLimit = System.currentTimeMillis() + timeout;
     	int p = -1;
-    	String urlhash;
+    	byte[] urlhash;
     	while (System.currentTimeMillis() < timeLimit) {
             final SortStack<WordReferenceVars>.stackElement obrwi = takeRWI(skipDoubleDom);
             if (obrwi == null) {
@@ -383,9 +389,13 @@ public final class RankingProcess extends Thread {
             	continue;
             }
             urlhash = obrwi.element.metadataHash();
-            final URIMetadataRow page = this.query.getSegment().urlMetadata().load(urlhash.getBytes(), obrwi.element, obrwi.weight.longValue());
+            final URIMetadataRow page = this.query.getSegment().urlMetadata().load(urlhash, obrwi.element, obrwi.weight.longValue());
             if (page == null) {
-            	misses.add(obrwi.element.metadataHash());
+            	try {
+                    misses.put(obrwi.element.metadataHash());
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                }
             	continue;
             }
             
@@ -405,7 +415,7 @@ public final class RankingProcess extends Thread {
                 
                 // in case that we do not have e catchall filter for urls
                 // we must also construct the domain navigator here
-                this.hostNavigator.inc(urlhash.substring(6), urlhash);
+                this.hostNavigator.inc(new String(urlhash).substring(6), new String(urlhash));
             }
             
             // check for more errors
@@ -536,7 +546,7 @@ public final class RankingProcess extends Thread {
         urlhashes.remove(reference.urlHash);
     }
     
-    public Iterator<String> miss() {
+    public Iterator<byte[]> miss() {
         return this.misses.iterator();
     }
     
@@ -605,7 +615,7 @@ public final class RankingProcess extends Thread {
             word = words[i].toLowerCase();
             if (word.length() > 2 &&
                 "http_html_php_ftp_www_com_org_net_gov_edu_index_home_page_for_usage_the_and_".indexOf(word) < 0 &&
-                !query.queryHashes.contains(Word.word2hash(word)) &&
+                !query.queryHashes.has(Word.word2hash(word)) &&
                 word.matches("[a-z]+") &&
                 !Switchboard.badwords.contains(word) &&
                 !Switchboard.stopwords.contains(word)) {

@@ -25,15 +25,17 @@
 package de.anomic.yacy.dht;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.TreeMap;
 
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.data.word.WordReferenceRow;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
+import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.rwi.ReferenceContainerCache;
 import net.yacy.kelondro.workflow.WorkflowJob;
@@ -84,8 +86,8 @@ public class Transmission {
          */
         private final byte[]                          primaryTarget;
         private final ReferenceContainerCache<WordReference> containers;
-        private final HashMap<String, URIMetadataRow> references;
-        private final HashSet<String>                 badReferences;
+        private final TreeMap<byte[], URIMetadataRow> references;
+        private final HandleSet                       badReferences;
         private final ArrayList<yacySeed>             targets;
         private int                             hit, miss;
         
@@ -104,8 +106,8 @@ public class Transmission {
             super();
             this.primaryTarget = primaryTarget;
             this.containers = new ReferenceContainerCache<WordReference>(Segment.wordReferenceFactory, payloadrow, Segment.wordOrder);
-            this.references = new HashMap<String, URIMetadataRow>();
-            this.badReferences = new HashSet<String>();
+            this.references = new TreeMap<byte[], URIMetadataRow>(Base64Order.enhancedCoder);
+            this.badReferences = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
             this.targets    = targets;
             this.hit = 0;
             this.miss = 0;
@@ -120,24 +122,24 @@ public class Transmission {
         public void add(ReferenceContainer<WordReference> container) throws RowSpaceExceededException {
             // iterate through the entries in the container and check if the reference is in the repository
             Iterator<WordReference>  i = container.entries();
-            ArrayList<String> notFound = new ArrayList<String>();
+            ArrayList<byte[]> notFoundx = new ArrayList<byte[]>();
             while (i.hasNext()) {
                 WordReference e = i.next();
                 if (references.containsKey(e.metadataHash())) continue;
-                if (badReferences.contains(e.metadataHash())) {
-                    notFound.add(e.metadataHash());
+                if (badReferences.has(e.metadataHash())) {
+                    notFoundx.add(e.metadataHash());
                     continue;
                 }
-                URIMetadataRow r = segment.urlMetadata().load(e.metadataHash().getBytes(), null, 0);
+                URIMetadataRow r = segment.urlMetadata().load(e.metadataHash(), null, 0);
                 if (r == null) {
-                    notFound.add(e.metadataHash());
-                    badReferences.add(e.metadataHash());
+                    notFoundx.add(e.metadataHash());
+                    badReferences.put(e.metadataHash());
                 } else {
                     references.put(e.metadataHash(), r);
                 }
             }
             // now delete all references that were not found
-            for (String s : notFound) container.remove(s);
+            for (byte[] b : notFoundx) container.removeReference(b);
             // finally add the remaining container to the cache
             containers.add(container);
         }
@@ -204,7 +206,7 @@ public class Transmission {
                 Iterator<ReferenceContainer<WordReference>> i = this.containers.iterator();
                 ReferenceContainer<WordReference> firstContainer = (i == null) ? null : i.next();
                 log.logInfo("Index transfer of " + this.containers.size() + 
-                                 " words [" + ((firstContainer == null) ? null : firstContainer.getTermHashAsString()) + " .. " + new String(this.primaryTarget) + "]" + 
+                                 " words [" + ((firstContainer == null) ? null : new String(firstContainer.getTermHash())) + " .. " + new String(this.primaryTarget) + "]" + 
                                  " and " + this.references.size() + " URLs" +
                                  " to peer " + target.getName() + ":" + target.hash + 
                                  " in " + (transferTime / 1000) + 

@@ -39,6 +39,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.index.HandleSet;
+
 public class SetTools {
 
     
@@ -47,9 +49,9 @@ public class SetTools {
     // ------------------------------------------------------------------------------------------------
     // helper methods
 	
-    public static int log2a(int x) {
+    public final static int log2a(int x) {
         // this computes 1 + log2
-        // it is the number of bits in x, not the logarithmus by 2
+        // it is the number of bits in x, not the logarithm by 2
     	int l = 0;
     	while (x > 0) {x = x >>> 1; l++;}
     	return l;
@@ -211,7 +213,7 @@ public class SetTools {
     }
 
     private static <A> TreeSet<A> joinConstructiveByEnumeration(final TreeSet<A> set1, final TreeSet<A> set2) {
-    	// implement pairvise enumeration
+    	// implement pairwise enumeration
     	final Comparator<? super A> comp = set1.comparator();
     	final Iterator<A> mi = set1.iterator();
     	final Iterator<A> si = set2.iterator();
@@ -257,38 +259,91 @@ public class SetTools {
 		return anymatchByEnumeration(set1, set2);
 	}
 
-	private static <A> boolean anymatchByTest(final TreeSet<A> small, final TreeSet<A> large) {
-		final Iterator<A> mi = small.iterator();
-		A o;
-		while (mi.hasNext()) {
-			o = mi.next();
-			if (large.contains(o)) return true;
-		}
-		return false;
-	}
+    public static <A> boolean anymatch(final HandleSet set1, final HandleSet set2) {
+        // comparators must be equal
+        if ((set1 == null) || (set2 == null)) return false;
+        if (set1.comparator() != set2.comparator()) return false;
+        if (set1.isEmpty() || set2.isEmpty()) return false;
+
+        // decide which method to use
+        final int high = ((set1.size() > set2.size()) ? set1.size() : set2.size());
+        final int low = ((set1.size() > set2.size()) ? set2.size() : set1.size());
+        final int stepsEnum = 10 * (high + low - 1);
+        final int stepsTest = 12 * log2a(high) * low;
+
+        // start most efficient method
+        if (stepsEnum > stepsTest) {
+            if (set1.size() < set2.size()) return anymatchByTest(set1, set2);
+            return anymatchByTest(set2, set1);
+        }
+        return anymatchByEnumeration(set1, set2);
+    }
+
+    private static <A> boolean anymatchByTest(final TreeSet<A> small, final TreeSet<A> large) {
+        final Iterator<A> mi = small.iterator();
+        A o;
+        while (mi.hasNext()) {
+            o = mi.next();
+            if (large.contains(o)) return true;
+        }
+        return false;
+    }
+
+    private static boolean anymatchByTest(final HandleSet small, final HandleSet large) {
+        final Iterator<byte[]> mi = small.iterator();
+        byte[] o;
+        while (mi.hasNext()) {
+            o = mi.next();
+            if (large.has(o)) return true;
+        }
+        return false;
+    }
 
     private static <A> boolean anymatchByEnumeration(final TreeSet<A> set1, final TreeSet<A> set2) {
-		// implement pairvise enumeration
-		final Comparator<? super A> comp = set1.comparator();
-		final Iterator<A> mi = set1.iterator();
-		final Iterator<A> si = set2.iterator();
-		int c;
-		if ((mi.hasNext()) && (si.hasNext())) {
-			A mobj = mi.next();
-			A sobj = si.next();
-			while (true) {
-				c = comp.compare(mobj, sobj);
-				if (c < 0) {
-					if (mi.hasNext()) mobj = mi.next(); else break;
-				} else if (c > 0) {
-					if (si.hasNext()) sobj = si.next(); else break;
-				} else {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
+        // implement pairwise enumeration
+        final Comparator<? super A> comp = set1.comparator();
+        final Iterator<A> mi = set1.iterator();
+        final Iterator<A> si = set2.iterator();
+        int c;
+        if ((mi.hasNext()) && (si.hasNext())) {
+            A mobj = mi.next();
+            A sobj = si.next();
+            while (true) {
+                c = comp.compare(mobj, sobj);
+                if (c < 0) {
+                    if (mi.hasNext()) mobj = mi.next(); else break;
+                } else if (c > 0) {
+                    if (si.hasNext()) sobj = si.next(); else break;
+                } else {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    private static boolean anymatchByEnumeration(final HandleSet set1, final HandleSet set2) {
+        // implement pairwise enumeration
+        final Comparator<byte[]> comp = set1.comparator();
+        final Iterator<byte[]> mi = set1.iterator();
+        final Iterator<byte[]> si = set2.iterator();
+        int c;
+        if ((mi.hasNext()) && (si.hasNext())) {
+            byte[] mobj = mi.next();
+            byte[] sobj = si.next();
+            while (true) {
+                c = comp.compare(mobj, sobj);
+                if (c < 0) {
+                    if (mi.hasNext()) mobj = mi.next(); else break;
+                } else if (c > 0) {
+                    if (si.hasNext()) sobj = si.next(); else break;
+                } else {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
     
     // ------------------------------------------------------------------------------------------------
     // exclude
@@ -425,7 +480,7 @@ public class SetTools {
         return list;
     }
 
-    public static String setToString(final TreeSet<byte[]> set, final char separator) {
+    public static String setToString(final HandleSet set, final char separator) {
         final Iterator<byte[]> i = set.iterator();
         final StringBuilder sb = new StringBuilder(set.size() * 7);
         if (i.hasNext()) sb.append(new String(i.next()));
@@ -434,6 +489,7 @@ public class SetTools {
         }
         return sb.toString();
     }
+    
     public static String setToString(final Set<String> set, final char separator) {
         final Iterator<String> i = set.iterator();
         final StringBuilder sb = new StringBuilder(set.size() * 7);

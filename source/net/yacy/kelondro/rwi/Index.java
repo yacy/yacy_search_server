@@ -30,9 +30,9 @@ package net.yacy.kelondro.rwi;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.TreeSet;
 
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
@@ -88,7 +88,7 @@ public interface Index <ReferenceType extends Reference> {
 	 * @return the references
 	 * @throws IOException
 	 */
-	public ReferenceContainer<ReferenceType> get(byte[] termHash, Set<String> referenceselection) throws IOException;
+	public ReferenceContainer<ReferenceType> get(byte[] termHash, HandleSet referenceselection) throws IOException;
     
     /**
      * delete all references for a word
@@ -114,8 +114,8 @@ public interface Index <ReferenceType extends Reference> {
      * @return
      * @throws IOException
      */
-    public int remove(final byte[] termHash, Set<String> referenceHashes) throws IOException;
-    public int remove(final TreeSet<byte[]> termHashes, final byte[] urlHashBytes) throws IOException;
+    public int remove(final byte[] termHash, HandleSet referenceHashes) throws IOException;
+    public int remove(final HandleSet termHashes, final byte[] urlHashBytes) throws IOException;
     
     /**
      * iterate all references from the beginning of a specific word hash
@@ -144,7 +144,7 @@ public interface Index <ReferenceType extends Reference> {
      * @param urlselection
      * @return map of wordhash:indexContainer
      */
-    public HashMap<byte[], ReferenceContainer<ReferenceType>> searchConjunction(final TreeSet<byte[]> wordHashes, final Set<String> urlselection);        
+    public HashMap<byte[], ReferenceContainer<ReferenceType>> searchConjunction(final HandleSet wordHashes, final HandleSet urlselection);        
   
     /**
      * delete all references entries

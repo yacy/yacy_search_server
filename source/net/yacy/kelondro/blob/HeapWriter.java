@@ -96,7 +96,6 @@ public final class HeapWriter {
      * @throws RowSpaceExceededException 
      */
     public synchronized void add(byte[] key, final byte[] blob) throws IOException, RowSpaceExceededException {
-        //System.out.println("HeapWriter.add: " + new String(key));
         assert blob.length > 0;
         key = HeapReader.normalizeKey(key, this.keylength);
         assert index.row().primaryKeyLength == this.keylength : index.row().primaryKeyLength + "!=" + key.length;
@@ -108,7 +107,6 @@ public final class HeapWriter {
         os.writeInt(chunkl);
         os.write(key);
         os.write(blob);
-        //assert (this.doublecheck.add(new String(key))) : "doublecheck failed for " + new String(key);
         this.seek += chunkl + 4;
         //os.flush(); // necessary? may cause bad IO performance :-(
     }

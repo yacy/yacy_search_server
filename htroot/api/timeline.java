@@ -30,6 +30,7 @@ import java.util.TreeSet;
 
 import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReference;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.rwi.ReferenceContainer;
@@ -75,7 +76,7 @@ public final class timeline {
             if (language == null) language = "en";
         }
         final TreeSet<String>[] query = QueryParams.cleanQuery(querystring); // converts also umlaute
-        TreeSet<byte[]> q = Word.words2hashes(query[0]);
+        HandleSet q = Word.words2hashesHandles(query[0]);
         
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(3000);
@@ -93,7 +94,7 @@ public final class timeline {
         // get the index container with the result vector
         TermSearch<WordReference> search = null;
         try {
-            search = segment.termIndex().query(q, Word.words2hashes(query[1]), null, Segment.wordReferenceFactory, maxdist);
+            search = segment.termIndex().query(q, Word.words2hashesHandles(query[1]), null, Segment.wordReferenceFactory, maxdist);
         } catch (RowSpaceExceededException e) {
             Log.logException(e);
         }

@@ -193,8 +193,6 @@ public class NoticedURL {
             return false;
         } catch (RowSpaceExceededException e) {
             return false;
-        } catch (IOException e) {
-            return false;
         }
     }
     

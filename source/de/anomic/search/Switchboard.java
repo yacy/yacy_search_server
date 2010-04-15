@@ -74,6 +74,7 @@ import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.meta.URIMetadataRow.Components;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Digest;
@@ -162,9 +163,9 @@ public final class Switchboard extends serverSwitch {
     public static TreeSet<String> badwords       = new TreeSet<String>(NaturalOrder.naturalComparator);
     public static TreeSet<String> stopwords      = new TreeSet<String>(NaturalOrder.naturalComparator);    
     public static TreeSet<String> blueList       = null;
-    public static TreeSet<byte[]> badwordHashes  = null;
-    public static TreeSet<byte[]> blueListHashes = null;
-    public static TreeSet<byte[]> stopwordHashes = null;    
+    public static HandleSet badwordHashes  = null;
+    public static HandleSet blueListHashes = null;
+    public static HandleSet stopwordHashes = null;    
     public static Blacklist urlBlacklist = null;
     
     public static wikiParser wikiParser = null;
@@ -376,7 +377,7 @@ public final class Switchboard extends serverSwitch {
             final String f = getConfig(SwitchboardConstants.LIST_BLUE, SwitchboardConstants.LIST_BLUE_DEFAULT);
             final File plasmaBlueListFile = new File(f);
             if (f != null) blueList = SetTools.loadList(plasmaBlueListFile, NaturalOrder.naturalComparator); else blueList= new TreeSet<String>();
-            blueListHashes = Word.words2hashes(blueList);
+            blueListHashes = Word.words2hashesHandles(blueList);
             this.log.logConfig("loaded blue-list from file " + plasmaBlueListFile.getName() + ", " +
             blueList.size() + " entries, " +
             ppRamString(plasmaBlueListFile.length()/1024));
@@ -394,7 +395,7 @@ public final class Switchboard extends serverSwitch {
         if (badwords == null || badwords.isEmpty()) {
             final File badwordsFile = new File(rootPath, SwitchboardConstants.LIST_BADWORDS_DEFAULT);
             badwords = SetTools.loadList(badwordsFile, NaturalOrder.naturalComparator);
-            badwordHashes = Word.words2hashes(badwords);
+            badwordHashes = Word.words2hashesHandles(badwords);
             this.log.logConfig("loaded badwords from file " + badwordsFile.getName() +
                                ", " + badwords.size() + " entries, " +
                                ppRamString(badwordsFile.length()/1024));
@@ -404,7 +405,7 @@ public final class Switchboard extends serverSwitch {
         if (stopwords == null || stopwords.isEmpty()) {
             final File stopwordsFile = new File(rootPath, SwitchboardConstants.LIST_STOPWORDS_DEFAULT);
             stopwords = SetTools.loadList(stopwordsFile, NaturalOrder.naturalComparator);
-            stopwordHashes = Word.words2hashes(stopwords);
+            stopwordHashes = Word.words2hashesHandles(stopwords);
             this.log.logConfig("loaded stopwords from file " + stopwordsFile.getName() + ", " +
             stopwords.size() + " entries, " +
             ppRamString(stopwordsFile.length()/1024));

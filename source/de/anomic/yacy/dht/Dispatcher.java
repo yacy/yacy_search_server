@@ -27,13 +27,14 @@ package de.anomic.yacy.dht;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceRow;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
@@ -193,15 +194,13 @@ public class Dispatcher {
         final ArrayList<ReferenceContainer<WordReference>> rc;
         if (ram) {
             // selection was only from ram, so we have to carefully remove only the selected entries
-            HashSet<String> urlHashes = new HashSet<String>();
+            HandleSet urlHashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
             Iterator<WordReference> it;
             for (ReferenceContainer<WordReference> c: containers) {
                 urlHashes.clear();
                 it = c.entries();
-                while (it.hasNext()) {
-                    urlHashes.add(it.next().metadataHash());
-                }
-                if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + c.getTermHashAsString() + "'");
+                while (it.hasNext()) try { urlHashes.put(it.next().metadataHash()); } catch (RowSpaceExceededException e) { Log.logException(e); }
+                if (this.log.isFine()) this.log.logFine("selected " + urlHashes.size() + " urls for word '" + new String(c.getTermHash()) + "'");
                 if (!urlHashes.isEmpty()) this.segment.termIndex().remove(c.getTermHash(), urlHashes);
             }
             rc = containers;
@@ -212,7 +211,7 @@ public class Dispatcher {
             for (ReferenceContainer<WordReference> c: containers) {
                 container = this.segment.termIndex().delete(c.getTermHash()); // be aware this might be null!
                 if (container != null && !container.isEmpty()) {
-                    if (this.log.isFine()) this.log.logFine("selected " + container.size() + " urls for word '" + c.getTermHashAsString() + "'");
+                    if (this.log.isFine()) this.log.logFine("selected " + container.size() + " urls for word '" + new String(c.getTermHash()) + "'");
                     rc.add(container);
                 }
             }

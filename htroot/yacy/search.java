@@ -39,7 +39,8 @@ import net.yacy.document.content.RSSMessage;
 import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.WordReference;
-import net.yacy.kelondro.order.Base64Order;
+import net.yacy.kelondro.data.word.WordReferenceRow;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.rwi.ReferenceContainer;
 import net.yacy.kelondro.util.EventTracker;
@@ -164,7 +165,7 @@ public final class search {
         // tell all threads to do nothing for a specific time
         sb.intermissionAllThreads(3000);
 
-        final TreeSet<byte[]> abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : QueryParams.hashes2Set(abstracts);
+        final HandleSet abstractSet = ((abstracts.length() == 0) || (abstracts.equals("auto"))) ? null : QueryParams.hashes2Set(abstracts);
         
         // store accessing peer
         final yacySeed remoteSeed = yacySeed.genRemoteSeed(oseed, key, false);
@@ -175,8 +176,8 @@ public final class search {
         }
 
         // prepare search
-        final TreeSet<byte[]> queryhashes = QueryParams.hashes2Set(query);
-        final TreeSet<byte[]> excludehashes = (exclude.length() == 0) ? new TreeSet<byte[]>(Base64Order.enhancedCoder) : QueryParams.hashes2Set(exclude);
+        final HandleSet queryhashes = QueryParams.hashes2Set(query);
+        final HandleSet excludehashes = (exclude.length() == 0) ? new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0) : QueryParams.hashes2Set(exclude);
         final long timestamp = System.currentTimeMillis();
         
     	// prepare a search profile
@@ -195,7 +196,7 @@ public final class search {
             theQuery = new QueryParams(
                     null,
                     abstractSet,
-                    new TreeSet<byte[]>(Base64Order.enhancedCoder),
+                    new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0),
                     null,
                     null,
                     maxdist,
@@ -223,7 +224,7 @@ public final class search {
 
             final long timer = System.currentTimeMillis();
             //final Map<byte[], ReferenceContainer<WordReference>>[] containers = sb.indexSegment.index().searchTerm(theQuery.queryHashes, theQuery.excludeHashes, plasmaSearchQuery.hashes2StringSet(urls));
-            final HashMap<byte[], ReferenceContainer<WordReference>> incc = indexSegment.termIndex().searchConjunction(theQuery.queryHashes, QueryParams.hashes2StringSet(urls));
+            final HashMap<byte[], ReferenceContainer<WordReference>> incc = indexSegment.termIndex().searchConjunction(theQuery.queryHashes, QueryParams.hashes2Handles(urls));
             
             EventTracker.update("SEARCH", new ProfilingGraph.searchEvent(theQuery.id(true), SearchEvent.COLLECTION, incc.size(), System.currentTimeMillis() - timer), false, 30000, ProfilingGraph.maxTime);
             if (incc != null) {

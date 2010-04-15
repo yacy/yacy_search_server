@@ -347,7 +347,7 @@ public class Tables {
         return new RowIterator(table, wherePattern);
     }
     
-    public Collection<Row> orderByPK(Iterator<Row> rowIterator, int maxcount) throws IOException {
+    public Collection<Row> orderByPK(Iterator<Row> rowIterator, int maxcount) {
         TreeMap<String, Row> sortTree = new TreeMap<String, Row>();
         Row row;
         while ((maxcount < 0 || maxcount-- > 0) && rowIterator.hasNext()) {
@@ -357,7 +357,7 @@ public class Tables {
         return sortTree.values();
     }
     
-    public Collection<Row> orderBy(Iterator<Row> rowIterator, int maxcount, String sortColumn) throws IOException {
+    public Collection<Row> orderBy(Iterator<Row> rowIterator, int maxcount, String sortColumn) {
         TreeMap<String, Row> sortTree = new TreeMap<String, Row>();
         Row row;
         byte[] r;

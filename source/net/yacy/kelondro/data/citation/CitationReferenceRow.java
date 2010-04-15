@@ -132,8 +132,8 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
         return this.entry;
     }
 
-    public String metadataHash() {
-        return this.entry.getColString(col_urlhash, null);
+    public byte[] metadataHash() {
+        return this.entry.getColBytes(col_urlhash, true);
     }
     
     public int virtualAge() {
@@ -181,7 +181,7 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
     
     @Override
     public int hashCode() {
-        return this.metadataHash().hashCode();
+        return new String(this.metadataHash()).hashCode();
     }
 
     @Override
@@ -190,7 +190,7 @@ public final class CitationReferenceRow implements Reference /*, Cloneable*/ {
         if (obj == null) return false;
         if (!(obj instanceof CitationReferenceRow)) return false;
         CitationReferenceRow other = (CitationReferenceRow) obj;
-        return this.metadataHash().equals(other.metadataHash());
+        return Base64Order.enhancedCoder.equal(this.metadataHash(), other.metadataHash());
     }
     
     public int distance() {

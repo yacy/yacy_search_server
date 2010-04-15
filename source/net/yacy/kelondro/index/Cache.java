@@ -98,10 +98,6 @@ public final class Cache implements ObjectIndex, Iterable<Row.Entry> {
         this.hasnotDelete = 0;
     }
     
-    public final int cacheObjectChunkSize() {
-        return index.row().objectsize;
-    }
-    
     public final int writeBufferSize() {
         return 0;
     }

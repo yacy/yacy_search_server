@@ -29,9 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -45,6 +43,8 @@ import net.yacy.kelondro.data.word.Word;
 import net.yacy.kelondro.data.word.WordReferenceVars;
 import net.yacy.kelondro.index.ARC;
 import net.yacy.kelondro.index.ConcurrentARC;
+import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.util.SetTools;
@@ -78,10 +78,10 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     private String line;
     private final String error;
     private final int errorCode;
-    private TreeSet<byte[]> remaingHashes;
+    private HandleSet remaingHashes;
     private final DigestURI favicon;
     
-    public static boolean existsInCache(final DigestURI url, final TreeSet<byte[]> queryhashes) {
+    public static boolean existsInCache(final DigestURI url, final HandleSet queryhashes) {
         final String hashes = yacySearch.set2string(queryhashes);
         return retrieveFromCache(hashes, new String(url.hash())) != null;
     }
@@ -109,19 +109,23 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
      * @param queryhashes
      * @return the given hash set minus the hashes from the tokenization of the given sentence
      */
-    public static TreeSet<byte[]> removeAppearanceHashes(final String sentence, final TreeSet<byte[]> queryhashes) {
+    public static HandleSet removeAppearanceHashes(final String sentence, final HandleSet queryhashes) {
         // remove all hashes that appear in the sentence
         if (sentence == null) return queryhashes;
         final TreeMap<byte[], Integer> hs = Condenser.hashSentence(sentence);
         final Iterator<byte[]> j = queryhashes.iterator();
         byte[] hash;
         Integer pos;
-        final TreeSet<byte[]> remaininghashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
+        final HandleSet remaininghashes = new HandleSet(queryhashes.row().primaryKeyLength, queryhashes.comparator(), queryhashes.size());
         while (j.hasNext()) {
             hash = j.next();
             pos = hs.get(hash);
             if (pos == null) {
-                remaininghashes.add(hash);
+                try {
+                    remaininghashes.put(hash);
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                }
             }
         }
         return remaininghashes;
@@ -148,11 +152,11 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
      */
     private final static Pattern p01 = Pattern.compile("(.*?)(\\<b\\>.+?\\</b\\>)(.*)"); // marked words are in <b>-tags
     
-    public TextSnippet(final DigestURI url, final String line, final int errorCode, final TreeSet<byte[]> remaingHashes, final String errortext) {
-        this(url,line,errorCode,remaingHashes,errortext,null);
+    public TextSnippet(final DigestURI url, final String line, final int errorCode, final HandleSet remaingHashes, final String errortext) {
+        this(url, line, errorCode, remaingHashes, errortext, null);
     }
     
-    public TextSnippet(final DigestURI url, final String line, final int errorCode, final TreeSet<byte[]> remaingHashes, final String errortext, final DigestURI favicon) {
+    public TextSnippet(final DigestURI url, final String line, final int errorCode, final HandleSet remaingHashes, final String errortext, final DigestURI favicon) {
         this.url = url;
         this.line = line;
         this.errorCode = errorCode;
@@ -192,12 +196,12 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
     public int getErrorCode() {
         return errorCode;
     }
-    public TreeSet<byte[]> getRemainingHashes() {
+    public HandleSet getRemainingHashes() {
         return this.remaingHashes;
     }
-    public String getLineMarked(final TreeSet<byte[]> queryHashes) {
+    public String getLineMarked(final HandleSet queryHashes) {
         if (line == null) return "";
-        if ((queryHashes == null) || (queryHashes.isEmpty())) return line.trim();
+        if (queryHashes == null || queryHashes.isEmpty()) return line.trim();
         if (line.endsWith(".")) line = line.substring(0, line.length() - 1);
         final Iterator<byte[]> i = queryHashes.iterator();
         byte[] h;
@@ -306,8 +310,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         return al;
     }
     
-    @SuppressWarnings("unchecked")
-    public static TextSnippet retrieveTextSnippet(final LoaderDispatcher loader, final URIMetadataRow.Components comp, final TreeSet<byte[]> queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int maxDocLen, final boolean reindexing) {
+    public static TextSnippet retrieveTextSnippet(final LoaderDispatcher loader, final URIMetadataRow.Components comp, final HandleSet queryhashes, final boolean fetchOnline, final boolean pre, final int snippetMaxLength, final int maxDocLen, final boolean reindexing) {
         // heise = "0OQUNU3JSs05"
         final DigestURI url = comp.url();
         if (queryhashes.isEmpty()) {
@@ -413,7 +416,7 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         if (sentences == null) return new TextSnippet(url, null, ERROR_PARSER_NO_LINES, queryhashes, "parser returned no sentences",resFavicon);
         final Object[] tsr = computeTextSnippet(sentences, queryhashes, snippetMaxLength);
         final String textline = (tsr == null) ? null : (String) tsr[0];
-        final TreeSet<byte[]> remainingHashes = (tsr == null) ? queryhashes : (TreeSet<byte[]>) tsr[1];
+        final HandleSet remainingHashes = (tsr == null) ? queryhashes : (HandleSet) tsr[1];
         
         // compute snippet from media
         //String audioline = computeMediaSnippet(document.getAudiolinks(), queryhashes);
@@ -439,18 +442,16 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         return new TextSnippet(url, line, source, null, null, resFavicon);
     }
     
-    private static boolean containsAllHashes(final String sentence, final Set<byte[]> queryhashes) {
+    private static boolean containsAllHashes(final String sentence, final HandleSet queryhashes) {
         final TreeMap<byte[], Integer> m = Condenser.hashSentence(sentence);
-        final Iterator<byte[]> i = queryhashes.iterator();
-        while (i.hasNext()) {
-            if (!(m.containsKey(i.next()))) return false;
+        for (byte[] b: queryhashes) {
+            if (!(m.containsKey(b))) return false;
         }
         return true;
     }
     
-    @SuppressWarnings("unchecked")
-    private static Object[] /*{String - the snippet, Set - remaining hashes}*/
-            computeTextSnippet(final Iterator<StringBuilder> sentences, final TreeSet<byte[]> queryhashes, int maxLength) {
+    private static Object[] /*{String - the snippet, HandleSet - remaining hashes}*/
+            computeTextSnippet(final Iterator<StringBuilder> sentences, final HandleSet queryhashes, int maxLength) {
         try {
             if (sentences == null) return null;
             if ((queryhashes == null) || (queryhashes.isEmpty())) return null;
@@ -472,14 +473,14 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             }
             
             String result;
-            TreeSet<byte[]> remaininghashes;
+            HandleSet remaininghashes;
             while (!os.isEmpty()) {
                 sentence = os.remove(os.lastKey()); // sentence with the biggest score
                 Object[] tsr = computeTextSnippet(sentence.toString(), queryhashes, maxLength);
                 if (tsr == null) continue;
                 result = (String) tsr[0];
                 if ((result != null) && (result.length() > 0)) {
-                    remaininghashes = (TreeSet<byte[]>) tsr[1];
+                    remaininghashes = (HandleSet) tsr[1];
                     if (remaininghashes.isEmpty()) {
                         // we have found the snippet
                         return new Object[]{result, remaininghashes};
@@ -508,8 +509,8 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
         }
     }
     
-    private static Object[] /*{String - the snippet, Set - remaining hashes}*/
-            computeTextSnippet(String sentence, final TreeSet<byte[]> queryhashes, final int maxLength) {
+    private static Object[] /*{String - the snippet, HandleSet - remaining hashes}*/
+            computeTextSnippet(String sentence, final HandleSet queryhashes, final int maxLength) {
         try {
             if (sentence == null) return null;
             if ((queryhashes == null) || (queryhashes.isEmpty())) return null;
@@ -520,12 +521,16 @@ public class TextSnippet implements Comparable<TextSnippet>, Comparator<TextSnip
             final Iterator<byte[]> j = queryhashes.iterator();
             Integer pos;
             int p, minpos = sentence.length(), maxpos = -1;
-            final TreeSet<byte[]> remainingHashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
+            final HandleSet remainingHashes = new HandleSet(queryhashes.row().primaryKeyLength, queryhashes.comparator(), 0);
             while (j.hasNext()) {
                 hash = j.next();
                 pos = hs.get(hash);
                 if (pos == null) {
-                    remainingHashes.add(hash);
+                    try {
+                        remainingHashes.put(hash);
+                    } catch (RowSpaceExceededException e) {
+                        Log.logException(e);
+                    }
                 } else {
                     p = pos.intValue();
                     if (p > maxpos) maxpos = p;

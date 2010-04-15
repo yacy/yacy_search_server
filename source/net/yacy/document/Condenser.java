@@ -234,7 +234,7 @@ public final class Condenser {
         }
         int pip = 0;
         while (wordenum.hasMoreElements()) {
-            word = (new String(wordenum.nextElement())).toLowerCase(Locale.ENGLISH);
+            word = (wordenum.nextElement().toString()).toLowerCase(Locale.ENGLISH);
             if (useForLanguageIdentification) languageIdentificator.add(word);
             if (word.length() < 3) continue;
             wprop = words.get(word);
@@ -305,7 +305,7 @@ public final class Condenser {
         // read source
         final sievedWordsEnum wordenum = new sievedWordsEnum(is);
         while (wordenum.hasMoreElements()) {
-            word = (new String(wordenum.nextElement())).toLowerCase(Locale.ENGLISH); // TODO: does toLowerCase work for non ISO-8859-1 chars?
+            word = (wordenum.nextElement().toString()).toLowerCase(Locale.ENGLISH); // TODO: does toLowerCase work for non ISO-8859-1 chars?
             if (languageIdentificator != null) languageIdentificator.add(word);
             if (word.length() < wordminsize) continue;
             
@@ -485,7 +485,7 @@ public final class Condenser {
         byte[] hash;
         while (words.hasMoreElements()) {
             word = words.nextElement();
-            hash = Word.word2hash(new String(word));
+            hash = Word.word2hash(word.toString());
             if (!map.containsKey(hash)) map.put(hash, Integer.valueOf(pos)); // don't overwrite old values, that leads to too far word distances
             pos += word.length() + 1;
         }

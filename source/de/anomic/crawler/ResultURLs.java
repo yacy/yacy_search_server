@@ -47,10 +47,10 @@ public final class ResultURLs {
     private final Map<EventOrigin, ScoreCluster<String>> resultDomains;
 
     public class InitExecEntry {
-        public byte[] initiatorHashb, executorHashb;
+        public byte[] initiatorHash, executorHash;
         public InitExecEntry(final byte[] initiatorHash, final byte[] executorHash) {
-            this.initiatorHashb = initiatorHash;
-            this.executorHashb = executorHash;
+            this.initiatorHash = initiatorHash;
+            this.executorHash = executorHash;
         }
     }
     

@@ -30,7 +30,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,6 +41,9 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import net.yacy.kelondro.data.meta.DigestURI;
+import net.yacy.kelondro.data.meta.URIMetadataRow;
+import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.util.FileUtils;
 import net.yacy.kelondro.util.SetTools;
@@ -77,7 +79,7 @@ public class Blacklist {
     public static final String BLACKLIST_TYPES_STRING="proxy,crawler,dht,search,surftips,news";
     
     protected File blacklistRootPath = null;
-    protected HashMap<String, Set<String>> cachedUrlHashs = null; 
+    protected HashMap<String, HandleSet> cachedUrlHashs = null; 
     //protected HashMap<String, HashMap<String, ArrayList<String>>> hostpaths = null; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
     protected HashMap<String, HashMap<String, ArrayList<String>>> hostpaths_matchable = null; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
     protected HashMap<String, HashMap<String, ArrayList<String>>> hostpaths_notmatchable = null; // key=host, value=path; mapped url is http://host/path; path does not start with '/' here
@@ -91,7 +93,7 @@ public class Blacklist {
         //this.hostpaths = new HashMap<String, HashMap<String, ArrayList<String>>>();
         this.hostpaths_matchable = new HashMap<String, HashMap<String, ArrayList<String>>>();
         this.hostpaths_notmatchable = new HashMap<String, HashMap<String, ArrayList<String>>>();
-        this.cachedUrlHashs = new HashMap<String, Set<String>>();
+        this.cachedUrlHashs = new HashMap<String, HandleSet>();
         
         final Iterator<String> iter = BLACKLIST_TYPES.iterator();
         while (iter.hasNext()) {
@@ -99,7 +101,7 @@ public class Blacklist {
             //this.hostpaths.put(blacklistType, new HashMap<String, ArrayList<String>>());
             this.hostpaths_matchable.put(blacklistType, new HashMap<String, ArrayList<String>>());
             this.hostpaths_notmatchable.put(blacklistType, new HashMap<String, ArrayList<String>>());
-            this.cachedUrlHashs.put(blacklistType, Collections.synchronizedSet(new HashSet<String>()));
+            this.cachedUrlHashs.put(blacklistType, new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0));
         }            
     }
 
@@ -121,7 +123,7 @@ public class Blacklist {
         return (matchable)? this.hostpaths_matchable.get(blacklistType) : this.hostpaths_notmatchable.get(blacklistType);
     }
     
-    protected Set<String> getCacheUrlHashsSet(final String blacklistType) {
+    protected HandleSet getCacheUrlHashsSet(final String blacklistType) {
         if (blacklistType == null) throw new IllegalArgumentException();
         if (!BLACKLIST_TYPES.contains(blacklistType)) throw new IllegalArgumentException("Unknown backlist type.");        
 
@@ -129,13 +131,13 @@ public class Blacklist {
     }
     
     public void clear() {
-        for(final HashMap<String, ArrayList<String>> entry: this.hostpaths_matchable.values()) {
+        for (final HashMap<String, ArrayList<String>> entry: this.hostpaths_matchable.values()) {
             entry.clear();
         }
-        for(final HashMap<String, ArrayList<String>> entry: this.hostpaths_notmatchable.values()) {
+        for (final HashMap<String, ArrayList<String>> entry: this.hostpaths_notmatchable.values()) {
             entry.clear();
         }
-        for(final Set<String> entry: this.cachedUrlHashs.values()) {
+        for (final HandleSet entry: this.cachedUrlHashs.values()) {
             entry.clear();
         }
     }
@@ -162,7 +164,7 @@ public class Blacklist {
         }
     }
     
-    public void loadList(final BlacklistFile blFile, final String sep) {
+    private void loadList(final BlacklistFile blFile, final String sep) {
         final HashMap<String, ArrayList<String>> blacklistMapMatch = getBlacklistMap(blFile.getType(),true);
         final HashMap<String, ArrayList<String>> blacklistMapNotMatch = getBlacklistMap(blFile.getType(),false);
         Set<Map.Entry<String, ArrayList<String>>> loadedBlacklist;
@@ -253,15 +255,15 @@ public class Blacklist {
         int size = 0;
         final Iterator<String> iter = this.cachedUrlHashs.keySet().iterator();
         while (iter.hasNext()) {
-            final Set<String> blacklistMap = this.cachedUrlHashs.get(iter.next());
+            final HandleSet blacklistMap = this.cachedUrlHashs.get(iter.next());
             size += blacklistMap.size();
         }
         return size;        
     }
 
-    public boolean hashInBlacklistedCache(final String blacklistType, final String urlHash) {
-        final Set<String> urlHashCache = getCacheUrlHashsSet(blacklistType);   
-        return urlHashCache.contains(urlHash);
+    public boolean hashInBlacklistedCache(final String blacklistType, final byte[] urlHash) {
+        final HandleSet urlHashCache = getCacheUrlHashsSet(blacklistType);   
+        return urlHashCache.has(urlHash);
     }
 
     public boolean contains(final String blacklistType, String host, String path) {
@@ -282,11 +284,15 @@ public class Blacklist {
 
     public boolean isListed(final String blacklistType, final DigestURI url) {
 
-        final Set<String> urlHashCache = getCacheUrlHashsSet(blacklistType);        
-        if (!urlHashCache.contains(new String(url.hash()))) {
+        final HandleSet urlHashCache = getCacheUrlHashsSet(blacklistType);        
+        if (!urlHashCache.has(url.hash())) {
             final boolean temp = isListed(blacklistType, url.getHost().toLowerCase(), url.getFile());
             if (temp) {
-                urlHashCache.add(new String(url.hash()));
+                try {
+                    urlHashCache.put(url.hash());
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                }
             }
             return temp;   
         }        

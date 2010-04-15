@@ -37,9 +37,10 @@ import java.util.Iterator;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.ByteOrder;
 import net.yacy.kelondro.order.CloneableIterator;
+import net.yacy.kelondro.util.SetTools;
 
 
-public final class HandleSet implements Iterable<byte[]> {
+public final class HandleSet implements Iterable<byte[]>, Cloneable {
     
     private final Row rowdef;
     private ObjectIndex index;
@@ -54,6 +55,15 @@ public final class HandleSet implements Iterable<byte[]> {
         this.index = new ObjectIndexCache(rowdef, expectedspace, initialspace);
     }
 
+    private HandleSet(Row rowdef, ObjectIndex index) {
+        this.rowdef = rowdef;
+        this.index = index;
+    }
+
+    public HandleSet clone() {
+        return new HandleSet(this.rowdef, ((ObjectIndexCache) this.index).clone());
+    }
+    
     /**
      * initialize a HandleSet with the content of a dump
      * @param keylength
@@ -100,12 +110,20 @@ public final class HandleSet implements Iterable<byte[]> {
         return c;
     }
     
+    public ByteOrder comparator() {
+        return this.rowdef.objectOrder;
+    }
+    
     public final Row row() {
         return index.row();
     }
     
-    public final void clear() throws IOException {
-        this.index.clear();
+    public final void clear() {
+        try {
+            this.index.clear();
+        } catch (IOException e) {
+            Log.logException(e);
+        }
     }
     
     public final synchronized boolean has(final byte[] key) {
@@ -113,33 +131,58 @@ public final class HandleSet implements Iterable<byte[]> {
         return index.has(key);
     }
     
-    public final synchronized int put(final byte[] key) throws IOException, RowSpaceExceededException {
+    public final void putAll(final HandleSet aset) throws RowSpaceExceededException {
+        for (byte[] b: aset) put(b);
+    }
+
+    public final synchronized void put(final byte[] key) throws RowSpaceExceededException {
         assert (key != null);
         final Row.Entry newentry = index.row().newEntry();
         newentry.setCol(0, key);
-        final Row.Entry oldentry = index.replace(newentry);
-        if (oldentry == null) return -1;
-        return (int) oldentry.getColLong(1);
+        try {
+            index.put(newentry);
+        } catch (IOException e) {
+            Log.logException(e);
+        }
     }
     
-    public final synchronized void putUnique(final byte[] key) throws IOException, RowSpaceExceededException {
+    public final synchronized void putUnique(final byte[] key) throws RowSpaceExceededException {
         assert (key != null);
         final Row.Entry newentry = this.rowdef.newEntry();
         newentry.setCol(0, key);
-        index.addUnique(newentry);
+        try {
+            index.addUnique(newentry);
+        } catch (IOException e) {
+            Log.logException(e);
+        }
     }
     
-    public final synchronized int remove(final byte[] key) throws IOException {
+    public final synchronized boolean remove(final byte[] key) {
         assert (key != null);
-        final Row.Entry indexentry = index.remove(key);
-        if (indexentry == null) return -1;
-        return (int) indexentry.getColLong(1);
+        Row.Entry indexentry;
+        try {
+            indexentry = index.remove(key);
+            return indexentry != null;
+        } catch (IOException e) {
+            Log.logException(e);
+            return false;
+        }
     }
 
-    public final synchronized int removeone() throws IOException {
-        final Row.Entry indexentry = index.removeOne();
-        if (indexentry == null) return -1;
-        return (int) indexentry.getColLong(1);
+    public final synchronized byte[] removeone() {
+        Row.Entry indexentry;
+        try {
+            indexentry = index.removeOne();
+            if (indexentry == null) return null;
+            return indexentry.getColBytes(0, true);
+        } catch (IOException e) {
+            Log.logException(e);
+            return null;
+        }
+    }
+    
+    public final synchronized boolean isEmpty() {
+        return index.isEmpty();
     }
     
     public final synchronized int size() {
@@ -163,5 +206,95 @@ public final class HandleSet implements Iterable<byte[]> {
         index.close();
         index = null;
     }
+    
+    // set tools
+    
+    public HandleSet joinConstructive(final HandleSet other) throws RowSpaceExceededException {
+        return joinConstructive(this, other);
+    }
 
+    // now the same for set-set
+    public static HandleSet joinConstructive(final HandleSet set1, final HandleSet set2) throws RowSpaceExceededException {
+        // comparators must be equal
+        if ((set1 == null) || (set2 == null)) return null;
+        assert set1.comparator() == set2.comparator();
+        if (set1.comparator() != set2.comparator()) return null;
+        if (set1.isEmpty() || set2.isEmpty()) return new HandleSet(set1.rowdef.primaryKeyLength, set1.comparator(), 0);
+
+        // decide which method to use
+        final int high = ((set1.size() > set2.size()) ? set1.size() : set2.size());
+        final int low  = ((set1.size() > set2.size()) ? set2.size() : set1.size());
+        final int stepsEnum = 10 * (high + low - 1);
+        final int stepsTest = 12 * SetTools.log2a(high) * low;
+
+        // start most efficient method
+        if (stepsEnum > stepsTest) {
+            if (set1.size() < set2.size()) return joinConstructiveByTest(set1, set2);
+            return joinConstructiveByTest(set2, set1);
+        }
+        return joinConstructiveByEnumeration(set1, set2);
+    }
+
+    private static HandleSet joinConstructiveByTest(final HandleSet small, final HandleSet large) throws RowSpaceExceededException {
+        final Iterator<byte[]> mi = small.iterator();
+        final HandleSet result = new HandleSet(small.rowdef.primaryKeyLength, small.comparator(), 0);
+        byte[] o;
+        while (mi.hasNext()) {
+            o = mi.next();
+            if (large.has(o)) result.put(o);
+        }
+        return result;
+    }
+
+    private static HandleSet joinConstructiveByEnumeration(final HandleSet set1, final HandleSet set2) throws RowSpaceExceededException {
+        // implement pairwise enumeration
+        final ByteOrder comp = set1.comparator();
+        final Iterator<byte[]> mi = set1.iterator();
+        final Iterator<byte[]> si = set2.iterator();
+        final HandleSet result = new HandleSet(set1.rowdef.primaryKeyLength, comp, 0);
+        int c;
+        if (mi.hasNext() && si.hasNext()) {
+            byte[] mobj = mi.next();
+            byte[] sobj = si.next();
+            while (true) {
+                c = comp.compare(mobj, sobj);
+                if (c < 0) {
+                    if (mi.hasNext()) mobj = mi.next(); else break;
+                } else if (c > 0) {
+                    if (si.hasNext()) sobj = si.next(); else break;
+                } else {
+                    result.put(mobj);
+                    if (mi.hasNext()) mobj = mi.next(); else break;
+                    if (si.hasNext()) sobj = si.next(); else break;
+                }
+            }
+        }
+        return result;
+    }
+
+    public void excludeDestructive(final HandleSet other) {
+        excludeDestructive(this, other);
+    }
+    
+    private static void excludeDestructive(final HandleSet set1, final HandleSet set2) {
+        if (set1 == null) return;
+        if (set2 == null) return;
+        assert set1.comparator() == set2.comparator();
+        if (set1.isEmpty() || set2.isEmpty()) return;
+        
+        if (set1.size() < set2.size())
+            excludeDestructiveByTestSmallInLarge(set1, set2);
+        else
+            excludeDestructiveByTestLargeInSmall(set1, set2);
+    }
+    
+    private static void excludeDestructiveByTestSmallInLarge(final HandleSet small, final HandleSet large) {
+        final Iterator<byte[]> mi = small.iterator();
+        while (mi.hasNext()) if (large.has(mi.next())) mi.remove();
+    }
+    
+    private static void excludeDestructiveByTestLargeInSmall(final HandleSet large, final HandleSet small) {
+        final Iterator<byte[]> si = small.iterator();
+        while (si.hasNext()) large.remove(si.next());
+    }
 }

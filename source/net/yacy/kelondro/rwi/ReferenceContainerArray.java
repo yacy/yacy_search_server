@@ -239,7 +239,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
     /**
      * delete a indexContainer from the heap cache. This can only be used for write-enabled heaps
      * @param wordHash
-     * @return the indexContainer if the cache contained the container, null othervise
+     * @return the indexContainer if the cache contained the container, null otherwise
      * @throws IOException 
      */
     public synchronized void delete(final byte[] termHash) throws IOException {
@@ -342,7 +342,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
             long lastlog = start - 27000;
             int count = 0;
             ReferenceType reference;
-            String mh;
+            byte[] mh;
             while (ei.hasNext()) {
                 container = ei.next();
                 if (container == null) continue;
@@ -352,7 +352,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
                 	if (reference == null) continue;
                 	mh = reference.metadataHash();
                 	if (mh == null) continue;
-                    references.inc(mh.getBytes());
+                    references.inc(mh);
                 }
                 count++;
                 // write a log

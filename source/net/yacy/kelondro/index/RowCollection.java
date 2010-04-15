@@ -47,13 +47,19 @@ import net.yacy.kelondro.util.NamePrefixThreadFactory;
 import net.yacy.kelondro.util.kelondroException;
 
 
-public class RowCollection implements Iterable<Row.Entry> {
+public class RowCollection implements Iterable<Row.Entry>, Cloneable {
 
     public  static final long growfactorLarge100 = 140L;
     public  static final long growfactorSmall100 = 120L;
     private static final int isortlimit = 20;
     private static       int availableCPU = Runtime.getRuntime().availableProcessors();
     
+    private static final int exp_chunkcount  = 0;
+    private static final int exp_last_read   = 1;
+    private static final int exp_last_wrote  = 2;
+    private static final int exp_order_type  = 3;
+    private static final int exp_order_bound = 4;
+    private static final int exp_collection  = 5;
     
     public static final ExecutorService sortingthreadexecutor = (availableCPU > 1) ? Executors.newCachedThreadPool(new NamePrefixThreadFactory("sorting")) : null;
     public static final ExecutorService partitionthreadexecutor = (availableCPU > 1) ? Executors.newCachedThreadPool(new NamePrefixThreadFactory("partition")) : null;
@@ -63,13 +69,6 @@ public class RowCollection implements Iterable<Row.Entry> {
     protected       int    chunkcount;
     protected       int    sortBound;
     protected       long   lastTimeWrote;
-    
-    private static final int exp_chunkcount  = 0;
-    private static final int exp_last_read   = 1;
-    private static final int exp_last_wrote  = 2;
-    private static final int exp_order_type  = 3;
-    private static final int exp_order_bound = 4;
-    private static final int exp_collection  = 5;
     
     public RowCollection(final RowCollection rc) {
         this.rowdef = rc.rowdef;
@@ -127,6 +126,19 @@ public class RowCollection implements Iterable<Row.Entry> {
             this.sortBound = chunkcount;
         }
         this.chunkcache = exportedCollection.getColBytes(exp_collection, false);        
+    }
+    
+    protected RowCollection(Row rowdef, byte[] chunkcache, int chunkcount, int sortBound, long lastTimeWrote) {
+        this.rowdef = rowdef;
+        this.chunkcache = new byte[chunkcache.length];
+        System.arraycopy(chunkcache, 0, this.chunkcache, 0, chunkcache.length);
+        this.chunkcount = chunkcount;
+        this.sortBound = sortBound;
+        this.lastTimeWrote = lastTimeWrote;
+    }
+    
+    public RowCollection clone() {
+        return new RowCollection(this.rowdef, this.chunkcache, this.chunkcount, this.sortBound, this.lastTimeWrote);
     }
 
 	public void reset() {
@@ -549,17 +561,6 @@ public class RowCollection implements Iterable<Row.Entry> {
             removeRow(p, true);
         }
 
-    }
-    
-    public synchronized void select(final Set<String> keys) {
-        // removes all entries but the ones given by urlselection
-        if ((keys == null) || (keys.isEmpty())) return;
-        final Iterator<Row.Entry> i = iterator();
-        Row.Entry row;
-        while (i.hasNext()) {
-            row = i.next();
-            if (!(keys.contains(row.getColString(0, null)))) i.remove();
-        }
     }
     
     public synchronized final void sort() {

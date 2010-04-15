@@ -578,8 +578,8 @@ public final class yacyClient {
 
 			// the search-result-url transports all the attributes of word indexes
 			entry = urlEntry.word();
-			if (!Base64Order.enhancedCoder.equal(entry.metadataHash().getBytes(), urlEntry.hash())) {
-				if (yacyCore.log.isInfo()) yacyCore.log.logInfo("remote search (client): url-hash " + new String(urlEntry.hash()) + " does not belong to word-attached-hash " + entry.metadataHash() + "; url = " + metadata.url() + " from peer " + target.getName());
+			if (!Base64Order.enhancedCoder.equal(entry.metadataHash(), urlEntry.hash())) {
+				if (yacyCore.log.isInfo()) yacyCore.log.logInfo("remote search (client): url-hash " + new String(urlEntry.hash()) + " does not belong to word-attached-hash " + new String(entry.metadataHash()) + "; url = " + metadata.url() + " from peer " + target.getName());
 				continue; // spammed
 			}
 
@@ -880,7 +880,7 @@ public final class yacyClient {
     public static String transferIndex(
             final yacySeed targetSeed,
             final ReferenceContainerCache<WordReference> indexes,
-            final HashMap<String, URIMetadataRow> urlCache,
+            final TreeMap<byte[], URIMetadataRow> urlCache,
             final boolean gzipBody,
             final int timeout) {
         
@@ -896,7 +896,7 @@ public final class yacyClient {
                 while (eenum.hasNext()) {
                     entry = eenum.next();
                     if (urlCache.get(entry.metadataHash()) == null) {
-                        if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + entry.metadataHash() + "' is not contained in urlCache");
+                        if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: to-send url hash '" + new String(entry.metadataHash()) + "' is not contained in urlCache");
                     }
                 }
             }        
@@ -934,7 +934,7 @@ public final class yacyClient {
             // extract the urlCache from the result
             final URIMetadataRow[] urls = new URIMetadataRow[uhs.length];
             for (int i = 0; i < uhs.length; i++) {
-                urls[i] = urlCache.get(uhs[i]);
+                urls[i] = urlCache.get(uhs[i].getBytes());
                 if (urls[i] == null) {
                     if (yacyCore.log.isFine()) yacyCore.log.logFine("DEBUG transferIndex: requested url hash '" + uhs[i] + "', unknownURL='" + uhss + "'");
                 }
@@ -990,7 +990,7 @@ public final class yacyClient {
             eenum = ic.entries();
             while (eenum.hasNext()) {
                 entry = eenum.next();
-                entrypost.append(ic.getTermHashAsString()) 
+                entrypost.append(new String(ic.getTermHash())) 
                          .append(entry.toPropertyForm()) 
                          .append(serverCore.CRLF_STRING);
                 indexcount++;

@@ -51,7 +51,8 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
 	
     public Bitfield flags;
     public long lastModified;
-    public String language, urlHash;
+    public String language;
+    public byte[] urlHash;
     public char type;
     public int hitcount, llocal, lother, phrasesintext,
                posinphrase, posofphrase,
@@ -61,7 +62,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
     public double termFrequency;
     
     public WordReferenceVars(
-            final String   urlHash,
+            final byte[]   urlHash,
             final int      urlLength,     // byte-length of complete URL
             final int      urlComps,      // number of path components
             final int      titleLength,   // length of description/length (longer are better?)
@@ -274,7 +275,7 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         return toRowEntry().toPropertyForm();
     }
 
-    public String metadataHash() {
+    public byte[] metadataHash() {
         return urlHash;
     }
 
@@ -367,16 +368,16 @@ public class WordReferenceVars extends AbstractReference implements WordReferenc
         if (obj == null) return false;
         if (!(obj instanceof WordReferenceVars)) return false;
         WordReferenceVars other = (WordReferenceVars) obj;
-        return this.urlHash.equals(other.urlHash);
+        return Base64Order.enhancedCoder.equal(this.urlHash, other.urlHash);
     }
     
     @Override
     public int hashCode() {
-        return this.urlHash.hashCode();
+        return new String(this.urlHash).hashCode();
     }
     
     public int compareTo(final WordReferenceVars o) {
-        return Base64Order.enhancedCoder.compare(this.urlHash.getBytes(), o.metadataHash().getBytes());
+        return Base64Order.enhancedCoder.compare(this.urlHash, o.metadataHash());
     }
     
     public void addPosition(final int position) {

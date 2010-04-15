@@ -36,6 +36,10 @@ import net.yacy.document.parser.html.AbstractScraper;
 import net.yacy.document.parser.html.CharacterCoding;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.data.word.WordReferenceRow;
+import net.yacy.kelondro.index.HandleSet;
+import net.yacy.kelondro.index.RowSpaceExceededException;
+import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.order.NaturalOrder;
@@ -63,7 +67,7 @@ public final class QueryParams {
     public static final Pattern matchnothing_pattern = Pattern.compile("");
     
     public final String queryString;
-    public TreeSet<byte[]> fullqueryHashes, queryHashes, excludeHashes;
+    public HandleSet fullqueryHashes, queryHashes, excludeHashes;
     public final int itemsPerPage;
     public int offset;
     public final Pattern urlMask, prefer;
@@ -98,15 +102,19 @@ public final class QueryParams {
                              final RankingProfile ranking) {
     	if ((queryString.length() == 12) && (Base64Order.enhancedCoder.wellformed(queryString.getBytes()))) {
     		this.queryString = null;
-            this.queryHashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
-            this.excludeHashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
-            this.queryHashes.add(queryString.getBytes());
+            this.queryHashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+            this.excludeHashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+            try {
+                this.queryHashes.put(queryString.getBytes());
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+            }
     	} else {
     		this.queryString = queryString;
     		final TreeSet<String>[] cq = cleanQuery(queryString);
-    		this.queryHashes = Word.words2hashes(cq[0]);
-    		this.excludeHashes = Word.words2hashes(cq[1]);
-    		this.fullqueryHashes = Word.words2hashes(cq[2]);
+    		this.queryHashes = Word.words2hashesHandles(cq[0]);
+    		this.excludeHashes = Word.words2hashesHandles(cq[1]);
+    		this.fullqueryHashes = Word.words2hashesHandles(cq[2]);
     	}
     	this.ranking = ranking;
     	this.tenant = null;
@@ -136,9 +144,9 @@ public final class QueryParams {
     }
     
     public QueryParams(
-		final String queryString, final TreeSet<byte[]> queryHashes,
-		final TreeSet<byte[]> excludeHashes, 
-        final TreeSet<byte[]> fullqueryHashes,
+		final String queryString, final HandleSet queryHashes,
+		final HandleSet excludeHashes, 
+        final HandleSet fullqueryHashes,
         final String tenant,
         final int maxDistance, final String prefer, final ContentDomain contentdom,
         final String language,
@@ -216,11 +224,13 @@ public final class QueryParams {
         return this.domType == SEARCHDOM_LOCAL;
     }
     
-    public static TreeSet<byte[]> hashes2Set(final String query) {
-        if (query == null) return new TreeSet<byte[]>(Base64Order.enhancedCoder);
-        final TreeSet<byte[]> keyhashes = new TreeSet<byte[]>(Base64Order.enhancedCoder);
-        for (int i = 0; i < (query.length() / Word.commonHashLength); i++) {
-            keyhashes.add(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes());
+    public static HandleSet hashes2Set(final String query) {
+        final HandleSet keyhashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+        if (query == null) return keyhashes;
+        for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
+            keyhashes.put(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes());
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
         }
         return keyhashes;
     }
@@ -234,18 +244,40 @@ public final class QueryParams {
         return keyhashes;
     }
     
+    public static HandleSet hashes2Handles(final String query) {
+        final HandleSet keyhashes = new HandleSet(WordReferenceRow.urlEntryRow.primaryKeyLength, WordReferenceRow.urlEntryRow.objectOrder, 0);
+        if (query == null) return keyhashes;
+        for (int i = 0; i < (query.length() / Word.commonHashLength); i++) try {
+            keyhashes.put(query.substring(i * Word.commonHashLength, (i + 1) * Word.commonHashLength).getBytes());
+        } catch (RowSpaceExceededException e) {
+            Log.logException(e);
+        }
+        return keyhashes;
+    }
+    /*
     public static String hashSet2hashString(final TreeSet<byte[]> hashes) {
         final byte[] bb = new byte[hashes.size() * Word.commonHashLength];
         int p = 0;
         for (byte[] b : hashes) {
-        	assert b.length == Word.commonHashLength : "hash = " + new String(b);
-        	System.arraycopy(b, 0, bb, p, Word.commonHashLength);
-        	p += Word.commonHashLength;
+            assert b.length == Word.commonHashLength : "hash = " + new String(b);
+            System.arraycopy(b, 0, bb, p, Word.commonHashLength);
+            p += Word.commonHashLength;
+        }
+        return new String(bb);
+    }
+     */
+    public static String hashSet2hashString(final HandleSet hashes) {
+        final byte[] bb = new byte[hashes.size() * Word.commonHashLength];
+        int p = 0;
+        for (byte[] b : hashes) {
+            assert b.length == Word.commonHashLength : "hash = " + new String(b);
+            System.arraycopy(b, 0, bb, p, Word.commonHashLength);
+            p += Word.commonHashLength;
         }
         return new String(bb);
     }
 
-    public static String anonymizedQueryHashes(final TreeSet<byte[]> hashes) {
+    public static String anonymizedQueryHashes(final HandleSet hashes) {
         // create a more anonymized representation of a query hashes for logging
         final Iterator<byte[]> i = hashes.iterator();
         final StringBuilder sb = new StringBuilder(hashes.size() * (Word.commonHashLength + 2) + 2);
@@ -263,10 +295,10 @@ public final class QueryParams {
         return new String(sb);
     }
     
-    public static final boolean matches(final String text, final TreeSet<byte[]> keyhashes) {
+    public static final boolean matches(final String text, final HandleSet keyhashes) {
     	// returns true if any of the word hashes in keyhashes appear in the String text
     	// to do this, all words in the string must be recognized and transcoded to word hashes
-    	final TreeSet<byte[]> wordhashes = Word.words2hashes(Condenser.getWords(text).keySet());
+    	final HandleSet wordhashes = Word.words2hashesHandles(Condenser.getWords(text).keySet());
     	return SetTools.anymatch(wordhashes, keyhashes);
     }
     
@@ -325,8 +357,8 @@ public final class QueryParams {
     public void filterOut(final TreeSet<String> blueList) {
         // filter out words that appear in this set
     	// this is applied to the queryHashes
-    	final TreeSet<byte[]> blues = Word.words2hashes(blueList);
-    	SetTools.excludeDestructive(queryHashes, blues);
+    	final HandleSet blues = Word.words2hashesHandles(blueList);
+    	for (byte[] b: blues) queryHashes.remove(b);
     }
 
     public String id(final boolean anonymized) {

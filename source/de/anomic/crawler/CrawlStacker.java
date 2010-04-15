@@ -366,18 +366,18 @@ public final class CrawlStacker {
             ("the host '" + host + "' is global, but global addresses are not accepted");
     }
     
-    public String urlInAcceptedDomainHash(final String urlhash) {
+    public String urlInAcceptedDomainHash(final byte[] urlhash) {
         // returns true if the url can be accepted accoring to network.unit.domain
         if (urlhash == null) return "url is null";
         if (this.acceptGlobalURLs && this.acceptLocalURLs) return null; // fast shortcut to avoid dnsResolve
         // check if this is a local address and we are allowed to index local pages:
         //boolean local = hostAddress.isSiteLocalAddress() || hostAddress.isLoopbackAddress();
-        final boolean local = DigestURI.isLocal(urlhash.getBytes());
+        final boolean local = DigestURI.isLocal(urlhash);
         //assert local == yacyURL.isLocalDomain(url.hash()); // TODO: remove the dnsResolve above!
         if ((this.acceptGlobalURLs && !local) || (this.acceptLocalURLs && local)) return null;
         return (local) ?
-            ("the urlhash '" + urlhash + "' is local, but local addresses are not accepted") :
-            ("the urlhash '" + urlhash + "' is global, but global addresses are not accepted");
+            ("the urlhash '" + new String(urlhash) + "' is local, but local addresses are not accepted") :
+            ("the urlhash '" + new String(urlhash) + "' is global, but global addresses are not accepted");
     }
 
     public boolean acceptLocalURLs() {

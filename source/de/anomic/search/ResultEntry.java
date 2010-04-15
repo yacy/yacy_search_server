@@ -83,7 +83,7 @@ public class ResultEntry implements Comparable<ResultEntry>, Comparator<ResultEn
                 // seed is not known from here
                 try {
                     indexSegment.termIndex().remove(
-                        Word.words2hashes(Condenser.getWords(
+                        Word.words2hashesHandles(Condenser.getWords(
                             ("yacyshare " +
                              filename.replace('?', ' ') +
                              " " +

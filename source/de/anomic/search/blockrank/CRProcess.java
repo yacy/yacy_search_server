@@ -433,7 +433,7 @@ public class CRProcess {
         CloneableIterator<Row.Entry> cr_entry;
         while (i.hasNext()) {
             keycollection = i.next();
-            referee = keycollection.getTermHashAsString();
+            referee = new String(keycollection.getTermHash());
             if (referee.length() == 6) refereeDom = referee; else refereeDom = referee.substring(6);
             cr_entry = keycollection.rows();
             

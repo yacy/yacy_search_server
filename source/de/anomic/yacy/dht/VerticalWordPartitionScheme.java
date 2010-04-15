@@ -80,11 +80,11 @@ public class VerticalWordPartitionScheme implements PartitionScheme {
         return (FlatWordPartitionScheme.std.dhtPosition(wordHash, null) & partitionMask) | verticalMask;
     }
     
-    public final int verticalPosition(final String urlHash) {
+    public final int verticalPosition(final byte[] urlHash) {
         assert urlHash != null;
         if (urlHash == null || partitionExponent < 1) return 0;
         assert partitionExponent > 0;
-        return (int) (FlatWordPartitionScheme.std.dhtPosition(urlHash.getBytes(), null) >> (Long.SIZE - 1 - partitionExponent)); // take only the top-<partitionExponent> bits
+        return (int) (FlatWordPartitionScheme.std.dhtPosition(urlHash, null) >> (Long.SIZE - 1 - partitionExponent)); // take only the top-<partitionExponent> bits
     }
     
     /**

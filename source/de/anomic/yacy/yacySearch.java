@@ -29,9 +29,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.regex.Pattern;
 
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.util.ScoreCluster;
@@ -135,8 +135,15 @@ public class yacySearch extends Thread {
         	containerCache.oneFeederTerminated();
         }
     }
-
+    /*
     public static String set2string(final TreeSet<byte[]> hashes) {
+        String wh = "";
+        final Iterator<byte[]> iter = hashes.iterator();
+        while (iter.hasNext()) { wh = wh + new String(iter.next()); }
+        return wh;
+    }
+     */
+    public static String set2string(final HandleSet hashes) {
         String wh = "";
         final Iterator<byte[]> iter = hashes.iterator();
         while (iter.hasNext()) { wh = wh + new String(iter.next()); }
@@ -176,7 +183,7 @@ public class yacySearch extends Thread {
     	//return (yacySeed[]) l.toArray();
     }
     
-    private static yacySeed[] selectSearchTargets(final yacySeedDB seedDB, final TreeSet<byte[]> wordhashes, int seedcount, int redundancy) {
+    private static yacySeed[] selectSearchTargets(final yacySeedDB seedDB, final HandleSet wordhashes, int seedcount, int redundancy) {
         // find out a specific number of seeds, that would be relevant for the given word hash(es)
         // the result is ordered by relevance: [0] is most relevant
         // the seedcount is the maximum number of wanted results

@@ -28,13 +28,14 @@ package net.yacy.kelondro.rwi;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 
 import de.anomic.yacy.graphics.ProfilingGraph;
 
+import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.index.ARC;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.Row;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 import net.yacy.kelondro.index.SimpleARC;
@@ -197,7 +198,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * @throws IOException
      * @return a container with merged ReferenceContainer from RAM and the file array or null if there is no data to be returned
      */
-    public ReferenceContainer<ReferenceType> get(byte[] termHash, Set<String> urlselection) throws IOException {
+    public ReferenceContainer<ReferenceType> get(byte[] termHash, HandleSet urlselection) throws IOException {
         ReferenceContainer<ReferenceType> c0 = this.ram.get(termHash, null);
         ReferenceContainer<ReferenceType> c1 = null;
         try {
@@ -265,6 +266,13 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
      * new BLOBs. This returns the sum of all url references that have been removed
      * @throws IOException 
      */
+    public int remove(byte[] termHash, HandleSet urlHashes) throws IOException {
+        int removed = this.ram.remove(termHash, urlHashes);
+        int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHashes));
+        this.countCache.remove(new ByteArray(termHash));
+        return removed + (reduced / this.array.rowdef().objectsize);
+    }
+
     public int remove(byte[] termHash, Set<String> urlHashes) throws IOException {
         int removed = this.ram.remove(termHash, urlHashes);
         int reduced = this.array.replace(termHash, new RemoveRewriter<ReferenceType>(urlHashes));
@@ -281,15 +289,29 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
 
     private static class RemoveRewriter<ReferenceType extends Reference> implements ReferenceContainerArray.ContainerRewriter<ReferenceType> {
         
-        Set<String> urlHashes;
+        HandleSet urlHashes;
         
-        public RemoveRewriter(Set<String> urlHashes) {
+        public RemoveRewriter(HandleSet urlHashes) {
             this.urlHashes = urlHashes;
         }
         
+        public RemoveRewriter(Set<String> urlHashes) {
+            this.urlHashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            for (String s: urlHashes)
+                try {
+                    this.urlHashes.put(s.getBytes());
+                } catch (RowSpaceExceededException e) {
+                    Log.logException(e);
+                }
+        }
+        
         public RemoveRewriter(byte[] urlHashBytes) {
-            this.urlHashes = new HashSet<String>();
-            this.urlHashes.add(new String(urlHashBytes));
+            this.urlHashes = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
+            try {
+                this.urlHashes.put(urlHashBytes);
+            } catch (RowSpaceExceededException e) {
+                Log.logException(e);
+            }
         }
         
         public ReferenceContainer<ReferenceType> rewrite(ReferenceContainer<ReferenceType> container) {

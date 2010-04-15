@@ -28,9 +28,8 @@
 package net.yacy.kelondro.rwi;
 
 import java.util.HashMap;
-import java.util.Set;
-import java.util.TreeSet;
 
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.RowSpaceExceededException;
 
 
@@ -41,9 +40,9 @@ public class TermSearch <ReferenceType extends Reference> {
     
     public TermSearch(
             Index<ReferenceType> base,
-            final TreeSet<byte[]> queryHashes,
-            final TreeSet<byte[]> excludeHashes,
-            final Set<String> urlselection,
+            final HandleSet queryHashes,
+            final HandleSet excludeHashes,
+            final HandleSet urlselection,
             ReferenceFactory<ReferenceType> termFactory,
             int maxDistance) throws RowSpaceExceededException {
         

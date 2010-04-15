@@ -4,16 +4,16 @@ import net.yacy.kelondro.logging.Log;
 
 public abstract class AbstractImporter extends Thread implements Importer {
 
-    protected int jobID = -1;
-    protected String jobType;
-    protected Log log;
-    protected boolean stopped = false;
-    protected boolean paused = false;
-    protected long globalStart = System.currentTimeMillis();
+    private int jobID = -1;
+    private String jobType;
+    private Log log;
+    private boolean stopped = false;
+    private boolean paused = false;
+    private long globalStart = System.currentTimeMillis();
     protected long globalEnd;
-    protected long globalPauseLast;
-    protected long globalPauseDuration;
-    protected String error;
+    private long globalPauseLast;
+    private long globalPauseDuration;
+    private String error;
 
     public AbstractImporter(final String theJobType) {
     	this.jobType = theJobType;

@@ -67,7 +67,6 @@ public class CompressedHashMap {
     private static int hashkey(final byte[] key, final int capacity) {
         int h = 0;
         for (int i = 0; i < key.length; i++) h = h * 15 + (0xff & key[i]);
-        //System.out.println("hash code of key " + new String(key) + " is " + h);
         return h % capacity;
     }
     
@@ -83,7 +82,6 @@ public class CompressedHashMap {
     private int findExisting(final byte[] key) {
         // returns an index position if found; -1 otherwise
         int hash = hashkey(key, capacity());
-        //System.out.println("first guess for key " + new String(key) + ": " + hash + "( capacity is " + capacity() + " )");
         int testcount = 0;
         while (testcount++ < rehashtry()) {
             if (mem[hash * reclen] == 0) return -1;
@@ -167,7 +165,6 @@ public class CompressedHashMap {
                 }
             } else {
                 // there is enough space
-                //System.out.println("put " + new String(key) + " into cell " + hash);
                 final int mempos = hash * reclen;
                 System.arraycopy(key, 0, mem, mempos, keylen);
                 System.arraycopy(value, 0, mem, mempos + keylen, valuelen);
@@ -189,7 +186,6 @@ public class CompressedHashMap {
         assert (key.length == keylen);
         
         final int hash = findExisting(key);
-        //System.out.println("get " + new String(key) + " from cell " + hash);
         if (hash < 0) {
             return null;
         }

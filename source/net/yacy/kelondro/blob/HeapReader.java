@@ -292,13 +292,17 @@ public class HeapReader {
      * the number of BLOBs in the heap
      * @return the number of BLOBs in the heap
      */
-    public synchronized int size() {
-        return (this.index == null) ? 0 : this.index.size();
+    public int size() {
+        synchronized (index) {
+            return (this.index == null) ? 0 : this.index.size();
+        }
     }
     
-    public synchronized boolean isEmpty() {
+    public boolean isEmpty() {
         if (this.index == null) return true;
-        return this.index.isEmpty();
+        synchronized (index) {
+            return this.index.isEmpty();
+        }
     }
     
     /**
@@ -310,7 +314,7 @@ public class HeapReader {
         assert index != null;
         key = normalizeKey(key);
         
-        synchronized (this) {
+        synchronized (this.index) {
             // check if the file index contains the key
             return index.get(key) >= 0;
         }
@@ -328,7 +332,9 @@ public class HeapReader {
      * @throws IOException
      */
     protected synchronized byte[] firstKey() throws IOException {
-        return index.smallestKey();
+        synchronized (this.index) {
+            return index.smallestKey();
+        }
     }
     
     /**
@@ -338,10 +344,12 @@ public class HeapReader {
      * @return the entry which key is the smallest in the heap
      * @throws IOException
      */
-    protected synchronized byte[] first() throws IOException {
-        byte[] key = index.smallestKey();
-        if (key == null) return null;
-        return get(key);
+    protected byte[] first() throws IOException {
+        synchronized (this.index) {
+            byte[] key = index.smallestKey();
+            if (key == null) return null;
+            return get(key);
+        }
     }
     
     /**
@@ -351,8 +359,10 @@ public class HeapReader {
      * @return the largest key in the heap
      * @throws IOException
      */
-    protected synchronized byte[] lastKey() throws IOException {
-        return index.largestKey();
+    protected byte[] lastKey() throws IOException {
+        synchronized (this.index) {
+            return index.largestKey();
+        }
     }
     
     /**
@@ -362,10 +372,12 @@ public class HeapReader {
      * @return the entry which key is the smallest in the heap
      * @throws IOException
      */
-    protected synchronized byte[] last() throws IOException {
-        byte[] key = index.largestKey();
-        if (key == null) return null;
-        return get(key);
+    protected byte[] last() throws IOException {
+        synchronized (this.index) {
+            byte[] key = index.largestKey();
+            if (key == null) return null;
+            return get(key);
+        }
     }
     
     /**
@@ -377,7 +389,7 @@ public class HeapReader {
     public byte[] get(byte[] key) throws IOException {
         key = normalizeKey(key);
        
-        synchronized (this) {
+        synchronized (this.index) {
             // check if the index contains the key
             final long pos = index.get(key);
             if (pos < 0) return null;
@@ -429,7 +441,7 @@ public class HeapReader {
     public long length(byte[] key) throws IOException {
         key = normalizeKey(key);
         
-        synchronized (this) {
+        synchronized (this.index) {
             // check if the index contains the key
             final long pos = index.get(key);
             if (pos < 0) return -1;
@@ -443,42 +455,44 @@ public class HeapReader {
     /**
      * close the BLOB table
      */
-    public synchronized void close(boolean writeIDX) {
-        if (file != null)
-			try {
-				file.close();
-			} catch (IOException e) {
-			    Log.logException(e);
-			}
-        file = null;
-        if (writeIDX && index != null && free != null && (index.size() > 3 || free.size() > 3)) {
-            // now we can create a dump of the index and the gap information
-            // to speed up the next start
-            try {
-                long start = System.currentTimeMillis();
-                String fingerprint = HeapWriter.fingerprintFileHash(this.heapFile);
-                if (fingerprint == null) {
-                    Log.logSevere("kelondroBLOBHeap", "cannot write a dump for " + heapFile.getName()+ ": fingerprint is null");
-                } else {
-                    free.dump(HeapWriter.fingerprintGapFile(this.heapFile, fingerprint));
+    public void close(boolean writeIDX) {
+        synchronized (this.index) {
+            if (file != null)
+    			try {
+    				file.close();
+    			} catch (IOException e) {
+    			    Log.logException(e);
+    			}
+            file = null;
+            if (writeIDX && index != null && free != null && (index.size() > 3 || free.size() > 3)) {
+                // now we can create a dump of the index and the gap information
+                // to speed up the next start
+                try {
+                    long start = System.currentTimeMillis();
+                    String fingerprint = HeapWriter.fingerprintFileHash(this.heapFile);
+                    if (fingerprint == null) {
+                        Log.logSevere("kelondroBLOBHeap", "cannot write a dump for " + heapFile.getName()+ ": fingerprint is null");
+                    } else {
+                        free.dump(HeapWriter.fingerprintGapFile(this.heapFile, fingerprint));
+                    }
+                    free.clear();
+                    free = null;
+                    if (fingerprint != null) {
+                        index.dump(HeapWriter.fingerprintIndexFile(this.heapFile, fingerprint));
+                        Log.logInfo("kelondroBLOBHeap", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
+                    }
+                    index.close();
+                    index = null;
+                } catch (IOException e) {
+                    Log.logException(e);
                 }
-                free.clear();
+            } else {
+                // this is small.. just free resources, do not write index
+                if (free != null) free.clear();
                 free = null;
-                if (fingerprint != null) {
-                    index.dump(HeapWriter.fingerprintIndexFile(this.heapFile, fingerprint));
-                    Log.logInfo("kelondroBLOBHeap", "wrote a dump for the " + this.index.size() +  " index entries of " + heapFile.getName()+ " in " + (System.currentTimeMillis() - start) + " milliseconds.");
-                }
-                index.close();
+                if (index != null) index.close();
                 index = null;
-            } catch (IOException e) {
-                Log.logException(e);
             }
-        } else {
-            // this is small.. just free resources, do not write index
-            if (free != null) free.clear();
-            free = null;
-            if (index != null) index.close();
-            index = null;
         }
     }
     
@@ -506,8 +520,10 @@ public class HeapReader {
      * @return
      * @throws IOException
      */
-    public synchronized CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
-        return new RotateIterator<byte[]>(this.index.keys(up, null), null, this.index.size());
+    public CloneableIterator<byte[]> keys(final boolean up, final boolean rotating) throws IOException {
+        synchronized (this.index) {
+            return new RotateIterator<byte[]>(this.index.keys(up, null), null, this.index.size());
+        }
     }
 
     /**
@@ -517,12 +533,16 @@ public class HeapReader {
      * @return
      * @throws IOException
      */
-    public synchronized CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
-        return this.index.keys(up, firstKey);
+    public CloneableIterator<byte[]> keys(final boolean up, final byte[] firstKey) throws IOException {
+        synchronized (this.index) {
+            return this.index.keys(up, firstKey);
+        }
     }
 
     public long length() {
-        return this.heapFile.length();
+        synchronized (this.index) {
+            return this.heapFile.length();
+        }
     }
     
     /**

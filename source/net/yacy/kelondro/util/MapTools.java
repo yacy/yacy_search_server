@@ -91,7 +91,7 @@ public final class MapTools {
             }
             if (buf.length() > 1) { buf.setLength(buf.length() - 1); } // remove last separator
             if (braces) { buf.append("}"); }
-            return new String(buf);
+            return buf.toString();
         }
     }
     

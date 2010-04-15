@@ -83,6 +83,14 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
         return new RowSet(rowdef, size, chunkcache, orderbound);
     }
     
+    private RowSet(Row rowdef, byte[] chunkcache, int chunkcount, int sortBound, long lastTimeWrote) {
+        super(rowdef, chunkcache, chunkcount, sortBound, lastTimeWrote);
+    }
+    
+    public RowSet clone() {
+        return new RowSet(super.rowdef, super.chunkcache, super.chunkcount, super.sortBound, super.lastTimeWrote);
+    }
+
 	public void reset() {
 		super.reset();
 	}
@@ -280,7 +288,6 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
                 p = 0;
             } else {
                 p = binaryPosition(first, 0, first.length); // check this to find bug in DHT selection enumeration
-                //System.out.println("binaryposition for key " + new String(firstKey) + " is " + p);
             }
         }
         
@@ -340,7 +347,6 @@ public class RowSet extends RowCollection implements ObjectIndex, Iterable<Row.E
                 p = 0;
             } else {
                 p = binaryPosition(first, 0, first.length); // check this to find bug in DHT selection enumeration
-                //System.out.println("binaryposition for key " + new String(firstKey) + " is " + p);
             }
         }
         

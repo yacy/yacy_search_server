@@ -41,6 +41,7 @@ import net.yacy.document.parser.xml.RSSFeed;
 import net.yacy.kelondro.data.meta.DigestURI;
 import net.yacy.kelondro.data.meta.URIMetadataRow;
 import net.yacy.kelondro.data.word.Word;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Bitfield;
 import net.yacy.kelondro.util.Domains;
@@ -406,7 +407,7 @@ public class yacysearch {
                 
                 // delete the index entry locally
                 final String delHash = post.get("deleteref", ""); // urlhash
-                indexSegment.termIndex().remove(Word.words2hashes(query[0]), delHash.getBytes());
+                indexSegment.termIndex().remove(Word.words2hashesHandles(query[0]), delHash.getBytes());
 
                 // make new news message with negative voting
                 final HashMap<String, String> map = new HashMap<String, String>();
@@ -449,12 +450,12 @@ public class yacysearch {
             final boolean globalsearch = (global) && indexReceiveGranted; /* && (yacyonline)*/ 
         
             // do the search
-            final TreeSet<byte[]> queryHashes = Word.words2hashes(query[0]);
+            final HandleSet queryHashes = Word.words2hashesHandles(query[0]);
             final QueryParams theQuery = new QueryParams(
         			originalquerystring,
         			queryHashes,
-        			Word.words2hashes(query[1]),
-        			Word.words2hashes(query[2]),
+        			Word.words2hashesHandles(query[1]),
+        			Word.words2hashesHandles(query[2]),
         			tenant,
                     maxDistance,
                     prefermask,

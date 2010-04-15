@@ -83,7 +83,7 @@ public class FlatWordPartitionScheme implements PartitionScheme {
         return l;
     }
 
-    public int verticalPosition(String urlHash) {
+    public int verticalPosition(byte[] urlHash) {
         return 0; // this is not a method stub, this is actually true for all FlatWordPartitionScheme
     }
 

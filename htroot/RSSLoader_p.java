@@ -26,8 +26,6 @@
 //if the shell's current path is HTROOT
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.Map;
 
@@ -35,12 +33,9 @@ import net.yacy.document.Document;
 import net.yacy.document.ParserException;
 import net.yacy.document.parser.rssParser;
 import net.yacy.kelondro.data.meta.DigestURI;
-import net.yacy.kelondro.logging.Log;
 
 import de.anomic.crawler.retrieval.Response;
-import de.anomic.http.client.Cache;
 import de.anomic.http.server.RequestHeader;
-import de.anomic.http.server.ResponseHeader;
 import de.anomic.search.Segment;
 import de.anomic.search.Segments;
 import de.anomic.search.Switchboard;

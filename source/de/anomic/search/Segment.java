@@ -32,7 +32,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -50,6 +49,7 @@ import net.yacy.kelondro.data.word.WordReference;
 import net.yacy.kelondro.data.word.WordReferenceFactory;
 import net.yacy.kelondro.data.word.WordReferenceRow;
 import net.yacy.kelondro.data.word.WordReferenceVars;
+import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.logging.Log;
 import net.yacy.kelondro.order.Base64Order;
 import net.yacy.kelondro.order.ByteOrder;
@@ -362,6 +362,10 @@ public class Segment {
         return removeAllUrlReferences(url.hash(), loader, fetchOnline);
     }
     
+    public void removeAllUrlReferences(final HandleSet urls, LoaderDispatcher loader, final boolean fetchOnline) {
+        for (byte[] urlhash: urls) removeAllUrlReferences(urlhash, loader, fetchOnline);
+    }
+    
     public int removeAllUrlReferences(final byte[] urlhash, LoaderDispatcher loader, final boolean fetchOnline) {
         // find all the words in a specific resource and remove the url reference from every word index
         // finally, delete the url entry
@@ -403,7 +407,7 @@ public class Segment {
                 
                 // delete all word references
                 int count = 0;
-                if (words != null) count = termIndex().remove(Word.words2hashes(words), urlhash);
+                if (words != null) count = termIndex().remove(Word.words2hashesHandles(words), urlhash);
                 
                 // finally delete the url entry itself
                 urlMetadata().remove(urlhash);
@@ -445,7 +449,7 @@ public class Segment {
             ReferenceContainer<WordReference> container = null;
             WordReferenceVars entry = null;
             DigestURI url = null;
-            final HashSet<String> urlHashs = new HashSet<String>();
+            final HandleSet urlHashs = new HandleSet(URIMetadataRow.rowdef.primaryKeyLength, URIMetadataRow.rowdef.objectOrder, 0);
             try {
                 Iterator<ReferenceContainer<WordReference>> indexContainerIterator = termIndex.references(startHash, false, 100, false).iterator();
                 while (indexContainerIterator.hasNext() && run) {
@@ -458,19 +462,19 @@ public class Segment {
                         entry = new WordReferenceVars(containerIterator.next());
                         // System.out.println("Wordhash: "+wordHash+" UrlHash:
                         // "+entry.getUrlHash());
-                        final URIMetadataRow ue = urlMetadata.load(entry.metadataHash().getBytes(), entry, 0);
+                        final URIMetadataRow ue = urlMetadata.load(entry.metadataHash(), entry, 0);
                         if (ue == null) {
-                            urlHashs.add(entry.metadataHash());
+                            urlHashs.put(entry.metadataHash());
                         } else {
                             url = ue.metadata().url();
                             if (url == null || Switchboard.urlBlacklist.isListed(Blacklist.BLACKLIST_CRAWLER, url)) {
-                                urlHashs.add(entry.metadataHash());
+                                urlHashs.put(entry.metadataHash());
                             }
                         }
                     }
                     if (!urlHashs.isEmpty()) try {
                         final int removed = termIndex.remove(container.getTermHash(), urlHashs);
-                        Log.logFine("INDEXCLEANER", container.getTermHashAsString() + ": " + removed + " of " + container.size() + " URL-entries deleted");
+                        Log.logFine("INDEXCLEANER", new String(container.getTermHash()) + ": " + removed + " of " + container.size() + " URL-entries deleted");
                         lastWordHash = container.getTermHash();
                         lastDeletionCounter = urlHashs.size();
                         urlHashs.clear();

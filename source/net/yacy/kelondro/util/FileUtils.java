@@ -740,32 +740,6 @@ public final class FileUtils {
         }
         return FileUtils.writeList(listFile, new String(out)); //(File, String)
     }
-
-    
-    /*
-    public static ArrayList<String> strings(byte[] a) {
-        final ArrayList<String> list = new ArrayList<String>();
-        Iterator<String> i = new StringsIterator(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(a))));
-        while (i.hasNext()) list.add(i.next());
-        return list;
-    }
-    
-    public static ArrayList<String> strings(byte[] a) {
-        final ArrayList<String> list = new ArrayList<String>();
-        BufferedReader bufreader = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(a)));
-        String line = null;
-        try {
-            while ((line = bufreader.readLine()) != null) {
-                line = line.trim();
-                if (line.length() > 0) list.add(line);
-            }
-        } catch (IOException e) {
-            Log.logWarning("FileUtils", "failed strings: " + e.getMessage(), e);
-            return list;
-        }
-        return list;
-    }
-     */
     
     public static class StringsIterator implements Iterator<String> {
         private final BufferedReader reader;
