@@ -55,7 +55,7 @@ public class IODispatcher extends Thread {
     private   ArrayBlockingQueue<DumpJob<? extends Reference>> dumpQueue;
     //private ReferenceFactory<ReferenceType> factory;
     private   boolean                      terminate;
-    protected int                          writeBufferSize;
+    private int                          writeBufferSize;
     
     public IODispatcher(int dumpQueueLength, int mergeQueueLength, int writeBufferSize) {
         this.termination = new Semaphore(0);
@@ -80,7 +80,7 @@ public class IODispatcher extends Thread {
     }
     
     @SuppressWarnings("unchecked")
-    public synchronized void dump(ReferenceContainerCache<? extends Reference> cache, File file, ReferenceContainerArray<? extends Reference> array) {
+    protected synchronized void dump(ReferenceContainerCache<? extends Reference> cache, File file, ReferenceContainerArray<? extends Reference> array) {
         if (dumpQueue == null || controlQueue == null || !this.isAlive()) {
             Log.logWarning("IODispatcher", "emergency dump of file " + file.getName());
              if (!cache.isEmpty()) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
@@ -103,11 +103,11 @@ public class IODispatcher extends Thread {
         }
     }
     
-    public synchronized int queueLength() {
+    protected synchronized int queueLength() {
         return (controlQueue == null || !this.isAlive()) ? 0 : controlQueue.availablePermits();
     }
     
-    public synchronized void merge(File f1, File f2, ReferenceFactory<? extends Reference> factory, ArrayStack array, Row payloadrow, File newFile) {
+    protected synchronized void merge(File f1, File f2, ReferenceFactory<? extends Reference> factory, ArrayStack array, Row payloadrow, File newFile) {
         if (mergeQueue == null || controlQueue == null || !this.isAlive()) {
             if (f2 == null) {
                 Log.logWarning("IODispatcher", "emergency rewrite of file " + f1.getName() + " to " + newFile.getName());
@@ -213,16 +213,16 @@ public class IODispatcher extends Thread {
         }
     }
     
-    public class DumpJob <ReferenceType extends Reference> {
-        ReferenceContainerCache<ReferenceType> cache;
-        File file;
-        ReferenceContainerArray<ReferenceType> array;
-        public DumpJob(ReferenceContainerCache<ReferenceType> cache, File file, ReferenceContainerArray<ReferenceType> array) {
+    private class DumpJob <ReferenceType extends Reference> {
+        private ReferenceContainerCache<ReferenceType> cache;
+        private File file;
+        private ReferenceContainerArray<ReferenceType> array;
+        private DumpJob(ReferenceContainerCache<ReferenceType> cache, File file, ReferenceContainerArray<ReferenceType> array) {
             this.cache = cache;
             this.file = file;
             this.array = array;
         }
-        public void dump() {
+        private void dump() {
             try {
                 if (!cache.isEmpty()) cache.dump(file, (int) Math.min(MemoryControl.available() / 3, writeBufferSize));
                 array.mountBLOBFile(file);
@@ -232,14 +232,14 @@ public class IODispatcher extends Thread {
         }
     }
     
-    public class MergeJob {
+    private class MergeJob {
 
-        File f1, f2, newFile;
-        ArrayStack array;
-        Row payloadrow;
-        ReferenceFactory<? extends Reference> factory;
+        private File f1, f2, newFile;
+        private ArrayStack array;
+        private Row payloadrow;
+        private ReferenceFactory<? extends Reference> factory;
         
-        public MergeJob(
+        private MergeJob(
                 File f1,
                 File f2,
                 ReferenceFactory<? extends Reference> factory,
@@ -254,7 +254,7 @@ public class IODispatcher extends Thread {
             this.payloadrow = payloadrow;
         }
 
-        public File merge() {
+        private File merge() {
         	if (!f1.exists()) {
         		Log.logWarning("IODispatcher", "merge of file (1) " + f1.getName() + " failed: file does not exists");
         		return null;

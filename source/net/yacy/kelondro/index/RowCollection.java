@@ -30,7 +30,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -52,7 +51,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     public  static final long growfactorLarge100 = 140L;
     public  static final long growfactorSmall100 = 120L;
     private static final int isortlimit = 20;
-    private static       int availableCPU = Runtime.getRuntime().availableProcessors();
+    private static final int availableCPU = Runtime.getRuntime().availableProcessors();
     
     private static final int exp_chunkcount  = 0;
     private static final int exp_last_read   = 1;
@@ -62,7 +61,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     private static final int exp_collection  = 5;
     
     public static final ExecutorService sortingthreadexecutor = (availableCPU > 1) ? Executors.newCachedThreadPool(new NamePrefixThreadFactory("sorting")) : null;
-    public static final ExecutorService partitionthreadexecutor = (availableCPU > 1) ? Executors.newCachedThreadPool(new NamePrefixThreadFactory("partition")) : null;
+    private static final ExecutorService partitionthreadexecutor = (availableCPU > 1) ? Executors.newCachedThreadPool(new NamePrefixThreadFactory("partition")) : null;
     
     public    final Row    rowdef;
     protected       byte[] chunkcache;
@@ -70,7 +69,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     protected       int    sortBound;
     protected       long   lastTimeWrote;
     
-    public RowCollection(final RowCollection rc) {
+    protected RowCollection(final RowCollection rc) {
         this.rowdef = rc.rowdef;
         this.chunkcache = rc.chunkcache;
         this.chunkcount = rc.chunkcount;
@@ -78,7 +77,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         this.lastTimeWrote = rc.lastTimeWrote;
     }
     
-    public RowCollection(final Row rowdef) {
+    protected RowCollection(final Row rowdef) {
         this.rowdef = rowdef;
         this.sortBound = 0;
         this.lastTimeWrote = System.currentTimeMillis();
@@ -91,7 +90,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         ensureSize(objectCount);
     }
      
-    public RowCollection(final Row rowdef, final int objectCount, final byte[] cache, final int sortBound) {
+    protected RowCollection(final Row rowdef, final int objectCount, final byte[] cache, final int sortBound) {
         this.rowdef = rowdef;
         this.chunkcache = cache;
         this.chunkcount = objectCount;
@@ -99,7 +98,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         this.lastTimeWrote = System.currentTimeMillis();
     }
     
-    public RowCollection(final Row rowdef, final Row.Entry exportedCollectionRowEnvironment) {
+    protected RowCollection(final Row rowdef, final Row.Entry exportedCollectionRowEnvironment) {
         final int chunkcachelength = exportedCollectionRowEnvironment.cellwidth(1) - exportOverheadSize;
         final Row.Entry exportedCollection = exportRow(chunkcachelength).newEntry(exportedCollectionRowEnvironment, 1);
         
@@ -157,7 +156,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     
     private static final long day = 1000 * 60 * 60 * 24;
     
-    public static int daysSince2000(final long time) {
+    private static int daysSince2000(final long time) {
         return (int) (time / day) - 10957;
     }
     
@@ -193,7 +192,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         );
     }
     
-    public static final int exportOverheadSize = 14;
+    protected static final int exportOverheadSize = 14;
 
     public synchronized byte[] exportCollection() {
         // returns null if the collection is empty
@@ -220,7 +219,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         return this.rowdef;
     }
     
-    protected final long neededSpaceForEnsuredSize(final int elements, final boolean forcegc) {
+    private final long neededSpaceForEnsuredSize(final int elements, final boolean forcegc) {
         assert elements > 0 : "elements = " + elements;
         final long needed = elements * rowdef.objectsize;
         if (chunkcache.length >= needed) return 0;
@@ -234,7 +233,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         return needed;
     }
     
-    protected final void ensureSize(final int elements) throws RowSpaceExceededException {
+    private final void ensureSize(final int elements) throws RowSpaceExceededException {
         if (elements == 0) return;
         final long allocram = neededSpaceForEnsuredSize(elements, true);
         if (allocram == 0) return;
@@ -264,11 +263,11 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
      * than is necessary to store the data. This method computes the extra memory that is needed to perform this task.
      * @return
      */
-    public final long memoryNeededForGrow() {
+    protected final long memoryNeededForGrow() {
         return neededSpaceForEnsuredSize(chunkcount + 1, false);
     }
     
-    public synchronized void trim(final boolean plusGrowFactor) {
+    protected synchronized void trim(final boolean plusGrowFactor) {
         if (chunkcache.length == 0) return;
         long needed = chunkcount * rowdef.objectsize;
         if (plusGrowFactor) needed = neededSpaceForEnsuredSize(chunkcount, false);
@@ -289,7 +288,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         return lastTimeWrote;
     }
     
-    public synchronized final byte[] getKey(final int index) {
+    protected synchronized final byte[] getKey(final int index) {
         assert (index >= 0) : "get: access with index " + index + " is below zero";
         assert (index < chunkcount) : "get: access with index " + index + " is above chunkcount " + chunkcount + "; sortBound = " + sortBound;
         assert (index * rowdef.objectsize < chunkcache.length);
@@ -456,7 +455,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         return r;
     }
     
-    public synchronized byte[] smallestKey() {
+    protected synchronized byte[] smallestKey() {
         if (chunkcount == 0) return null;
         this.sort();
         final Row.Entry r = get(0, false);
@@ -464,7 +463,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         return b;
     }
     
-    public synchronized byte[] largestKey() {
+    protected synchronized byte[] largestKey() {
         if (chunkcount == 0) return null;
         this.sort();
         final Row.Entry r = get(chunkcount - 1, false);
@@ -503,12 +502,12 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
      * collection during removes.
      *
      */
-    public class keyIterator implements Iterator<byte[]> {
+    private class keyIterator implements Iterator<byte[]> {
 
         private int p;
         private final boolean keepOrderWhenRemoving;
         
-        public keyIterator(final boolean keepOrderWhenRemoving) {
+        private keyIterator(final boolean keepOrderWhenRemoving) {
             this.p = 0;
             this.keepOrderWhenRemoving = keepOrderWhenRemoving;
         }
@@ -540,7 +539,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
      * It supports remove() and keeps the order of the underlying
      * collection during removes.
      */
-    public class rowIterator implements Iterator<Row.Entry> {
+    private class rowIterator implements Iterator<Row.Entry> {
 
         private int p;
         
@@ -563,7 +562,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
 
     }
     
-    public synchronized final void sort() {
+    protected synchronized final void sort() {
         assert (this.rowdef.objectOrder != null);
         if (this.sortBound == this.chunkcount) return; // this is already sorted
         if (this.chunkcount < isortlimit) {
@@ -643,8 +642,8 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         //assert this.isSorted();
     }
 
-    public static class qsortthread implements Callable<Object> {
-        RowCollection rc;
+    private static class qsortthread implements Callable<Object> {
+        private RowCollection rc;
         int L, R, S;
         
     	public qsortthread(final RowCollection rc, final int L, final int R, final int S) {
@@ -831,7 +830,7 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
         if (i == p) return j; else if (j == p) return i; else return p;
     }
 
-    public synchronized void uniq() {
+    protected synchronized void uniq() {
         assert (this.rowdef.objectOrder != null);
         // removes double-occurrences of chunks
         // this works only if the collection was ordered with sort before
@@ -1029,11 +1028,11 @@ public class RowCollection implements Iterable<Row.Entry>, Cloneable {
     	}
     	final long t2 = System.nanoTime();
     	System.out.println("copy c -> d: " + (t2 - t1) + " nanoseconds, " + d(testsize, (t2 - t1)) + " entries/nanoseconds");
-    	availableCPU = 1;
+    	//availableCPU = 1;
     	c.sort();
     	final long t3 = System.nanoTime();
     	System.out.println("sort c (1) : " + (t3 - t2) + " nanoseconds, " + d(testsize, (t3 - t2)) + " entries/nanoseconds");
-    	availableCPU = 2;
+    	//availableCPU = 2;
     	d.sort();
     	final long t4 = System.nanoTime();
     	System.out.println("sort d (2) : " + (t4 - t3) + " nanoseconds, " + d(testsize, (t4 - t3)) + " entries/nanoseconds");

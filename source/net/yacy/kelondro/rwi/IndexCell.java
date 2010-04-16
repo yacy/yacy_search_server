@@ -414,7 +414,7 @@ public final class IndexCell<ReferenceType extends Reference> extends AbstractBu
         if (this.dumperSemaphore.availablePermits() > 0 &&
             (this.ram.size() >= this.maxRamEntries ||
              (this.ram.size() > 3000 && !MemoryControl.request(80L * 1024L * 1024L, false)) ||
-             (this.ram.size() > 0 && this.lastDump + dumpCycle < t))) {
+             (this.ram.size() > 3000 && this.lastDump + dumpCycle < t))) {
             try {
                 this.dumperSemaphore.acquire(); // only one may pass
                 if (this.ram.size() >= this.maxRamEntries ||
