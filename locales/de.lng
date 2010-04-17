@@ -1662,7 +1662,7 @@ Potential Peers in \'\#\[networkName\]\#\' Network==Potentielle Peers Peers im '
 Manually contacting Peer==Kontaktiere Peer manuell
 no remote \#\[peertype\]\# peer for this list known==Kein remote Peer #[peertype]# bekannt oder online.
 Showing \#\[num\]\# entries from a total of \#\[total\]\# peers.==Gezeigt werden #[num]# Einträge von insgesamt #[total]# Peers.
-send&nbsp;<strong>M</strong>essage/<br />show&nbsp;<strong>P</strong>rofile/<br />edit&nbsp;<strong>W</strong>iki==Sende Nachricht (<strong>m</strong>)/<br />Zeige Profil (<strong>p</strong>)/<br />Ändere Wiki (<strong>w</strong>)
+send&nbsp;<strong>M</strong>essage/<br />show&nbsp;<strong>P</strong>rofile/<br />edit&nbsp;<strong>W</strong>iki/<br />browse&nbsp;<strong>B</strong>log==Sende Nachricht (<strong>m</strong>)/<br />Zeige Profil (<strong>p</strong>)/<br />Ändere Wiki (<strong>w</strong>)/<br />Durchsuche Blog (<strong>b</strong>)
 Search for a peername \(RegExp allowed\)==Suche nach Peernamen (RegExp erlaubt)
 "Search"=="Suche"
 Name==Name
@@ -1670,7 +1670,6 @@ Address==Adresse
 Hash==Hash
 Type==Typ
 Release/<br />SVN==YaCy Version/<br />SVN
-Contact==Kontakt
 Last<br />Seen==Zuletzt<br />online
 Location==Ort
 >URLs for<br />Remote<br />Crawl<==>URLs zum<br />Remote<br />Crawlen<
@@ -1678,6 +1677,23 @@ Offset==Versatz
 Send message to peer==Sende Nachricht an Peer
 View profile of peer==Zeige Profil des Peers
 Read and edit wiki on peer==Lese und ändere Wiki des Peers
+Browse blog of peer==Durchsuche den Blog von Peer
+"Ranking Receive: no"=="Ranking Empfang: nein"
+"no ranking receive"=="kein Ranking Empfang"
+"Ranking Receive: yes"=="Ranking Empfang: ja"
+"Ranking receive enabled"=="Ranking Empfang aktiv"
+"DHT Receive: yes"=="DHT Empfang: ja"
+"DHT receive enabled"=="DHT Empfang aktiv"
+"DHT Receive: no; \#\[peertags\]\#"=="DHT Empfang: nein; #[peertags]#"
+"no DHT receive"=="kein DHT Empfang"
+"Accept Crawl: no"=="Akzeptiert Crawl: nein"
+"no crawl"=="kein Crawl"
+"Accept Crawl: yes"=="Akzeptiert Crawl: ja"
+"crawl possible"=="Crawl möglich"
+Contact: passive==Kontakt: passiv
+Contact: direct==Kontakt: direkt
+Seed download: possible==Seed Download: möglich
+runtime:==Laufzeit:
 Branch==Typ
 #Peers==Peers
 All Links==Alle Links
@@ -1712,7 +1728,6 @@ Connects<br />per hour==Verbindungen<br />pro Stunde
 
 Version==Version
 Own/Other==Eigene/Andere
-Accept Crawl==Akzeptiert Crawl
 Network legend:==Netzwerklegende:
 dark font==schwarze Schrift
 senior/principal peers==Senior/Principal Peers
