@@ -66,7 +66,7 @@ public class IODispatcher extends Thread {
         this.terminate = false;
     }
     
-    public synchronized void terminate() {
+    public void terminate() {
         if (termination != null && controlQueue != null && this.isAlive()) {
             this.terminate = true;
             this.controlQueue.release();

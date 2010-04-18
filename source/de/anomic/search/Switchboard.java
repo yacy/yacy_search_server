@@ -1047,22 +1047,16 @@ public final class Switchboard extends serverSwitch {
         crawlQueues.urlRemove(hash);
     }
     
-    public void urlRemove(final Segments.Process process, final byte[] hash) {
-        indexSegments.urlMetadata(process).remove(hash);
-        crawlResults.remove(new String(hash));
-        crawlQueues.urlRemove(hash);
-    }
-    
     public DigestURI getURL(final Segments.Process process, final byte[] urlhash) {
         if (urlhash == null) return null;
         if (urlhash.length == 0) return null;
-        final DigestURI ne = crawlQueues.getURL(urlhash);
-        if (ne != null) return ne;
         final URIMetadataRow le = indexSegments.urlMetadata(process).load(urlhash, null, 0);
-        if (le == null) return null;
-        Components metadata = le.metadata();
-        if (metadata == null) return null;
-        return metadata.url();
+        if (le != null) {
+            Components metadata = le.metadata();
+            if (metadata == null) return null;
+            return metadata.url();
+        }
+        return crawlQueues.getURL(urlhash);
     }
     
     public RankingProfile getRanking() {
@@ -1927,7 +1921,7 @@ public final class Switchboard extends serverSwitch {
         // 1000 <= wantedPPM        : maximum performance
         if (wPPM <= 10) wPPM = 10;
         if (wPPM >= 30000) wPPM = 30000;
-        final int newBusySleep = 30000 / wPPM; // for wantedPPM = 10: 6000; for wantedPPM = 1000: 60
+        final int newBusySleep = 60000 / wPPM; // for wantedPPM = 10: 6000; for wantedPPM = 1000: 60
 
         BusyThread thread;
         

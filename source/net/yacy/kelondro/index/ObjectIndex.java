@@ -38,7 +38,7 @@ import java.util.Iterator;
 import net.yacy.kelondro.order.CloneableIterator;
 
 
-public interface ObjectIndex {
+public interface ObjectIndex extends Iterable<Row.Entry> {
 
     public String filename(); // returns a unique identified for this index; can be a real or artificial file name
     public int size();

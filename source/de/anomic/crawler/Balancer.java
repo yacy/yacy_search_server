@@ -32,6 +32,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import net.yacy.kelondro.index.BufferedObjectIndex;
 import net.yacy.kelondro.index.HandleSet;
 import net.yacy.kelondro.index.ObjectIndex;
 import net.yacy.kelondro.index.Row;
@@ -49,12 +50,13 @@ public class Balancer {
     
     private static final String indexSuffix = "9.db";
     private static final int EcoFSBufferSize = 1000;
+    private static final int objectIndexBufferSize = 1000;
 
     // class variables
     private final ConcurrentHashMap<String, LinkedList<byte[]>> domainStacks;    // a map from domain name part to Lists with url hashs
     private final ConcurrentLinkedQueue<byte[]> top;
     private final TreeMap<Long, byte[]> delayed;
-    private ObjectIndex  urlFileIndex;
+    private BufferedObjectIndex  urlFileIndex;
     private final File   cacheStacksPath;
     private long         minimumLocalDelta;
     private long         minimumGlobalDelta;
@@ -81,10 +83,10 @@ public class Balancer {
         cacheStacksPath.mkdirs();
         final File f = new File(cacheStacksPath, stackname + indexSuffix);
         try {
-            urlFileIndex = new Table(f, Request.rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727);
+            urlFileIndex = new BufferedObjectIndex(new Table(f, Request.rowdef, EcoFSBufferSize, 0, useTailCache, exceed134217727), objectIndexBufferSize);
         } catch (RowSpaceExceededException e) {
             try {
-                urlFileIndex = new Table(f, Request.rowdef, 0, 0, false, exceed134217727);
+                urlFileIndex = new BufferedObjectIndex(new Table(f, Request.rowdef, 0, 0, false, exceed134217727), objectIndexBufferSize);
             } catch (RowSpaceExceededException e1) {
                 Log.logException(e1);
             }
@@ -491,7 +493,8 @@ public class Balancer {
     	this.domainStacks.clear();
     	//synchronized (this.delayed) { delayed.clear(); }
     	this.lastDomainStackFill = System.currentTimeMillis();
-    	final CloneableIterator<byte[]> i = this.urlFileIndex.keys(true, null);
+    	final HandleSet handles = this.urlFileIndex.keysFromBuffer(objectIndexBufferSize / 2);
+        final CloneableIterator<byte[]> i = handles.keys(true, null);
     	while (i.hasNext()) {
     		pushHashToDomainStacks(i.next(), 1000);
     		if (this.domainStacks.size() > maxdomstacksize) break;

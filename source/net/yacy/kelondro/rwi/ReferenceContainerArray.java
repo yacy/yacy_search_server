@@ -76,11 +76,11 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         this.merger = merger;
     }
     
-    public synchronized void close() {
-    	this.array.close(true);
+    public void close() {
+        this.array.close(true);
     }
     
-    public synchronized void clear() throws IOException {
+    public void clear() throws IOException {
     	this.array.clear();
     }
     
@@ -110,7 +110,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * objects in the cache.
      * @throws IOException 
      */
-    public synchronized CloneableIterator<ReferenceContainer<ReferenceType>> wordContainerIterator(final byte[] startWordHash, final boolean rot) {
+    public CloneableIterator<ReferenceContainer<ReferenceType>> wordContainerIterator(final byte[] startWordHash, final boolean rot) {
         try {
             return new heapCacheIterator(startWordHash, rot);
         } catch (IOException e) {
@@ -191,7 +191,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * @return true, if the key is used in the heap; false otherwise
      * @throws IOException 
      */
-    public synchronized boolean has(final byte[] termHash) {
+    public boolean has(final byte[] termHash) {
         return this.array.has(termHash);
     }
     
@@ -242,12 +242,12 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
      * @return the indexContainer if the cache contained the container, null otherwise
      * @throws IOException 
      */
-    public synchronized void delete(final byte[] termHash) throws IOException {
+    public void delete(final byte[] termHash) throws IOException {
         // returns the index that had been deleted
     	array.remove(termHash);
     }
     
-    public synchronized int replace(final byte[] termHash, ContainerRewriter<ReferenceType> rewriter) throws IOException {
+    public int replace(final byte[] termHash, ContainerRewriter<ReferenceType> rewriter) throws IOException {
         return array.replace(termHash, new BLOBRewriter(termHash, rewriter));
     }
     
@@ -279,7 +279,7 @@ public final class ReferenceContainerArray<ReferenceType extends Reference> {
         return this.array.entries();
     }
     
-    public synchronized boolean shrink(long targetFileSize, long maxFileSize) {
+    public boolean shrink(long targetFileSize, long maxFileSize) {
         if (this.array.entries() < 2) return false;
         boolean donesomething = false;
         
